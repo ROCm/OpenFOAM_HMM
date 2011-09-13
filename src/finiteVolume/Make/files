@@ -17,6 +17,7 @@ $(basicFvPatches)/generic/genericFvPatch.C
 
 constraintFvPatches = $(fvPatches)/constraint
 $(constraintFvPatches)/cyclic/cyclicFvPatch.C
+$(constraintFvPatches)/cyclicAMI/cyclicAMIFvPatch.C
 $(constraintFvPatches)/cyclicSlip/cyclicSlipFvPatch.C
 $(constraintFvPatches)/empty/emptyFvPatch.C
 $(constraintFvPatches)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatch.C
@@ -27,8 +28,8 @@ $(constraintFvPatches)/wedge/wedgeFvPatch.C
 
 derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
-$(derivedFvPatches)/directMapped/directMappedFvPatch.C
-$(derivedFvPatches)/directMapped/directMappedWallFvPatch.C
+$(derivedFvPatches)/mapped/mappedFvPatch.C
+$(derivedFvPatches)/mapped/mappedWallFvPatch.C
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
@@ -98,6 +99,7 @@ $(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 
 constraintFvPatchFields = $(fvPatchFields)/constraint
 $(constraintFvPatchFields)/cyclic/cyclicFvPatchFields.C
+$(constraintFvPatchFields)/cyclicAMI/cyclicAMIFvPatchFields.C
 $(constraintFvPatchFields)/cyclicSlip/cyclicSlipFvPatchFields.C
 $(constraintFvPatchFields)/empty/emptyFvPatchFields.C
 $(constraintFvPatchFields)/jumpCyclic/jumpCyclicFvPatchFields.C
@@ -115,16 +117,17 @@ $(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorFi
 $(derivedFvPatchFields)/activePressureForceBaffleVelocity/activePressureForceBaffleVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/advective/advectiveFvPatchFields.C
 $(derivedFvPatchFields)/codedFixedValue/codedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedField/directMappedFieldFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedInternalValue/directMappedFixedInternalValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedPushedInternalValue/directMappedFixedPushedInternalValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
-$(derivedFvPatchFields)/directMappedFlowRate/directMappedFlowRateFvPatchVectorField.C
+$(derivedFvPatchFields)/mappedField/mappedFieldFvPatchFields.C
+$(derivedFvPatchFields)/mappedFixedInternalValue/mappedFixedInternalValueFvPatchFields.C
+$(derivedFvPatchFields)/mappedFixedPushedInternalValue/mappedFixedPushedInternalValueFvPatchFields.C
+$(derivedFvPatchFields)/mappedFixedValue/mappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/mappedVelocityFluxFixedValue/mappedVelocityFluxFixedValueFvPatchField.C
+$(derivedFvPatchFields)/mappedFlowRate/mappedFlowRateFvPatchVectorField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fanPressure/fanPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/buoyantPressure/buoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/multiphaseFixedFluxPressure/multiphaseFixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fixedPressureCompressibleDensity/fixedPressureCompressibleDensityFvPatchScalarField.C
@@ -148,7 +151,7 @@ $(derivedFvPatchFields)/pressureInletUniformVelocity/pressureInletUniformVelocit
 $(derivedFvPatchFields)/pressureInletVelocity/pressureInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingPressureInletOutletVelocity/rotatingPressureInletOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/rotatingTotalPressure/rotatingTotalPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/selfContainedDirectMapped/selfContainedDirectMappedFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/selfContainedMapped/selfContainedMappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/slip/slipFvPatchFields.C
 $(derivedFvPatchFields)/supersonicFreestream/supersonicFreestreamFvPatchVectorField.C
 $(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVectorField.C
@@ -181,6 +184,7 @@ $(basicFvsPatchFields)/sliced/slicedFvsPatchFields.C
 
 constraintFvsPatchFields = $(fvsPatchFields)/constraint
 $(constraintFvsPatchFields)/cyclic/cyclicFvsPatchFields.C
+$(constraintFvsPatchFields)/cyclicAMI/cyclicAMIFvsPatchFields.C
 $(constraintFvsPatchFields)/cyclicSlip/cyclicSlipFvsPatchFields.C
 $(constraintFvsPatchFields)/empty/emptyFvsPatchFields.C
 $(constraintFvsPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvsPatchFields.C

@@ -31,14 +31,14 @@ FoamFile
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          1100;
         startFace       68110;
         sampleMode      nearestPatchFace;
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_wallFilmFaces;
         offsetMode      nonuniform;
-        offsets         
+        offsets
 1100
 (
 (-1.110223025e-16 0 -5.551115123e-17)

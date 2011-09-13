@@ -41,7 +41,7 @@ boundaryField
     obstacle
     {
         type            calculated;
-        value           nonuniform List<scalar> 
+        value           nonuniform List<scalar>
 208
 (
 0

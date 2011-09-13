@@ -47,6 +47,7 @@ License
                                                                               \
     makeInjectionModelType(CellZoneInjection, CloudType);                     \
     makeInjectionModelType(ConeInjection, CloudType);                         \
+    makeInjectionModelType(ConeNozzleInjection, CloudType);                   \
     makeInjectionModelType(FieldActivatedInjection, CloudType);               \
     makeInjectionModelType(InflationInjection, CloudType);                    \
     makeInjectionModelType(KinematicLookupTableInjection, CloudType);         \

@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,7 +85,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     temperatureCoupledBase(patch(), dict),
     neighbourFieldName_(dict.lookup("neighbourFieldName"))
 {
-    if (!isA<directMappedPatchBase>(this->patch().patch()))
+    if (!isA<mappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
@@ -97,7 +97,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
             "    const dictionary& dict\n"
             ")\n"
         )   << "\n    patch type '" << p.type()
-            << "' not type '" << directMappedPatchBase::typeName << "'"
+            << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
@@ -150,8 +150,8 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    // Get the coupling information from the directMappedPatchBase
-    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    // Get the coupling information from the mappedPatchBase
+    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
     (
         patch().patch()
     );

@@ -28,6 +28,7 @@ License
 #include "cpuTime.H"
 #include "cellSet.H"
 #include "regionSplit.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +48,8 @@ void Foam::domainDecomposition::distributeCells()
     {
         wordList pNames(decompositionDict_.lookup("preservePatches"));
 
-        Info<< "Keeping owner of faces in patches " << pNames
+        Info<< nl
+            << "Keeping owner of faces in patches " << pNames
             << " on same processor. This only makes sense for cyclics." << endl;
 
         const polyBoundaryMesh& patches = boundaryMesh();
@@ -76,7 +78,8 @@ void Foam::domainDecomposition::distributeCells()
     {
         wordList zNames(decompositionDict_.lookup("preserveFaceZones"));
 
-        Info<< "Keeping owner and neighbour of faces in zones " << zNames
+        Info<< nl
+            << "Keeping owner and neighbour of faces in zones " << zNames
             << " on same processor" << endl;
 
         const faceZoneMesh& fZones = faceZones();
@@ -103,6 +106,65 @@ void Foam::domainDecomposition::distributeCells()
     }
 
 
+    // Specified processor for owner and neighbour of faces
+    Map<label> specifiedProcessorFaces;
+    List<Tuple2<word, label> > zNameAndProcs;
+
+    if (decompositionDict_.found("singleProcessorFaceZones"))
+    {
+        decompositionDict_.lookup("singleProcessorFaceZones") >> zNameAndProcs;
+
+        const faceZoneMesh& fZones = faceZones();
+
+        label nCells = 0;
+
+        Info<< endl;
+
+        forAll(zNameAndProcs, i)
+        {
+            Info<< "Keeping all cells connected to faceZone "
+                << zNameAndProcs[i].first()
+                << " on processor " << zNameAndProcs[i].second() << endl;
+
+            label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
+
+            if (zoneI == -1)
+            {
+                FatalErrorIn("domainDecomposition::distributeCells()")
+                    << "Unknown singleProcessorFaceZone "
+                    << zNameAndProcs[i].first()
+                    << endl << "Valid faceZones are " << fZones.names()
+                    << exit(FatalError);
+            }
+
+            const faceZone& fz = fZones[zoneI];
+
+            nCells += fz.size();
+        }
+
+
+        // Size
+        specifiedProcessorFaces.resize(2*nCells);
+
+
+        // Fill
+        forAll(zNameAndProcs, i)
+        {
+            label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
+            const faceZone& fz = fZones[zoneI];
+
+            label procI = zNameAndProcs[i].second();
+
+            forAll(fz, fzI)
+            {
+                label faceI = fz[fzI];
+
+                specifiedProcessorFaces.insert(faceI, procI);
+            }
+        }
+    }
+
+
     // Construct decomposition method and either do decomposition on
     // cell centres or on agglomeration
 
@@ -112,7 +174,8 @@ void Foam::domainDecomposition::distributeCells()
         decompositionDict_
     );
 
-    if (sameProcFaces.empty())
+
+    if (sameProcFaces.empty() && specifiedProcessorFaces.empty())
     {
         if (decompositionDict_.found("weightField"))
         {
@@ -146,9 +209,11 @@ void Foam::domainDecomposition::distributeCells()
     }
     else
     {
-        Info<< "Selected " << sameProcFaces.size()
-            << " faces whose owner and neighbour cell should be kept on the"
-            << " same processor" << endl;
+        Info<< "Constrained decomposition:" << endl
+            << "    faces with same processor owner and neighbour : "
+            << sameProcFaces.size() << endl
+            << "    faces all on same processor                   : "
+            << specifiedProcessorFaces.size() << endl << endl;
 
         // Faces where owner and neighbour are not 'connected' (= all except
         // sameProcFaces)
@@ -158,6 +223,24 @@ void Foam::domainDecomposition::distributeCells()
         {
             blockedFace[iter.key()] = false;
         }
+
+
+        // For specifiedProcessorFaces add all point connected faces
+        {
+            forAllConstIter(Map<label>, specifiedProcessorFaces, iter)
+            {
+                const face& f = faces()[iter.key()];
+                forAll(f, fp)
+                {
+                    const labelList& pFaces = pointFaces()[f[fp]];
+                    forAll(pFaces, i)
+                    {
+                        blockedFace[pFaces[i]] = false;
+                    }
+                }
+            }
+        }
+
 
         // Connect coupled boundary faces
         const polyBoundaryMesh& patches =  boundaryMesh();
@@ -201,10 +284,11 @@ void Foam::domainDecomposition::distributeCells()
 
         // Do decomposition on agglomeration
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        scalarField regionWeights(globalRegion.nRegions(), 0);
+
         if (decompositionDict_.found("weightField"))
         {
-            scalarField regionWeights(globalRegion.nRegions(), 0);
-
             word weightName = decompositionDict_.lookup("weightField");
 
             volScalarField weights
@@ -226,23 +310,70 @@ void Foam::domainDecomposition::distributeCells()
 
                 regionWeights[regionI] += weights.internalField()[cellI];
             }
-
-            cellToProc_ = decomposePtr().decompose
-            (
-                *this,
-                globalRegion,
-                regionCentres,
-                regionWeights
-            );
         }
         else
         {
-            cellToProc_ = decomposePtr().decompose
-            (
-                *this,
-                globalRegion,
-                regionCentres
-            );
+            forAll(globalRegion, cellI)
+            {
+                label regionI = globalRegion[cellI];
+
+                regionWeights[regionI] += 1.0;
+            }
+        }
+
+        cellToProc_ = decomposePtr().decompose
+        (
+            *this,
+            globalRegion,
+            regionCentres,
+            regionWeights
+        );
+
+
+        // For specifiedProcessorFaces rework the cellToProc to enforce
+        // all on one processor since we can't guarantee that the input
+        // to regionSplit was a single region.
+        // E.g. faceZone 'a' with the cells split into two regions
+        // by a notch formed by two walls
+        //
+        //          \   /
+        //           \ /
+        //    ---a----+-----a-----
+        //
+        //
+        // Note that reworking the cellToProc might make the decomposition
+        // unbalanced.
+        if (specifiedProcessorFaces.size())
+        {
+            const faceZoneMesh& fZones = faceZones();
+
+            forAll(zNameAndProcs, i)
+            {
+                label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
+                const faceZone& fz = fZones[zoneI];
+
+                if (fz.size())
+                {
+                    label procI = zNameAndProcs[i].second();
+                    if (procI == -1)
+                    {
+                        // If no processor specified use the one from the
+                        // 0th element
+                        procI = cellToProc_[faceOwner()[fz[0]]];
+                    }
+
+                    forAll(fz, fzI)
+                    {
+                        label faceI = fz[fzI];
+
+                        cellToProc_[faceOwner()[faceI]] = procI;
+                        if (isInternalFace(faceI))
+                        {
+                            cellToProc_[faceNeighbour()[faceI]] = procI;
+                        }
+                    }
+                }
+            }
         }
     }
 

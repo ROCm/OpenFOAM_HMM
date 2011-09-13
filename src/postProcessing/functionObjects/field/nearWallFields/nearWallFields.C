@@ -89,7 +89,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         distance_ = readScalar(dict.lookup("distance"));
 
 
-        // Clear out any previously loaded fields 
+        // Clear out any previously loaded fields
         vsf_.clear();
         vvf_.clear();
         vSpheretf_.clear();
@@ -99,7 +99,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         reverseFieldMap_.clear();
 
 
-        // Generate fields with selfContainedDirectMapped bc.
+        // Generate fields with selfContainedMapped bc.
 
         // Convert field to map
         fieldMap_.resize(2*fieldSet_.size());

@@ -620,8 +620,9 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
                 (
                     "bool ThermoSurfaceFilm<CloudType>::transferParcel"
                     "("
-                        "const parcelType&, "
-                        "const label"
+                        "parcelType&, "
+                        "const polyPatch&, "
+                        "bool&"
                     ")"
                 )   << "Unknown interaction type enumeration"
                     << abort(FatalError);
@@ -642,7 +643,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
     const label primaryPatchI,
-    const mapDistribute& distMap,
+    const mappedPatchBase& mapPatch,
     const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
@@ -650,15 +651,15 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     (
         filmPatchI,
         primaryPatchI,
-        distMap,
+        mapPatch,
         filmModel
     );
 
     TFilmPatch_ = filmModel.Ts().boundaryField()[filmPatchI];
-    distMap.distribute(TFilmPatch_);
+    mapPatch.distribute(TFilmPatch_);
 
     CpFilmPatch_ = filmModel.Cp().boundaryField()[filmPatchI];
-    distMap.distribute(CpFilmPatch_);
+    mapPatch.distribute(CpFilmPatch_);
 }
 
 

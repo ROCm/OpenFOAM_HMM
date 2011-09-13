@@ -20,39 +20,39 @@ internalField   uniform 300;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform 300;
     }
 
-    outlet          
+    outlet
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
 
-    bottomWall      
+    bottomWall
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
 
-    topWall         
+    topWall
     {
         type            inletOutlet;
         inletValue      uniform 300;
         value           uniform 300;
     }
 
-    prismWall       
+    prismWall
     {
         type            zeroGradient;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

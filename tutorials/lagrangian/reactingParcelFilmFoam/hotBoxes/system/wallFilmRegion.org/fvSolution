@@ -40,12 +40,19 @@ PISO
 {
     momentumPredictor true;
     nOuterCorr      1;
-    nCorr           1;
+    nCorr           2;
     nNonOrthCorr    0;
 }
 
 
 relaxationFactors
-{}
+{
+    fields
+    {
+    }
+    equations
+    {
+    }
+}
 
 // ************************************************************************* //

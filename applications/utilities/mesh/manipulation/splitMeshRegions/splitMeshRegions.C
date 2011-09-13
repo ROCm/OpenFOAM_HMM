@@ -36,7 +36,7 @@ Description
     Output is:
     - volScalarField with regions as different scalars (-detectOnly)
             or
-    - mesh with multiple regions and directMapped patches. These patches
+    - mesh with multiple regions and mapped patches. These patches
       either cover the whole interface between two region (default) or
       only part according to faceZones (-useFaceZones)
             or
@@ -57,7 +57,7 @@ Description
 
     - Should work in parallel.
     cellZones can differ on either side of processor boundaries in which case
-    the faces get moved from processor patch to directMapped patch. Not
+    the faces get moved from processor patch to mapped patch. Not
     very well tested.
 
     - If a cell zone gets split into more than one region it can detect
@@ -94,7 +94,7 @@ Description
 #include "EdgeMap.H"
 #include "syncTools.H"
 #include "ReadFields.H"
-#include "directMappedWallPolyPatch.H"
+#include "mappedWallPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
 
 using namespace Foam;
@@ -687,7 +687,7 @@ void getInterfaceSizes
         }
     }
 
-    // Rework 
+    // Rework
 
     Pstream::scatter(regionsToSize);
 
@@ -1260,14 +1260,14 @@ labelList addRegionPatches
         //    << " trying to add patches " << names << endl;
 
 
-        directMappedWallPolyPatch patch1
+        mappedWallPolyPatch patch1
         (
             names[0],
             0,                  // overridden
             0,                  // overridden
             0,                  // overridden
             regionNames[e[1]],  // sampleRegion
-            directMappedPatchBase::NEARESTPATCHFACE,
+            mappedPatchBase::NEARESTPATCHFACE,
             names[1],           // samplePatch
             point::zero,        // offset
             mesh.boundaryMesh()
@@ -1275,14 +1275,14 @@ labelList addRegionPatches
 
         interfacePatches[interI] = addPatch(mesh, patch1);
 
-        directMappedWallPolyPatch patch2
+        mappedWallPolyPatch patch2
         (
             names[1],
             0,
             0,
             0,
             regionNames[e[0]],  // sampleRegion
-            directMappedPatchBase::NEARESTPATCHFACE,
+            mappedPatchBase::NEARESTPATCHFACE,
             names[0],
             point::zero,        // offset
             mesh.boundaryMesh()

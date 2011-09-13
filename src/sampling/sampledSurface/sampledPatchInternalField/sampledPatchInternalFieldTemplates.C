@@ -82,7 +82,7 @@ Foam::sampledPatchInternalField::interpolateField
 
     forAll(patchIDs(), i)
     {
-        // See directMappedFixedValueFvPatchField
+        // See mappedFixedValueFvPatchField
         const mapDistribute& distMap = mappers_[i].map();
 
         // Send back sample points to processor that holds the cell.

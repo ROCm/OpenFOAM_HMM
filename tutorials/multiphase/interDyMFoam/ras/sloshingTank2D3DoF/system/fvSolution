@@ -105,7 +105,13 @@ PIMPLE
 
 relaxationFactors
 {
-    "U.*"           1;
+    fields
+    {
+    }
+    equations
+    {
+        "U.*"           1;
+    }
 }
 
 

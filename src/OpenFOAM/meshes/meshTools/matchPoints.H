@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Function matchPoints Declaration
+                      Function matchPoints Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Determine correspondence between pointFields. Gets passed

@@ -393,9 +393,9 @@ DebugSwitches
     diagonal            0;
     dictionary          0;
     dimensionSet        1;
-    directMappedBase    0;
-    directMappedPatch   0;
-    directMappedVelocityFlux 0;
+    mappedBase    0;
+    mappedPatch   0;
+    mappedVelocityFlux 0;
     directionMixed      0;
     directional         0;
     disallowGenericFvPatchField 0;

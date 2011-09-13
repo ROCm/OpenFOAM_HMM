@@ -55,10 +55,16 @@ SIMPLE
 
 relaxationFactors
 {
-    p               0.3;
-    U               0.7;
-    k               0.9;
-    epsilon         0.9;
+    fields
+    {
+        p               0.3;
+    }
+    equations
+    {
+        U               0.7;
+        k               0.9;
+        epsilon         0.9;
+    }
 }
 
 

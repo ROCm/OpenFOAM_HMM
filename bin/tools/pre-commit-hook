@@ -150,13 +150,17 @@ checkIllegalCode()
         (*[Mm]akefile* | wmake/rules/*)
         ;;
         (*)
-            # parse line numbers from grep output:
-            #        <lineNr>:   contents
-            lines=$(git grep -E -hn -e "$reBad" $scope"$f" |
-                sed -e 's@:.*@@' |
-                tr '\n' ' '
-            )
-            [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+            fileType=`file -b $f`
+            if [ "$fileType" != "data" ]
+            then
+                # parse line numbers from grep output:
+                #        <lineNr>:   contents
+                lines=$(git grep -E -hn -e "$reBad" $scope"$f" |
+                    sed -e 's@:.*@@' |
+                    tr '\n' ' '
+                )
+                [ -n "$lines" ] && echo "$Indent$f -- lines: $lines"
+            fi
         ;;
         esac
     done
@@ -274,7 +278,7 @@ checkCopyright()
     for f in $fileList
     do
         sYear=`grep "Copyright.*OpenFOAM" $f | sed 's/[^0-9]//g'`
-        if [ "$year" != "" ] && [ "$year" != "$sYear" ]; then
+        if [ "$sYear" != "" ] && [ "$year" != "$sYear" ]; then
             echo "Updated copyright for: $f"
             sed -i "s/$sYear OpenFOAM/$year OpenFOAM/g" $f
         fi

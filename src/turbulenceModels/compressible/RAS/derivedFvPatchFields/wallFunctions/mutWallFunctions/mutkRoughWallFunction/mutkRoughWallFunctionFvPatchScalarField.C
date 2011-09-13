@@ -84,32 +84,37 @@ tmp<scalarField> mutkRoughWallFunctionFvPatchScalarField::calcMut() const
         label faceCellI = patch().faceCells()[faceI];
 
         scalar uStar = Cmu25*sqrt(k[faceCellI]);
-
         scalar yPlus = uStar*y[faceI]/(muw[faceI]/rhow[faceI]);
-
         scalar KsPlus = uStar*Ks_[faceI]/(muw[faceI]/rhow[faceI]);
 
         scalar Edash = E_;
-        scalar yPlusLamNew = yPlusLam_;
         if (KsPlus > 2.25)
         {
             Edash /= fnRough(KsPlus, Cs_[faceI]);
-            yPlusLamNew = calcYPlusLam(kappa_, Edash);
         }
+
+        scalar limitingMutw = max(mutw[faceI], muw[faceI]);
+
+        // To avoid oscillations limit the change in the wall viscosity
+        // which is particularly important if it temporarily becomes zero
+        mutw[faceI] =
+            max
+            (
+                min
+                (
+                    muw[faceI]
+                   *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                    2*limitingMutw
+                ), 0.5*limitingMutw
+            );
 
         if (debug)
         {
             Info<< "yPlus = " << yPlus
                 << ", KsPlus = " << KsPlus
                 << ", Edash = " << Edash
-                << ", yPlusLam = " << yPlusLam_
+                << ", mutw = " << mutw[faceI]
                 << endl;
-        }
-
-        if (yPlus > yPlusLamNew)
-        {
-            mutw[faceI] =
-                muw[faceI]*(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1);
         }
     }
 

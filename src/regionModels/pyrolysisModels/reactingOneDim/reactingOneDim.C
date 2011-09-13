@@ -25,8 +25,6 @@ License
 
 #include "reactingOneDim.H"
 #include "addToRunTimeSelectionTable.H"
-#include "directMappedPatchBase.H"
-#include "mapDistribute.H"
 #include "zeroGradientFvPatchFields.H"
 #include "surfaceInterpolate.H"
 #include "fvm.H"
@@ -48,19 +46,40 @@ namespace pyrolysisModels
 defineTypeNameAndDebug(reactingOneDim, 0);
 
 addToRunTimeSelectionTable(pyrolysisModel, reactingOneDim, mesh);
+addToRunTimeSelectionTable(pyrolysisModel, reactingOneDim, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void reactingOneDim::readReactingOneDimControls()
+{
+    const dictionary& solution = this->solution().subDict("SIMPLE");
+    solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
+    time_.controlDict().lookup("maxDi") >> maxDiff_;
+
+    coeffs().lookup("radFluxName") >> primaryRadFluxName_;
+    coeffs().lookup("minimumDelta") >> minimumDelta_;
+}
+
 
 bool reactingOneDim::read()
 {
     if (pyrolysisModel::read())
     {
-        const dictionary& solution = this->solution().subDict("SIMPLE");
-        solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
-        time_.controlDict().lookup("maxDi") >> maxDiff_;
+        readReactingOneDimControls();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
-        coeffs().lookup("radFluxName") >> primaryRadFluxName_;
-        coeffs().lookup("minimumDelta") >> minimumDelta_;
+
+bool reactingOneDim::read(const dictionary& dict)
+{
+    if (pyrolysisModel::read(dict))
+    {
+        readReactingOneDimControls();
         return true;
     }
     else
@@ -420,6 +439,108 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
 }
 
 
+reactingOneDim::reactingOneDim
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    pyrolysisModel(modelType, mesh, dict),
+    solidChemistry_(solidChemistryModel::New(regionMesh())),
+    solidThermo_(solidChemistry_->solidThermo()),
+    kappa_(solidThermo_.kappa()),
+    K_(solidThermo_.K()),
+    rho_(solidThermo_.rho()),
+    Ys_(solidThermo_.composition().Y()),
+    T_(solidThermo_.T()),
+    primaryRadFluxName_(dict.lookupOrDefault<word>("radFluxName", "Qr")),
+    nNonOrthCorr_(-1),
+    maxDiff_(10),
+    minimumDelta_(1e-4),
+
+    phiGas_
+    (
+        IOobject
+        (
+            "phiGas",
+            time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimMass/dimTime, 0.0)
+    ),
+
+    phiHsGas_
+    (
+        IOobject
+        (
+            "phiHsGas",
+            time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimEnergy/dimTime, 0.0)
+    ),
+
+    chemistrySh_
+    (
+        IOobject
+        (
+            "chemistrySh",
+            time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
+    ),
+
+    QrCoupled_
+    (
+        IOobject
+        (
+            primaryRadFluxName_,
+            time().timeName(),
+            regionMesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh()
+    ),
+
+    Qr_
+    (
+        IOobject
+        (
+            "QrPyr",
+            time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimEnergy/dimArea/dimTime, 0.0),
+        zeroGradientFvPatchVectorField::typeName
+    ),
+
+    lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
+    addedGasMass_(dimensionedScalar("zero", dimMass, 0.0)),
+    totalGasMassFlux_(0.0),
+    totalHeatRR_(dimensionedScalar("zero", dimEnergy/dimTime, 0.0))
+{
+    if (active_)
+    {
+        read(dict);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 reactingOneDim::~reactingOneDim()
@@ -560,6 +681,8 @@ void reactingOneDim::preEvolveRegion()
 
 void reactingOneDim::evolveRegion()
 {
+    Info<< "\nEvolving pyrolysis in region: " << regionMesh().name() << endl;
+
     const scalarField mass0 = rho_*regionMesh().V();
 
     solidChemistry_->solve
@@ -591,7 +714,7 @@ void reactingOneDim::evolveRegion()
 
 void reactingOneDim::info() const
 {
-    Info<< "\nPyrolysis: " << type() << endl;
+    Info<< "\nPyrolysis in region: " << regionMesh().name() << endl;
 
     Info<< indent << "Total gas mass produced  [kg] = "
         << addedGasMass_.value() << nl

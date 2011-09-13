@@ -87,6 +87,7 @@ private:
         //- Are faces collocated. Either size 0,1 or length of patch.
         mutable boolList collocated_;
 
+
 protected:
 
     // Protected Member Functions

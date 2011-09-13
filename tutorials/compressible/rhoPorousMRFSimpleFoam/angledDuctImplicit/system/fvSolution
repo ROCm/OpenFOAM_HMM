@@ -67,11 +67,17 @@ SIMPLE
 
 relaxationFactors
 {
-    p               0.3;
-    rho             1;
-    U               0.7;
-    "(k|epsilon)"   0.9;
-    h               0.9;
+    fields
+    {
+        p               0.3;
+        rho             1;
+    }
+    equations
+    {
+        U               0.7;
+        "(k|epsilon)"   0.9;
+        h               0.9;
+    }
 }
 
 

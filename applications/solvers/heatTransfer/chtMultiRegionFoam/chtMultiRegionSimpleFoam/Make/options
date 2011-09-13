@@ -20,5 +20,4 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lradiationModels \
-    -lcoupledDerivedFvPatchFields
+    -lradiationModels

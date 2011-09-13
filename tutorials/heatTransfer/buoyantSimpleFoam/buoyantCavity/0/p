@@ -21,7 +21,7 @@ internalField   uniform 1e5;
 
 boundaryField
 {
-    frontAndBack 
+    frontAndBack
     {
         type            calculated;
         value           $internalField;

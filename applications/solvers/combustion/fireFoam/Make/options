@@ -24,8 +24,7 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/pyrolysisModels/lnInclude \
     -I$(LIB_SRC)/lagrangian/basic/lnInclude \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude \
-    -I$(LIB_SRC)/ODE/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude
+    -I$(LIB_SRC)/ODE/lnInclude
 
 
 EXE_LIBS = \
@@ -48,5 +47,4 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lpyrolysisModels \
     -llagrangianIntermediate \
-    -lODE \
-    -lsampling
+    -lODE

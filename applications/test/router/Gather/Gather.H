@@ -25,7 +25,7 @@ Class
     Foam::Gather
 
 Description
-    Gather data from all processors onto all processors. 
+    Gather data from all processors onto all processors.
 
 SourceFiles
     Gather.C

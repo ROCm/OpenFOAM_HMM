@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nearWallFields.H"
-#include "selfContainedDirectMappedFixedValueFvPatchFields.H"
+#include "selfContainedMappedFixedValueFvPatchFields.H"
 #include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,7 +66,7 @@ void Foam::nearWallFields::createFields
                 sflds.set(sz, new vfType(io, fld));
                 vfType& sampleFld = sflds[sz];
 
-                // Reset the bcs to be directMapped
+                // Reset the bcs to be mapped
                 forAllConstIter(labelHashSet, patchSet_, iter)
                 {
                     label patchI = iter.key();
@@ -74,14 +74,13 @@ void Foam::nearWallFields::createFields
                     sampleFld.boundaryField().set
                     (
                         patchI,
-                        new selfContainedDirectMappedFixedValueFvPatchField
-                            <Type>
+                        new selfContainedMappedFixedValueFvPatchField<Type>
                         (
                             sampleFld.mesh().boundary()[patchI],
                             sampleFld.dimensionedInternalField(),
 
                             sampleFld.mesh().name(),
-                            directMappedPatchBase::NEARESTCELL,
+                            mappedPatchBase::NEARESTCELL,
                             word::null,     // samplePatch
                             -distance_,
 
@@ -116,7 +115,7 @@ void Foam::nearWallFields::sampleFields
 
         // Take over internal and boundary values
         sflds[i] == fld;
-        // Evaluate to update the directMapped
+        // Evaluate to update the mapped
         sflds[i].correctBoundaryConditions();
     }
 }

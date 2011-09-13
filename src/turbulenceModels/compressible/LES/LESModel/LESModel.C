@@ -170,7 +170,7 @@ bool LESModel::read()
     // Bit of trickery : we are both IOdictionary ('RASProperties') and
     // an regIOobject (from the turbulenceModel). Problem is to distinguish
     // between the two - we only want to reread the IOdictionary.
-    
+
     bool ok = IOdictionary::readData
     (
         IOdictionary::readStream

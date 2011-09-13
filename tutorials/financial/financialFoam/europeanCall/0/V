@@ -20,19 +20,19 @@ internalField   uniform 0;
 
 boundaryField
 {
-    lowValue        
+    lowValue
     {
         type            fixedValue;
         value           uniform 0;
     }
 
-    highValue       
+    highValue
     {
         type            fixedGradient;
         gradient        uniform 60;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

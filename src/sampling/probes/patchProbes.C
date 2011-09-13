@@ -27,7 +27,7 @@ License
 #include "volFields.H"
 #include "IOmanip.H"
 // For 'nearInfo' helper class only
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 //#include "meshSearch.H"
 #include "treeBoundBox.H"
 #include "treeDataFace.H"
@@ -59,7 +59,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     }
 
      // All the info for nearest. Construct to miss
-    List<directMappedPatchBase::nearInfo> nearest(this->size());
+    List<mappedPatchBase::nearInfo> nearest(this->size());
 
     const polyPatch& pp = bm[patchI];
 
@@ -133,7 +133,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             {
                 const point& fc = mesh.faceCentres()[faceI];
 
-                directMappedPatchBase::nearInfo sampleInfo;
+                mappedPatchBase::nearInfo sampleInfo;
 
                 sampleInfo.first() = pointIndexHit
                 (
@@ -152,7 +152,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
 
 
     // Find nearest.
-    Pstream::listCombineGather(nearest, directMappedPatchBase::nearestEqOp());
+    Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
     if (debug)

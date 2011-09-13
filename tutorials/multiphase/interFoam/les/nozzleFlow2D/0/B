@@ -25,30 +25,30 @@ boundaryField
         type            empty;
     }
 
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform (0 0 0 0 0 0 0 0 0);
     }
 
-    wall            
+    wall
     {
         type            zeroGradient;
     }
 
-    atmosphere      
+    atmosphere
     {
         type            inletOutlet;
         inletValue      uniform (0 0 0 0 0 0 0 0 0);
         value           uniform (0 0 0 0 0 0 0 0 0);
     }
 
-    front         
+    front
     {
         type            wedge;
     }
 
-    back         
+    back
     {
         type            wedge;
     }

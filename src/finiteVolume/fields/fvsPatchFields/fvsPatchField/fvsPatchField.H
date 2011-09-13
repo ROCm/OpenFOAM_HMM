@@ -223,7 +223,7 @@ public:
         static tmp<fvsPatchField<Type> > New
         (
             const word&,
-            const word& actualPatchType, 
+            const word& actualPatchType,
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&
         );

@@ -13,7 +13,7 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/SLGThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
-    -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
+    -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/LES/LESdeltas/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/LES/lnInclude \
@@ -27,19 +27,21 @@ LIB_LIBS = \
     -lmeshTools \
     -llagrangian \
     -ldistributionModels \
+    -lspecie \
+    -lbasicThermophysicalModels \
     -lliquidProperties \
     -lliquidMixtureProperties \
     -lsolidProperties \
     -lsolidMixtureProperties \
-    -lspecie \
-    -lbasicThermophysicalModels \
     -lreactionThermophysicalModels \
     -lSLGThermo \
-    -lchemistryModel \
     -lradiationModels \
-    -lODE \
+    -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
+    -lLESdeltas \
+    -lregionModels \
+    -lsurfaceFilmModels \
     -ldynamicFvMesh \
-    -lsurfaceFilmModels
+    -lsampling
 

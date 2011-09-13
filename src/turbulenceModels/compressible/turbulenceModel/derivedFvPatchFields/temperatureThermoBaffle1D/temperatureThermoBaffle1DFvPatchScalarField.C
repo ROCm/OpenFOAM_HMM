@@ -25,7 +25,7 @@ License
 
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "directMappedPatchBase.H"
+#include "mappedPatchBase.H"
 #include "turbulenceModel.H"
 #include "mapDistribute.H"
 
@@ -90,7 +90,7 @@ temperatureThermoBaffle1DFvPatchScalarField
     Qs_(scalarField("Qs", dict, p.size())),
     solid_(new solidThermoData(dict))
 {
-    if (!isA<directMappedPatchBase>(this->patch().patch()))
+    if (!isA<mappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
@@ -102,7 +102,7 @@ temperatureThermoBaffle1DFvPatchScalarField
             "    const dictionary& dict\n"
             ")\n"
         )   << "\n    patch type '" << patch().type()
-            << "' not type '" << directMappedPatchBase::typeName << "'"
+            << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << patch().name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
@@ -197,7 +197,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
+    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
     (
         patch().patch()
     );

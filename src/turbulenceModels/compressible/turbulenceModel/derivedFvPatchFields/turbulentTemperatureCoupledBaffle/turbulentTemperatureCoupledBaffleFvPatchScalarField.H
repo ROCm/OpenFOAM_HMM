@@ -42,11 +42,11 @@ Description
             value               uniform 300;
         }
 
-    Needs to be on underlying directMapped(Wall)FvPatch.
+    Needs to be on underlying mapped(Wall)FvPatch.
 
     Note: see temperatureCoupledBase on ways to specify K.
 
-    Note: runs in parallel with arbitrary decomposition. Uses directMapped
+    Note: runs in parallel with arbitrary decomposition. Uses mapped
     functionality to calculate exchange.
 
     Note: lags interface data so both sides use same data.

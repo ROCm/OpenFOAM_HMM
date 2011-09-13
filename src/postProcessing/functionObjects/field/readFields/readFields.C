@@ -88,7 +88,7 @@ void Foam::readFields::execute()
 {
     //Info<< type() << " " << name_ << ":" << nl;
 
-    // Clear out any previously loaded fields 
+    // Clear out any previously loaded fields
     vsf_.clear();
     vvf_.clear();
     vSpheretf_.clear();

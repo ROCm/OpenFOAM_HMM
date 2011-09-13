@@ -19,5 +19,4 @@ EXE_LIBS = \
     -lcompressibleLESModels \
     -lmeshTools \
     -lfiniteVolume \
-    -lradiationModels \
-    -lcoupledDerivedFvPatchFields
+    -lradiationModels

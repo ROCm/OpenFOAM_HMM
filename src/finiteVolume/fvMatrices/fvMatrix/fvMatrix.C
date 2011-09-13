@@ -627,9 +627,9 @@ void Foam::fvMatrix<Type>::relax()
         ("finalIteration", false)
     );
 
-    if (psi_.mesh().relax(name))
+    if (psi_.mesh().relaxEquation(name))
     {
-        relax(psi_.mesh().relaxationFactor(name));
+        relax(psi_.mesh().equationRelaxationFactor(name));
     }
 }
 
@@ -927,6 +927,7 @@ void Foam::fvMatrix<Type>::operator=(const fvMatrix<Type>& fvmv)
             << abort(FatalError);
     }
 
+    dimensions_ = fvmv.dimensions_;
     lduMatrix::operator=(fvmv);
     source_ = fvmv.source_;
     internalCoeffs_ = fvmv.internalCoeffs_;

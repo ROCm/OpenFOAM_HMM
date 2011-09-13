@@ -160,6 +160,13 @@ public:
             //- Return corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
 
+
+        // Manipulate
+
+            //- Inflate box by factor*mag(span) in all dimensions
+            void inflate(const scalar s);
+
+
         // Query
 
             //- Overlaps/touches boundingBox?

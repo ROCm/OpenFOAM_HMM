@@ -4,4 +4,4 @@ diameterModels/diameterModel/newDiameterModel.C
 diameterModels/constantDiameter/constantDiameter.C
 diameterModels/isothermalDiameter/isothermalDiameter.C
 
-LIB = $(FOAM_USER_LIBBIN)/libcompressiblePhaseModel
+LIB = $(FOAM_LIBBIN)/libcompressiblePhaseModel

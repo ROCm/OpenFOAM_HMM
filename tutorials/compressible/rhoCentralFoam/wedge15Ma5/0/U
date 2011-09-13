@@ -20,23 +20,23 @@ internalField   uniform (5 0 0);
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform (5 0 0);
     }
 
-    outlet          
+    outlet
     {
         type            zeroGradient;
     }
 
-    bottom          
+    bottom
     {
         type            symmetryPlane;
     }
 
-    top             
+    top
     {
         type            symmetryPlane;
     }
@@ -46,7 +46,7 @@ boundaryField
         type            slip;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

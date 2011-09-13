@@ -85,15 +85,13 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        p.storePrevIter();
-
         laminarTransport.lookup("lambda") >> lambda;
 
         //alpha +=
         //    mesh.relaxationFactor("alpha")
         //   *(lambda*max(Ua & U, zeroSensitivity) - alpha);
         alpha +=
-            mesh.relaxationFactor("alpha")
+            mesh.fieldRelaxationFactor("alpha")
            *(min(max(alpha + lambda*(Ua & U), zeroAlpha), alphaMax) - alpha);
 
         zeroCells(alpha, inletCells);
@@ -147,8 +145,6 @@ int main(int argc, char *argv[])
             U -= rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
-
-        pa.storePrevIter();
 
         // Adjoint Pressure-velocity SIMPLE corrector
         {

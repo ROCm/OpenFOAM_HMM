@@ -70,10 +70,16 @@ potentialFlow
 
 relaxationFactors
 {
-    p               0.3;
-    U               0.7;
-    k               0.7;
-    omega           0.7;
+    fields
+    {
+        p               0.3;
+    }
+    equations
+    {
+        U               0.7;
+        k               0.7;
+        omega           0.7;
+    }
 }
 
 cache

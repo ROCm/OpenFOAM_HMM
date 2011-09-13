@@ -55,7 +55,7 @@ void Foam::mapDistribute::distribute
         {
             subField[i] = field[mySubMap[i]];
         }
-        
+
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
 
@@ -407,7 +407,7 @@ void Foam::mapDistribute::distribute
         {
             subField[i] = field[mySubMap[i]];
         }
-        
+
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
 

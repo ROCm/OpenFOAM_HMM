@@ -20,7 +20,7 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet      
+    inlet
     {
         //type            totalPressure;
         //p0              uniform 40;
@@ -38,13 +38,13 @@ boundaryField
         value           uniform 40;
     }
 
-    outlet1     
+    outlet1
     {
         type            fixedValue;
         value           uniform 10;
     }
 
-    outlet2    
+    outlet2
     {
         type            fixedValue;
         value           uniform 0;

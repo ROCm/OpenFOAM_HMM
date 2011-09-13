@@ -40,7 +40,7 @@ boundaryField
 
     frontBack
     {
-        type            empty; 
+        type            empty;
     }
 }
 

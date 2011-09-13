@@ -25,7 +25,7 @@ License
 
 #include "pyrolysisModel.H"
 #include "fvMesh.H"
-#include "directMappedFieldFvPatchField.H"
+#include "mappedFieldFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,6 +40,7 @@ namespace pyrolysisModels
 
 defineTypeNameAndDebug(pyrolysisModel, 0);
 defineRunTimeSelectionTable(pyrolysisModel, mesh);
+defineRunTimeSelectionTable(pyrolysisModel, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -70,7 +71,7 @@ void pyrolysisModel::constructMeshObjects()
         forAll(filmDelta.boundaryField(), patchI)
         {
             const fvPatchField<scalar>& fvp = filmDelta.boundaryField()[patchI];
-            if (isA<directMappedFieldFvPatchField<scalar> >(fvp))
+            if (isA<mappedFieldFvPatchField<scalar> >(fvp))
             {
                 foundCoupledPatch = true;
                 break;
@@ -81,7 +82,7 @@ void pyrolysisModel::constructMeshObjects()
         {
             WarningIn("void pyrolysisModels::constructMeshObjects()")
                 << "filmCoupled flag set to true, but no "
-                << directMappedFieldFvPatchField<scalar>::typeName
+                << mappedFieldFvPatchField<scalar>::typeName
                 << " patches found on " << filmDelta.name() << " field"
                 << endl;
         }
@@ -91,14 +92,33 @@ void pyrolysisModel::constructMeshObjects()
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void pyrolysisModel::readPyrolysisControls()
+{
+    filmCoupled_ = readBool(coeffs_.lookup("filmCoupled"));
+    reactionDeltaMin_ =
+        coeffs_.lookupOrDefault<scalar>("reactionDeltaMin", 0.0);
+}
+
+
 bool pyrolysisModel::read()
 {
     if (regionModel1D::read())
     {
-        filmCoupled_ = readBool(coeffs_.lookup("filmCoupled"));
-        reactionDeltaMin_ =
-            coeffs_.lookupOrDefault<scalar>("reactionDeltaMin", 0.0);
+        readPyrolysisControls();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
+
+bool pyrolysisModel::read(const dictionary& dict)
+{
+    if (regionModel1D::read(dict))
+    {
+        readPyrolysisControls();
         return true;
     }
     else
@@ -129,6 +149,26 @@ pyrolysisModel::pyrolysisModel(const word& modelType, const fvMesh& mesh)
     if (active_)
     {
         read();
+        constructMeshObjects();
+    }
+}
+
+
+pyrolysisModel::pyrolysisModel
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    regionModel1D(mesh, "pyrolysis", modelType, dict),
+    filmCoupled_(false),
+    filmDeltaPtr_(NULL),
+    reactionDeltaMin_(0.0)
+{
+    if (active_)
+    {
+        read(dict);
         constructMeshObjects();
     }
 }
@@ -175,7 +215,7 @@ scalar pyrolysisModel::maxDiff() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace surfaceFilmModels
+} // End namespace pyrolysisModels
 } // End namespace regionModels
 } // End namespace Foam
 

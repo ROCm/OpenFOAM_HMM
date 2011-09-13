@@ -84,23 +84,12 @@
               + (alpha2/rho2)*pEqnComp2()
             ) +
             pEqnIncomp,
-            mesh.solver
-            (
-                p.select(pimple.finalInnerIter(corr, nonOrth))
-                /*
-                (
-                    oCorr == pimple.nOuterCorr()-1
-                 && corr == nCorr-1
-                 && nonOrth == nNonOrthCorr
-                )
-                */
-            )
+            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
         if (nonOrth == pimple.nNonOrthCorr())
         {
             surfaceScalarField mSfGradp = pEqnIncomp.flux()/Dp;
-
             phi1 += rAlphaAU1f*mSfGradp/fvc::interpolate(rho1);
             phi2 += rAlphaAU2f*mSfGradp/fvc::interpolate(rho2);
             phi = alpha1f*phi1 + alpha2f*phi2;

@@ -135,7 +135,7 @@ public:
             virtual int tag() const
             {
                 return fineProcInterface_.tag();
-            }   
+            }
 };
 
 

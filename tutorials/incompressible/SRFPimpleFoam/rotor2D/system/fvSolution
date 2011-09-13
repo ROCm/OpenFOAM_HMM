@@ -74,9 +74,15 @@ PIMPLE
 
 relaxationFactors
 {
-    "Urel.*"        1;
-    "k.*"           1;
-    "epsilon.*"     1;
+    fields
+    {
+    }
+    equations
+    {
+        "Urel.*"        1;
+        "k.*"           1;
+        "epsilon.*"     1;
+    }
 }
 
 

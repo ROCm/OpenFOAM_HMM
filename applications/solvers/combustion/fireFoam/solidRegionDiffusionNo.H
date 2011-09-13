@@ -1,1 +1,1 @@
-scalar DiNum =  pyrolysis->solidRegionDiffNo();
+scalar DiNum =  pyrolysis.solidRegionDiffNo();

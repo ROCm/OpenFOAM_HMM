@@ -12,4 +12,4 @@ heatTransferModels/heatTransferModel/heatTransferModel.C
 heatTransferModels/heatTransferModel/newHeatTransferModel.C
 heatTransferModels/RanzMarshall/RanzMarshall.C
 
-LIB = $(FOAM_USER_LIBBIN)/libcompressibleEulerianInterfacialModels
+LIB = $(FOAM_LIBBIN)/libcompressibleEulerianInterfacialModels

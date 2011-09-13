@@ -64,7 +64,6 @@ Foam::multiphaseMixture::multiphaseMixture
 :
     transportModel(U, phi),
     phases_(lookup("phases"), phase::iNew(U, phi)),
-    refPhase_(*phases_.lookup(word(lookup("refPhase")))),
 
     mesh_(U.mesh()),
     U_(U),
@@ -335,7 +334,7 @@ void Foam::multiphaseMixture::correctContactAngle
 ) const
 {
     const volScalarField::GeometricBoundaryField& gbf
-        = refPhase_.boundaryField();
+        = alpha1.boundaryField();
 
     const fvBoundaryMesh& boundary = mesh_.boundary();
 
@@ -549,8 +548,20 @@ void Foam::multiphaseMixture::solveAlphas
 
     MULES::limitSum(phiAlphaCorrs);
 
-    rhoPhi_ = 0.0*phi_*refPhase_.rho();
-    volScalarField sumAlpha("sumAlpha", 0.0*refPhase_);
+    rhoPhi_ = dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0);
+
+    volScalarField sumAlpha
+    (
+        IOobject
+        (
+            "sumAlpha",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar("sumAlpha", dimless, 0)
+    );
+
     phasei = 0;
 
     forAllIter(PtrDictionary<phase>, phases_, iter)

@@ -73,6 +73,18 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read();
 
+        //- Read control parameters from dictionary
+        virtual bool read(const dictionary& dict);
+
+        //- Reset solidChemistryModel and basicSolidThermo pointers
+        void constructThermoChemistry();
+
+        //- Reference to the solid chemistry model
+        autoPtr<solidChemistryModel> solidChemistry_;
+
+        //- Reference to solid thermo
+        autoPtr<basicSolidThermo> solidThermo_;
+
 
 public:
 
@@ -84,6 +96,14 @@ public:
 
         //- Construct from type name and mesh
         noPyrolysis(const word& modelType, const fvMesh& mesh);
+
+        //- Construct from type name and mesh and dict
+        noPyrolysis
+        (
+            const word& modelType,
+            const fvMesh& mesh,
+            const dictionary& dict
+        );
 
 
     //- Destructor
@@ -111,6 +131,16 @@ public:
 
             //- Return the total gas mass flux to primary region [kg/m2/s]
             virtual const surfaceScalarField& phiGas() const;
+
+
+        // Evolution
+
+            //- Pre-evolve region
+            virtual void preEvolveRegion();
+
+            //- Evolve the pyrolysis equations
+            virtual void evolveRegion();
+
 };
 
 

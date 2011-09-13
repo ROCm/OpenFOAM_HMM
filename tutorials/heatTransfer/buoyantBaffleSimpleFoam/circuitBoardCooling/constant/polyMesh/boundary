@@ -49,7 +49,7 @@ FoamFile
     }
     baffle1Wall_0
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          7;
         startFace       3246;
         sampleMode      nearestPatchFace;
@@ -60,7 +60,7 @@ FoamFile
     }
     baffle1Wall_1
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          7;
         startFace       3253;
         sampleMode      nearestPatchFace;
@@ -71,7 +71,7 @@ FoamFile
     }
     baffle2Wall_0
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          7;
         startFace       3260;
         sampleMode      nearestPatchFace;
@@ -82,7 +82,7 @@ FoamFile
     }
     baffle2Wall_1
     {
-        type            directMappedWall;
+        type            mappedWall;
         nFaces          7;
         startFace       3267;
         sampleMode      nearestPatchFace;

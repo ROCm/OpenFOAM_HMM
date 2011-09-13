@@ -66,11 +66,11 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
         mappers_.set
         (
             i,
-            new directMappedPatchBase
+            new mappedPatchBase
             (
                 mesh.boundaryMesh()[patchI],
                 mesh.name(),                        // sampleRegion
-                directMappedPatchBase::NEARESTCELL, // sampleMode
+                mappedPatchBase::NEARESTCELL, // sampleMode
                 word::null,                         // samplePatch
                 -distance                           // sample inside my domain
             )
