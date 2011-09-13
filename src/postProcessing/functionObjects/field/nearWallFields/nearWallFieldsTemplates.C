@@ -60,6 +60,7 @@ void Foam::nearWallFields::createFields
 
                 IOobject io(fld);
                 io.readOpt() = IOobject::NO_READ;
+                io.writeOpt() = IOobject::NO_WRITE;
                 io.rename(sampleFldName);
 
                 sflds.set(sz, new vfType(io, fld));

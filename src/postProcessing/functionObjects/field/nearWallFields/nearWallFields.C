@@ -25,9 +25,6 @@ License
 
 #include "nearWallFields.H"
 #include "wordReList.H"
-//#include "volFields.H"
-//#include "selfContainedDirectMappedFixedValueFvPatchFields.H"
-//#include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -152,6 +149,7 @@ void Foam::nearWallFields::write()
         Info<< "Writing sampled fields to " << obr_.time().timeName()
             << endl;
 
+        // Write fields
         forAll(vsf_, i)
         {
             vsf_[i].write();
