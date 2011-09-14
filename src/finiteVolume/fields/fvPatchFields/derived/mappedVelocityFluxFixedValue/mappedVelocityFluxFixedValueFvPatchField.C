@@ -176,13 +176,10 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
     (
         mappedVelocityFluxFixedValueFvPatchField::patch().patch()
     );
-    const mapDistribute& distMap = mpp.map();
     const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
     const word& fieldName = dimensionedInternalField().name();
-    const volVectorField& UField = nbrMesh.lookupObject<volVectorField>
-    (
-        fieldName
-    );
+    const volVectorField& UField =
+        nbrMesh.lookupObject<volVectorField>(fieldName);
 
     surfaceScalarField& phiField = const_cast<surfaceScalarField&>
     (
@@ -213,26 +210,25 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 }
             }
 
-            distMap.distribute(allUValues);
+            mpp.distribute(allUValues);
             newUValues.transfer(allUValues);
 
-            distMap.distribute(allPhiValues);
+            mpp.distribute(allPhiValues);
             newPhiValues.transfer(allPhiValues);
 
             break;
         }
         case mappedPolyPatch::NEARESTPATCHFACE:
+        case mappedPolyPatch::NEARESTPATCHFACEAMI:
         {
-            const label nbrPatchID = nbrMesh.boundaryMesh().findPatchID
-            (
-                mpp.samplePatch()
-            );
+            const label nbrPatchID =
+                nbrMesh.boundaryMesh().findPatchID(mpp.samplePatch());
 
             newUValues = UField.boundaryField()[nbrPatchID];
-            distMap.distribute(newUValues);
+            mpp.distribute(newUValues);
 
             newPhiValues = phiField.boundaryField()[nbrPatchID];
-            distMap.distribute(newPhiValues);
+            mpp.distribute(newPhiValues);
 
             break;
         }
@@ -242,8 +238,9 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
             (
                 "mappedVelocityFluxFixedValueFvPatchField::"
                 "updateCoeffs()"
-            )   << "patch can only be used in NEARESTPATCHFACE or NEARESTFACE "
-                << "mode" << nl << abort(FatalError);
+            )   << "patch can only be used in NEARESTPATCHFACE, "
+                << "NEARESTPATCHFACEAMI or NEARESTFACE mode" << nl
+                << abort(FatalError);
         }
     }
 

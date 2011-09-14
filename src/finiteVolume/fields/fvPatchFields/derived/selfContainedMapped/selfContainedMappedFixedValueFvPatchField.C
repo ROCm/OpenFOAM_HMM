@@ -229,7 +229,6 @@ void selfContainedMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
     const fvMesh& nbrMesh = refCast<const fvMesh>(sampleMesh());
-    const mapDistribute& distMap = mappedPatchBase::map();
 
     // Result of obtaining remote values
     Field<Type> newValues;
@@ -238,6 +237,8 @@ void selfContainedMappedFixedValueFvPatchField<Type>::updateCoeffs()
     {
         case NEARESTCELL:
         {
+            const mapDistribute& distMap = mappedPatchBase::map();
+
             if (interpolationScheme_ != interpolationCell<Type>::typeName)
             {
                 // Need to do interpolation so need cells to sample.
@@ -275,12 +276,10 @@ void selfContainedMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
             break;
         }
-        case NEARESTPATCHFACE:
+        case NEARESTPATCHFACE: case NEARESTPATCHFACEAMI:
         {
-            const label nbrPatchID = nbrMesh.boundaryMesh().findPatchID
-            (
-                samplePatch()
-            );
+            const label nbrPatchID =
+                nbrMesh.boundaryMesh().findPatchID(samplePatch());
             if (nbrPatchID < 0)
             {
                 FatalErrorIn
@@ -297,7 +296,7 @@ void selfContainedMappedFixedValueFvPatchField<Type>::updateCoeffs()
             const fieldType& nbrField = sampleField();
 
             newValues = nbrField.boundaryField()[nbrPatchID];
-            distMap.distribute(newValues);
+            this->distribute(newValues);
 
             break;
         }
@@ -319,7 +318,7 @@ void selfContainedMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 }
             }
 
-            distMap.distribute(allValues);
+            this->distribute(allValues);
 
             newValues.transfer(allValues);
 

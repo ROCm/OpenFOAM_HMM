@@ -204,14 +204,13 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
     {
         case NEARESTCELL:
         {
-            const mapDistribute& distMap = mappedPatchBase::map();
             newValues = sampleField();
 
-            distMap.distribute(newValues);
+            this->distribute(newValues);
 
             break;
         }
-        case NEARESTPATCHFACE:
+        case NEARESTPATCHFACE: case NEARESTPATCHFACEAMI:
         {
             const label nbrPatchID =
                 nbrMesh.boundaryMesh().findPatchID(samplePatch());
@@ -230,34 +229,7 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
 
             const mapDistribute& distMap = mappedPatchBase::map();
             newValues = nbrField.boundaryField()[nbrPatchID];
-            distMap.distribute(newValues);
-
-            break;
-        }
-        case mappedPatchBase::NEARESTPATCHFACEAMI:
-        {
-            const label nbrPatchID =
-                nbrMesh.boundaryMesh().findPatchID(samplePatch());
-
-            if (nbrPatchID < 0)
-            {
-                FatalErrorIn
-                (
-                    "void mappedFixedValueFvPatchField<Type>::updateCoeffs()"
-                )<< "Unable to find sample patch " << samplePatch()
-                 << " in region " << sampleRegion()
-                 << " for patch " << this->patch().name() << nl
-                 << abort(FatalError);
-            }
-
-//            const fieldType& nbrField = sampleField();
-//            newValues = mpp.AMI().interpolateToSource(nbrField);
-
-            notImplemented
-            (
-                "void mappedFieldFvPatchField<Type>::updateCoeffs() "
-                "with mappedPatchBase::NEARESTPATCHFACEAMI"
-            );
+            this->distribute(newValues);
 
             break;
         }
@@ -279,9 +251,7 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
                 }
             }
 
-            const mapDistribute& distMap = mappedPatchBase::map();
-            distMap.distribute(allValues);
-
+            this->distribute(allValues);
             newValues.transfer(allValues);
 
             break;

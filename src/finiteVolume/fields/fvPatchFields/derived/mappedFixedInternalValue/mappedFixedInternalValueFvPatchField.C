@@ -127,31 +127,7 @@ void Foam::mappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
 
     // Retrieve the neighbour patch internal field
     Field<Type> nbrIntFld(nbrField.patchInternalField());
-
-    switch (mpp.mode())
-    {
-        case (mappedPatchBase::NEARESTPATCHFACEAMI):
-        {
-            // Retrieve the neighbour patch internal field
-            nbrIntFld = mpp.AMI().interpolateToSource(nbrIntFld);
-            break;
-        }
-        default:
-        {
-            const mapDistribute& distMap = mpp.map();
-
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),           // what to send
-                distMap.constructMap(),     // what to receive
-                nbrIntFld
-            );
-            break;
-        }
-    }
+    mpp.distribute(nbrIntFld);
 
     // Restore tag
     UPstream::msgType() = oldTag;
