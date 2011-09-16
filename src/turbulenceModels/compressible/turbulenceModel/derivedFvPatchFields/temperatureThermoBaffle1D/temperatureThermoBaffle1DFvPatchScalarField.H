@@ -25,7 +25,7 @@ Class
     Foam::temperatureThermoBaffle1DFvPatchScalarField
 
 Description
-    Bounday which solves the 1D steady state heat transfer equation
+    Boundary which solves the 1D steady state heat transfer equation
     through a baffle.
 
 SourceFiles

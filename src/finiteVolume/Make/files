@@ -386,6 +386,7 @@ $(basicSource)/basicSource/basicSourceIO.C
 $(basicSource)/basicSource/basicSourceList.C
 $(basicSource)/basicSource/IObasicSourceList.C
 $(basicSource)/actuationDiskSource/actuationDiskSource.C
+$(basicSource)/radialActuationDiskSource/radialActuationDiskSource.C
 $(basicSource)/explicitSource/explicitSource.C
 
 

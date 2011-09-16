@@ -42,13 +42,14 @@ Description
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
+#   include "addRegionOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createMeshNoClear.H"
+#   include "createNamedMesh.H"
 
     pointMesh pMesh(mesh);
 

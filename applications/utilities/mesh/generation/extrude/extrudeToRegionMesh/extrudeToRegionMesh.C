@@ -924,6 +924,7 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
+    argList::addOption("dict", "name", "specify alternative dictionary");
     argList::addBoolOption("AMI", "apply mapped AMI boundary type");
 
     #include "setRootCase.H"
@@ -932,6 +933,8 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
     bool overwrite = args.optionFound("overwrite");
+    const word dictName
+        (args.optionLookupOrDefault<word>("dict", "extrudeToRegionMeshDict"));
 
     mappedPatchBase::sampleMode sampleMode = mappedPatchBase::NEARESTPATCHFACE;
     if (args.optionFound("AMI"))
@@ -943,7 +946,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            "extrudeToRegionMeshDict",
+            dictName,
             runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED

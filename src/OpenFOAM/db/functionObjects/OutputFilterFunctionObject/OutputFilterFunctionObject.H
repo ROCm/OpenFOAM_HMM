@@ -68,18 +68,28 @@ class OutputFilterFunctionObject
         //- Input dictionary
         dictionary dict_;
 
-        //- Name of region
-        word regionName_;
 
-        //- Optional dictionary name to supply required inputs
-        word dictName_;
+        // Optional user inputs
 
-        //- Switch for the execution of the functionObject
-        bool enabled_;
+            //- Name of region - defaults to name of polyMesh::defaultRegion
+            word regionName_;
 
-        //- Switch to store filter in between writes or use on-the-fly
-        //  construction
-        bool storeFilter_;
+            //- Dictionary name to supply required inputs
+            word dictName_;
+
+            //- Switch for the execution - defaults to 'yes/on'
+            bool enabled_;
+
+            //- Switch to store filter in between writes or use on-the-fly
+            //  construction - defaults to true
+            bool storeFilter_;
+
+            //- Activation time - defaults to -VGREAT
+            scalar timeStart_;
+
+            //- De-activation time - defaults to VGREAT
+            scalar timeEnd_;
+
 
         //- Output controls
         outputFilterOutputControl outputControl_;
@@ -98,6 +108,9 @@ class OutputFilterFunctionObject
 
         //- Destroys most of the data associated with this object.
         void destroyFilter();
+
+        //- Returns true if active (enabled and within time bounds)
+        bool active() const;
 
         //- Disallow default bitwise copy construct
         OutputFilterFunctionObject(const OutputFilterFunctionObject&);

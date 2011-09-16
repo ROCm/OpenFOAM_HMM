@@ -97,9 +97,10 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
     boundBox bbSrc(srcPatch.points(), srcPatch.meshPoints());
     boundBox bbTgt(tgtPatch.points(), tgtPatch.meshPoints());
 
-    bbTgt.inflate(maxBoundsError);
+    boundBox bbTgtInf(bbTgt);
+    bbTgtInf.inflate(maxBoundsError);
 
-    if (!bbTgt.contains(bbSrc))
+    if (!bbTgtInf.contains(bbSrc))
     {
         WarningIn
         (
@@ -109,10 +110,11 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
                 "const primitivePatch&"
             ")"
         )   << "Source and target patch bounding boxes are not similar" << nl
-            << "    src span : " << bbSrc.span() << nl
-            << "    tgt span : " << bbTgt.span() << nl
-            << "    source: " << bbSrc << nl
-            << "    target: " << bbTgt << endl;
+            << "    source box span     : " << bbSrc.span() << nl
+            << "    target box span     : " << bbTgt.span() << nl
+            << "    source box          : " << bbSrc << nl
+            << "    target box          : " << bbTgt << nl
+            << "    inflated target box : " << bbTgtInf << endl;
     }
 }
 
