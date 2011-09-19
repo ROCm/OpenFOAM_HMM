@@ -486,6 +486,14 @@ case QSMPI:
     _foamAddLib     $MPI_ARCH_PATH/lib
     breaksw
 
+case SGIMPI:
+    setenv FOAM_MPI ${MPI_ROOT##*/}
+    setenv MPI_ARCH_PATH $MPI_ROOT
+
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    breaksw
+
 default:
     setenv FOAM_MPI dummy
     breaksw

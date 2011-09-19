@@ -510,6 +510,14 @@ QSMPI)
     _foamAddLib     $MPI_ARCH_PATH/lib
     ;;
 
+SGIMPI)
+    export FOAM_MPI=${MPI_ROOT##*/}
+    export MPI_ARCH_PATH=$MPI_ROOT
+
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    ;;
+
 *)
     export FOAM_MPI=dummy
     ;;

@@ -43,6 +43,7 @@ Description
 int main(int argc, char *argv[])
 {
     Foam::timeSelector::addOptions();
+#   include "addRegionOption.H"
     Foam::argList::addBoolOption
     (
         "noWrite",
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
     Foam::instantList timeDirs = Foam::timeSelector::select0(runTime, args);
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     utility().tryPreCalc(args, runTime, mesh);
 
