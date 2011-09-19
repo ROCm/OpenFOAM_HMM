@@ -165,6 +165,9 @@ protected:
             //- Coordinate system used when evaluting forces/moments
             coordinateSystem coordSys_;
 
+            //- Flag to indicate whether we are using a local co-ordinate sys
+            bool localSystem_;
+
 
         //- Forces/moment file ptr
         autoPtr<OFstream> forcesFilePtr_;
