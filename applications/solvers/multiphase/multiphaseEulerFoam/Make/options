@@ -1,6 +1,7 @@
 EXE_INC = \
     -IphaseModel/lnInclude \
     -ImultiphaseSystem/lnInclude \
+    -ImultiphaseFixedFluxPressure \
     /*-IkineticTheoryModels/lnInclude*/ \
     -IinterfacialModels/lnInclude \
     -I$(LIB_SRC)/transportModels \
