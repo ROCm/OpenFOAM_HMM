@@ -129,6 +129,14 @@ public:
             //- Post-evolve hook
             virtual void postEvolve();
 
+            //- Post-move hook
+            virtual void postMove
+            (
+                const typename CloudType::parcelType& p,
+                const label cellI,
+                const scalar dt
+            );
+
             //- Post-patch hook
             virtual void postPatch
             (
