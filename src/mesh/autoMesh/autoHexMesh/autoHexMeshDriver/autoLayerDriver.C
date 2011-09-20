@@ -46,6 +46,7 @@ Description
 #include "combineFaces.H"
 #include "IOmanip.H"
 #include "globalIndex.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1990,6 +1991,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
     const dictionary& meshQualityDict,
+    const bool additionalReporting,
     const List<labelPair>& baffles,
     const indirectPrimitivePatch& pp,
     const fvMesh& newMesh,
@@ -2032,6 +2034,12 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
     );
 
     // Check if any of the faces in error uses any face of an added cell
+    // - if additionalReporting print the few remaining areas for ease of
+    //   finding out where the problems are.
+
+    const label nReportMax = 10;
+    DynamicField<point> disabledFaceCentres(nReportMax);
+
     forAll(addedCells, oldPatchFaceI)
     {
         // Get the cells (in newMesh labels) per old patch face (in mesh
@@ -2052,12 +2060,58 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
                 )
             )
             {
+                if (additionalReporting && (nChanged < nReportMax))
+                {
+                    disabledFaceCentres.append
+                    (
+                        pp.faceCentres()[oldPatchFaceI]
+                    );
+                }
+
                 nChanged++;
             }
         }
     }
 
-    return returnReduce(nChanged, sumOp<label>());
+
+    label nChangedTotal = returnReduce(nChanged, sumOp<label>());
+
+    if (additionalReporting)
+    {
+        // Limit the number of points to be printed so that
+        // not too many points are reported when running in parallel
+        // Not accurate, i.e. not always nReportMax points are written,
+        // but this estimation avoid some communication here.
+        // The important thing, however, is that when only a few faces
+        // are disabled, their coordinates are printed, and this should be
+        // the case
+        label nReportLocal =
+            min
+            (
+                max(nChangedTotal / Pstream::nProcs(), 1),
+                min
+                (
+                    nChanged,
+                    max(nReportMax / Pstream::nProcs(), 1)
+                )
+            );
+
+        Pout<< "Checked mesh with layers. Disabled extrusion at " << endl;
+        for (label i=0; i < nReportLocal; i++)
+        {
+            Pout<< "    " << disabledFaceCentres[i] << endl;
+        }
+
+        label nReportTotal = returnReduce(nReportLocal, sumOp<label>());
+
+        if (nReportTotal < nChangedTotal)
+        {
+            Info<< "Suppressed disabled extrusion message for other "
+                << nChangedTotal - nReportTotal << " faces." << endl;
+        }
+    }
+
+    return nChangedTotal;
 }
 
 
@@ -2858,6 +2912,7 @@ void Foam::autoLayerDriver::addLayers
         (
             addLayer,
             meshQualityDict,
+            layerParams.additionalReporting(),
             newMeshBaffles,
             pp(),
             newMesh,
