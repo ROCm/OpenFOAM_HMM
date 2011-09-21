@@ -92,20 +92,25 @@ void Foam::CloudFunctionObject<CloudType>::postEvolve()
 
 
 template<class CloudType>
+void Foam::CloudFunctionObject<CloudType>::postMove
+(
+    const typename CloudType::parcelType&,
+    const label,
+    const scalar
+)
+{
+    // do nothing
+}
+
+
+template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postPatch
 (
     const typename CloudType::parcelType&,
     const label
 )
 {
-    notImplemented
-    (
-        "void Foam::CloudFunctionObject<CloudType>::postPatch"
-        "("
-            "const typename CloudType::parcelType&,"
-            "const label"
-        ")"
-    );
+    // do nothing
 }
 
 
@@ -115,13 +120,7 @@ void Foam::CloudFunctionObject<CloudType>::postFace
     const typename CloudType::parcelType&
 )
 {
-    notImplemented
-    (
-        "void Foam::CloudFunctionObject<CloudType>::postFace"
-        "("
-            "const typename CloudType::parcelType&"
-        ")"
-    );
+    // do nothing
 }
 
 

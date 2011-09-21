@@ -22,22 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CloudFunctionObjectList
+    Foam::VoidFraction
 
 Description
-    List of cloud function objects
+    Creates particle void fraction field on carrier phase
 
 SourceFiles
-    CloudFunctionObjectListI.H
-    CloudFunctionObjectList.C
+    VoidFraction.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CloudFunctionObjectList_H
-#define CloudFunctionObjectList_H
+#ifndef VoidFraction_H
+#define VoidFraction_H
 
-#include "PtrList.H"
 #include "CloudFunctionObject.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,61 +44,63 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class CloudFunctionObjectList Declaration
+                       Class VoidFraction Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class CloudFunctionObjectList
+class VoidFraction
 :
-    public PtrList<CloudFunctionObject<CloudType> >
+    public CloudFunctionObject<CloudType>
 {
+    // Private Data
+
+        // Typedefs
+
+            //- Convenience typedef for parcel type
+            typedef typename CloudType::parcelType parcelType;
+
+
+        //- Void fraction field
+        autoPtr<volScalarField> thetaPtr_;
+
+
 protected:
 
-    // Protected Data
+    // Protected Member Functions
 
-        //- Reference to the owner cloud
-        const CloudType& owner_;
-
-        //- Dictionary
-        const dictionary dict_;
+        //- Write post-processing info
+        virtual void write();
 
 
 public:
 
+    //- Runtime type information
+    TypeName("voidFraction");
+
+
     // Constructors
 
-        //- Null constructor
-        CloudFunctionObjectList(CloudType& owner);
-
-        //- Construct from mesh
-        CloudFunctionObjectList
-        (
-            CloudType& owner,
-            const dictionary& dict,
-            const bool readFields
-        );
+        //- Construct from dictionary
+        VoidFraction(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        CloudFunctionObjectList(const CloudFunctionObjectList& ppml);
+        VoidFraction(const VoidFraction<CloudType>& vf);
+
+        //- Construct and return a clone
+        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
+        {
+            return autoPtr<CloudFunctionObject<CloudType> >
+            (
+                new VoidFraction<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
-    virtual ~CloudFunctionObjectList();
+    virtual ~VoidFraction();
 
 
     // Member Functions
-
-        // Access
-
-            //- Return const access to the cloud owner
-            inline const CloudType& owner() const;
-
-            //- Return refernce to the cloud owner
-            inline CloudType& owner();
-
-            //- Return the forces dictionary
-            inline const dictionary& dict() const;
-
 
         // Evaluation
 
@@ -111,21 +112,11 @@ public:
 
             //- Post-move hook
             virtual void postMove
-            (
-                const typename CloudType::parcelType& p,
+            (   
+                const parcelType& p,
                 const label cellI,
                 const scalar dt
             );
-
-            //- Post-patch hook
-            virtual void postPatch
-            (
-                const typename CloudType::parcelType& p,
-                const label patchI
-            );
-
-            //- Post-face hook
-            virtual void postFace(const typename CloudType::parcelType& p);
 };
 
 
@@ -135,10 +126,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "CloudFunctionObjectListI.H"
-
 #ifdef NoRepository
-    #include "CloudFunctionObjectList.C"
+#   include "VoidFraction.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

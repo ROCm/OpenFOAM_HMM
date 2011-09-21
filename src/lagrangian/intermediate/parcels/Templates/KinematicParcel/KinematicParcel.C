@@ -324,6 +324,8 @@ bool Foam::KinematicParcel<ParcelType>::move
         }
 
         p.age() += dt;
+
+        td.cloud().functions().postMove(p, cellI, dt);
     }
 
     return td.keepParticle;

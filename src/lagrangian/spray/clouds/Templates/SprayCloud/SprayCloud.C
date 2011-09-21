@@ -110,6 +110,11 @@ Foam::SprayCloud<CloudType>::SprayCloud
 
         Info << "Average parcel mass: " << averageParcelMass_ << endl;
     }
+
+    if (this->solution().resetSourcesOnStartup())
+    {
+        CloudType::resetSourceTerms();
+    }
 }
 
 
