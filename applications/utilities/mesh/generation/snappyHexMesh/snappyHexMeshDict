@@ -311,6 +311,11 @@ addLayersControls
     // get used. Up to nRelaxIter it uses the settings in meshQualityControls,
     // after nRelaxIter it uses the values in meshQualityControls::relaxed.
     nRelaxedIter 20;
+
+    // Additional reporting: if there are just a few faces where there
+    // are mesh errors (after adding the layers) print their face centres.
+    // This helps in tracking down problematic mesh areas.
+    //additionalReporting true;
 }
 
 // Generic mesh quality settings. At any undoable phase these determine
