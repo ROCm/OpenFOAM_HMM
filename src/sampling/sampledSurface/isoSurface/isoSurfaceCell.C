@@ -287,16 +287,16 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
         if (shared[0] != -1)
         {
-            //vector n0 = tri0.normal(localPoints);
-            //n0 /= mag(n0);
-            //vector n1 = tri1.normal(localPoints);
-            //n1 /= mag(n1);
-            //
-            //if ((n0 & n1) < 0)
-            //{
-            //    // Too big an angle. Do not simplify.
-            //}
-            //else
+            vector n0 = tri0.normal(localPoints);
+            n0 /= mag(n0);
+            vector n1 = tri1.normal(localPoints);
+            n1 /= mag(n1);
+
+            if ((n0 & n1) < 0)
+            {
+                // Too big an angle. Do not simplify.
+            }
+            else
             {
                 info.setPoint
                 (
@@ -332,18 +332,18 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
         if (nZones == 1)
         {
             // Check that all normals make a decent angle
-            //scalar minCos = GREAT;
-            //const vector& n0 = surf.faceNormals()[0];
-            //for (label i = 1; i < surf.size(); i++)
-            //{
-            //    scalar cosAngle = (n0 & surf.faceNormals()[i]);
-            //    if (cosAngle < minCos)
-            //    {
-            //        minCos = cosAngle;
-            //    }
-            //}
-            //
-            //if (minCos > 0)
+            scalar minCos = GREAT;
+            const vector& n0 = surf.faceNormals()[0];
+            for (label i = 1; i < surf.size(); i++)
+            {
+                scalar cosAngle = (n0 & surf.faceNormals()[i]);
+                if (cosAngle < minCos)
+                {
+                    minCos = cosAngle;
+                }
+            }
+
+            if (minCos > 0)
             {
                 info.setPoint(calcCentre(surf));
                 info.setHit();
@@ -443,7 +443,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                     label faceI = cFaces[cFaceI];
                     const face& f = mesh_.faces()[faceI];
 
-                    // Do a tetrahedrisation. Each face to cc becomes pyr.
+                    // Do a tetrahedralisation. Each face to cc becomes pyr.
                     // Each pyr gets split into tets by diagonalisation
                     // of face.
 
@@ -467,14 +467,18 @@ void Foam::isoSurfaceCell::calcSnappedCc
                          && (s[2] >= 0.0 && s[2] <= 0.5)
                         )
                         {
-                            if (mesh_.faceOwner()[faceI] == cellI)
+                            if
+                            (
+                                (mesh_.faceOwner()[faceI] == cellI)
+                             == (cVal >= pVals[tri[0]])
+                            )
                             {
                                 localTris.append
                                 (
                                     labelledTri
                                     (
-                                        pointToLocal[tri[0]],
                                         pointToLocal[tri[1]],
+                                        pointToLocal[tri[0]],
                                         pointToLocal[tri[2]],
                                         0
                                     )
@@ -486,8 +490,8 @@ void Foam::isoSurfaceCell::calcSnappedCc
                                 (
                                     labelledTri
                                     (
-                                        pointToLocal[tri[1]],
                                         pointToLocal[tri[0]],
+                                        pointToLocal[tri[1]],
                                         pointToLocal[tri[2]],
                                         0
                                     )
@@ -575,7 +579,11 @@ void Foam::isoSurfaceCell::genPointTris
             point p1 = (1.0-s[1])*pts[pointI] + s[1]*pts[c];
             point p2 = (1.0-s[2])*pts[pointI] + s[2]*cc[cellI];
 
-            if (mesh_.faceOwner()[faceI] == cellI)
+            if
+            (
+                (mesh_.faceOwner()[faceI] == cellI)
+             == (pointValues[pointI] > cellValues[cellI])
+            )
             {
                 localTriPoints.append(p0);
                 localTriPoints.append(p1);
@@ -754,7 +762,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
         }
 
 
-        // Loop over all pointCells (by using pointFaces)
+        // Do a pointCells walk (by using pointFaces)
 
         localPointCells.clear();
         localTriPoints.clear();
@@ -766,6 +774,8 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
             if (isTet.get(own) == 1)
             {
+                // Since tets have no cell centre to include make sure
+                // we only generate a triangle once per point.
                 if (localPointCells.insert(own))
                 {
                     genPointTris(pVals, pointI, faceI, own, localTriPoints);
@@ -848,20 +858,19 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
             if (nZones == 1)
             {
-                //// Check that all normals make a decent angle
-                //scalar minCos = GREAT;
-                //const vector& n0 = surf.faceNormals()[0];
-                //for (label i = 1; i < surf.size(); i++)
-                //{
-                //    const vector& n = surf.faceNormals()[i];
-                //    scalar cosAngle = (n0 & n);
-                //    if (cosAngle < minCos)
-                //    {
-                //        minCos = cosAngle;
-                //    }
-                //}
-                //
-                //if (minCos > 0)
+                // Check that all normals make a decent angle
+                scalar minCos = GREAT;
+                const vector& n0 = surf.faceNormals()[0];
+                for (label i = 1; i < surf.size(); i++)
+                {
+                    const vector& n = surf.faceNormals()[i];
+                    scalar cosAngle = (n0 & n);
+                    if (cosAngle < minCos)
+                    {
+                        minCos = cosAngle;
+                    }
+                }
+                if (minCos > 0)
                 {
                     collapsedPoint[pointI] = calcCentre(surf);
                 }
@@ -882,7 +891,9 @@ void Foam::isoSurfaceCell::calcSnappedPoint
 
     forAll(collapsedPoint, pointI)
     {
-        if (collapsedPoint[pointI] != greatPoint)
+        // Cannot do == comparison since might be transformed so have
+        // truncation errors.
+        if (magSqr(collapsedPoint[pointI]) < 0.5*magSqr(greatPoint))
         {
             snappedPoint[pointI] = snappedPoints.size();
             snappedPoints.append(collapsedPoint[pointI]);
@@ -1208,142 +1219,142 @@ void Foam::isoSurfaceCell::calcAddressing
 }
 
 
-void Foam::isoSurfaceCell::walkOrientation
-(
-    const triSurface& surf,
-    const List<FixedList<label, 3> >& faceEdges,
-    const labelList& edgeFace0,
-    const labelList& edgeFace1,
-    const label seedTriI,
-    labelList& flipState
-)
-{
-    // Do walk for consistent orientation.
-    DynamicList<label> changedFaces(surf.size());
-
-    changedFaces.append(seedTriI);
-
-    while (changedFaces.size())
-    {
-        DynamicList<label> newChangedFaces(changedFaces.size());
-
-        forAll(changedFaces, i)
-        {
-            label triI = changedFaces[i];
-            const labelledTri& tri = surf[triI];
-            const FixedList<label, 3>& fEdges = faceEdges[triI];
-
-            forAll(fEdges, fp)
-            {
-                label edgeI = fEdges[fp];
-
-                // my points:
-                label p0 = tri[fp];
-                label p1 = tri[tri.fcIndex(fp)];
-
-                label nbrI =
-                (
-                    edgeFace0[edgeI] != triI
-                  ? edgeFace0[edgeI]
-                  : edgeFace1[edgeI]
-                );
-
-                if (nbrI != -1 && flipState[nbrI] == -1)
-                {
-                    const labelledTri& nbrTri = surf[nbrI];
-
-                    // nbr points
-                    label nbrFp = findIndex(nbrTri, p0);
-                    label nbrP1 = nbrTri[nbrTri.rcIndex(nbrFp)];
-
-                    bool sameOrientation = (p1 == nbrP1);
-
-                    if (flipState[triI] == 0)
-                    {
-                        flipState[nbrI] = (sameOrientation ? 0 : 1);
-                    }
-                    else
-                    {
-                        flipState[nbrI] = (sameOrientation ? 1 : 0);
-                    }
-                    newChangedFaces.append(nbrI);
-                }
-            }
-        }
-
-        changedFaces.transfer(newChangedFaces);
-    }
-}
-
-
-void Foam::isoSurfaceCell::orientSurface
-(
-    triSurface& surf,
-    const List<FixedList<label, 3> >& faceEdges,
-    const labelList& edgeFace0,
-    const labelList& edgeFace1,
-    const Map<labelList>& edgeFacesRest
-)
-{
-    // -1 : unvisited
-    //  0 : leave as is
-    //  1 : flip
-    labelList flipState(surf.size(), -1);
-
-    label seedTriI = 0;
-
-    while (true)
-    {
-        // Find first unvisited triangle
-        for
-        (
-            ;
-            seedTriI < surf.size() && flipState[seedTriI] != -1;
-            seedTriI++
-        )
-        {}
-
-        if (seedTriI == surf.size())
-        {
-            break;
-        }
-
-        // Note: Determine orientation of seedTriI?
-        // for now assume it is ok
-        flipState[seedTriI] = 0;
-
-        walkOrientation
-        (
-            surf,
-            faceEdges,
-            edgeFace0,
-            edgeFace1,
-            seedTriI,
-            flipState
-        );
-    }
-
-    // Do actual flipping
-    surf.clearOut();
-    forAll(surf, triI)
-    {
-        if (flipState[triI] == 1)
-        {
-            labelledTri tri(surf[triI]);
-
-            surf[triI][0] = tri[0];
-            surf[triI][1] = tri[2];
-            surf[triI][2] = tri[1];
-        }
-        else if (flipState[triI] == -1)
-        {
-            FatalErrorIn
-            (
-                "isoSurfaceCell::orientSurface(triSurface&, const label)"
-            )   << "problem" << abort(FatalError);
-        }
-    }
-}
+//void Foam::isoSurfaceCell::walkOrientation
+//(
+//    const triSurface& surf,
+//    const List<FixedList<label, 3> >& faceEdges,
+//    const labelList& edgeFace0,
+//    const labelList& edgeFace1,
+//    const label seedTriI,
+//    labelList& flipState
+//)
+//{
+//    // Do walk for consistent orientation.
+//    DynamicList<label> changedFaces(surf.size());
+//
+//    changedFaces.append(seedTriI);
+//
+//    while (changedFaces.size())
+//    {
+//        DynamicList<label> newChangedFaces(changedFaces.size());
+//
+//        forAll(changedFaces, i)
+//        {
+//            label triI = changedFaces[i];
+//            const labelledTri& tri = surf[triI];
+//            const FixedList<label, 3>& fEdges = faceEdges[triI];
+//
+//            forAll(fEdges, fp)
+//            {
+//                label edgeI = fEdges[fp];
+//
+//                // my points:
+//                label p0 = tri[fp];
+//                label p1 = tri[tri.fcIndex(fp)];
+//
+//                label nbrI =
+//                (
+//                    edgeFace0[edgeI] != triI
+//                  ? edgeFace0[edgeI]
+//                  : edgeFace1[edgeI]
+//                );
+//
+//                if (nbrI != -1 && flipState[nbrI] == -1)
+//                {
+//                    const labelledTri& nbrTri = surf[nbrI];
+//
+//                    // nbr points
+//                    label nbrFp = findIndex(nbrTri, p0);
+//                    label nbrP1 = nbrTri[nbrTri.rcIndex(nbrFp)];
+//
+//                    bool sameOrientation = (p1 == nbrP1);
+//
+//                    if (flipState[triI] == 0)
+//                    {
+//                        flipState[nbrI] = (sameOrientation ? 0 : 1);
+//                    }
+//                    else
+//                    {
+//                        flipState[nbrI] = (sameOrientation ? 1 : 0);
+//                    }
+//                    newChangedFaces.append(nbrI);
+//                }
+//            }
+//        }
+//
+//        changedFaces.transfer(newChangedFaces);
+//    }
+//}
+//
+//
+//void Foam::isoSurfaceCell::orientSurface
+//(
+//    triSurface& surf,
+//    const List<FixedList<label, 3> >& faceEdges,
+//    const labelList& edgeFace0,
+//    const labelList& edgeFace1,
+//    const Map<labelList>& edgeFacesRest
+//)
+//{
+//    // -1 : unvisited
+//    //  0 : leave as is
+//    //  1 : flip
+//    labelList flipState(surf.size(), -1);
+//
+//    label seedTriI = 0;
+//
+//    while (true)
+//    {
+//        // Find first unvisited triangle
+//        for
+//        (
+//            ;
+//            seedTriI < surf.size() && flipState[seedTriI] != -1;
+//            seedTriI++
+//        )
+//        {}
+//
+//        if (seedTriI == surf.size())
+//        {
+//            break;
+//        }
+//
+//        // Note: Determine orientation of seedTriI?
+//        // for now assume it is ok
+//        flipState[seedTriI] = 0;
+//
+//        walkOrientation
+//        (
+//            surf,
+//            faceEdges,
+//            edgeFace0,
+//            edgeFace1,
+//            seedTriI,
+//            flipState
+//        );
+//    }
+//
+//    // Do actual flipping
+//    surf.clearOut();
+//    forAll(surf, triI)
+//    {
+//        if (flipState[triI] == 1)
+//        {
+//            labelledTri tri(surf[triI]);
+//
+//            surf[triI][0] = tri[0];
+//            surf[triI][1] = tri[2];
+//            surf[triI][2] = tri[1];
+//        }
+//        else if (flipState[triI] == -1)
+//        {
+//            FatalErrorIn
+//            (
+//                "isoSurfaceCell::orientSurface(triSurface&, const label)"
+//            )   << "problem" << abort(FatalError);
+//        }
+//    }
+//}
 
 
 // Checks if triangle is connected through edgeI only.
@@ -1625,7 +1636,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     (
         stitchTriPoints
         (
-            true,               // check for duplicate tris
+            regularise,         // check for duplicate tris
             triPoints,
             triPointMergeMap_,  // unmerged to merged point
             triMap
@@ -1657,7 +1668,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     }
 
 
-    if (false)
+    if (regularise)
     {
         List<FixedList<label, 3> > faceEdges;
         labelList edgeFace0, edgeFace1;
@@ -1717,7 +1728,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
             inplaceRenumber(reversePointMap, triPointMergeMap_);
         }
 
-        orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
+        //orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
     }
 }
 

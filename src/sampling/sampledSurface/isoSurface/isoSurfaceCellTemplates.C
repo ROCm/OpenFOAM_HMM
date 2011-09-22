@@ -76,23 +76,27 @@ void Foam::isoSurfaceCell::generateTriPoints
 (
     const DynamicList<Type>& snapped,
 
+    const scalar isoVal0,
     const scalar s0,
     const Type& p0,
     const label p0Index,
 
+    const scalar isoVal1,
     const scalar s1,
     const Type& p1,
     const label p1Index,
 
+    const scalar isoVal2,
     const scalar s2,
     const Type& p2,
     const label p2Index,
 
+    const scalar isoVal3,
     const scalar s3,
     const Type& p3,
     const label p3Index,
 
-    DynamicList<Type>& points
+    DynamicList<Type>& pts
 ) const
 {
     int triIndex = 0;
@@ -122,77 +126,160 @@ void Foam::isoSurfaceCell::generateTriPoints
 
         case 0x0E:
         case 0x01:
-            points.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
-            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+        {
+            // 0 is common point. Orient such that normal points in positive
+            // gradient direction
+            if (isoVal0 >= isoVal1)
+            {
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+            }
+            else
+            {
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index));
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+            }
+        }
         break;
 
         case 0x0D:
         case 0x02:
-            points.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+        {
+            // 1 is common point
+            if (isoVal1 >= isoVal0)
+            {
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+            }
+            else
+            {
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+            }
+        }
         break;
 
         case 0x0C:
         case 0x03:
         {
-            Type tp1 = generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index);
-            Type tp2 = generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index);
+            Type s02 = generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index);
+            Type s13 = generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index);
 
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
-            points.append(tp1);
-            points.append(tp2);
-            points.append(tp2);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
-            points.append(tp1);
+            if (isoVal0 >= isoVal3)
+            {
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+                pts.append(s02);
+                pts.append(s13);
+                pts.append(s13);
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+                pts.append(s02);
+            }
+            else
+            {
+                pts.append(s02);
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+                pts.append(s13);
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+                pts.append(s13);
+                pts.append(s02);
+            }
         }
         break;
 
         case 0x0B:
         case 0x04:
         {
-            points.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
-            points.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
+            // 2 is common point
+            if (isoVal2 >= isoVal0)
+            {
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
+            }
+            else
+            {
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s1,p1,p1Index));
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index));
+            }
         }
         break;
 
         case 0x0A:
         case 0x05:
         {
-            Type tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
-            Type tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
+            Type s01 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            Type s23 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
 
-            points.append(tp0);
-            points.append(tp1);
-            points.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
-            points.append(tp0);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
-            points.append(tp1);
+            if (isoVal3 >= isoVal0)
+            {
+                pts.append(s01);
+                pts.append(s23);
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+                pts.append(s01);
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+                pts.append(s23);
+            }
+            else
+            {
+                pts.append(s23);
+                pts.append(s01);
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s3,p3,p3Index));
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s2,p2,p2Index));
+                pts.append(s01);
+                pts.append(s23);
+            }
         }
         break;
 
         case 0x09:
         case 0x06:
         {
-            Type tp0 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
-            Type tp1 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
+            Type s01 = generatePoint(snapped,s0,p0,p0Index,s1,p1,p1Index);
+            Type s23 = generatePoint(snapped,s2,p2,p2Index,s3,p3,p3Index);
 
-            points.append(tp0);
-            points.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
-            points.append(tp1);
-            points.append(tp0);
-            points.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
-            points.append(tp1);
+            if (isoVal3 >= isoVal1)
+            {
+                pts.append(s01);
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+                pts.append(s23);
+                pts.append(s01);
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+                pts.append(s23);
+            }
+            else
+            {
+                pts.append(generatePoint(snapped,s1,p1,p1Index,s3,p3,p3Index));
+                pts.append(s01);
+                pts.append(s23);
+                pts.append(generatePoint(snapped,s0,p0,p0Index,s2,p2,p2Index));
+                pts.append(s01);
+                pts.append(s23);
+            }
         }
         break;
 
         case 0x07:
         case 0x08:
-            points.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
-            points.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
-            points.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
+        {
+            // 3 is common point
+            if (isoVal3 >= isoVal0)
+            {
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
+            }
+            else
+            {
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s2,p2,p2Index));
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s0,p0,p0Index));
+                pts.append(generatePoint(snapped,s3,p3,p3Index,s1,p1,p1Index));
+            }
+        }
         break;
     }
 }
@@ -252,18 +339,23 @@ void Foam::isoSurfaceCell::generateTriPoints
                     generateTriPoints
                     (
                         snappedPoints,
+
+                        pVals_[f0[1]],
                         pVals[f0[1]],
                         pCoords[f0[1]],
                         snappedPoint[f0[1]],
 
+                        pVals_[f0[0]],
                         pVals[f0[0]],
                         pCoords[f0[0]],
                         snappedPoint[f0[0]],
 
+                        pVals_[f0[2]],
                         pVals[f0[2]],
                         pCoords[f0[2]],
                         snappedPoint[f0[2]],
 
+                        pVals_[oppositeI],
                         pVals[oppositeI],
                         pCoords[oppositeI],
                         snappedPoint[oppositeI],
@@ -276,18 +368,23 @@ void Foam::isoSurfaceCell::generateTriPoints
                     generateTriPoints
                     (
                         snappedPoints,
+
+                        pVals_[f0[0]],
                         pVals[f0[0]],
                         pCoords[f0[0]],
                         snappedPoint[f0[0]],
 
+                        pVals_[f0[1]],
                         pVals[f0[1]],
                         pCoords[f0[1]],
                         snappedPoint[f0[1]],
 
+                        pVals_[f0[2]],
                         pVals[f0[2]],
                         pCoords[f0[2]],
                         snappedPoint[f0[2]],
 
+                        pVals_[oppositeI],
                         pVals[oppositeI],
                         pCoords[oppositeI],
                         snappedPoint[oppositeI],
@@ -321,18 +418,22 @@ void Foam::isoSurfaceCell::generateTriPoints
                             (
                                 snappedPoints,
 
+                                pVals_[tri[1]],
                                 pVals[tri[1]],
                                 pCoords[tri[1]],
                                 snappedPoint[tri[1]],
 
+                                pVals_[tri[0]],
                                 pVals[tri[0]],
                                 pCoords[tri[0]],
                                 snappedPoint[tri[0]],
 
+                                pVals_[tri[2]],
                                 pVals[tri[2]],
                                 pCoords[tri[2]],
                                 snappedPoint[tri[2]],
 
+                                cVals_[cellI],
                                 cVals[cellI],
                                 cCoords[cellI],
                                 snappedCc[cellI],
@@ -346,18 +447,22 @@ void Foam::isoSurfaceCell::generateTriPoints
                             (
                                 snappedPoints,
 
+                                pVals_[tri[0]],
                                 pVals[tri[0]],
                                 pCoords[tri[0]],
                                 snappedPoint[tri[0]],
 
+                                pVals_[tri[1]],
                                 pVals[tri[1]],
                                 pCoords[tri[1]],
                                 snappedPoint[tri[1]],
 
+                                pVals_[tri[2]],
                                 pVals[tri[2]],
                                 pCoords[tri[2]],
                                 snappedPoint[tri[2]],
 
+                                cVals_[cellI],
                                 cVals[cellI],
                                 cCoords[cellI],
                                 snappedCc[cellI],
