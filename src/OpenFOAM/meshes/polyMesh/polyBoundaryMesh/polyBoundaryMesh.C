@@ -514,7 +514,8 @@ Foam::label Foam::polyBoundaryMesh::whichPatch(const label faceIndex) const
         FatalErrorIn
         (
             "polyBoundaryMesh::whichPatch(const label faceIndex) const"
-        )   << "given label greater than the number of geometric faces"
+        )   << "given label " << faceIndex
+            << " greater than the number of geometric faces " << mesh().nFaces()
             << abort(FatalError);
     }
 
