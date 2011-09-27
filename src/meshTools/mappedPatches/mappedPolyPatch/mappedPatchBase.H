@@ -339,6 +339,26 @@ public:
         }
 
 
+        //- Wrapper around map/interpolate data distribution
+        template<class Type>
+        void reverseDistribute(List<Type>& lst) const
+        {
+            switch (mode_)
+            {
+                case NEARESTPATCHFACEAMI:
+                {
+                    lst = AMI().interpolateToTarget(Field<Type>(lst.xfer()));
+                    break;
+                }
+                default:
+                {
+                    label cSize = patch_.size();
+                    map().reverseDistribute(cSize, lst);
+                }
+            }
+        }
+
+
         //- Return reference to the parallel distribution map
         const mapDistribute& map() const
         {
