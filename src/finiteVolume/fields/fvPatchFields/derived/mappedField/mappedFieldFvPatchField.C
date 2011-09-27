@@ -227,7 +227,6 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
 
             const fieldType& nbrField = sampleField();
 
-            const mapDistribute& distMap = mappedPatchBase::map();
             newValues = nbrField.boundaryField()[nbrPatchID];
             this->distribute(newValues);
 

@@ -227,7 +227,6 @@ protected:
             (
                 const label filmPatchI,
                 const label primaryPatchI,
-                const mappedPatchBase& distMap,
                 const regionModels::surfaceFilmModels::surfaceFilmModel&
                     filmModel
             );

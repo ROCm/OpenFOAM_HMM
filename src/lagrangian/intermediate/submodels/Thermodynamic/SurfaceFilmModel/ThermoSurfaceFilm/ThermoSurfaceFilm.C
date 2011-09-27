@@ -643,7 +643,6 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 (
     const label filmPatchI,
     const label primaryPatchI,
-    const mappedPatchBase& mapPatch,
     const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
 )
 {
@@ -651,15 +650,14 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
     (
         filmPatchI,
         primaryPatchI,
-        mapPatch,
         filmModel
     );
 
     TFilmPatch_ = filmModel.Ts().boundaryField()[filmPatchI];
-    mapPatch.distribute(TFilmPatch_);
+    filmModel.toPrimary(filmPatchI, TFilmPatch_);
 
     CpFilmPatch_ = filmModel.Cp().boundaryField()[filmPatchI];
-    mapPatch.distribute(CpFilmPatch_);
+    filmModel.toPrimary(filmPatchI, CpFilmPatch_);
 }
 
 
