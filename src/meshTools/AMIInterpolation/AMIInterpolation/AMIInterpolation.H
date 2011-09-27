@@ -167,6 +167,13 @@ class AMIInterpolation
 
         // Parallel functionality
 
+            //- Return true if faces are spread over multiple domains
+            bool distributed
+            (
+                const primitivePatch& srcPatch,
+                const primitivePatch& tgtPatch
+            );
+
             label calcOverlappingProcs
             (
                 const List<treeBoundBoxList>& procBb,
