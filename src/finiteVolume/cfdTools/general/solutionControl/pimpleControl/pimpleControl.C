@@ -59,16 +59,19 @@ bool Foam::pimpleControl::criteriaSatisfied()
     bool firstIter = corr_ == 1;
 
     bool achieved = true;
-    const dictionary& solverDict = mesh_.solverPerformanceDict();
+    bool checked = false;    // safety that some checks were indeed performed
 
+    const dictionary& solverDict = mesh_.solverPerformanceDict();
     forAllConstIter(dictionary, solverDict, iter)
     {
         const word& variableName = iter().keyword();
-        label fieldI = applyToField(variableName);
+        const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
             const List<lduMatrix::solverPerformance> sp(iter().stream());
             const scalar residual = sp.last().initialResidual();
+
+            checked = true;
 
             if (firstIter)
             {
@@ -76,19 +79,17 @@ bool Foam::pimpleControl::criteriaSatisfied()
                     sp.first().initialResidual();
             }
 
-            bool absCheck = residual < residualControl_[fieldI].absTol;
-
+            const bool absCheck = residual < residualControl_[fieldI].absTol;
             bool relCheck = false;
 
             scalar relative = 0.0;
             if (!firstIter)
             {
-                scalar iniRes =
+                const scalar iniRes =
                     residualControl_[fieldI].initialResidual
                   + ROOTVSMALL;
 
                 relative = residual/iniRes;
-
                 relCheck = relative < residualControl_[fieldI].relTol;
             }
 
@@ -110,7 +111,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
         }
     }
 
-    return achieved;
+    return checked && achieved;
 }
 
 
@@ -129,7 +130,13 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
     if (nOuterCorr_ > 1)
     {
         Info<< nl;
-        if (!residualControl_.empty())
+        if (residualControl_.empty())
+        {
+            Info<< algorithmName_ << ": no residual control data found. "
+                << "Calculations will employ " << nOuterCorr_
+                << " corrector loops" << nl << endl;
+        }
+        else
         {
             Info<< algorithmName_ << ": max iterations = " << nOuterCorr_
                 << endl;
@@ -141,12 +148,6 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
                     << nl;
             }
             Info<< endl;
-        }
-        else
-        {
-            Info<< algorithmName_ << ": no residual control data found. " << nl
-                << "Calculations will employ " << nOuterCorr_
-                << " corrector loops" << nl << endl;
         }
     }
     else

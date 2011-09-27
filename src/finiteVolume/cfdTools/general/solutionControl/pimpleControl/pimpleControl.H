@@ -69,10 +69,10 @@ protected:
 
     // Protected Member Functions
 
-        //- Read constrols from fvSolution dictionary
+        //- Read controls from fvSolution dictionary
         virtual void read();
 
-        //- Return true if all convergence checks are satified
+        //- Return true if all convergence checks are satisfied
         virtual bool criteriaSatisfied();
 
         //- Disallow default bitwise copy construct
