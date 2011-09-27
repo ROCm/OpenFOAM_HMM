@@ -705,12 +705,11 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho() const
     forAll(intCoupledPatchIDs(), i)
     {
         const label filmPatchI = intCoupledPatchIDs()[i];
-        const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
         scalarField patchMass =
             primaryMassPCTrans_.boundaryField()[filmPatchI];
 
-        filmMap.distribute(patchMass);
+        toPrimary(filmPatchI, patchMass);
 
         const label primaryPatchI = primaryPatchIDs()[i];
         const unallocLabelList& cells =
@@ -761,12 +760,11 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Srho
         forAll(intCoupledPatchIDs_, i)
         {
             const label filmPatchI = intCoupledPatchIDs_[i];
-            const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
             scalarField patchMass =
                 primaryMassPCTrans_.boundaryField()[filmPatchI];
 
-            filmMap.distribute(patchMass);
+            toPrimary(filmPatchI, patchMass);
 
             const label primaryPatchI = primaryPatchIDs()[i];
             const unallocLabelList& cells =
@@ -812,12 +810,11 @@ tmp<DimensionedField<scalar, volMesh> > thermoSingleLayer::Sh() const
     forAll(intCoupledPatchIDs_, i)
     {
         const label filmPatchI = intCoupledPatchIDs_[i];
-        const mappedPatchBase& filmMap = mappedPatches_[filmPatchI];
 
         scalarField patchEnergy =
             primaryEnergyPCTrans_.boundaryField()[filmPatchI];
 
-        filmMap.distribute(patchEnergy);
+        toPrimary(filmPatchI, patchEnergy);
 
         const label primaryPatchI = primaryPatchIDs()[i];
         const unallocLabelList& cells =
