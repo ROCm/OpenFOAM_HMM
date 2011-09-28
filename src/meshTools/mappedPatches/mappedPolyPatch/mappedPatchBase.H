@@ -112,6 +112,10 @@ public:
             NORMAL              // use face normal + distance
         };
 
+        static const NamedEnum<sampleMode, 4> sampleModeNames_;
+
+        static const NamedEnum<offsetMode, 3> offsetModeNames_;
+
 
     //- Helper class for finding nearest
     // Nearest:
@@ -145,10 +149,6 @@ public:
 private:
 
     // Private data
-
-        static const NamedEnum<sampleMode, 4> sampleModeNames_;
-
-        static const NamedEnum<offsetMode, 3> offsetModeNames_;
 
         //- Patch to sample
         const polyPatch& patch_;

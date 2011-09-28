@@ -64,7 +64,7 @@ protected:
         Switch dumpLevel_;
 
         //- Fluxes to map
-        List<Pair<word> > correctFluxes_;
+        HashTable<word> correctFluxes_;
 
         //- Number of refinement/unrefinement steps done so far.
         label nRefinementIterations_;
