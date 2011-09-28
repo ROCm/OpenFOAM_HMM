@@ -117,9 +117,6 @@ protected:
             //- List of patch IDs internally coupled with the primary region
             labelList intCoupledPatchIDs_;
 
-            //- List of patch map info
-            PtrList<mappedPatchBase> mappedPatches_;
-
 
     // Protected member functions
 
@@ -212,11 +209,27 @@ public:
                 //  primary region
                 inline const labelList& intCoupledPatchIDs() const;
 
-                //- Return the list of patch map info
-                inline const PtrList<mappedPatchBase>& mappedPatches() const;
-
                 //- Return region ID corresponding to primaryPatchID
                 inline label regionPatchID(const label primaryPatchID) const;
+
+
+        // Helper
+
+            //- Convert a local region field to the primary region
+            template<class Type>
+            void toPrimary
+            (
+                const label regionPatchI,
+                List<Type>& regionField
+            ) const;
+
+            //- Convert a primary region field to the local region
+            template<class Type>
+            void toRegion
+            (
+                const label regionPatchI,
+                List<Type>& primaryFieldField
+            ) const;
 
 
         // Evolution
@@ -246,6 +259,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "regionModelI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "regionModelTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

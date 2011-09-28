@@ -139,7 +139,7 @@ void drippingInjection::correct
         {
             // Mass below minimum threshold - cannot be injected
             massToInject[cellI] = 0.0;
-            diameterToInject[cellI] = -1.0;
+            diameterToInject[cellI] = 0.0;
         }
     }
 }

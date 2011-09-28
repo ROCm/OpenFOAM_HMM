@@ -70,11 +70,9 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    const mappedPatchBase& filmMap = filmModel.mappedPatches()[filmPatchI];
-
     tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());
     scalarField mDotFilmp = mDotFilm().boundaryField()[filmPatchI];
-    filmMap.distribute(mDotFilmp);
+    filmModel.toPrimary(filmPatchI, mDotFilmp);
 
 
     // Retrieve RAS turbulence model

@@ -40,7 +40,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class solutionControl Declaration
+                       Class solutionControl Declaration
 \*---------------------------------------------------------------------------*/
 
 class solutionControl
@@ -78,19 +78,19 @@ protected:
             //- Flag to indicate to solve for momentum
             bool momentumPredictor_;
 
-            //- Flag to indictae to solve using transonic algorithm
+            //- Flag to indicate to solve using transonic algorithm
             bool transonic_;
 
 
     // Protected Member Functions
 
-        //- Read constrols from fvSolution dictionary
+        //- Read controls from fvSolution dictionary
         virtual void read(const bool absTolOnly);
 
         //- Return index of field in residualControl_ if present
         virtual label applyToField(const word& fieldName) const;
 
-        //- Return true if all convergence checks are satified
+        //- Return true if all convergence checks are satisfied
         virtual bool criteriaSatisfied() = 0;
 
         //- Store previous iteration fields
@@ -142,7 +142,7 @@ public:
             //- Flag to indicate to solve for momentum
             inline bool momentumPredictor() const;
 
-            //- Flag to indictae to solve using transonic algorithm
+            //- Flag to indicate to solve using transonic algorithm
             inline bool transonic() const;
 };
 

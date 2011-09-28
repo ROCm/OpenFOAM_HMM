@@ -93,8 +93,6 @@ void Foam::regionModels::regionModel::initialise()
     DynamicList<label> primaryPatchIDs;
     DynamicList<label> intCoupledPatchIDs;
     const polyBoundaryMesh& rbm = regionMesh().boundaryMesh();
-    const polyBoundaryMesh& pbm = primaryMesh().boundaryMesh();
-    mappedPatches_.setSize(rbm.size());
 
     forAll(rbm, patchI)
     {
@@ -116,19 +114,6 @@ void Foam::regionModels::regionModel::initialise()
 
             const label primaryPatchI = mapPatch.samplePolyPatch().index();
             primaryPatchIDs.append(primaryPatchI);
-
-            mappedPatches_.set
-            (
-                patchI,
-                new mappedPatchBase
-                (
-                    pbm[primaryPatchI],
-                    regionMesh().name(),
-                    mapPatch.mode(),
-                    regionPatch.name(),
-                    vector::zero
-                )
-            );
         }
     }
 
@@ -212,8 +197,7 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
     regionMeshPtr_(NULL),
     coeffs_(dictionary::null),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_(),
-    mappedPatches_()
+    intCoupledPatchIDs_()
 {}
 
 
@@ -244,8 +228,7 @@ Foam::regionModels::regionModel::regionModel
     regionMeshPtr_(NULL),
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_(),
-    mappedPatches_()
+    intCoupledPatchIDs_()
 {
     if (active_)
     {
@@ -290,8 +273,7 @@ Foam::regionModels::regionModel::regionModel
     regionMeshPtr_(NULL),
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_(),
-    mappedPatches_()
+    intCoupledPatchIDs_()
 {
     if (active_)
     {

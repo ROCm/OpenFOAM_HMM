@@ -9,13 +9,7 @@
     if (pZones.size())
     {
         // nUCorrectors for pressureImplicitPorosity
-        if (mesh.solutionDict().subDict("SIMPLE").found("nUCorrectors"))
-        {
-            nUCorr = readInt
-            (
-                mesh.solutionDict().subDict("SIMPLE").lookup("nUCorrectors")
-            );
-        }
+        simple.dict().readIfPresent("nUCorrectors", nUCorr);
 
         if (nUCorr > 0)
         {

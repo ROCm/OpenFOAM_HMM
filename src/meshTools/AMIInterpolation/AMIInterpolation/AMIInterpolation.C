@@ -120,6 +120,37 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 
 
 template<class SourcePatch, class TargetPatch>
+bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributed
+(
+    const primitivePatch& srcPatch,
+    const primitivePatch& tgtPatch
+)
+{
+    if (Pstream::parRun())
+    {
+        List<label> facesPresentOnProc(Pstream::nProcs(), 0);
+        if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
+        {
+            facesPresentOnProc[Pstream::myProcNo()] = 1;
+        }
+        else
+        {
+            facesPresentOnProc[Pstream::myProcNo()] = 0;
+        }
+
+        Pstream::gatherList(facesPresentOnProc);
+        Pstream::scatterList(facesPresentOnProc);
+        if (sum(facesPresentOnProc) > 1)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 Foam::label
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
 (
@@ -1160,7 +1191,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 {
     static label patchI = 0;
 
-    if (Pstream::parRun())
+    if (Pstream::parRun() && distributed(srcPatch, tgtPatch))
     {
         // convert local addressing to global addressing
         globalIndex globalSrcFaces(srcPatch.size());

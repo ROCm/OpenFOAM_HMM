@@ -827,7 +827,7 @@ void kinematicSingleLayer::preEvolveRegion()
 //    availableMass_ = mass();
     availableMass_ = netMass();
     cloudMassTrans_ == dimensionedScalar("zero", dimMass, 0.0);
-    cloudDiameterTrans_ == dimensionedScalar("zero", dimLength, -1.0);
+    cloudDiameterTrans_ == dimensionedScalar("zero", dimLength, 0.0);
 }
 
 
