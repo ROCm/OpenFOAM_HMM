@@ -188,8 +188,25 @@ surfaces
         // cell, can be arbitrarily far away.
         type            patchInternalField;
         patches         ( ".*Wall.*" );
-        distance        0.0001;
         interpolate     true;
+
+
+        // Optional: specify how to obtain sampling points from the patch
+        //           face centres (default is 'normal')
+        //
+        //  //- Specify distance to offset in normal direction
+        offsetMode  normal;
+        distance    0.1;
+        //
+        //  //- Specify single uniform offset
+        //  offsetMode  uniform;
+        //  offset      (0 0 0.0001);
+        //
+        //  //- Specify offset per patch face
+        //  offsetMode  nonuniform;
+        //  offsets     ((0 0 0.0001) (0 0 0.0002));
+
+
         // Optional: whether to leave as faces (=default) or triangulate
         // triangulate     false;
     }
