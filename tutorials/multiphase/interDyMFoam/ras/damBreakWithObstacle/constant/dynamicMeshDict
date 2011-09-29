@@ -39,7 +39,9 @@ dynamicRefineFvMeshCoeffs
     // on surfaceScalarFields that do not need to be reinterpolated.
     correctFluxes
     (
-        (phi U)
+        (phi Urel)
+        (phiAbs U)
+        (phiAbs_0 U_0)
         (nHatf none)
         (rho*phi none)
         (ghf none)
