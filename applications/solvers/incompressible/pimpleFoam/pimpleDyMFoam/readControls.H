@@ -8,3 +8,5 @@
     const bool checkMeshCourantNo =
         pimpleDict.lookupOrDefault("checkMeshCourantNo", false);
 
+    const bool ddtPhiCorr =
+        pimpleDict.lookupOrDefault("ddtPhiCorr", true);
