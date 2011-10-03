@@ -146,9 +146,9 @@ public:
     };
 
 
-private:
+protected:
 
-    // Private data
+    // Protected data
 
         //- Patch to sample
         const polyPatch& patch_;
@@ -199,7 +199,7 @@ private:
             dictionary surfDict_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Collect single list of samples and originating processor+face.
         void collectSamples

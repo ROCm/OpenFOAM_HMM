@@ -71,7 +71,10 @@ class mappedFixedValueFvPatchField
 :
     public fixedValueFvPatchField<Type>
 {
-    // Private data
+
+protected:
+
+    // Protected data
 
         //- Name of field to sample - defaults to field associated with this
         //  patchField if not specified
@@ -90,7 +93,7 @@ class mappedFixedValueFvPatchField
         mutable autoPtr<interpolation<Type> > interpolator_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Field to sample. Either on my or nbr mesh
         const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
