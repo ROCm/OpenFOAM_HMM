@@ -40,7 +40,7 @@ Foam::Field<Type> Foam::interpolateSplineXY
 
     forAll(xNew, i)
     {
-        yNew[i] = interpolateSmoothXY(xNew[i], xOld, yOld);
+        yNew[i] = interpolateSplineXY(xNew[i], xOld, yOld);
     }
 
     return yNew;

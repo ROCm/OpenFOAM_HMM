@@ -58,12 +58,6 @@ class nuSgsUSpaldingWallFunctionFvPatchScalarField
 {
     // Private data
 
-        //- Name of velocity field
-        word UName_;
-
-        //- Name of laminar viscosity field
-        word nuName_;
-
         //- Von Karman constant
         scalar kappa_;
 
