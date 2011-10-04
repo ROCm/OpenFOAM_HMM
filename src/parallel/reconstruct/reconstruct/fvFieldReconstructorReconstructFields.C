@@ -37,8 +37,44 @@ template<class Type>
 Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh> >
 Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
 (
+    const IOobject& fieldIoObject,
+    const PtrList<DimensionedField<Type, volMesh> >& procFields
+) const
+{
+    // Create the internalField
+    Field<Type> internalField(mesh_.nCells());
+
+    forAll(procMeshes_, procI)
+    {
+        const DimensionedField<Type, volMesh>& procField = procFields[procI];
+
+        // Set the cell values in the reconstructed field
+        internalField.rmap
+        (
+            procField.field(),
+            cellProcAddressing_[procI]
+        );
+    }
+
+    return tmp<DimensionedField<Type, volMesh> >
+    (
+        new DimensionedField<Type, volMesh>
+        (
+            fieldIoObject,
+            mesh_,
+            procFields[0].dimensions(),
+            internalField
+        )
+    );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::DimensionedField<Type, Foam::volMesh> >
+Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
+(
     const IOobject& fieldIoObject
-)
+) const
 {
     // Read the field for all the processors
     PtrList<DimensionedField<Type, volMesh> > procFields
@@ -67,37 +103,17 @@ Foam::fvFieldReconstructor::reconstructFvVolumeInternalField
     }
 
 
-    // Create the internalField
-    Field<Type> internalField(mesh_.nCells());
-
-    forAll(procMeshes_, procI)
-    {
-        const DimensionedField<Type, volMesh>& procField = procFields[procI];
-
-        // Set the cell values in the reconstructed field
-        internalField.rmap
-        (
-            procField.field(),
-            cellProcAddressing_[procI]
-        );
-    }
-
-    return tmp<DimensionedField<Type, volMesh> >
+    return reconstructFvVolumeInternalField
     (
-        new DimensionedField<Type, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
             mesh_,
-            procFields[0].dimensions(),
-            internalField
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        procFields
     );
 }
 
@@ -106,44 +122,17 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
 Foam::fvFieldReconstructor::reconstructFvVolumeField
 (
-    const IOobject& fieldIoObject
-)
+    const IOobject& fieldIoObject,
+    const PtrList<GeometricField<Type, fvPatchField, volMesh> >& procFields
+) const
 {
-    // Read the field for all the processors
-    PtrList<GeometricField<Type, fvPatchField, volMesh> > procFields
-    (
-        procMeshes_.size()
-    );
-
-    forAll(procMeshes_, procI)
-    {
-        procFields.set
-        (
-            procI,
-            new GeometricField<Type, fvPatchField, volMesh>
-            (
-                IOobject
-                (
-                    fieldIoObject.name(),
-                    procMeshes_[procI].time().timeName(),
-                    procMeshes_[procI],
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                procMeshes_[procI]
-            )
-        );
-    }
-
-
     // Create the internalField
     Field<Type> internalField(mesh_.nCells());
 
     // Create the patch fields
     PtrList<fvPatchField<Type> > patchFields(mesh_.boundary().size());
 
-
-    forAll(procMeshes_, procI)
+    forAll(procFields, procI)
     {
         const GeometricField<Type, fvPatchField, volMesh>& procField =
             procFields[procI];
@@ -163,7 +152,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
 
             // Get addressing slice for this patch
             const labelList::subList cp =
-                procMeshes_[procI].boundary()[patchI].patchSlice
+                procField.mesh().boundary()[patchI].patchSlice
                 (
                     faceProcAddressing_[procI]
                 );
@@ -198,10 +187,31 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
 
                 forAll(cp, faceI)
                 {
+                    // Check
+                    if (cp[faceI] <= 0)
+                    {
+                        FatalErrorIn
+                        (
+                            "fvFieldReconstructor::reconstructFvVolumeField\n"
+                            "(\n"
+                            "    const IOobject&,\n"
+                            "    const PtrList<GeometricField<Type,"
+                            " fvPatchField, volMesh> >&\n"
+                            ") const\n"
+                        )   << "Processor " << procI
+                            << " patch "
+                            << procField.mesh().boundary()[patchI].name()
+                            << " face " << faceI
+                            << " originates from reversed face since "
+                            << cp[faceI]
+                            << exit(FatalError);
+                    }
+
                     // Subtract one to take into account offsets for
                     // face direction.
                     reverseAddressing[faceI] = cp[faceI] - 1 - curPatchStart;
                 }
+
 
                 patchFields[curBPatch].rmap
                 (
@@ -283,14 +293,7 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
     (
         new GeometricField<Type, fvPatchField, volMesh>
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            fieldIoObject,
             mesh_,
             procFields[0].dimensions(),
             internalField,
@@ -301,14 +304,14 @@ Foam::fvFieldReconstructor::reconstructFvVolumeField
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
-Foam::fvFieldReconstructor::reconstructFvSurfaceField
+Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
+Foam::fvFieldReconstructor::reconstructFvVolumeField
 (
     const IOobject& fieldIoObject
-)
+) const
 {
     // Read the field for all the processors
-    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> > procFields
+    PtrList<GeometricField<Type, fvPatchField, volMesh> > procFields
     (
         procMeshes_.size()
     );
@@ -318,7 +321,7 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
         procFields.set
         (
             procI,
-            new GeometricField<Type, fvsPatchField, surfaceMesh>
+            new GeometricField<Type, fvPatchField, volMesh>
             (
                 IOobject
                 (
@@ -333,7 +336,29 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
         );
     }
 
+    return reconstructFvVolumeField
+    (
+        IOobject
+        (
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        procFields
+    );
+}
 
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fvFieldReconstructor::reconstructFvSurfaceField
+(
+    const IOobject& fieldIoObject,
+    const PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >& procFields
+) const
+{
     // Create the internalField
     Field<Type> internalField(mesh_.nInternalFaces());
 
@@ -503,19 +528,60 @@ Foam::fvFieldReconstructor::reconstructFvSurfaceField
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            fieldIoObject,
             mesh_,
             procFields[0].dimensions(),
             internalField,
             patchFields
         )
+    );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh> >
+Foam::fvFieldReconstructor::reconstructFvSurfaceField
+(
+    const IOobject& fieldIoObject
+) const
+{
+    // Read the field for all the processors
+    PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> > procFields
+    (
+        procMeshes_.size()
+    );
+
+    forAll(procMeshes_, procI)
+    {
+        procFields.set
+        (
+            procI,
+            new GeometricField<Type, fvsPatchField, surfaceMesh>
+            (
+                IOobject
+                (
+                    fieldIoObject.name(),
+                    procMeshes_[procI].time().timeName(),
+                    procMeshes_[procI],
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                procMeshes_[procI]
+            )
+        );
+    }
+
+    return reconstructFvSurfaceField
+    (
+        IOobject
+        (
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        procFields
     );
 }
 
