@@ -23,24 +23,19 @@ boundaryField
 {
     outlet
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            calculated;
     }
     sides
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            calculated;
     }
     base
     {
-        type            zeroGradient;
+        type            calculated;
     }
     inlet
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            calculated;
     }
 }
 

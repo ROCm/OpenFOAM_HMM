@@ -21,32 +21,27 @@ boundaryField
 {
     top
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            calculated;
     }
 
     ground
     {
-        type            zeroGradient;
+        type            calculated;
     }
 
     sides
     {
-        type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        type            calculated;
     }
 
     burner
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            calculated;
     }
 
     "(region0_to.*)"
     {
-        type            zeroGradient;
+        type            calculated;
     }
 }
 
