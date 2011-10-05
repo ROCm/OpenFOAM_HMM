@@ -1,12 +1,12 @@
     scalar CoNum = -GREAT;
 
-    forAll(fluidRegions, regionI)
+    forAll(fluidToProc, regionI)
     {
         CoNum = max
         (
             compressibleCourantNo
             (
-                fluidRegions[regionI],
+                procMeshes[fluidToProc[regionI]],
                 runTime,
                 rhoFluid[regionI],
                 phiFluid[regionI]

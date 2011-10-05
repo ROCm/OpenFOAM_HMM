@@ -1,13 +1,13 @@
-    PtrList<fvMesh> fluidRegions(rp.fluidRegionNames().size());
-
     forAll(rp.fluidRegionNames(), i)
     {
         Info<< "Create fluid mesh for region " << rp.fluidRegionNames()[i]
             << " for time = " << runTime.timeName() << nl << endl;
 
-        fluidRegions.set
+        label procI = fluidToProc[i];
+
+        procMeshes.set
         (
-            i,
+            procI,
             new fvMesh
             (
                 IOobject
@@ -19,4 +19,58 @@
                 )
             )
         );
+
+        if (temperatureCoupled)
+        {
+            cellProcAddressing.set
+            (
+                procI,
+                new labelIOList
+                (
+                    IOobject
+                    (
+                        "cellRegionAddressing",
+                        procMeshes[procI].facesInstance(),
+                        procMeshes[procI].meshSubDir,
+                        procMeshes[procI],
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                )
+            );
+
+            faceProcAddressing.set
+            (
+                procI,
+                new labelIOList
+                (
+                    IOobject
+                    (
+                        "faceRegionAddressing",
+                        procMeshes[procI].facesInstance(),
+                        procMeshes[procI].meshSubDir,
+                        procMeshes[procI],
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                )
+            );
+
+            boundaryProcAddressing.set
+            (
+                procI,
+                new labelIOList
+                (
+                    IOobject
+                    (
+                        "boundaryRegionAddressing",
+                        procMeshes[procI].facesInstance(),
+                        procMeshes[procI].meshSubDir,
+                        procMeshes[procI],
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                )
+            );
+        }
     }
