@@ -58,6 +58,11 @@ OptimisationSwitches
     commsType       nonBlocking; //scheduled; //blocking;
     floatTransfer   0;
     nProcsSimpleSum 0;
+
+    // Force dumping (at next timestep) upon signal (-1 to disable)
+    writeNowSignal              -1; //10;
+    // Force dumping (at next timestep) upon signal (-1 to disable) and exit
+    stopAtWriteNowSignal        -1;
 }
 
 

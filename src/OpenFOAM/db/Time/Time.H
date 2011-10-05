@@ -52,6 +52,8 @@ SourceFiles
 #include "dlLibraryTable.H"
 #include "functionObjectList.H"
 #include "fileMonitor.H"
+#include "sigWriteNow.H"
+#include "sigStopAtWriteNow.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,14 +132,34 @@ protected:
 
         scalar writeInterval_;
 
+        // Additional writing
+
+            writeControls secondaryWriteControl_;
+
+            scalar secondaryWriteInterval_;
+
+
         label  purgeWrite_;
         mutable FIFOStack<word> previousOutputTimes_;
+
+        // One-shot writing
+        bool writeOnce_;
 
         //- Is the time currently being sub-cycled?
         bool subCycling_;
 
         //- If time is being sub-cycled this is the previous TimeState
         autoPtr<TimeState> prevTimeState_;
+
+
+        // Signal handlers for secondary writing
+
+            //- Enable one-shot writing upon signal
+            sigWriteNow sigWriteNow_;
+
+            //- Enable write and clean exit upon signal
+            sigStopAtWriteNow sigStopAtWriteNow_;
+
 
         //- Time directory name format
         static fmtflags format_;
@@ -357,11 +379,15 @@ public:
                 IOstream::compressionType
             ) const;
 
-            //- Write the objects now and continue the run
+            //- Write the objects now (not at end of iteration) and continue
+            //  the run
             bool writeNow();
 
-            //- Write the objects now and end the run
+            //- Write the objects now (not at end of iteration) and end the run
             bool writeAndEnd();
+
+            //- Write the objects once (one shot) and continue the run
+            void writeOnce();
 
 
         // Access
