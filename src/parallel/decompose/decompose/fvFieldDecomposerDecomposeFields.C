@@ -28,6 +28,7 @@ License
 #include "processorFvsPatchField.H"
 #include "processorCyclicFvPatchField.H"
 #include "processorCyclicFvsPatchField.H"
+#include "emptyFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -35,7 +36,8 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >
 Foam::fvFieldDecomposer::decomposeField
 (
-    const GeometricField<Type, fvPatchField, volMesh>& field
+    const GeometricField<Type, fvPatchField, volMesh>& field,
+    const bool allowUnknownPatchFields
 ) const
 {
     // Create and map the internal field values
@@ -91,6 +93,18 @@ Foam::fvFieldDecomposer::decomposeField
                         field.internalField(),
                         *processorVolPatchFieldDecomposerPtrs_[patchi]
                     )
+                )
+            );
+        }
+        else if (allowUnknownPatchFields)
+        {
+            patchFields.set
+            (
+                patchi,
+                new emptyFvPatchField<Type>
+                (
+                    procMesh_.boundary()[patchi],
+                    DimensionedField<Type, volMesh>::null()
                 )
             );
         }

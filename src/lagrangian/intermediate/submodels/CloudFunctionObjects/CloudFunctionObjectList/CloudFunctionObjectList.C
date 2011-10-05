@@ -128,6 +128,21 @@ void Foam::CloudFunctionObjectList<CloudType>::postEvolve()
 
 
 template<class CloudType>
+void Foam::CloudFunctionObjectList<CloudType>::postMove
+(
+    const typename CloudType::parcelType& p,
+    const label cellI,
+    const scalar dt
+)
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).postMove(p, cellI, dt);
+    }
+}
+
+
+template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postPatch
 (
     const typename CloudType::parcelType& p,

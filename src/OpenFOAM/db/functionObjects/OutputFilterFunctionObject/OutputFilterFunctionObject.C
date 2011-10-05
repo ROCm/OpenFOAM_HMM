@@ -37,6 +37,18 @@ void Foam::OutputFilterFunctionObject<OutputFilter>::readDict()
     dict_.readIfPresent("dictionary", dictName_);
     dict_.readIfPresent("enabled", enabled_);
     dict_.readIfPresent("storeFilter", storeFilter_);
+    dict_.readIfPresent("timeStart", timeStart_);
+    dict_.readIfPresent("timeEnd", timeEnd_);
+}
+
+
+template<class OutputFilter>
+bool Foam::OutputFilterFunctionObject<OutputFilter>::active() const
+{
+    return
+        enabled_
+     && time_.value() >= timeStart_
+     && time_.value() <= timeEnd_;
 }
 
 
@@ -94,6 +106,8 @@ Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
     dictName_(),
     enabled_(true),
     storeFilter_(true),
+    timeStart_(-VGREAT),
+    timeEnd_(VGREAT),
     outputControl_(t, dict)
 {
     readDict();
@@ -121,7 +135,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
 {
     readDict();
 
-    if (enabled_&&storeFilter_)
+    if (enabled_ && storeFilter_)
     {
         allocateFilter();
     }
@@ -136,7 +150,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute
     const bool forceWrite
 )
 {
-    if (enabled_)
+    if (active())
     {
         if (!storeFilter_)
         {
@@ -163,7 +177,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute
 template<class OutputFilter>
 bool Foam::OutputFilterFunctionObject<OutputFilter>::end()
 {
-    if (enabled_)
+    if (active())
     {
         if (!storeFilter_)
         {

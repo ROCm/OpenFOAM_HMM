@@ -1,3 +1,4 @@
 multiphaseEulerFoam.C
+multiphaseFixedFluxPressure/multiphaseFixedFluxPressureFvPatchScalarField.C
 
 EXE = $(FOAM_APPBIN)/multiphaseEulerFoam

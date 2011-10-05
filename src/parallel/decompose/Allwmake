@@ -53,4 +53,6 @@ fi
 
 wmake $makeType decompositionMethods
 
+wmake $makeType decompose
+
 # ----------------------------------------------------------------- end-of-file

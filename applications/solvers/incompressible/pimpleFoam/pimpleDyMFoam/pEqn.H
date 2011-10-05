@@ -7,6 +7,11 @@ if (pimple.nCorr() <= 1)
 
 phi = (fvc::interpolate(U) & mesh.Sf());
 
+if (ddtPhiCorr)
+{
+    phi += fvc::ddtPhiCorr(rAU, U, phi);
+}
+
 if (p.needReference())
 {
     fvc::makeRelative(phi, U);

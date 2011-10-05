@@ -68,10 +68,10 @@ castellatedMeshControls
     // Refinement parameters
     // ~~~~~~~~~~~~~~~~~~~~~
 
-    // While refining maximum number of cells per processor. This is basically
-    // the number of cells that fit on a processor. If you choose this too small
-    // it will do just more refinement iterations to obtain a similar mesh.
-    maxLocalCells 1000000;
+    // If local number of cells is >= maxLocalCells on any processor
+    // switches from from refinement followed by balancing
+    // (current method) to (weighted) balancing before refinement.
+    maxLocalCells 100000;
 
     // Overall cell limit (approximately). Refinement will stop immediately
     // upon reaching this number so a refinement level might not complete.

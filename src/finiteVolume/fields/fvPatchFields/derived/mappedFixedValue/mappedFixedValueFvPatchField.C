@@ -283,30 +283,6 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
             break;
         }
         case mappedPatchBase::NEARESTPATCHFACE:
-        {
-            const mapDistribute& distMap = mpp.map();
-
-            const label nbrPatchID =
-                nbrMesh.boundaryMesh().findPatchID(mpp.samplePatch());
-
-            if (nbrPatchID < 0)
-            {
-                FatalErrorIn
-                (
-                    "void mappedFixedValueFvPatchField<Type>::updateCoeffs()"
-                )<< "Unable to find sample patch " << mpp.samplePatch()
-                 << " in region " << mpp.sampleRegion()
-                 << " for patch " << this->patch().name() << nl
-                 << abort(FatalError);
-            }
-
-            const fieldType& nbrField = sampleField();
-
-            newValues = nbrField.boundaryField()[nbrPatchID];
-            distMap.distribute(newValues);
-
-            break;
-        }
         case mappedPatchBase::NEARESTPATCHFACEAMI:
         {
             const label nbrPatchID =
@@ -324,9 +300,9 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
             }
 
             const fieldType& nbrField = sampleField();
-            newValues = nbrField.boundaryField()[nbrPatchID];
 
-            newValues = mpp.AMI().interpolateToSource(newValues);
+            newValues = nbrField.boundaryField()[nbrPatchID];
+            mpp.distribute(newValues);
 
             break;
         }

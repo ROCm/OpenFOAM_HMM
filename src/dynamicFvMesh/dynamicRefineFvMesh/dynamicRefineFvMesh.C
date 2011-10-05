@@ -186,7 +186,16 @@ void Foam::dynamicRefineFvMesh::readDict()
         ).subDict(typeName + "Coeffs")
     );
 
-    correctFluxes_ = List<Pair<word> >(refineDict.lookup("correctFluxes"));
+    List<Pair<word> > fluxVelocities = List<Pair<word> >
+    (
+        refineDict.lookup("correctFluxes")
+    );
+    // Rework into hashtable.
+    correctFluxes_.resize(fluxVelocities.size());
+    forAll(fluxVelocities, i)
+    {
+        correctFluxes_.insert(fluxVelocities[i][0], fluxVelocities[i][1]);
+    }
 
     dumpLevel_ = Switch(refineDict.lookup("dumpLevel"));
 }
@@ -289,23 +298,46 @@ Foam::dynamicRefineFvMesh::refine
                 << " split faces " << endl;
         }
 
-        forAll(correctFluxes_, i)
+        HashTable<const surfaceScalarField*> fluxes
+        (
+            lookupClass<surfaceScalarField>()
+        );
+        forAllConstIter(HashTable<const surfaceScalarField*>, fluxes, iter)
         {
+            if (!correctFluxes_.found(iter.key()))
+            {
+                WarningIn("dynamicRefineFvMesh::refine(const labelList&)")
+                    << "Cannot find surfaceScalarField " << iter.key()
+                    << " in user-provided flux mapping table "
+                    << correctFluxes_ << endl
+                    << "    The flux mapping table is used to recreate the"
+                    << " flux on newly created faces." << endl
+                    << "    Either add the entry if it is a flux or use ("
+                    << iter.key() << " none) to suppress this warning."
+                    << endl;
+                continue;
+            }
+
+            const word& UName = correctFluxes_[iter.key()];
+
+            if (UName == "none")
+            {
+                continue;
+            }
+
             if (debug)
             {
-                Info<< "Mapping flux " << correctFluxes_[i][0]
-                    << " using interpolated flux " << correctFluxes_[i][1]
+                Info<< "Mapping flux " << iter.key()
+                    << " using interpolated flux " << UName
                     << endl;
             }
-            surfaceScalarField& phi = const_cast<surfaceScalarField&>
-            (
-                lookupObject<surfaceScalarField>(correctFluxes_[i][0])
-            );
+
+            surfaceScalarField& phi = const_cast<surfaceScalarField&>(*iter());
             const surfaceScalarField phiU
             (
                 fvc::interpolate
                 (
-                    lookupObject<volVectorField>(correctFluxes_[i][1])
+                    lookupObject<volVectorField>(UName)
                 )
               & Sf()
             );
@@ -482,26 +514,50 @@ Foam::dynamicRefineFvMesh::unrefine
         const labelList& reversePointMap = map().reversePointMap();
         const labelList& reverseFaceMap = map().reverseFaceMap();
 
-        forAll(correctFluxes_, i)
+        HashTable<const surfaceScalarField*> fluxes
+        (
+            lookupClass<surfaceScalarField>()
+        );
+        forAllConstIter(HashTable<const surfaceScalarField*>, fluxes, iter)
         {
+            if (!correctFluxes_.found(iter.key()))
+            {
+                WarningIn("dynamicRefineFvMesh::refine(const labelList&)")
+                    << "Cannot find surfaceScalarField " << iter.key()
+                    << " in user-provided flux mapping table "
+                    << correctFluxes_ << endl
+                    << "    The flux mapping table is used to recreate the"
+                    << " flux on newly created faces." << endl
+                    << "    Either add the entry if it is a flux or use ("
+                    << iter.key() << " none) to suppress this warning."
+                    << endl;
+                continue;
+            }
+
+            const word& UName = correctFluxes_[iter.key()];
+
+            if (UName == "none")
+            {
+                continue;
+            }
+
             if (debug)
             {
-                Info<< "Mapping flux " << correctFluxes_[i][0]
-                    << " using interpolated flux " << correctFluxes_[i][1]
+                Info<< "Mapping flux " << iter.key()
+                    << " using interpolated flux " << UName
                     << endl;
             }
-            surfaceScalarField& phi = const_cast<surfaceScalarField&>
-            (
-                lookupObject<surfaceScalarField>(correctFluxes_[i][0])
-            );
-            surfaceScalarField phiU
+
+            surfaceScalarField& phi = const_cast<surfaceScalarField&>(*iter());
+            const surfaceScalarField phiU
             (
                 fvc::interpolate
                 (
-                    lookupObject<volVectorField>(correctFluxes_[i][1])
+                    lookupObject<volVectorField>(UName)
                 )
               & Sf()
             );
+
 
             forAllConstIter(Map<label>, faceToSplitPoint, iter)
             {

@@ -58,23 +58,79 @@ Foam::sampledPatchInternalField::sampledPatchInternalField
     sampledPatch(name, mesh, dict),
     mappers_(patchIDs().size())
 {
-    const scalar distance = readScalar(dict.lookup("distance"));
-
-    forAll(patchIDs(), i)
+    mappedPatchBase::offsetMode mode = mappedPatchBase::NORMAL;
+    if (dict.found("offsetMode"))
     {
-        label patchI = patchIDs()[i];
-        mappers_.set
+        mode = mappedPatchBase::offsetModeNames_.read
         (
-            i,
-            new mappedPatchBase
-            (
-                mesh.boundaryMesh()[patchI],
-                mesh.name(),                        // sampleRegion
-                mappedPatchBase::NEARESTCELL, // sampleMode
-                word::null,                         // samplePatch
-                -distance                           // sample inside my domain
-            )
+            dict.lookup("offsetMode")
         );
+    }
+
+    switch (mode)
+    {
+        case mappedPatchBase::NORMAL:
+        {
+            const scalar distance = readScalar(dict.lookup("distance"));
+            forAll(patchIDs(), i)
+            {
+                mappers_.set
+                (
+                    i,
+                    new mappedPatchBase
+                    (
+                        mesh.boundaryMesh()[patchIDs()[i]],
+                        mesh.name(),                        // sampleRegion
+                        mappedPatchBase::NEARESTCELL,       // sampleMode
+                        word::null,                         // samplePatch
+                        -distance                  // sample inside my domain
+                    )
+                );
+            }
+        }
+        break;
+
+        case mappedPatchBase::UNIFORM:
+        {
+            const point offset(dict.lookup("offset"));
+            forAll(patchIDs(), i)
+            {
+                mappers_.set
+                (
+                    i,
+                    new mappedPatchBase
+                    (
+                        mesh.boundaryMesh()[patchIDs()[i]],
+                        mesh.name(),                        // sampleRegion
+                        mappedPatchBase::NEARESTCELL,       // sampleMode
+                        word::null,                         // samplePatch
+                        offset                  // sample inside my domain
+                    )
+                );
+            }
+        }
+        break;
+
+        case mappedPatchBase::NONUNIFORM:
+        {
+            const pointField offsets(dict.lookup("offsets"));
+            forAll(patchIDs(), i)
+            {
+                mappers_.set
+                (
+                    i,
+                    new mappedPatchBase
+                    (
+                        mesh.boundaryMesh()[patchIDs()[i]],
+                        mesh.name(),                        // sampleRegion
+                        mappedPatchBase::NEARESTCELL,       // sampleMode
+                        word::null,                         // samplePatch
+                        offsets                  // sample inside my domain
+                    )
+                );
+            }
+        }
+        break;
     }
 }
 

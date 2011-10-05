@@ -114,42 +114,65 @@ void Foam::mappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
     const mappedPatchBase& mpp =
         refCast<const mappedPatchBase>(this->patch().patch());
     const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
-    const label samplePatchI = mpp.samplePolyPatch().index();
-    const fvPatch& nbrPatch = nbrMesh.boundary()[samplePatchI];
 
-
-    // Retrieve the neighbour field
-    const fvPatchField<Type>& nbrField =
-        nbrPatch.template lookupPatchField<FieldType, Type>
-        (
-            this->dimensionedInternalField().name()
-        );
-
-    // Retrieve the neighbour patch internal field
-    Field<Type> nbrIntFld(nbrField.patchInternalField());
+    Field<Type> nbrIntFld;
 
     switch (mpp.mode())
     {
-        case (mappedPatchBase::NEARESTPATCHFACEAMI):
+        case mappedPatchBase::NEARESTCELL:
         {
-            // Retrieve the neighbour patch internal field
-            nbrIntFld = mpp.AMI().interpolateToSource(nbrIntFld);
+            FatalErrorIn
+            (
+                "void mappedFixedValueFvPatchField<Type>::updateCoeffs()"
+            )   << "Cannot apply "
+                << mappedPatchBase::sampleModeNames_
+                   [
+                       mappedPatchBase::NEARESTCELL
+                   ]
+                << " mapping mode for patch " << this->patch().name()
+                << exit(FatalError);
+
+            break;
+        }
+        case mappedPatchBase::NEARESTPATCHFACE:
+        {
+            const label samplePatchI = mpp.samplePolyPatch().index();
+            const fvPatchField<Type>& nbrPatchField =
+                this->sampleField().boundaryField()[samplePatchI];
+            nbrIntFld = nbrPatchField.patchInternalField();
+            mpp.distribute(nbrIntFld);
+
+            break;
+        }
+        case mappedPatchBase::NEARESTFACE:
+        {
+            Field<Type> allValues(nbrMesh.nFaces(), pTraits<Type>::zero);
+
+            const FieldType& nbrField = this->sampleField();
+
+            forAll(nbrField.boundaryField(), patchI)
+            {
+                const fvPatchField<Type>& pf = nbrField.boundaryField()[patchI];
+                const Field<Type> pif(pf.patchInternalField());
+
+                label faceStart = pf.patch().start();
+
+                forAll(pf, faceI)
+                {
+                    allValues[faceStart++] = pif[faceI];
+                }
+            }
+
+            mpp.distribute(allValues);
+            nbrIntFld.transfer(allValues);
+
             break;
         }
         default:
         {
-            const mapDistribute& distMap = mpp.map();
-
-            mapDistribute::distribute
-            (
-                Pstream::defaultCommsType,
-                distMap.schedule(),
-                distMap.constructSize(),
-                distMap.subMap(),           // what to send
-                distMap.constructMap(),     // what to receive
-                nbrIntFld
-            );
-            break;
+            FatalErrorIn("mappedFixedValueFvPatchField<Type>::updateCoeffs()")
+                << "Unknown sampling mode: " << mpp.mode()
+                << abort(FatalError);
         }
     }
 

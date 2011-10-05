@@ -55,8 +55,10 @@ Description
     this if you don't mind having disconnected domains in a single region.
     This option requires all cells to be in one (and one only) cellZone.
 
+
     - Should work in parallel.
     cellZones can differ on either side of processor boundaries in which case
+    the faces get moved from processor patch to directMapped patch. Not
     the faces get moved from processor patch to mapped patch. Not
     very well tested.
 
@@ -79,6 +81,8 @@ Description
         - faceRegionAddressing  :   ,,      face                ,,  face in
         the original mesh + 'turning index'. For a face in the same orientation
         this is the original facelabel+1, for a turned face this is -facelabel-1
+        - boundaryRegionAddressing : for every patch in this region the
+        patch in the original mesh (or -1 if added patch)
 \*---------------------------------------------------------------------------*/
 
 #include "SortableList.H"
@@ -1231,6 +1235,36 @@ void createAndWriteRegion
         << " from region" << regionI
         << " cells back to base mesh." << endl;
     cellProcAddressing.write();
+
+    labelIOList boundaryProcAddressing
+    (
+        IOobject
+        (
+            "boundaryRegionAddressing",
+            newMesh().facesInstance(),
+            newMesh().meshSubDir,
+            newMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        labelList(nNewPatches, -1)
+    );
+    forAll(oldToNew, i)
+    {
+        if (!addedPatches.found(i))
+        {
+            label newI = oldToNew[i];
+            if (newI >= 0 && newI < nNewPatches)
+            {
+                boundaryProcAddressing[oldToNew[i]] = i;
+            }
+        }
+    }
+    Info<< "Writing map " << boundaryProcAddressing.name()
+        << " from region" << regionI
+        << " boundary back to base mesh." << endl;
+    boundaryProcAddressing.write();
 }
 
 

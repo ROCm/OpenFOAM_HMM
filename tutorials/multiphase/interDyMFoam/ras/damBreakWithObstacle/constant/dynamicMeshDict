@@ -35,13 +35,16 @@ dynamicRefineFvMeshCoeffs
     // Stop refinement if maxCells reached
     maxCells        200000;
     // Flux field and corresponding velocity field. Fluxes on changed
-    // faces get recalculated by interpolating the velocity.
+    // faces get recalculated by interpolating the velocity. Use 'none'
+    // on surfaceScalarFields that do not need to be reinterpolated.
     correctFluxes
     (
-        (
-            phi
-            U
-        )
+        (phi Urel)
+        (phiAbs U)
+        (phiAbs_0 U_0)
+        (nHatf none)
+        (rho*phi none)
+        (ghf none)
     );
     // Write the refinement level as a volScalarField
     dumpLevel       true;

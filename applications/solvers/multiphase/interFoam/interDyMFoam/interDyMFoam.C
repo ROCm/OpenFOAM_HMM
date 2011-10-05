@@ -58,6 +58,9 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
+    surfaceScalarField phiAbs("phiAbs", phi);
+    fvc::makeAbsolute(phiAbs, U);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
 
@@ -67,9 +70,6 @@ int main(int argc, char *argv[])
         #include "alphaCourantNo.H"
         #include "CourantNo.H"
 
-        // Make the fluxes absolute
-        fvc::makeAbsolute(phi, U);
-
         #include "setDeltaT.H"
 
         runTime++;
@@ -78,8 +78,18 @@ int main(int argc, char *argv[])
 
         scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
 
-        // Do any mesh changes
-        mesh.update();
+        {
+            // Calculate the relative velocity used to map the relative flux phi
+            volVectorField Urel("Urel", U);
+
+            if (mesh.moving())
+            {
+                Urel -= fvc::reconstruct(fvc::meshPhi(U));
+            }
+
+            // Do any mesh changes
+            mesh.update();
+        }
 
         if (mesh.changing())
         {
@@ -95,9 +105,6 @@ int main(int argc, char *argv[])
         {
             #include "correctPhi.H"
         }
-
-        // Make the fluxes relative to the mesh motion
-        fvc::makeRelative(phi, U);
 
         if (mesh.changing() && checkMeshCourantNo)
         {

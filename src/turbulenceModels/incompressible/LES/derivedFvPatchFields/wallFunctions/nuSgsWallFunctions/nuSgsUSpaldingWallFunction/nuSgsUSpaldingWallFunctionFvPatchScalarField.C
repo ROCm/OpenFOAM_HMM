@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nuSgsUSpaldingWallFunctionFvPatchScalarField.H"
+#include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -47,8 +48,6 @@ nuSgsUSpaldingWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    nuName_("nu"),
     kappa_(0.41),
     E_(9.8)
 {}
@@ -64,8 +63,6 @@ nuSgsUSpaldingWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    nuName_(ptf.nuName_),
     kappa_(ptf.kappa_),
     E_(ptf.E_)
 {}
@@ -80,8 +77,6 @@ nuSgsUSpaldingWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {}
@@ -94,8 +89,6 @@ nuSgsUSpaldingWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(nwfpsf),
-    UName_(nwfpsf.UName_),
-    nuName_(nwfpsf.nuName_),
     kappa_(nwfpsf.kappa_),
     E_(nwfpsf.E_)
 {}
@@ -109,8 +102,6 @@ nuSgsUSpaldingWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(nwfpsf, iF),
-    UName_(nwfpsf.UName_),
-    nuName_(nwfpsf.nuName_),
     kappa_(nwfpsf.kappa_),
     E_(nwfpsf.E_)
 {}
@@ -123,15 +114,14 @@ void nuSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
+    const label patchi = patch().index();
+    const fvPatchVectorField& U = lesModel.U().boundaryField()[patchi];
+    const scalarField nuw = lesModel.nu()().boundaryField()[patchi];
+
     const scalarField& ry = patch().deltaCoeffs();
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
-
     const scalarField magUp(mag(U.patchInternalField() - U));
-
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     scalarField& nuSgsw = *this;
 
@@ -185,8 +175,6 @@ void nuSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
 void nuSgsUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
@@ -200,6 +188,7 @@ makePatchTypeField
     fvPatchScalarField,
     nuSgsUSpaldingWallFunctionFvPatchScalarField
 );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

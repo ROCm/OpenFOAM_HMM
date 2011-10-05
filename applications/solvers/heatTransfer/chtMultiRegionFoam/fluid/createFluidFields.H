@@ -1,30 +1,36 @@
     // Initialise fluid field pointer lists
-    PtrList<basicRhoThermo> thermoFluid(fluidRegions.size());
-    PtrList<volScalarField> rhoFluid(fluidRegions.size());
-    PtrList<volScalarField> KFluid(fluidRegions.size());
-    PtrList<volVectorField> UFluid(fluidRegions.size());
-    PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
-    PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
-    PtrList<compressible::turbulenceModel> turbulence(fluidRegions.size());
-    PtrList<volScalarField> p_rghFluid(fluidRegions.size());
-    PtrList<volScalarField> ghFluid(fluidRegions.size());
-    PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
-    PtrList<radiation::radiationModel> radiation(fluidRegions.size());
-    PtrList<volScalarField> DpDtFluid(fluidRegions.size());
+    PtrList<basicRhoThermo> thermoFluid(rp.fluidRegionNames().size());
+    PtrList<volScalarField> rhoFluid(rp.fluidRegionNames().size());
+    PtrList<volScalarField> KFluid(rp.fluidRegionNames().size());
+    PtrList<volVectorField> UFluid(rp.fluidRegionNames().size());
+    PtrList<surfaceScalarField> phiFluid(rp.fluidRegionNames().size());
+    PtrList<uniformDimensionedVectorField> gFluid(rp.fluidRegionNames().size());
+    PtrList<compressible::turbulenceModel> turbulence
+    (
+        rp.fluidRegionNames().size()
+    );
+    PtrList<volScalarField> p_rghFluid(rp.fluidRegionNames().size());
+    PtrList<volScalarField> ghFluid(rp.fluidRegionNames().size());
+    PtrList<surfaceScalarField> ghfFluid(rp.fluidRegionNames().size());
+    PtrList<radiation::radiationModel> radiation(rp.fluidRegionNames().size());
+    PtrList<volScalarField> DpDtFluid(rp.fluidRegionNames().size());
 
-    List<scalar> initialMassFluid(fluidRegions.size());
+    List<scalar> initialMassFluid(rp.fluidRegionNames().size());
 
     // Populate fluid field pointer lists
-    forAll(fluidRegions, i)
+    forAll(rp.fluidRegionNames(), i)
     {
         Info<< "*** Reading fluid mesh thermophysical properties for region "
-            << fluidRegions[i].name() << nl << endl;
+            << rp.fluidRegionNames()[i] << nl << endl;
+
+        label procI = fluidToProc[i];
+
 
         Info<< "    Adding to thermoFluid\n" << endl;
         thermoFluid.set
         (
             i,
-            basicRhoThermo::New(fluidRegions[i]).ptr()
+            basicRhoThermo::New(procMeshes[procI]).ptr()
         );
 
         Info<< "    Adding to rhoFluid\n" << endl;
@@ -37,7 +43,7 @@
                 (
                     "rho",
                     runTime.timeName(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
@@ -55,7 +61,7 @@
                 (
                     "K",
                     runTime.timeName(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
@@ -73,11 +79,11 @@
                 (
                     "U",
                     runTime.timeName(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
                 ),
-                fluidRegions[i]
+                procMeshes[procI]
             )
         );
 
@@ -91,12 +97,12 @@
                 (
                     "phi",
                     runTime.timeName(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::READ_IF_PRESENT,
                     IOobject::AUTO_WRITE
                 ),
                 linearInterpolate(rhoFluid[i]*UFluid[i])
-                    & fluidRegions[i].Sf()
+                    & procMeshes[procI].Sf()
             )
         );
 
@@ -110,7 +116,7 @@
                 (
                     "g",
                     runTime.constant(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 )
@@ -137,14 +143,14 @@
         ghFluid.set
         (
             i,
-            new volScalarField("gh", gFluid[i] & fluidRegions[i].C())
+            new volScalarField("gh", gFluid[i] & procMeshes[procI].C())
         );
 
         Info<< "    Adding to ghfFluid\n" << endl;
         ghfFluid.set
         (
             i,
-            new surfaceScalarField("ghf", gFluid[i] & fluidRegions[i].Cf())
+            new surfaceScalarField("ghf", gFluid[i] & procMeshes[procI].Cf())
         );
 
         p_rghFluid.set
@@ -156,11 +162,11 @@
                 (
                     "p_rgh",
                     runTime.timeName(),
-                    fluidRegions[i],
+                    procMeshes[procI],
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
                 ),
-                fluidRegions[i]
+                procMeshes[procI]
             )
         );
 

@@ -70,7 +70,7 @@ castellatedMeshControls
     // If local number of cells is >= maxLocalCells on any processor
     // switches from from refinement followed by balancing
     // (current method) to (weighted) balancing before refinement.
-    maxLocalCells 1000000;
+    maxLocalCells 100000;
 
     // Overall cell limit (approximately). Refinement will stop immediately
     // upon reaching this number so a refinement level might not complete.
@@ -311,6 +311,11 @@ addLayersControls
     // get used. Up to nRelaxIter it uses the settings in meshQualityControls,
     // after nRelaxIter it uses the values in meshQualityControls::relaxed.
     nRelaxedIter 20;
+
+    // Additional reporting: if there are just a few faces where there
+    // are mesh errors (after adding the layers) print their face centres.
+    // This helps in tracking down problematic mesh areas.
+    //additionalReporting true;
 }
 
 // Generic mesh quality settings. At any undoable phase these determine

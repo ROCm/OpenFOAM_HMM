@@ -137,98 +137,98 @@ Foam::labelList Foam::layerParameters::readNumLayers
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-Foam::layerParameters::layerParameters
-(
-    const PtrList<dictionary>& surfaceDicts,
-    const refinementSurfaces& refineSurfaces,
-    const labelList& globalToPatch,
-    const dictionary& dict,
-    const polyBoundaryMesh& boundaryMesh
-)
-:
-    numLayers_
-    (
-        readNumLayers
-        (
-            surfaceDicts,
-            refineSurfaces,
-            globalToPatch,
-            boundaryMesh
-        )
-    ),
-    expansionRatio_
-    (
-        numLayers_.size(),
-        readScalar(dict.lookup("expansionRatio"))
-    ),
-    relativeSizes_(false),
-    finalLayerThickness_
-    (
-        numLayers_.size(),
-        readScalar(dict.lookup("finalLayerRatio"))
-    ),
-    minThickness_
-    (
-        numLayers_.size(),
-        readScalar(dict.lookup("minThickness"))
-    ),
-    featureAngle_(readScalar(dict.lookup("featureAngle"))),
-    concaveAngle_
-    (
-        dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
-    ),
-    nGrow_(readLabel(dict.lookup("nGrow"))),
-    nSmoothSurfaceNormals_
-    (
-        readLabel(dict.lookup("nSmoothSurfaceNormals"))
-    ),
-    nSmoothNormals_(readLabel(dict.lookup("nSmoothNormals"))),
-    nSmoothThickness_(readLabel(dict.lookup("nSmoothThickness"))),
-    maxFaceThicknessRatio_
-    (
-        readScalar(dict.lookup("maxFaceThicknessRatio"))
-    ),
-    layerTerminationCos_
-    (
-        Foam::cos(degToRad(0.5*featureAngle_))
-    ),
-    maxThicknessToMedialRatio_
-    (
-        readScalar(dict.lookup("maxThicknessToMedialRatio"))
-    ),
-    minMedianAxisAngleCos_
-    (
-        Foam::cos(degToRad(readScalar(dict.lookup("minMedianAxisAngle"))))
-    ),
-    nBufferCellsNoExtrude_
-    (
-        readLabel(dict.lookup("nBufferCellsNoExtrude"))
-    ),
-    nSnap_(readLabel(dict.lookup("nSnap"))),
-    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
-    nRelaxedIter_(labelMax)
-{
-    if (nGrow_ > 0)
-    {
-        WarningIn("layerParameters::layerParameters(..)")
-            << "The nGrow parameter effect has changed with respect to 1.6.x."
-            << endl
-            << "Please set nGrow=0 for 1.6.x behaviour."
-            << endl;
-    }
-
-    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
-
-    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
-    {
-        FatalErrorIn("layerParameters::layerParameters(..)")
-            << "Layer iterations should be >= 0." << endl
-            << "nLayerIter:" << nLayerIter_
-            << " nRelaxedIter:" << nRelaxedIter_
-            << exit(FatalError);
-    }
-}
+//// Construct from dictionary
+//Foam::layerParameters::layerParameters
+//(
+//    const PtrList<dictionary>& surfaceDicts,
+//    const refinementSurfaces& refineSurfaces,
+//    const labelList& globalToPatch,
+//    const dictionary& dict,
+//    const polyBoundaryMesh& boundaryMesh
+//)
+//:
+//    numLayers_
+//    (
+//        readNumLayers
+//        (
+//            surfaceDicts,
+//            refineSurfaces,
+//            globalToPatch,
+//            boundaryMesh
+//        )
+//    ),
+//    expansionRatio_
+//    (
+//        numLayers_.size(),
+//        readScalar(dict.lookup("expansionRatio"))
+//    ),
+//    relativeSizes_(false),
+//    finalLayerThickness_
+//    (
+//        numLayers_.size(),
+//        readScalar(dict.lookup("finalLayerRatio"))
+//    ),
+//    minThickness_
+//    (
+//        numLayers_.size(),
+//        readScalar(dict.lookup("minThickness"))
+//    ),
+//    featureAngle_(readScalar(dict.lookup("featureAngle"))),
+//    concaveAngle_
+//    (
+//        dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
+//    ),
+//    nGrow_(readLabel(dict.lookup("nGrow"))),
+//    nSmoothSurfaceNormals_
+//    (
+//        readLabel(dict.lookup("nSmoothSurfaceNormals"))
+//    ),
+//    nSmoothNormals_(readLabel(dict.lookup("nSmoothNormals"))),
+//    nSmoothThickness_(readLabel(dict.lookup("nSmoothThickness"))),
+//    maxFaceThicknessRatio_
+//    (
+//        readScalar(dict.lookup("maxFaceThicknessRatio"))
+//    ),
+//    layerTerminationCos_
+//    (
+//        Foam::cos(degToRad(0.5*featureAngle_))
+//    ),
+//    maxThicknessToMedialRatio_
+//    (
+//        readScalar(dict.lookup("maxThicknessToMedialRatio"))
+//    ),
+//    minMedianAxisAngleCos_
+//    (
+//        Foam::cos(degToRad(readScalar(dict.lookup("minMedianAxisAngle"))))
+//    ),
+//    nBufferCellsNoExtrude_
+//    (
+//        readLabel(dict.lookup("nBufferCellsNoExtrude"))
+//    ),
+//    nSnap_(readLabel(dict.lookup("nSnap"))),
+//    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+//    nRelaxedIter_(labelMax)
+//{
+//    if (nGrow_ > 0)
+//    {
+//        WarningIn("layerParameters::layerParameters(..)")
+//            << "The nGrow parameter effect has changed with respect to 1.6.x."
+//            << endl
+//            << "Please set nGrow=0 for 1.6.x behaviour."
+//            << endl;
+//    }
+//
+//    dict.readIfPresent("nRelaxedIter", nRelaxedIter_);
+//
+//    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
+//    {
+//        FatalErrorIn("layerParameters::layerParameters(..)")
+//            << "Layer iterations should be >= 0." << endl
+//            << "nLayerIter:" << nLayerIter_
+//            << " nRelaxedIter:" << nRelaxedIter_
+//            << exit(FatalError);
+//    }
+//}
 
 
 // Construct from dictionary
@@ -289,7 +289,8 @@ Foam::layerParameters::layerParameters
     ),
     nSnap_(readLabel(dict.lookup("nRelaxIter"))),
     nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
-    nRelaxedIter_(labelMax)
+    nRelaxedIter_(labelMax),
+    additionalReporting_(dict.lookupOrDefault("additionalReporting", false))
 {
     if (nGrow_ > 0)
     {

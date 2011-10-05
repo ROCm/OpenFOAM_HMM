@@ -331,6 +331,7 @@ class autoLayerDriver
                 (
                     const addPatchCellLayer& addLayer,
                     const dictionary& motionDict,
+                    const bool additionalReporting,
                     const List<labelPair>& baffles,
                     const indirectPrimitivePatch& pp,
                     const fvMesh&,

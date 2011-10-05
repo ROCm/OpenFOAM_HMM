@@ -154,13 +154,11 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    const mappedPatchBase& filmMap = filmModel.mappedPatches()[filmPatchI];
-
     scalarField deltaFilm = filmModel.delta().boundaryField()[filmPatchI];
-    filmMap.distribute(deltaFilm);
+    filmModel.toPrimary(filmPatchI, deltaFilm);
 
     vectorField UFilm = filmModel.Us().boundaryField()[filmPatchI];
-    filmMap.distribute(UFilm);
+    filmModel.toPrimary(filmPatchI, UFilm);
 
 
     // Retrieve pyrolysis model
@@ -172,10 +170,8 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
 
     const label pyrPatchI = pyrModel.regionPatchID(patchI);
 
-    const mappedPatchBase& pyrMap = pyrModel.mappedPatches()[pyrPatchI];
-
     scalarField phiPyr = pyrModel.phiGas().boundaryField()[pyrPatchI];
-    pyrMap.distribute(phiPyr);
+    pyrModel.toPrimary(pyrPatchI, phiPyr);
 
 
     const surfaceScalarField& phi =

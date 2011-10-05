@@ -53,12 +53,12 @@
 
         phase.U() = rAUs[phasei]*UEqns[phasei].H();
 
+        mrfZones.absoluteFlux(phase.phi());
         phase.phi() =
         (
             (fvc::interpolate(phase.U()) & mesh.Sf())
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
         );
-
         mrfZones.relativeFlux(phase.phi());
         phase.phi() += rAlphaAUfs[phasei]*(g & mesh.Sf());
 
@@ -241,7 +241,6 @@
                     }
                 }
 
-                phase.U() = fvc::reconstruct(phase.phi());
                 phase.U().correctBoundaryConditions();
 
                 U += alpha*phase.U();

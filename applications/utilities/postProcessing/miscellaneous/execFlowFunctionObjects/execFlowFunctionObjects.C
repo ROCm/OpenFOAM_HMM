@@ -37,6 +37,11 @@ Description
 
 #include "calc.H"
 
+#include "volFields.H"
+#include "surfaceFields.H"
+#include "pointFields.H"
+#include "ReadFields.H"
+
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 
 #include "incompressible/RAS/RASModel/RASModel.H"
@@ -84,203 +89,268 @@ namespace Foam
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
-    Info<< "    Reading phi" << endl;
-    surfaceScalarField phi
-    (
-        IOobject
-        (
-            "phi",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        ),
-        mesh
-    );
-
-    Info<< "    Reading U" << endl;
-    volVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        ),
-        mesh
-    );
-
-    Info<< "    Reading p" << endl;
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        ),
-        mesh
-    );
-
-    if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
+    if (args.optionFound("noFlow"))
     {
-        IOobject RASPropertiesHeader
-        (
-            "RASProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        );
+        Info<< "    Operating in no-flow mode; no models will be loaded."
+            << " All vol, surface and point fields will be loaded." << endl;
 
-        IOobject LESPropertiesHeader
-        (
-            "LESProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        );
+        // Read objects in time directory
+        IOobjectList objects(mesh, runTime.timeName());
 
-        if (RASPropertiesHeader.headerOk())
-        {
-            IOdictionary RASProperties(RASPropertiesHeader);
+        // Read vol fields.
 
-            singlePhaseTransportModel laminarTransport(U, phi);
+        PtrList<volScalarField> vsFlds;
+        ReadFields(mesh, objects, vsFlds);
 
-            autoPtr<incompressible::RASModel> RASModel
-            (
-                incompressible::RASModel::New
-                (
-                    U,
-                    phi,
-                    laminarTransport
-                )
-            );
-            execFlowFunctionObjects(args, runTime);
-        }
-        else if (LESPropertiesHeader.headerOk())
-        {
-            IOdictionary LESProperties(LESPropertiesHeader);
+        PtrList<volVectorField> vvFlds;
+        ReadFields(mesh, objects, vvFlds);
 
-            singlePhaseTransportModel laminarTransport(U, phi);
+        PtrList<volSphericalTensorField> vstFlds;
+        ReadFields(mesh, objects, vstFlds);
 
-            autoPtr<incompressible::LESModel> sgsModel
-            (
-                incompressible::LESModel::New(U, phi, laminarTransport)
-            );
+        PtrList<volSymmTensorField> vsymtFlds;
+        ReadFields(mesh, objects, vsymtFlds);
 
-            execFlowFunctionObjects(args, runTime);
-        }
-        else
-        {
-            IOdictionary transportProperties
-            (
-                IOobject
-                (
-                    "transportProperties",
-                    runTime.constant(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
-                )
-            );
+        PtrList<volTensorField> vtFlds;
+        ReadFields(mesh, objects, vtFlds);
 
-            dimensionedScalar nu(transportProperties.lookup("nu"));
+        // Read surface fields.
 
-            execFlowFunctionObjects(args, runTime);
-        }
-    }
-    else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
-    {
-        autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
+        PtrList<surfaceScalarField> ssFlds;
+        ReadFields(mesh, objects, ssFlds);
 
-        volScalarField rho
-        (
-            IOobject
-            (
-                "rho",
-                runTime.timeName(),
-                mesh
-            ),
-            thermo->rho()
-        );
+        PtrList<surfaceVectorField> svFlds;
+        ReadFields(mesh, objects, svFlds);
 
-        IOobject RASPropertiesHeader
-        (
-            "RASProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        );
+        PtrList<surfaceSphericalTensorField> sstFlds;
+        ReadFields(mesh, objects, sstFlds);
 
-        IOobject LESPropertiesHeader
-        (
-            "LESProperties",
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        );
+        PtrList<surfaceSymmTensorField> ssymtFlds;
+        ReadFields(mesh, objects, ssymtFlds);
 
-        if (RASPropertiesHeader.headerOk())
-        {
-            IOdictionary RASProperties(RASPropertiesHeader);
+        PtrList<surfaceTensorField> stFlds;
+        ReadFields(mesh, objects, stFlds);
 
-            autoPtr<compressible::RASModel> RASModel
-            (
-                compressible::RASModel::New
-                (
-                    rho,
-                    U,
-                    phi,
-                    thermo()
-                )
-            );
+        // Read point fields.
+        const pointMesh& pMesh = pointMesh::New(mesh);
 
-            execFlowFunctionObjects(args, runTime);
-        }
-        else if (LESPropertiesHeader.headerOk())
-        {
-            IOdictionary LESProperties(LESPropertiesHeader);
+        PtrList<pointScalarField> psFlds;
+        ReadFields(pMesh, objects, psFlds);
 
-            autoPtr<compressible::LESModel> sgsModel
-            (
-                compressible::LESModel::New(rho, U, phi, thermo())
-            );
+        PtrList<pointVectorField> pvFlds;
+        ReadFields(pMesh, objects, pvFlds);
 
-            execFlowFunctionObjects(args, runTime);
-        }
-        else
-        {
-            IOdictionary transportProperties
-            (
-                IOobject
-                (
-                    "transportProperties",
-                    runTime.constant(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
-                )
-            );
+        PtrList<pointSphericalTensorField> pstFlds;
+        ReadFields(pMesh, objects, pstFlds);
 
-            dimensionedScalar mu(transportProperties.lookup("mu"));
+        PtrList<pointSymmTensorField> psymtFlds;
+        ReadFields(pMesh, objects, psymtFlds);
 
-            execFlowFunctionObjects(args, runTime);
-        }
+        PtrList<pointTensorField> ptFlds;
+        ReadFields(pMesh, objects, ptFlds);
+
+        execFlowFunctionObjects(args, runTime);
     }
     else
     {
-        FatalErrorIn(args.executable())
-            << "Incorrect dimensions of phi: " << phi.dimensions()
-            << nl << exit(FatalError);
+        Info<< "    Reading phi" << endl;
+        surfaceScalarField phi
+        (
+            IOobject
+            (
+                "phi",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            mesh
+        );
+
+        Info<< "    Reading U" << endl;
+        volVectorField U
+        (
+            IOobject
+            (
+                "U",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            mesh
+        );
+
+        Info<< "    Reading p" << endl;
+        volScalarField p
+        (
+            IOobject
+            (
+                "p",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ
+            ),
+            mesh
+        );
+
+        if (phi.dimensions() == dimensionSet(0, 3, -1, 0, 0))
+        {
+            IOobject RASPropertiesHeader
+            (
+                "RASProperties",
+                runTime.constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            );
+
+            IOobject LESPropertiesHeader
+            (
+                "LESProperties",
+                runTime.constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            );
+
+            if (RASPropertiesHeader.headerOk())
+            {
+                IOdictionary RASProperties(RASPropertiesHeader);
+
+                singlePhaseTransportModel laminarTransport(U, phi);
+
+                autoPtr<incompressible::RASModel> RASModel
+                (
+                    incompressible::RASModel::New
+                    (
+                        U,
+                        phi,
+                        laminarTransport
+                    )
+                );
+                execFlowFunctionObjects(args, runTime);
+            }
+            else if (LESPropertiesHeader.headerOk())
+            {
+                IOdictionary LESProperties(LESPropertiesHeader);
+
+                singlePhaseTransportModel laminarTransport(U, phi);
+
+                autoPtr<incompressible::LESModel> sgsModel
+                (
+                    incompressible::LESModel::New(U, phi, laminarTransport)
+                );
+
+                execFlowFunctionObjects(args, runTime);
+            }
+            else
+            {
+                IOdictionary transportProperties
+                (
+                    IOobject
+                    (
+                        "transportProperties",
+                        runTime.constant(),
+                        mesh,
+                        IOobject::MUST_READ_IF_MODIFIED,
+                        IOobject::NO_WRITE
+                    )
+                );
+
+                dimensionedScalar nu(transportProperties.lookup("nu"));
+
+                execFlowFunctionObjects(args, runTime);
+            }
+        }
+        else if (phi.dimensions() == dimensionSet(1, 0, -1, 0, 0))
+        {
+            autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
+
+            volScalarField rho
+            (
+                IOobject
+                (
+                    "rho",
+                    runTime.timeName(),
+                    mesh
+                ),
+                thermo->rho()
+            );
+
+            IOobject RASPropertiesHeader
+            (
+                "RASProperties",
+                runTime.constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            );
+
+            IOobject LESPropertiesHeader
+            (
+                "LESProperties",
+                runTime.constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            );
+
+            if (RASPropertiesHeader.headerOk())
+            {
+                IOdictionary RASProperties(RASPropertiesHeader);
+
+                autoPtr<compressible::RASModel> RASModel
+                (
+                    compressible::RASModel::New
+                    (
+                        rho,
+                        U,
+                        phi,
+                        thermo()
+                    )
+                );
+
+                execFlowFunctionObjects(args, runTime);
+            }
+            else if (LESPropertiesHeader.headerOk())
+            {
+                IOdictionary LESProperties(LESPropertiesHeader);
+
+                autoPtr<compressible::LESModel> sgsModel
+                (
+                    compressible::LESModel::New(rho, U, phi, thermo())
+                );
+
+                execFlowFunctionObjects(args, runTime);
+            }
+            else
+            {
+                IOdictionary transportProperties
+                (
+                    IOobject
+                    (
+                        "transportProperties",
+                        runTime.constant(),
+                        mesh,
+                        IOobject::MUST_READ_IF_MODIFIED,
+                        IOobject::NO_WRITE
+                    )
+                );
+
+                dimensionedScalar mu(transportProperties.lookup("mu"));
+
+                execFlowFunctionObjects(args, runTime);
+            }
+        }
+        else
+        {
+            FatalErrorIn(args.executable())
+                << "Incorrect dimensions of phi: " << phi.dimensions()
+                << nl << exit(FatalError);
+        }
     }
 }
 

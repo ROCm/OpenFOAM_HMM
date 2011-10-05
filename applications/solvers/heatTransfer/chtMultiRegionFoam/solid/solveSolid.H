@@ -1,8 +1,3 @@
-if (finalIter)
-{
-    mesh.data::add("finalIteration", true);
-}
-
 {
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
@@ -16,11 +11,4 @@ if (finalIter)
     }
 
     Info<< "Min/max T:" << min(T) << ' ' << max(T) << endl;
-}
-
-thermo.correct();
-
-if (finalIter)
-{
-    mesh.data::remove("finalIteration");
 }

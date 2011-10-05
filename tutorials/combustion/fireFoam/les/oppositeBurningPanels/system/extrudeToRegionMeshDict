@@ -20,6 +20,8 @@ faceZones       (fRight_zone fLeft_zone);
 
 oneD            true;
 
+sampleMode      nearestPatchFace;
+
 oneDPolyPatchType emptyPolyPatch; //wedgePolyPatch
 
 extrudeModel    linearNormal;

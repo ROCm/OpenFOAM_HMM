@@ -112,6 +112,10 @@ public:
             NORMAL              // use face normal + distance
         };
 
+        static const NamedEnum<sampleMode, 4> sampleModeNames_;
+
+        static const NamedEnum<offsetMode, 3> offsetModeNames_;
+
 
     //- Helper class for finding nearest
     // Nearest:
@@ -142,13 +146,9 @@ public:
     };
 
 
-private:
+protected:
 
-    // Private data
-
-        static const NamedEnum<sampleMode, 4> sampleModeNames_;
-
-        static const NamedEnum<offsetMode, 3> offsetModeNames_;
+    // Protected data
 
         //- Patch to sample
         const polyPatch& patch_;
@@ -199,7 +199,7 @@ private:
             dictionary surfDict_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Collect single list of samples and originating processor+face.
         void collectSamples
@@ -334,6 +334,26 @@ public:
                 default:
                 {
                     map().distribute(lst);
+                }
+            }
+        }
+
+
+        //- Wrapper around map/interpolate data distribution
+        template<class Type>
+        void reverseDistribute(List<Type>& lst) const
+        {
+            switch (mode_)
+            {
+                case NEARESTPATCHFACEAMI:
+                {
+                    lst = AMI().interpolateToTarget(Field<Type>(lst.xfer()));
+                    break;
+                }
+                default:
+                {
+                    label cSize = patch_.size();
+                    map().reverseDistribute(cSize, lst);
                 }
             }
         }

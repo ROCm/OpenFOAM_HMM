@@ -50,16 +50,19 @@ bool Foam::simpleControl::criteriaSatisfied()
     }
 
     bool achieved = true;
-    const dictionary& solverDict = mesh_.solverPerformanceDict();
+    bool checked = false;    // safety that some checks were indeed performed
 
+    const dictionary& solverDict = mesh_.solverPerformanceDict();
     forAllConstIter(dictionary, solverDict, iter)
     {
         const word& variableName = iter().keyword();
-        label fieldI = applyToField(variableName);
+        const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
             const List<lduMatrix::solverPerformance> sp(iter().stream());
             const scalar residual = sp.first().initialResidual();
+
+            checked = true;
 
             bool absCheck = residual < residualControl_[fieldI].absTol;
             achieved = achieved && absCheck;
@@ -75,7 +78,7 @@ bool Foam::simpleControl::criteriaSatisfied()
         }
     }
 
-    return achieved;
+    return checked && achieved;
 }
 
 
@@ -90,7 +93,13 @@ Foam::simpleControl::simpleControl(fvMesh& mesh)
 
     Info<< nl;
 
-    if (residualControl_.size() > 0)
+    if (residualControl_.empty())
+    {
+        Info<< algorithmName_ << ": no convergence criteria found. "
+            << "Calculations will run for " << mesh_.time().endTime().value()
+            << " steps." << nl << endl;
+    }
+    else
     {
         Info<< algorithmName_ << ": convergence criteria" << nl;
         forAll(residualControl_, i)
@@ -100,12 +109,6 @@ Foam::simpleControl::simpleControl(fvMesh& mesh)
                 << nl;
         }
         Info<< endl;
-    }
-    else
-    {
-        Info<< algorithmName_ << ": no convergence criteria found. "
-            << "Calculations will run for " << mesh_.time().endTime().value()
-            << " steps." << nl << endl;
     }
 }
 

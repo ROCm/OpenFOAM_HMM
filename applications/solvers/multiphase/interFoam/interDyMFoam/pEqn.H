@@ -3,16 +3,19 @@
     surfaceScalarField rAUf(fvc::interpolate(rAU));
 
     U = rAU*UEqn.H();
-    surfaceScalarField phiU("phiU", (fvc::interpolate(U) & mesh.Sf()));
+
+    phiAbs =
+        (fvc::interpolate(U) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU, rho, U, phiAbs);
 
     if (p_rgh.needReference())
     {
-        fvc::makeRelative(phiU, U);
-        adjustPhi(phiU, U, p_rgh);
-        fvc::makeAbsolute(phiU, U);
+        fvc::makeRelative(phiAbs, U);
+        adjustPhi(phiAbs, U, p_rgh);
+        fvc::makeAbsolute(phiAbs, U);
     }
 
-    phi = phiU +
+    phi = phiAbs +
     (
         fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
       - ghf*fvc::snGrad(rho)
@@ -38,10 +41,12 @@
         }
     }
 
-    U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
+    U += rAU*fvc::reconstruct((phi - phiAbs)/rAUf);
     U.correctBoundaryConditions();
 
     #include "continuityErrs.H"
+
+    phiAbs = phi;
 
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative(phi, U);

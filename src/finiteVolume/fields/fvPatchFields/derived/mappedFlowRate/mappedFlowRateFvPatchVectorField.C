@@ -28,7 +28,6 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "mappedPatchBase.H"
-#include "mapDistribute.H"
 #include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -128,7 +127,7 @@ void Foam::mappedFlowRateFvPatchVectorField::updateCoeffs()
     scalarList phi =
         nbrPatch.lookupPatchField<surfaceScalarField, scalar>(nbrPhiName_);
 
-    mpp.map().distribute(phi);
+    mpp.distribute(phi);
 
 
     const surfaceScalarField& phiName =
