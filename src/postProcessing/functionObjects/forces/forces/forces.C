@@ -428,36 +428,43 @@ void Foam::forces::write()
                 Info<< "forces output:" << nl
                     << "    forces(pressure, viscous)" << fm.first() << nl
                     << "    moment(pressure, viscous)" << fm.second() << nl;
+            }
 
-                forcesFilePtr_() << obr_.time().value() << tab << fm;
+            forcesFilePtr_() << obr_.time().value() << tab << fm;
 
-                if (localSystem_)
+            if (localSystem_)
+            {
+                forcesMoments fmLocal;
+
+                fmLocal.first().first() =
+                    coordSys_.localVector(fm.first().first());
+
+                fmLocal.first().second() =
+                    coordSys_.localVector(fm.first().second());
+
+                fmLocal.second().first() =
+                    coordSys_.localVector(fm.second().first());
+
+                fmLocal.second().second() =
+                    coordSys_.localVector(fm.second().second());
+
+                forcesFilePtr_() << tab << fmLocal;
+
+                if (log_)
                 {
-                    forcesMoments fmLocal;
-
-                    fmLocal.first().first() =
-                        coordSys_.localVector(fm.first().first());
-
-                    fmLocal.first().second() =
-                        coordSys_.localVector(fm.first().second());
-
-                    fmLocal.second().first() =
-                        coordSys_.localVector(fm.second().first());
-
-                    fmLocal.second().second() =
-                        coordSys_.localVector(fm.second().second());
-
-                    forcesFilePtr_() << tab << fmLocal;
-
-
                     Info<< "  local:" << nl
                         << "    forces(pressure, viscous)" << fmLocal.first()
                         << nl
                         << "    moment(pressure, viscous)" << fmLocal.second()
                         << nl;
                 }
+            }
 
-                forcesFilePtr_() << endl;
+
+            forcesFilePtr_() << endl;
+
+            if (log_)
+            {
                 Info<< endl;
             }
         }
