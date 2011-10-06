@@ -53,15 +53,42 @@ Foam::UIPstream::UIPstream
 {
     notImplemented
     (
-        "UIPstream::UIPstream"
-        "("
-            "const commsTypes,"
-            "const int fromProcNo,"
-            "DynamicList<char>&,"
-            "label&,"
-            "const int tag,"
-            "const bool,"
-            "streamFormat, versionNumber"
+        "UIPstream::UIPstream\n"
+        "(\n"
+            "const commsTypes,\n"
+            "const int,\n"
+            "DynamicList<char>&,\n"
+            "label&,\n"
+            "const int,\n"
+            "const bool,\n"
+            "streamFormat,\n"
+            "versionNumber\n"
+        ")"
+    );
+}
+
+
+Foam::UIPstream::UIPstream
+(
+    const int fromProcNo,
+    PstreamBuffers& buffers
+)
+:
+    UPstream(buffers.commsType_),
+    Istream(buffers.format_, buffers.version_),
+    fromProcNo_(fromProcNo),
+    externalBuf_(buffers.recvBuf_[fromProcNo]),
+    externalBufPosition_(buffers.recvBufPos_[fromProcNo]),
+    tag_(buffers.tag_),
+    clearAtEnd_(true),
+    messageSize_(0)
+{
+    notImplemented
+    (
+        "UIPstream::UIPstream\n"
+        "(\n"
+            "const int,\n"
+            "PstreamBuffers&\n"
         ")"
     );
 }
