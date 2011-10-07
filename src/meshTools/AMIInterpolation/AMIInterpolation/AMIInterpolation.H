@@ -53,6 +53,7 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "treeBoundBoxList.H"
 #include "globalIndex.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -345,11 +346,46 @@ public:
 
         // Evaluation
 
+            //- Interpolate from target to source with supplied op
+            template<class Type, class BinaryOp>
+            tmp<Field<Type> > interpolateToSource
+            (
+                const Field<Type>& fld,
+                const BinaryOp& bop
+            ) const;
+
+            //- Interpolate from target tmp field to source with supplied op
+            template<class Type, class BinaryOp>
+            tmp<Field<Type> > interpolateToSource
+            (
+                const tmp<Field<Type> >& tFld,
+                const BinaryOp& bop
+            ) const;
+
+            //- Interpolate from source to target with supplied op
+            template<class Type, class BinaryOp>
+            tmp<Field<Type> > interpolateToTarget
+            (
+                const Field<Type>& fld,
+                const BinaryOp& bop
+            ) const;
+
+            //- Interpolate from source tmp field to target with supplied op
+            template<class Type, class BinaryOp>
+            tmp<Field<Type> > interpolateToTarget
+            (
+                const tmp<Field<Type> >& tFld,
+                const BinaryOp& bop
+            ) const;
+
             //- Interpolate from target to source
             template<class Type>
-            tmp<Field<Type> > interpolateToSource(const Field<Type>& fld) const;
+            tmp<Field<Type> > interpolateToSource
+            (
+                const Field<Type>& fld
+            ) const;
 
-            //- Interpolate from target tmp field to source
+            //- Interpolate from target tmp field
             template<class Type>
             tmp<Field<Type> > interpolateToSource
             (
@@ -358,9 +394,12 @@ public:
 
             //- Interpolate from source to target
             template<class Type>
-            tmp<Field<Type> > interpolateToTarget(const Field<Type>& fld) const;
+            tmp<Field<Type> > interpolateToTarget
+            (
+                const Field<Type>& fld
+            ) const;
 
-            //- Interpolate from source tmp field to target
+            //- Interpolate from source tmp field
             template<class Type>
             tmp<Field<Type> > interpolateToTarget
             (
