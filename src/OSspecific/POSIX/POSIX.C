@@ -123,7 +123,7 @@ bool Foam::setEnv
 }
 
 
-Foam::word Foam::hostName(bool full)
+Foam::string Foam::hostName(bool full)
 {
     char buf[128];
     ::gethostname(buf, sizeof(buf));
@@ -142,7 +142,7 @@ Foam::word Foam::hostName(bool full)
 }
 
 
-Foam::word Foam::domainName()
+Foam::string Foam::domainName()
 {
     char buf[128];
     ::gethostname(buf, sizeof(buf));
@@ -159,11 +159,11 @@ Foam::word Foam::domainName()
         }
     }
 
-    return word::null;
+    return string::null;
 }
 
 
-Foam::word Foam::userName()
+Foam::string Foam::userName()
 {
     struct passwd* pw = ::getpwuid(::getuid());
 
@@ -173,7 +173,7 @@ Foam::word Foam::userName()
     }
     else
     {
-        return word::null;
+        return string::null;
     }
 }
 
@@ -209,7 +209,7 @@ Foam::fileName Foam::home()
 }
 
 
-Foam::fileName Foam::home(const word& userName)
+Foam::fileName Foam::home(const string& userName)
 {
     struct passwd* pw;
 
@@ -1069,7 +1069,7 @@ void Foam::fdClose(const int fd)
 
 bool Foam::ping
 (
-    const word& destName,
+    const string& destName,
     const label destPort,
     const label timeOut
 )
@@ -1083,7 +1083,7 @@ bool Foam::ping
     {
         FatalErrorIn
         (
-            "Foam::ping(const word&, ...)"
+            "Foam::ping(const string&, ...)"
         )   << "gethostbyname error " << h_errno << " for host " << destName
             << abort(FatalError);
     }
@@ -1097,7 +1097,7 @@ bool Foam::ping
     {
         FatalErrorIn
         (
-            "Foam::ping(const word&, const label)"
+            "Foam::ping(const string&, const label)"
         )   << "socket error"
             << abort(FatalError);
     }
@@ -1149,7 +1149,7 @@ bool Foam::ping
 }
 
 
-bool Foam::ping(const word& hostname, const label timeOut)
+bool Foam::ping(const string& hostname, const label timeOut)
 {
     return ping(hostname, 222, timeOut) || ping(hostname, 22, timeOut);
 }

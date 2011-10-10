@@ -2,6 +2,8 @@ signals/sigFpe.C
 signals/sigSegv.C
 signals/sigInt.C
 signals/sigQuit.C
+signals/sigStopAtWriteNow.C
+signals/sigWriteNow.C
 regExp.C
 timer.C
 fileStat.C
