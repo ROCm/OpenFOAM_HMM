@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
+#include "explicitSetValue.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -33,35 +33,19 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(explicitSource, 0);
+    defineTypeNameAndDebug(explicitSetValue, 0);
     addToRunTimeSelectionTable
     (
         basicSource,
-        explicitSource,
+        explicitSetValue,
         dictionary
     );
-
-
-    // * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-    template<> const char* NamedEnum
-    <
-        explicitSource::volumeModeType,
-        2
-        >::names[] =
-    {
-        "absolute",
-        "specific"
-    };
-
-    const NamedEnum<explicitSource::volumeModeType, 2>
-        explicitSource::volumeModeTypeNames_;
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::explicitSource::setFieldData(const dictionary& dict)
+void Foam::explicitSetValue::setFieldData(const dictionary& dict)
 {
     scalarFields_.clear();
     vectorFields_.clear();
@@ -90,7 +74,7 @@ void Foam::explicitSource::setFieldData(const dictionary& dict)
         {
             FatalErrorIn
             (
-                "explicitSource::setFieldData"
+                "explicitSetValue::setFieldData"
             )   << "header not OK " << io.name()
                 << exit(FatalError);
         }
@@ -103,7 +87,7 @@ void Foam::explicitSource::setFieldData(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::explicitSource::explicitSource
+Foam::explicitSetValue::explicitSetValue
 (
     const word& name,
     const word& modelType,
@@ -112,22 +96,21 @@ Foam::explicitSource::explicitSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    dict_(dict.subDict(modelType + "Coeffs")),
-    volumeMode_(volumeModeTypeNames_.read(dict_.lookup("volumeMode")))
+    dict_(dict.subDict(modelType + "Coeffs"))
 {
     setFieldData(dict_.subDict("fieldData"));
 }
 
 
-void Foam::explicitSource::addSu(fvMatrix<scalar>& Eqn)
+void Foam::explicitSetValue::setValue(fvMatrix<scalar>& Eqn)
 {
-    addSource(Eqn, scalarFields_[Eqn.psi().name()]);
+    setFieldValue(Eqn, scalarFields_[Eqn.psi().name()]);
 }
 
 
-void Foam::explicitSource::addSu(fvMatrix<vector>& Eqn)
+void Foam::explicitSetValue::setValue(fvMatrix<vector>& Eqn)
 {
-    addSource(Eqn, vectorFields_[Eqn.psi().name()]);
+    setFieldValue(Eqn, vectorFields_[Eqn.psi().name()]);
 }
 
 

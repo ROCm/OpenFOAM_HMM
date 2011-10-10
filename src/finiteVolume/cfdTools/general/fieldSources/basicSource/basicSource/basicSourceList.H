@@ -92,6 +92,9 @@ public:
             //- Add source terms to vector fvMatrix
             void addSu(fvMatrix<vector>& Eq);
 
+            //- Set constant value on field
+            void setValue(fvMatrix<scalar>& Eq);
+
 
         // I-O
 

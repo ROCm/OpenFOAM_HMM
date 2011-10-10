@@ -53,7 +53,6 @@ addRadialActuationDiskAxialInertialResistance
     E.xx() = uniDiskDir.x();
     E.yy() = uniDiskDir.y();
     E.zz() = uniDiskDir.z();
-    const vectorField U1((1.0 - a)*U);
 
     const Field<vector> zoneCellCentres(mesh().cellCentres(), cells);
     const Field<scalar> zoneCellVolumes(mesh().cellVolumes(), cells);
@@ -68,7 +67,7 @@ addRadialActuationDiskAxialInertialResistance
 
     forAll(cells, i)
     {
-        T[i] = 2.0*rho[cells[i]]*diskArea_*mag(U1[cells[i]])*a/(1.0 - a);
+        T[i] = 2.0*rho[cells[i]]*diskArea_*mag(U[cells[i]])*a/(1.0 - a);
 
         scalar r = mag(mesh().cellCentres()[cells[i]] - avgCentre);
 
@@ -79,7 +78,7 @@ addRadialActuationDiskAxialInertialResistance
 
     forAll(cells, i)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*Tr[i]*E) & U1[cells[i]];
+        Usource[cells[i]] += ((Vcells[cells[i]]/V())*Tr[i]*E) & U[cells[i]];
     }
 
     if (debug)
