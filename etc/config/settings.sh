@@ -520,7 +520,7 @@ SGIMPI)
     export FOAM_MPI=${MPI_ROOT##*/}
     export MPI_ARCH_PATH=$MPI_ROOT
 
-    if [ -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
+    if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
     then
         echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
         echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
