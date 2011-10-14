@@ -88,7 +88,7 @@ Foam::interpolationTable<Type>::interpolationTable(const fileName& fName)
     List<Tuple2<scalar, Type> >(),
     boundsHandling_(interpolationTable::WARN),
     fileName_(fName),
-    reader_(new openFoamTableReader<Type>())
+    reader_(new openFoamTableReader<Type>(dictionary()))
 {
     readTable();
 }

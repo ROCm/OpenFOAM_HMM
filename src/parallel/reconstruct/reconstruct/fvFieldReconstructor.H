@@ -86,6 +86,7 @@ class fvFieldReconstructor
 
 public:
 
+        //- Mapper for sizing only - does not do any actual mapping.
         class fvPatchFieldReconstructor
         :
             public fvPatchFieldMapper
@@ -146,19 +147,48 @@ public:
         //- Reconstruct volume internal field
         template<class Type>
         tmp<DimensionedField<Type, volMesh> >
-        reconstructFvVolumeInternalField(const IOobject& fieldIoObject);
+        reconstructFvVolumeInternalField
+        (
+            const IOobject& fieldIoObject,
+            const PtrList<DimensionedField<Type, volMesh> >& procFields
+        ) const;
+
+        //- Read and reconstruct volume internal field
+        template<class Type>
+        tmp<DimensionedField<Type, volMesh> >
+        reconstructFvVolumeInternalField(const IOobject& fieldIoObject) const;
+
 
         //- Reconstruct volume field
         template<class Type>
         tmp<GeometricField<Type, fvPatchField, volMesh> >
-        reconstructFvVolumeField(const IOobject& fieldIoObject);
+        reconstructFvVolumeField
+        (
+            const IOobject& fieldIoObject,
+            const PtrList<GeometricField<Type, fvPatchField, volMesh> >&
+        ) const;
+
+        //- Read and reconstruct volume field
+        template<class Type>
+        tmp<GeometricField<Type, fvPatchField, volMesh> >
+        reconstructFvVolumeField(const IOobject& fieldIoObject) const;
+
 
         //- Reconstruct surface field
         template<class Type>
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        reconstructFvSurfaceField(const IOobject& fieldIoObject);
+        reconstructFvSurfaceField
+        (
+            const IOobject& fieldIoObject,
+            const PtrList<GeometricField<Type, fvsPatchField, surfaceMesh> >&
+        ) const;
 
-        //- Reconstruct and write all/selected volume internal fields
+        //- Read and reconstruct surface field
+        template<class Type>
+        tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        reconstructFvSurfaceField(const IOobject& fieldIoObject) const;
+
+        //- Read, reconstruct and write all/selected volume internal fields
         template<class Type>
         void reconstructFvVolumeInternalFields
         (
@@ -166,7 +196,7 @@ public:
             const HashSet<word>& selectedFields
         );
 
-        //- Reconstruct and write all/selected volume fields
+        //- Read, reconstruct and write all/selected volume fields
         template<class Type>
         void reconstructFvVolumeFields
         (
@@ -174,7 +204,7 @@ public:
             const HashSet<word>& selectedFields
         );
 
-        //- Reconstruct and write all/selected surface fields
+        //- Read, reconstruct and write all/selected surface fields
         template<class Type>
         void reconstructFvSurfaceFields
         (

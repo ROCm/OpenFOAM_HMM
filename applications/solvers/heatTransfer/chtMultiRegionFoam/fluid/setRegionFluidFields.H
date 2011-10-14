@@ -1,4 +1,4 @@
-    fvMesh& mesh = fluidRegions[i];
+    fvMesh& mesh = procMeshes[fluidToProc[i]];
 
     basicRhoThermo& thermo = thermoFluid[i];
     volScalarField& rho = rhoFluid[i];

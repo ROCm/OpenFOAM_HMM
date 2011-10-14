@@ -151,7 +151,8 @@ set -o pipefail
 #
 colourPipe()
 {
-    if [ "$1" ]
+
+    if tty -s <&1       #    [ "$1" ]
     then
     (
         while read line

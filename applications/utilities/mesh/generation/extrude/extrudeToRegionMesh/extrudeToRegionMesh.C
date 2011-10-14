@@ -936,12 +936,6 @@ int main(int argc, char *argv[])
     const word dictName
         (args.optionLookupOrDefault<word>("dict", "extrudeToRegionMeshDict"));
 
-    mappedPatchBase::sampleMode sampleMode = mappedPatchBase::NEARESTPATCHFACE;
-    if (args.optionFound("AMI"))
-    {
-        sampleMode = mappedPatchBase::NEARESTPATCHFACEAMI;
-    }
-
     IOdictionary dict
     (
         IOobject
@@ -965,6 +959,9 @@ int main(int argc, char *argv[])
     {
         dict.lookup("faceZonesShadow") >> zoneShadowNames;
     }
+
+    mappedPatchBase::sampleMode sampleMode =
+        mappedPatchBase::sampleModeNames_[dict.lookup("sampleMode")];
 
     const Switch oneD(dict.lookup("oneD"));
     const Switch adaptMesh(dict.lookup("adaptMesh"));

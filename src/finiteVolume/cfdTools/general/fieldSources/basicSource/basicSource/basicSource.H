@@ -56,13 +56,13 @@ Description
         selectionMode   points;
         cellSet         c0;
 
+        points            // list of points when selectionMode = points
+        (
+            (-0.088 0.007 -0.02)
+            (-0.028 0.007 -0.02)
+        );
         explicitSourceCoeffs
         {
-            points            // list of points when selectionMode = points
-            (
-                (-0.088 0.007 -0.02)
-                (-0.028 0.007 -0.02)
-            );
             volumeMode      specific;  //absolute
             fieldData                  //field data
             {
@@ -323,10 +323,14 @@ public:
         // Evaluation
 
             //- Add source term to vector fvMatrix
-            virtual void addSu(fvMatrix<vector>& Eqn) = 0;
+            virtual void addSu(fvMatrix<vector>& Eqn);
 
             //- Add source term to scalar fvMatrix
-            virtual void addSu(fvMatrix<scalar>& Eqn) = 0;
+            virtual void addSu(fvMatrix<scalar>& Eqn);
+
+            //- Set constant value on field
+            virtual void setValue(fvMatrix<scalar>& Eq);
+
 
 
         // I-O

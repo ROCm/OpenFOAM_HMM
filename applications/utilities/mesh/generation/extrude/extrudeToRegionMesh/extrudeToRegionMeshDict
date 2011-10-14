@@ -15,10 +15,10 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Name of region to create
-region  liquidFilm;
+region          liquidFilm;
 
 // FaceZones to extrude
-faceZones (f0);
+faceZones       (f0);
 
 // FaceZone shadow
 //faceZonesShadow (fBaffleShadow);
@@ -30,10 +30,13 @@ faceZones (f0);
 // - extruding boundary faces: repatched to be on mapped patches
 // If false: leave original mesh intact. Extruded mesh will still have
 // mapped patch which might need to be adapted.
-adaptMesh true;
+adaptMesh       true;
+
+// Sample mode for inter-region communication
+sampleMode      nearestPatchFace;
 
 // Extrude 1D-columns of cells?
-oneD false;
+oneD            false;
 
 // If oneD is true. Specify which boundary is wanted between the layers
 //oneDPolyPatchType emptyPolyPatch; //wedgePolyPatch
@@ -42,23 +45,23 @@ oneD false;
 //- Extrusion model to use. The only logical choice is linearNormal?
 
 //- Linear extrusion in normal direction
-extrudeModel        linearNormal;
+extrudeModel    linearNormal;
 
 //- Linear extrusion in specified direction
-//extrudeModel        linearDirection;
+// extrudeModel   linearDirection;
 
 //- Wedge extrusion. If nLayers is 1 assumes symmetry around plane.
-// extrudeModel        wedge;
+// extrudeModel   wedge;
 
 //- Extrudes into sphere around (0 0 0)
-//extrudeModel        linearRadial;
+// extrudeModel   linearRadial;
 
 //- Extrudes into sphere with grading according to pressure (atmospherics)
-//extrudeModel        sigmaRadial;
+// extrudeModel   sigmaRadial;
 
-nLayers             10;
+nLayers         10;
 
-expansionRatio      0.9;
+expansionRatio  0.9;
 
 linearNormalCoeffs
 {

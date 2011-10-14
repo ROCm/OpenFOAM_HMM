@@ -75,7 +75,7 @@ void Foam::explicitSource::setFieldData(const dictionary& dict)
         IOobject io
         (
             fieldName,
-            this->mesh().time().timeName(0),
+            this->mesh().time().timeName(),
             this->mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,

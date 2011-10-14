@@ -6,3 +6,6 @@
 
     const int nOuterCorr =
         pimple.lookupOrDefault<int>("nOuterCorrectors", 1);
+
+    const Switch temperatureCoupled =
+        pimple.lookupOrDefault<Switch>("temperatureCoupled", false);
