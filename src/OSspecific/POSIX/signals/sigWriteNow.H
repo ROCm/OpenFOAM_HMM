@@ -67,6 +67,8 @@ class sigWriteNow
 
 public:
 
+    friend class sigStopAtWriteNow;
+
     // Constructors
 
         //- Construct null
