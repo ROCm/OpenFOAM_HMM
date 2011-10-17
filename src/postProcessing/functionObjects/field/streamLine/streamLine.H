@@ -86,6 +86,9 @@ class streamLine
         //- Field to transport particle with
         word UName_;
 
+        //- Interpolation scheme to use
+        word interpolationScheme_;
+
         //- Whether to use +u or -u
         bool trackForward_;
 

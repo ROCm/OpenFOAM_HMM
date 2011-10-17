@@ -26,17 +26,22 @@ License
 #include "pyrolysisModelCollection.H"
 #include "volFields.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTemplateTypeNameAndDebug
+(
+    Foam::IOPtrList<Foam::regionModels::pyrolysisModels::pyrolysisModel>,
+    0
+);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 namespace regionModels
 {
 namespace pyrolysisModels
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTemplateTypeNameAndDebug(IOPtrList<pyrolysisModel>, 0);
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
