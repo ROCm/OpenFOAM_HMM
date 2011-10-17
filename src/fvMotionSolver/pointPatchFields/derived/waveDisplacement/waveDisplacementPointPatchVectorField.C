@@ -46,7 +46,7 @@ waveDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF),
     amplitude_(vector::zero),
     omega_(0.0),
-    waveLength_(vector::zero)
+    waveNumber_(vector::zero)
 {}
 
 
@@ -61,7 +61,7 @@ waveDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(p, iF, dict),
     amplitude_(dict.lookup("amplitude")),
     omega_(readScalar(dict.lookup("omega"))),
-    waveLength_(dict.lookupOrDefault<vector>("waveLength", vector::zero))
+    waveNumber_(dict.lookupOrDefault<vector>("waveLength", vector::zero))
 {
     if (!dict.found("value"))
     {
@@ -82,7 +82,7 @@ waveDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, p, iF, mapper),
     amplitude_(ptf.amplitude_),
     omega_(ptf.omega_),
-    waveLength_(ptf.waveLength_)
+    waveNumber_(ptf.waveNumber_)
 {}
 
 
@@ -96,7 +96,7 @@ waveDisplacementPointPatchVectorField
     fixedValuePointPatchField<vector>(ptf, iF),
     amplitude_(ptf.amplitude_),
     omega_(ptf.omega_),
-    waveLength_(ptf.waveLength_)
+    waveNumber_(ptf.waveNumber_)
 {}
 
 
@@ -112,7 +112,7 @@ void waveDisplacementPointPatchVectorField::updateCoeffs()
     const polyMesh& mesh = this->dimensionedInternalField().mesh()();
     const Time& t = mesh.time();
 
-    const scalarField points( waveLength_ & patch().localPoints());
+    const scalarField points( waveNumber_ & patch().localPoints());
 
     Field<vector>::operator=
     (
@@ -130,8 +130,8 @@ void waveDisplacementPointPatchVectorField::write(Ostream& os) const
         << amplitude_ << token::END_STATEMENT << nl;
     os.writeKeyword("omega")
         << omega_ << token::END_STATEMENT << nl;
-    os.writeKeyword("waveLength")
-        << waveLength_ << token::END_STATEMENT << nl;
+    os.writeKeyword("waveNumber")
+        << waveNumber_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

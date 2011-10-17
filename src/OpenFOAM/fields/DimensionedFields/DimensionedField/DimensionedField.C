@@ -124,11 +124,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     const DimensionedField<Type, GeoMesh>& df
 )
 :
-#   ifdef ConstructFromTmp
     regIOobject(df),
-#   else
-    regIOobject(df, true),
-#   endif
     Field<Type>(df),
     mesh_(df.mesh_),
     dimensions_(df.dimensions_)
@@ -142,7 +138,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     bool reUse
 )
 :
-    regIOobject(df, true),
+    regIOobject(df, reUse),
     Field<Type>(df, reUse),
     mesh_(df.mesh_),
     dimensions_(df.dimensions_)
@@ -169,7 +165,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     const tmp<DimensionedField<Type, GeoMesh> >& tdf
 )
 :
-    regIOobject(tdf(), true),
+    regIOobject(tdf(), tdf.isTmp()),
     Field<Type>
     (
         const_cast<DimensionedField<Type, GeoMesh>&>(tdf()),
