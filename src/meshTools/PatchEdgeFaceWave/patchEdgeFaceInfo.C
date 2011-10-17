@@ -23,16 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PatchTools.H"
+#include "patchEdgeFaceInfo.H"
 
-#include "PatchToolsCheck.C"
-#include "PatchToolsEdgeOwner.C"
-#include "PatchToolsSearch.C"
-#include "PatchToolsSortEdges.C"
-#include "PatchToolsNormals.C"
-#include "PatchToolsMatch.C"
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::patchEdgeFaceInfo& wDist
+)
+{
+    return os << wDist.origin() << wDist.distSqr();
+}
+
+
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::patchEdgeFaceInfo& wDist
+)
+{
+    return is >> wDist.origin_ >> wDist.distSqr_;
+}
 
 
 // ************************************************************************* //

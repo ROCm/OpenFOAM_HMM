@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2004-2010 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,16 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PatchTools.H"
+#include "PatchEdgeFaceWave.H"
 
-#include "PatchToolsCheck.C"
-#include "PatchToolsEdgeOwner.C"
-#include "PatchToolsSearch.C"
-#include "PatchToolsSortEdges.C"
-#include "PatchToolsNormals.C"
-#include "PatchToolsMatch.C"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+defineTypeNameAndDebug(Foam::PatchEdgeFaceWaveName, 0);
 
 // ************************************************************************* //

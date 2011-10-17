@@ -46,6 +46,20 @@ defineTypeNameAndDebug(Foam::globalMeshData, 0);
 // Geometric matching tolerance. Factor of mesh bounding box.
 const Foam::scalar Foam::globalMeshData::matchTol_ = 1E-8;
 
+namespace Foam
+{
+template<>
+class minEqOp<labelPair>
+{
+public:
+    void operator()(labelPair& x, const labelPair& y) const
+    {
+        x[0] = min(x[0], y[0]);
+        x[1] = min(x[1], y[1]);
+    }
+};
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -1063,6 +1077,128 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
 }
 
 
+void Foam::globalMeshData::calcGlobalEdgeOrientation() const
+{
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalEdgeOrientation() :"
+            << " calculating edge orientation w.r.t. master edge." << endl;
+    }
+
+    const globalIndex& globalPoints = globalPointNumbering();
+
+    // 1. Determine master point
+    labelList masterPoint;
+    {
+        const mapDistribute& map = globalPointSlavesMap();
+
+        masterPoint.setSize(map.constructSize());
+        masterPoint = labelMax;
+
+        for (label pointI = 0; pointI < coupledPatch().nPoints(); pointI++)
+        {
+            masterPoint[pointI] = globalPoints.toGlobal(pointI);
+        }
+        syncData
+        (
+            masterPoint,
+            globalPointSlaves(),
+            globalPointTransformedSlaves(),
+            map,
+            minEqOp<label>()
+        );
+    }
+
+    // Now all points should know who is master by comparing their global
+    // pointID with the masterPointID. We now can use this information
+    // to find the orientation of the master edge.
+
+    {
+        const mapDistribute& map = globalEdgeSlavesMap();
+        const labelListList& slaves = globalEdgeSlaves();
+        const labelListList& transformedSlaves = globalEdgeTransformedSlaves();
+
+        // Distribute orientation of master edge (in masterPoint numbering)
+        labelPairList masterEdgeVerts(map.constructSize());
+        masterEdgeVerts = labelPair(labelMax, labelMax);
+
+        for (label edgeI = 0; edgeI < coupledPatch().nEdges(); edgeI++)
+        {
+            if
+            (
+                (
+                    slaves[edgeI].size()
+                  + transformedSlaves[edgeI].size()
+                )
+              > 0
+            )
+            {
+                // I am master. Fill in my masterPoint equivalent.
+
+                const edge& e = coupledPatch().edges()[edgeI];
+                masterEdgeVerts[edgeI] = labelPair
+                (
+                    masterPoint[e[0]],
+                    masterPoint[e[1]]
+                );
+            }
+        }
+        syncData
+        (
+            masterEdgeVerts,
+            slaves,
+            transformedSlaves,
+            map,
+            minEqOp<labelPair>()
+        );
+
+        // Now check my edges on how they relate to the master's edgeVerts
+        globalEdgeOrientationPtr_.reset
+        (
+            new PackedBoolList(coupledPatch().nEdges())
+        );
+        PackedBoolList& globalEdgeOrientation = globalEdgeOrientationPtr_();
+
+        forAll(coupledPatch().edges(), edgeI)
+        {
+            const edge& e = coupledPatch().edges()[edgeI];
+            const labelPair masterE
+            (
+                masterPoint[e[0]],
+                masterPoint[e[1]]
+            );
+
+            label stat = labelPair::compare
+            (
+                masterE,
+                masterEdgeVerts[edgeI]
+            );
+            if (stat == 0)
+            {
+                FatalErrorIn
+                (
+                    "globalMeshData::calcGlobalEdgeOrientation() const"
+                )   << "problem : my edge:" << e
+                    << " in master points:" << masterE
+                    << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
+                    << exit(FatalError);
+            }
+            else
+            {
+                globalEdgeOrientation[edgeI] = (stat == 1);
+            }
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "globalMeshData::calcGlobalEdgeOrientation() :"
+            << " finished calculating edge orientation."
+            << endl;
+    }
+}
+
+
 // Calculate uncoupled boundary faces (without calculating
 // primitiveMesh::pointFaces())
 void Foam::globalMeshData::calcPointBoundaryFaces
@@ -1660,6 +1796,7 @@ void Foam::globalMeshData::clearOut()
     globalEdgeNumberingPtr_.clear();
     globalEdgeSlavesPtr_.clear();
     globalEdgeTransformedSlavesPtr_.clear();
+    globalEdgeOrientationPtr_.clear();
     globalEdgeSlavesMapPtr_.clear();
 
     // Face
@@ -2092,6 +2229,16 @@ const
         calcGlobalEdgeSlaves();
     }
     return globalEdgeTransformedSlavesPtr_();
+}
+
+
+const Foam::PackedBoolList& Foam::globalMeshData::globalEdgeOrientation() const
+{
+    if (!globalEdgeOrientationPtr_.valid())
+    {
+        calcGlobalEdgeOrientation();
+    }
+    return globalEdgeOrientationPtr_();
 }
 
 
