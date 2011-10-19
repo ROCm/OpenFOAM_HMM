@@ -121,7 +121,8 @@ public:
         //- Return reference to cell-centre difference coefficients
         const surfaceScalarField& deltaCoeffs() const;
 
-        //- Return reference to non-orthogonal cell-centre difference coefficients
+        //- Return reference to non-orthogonal cell-centre difference
+        //  coefficients
         const surfaceScalarField& nonOrthDeltaCoeffs() const;
 
         //- Return reference to non-orthogonality correction vectors
