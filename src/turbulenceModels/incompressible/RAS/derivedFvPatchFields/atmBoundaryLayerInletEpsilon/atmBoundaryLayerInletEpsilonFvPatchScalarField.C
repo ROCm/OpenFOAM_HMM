@@ -86,7 +86,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
     z_(dict.lookup("z")),
     z0_(readScalar(dict.lookup("z0"))),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    zGround_(readScalar(dict.lookup("zGround")))
+    zGround_("zGround", dict, p.size())
 {
     if (mag(z_) < SMALL)
     {
