@@ -41,6 +41,7 @@ SourceFiles
 
 #include "primitiveFacePatch.H"
 #include "PackedBoolList.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +51,7 @@ namespace Foam
 // Forward declaration of classes
 class mapPolyMesh;
 class polyTopoChange;
+class globalMeshData;
 
 /*---------------------------------------------------------------------------*\
                            Class createShellMesh Declaration
@@ -79,6 +81,18 @@ class createShellMesh
 
 
     // Private Member Functions
+
+        static void syncEdges
+        (
+            const globalMeshData&,
+            const labelList&,
+            const labelList&,
+            const PackedBoolList& sameEdgeOrientation,
+            PackedBoolList& isChangedEdge,
+            DynamicList<label>& changedEdges,
+            labelPairList& allEdgeData
+        );
+
 
         //- Disallow default bitwise copy construct
         createShellMesh(const createShellMesh&);
@@ -142,13 +156,22 @@ public:
 
         // Other
 
-            //- Helper: calculate point regions
+            //- Helper: calculate point regions. The point region is the
+            //  same on all faces connected to a point if they can be
+            //  reached through a face-edge-face walk without crossing
+            //  the nonManifoldEdge.
+            //  pointGlobalRegions : non-compact. Guaranteed to be the same
+            //  across processors.
+            //  pointLocalRegions : compact.
+            //  localToGlobalRegion : local to global region.
             static void calcPointRegions
             (
+                const globalMeshData& globalData,
                 const primitiveFacePatch& patch,
                 const PackedBoolList& nonManifoldEdge,
-                faceList& pointRegions,
-                labelList& regionPoints
+                faceList& pointGlobalRegions,
+                faceList& pointLocalRegions,
+                labelList& localToGlobalRegion
             );
 
             //- Play commands into polyTopoChange to create layer mesh.
