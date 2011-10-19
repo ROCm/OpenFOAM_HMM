@@ -150,12 +150,6 @@ void Foam::fvPatch::makeWeights(scalarField& w) const
 }
 
 
-void Foam::fvPatch::makeDeltaCoeffs(scalarField& dc) const
-{
-    dc = 1.0/(nf() & delta());
-}
-
-
 void Foam::fvPatch::initMovePoints()
 {}
 

@@ -59,17 +59,17 @@ class surfaceInterpolation
 
         // Demand-driven data
 
-            //- Central-differencing weighting factors
-            mutable surfaceScalarField* weightingFactors_;
+            //- Linear difference weighting factors
+            mutable surfaceScalarField* weights_;
 
-            //- Face-gradient difference factors
-            mutable surfaceScalarField* differenceFactors_;
+            //- Cell-centre difference coefficients
+            mutable surfaceScalarField* deltaCoeffs_;
 
-            //- Is mesh orthogonal
-            mutable bool orthogonal_;
+            //- Non-orthogonal cell-centre difference coefficients
+            mutable surfaceScalarField* nonOrthDeltaCoeffs_;
 
             //- Non-orthogonality correction vectors
-            mutable surfaceVectorField* correctionVectors_;
+            mutable surfaceVectorField* nonOrthCorrectionVectors_;
 
 
     // Private Member Functions
@@ -80,8 +80,11 @@ class surfaceInterpolation
         //- Construct face-gradient difference factors
         void makeDeltaCoeffs() const;
 
+        //- Construct face-gradient difference factors
+        void makeNonOrthDeltaCoeffs() const;
+
         //- Construct non-orthogonality correction vectors
-        void makeCorrectionVectors() const;
+        void makeNonOrthCorrectionVectors() const;
 
 
 protected:
@@ -112,17 +115,17 @@ public:
 
     // Member functions
 
-        //- Return reference to weighting factors array
+        //- Return reference to linear difference weighting factors
         const surfaceScalarField& weights() const;
 
-        //- Return reference to difference factors array
+        //- Return reference to cell-centre difference coefficients
         const surfaceScalarField& deltaCoeffs() const;
 
-        //- Return whether mesh is orthogonal or not
-        bool orthogonal() const;
+        //- Return reference to non-orthogonal cell-centre difference coefficients
+        const surfaceScalarField& nonOrthDeltaCoeffs() const;
 
-        //- Return reference to non-orthogonality correction vectors array
-        const surfaceVectorField& correctionVectors() const;
+        //- Return reference to non-orthogonality correction vectors
+        const surfaceVectorField& nonOrthCorrectionVectors() const;
 
         //- Do what is neccessary if the mesh has moved
         bool movePoints();

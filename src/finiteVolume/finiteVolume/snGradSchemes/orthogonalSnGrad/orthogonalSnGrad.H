@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::uncorrectedSnGrad
+    Foam::fv::orthogonalSnGrad
 
 Description
     Simple central-difference snGrad scheme without non-orthogonal correction.
 
 SourceFiles
-    uncorrectedSnGrad.C
+    orthogonalSnGrad.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uncorrectedSnGrad_H
-#define uncorrectedSnGrad_H
+#ifndef orthogonalSnGrad_H
+#define orthogonalSnGrad_H
 
 #include "snGradScheme.H"
 
@@ -48,18 +48,18 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class uncorrectedSnGrad Declaration
+                 Class orthogonalSnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class uncorrectedSnGrad
+class orthogonalSnGrad
 :
     public snGradScheme<Type>
 {
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const uncorrectedSnGrad&);
+        void operator=(const orthogonalSnGrad&);
 
 
 public:
@@ -71,21 +71,21 @@ public:
     // Constructors
 
         //- Construct from mesh
-        uncorrectedSnGrad(const fvMesh& mesh)
+        orthogonalSnGrad(const fvMesh& mesh)
         :
             snGradScheme<Type>(mesh)
         {}
 
 
         //- Construct from mesh and data stream
-        uncorrectedSnGrad(const fvMesh& mesh, Istream&)
+        orthogonalSnGrad(const fvMesh& mesh, Istream&)
         :
             snGradScheme<Type>(mesh)
         {}
 
 
     //- Destructor
-    virtual ~uncorrectedSnGrad();
+    virtual ~orthogonalSnGrad();
 
 
     // Member Functions
@@ -96,7 +96,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const
         {
-            return this->mesh().nonOrthDeltaCoeffs();
+            return this->mesh().deltaCoeffs();
         }
 
         //- Return true if this scheme uses an explicit correction
@@ -105,7 +105,7 @@ public:
             return false;
         }
 
-        //- Return the explicit correction to the uncorrectedSnGrad
+        //- Return the explicit correction to the orthogonalSnGrad
         //  for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const;
@@ -123,7 +123,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "uncorrectedSnGrad.C"
+#   include "orthogonalSnGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

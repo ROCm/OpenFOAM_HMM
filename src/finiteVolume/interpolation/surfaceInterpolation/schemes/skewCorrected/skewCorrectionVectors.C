@@ -82,21 +82,17 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
     const surfaceVectorField& Sf = mesh_.Sf();
 
     const labelUList& owner = mesh_.owner();
+    const labelUList& neighbour = mesh_.neighbour();
 
-    // Build the d-vectors
-    surfaceVectorField d(Sf/(mesh_.magSf()*mesh_.deltaCoeffs()));
-
-    if (!mesh_.orthogonal())
+    forAll(owner, facei)
     {
-        d -= mesh_.correctionVectors()/mesh_.deltaCoeffs();
-    }
+        label own = owner[facei];
+        label nei = neighbour[facei];
 
-    forAll(owner, faceI)
-    {
-        vector Cpf = Cf[faceI] - C[owner[faceI]];
+        vector d = C[nei] - C[own];
+        vector Cpf = Cf[facei] - C[own];
 
-        SkewCorrVecs[faceI] =
-            Cpf - ((Sf[faceI] & Cpf)/(Sf[faceI] & d[faceI]))*d[faceI];
+        SkewCorrVecs[facei] = Cpf - ((Sf[facei] & Cpf)/(Sf[facei] & d))*d;
     }
 
 
@@ -115,7 +111,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
             const labelUList& faceCells = p.faceCells();
             const vectorField& patchFaceCentres = Cf.boundaryField()[patchI];
             const vectorField& patchSf = Sf.boundaryField()[patchI];
-            const vectorField& patchD = d.boundaryField()[patchI];
+            const vectorField patchD = p.delta();
 
             forAll(p, patchFaceI)
             {
@@ -136,7 +132,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
 
     if (Sf.internalField().size())
     {
-        skewCoeff = max(mag(SkewCorrVecs)/mag(d)).value();
+        skewCoeff = max(mag(SkewCorrVecs)*mesh_.deltaCoeffs()).value();
     }
 
     if (debug)
@@ -182,7 +178,7 @@ const Foam::surfaceVectorField& Foam::skewCorrectionVectors::operator()() const
     if (!skew())
     {
         FatalErrorIn("skewCorrectionVectors::operator()()")
-            << "Cannot return correctionVectors; mesh is not skewed"
+            << "Cannot return skewCorrectionVectors; mesh is not skewed"
             << abort(FatalError);
     }
 

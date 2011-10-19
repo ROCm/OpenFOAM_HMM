@@ -121,24 +121,12 @@ Foam::fv::fourthGrad<Type>::calcGrad
 
             const scalarField& lambdap = lambda.boundaryField()[patchi];
 
+            const fvPatch& p = fGrad.boundaryField()[patchi].patch();
+
+            const labelUList& faceCells = p.faceCells();
+
             // Build the d-vectors
-            vectorField pd
-            (
-                mesh.Sf().boundaryField()[patchi]
-              / (
-                    mesh.magSf().boundaryField()[patchi]
-                  * mesh.deltaCoeffs().boundaryField()[patchi]
-                )
-            );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                     /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
-
-            const labelUList& faceCells =
-                fGrad.boundaryField()[patchi].patch().faceCells();
+            vectorField pd = p.delta();
 
             const Field<GradType> neighbourSecondfGrad
             (
