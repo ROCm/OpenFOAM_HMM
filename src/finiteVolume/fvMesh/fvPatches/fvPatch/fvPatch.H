@@ -86,9 +86,6 @@ protected:
         //- Make patch weighting factors
         virtual void makeWeights(scalarField&) const;
 
-        //- Make patch face - neighbour cell distances
-        virtual void makeDeltaCoeffs(scalarField&) const;
-
         //- Initialise the patches for moving points
         virtual void initMovePoints();
 

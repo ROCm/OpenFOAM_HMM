@@ -211,7 +211,7 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makeFvLaplacianTypeScheme(SS, Type, GType)                             \
+#define makeFvLaplacianTypeScheme(SS, GType, Type)                             \
                                                                                \
     typedef SS<Type, GType> SS##Type##GType;                                   \
     defineNamedTemplateTypeNameAndDebug(SS##Type##GType, 0);                   \
@@ -224,13 +224,20 @@ public:
 #define makeFvLaplacianScheme(SS)                                              \
                                                                                \
 makeFvLaplacianTypeScheme(SS, scalar, scalar)                                  \
-makeFvLaplacianTypeScheme(SS, scalar, symmTensor)                              \
-makeFvLaplacianTypeScheme(SS, scalar, tensor)                                  \
-makeFvLaplacianTypeScheme(SS, vector, scalar)                                  \
-makeFvLaplacianTypeScheme(SS, sphericalTensor, scalar)                         \
 makeFvLaplacianTypeScheme(SS, symmTensor, scalar)                              \
 makeFvLaplacianTypeScheme(SS, tensor, scalar)                                  \
-
+makeFvLaplacianTypeScheme(SS, scalar, vector)                                  \
+makeFvLaplacianTypeScheme(SS, symmTensor, vector)                              \
+makeFvLaplacianTypeScheme(SS, tensor, vector)                                  \
+makeFvLaplacianTypeScheme(SS, scalar, sphericalTensor)                         \
+makeFvLaplacianTypeScheme(SS, symmTensor, sphericalTensor)                     \
+makeFvLaplacianTypeScheme(SS, tensor, sphericalTensor)                         \
+makeFvLaplacianTypeScheme(SS, scalar, symmTensor)                              \
+makeFvLaplacianTypeScheme(SS, symmTensor, symmTensor)                          \
+makeFvLaplacianTypeScheme(SS, tensor, symmTensor)                              \
+makeFvLaplacianTypeScheme(SS, scalar, tensor)                                  \
+makeFvLaplacianTypeScheme(SS, symmTensor, tensor)                              \
+makeFvLaplacianTypeScheme(SS, tensor, tensor)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

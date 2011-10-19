@@ -190,7 +190,7 @@ relaxationFactors
         h               0.95;
         k               0.9;
         epsilon         0.9;
-    }w
+    }
 }
 
 relaxationFactors0

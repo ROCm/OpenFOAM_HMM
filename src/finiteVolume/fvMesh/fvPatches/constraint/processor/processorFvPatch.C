@@ -65,19 +65,6 @@ void processorFvPatch::makeWeights(scalarField& w) const
 }
 
 
-void processorFvPatch::makeDeltaCoeffs(scalarField& dc) const
-{
-    if (Pstream::parRun())
-    {
-        dc = (1.0 - weights())/(nf() & fvPatch::delta());
-    }
-    else
-    {
-        dc = 1.0/(nf() & fvPatch::delta());
-    }
-}
-
-
 tmp<vectorField> processorFvPatch::delta() const
 {
     if (Pstream::parRun())

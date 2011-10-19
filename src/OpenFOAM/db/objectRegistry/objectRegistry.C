@@ -164,10 +164,13 @@ Foam::label Foam::objectRegistry::getEvent() const
 
     if (event_ == labelMax)
     {
-        WarningIn("objectRegistry::getEvent() const")
-            << "Event counter has overflowed. "
-            << "Resetting counter on all dependent objects." << nl
-            << "This might cause extra evaluations." << endl;
+        if (objectRegistry::debug)
+        {
+            WarningIn("objectRegistry::getEvent() const")
+                << "Event counter has overflowed. "
+                << "Resetting counter on all dependent objects." << nl
+                << "This might cause extra evaluations." << endl;
+        }
 
         // Reset event counter
         curEvent = 1;
