@@ -319,7 +319,7 @@ FoamFile
 //    source setToFaceZone;
 //    sourceInfo
 //    {
-//        set f0;           // name of faceSet
+//        faceSet f0;       // name of faceSet
 //    }
 //
 //    // Select based on faceSet, using cellSet to determine orientation
