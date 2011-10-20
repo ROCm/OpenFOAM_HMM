@@ -66,9 +66,6 @@ protected:
         //- Make patch weighting factors
         virtual void makeWeights(scalarField&) const = 0;
 
-        //- Make patch face - neighbour cell distances
-        virtual void makeDeltaCoeffs(scalarField&) const = 0;
-
 
 public:
 

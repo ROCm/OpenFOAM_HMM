@@ -57,25 +57,6 @@ void Foam::cyclicFvPatch::makeWeights(scalarField& w) const
 }
 
 
-// Make patch face - neighbour cell distances
-void Foam::cyclicFvPatch::makeDeltaCoeffs(scalarField& dc) const
-{
-    //const cyclicPolyPatch& nbrPatch = cyclicPolyPatch_.neighbPatch();
-    const cyclicFvPatch& nbrPatch = neighbFvPatch();
-
-    const scalarField deltas(nf() & fvPatch::delta());
-    const scalarField nbrDeltas(nbrPatch.nf() & nbrPatch.fvPatch::delta());
-
-    forAll(deltas, facei)
-    {
-        scalar di = deltas[facei];
-        scalar dni = nbrDeltas[facei];
-
-        dc[facei] = 1.0/(di + dni);
-    }
-}
-
-
 // Return delta (P to N) vectors across coupled patch
 Foam::tmp<Foam::vectorField> Foam::cyclicFvPatch::delta() const
 {

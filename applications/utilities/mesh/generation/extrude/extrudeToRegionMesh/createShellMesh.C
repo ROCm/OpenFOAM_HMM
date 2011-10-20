@@ -31,130 +31,381 @@ License
 #include "polyAddFace.H"
 #include "polyModifyFace.H"
 #include "polyAddCell.H"
-#include "patchPointEdgeCirculator.H"
+#include "labelPair.H"
+#include "indirectPrimitivePatch.H"
+#include "mapDistribute.H"
+#include "globalMeshData.H"
+#include "PatchTools.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::createShellMesh, 0);
 
+namespace Foam
+{
+template<>
+class minEqOp<labelPair>
+{
+public:
+    void operator()(labelPair& x, const labelPair& y) const
+    {
+        x[0] = min(x[0], y[0]);
+        x[1] = min(x[1], y[1]);
+    }
+};
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::createShellMesh::calcPointRegions
+// Synchronise edges
+void Foam::createShellMesh::syncEdges
 (
-    const primitiveFacePatch& patch,
-    const PackedBoolList& nonManifoldEdge,
-    faceList& pointRegions,
-    labelList& regionPoints
+    const globalMeshData& globalData,
+
+    const labelList& patchEdges,
+    const labelList& coupledEdges,
+    const PackedBoolList& sameEdgeOrientation,
+
+    PackedBoolList& isChangedEdge,
+    DynamicList<label>& changedEdges,
+    labelPairList& allEdgeData
 )
 {
-    pointRegions.setSize(patch.size());
-    forAll(pointRegions, faceI)
+    const mapDistribute& map = globalData.globalEdgeSlavesMap();
+    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
+
+    // Convert patch-edge data into cpp-edge data
+    labelPairList cppEdgeData
+    (
+        map.constructSize(),
+        labelPair(labelMax, labelMax)
+    );
+
+    forAll(patchEdges, i)
     {
-        const face& f = patch.localFaces()[faceI];
-        pointRegions[faceI].setSize(f.size(), -1);
+        label patchEdgeI = patchEdges[i];
+        label coupledEdgeI = coupledEdges[i];
+
+        if (isChangedEdge[patchEdgeI])
+        {
+            const labelPair& data = allEdgeData[patchEdgeI];
+
+            // Patch-edge data needs to be converted into coupled-edge data
+            // (optionally flipped) and consistent in orientation with
+            // other coupled edge (optionally flipped)
+            if (sameEdgeOrientation[i] == cppOrientation[coupledEdgeI])
+            {
+                cppEdgeData[coupledEdgeI] = data;
+            }
+            else
+            {
+                cppEdgeData[coupledEdgeI] = labelPair(data[1], data[0]);
+            }
+        }
     }
 
-    label nRegions = 0;
+    // Synchronise
+    globalData.syncData
+    (
+        cppEdgeData,
+        globalData.globalEdgeSlaves(),
+        globalData.globalEdgeTransformedSlaves(),
+        map,
+        minEqOp<labelPair>()
+    );
 
-    forAll(pointRegions, faceI)
+    // Back from cpp-edge to patch-edge data
+    forAll(patchEdges, i)
+    {
+        label patchEdgeI = patchEdges[i];
+        label coupledEdgeI = coupledEdges[i];
+
+        if (cppEdgeData[coupledEdgeI] != labelPair(labelMax, labelMax))
+        {
+            const labelPair& data = cppEdgeData[coupledEdgeI];
+
+            if (sameEdgeOrientation[i] == cppOrientation[coupledEdgeI])
+            {
+                allEdgeData[patchEdgeI] = data;
+            }
+            else
+            {
+                allEdgeData[patchEdgeI] = labelPair(data[1], data[0]);
+            }
+
+            if (!isChangedEdge[patchEdgeI])
+            {
+                changedEdges.append(patchEdgeI);
+                isChangedEdge[patchEdgeI] = true;
+            }
+        }
+    }
+}
+
+
+void Foam::createShellMesh::calcPointRegions
+(
+    const globalMeshData& globalData,
+    const primitiveFacePatch& patch,
+    const PackedBoolList& nonManifoldEdge,
+
+    faceList& pointGlobalRegions,
+    faceList& pointLocalRegions,
+    labelList& localToGlobalRegion
+)
+{
+    const indirectPrimitivePatch& cpp = globalData.coupledPatch();
+
+    // Calculate correspondence between patch and globalData.coupledPatch.
+    labelList patchEdges;
+    labelList coupledEdges;
+    PackedBoolList sameEdgeOrientation;
+    PatchTools::matchEdges
+    (
+        cpp,
+        patch,
+
+        coupledEdges,
+        patchEdges,
+        sameEdgeOrientation
+    );
+
+
+    // Initial unique regions
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    // These get merged later on across connected edges.
+
+    // 1. Count
+    label nMaxRegions = 0;
+    forAll(patch.localFaces(), faceI)
     {
         const face& f = patch.localFaces()[faceI];
+        nMaxRegions += f.size();
+    }
 
-        forAll(f, fp)
+    const globalIndex globalRegions(nMaxRegions);
+
+    // 2. Assign unique regions
+    label nRegions = 0;
+
+    pointGlobalRegions.setSize(patch.size());
+    forAll(pointGlobalRegions, faceI)
+    {
+        const face& f = patch.localFaces()[faceI];
+        labelList& pRegions = pointGlobalRegions[faceI];
+        pRegions.setSize(f.size());
+        forAll(pRegions, fp)
         {
-            if (pointRegions[faceI][fp] == -1)
+            pRegions[fp] = globalRegions.toGlobal(nRegions++);
+        }
+    }
+
+
+    DynamicList<label> changedEdges(patch.nEdges());
+    labelPairList allEdgeData(patch.nEdges(), labelPair(labelMax, labelMax));
+    PackedBoolList isChangedEdge(patch.nEdges());
+
+
+    // Fill initial seed
+    // ~~~~~~~~~~~~~~~~~
+
+    forAll(patch.edgeFaces(), edgeI)
+    {
+        if (!nonManifoldEdge[edgeI])
+        {
+            // Take over value from one face only.
+            const edge& e = patch.edges()[edgeI];
+            label faceI = patch.edgeFaces()[edgeI][0];
+            const face& f = patch.localFaces()[faceI];
+
+            label fp0 = findIndex(f, e[0]);
+            label fp1 = findIndex(f, e[1]);
+            allEdgeData[edgeI] = labelPair
+            (
+                pointGlobalRegions[faceI][fp0],
+                pointGlobalRegions[faceI][fp1]
+            );
+            if (!isChangedEdge[edgeI])
             {
-                // Found unassigned point. Distribute current region.
-                label pointI = f[fp];
-                label edgeI = patch.faceEdges()[faceI][fp];
+                changedEdges.append(edgeI);
+                isChangedEdge[edgeI] = true;
+            }
+        }
+    }
 
-                patchPointEdgeCirculator circ
-                (
-                    patch,
-                    nonManifoldEdge,
-                    edgeI,
-                    findIndex(patch.edgeFaces()[edgeI], faceI),
-                    pointI
-                );
 
-                for
-                (
-                    patchPointEdgeCirculator iter = circ.begin();
-                    iter != circ.end();
-                    ++iter
-                )
+    syncEdges
+    (
+        globalData,
+
+        patchEdges,
+        coupledEdges,
+        sameEdgeOrientation,
+
+        isChangedEdge,
+        changedEdges,
+        allEdgeData
+    );
+
+
+    // Edge-Face-Edge walk across patch
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Across edge minimum regions win
+
+    while (true)
+    {
+        // From edge to face
+        // ~~~~~~~~~~~~~~~~~
+
+        DynamicList<label> changedFaces(patch.size());
+        PackedBoolList isChangedFace(patch.size());
+
+        forAll(changedEdges, changedI)
+        {
+            label edgeI = changedEdges[changedI];
+            const labelPair& edgeData = allEdgeData[edgeI];
+
+            const edge& e = patch.edges()[edgeI];
+            const labelList& eFaces = patch.edgeFaces()[edgeI];
+
+            forAll(eFaces, i)
+            {
+                label faceI = eFaces[i];
+                const face& f = patch.localFaces()[faceI];
+
+                // Combine edgeData with face data
+                label fp0 = findIndex(f, e[0]);
+                if (pointGlobalRegions[faceI][fp0] > edgeData[0])
                 {
-                    label face2 = iter.faceID();
-
-                    if (face2 != -1)
+                    pointGlobalRegions[faceI][fp0] = edgeData[0];
+                    if (!isChangedFace[faceI])
                     {
-                        const face& f2 = patch.localFaces()[face2];
-                        label fp2 = findIndex(f2, pointI);
-                        label& region = pointRegions[face2][fp2];
-                        if (region != -1)
-                        {
-                            FatalErrorIn
-                            (
-                                "createShellMesh::calcPointRegions(..)"
-                            )   << "On point " << pointI
-                                << " at:" << patch.localPoints()[pointI]
-                                << " found region:" << region
-                                << abort(FatalError);
-                        }
-                        region = nRegions;
+                        isChangedFace[faceI] = true;
+                        changedFaces.append(faceI);
                     }
                 }
 
-                nRegions++;
+                label fp1 = findIndex(f, e[1]);
+                if (pointGlobalRegions[faceI][fp1] > edgeData[1])
+                {
+                    pointGlobalRegions[faceI][fp1] = edgeData[1];
+                    if (!isChangedFace[faceI])
+                    {
+                        isChangedFace[faceI] = true;
+                        changedFaces.append(faceI);
+                    }
+                }
             }
+        }
+
+
+        label nChangedFaces = returnReduce(changedFaces.size(), sumOp<label>());
+        if (nChangedFaces == 0)
+        {
+            break;
+        }
+
+
+        // From face to edge
+        // ~~~~~~~~~~~~~~~~~
+
+        isChangedEdge = false;
+        changedEdges.clear();
+
+        forAll(changedFaces, i)
+        {
+            label faceI = changedFaces[i];
+            const face& f = patch.localFaces()[faceI];
+            const labelList& fEdges = patch.faceEdges()[faceI];
+
+            forAll(fEdges, fp)
+            {
+                label edgeI = fEdges[fp];
+
+                if (!nonManifoldEdge[edgeI])
+                {
+                    const edge& e = patch.edges()[edgeI];
+                    label fp0 = findIndex(f, e[0]);
+                    label region0 = pointGlobalRegions[faceI][fp0];
+                    label fp1 = findIndex(f, e[1]);
+                    label region1 = pointGlobalRegions[faceI][fp1];
+
+                    if
+                    (
+                        (allEdgeData[edgeI][0] > region0)
+                     || (allEdgeData[edgeI][1] > region1)
+                    )
+                    {
+                        allEdgeData[edgeI] = labelPair(region0, region1);
+                        if (!isChangedEdge[edgeI])
+                        {
+                            changedEdges.append(edgeI);
+                            isChangedEdge[edgeI] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        syncEdges
+        (
+            globalData,
+
+            patchEdges,
+            coupledEdges,
+            sameEdgeOrientation,
+
+            isChangedEdge,
+            changedEdges,
+            allEdgeData
+        );
+
+
+        label nChangedEdges = returnReduce(changedEdges.size(), sumOp<label>());
+        if (nChangedEdges == 0)
+        {
+            break;
         }
     }
 
 
-    // From region back to originating point (many to one, a point might
-    // have multiple regions though)
-    regionPoints.setSize(nRegions);
-    forAll(pointRegions, faceI)
+
+    // Assign local regions
+    // ~~~~~~~~~~~~~~~~~~~~
+
+    // Calculate addressing from global region back to local region
+    pointLocalRegions.setSize(patch.size());
+    Map<label> globalToLocalRegion(globalRegions.localSize()/4);
+    DynamicList<label> dynLocalToGlobalRegion(globalToLocalRegion.size());
+    forAll(patch.localFaces(), faceI)
     {
         const face& f = patch.localFaces()[faceI];
-
+        face& pRegions = pointLocalRegions[faceI];
+        pRegions.setSize(f.size());
         forAll(f, fp)
         {
-            regionPoints[pointRegions[faceI][fp]] = f[fp];
-        }
-    }
+            label globalRegionI = pointGlobalRegions[faceI][fp];
 
+            Map<label>::iterator fnd = globalToLocalRegion.find(globalRegionI);
 
-    if (debug)
-    {
-        const labelListList& pointFaces = patch.pointFaces();
-        forAll(pointFaces, pointI)
-        {
-            label region = -1;
-            const labelList& pFaces = pointFaces[pointI];
-            forAll(pFaces, i)
+            if (fnd != globalToLocalRegion.end())
             {
-                label faceI = pFaces[i];
-                const face& f = patch.localFaces()[faceI];
-                label fp = findIndex(f, pointI);
-
-                if (region == -1)
-                {
-                    region = pointRegions[faceI][fp];
-                }
-                else if (region != pointRegions[faceI][fp])
-                {
-                    Pout<< "Non-manifold point:" << pointI
-                        << " at " << patch.localPoints()[pointI]
-                        << " region:" << region
-                        << " otherRegion:" << pointRegions[faceI][fp]
-                        << endl;
-
-                }
+                // Already encountered this global region. Assign same local one
+                pRegions[fp] = fnd();
+            }
+            else
+            {
+                // Region not yet seen. Create new one
+                label localRegionI = globalToLocalRegion.size();
+                pRegions[fp] = localRegionI;
+                globalToLocalRegion.insert(globalRegionI, localRegionI);
+                dynLocalToGlobalRegion.append(globalRegionI);
             }
         }
     }
+    localToGlobalRegion.transfer(dynLocalToGlobalRegion);
 }
 
 

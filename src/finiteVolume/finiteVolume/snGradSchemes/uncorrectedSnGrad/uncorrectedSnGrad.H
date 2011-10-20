@@ -96,7 +96,7 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&
         ) const
         {
-            return this->mesh().deltaCoeffs();
+            return this->mesh().nonOrthDeltaCoeffs();
         }
 
         //- Return true if this scheme uses an explicit correction

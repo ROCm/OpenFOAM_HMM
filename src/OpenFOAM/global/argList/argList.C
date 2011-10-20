@@ -726,7 +726,7 @@ Foam::argList::argList
     }
 
 
-    wordList slaveProcs;
+    stringList slaveProcs;
 
     // collect slave machine/pid
     if (parRunControl_.parRun())
@@ -734,7 +734,7 @@ Foam::argList::argList
         if (Pstream::master())
         {
             slaveProcs.setSize(Pstream::nProcs() - 1);
-            word  slaveMachine;
+            string  slaveMachine;
             label slavePid;
 
             label procI = 0;

@@ -66,6 +66,7 @@ Description
 #include "Switch.H"
 #include "bound.H"
 #include "dynamicRefineFvMesh.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,6 +84,8 @@ int main(int argc, char *argv[])
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
 
+    pimpleControl pimple(mesh);
+
     scalar StCoNum = 0.0;
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -94,7 +97,6 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "readPISOControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -163,25 +165,34 @@ int main(int argc, char *argv[])
 
 
         #include "rhoEqn.H"
-        #include "UEqn.H"
 
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (pimple.start(); pimple.loop(); pimple++)
         {
-            #include "bEqn.H"
-            #include "ftEqn.H"
-            #include "huEqn.H"
-            #include "hEqn.H"
+            #include "UEqn.H"
 
-            if (!ign.ignited())
+
+            // --- PISO loop
+            for (int corr=1; corr<=pimple.nCorr(); corr++)
             {
-                hu == h;
+                #include "bEqn.H"
+                #include "ftEqn.H"
+                #include "huEqn.H"
+                #include "hEqn.H"
+
+                if (!ign.ignited())
+                {
+                    hu == h;
+                }
+
+                #include "pEqn.H"
             }
 
-            #include "pEqn.H"
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
         }
-
-        turbulence->correct();
 
         runTime.write();
 

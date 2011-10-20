@@ -90,7 +90,7 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
         const scalar kappa_;
 
         //- Minimum corrdinate value in z direction
-        const scalar zGround_;
+        const scalarField zGround_;
 
 
 public:

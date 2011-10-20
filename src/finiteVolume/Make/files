@@ -334,6 +334,7 @@ $(snGradSchemes)/snGradScheme/snGradSchemes.C
 $(snGradSchemes)/correctedSnGrad/correctedSnGrads.C
 $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
+$(snGradSchemes)/orthogonalSnGrad/orthogonalSnGrads.C
 /*
 $(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
 $(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
@@ -388,6 +389,7 @@ $(basicSource)/basicSource/IObasicSourceList.C
 $(basicSource)/actuationDiskSource/actuationDiskSource.C
 $(basicSource)/radialActuationDiskSource/radialActuationDiskSource.C
 $(basicSource)/explicitSource/explicitSource.C
+$(basicSource)/explicitSetValue/explicitSetValue.C
 
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

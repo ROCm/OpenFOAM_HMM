@@ -38,7 +38,7 @@ SourceFiles
 
 #include "particle.H"
 #include "autoPtr.H"
-#include "interpolationCellPoint.H"
+#include "interpolation.H"
 #include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,8 +68,8 @@ public:
     public:
 
 
-        const PtrList<interpolationCellPoint<scalar> >& vsInterp_;
-        const PtrList<interpolationCellPoint<vector> >& vvInterp_;
+        const PtrList<interpolation<scalar> >& vsInterp_;
+        const PtrList<interpolation<vector> >& vvInterp_;
         const label UIndex_;
         const bool trackForward_;
         const label nSubCycle_;
@@ -84,8 +84,8 @@ public:
             trackingData
             (
                 Cloud<streamLineParticle>& cloud,
-                const PtrList<interpolationCellPoint<scalar> >& vsInterp,
-                const PtrList<interpolationCellPoint<vector> >& vvInterp,
+                const PtrList<interpolation<scalar> >& vsInterp,
+                const PtrList<interpolation<vector> >& vvInterp,
                 const label UIndex,
                 const bool trackForward,
                 const label nSubCycle,

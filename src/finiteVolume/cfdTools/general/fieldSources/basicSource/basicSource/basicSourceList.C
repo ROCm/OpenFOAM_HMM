@@ -90,6 +90,19 @@ void Foam::basicSourceList::addSu(fvMatrix<vector>& Eqn)
 }
 
 
+void Foam::basicSourceList::setValue(fvMatrix<scalar>& Eqn)
+{
+
+    forAll(*this, i)
+    {
+        if (this->operator[](i).isActive())
+        {
+            this->operator[](i).setValue(Eqn);
+        }
+    }
+}
+
+
 bool Foam::basicSourceList::read(const dictionary& dict)
 {
     bool allOk = true;

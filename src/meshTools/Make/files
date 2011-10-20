@@ -30,8 +30,13 @@ meshSearch/meshSearch.C
 
 meshTools/meshTools.C
 
-PointEdgeWave/PointEdgeWaveName.C
-PointEdgeWave/pointEdgePoint.C
+pWave = PointEdgeWave
+$(pWave)/PointEdgeWaveName.C
+$(pWave)/pointEdgePoint.C
+
+patchWave = PatchEdgeFaceWave
+$(patchWave)/PatchEdgeFaceWaveName.C
+$(patchWave)/patchEdgeFaceInfo.C
 
 regionSplit/regionSplit.C
 

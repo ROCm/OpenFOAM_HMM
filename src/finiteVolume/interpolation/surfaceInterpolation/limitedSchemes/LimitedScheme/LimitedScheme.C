@@ -122,20 +122,7 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
             );
 
             // Build the d-vectors
-            vectorField pd
-            (
-                mesh.Sf().boundaryField()[patchi]
-              / (
-                    mesh.magSf().boundaryField()[patchi]
-                  * mesh.deltaCoeffs().boundaryField()[patchi]
-                )
-            );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                    /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
+            vectorField pd = CDweights.boundaryField()[patchi].patch().delta();
 
             forAll(pLim, face)
             {

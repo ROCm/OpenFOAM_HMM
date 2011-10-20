@@ -203,10 +203,6 @@ case ThirdParty:
     switch ("$WM_COMPILER")
     case Gcc:
     case Gcc++0x:
-        set gcc_version=gcc-4.4.3
-        set gmp_version=gmp-5.0.1
-        set mpfr_version=mpfr-2.4.2
-        breaksw
     case Gcc46:
     case Gcc46++0x:
         set gcc_version=gcc-4.6.1
@@ -487,8 +483,30 @@ case QSMPI:
     breaksw
 
 case SGIMPI:
-    setenv FOAM_MPI ${MPI_ROOT##*/}
+    if ( ! $?MPI_ROOT) setenv MPI_ROOT /dummy
+
+    if ( ! -d "$MPI_ROOT" ) then
+        echo "Warning in $WM_PROJECT_DIR/etc/config/settings.csh:"
+        echo "    MPI_ROOT not a valid mpt installation directory."
+        echo "    Please set MPI_ROOT to the mpt installation directory."
+        echo "    (usually done by loading the mpt module)"
+        echo "    MPI_ROOT currently set to '$MPI_ROOT'"
+    endif
+
+    if ( "${MPI_ROOT:h}/" == $MPI_ROOT ) then
+        setenv MPI_ROOT ${MPI_ROOT:h}
+    endif
+
+    setenv FOAM_MPI ${MPI_ROOT:t}
     setenv MPI_ARCH_PATH $MPI_ROOT
+
+
+    if ($?FOAM_VERBOSE && $?prompt) then
+        echo "Using SGI MPT:"
+        echo "    MPI_ROOT : $MPI_ROOT"
+        echo "    FOAM_MPI : $FOAM_MPI"
+    endif
+
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib

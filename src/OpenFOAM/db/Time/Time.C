@@ -81,10 +81,17 @@ void Foam::Time::adjustDeltaT()
 {
     if (writeControl_ == wcAdjustableRunTime)
     {
+        scalar interval = writeInterval_;
+        if (secondaryWriteControl_ == wcAdjustableRunTime)
+        {
+            interval = min(interval, secondaryWriteInterval_);
+        }
+
+
         scalar timeToNextWrite = max
         (
             0.0,
-            (outputTimeIndex_ + 1)*writeInterval_ - (value() - startTime_)
+            (outputTimeIndex_ + 1)*interval - (value() - startTime_)
         );
 
         scalar nSteps = timeToNextWrite/deltaT_ - SMALL;
@@ -252,8 +259,13 @@ Foam::Time::Time
     stopAt_(saEndTime),
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
+    secondaryWriteControl_(wcTimeStep),
+    secondaryWriteInterval_(labelMax),
     purgeWrite_(0),
+    writeOnce_(false),
     subCycling_(false),
+    sigWriteNow_(true, *this),
+    sigStopAtWriteNow_(true, *this),
 
     writeFormat_(IOstream::ASCII),
     writeVersion_(IOstream::currentVersion),
@@ -339,8 +351,13 @@ Foam::Time::Time
     stopAt_(saEndTime),
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
+    secondaryWriteControl_(wcTimeStep),
+    secondaryWriteInterval_(labelMax),
     purgeWrite_(0),
+    writeOnce_(false),
     subCycling_(false),
+    sigWriteNow_(true, *this),
+    sigStopAtWriteNow_(true, *this),
 
     writeFormat_(IOstream::ASCII),
     writeVersion_(IOstream::currentVersion),
@@ -429,8 +446,13 @@ Foam::Time::Time
     stopAt_(saEndTime),
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
+    secondaryWriteControl_(wcTimeStep),
+    secondaryWriteInterval_(labelMax),
     purgeWrite_(0),
+    writeOnce_(false),
     subCycling_(false),
+    sigWriteNow_(true, *this),
+    sigStopAtWriteNow_(true, *this),
 
     writeFormat_(IOstream::ASCII),
     writeVersion_(IOstream::currentVersion),
@@ -521,7 +543,10 @@ Foam::Time::Time
     stopAt_(saEndTime),
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
+    secondaryWriteControl_(wcTimeStep),
+    secondaryWriteInterval_(labelMax),
     purgeWrite_(0),
+    writeOnce_(false),
     subCycling_(false),
 
     writeFormat_(IOstream::ASCII),
@@ -944,6 +969,35 @@ Foam::Time& Foam::Time::operator++()
 
     if (!subCycling_)
     {
+        if (sigStopAtWriteNow_.active() || sigWriteNow_.active())
+        {
+            // A signal might have been sent on one processor only
+            // Reduce so all decide the same.
+
+            label flag = 0;
+            if (sigStopAtWriteNow_.active() && stopAt_ == saWriteNow)
+            {
+                flag += 1;
+            }
+            if (sigWriteNow_.active() && writeOnce_)
+            {
+                flag += 2;
+            }
+            reduce(flag, maxOp<label>());
+
+            if (flag & 1)
+            {
+                stopAt_ = saWriteNow;
+            }
+            if (flag & 2)
+            {
+                writeOnce_ = true;
+            }
+        }
+
+
+        outputTime_ = false;
+
         switch (writeControl_)
         {
             case wcTimeStep:
@@ -964,10 +1018,6 @@ Foam::Time& Foam::Time::operator++()
                     outputTime_ = true;
                     outputTimeIndex_ = outputIndex;
                 }
-                else
-                {
-                    outputTime_ = false;
-                }
             }
             break;
 
@@ -982,10 +1032,6 @@ Foam::Time& Foam::Time::operator++()
                 {
                     outputTime_ = true;
                     outputTimeIndex_ = outputIndex;
-                }
-                else
-                {
-                    outputTime_ = false;
                 }
             }
             break;
@@ -1002,13 +1048,68 @@ Foam::Time& Foam::Time::operator++()
                     outputTime_ = true;
                     outputTimeIndex_ = outputIndex;
                 }
-                else
+            }
+            break;
+        }
+
+
+        // Adapt for secondaryWrite controls
+        switch (secondaryWriteControl_)
+        {
+            case wcTimeStep:
+                outputTime_ =
+                    outputTime_
+                || !(timeIndex_ % label(secondaryWriteInterval_));
+            break;
+
+            case wcRunTime:
+            case wcAdjustableRunTime:
+            {
+                label outputIndex = label
+                (
+                    ((value() - startTime_) + 0.5*deltaT_)
+                  / secondaryWriteInterval_
+                );
+
+                if (outputIndex > outputTimeIndex_)
                 {
-                    outputTime_ = false;
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
+                }
+            }
+            break;
+
+            case wcCpuTime:
+            {
+                label outputIndex = label
+                (
+                    returnReduce(elapsedCpuTime(), maxOp<double>())
+                  / secondaryWriteInterval_
+                );
+                if (outputIndex > outputTimeIndex_)
+                {
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
+                }
+            }
+            break;
+
+            case wcClockTime:
+            {
+                label outputIndex = label
+                (
+                    returnReduce(label(elapsedClockTime()), maxOp<label>())
+                  / secondaryWriteInterval_
+                );
+                if (outputIndex > outputTimeIndex_)
+                {
+                    outputTime_ = true;
+                    outputTimeIndex_ = outputIndex;
                 }
             }
             break;
         }
+
 
         // see if endTime needs adjustment to stop at the next run()/end() check
         if (!end())
@@ -1027,6 +1128,14 @@ Foam::Time& Foam::Time::operator++()
                 endTime_ = value();
             }
         }
+
+        // Override outputTime if one-shot writing
+        if (writeOnce_)
+        {
+            outputTime_ = true;
+            writeOnce_ = false;
+        }
+
     }
 
     return *this;

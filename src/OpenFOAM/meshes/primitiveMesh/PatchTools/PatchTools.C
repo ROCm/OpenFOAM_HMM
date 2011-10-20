@@ -30,6 +30,7 @@ License
 #include "PatchToolsSearch.C"
 #include "PatchToolsSortEdges.C"
 #include "PatchToolsNormals.C"
+#include "PatchToolsMatch.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -548,7 +548,7 @@ Foam::string& Foam::stringOps::inplaceExpand
             //   ~OpenFOAM => site/user OpenFOAM configuration directory
             //   ~user     => home directory for specified user
 
-            word user;
+            string user;
             fileName file;
 
             if ((begVar = s.find('/')) != string::npos)

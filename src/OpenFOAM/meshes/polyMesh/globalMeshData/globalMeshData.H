@@ -95,6 +95,7 @@ class mapDistribute;
 template<class T> class EdgeMap;
 class globalIndex;
 class globalIndexAndTransform;
+class PackedBoolList;
 
 /*---------------------------------------------------------------------------*\
                            Class globalMeshData Declaration
@@ -191,6 +192,7 @@ class globalMeshData
             mutable autoPtr<globalIndex> globalEdgeNumberingPtr_;
             mutable autoPtr<labelListList> globalEdgeSlavesPtr_;
             mutable autoPtr<labelListList> globalEdgeTransformedSlavesPtr_;
+            mutable autoPtr<PackedBoolList> globalEdgeOrientationPtr_;
             mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
 
 
@@ -296,6 +298,9 @@ class globalMeshData
 
             //- Calculate global edge addressing.
             void calcGlobalEdgeSlaves() const;
+
+            //- Calculate orientation w.r.t. edge master.
+            void calcGlobalEdgeOrientation() const;
 
 
         // Global boundary face/cell addressing
@@ -539,6 +544,8 @@ public:
                 const labelListList& globalEdgeSlaves() const;
                 const labelListList& globalEdgeTransformedSlaves() const;
                 const mapDistribute& globalEdgeSlavesMap() const;
+                //- Is my edge same orientation master edge
+                const PackedBoolList& globalEdgeOrientation() const;
 
             // Coupled point to boundary faces. These are uncoupled boundary
             // faces only but include empty patches.

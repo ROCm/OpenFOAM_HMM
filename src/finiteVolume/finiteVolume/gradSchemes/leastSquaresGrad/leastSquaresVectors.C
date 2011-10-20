@@ -130,20 +130,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.patch().faceCells();
 
         // Build the d-vectors
-        vectorField pd
-        (
-            mesh.Sf().boundaryField()[patchi]
-          / (
-                mesh.magSf().boundaryField()[patchi]
-              * mesh.deltaCoeffs().boundaryField()[patchi]
-           )
-        );
-
-        if (!mesh.orthogonal())
-        {
-            pd -= mesh.correctionVectors().boundaryField()[patchi]
-                /mesh.deltaCoeffs().boundaryField()[patchi];
-        }
+        vectorField pd = p.delta();
 
         if (p.coupled())
         {
@@ -196,21 +183,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd
-        (
-            mesh.Sf().boundaryField()[patchi]
-           /(
-               mesh.magSf().boundaryField()[patchi]
-              *mesh.deltaCoeffs().boundaryField()[patchi]
-            )
-        );
-
-        if (!mesh.orthogonal())
-        {
-            pd -= mesh.correctionVectors().boundaryField()[patchi]
-                /mesh.deltaCoeffs().boundaryField()[patchi];
-        }
-
+        vectorField pd = p.delta();
 
         if (p.coupled())
         {

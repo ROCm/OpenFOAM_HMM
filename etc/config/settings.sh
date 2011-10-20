@@ -222,12 +222,7 @@ fi
 case "${foamCompiler}" in
 OpenFOAM | ThirdParty)
     case "$WM_COMPILER" in
-    Gcc | Gcc++0x)
-        gcc_version=gcc-4.4.3
-        gmp_version=gmp-5.0.1
-        mpfr_version=mpfr-2.4.2
-        ;;
-    Gcc46 | Gcc46++0x)
+    Gcc | Gcc++0x | Gcc46 | Gcc46++0x)
         gcc_version=gcc-4.6.1
         gmp_version=gmp-5.0.2
         mpfr_version=mpfr-3.0.1
@@ -511,8 +506,29 @@ QSMPI)
     ;;
 
 SGIMPI)
+    lastCharID=$(( ${#MPI_ROOT} - 1 ))
+    if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
+    then
+        MPI_ROOT=${MPI_ROOT:0:$lastCharID}
+    fi
+
     export FOAM_MPI=${MPI_ROOT##*/}
     export MPI_ARCH_PATH=$MPI_ROOT
+
+    if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
+    then
+        echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+        echo "    MPI_ROOT not a valid mpt installation directory or ending in a '/'." 1>&2
+        echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
+        echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
+    fi
+
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        echo "Using SGI MPT:"
+        echo "    MPI_ROOT : $MPI_ROOT"
+        echo "    FOAM_MPI : $FOAM_MPI"
+    fi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib

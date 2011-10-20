@@ -58,6 +58,45 @@ void Foam::Time::readDict()
         controlDict_.lookup("writeFrequency") >> writeInterval_;
     }
 
+
+    // Additional writing
+    if (controlDict_.found("secondaryWriteControl"))
+    {
+        secondaryWriteControl_ = writeControlNames_.read
+        (
+            controlDict_.lookup("secondaryWriteControl")
+        );
+
+        if
+        (
+            controlDict_.readIfPresent
+            (
+                "secondaryWriteInterval",
+                secondaryWriteInterval_
+            )
+        )
+        {
+            if
+            (
+                secondaryWriteControl_
+             == wcTimeStep && label(secondaryWriteInterval_) < 1
+            )
+            {
+                FatalIOErrorIn("Time::readDict()", controlDict_)
+                    << "secondaryWriteInterval < 1"
+                    << " for secondaryWriteControl timeStep"
+                    << exit(FatalIOError);
+            }
+        }
+        else
+        {
+            controlDict_.lookup("secondaryWriteFrequency")
+                >> secondaryWriteInterval_;
+        }
+    }
+
+
+
     if (oldWriteInterval != writeInterval_)
     {
         switch (writeControl_)
@@ -307,6 +346,12 @@ bool Foam::Time::writeAndEnd()
     endTime_ = value();
 
     return writeNow();
+}
+
+
+void Foam::Time::writeOnce()
+{
+    writeOnce_ = true;
 }
 
 

@@ -111,20 +111,7 @@ Foam::linearUpwind<Type>::correction
             );
 
             // Build the d-vectors
-            vectorField pd
-            (
-                mesh.Sf().boundaryField()[patchi]
-              / (
-                    mesh.magSf().boundaryField()[patchi]
-                  * mesh.deltaCoeffs().boundaryField()[patchi]
-                )
-            );
-
-            if (!mesh.orthogonal())
-            {
-                pd -= mesh.correctionVectors().boundaryField()[patchi]
-                    /mesh.deltaCoeffs().boundaryField()[patchi];
-            }
+            vectorField pd = Cf.boundaryField()[patchi].patch().delta();
 
             forAll(pOwner, facei)
             {

@@ -1,4 +1,3 @@
-patchPointEdgeCirculator.C
 createShellMesh.C
 extrudeToRegionMesh.C
 
