@@ -37,8 +37,8 @@ boundaryField
 
     left
     {
-        type            fixedValue;
-        value           uniform (1 0 0);
+        type            uniformFixedValue;
+        uniformValue    (1 0 0);
     }
 
     cylinder
