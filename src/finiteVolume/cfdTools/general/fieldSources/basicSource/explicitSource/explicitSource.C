@@ -112,8 +112,8 @@ Foam::explicitSource::explicitSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    dict_(dict.subDict(modelType + "Coeffs")),
-    volumeMode_(volumeModeTypeNames_.read(dict_.lookup("volumeMode")))
+    coeffs_(dict.subDict(modelType + "Coeffs")),
+    volumeMode_(volumeModeTypeNames_.read(coeffs_.lookup("volumeMode")))
 {
     setFieldData(dict_.subDict("fieldData"));
 }

@@ -77,10 +77,9 @@ void Foam::basicSource::writeData(Ostream& os) const
 
 bool Foam::basicSource::read(const dictionary& dict)
 {
-    const dictionary& sourceDict = dict.subDict(name_);
-    active_ = readBool(sourceDict.lookup("active"));
-    timeStart_ = readScalar(sourceDict.lookup("timeStart"));
-    duration_  = readScalar(sourceDict.lookup("duration"));
+    active_ = readBool(dict.lookup("active"));
+    timeStart_ = readScalar(dict.lookup("timeStart"));
+    duration_  = readScalar(dict.lookup("duration"));
     return true;
 }
 

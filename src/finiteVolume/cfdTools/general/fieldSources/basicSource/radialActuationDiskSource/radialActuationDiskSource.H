@@ -62,7 +62,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class radialActuationDiskSource Declaration
+                  Class radialActuationDiskSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class radialActuationDiskSource
@@ -71,8 +71,8 @@ class radialActuationDiskSource
 {
     // Private data
 
-        //- Sub dictionary with model information
-        const dictionary& dict_;
+        //- Coefficients dictionary
+        dictionary coeffsDict_;
 
         //- Coeffcients for the radial distribution
         FixedList<scalar, 3> coeffs_;
@@ -123,7 +123,7 @@ public:
 
         // Public Functions
 
-            //-Source term to fvMatrix<vector>
+            //- Source term to fvMatrix<vector>
             virtual void addSu(fvMatrix<vector>& UEqn);
 
 
