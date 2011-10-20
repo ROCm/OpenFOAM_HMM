@@ -82,7 +82,10 @@ void Foam::rotorDiskSource::checkData()
                 }
                 case ifSurfaceNormal:
                 {
-                    scalar UIn(readScalar(coeffs_.lookup("inletNormalVelocity")));
+                    scalar UIn
+                    (
+                        readScalar(coeffs_.lookup("inletNormalVelocity"))
+                    );
                     inletVelocity_ = -coordSys_.e3()*UIn;
                     break;
                 }
@@ -263,8 +266,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
             (
                 "rotorDiskSource::createCoordinateSystem(const geometryMode&);"
             )   << "Unknown geometryMode " << geometryModeTypeNames_[gm]
-                << ". Available geometry modes include " << geometryModeTypeNames_
-                << exit(FatalError);
+                << ". Available geometry modes include "
+                << geometryModeTypeNames_ << exit(FatalError);
         }
     }
 
