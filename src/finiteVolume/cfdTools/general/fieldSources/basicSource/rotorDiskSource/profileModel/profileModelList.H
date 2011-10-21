@@ -21,41 +21,71 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::profileModelList
+
+Description
+    Base class for profile models
+
+SourceFiles
+    profileModel.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#ifndef profileModelList_H
+#define profileModelList_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "PtrList.H"
+#include "profileModel.H"
 
-void Foam::explicitSetValue::writeData(Ostream& os) const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
-}
 
+/*---------------------------------------------------------------------------*\
+                    Class profileModelList Declaration
+\*---------------------------------------------------------------------------*/
 
-bool Foam::explicitSetValue::read(const dictionary& dict)
+class profileModelList
+:
+    public PtrList<profileModel>
 {
-    if (basicSource::read(dict))
-    {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
-        setFieldData(coeffs_.subDict("fieldData"));
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+
+protected:
+
+    // Protected data
+
+        //- Dictionary
+        const dictionary dict_;
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+public:
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSetValue& source)
-{
-    source.writeData(os);
-    return os;
-}
+    //- Constructor
+    profileModelList(const dictionary& dict, const bool readFields = true);
 
+    //- Destructor
+    ~profileModelList();
+
+
+    // Member Functions
+
+        //- Set blade->profile addressing
+        void connectBlades
+        (
+            const List<word>& names,
+            List<label>& addr
+        ) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

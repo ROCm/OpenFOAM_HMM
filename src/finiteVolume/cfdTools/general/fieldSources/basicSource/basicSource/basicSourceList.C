@@ -51,12 +51,12 @@ Foam::basicSourceList::basicSourceList
     forAllConstIter(dictionary, dict, iter)
     {
         const word& name = iter().keyword();
-        const dictionary& dict = iter().dict();
+        const dictionary& sourceDict = iter().dict();
 
         this->set
         (
             i++,
-            basicSource::New(name, dict, mesh)
+            basicSource::New(name, sourceDict, mesh)
         );
     }
 }
@@ -108,7 +108,8 @@ bool Foam::basicSourceList::read(const dictionary& dict)
     bool allOk = true;
     forAll(*this, i)
     {
-        bool ok = this->operator[](i).read(dict);
+        basicSource& bs = this->operator[](i);
+        bool ok = bs.read(dict.subDict(bs.name()));
         allOk = (allOk && ok);
     }
     return allOk;
@@ -117,21 +118,12 @@ bool Foam::basicSourceList::read(const dictionary& dict)
 
 bool Foam::basicSourceList::writeData(Ostream& os) const
 {
-    // Write size of list
-    os << nl << this->size();
-
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST;
-
     // Write list contents
     forAll(*this, i)
     {
         os << nl;
         this->operator[](i).writeData(os);
     }
-
-    // Write end of contents
-    os << token::END_LIST << token::END_STATEMENT << nl;
 
     // Check state of IOstream
     return os.good();

@@ -110,8 +110,8 @@ protected:
 
     // Protected data
 
-         //- Sub dictionary for time activated explicit sources
-        const dictionary& dict_;
+        //- Coefficients dictionary
+        dictionary coeffs_;
 
         //- Volume mode
         volumeModeType volumeMode_;

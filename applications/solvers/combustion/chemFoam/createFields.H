@@ -45,8 +45,28 @@
         ),
         thermo.rho()
     );
+
     volScalarField& p = thermo.p();
     volScalarField& hs = thermo.hs();
+
+    volScalarField Rspecific
+    (
+        IOobject
+        (
+            "Rspecific",
+            runTime.timeName(),
+            runTime,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar
+        (
+            "zero",
+            dimensionSet(dimEnergy/dimMass/dimTemperature),
+            0.0
+        )
+    );
 
     volVectorField U
     (

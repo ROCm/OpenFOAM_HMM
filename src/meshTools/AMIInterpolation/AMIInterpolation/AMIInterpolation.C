@@ -1333,11 +1333,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type>
+template<class Type, class BinaryOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
-    const Field<Type>& fld
+    const Field<Type>& fld,
+    const BinaryOp& bop
 ) const
 {
     if (fld.size() != tgtAddress_.size())
@@ -1377,7 +1378,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                result[faceI] += work[faces[i]]*weights[i];
+                result[faceI] = bop(result[faceI], work[faces[i]]*weights[i]);
             }
         }
     }
@@ -1390,7 +1391,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                result[faceI] += fld[faces[i]]*weights[i];
+                result[faceI] = bop(result[faceI], fld[faces[i]]*weights[i]);
             }
         }
     }
@@ -1400,24 +1401,26 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type>
+template<class Type, class BinaryOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
-    const tmp<Field<Type> >& tFld
+    const tmp<Field<Type> >& tFld,
+    const BinaryOp& bop
 ) const
 {
-    return interpolateToSource(tFld());
+    return interpolateToSource(tFld(), bop);
 }
 
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type>
+template<class Type, class BinaryOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
-    const Field<Type>& fld
+    const Field<Type>& fld,
+    const BinaryOp& bop
 ) const
 {
     if (fld.size() != srcAddress_.size())
@@ -1457,7 +1460,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                result[faceI] += work[faces[i]]*weights[i];
+                result[faceI] = bop(result[faceI], work[faces[i]]*weights[i]);
             }
         }
     }
@@ -1470,12 +1473,61 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                result[faceI] += fld[faces[i]]*weights[i];
+                result[faceI] = bop(result[faceI], fld[faces[i]]*weights[i]);
             }
         }
     }
 
     return tresult;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type, class BinaryOp>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
+(
+    const tmp<Field<Type> >& tFld,
+    const BinaryOp& bop
+) const
+{
+    return interpolateToTarget(tFld(), bop);
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+(
+    const Field<Type>& fld
+) const
+{
+    return interpolateToSource(fld, sumOp<Type>());
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+(
+    const tmp<Field<Type> >& tFld
+) const
+{
+    return interpolateToSource(tFld, sumOp<Type>());
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
+(
+    const Field<Type>& fld
+) const
+{
+    return interpolateToSource(fld, sumOp<Type>());
 }
 
 
@@ -1487,7 +1539,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToTarget(tFld());
+    return interpolateToSource(tFld, sumOp<Type>());
 }
 
 

@@ -23,39 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#include "fieldCoordinateSystemTransformFunctionObject.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-void Foam::explicitSetValue::writeData(Ostream& os) const
+namespace Foam
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    defineNamedTemplateTypeNameAndDebug
+    (
+        fieldCoordinateSystemTransformFunctionObject, 0
+    );
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        fieldCoordinateSystemTransformFunctionObject,
+        dictionary
+    );
 }
-
-
-bool Foam::explicitSetValue::read(const dictionary& dict)
-{
-    if (basicSource::read(dict))
-    {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
-        setFieldData(coeffs_.subDict("fieldData"));
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSetValue& source)
-{
-    source.writeData(os);
-    return os;
-}
-
 
 // ************************************************************************* //

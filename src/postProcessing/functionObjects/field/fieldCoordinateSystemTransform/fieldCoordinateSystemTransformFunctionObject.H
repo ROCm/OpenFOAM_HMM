@@ -21,41 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::fieldCoordinateSystemTransformFunctionObject
+
+Description
+    FunctionObject wrapper around fieldCoordinateSystemTransform to allow
+    them to be created via the functions entry within controlDict.
+
+SourceFiles
+    fieldCoordinateSystemTransformFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#ifndef fieldCoordinateSystemTransformFunctionObject_H
+#define fieldCoordinateSystemTransformFunctionObject_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "fieldCoordinateSystemTransform.H"
+#include "OutputFilterFunctionObject.H"
 
-void Foam::explicitSetValue::writeData(Ostream& os) const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    typedef OutputFilterFunctionObject<fieldCoordinateSystemTransform>
+        fieldCoordinateSystemTransformFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool Foam::explicitSetValue::read(const dictionary& dict)
-{
-    if (basicSource::read(dict))
-    {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
-        setFieldData(coeffs_.subDict("fieldData"));
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSetValue& source)
-{
-    source.writeData(os);
-    return os;
-}
-
+#endif
 
 // ************************************************************************* //

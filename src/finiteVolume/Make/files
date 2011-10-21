@@ -390,6 +390,12 @@ $(basicSource)/actuationDiskSource/actuationDiskSource.C
 $(basicSource)/radialActuationDiskSource/radialActuationDiskSource.C
 $(basicSource)/explicitSource/explicitSource.C
 $(basicSource)/explicitSetValue/explicitSetValue.C
+$(basicSource)/rotorDiskSource/rotorDiskSource.C
+$(basicSource)/rotorDiskSource/bladeModel/bladeModel.C
+$(basicSource)/rotorDiskSource/profileModel/profileModel.C
+$(basicSource)/rotorDiskSource/profileModel/profileModelList.C
+$(basicSource)/rotorDiskSource/profileModel/lookup/lookupProfile.C
+$(basicSource)/rotorDiskSource/profileModel/series/seriesProfile.C
 
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume
