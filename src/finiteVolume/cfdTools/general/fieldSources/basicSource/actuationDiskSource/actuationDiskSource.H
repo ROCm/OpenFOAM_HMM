@@ -74,8 +74,8 @@ protected:
 
     // Protected data
 
-        //- Sub dictionary with actuationDisk information
-        const dictionary& dict_;
+        //- Coefficients dictionary
+        dictionary coeffs_;
 
         //- Disk area normal
         vector diskDir_;

@@ -134,7 +134,7 @@ Foam::fv::gradScheme<Type>::grad
             regIOobject::store(tgGrad.ptr());
         }
 
-        cachePrintMessage("Retreiving", name, vsf);
+        cachePrintMessage("Retrieving", name, vsf);
         GradFieldType& gGrad = const_cast<GradFieldType&>
         (
             mesh().objectRegistry::template lookupObject<GradFieldType>(name)

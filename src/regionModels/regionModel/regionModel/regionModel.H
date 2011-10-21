@@ -231,6 +231,24 @@ public:
                 List<Type>& primaryFieldField
             ) const;
 
+            //- Convert a local region field to the primary region with op
+            template<class Type, class BinaryOp>
+            void toPrimary
+            (
+                const label regionPatchI,
+                List<Type>& regionField,
+                const BinaryOp& bop
+            ) const;
+
+            //- Convert a primary region field to the local region with op
+            template<class Type, class BinaryOp>
+            void toRegion
+            (
+                const label regionPatchI,
+                List<Type>& primaryFieldField,
+                const BinaryOp& bop
+            ) const;
+
 
         // Evolution
 

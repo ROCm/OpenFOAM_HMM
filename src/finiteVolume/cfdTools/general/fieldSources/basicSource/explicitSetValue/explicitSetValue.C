@@ -72,11 +72,9 @@ void Foam::explicitSetValue::setFieldData(const dictionary& dict)
         }
         else
         {
-            FatalErrorIn
-            (
-                "explicitSetValue::setFieldData"
-            )   << "header not OK " << io.name()
-                << exit(FatalError);
+            FatalErrorIn("explicitSetValue::setFieldData")
+                << "header not OK for field " << io.name()
+                << abort(FatalError);
         }
     }
 
@@ -96,9 +94,9 @@ Foam::explicitSetValue::explicitSetValue
 )
 :
     basicSource(name, modelType, dict, mesh),
-    dict_(dict.subDict(modelType + "Coeffs"))
+    coeffs_(dict.subDict(modelType + "Coeffs"))
 {
-    setFieldData(dict_.subDict("fieldData"));
+    setFieldData(coeffs_.subDict("fieldData"));
 }
 
 

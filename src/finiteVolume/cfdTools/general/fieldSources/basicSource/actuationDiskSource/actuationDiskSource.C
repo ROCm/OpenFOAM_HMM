@@ -75,11 +75,11 @@ Foam::actuationDiskSource::actuationDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    dict_(dict.subDict(modelType + "Coeffs")),
-    diskDir_(dict_.lookup("diskDir")),
-    Cp_(readScalar(dict_.lookup("Cp"))),
-    Ct_(readScalar(dict_.lookup("Ct"))),
-    diskArea_(readScalar(dict_.lookup("diskArea")))
+    coeffs_(dict.subDict(modelType + "Coeffs")),
+    diskDir_(coeffs_.lookup("diskDir")),
+    Cp_(readScalar(coeffs_.lookup("Cp"))),
+    Ct_(readScalar(coeffs_.lookup("Ct"))),
+    diskArea_(readScalar(coeffs_.lookup("diskArea")))
 {
     Info<< "    - creating actuation disk zone: "
         << this->name() << endl;
@@ -132,20 +132,8 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
 
 void Foam::actuationDiskSource::writeData(Ostream& os) const
 {
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-    os.writeKeyword("name") << this->name() << token::END_STATEMENT << nl;
-
-    if (dict_.found("note"))
-    {
-        os.writeKeyword("note") << string(dict_.lookup("note"))
-            << token::END_STATEMENT << nl;
-    }
-
-    os << indent << "actuationDisk";
-
+    os  << indent << name_ << endl;
     dict_.write(os);
-
-    os << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
@@ -153,13 +141,11 @@ bool Foam::actuationDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        const dictionary& sourceDict = dict.subDict(name());
-        const dictionary& subDictCoeffs =
-            sourceDict.subDict(typeName + "Coeffs");
-        subDictCoeffs.readIfPresent("diskDir", diskDir_);
-        subDictCoeffs.readIfPresent("Cp", Cp_);
-        subDictCoeffs.readIfPresent("Ct", Ct_);
-        subDictCoeffs.readIfPresent("diskArea", diskArea_);
+        coeffs_ = dict.subDict(typeName + "Coeffs");
+        coeffs_.readIfPresent("diskDir", diskDir_);
+        coeffs_.readIfPresent("Cp", Cp_);
+        coeffs_.readIfPresent("Ct", Ct_);
+        coeffs_.readIfPresent("diskArea", diskArea_);
 
         checkData();
 

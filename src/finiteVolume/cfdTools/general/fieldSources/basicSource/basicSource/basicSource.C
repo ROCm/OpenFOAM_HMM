@@ -277,28 +277,20 @@ bool Foam::basicSource::isActive()
 
 void Foam::basicSource::addSu(Foam::fvMatrix<vector>& Eqn)
 {
-    notImplemented
-    (
-        "Foam::basicSource addSu(Foam::fvMatrix<vector>& Eqn)"
-    );
+    notImplemented("Foam::basicSource addSu(Foam::fvMatrix<vector>& Eqn)");
 }
 
 
 void Foam::basicSource::addSu(Foam::fvMatrix<scalar>& Eqn)
 {
-    notImplemented
-    (
-        "Foam::basicSource addSu(Foam::fvMatrix<scalar>& Eqn)"
-    );
+    notImplemented("Foam::basicSource addSu(Foam::fvMatrix<scalar>& Eqn)");
 }
 
 
 void Foam::basicSource::setValue(Foam::fvMatrix<scalar>& Eqn)
 {
-    notImplemented
-    (
-        "Foam::basicSource setValue(Foam::fvMatrix<scalar>& Eqn)"
-    );
+    notImplemented("Foam::basicSource setValue(Foam::fvMatrix<scalar>& Eqn)");
 }
+
 
 // ************************************************************************* //

@@ -89,8 +89,8 @@ protected:
 
     // Protected data
 
-         //- Sub dictionary for time activated explicit sources
-        const dictionary& dict_;
+        //- Coefficients dictionary
+        dictionary coeffs_;
 
 
     // Protected functions
@@ -119,10 +119,7 @@ public:
         //- Return clone
         autoPtr<explicitSetValue> clone() const
         {
-            notImplemented
-            (
-                "autoPtr<explicitSetValue> clone() const"
-            );
+            notImplemented("autoPtr<explicitSetValue> clone() const");
             return autoPtr<explicitSetValue>(NULL);
         }
 

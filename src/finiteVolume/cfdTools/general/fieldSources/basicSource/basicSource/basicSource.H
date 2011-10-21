@@ -202,10 +202,7 @@ public:
         //- Return clone
         autoPtr<basicSource> clone() const
         {
-            notImplemented
-            (
-                "autoPtr<basicSource> clone() const"
-            );
+            notImplemented("autoPtr<basicSource> clone() const");
             return autoPtr<basicSource>(NULL);
         }
 
@@ -273,7 +270,7 @@ public:
             //- Return const access to the mesh database
             inline const fvMesh& mesh() const;
 
-            //- Return dictionay
+            //- Return dictionary
             inline const dictionary& dictCoeffs() const;
 
             //- Return const access to the source active flag
@@ -340,7 +337,6 @@ public:
 
             //- Read source dictionary
             virtual bool read(const dictionary& dict) = 0;
-
 };
 
 

@@ -77,4 +77,69 @@ void Foam::regionModels::regionModel::toRegion
 }
 
 
+template<class Type, class BinaryOp>
+void Foam::regionModels::regionModel::toPrimary
+(
+    const label regionPatchI,
+    List<Type>& regionField,
+    const BinaryOp& bop
+) const
+{
+    forAll(intCoupledPatchIDs_, i)
+    {
+        if (intCoupledPatchIDs_[i] == regionPatchI)
+        {
+            const mappedPatchBase& mpb =
+                refCast<const mappedPatchBase>
+                (
+                    regionMesh().boundaryMesh()[regionPatchI]
+                );
+            mpb.reverseDistribute(regionField, bop);
+            return;
+        }
+    }
+
+    FatalErrorIn
+    (
+        "const void toPrimary"
+        "("
+            "const label, "
+            "List<Type>&, "
+            "const BinaryOp&"
+        ") const"
+    )   << "Region patch ID " << regionPatchI << " not found in region mesh"
+        << abort(FatalError);
+}
+
+
+template<class Type, class BinaryOp>
+void Foam::regionModels::regionModel::toRegion
+(
+    const label regionPatchI,
+    List<Type>& primaryField,
+    const BinaryOp& bop
+) const
+{
+    forAll(intCoupledPatchIDs_, i)
+    {
+        if (intCoupledPatchIDs_[i] == regionPatchI)
+        {
+            const mappedPatchBase& mpb =
+                refCast<const mappedPatchBase>
+                (
+                    regionMesh().boundaryMesh()[regionPatchI]
+                );
+            mpb.distribute(primaryField, bop);
+            return;
+        }
+    }
+
+    FatalErrorIn
+    (
+        "const void toRegion(const label, List<Type>&, const BinaryOp&) const"
+    )   << "Region patch ID " << regionPatchI << " not found in region mesh"
+        << abort(FatalError);
+}
+
+
 // ************************************************************************* //

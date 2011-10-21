@@ -83,6 +83,21 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow
 {
     if (signal_ > 0)
     {
+        // Check that the signal is different from the writeNowSignal
+        if (sigWriteNow::signal_ == signal_)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigStopAtWriteNow::sigStopAtWriteNow"
+                "(const bool, const Time&)"
+            )   << "stopAtWriteNowSignal : " << signal_
+                << " cannot be the same as the writeNowSignal."
+                << " Please change this in the controlDict ("
+                << findEtcFile("controlDict", false) << ")."
+                << exit(FatalError);
+        }
+
+
         // Store runTime
         runTimePtr_ = &runTime;
 

@@ -21,47 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::fieldCoordinateSystemTransformFunctionObject
+
+Description
+    FunctionObject wrapper around fieldCoordinateSystemTransform to allow
+    them to be created via the functions entry within controlDict.
+
+SourceFiles
+    fieldCoordinateSystemTransformFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "patchPointEdgeCirculator.H"
+#ifndef fieldCoordinateSystemTransformFunctionObject_H
+#define fieldCoordinateSystemTransformFunctionObject_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "fieldCoordinateSystemTransform.H"
+#include "OutputFilterFunctionObject.H"
 
-const Foam::patchPointEdgeCirculator
-Foam::patchPointEdgeCirculator::endConstIter
-(
-    *reinterpret_cast<primitiveFacePatch*>(0),  // primitiveFacePatch
-    *reinterpret_cast<PackedBoolList*>(0),      // PackedBoolList
-    -1,                                         // edgeID
-    -1,                                         // index
-    -1                                          // pointID
-);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const InfoProxy<patchPointEdgeCirculator>& ip
-)
+namespace Foam
 {
-    const patchPointEdgeCirculator& c = ip.t_;
-
-    const pointField& pts = c.patch_.localPoints();
-    const edge& e = c.patch_.edges()[c.edgeID_];
-    label faceI = c.faceID();
-
-    os  << "around point:" << c.pointID_
-        << " coord:" << pts[c.pointID_]
-        << " at edge:" << c.edgeID_
-        << " coord:" << pts[e.otherVertex(c.pointID_)]
-        << " in direction of face:" << faceI;
-
-    if (faceI != -1)
-    {
-        os  << " fc:" << c.patch_.localFaces()[faceI].centre(pts);
-    }
-    return os;
+    typedef OutputFilterFunctionObject<fieldCoordinateSystemTransform>
+        fieldCoordinateSystemTransformFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

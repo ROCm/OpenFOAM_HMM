@@ -53,10 +53,10 @@ Foam::radialActuationDiskSource::radialActuationDiskSource
 )
 :
     actuationDiskSource(name, modelType, dict, mesh),
-    dict_(dict.subDict(modelType + "Coeffs")),
+    coeffsDict_(dict.subDict(modelType + "Coeffs")),
     coeffs_()
 {
-    dict_.lookup("coeffs") >> coeffs_;
+    coeffsDict_.lookup("coeffs") >> coeffs_;
     Info<< "    - creating radial actuation disk zone: "
         << this->name() << endl;
 }
@@ -114,14 +114,12 @@ bool Foam::radialActuationDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        const dictionary& sourceDict = dict.subDict(name());
-        const dictionary& subDictCoeffs =
-            sourceDict.subDict(typeName + "Coeffs");
-        subDictCoeffs.readIfPresent("diskDir", diskDir_);
-        subDictCoeffs.readIfPresent("Cp", Cp_);
-        subDictCoeffs.readIfPresent("Ct", Ct_);
-        subDictCoeffs.readIfPresent("diskArea", diskArea_);
-        subDictCoeffs.lookup("coeffs") >> coeffs_;
+        const dictionary& coeffsDict_ = dict.subDict(typeName + "Coeffs");
+        coeffsDict_.readIfPresent("diskDir", diskDir_);
+        coeffsDict_.readIfPresent("Cp", Cp_);
+        coeffsDict_.readIfPresent("Ct", Ct_);
+        coeffsDict_.readIfPresent("diskArea", diskArea_);
+        coeffsDict_.lookup("coeffs") >> coeffs_;
         return true;
     }
     else

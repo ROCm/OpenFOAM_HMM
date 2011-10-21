@@ -36,6 +36,7 @@ SourceFiles
     PatchToolsSearch.C
     PatchToolsSortEdges.C
     PatchToolsNormals.C
+    PatchToolsMatch.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +52,7 @@ namespace Foam
 {
 
 class polyMesh;
+class PackedBoolList;
 
 /*---------------------------------------------------------------------------*\
                          Class PatchTools Declaration
@@ -166,6 +168,55 @@ public:
     static labelList edgeOwner
     (
         const PrimitivePatch<Face, FaceList, PointField, PointType>&
+    );
+
+
+    //- Find corresponding points on patches sharing the same points
+    //  p1PointLabels : points on p1 that were matched
+    //  p2PointLabels : corresponding points on p2
+    template
+    <
+        class Face1,
+        template<class> class FaceList1,
+        class PointField1,
+        class PointType1,
+        class Face2,
+        template<class> class FaceList2,
+        class PointField2,
+        class PointType2
+    >
+    static void matchPoints
+    (
+        const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
+        const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+
+        labelList& p1PointLabels,
+        labelList& p2PointLabels
+    );
+
+    //- Find corresponding edges on patches sharing the same points
+    //  p1EdgeLabels    : edges on p1 that were matched
+    //  p2EdgeLabels    : corresponding edges on p2
+    //  sameOrientation : same orientation?
+    template
+    <
+        class Face1,
+        template<class> class FaceList1,
+        class PointField1,
+        class PointType1,
+        class Face2,
+        template<class> class FaceList2,
+        class PointField2,
+        class PointType2
+    >
+    static void matchEdges
+    (
+        const PrimitivePatch<Face1, FaceList1, PointField1, PointType1>& p1,
+        const PrimitivePatch<Face2, FaceList2, PointField2, PointType2>& p2,
+
+        labelList& p1EdgeLabels,
+        labelList& p2EdgeLabels,
+        PackedBoolList& sameOrientation
     );
 
 

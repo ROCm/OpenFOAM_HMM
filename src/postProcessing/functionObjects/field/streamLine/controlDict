@@ -60,7 +60,7 @@ functions
         setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
 
         // Velocity field to use for tracking.
-        U U;
+        UName U;
 
         // Interpolation method. Default is cellPoint. See sampleDict.
         //interpolationScheme pointMVC;

@@ -54,10 +54,6 @@ externalWallHeatFluxTemperatureFvPatchScalarField::operationModeNames;
 
 } // End namespace Foam
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::
@@ -118,7 +114,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         oldMode_ = fixedHeatFlux;
         q_ = scalarField("q", dict, p.size());
     }
-    else if(dict.found("h") && dict.found("Ta") && !dict.found("q"))
+    else if (dict.found("h") && dict.found("Ta") && !dict.found("q"))
     {
         oldMode_ = fixedHeatTransferCoeff;
         h_ = scalarField("h", dict, p.size());
@@ -209,7 +205,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     {
         q = q_;
     }
-    else if(oldMode_ == fixedHeatTransferCoeff)
+    else if (oldMode_ == fixedHeatTransferCoeff)
     {
         q = (Ta_ - *this)*h_;
     }

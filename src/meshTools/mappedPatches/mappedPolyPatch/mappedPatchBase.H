@@ -339,6 +339,39 @@ public:
         }
 
 
+        //- Wrapper around map/interpolate data distribution with supplied op
+        template<class Type, class BinaryOp>
+        void distribute(List<Type>& lst, const BinaryOp& bop) const
+        {
+            switch (mode_)
+            {
+                case NEARESTPATCHFACEAMI:
+                {
+                    lst = AMI().interpolateToSource
+                        (
+                            Field<Type>(lst.xfer()),
+                            bop
+                        );
+                    break;
+                }
+                default:
+                {
+                    map().distribute
+                    (
+                        Pstream::defaultCommsType,
+                        map().schedule(),
+                        map().constructSize(),
+                        map().subMap(),
+                        map().constructMap(),
+                        lst,
+                        bop,
+                        pTraits<Type>::zero
+                    );
+                }
+            }
+        }
+
+
         //- Wrapper around map/interpolate data distribution
         template<class Type>
         void reverseDistribute(List<Type>& lst) const
@@ -354,6 +387,40 @@ public:
                 {
                     label cSize = patch_.size();
                     map().reverseDistribute(cSize, lst);
+                }
+            }
+        }
+
+
+        //- Wrapper around map/interpolate data distribution with supplied op
+        template<class Type, class BinaryOp>
+        void reverseDistribute(List<Type>& lst, const BinaryOp& bop) const
+        {
+            switch (mode_)
+            {
+                case NEARESTPATCHFACEAMI:
+                {
+                    lst = AMI().interpolateToTarget
+                        (
+                            Field<Type>(lst.xfer()),
+                            bop
+                        );
+                    break;
+                }
+                default:
+                {
+                    label cSize = patch_.size();
+                    map().distribute
+                    (
+                        Pstream::defaultCommsType,
+                        map().schedule(),
+                        cSize,
+                        map().constructMap(),
+                        map().subMap(),
+                        lst,
+                        bop,
+                        pTraits<Type>::zero
+                    );
                 }
             }
         }

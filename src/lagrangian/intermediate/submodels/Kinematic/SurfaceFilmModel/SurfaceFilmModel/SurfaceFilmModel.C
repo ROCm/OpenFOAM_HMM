@@ -239,7 +239,7 @@ void Foam::SurfaceFilmModel<CloudType>::cacheFilmFields
 
     diameterParcelPatch_ =
         filmModel.cloudDiameterTrans().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, diameterParcelPatch_);
+    filmModel.toPrimary(filmPatchI, diameterParcelPatch_, maxOp<scalar>());
 
     UFilmPatch_ = filmModel.Us().boundaryField()[filmPatchI];
     filmModel.toPrimary(filmPatchI, UFilmPatch_);
