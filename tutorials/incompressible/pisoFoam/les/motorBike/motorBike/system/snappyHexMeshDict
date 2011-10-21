@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.7.1                                 |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -35,7 +35,7 @@ geometry
     }
 
     // Analytical shape; cylinder, sphere
-    refinementBox 
+    refinementBox
     {
         type searchableBox;
         min (-1.0 -0.7 0.0);
@@ -158,7 +158,7 @@ castellatedMeshControls
     // Whether any faceZones (as specified in the refinementSurfaces)
     // are only on the boundary of corresponding cellZones or also allow
     // free-standing zone faces. Not used if there are no faceZones.
-    allowFreeStandingZoneFaces false;    
+    allowFreeStandingZoneFaces false;
 }
 
 
