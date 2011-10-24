@@ -53,7 +53,7 @@ class lduMesh;
 class lduMatrix;
 
 /*---------------------------------------------------------------------------*\
-                           Class GAMGAgglomeration Declaration
+                    Class GAMGAgglomeration Declaration
 \*---------------------------------------------------------------------------*/
 
 class GAMGAgglomeration
