@@ -193,6 +193,7 @@ dll = db/dynamicLibrary
 $(dll)/dlLibraryTable/dlLibraryTable.C
 $(dll)/dynamicCode/dynamicCode.C
 $(dll)/dynamicCode/dynamicCodeContext.C
+$(dll)/codedBase/codedBase.C
 
 db/functionObjects/functionObject/functionObject.C
 db/functionObjects/functionObjectList/functionObjectList.C
