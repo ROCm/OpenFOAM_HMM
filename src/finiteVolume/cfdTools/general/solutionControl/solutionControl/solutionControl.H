@@ -88,7 +88,11 @@ protected:
         virtual void read(const bool absTolOnly);
 
         //- Return index of field in residualControl_ if present
-        virtual label applyToField(const word& fieldName) const;
+        virtual label applyToField
+        (
+            const word& fieldName,
+            const bool useRegEx = true
+        ) const;
 
         //- Return true if all convergence checks are satisfied
         virtual bool criteriaSatisfied() = 0;
