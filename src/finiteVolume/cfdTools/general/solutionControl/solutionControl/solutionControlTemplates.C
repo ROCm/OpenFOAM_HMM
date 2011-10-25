@@ -41,12 +41,16 @@ void Foam::solutionControl::storePrevIter() const
     {
         GeoField& fld = const_cast<GeoField&>(*iter());
 
-        if (mesh_.relaxField(fld.name()))
+        const word& fName = fld.name();
+
+        size_t prevIterField = fName.find("PrevIter");
+
+        if ((prevIterField == word::npos) && mesh_.relaxField(fName))
         {
             if (debug)
             {
                 Info<< algorithmName_ << ": storing previous iter for "
-                    << fld.name() << endl;
+                    << fName << endl;
             }
 
             fld.storePrevIter();
