@@ -47,19 +47,21 @@ void Foam::solutionControl::read(const bool absTolOnly)
 
     // Read residual information
     const dictionary residualDict(solnDict.subOrEmptyDict("residualControl"));
-    DynamicList<fieldData> data(residualDict.toc().size());
-    wordHashSet fieldNames;
+
+    DynamicList<fieldData> data(residualControl_);
 
     forAllConstIter(dictionary, residualDict, iter)
     {
-        if (fieldNames.insert(iter().keyword()))
+        const word& fName = iter().keyword();
+        const label fieldI = applyToField(fName, false);
+        if (fieldI == -1)
         {
             fieldData fd;
-            fd.name = iter().keyword().c_str();
+            fd.name = fName.c_str();
 
             if (absTolOnly)
             {
-                fd.absTol = readScalar(residualDict.lookup(iter().keyword()));
+                fd.absTol = readScalar(residualDict.lookup(fName));
                 fd.relTol = -1;
                 fd.initialResidual = -1;
             }
@@ -83,17 +85,62 @@ void Foam::solutionControl::read(const bool absTolOnly)
 
             data.append(fd);
         }
+        else
+        {
+            fieldData& fd = data[fieldI];
+            if (absTolOnly)
+            {
+                fd.absTol = readScalar(residualDict.lookup(fName));
+            }
+            else
+            {
+                if (iter().isDict())
+                {
+                    const dictionary& fieldDict(iter().dict());
+                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
+                    fd.relTol = readScalar(fieldDict.lookup("relTol"));
+                }
+                else
+                {
+                    FatalErrorIn("bool Foam::solutionControl::read()")
+                        << "Residual data for " << iter().keyword()
+                        << " must be specified as a dictionary"
+                        << exit(FatalError);
+                }
+            }
+        }
     }
 
     residualControl_.transfer(data);
+
+    if (debug)
+    {
+        forAll(residualControl_, i)
+        {
+            const fieldData& fd = residualControl_[i];
+            Info<< "residualControl[" << i << "]:" << nl
+                << "    name     : " << fd.name << nl
+                << "    absTol   : " << fd.absTol << nl
+                << "    relTol   : " << fd.relTol << nl
+                << "    iniResid : " << fd.initialResidual << endl;
+        }
+    }
 }
 
 
-Foam::label Foam::solutionControl::applyToField(const word& fieldName) const
+Foam::label Foam::solutionControl::applyToField
+(
+    const word& fieldName,
+    const bool useRegEx
+) const
 {
     forAll(residualControl_, i)
     {
-        if (residualControl_[i].name.match(fieldName))
+        if (useRegEx && residualControl_[i].name.match(fieldName))
+        {
+            return i;
+        }
+        else if (residualControl_[i].name == fieldName)
         {
             return i;
         }
