@@ -178,12 +178,14 @@ Foam::label Foam::checkTopology
         if (mesh.checkFaceFaces(true, &faces))
         {
             noFailedChecks++;
+        }
 
-            label nFaces = returnReduce(faces.size(), sumOp<label>());
-
+        label nFaces = returnReduce(faces.size(), sumOp<label>());
+        if (nFaces > 0)
+        {
             Info<< "  <<Writing " << nFaces
-                << " faces with incorrect edges to set " << faces.name()
-                << endl;
+                << " faces with non-standard edge connectivity to set "
+                << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
         }

@@ -43,7 +43,7 @@ defineTypeNameAndDebug(Foam::streamLine, 0);
 
 void Foam::streamLine::track()
 {
-    const Time& runTime = const_cast<Time&>(obr_.time());
+    const Time& runTime = obr_.time();
     const fvMesh& mesh = dynamic_cast<const fvMesh&>(obr_);
 
     IDLList<streamLineParticle> initialParticles;
@@ -383,7 +383,7 @@ void Foam::streamLine::read(const dictionary& dict)
 
 void Foam::streamLine::execute()
 {
-//    const Time& runTime = const_cast<Time&>(obr_.time());
+//    const Time& runTime = obr_.time();
 //    Pout<< "**streamLine::execute : time:" << runTime.timeName() << endl;
 //
 //    bool isOutputTime = false;
@@ -418,15 +418,14 @@ void Foam::streamLine::execute()
 
 
 void Foam::streamLine::end()
-{
-}
+{}
 
 
 void Foam::streamLine::write()
 {
     if (active_)
     {
-        const Time& runTime = const_cast<Time&>(obr_.time());
+        const Time& runTime = obr_.time();
         const fvMesh& mesh = dynamic_cast<const fvMesh&>(obr_);
 
 

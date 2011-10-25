@@ -212,6 +212,21 @@ void Foam::Time::setControls()
     {
         timeIndex_ = startTimeIndex_;
     }
+
+    scalar timeValue;
+    if (timeDict.readIfPresent("value", timeValue))
+    {
+        if (mag(timeValue - value()) > SMALL)
+        {
+            IOWarningIn("Time::setControls()", timeDict)
+                << "Time read from time dictionary " << timeValue
+                << " differs from actual time " << value() << '.' << nl
+                << "    This may cause unexpected database behaviour."
+                << " If you are not interested" << nl
+                << "    in preserving time state delete the time dictionary."
+                << endl;
+        }
+    }
 }
 
 

@@ -417,6 +417,12 @@ public:
             }
 
             //- External access to the loaded libraries
+            const dlLibraryTable& libs() const
+            {
+                return libs_;
+            }
+
+            //- External access to the loaded libraries
             dlLibraryTable& libs()
             {
                 return libs_;

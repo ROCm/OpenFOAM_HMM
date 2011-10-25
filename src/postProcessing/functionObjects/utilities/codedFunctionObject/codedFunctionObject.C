@@ -49,271 +49,71 @@ namespace Foam
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void* Foam::codedFunctionObject::loadLibrary
-(
-    const fileName& libPath,
-    const string& globalFuncName,
-    const dictionary& contextDict
-) const
-{
-    void* lib = 0;
-
-    // avoid compilation by loading an existing library
-    if (!libPath.empty())
-    {
-        dlLibraryTable& libs = const_cast<Time&>(time_).libs();
-
-        if (libs.open(libPath, false))
-        {
-            lib = libs.findLibrary(libPath);
-
-            // verify the loaded version and unload if needed
-            if (lib)
-            {
-                // provision for manual execution of code after loading
-                if (dlSymFound(lib, globalFuncName))
-                {
-                    loaderFunctionType function =
-                        reinterpret_cast<loaderFunctionType>
-                        (
-                            dlSym(lib, globalFuncName)
-                        );
-
-                    if (function)
-                    {
-                        (*function)(true);    // force load
-                    }
-                    else
-                    {
-                        FatalIOErrorIn
-                        (
-                            "codedFunctionObject::updateLibrary()",
-                            contextDict
-                        )   << "Failed looking up symbol " << globalFuncName
-                            << nl << "from " << libPath << exit(FatalIOError);
-                    }
-                }
-                else
-                {
-                    FatalIOErrorIn
-                    (
-                        "codedFunctionObject::loadLibrary()",
-                        contextDict
-                    )   << "Failed looking up symbol " << globalFuncName << nl
-                        << "from " << libPath << exit(FatalIOError);
-
-                    lib = 0;
-                    if (!libs.close(libPath, false))
-                    {
-                        FatalIOErrorIn
-                        (
-                            "codedFunctionObject::loadLibrary()",
-                            contextDict
-                        )   << "Failed unloading library "
-                            << libPath
-                            << exit(FatalIOError);
-                    }
-                }
-            }
-        }
-    }
-
-    return lib;
-}
-
-
-void Foam::codedFunctionObject::unloadLibrary
-(
-    const fileName& libPath,
-    const string& globalFuncName,
-    const dictionary& contextDict
-) const
-{
-    void* lib = 0;
-
-    if (libPath.empty())
-    {
-        return;
-    }
-
-    dlLibraryTable& libs = const_cast<Time&>(time_).libs();
-
-    lib = libs.findLibrary(libPath);
-
-    if (!lib)
-    {
-        return;
-    }
-
-    // provision for manual execution of code before unloading
-    if (dlSymFound(lib, globalFuncName))
-    {
-        loaderFunctionType function =
-            reinterpret_cast<loaderFunctionType>
-            (
-                dlSym(lib, globalFuncName)
-            );
-
-        if (function)
-        {
-            (*function)(false);    // force unload
-        }
-        else
-        {
-            FatalIOErrorIn
-            (
-                "codedFunctionObject::unloadLibrary()",
-                contextDict
-            )   << "Failed looking up symbol " << globalFuncName << nl
-                << "from " << libPath << exit(FatalIOError);
-        }
-    }
-
-    if (!libs.close(libPath, false))
-    {
-        FatalIOErrorIn
-        (
-            "codedFunctionObject::"
-            "updateLibrary()",
-            contextDict
-        )   << "Failed unloading library " << libPath
-            << exit(FatalIOError);
-    }
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::codedFunctionObject::createLibrary
+void Foam::codedFunctionObject::prepare
 (
     dynamicCode& dynCode,
     const dynamicCodeContext& context
 ) const
 {
-    bool create = Pstream::master();
+    // Set additional rewrite rules
+    dynCode.setFilterVariable("typeName", redirectType_);
+    dynCode.setFilterVariable("codeRead", codeRead_);
+    dynCode.setFilterVariable("codeExecute", codeExecute_);
+    dynCode.setFilterVariable("codeEnd", codeEnd_);
+    //dynCode.setFilterVariable("codeWrite", codeWrite_);
 
-    if (create)
-    {
-        // Write files for new library
-        if (!dynCode.upToDate(context))
-        {
-            // filter with this context
-            dynCode.reset(context);
+    // compile filtered C template
+    dynCode.addCompileFile("functionObjectTemplate.C");
+    dynCode.addCompileFile("FilterFunctionObjectTemplate.C");
 
-            // Set additional rewrite rules
-            dynCode.setFilterVariable("typeName", redirectType_);
-            dynCode.setFilterVariable("codeRead", codeRead_);
-            dynCode.setFilterVariable("codeExecute", codeExecute_);
-            dynCode.setFilterVariable("codeEnd", codeEnd_);
-            //dynCode.setFilterVariable("codeWrite", codeWrite_);
+    // copy filtered H template
+    dynCode.addCopyFile("FilterFunctionObjectTemplate.H");
+    dynCode.addCopyFile("functionObjectTemplate.H");
+    dynCode.addCopyFile("IOfunctionObjectTemplate.H");
 
-            // compile filtered C template
-            dynCode.addCompileFile("functionObjectTemplate.C");
-            dynCode.addCompileFile("FilterFunctionObjectTemplate.C");
+    // debugging: make BC verbose
+    //         dynCode.setFilterVariable("verbose", "true");
+    //         Info<<"compile " << redirectType_ << " sha1: "
+    //             << context.sha1() << endl;
 
-            // copy filtered H template
-            dynCode.addCopyFile("FilterFunctionObjectTemplate.H");
-            dynCode.addCopyFile("functionObjectTemplate.H");
-            dynCode.addCopyFile("IOfunctionObjectTemplate.H");
-
-            // debugging: make BC verbose
-            //         dynCode.setFilterVariable("verbose", "true");
-            //         Info<<"compile " << redirectType_ << " sha1: "
-            //             << context.sha1() << endl;
-
-            // define Make/options
-            dynCode.setMakeOptions
-            (
-                "EXE_INC = -g \\\n"
-                "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
-              + context.options()
-              + "\n\nLIB_LIBS = \\\n"
-              + "    -lOpenFOAM \\\n"
-              + "    -lfiniteVolume \\\n"
-              + context.libs()
-            );
-
-            if (!dynCode.copyOrCreateFiles(true))
-            {
-                FatalIOErrorIn
-                (
-                    "codedFunctionObject::createLibrary(..)",
-                    context.dict()
-                )   << "Failed writing files for" << nl
-                    << dynCode.libRelPath() << nl
-                    << exit(FatalIOError);
-            }
-        }
-
-        if (!dynCode.wmakeLibso())
-        {
-            FatalIOErrorIn
-            (
-                "codedFunctionObject::createLibrary(..)",
-                context.dict()
-            )   << "Failed wmake " << dynCode.libRelPath() << nl
-                << exit(FatalIOError);
-        }
-    }
-
-
-    // all processes must wait for compile to finish
-    reduce(create, orOp<bool>());
+    // define Make/options
+    dynCode.setMakeOptions
+        (
+            "EXE_INC = -g \\\n"
+            "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
+            + context.options()
+            + "\n\nLIB_LIBS = \\\n"
+            + "    -lOpenFOAM \\\n"
+            + "    -lfiniteVolume \\\n"
+            + context.libs()
+        );
 }
 
 
-void Foam::codedFunctionObject::updateLibrary() const
+Foam::dlLibraryTable& Foam::codedFunctionObject::libs() const
 {
-    dynamicCode::checkSecurity
-    (
-        "codedFunctionObject::updateLibrary()",
-        dict_
-    );
-
-    dynamicCodeContext context(dict_);
-
-    // codeName: redirectType + _<sha1>
-    // codeDir : redirectType
-    dynamicCode dynCode
-    (
-        redirectType_ + context.sha1().str(true),
-        redirectType_
-    );
-    const fileName libPath = dynCode.libPath();
+    return const_cast<Time&>(time_).libs();
+}
 
 
-    // the correct library was already loaded => we are done
-    if (const_cast<Time&>(time_).libs().findLibrary(libPath))
-    {
-        return;
-    }
-
-    Info<< "Using dynamicCode for functionObject " << name()
-        << " at line " << dict_.startLineNumber()
-        << " in " << dict_.name() << endl;
+Foam::string Foam::codedFunctionObject::description() const
+{
+    return "functionObject " + name();
+}
 
 
-    // remove instantiation of fvPatchField provided by library
+void Foam::codedFunctionObject::clearRedirect() const
+{
     redirectFunctionObjectPtr_.clear();
+}
 
-    // may need to unload old library
-    unloadLibrary
-    (
-        oldLibPath_,
-        dynamicCode::libraryBaseName(oldLibPath_),
-        context.dict()
-    );
 
-    // try loading an existing library (avoid compilation when possible)
-    if (!loadLibrary(libPath, dynCode.codeName(), context.dict()))
-    {
-        createLibrary(dynCode, context);
-
-        loadLibrary(libPath, dynCode.codeName(), context.dict());
-    }
-
-    // retain for future reference
-    oldLibPath_ = libPath;
+const Foam::dictionary& Foam::codedFunctionObject::codeDict() const
+{
+    return dict_;
 }
 
 
@@ -323,14 +123,18 @@ Foam::codedFunctionObject::codedFunctionObject
 (
     const word& name,
     const Time& time,
-    const dictionary& dict
+    const dictionary& dict,
+    bool readNow
 )
 :
     functionObject(name),
-    time_(time),
-    dict_(dict)
+    codedBase(),
+    time_(time)
 {
-    read(dict_);
+    if (readNow)
+    {
+        read(dict_);
+    }
 }
 
 
@@ -363,21 +167,21 @@ Foam::codedFunctionObject::redirectFunctionObject() const
 
 bool Foam::codedFunctionObject::start()
 {
-    updateLibrary();
+    updateLibrary(redirectType_);
     return redirectFunctionObject().start();
 }
 
 
 bool Foam::codedFunctionObject::execute(const bool forceWrite)
 {
-    updateLibrary();
+    updateLibrary(redirectType_);
     return redirectFunctionObject().execute(forceWrite);
 }
 
 
 bool Foam::codedFunctionObject::end()
 {
-    updateLibrary();
+    updateLibrary(redirectType_);
     return redirectFunctionObject().end();
 }
 
@@ -440,7 +244,7 @@ bool Foam::codedFunctionObject::read(const dictionary& dict)
         );
     }
 
-    updateLibrary();
+    updateLibrary(redirectType_);
     return redirectFunctionObject().read(dict);
 }
 

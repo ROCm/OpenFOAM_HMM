@@ -307,6 +307,7 @@ bool Foam::Time::writeObject
             )
         );
 
+        timeDict.add("value", value());
         timeDict.add("index", timeIndex_);
         timeDict.add("deltaT", deltaT_);
         timeDict.add("deltaT0", deltaT0_);

@@ -62,19 +62,39 @@ functions
 
             Info<< "Reading inlet velocity  uInfX\n" << endl;
 
+            scalar ULeft = 0.0;
+            label leftI = mesh().boundaryMesh().findPatchID("left");
+            const fvPatchVectorField& fvp = U.boundaryField()[leftI];
+            if (fvp.size())
+            {
+                ULeft = fvp[0].x();
+            }
+            reduce(ULeft, maxOp<scalar>());
+
             dimensionedScalar uInfX
             (
                 "uInfx",
                 dimensionSet(0, 1, -1, 0, 0),
-                U.boundaryField()[3][0].x()
+                ULeft
             );
+
             Info << "U at inlet = " << uInfX.value() << " m/s" << endl;
+
+
+            scalar magCylinder = 0.0;
+            label cylI = mesh().boundaryMesh().findPatchID("cylinder");
+            const fvPatchVectorField& cylFvp = mesh().C().boundaryField()[cylI];
+            if (cylFvp.size())
+            {
+                magCylinder = mag(cylFvp[0]);
+            }
+            reduce(magCylinder, maxOp<scalar>());
 
             dimensionedScalar radius
             (
                 "radius",
                 dimensionSet(0, 1, 0, 0, 0),
-                mag(U.mesh().boundary()[4].Cf()[0])
+                magCylinder
             );
 
             Info << "Cylinder radius = " << radius.value() << " m" << endl;

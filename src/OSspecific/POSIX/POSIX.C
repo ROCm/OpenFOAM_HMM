@@ -1161,7 +1161,7 @@ int Foam::system(const std::string& command)
 }
 
 
-void* Foam::dlOpen(const fileName& lib)
+void* Foam::dlOpen(const fileName& lib, const bool check)
 {
     if (POSIX::debug)
     {
@@ -1169,6 +1169,13 @@ void* Foam::dlOpen(const fileName& lib)
             << " : dlopen of " << lib << std::endl;
     }
     void* handle = ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+
+    if (!handle && check)
+    {
+        WarningIn("dlOpen(const fileName&, const bool)")
+            << "dlopen error : " << ::dlerror()
+            << endl;
+    }
 
     if (POSIX::debug)
     {

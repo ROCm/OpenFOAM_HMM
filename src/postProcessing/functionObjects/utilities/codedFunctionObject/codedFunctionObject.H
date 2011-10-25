@@ -35,22 +35,13 @@ SourceFiles
 #ifndef codedFunctionObject_H
 #define codedFunctionObject_H
 
-#include "pointFieldFwd.H"
 #include "functionObject.H"
-#include "dictionary.H"
+#include "codedBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class objectRegistry;
-class dictionary;
-class mapPolyMesh;
-class dynamicCode;
-class dynamicCodeContext;
-class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
                        Class codedFunctionObject Declaration
@@ -58,7 +49,8 @@ class IOdictionary;
 
 class codedFunctionObject
 :
-    public functionObject
+    public functionObject,
+    public codedBase
 {
 protected:
 
@@ -76,42 +68,28 @@ protected:
         string codeExecute_;
         string codeEnd_;
 
-        //- Previously loaded library
-        mutable fileName oldLibPath_;
-
         //- Underlying functionObject
         mutable autoPtr<functionObject> redirectFunctionObjectPtr_;
 
-    // Private Member Functions
 
-        //- Global loader/unloader function type
-        typedef void (*loaderFunctionType)(bool);
+    // Protected Member Functions
 
-        //- Load specified library and execute globalFuncName(true)
-        void* loadLibrary
-        (
-            const fileName& libPath,
-            const string& globalFuncName,
-            const dictionary& contextDict
-        ) const;
+        //- get the loaded dynamic libraries
+        virtual dlLibraryTable& libs() const;
 
-        //- Execute globalFuncName(false) and unload specified library
-        void unloadLibrary
-        (
-            const fileName& libPath,
-            const string& globalFuncName,
-            const dictionary& contextDict
-        ) const;
+        //- adapt the context for the current object
+        virtual void prepare(dynamicCode &,const dynamicCodeContext&) const;
 
+        // Return a description (type + name) for the output
+        virtual string description() const;
 
-        //- Create library based on the dynamicCodeContext
-        void createLibrary(dynamicCode&, const dynamicCodeContext&) const;
+        // Clear any redirected objects
+        virtual void clearRedirect() const;
 
-        //- Update library as required
-        void updateLibrary() const;
+        // Get the dictionary to initialize the codeContext
+        virtual const dictionary& codeDict() const;
 
-        //- Read relevant dictionary entries
-        void readDict();
+private:
 
         //- Disallow default bitwise copy construct
         codedFunctionObject(const codedFunctionObject&);
@@ -134,7 +112,8 @@ public:
         (
             const word& name,
             const Time& time,
-            const dictionary& dict
+            const dictionary& dict,
+            bool readNow=true   // allow child-classes to avoid compilation
         );
 
 
