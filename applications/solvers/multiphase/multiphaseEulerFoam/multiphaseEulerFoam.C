@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "correctPhi.H"
-    #include "CourantNos.H"
+    #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "CourantNos.H"
+        #include "CourantNo.H"
         #include "setDeltaT.H"
 
         runTime++;
@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
             sgsModel->correct();
             fluid.solve();
             rho = fluid.rho();
+            #include "zonePhaseVolumes.H"
 
             //#include "interfacialCoeffs.H"
             //#include "TEqns.H"

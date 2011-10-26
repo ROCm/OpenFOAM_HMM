@@ -441,24 +441,15 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::K
 
 Foam::multiphaseSystem::multiphaseSystem
 (
-    const fvMesh& mesh,
+    const volVectorField& U,
     const surfaceScalarField& phi
 )
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            "transportProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-    phases_(lookup("phases"), phaseModel::iNew(mesh)),
+    transportModel(U, phi),
 
-    mesh_(mesh),
+    phases_(lookup("phases"), phaseModel::iNew(U.mesh())),
+
+    mesh_(U.mesh()),
     phi_(phi),
 
     alphas_
@@ -514,7 +505,6 @@ Foam::multiphaseSystem::multiphaseSystem
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
 Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::rho() const
 {
     PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
@@ -527,6 +517,21 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::rho() const
     }
 
     return trho;
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::nu() const
+{
+    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+
+    tmp<volScalarField> tnu = iter()*iter().nu();
+
+    for (++iter; iter != phases_.end(); ++iter)
+    {
+        tnu() += iter()*iter().nu();
+    }
+
+    return tnu;
 }
 
 
@@ -770,19 +775,80 @@ void Foam::multiphaseSystem::solve()
 
     label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
 
-    volScalarField& alpha = phases_.first();
-
     if (nAlphaSubCycles > 1)
     {
         dimensionedScalar totalDeltaT = runTime.deltaT();
 
+        PtrList<volScalarField> alpha0s(phases_.size());
+        PtrList<surfaceScalarField> phiSums(phases_.size());
+
+        int phasei = 0;
+        forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+        {
+            phaseModel& phase = iter();
+            volScalarField& alpha = phase;
+
+            alpha0s.set
+            (
+                phasei,
+                new volScalarField(alpha.oldTime())
+            );
+
+            phiSums.set
+            (
+                phasei,
+                new surfaceScalarField
+                (
+                    IOobject
+                    (
+                        "phiSum" + alpha.name(),
+                        runTime.timeName(),
+                        mesh_
+                    ),
+                    mesh_,
+                    dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+                )
+            );
+
+            phasei++;
+        }
+
         for
         (
-            subCycle<volScalarField> alphaSubCycle(alpha, nAlphaSubCycles);
+            subCycleTime alphaSubCycle
+            (
+                const_cast<Time&>(runTime),
+                nAlphaSubCycles
+            );
             !(++alphaSubCycle).end();
         )
         {
             solveAlphas();
+
+            int phasei = 0;
+            forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+            {
+                phiSums[phasei] += (runTime.deltaT()/totalDeltaT)*iter().phi();
+                phasei++;
+            }
+        }
+
+        phasei = 0;
+        forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+        {
+            phaseModel& phase = iter();
+            volScalarField& alpha = phase;
+
+            phase.phi() = phiSums[phasei];
+
+            // Correct the time index of the field to correspond to the global time
+            alpha.timeIndex() = runTime.timeIndex();
+
+            // Reset the old-time field value
+            alpha.oldTime() = alpha0s[phasei];
+            alpha.oldTime().timeIndex() = runTime.timeIndex();
+
+            phasei++;
         }
     }
     else
