@@ -25,7 +25,7 @@
       + fvc::div(phi)
     );
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
@@ -33,12 +33,9 @@
           - fvm::laplacian(rhorAUf, p_rgh)
         );
 
-        p_rghEqn.solve
-        (
-            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             // Calculate the conservative fluxes
             phi += p_rghEqn.flux();

@@ -32,7 +32,7 @@
       + massSource.SuTot()
     );
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
@@ -40,12 +40,9 @@
           - fvm::laplacian(rho*rAU, p)
         );
 
-        pEqn.solve
-        (
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi += pEqn.flux();
         }

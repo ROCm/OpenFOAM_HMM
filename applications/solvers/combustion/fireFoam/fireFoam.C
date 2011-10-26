@@ -91,13 +91,13 @@ int main(int argc, char *argv[])
             #include "rhoEqn.H"
 
             // --- PIMPLE loop
-            for (pimple.start(); pimple.loop(); pimple++)
+            while (pimple.loop())
             {
                 #include "UEqn.H"
                 #include "YhsEqn.H"
 
-                // --- PISO loop
-                for (int corr=1; corr<=pimple.nCorr(); corr++)
+                // --- Pressure corrector loop
+                while (pimple.correct())
                 {
                     #include "pEqn.H"
                 }

@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         #include "rhoEqn.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (pimple.start(); pimple.loop(); pimple++)
+        while (pimple.loop())
         {
             turbulence->correct();
 
@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
             #include "YEqn.H"
             #include "hsEqn.H"
 
-            // --- PISO loop
-            for (int corr=0; corr<pimple.nCorr(); corr++)
+            // --- Pressure corrector loop
+            while (pimple.correct())
             {
                 #include "pEqn.H"
             }

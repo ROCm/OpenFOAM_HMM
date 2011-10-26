@@ -134,7 +134,7 @@
     Dp = mag(Dp);
     adjustPhi(phi, U, p);
 
-    for(int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqnIncomp
         (
@@ -152,7 +152,7 @@
             mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
         );
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             surfaceScalarField mSfGradp = pEqnIncomp.flux()/Dp;
 
