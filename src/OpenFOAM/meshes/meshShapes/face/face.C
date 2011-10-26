@@ -655,6 +655,27 @@ Foam::scalar Foam::face::sweptVol
     const pointField& newPoints
 ) const
 {
+    if (size() == 3)
+    {
+        return
+        (
+            triPointRef
+            (
+                oldPoints[operator[](0)],
+                oldPoints[operator[](1)],
+                oldPoints[operator[](2)]
+            ).sweptVol
+            (
+                triPointRef
+                (
+                    newPoints[operator[](0)],
+                    newPoints[operator[](1)],
+                    newPoints[operator[](2)]
+                )
+            )
+        );
+    }
+
     scalar sv = 0;
 
     // Calculate the swept volume by breaking the face into triangles and

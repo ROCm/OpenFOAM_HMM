@@ -280,6 +280,7 @@ $(limitedSchemes)/limitWith/limitWith.C
 multivariateSchemes = $(surfaceInterpolation)/multivariateSchemes
 $(multivariateSchemes)/multivariateSurfaceInterpolationScheme/multivariateSurfaceInterpolationSchemes.C
 $(multivariateSchemes)/multivariateSelectionScheme/multivariateSelectionSchemes.C
+$(multivariateSchemes)/multivariateIndependentScheme/multivariateIndependentSchemes.C
 $(multivariateSchemes)/upwind/multivariateUpwind.C
 $(multivariateSchemes)/Gamma/multivariateGamma.C
 $(multivariateSchemes)/vanLeer/multivariateVanLeer.C
