@@ -119,4 +119,38 @@ Foam::simpleControl::~simpleControl()
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::simpleControl::loop()
+{
+    read();
+
+    Time& time = const_cast<Time&>(mesh_.time());
+
+    if (initialised_)
+    {
+        if (criteriaSatisfied())
+        {
+            Info<< nl << algorithmName_ << " solution converged in "
+                << time.timeName() << " iterations" << nl << endl;
+
+            // Set to finalise calculation
+            time.writeAndEnd();
+        }
+        else
+        {
+            storePrevIterFields();
+        }
+    }
+    else
+    {
+        initialised_ = true;
+        storePrevIterFields();
+    }
+
+
+    return time.loop();
+}
+
+
 // ************************************************************************* //

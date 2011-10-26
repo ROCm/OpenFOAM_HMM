@@ -33,7 +33,7 @@
     }
 
     // correct interface on first PIMPLE corrector
-    if (pimple.corrPIMPLE() == 1)
+    if (pimple.corr() == 1)
     {
         interface.correct();
     }

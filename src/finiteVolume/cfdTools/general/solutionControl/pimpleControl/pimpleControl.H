@@ -60,17 +60,8 @@ protected:
             //- Maximum number of PISO correctors
             label nCorrPISO_;
 
-            //- Maximum number of non-orthogonal correctors
-            label nCorrNonOrtho_;
-
-            //- Current PIMPLE corrector
-            label corrPIMPLE_;
-
             //- Current PISO corrector
             label corrPISO_;
-
-            //- Current non-orthogonal corrector
-            label corrNonOrtho_;
 
             //- Flag to indicate whether to only solve turbulence on final iter
             bool turbOnFinalIterOnly_;
@@ -120,38 +111,23 @@ public:
             //- Maximum number of PISO correctors
             inline label nCorrPISO() const;
 
-            //- Maximum number of non-orthogonal correctors
-            inline label nCorrNonOrtho() const;
-
-            //- Current PIMPLE corrector index
-            inline label corrPIMPLE() const;
-
             //- Current PISO corrector index
             inline label corrPISO() const;
-
-            //- Current non-orthogonal corrector index
-            inline label corrNonOrtho() const;
 
 
         // Solution control
 
             //- PIMPLE loop
-            inline bool loop();
+            virtual bool loop();
 
-            //- Corrector loop
+            //- Pressure corrector loop
             inline bool correct();
-
-            //- Non-orthogonal corrector loop
-            inline bool correctNonOrthogonal();
 
             //- Helper function to identify when to store the intial residuals
             inline bool storeInitialResiduals() const;
 
             //- Helper function to identify final PIMPLE (outer) iteration
             inline bool finalIter() const;
-
-            //- Helper function to identify final non-orthogonal iteration
-            inline bool finalNonOrthogonalIter() const;
 
             //- Helper function to identify final inner iteration
             inline bool finalInnerIter() const;

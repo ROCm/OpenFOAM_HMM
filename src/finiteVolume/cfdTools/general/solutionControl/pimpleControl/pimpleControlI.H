@@ -37,79 +37,9 @@ inline Foam::label Foam::pimpleControl::nCorrPISO() const
 }
 
 
-inline Foam::label Foam::pimpleControl::nCorrNonOrtho() const
-{
-    return nCorrPISO_;
-}
-
-
-inline Foam::label Foam::pimpleControl::corrPIMPLE() const
-{
-    return corrPIMPLE_;
-}
-
-
 inline Foam::label Foam::pimpleControl::corrPISO() const
 {
     return corrPISO_;
-}
-
-
-inline Foam::label Foam::pimpleControl::corrNonOrtho() const
-{
-    return corrNonOrtho_;
-}
-
-
-inline bool Foam::pimpleControl::loop()
-{
-    corrPIMPLE_++;
-
-    if (debug)
-    {
-        Info<< algorithmName_ << " loop: corrPIMPLE = " << corrPIMPLE_ << endl;
-    }
-
-    if (corrPIMPLE_ == nCorrPIMPLE_ + 1)
-    {
-        if ((!residualControl_.empty()) && (nCorrPIMPLE_ != 1))
-        {
-            Info<< algorithmName_ << ": not converged within "
-                << nCorrPIMPLE_ << " iterations" << endl;
-        }
-
-        corrPIMPLE_ = 0;
-        mesh_.data::remove("finalIteration");
-        return false;
-    }
-
-    bool completed = false;
-    if (criteriaSatisfied())
-    {
-        Info<< algorithmName_ << ": converged in " << corrPIMPLE_
-            << " iterations" << endl;
-        completed = true;
-    }
-    else
-    {
-        if (finalIter())
-        {
-            mesh_.data::add("finalIteration", true);
-        }
-
-        if (corrPIMPLE_ <= nCorrPIMPLE_)
-        {
-            if (nCorrPIMPLE_ != 1)
-            {
-                Info<< algorithmName_ << ": iteration " << corrPIMPLE_ << endl;
-                storePrevIterFields();
-            }
-
-            completed = false;
-        }
-    }
-
-    return !completed;
 }
 
 
@@ -134,53 +64,25 @@ inline bool Foam::pimpleControl::correct()
 }
 
 
-inline bool Foam::pimpleControl::correctNonOrthogonal()
-{
-    corrNonOrtho_++;
-
-    if (debug)
-    {
-        Info<< algorithmName_ << " correctNonOrthogonal: corrNonOrtho = "
-            << corrNonOrtho_ << endl;
-    }
-
-    if (corrNonOrtho_ <= nCorrNonOrtho_ + 1)
-    {
-        return true;
-    }
-    else
-    {
-        corrNonOrtho_ = 0;
-        return false;
-    }
-}
-
-
 inline bool Foam::pimpleControl::storeInitialResiduals() const
 {
     // start from second PIMPLE iteration
-    return (corrPIMPLE_ == 2) && (corrPISO_ == 0) && (corrNonOrtho_ == 0);
+    return (corr_ == 2) && (corrPISO_ == 0) && (corrNonOrtho_ == 0);
 }
 
 
 inline bool Foam::pimpleControl::finalIter() const
 {
-    return corrPIMPLE_ == nCorrPIMPLE_;
-}
-
-
-inline bool Foam::pimpleControl::finalNonOrthogonalIter() const
-{
-    return corrNonOrtho_ == nCorrNonOrtho_ + 1;
+    return corr_ == nCorrPIMPLE_;
 }
 
 
 inline bool Foam::pimpleControl::finalInnerIter() const
 {
-     return
-        corrPIMPLE_ == nCorrPIMPLE_
-     && corrPISO_ == nCorrPISO_
-     && corrNonOrtho_ == nCorrNonOrtho_ + 1;
+    return
+       corr_ == nCorrPIMPLE_
+    && corrPISO_ == nCorrPISO_
+    && corrNonOrtho_ == nNonOrthCorr_ + 1;
 }
 
 
