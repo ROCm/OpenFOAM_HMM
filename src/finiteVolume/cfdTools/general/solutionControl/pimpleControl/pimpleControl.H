@@ -55,13 +55,22 @@ protected:
         // Solution controls
 
             //- Maximum number of PIMPLE correctors
-            label nOuterCorr_;
+            label nCorrPIMPLE_;
 
             //- Maximum number of PISO correctors
-            label nCorr_;
+            label nCorrPISO_;
+
+            //- Maximum number of non-orthogonal correctors
+            label nCorrNonOrtho_;
 
             //- Current PIMPLE corrector
-            label corr_;
+            label corrPIMPLE_;
+
+            //- Current PISO corrector
+            label corrPISO_;
+
+            //- Current non-orthogonal corrector
+            label corrNonOrtho_;
 
             //- Flag to indicate whether to only solve turbulence on final iter
             bool turbOnFinalIterOnly_;
@@ -105,41 +114,50 @@ public:
 
         // Access
 
-            //- Current corrector index
-            inline label corr() const;
-
             //- Maximum number of PIMPLE correctors
-            inline label nOuterCorr() const;
+            inline label nCorrPIMPLE() const;
 
             //- Maximum number of PISO correctors
-            inline label nCorr() const;
+            inline label nCorrPISO() const;
+
+            //- Maximum number of non-orthogonal correctors
+            inline label nCorrNonOrtho() const;
+
+            //- Current PIMPLE corrector index
+            inline label corrPIMPLE() const;
+
+            //- Current PISO corrector index
+            inline label corrPISO() const;
+
+            //- Current non-orthogonal corrector index
+            inline label corrNonOrtho() const;
 
 
         // Solution control
 
-            //- Loop start
-            inline bool start();
-
-            //- Loop loop
+            //- PIMPLE loop
             inline bool loop();
+
+            //- Corrector loop
+            inline bool correct();
+
+            //- Non-orthogonal corrector loop
+            inline bool correctNonOrthogonal();
+
+            //- Helper function to identify when to store the intial residuals
+            inline bool storeInitialResiduals() const;
 
             //- Helper function to identify final PIMPLE (outer) iteration
             inline bool finalIter() const;
 
+            //- Helper function to identify final non-orthogonal iteration
+            inline bool finalNonOrthogonalIter() const;
+
             //- Helper function to identify final inner iteration
-            inline bool finalInnerIter
-            (
-                const label corr,
-                const label nonOrth
-            ) const;
+            inline bool finalInnerIter() const;
 
             //- Helper function to identify whether to solve for turbulence
             inline bool turbCorr() const;
-
-
-    // Member Operators
-
-        void operator++(int);
 };
 
 
