@@ -167,7 +167,7 @@
             //   + (alpha2/rho2)*pEqnComp2()
             // ) +
             pEqnIncomp,
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
+            mesh.solver(p.select(pimple.finalInnerIter()))
         );
 
         if (pimple.finalNonOrthogonalIter())
