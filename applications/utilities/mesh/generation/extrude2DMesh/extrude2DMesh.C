@@ -89,7 +89,7 @@ void Foam::extrude2DMesh::setRefinement
     forAll(mesh_.points(), pointI)
     {
         point newPoint(mesh_.points()[pointI]);
-        newPoint[extrudeDir] = thickness;
+        newPoint[extrudeDir] += thickness;
 
         meshMod.addPoint
         (
