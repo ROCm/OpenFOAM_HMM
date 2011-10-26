@@ -841,7 +841,8 @@ void Foam::multiphaseSystem::solve()
 
             phase.phi() = phiSums[phasei];
 
-            // Correct the time index of the field to correspond to the global time
+            // Correct the time index of the field
+            // to correspond to the global time
             alpha.timeIndex() = runTime.timeIndex();
 
             // Reset the old-time field value
