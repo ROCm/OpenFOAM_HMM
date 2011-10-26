@@ -61,7 +61,7 @@ namespace Foam
 
 class multiphaseSystem
 :
-    public IOdictionary
+    public transportModel
 {
 
 public:
@@ -247,7 +247,7 @@ public:
         //- Construct from components
         multiphaseSystem
         (
-            const fvMesh& mesh,
+            const volVectorField& U,
             const surfaceScalarField& phi
         );
 
@@ -273,6 +273,9 @@ public:
 
         //- Return the mixture density
         tmp<volScalarField> rho() const;
+
+        //- Return the mixture laminar viscosity
+        tmp<volScalarField> nu() const;
 
         //- Return the virtual-mass coefficient for the given phase
         tmp<volScalarField> Cvm(const phaseModel& phase) const;
@@ -304,6 +307,10 @@ public:
 
         //- Solve for the mixture phase-fractions
         void solve();
+
+        //- Dummy correct
+        void correct()
+        {}
 
         //- Read base transportProperties dictionary
         bool read();

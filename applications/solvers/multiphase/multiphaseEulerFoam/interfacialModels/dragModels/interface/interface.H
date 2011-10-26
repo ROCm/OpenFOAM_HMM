@@ -21,40 +21,72 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    CourantNo
+Class
+    Foam::dragModels::interface
 
 Description
-    Calculates and outputs the mean and maximum Courant Numbers.
+    Drag between phase separated by a VoF resolved interface.
+
+SourceFiles
+    interface.C
 
 \*---------------------------------------------------------------------------*/
 
-scalar CoNum = 0.0;
-scalar meanCoNum = 0.0;
+#ifndef interface_H
+#define interface_H
 
-if (mesh.nInternalFaces())
+#include "dragModel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    scalarField sumPhi
-    (
-        fvc::surfaceSum(mag(phi))().internalField()
-    );
+namespace dragModels
+{
 
-    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
-    {
-        sumPhi = max
+/*---------------------------------------------------------------------------*\
+                           Class interface Declaration
+\*---------------------------------------------------------------------------*/
+
+class interface
+:
+    public dragModel
+{
+
+public:
+
+    //- Runtime type information
+    TypeName("interface");
+
+
+    // Constructors
+
+        //- Construct from components
+        interface
         (
-            sumPhi,
-            fvc::surfaceSum(mag(iter().phi()))().internalField()
+            const dictionary& interfaceDict,
+            const phaseModel& phase1,
+            const phaseModel& phase2
         );
-    }
 
-    CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
-    meanCoNum =
-        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
-}
+    //- Destructor
+    virtual ~interface();
 
-Info<< "Courant Number mean: " << meanCoNum
-    << " max: " << CoNum << endl;
+
+    // Member Functions
+
+        tmp<volScalarField> K(const volScalarField& Ur) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace dragModels
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -41,6 +41,20 @@
         phasei++;
     }
 
+    surfaceScalarField phi0
+    (
+        IOobject
+        (
+            "phi0",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("phi0", dimArea*dimVelocity, 0)
+    );
+
     phasei = 0;
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
@@ -60,7 +74,8 @@
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
         );
         mrfZones.relativeFlux(phase.phi());
-        phase.phi() += rAlphaAUfs[phasei]*(g & mesh.Sf());
+        surfaceScalarField pphi0("pphi0", phase.phi());
+        pphi0 += rAlphaAUfs[phasei]*(g & mesh.Sf());
 
         multiphaseSystem::dragModelTable::const_iterator dmIter =
             fluid.dragModels().begin();
@@ -99,12 +114,15 @@
                     phasej++;
                 }
 
-                phase.phi() +=
+                pphi0 +=
                     fvc::interpolate
                     ((1.0/phase.rho())*rAUs[phasei]*(*dcIter()))
                    *phi0s[phasej];
             }
         }
+
+        phi0 += alphafs[phasei]*pphi0;
+        phase.phi() = pphi0;
 
         phasei++;
     }
@@ -132,13 +150,13 @@
         phasei++;
     }
     Dp = mag(Dp);
-    adjustPhi(phi, U, p);
+    adjustPhi(phi0, U, p);
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqnIncomp
         (
-            fvc::div(phi)
+            fvc::div(phi0)
           - fvm::laplacian(Dp, p)
         );
 
@@ -169,6 +187,7 @@
             }
 
             // dgdt =
+
             // (
             //     pos(alpha2)*(pEqnComp2 & p)/rho2
             //   - pos(alpha1)*(pEqnComp1 & p)/rho1
