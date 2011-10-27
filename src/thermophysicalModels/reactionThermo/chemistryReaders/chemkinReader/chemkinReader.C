@@ -854,29 +854,31 @@ void Foam::chemkinReader::read
 Foam::chemkinReader::chemkinReader
 (
     const fileName& CHEMKINFileName,
+    speciesTable& species,
     const fileName& thermoFileName
 )
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(),
+    speciesTable_(species),
     reactions_(speciesTable_, speciesThermo_)
 {
     read(CHEMKINFileName, thermoFileName);
 }
 
 
-Foam::chemkinReader::chemkinReader(const dictionary& thermoDict)
+Foam::chemkinReader::chemkinReader
+(
+    const dictionary& thermoDict,
+    speciesTable& species
+)
 :
     lineNo_(1),
     specieNames_(10),
-    speciesTable_(),
+    speciesTable_(species),
     reactions_(speciesTable_, speciesThermo_)
 {
-    fileName chemkinFile
-    (
-        fileName(thermoDict.lookup("CHEMKINFile")).expand()
-    );
+    fileName chemkinFile(fileName(thermoDict.lookup("CHEMKINFile")).expand());
 
     fileName thermoFile = fileName::null;
 

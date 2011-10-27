@@ -35,14 +35,15 @@ Foam::reactingMixture<ThermoType>::reactingMixture
     const fvMesh& mesh
 )
 :
+    speciesTable(),
     autoPtr<chemistryReader<ThermoType> >
     (
-        chemistryReader<ThermoType>::New(thermoDict)
+        chemistryReader<ThermoType>::New(thermoDict, *this)
     ),
     multiComponentMixture<ThermoType>
     (
         thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
+        *this,
         autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
         mesh
     ),

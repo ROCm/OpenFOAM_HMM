@@ -35,6 +35,7 @@ SourceFiles
 #ifndef reactingMixture_H
 #define reactingMixture_H
 
+#include "speciesTable.H"
 #include "chemistryReader.H"
 #include "multiComponentMixture.H"
 
@@ -50,6 +51,7 @@ namespace Foam
 template<class ThermoType>
 class reactingMixture
 :
+    public speciesTable,
     public autoPtr<chemistryReader<ThermoType> >,
     public multiComponentMixture<ThermoType>,
     public PtrList<Reaction<ThermoType> >
@@ -84,6 +86,16 @@ public:
 
         //- Read dictionary
         void read(const dictionary&);
+
+        label size() const
+        {
+            return PtrList<Reaction<ThermoType> >::size();
+        }
+
+        Reaction<ThermoType>& operator [] (const label i)
+        {
+            return PtrList<Reaction<ThermoType> >::operator[](i);
+        }
 };
 
 

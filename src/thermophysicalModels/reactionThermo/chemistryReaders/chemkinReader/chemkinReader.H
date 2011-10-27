@@ -193,7 +193,7 @@ private:
         HashTable<label> specieIndices_;
 
         //- Table of species
-        speciesTable speciesTable_;
+        speciesTable& speciesTable_;
 
         //- Specie phase
         HashTable<phase> speciePhase_;
@@ -318,11 +318,12 @@ public:
         chemkinReader
         (
             const fileName& chemkinFile,
+            speciesTable& species,
             const fileName& thermoFileName = fileName::null
         );
 
         //- Construct by getting the CHEMKIN III file name from dictionary
-        chemkinReader(const dictionary& thermoDict);
+        chemkinReader(const dictionary& thermoDict, speciesTable& species);
 
 
     //- Destructor
