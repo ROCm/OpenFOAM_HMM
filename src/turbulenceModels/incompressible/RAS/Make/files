@@ -16,6 +16,7 @@ LienCubicKELowRe/LienCubicKELowRe.C
 NonlinearKEShih/NonlinearKEShih.C
 LienLeschzinerLowRe/LienLeschzinerLowRe.C
 LamBremhorstKE/LamBremhorstKE.C
+kkLOmega/kkLOmega.C
 
 /* Wall functions */
 wallFunctions = derivedFvPatchFields/wallFunctions
