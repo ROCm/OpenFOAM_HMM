@@ -95,7 +95,10 @@ inline Foam::janafThermo<EquationOfState>::janafThermo
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EquationOfState>
-inline Foam::scalar Foam::janafThermo<EquationOfState>::limit(const scalar T) const
+inline Foam::scalar Foam::janafThermo<EquationOfState>::limit
+(
+    const scalar T
+) const
 {
     if (T < Tlow_ || T > Thigh_)
     {
