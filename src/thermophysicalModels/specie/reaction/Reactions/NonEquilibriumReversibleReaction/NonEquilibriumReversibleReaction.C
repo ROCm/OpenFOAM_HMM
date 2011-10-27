@@ -68,8 +68,8 @@ NonEquilibriumReversibleReaction
 )
 :
     Reaction<ReactionThermo>(species, thermoDatabase, dict),
-    fk_(species, dict),
-    rk_(species, dict)
+    fk_(species, dict.subDict("forward")),
+    rk_(species, dict.subDict("reverse"))
 {}
 
 
@@ -136,8 +136,20 @@ void Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::write
 ) const
 {
     Reaction<ReactionThermo>::write(os);
+
+    os  << indent << "forward" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     fk_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
+
+    os  << indent << "reverse" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     rk_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
 }
 
 

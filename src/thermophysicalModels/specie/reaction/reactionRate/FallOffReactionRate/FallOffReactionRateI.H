@@ -67,10 +67,10 @@ FallOffReactionRate
     const dictionary& dict
 )
 :
-    k0_(species, dict),
-    kInf_(species, dict),
-    F_(dict),
-    thirdBodyEfficiencies_(species, dict)
+    k0_(species, dict.subDict("k0")),
+    kInf_(species, dict.subDict("kInf")),
+    F_(dict.subDict("F")),
+    thirdBodyEfficiencies_(species, dict.subDict("thirdBodyEfficiencies"))
 {}
 
 
@@ -100,10 +100,33 @@ inline void Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::write
     Ostream& os
 ) const
 {
+    os  << indent << "k0" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     k0_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
+
+    os  << indent << "kInf" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     kInf_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
+
+    os  << indent << "F" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     F_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
+
+    os  << indent << "thirdBodyEfficiencies" << nl;
+    os  << indent << token::BEGIN_BLOCK << nl;
+    os  << incrIndent;
     thirdBodyEfficiencies_.write(os);
+    os  << decrIndent;
+    os  << indent << token::END_BLOCK << nl;
 }
 
 
