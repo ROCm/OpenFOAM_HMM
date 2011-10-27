@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
             adjustPhi(phi, U, p);
 
             // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+            while (simple.correctNonOrthogonal())
             {
                 fvScalarMatrix pEqn
                 (
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
                 pEqn.setReference(pRefCell, pRefValue);
                 pEqn.solve();
 
-                if (nonOrth == simple.nNonOrthCorr())
+                if (simple.finalNonOrthogonalIter())
                 {
                     phi -= pEqn.flux();
                 }
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
             adjustPhi(phia, Ua, pa);
 
             // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+            while (simple.correctNonOrthogonal())
             {
                 fvScalarMatrix paEqn
                 (
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
                 paEqn.setReference(paRefCell, paRefValue);
                 paEqn.solve();
 
-                if (nonOrth == simple.nNonOrthCorr())
+                if (simple.finalNonOrthogonalIter())
                 {
                     phia -= paEqn.flux();
                 }

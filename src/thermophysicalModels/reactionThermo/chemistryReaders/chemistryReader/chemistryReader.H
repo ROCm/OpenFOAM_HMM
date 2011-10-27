@@ -85,16 +85,21 @@ public:
             chemistryReader,
             dictionary,
             (
-                const dictionary& thermoDict
+                const dictionary& thermoDict,
+                speciesTable& species
             ),
-            (thermoDict)
+            (thermoDict, species)
         );
 
 
     // Selectors
 
         //- Select constructed from dictionary
-        static autoPtr<chemistryReader> New(const dictionary& thermoDict);
+        static autoPtr<chemistryReader> New
+        (
+            const dictionary& thermoDict,
+            speciesTable& species
+        );
 
 
     //- Destructor

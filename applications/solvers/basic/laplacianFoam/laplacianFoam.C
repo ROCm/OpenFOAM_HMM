@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+        while (simple.correctNonOrthogonal())
         {
             solve
             (

@@ -14,7 +14,7 @@ bool closedVolume = false;
 
 if (simple.transonic())
 {
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         surfaceScalarField phid
         (
@@ -44,17 +44,9 @@ if (simple.transonic())
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        // Retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        pEqn.solve();
 
-        if (nonOrth == simple.nNonOrthCorr())
+        if (simple.finalNonOrthogonalIter())
         {
             phi == phic + pEqn.flux();
         }
@@ -62,7 +54,7 @@ if (simple.transonic())
 }
 else
 {
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         phi = fvc::interpolate(rho*U) & mesh.Sf();
         closedVolume = adjustPhi(phi, U, p);
@@ -77,18 +69,9 @@ else
 
         pEqn.setReference(pRefCell, pRefValue);
 
-        // Retain the residual from the first iteration
-        if (nonOrth == 0)
-        {
-            pEqn.solve();
-        }
-        else
-        {
-            pEqn.solve();
-        }
+        pEqn.solve();
 
-
-        if (nonOrth == simple.nNonOrthCorr())
+        if (simple.finalNonOrthogonalIter())
         {
             phi += pEqn.flux();
         }

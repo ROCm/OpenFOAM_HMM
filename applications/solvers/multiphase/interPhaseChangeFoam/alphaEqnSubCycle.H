@@ -7,7 +7,7 @@ surfaceScalarField rhoPhi
         mesh
     ),
     mesh,
-    dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0)
+    dimensionedScalar("0", dimMass/dimTime, 0)
 );
 
 {
@@ -40,7 +40,7 @@ surfaceScalarField rhoPhi
         #include "alphaEqn.H"
     }
 
-    if (pimple.nOuterCorr() == 1)
+    if (pimple.nCorrPIMPLE() == 1)
     {
         interface.correct();
     }

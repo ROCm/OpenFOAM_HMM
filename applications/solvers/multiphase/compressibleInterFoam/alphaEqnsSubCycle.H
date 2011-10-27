@@ -30,7 +30,8 @@
         #include "alphaEqns.H"
     }
 
-    if (pimple.corr() == 0)
+    // correct interface on first PIMPLE corrector
+    if (pimple.corr() == 1)
     {
         interface.correct();
     }

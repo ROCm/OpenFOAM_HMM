@@ -170,7 +170,9 @@ Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
     algorithmName_(algorithmName),
     nNonOrthCorr_(0),
     momentumPredictor_(true),
-    transonic_(false)
+    transonic_(false),
+    corr_(0),
+    corrNonOrtho_(0)
 {}
 
 

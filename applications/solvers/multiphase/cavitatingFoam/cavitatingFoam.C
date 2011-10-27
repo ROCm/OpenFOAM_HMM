@@ -68,13 +68,15 @@ int main(int argc, char *argv[])
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        for (pimple.start(); pimple.loop(); pimple++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
         {
             #include "rhoEqn.H"
             #include "gammaPsi.H"
             #include "UEqn.H"
 
-            for (int corr=0; corr<pimple.nCorr(); corr++)
+            // --- Pressure corrector loop
+            while (pimple.correct())
             {
                 #include "pEqn.H"
             }

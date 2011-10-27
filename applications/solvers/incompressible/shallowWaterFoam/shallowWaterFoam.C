@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (pimple.start(); pimple.loop(); pimple++)
+        while (pimple.loop())
         {
             surfaceScalarField phiv("phiv", phi/fvc::interpolate(h));
 
@@ -89,8 +89,8 @@ int main(int argc, char *argv[])
                 }
             }
 
-            // --- PISO loop
-            for (int corr=0; corr<pimple.nCorr(); corr++)
+            // --- Pressure corrector loop
+            while (pimple.correct())
             {
                 volScalarField rAU(1.0/hUEqn.A());
                 surfaceScalarField ghrAUf(magg*fvc::interpolate(h*rAU));
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
                     + fvc::ddtPhiCorr(rAU, h, hU, phi)
                     - phih0;
 
-                for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+                while (pimple.correctNonOrthogonal())
                 {
                     fvScalarMatrix hEqn
                     (
@@ -119,15 +119,9 @@ int main(int argc, char *argv[])
                       - fvm::laplacian(ghrAUf, h)
                     );
 
-                    hEqn.solve
-                    (
-                        mesh.solver
-                        (
-                            h.select(pimple.finalInnerIter(corr, nonOrth))
-                        )
-                    );
+                    hEqn.solve(mesh.solver(h.select(pimple.finalInnerIter())));
 
-                    if (nonOrth == pimple.nNonOrthCorr())
+                    if (pimple.finalNonOrthogonalIter())
                     {
                         phi += hEqn.flux();
                     }

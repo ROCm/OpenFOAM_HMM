@@ -20,7 +20,7 @@ if (simple.transonic())
     );
     mrfZones.relativeFlux(fvc::interpolate(psi), phid);
 
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         tmp<fvScalarMatrix> tpEqn;
 
@@ -37,7 +37,7 @@ if (simple.transonic())
 
         tpEqn().solve();
 
-        if (nonOrth == simple.nNonOrthCorr())
+        if (simple.finalNonOrthogonalIter())
         {
             phi == tpEqn().flux();
         }
@@ -50,7 +50,7 @@ else
 
     closedVolume = adjustPhi(phi, U, p);
 
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         tmp<fvScalarMatrix> tpEqn;
 
@@ -67,7 +67,7 @@ else
 
         tpEqn().solve();
 
-        if (nonOrth == simple.nNonOrthCorr())
+        if (simple.finalNonOrthogonalIter())
         {
             phi -= tpEqn().flux();
         }

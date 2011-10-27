@@ -27,12 +27,28 @@ License
 #include "IFstream.H"
 #include "addToRunTimeSelectionTable.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ThermoType>
+Foam::speciesTable& Foam::foamChemistryReader<ThermoType>::setSpecies
+(
+    const dictionary& dict,
+    speciesTable& species
+)
+{
+    wordList s(dict.lookup("species"));
+    species.transfer(s);
+    return species;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 template<class ThermoType>
 Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 (
     const fileName& reactionsFileName,
+    speciesTable& species,
     const fileName& thermoFileName
 )
 :
@@ -51,8 +67,8 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
             fileName(thermoFileName).expand()
         )()
     ),
+    speciesTable_(setSpecies(chemDict_, species)),
     speciesThermo_(thermoDict_),
-    speciesTable_(chemDict_.lookup("species")),
     reactions_(speciesTable_, speciesThermo_, chemDict_)
 {}
 
@@ -60,7 +76,8 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 template<class ThermoType>
 Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 (
-    const dictionary& thermoDict
+    const dictionary& thermoDict,
+    speciesTable& species
 )
 :
     chemistryReader<ThermoType>(),
@@ -79,7 +96,7 @@ Foam::foamChemistryReader<ThermoType>::foamChemistryReader
         )()
     ),
     speciesThermo_(thermoDict_),
-    speciesTable_(chemDict_.lookup("species")),
+    speciesTable_(setSpecies(chemDict_, species)),
     reactions_(speciesTable_, speciesThermo_, chemDict_)
 {}
 
