@@ -109,6 +109,9 @@ public:
 
     // Member Functions
 
+        //- Return access to the list of species
+        virtual const speciesTable& species() const = 0;
+
         //- Return access to the thermo packages
         virtual const HashPtrTable<ThermoType>& speciesThermo() const = 0;
 
