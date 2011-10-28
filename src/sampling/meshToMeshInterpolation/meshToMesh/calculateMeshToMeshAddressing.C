@@ -102,7 +102,7 @@ void Foam::meshToMesh::calcAddressing()
 
     indexedOctree<treeDataCell> oc
     (
-        treeDataCell(false, fromMesh_),
+        treeDataCell(false, fromMesh_, polyMesh::FACEDIAGTETS),
         shiftedBb,      // overall bounding box
         8,              // maxLevel
         10,             // leafsize
@@ -267,7 +267,7 @@ void Foam::meshToMesh::cellAddresses
         cellAddressing_[toI] = -1;
 
         // Check point is actually in the nearest cell
-        if (fromMesh.pointInCell(p, curCell))
+        if (fromMesh.pointInCell(p, curCell, polyMesh::FACEDIAGTETS))
         {
             cellAddressing_[toI] = curCell;
         }
@@ -292,7 +292,15 @@ void Foam::meshToMesh::cellAddresses
                 {
                     // search through all the neighbours.
                     // If point is in neighbour reset current cell
-                    if (fromMesh.pointInCell(p, neighbours[nI]))
+                    if
+                    (
+                        fromMesh.pointInCell
+                        (
+                            p,
+                            neighbours[nI],
+                            polyMesh::FACEDIAGTETS
+                        )
+                    )
                     {
                         cellAddressing_[toI] = neighbours[nI];
                         found = true;
@@ -316,7 +324,15 @@ void Foam::meshToMesh::cellAddresses
                         {
                             // search through all the neighbours.
                             // If point is in neighbour reset current cell
-                            if (fromMesh.pointInCell(p, nn[nI]))
+                            if
+                            (
+                                fromMesh.pointInCell
+                                (
+                                    p,
+                                    nn[nI],
+                                    polyMesh::FACEDIAGTETS
+                                )
+                            )
                             {
                                 cellAddressing_[toI] = nn[nI];
                                 found = true;

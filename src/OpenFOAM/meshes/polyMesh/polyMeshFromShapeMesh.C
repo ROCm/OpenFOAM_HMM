@@ -30,6 +30,9 @@ Description
 #include "Time.H"
 #include "primitiveMesh.H"
 #include "DynamicList.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -504,6 +507,7 @@ Foam::polyMesh::polyMesh
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
+    cellTreePtr_(NULL),
     pointZones_
     (
         IOobject
@@ -548,6 +552,7 @@ Foam::polyMesh::polyMesh
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
+    changing_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {
@@ -778,6 +783,7 @@ Foam::polyMesh::polyMesh
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
+    cellTreePtr_(NULL),
     pointZones_
     (
         IOobject
@@ -822,6 +828,7 @@ Foam::polyMesh::polyMesh
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
+    changing_(false),
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(NULL)
 {

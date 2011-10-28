@@ -56,7 +56,11 @@ static label findCell(const Cloud<passiveParticle>& cloud, const point& pt)
         // See if particle on face by finding nearest face and shifting
         // particle.
 
-        meshSearch meshSearcher(mesh, false);
+        meshSearch meshSearcher
+        (
+            mesh,
+            polyMesh::FACEPLANES    // no decomposition needed
+        );
 
         label faceI = meshSearcher.findNearestBoundaryFace(pt);
 

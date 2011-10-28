@@ -680,13 +680,17 @@ void Foam::polyTopoChange::getFaceOrder
     // First unassigned face
     label newFaceI = 0;
 
+    labelList nbr;
+    labelList order;
+
     forAll(cellMap_, cellI)
     {
         label startOfCell = cellFaceOffsets[cellI];
         label nFaces = cellFaceOffsets[cellI+1] - startOfCell;
 
         // Neighbouring cells
-        SortableList<label> nbr(nFaces);
+        //SortableList<label> nbr(nFaces);
+        nbr.setSize(nFaces);
 
         for (label i = 0; i < nFaces; i++)
         {
@@ -725,14 +729,24 @@ void Foam::polyTopoChange::getFaceOrder
             }
         }
 
-        nbr.sort();
+        //nbr.sort();
+        order.setSize(nFaces);
+        sortedOrder(nbr, order);
 
-        forAll(nbr, i)
+        //forAll(nbr, i)
+        //{
+        //    if (nbr[i] != -1)
+        //    {
+        //        oldToNew[cellFaces[startOfCell + nbr.indices()[i]]] =
+        //            newFaceI++;
+        //    }
+        //}
+        forAll(order, i)
         {
-            if (nbr[i] != -1)
+            label index = order[i];
+            if (nbr[index] != -1)
             {
-                oldToNew[cellFaces[startOfCell + nbr.indices()[i]]] =
-                    newFaceI++;
+                oldToNew[cellFaces[startOfCell + index]] = newFaceI++;
             }
         }
     }

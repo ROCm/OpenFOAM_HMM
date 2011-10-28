@@ -53,7 +53,11 @@ void Foam::triSurfaceMeshPointSet::calcSamples
 {
     forAll(sampleCoords_, sampleI)
     {
-        label cellI = searchEngine().findCell(sampleCoords_[sampleI]);
+        label cellI = searchEngine().findCell
+        (
+            sampleCoords_[sampleI],
+            polyMesh::FACEDIAGTETS
+        );
 
         if (cellI != -1)
         {

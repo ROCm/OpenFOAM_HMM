@@ -166,7 +166,7 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
         // Construct search engine on mesh
 
-        meshSearch queryMesh(mesh_, true);
+        meshSearch queryMesh(mesh_, polyMesh::FACEDIAGTETS);
 
 
         // Check all 'outside' points

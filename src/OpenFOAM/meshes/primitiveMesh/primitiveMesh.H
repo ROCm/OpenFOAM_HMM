@@ -69,10 +69,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class treeDataCell;
-template<class Type> class indexedOctree;
-
 /*---------------------------------------------------------------------------*\
                       Class primitiveMesh Declaration
 \*---------------------------------------------------------------------------*/
@@ -154,9 +150,6 @@ class primitiveMesh
 
             //- Cell-points
             mutable labelListList* cpPtr_;
-
-            //- Search tree to allow spatial tet searching
-            mutable indexedOctree<treeDataCell>* cellTreePtr_;
 
 
         // On-the-fly edge addresing storage
@@ -483,10 +476,6 @@ public:
                 const labelListList& pointEdges() const;
                 const labelListList& pointPoints() const;
                 const labelListList& cellPoints() const;
-
-
-            //- Build (if necessary) and return the cell search tree
-            const indexedOctree<treeDataCell>& cellTree() const;
 
 
             // Geometric data (raw!)
@@ -820,9 +809,6 @@ public:
 
             //- Clear topological data
             void clearAddressing();
-
-            //- Clear cell tree data
-            void clearCellTree();
 
             //- Clear all geometry and addressing unnecessary for CFD
             void clearOut();

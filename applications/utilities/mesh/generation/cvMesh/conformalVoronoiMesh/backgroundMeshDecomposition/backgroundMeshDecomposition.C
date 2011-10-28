@@ -971,7 +971,7 @@ Foam::backgroundMeshDecomposition::distribute
         {
             // Map cellVertices, cellVertexIndices and cellVertexTypes
 
-            meshSearch cellSearch(mesh_);
+            meshSearch cellSearch(mesh_, polyMesh::FACEPLANES);
 
             const labelList& reverseCellMap = map().reverseCellMap();
 
