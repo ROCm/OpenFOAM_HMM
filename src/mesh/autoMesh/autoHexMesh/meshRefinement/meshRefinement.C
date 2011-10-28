@@ -1825,7 +1825,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     label regionI = -1;
 
-    label cellI = mesh_.findCell(keepPoint);
+    label cellI = mesh_.findCell(keepPoint, polyMesh::FACEDIAGTETS);
 
     if (cellI != -1)
     {

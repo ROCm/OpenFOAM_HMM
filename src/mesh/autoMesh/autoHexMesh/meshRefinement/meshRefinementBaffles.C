@@ -1248,7 +1248,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
         // Find the region containing the insidePoint
         label keepRegionI = -1;
 
-        label cellI = mesh_.findCell(insidePoint);
+        label cellI = mesh_.findCell(insidePoint, polyMesh::FACEDIAGTETS);
 
         if (cellI != -1)
         {
@@ -1418,7 +1418,7 @@ void Foam::meshRefinement::findCellZoneTopo
     // Find the region containing the keepPoint
     label keepRegionI = -1;
 
-    label cellI = mesh_.findCell(keepPoint);
+    label cellI = mesh_.findCell(keepPoint, polyMesh::FACEDIAGTETS);
 
     if (cellI != -1)
     {
@@ -1959,7 +1959,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     // Find the region containing the keepPoint
     label keepRegionI = -1;
 
-    label cellI = mesh_.findCell(keepPoint);
+    label cellI = mesh_.findCell(keepPoint, polyMesh::FACEDIAGTETS);
 
     if (cellI != -1)
     {

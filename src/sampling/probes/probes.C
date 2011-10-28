@@ -45,7 +45,7 @@ void Foam::probes::findElements(const fvMesh& mesh)
     {
         const vector& location = operator[](probeI);
 
-        elementList_[probeI] = mesh.findCell(location);
+        elementList_[probeI] = mesh.findCell(location, polyMesh::FACEDIAGTETS);
 
         if (debug && elementList_[probeI] != -1)
         {

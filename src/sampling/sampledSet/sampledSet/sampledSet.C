@@ -68,7 +68,7 @@ Foam::label Foam::sampledSet::getCell
     {
         label cellI = getBoundaryCell(faceI);
 
-        if (!mesh().pointInCell(sample, cellI))
+        if (!mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
         {
             FatalErrorIn
             (
@@ -85,7 +85,7 @@ Foam::label Foam::sampledSet::getCell
 
         label cellI = mesh().faceOwner()[faceI];
 
-        if (mesh().pointInCell(sample, cellI))
+        if (mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
         {
             return cellI;
         }
@@ -93,7 +93,7 @@ Foam::label Foam::sampledSet::getCell
         {
             cellI = mesh().faceNeighbour()[faceI];
 
-            if (mesh().pointInCell(sample, cellI))
+            if (mesh().pointInCell(sample, cellI, searchEngine_.decompMode()))
             {
                 return cellI;
             }
@@ -261,12 +261,17 @@ bool Foam::sampledSet::getTrackingPoint
     if (bFaceI == -1)
     {
         // No boundary intersection. Try and find cell samplePt is in
-        trackCellI = mesh().findCell(samplePt);
+        trackCellI = mesh().findCell(samplePt, searchEngine_.decompMode());
 
         if
         (
             (trackCellI == -1)
-         || !mesh().pointInCell(samplePt, trackCellI)
+        || !mesh().pointInCell
+            (
+                samplePt,
+                trackCellI,
+                searchEngine_.decompMode()
+            )
         )
         {
             // Line samplePt - end_ does not intersect domain at all.
@@ -316,7 +321,7 @@ bool Foam::sampledSet::getTrackingPoint
             // samplePt inside or marginally outside.
             trackPt = samplePt;
             trackFaceI = -1;
-            trackCellI = mesh().findCell(trackPt);
+            trackCellI = mesh().findCell(trackPt, searchEngine_.decompMode());
 
             isGoodSample = true;
         }

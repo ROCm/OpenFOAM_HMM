@@ -25,7 +25,7 @@ License
 
 #include "treeDataCell.H"
 #include "indexedOctree.H"
-#include "primitiveMesh.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,13 +83,15 @@ void Foam::treeDataCell::update()
 Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
-    const primitiveMesh& mesh,
-    const labelUList& cellLabels
+    const polyMesh& mesh,
+    const labelUList& cellLabels,
+    const polyMesh::cellRepresentation decompMode
 )
 :
     mesh_(mesh),
     cellLabels_(cellLabels),
-    cacheBb_(cacheBb)
+    cacheBb_(cacheBb),
+    decompMode_(decompMode)
 {
     update();
 }
@@ -98,13 +100,15 @@ Foam::treeDataCell::treeDataCell
 Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
-    const primitiveMesh& mesh,
-    const Xfer<labelList>& cellLabels
+    const polyMesh& mesh,
+    const Xfer<labelList>& cellLabels,
+    const polyMesh::cellRepresentation decompMode
 )
 :
     mesh_(mesh),
     cellLabels_(cellLabels),
-    cacheBb_(cacheBb)
+    cacheBb_(cacheBb),
+    decompMode_(decompMode)
 {
     update();
 }
@@ -113,12 +117,14 @@ Foam::treeDataCell::treeDataCell
 Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
-    const primitiveMesh& mesh
+    const polyMesh& mesh,
+    const polyMesh::cellRepresentation decompMode
 )
 :
     mesh_(mesh),
     cellLabels_(identity(mesh_.nCells())),
-    cacheBb_(cacheBb)
+    cacheBb_(cacheBb),
+    decompMode_(decompMode)
 {
     update();
 }
@@ -162,7 +168,7 @@ bool Foam::treeDataCell::contains
     const point& sample
 ) const
 {
-    return mesh_.pointInCell(sample, cellLabels_[index]);
+    return mesh_.pointInCell(sample, cellLabels_[index], decompMode_);
 }
 
 

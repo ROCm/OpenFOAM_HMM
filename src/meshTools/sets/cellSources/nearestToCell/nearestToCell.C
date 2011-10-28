@@ -25,8 +25,6 @@ License
 
 #include "nearestToCell.H"
 #include "polyMesh.H"
-#include "meshSearch.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

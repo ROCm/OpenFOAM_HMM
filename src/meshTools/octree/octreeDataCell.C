@@ -116,7 +116,12 @@ bool Foam::octreeDataCell::contains
     const point& sample
 ) const
 {
-    return mesh_.pointInCell(sample, cellLabels_[index]);
+    return mesh_.pointInCell
+    (
+        sample,
+        cellLabels_[index],
+        polyMesh::FACEDIAGTETS
+    );
 }
 
 

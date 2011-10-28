@@ -86,7 +86,7 @@ Foam::labelList Foam::refinementParameters::findCells(const polyMesh& mesh)
     {
         const point& keepPoint = keepPoints_[i];
 
-        label localCellI = mesh.findCell(keepPoint);
+        label localCellI = mesh.findCell(keepPoint, polyMesh::FACEDIAGTETS);
 
         label globalCellI = -1;
 

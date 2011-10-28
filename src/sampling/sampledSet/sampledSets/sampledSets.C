@@ -138,7 +138,7 @@ Foam::sampledSets::sampledSets
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
-    searchEngine_(mesh_, true),
+    searchEngine_(mesh_, polyMesh::FACEDIAGTETS),
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {

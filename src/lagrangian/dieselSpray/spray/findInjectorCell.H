@@ -9,7 +9,8 @@ if (injectorCell >= 0)
     foundCell = mesh_.pointInCell
     (
         injectionPosition,
-        injectorCell
+        injectorCell,
+        polyMesh::FACEDIAGTETS
     );
 }
 
@@ -39,7 +40,8 @@ if (!foundCell)
         foundCell = mesh_.pointInCell
         (
             injectionPosition,
-            injectorCell
+            injectorCell,
+            polyMesh::FACEDIAGTETS
         );
     }
     reduce(foundCell, orOp<bool>());
@@ -61,7 +63,8 @@ if (!foundCell)
             foundCell = mesh_.pointInCell
             (
                 injectionPosition,
-                injectorCell
+                injectorCell,
+                polyMesh::FACEDIAGTETS
             );
         }
         reduce(foundCell, orOp<bool>());

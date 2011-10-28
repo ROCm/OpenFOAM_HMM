@@ -76,7 +76,11 @@ void Foam::setRefCell
         else if (dict.found(refPointName))
         {
             point refPointi(dict.lookup(refPointName));
-            refCelli = field.mesh().findCell(refPointi);
+            refCelli = field.mesh().findCell
+            (
+                refPointi,
+                polyMesh::FACEDIAGTETS
+            );
             label hasRef = (refCelli >= 0 ? 1 : 0);
             label sumHasRef = returnReduce<label>(hasRef, sumOp<label>());
             if (sumHasRef != 1)

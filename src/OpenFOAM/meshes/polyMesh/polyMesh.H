@@ -34,7 +34,6 @@ SourceFiles
     polyMeshFromShapeMesh.C
     polyMeshIO.C
     polyMeshUpdate.C
-    polyMeshFindCell.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,9 +60,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
 class globalMeshData;
 class mapPolyMesh;
 class polyMeshTetDecomposition;
+class treeDataCell;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                           Class polyMesh Declaration
@@ -89,6 +91,15 @@ public:
             POINTS_MOVED,
             TOPO_CHANGE,
             TOPO_PATCH_CHANGE
+        };
+
+        //- Enumeration defining the representation of the cell for
+        //  inside checking
+        enum cellRepresentation
+        {
+            FACEPLANES,     // cell bound by planes of faces
+            FACECENTRETETS, // tet decomposition using facectr and cellctr
+            FACEDIAGTETS    // tet decomposition using face diagonal and cellctr
         };
 
 
@@ -130,7 +141,10 @@ private:
             mutable Vector<label> solutionD_;
 
             //- Base point for face decomposition into tets
-            mutable labelList* tetBasePtIsPtr_;
+            mutable autoPtr<labelList> tetBasePtIsPtr_;
+
+            //- Search tree to allow spatial cell searching
+            mutable autoPtr<indexedOctree<treeDataCell> > cellTreePtr_;
 
 
         // Zoning information
@@ -146,7 +160,7 @@ private:
 
 
         //- Parallel info
-        mutable globalMeshData* globalMeshDataPtr_;
+        mutable autoPtr<globalMeshData> globalMeshDataPtr_;
 
 
         // Mesh motion related data
@@ -161,7 +175,7 @@ private:
             mutable label curMotionTimeIndex_;
 
             //- Old points (for the last mesh motion)
-            mutable pointField* oldPointsPtr_;
+            mutable autoPtr<pointField> oldPointsPtr_;
 
 
     // Private Member Functions
@@ -365,6 +379,9 @@ public:
             //- Return the tetBasePtIs
             const labelList& tetBasePtIs() const;
 
+            //- Return the cell search tree
+            const indexedOctree<treeDataCell>& cellTree() const;
+
             //- Return point zone mesh
             const pointZoneMesh& pointZones() const
             {
@@ -505,6 +522,9 @@ public:
             //- Clear primitive data (points, faces and cells)
             void clearPrimitives();
 
+            //- Clear cell tree data
+            void clearCellTree();
+
             //- Remove all files from mesh instance
             void removeFiles(const fileName& instanceDir) const;
 
@@ -531,6 +551,21 @@ public:
                 const point& pt,
                 label& tetFaceI,
                 label& tetPtI
+            ) const;
+
+            //- Is the point in the cell
+            bool pointInCell
+            (
+                const point&,
+                label cellI,
+                const cellRepresentation
+            ) const;
+
+            //- Find cell enclosing this location (-1 if not in mesh)
+            label findCell
+            (
+                const point&,
+                const cellRepresentation
             ) const;
 };
 
