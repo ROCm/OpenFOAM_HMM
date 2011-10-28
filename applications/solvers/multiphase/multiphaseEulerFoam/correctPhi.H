@@ -34,7 +34,7 @@
 
     adjustPhi(phi, U, pcorr);
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pcorrEqn
         (
@@ -44,7 +44,7 @@
         pcorrEqn.setReference(pRefCell, pRefValue);
         pcorrEqn.solve();
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi -= pcorrEqn.flux();
         }

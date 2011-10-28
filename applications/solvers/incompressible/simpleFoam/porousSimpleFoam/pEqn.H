@@ -11,7 +11,7 @@ UEqn.clear();
 phi = fvc::interpolate(U) & mesh.Sf();
 adjustPhi(phi, U, p);
 
-for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+while (simple.correctNonOrthogonal())
 {
     tmp<fvScalarMatrix> tpEqn;
 
@@ -25,17 +25,10 @@ for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
     }
 
     tpEqn().setReference(pRefCell, pRefValue);
-    // retain the residual from the first iteration
-    if (nonOrth == 0)
-    {
-        tpEqn().solve();
-    }
-    else
-    {
-        tpEqn().solve();
-    }
 
-    if (nonOrth == simple.nNonOrthCorr())
+    tpEqn().solve();
+
+    if (simple.finalNonOrthogonalIter())
     {
         phi -= tpEqn().flux();
     }

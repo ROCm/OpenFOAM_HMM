@@ -39,7 +39,7 @@
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf();
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqnIncomp
         (
@@ -55,10 +55,10 @@
             )
            *p_rghEqnComp()
           + p_rghEqnIncomp,
-            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
+            mesh.solver(p_rgh.select(pimple.finalInnerIter()))
         );
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             dgdt =
                 (pos(alpha2)*(psi2/rho2) - pos(alpha1)*(psi1/rho1))

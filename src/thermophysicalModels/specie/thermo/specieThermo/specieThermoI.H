@@ -43,7 +43,8 @@ inline Foam::scalar Foam::specieThermo<Thermo>::T
     scalar f,
     scalar T0,
     scalar (specieThermo<Thermo>::*F)(const scalar) const,
-    scalar (specieThermo<Thermo>::*dFdT)(const scalar) const
+    scalar (specieThermo<Thermo>::*dFdT)(const scalar) const,
+    scalar (specieThermo<Thermo>::*limit)(const scalar) const
 ) const
 {
     scalar Test = T0;
@@ -54,7 +55,8 @@ inline Foam::scalar Foam::specieThermo<Thermo>::T
     do
     {
         Test = Tnew;
-        Tnew = Test - ((this->*F)(Test) - f)/(this->*dFdT)(Test);
+        Tnew =
+            (this->*limit)(Test - ((this->*F)(Test) - f)/(this->*dFdT)(Test));
 
         if (iter++ > maxIter_)
         {
@@ -276,7 +278,14 @@ inline Foam::scalar Foam::specieThermo<Thermo>::TH
     const scalar T0
 ) const
 {
-    return T(h, T0, &specieThermo<Thermo>::H, &specieThermo<Thermo>::Cp);
+    return T
+    (
+        h,
+        T0,
+        &specieThermo<Thermo>::H,
+        &specieThermo<Thermo>::Cp,
+        &specieThermo<Thermo>::limit
+    );
 }
 
 
@@ -287,7 +296,14 @@ inline Foam::scalar Foam::specieThermo<Thermo>::THs
     const scalar T0
 ) const
 {
-    return T(hs, T0, &specieThermo<Thermo>::Hs, &specieThermo<Thermo>::Cp);
+    return T
+    (
+        hs,
+        T0,
+        &specieThermo<Thermo>::Hs,
+        &specieThermo<Thermo>::Cp,
+        &specieThermo<Thermo>::limit
+    );
 }
 
 
@@ -298,7 +314,14 @@ inline Foam::scalar Foam::specieThermo<Thermo>::TE
     const scalar T0
 ) const
 {
-    return T(e, T0, &specieThermo<Thermo>::E, &specieThermo<Thermo>::Cv);
+    return T
+    (
+        e,
+        T0,
+        &specieThermo<Thermo>::E,
+        &specieThermo<Thermo>::Cv,
+        &specieThermo<Thermo>::limit
+    );
 }
 
 

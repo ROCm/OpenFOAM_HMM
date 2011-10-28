@@ -69,7 +69,7 @@
       + alpha2f*rAlphaAU2f/fvc::interpolate(rho2))
     );
 
-    for(int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqnIncomp
         (
@@ -82,12 +82,11 @@
             (
                 (alpha1/rho1)*pEqnComp1()
               + (alpha2/rho2)*pEqnComp2()
-            ) +
-            pEqnIncomp,
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+            )
+          + pEqnIncomp,
+            mesh.solver(p.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             surfaceScalarField mSfGradp = pEqnIncomp.flux()/Dp;
             phi1 += rAlphaAU1f*mSfGradp/fvc::interpolate(rho1);

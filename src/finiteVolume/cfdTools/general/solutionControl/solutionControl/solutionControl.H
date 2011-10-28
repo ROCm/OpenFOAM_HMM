@@ -82,6 +82,15 @@ protected:
             bool transonic_;
 
 
+        // Evolution
+
+            //- Current corrector loop index
+            label corr_;
+
+            //- Current non-orthogonal corrector loop index
+            label corrNonOrtho_;
+
+
     // Protected Member Functions
 
         //- Read controls from fvSolution dictionary
@@ -137,17 +146,35 @@ public:
             //- Return the solution dictionary
             inline const dictionary& dict() const;
 
+            //- Current corrector loop index
+            inline label corr() const;
+
+            //- Current non-orthogonal corrector index
+            inline label corrNonOrtho() const;
+
 
         // Solution control
 
             //- Maximum number of non-orthogonal correctors
             inline label nNonOrthCorr() const;
 
+            //- Helper function to identify final non-orthogonal iteration
+            inline bool finalNonOrthogonalIter() const;
+
             //- Flag to indicate to solve for momentum
             inline bool momentumPredictor() const;
 
             //- Flag to indicate to solve using transonic algorithm
             inline bool transonic() const;
+
+
+        // Evolution
+
+            //- Main control loop
+            virtual bool loop() = 0;
+
+            //- Non-orthogonal corrector loop
+            inline bool correctNonOrthogonal();
 };
 
 

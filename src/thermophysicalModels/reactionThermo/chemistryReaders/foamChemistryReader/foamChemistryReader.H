@@ -67,13 +67,16 @@ class foamChemistryReader
         HashPtrTable<ThermoType> speciesThermo_;
 
         //- Table of species
-        speciesTable speciesTable_;
+        speciesTable& speciesTable_;
 
         //- List of the reactions
         ReactionList<ThermoType> reactions_;
 
 
     // Private Member Functions
+
+        //- Set the species list
+        speciesTable& setSpecies(const dictionary& dict, speciesTable& species);
 
         //- Disallow default bitwise copy construct
         foamChemistryReader(const foamChemistryReader&);
@@ -94,12 +97,17 @@ public:
         foamChemistryReader
         (
             const fileName& reactionsFileName,
+            speciesTable& species,
             const fileName& thermoFileName
         );
 
         //- Construct by getting the foamChemistry and thermodynamics file names
         //  from dictionary
-        foamChemistryReader(const dictionary& thermoDict);
+        foamChemistryReader
+        (
+            const dictionary& thermoDict,
+            speciesTable& species
+        );
 
 
     //- Destructor

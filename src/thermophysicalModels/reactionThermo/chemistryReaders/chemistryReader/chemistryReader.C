@@ -31,7 +31,8 @@ template<class ThermoType>
 Foam::autoPtr<Foam::chemistryReader<ThermoType> >
 Foam::chemistryReader<ThermoType>::New
 (
-    const dictionary& thermoDict
+    const dictionary& thermoDict,
+    speciesTable& species
 )
 {
     // Let the chemistry reader type default to CHEMKIN
@@ -50,7 +51,7 @@ Foam::chemistryReader<ThermoType>::New
     {
         FatalErrorIn
         (
-            "chemistryReader::New(const dictionary& thermoDict)"
+            "chemistryReader::New(const dictionary&, speciesTable&)"
         )   << "Unknown chemistryReader type "
             << chemistryReaderTypeName << nl << nl
             << "Valid chemistryReader types are:" << nl
@@ -58,7 +59,10 @@ Foam::chemistryReader<ThermoType>::New
             << exit(FatalError);
     }
 
-    return autoPtr<chemistryReader<ThermoType> >(cstrIter()(thermoDict));
+    return autoPtr<chemistryReader<ThermoType> >
+    (
+        cstrIter()(thermoDict, species)
+    );
 }
 
 

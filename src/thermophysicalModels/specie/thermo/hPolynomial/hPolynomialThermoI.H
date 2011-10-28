@@ -83,6 +83,16 @@ inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::limit
+(
+    const scalar T
+) const
+{
+    return T;
+}
+
+
+template<class EquationOfState, int PolySize>
 inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::cp
 (
     const scalar T

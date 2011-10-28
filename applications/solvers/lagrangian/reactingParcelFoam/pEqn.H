@@ -15,7 +15,7 @@ if (pimple.transonic())
         )
     );
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
@@ -26,12 +26,9 @@ if (pimple.transonic())
             parcels.Srho()
         );
 
-        pEqn.solve
-        (
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi == pEqn.flux();
         }
@@ -46,7 +43,7 @@ else
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
@@ -57,12 +54,9 @@ else
             parcels.Srho()
         );
 
-        pEqn.solve
-        (
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi += pEqn.flux();
         }

@@ -9,7 +9,7 @@
     adjustPhi(phi, U, p);
 
     // Non-orthogonal pressure corrector loop
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
@@ -20,7 +20,7 @@
 
         pEqn.solve();
 
-        if (nonOrth == simple.nNonOrthCorr())
+        if (simple.finalNonOrthogonalIter())
         {
             phi -= pEqn.flux();
         }

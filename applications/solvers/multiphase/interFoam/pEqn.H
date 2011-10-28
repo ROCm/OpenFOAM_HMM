@@ -18,7 +18,7 @@
       - ghf*fvc::snGrad(rho)
     )*rAUf*mesh.magSf();
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
@@ -27,12 +27,9 @@
 
         p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
 
-        p_rghEqn.solve
-        (
-            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi -= p_rghEqn.flux();
         }

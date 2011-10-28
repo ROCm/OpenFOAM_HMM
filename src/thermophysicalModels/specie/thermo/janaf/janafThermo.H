@@ -119,9 +119,6 @@ private:
         //- Check that input data is valid
         void checkInputData() const;
 
-        //- Check given temperature is within the range of the fitted coeffs
-        inline void checkT(const scalar T) const;
-
         //- Return the coefficients corresponding to the given temperature
         inline const coeffArray& coeffs(const scalar T) const;
 
@@ -152,6 +149,9 @@ public:
 
 
     // Member Functions
+
+        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        inline scalar limit(const scalar T) const;
 
         // Fundamental properties
 

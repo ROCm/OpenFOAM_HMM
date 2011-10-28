@@ -1,7 +1,7 @@
 volScalarField rAUrel(1.0/UrelEqn().A());
 Urel = rAUrel*UrelEqn().H();
 
-if (pimple.nCorr() <= 1)
+if (pimple.nCorrPIMPLE() <= 1)
 {
     UrelEqn.clear();
 }
@@ -12,7 +12,7 @@ phi = (fvc::interpolate(Urel) & mesh.Sf())
 adjustPhi(phi, Urel, p);
 
 // Non-orthogonal pressure corrector loop
-for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+while (pimple.correctNonOrthogonal())
 {
     // Pressure corrector
     fvScalarMatrix pEqn
@@ -22,12 +22,9 @@ for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
 
     pEqn.setReference(pRefCell, pRefValue);
 
-    pEqn.solve
-    (
-        mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-    );
+    pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
-    if (nonOrth == pimple.nNonOrthCorr())
+    if (pimple.finalNonOrthogonalIter())
     {
         phi -= pEqn.flux();
     }

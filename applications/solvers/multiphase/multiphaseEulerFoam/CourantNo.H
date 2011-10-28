@@ -39,6 +39,15 @@ if (mesh.nInternalFaces())
         fvc::surfaceSum(mag(phi))().internalField()
     );
 
+    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    {
+        sumPhi = max
+        (
+            sumPhi,
+            fvc::surfaceSum(mag(iter().phi()))().internalField()
+        );
+    }
+
     CoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
 
     meanCoNum =

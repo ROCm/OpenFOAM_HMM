@@ -89,6 +89,16 @@ Foam::hConstThermo<equationOfState>::New(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class EquationOfState>
+inline Foam::scalar Foam::hConstThermo<EquationOfState>::limit
+(
+    const scalar T
+) const
+{
+    return T;
+}
+
+
 template<class equationOfState>
 inline Foam::scalar Foam::hConstThermo<equationOfState>::cp
 (

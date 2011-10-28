@@ -34,7 +34,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "argList.H"
 #include "conformalVoronoiMesh.H"
 
 using namespace Foam;

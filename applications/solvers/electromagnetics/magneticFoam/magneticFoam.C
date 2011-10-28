@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     runTime++;
 
-    for (int nonOrth=0; nonOrth<=simple.nNonOrthCorr(); nonOrth++)
+    while (simple.correctNonOrthogonal())
     {
         solve(fvm::laplacian(murf, psi) + fvc::div(murf*Mrf));
     }

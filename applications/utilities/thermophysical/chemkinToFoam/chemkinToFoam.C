@@ -44,7 +44,9 @@ int main(int argc, char *argv[])
     argList::validArgs.append("FOAMThermodynamicsFile");
     argList args(argc, argv);
 
-    chemkinReader cr(args[1], args[2]);
+    speciesTable species;
+
+    chemkinReader cr(args[1], species, args[2]);
 
     OFstream reactionsFile(args[3]);
     reactionsFile

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VoidFraction.H"
-#
+
 // * * * * * * * * * * * * * Protectd Member Functions * * * * * * * * * * * //
 
 template<class CloudType>

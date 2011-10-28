@@ -42,8 +42,8 @@ void Foam::pimpleControl::read()
 
     // Read solution controls
     const dictionary& pimpleDict = dict();
-    nOuterCorr_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
-    nCorr_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
+    nCorrPIMPLE_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);
+    nCorrPISO_ = pimpleDict.lookupOrDefault<label>("nCorrectors", 1);
     turbOnFinalIterOnly_ =
         pimpleDict.lookupOrDefault<Switch>("turbOnFinalIterOnly", true);
 }
@@ -51,12 +51,14 @@ void Foam::pimpleControl::read()
 
 bool Foam::pimpleControl::criteriaSatisfied()
 {
-    if ((corr_ == 0) || residualControl_.empty() || finalIter())
+    // no checks on first iteration - nothing has been calculated yet
+    if ((corr_ == 1) || residualControl_.empty() || finalIter())
     {
         return false;
     }
 
-    bool firstIter = corr_ == 1;
+
+    bool storeIni = this->storeInitialResiduals();
 
     bool achieved = true;
     bool checked = false;    // safety that some checks were indeed performed
@@ -73,7 +75,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
 
             checked = true;
 
-            if (firstIter)
+            if (storeIni)
             {
                 residualControl_[fieldI].initialResidual =
                     sp.first().initialResidual();
@@ -83,7 +85,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
             bool relCheck = false;
 
             scalar relative = 0.0;
-            if (!firstIter)
+            if (!storeIni)
             {
                 const scalar iniRes =
                     residualControl_[fieldI].initialResidual
@@ -97,9 +99,10 @@ bool Foam::pimpleControl::criteriaSatisfied()
 
             if (debug)
             {
-                Info<< algorithmName_ << "loop statistics:" << endl;
+                Info<< algorithmName_ << " loop:" << endl;
 
-                Info<< "    " << variableName << " iter " << corr_
+                Info<< "    " << variableName
+                    << " PIMPLE iter " << corr_
                     << ": ini res = "
                     << residualControl_[fieldI].initialResidual
                     << ", abs tol = " << residual
@@ -120,25 +123,25 @@ bool Foam::pimpleControl::criteriaSatisfied()
 Foam::pimpleControl::pimpleControl(fvMesh& mesh)
 :
     solutionControl(mesh, "PIMPLE"),
-    nOuterCorr_(0),
-    nCorr_(0),
-    corr_(0),
+    nCorrPIMPLE_(0),
+    nCorrPISO_(0),
+    corrPISO_(0),
     turbOnFinalIterOnly_(true)
 {
     read();
 
-    if (nOuterCorr_ > 1)
+    if (nCorrPIMPLE_ > 1)
     {
         Info<< nl;
         if (residualControl_.empty())
         {
             Info<< algorithmName_ << ": no residual control data found. "
-                << "Calculations will employ " << nOuterCorr_
+                << "Calculations will employ " << nCorrPIMPLE_
                 << " corrector loops" << nl << endl;
         }
         else
         {
-            Info<< algorithmName_ << ": max iterations = " << nOuterCorr_
+            Info<< algorithmName_ << ": max iterations = " << nCorrPIMPLE_
                 << endl;
             forAll(residualControl_, i)
             {
@@ -162,6 +165,62 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh)
 
 Foam::pimpleControl::~pimpleControl()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::pimpleControl::loop()
+{
+    read();
+
+    corr_++;
+
+    if (debug)
+    {
+        Info<< algorithmName_ << " loop: corr = " << corr_ << endl;
+    }
+
+    if (corr_ == nCorrPIMPLE_ + 1)
+    {
+        if ((!residualControl_.empty()) && (nCorrPIMPLE_ != 1))
+        {
+            Info<< algorithmName_ << ": not converged within "
+                << nCorrPIMPLE_ << " iterations" << endl;
+        }
+
+        corr_ = 0;
+        mesh_.data::remove("finalIteration");
+        return false;
+    }
+
+    bool completed = false;
+    if (criteriaSatisfied())
+    {
+        Info<< algorithmName_ << ": converged in " << corr_ << " iterations"
+            << endl;
+        completed = true;
+    }
+    else
+    {
+        if (finalIter())
+        {
+            mesh_.data::add("finalIteration", true);
+        }
+
+        if (corr_ <= nCorrPIMPLE_)
+        {
+            if (nCorrPIMPLE_ != 1)
+            {
+                Info<< algorithmName_ << ": iteration " << corr_ << endl;
+                storePrevIterFields();
+            }
+
+            completed = false;
+        }
+    }
+
+    return !completed;
+}
 
 
 // ************************************************************************* //

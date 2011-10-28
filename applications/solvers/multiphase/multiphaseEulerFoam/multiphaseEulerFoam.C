@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "correctPhi.H"
-    #include "CourantNos.H"
+    #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,25 +68,26 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "CourantNos.H"
+        #include "CourantNo.H"
         #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
-        for (pimple.start(); pimple.loop(); pimple++)
+        while (pimple.loop())
         {
             sgsModel->correct();
             fluid.solve();
             rho = fluid.rho();
+            #include "zonePhaseVolumes.H"
 
             //#include "interfacialCoeffs.H"
             //#include "TEqns.H"
             #include "UEqns.H"
 
-            // --- PISO loop
-            for (int corr=0; corr<pimple.nCorr(); corr++)
+            // --- Pressure corrector loop
+            while (pimple.correct())
             {
                 #include "pEqn.H"
             }

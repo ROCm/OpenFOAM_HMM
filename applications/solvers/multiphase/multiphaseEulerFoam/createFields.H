@@ -42,7 +42,7 @@
         dimensionedScalar("phi", dimArea*dimVelocity, 0)
     );
 
-    multiphaseSystem fluid(mesh, phi);
+    multiphaseSystem fluid(U, phi);
 
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
@@ -77,9 +77,8 @@
     scalar pRefValue = 0.0;
     setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
-    singlePhaseTransportModel laminarTransport(U, phi);
 
     autoPtr<incompressible::LESModel> sgsModel
     (
-        incompressible::LESModel::New(U, phi, laminarTransport)
+        incompressible::LESModel::New(U, phi, fluid)
     );

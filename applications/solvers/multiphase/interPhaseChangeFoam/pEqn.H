@@ -13,8 +13,9 @@
 
     adjustPhi(phiU, U, p_rgh);
 
-    phi = phiU +
-        (
+    phi =
+        phiU
+      + (
             fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf();
@@ -23,7 +24,7 @@
     const volScalarField& vDotcP = vDotP[0]();
     const volScalarField& vDotvP = vDotP[1]();
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
@@ -33,12 +34,9 @@
 
         p_rghEqn.setReference(pRefCell, pRefValue);
 
-        p_rghEqn.solve
-        (
-            mesh.solver(p_rgh.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phi += p_rghEqn.flux();
         }

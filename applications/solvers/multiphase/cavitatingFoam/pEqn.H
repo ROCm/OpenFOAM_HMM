@@ -1,5 +1,5 @@
 {
-    if (pimple.nOuterCorr() == 1)
+    if (pimple.nCorrPIMPLE() == 1)
     {
         p =
         (
@@ -26,7 +26,7 @@
 
     #include "resetPhivPatches.H"
 
-    for (int nonOrth=0; nonOrth<=pimple.nNonOrthCorr(); nonOrth++)
+    while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
@@ -37,12 +37,9 @@
           - fvm::laplacian(rAUf, p)
         );
 
-        pEqn.solve
-        (
-            mesh.solver(p.select(pimple.finalInnerIter(corr, nonOrth)))
-        );
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
-        if (nonOrth == pimple.nNonOrthCorr())
+        if (pimple.finalNonOrthogonalIter())
         {
             phiv += (phiGradp + pEqn.flux())/rhof;
         }

@@ -23,39 +23,70 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Time.H"
+#include "interface.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace dragModels
+{
+    defineTypeNameAndDebug(interface, 0);
+
+    addToRunTimeSelectionTable
+    (
+        dragModel,
+        interface,
+        dictionary
+    );
+}
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dragModels::interface::interface
+(
+    const dictionary& interfaceDict,
+    const phaseModel& phase1,
+    const phaseModel& phase2
+)
+:
+    dragModel(interfaceDict, phase1, phase2)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::dragModels::interface::~interface()
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::simpleControl::loop()
+Foam::tmp<Foam::volScalarField> Foam::dragModels::interface::K
+(
+    const volScalarField& Ur
+) const
 {
-    read();
-
-    Time& time = const_cast<Time&>(mesh_.time());
-
-    if (initialised_)
-    {
-        if (criteriaSatisfied())
-        {
-            Info<< nl << algorithmName_ << " solution converged in "
-                << time.timeName() << " iterations" << nl << endl;
-
-            // Set to finalise calculation
-            time.writeAndEnd();
-        }
-        else
-        {
-            storePrevIterFields();
-        }
-    }
-    else
-    {
-        initialised_ = true;
-        storePrevIterFields();
-    }
-
-
-    return time.loop();
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "K",
+                Ur.mesh().time().timeName(),
+                Ur.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            Ur.mesh(),
+            dimensionedScalar("K", dimDensity/dimTime, 0)
+        )
+    );
 }
 
 

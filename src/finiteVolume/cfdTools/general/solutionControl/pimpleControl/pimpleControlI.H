@@ -25,106 +25,70 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::pimpleControl::corr() const
+inline Foam::label Foam::pimpleControl::nCorrPIMPLE() const
 {
-    return corr_;
+    return nCorrPIMPLE_;
 }
 
 
-inline Foam::label Foam::pimpleControl::nOuterCorr() const
+inline Foam::label Foam::pimpleControl::nCorrPISO() const
 {
-    return nOuterCorr_;
+    return nCorrPISO_;
 }
 
 
-inline Foam::label Foam::pimpleControl::nCorr() const
+inline Foam::label Foam::pimpleControl::corrPISO() const
 {
-    return nCorr_;
+    return corrPISO_;
 }
 
 
-inline bool Foam::pimpleControl::start()
+inline bool Foam::pimpleControl::correct()
 {
-    corr_ = 0;
+    corrPISO_++;
 
-    return true;
-}
-
-
-inline bool Foam::pimpleControl::loop()
-{
-    read();
-
-    if (criteriaSatisfied())
+    if (debug)
     {
-        Info<< algorithmName_ << ": converged in " << corr_ << " iterations"
-            << endl;
-        return false;
+        Info<< algorithmName_ << " correct: corrPISO = " << corrPISO_ << endl;
+    }
+
+    if (corrPISO_ <= nCorrPISO_)
+    {
+        return true;
     }
     else
     {
-        if (finalIter())
-        {
-            mesh_.data::add("finalIteration", true);
-        }
-
-        if (corr_ < nOuterCorr_)
-        {
-            if (nOuterCorr_ != 1)
-            {
-                Info<< algorithmName_ << ": iteration " << corr_ + 1 << endl;
-                storePrevIterFields();
-            }
-
-            return true;
-        }
-        else
-        {
-            if ((!residualControl_.empty()) && (nOuterCorr_ != 1))
-            {
-                Info<< algorithmName_ << ": not converged within "
-                    << nOuterCorr_ << " iterations" << endl;
-            }
-
-            return false;
-        }
+        corrPISO_ = 0;
+        return false;
     }
+}
+
+
+inline bool Foam::pimpleControl::storeInitialResiduals() const
+{
+    // start from second PIMPLE iteration
+    return (corr_ == 2) && (corrPISO_ == 0) && (corrNonOrtho_ == 0);
 }
 
 
 inline bool Foam::pimpleControl::finalIter() const
 {
-    return corr_ == nOuterCorr_-1;
+    return corr_ == nCorrPIMPLE_;
 }
 
 
-inline bool Foam::pimpleControl::finalInnerIter
-(
-    const label corr,
-    const label nonOrth
-) const
+inline bool Foam::pimpleControl::finalInnerIter() const
 {
     return
-        corr_ == nOuterCorr_-1
-     && corr == nCorr_-1
-     && nonOrth == nNonOrthCorr_;
+       corr_ == nCorrPIMPLE_
+    && corrPISO_ == nCorrPISO_
+    && corrNonOrtho_ == nNonOrthCorr_ + 1;
 }
 
 
 inline bool Foam::pimpleControl::turbCorr() const
 {
     return !turbOnFinalIterOnly_ || finalIter();
-}
-
-
-inline void Foam::pimpleControl::operator++(int)
-{
-    if (finalIter())
-    {
-        mesh_.data::remove("finalIteration");
-    }
-
-    corr_++;
 }
 
 

@@ -55,13 +55,13 @@ protected:
         // Solution controls
 
             //- Maximum number of PIMPLE correctors
-            label nOuterCorr_;
+            label nCorrPIMPLE_;
 
             //- Maximum number of PISO correctors
-            label nCorr_;
+            label nCorrPISO_;
 
-            //- Current PIMPLE corrector
-            label corr_;
+            //- Current PISO corrector
+            label corrPISO_;
 
             //- Flag to indicate whether to only solve turbulence on final iter
             bool turbOnFinalIterOnly_;
@@ -105,41 +105,35 @@ public:
 
         // Access
 
-            //- Current corrector index
-            inline label corr() const;
-
             //- Maximum number of PIMPLE correctors
-            inline label nOuterCorr() const;
+            inline label nCorrPIMPLE() const;
 
             //- Maximum number of PISO correctors
-            inline label nCorr() const;
+            inline label nCorrPISO() const;
+
+            //- Current PISO corrector index
+            inline label corrPISO() const;
 
 
         // Solution control
 
-            //- Loop start
-            inline bool start();
+            //- PIMPLE loop
+            virtual bool loop();
 
-            //- Loop loop
-            inline bool loop();
+            //- Pressure corrector loop
+            inline bool correct();
+
+            //- Helper function to identify when to store the intial residuals
+            inline bool storeInitialResiduals() const;
 
             //- Helper function to identify final PIMPLE (outer) iteration
             inline bool finalIter() const;
 
             //- Helper function to identify final inner iteration
-            inline bool finalInnerIter
-            (
-                const label corr,
-                const label nonOrth
-            ) const;
+            inline bool finalInnerIter() const;
 
             //- Helper function to identify whether to solve for turbulence
             inline bool turbCorr() const;
-
-
-    // Member Operators
-
-        void operator++(int);
 };
 
 
