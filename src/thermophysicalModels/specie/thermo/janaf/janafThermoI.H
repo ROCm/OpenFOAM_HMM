@@ -206,15 +206,15 @@ inline void Foam::janafThermo<EquationOfState>::operator+=
 
     if (notEqual(Tcommon_, jt.Tcommon_))
     {
-        WarningIn
+        FatalErrorIn
         (
             "janafThermo<EquationOfState>::operator+="
             "(const janafThermo<EquationOfState>& jt) const"
-        )   << "Tcommon " << Tcommon_ << " != " << jt.Tcommon_
-            << ", an average value will be used for the result"
-            << endl;
-
-        Tcommon_ = molr1*Tcommon_ + molr2*jt.Tcommon_;
+        )   << "Tcommon " << Tcommon_ << " for "
+            << (this->name().size() ? this->name() : "others")
+            << " != " << jt.Tcommon_ << " for "
+            << (jt.name().size() ? jt.name() : "others")
+            << exit(FatalError);
     }
 
     for
@@ -253,15 +253,15 @@ inline void Foam::janafThermo<EquationOfState>::operator-=
 
     if (notEqual(Tcommon_, jt.Tcommon_))
     {
-        WarningIn
+        FatalErrorIn
         (
             "janafThermo<EquationOfState>::operator-="
             "(const janafThermo<EquationOfState>& jt) const"
-        )   << "Tcommon " << Tcommon_ << " != " << jt.Tcommon_
-            << ", an average value will be used for the result"
-            << endl;
-
-        Tcommon_ = (molr1*Tcommon_ + molr2*jt.Tcommon_)/(molr1 + molr2);
+        )   << "Tcommon " << Tcommon_ << " for "
+            << (this->name().size() ? this->name() : "others")
+            << " != " << jt.Tcommon_ << " for "
+            << (jt.name().size() ? jt.name() : "others")
+            << exit(FatalError);
     }
 
     for
@@ -316,19 +316,18 @@ inline Foam::janafThermo<EquationOfState> Foam::operator+
           + molr2*jt2.lowCpCoeffs_[coefLabel];
     }
 
-    scalar Tcommon = jt1.Tcommon_;
     if (notEqual(jt1.Tcommon_, jt2.Tcommon_))
     {
-        WarningIn
+        FatalErrorIn
         (
             "operator+"
             "(const janafThermo<EquationOfState>& jt1,"
             " const janafThermo<EquationOfState>& jt2)"
-        )   << "Tcommon " << jt1.Tcommon_ << " != " << jt2.Tcommon_
-            << ", an average value will be used for the result"
-            << endl;
-
-        Tcommon = molr1*jt1.Tcommon_ + molr2*jt2.Tcommon_;
+        )   << "Tcommon " << jt1.Tcommon_ << " for "
+            << (jt1.name().size() ? jt1.name() : "others")
+            << " != " << jt2.Tcommon_ << " for "
+            << (jt2.name().size() ? jt2.name() : "others")
+            << exit(FatalError);
     }
 
     return janafThermo<EquationOfState>
@@ -336,7 +335,7 @@ inline Foam::janafThermo<EquationOfState> Foam::operator+
         eofs,
         max(jt1.Tlow_, jt2.Tlow_),
         min(jt1.Thigh_, jt2.Thigh_),
-        Tcommon,
+        jt1.Tcommon_,
         highCpCoeffs,
         lowCpCoeffs
     );
@@ -375,19 +374,18 @@ inline Foam::janafThermo<EquationOfState> Foam::operator-
           - molr2*jt2.lowCpCoeffs_[coefLabel];
     }
 
-    scalar Tcommon = jt1.Tcommon_;
     if (notEqual(jt1.Tcommon_, jt2.Tcommon_))
     {
-        WarningIn
+        FatalErrorIn
         (
             "operator-"
             "(const janafThermo<EquationOfState>& jt1,"
             " const janafThermo<EquationOfState>& jt2)"
-        )   << "Tcommon " << jt1.Tcommon_ << " != " << jt2.Tcommon_
-            << ", an average value will be used for the result"
-            << endl;
-
-        Tcommon = (molr1*jt1.Tcommon_ + molr2*jt2.Tcommon_)/(molr1 + molr2);
+        )   << "Tcommon " << jt1.Tcommon_ << " for "
+            << (jt1.name().size() ? jt1.name() : "others")
+            << " != " << jt2.Tcommon_ << " for "
+            << (jt2.name().size() ? jt2.name() : "others")
+            << exit(FatalError);
     }
 
     return janafThermo<EquationOfState>
@@ -395,7 +393,7 @@ inline Foam::janafThermo<EquationOfState> Foam::operator-
         eofs,
         max(jt1.Tlow_, jt2.Tlow_),
         min(jt1.Thigh_, jt2.Thigh_),
-        Tcommon,
+        jt1.Tcommon_,
         highCpCoeffs,
         lowCpCoeffs
     );
