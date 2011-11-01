@@ -76,7 +76,7 @@ Info<< "Time scales min/max:" << endl;
             (
                 DpDt
               + parcels.hsTrans()/(mesh.V()*runTime.deltaT())
-              + energySource.Su()
+//              + energySource.Su()
               + combustion->Sh()()
             )
            /rho

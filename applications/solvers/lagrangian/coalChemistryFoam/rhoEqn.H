@@ -30,13 +30,17 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    solve
+    fvScalarMatrix rhoEqn
     (
         fvm::ddt(rho)
       + fvc::div(phi)
       ==
         coalParcels.Srho(rho)
     );
+
+    sources.apply(rhoEqn);
+
+    rhoEqn.solve();
 }
 
 // ************************************************************************* //

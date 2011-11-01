@@ -40,7 +40,7 @@ Description
 #include "basicThermoCloud.H"
 #include "coalCloud.H"
 #include "psiChemistryCombustionModel.H"
-#include "timeActivatedExplicitSource.H"
+#include "IObasicSourceList.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"

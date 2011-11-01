@@ -26,6 +26,8 @@ if (pimple.transonic())
             coalParcels.Srho()
         );
 
+        sources.apply(pEqn);
+
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
         if (pimple.finalNonOrthogonalIter())
@@ -53,6 +55,8 @@ else
          ==
             coalParcels.Srho()
         );
+
+        sources.apply(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

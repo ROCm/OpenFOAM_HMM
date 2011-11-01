@@ -29,7 +29,7 @@
     }
 
     {
-        solve
+        fvScalarMatrix hsEqn
         (
             fvm::ddt(rho, hs)
           + mvConvection->fvmDiv(phi, hs)
@@ -38,9 +38,12 @@
             pWork()
           + parcels.Sh(hs)
           + radiation->Shs(thermo)
-          + energySource.Su()
           + combustion->Sh()
         );
+
+        sources.apply(hsEqn);
+
+        hsEqn.solve();
 
         thermo.correct();
 
