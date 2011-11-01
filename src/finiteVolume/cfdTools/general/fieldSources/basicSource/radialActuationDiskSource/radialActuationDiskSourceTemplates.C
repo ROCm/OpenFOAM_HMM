@@ -61,24 +61,25 @@ addRadialActuationDiskAxialInertialResistance
     const scalar maxR = gMax(mag(zoneCellCentres - avgCentre));
 
     scalar intCoeffs =
-        coeffs_[0]
-      + coeffs_[1]*sqr(maxR)/2.0
-      + coeffs_[2]*pow4(maxR)/3.0;
+        radialCoeffs_[0]
+      + radialCoeffs_[1]*sqr(maxR)/2.0
+      + radialCoeffs_[2]*pow4(maxR)/3.0;
 
     forAll(cells, i)
     {
         T[i] = 2.0*rho[cells[i]]*diskArea_*mag(U[cells[i]])*a/(1.0 - a);
 
-        scalar r = mag(mesh().cellCentres()[cells[i]] - avgCentre);
+        scalar r2 = magSqr(mesh().cellCentres()[cells[i]] - avgCentre);
 
         Tr[i] =
-            T[i]*(coeffs_[0] + coeffs_[1]*sqr(r) + coeffs_[2]*pow4(r))
+            T[i]
+           *(radialCoeffs_[0] + radialCoeffs_[1]*r2 + radialCoeffs_[2]*sqr(r2))
            /intCoeffs;
     }
 
     forAll(cells, i)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*Tr[i]*E) & U[cells[i]];
+        Usource[cells[i]] += ((Vcells[cells[i]]/V_)*Tr[i]*E) & U[cells[i]];
     }
 
     if (debug)

@@ -61,7 +61,7 @@ void Foam::explicitSetValue::setFieldData(const dictionary& dict)
             fieldName,
             this->mesh().time().timeName(),
             this->mesh(),
-            IOobject::NO_READ,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         );
@@ -93,22 +93,40 @@ Foam::explicitSetValue::explicitSetValue
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
-    coeffs_(dict.subDict(modelType + "Coeffs"))
+    basicSource(name, modelType, dict, mesh)
 {
     setFieldData(coeffs_.subDict("fieldData"));
 }
 
 
-void Foam::explicitSetValue::setValue(fvMatrix<scalar>& Eqn)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::label Foam::explicitSetValue::applyToField
+(
+    const word& fieldName
+) const
 {
-    setFieldValue(Eqn, scalarFields_[Eqn.psi().name()]);
+    notImplemented("Foam::explicitSetValue::applyToField(const word&)");
 }
 
 
-void Foam::explicitSetValue::setValue(fvMatrix<vector>& Eqn)
+void Foam::explicitSetValue::setValue
+(
+    fvMatrix<scalar>& eqn,
+    const label
+)
 {
-    setFieldValue(Eqn, vectorFields_[Eqn.psi().name()]);
+    setFieldValue(eqn, scalarFields_[eqn.psi().name()]);
+}
+
+
+void Foam::explicitSetValue::setValue
+(
+    fvMatrix<vector>& eqn,
+    const label
+)
+{
+    setFieldValue(eqn, vectorFields_[eqn.psi().name()]);
 }
 
 

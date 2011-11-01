@@ -87,12 +87,6 @@ class explicitSetValue
 
 protected:
 
-    // Protected data
-
-        //- Coefficients dictionary
-        dictionary coeffs_;
-
-
     // Protected functions
 
         //- Set the local field data
@@ -126,20 +120,19 @@ public:
 
     // Member Functions
 
+        // Check
 
-        // Edit
-
-            //- Return points
-            inline  const List<point>& points() const;
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
 
 
         // Evaluation
 
             //- Set value on vector field
-            virtual void setValue(fvMatrix<vector>& UEqn);
+            virtual void setValue(fvMatrix<vector>& eqn, const label fieldI);
 
             //- Set value on scalar field
-            virtual void setValue(fvMatrix<scalar>& UEqn);
+            virtual void setValue(fvMatrix<scalar>& eqn, const label fieldI);
 
 
         // I-O
@@ -147,26 +140,14 @@ public:
             //- Write the source properties
             virtual void writeData(Ostream&) const;
 
-            //- Read fieldData in sub-dictionary
+            //- Read source dictionary
             virtual bool read(const dictionary& dict);
-
-            //- Ostream operator
-            friend Ostream& operator<<
-            (
-                Ostream& os,
-                const explicitSetValue& source
-            );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "explicitSetValueIO.C"
-#include "explicitSetValueI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

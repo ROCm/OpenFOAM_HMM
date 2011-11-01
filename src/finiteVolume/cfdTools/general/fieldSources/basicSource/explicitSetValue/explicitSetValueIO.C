@@ -30,7 +30,7 @@ License
 void Foam::explicitSetValue::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
-    dict_.write(os);
+    coeffs_.write(os);
 }
 
 
@@ -38,7 +38,6 @@ bool Foam::explicitSetValue::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
         setFieldData(coeffs_.subDict("fieldData"));
         return true;
     }
@@ -46,15 +45,6 @@ bool Foam::explicitSetValue::read(const dictionary& dict)
     {
         return false;
     }
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSetValue& source)
-{
-    source.writeData(os);
-    return os;
 }
 
 

@@ -23,28 +23,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
+#include "ExplicitSource.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::explicitSource::volumeModeType&
-Foam::explicitSource::volumeMode() const
+template<class Type>
+void Foam::ExplicitSource<Type>::writeData(Ostream& os) const
 {
-    return volumeMode_;
+    notImplemented
+    (
+        "void Foam::ExplicitSource<Type>::read(Ostream&) const"
+    );
 }
 
 
-inline Foam::explicitSource::volumeModeType&
-Foam::explicitSource::volumeMode()
+template<class Type>
+bool Foam::ExplicitSource<Type>::read(const dictionary& dict)
 {
-    return volumeMode_;
-}
+    notImplemented
+    (
+        "bool Foam::ExplicitSource<Type>::read(const dictionary&)"
+    );
 
-
-inline const Foam::List<Foam::point>&
-Foam::explicitSource::points() const
-{
-    return points_;
+    return false;
 }
 
 

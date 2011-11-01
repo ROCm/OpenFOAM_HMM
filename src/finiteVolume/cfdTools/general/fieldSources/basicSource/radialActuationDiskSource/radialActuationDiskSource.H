@@ -71,11 +71,8 @@ class radialActuationDiskSource
 {
     // Private data
 
-        //- Coefficients dictionary
-        dictionary coeffsDict_;
-
         //- Coeffcients for the radial distribution
-        FixedList<scalar, 3> coeffs_;
+        FixedList<scalar, 3> radialCoeffs_;
 
 
     // Private Member Functions
@@ -124,7 +121,7 @@ public:
         // Public Functions
 
             //- Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
         // I-O

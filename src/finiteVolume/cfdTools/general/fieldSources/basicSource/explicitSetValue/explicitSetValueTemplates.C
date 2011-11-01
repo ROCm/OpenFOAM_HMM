@@ -52,14 +52,14 @@ void Foam::explicitSetValue::setFieldValue
         )
     );
 
-    List<Type> values(this->cells().size());
+    List<Type> values(cells_.size());
 
-    forAll (values, i)
+    forAll(values, i)
     {
         values[i] = data;
     }
 
-    Eqn.setValues(this->cells(), values);
+    Eqn.setValues(cells_, values);
 }
 
 

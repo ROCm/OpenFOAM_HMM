@@ -23,22 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeActivatedExplicitSource.H"
+#include "pressureGradientExplicitSource.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
+void Foam::pressureGradientExplicitSourceNew::writeData(Ostream& os) const
 {
-    defineTemplateTypeNameAndDebug
+    notImplemented
     (
-        IOPtrList<scalarTimeActivatedExplicitSource>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        IOPtrList<vectorTimeActivatedExplicitSource>,
-         0
+        "void Foam::pressureGradientExplicitSourceNew::writeData"
+        "("
+            "Ostream&"
+        ") const"
     );
 }
+
+
+bool Foam::pressureGradientExplicitSourceNew::read(const dictionary& dict)
+{
+    notImplemented
+    (
+        "bool Foam::pressureGradientExplicitSourceNew::read"
+        "("
+            "const dictionary&"
+        ") const"
+    );
+
+    return false;
+}
+
 
 // ************************************************************************* //

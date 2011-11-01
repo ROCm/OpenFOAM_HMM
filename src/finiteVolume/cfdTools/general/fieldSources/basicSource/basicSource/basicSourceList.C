@@ -24,6 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicSourceList.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(basicSourceList, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -50,58 +58,22 @@ Foam::basicSourceList::basicSourceList
     label i = 0;
     forAllConstIter(dictionary, dict, iter)
     {
-        const word& name = iter().keyword();
-        const dictionary& sourceDict = iter().dict();
+        if (iter().isDict())
+        {
+            const word& name = iter().keyword();
+            const dictionary& sourceDict = iter().dict();
 
-        this->set
-        (
-            i++,
-            basicSource::New(name, sourceDict, mesh)
-        );
+            this->set
+            (
+                i++,
+                basicSource::New(name, sourceDict, mesh)
+            );
+        }
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-void Foam::basicSourceList::addSu(fvMatrix<scalar>& Eqn)
-{
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).addSu(Eqn);
-        }
-    }
-}
-
-
-void Foam::basicSourceList::addSu(fvMatrix<vector>& Eqn)
-{
-
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).addSu(Eqn);
-        }
-    }
-}
-
-
-void Foam::basicSourceList::setValue(fvMatrix<scalar>& Eqn)
-{
-
-    forAll(*this, i)
-    {
-        if (this->operator[](i).isActive())
-        {
-            this->operator[](i).setValue(Eqn);
-        }
-    }
-}
-
 
 bool Foam::basicSourceList::read(const dictionary& dict)
 {

@@ -23,38 +23,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::explicitSource::writeData(Ostream& os) const
+template<class Type>
+void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
-}
+    const word& fieldName = eqn.psi().name();
 
-
-bool Foam::explicitSource::read(const dictionary& dict)
-{
-    if (basicSource::read(dict))
+    forAll(*this, i)
     {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
-        setFieldData(coeffs_.subDict("fieldData"));
-        return true;
+        basicSource& source = this->operator[](i);
+
+        label fieldI = source.applyToField(fieldName);
+
+        if (source.isActive() && (fieldI != -1))
+        {
+            if (debug)
+            {
+                Info<< "Applying source " << source.name() << " to field "
+                    << fieldName << endl;
+            }
+
+            source.addSup(eqn, fieldI);
+            source.setValue(eqn, fieldI);
+        }
     }
-    else
-    {
-        return false;
-    }
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSource& source)
-{
-    source.writeData(os);
-    return os;
 }
 
 

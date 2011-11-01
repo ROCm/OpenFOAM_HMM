@@ -378,19 +378,20 @@ $(SRF)/SRFModel/rpm/rpm.C
 $(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
 $(SRF)/derivedFvPatchFields/SRFFreestreamVelocityFvPatchVectorField/SRFFreestreamVelocityFvPatchVectorField.C
 
-fieldSources = $(general)/fieldSources
-$(fieldSources)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
-$(fieldSources)/timeActivatedExplicitSource/timeActivatedExplicitSource.C
-
 basicSource = $(general)/fieldSources/basicSource
 $(basicSource)/basicSource/basicSource.C
 $(basicSource)/basicSource/basicSourceIO.C
 $(basicSource)/basicSource/basicSourceList.C
 $(basicSource)/basicSource/IObasicSourceList.C
-$(basicSource)/actuationDiskSource/actuationDiskSource.C
-$(basicSource)/radialActuationDiskSource/radialActuationDiskSource.C
+
+$(basicSource)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
+$(basicSource)/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
+
 $(basicSource)/explicitSource/explicitSource.C
+
 $(basicSource)/explicitSetValue/explicitSetValue.C
+$(basicSource)/explicitSetValue/explicitSetValueIO.C
+
 $(basicSource)/rotorDiskSource/rotorDiskSource.C
 $(basicSource)/rotorDiskSource/bladeModel/bladeModel.C
 $(basicSource)/rotorDiskSource/profileModel/profileModel.C
@@ -398,5 +399,7 @@ $(basicSource)/rotorDiskSource/profileModel/profileModelList.C
 $(basicSource)/rotorDiskSource/profileModel/lookup/lookupProfile.C
 $(basicSource)/rotorDiskSource/profileModel/series/seriesProfile.C
 
+$(basicSource)/actuationDiskSource/actuationDiskSource.C
+$(basicSource)/radialActuationDiskSource/radialActuationDiskSource.C
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

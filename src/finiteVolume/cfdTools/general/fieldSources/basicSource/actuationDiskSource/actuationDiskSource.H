@@ -74,8 +74,8 @@ protected:
 
     // Protected data
 
-        //- Coefficients dictionary
-        dictionary coeffs_;
+        //- Name of field to apply source upon
+        word fieldName_;
 
         //- Disk area normal
         vector diskDir_;
@@ -140,6 +140,12 @@ public:
 
     // Member Functions
 
+        // Check
+
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
+
+
         // Access
 
             //- Return Cp
@@ -169,11 +175,8 @@ public:
 
         // Public Functions
 
-            //-Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //-Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn){}
+            //- Source term to fvMatrix<vector>
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
         // I-O

@@ -97,8 +97,8 @@ protected:
 
     // Protected data
 
-        //- Coefficients dictionary
-        dictionary coeffs_;
+        //- Name of field on which to apply the source
+        word fieldName_;
 
         //- Name of density field
         word rhoName_;
@@ -212,13 +212,16 @@ public:
     // Member Functions
 
 
+        // Checks
+
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
+
+
         // Source term addition
 
             //- Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //- Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn);
+            virtual void addSup(fvMatrix<vector>& eqn);
 
 
         // I-O

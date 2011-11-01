@@ -23,14 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#include "ExplicitSource.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::List<Foam::point>&
-Foam::explicitSetValue::points() const
+template<class Type>
+inline const typename Foam::ExplicitSource<Type>::volumeModeType&
+Foam::ExplicitSource<Type>::volumeMode() const
 {
-    return points_;
+    return volumeMode_;
+}
+
+
+template<class Type>
+inline const Type& Foam::ExplicitSource<Type>::fieldData() const
+{
+    return fieldData_;
+}
+
+
+template<class Type>
+inline typename Foam::ExplicitSource<Type>::volumeModeType&
+Foam::ExplicitSource<Type>::volumeMode()
+{
+    return volumeMode_;
+}
+
+
+template<class Type>
+inline Type& Foam::ExplicitSource<Type>::fieldData()
+{
+    return fieldData_;
 }
 
 

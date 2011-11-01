@@ -118,7 +118,7 @@ void Foam::basicSource::setCellSet()
                 {
                     WarningIn
                     (
-                        "TimeActivatedExplicitSource<Type>::setCellIds()"
+                        "basicSource::setCellIds()"
                     )
                     << "Unable to find owner cell for point " << points_[i]
                     << endl;
@@ -148,7 +148,7 @@ void Foam::basicSource::setCellSet()
             label zoneID = mesh_.cellZones().findZoneID(cellSetName_);
             if (zoneID == -1)
             {
-                FatalErrorIn("basicSource<Type>::setCellIds()")
+                FatalErrorIn("basicSource::setCellIds()")
                     << "Cannot find cellZone " << cellSetName_ << endl
                     << "Valid cellZones are " << mesh_.cellZones().names()
                     << exit(FatalError);
@@ -166,7 +166,7 @@ void Foam::basicSource::setCellSet()
         }
         default:
         {
-            FatalErrorIn("basicSource<Type>::setCellIds()")
+            FatalErrorIn("basicSource::setCellIds()")
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
                 << ". Valid selectionMode types are" << selectionModeTypeNames_
@@ -194,24 +194,24 @@ Foam::basicSource::basicSource
 (
     const word& name,
     const word& modelType,
-    const dictionary& dict,
+    const dictionary& coeffs,
     const fvMesh& mesh
 )
 :
     name_(name),
     mesh_(mesh),
-    dict_(dict),
-    active_(readBool(dict_.lookup("active"))),
-    timeStart_(readScalar(dict_.lookup("timeStart"))),
-    duration_(readScalar(dict_.lookup("duration"))),
+    coeffs_(coeffs),
+    active_(readBool(coeffs_.lookup("active"))),
+    timeStart_(readScalar(coeffs_.lookup("timeStart"))),
+    duration_(readScalar(coeffs_.lookup("duration"))),
     selectionMode_
     (
-        selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
+        selectionModeTypeNames_.read(coeffs_.lookup("selectionMode"))
     ),
     cellSetName_("none"),
     V_(0.0)
 {
-    setSelection(dict_);
+    setSelection(coeffs_);
 
     setCellSet();
 }
@@ -222,11 +222,11 @@ Foam::basicSource::basicSource
 Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
 (
     const word& name,
-    const dictionary& dict,
+    const dictionary& coeffs,
     const fvMesh& mesh
 )
 {
-    word modelType(dict.lookup("type"));
+    word modelType(coeffs.lookup("type"));
 
     Info<< "Selecting model type " << modelType << endl;
 
@@ -237,16 +237,16 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     {
         FatalErrorIn
         (
-            "basicSource::New(const volVectorField&, "
-            "const surfaceScalarField&, transportModel&)"
+            "basicSource::New"
+            "(const name&, const dictionary&, const fvMesh&)"
         )   << "Unknown Model type " << modelType
             << nl << nl
-            << "Valid model types are :" << nl
+            << "Valid model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<basicSource>(cstrIter()(name, modelType, dict, mesh));
+    return autoPtr<basicSource>(cstrIter()(name, modelType, coeffs, mesh));
 }
 
 
@@ -275,21 +275,75 @@ bool Foam::basicSource::isActive()
 }
 
 
-void Foam::basicSource::addSu(Foam::fvMatrix<vector>& Eqn)
+void Foam::basicSource::addSup(fvMatrix<scalar>& eqn, const label fieldI)
 {
-    notImplemented("Foam::basicSource addSu(Foam::fvMatrix<vector>& Eqn)");
+    // do nothing
 }
 
 
-void Foam::basicSource::addSu(Foam::fvMatrix<scalar>& Eqn)
+void Foam::basicSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
-    notImplemented("Foam::basicSource addSu(Foam::fvMatrix<scalar>& Eqn)");
+    // do nothing
 }
 
 
-void Foam::basicSource::setValue(Foam::fvMatrix<scalar>& Eqn)
+void Foam::basicSource::addSup
+(
+    fvMatrix<sphericalTensor>& eqn,
+    const label fieldI
+)
 {
-    notImplemented("Foam::basicSource setValue(Foam::fvMatrix<scalar>& Eqn)");
+    // do nothing
+}
+
+
+void Foam::basicSource::addSup(fvMatrix<symmTensor>& eqn, const label fieldI)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::addSup(fvMatrix<tensor>& eqn, const label fieldI)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::setValue(fvMatrix<scalar>& eqn, const label fieldI)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::setValue(fvMatrix<vector>& eqn, const label fieldI)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::setValue
+(
+    fvMatrix<sphericalTensor>& eqn,
+    const label fieldI
+)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::setValue
+(
+    fvMatrix<symmTensor>& eqn,
+    const label fieldI
+)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::setValue(fvMatrix<tensor>& eqn, const label fieldI)
+{
+    // do nothing
 }
 
 

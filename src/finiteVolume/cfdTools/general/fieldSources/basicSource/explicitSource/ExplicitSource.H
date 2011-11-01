@@ -22,37 +22,45 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::explicitSource
+    Foam::ExplicitSource
 
 Description
-    Explicit source.
+    Time activated explicit source.
 
     Sources described by:
 
-    explicitSourceCoeffs
     {
-        points            // list of points when selectionMode = points
+        active          true;      // on/off switch
+        timeStart       0.2;       // start time
+        duration        2.0;       // duration
+        selectionMode   points;    // cellSet/cellZone/all
+        volumeMode      absolute;  // specific
+
+        fieldData                  // field data - usage for multiple fields
         (
-            (-0.088 0.007 -0.02)
-            (-0.028 0.007 -0.02)
+            (H2O 0.005)
         );
-        volumeMode          specific;  //absolute
-        fieldData            // field data - usage for multiple fields
-        {
-            k   30.7;
-            epsilon  1.5;
-        }
+
+        fieldData       0.005;     // field data - usage for single field
+
+        points                     // list of points when selectionMode = points
+        (
+            (2.75 0.5 0)
+        );
+
+        cellSet         c0;        // cellSet name when selectionMode=cellSet
+        cellZone        c0;        // cellZone name when selectionMode=cellZone
     }
 
 SourceFiles
-    explicitSource.C
+    ExplicitSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef explicitSource_H
-#define explicitSource_H
+#ifndef ExplicitSource_H
+#define ExplicitSource_H
 
-#include "cellSet.H"
+#include "Tuple2.H"
 #include "volFieldsFwd.H"
 #include "DimensionedField.H"
 #include "basicSource.H"
@@ -62,35 +70,31 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+
+class fvMesh;
+
+template<class Type>
+class ExplicitSource;
+
+// Forward declaration of friend functions
+
+template<class Type>
+Ostream& operator<<
+(
+    Ostream&,
+    const ExplicitSource<Type>&
+);
+
 /*---------------------------------------------------------------------------*\
-                       Class explicitSource Declaration
+               Class ExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class explicitSource
+template<class Type>
+class ExplicitSource
 :
     public basicSource
 {
-    // Private data
-
-        //- List of field types
-        HashTable<scalar> scalarFields_;
-        HashTable<vector> vectorFields_;
-
-        //- Add source to matrix
-        template<class Type>
-        void addSource(fvMatrix<Type>&, const Type&) const;
-
-        //- Add field names and values to field table for types.
-        template<class Type>
-        void addField
-        (
-            HashTable<Type>& fields,
-            const wordList& fieldTypes,
-            const wordList& fieldNames,
-            const dictionary& dict
-        );
-
-
 public:
 
     // Public data
@@ -103,36 +107,44 @@ public:
         };
 
         //- Word list of volume mode type names
-        static const NamedEnum<volumeModeType, 2> volumeModeTypeNames_;
+        static const wordList volumeModeTypeNames_;
 
 
 protected:
 
     // Protected data
 
-        //- Coefficients dictionary
-        dictionary coeffs_;
+        typedef Tuple2<word, Type> fieldNameValuePair;
 
         //- Volume mode
         volumeModeType volumeMode_;
 
+        //- Volume normalisation
+        scalar VDash_;
+
+        //- Source value per field
+        List<fieldNameValuePair> fieldData_;
+
 
     // Protected functions
 
-        //- Set the local field data
-        void setFieldData(const dictionary& dict);
+        //- Helper function to convert from a word to a volumeModeType
+        volumeModeType wordToVolumeModeType(const word& vtName) const;
+
+        //- Helper function to convert from a volumeModeType to a word
+        word volumeModeTypeToWord(const volumeModeType& vtType) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("explicitSource");
+    TypeName("ExplicitSource");
 
 
     // Constructors
 
         //- Construct from components
-        explicitSource
+        ExplicitSource
         (
             const word& name,
             const word& modelType,
@@ -140,24 +152,22 @@ public:
             const fvMesh& mesh
         );
 
-        //- Return clone
-        autoPtr<explicitSource> clone() const
-        {
-            notImplemented
-            (
-                "autoPtr<explicitSource> clone() const"
-            );
-            return autoPtr<explicitSource>(NULL);
-        }
-
-
 
     // Member Functions
+
+        // Check
+
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
+
 
         // Access
 
             //- Return const access to the volume mode
             inline const volumeModeType& volumeMode() const;
+
+            //- Return const access to the source field value
+            inline const Type& fieldData() const;
 
 
         // Edit
@@ -165,17 +175,14 @@ public:
             //- Return access to the volume mode
             inline volumeModeType& volumeMode();
 
-            //- Return points
-            inline  const List<point>& points() const;
+            //- Return access to the source field value
+            inline Type& fieldData();
 
 
         // Evaluation
 
-            //-Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //-Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn);
+            //- Add explicit contribution to equation
+            virtual void addSup(fvMatrix<Type>& eqn, const label fieldI);
 
 
         // I-O
@@ -183,15 +190,8 @@ public:
             //- Write the source properties
             virtual void writeData(Ostream&) const;
 
-            //- Read fieldData in sub-dictionary
+            //- Read source dictionary
             virtual bool read(const dictionary& dict);
-
-            //- Ostream operator
-            friend Ostream& operator<<
-            (
-                Ostream& os,
-                const explicitSource& source
-            );
 };
 
 
@@ -201,14 +201,14 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "explicitSourceIO.C"
-#include "explicitSourceI.H"
+#ifdef NoRepository
+#   include "ExplicitSource.C"
+#   include "ExplicitSourceIO.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "explicitSourceTemplates.C"
-#endif
+#include "ExplicitSourceI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

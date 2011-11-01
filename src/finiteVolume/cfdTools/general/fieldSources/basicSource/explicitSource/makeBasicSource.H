@@ -21,43 +21,28 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::timeActivatedExplicitSource
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeActivatedExplicitSource_H
-#define timeActivatedExplicitSource_H
+#ifndef makeBasicSource_H
+#define makeBasicSource_H
 
-#include "TimeActivatedExplicitSource.H"
-#include "TimeActivatedExplicitSourceList.H"
+#include "basicSource.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    typedef TimeActivatedExplicitSource<scalar>
-        scalarTimeActivatedExplicitSource;
-    typedef TimeActivatedExplicitSource<vector>
-        vectorTimeActivatedExplicitSource;
-    typedef TimeActivatedExplicitSource<sphericalTensor>
-        sphericalTensorTimeActivatedExplicitSource;
-    typedef TimeActivatedExplicitSource<symmTensor>
-        symmTensorTimeActivatedExplicitSource;
-    typedef TimeActivatedExplicitSource<tensor>
-        tensorTimeActivatedExplicitSource;
+#define makeBasicSource(Source, Type)                                               \
+                                                                              \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        Source<Type>,                                                         \
+        #Type#Source,                                                         \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    basicSource::adddictionaryConstructorToTable<Source<Type> >            \
+        add##Source##Type##dictionary##ConstructorTobasicSourceTable_
 
-    typedef TimeActivatedExplicitSourceList<scalar>
-        scalarTimeActivatedExplicitSourceList;
-    typedef TimeActivatedExplicitSourceList<vector>
-        vectorTimeActivatedExplicitSourceList;
-    typedef TimeActivatedExplicitSourceList<sphericalTensor>
-        sphericalTensorTimeActivatedExplicitSourceList;
-    typedef TimeActivatedExplicitSourceList<symmTensor>
-        symmTensorTimeActivatedExplicitSourceList;
-    typedef TimeActivatedExplicitSourceList<tensor>
-        tensorTimeActivatedExplicitSourceList;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

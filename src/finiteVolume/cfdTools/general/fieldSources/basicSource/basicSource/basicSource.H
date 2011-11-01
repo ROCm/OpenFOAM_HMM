@@ -129,10 +129,13 @@ protected:
         const fvMesh& mesh_;
 
         //- Dictionary containing the data of the source
-        const dictionary& dict_;
+        dictionary coeffs_;
 
         //- Source active flag
         bool active_;
+
+        //- Flag to indicate whether or not the source has been applied
+//        bool applied_;   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         //- Time start
         scalar timeStart_;
@@ -271,7 +274,7 @@ public:
             inline const fvMesh& mesh() const;
 
             //- Return dictionary
-            inline const dictionary& dictCoeffs() const;
+            inline const dictionary& coeffs() const;
 
             //- Return const access to the source active flag
             inline bool active() const;
@@ -316,18 +319,86 @@ public:
             //- Is the source active?
             bool isActive();
 
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const = 0;
+
 
         // Evaluation
 
-            //- Add source term to vector fvMatrix
-            virtual void addSu(fvMatrix<vector>& Eqn);
+            // Add explicit and implicit contributions
 
-            //- Add source term to scalar fvMatrix
-            virtual void addSu(fvMatrix<scalar>& Eqn);
+                //- Scalar
+                virtual void addSup
+                (
+                    fvMatrix<scalar>& eqn,
+                    const label fieldI
+                );
 
-            //- Set constant value on field
-            virtual void setValue(fvMatrix<scalar>& Eq);
+                //- Vector
+                virtual void addSup
+                (
+                    fvMatrix<vector>& eqn,
+                    const label fieldI
+                );
 
+                //- Spherical tensor
+                virtual void addSup
+                (
+                    fvMatrix<symmTensor>& eqn,
+                    const label fieldI
+                );
+
+                //- Symmetric tensor
+                virtual void addSup
+                (
+                    fvMatrix<sphericalTensor>& eqn,
+                    const label fieldI
+                );
+
+                //- Tensor
+                virtual void addSup
+                (
+                    fvMatrix<tensor>& eqn,
+                    const label fieldI
+                );
+
+
+            // Set values directly
+
+                //- Scalar
+                virtual void setValue
+                (
+                    fvMatrix<scalar>& eqn,
+                    const label fieldI
+                );
+
+                //- Vector
+                virtual void setValue
+                (
+                    fvMatrix<vector>& eqn,
+                    const label fieldI
+                );
+
+                //- Spherical tensor
+                virtual void setValue
+                (
+                    fvMatrix<sphericalTensor>& eqn,
+                    const label fieldI
+                );
+
+                //- Symmetric tensor
+                virtual void setValue
+                (
+                    fvMatrix<symmTensor>& eqn,
+                    const label fieldI
+                );
+
+                //- Tensor
+                virtual void setValue
+                (
+                    fvMatrix<tensor>& eqn,
+                    const label fieldI
+                );
 
 
         // I-O
