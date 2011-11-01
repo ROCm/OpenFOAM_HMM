@@ -23,69 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#include "ExplicitSetValue.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "dimensionedType.H"
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::wordList Foam::ExplicitSource<Type>::
-volumeModeTypeNames_
-(
-    IStringStream("(absolute specific)")()
-);
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-typename Foam::ExplicitSource<Type>::volumeModeType
-Foam::ExplicitSource<Type>::wordToVolumeModeType
-(
-    const word& vmtName
-) const
-{
-    forAll(volumeModeTypeNames_, i)
-    {
-        if (vmtName == volumeModeTypeNames_[i])
-        {
-            return volumeModeType(i);
-        }
-    }
-
-    FatalErrorIn
-    (
-        "ExplicitSource<Type>::volumeModeType"
-        "ExplicitSource<Type>::wordToVolumeModeType(const word&)"
-    )   << "Unknown volumeMode type " << vmtName
-        << ". Valid volumeMode types are:" << nl << volumeModeTypeNames_
-        << exit(FatalError);
-
-    return volumeModeType(0);
-}
-
-
-template<class Type>
-Foam::word Foam::ExplicitSource<Type>::volumeModeTypeToWord
-(
-    const volumeModeType& vmtType
-) const
-{
-    if (vmtType > volumeModeTypeNames_.size())
-    {
-        return "UNKNOWN";
-    }
-    else
-    {
-        return volumeModeTypeNames_[vmtType];
-    }
-}
-
-
-template<class Type>
-void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
+void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
 {
     fieldData_.setSize(dict.toc().size());
 
@@ -102,33 +47,25 @@ void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::ExplicitSource<Type>::ExplicitSource
+Foam::ExplicitSetValue<Type>::ExplicitSetValue
 (
     const word& name,
     const word& modelType,
-    const dictionary& coeffs,
+    const dictionary& dict,
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, coeffs, mesh),
-    volumeMode_(wordToVolumeModeType(coeffs_.lookup("volumeMode"))),
-    VDash_(1.0),
+    basicSource(name, modelType, dict, mesh),
     fieldData_()
 {
     setFieldData(coeffs_.subDict("fieldData"));
-
-    // Set volume normalisation
-    if (volumeMode_ == vmAbsolute)
-    {
-        VDash_ = V_;
-    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::ExplicitSource<Type>::applyToField
+Foam::label Foam::ExplicitSetValue<Type>::applyToField
 (
     const word& fieldName
 ) const
@@ -146,7 +83,7 @@ Foam::label Foam::ExplicitSource<Type>::applyToField
 
 
 template<class Type>
-void Foam::ExplicitSource<Type>::addSup
+void Foam::ExplicitSetValue<Type>::setValue
 (
     fvMatrix<Type>& eqn,
     const label fieldI
@@ -154,36 +91,38 @@ void Foam::ExplicitSource<Type>::addSup
 {
     if (debug)
     {
-        Info<< "ExplicitSource<"<< pTraits<Type>::typeName
-            << ">::addSup for source " << name_ << endl;
+        Info<< "ExplicitSetValue<"<< pTraits<Type>::typeName
+            << ">::setValue for source " << name_ << endl;
     }
 
-    DimensionedField<Type, volMesh> Su
+    DimensionedField<Type, volMesh> rhs
     (
         IOobject
         (
-            name_ + fieldData_[fieldI].first() + "Sup",
-            mesh_.time().timeName(),
-            mesh_,
+            name_ + fieldData_[fieldI].first() + "rhs",
+            eqn.psi().mesh().time().timeName(),
+            eqn.psi().mesh(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
-        mesh_,
+        eqn.psi().mesh(),
         dimensioned<Type>
         (
             "zero",
-            eqn.dimensions()/dimVolume,
+            dimless,
             pTraits<Type>::zero
-        ),
-        false
+        )
     );
 
-    forAll(cells_, i)
+    List<Type> values(cells_.size());
+
+    forAll(values, i)
     {
-        Su[cells_[i]] = fieldData_[fieldI].second()/VDash_;
+        values[i] = fieldData_[fieldI].second();
     }
 
-    eqn -= Su;
+    eqn.setValues(cells_, values);
 }
 
 

@@ -388,9 +388,7 @@ $(basicSource)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
 $(basicSource)/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
 
 $(basicSource)/explicitSource/explicitSource.C
-
 $(basicSource)/explicitSetValue/explicitSetValue.C
-$(basicSource)/explicitSetValue/explicitSetValueIO.C
 
 $(basicSource)/rotorDiskSource/rotorDiskSource.C
 $(basicSource)/rotorDiskSource/bladeModel/bladeModel.C

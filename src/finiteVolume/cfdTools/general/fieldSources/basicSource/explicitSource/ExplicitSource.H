@@ -134,6 +134,9 @@ protected:
         //- Helper function to convert from a volumeModeType to a word
         word volumeModeTypeToWord(const volumeModeType& vtType) const;
 
+        //- Set the local field data
+        void setFieldData(const dictionary& dict);
+
 
 public:
 

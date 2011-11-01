@@ -43,13 +43,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef explicitSetValue_H
-#define explicitSetValue_H
+#ifndef ExplicitSetValue_H
+#define ExplicitSetValue_H
 
-#include "cellSet.H"
-#include "volFieldsFwd.H"
-#include "DimensionedField.H"
 #include "basicSource.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,32 +58,21 @@ namespace Foam
                        Class explicitSetValue Declaration
 \*---------------------------------------------------------------------------*/
 
-class explicitSetValue
+template<class Type>
+class ExplicitSetValue
 :
     public basicSource
 {
-    // Private data
-
-        //- List of field types
-        HashTable<scalar> scalarFields_;
-        HashTable<vector> vectorFields_;
-
-        //- Set value to field
-        template<class Type>
-        void setFieldValue(fvMatrix<Type>&, const Type&) const;
-
-        //- Add field names and values to field table for types.
-        template<class Type>
-        void addField
-        (
-            HashTable<Type>& fields,
-            const wordList& fieldTypes,
-            const wordList& fieldNames,
-            const dictionary& dict
-        );
-
 
 protected:
+
+    // Protected data
+
+        typedef Tuple2<word, Type> fieldNameValuePair;
+
+        //- Source value per field
+        List<fieldNameValuePair> fieldData_;
+
 
     // Protected functions
 
@@ -102,20 +89,13 @@ public:
     // Constructors
 
         //- Construct from components
-        explicitSetValue
+        ExplicitSetValue
         (
             const word& name,
             const word& modelType,
             const dictionary& dict,
             const fvMesh& mesh
         );
-
-        //- Return clone
-        autoPtr<explicitSetValue> clone() const
-        {
-            notImplemented("autoPtr<explicitSetValue> clone() const");
-            return autoPtr<explicitSetValue>(NULL);
-        }
 
 
     // Member Functions
@@ -129,10 +109,7 @@ public:
         // Evaluation
 
             //- Set value on vector field
-            virtual void setValue(fvMatrix<vector>& eqn, const label fieldI);
-
-            //- Set value on scalar field
-            virtual void setValue(fvMatrix<scalar>& eqn, const label fieldI);
+            virtual void setValue(fvMatrix<Type>& eqn, const label fieldI);
 
 
         // I-O
@@ -152,7 +129,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "explicitSetValueTemplates.C"
+#   include "ExplicitSetValue.C"
+#   include "ExplicitSetValueIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

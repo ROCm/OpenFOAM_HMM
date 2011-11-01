@@ -23,18 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#include "ExplicitSetValue.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::explicitSetValue::writeData(Ostream& os) const
+template<class Type>
+void Foam::ExplicitSetValue<Type>::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     coeffs_.write(os);
 }
 
 
-bool Foam::explicitSetValue::read(const dictionary& dict)
+template<class Type>
+bool Foam::ExplicitSetValue<Type>::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
