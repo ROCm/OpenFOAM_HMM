@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
-    IObasicSourceList actuationDisks(mesh);
+    IObasicSourceList sources(mesh);
 
     simpleControl simple(mesh);
 
