@@ -426,6 +426,7 @@ void LienCubicKELowRe::correct()
 
     volScalarField G
     (
+        "RASModel::G",
         Cmu_*fMu*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
     );
 
