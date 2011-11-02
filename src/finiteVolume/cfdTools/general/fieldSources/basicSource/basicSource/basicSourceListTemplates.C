@@ -23,11 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "fvMesh.H"
+#include "Time.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
+    if (mesh_.time().timeIndex() == mesh_.time().startTimeIndex() + 1)
+    {
+        checkApplied();
+    }
+
     const word& fieldName = eqn.psi().name();
 
     forAll(*this, i)

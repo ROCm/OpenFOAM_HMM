@@ -33,6 +33,24 @@ namespace Foam
     defineTypeNameAndDebug(basicSourceList, 0);
 }
 
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::basicSourceList::checkApplied() const
+{
+    forAll(*this, i)
+    {
+        const basicSource& bs = this->operator[](i);
+
+        if (!bs.applied())
+        {
+            WarningIn("void Foam::basicSourceList::checkApplied() const")
+                << "Source " << bs.name() << " defined, but not used" << endl;
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicSourceList::basicSourceList

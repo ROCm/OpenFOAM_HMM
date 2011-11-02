@@ -62,6 +62,9 @@ private:
 
     // Private Member Functions
 
+        //- Check that all sources have been applied
+        void checkApplied() const;
+
         //- Disallow default bitwise copy construct
         basicSourceList(const basicSourceList&);
 

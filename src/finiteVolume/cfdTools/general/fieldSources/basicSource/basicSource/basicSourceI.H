@@ -51,6 +51,12 @@ inline bool Foam::basicSource::active() const
 }
 
 
+inline bool Foam::basicSource::applied() const
+{
+    return applied_;
+}
+
+
 inline Foam::scalar Foam::basicSource::timeStart() const
 {
     return timeStart_;

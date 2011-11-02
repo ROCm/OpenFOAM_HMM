@@ -242,6 +242,9 @@ public:
             //- Return const access to the source active flag
             inline bool active() const;
 
+            //- Return const access to the applied flag
+            inline bool applied() const;
+
             //- Return const access to the time start
             inline scalar timeStart() const;
 
