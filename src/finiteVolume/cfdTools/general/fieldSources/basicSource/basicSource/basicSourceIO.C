@@ -36,7 +36,7 @@ void Foam::basicSource::writeHeader(Ostream& os) const
 
 void Foam::basicSource::writeFooter(Ostream& os) const
 {
-    os << decrIndent << indent << token::END_BLOCK << endl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
