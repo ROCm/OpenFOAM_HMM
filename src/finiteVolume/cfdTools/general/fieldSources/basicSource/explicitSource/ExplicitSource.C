@@ -96,6 +96,12 @@ void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
         dict.lookup(iter().keyword()) >> fieldData_[i].second();
         i++;
     }
+
+    // Set volume normalisation
+    if (volumeMode_ == vmAbsolute)
+    {
+        VDash_ = V_;
+    }
 }
 
 
@@ -106,22 +112,16 @@ Foam::ExplicitSource<Type>::ExplicitSource
 (
     const word& name,
     const word& modelType,
-    const dictionary& coeffs,
+    const dictionary& dict,
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, coeffs, mesh),
-    volumeMode_(wordToVolumeModeType(coeffs_.lookup("volumeMode"))),
+    basicSource(name, modelType, dict, mesh),
+    volumeMode_(vmAbsolute),
     VDash_(1.0),
     fieldData_()
 {
-    setFieldData(coeffs_.subDict("fieldData"));
-
-    // Set volume normalisation
-    if (volumeMode_ == vmAbsolute)
-    {
-        VDash_ = V_;
-    }
+    read(dict);
 }
 
 

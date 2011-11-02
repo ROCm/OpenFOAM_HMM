@@ -59,7 +59,7 @@ Foam::ExplicitSetValue<Type>::ExplicitSetValue
     basicSource(name, modelType, dict, mesh),
     fieldData_()
 {
-    setFieldData(coeffs_.subDict("fieldData"));
+    read(dict);
 }
 
 

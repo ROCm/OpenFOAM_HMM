@@ -30,22 +30,25 @@ License
 template<class Type>
 void Foam::ExplicitSource<Type>::writeData(Ostream& os) const
 {
-    notImplemented
-    (
-        "void Foam::ExplicitSource<Type>::read(Ostream&) const"
-    );
+    os  << indent << name_ << endl;
+    dict_.write(os);
 }
 
 
 template<class Type>
 bool Foam::ExplicitSource<Type>::read(const dictionary& dict)
 {
-    notImplemented
-    (
-        "bool Foam::ExplicitSource<Type>::read(const dictionary&)"
-    );
+    if (basicSource::read(dict))
+    {
+        setFieldData(coeffs_.subDict("fieldData"));
+        volumeMode_ = wordToVolumeModeType(coeffs_.lookup("volumeMode"));
 
-    return false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
