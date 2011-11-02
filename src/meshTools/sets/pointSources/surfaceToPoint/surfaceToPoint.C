@@ -25,7 +25,6 @@ License
 
 #include "surfaceToPoint.H"
 #include "polyMesh.H"
-#include "meshSearch.H"
 #include "triSurfaceSearch.H"
 #include "cpuTime.H"
 

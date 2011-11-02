@@ -53,30 +53,12 @@ inline Foam::janafThermo<EquationOfState>::janafThermo
 
 
 template<class EquationOfState>
-inline void Foam::janafThermo<EquationOfState>::checkT(const scalar T) const
-{
-    if (T < Tlow_ || T > Thigh_)
-    {
-        FatalErrorIn
-        (
-            "janafThermo<EquationOfState>::checkT(const scalar T) const"
-        )   << "attempt to use janafThermo<EquationOfState>"
-               " out of temperature range "
-            << Tlow_ << " -> " << Thigh_ << ";  T = " << T
-            << abort(FatalError);
-    }
-}
-
-
-template<class EquationOfState>
 inline const typename Foam::janafThermo<EquationOfState>::coeffArray&
 Foam::janafThermo<EquationOfState>::coeffs
 (
     const scalar T
 ) const
 {
-    checkT(T);
-
     if (T < Tcommon_)
     {
         return lowCpCoeffs_;
@@ -111,6 +93,31 @@ inline Foam::janafThermo<EquationOfState>::janafThermo
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class EquationOfState>
+inline Foam::scalar Foam::janafThermo<EquationOfState>::limit
+(
+    const scalar T
+) const
+{
+    if (T < Tlow_ || T > Thigh_)
+    {
+        WarningIn
+        (
+            "janafThermo<EquationOfState>::limit(const scalar T) const"
+        )   << "attempt to use janafThermo<EquationOfState>"
+               " out of temperature range "
+            << Tlow_ << " -> " << Thigh_ << ";  T = " << T
+            << endl;
+
+        return min(max(T, Tlow_), Thigh_);
+    }
+    else
+    {
+        return T;
+    }
+}
+
 
 template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::cp
@@ -196,7 +203,19 @@ inline void Foam::janafThermo<EquationOfState>::operator+=
 
     Tlow_ = max(Tlow_, jt.Tlow_);
     Thigh_ = min(Thigh_, jt.Thigh_);
-    Tcommon_ = molr1*Tcommon_ + molr2*jt.Tcommon_;
+
+    if (notEqual(Tcommon_, jt.Tcommon_))
+    {
+        FatalErrorIn
+        (
+            "janafThermo<EquationOfState>::operator+="
+            "(const janafThermo<EquationOfState>& jt) const"
+        )   << "Tcommon " << Tcommon_ << " for "
+            << (this->name().size() ? this->name() : "others")
+            << " != " << jt.Tcommon_ << " for "
+            << (jt.name().size() ? jt.name() : "others")
+            << exit(FatalError);
+    }
 
     for
     (
@@ -231,7 +250,19 @@ inline void Foam::janafThermo<EquationOfState>::operator-=
 
     Tlow_ = max(Tlow_, jt.Tlow_);
     Thigh_ = min(Thigh_, jt.Thigh_);
-    Tcommon_ = molr1*Tcommon_ - molr2*jt.Tcommon_;
+
+    if (notEqual(Tcommon_, jt.Tcommon_))
+    {
+        FatalErrorIn
+        (
+            "janafThermo<EquationOfState>::operator-="
+            "(const janafThermo<EquationOfState>& jt) const"
+        )   << "Tcommon " << Tcommon_ << " for "
+            << (this->name().size() ? this->name() : "others")
+            << " != " << jt.Tcommon_ << " for "
+            << (jt.name().size() ? jt.name() : "others")
+            << exit(FatalError);
+    }
 
     for
     (
@@ -285,12 +316,26 @@ inline Foam::janafThermo<EquationOfState> Foam::operator+
           + molr2*jt2.lowCpCoeffs_[coefLabel];
     }
 
+    if (notEqual(jt1.Tcommon_, jt2.Tcommon_))
+    {
+        FatalErrorIn
+        (
+            "operator+"
+            "(const janafThermo<EquationOfState>& jt1,"
+            " const janafThermo<EquationOfState>& jt2)"
+        )   << "Tcommon " << jt1.Tcommon_ << " for "
+            << (jt1.name().size() ? jt1.name() : "others")
+            << " != " << jt2.Tcommon_ << " for "
+            << (jt2.name().size() ? jt2.name() : "others")
+            << exit(FatalError);
+    }
+
     return janafThermo<EquationOfState>
     (
         eofs,
         max(jt1.Tlow_, jt2.Tlow_),
         min(jt1.Thigh_, jt2.Thigh_),
-        molr1*jt1.Tcommon_ + molr2*jt2.Tcommon_,
+        jt1.Tcommon_,
         highCpCoeffs,
         lowCpCoeffs
     );
@@ -329,12 +374,26 @@ inline Foam::janafThermo<EquationOfState> Foam::operator-
           - molr2*jt2.lowCpCoeffs_[coefLabel];
     }
 
+    if (notEqual(jt1.Tcommon_, jt2.Tcommon_))
+    {
+        FatalErrorIn
+        (
+            "operator-"
+            "(const janafThermo<EquationOfState>& jt1,"
+            " const janafThermo<EquationOfState>& jt2)"
+        )   << "Tcommon " << jt1.Tcommon_ << " for "
+            << (jt1.name().size() ? jt1.name() : "others")
+            << " != " << jt2.Tcommon_ << " for "
+            << (jt2.name().size() ? jt2.name() : "others")
+            << exit(FatalError);
+    }
+
     return janafThermo<EquationOfState>
     (
         eofs,
         max(jt1.Tlow_, jt2.Tlow_),
         min(jt1.Thigh_, jt2.Thigh_),
-        molr1*jt1.Tcommon_ - molr2*jt2.Tcommon_,
+        jt1.Tcommon_,
         highCpCoeffs,
         lowCpCoeffs
     );

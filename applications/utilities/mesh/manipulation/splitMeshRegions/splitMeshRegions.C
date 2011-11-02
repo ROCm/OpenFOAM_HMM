@@ -2194,7 +2194,7 @@ int main(int argc, char *argv[])
 
             label regionI = -1;
 
-            label cellI = mesh.findCell(insidePoint);
+            label cellI = mesh.findCell(insidePoint, polyMesh::FACEDIAGTETS);
 
             Info<< nl << "Found point " << insidePoint << " in cell " << cellI
                 << endl;

@@ -70,17 +70,10 @@ Foam::porousBafflePressureFvPatchField<Type>::porousBafflePressureFvPatchField
     I_(readScalar(dict.lookup("I"))),
     length_(readScalar(dict.lookup("length")))
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::blocking);
-    }
+    fvPatchField<Type>::operator=
+    (
+        Field<Type>("value", dict, p.size())
+    );
 }
 
 

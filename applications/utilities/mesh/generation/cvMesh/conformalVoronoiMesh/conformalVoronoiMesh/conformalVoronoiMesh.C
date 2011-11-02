@@ -1405,7 +1405,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             zeroGradientFvPatchScalarField::typeName
         );
 
-        meshSearch cellSearch(bMesh);
+        meshSearch cellSearch(bMesh, polyMesh::FACEPLANES);
 
         List<DynamicList<Foam::point> > cellVertices(bMesh.nCells());
         List<DynamicList<label> > cellVertexIndices(bMesh.nCells());

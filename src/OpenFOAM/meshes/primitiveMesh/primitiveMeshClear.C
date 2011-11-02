@@ -24,11 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
 #include "demandDrivenData.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -102,11 +98,6 @@ void Foam::primitiveMesh::printAllocated() const
         Pout<< "    Cell-point" << endl;
     }
 
-    if (cellTreePtr_)
-    {
-        Pout<< "    Cell-tree" << endl;
-    }
-
     // Geometry
     if (cellCentresPtr_)
     {
@@ -173,14 +164,6 @@ void Foam::primitiveMesh::clearAddressing()
     deleteDemandDrivenData(pePtr_);
     deleteDemandDrivenData(ppPtr_);
     deleteDemandDrivenData(cpPtr_);
-
-    deleteDemandDrivenData(cellTreePtr_);
-}
-
-
-void Foam::primitiveMesh::clearCellTree()
-{
-    deleteDemandDrivenData(cellTreePtr_);
 }
 
 

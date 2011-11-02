@@ -27,7 +27,7 @@ dictionaryReplacement
                 D               700;
                 I               500;
                 length          1.05;
-                jump            uniform 0
+                jump            uniform 0;
                 value           uniform 0;
             }
             porous_half1

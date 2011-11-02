@@ -26,9 +26,10 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "globalMeshData.H"
-#include "demandDrivenData.H"
 #include "pointMesh.H"
 #include "Time.H"
+#include "indexedOctree.H"
+#include "treeDataCell.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -72,7 +73,9 @@ void Foam::polyMesh::clearGeom()
     solutionD_ = Vector<label>::zero;
 
     // Remove the stored tet base points
-    deleteDemandDrivenData(tetBasePtIsPtr_);
+    tetBasePtIsPtr_.clear();
+    // Remove the cell tree
+    cellTreePtr_.clear();
 
     pointMesh::Delete(*this);
 }
@@ -91,7 +94,7 @@ void Foam::polyMesh::clearAddressing()
 
     // parallelData depends on the processorPatch ordering so force
     // recalculation
-    deleteDemandDrivenData(globalMeshDataPtr_);
+    globalMeshDataPtr_.clear();
 
     // Reset valid directions
     geometricD_ = Vector<label>::zero;
@@ -118,6 +121,12 @@ void Foam::polyMesh::clearOut()
 {
     clearGeom();
     clearAddressing();
+}
+
+
+void Foam::polyMesh::clearCellTree()
+{
+    cellTreePtr_.clear();
 }
 
 

@@ -28,7 +28,6 @@ License
 #include "IOmanip.H"
 // For 'nearInfo' helper class only
 #include "mappedPatchBase.H"
-//#include "meshSearch.H"
 #include "treeBoundBox.H"
 #include "treeDataFace.H"
 

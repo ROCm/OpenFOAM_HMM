@@ -46,70 +46,180 @@ volScalarField DT
 
 if (thermalStress)
 {
-    volScalarField C
+
+    autoPtr<volScalarField> CPtr;
+
+    IOobject CIO
     (
-        IOobject
-        (
-            "C",
-            runTime.timeName(0),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
+        "C",
+        runTime.timeName(0),
         mesh,
-        dimensionedScalar("0", dimensionSet(0, 2, -2 , -1, 0), 0.0)
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
     );
 
     const dictionary& CDict(thermalProperties.subDict("C"));
-    word CType(CDict.lookup("C"));
-    if (CType == "CInf")
+    word CType(CDict.lookup("type"));
+    if (CType == "uniform")
     {
-        C = CDict.lookup("CInf");
+        scalar CValue(readScalar(CDict.lookup("value")));
+
+        CPtr.reset
+        (
+            new volScalarField
+            (
+                CIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "C",
+                    dimensionSet(0, 2, -2 , -1, 0),
+                    CValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
+
+    }
+    else if(CType == "field")
+    {
+        CIO.readOpt() = IOobject::MUST_READ;
+
+        CPtr.reset
+        (
+            new volScalarField
+            (
+                CIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+             "readThermalProperties.H"
+        )   << "Valid type entries are uniform or field for C"
+            << abort(FatalError);
     }
 
+    volScalarField& C = CPtr();
 
-    volScalarField rhoK
+    autoPtr<volScalarField> rhoKPtr;
+
+    IOobject rhoKIO
     (
-        IOobject
-        (
-            "k",
-            runTime.timeName(0),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
+        "k",
+        runTime.timeName(0),
         mesh,
-        dimensionedScalar("0", dimensionSet(1, 1, -3 , -1, 0), 0.0)
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
     );
 
     const dictionary& kDict(thermalProperties.subDict("k"));
-    word kType(kDict.lookup("k"));
-    if (kType == "kInf")
+    word kType(kDict.lookup("type"));
+    if (kType == "uniform")
     {
-        rhoK = kDict.lookup("kInf");
+        scalar rhoKValue(readScalar(kDict.lookup("value")));
+
+        rhoKPtr.reset
+        (
+            new volScalarField
+            (
+                rhoKIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "rhoK",
+                    dimensionSet(1, 1, -3 , -1, 0),
+                    rhoKValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
+
+    }
+    else if (kType == "field")
+    {
+        rhoKIO.readOpt() = IOobject::MUST_READ;
+
+        rhoKPtr.reset
+        (
+            new volScalarField
+            (
+                rhoKIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+             "readThermalProperties.H"
+        )   << "Valid type entries are uniform or field for K"
+            << abort(FatalError);
     }
 
-    volScalarField alpha
+    volScalarField& rhoK = rhoKPtr();
+
+    autoPtr<volScalarField> alphaPtr;
+
+    IOobject alphaIO
     (
-        IOobject
-        (
-            "alpha",
-            runTime.timeName(0),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
+        "alpha",
+        runTime.timeName(0),
         mesh,
-        dimensionedScalar("0", dimensionSet(0, 0, 0 , -1, 0), 0.0)
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
     );
 
-    const dictionary& alphaDict(thermalProperties.subDict("alpha"));
-    word alphaType(alphaDict.lookup("alpha"));
 
-    if (alphaType == "alphaInf")
+    const dictionary& alphaDict(thermalProperties.subDict("alpha"));
+    word alphaType(alphaDict.lookup("type"));
+
+    if (alphaType == "uniform")
     {
-        alpha = alphaDict.lookup("alphaInf");
+        scalar alphaValue(readScalar(alphaDict.lookup("value")));
+        alphaPtr.reset
+        (
+            new volScalarField
+            (
+                alphaIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "alpha",
+                    inv(dimTemperature),
+                    alphaValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
     }
+    else if (alphaType == "field")
+    {
+        alphaIO.readOpt() = IOobject::MUST_READ;
+
+        alphaPtr.reset
+        (
+            new volScalarField
+            (
+                alphaIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+             "readThermalProperties.H"
+        )   << "Valid type entries are uniform or field for alpha"
+            << abort(FatalError);
+    }
+
+    volScalarField& alpha = alphaPtr();
 
     Info<< "Normalising k : k/rho\n" << endl;
     volScalarField k = rhoK/rho;

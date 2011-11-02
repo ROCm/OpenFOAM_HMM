@@ -129,7 +129,8 @@ Foam::codedFunctionObject::codedFunctionObject
 :
     functionObject(name),
     codedBase(),
-    time_(time)
+    time_(time),
+    dict_(dict)
 {
     if (readNow)
     {

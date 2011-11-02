@@ -36,6 +36,7 @@ SourceFiles
 #ifndef treeDataCell_H
 #define treeDataCell_H
 
+#include "polyMesh.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,7 +45,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class primitiveMesh;
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
@@ -55,13 +55,16 @@ class treeDataCell
 {
     // Private data
 
-        const primitiveMesh& mesh_;
+        const polyMesh& mesh_;
 
         //- Subset of cells to work on
         const labelList cellLabels_;
 
         //- Whether to precalculate and store cell bounding box
         const bool cacheBb_;
+
+        //- How to decide if point is inside cell
+        const polyMesh::cellRepresentation decompMode_;
 
         //- cell bounding boxes (valid only if cacheBb_)
         treeBoundBoxList bbs_;
@@ -87,20 +90,27 @@ public:
         treeDataCell
         (
             const bool cacheBb,
-            const primitiveMesh&,
-            const labelUList&
+            const polyMesh&,
+            const labelUList&,
+            const polyMesh::cellRepresentation decompMode
         );
 
         //- Construct from mesh and subset of cells, transferring contents
         treeDataCell
         (
             const bool cacheBb,
-            const primitiveMesh&,
-            const Xfer<labelList>&
+            const polyMesh&,
+            const Xfer<labelList>&,
+            const polyMesh::cellRepresentation decompMode
         );
 
         //- Construct from mesh. Uses all cells in mesh.
-        treeDataCell(const bool cacheBb, const primitiveMesh&);
+        treeDataCell
+        (
+            const bool cacheBb,
+            const polyMesh&,
+            const polyMesh::cellRepresentation decompMode
+        );
 
 
     // Member Functions
@@ -112,11 +122,15 @@ public:
                 return cellLabels_;
             }
 
-            inline const primitiveMesh& mesh() const
+            inline const polyMesh& mesh() const
             {
                 return mesh_;
             }
 
+            inline polyMesh::cellRepresentation decompMode() const
+            {
+                return decompMode_;
+            }
 
             inline label size() const
             {

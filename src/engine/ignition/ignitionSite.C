@@ -36,7 +36,7 @@ void Foam::ignitionSite::findIgnitionCells(const fvMesh& mesh)
     const volVectorField& centres = mesh.C();
     const scalarField& vols = mesh.V();
 
-    label ignCell = mesh.findCell(location_);
+    label ignCell = mesh.findCell(location_, polyMesh::FACEDIAGTETS);
     if (ignCell == -1)
     {
         return;

@@ -302,7 +302,7 @@ Foam::label Foam::meshSearch::findCellLinear(const point& location) const
 
     while ((!cellFound) && (n < mesh_.nCells()))
     {
-        if (pointInCell(location, n))
+        if (mesh_.pointInCell(location, n, cellDecompMode_))
         {
             cellFound = true;
             cellI = n;
@@ -338,7 +338,7 @@ Foam::label Foam::meshSearch::findCellWalk
         )   << "illegal seedCell:" << seedCellI << exit(FatalError);
     }
 
-    if (pointInCell(location, seedCellI))
+    if (mesh_.pointInCell(location, seedCellI, cellDecompMode_))
     {
         return seedCellI;
     }
@@ -368,7 +368,7 @@ Foam::label Foam::meshSearch::findCellWalk
                 }
 
                 // Check if this is the correct cell
-                if (pointInCell(location, cellI))
+                if (mesh_.pointInCell(location, cellI, cellDecompMode_))
                 {
                     return cellI;
                 }
@@ -500,10 +500,14 @@ Foam::vector Foam::meshSearch::offset
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::meshSearch::meshSearch(const polyMesh& mesh, const bool faceDecomp)
+Foam::meshSearch::meshSearch
+(
+    const polyMesh& mesh,
+    const polyMesh::cellRepresentation cellDecompMode
+)
 :
     mesh_(mesh),
-    faceDecomp_(faceDecomp)
+    cellDecompMode_(cellDecompMode)
 {}
 
 
@@ -512,11 +516,11 @@ Foam::meshSearch::meshSearch
 (
     const polyMesh& mesh,
     const treeBoundBox& bb,
-    const bool faceDecomp
+    const polyMesh::cellRepresentation cellDecompMode
 )
 :
     mesh_(mesh),
-    faceDecomp_(faceDecomp)
+    cellDecompMode_(cellDecompMode)
 {
     overallBbPtr_.reset(new treeBoundBox(bb));
 }
@@ -615,8 +619,9 @@ const
             (
                 treeDataCell
                 (
-                    false,  // not cache bb
-                    mesh_
+                    false,          // not cache bb
+                    mesh_,
+                    cellDecompMode_ // cell decomposition mode for inside tests
                 ),
                 overallBbPtr_(),
                 8,              // maxLevel
@@ -630,90 +635,90 @@ const
 }
 
 
-// Is the point in the cell
-// Works by checking if there is a face inbetween the point and the cell
-// centre.
-// Check for internal uses proper face decomposition or just average normal.
-bool Foam::meshSearch::pointInCell(const point& p, label cellI) const
-{
-    if (faceDecomp_)
-    {
-        const point& ctr = mesh_.cellCentres()[cellI];
-
-        vector dir(p - ctr);
-        scalar magDir = mag(dir);
-
-        // Check if any faces are hit by ray from cell centre to p.
-        // If none -> p is in cell.
-        const labelList& cFaces = mesh_.cells()[cellI];
-
-        // Make sure half_ray does not pick up any faces on the wrong
-        // side of the ray.
-        scalar oldTol = intersection::setPlanarTol(0.0);
-
-        forAll(cFaces, i)
-        {
-            label faceI = cFaces[i];
-
-            pointHit inter = mesh_.faces()[faceI].ray
-            (
-                ctr,
-                dir,
-                mesh_.points(),
-                intersection::HALF_RAY,
-                intersection::VECTOR
-            );
-
-            if (inter.hit())
-            {
-                scalar dist = inter.distance();
-
-                if (dist < magDir)
-                {
-                    // Valid hit. Hit face so point is not in cell.
-                    intersection::setPlanarTol(oldTol);
-
-                    return false;
-                }
-            }
-        }
-
-        intersection::setPlanarTol(oldTol);
-
-        // No face inbetween point and cell centre so point is inside.
-        return true;
-    }
-    else
-    {
-        const labelList& f = mesh_.cells()[cellI];
-        const labelList& owner = mesh_.faceOwner();
-        const vectorField& cf = mesh_.faceCentres();
-        const vectorField& Sf = mesh_.faceAreas();
-
-        forAll(f, facei)
-        {
-            label nFace = f[facei];
-            vector proj = p - cf[nFace];
-            vector normal = Sf[nFace];
-            if (owner[nFace] == cellI)
-            {
-                if ((normal & proj) > 0)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if ((normal & proj) < 0)
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-}
+//// Is the point in the cell
+//// Works by checking if there is a face inbetween the point and the cell
+//// centre.
+//// Check for internal uses proper face decomposition or just average normal.
+//bool Foam::meshSearch::pointInCell(const point& p, label cellI) const
+//{
+//    if (faceDecomp_)
+//    {
+//        const point& ctr = mesh_.cellCentres()[cellI];
+//
+//        vector dir(p - ctr);
+//        scalar magDir = mag(dir);
+//
+//        // Check if any faces are hit by ray from cell centre to p.
+//        // If none -> p is in cell.
+//        const labelList& cFaces = mesh_.cells()[cellI];
+//
+//        // Make sure half_ray does not pick up any faces on the wrong
+//        // side of the ray.
+//        scalar oldTol = intersection::setPlanarTol(0.0);
+//
+//        forAll(cFaces, i)
+//        {
+//            label faceI = cFaces[i];
+//
+//            pointHit inter = mesh_.faces()[faceI].ray
+//            (
+//                ctr,
+//                dir,
+//                mesh_.points(),
+//                intersection::HALF_RAY,
+//                intersection::VECTOR
+//            );
+//
+//            if (inter.hit())
+//            {
+//                scalar dist = inter.distance();
+//
+//                if (dist < magDir)
+//                {
+//                    // Valid hit. Hit face so point is not in cell.
+//                    intersection::setPlanarTol(oldTol);
+//
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        intersection::setPlanarTol(oldTol);
+//
+//        // No face inbetween point and cell centre so point is inside.
+//        return true;
+//    }
+//    else
+//    {
+//        const labelList& f = mesh_.cells()[cellI];
+//        const labelList& owner = mesh_.faceOwner();
+//        const vectorField& cf = mesh_.faceCentres();
+//        const vectorField& Sf = mesh_.faceAreas();
+//
+//        forAll(f, facei)
+//        {
+//            label nFace = f[facei];
+//            vector proj = p - cf[nFace];
+//            vector normal = Sf[nFace];
+//            if (owner[nFace] == cellI)
+//            {
+//                if ((normal & proj) > 0)
+//                {
+//                    return false;
+//                }
+//            }
+//            else
+//            {
+//                if ((normal & proj) < 0)
+//                {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        return true;
+//    }
+//}
 
 
 Foam::label Foam::meshSearch::findNearestCell

@@ -25,7 +25,8 @@ License
 
 #include "cyclicGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+#include "labelPair.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,180 +63,65 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     ),
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {
-    // Make a lookup table of entries for owner/neighbour
-    Map<SLList<label> > neighboursTable
+    // From coarse face to coarse cell
+    DynamicList<label> dynFaceCells(localRestrictAddressing.size());
+    // From fine face to coarse face
+    DynamicList<label> dynFaceRestrictAddressing
     (
         localRestrictAddressing.size()
     );
 
-    // Table of face-sets to be agglomerated
-    Map<SLList<SLList<label> > > faceFaceTable
+    // From coarse cell pair to coarse face
+    HashTable<label, labelPair, labelPair::Hash<> > cellsToCoarseFace
     (
-        localRestrictAddressing.size()
+        2*localRestrictAddressing.size()
     );
-
-    label nCoarseFaces = 0;
 
     forAll(localRestrictAddressing, ffi)
     {
-        label curMaster = -1;
-        label curSlave = -1;
+        labelPair cellPair;
 
         // Do switching on master/slave indexes based on the owner/neighbour of
         // the processor index such that both sides get the same answer.
         if (owner())
         {
             // Master side
-            curMaster = localRestrictAddressing[ffi];
-            curSlave = neighbourRestrictAddressing[ffi];
+            cellPair = labelPair
+            (
+                localRestrictAddressing[ffi],
+                neighbourRestrictAddressing[ffi]
+            );
         }
         else
         {
             // Slave side
-            curMaster = neighbourRestrictAddressing[ffi];
-            curSlave = localRestrictAddressing[ffi];
+            cellPair = labelPair
+            (
+                neighbourRestrictAddressing[ffi],
+                localRestrictAddressing[ffi]
+            );
         }
 
-        // Look for the master cell.  If it has already got a face,
-        // add the coefficient to the face.  If not, create a new face.
-        if (neighboursTable.found(curMaster))
+        HashTable<label, labelPair, labelPair::Hash<> >::const_iterator fnd =
+            cellsToCoarseFace.find(cellPair);
+
+        if (fnd == cellsToCoarseFace.end())
         {
-            // Check all current neighbours to see if the current slave already
-            // exists and if so, add the fine face to the agglomeration.
-
-            SLList<label>& curNbrs = neighboursTable.find(curMaster)();
-
-            SLList<SLList<label> >& curFaceFaces =
-                faceFaceTable.find(curMaster)();
-
-            bool nbrFound = false;
-
-            SLList<label>::iterator nbrsIter = curNbrs.begin();
-
-            SLList<SLList<label> >::iterator faceFacesIter =
-                curFaceFaces.begin();
-
-            for
-            (
-                ;
-                nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
-                ++nbrsIter, ++faceFacesIter
-            )
-            {
-                if (nbrsIter() == curSlave)
-                {
-                    nbrFound = true;
-                    faceFacesIter().append(ffi);
-                    break;
-                }
-            }
-
-            if (!nbrFound)
-            {
-                curNbrs.append(curSlave);
-                curFaceFaces.append(ffi);
-
-                // New coarse face created
-                nCoarseFaces++;
-            }
+            // New coarse face
+            label coarseI = dynFaceCells.size();
+            dynFaceRestrictAddressing.append(coarseI);
+            dynFaceCells.append(localRestrictAddressing[ffi]);
+            cellsToCoarseFace.insert(cellPair, coarseI);
         }
         else
         {
-            // This master has got no neighbours yet.  Add a neighbour
-            // and a coefficient, thus creating a new face
-            neighboursTable.insert(curMaster, SLList<label>(curSlave));
-            faceFaceTable.insert(curMaster, SLList<SLList<label> >(ffi));
-
-            // New coarse face created
-            nCoarseFaces++;
-        }
-    } // end for all fine faces
-
-
-
-    faceCells_.setSize(nCoarseFaces, -1);
-    faceRestrictAddressing_.setSize(localRestrictAddressing.size());
-
-    labelList contents = neighboursTable.toc();
-
-    // Reset face counter for re-use
-    nCoarseFaces = 0;
-
-    if (owner())
-    {
-        // On master side, the owner addressing is stored in table of contents
-        forAll(contents, masterI)
-        {
-            SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
-
-            SLList<SLList<label> >& curFaceFaces =
-                faceFaceTable.find(contents[masterI])();
-
-            SLList<label>::iterator nbrsIter = curNbrs.begin();
-            SLList<SLList<label> >::iterator faceFacesIter =
-                curFaceFaces.begin();
-
-            for
-            (
-                ;
-                nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
-                ++nbrsIter, ++faceFacesIter
-            )
-            {
-                faceCells_[nCoarseFaces] = contents[masterI];
-
-                for
-                (
-                    SLList<label>::iterator facesIter = faceFacesIter().begin();
-                    facesIter != faceFacesIter().end();
-                    ++facesIter
-                )
-                {
-                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
-                }
-
-                nCoarseFaces++;
-            }
+            // Already have coarse face
+            dynFaceRestrictAddressing.append(fnd());
         }
     }
-    else
-    {
-        // On slave side, the owner addressing is stored in linked lists
-        forAll(contents, masterI)
-        {
-            SLList<label>& curNbrs = neighboursTable.find(contents[masterI])();
 
-            SLList<SLList<label> >& curFaceFaces =
-                faceFaceTable.find(contents[masterI])();
-
-            SLList<label>::iterator nbrsIter = curNbrs.begin();
-
-            SLList<SLList<label> >::iterator faceFacesIter =
-                curFaceFaces.begin();
-
-            for
-            (
-                ;
-                nbrsIter != curNbrs.end(), faceFacesIter != curFaceFaces.end();
-                ++nbrsIter, ++faceFacesIter
-            )
-            {
-                faceCells_[nCoarseFaces] = nbrsIter();
-
-                for
-                (
-                    SLList<label>::iterator facesIter = faceFacesIter().begin();
-                    facesIter != faceFacesIter().end();
-                    ++facesIter
-                )
-                {
-                    faceRestrictAddressing_[facesIter()] = nCoarseFaces;
-                }
-
-                nCoarseFaces++;
-            }
-        }
-    }
+    faceCells_.transfer(dynFaceCells);
+    faceRestrictAddressing_.transfer(dynFaceRestrictAddressing);
 }
 
 

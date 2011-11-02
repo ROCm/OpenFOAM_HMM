@@ -13,70 +13,176 @@
     );
 
     const dictionary& rhoDict(mechanicalProperties.subDict("rho"));
-    word rhoType(rhoDict.lookup("rho"));
+    word rhoType(rhoDict.lookup("type"));
 
-    volScalarField rho
+    autoPtr<volScalarField> rhoPtr;
+
+    IOobject rhoIO
     (
-        IOobject
-        (
-            "rho",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
+        "rho",
+        runTime.timeName(0),
         mesh,
-        dimensionedScalar("zero", dimMass/dimVolume, 0.0)
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
     );
 
-    if (rhoType == "rhoInf")
+    if (rhoType == "uniform")
     {
-        rho = rhoDict.lookup("rhoInf");
+        scalar rhoValue(readScalar(rhoDict.lookup("value")));
+
+        rhoPtr.reset
+        (
+            new volScalarField
+            (
+                rhoIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "rho",
+                    dimMass/dimVolume,
+                    rhoValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
+    }
+    else if (rhoType == "field")
+    {
+        rhoIO.readOpt() = IOobject::MUST_READ;
+
+        rhoPtr.reset
+        (
+            new volScalarField
+            (
+                rhoIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "readMechanicalProperties.H"
+        )   << "Valid type entries are uniform or field for rho"
+            << abort(FatalError);
     }
 
-    volScalarField rhoE
-    (
-        IOobject
-        (
-            "E",
-            runTime.timeName(0),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("0", dimMass/dimLength/sqr(dimTime), 0.0)
-    );
+    volScalarField& rho = rhoPtr();
 
     const dictionary& EDict(mechanicalProperties.subDict("E"));
-    word EType(EDict.lookup("E"));
-    if (EType == "EInf")
+    word EType(EDict.lookup("type"));
+
+    autoPtr<volScalarField> EPtr;
+
+    IOobject EIO
+    (
+        "E",
+        runTime.timeName(0),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (EType == "uniform")
     {
-        rhoE = EDict.lookup("EInf");
+        scalar rhoEValue(readScalar(EDict.lookup("value")));
+
+        EPtr.reset
+        (
+            new volScalarField
+            (
+                EIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "Erho",
+                    dimMass/dimLength/sqr(dimTime),
+                    rhoEValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
+    }
+    else if (EType == "field")
+    {
+        EIO.readOpt() = IOobject::MUST_READ;
+
+        EPtr.reset
+        (
+            new volScalarField
+            (
+                EIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "readMechanicalProperties.H"
+        )   << "Valid type entries are uniform or field for E"
+            << abort(FatalError);
     }
 
+    volScalarField& rhoE = EPtr();
 
-    volScalarField nu
+    autoPtr<volScalarField> nuPtr;
+
+    IOobject nuIO
     (
-        IOobject
-        (
-            "nu",
-            runTime.timeName(0),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
+        "nu",
+        runTime.timeName(0),
         mesh,
-        dimensionedScalar("0", dimless, 0.0)
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
     );
 
     const dictionary& nuDict(mechanicalProperties.subDict("nu"));
-    word nuType(nuDict.lookup("nu"));
+    word nuType(nuDict.lookup("type"));
 
-    if (nuType == "nuInf")
+    if (nuType == "uniform")
     {
-        nu = nuDict.lookup("nuInf");
+        scalar nuValue(readScalar(nuDict.lookup("value")));
+        nuPtr.reset
+        (
+            new volScalarField
+            (
+                nuIO,
+                mesh,
+                dimensionedScalar
+                (
+                    "nu",
+                    dimless,
+                    nuValue
+                ),
+                zeroGradientFvPatchField<scalar>::typeName
+            )
+        );
     }
+    else if(nuType == "field")
+    {
+        nuIO.readOpt() = IOobject::MUST_READ;
+        nuPtr.reset
+        (
+            new volScalarField
+            (
+                nuIO,
+                mesh
+            )
+        );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "readMechanicalProperties.H"
+        )   << "Valid type entries are uniform or field for nu"
+            << abort(FatalError);
+    }
+
+    volScalarField& nu = nuPtr();
 
     Info<< "Normalising E : E/rho\n" << endl;
     volScalarField E = rhoE/rho;

@@ -45,7 +45,7 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     cellZones_.clearAddressing();
 
     // Update parallel data
-    if (globalMeshDataPtr_)
+    if (globalMeshDataPtr_.valid())
     {
         globalMeshDataPtr_->updateMesh();
     }
@@ -53,12 +53,12 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
     setInstance(time().timeName());
 
     // Map the old motion points if present
-    if (oldPointsPtr_)
+    if (oldPointsPtr_.valid())
     {
         // Make a copy of the original points
-        pointField oldMotionPoints = *oldPointsPtr_;
+        pointField oldMotionPoints = oldPointsPtr_();
 
-        pointField& newMotionPoints = *oldPointsPtr_;
+        pointField& newMotionPoints = oldPointsPtr_();
 
         // Resize the list to new size
         newMotionPoints.setSize(points_.size());

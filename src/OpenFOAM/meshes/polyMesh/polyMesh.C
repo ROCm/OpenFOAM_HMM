@@ -32,7 +32,6 @@ License
 #include "globalMeshData.H"
 #include "processorPolyPatch.H"
 #include "OSspecific.H"
-#include "demandDrivenData.H"
 #include "polyMeshTetDecomposition.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
@@ -209,6 +208,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
+    cellTreePtr_(NULL),
     pointZones_
     (
         IOobject
@@ -401,6 +401,7 @@ Foam::polyMesh::polyMesh
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
+    cellTreePtr_(NULL),
     pointZones_
     (
         IOobject
@@ -558,6 +559,7 @@ Foam::polyMesh::polyMesh
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
+    cellTreePtr_(NULL),
     pointZones_
     (
         IOobject
@@ -859,7 +861,7 @@ Foam::label Foam::polyMesh::nSolutionD() const
 
 const Foam::labelList& Foam::polyMesh::tetBasePtIs() const
 {
-    if (!tetBasePtIsPtr_)
+    if (tetBasePtIsPtr_.empty())
     {
         if (debug)
         {
@@ -869,13 +871,51 @@ const Foam::labelList& Foam::polyMesh::tetBasePtIs() const
                 << endl;
         }
 
-        tetBasePtIsPtr_ = new labelList
+        tetBasePtIsPtr_.reset
         (
-            polyMeshTetDecomposition::findFaceBasePts(*this)
+            new labelList
+            (
+                polyMeshTetDecomposition::findFaceBasePts(*this)
+            )
         );
     }
 
-    return *tetBasePtIsPtr_;
+    return tetBasePtIsPtr_();
+}
+
+
+const Foam::indexedOctree<Foam::treeDataCell>&
+Foam::polyMesh::cellTree() const
+{
+    if (cellTreePtr_.empty())
+    {
+        treeBoundBox overallBb(points());
+
+        Random rndGen(261782);
+
+        overallBb = overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        cellTreePtr_.reset
+        (
+            new indexedOctree<treeDataCell>
+            (
+                treeDataCell
+                (
+                    false,          // not cache bb
+                    *this,
+                    FACEDIAGTETS    // use tetDecomposition for any inside test
+                ),
+                overallBb,
+                8,              // maxLevel
+                10,             // leafsize
+                5.0             // duplicity
+            )
+        );
+    }
+
+    return cellTreePtr_();
 }
 
 
@@ -911,7 +951,7 @@ void Foam::polyMesh::addPatches
     // recalculation. Problem: should really be done in removeBoundary but
     // there is some info in parallelData which might be interesting inbetween
     // removeBoundary and addPatches.
-    deleteDemandDrivenData(globalMeshDataPtr_);
+    globalMeshDataPtr_.clear();
 
     if (validBoundary)
     {
@@ -1033,7 +1073,7 @@ const Foam::labelList& Foam::polyMesh::faceNeighbour() const
 // Return old mesh motion points
 const Foam::pointField& Foam::polyMesh::oldPoints() const
 {
-    if (!oldPointsPtr_)
+    if (oldPointsPtr_.empty())
     {
         if (debug)
         {
@@ -1042,11 +1082,11 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
                 << endl;
         }
 
-        oldPointsPtr_ = new pointField(points_);
+        oldPointsPtr_.reset(new pointField(points_));
         curMotionTimeIndex_ = time().timeIndex();
     }
 
-    return *oldPointsPtr_;
+    return oldPointsPtr_();
 }
 
 
@@ -1068,8 +1108,8 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     if (curMotionTimeIndex_ != time().timeIndex())
     {
         // Mesh motion in the new time step
-        deleteDemandDrivenData(oldPointsPtr_);
-        oldPointsPtr_ = new pointField(points_);
+        oldPointsPtr_.clear();
+        oldPointsPtr_.reset(new pointField(points_));
         curMotionTimeIndex_ = time().timeIndex();
     }
 
@@ -1099,9 +1139,9 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     );
 
     // Adjust parallel shared points
-    if (globalMeshDataPtr_)
+    if (globalMeshDataPtr_.valid())
     {
-        globalMeshDataPtr_->movePoints(points_);
+        globalMeshDataPtr_().movePoints(points_);
     }
 
     // Force recalculation of all geometric data with new points
@@ -1141,14 +1181,14 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 void Foam::polyMesh::resetMotion() const
 {
     curMotionTimeIndex_ = 0;
-    deleteDemandDrivenData(oldPointsPtr_);
+    oldPointsPtr_.clear();
 }
 
 
 // Return parallel info
 const Foam::globalMeshData& Foam::polyMesh::globalData() const
 {
-    if (!globalMeshDataPtr_)
+    if (globalMeshDataPtr_.empty())
     {
         if (debug)
         {
@@ -1158,10 +1198,10 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
                 << endl;
         }
         // Construct globalMeshData using processorPatch information only.
-        globalMeshDataPtr_ = new globalMeshData(*this);
+        globalMeshDataPtr_.reset(new globalMeshData(*this));
     }
 
-    return *globalMeshDataPtr_;
+    return globalMeshDataPtr_();
 }
 
 
@@ -1304,6 +1344,113 @@ void Foam::polyMesh::findTetFacePt
 
             return;
         }
+    }
+}
+
+
+bool Foam::polyMesh::pointInCell
+(
+    const point& p,
+    label cellI,
+    const cellRepresentation decompMode
+) const
+{
+    switch (decompMode)
+    {
+        case FACEPLANES:
+        {
+            return primitiveMesh::pointInCell(p, cellI);
+        }
+        break;
+
+        case FACECENTRETETS:
+        {
+            const point& cc = cellCentres()[cellI];
+            const cell& cFaces = cells()[cellI];
+            forAll(cFaces, cFaceI)
+            {
+                label faceI = cFaces[cFaceI];
+                const face& f = faces_[faceI];
+                const point& fc = faceCentres()[faceI];
+                bool isOwn = (owner_[faceI] == cellI);
+
+                forAll(f, fp)
+                {
+                    label pointI;
+                    label nextPointI;
+
+                    if (isOwn)
+                    {
+                        pointI = f[fp];
+                        nextPointI = f.nextLabel(fp);
+                    }
+                    else
+                    {
+                        pointI = f.nextLabel(fp);
+                        nextPointI = f[fp];
+                    }
+
+                    if
+                    (
+                        tetPointRef
+                        (
+                            points()[nextPointI],
+                            points()[pointI],
+                            fc,
+                            cc
+                        ).inside(p)
+                    )
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        break;
+
+        case FACEDIAGTETS:
+        {
+            label tetFaceI, tetPtI;
+            findTetFacePt(cellI, p, tetFaceI, tetPtI);
+
+            return tetFaceI != -1;
+        }
+        break;
+    }
+    return false;
+}
+
+
+Foam::label Foam::polyMesh::findCell
+(
+    const point& location,
+    const cellRepresentation decompMode
+) const
+{
+    if (nCells() == 0)
+    {
+        return -1;
+    }
+
+    // Find the nearest cell centre to this location
+    label cellI = findNearestCell(location);
+
+    // If point is in the nearest cell return
+    if (pointInCell(location, cellI, decompMode))
+    {
+        return cellI;
+    }
+    else // point is not in the nearest cell so search all cells
+    {
+        for (label cellI = 0; cellI < nCells(); cellI++)
+        {
+            if (pointInCell(location, cellI, decompMode))
+            {
+                return cellI;
+            }
+        }
+        return -1;
     }
 }
 
