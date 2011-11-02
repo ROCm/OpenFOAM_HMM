@@ -35,7 +35,12 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(actuationDiskSource, 0);
-    addToRunTimeSelectionTable(basicSource, actuationDiskSource, dictionary);
+    addToRunTimeSelectionTable
+    (
+        basicSource,
+        actuationDiskSource,
+        dictionary
+    );
 }
 
 
@@ -75,7 +80,7 @@ Foam::actuationDiskSource::actuationDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    coeffs_(dict.subDict(modelType + "Coeffs")),
+    fieldName_(coeffs_.lookup("fieldName")),
     diskDir_(coeffs_.lookup("diskDir")),
     Cp_(readScalar(coeffs_.lookup("Cp"))),
     Ct_(readScalar(coeffs_.lookup("Ct"))),
@@ -90,17 +95,35 @@ Foam::actuationDiskSource::actuationDiskSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
+Foam::label Foam::actuationDiskSource::applyToField
+(
+    const word& fieldName
+) const
+{
+    if (fieldName == fieldName_)
+    {
+        return 0;
+    }
+
+    return -1;
+}
+
+
+void Foam::actuationDiskSource::addSup
+(
+    fvMatrix<vector>& eqn,
+    const label
+)
 {
     bool compressible = false;
-    if (UEqn.dimensions() == dimensionSet(1, 1, -2, 0, 0))
+    if (eqn.dimensions() == dimForce)
     {
         compressible = true;
     }
 
-    const scalarField& cellsV = this->mesh().V();
-    vectorField& Usource = UEqn.source();
-    const vectorField& U = UEqn.psi();
+    const scalarField& cellsV = mesh_.V();
+    vectorField& Usource = eqn.source();
+    const vectorField& U = eqn.psi();
 
     if (V() > VSMALL)
     {
@@ -111,7 +134,7 @@ void Foam::actuationDiskSource::addSu(fvMatrix<vector>& UEqn)
                 Usource,
                 cells_,
                 cellsV,
-                this->mesh().lookupObject<volScalarField>("rho"),
+                mesh_.lookupObject<volScalarField>("rho"),
                 U
             );
         }
@@ -141,7 +164,6 @@ bool Foam::actuationDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
         coeffs_.readIfPresent("diskDir", diskDir_);
         coeffs_.readIfPresent("Cp", Cp_);
         coeffs_.readIfPresent("Ct", Ct_);

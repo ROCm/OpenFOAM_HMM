@@ -7,7 +7,7 @@
     );
 
     // Add resistance on the actuation disks
-    actuationDisks.addSu(UEqn());
+    sources.apply(UEqn());
 
     UEqn().relax();
 

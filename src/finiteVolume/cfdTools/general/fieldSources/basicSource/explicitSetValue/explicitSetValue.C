@@ -23,92 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
-#include "fvMesh.H"
-#include "volFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "HashSet.H"
+#include "makeBasicSource.H"
+#include "ExplicitSetValue.H"
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(explicitSetValue, 0);
-    addToRunTimeSelectionTable
-    (
-        basicSource,
-        explicitSetValue,
-        dictionary
-    );
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::explicitSetValue::setFieldData(const dictionary& dict)
-{
-    scalarFields_.clear();
-    vectorFields_.clear();
-
-    wordList fieldTypes(dict.toc().size());
-    wordList fieldNames(dict.toc().size());
-
-    forAll(dict.toc(), i)
-    {
-        const word& fieldName = dict.toc()[i];
-        IOobject io
-        (
-            fieldName,
-            this->mesh().time().timeName(),
-            this->mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-        if (io.headerOk())
-        {
-            fieldTypes[i] = io.headerClassName();
-            fieldNames[i] = dict.toc()[i];
-        }
-        else
-        {
-            FatalErrorIn("explicitSetValue::setFieldData")
-                << "header not OK for field " << io.name()
-                << abort(FatalError);
-        }
-    }
-
-    addField(scalarFields_, fieldTypes, fieldNames, dict);
-    addField(vectorFields_, fieldTypes, fieldNames, dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::explicitSetValue::explicitSetValue
-(
-    const word& name,
-    const word& modelType,
-    const dictionary& dict,
-    const fvMesh& mesh
-)
-:
-    basicSource(name, modelType, dict, mesh),
-    coeffs_(dict.subDict(modelType + "Coeffs"))
-{
-    setFieldData(coeffs_.subDict("fieldData"));
-}
-
-
-void Foam::explicitSetValue::setValue(fvMatrix<scalar>& Eqn)
-{
-    setFieldValue(Eqn, scalarFields_[Eqn.psi().name()]);
-}
-
-
-void Foam::explicitSetValue::setValue(fvMatrix<vector>& Eqn)
-{
-    setFieldValue(Eqn, vectorFields_[Eqn.psi().name()]);
+    makeBasicSource(ExplicitSetValue, scalar);
+    makeBasicSource(ExplicitSetValue, vector);
+    makeBasicSource(ExplicitSetValue, sphericalTensor);
+    makeBasicSource(ExplicitSetValue, symmTensor);
+    makeBasicSource(ExplicitSetValue, tensor);
 }
 
 

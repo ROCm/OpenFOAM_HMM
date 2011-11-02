@@ -25,9 +25,20 @@ Class
     Foam::pressureGradientExplicitSource
 
 Description
-    Creates a cell set pressure gradient source
+    Creates a pressure gradient source
 
     Note: Currently only handles kinematic pressure
+
+    Sources described by:
+
+        pressureGradientExplicitSourceCoeffs
+        {
+            UName       U;          // name of velocity field
+            Ubar        (10.0 0 0); // desired average velocity
+            gradPini    gradPini [0 2 -2 0 0] 0; // initial pressure gradient
+            flowDir     (1 0 0);    // flow direction
+        }
+        
 
 SourceFiles
     pressureGradientExplicitSource.C
@@ -42,6 +53,7 @@ SourceFiles
 #include "cellSet.H"
 #include "fvMesh.H"
 #include "volFields.H"
+#include "basicSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,24 +61,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class pressureGradientExplicitSource Declaration
+               Class pressureGradientExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureGradientExplicitSource
+:
+    public basicSource
 {
     // Private data
 
-        //- Name of the source
-        const word sourceName_;
-
-        //- Reference to the mesh
-        const fvMesh& mesh_;
-
-        //- Reference to the velocity field
-        volVectorField& U_;
-
-        //- Properties dictionary
-        IOdictionary dict_;
+        //- Velocity field name
+        word UName_;
 
         //- Average velocity
         vector Ubar_;
@@ -80,20 +85,14 @@ class pressureGradientExplicitSource
         //- Flow direction
         vector flowDir_;
 
-        //- Name of cell source
-        word cellSource_;
-
-        //- The method by which the cells will be selected
-        autoPtr<topoSetSource> cellSelector_;
-
-        //- The set of selected cells
-        cellSet selectedCellSet_;
-
 
     // Private Member Functions
 
         //- Write the pressure gradient to file (for restarts etc)
         void writeGradP() const;
+
+        //- Correct driving force for a constant mass flow rate
+        void update();
 
         //- Disallow default bitwise copy construct
         pressureGradientExplicitSource(const pressureGradientExplicitSource&);
@@ -104,26 +103,43 @@ class pressureGradientExplicitSource
 
 public:
 
+    //- Runtime type information
+    TypeName("pressureGradientExplicitSource");
+
+
     // Constructors
 
         //- Construct from explicit source name and mesh
         pressureGradientExplicitSource
         (
             const word& sourceName,
-            volVectorField& U
+            const word& modelType,
+            const dictionary& dict,
+            const fvMesh& mesh
         );
 
 
     // Member Functions
 
+        // Checks
+
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
+
+
         // Access
 
-            //- Return a tmp field of the source
-            tmp<DimensionedField<vector, volMesh> > Su() const;
+            //- Add explicit contribution to equation
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
-        //- Correct driving force for a constant mass flow rate
-        void update();
+        // I-O
+
+            //- Write the source properties
+            virtual void writeData(Ostream&) const;
+
+            //- Read source dictionary
+            virtual bool read(const dictionary& dict);
 };
 
 

@@ -9,9 +9,10 @@
      +  combustion->Sh()
      +  coalParcels.Sh(hs)
      +  limestoneParcels.Sh(hs)
-     +  enthalpySource.Su()
      +  radiation->Shs(thermo)
     );
+
+    sources.apply(hsEqn);
 
     hsEqn.relax();
     hsEqn.solve();

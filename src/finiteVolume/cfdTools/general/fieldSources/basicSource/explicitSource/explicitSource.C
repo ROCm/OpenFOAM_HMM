@@ -23,111 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
-#include "fvMesh.H"
-#include "volFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "HashSet.H"
+#include "makeBasicSource.H"
+#include "ExplicitSource.H"
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(explicitSource, 0);
-    addToRunTimeSelectionTable
-    (
-        basicSource,
-        explicitSource,
-        dictionary
-    );
-
-
-    // * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
-    template<> const char* NamedEnum
-    <
-        explicitSource::volumeModeType,
-        2
-        >::names[] =
-    {
-        "absolute",
-        "specific"
-    };
-
-    const NamedEnum<explicitSource::volumeModeType, 2>
-        explicitSource::volumeModeTypeNames_;
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::explicitSource::setFieldData(const dictionary& dict)
-{
-    scalarFields_.clear();
-    vectorFields_.clear();
-
-    wordList fieldTypes(dict.toc().size());
-    wordList fieldNames(dict.toc().size());
-
-    forAll(dict.toc(), i)
-    {
-        const word& fieldName = dict.toc()[i];
-        IOobject io
-        (
-            fieldName,
-            this->mesh().time().timeName(),
-            this->mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-        if (io.headerOk())
-        {
-            fieldTypes[i] = io.headerClassName();
-            fieldNames[i] = dict.toc()[i];
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "explicitSource::setFieldData"
-            )   << "header not OK " << io.name()
-                << exit(FatalError);
-        }
-    }
-
-    addField(scalarFields_, fieldTypes, fieldNames, dict);
-    addField(vectorFields_, fieldTypes, fieldNames, dict);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::explicitSource::explicitSource
-(
-    const word& name,
-    const word& modelType,
-    const dictionary& dict,
-    const fvMesh& mesh
-)
-:
-    basicSource(name, modelType, dict, mesh),
-    coeffs_(dict.subDict(modelType + "Coeffs")),
-    volumeMode_(volumeModeTypeNames_.read(coeffs_.lookup("volumeMode")))
-{
-    setFieldData(dict_.subDict("fieldData"));
-}
-
-
-void Foam::explicitSource::addSu(fvMatrix<scalar>& Eqn)
-{
-    addSource(Eqn, scalarFields_[Eqn.psi().name()]);
-}
-
-
-void Foam::explicitSource::addSu(fvMatrix<vector>& Eqn)
-{
-    addSource(Eqn, vectorFields_[Eqn.psi().name()]);
+    makeBasicSource(ExplicitSource, scalar);
+    makeBasicSource(ExplicitSource, vector);
+    makeBasicSource(ExplicitSource, sphericalTensor);
+    makeBasicSource(ExplicitSource, symmTensor);
+    makeBasicSource(ExplicitSource, tensor);
 }
 
 

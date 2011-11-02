@@ -11,13 +11,28 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      massSourcesProperties;
+    object      sourcesProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-(
-    // none
-);
+source1
+{
+    type            scalarExplicitSource;
+    active          true;
+    timeStart       0.15;
+    duration        0.2;
+    selectionMode   cellSet;
+    cellSet         ignitionCells;
+
+    scalarExplicitSourceCoeffs
+    {
+        volumeMode      absolute;
+        fieldData
+        {
+            hs              20000;
+        }
+    }
+}
 
 
 // ************************************************************************* //

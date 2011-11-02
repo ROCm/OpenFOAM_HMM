@@ -23,28 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
+#include "ExplicitSetValue.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::explicitSource::volumeModeType&
-Foam::explicitSource::volumeMode() const
+template<class Type>
+void Foam::ExplicitSetValue<Type>::writeData(Ostream& os) const
 {
-    return volumeMode_;
+    os  << indent << name_ << endl;
+    dict_.write(os);
 }
 
 
-inline Foam::explicitSource::volumeModeType&
-Foam::explicitSource::volumeMode()
+template<class Type>
+bool Foam::ExplicitSetValue<Type>::read(const dictionary& dict)
 {
-    return volumeMode_;
-}
-
-
-inline const Foam::List<Foam::point>&
-Foam::explicitSource::points() const
-{
-    return points_;
+    if (basicSource::read(dict))
+    {
+        setFieldData(coeffs_.subDict("fieldData"));
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

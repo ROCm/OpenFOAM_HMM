@@ -38,10 +38,12 @@ inline const Foam::fvMesh& Foam::basicSource::mesh() const
     return mesh_;
 }
 
-inline const Foam::dictionary& Foam::basicSource::dictCoeffs() const
+
+inline const Foam::dictionary& Foam::basicSource::coeffs() const
 {
-    return dict_;
+    return coeffs_;
 }
+
 
 inline bool Foam::basicSource::active() const
 {

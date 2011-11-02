@@ -25,10 +25,60 @@ Class
     Foam::rotorDiskSource
 
 Description
-    Cell-zone based momemtum source
+    Cell based momemtum source
 
     Source approximates the mean effects of rotor forces on a cylindrical
     region within the domain
+
+    Sources described by:
+
+        rotorDiskSourceCoeffs
+        {
+            fieldName       U;      // name of field on which to apply source
+            rhoName         rho;    // density field if compressible case
+            nBlades         3;      // number of blades
+            tip effect      0.96;   // normalised radius above which lift = 0
+
+            inletFlowType   local;  // inlet flow type specification
+
+            geometryMode    auto;   // geometry specification
+
+            refDirection    (-1 0 0); // reference direction
+
+            flapCoeffs
+            {
+                beta0           0;  // coning angle [deg]
+                beta1           0;  // lateral flapping coeff
+                beta2           0;  // longitudinal flapping coeff
+            }
+            trimCoeffs
+            {
+                alphac          15; // collective pitch angle [deg]
+                A               0;  // lateral cyclic coeff
+                B               0;  // longitudinal cyclic coeff
+            }
+            blade
+            {
+                ...
+            }
+            profiles
+            {
+                ...
+            }
+        }
+
+    Where:
+
+        geometryMode =
+            auto          : determine rototor co-ord system from cells
+            specified     : specified co-ord system
+
+        inletFlowType =
+            fixed         : specified velocity
+            surfaceNormal : specified normal velocity (positive towards rotor)
+            local         : use local flow conditions
+
+
 
 SourceFiles
     rotorDiskSource.C
@@ -44,6 +94,8 @@ SourceFiles
 #include "NamedEnum.H"
 #include "bladeModel.H"
 #include "profileModelList.H"
+#include "volFieldsFwd.H"
+#include "dimensionSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,8 +149,8 @@ protected:
 
     // Protected data
 
-        //- Coefficients dictionary
-        dictionary coeffs_;
+        //- Name of field on which to apply the source
+        word fieldName_;
 
         //- Name of density field
         word rhoName_;
@@ -212,13 +264,16 @@ public:
     // Member Functions
 
 
+        // Checks
+
+            //- Return index of field name if found in fieldNames list
+            virtual label applyToField(const word& fieldName) const;
+
+
         // Source term addition
 
             //- Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //- Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn);
+            virtual void addSup(fvMatrix<vector>& eqn);
 
 
         // I-O

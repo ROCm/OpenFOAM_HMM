@@ -23,14 +23,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSetValue.H"
+#include "ExplicitSource.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::List<Foam::point>&
-Foam::explicitSetValue::points() const
+template<class Type>
+void Foam::ExplicitSource<Type>::writeData(Ostream& os) const
 {
-    return points_;
+    notImplemented
+    (
+        "void Foam::ExplicitSource<Type>::read(Ostream&) const"
+    );
+}
+
+
+template<class Type>
+bool Foam::ExplicitSource<Type>::read(const dictionary& dict)
+{
+    notImplemented
+    (
+        "bool Foam::ExplicitSource<Type>::read(const dictionary&)"
+    );
+
+    return false;
 }
 
 

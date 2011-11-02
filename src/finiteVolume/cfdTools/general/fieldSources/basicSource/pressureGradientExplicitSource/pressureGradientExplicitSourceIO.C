@@ -23,38 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "explicitSource.H"
+#include "pressureGradientExplicitSource.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::explicitSource::writeData(Ostream& os) const
+void Foam::pressureGradientExplicitSource::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    notImplemented
+    (
+        "void Foam::pressureGradientExplicitSource::writeData"
+        "("
+            "Ostream&"
+        ") const"
+    );
 }
 
 
-bool Foam::explicitSource::read(const dictionary& dict)
+bool Foam::pressureGradientExplicitSource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
-    {
-        coeffs_ = dict.subDict(typeName + "Coeffs");
-        setFieldData(coeffs_.subDict("fieldData"));
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+    notImplemented
+    (
+        "bool Foam::pressureGradientExplicitSource::read"
+        "("
+            "const dictionary&"
+        ") const"
+    );
 
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const explicitSource& source)
-{
-    source.writeData(os);
-    return os;
+    return false;
 }
 
 

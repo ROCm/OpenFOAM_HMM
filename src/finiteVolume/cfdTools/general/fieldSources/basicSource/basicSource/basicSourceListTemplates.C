@@ -23,22 +23,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeActivatedExplicitSource.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
-    defineTemplateTypeNameAndDebug
-    (
-        IOPtrList<scalarTimeActivatedExplicitSource>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        IOPtrList<vectorTimeActivatedExplicitSource>,
-         0
-    );
+    const word& fieldName = eqn.psi().name();
+
+    forAll(*this, i)
+    {
+        basicSource& source = this->operator[](i);
+
+        label fieldI = source.applyToField(fieldName);
+
+        if (source.isActive() && (fieldI != -1))
+        {
+            if (debug)
+            {
+                Info<< "Applying source " << source.name() << " to field "
+                    << fieldName << endl;
+            }
+
+            source.addSup(eqn, fieldI);
+            source.setValue(eqn, fieldI);
+        }
+    }
 }
+
 
 // ************************************************************************* //

@@ -71,6 +71,10 @@ private:
 
 public:
 
+    //- Runtime type information
+    TypeName("basicSourceList");
+
+
     // Constructors
 
         //- Construct from components with list of field names
@@ -86,14 +90,8 @@ public:
 
         // Evaluation
 
-            //- Add source terms to scalar fvMatrix
-            void addSu(fvMatrix<scalar>& Eq);
-
-            //- Add source terms to vector fvMatrix
-            void addSu(fvMatrix<vector>& Eq);
-
-            //- Set constant value on field
-            void setValue(fvMatrix<scalar>& Eq);
+            template<class Type>
+            void apply(fvMatrix<Type>& eqn);
 
 
         // I-O
@@ -116,6 +114,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "basicSourceListTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
