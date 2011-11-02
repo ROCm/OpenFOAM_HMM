@@ -369,11 +369,17 @@ public:
 
         // I-O
 
+            //- Write the source header information
+            virtual void writeHeader(Ostream&) const;
+
+            //- Write the source footer information
+            virtual void writeFooter(Ostream&) const;
+
             //- Write the source properties
-            virtual void writeData(Ostream&) const = 0;
+            virtual void writeData(Ostream&) const;
 
             //- Read source dictionary
-            virtual bool read(const dictionary& dict) = 0;
+            virtual bool read(const dictionary& dict);
 };
 
 

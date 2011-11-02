@@ -27,11 +27,21 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicSource::writeData(Ostream& os) const
+void Foam::basicSource::writeHeader(Ostream& os) const
 {
     os  << indent << name_ << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
+}
 
+
+void Foam::basicSource::writeFooter(Ostream& os) const
+{
+    os << decrIndent << indent << token::END_BLOCK << endl;
+}
+
+
+void Foam::basicSource::writeData(Ostream& os) const
+{
     os.writeKeyword("active") << active_ << token::END_STATEMENT << nl;
     os.writeKeyword("timeStart") << timeStart_ << token::END_STATEMENT << nl;
     os.writeKeyword("duration") << duration_ << token::END_STATEMENT << nl;
@@ -70,8 +80,6 @@ void Foam::basicSource::writeData(Ostream& os) const
                 << abort(FatalError);
         }
     }
-
-    os << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
