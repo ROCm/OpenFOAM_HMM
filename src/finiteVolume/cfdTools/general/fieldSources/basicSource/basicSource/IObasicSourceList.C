@@ -27,6 +27,39 @@ License
 #include "fvMesh.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::IOobject Foam::IObasicSourceList::createIOobject
+(
+    const fvMesh& mesh
+) const
+{
+    IOobject io
+    (
+        "sourcesProperties",
+        mesh.time().constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (io.headerOk())
+    {
+        Info<< "Creating field source list from " << io.name() << nl << endl;
+
+        io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
+        return io;
+    }
+    else
+    {
+        Info<< "No field sources present" << nl << endl;
+
+        io.readOpt() = IOobject::NO_READ;
+        return io;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IObasicSourceList::IObasicSourceList
@@ -34,17 +67,7 @@ Foam::IObasicSourceList::IObasicSourceList
     const fvMesh& mesh
 )
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            "sourcesProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
+    IOdictionary(createIOobject(mesh)),
     basicSourceList(mesh, *this)
 {}
 
