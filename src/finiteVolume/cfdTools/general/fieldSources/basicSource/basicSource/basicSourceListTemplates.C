@@ -31,7 +31,7 @@ License
 template<class Type>
 void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
-    if (mesh_.time().timeIndex() == mesh_.time().startTimeIndex() + 1)
+    if (mesh_.time().timeIndex() == mesh_.time().startTimeIndex() + 2)
     {
         checkApplied();
     }
