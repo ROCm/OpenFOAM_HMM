@@ -25,32 +25,24 @@ Class
     Foam::ExplicitSource
 
 Description
-    Time activated explicit source.
+    Explicit source
 
     Sources described by:
 
-    {
-        active          true;      // on/off switch
-        timeStart       0.2;       // start time
-        duration        2.0;       // duration
-        selectionMode   points;    // cellSet/cellZone/all
-        volumeMode      absolute;  // specific
+        <Type>ExplicitSourceCoeffs
+        {
+            volumeMode      absolute; // specific
+            fieldData
+            {
+                k           30.7;
+                epsilon     1.5;
+            }
+        }
 
-        fieldData                  // field data - usage for multiple fields
-        (
-            (H2O 0.005)
-        );
+    If volumeMode = 
+        - absolute: values are given as <quantity>
+        - specific: values are given as <quantity>/m3
 
-        fieldData       0.005;     // field data - usage for single field
-
-        points                     // list of points when selectionMode = points
-        (
-            (2.75 0.5 0)
-        );
-
-        cellSet         c0;        // cellSet name when selectionMode=cellSet
-        cellZone        c0;        // cellZone name when selectionMode=cellZone
-    }
 
 SourceFiles
     ExplicitSource.C
@@ -61,8 +53,6 @@ SourceFiles
 #define ExplicitSource_H
 
 #include "Tuple2.H"
-#include "volFieldsFwd.H"
-#include "DimensionedField.H"
 #include "basicSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -87,7 +77,7 @@ Ostream& operator<<
 );
 
 /*---------------------------------------------------------------------------*\
-               Class ExplicitSource Declaration
+                      Class ExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

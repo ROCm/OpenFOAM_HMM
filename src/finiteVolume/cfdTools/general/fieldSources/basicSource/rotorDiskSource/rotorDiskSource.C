@@ -28,6 +28,7 @@ License
 #include "mathematicalConstants.H"
 #include "unitConversion.H"
 #include "geometricOneField.H"
+#include "fvMatrices.H"
 
 using namespace Foam::constant;
 
@@ -361,13 +362,13 @@ Foam::rotorDiskSource::rotorDiskSource
 (
     const word& name,
     const word& modelType,
-    const dictionary& coeffs,
+    const dictionary& dict,
     const fvMesh& mesh
 
 )
 :
-    basicSource(name, modelType, coeffs, mesh),
-    fieldName_(coeffs.lookup("fieldName")),
+    basicSource(name, modelType, dict, mesh),
+    fieldName_(coeffs_.lookup("fieldName")),
     rhoName_("none"),
     omega_(0.0),
     nBlades_(0),
@@ -385,7 +386,7 @@ Foam::rotorDiskSource::rotorDiskSource
     coordSys_(false),
     rMax_(0.0)
 {
-    read(coeffs);
+    read(dict);
 }
 
 
@@ -445,7 +446,7 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn)
 void Foam::rotorDiskSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
-    coeffs_.write(os);
+    dict_.write(os);
 }
 
 

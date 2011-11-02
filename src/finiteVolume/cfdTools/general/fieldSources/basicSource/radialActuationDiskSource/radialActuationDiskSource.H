@@ -29,17 +29,31 @@ Description
     Actuation disk zone definition.
     Constant values for momentum source for actuation disk
 
-    T = 2*rho*A*sqr(Uo)*a*(1-a)
-    U1 = (1 -a)Uo
+        T = 2*rho*A*sqr(Uo)*a*(1-a)
+        U1 = (1 -a)Uo
+
     where:
-          A: disk area
-          Uo: upstream velocity
-          a: 1 - Cp/Ct
-          U1: velocity at the disk
+        A: disk area
+        Uo: upstream velocity
+        a: 1 - Cp/Ct
+        U1: velocity at the disk
 
 
     The thrust is distributed by a radial function:
-    thrust(r) = T*(C0 + C1*r^2 + C2*r^4)
+
+        thrust(r) = T*(C0 + C1*r^2 + C2*r^4)
+
+    Sources described by:
+
+        actuationDiskSourceCoeffs
+        {
+            fieldName       U;          // name of field to apply source
+            diskDir         (-1 0 0);   // disk direction
+            Cp              0.1;        // power coefficient
+            Ct              0.5;        // thrust coefficient
+            diskArea        5.0;        // disk area
+            coeffs          (0.1 0.5 0.01); // radial distribution coefficients
+        }
 
 
 SourceFiles
@@ -51,10 +65,8 @@ SourceFiles
 #ifndef radialActuationDiskSource_H
 #define radialActuationDiskSource_H
 
-#include "DimensionedField.H"
-#include "volFieldsFwd.H"
-#include "FixedList.H"
 #include "actuationDiskSource.H"
+#include "FixedList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IObasicSourceList.H"
+#include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

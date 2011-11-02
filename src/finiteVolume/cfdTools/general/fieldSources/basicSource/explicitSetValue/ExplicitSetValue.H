@@ -29,14 +29,15 @@ Description
 
     Sources described by:
 
-    explicitSetValueCoeffs
-    {
-        fieldData            // field data - usage for multiple fields
+        <Type>ExplicitSetValueCoeffs
         {
-            k   30.7;
-            epsilon  1.5;
+            fieldData
+            {
+                k           30.7;
+                epsilon     1.5;
+            }
         }
-    }
+
 
 SourceFiles
     explicitSetValue.C

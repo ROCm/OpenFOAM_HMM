@@ -27,11 +27,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSourceNew::writeData(Ostream& os) const
+void Foam::pressureGradientExplicitSource::writeData(Ostream& os) const
 {
     notImplemented
     (
-        "void Foam::pressureGradientExplicitSourceNew::writeData"
+        "void Foam::pressureGradientExplicitSource::writeData"
         "("
             "Ostream&"
         ") const"
@@ -39,11 +39,11 @@ void Foam::pressureGradientExplicitSourceNew::writeData(Ostream& os) const
 }
 
 
-bool Foam::pressureGradientExplicitSourceNew::read(const dictionary& dict)
+bool Foam::pressureGradientExplicitSource::read(const dictionary& dict)
 {
     notImplemented
     (
-        "bool Foam::pressureGradientExplicitSourceNew::read"
+        "bool Foam::pressureGradientExplicitSource::read"
         "("
             "const dictionary&"
         ") const"

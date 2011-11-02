@@ -80,6 +80,7 @@ Foam::actuationDiskSource::actuationDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
+    fieldName_(coeffs_.lookup("fieldName")),
     diskDir_(coeffs_.lookup("diskDir")),
     Cp_(readScalar(coeffs_.lookup("Cp"))),
     Ct_(readScalar(coeffs_.lookup("Ct"))),
@@ -155,7 +156,7 @@ void Foam::actuationDiskSource::addSup
 void Foam::actuationDiskSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
-    coeffs_.write(os);
+    dict_.write(os);
 }
 
 

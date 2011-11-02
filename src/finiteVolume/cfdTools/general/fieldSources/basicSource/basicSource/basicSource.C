@@ -25,18 +25,15 @@ License
 
 #include "basicSource.H"
 #include "fvMesh.H"
-#include "volFields.H"
+#include "fvMatrices.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(basicSource, 0);
     defineRunTimeSelectionTable(basicSource, dictionary);
-
-
-    // * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
     template<> const char* NamedEnum
     <
@@ -116,12 +113,9 @@ void Foam::basicSource::setCellSet()
                 label globalCellI = returnReduce(cellI, maxOp<label>());
                 if (globalCellI < 0)
                 {
-                    WarningIn
-                    (
-                        "basicSource::setCellIds()"
-                    )
-                    << "Unable to find owner cell for point " << points_[i]
-                    << endl;
+                    WarningIn("basicSource::setCellIds()")
+                        << "Unable to find owner cell for point " << points_[i]
+                        << endl;
 
                 }
 
@@ -194,24 +188,25 @@ Foam::basicSource::basicSource
 (
     const word& name,
     const word& modelType,
-    const dictionary& coeffs,
+    const dictionary& dict,
     const fvMesh& mesh
 )
 :
     name_(name),
     mesh_(mesh),
-    coeffs_(coeffs),
-    active_(readBool(coeffs_.lookup("active"))),
-    timeStart_(readScalar(coeffs_.lookup("timeStart"))),
-    duration_(readScalar(coeffs_.lookup("duration"))),
+    dict_(dict),
+    coeffs_(dict.subDict(modelType + "Coeffs")),
+    active_(readBool(dict_.lookup("active"))),
+    timeStart_(readScalar(dict_.lookup("timeStart"))),
+    duration_(readScalar(dict_.lookup("duration"))),
     selectionMode_
     (
-        selectionModeTypeNames_.read(coeffs_.lookup("selectionMode"))
+        selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
     ),
     cellSetName_("none"),
     V_(0.0)
 {
-    setSelection(coeffs_);
+    setSelection(dict_);
 
     setCellSet();
 }

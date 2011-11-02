@@ -25,8 +25,8 @@ License
 
 #include "ExplicitSource.H"
 #include "fvMesh.H"
-#include "volFields.H"
-#include "dimensionedType.H"
+#include "fvMatrices.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 

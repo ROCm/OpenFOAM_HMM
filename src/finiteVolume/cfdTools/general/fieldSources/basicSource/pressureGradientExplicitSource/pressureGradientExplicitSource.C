@@ -24,25 +24,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "pressureGradientExplicitSource.H"
-#include "volFields.H"
+#include "fvMatrices.H"
+#include "DimensionedField.H"
 #include "IFstream.H"
 #include "addToRunTimeSelectionTable.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 namespace Foam
 {
-    defineTypeNameAndDebug(pressureGradientExplicitSourceNew, 0);
+    defineTypeNameAndDebug(pressureGradientExplicitSource, 0);
 
     addToRunTimeSelectionTable
     (
         basicSource,
-        pressureGradientExplicitSourceNew,
+        pressureGradientExplicitSource,
         dictionary
     );
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSourceNew::writeGradP() const
+void Foam::pressureGradientExplicitSource::writeGradP() const
 {
     // Only write on output time
     if (mesh_.time().outputTime())
@@ -65,7 +69,7 @@ void Foam::pressureGradientExplicitSourceNew::writeGradP() const
 }
 
 
-void Foam::pressureGradientExplicitSourceNew::update()
+void Foam::pressureGradientExplicitSource::update()
 {
     volVectorField& U = const_cast<volVectorField&>
     (
@@ -117,7 +121,7 @@ void Foam::pressureGradientExplicitSourceNew::update()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pressureGradientExplicitSourceNew::pressureGradientExplicitSourceNew
+Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 (
     const word& sourceName,
     const word& modelType,
@@ -151,7 +155,7 @@ Foam::pressureGradientExplicitSourceNew::pressureGradientExplicitSourceNew
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::pressureGradientExplicitSourceNew::applyToField
+Foam::label Foam::pressureGradientExplicitSource::applyToField
 (
     const word& fieldName
 ) const
@@ -167,7 +171,7 @@ Foam::label Foam::pressureGradientExplicitSourceNew::applyToField
 }
 
 
-void Foam::pressureGradientExplicitSourceNew::addSup
+void Foam::pressureGradientExplicitSource::addSup
 (
     fvMatrix<vector>& eqn,
     const label

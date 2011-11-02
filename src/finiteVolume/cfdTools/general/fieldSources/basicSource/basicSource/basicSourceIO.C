@@ -80,6 +80,9 @@ bool Foam::basicSource::read(const dictionary& dict)
     active_ = readBool(dict.lookup("active"));
     timeStart_ = readScalar(dict.lookup("timeStart"));
     duration_  = readScalar(dict.lookup("duration"));
+
+    coeffs_ = dict.subDict(type() + "Coeffs");
+
     return true;
 }
 

@@ -28,7 +28,7 @@ Description
     Base class for profile models
 
 SourceFiles
-    profileModel.C
+    profileModelList.C
 
 \*---------------------------------------------------------------------------*/
 

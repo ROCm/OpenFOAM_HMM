@@ -25,52 +25,14 @@ Class
     Foam::basicSource
 
 Description
-    Basic source abtract class
+    Field source abtract base class.  Provides a base set of controls, e.g.
 
-    Sources described by:
+        type            scalarExplicitSource    // source type
+        active          on;                     // on/off switch
+        timeStart       0.0;                    // start time
+        duration        1000.0;                 // duration
+        selectionMode   cellSet;                // cellSet // points //cellZone
 
-    source1
-    {
-        type            actuationDiskSource; // explicitSource
-        active          on;            // on/off switch
-        timeStart       0.0;           // start time
-        duration        1000.0;        // duration
-        selectionMode   cellSet;       // cellSet // points //cellZone
-        cellSet         c0;            // cellSet name
-
-        actuationDiskSourceCoeffs
-        {
-            diskDir     (-1 0 0); // orientation of the disk
-            Cp          0.53;     // Cp
-            Ct          0.58;     // Ct
-            diskArea    40;       // disk area
-        }
-    }
-
-    source2
-    {
-        type            explicitSource;
-        active          on;
-        timeStart       0.0;
-        duration        1000.0;
-        selectionMode   points;
-        cellSet         c0;
-
-        points            // list of points when selectionMode = points
-        (
-            (-0.088 0.007 -0.02)
-            (-0.028 0.007 -0.02)
-        );
-        explicitSourceCoeffs
-        {
-            volumeMode      specific;  //absolute
-            fieldData                  //field data
-            {
-                k   30.7;
-                epsilon  1.5;
-            }
-        }
-    }
 
 SourceFiles
     basicSource.C
@@ -81,10 +43,8 @@ SourceFiles
 #ifndef basicSource_H
 #define basicSource_H
 
-#include "fvMatrices.H"
+#include "fvMatricesFwd.H"
 #include "cellSet.H"
-#include "volFieldsFwd.H"
-#include "DimensionedField.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -96,7 +56,7 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                          Class basicSource Declaration
+                         Class basicSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSource
@@ -128,7 +88,10 @@ protected:
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
-        //- Dictionary containing the data of the source
+        //- Top level source dictionary
+        dictionary dict_;
+
+        //- Dictionary containing source coefficients
         dictionary coeffs_;
 
         //- Source active flag

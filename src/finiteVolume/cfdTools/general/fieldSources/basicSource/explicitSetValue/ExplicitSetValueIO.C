@@ -31,7 +31,7 @@ template<class Type>
 void Foam::ExplicitSetValue<Type>::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
-    coeffs_.write(os);
+    dict_.write(os);
 }
 
 

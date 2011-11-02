@@ -22,20 +22,31 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pressureGradientExplicitSourceNew
+    Foam::pressureGradientExplicitSource
 
 Description
-    Creates a cell set pressure gradient source
+    Creates a pressure gradient source
 
     Note: Currently only handles kinematic pressure
 
+    Sources described by:
+
+        pressureGradientExplicitSourceCoeffs
+        {
+            UName       U;          // Name of velocity field
+            Ubar        (10.0 0 0); // Desired average velocity
+            gradPini    gradPini [0 2 -2 0 0]; // initial pressure gradient
+            flowDir     (1 0 0);    // flow direction
+        }
+        
+
 SourceFiles
-    pressureGradientExplicitSourceNew.C
+    pressureGradientExplicitSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pressureGradientExplicitSourceNew_H
-#define pressureGradientExplicitSourceNew_H
+#ifndef pressureGradientExplicitSource_H
+#define pressureGradientExplicitSource_H
 
 #include "autoPtr.H"
 #include "topoSetSource.H"
@@ -50,10 +61,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class pressureGradientExplicitSourceNew Declaration
+               Class pressureGradientExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class pressureGradientExplicitSourceNew
+class pressureGradientExplicitSource
 :
     public basicSource
 {
@@ -84,10 +95,10 @@ class pressureGradientExplicitSourceNew
         void update();
 
         //- Disallow default bitwise copy construct
-        pressureGradientExplicitSourceNew(const pressureGradientExplicitSourceNew&);
+        pressureGradientExplicitSource(const pressureGradientExplicitSource&);
 
         //- Disallow default bitwise assignment
-        void operator=(const pressureGradientExplicitSourceNew&);
+        void operator=(const pressureGradientExplicitSource&);
 
 
 public:
@@ -99,7 +110,7 @@ public:
     // Constructors
 
         //- Construct from explicit source name and mesh
-        pressureGradientExplicitSourceNew
+        pressureGradientExplicitSource
         (
             const word& sourceName,
             const word& modelType,

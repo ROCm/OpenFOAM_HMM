@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
 #include "unitConversion.H"
+#include "volFields.H"
 
 using namespace Foam::constant;
 

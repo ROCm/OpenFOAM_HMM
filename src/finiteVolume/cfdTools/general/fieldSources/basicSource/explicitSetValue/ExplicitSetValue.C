@@ -25,7 +25,8 @@ License
 
 #include "ExplicitSetValue.H"
 #include "fvMesh.H"
-#include "volFields.H"
+#include "fvMatrices.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
