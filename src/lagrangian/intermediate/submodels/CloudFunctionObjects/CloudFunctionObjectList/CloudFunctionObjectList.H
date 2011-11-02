@@ -121,11 +121,16 @@ public:
             virtual void postPatch
             (
                 const typename CloudType::parcelType& p,
-                const label patchI
+                const label patchI,
+                const label patchFaceI
             );
 
             //- Post-face hook
-            virtual void postFace(const typename CloudType::parcelType& p);
+            virtual void postFace
+            (
+                const typename CloudType::parcelType& p,
+                const label faceI
+            );
 };
 
 

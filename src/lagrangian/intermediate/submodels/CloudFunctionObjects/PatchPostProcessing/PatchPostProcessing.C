@@ -196,7 +196,8 @@ template<class CloudType>
 void Foam::PatchPostProcessing<CloudType>::postPatch
 (
     const parcelType& p,
-    const label patchI
+    const label patchI,
+    const label
 )
 {
     const label localPatchI = applyToPatch(patchI);
@@ -208,11 +209,6 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
         patchData_[localPatchI].append(data.str());
     }
 }
-
-
-template<class CloudType>
-void Foam::PatchPostProcessing<CloudType>::postFace(const parcelType&)
-{}
 
 
 // ************************************************************************* //
