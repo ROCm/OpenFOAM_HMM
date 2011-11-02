@@ -175,9 +175,9 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
             }
 
             // calculate forces
-            scalar pDyn = 0.5*rho[cellI]*sqr(magUc);
-            scalar f = pDyn*chord*nBlades_*area_[i]/(mathematical::twoPi);
-            vector localForce = vector(0.0, f*Cd, tipFactor*f*Cl);
+            const scalar pDyn = 0.5*rho[cellI]*sqr(magUc);
+            const scalar f = pDyn*chord*nBlades_*area_[i]/(mathematical::twoPi);
+            const vector localForce(0.0, f*Cd, tipFactor*f*Cl);
 
             // accumulate forces
             dragEff += localForce.y();
