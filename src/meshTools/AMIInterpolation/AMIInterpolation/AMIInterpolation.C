@@ -850,14 +850,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         return;
     }
 
-
-    if (debug)
-    {
-        Info<< "AMI: calcAddressing" << endl;
-        writePatch(srcPatch, "VTK", "source");
-        writePatch(tgtPatch, "VTK", "target");
-    }
-
     // temporary storage for addressing and weights
     List<DynamicList<label> > srcAddr(srcPatch.size());
     List<DynamicList<scalar> > srcWght(srcPatch.size());
@@ -1307,8 +1299,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         if (debug)
         {
-            writeWeights(srcWeights_, srcPatch, "VTK", "source");
-            writeWeights(tgtWeights_, tgtPatch, "VTK", "target");
             writeFaceConnectivity(srcPatch, newTgtPatch, srcAddress_);
         }
     }
@@ -1317,12 +1307,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         checkPatches(srcPatch, tgtPatch);
 
         calcAddressing(srcPatch, tgtPatch);
-
-        if (debug)
-        {
-            writeWeights(srcWeights_, srcPatch, "VTK", "source");
-            writeWeights(tgtWeights_, tgtPatch, "VTK", "target");
-        }
 
         normaliseWeights(srcPatch, "source", srcAddress_, srcWeights_, true);
         normaliseWeights(tgtPatch, "target", tgtAddress_, tgtWeights_, true);
@@ -1573,76 +1557,6 @@ const
             ptI += 2;
         }
     }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeWeights
-(
-    const scalarListList& weights,
-    const primitivePatch& patch,
-    const word& folder,
-    const word& prefix
-)
-const
-{
-/*
-    static label i = 0;
-
-    scalarField wghtSum(weights.size(), 0.0);
-
-    forAll(weights, faceI)
-    {
-        scalar s = sum(weights[faceI]);
-        wghtSum[faceI] = s;
-    }
-
-    vtkSurfaceWriter writer;
-
-    writer.write
-    (
-        folder,
-        prefix
-          + '_' + Foam::name(i) + "_proc" + Foam::name(Pstream::myProcNo()),
-        patch.localPoints(),
-        patch.localFaces(),
-        "weights",
-        wghtSum,
-        false
-    );
-
-    i++;
-*/
-}
-
-
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writePatch
-(
-    const primitivePatch& patch,
-    const word& folder,
-    const word& prefix
-)
-const
-{
-/*
-    static label i = 0;
-
-    vtkSurfaceWriter writer;
-    writer.write
-    (
-        folder,
-        prefix
-          + '_' + Foam::name(i) + "_proc" + Foam::name(Pstream::myProcNo()),
-        patch.localPoints(),
-        patch.localFaces(),
-        "AMIPatch",
-        scalarField(patch.size(), Pstream::myProcNo()),
-        false
-    );
-
-    i++;
-*/
 }
 
 

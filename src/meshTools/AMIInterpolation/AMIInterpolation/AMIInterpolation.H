@@ -416,25 +416,6 @@ public:
                 const primitivePatch& tgtPatch,
                 const labelListList& srcAddress
             ) const;
-
-            //- Write weights to VTK file
-            void writeWeights
-            (
-                const scalarListList& weights,
-                const primitivePatch& patch,
-                const word& folder,
-                const word& prefix
-            )
-            const;
-
-            //- Write patch
-            void writePatch
-            (
-                const primitivePatch& patch,
-                const word& folder,
-                const word& prefix
-            )
-            const;
 };
 
 
