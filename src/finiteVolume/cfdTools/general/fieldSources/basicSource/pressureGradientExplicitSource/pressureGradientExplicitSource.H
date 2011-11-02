@@ -33,9 +33,9 @@ Description
 
         pressureGradientExplicitSourceCoeffs
         {
-            UName       U;          // Name of velocity field
-            Ubar        (10.0 0 0); // Desired average velocity
-            gradPini    gradPini [0 2 -2 0 0]; // initial pressure gradient
+            UName       U;          // name of velocity field
+            Ubar        (10.0 0 0); // desired average velocity
+            gradPini    gradPini [0 2 -2 0 0] 0; // initial pressure gradient
             flowDir     (1 0 0);    // flow direction
         }
         
