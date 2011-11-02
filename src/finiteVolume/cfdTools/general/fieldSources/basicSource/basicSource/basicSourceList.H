@@ -84,15 +84,16 @@ public:
         basicSourceList(const fvMesh& mesh, const dictionary& dict);
 
 
-        //- Destructor
-        virtual ~basicSourceList()
-        {}
+    //- Destructor
+    virtual ~basicSourceList()
+    {}
 
 
     // Member Functions
 
         // Evaluation
 
+            //- Apply sources to equation
             template<class Type>
             void apply(fvMatrix<Type>& eqn);
 
@@ -111,7 +112,6 @@ public:
                 Ostream& os,
                 const basicSourceList& sources
             );
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
