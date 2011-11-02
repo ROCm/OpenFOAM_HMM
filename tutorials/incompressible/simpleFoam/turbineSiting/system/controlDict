@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     windSimpleFoam;
+application     simpleFoam;
 
 startFrom       latestTime;
 
