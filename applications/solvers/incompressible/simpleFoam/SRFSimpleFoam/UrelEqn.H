@@ -7,6 +7,8 @@
       + SRF->Su()
     );
 
+    sources.apply(UrelEqn());
+
     UrelEqn().relax();
 
     solve(UrelEqn() == -fvc::grad(p));

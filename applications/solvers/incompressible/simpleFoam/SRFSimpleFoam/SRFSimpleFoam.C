@@ -35,6 +35,7 @@ Description
 #include "RASModel.H"
 #include "SRFModel.H"
 #include "simpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
