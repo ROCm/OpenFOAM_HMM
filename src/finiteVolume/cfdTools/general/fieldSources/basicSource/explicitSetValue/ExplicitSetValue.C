@@ -124,6 +124,8 @@ void Foam::ExplicitSetValue<Type>::setValue
     }
 
     eqn.setValues(cells_, values);
+
+    basicSource::setValue(eqn, fieldI);
 }
 
 

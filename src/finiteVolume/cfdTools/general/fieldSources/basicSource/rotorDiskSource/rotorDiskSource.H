@@ -273,7 +273,7 @@ public:
         // Source term addition
 
             //- Source term to fvMatrix<vector>
-            virtual void addSup(fvMatrix<vector>& eqn);
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
         // I-O

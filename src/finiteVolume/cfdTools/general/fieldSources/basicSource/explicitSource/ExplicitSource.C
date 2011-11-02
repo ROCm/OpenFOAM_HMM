@@ -184,6 +184,8 @@ void Foam::ExplicitSource<Type>::addSup
     }
 
     eqn -= Su;
+
+    basicSource::addSup(eqn, fieldI);
 }
 
 

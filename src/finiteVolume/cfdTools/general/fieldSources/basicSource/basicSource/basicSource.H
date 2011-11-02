@@ -98,7 +98,7 @@ protected:
         bool active_;
 
         //- Flag to indicate whether or not the source has been applied
-//        bool applied_;   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        bool applied_;
 
         //- Time start
         scalar timeStart_;

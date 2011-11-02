@@ -112,7 +112,7 @@ Foam::label Foam::actuationDiskSource::applyToField
 void Foam::actuationDiskSource::addSup
 (
     fvMatrix<vector>& eqn,
-    const label
+    const label fieldI
 )
 {
     bool compressible = false;
@@ -150,6 +150,8 @@ void Foam::actuationDiskSource::addSup
             );
         }
     }
+
+    basicSource::addSup(eqn, fieldI);
 }
 
 

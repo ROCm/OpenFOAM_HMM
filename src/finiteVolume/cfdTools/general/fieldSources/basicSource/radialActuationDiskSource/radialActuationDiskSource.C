@@ -64,7 +64,7 @@ Foam::radialActuationDiskSource::radialActuationDiskSource
 void Foam::radialActuationDiskSource::addSup
 (
     fvMatrix<vector>& eqn,
-    const label
+    const label fieldI
 )
 {
     bool compressible = false;
@@ -102,6 +102,8 @@ void Foam::radialActuationDiskSource::addSup
             );
         }
     }
+
+    basicSource::addSup(eqn, fieldI);
 }
 
 

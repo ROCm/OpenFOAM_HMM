@@ -411,7 +411,7 @@ Foam::label Foam::rotorDiskSource::applyToField(const word& fieldName) const
 }
 
 
-void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn)
+void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
     // add source to lhs of eqn
 
@@ -440,6 +440,8 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn)
                 dimForce/dimVolume/dimDensity
             );
     }
+
+    basicSource::addSup(eqn, fieldI);
 }
 
 
