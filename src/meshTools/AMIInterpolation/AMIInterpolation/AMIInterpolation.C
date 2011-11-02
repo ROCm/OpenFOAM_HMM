@@ -1527,7 +1527,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const Field<Type>& fld
 ) const
 {
-    return interpolateToSource(fld, sumOp<Type>());
+    return interpolateToTarget(fld, sumOp<Type>());
 }
 
 
@@ -1539,7 +1539,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToSource(tFld, sumOp<Type>());
+    return interpolateToTarget(tFld, sumOp<Type>());
 }
 
 
