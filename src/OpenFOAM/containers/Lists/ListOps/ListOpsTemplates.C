@@ -243,6 +243,7 @@ void Foam::uniqueOrder
                 order[n++] = order[i];
             }
         }
+        order[n++] = order[order.size()-1];
         order.setSize(n);
     }
 }

@@ -170,7 +170,7 @@ void Foam::Time::setControls()
 
     readDict();
     deltaTSave_ = deltaT_;
-    deltaT0_ = deltaTSave_;
+    deltaT0_ = deltaT_;
 
     if (Pstream::parRun())
     {
@@ -203,10 +203,13 @@ void Foam::Time::setControls()
         )
     );
 
-    if (timeDict.readIfPresent("deltaT", deltaTSave_))
+    if (timeDict.readIfPresent("deltaT", deltaT_))
     {
-        deltaT0_ = deltaTSave_;
+        deltaTSave_ = deltaT_;
+        deltaT0_ = deltaT_;
     }
+
+    timeDict.readIfPresent("deltaT0", deltaT0_);
 
     if (timeDict.readIfPresent("index", startTimeIndex_))
     {
