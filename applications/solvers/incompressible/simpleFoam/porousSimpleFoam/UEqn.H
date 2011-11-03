@@ -6,6 +6,8 @@
       + turbulence->divDevReff(U)
     );
 
+    sources.apply(UEqn());
+
     UEqn().relax();
 
     // Include the porous media resistance and solve the momentum equation

@@ -57,6 +57,9 @@ private:
 
     // Private Member Functions
 
+        //- Create IO object if dictionary is present
+        IOobject createIOobject(const fvMesh& mesh) const;
+
         //- Disallow default bitwise copy construct
         IObasicSourceList(const IObasicSourceList&);
 

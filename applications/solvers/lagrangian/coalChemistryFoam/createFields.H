@@ -122,14 +122,8 @@
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
     );
 
-    Info<< "\nConstructing explicit enthalpy source" << endl;
-    scalarTimeActivatedExplicitSourceList enthalpySource
-    (
-        "energy",
-        mesh,
-        dimEnergy/dimTime/dimVolume,
-        "hs"
-    );
+    Info<< "\nConstructing sources" << endl;
+    IObasicSourceList sources(mesh);
 
     volScalarField dQ
     (

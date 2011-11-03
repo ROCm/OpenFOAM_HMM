@@ -38,10 +38,12 @@ inline const Foam::fvMesh& Foam::basicSource::mesh() const
     return mesh_;
 }
 
-inline const Foam::dictionary& Foam::basicSource::dictCoeffs() const
+
+inline const Foam::dictionary& Foam::basicSource::coeffs() const
 {
-    return dict_;
+    return coeffs_;
 }
+
 
 inline bool Foam::basicSource::active() const
 {
@@ -89,6 +91,12 @@ inline Foam::scalar Foam::basicSource::V() const
 inline const Foam::labelList& Foam::basicSource::cells() const
 {
     return cells_;
+}
+
+
+inline void Foam::basicSource::setApplied(const label fieldI)
+{
+    applied_[fieldI] = true;
 }
 
 

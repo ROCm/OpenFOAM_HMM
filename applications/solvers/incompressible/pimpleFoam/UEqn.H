@@ -7,6 +7,8 @@ tmp<fvVectorMatrix> UEqn
   + turbulence->divDevReff(U)
 );
 
+sources.apply(UEqn());
+
 UEqn().relax();
 
 volScalarField rAU(1.0/UEqn().A());

@@ -32,6 +32,8 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               + combustion->R(Yi)
             );
 
+            sources.apply(YiEqn);
+
             YiEqn.relax();
             YiEqn.solve(mesh.solver("Yi"));
 

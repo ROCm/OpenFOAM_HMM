@@ -37,6 +37,7 @@ Description
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 #include "SRFModel.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

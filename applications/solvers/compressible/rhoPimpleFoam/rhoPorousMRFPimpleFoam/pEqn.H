@@ -6,7 +6,7 @@ rho.relax();
 volScalarField rAU(1.0/UEqn().A());
 U = rAU*UEqn().H();
 
-if (pimple.nCorrPIMPLE() <= 1)
+if (pimple.nCorrPISO() <= 1)
 {
     UEqn.clear();
 }

@@ -107,6 +107,7 @@ template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postPatch
 (
     const typename CloudType::parcelType&,
+    const label,
     const label
 )
 {
@@ -117,7 +118,8 @@ void Foam::CloudFunctionObject<CloudType>::postPatch
 template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postFace
 (
-    const typename CloudType::parcelType&
+    const typename CloudType::parcelType&,
+    const label
 )
 {
     // do nothing

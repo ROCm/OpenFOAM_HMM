@@ -26,16 +26,30 @@ Class
     Foam::actuationDiskSource
 
 Description
-    Actuation disk zone definition.
+    Actuation disk source
+
     Constant values for momentum source for actuation disk
 
-    T = 2*rho*A*sqr(Uo)*a*(1-a)
-    U1 = (1 -a)Uo
+        T = 2*rho*A*sqr(Uo)*a*(1-a)
+        U1 = (1 -a)Uo
+
     where:
-          A: disk area
-          Uo: upstream velocity
-          a: 1 - Cp/Ct
-          U1: velocity at the disk
+        A: disk area
+        Uo: upstream velocity
+        a: 1 - Cp/Ct
+        U1: velocity at the disk
+
+    Sources described by:
+
+        actuationDiskSourceCoeffs
+        {
+            fieldNames      (U);        // names of fields to apply source
+            diskDir         (-1 0 0);   // disk direction
+            Cp              0.1;        // power coefficient
+            Ct              0.5;        // thrust coefficient
+            diskArea        5.0;        // disk area
+        }
+
 
 SourceFiles
     actuationDiskSource.C
@@ -46,14 +60,6 @@ SourceFiles
 #ifndef actuationDiskSource_H
 #define actuationDiskSource_H
 
-#include "IOdictionary.H"
-#include "coordinateSystem.H"
-#include "coordinateSystems.H"
-#include "wordList.H"
-#include "labelList.H"
-#include "DimensionedField.H"
-#include "volFieldsFwd.H"
-#include "fvMatricesFwd.H"
 #include "basicSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,9 +79,6 @@ class actuationDiskSource
 protected:
 
     // Protected data
-
-        //- Coefficients dictionary
-        dictionary coeffs_;
 
         //- Disk area normal
         vector diskDir_;
@@ -169,11 +172,8 @@ public:
 
         // Public Functions
 
-            //-Source term to fvMatrix<vector>
-            virtual void addSu(fvMatrix<vector>& UEqn);
-
-            //-Source term to fvMatrix<scalar>
-            virtual void addSu(fvMatrix<scalar>& UEqn){}
+            //- Source term to fvMatrix<vector>
+            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
         // I-O

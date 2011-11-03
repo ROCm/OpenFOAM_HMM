@@ -28,6 +28,7 @@ License
 #include "mathematicalConstants.H"
 #include "unitConversion.H"
 #include "geometricOneField.H"
+#include "fvMatrices.H"
 
 using namespace Foam::constant;
 
@@ -262,10 +263,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
         }
         default:
         {
-            FatalErrorIn
-            (
-                "rotorDiskSource::createCoordinateSystem(const geometryMode&);"
-            )   << "Unknown geometryMode " << geometryModeTypeNames_[gm]
+            FatalErrorIn("rotorDiskSource::createCoordinateSystem()")
+                << "Unknown geometryMode " << geometryModeTypeNames_[gm]
                 << ". Available geometry modes include "
                 << geometryModeTypeNames_ << exit(FatalError);
         }
@@ -369,7 +368,6 @@ Foam::rotorDiskSource::rotorDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    coeffs_(dict_.subDict(type() + "Coeffs")),
     rhoName_("none"),
     omega_(0.0),
     nBlades_(0),
@@ -399,20 +397,20 @@ Foam::rotorDiskSource::~rotorDiskSource()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::rotorDiskSource::addSu(fvMatrix<vector>& UEqn)
+void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
     // add source to lhs of eqn
 
-    const volVectorField& U = UEqn.psi();
+    const volVectorField& U = eqn.psi();
 
-    if (UEqn.dimensions() == dimForce)
+    if (eqn.dimensions() == dimForce)
     {
         coeffs_.lookup("rhoName") >> rhoName_;
 
         const volScalarField& rho =
             mesh_.lookupObject<volScalarField>(rhoName_);
 
-        UEqn += calculateForces
+        eqn += calculateForces
             (
                 rho.internalField(),
                 inflowVelocity(U),
@@ -421,19 +419,13 @@ void Foam::rotorDiskSource::addSu(fvMatrix<vector>& UEqn)
     }
     else
     {
-        UEqn += calculateForces
+        eqn += calculateForces
             (
                 oneField(),
                 inflowVelocity(U),
                 dimForce/dimVolume/dimDensity
             );
     }
-}
-
-
-void Foam::rotorDiskSource::addSu(fvMatrix<scalar>& UEqn)
-{
-    // do nothing
 }
 
 
@@ -448,7 +440,8 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        coeffs_ = dict.subDict(type() + "Coeffs");
+        coeffs_.lookup("fieldNames") >> fieldNames_;
+        applied_.setSize(fieldNames_.size(), false);
 
         scalar rpm(readScalar(coeffs_.lookup("rpm")));
         omega_ = rpm/60.0*mathematical::twoPi;

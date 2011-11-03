@@ -63,7 +63,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             "G",
             mesh_.time().timeName(),
             mesh_,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh_,
@@ -76,7 +76,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             "Qr",
             mesh_.time().timeName(),
             mesh_,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         mesh_,
@@ -102,8 +102,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             "Qin",
             mesh_.time().timeName(),
             mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
         ),
         mesh_,
         dimensionedScalar("Qin", dimMass/pow3(dimTime), 0.0)
@@ -228,7 +228,6 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
                 );
                 i++;
             }
-
         }
     }
 
@@ -277,7 +276,7 @@ bool Foam::radiation::fvDOM::read()
 {
     if (radiationModel::read())
     {
-//      Only reading solution parameters - not changing ray geometry
+        // Only reading solution parameters - not changing ray geometry
 
         coeffs_.readIfPresent("convergence", convergence_);
         coeffs_.readIfPresent("maxIter", maxIter_);

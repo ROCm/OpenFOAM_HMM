@@ -150,13 +150,18 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
         "mechanicalProperties"
     );
 
-    dimensionedScalar rho(mechanicalProperties.lookup("rho"));
-    dimensionedScalar rhoE(mechanicalProperties.lookup("E"));
-    dimensionedScalar nu(mechanicalProperties.lookup("nu"));
+    const fvPatchField<scalar>& rho =
+        patch().lookupPatchField<volScalarField, scalar>("rho");
 
-    dimensionedScalar E = rhoE/rho;
-    dimensionedScalar mu = E/(2.0*(1.0 + nu));
-    dimensionedScalar lambda = nu*E/((1.0 + nu)*(1.0 - 2.0*nu));
+    const fvPatchField<scalar>& rhoE =
+        patch().lookupPatchField<volScalarField, scalar>("E");
+
+    const fvPatchField<scalar>& nu =
+        patch().lookupPatchField<volScalarField, scalar>("nu");
+
+    scalarField E = rhoE/rho;
+    scalarField mu = E/(2.0*(1.0 + nu));
+    scalarField lambda = nu*E/((1.0 + nu)*(1.0 - 2.0*nu));
 
     Switch planeStress(mechanicalProperties.lookup("planeStress"));
 
@@ -175,8 +180,8 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
 
     gradient() =
     (
-        (traction_ + pressure_*n)/rho.value() - (n & (sigmaD + sigmaExp))
-    )/(2.0*mu + lambda).value();
+        (traction_ + pressure_*n)/rho - (n & (sigmaD + sigmaExp))
+    )/(2.0*mu + lambda);
 
     fixedGradientFvPatchVectorField::updateCoeffs();
 }

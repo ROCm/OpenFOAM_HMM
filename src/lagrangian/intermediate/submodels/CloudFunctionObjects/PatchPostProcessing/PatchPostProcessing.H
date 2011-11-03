@@ -121,10 +121,12 @@ public:
         // Evaluation
 
             //- Post-patch hook
-            virtual void postPatch(const parcelType& p, const label patchI);
-
-            //- Post-face hook
-            virtual void postFace(const parcelType& p);
+            virtual void postPatch
+            (
+                const parcelType& p,
+                const label patchI,
+                const label patchFaceI
+            );
 };
 
 

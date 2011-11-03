@@ -146,12 +146,13 @@ template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postPatch
 (
     const typename CloudType::parcelType& p,
-    const label patchI
+    const label patchI,
+    const label patchFaceI
 )
 {
     forAll(*this, i)
     {
-        this->operator[](i).postPatch(p, patchI);
+        this->operator[](i).postPatch(p, patchI, patchFaceI);
     }
 }
 
@@ -159,12 +160,13 @@ void Foam::CloudFunctionObjectList<CloudType>::postPatch
 template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postFace
 (
-    const typename CloudType::parcelType& p
+    const typename CloudType::parcelType& p,
+    const label faceI
 )
 {
     forAll(*this, i)
     {
-        this->operator[](i).postFace(p);
+        this->operator[](i).postFace(p, faceI);
     }
 }
 

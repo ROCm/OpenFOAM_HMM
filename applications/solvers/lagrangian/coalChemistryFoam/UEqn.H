@@ -9,6 +9,8 @@
       + limestoneParcels.SU(U)
     );
 
+    sources.apply(UEqn);
+
     UEqn.relax();
 
     if (pimple.momentumPredictor())

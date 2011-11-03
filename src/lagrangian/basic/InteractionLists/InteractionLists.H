@@ -30,7 +30,7 @@ Description
     cells are potentially in range of each other.
 
     Builds referred interaction list, specifying which cells are
-    required to provide interactions across coupled patched (cyclic or
+    required to provide interactions across coupled patches (cyclic or
     processor).  Generates referred cells, and refers particles to the
     correct processor, applying the appropriate transform.
 

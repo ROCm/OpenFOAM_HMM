@@ -53,30 +53,31 @@ Foam::radialActuationDiskSource::radialActuationDiskSource
 )
 :
     actuationDiskSource(name, modelType, dict, mesh),
-    coeffsDict_(dict.subDict(modelType + "Coeffs")),
-    coeffs_()
+    radialCoeffs_(coeffs_.lookup("coeffs"))
 {
-    coeffsDict_.lookup("coeffs") >> coeffs_;
-    Info<< "    - creating radial actuation disk zone: "
-        << this->name() << endl;
+    Info<< "    - creating radial actuation disk zone: " << name_ << endl;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::radialActuationDiskSource::addSu(fvMatrix<vector>& UEqn)
+void Foam::radialActuationDiskSource::addSup
+(
+    fvMatrix<vector>& eqn,
+    const label fieldI
+)
 {
     bool compressible = false;
-    if (UEqn.dimensions() == dimensionSet(1, 1, -2, 0, 0))
+    if (eqn.dimensions() == dimForce)
     {
         compressible = true;
     }
 
-    const scalarField& cellsV = this->mesh().V();
-    vectorField& Usource = UEqn.source();
-    const vectorField& U = UEqn.psi();
+    const scalarField& cellsV = mesh_.V();
+    vectorField& Usource = eqn.source();
+    const vectorField& U = eqn.psi();
 
-    if (V() > VSMALL)
+    if (V_ > VSMALL)
     {
         if (compressible)
         {
@@ -85,7 +86,7 @@ void Foam::radialActuationDiskSource::addSu(fvMatrix<vector>& UEqn)
                 Usource,
                 cells_,
                 cellsV,
-                this->mesh().lookupObject<volScalarField>("rho"),
+                mesh_.lookupObject<volScalarField>("rho"),
                 U
             );
         }
@@ -114,12 +115,11 @@ bool Foam::radialActuationDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        const dictionary& coeffsDict_ = dict.subDict(typeName + "Coeffs");
-        coeffsDict_.readIfPresent("diskDir", diskDir_);
-        coeffsDict_.readIfPresent("Cp", Cp_);
-        coeffsDict_.readIfPresent("Ct", Ct_);
-        coeffsDict_.readIfPresent("diskArea", diskArea_);
-        coeffsDict_.lookup("coeffs") >> coeffs_;
+        coeffs_.readIfPresent("diskDir", diskDir_);
+        coeffs_.readIfPresent("Cp", Cp_);
+        coeffs_.readIfPresent("Ct", Ct_);
+        coeffs_.readIfPresent("diskArea", diskArea_);
+        coeffs_.lookup("coeffs") >> radialCoeffs_;
         return true;
     }
     else

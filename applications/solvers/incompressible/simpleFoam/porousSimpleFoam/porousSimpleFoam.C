@@ -35,6 +35,7 @@ Description
 #include "RASModel.H"
 #include "porousZones.H"
 #include "simpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,7 +23,7 @@ if (solveSpecies)
         {
             volScalarField& Yi = Y[i];
 
-            solve
+            fvScalarMatrix YEqn
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
@@ -31,9 +31,11 @@ if (solveSpecies)
              ==
                 parcels.SYi(i, Yi)
               + combustion->R(Yi)
-              + massSource.Su(i),
-                mesh.solver("Yi")
             );
+
+            sources.apply(YEqn);
+
+            YEqn.solve(mesh.solver("Yi"));
 
             Yi.max(0.0);
             Yt += Yi;

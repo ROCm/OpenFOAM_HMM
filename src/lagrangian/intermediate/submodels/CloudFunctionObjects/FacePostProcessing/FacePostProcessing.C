@@ -390,16 +390,11 @@ Foam::FacePostProcessing<CloudType>::~FacePostProcessing()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::FacePostProcessing<CloudType>::postPatch
+void Foam::FacePostProcessing<CloudType>::postFace
 (
-    const parcelType&,
-    const label
+    const parcelType& p,
+    const label faceI
 )
-{}
-
-
-template<class CloudType>
-void Foam::FacePostProcessing<CloudType>::postFace(const parcelType& p)
 {
     if
     (
@@ -407,13 +402,13 @@ void Foam::FacePostProcessing<CloudType>::postFace(const parcelType& p)
      || this->owner().solution().transient()
     )
     {
-        label zoneI = -1;
-        label faceI = -1;
-        applyToFace(p.face(), zoneI, faceI);
+        label zoneId = -1;
+        label faceId = -1;
+        applyToFace(faceI, zoneId, faceId);
 
-        if ((zoneI != -1) && (faceI != -1))
+        if ((zoneId != -1) && (faceId != -1))
         {
-            mass_[zoneI][faceI] += p.mass()*p.nParticle();
+            mass_[zoneId][faceId] += p.mass()*p.nParticle();
         }
     }
 }

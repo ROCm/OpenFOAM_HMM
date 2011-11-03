@@ -128,7 +128,7 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
     const labelListList& ril = il_.ril();
 
     List<IDLList<typename CloudType::parcelType> >& referredParticles =
-    il_.referredParticles();
+        il_.referredParticles();
 
     List<DynamicList<typename CloudType::parcelType*> >& cellOccupancy =
         this->owner().cellOccupancy();
@@ -137,7 +137,7 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
     forAll(ril, refCellI)
     {
         IDLList<typename CloudType::parcelType>& refCellRefParticles =
-        referredParticles[refCellI];
+            referredParticles[refCellI];
 
         const labelList& realCells = ril[refCellI];
 
@@ -260,6 +260,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         U.boundaryField()[patchI][patchFaceI]
                     );
 
+                    bool particleHit = false;
                     if (normalAlignment > cosPhiMinFlatWall)
                     {
                         // Guard against a flat interaction being
@@ -284,6 +285,8 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                             );
 
                             flatSiteData.append(wSD);
+ 
+                            particleHit = true;
                         }
                     }
                     else
@@ -293,7 +296,20 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         otherSiteDistances.append(nearest.distance());
 
                         otherSiteData.append(wSD);
+
+                        particleHit = true;
                     }
+
+                    if (particleHit)
+                    {
+                        this->owner().functions().postFace(p, realFaceI);
+                        this->owner().functions().postPatch
+                        (
+                            p,
+                            patchI,
+                            patchFaceI
+                        );
+                     }
                 }
             }
 
@@ -333,6 +349,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         il_.referredWallData()[refWallFaceI]
                     );
 
+                    bool particleHit = false;
                     if (normalAlignment > cosPhiMinFlatWall)
                     {
                         // Guard against a flat interaction being
@@ -357,6 +374,8 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                             );
 
                             flatSiteData.append(wSD);
+
+                            particleHit = false;
                         }
                     }
                     else
@@ -366,6 +385,14 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                         otherSiteDistances.append(nearest.distance());
 
                         otherSiteData.append(wSD);
+
+                        particleHit = false;
+                    }
+
+                    if (particleHit)
+                    {
+                        // TODO: call cloud function objects for referred
+                        //       wall particle interactions
                     }
                 }
             }

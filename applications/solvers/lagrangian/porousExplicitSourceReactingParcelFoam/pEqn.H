@@ -29,8 +29,9 @@
       + fvc::div(phi)
      ==
         parcels.Srho()
-      + massSource.SuTot()
     );
+
+    sources.apply(pDDtEqn);
 
     while (pimple.correctNonOrthogonal())
     {

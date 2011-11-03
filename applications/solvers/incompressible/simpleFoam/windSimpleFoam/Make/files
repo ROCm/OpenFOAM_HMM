@@ -1,3 +1,0 @@
-windSimpleFoam.C
-
-EXE = $(FOAM_APPBIN)/windSimpleFoam

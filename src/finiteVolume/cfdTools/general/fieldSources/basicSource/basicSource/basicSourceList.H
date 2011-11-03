@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class basicSourceList Declaration
+                       Class basicSourceList Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSourceList
@@ -59,8 +59,14 @@ private:
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
+        //- Time index to check that all defined sources have been applied
+        label checkTimeIndex_;
+
 
     // Private Member Functions
+
+        //- Check that all sources have been applied
+        void checkApplied() const;
 
         //- Disallow default bitwise copy construct
         basicSourceList(const basicSourceList&);
@@ -71,29 +77,28 @@ private:
 
 public:
 
+    //- Runtime type information
+    TypeName("basicSourceList");
+
+
     // Constructors
 
         //- Construct from components with list of field names
         basicSourceList(const fvMesh& mesh, const dictionary& dict);
 
 
-        //- Destructor
-        virtual ~basicSourceList()
-        {}
+    //- Destructor
+    virtual ~basicSourceList()
+    {}
 
 
     // Member Functions
 
         // Evaluation
 
-            //- Add source terms to scalar fvMatrix
-            void addSu(fvMatrix<scalar>& Eq);
-
-            //- Add source terms to vector fvMatrix
-            void addSu(fvMatrix<vector>& Eq);
-
-            //- Set constant value on field
-            void setValue(fvMatrix<scalar>& Eq);
+            //- Apply sources to equation
+            template<class Type>
+            void apply(fvMatrix<Type>& eqn);
 
 
         // I-O
@@ -110,12 +115,17 @@ public:
                 Ostream& os,
                 const basicSourceList& sources
             );
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "basicSourceListTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

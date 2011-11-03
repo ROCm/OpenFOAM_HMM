@@ -37,6 +37,7 @@ Description
 #include "turbulenceModel.H"
 #include "dynamicFvMesh.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -109,12 +109,11 @@ void Foam::ParticleTracks<CloudType>::preEvolve()
 
 
 template<class CloudType>
-void Foam::ParticleTracks<CloudType>::postPatch(const parcelType&, const label)
-{}
-
-
-template<class CloudType>
-void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p)
+void Foam::ParticleTracks<CloudType>::postFace
+(
+    const parcelType& p,
+    const label
+)
 {
     if
     (
@@ -126,7 +125,11 @@ void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p)
         {
             FatalErrorIn
             (
-                "Foam::ParticleTracks<CloudType>::postFace(const parcelType&)"
+                "Foam::ParticleTracks<CloudType>::postFace"
+                "("
+                    "const parcelType&, "
+                    "const label"
+                ")"
             )<< "Cloud storage not allocated" << abort(FatalError);
         }
 

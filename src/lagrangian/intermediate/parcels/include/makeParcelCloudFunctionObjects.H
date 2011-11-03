@@ -29,6 +29,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "FacePostProcessing.H"
+#include "ParticleErosion.H"
 #include "ParticleTracks.H"
 #include "PatchPostProcessing.H"
 #include "VoidFraction.H"
@@ -40,6 +41,7 @@ License
     makeCloudFunctionObject(CloudType);                                       \
                                                                               \
     makeCloudFunctionObjectType(FacePostProcessing, CloudType);               \
+    makeCloudFunctionObjectType(ParticleErosion, CloudType);                  \
     makeCloudFunctionObjectType(ParticleTracks, CloudType);                   \
     makeCloudFunctionObjectType(PatchPostProcessing, CloudType);              \
     makeCloudFunctionObjectType(VoidFraction, CloudType);

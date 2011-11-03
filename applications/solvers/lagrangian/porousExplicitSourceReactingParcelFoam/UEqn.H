@@ -7,8 +7,9 @@
      ==
         rho.dimensionedInternalField()*g
       + parcels.SU(U)
-      + momentumSource.Su()
     );
+
+    sources.apply(UEqn);
 
     pZones.addResistance(UEqn);
 

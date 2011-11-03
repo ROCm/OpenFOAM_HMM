@@ -41,7 +41,7 @@ Description
 #include "rhoChemistryCombustionModel.H"
 #include "radiationModel.H"
 #include "porousZones.H"
-#include "timeActivatedExplicitSource.H"
+#include "IObasicSourceList.H"
 #include "SLGThermo.H"
 #include "fvcSmooth.H"
 #include "pimpleControl.H"

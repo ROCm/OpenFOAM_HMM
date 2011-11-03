@@ -56,3 +56,5 @@
     (
         SRF::SRFModel::New(Urel)
     );
+
+    IObasicSourceList sources(mesh);

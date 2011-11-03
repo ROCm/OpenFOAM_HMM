@@ -39,3 +39,5 @@
     (
         incompressible::RASModel::New(U, phi, laminarTransport)
     );
+
+    IObasicSourceList sources(mesh);

@@ -33,6 +33,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
 #include "simpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
