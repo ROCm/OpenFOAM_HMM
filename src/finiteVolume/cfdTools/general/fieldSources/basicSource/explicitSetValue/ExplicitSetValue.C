@@ -34,7 +34,7 @@ template<class Type>
 void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
-    fieldData_.setSize(fieldNames_.size());
+    injectionRate_.setSize(fieldNames_.size());
 
     applied_.setSize(fieldNames_.size(), false);
 
@@ -42,7 +42,7 @@ void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
     forAllConstIter(dictionary, dict, iter)
     {
         fieldNames_[i] = iter().keyword();
-        dict.lookup(iter().keyword()) >> fieldData_[i];
+        dict.lookup(iter().keyword()) >> injectionRate_[i];
         i++;
     }
 }
@@ -60,7 +60,7 @@ Foam::ExplicitSetValue<Type>::ExplicitSetValue
 )
 :
     basicSource(name, modelType, dict, mesh),
-    fieldData_()
+    injectionRate_()
 {
     read(dict);
 }
@@ -105,7 +105,7 @@ void Foam::ExplicitSetValue<Type>::setValue
 
     forAll(values, i)
     {
-        values[i] = fieldData_[fieldI];
+        values[i] = injectionRate_[fieldI];
     }
 
     eqn.setValues(cells_, values);

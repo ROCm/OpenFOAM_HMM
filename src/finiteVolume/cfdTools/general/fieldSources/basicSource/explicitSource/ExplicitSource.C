@@ -88,7 +88,7 @@ template<class Type>
 void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
-    fieldData_.setSize(fieldNames_.size());
+    injectionRate_.setSize(fieldNames_.size());
 
     applied_.setSize(fieldNames_.size(), false);
 
@@ -96,7 +96,7 @@ void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
     forAllConstIter(dictionary, dict, iter)
     {
         fieldNames_[i] = iter().keyword();
-        dict.lookup(iter().keyword()) >> fieldData_[i];
+        dict.lookup(iter().keyword()) >> injectionRate_[i];
         i++;
     }
 
@@ -122,7 +122,7 @@ Foam::ExplicitSource<Type>::ExplicitSource
     basicSource(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
     VDash_(1.0),
-    fieldData_()
+    injectionRate_()
 {
     read(dict);
 }
@@ -165,7 +165,7 @@ void Foam::ExplicitSource<Type>::addSup
 
     forAll(cells_, i)
     {
-        Su[cells_[i]] = fieldData_[fieldI]/VDash_;
+        Su[cells_[i]] = injectionRate_[fieldI]/VDash_;
     }
 
     eqn -= Su;

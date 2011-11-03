@@ -36,9 +36,9 @@ Foam::ExplicitSource<Type>::volumeMode() const
 
 
 template<class Type>
-inline const Foam::List<Type>& Foam::ExplicitSource<Type>::fieldData() const
+inline const Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate() const
 {
-    return fieldData_;
+    return injectionRate_;
 }
 
 
@@ -51,9 +51,9 @@ Foam::ExplicitSource<Type>::volumeMode()
 
 
 template<class Type>
-inline Foam::List<Type>& Foam::ExplicitSource<Type>::fieldData()
+inline Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate()
 {
-    return fieldData_;
+    return injectionRate_;
 }
 
 

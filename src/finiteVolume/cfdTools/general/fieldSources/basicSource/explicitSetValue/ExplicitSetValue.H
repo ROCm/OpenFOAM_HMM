@@ -31,7 +31,7 @@ Description
 
         <Type>ExplicitSetValueCoeffs
         {
-            fieldData
+            injectionRate
             {
                 k           30.7;
                 epsilon     1.5;
@@ -70,7 +70,7 @@ protected:
     // Protected data
 
         //- Source value per field
-        List<Type> fieldData_;
+        List<Type> injectionRate_;
 
 
     // Protected functions
