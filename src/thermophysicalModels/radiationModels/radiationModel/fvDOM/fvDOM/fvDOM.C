@@ -228,7 +228,6 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
                 );
                 i++;
             }
-
         }
     }
 
@@ -277,7 +276,7 @@ bool Foam::radiation::fvDOM::read()
 {
     if (radiationModel::read())
     {
-//      Only reading solution parameters - not changing ray geometry
+        // Only reading solution parameters - not changing ray geometry
 
         coeffs_.readIfPresent("convergence", convergence_);
         coeffs_.readIfPresent("maxIter", maxIter_);
