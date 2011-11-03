@@ -104,16 +104,14 @@ protected:
 
     // Protected data
 
-        typedef Tuple2<word, Type> fieldNameValuePair;
-
         //- Volume mode
         volumeModeType volumeMode_;
 
         //- Volume normalisation
         scalar VDash_;
 
-        //- Source value per field
-        List<fieldNameValuePair> fieldData_;
+        //- Source field values
+        List<Type> fieldData_;
 
 
     // Protected functions
@@ -148,19 +146,13 @@ public:
 
     // Member Functions
 
-        // Check
-
-            //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const;
-
-
         // Access
 
             //- Return const access to the volume mode
             inline const volumeModeType& volumeMode() const;
 
-            //- Return const access to the source field value
-            inline const Type& fieldData() const;
+            //- Return const access to the source field values
+            inline const List<Type>& fieldData() const;
 
 
         // Edit
@@ -168,8 +160,8 @@ public:
             //- Return access to the volume mode
             inline volumeModeType& volumeMode();
 
-            //- Return access to the source field value
-            inline Type& fieldData();
+            //- Return access to the source field values
+            inline List<Type>& fieldData();
 
 
         // Evaluation

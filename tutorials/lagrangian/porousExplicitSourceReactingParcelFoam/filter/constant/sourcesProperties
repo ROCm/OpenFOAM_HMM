@@ -32,7 +32,9 @@ massSource1
         volumeMode      absolute;
         fieldData
         {
+            rho         1e-4; // kg/s
             H2O         1e-4; // kg/s
+            p           1e-4; // kg/s
         }
     }
 }

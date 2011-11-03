@@ -80,12 +80,14 @@ Foam::actuationDiskSource::actuationDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    fieldName_(coeffs_.lookup("fieldName")),
     diskDir_(coeffs_.lookup("diskDir")),
     Cp_(readScalar(coeffs_.lookup("Cp"))),
     Ct_(readScalar(coeffs_.lookup("Ct"))),
     diskArea_(readScalar(coeffs_.lookup("diskArea")))
 {
+    coeffs_.lookup("fieldNames") >> fieldNames_;
+    applied_.setSize(fieldNames_.size(), false);
+
     Info<< "    - creating actuation disk zone: "
         << this->name() << endl;
 
@@ -94,20 +96,6 @@ Foam::actuationDiskSource::actuationDiskSource
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::actuationDiskSource::applyToField
-(
-    const word& fieldName
-) const
-{
-    if (fieldName == fieldName_)
-    {
-        return 0;
-    }
-
-    return -1;
-}
-
 
 void Foam::actuationDiskSource::addSup
 (
@@ -150,8 +138,6 @@ void Foam::actuationDiskSource::addSup
             );
         }
     }
-
-    basicSource::addSup(eqn, fieldI);
 }
 
 

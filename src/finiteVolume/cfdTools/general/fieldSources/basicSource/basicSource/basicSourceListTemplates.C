@@ -23,18 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMesh.H"
-#include "Time.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
-    if (mesh_.time().timeIndex() == mesh_.time().startTimeIndex() + 2)
-    {
-        checkApplied();
-    }
+    checkApplied();
 
     const word& fieldName = eqn.psi().name();
 
@@ -44,16 +38,21 @@ void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 
         label fieldI = source.applyToField(fieldName);
 
-        if (source.isActive() && (fieldI != -1))
+        if (fieldI != -1)
         {
-            if (debug)
-            {
-                Info<< "Applying source " << source.name() << " to field "
-                    << fieldName << endl;
-            }
+            source.setApplied(fieldI);
 
-            source.addSup(eqn, fieldI);
-            source.setValue(eqn, fieldI);
+            if (source.isActive())
+            {
+                if (debug)
+                {
+                    Info<< "Applying source " << source.name() << " to field "
+                        << fieldName << endl;
+                }
+
+                source.addSup(eqn, fieldI);
+                source.setValue(eqn, fieldI);
+            }
         }
     }
 }

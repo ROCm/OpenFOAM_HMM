@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class basicSourceList Declaration
+                       Class basicSourceList Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicSourceList
@@ -58,6 +58,9 @@ private:
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
+
+        //- Time index to check that all defined sources have been applied
+        label checkTimeIndex_;
 
 
     // Private Member Functions

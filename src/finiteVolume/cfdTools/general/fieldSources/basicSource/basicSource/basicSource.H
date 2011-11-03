@@ -97,9 +97,6 @@ protected:
         //- Source active flag
         bool active_;
 
-        //- Flag to indicate whether or not the source has been applied
-        bool applied_;
-
         //- Time start
         scalar timeStart_;
 
@@ -120,6 +117,12 @@ protected:
 
         //- Sum of cell volumes
         scalar V_;
+
+        //- Field names to apply source to - populated by derived models
+        wordList fieldNames_;
+
+        //- Applied flag list - corresponds to each fieldNames_ entry
+        List<bool> applied_;
 
 
     // Protected functions
@@ -242,9 +245,6 @@ public:
             //- Return const access to the source active flag
             inline bool active() const;
 
-            //- Return const access to the applied flag
-            inline bool applied() const;
-
             //- Return const access to the time start
             inline scalar timeStart() const;
 
@@ -267,6 +267,9 @@ public:
             //- Return const access to the cell set
             inline const labelList& cells() const;
 
+            //- Set the applied flag to true for field index fieldI
+            inline void setApplied(const label fieldI);
+
 
         // Edit
 
@@ -283,10 +286,13 @@ public:
         // Checks
 
             //- Is the source active?
-            bool isActive();
+            virtual bool isActive();
 
             //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const = 0;
+            virtual label applyToField(const word& fieldName) const;
+
+            //- Check that the source has been applied
+            virtual void checkApplied() const;
 
 
         // Evaluation

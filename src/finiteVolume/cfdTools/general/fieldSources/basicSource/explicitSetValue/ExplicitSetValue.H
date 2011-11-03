@@ -69,10 +69,8 @@ protected:
 
     // Protected data
 
-        typedef Tuple2<word, Type> fieldNameValuePair;
-
         //- Source value per field
-        List<fieldNameValuePair> fieldData_;
+        List<Type> fieldData_;
 
 
     // Protected functions
@@ -100,12 +98,6 @@ public:
 
 
     // Member Functions
-
-        // Check
-
-            //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const;
-
 
         // Evaluation
 
