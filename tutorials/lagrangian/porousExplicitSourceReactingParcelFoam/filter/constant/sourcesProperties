@@ -30,7 +30,7 @@ massSource1
     scalarExplicitSourceCoeffs
     {
         volumeMode      absolute;
-        fieldData
+        injectionRate
         {
             rho         1e-4; // kg/s
             H2O         1e-4; // kg/s
@@ -54,7 +54,7 @@ momentumSource1
     vectorExplicitSourceCoeffs
     {
         volumeMode      absolute;
-        fieldData
+        injectionRate
         {
             U           (0 0.005 0);
         }
@@ -77,7 +77,7 @@ energySource1
     scalarExplicitSourceCoeffs
     {
         volumeMode      absolute;
-        fieldData
+        injectionRate
         {
             hs          10;
         }
