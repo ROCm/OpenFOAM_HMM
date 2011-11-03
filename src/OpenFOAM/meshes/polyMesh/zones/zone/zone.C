@@ -26,6 +26,7 @@ License
 #include "zone.H"
 #include "IOstream.H"
 #include "demandDrivenData.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -192,6 +193,9 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
 
     bool hasError = false;
 
+    // To check for duplicate entries
+    labelHashSet elems(size());
+
     forAll(addr, i)
     {
         if (addr[i] < 0 || addr[i] >= maxSize)
@@ -213,6 +217,18 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
             {
                 // w/o report - can stop checking now
                 break;
+            }
+        }
+        else if (!elems.insert(addr[i]))
+        {
+            if (report)
+            {
+                WarningIn
+                (
+                    "bool zone::checkDefinition("
+                    "const label maxSize, const bool report) const"
+                )   << "Zone " << name_
+                    << " contains duplicate index label " << addr[i] << endl;
             }
         }
     }
