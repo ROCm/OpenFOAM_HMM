@@ -26,7 +26,7 @@ if (pimple.transonic())
             coalParcels.Srho()
         );
 
-        sources.apply(pEqn);
+        sources.apply(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -56,7 +56,7 @@ else
             coalParcels.Srho()
         );
 
-        sources.apply(pEqn);
+        sources.apply(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

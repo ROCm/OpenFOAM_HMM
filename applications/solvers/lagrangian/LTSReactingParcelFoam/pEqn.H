@@ -31,7 +31,7 @@
         parcels.Srho()
     );
 
-    sources.apply(pDDtEqn);
+    sources.apply(pDDtEqn, rho.name());
 
     while (pimple.correctNonOrthogonal())
     {
