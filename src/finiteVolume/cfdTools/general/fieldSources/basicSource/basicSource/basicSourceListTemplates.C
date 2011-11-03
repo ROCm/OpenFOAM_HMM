@@ -26,16 +26,30 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
+Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+(
+    GeometricField<Type, fvPatchField, volMesh>& fld
+)
 {
-    apply(eqn, eqn.psi().name());
+    return this->operator()(fld, fld.name());
 }
 
 
 template<class Type>
-void Foam::basicSourceList::apply(fvMatrix<Type>& eqn, const word& fieldName)
+Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+(
+    GeometricField<Type, fvPatchField, volMesh>& fld,
+    const word& fieldName
+)
 {
     checkApplied();
+
+    const dimensionSet ds = fld.dimensions()/dimTime*dimVolume;
+
+    tmp<fvMatrix<Type> > tmtx(new fvMatrix<Type>(fld, ds));
+
+    fvMatrix<Type>& mtx = tmtx();
+
 
     forAll(*this, i)
     {
@@ -55,7 +69,104 @@ void Foam::basicSourceList::apply(fvMatrix<Type>& eqn, const word& fieldName)
                         << fieldName << endl;
                 }
 
-                source.addSup(eqn, fieldI);
+                source.addSup(mtx, fieldI);
+            }
+        }
+    }
+
+    return tmtx;
+}
+
+
+template<class Type, class RhoType>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+(
+    const RhoType& rho,
+    GeometricField<Type, fvPatchField, volMesh>& fld
+)
+{
+    return this->operator()(rho, fld, fld.name());
+}
+
+
+template<class Type, class RhoType>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+(
+    const RhoType& rho,
+    GeometricField<Type, fvPatchField, volMesh>& fld,
+    const word& fieldName
+)
+{
+    checkApplied();
+
+    const dimensionSet ds = rho.dimensions()*fld.dimensions()/dimTime*dimVolume;
+
+    tmp<fvMatrix<Type> > tmtx(new fvMatrix<Type>(fld, ds));
+
+    fvMatrix<Type>& mtx = tmtx();
+
+
+    forAll(*this, i)
+    {
+        basicSource& source = this->operator[](i);
+
+        label fieldI = source.applyToField(fieldName);
+
+        if (fieldI != -1)
+        {
+            source.setApplied(fieldI);
+
+            if (source.isActive())
+            {
+                if (debug)
+                {
+                    Info<< "Applying source " << source.name() << " to field "
+                        << fieldName << endl;
+                }
+
+                source.addSup(mtx, fieldI);
+            }
+        }
+    }
+
+    return tmtx;
+}
+
+
+template<class Type>
+void Foam::basicSourceList::constrain(fvMatrix<Type>& eqn)
+{
+    constrain(eqn, eqn.psi().name());
+}
+
+
+template<class Type>
+void Foam::basicSourceList::constrain
+(
+    fvMatrix<Type>& eqn,
+    const word& fieldName
+)
+{
+    checkApplied();
+
+    forAll(*this, i)
+    {
+        basicSource& source = this->operator[](i);
+
+        label fieldI = source.applyToField(fieldName);
+
+        if (fieldI != -1)
+        {
+            source.setApplied(fieldI);
+
+            if (source.isActive())
+            {
+                if (debug)
+                {
+                    Info<< "Applying constraint " << source.name()
+                        << " to field " << fieldName << endl;
+                }
+
                 source.setValue(eqn, fieldI);
             }
         }
