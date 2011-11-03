@@ -28,9 +28,14 @@ License
 template<class Type>
 void Foam::basicSourceList::apply(fvMatrix<Type>& eqn)
 {
-    checkApplied();
+    apply(eqn, eqn.psi().name());
+}
 
-    const word& fieldName = eqn.psi().name();
+
+template<class Type>
+void Foam::basicSourceList::apply(fvMatrix<Type>& eqn, const word& fieldName)
+{
+    checkApplied();
 
     forAll(*this, i)
     {

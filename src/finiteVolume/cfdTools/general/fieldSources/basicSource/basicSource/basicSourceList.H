@@ -100,6 +100,10 @@ public:
             template<class Type>
             void apply(fvMatrix<Type>& eqn);
 
+            //- Apply sources to equation with specified name
+            template<class Type>
+            void apply(fvMatrix<Type>& eqn, const word& name);
+
 
         // I-O
 
