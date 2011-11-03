@@ -22,25 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    continuityErrs
+    cumulativeAdjointContErr
 
 Description
-    Calculates and prints the continuity errors.
+    Declare and initialise the cumulative ddjoint continuity error.
 
 \*---------------------------------------------------------------------------*/
 
-{
-    scalar sumLocalContErr = runTime.deltaTValue()*
-        mag(fvc::div(phia))().weightedAverage(mesh.V()).value();
+#ifndef initAdjointContinuityErrs_H
+#define initAdjointContinuityErrs_H
 
-    scalar globalContErr = runTime.deltaTValue()*
-        fvc::div(phia)().weightedAverage(mesh.V()).value();
-    cumulativeAdjointContErr += globalContErr;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "Adjoint continuity errors : sum local = " << sumLocalContErr
-        << ", global = " << globalContErr
-        << ", cumulative = " << cumulativeAdjointContErr
-        << endl;
-}
+scalar cumulativeAdjointContErr = 0;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
