@@ -34,7 +34,7 @@ Description
 
         rotorDiskSourceCoeffs
         {
-            fieldName       U;      // name of field on which to apply source
+            fieldNames      (U);    // names of fields on which to apply source
             rhoName         rho;    // density field if compressible case
             nBlades         3;      // number of blades
             tip effect      0.96;   // normalised radius above which lift = 0
@@ -149,9 +149,6 @@ protected:
 
     // Protected data
 
-        //- Name of field on which to apply the source
-        word fieldName_;
-
         //- Name of density field
         word rhoName_;
 
@@ -262,13 +259,6 @@ public:
 
 
     // Member Functions
-
-
-        // Checks
-
-            //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const;
-
 
         // Source term addition
 

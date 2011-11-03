@@ -102,8 +102,6 @@ void Foam::radialActuationDiskSource::addSup
             );
         }
     }
-
-    basicSource::addSup(eqn, fieldI);
 }
 
 

@@ -51,12 +51,6 @@ inline bool Foam::basicSource::active() const
 }
 
 
-inline bool Foam::basicSource::applied() const
-{
-    return applied_;
-}
-
-
 inline Foam::scalar Foam::basicSource::timeStart() const
 {
     return timeStart_;
@@ -97,6 +91,12 @@ inline Foam::scalar Foam::basicSource::V() const
 inline const Foam::labelList& Foam::basicSource::cells() const
 {
     return cells_;
+}
+
+
+inline void Foam::basicSource::setApplied(const label fieldI)
+{
+    applied_[fieldI] = true;
 }
 
 

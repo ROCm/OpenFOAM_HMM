@@ -70,9 +70,6 @@ class pressureGradientExplicitSource
 {
     // Private data
 
-        //- Velocity field name
-        word UName_;
-
         //- Average velocity
         vector Ubar_;
 
@@ -92,7 +89,7 @@ class pressureGradientExplicitSource
         void writeGradP() const;
 
         //- Correct driving force for a constant mass flow rate
-        void update();
+        void update(fvMatrix<vector>& eqn);
 
         //- Disallow default bitwise copy construct
         pressureGradientExplicitSource(const pressureGradientExplicitSource&);
@@ -120,12 +117,6 @@ public:
 
 
     // Member Functions
-
-        // Checks
-
-            //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const;
-
 
         // Access
 

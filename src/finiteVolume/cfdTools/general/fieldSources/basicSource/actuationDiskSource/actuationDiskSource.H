@@ -43,7 +43,7 @@ Description
 
         actuationDiskSourceCoeffs
         {
-            fieldName       U;          // name of field to apply source
+            fieldNames      (U);        // names of fields to apply source
             diskDir         (-1 0 0);   // disk direction
             Cp              0.1;        // power coefficient
             Ct              0.5;        // thrust coefficient
@@ -79,9 +79,6 @@ class actuationDiskSource
 protected:
 
     // Protected data
-
-        //- Name of field to apply source upon
-        word fieldName_;
 
         //- Disk area normal
         vector diskDir_;
@@ -145,12 +142,6 @@ public:
 
 
     // Member Functions
-
-        // Check
-
-            //- Return index of field name if found in fieldNames list
-            virtual label applyToField(const word& fieldName) const;
-
 
         // Access
 

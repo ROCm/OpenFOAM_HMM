@@ -69,15 +69,12 @@ void Foam::pressureGradientExplicitSource::writeGradP() const
 }
 
 
-void Foam::pressureGradientExplicitSource::update()
+void Foam::pressureGradientExplicitSource::update(fvMatrix<vector>& eqn)
 {
-    volVectorField& U = const_cast<volVectorField&>
-    (
-        mesh_.lookupObject<volVectorField>(UName_)
-    );
+    volVectorField& U = const_cast<volVectorField&>(eqn.psi());
 
     const volScalarField& rAU =
-        mesh_.lookupObject<volScalarField>("(1|A(" + UName_ + "))");
+        mesh_.lookupObject<volScalarField>("(1|A(" + U.name() + "))");
 
     // Integrate flow variables over cell set
     scalar magUbarAve = 0.0;
@@ -130,12 +127,14 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 )
 :
     basicSource(sourceName, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
     Ubar_(coeffs_.lookup("Ubar")),
     gradPini_(coeffs_.lookup("gradPini")),
     gradP_(gradPini_),
     flowDir_(Ubar_/mag(Ubar_))
 {
+    coeffs_.lookup("fieldNames") >> fieldNames_;
+    applied_.setSize(fieldNames_.size(), false);
+
     // Read the initial pressure gradient from file if it exists
     IFstream propsFile
     (
@@ -155,35 +154,19 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::pressureGradientExplicitSource::applyToField
-(
-    const word& fieldName
-) const
-{
-    if (fieldName == UName_)
-    {
-        return 0;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-
 void Foam::pressureGradientExplicitSource::addSup
 (
     fvMatrix<vector>& eqn,
-    const label
+    const label fieldI
 )
 {
-    update();
+    update(eqn);
 
     DimensionedField<vector, volMesh> Su
     (
         IOobject
         (
-            name_ + UName_ + "Sup",
+            name_ + fieldNames_[fieldI] + "Sup",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,

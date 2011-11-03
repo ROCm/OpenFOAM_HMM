@@ -25,6 +25,8 @@ License
 
 #include "basicSourceList.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvMesh.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -38,14 +40,12 @@ namespace Foam
 
 void Foam::basicSourceList::checkApplied() const
 {
-    forAll(*this, i)
+    if (mesh_.time().timeIndex() == checkTimeIndex_)
     {
-        const basicSource& bs = this->operator[](i);
-
-        if (!bs.applied())
+        forAll(*this, i)
         {
-            WarningIn("void Foam::basicSourceList::checkApplied() const")
-                << "Source " << bs.name() << " defined, but not used" << endl;
+            const basicSource& bs = this->operator[](i);
+            bs.checkApplied();
         }
     }
 }
@@ -60,7 +60,8 @@ Foam::basicSourceList::basicSourceList
 )
 :
     PtrList<basicSource>(),
-    mesh_(mesh)
+    mesh_(mesh),
+    checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {
     label count = 0;
     forAllConstIter(dictionary, dict, iter)
@@ -95,6 +96,8 @@ Foam::basicSourceList::basicSourceList
 
 bool Foam::basicSourceList::read(const dictionary& dict)
 {
+    checkTimeIndex_ = mesh_.time().timeIndex() + 2;
+
     bool allOk = true;
     forAll(*this, i)
     {
@@ -111,7 +114,7 @@ bool Foam::basicSourceList::writeData(Ostream& os) const
     // Write list contents
     forAll(*this, i)
     {
-        os << nl;
+        os  << nl;
         this->operator[](i).writeData(os);
     }
 

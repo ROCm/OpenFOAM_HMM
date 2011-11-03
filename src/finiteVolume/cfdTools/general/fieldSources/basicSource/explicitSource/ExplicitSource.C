@@ -87,13 +87,16 @@ Foam::word Foam::ExplicitSource<Type>::volumeModeTypeToWord
 template<class Type>
 void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
 {
-    fieldData_.setSize(dict.toc().size());
+    fieldNames_.setSize(dict.toc().size());
+    fieldData_.setSize(fieldNames_.size());
+
+    applied_.setSize(fieldNames_.size(), false);
 
     label i = 0;
     forAllConstIter(dictionary, dict, iter)
     {
-        fieldData_[i].first() = iter().keyword();
-        dict.lookup(iter().keyword()) >> fieldData_[i].second();
+        fieldNames_[i] = iter().keyword();
+        dict.lookup(iter().keyword()) >> fieldData_[i];
         i++;
     }
 
@@ -128,31 +131,13 @@ Foam::ExplicitSource<Type>::ExplicitSource
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::ExplicitSource<Type>::applyToField
-(
-    const word& fieldName
-) const
-{
-    forAll(fieldData_, i)
-    {
-        if (fieldData_[i].first() == fieldName)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class Type>
 void Foam::ExplicitSource<Type>::addSup
 (
     fvMatrix<Type>& eqn,
     const label fieldI
 )
 {
-    if (debug)
+//    if (debug)
     {
         Info<< "ExplicitSource<"<< pTraits<Type>::typeName
             << ">::addSup for source " << name_ << endl;
@@ -162,7 +147,7 @@ void Foam::ExplicitSource<Type>::addSup
     (
         IOobject
         (
-            name_ + fieldData_[fieldI].first() + "Sup",
+            name_ + fieldNames_[fieldI] + "Sup",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -180,12 +165,10 @@ void Foam::ExplicitSource<Type>::addSup
 
     forAll(cells_, i)
     {
-        Su[cells_[i]] = fieldData_[fieldI].second()/VDash_;
+        Su[cells_[i]] = fieldData_[fieldI]/VDash_;
     }
 
     eqn -= Su;
-
-    basicSource::addSup(eqn, fieldI);
 }
 
 

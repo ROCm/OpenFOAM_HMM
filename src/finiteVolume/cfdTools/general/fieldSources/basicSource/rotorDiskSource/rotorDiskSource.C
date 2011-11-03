@@ -368,7 +368,6 @@ Foam::rotorDiskSource::rotorDiskSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    fieldName_(coeffs_.lookup("fieldName")),
     rhoName_("none"),
     omega_(0.0),
     nBlades_(0),
@@ -397,19 +396,6 @@ Foam::rotorDiskSource::~rotorDiskSource()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::label Foam::rotorDiskSource::applyToField(const word& fieldName) const
-{
-    if (fieldName == fieldName_)
-    {
-        return 0;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
 
 void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
@@ -440,8 +426,6 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
                 dimForce/dimVolume/dimDensity
             );
     }
-
-    basicSource::addSup(eqn, fieldI);
 }
 
 
@@ -456,6 +440,9 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
+        coeffs_.lookup("fieldNames") >> fieldNames_;
+        applied_.setSize(fieldNames_.size(), false);
+
         scalar rpm(readScalar(coeffs_.lookup("rpm")));
         omega_ = rpm/60.0*mathematical::twoPi;
 

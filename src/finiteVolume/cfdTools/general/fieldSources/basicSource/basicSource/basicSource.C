@@ -201,7 +201,6 @@ Foam::basicSource::basicSource
     dict_(dict),
     coeffs_(dict.subDict(modelType + "Coeffs")),
     active_(readBool(dict_.lookup("active"))),
-    applied_(false),
     timeStart_(readScalar(dict_.lookup("timeStart"))),
     duration_(readScalar(dict_.lookup("duration"))),
     selectionMode_
@@ -209,7 +208,9 @@ Foam::basicSource::basicSource
         selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
     ),
     cellSetName_("none"),
-    V_(0.0)
+    V_(0.0),
+    fieldNames_(),
+    applied_()
 {
     setSelection(dict_);
 
@@ -228,7 +229,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
 {
     word modelType(coeffs.lookup("type"));
 
-    Info<< "Selecting model type " << modelType << endl;
+    Info<< "Selecting source model type " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -275,15 +276,43 @@ bool Foam::basicSource::isActive()
 }
 
 
+Foam::label Foam::basicSource::applyToField(const word& fieldName) const
+{
+    forAll(fieldNames_, i)
+    {
+        if (fieldNames_[i] == fieldName)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+void Foam::basicSource::checkApplied() const
+{
+    forAll(applied_, i)
+    {
+        if (!applied_[i])
+        {
+            WarningIn("void Foam::basicSource::checkApplied() const")
+                << "Source " << name_ << " defined for field "
+                << fieldNames_[i] << " but never used" << endl;
+        }
+    }
+}
+
+
 void Foam::basicSource::addSup(fvMatrix<scalar>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
@@ -293,31 +322,31 @@ void Foam::basicSource::addSup
     const label fieldI
 )
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::addSup(fvMatrix<symmTensor>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::addSup(fvMatrix<tensor>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::setValue(fvMatrix<scalar>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::setValue(fvMatrix<vector>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 
@@ -327,7 +356,7 @@ void Foam::basicSource::setValue
     const label fieldI
 )
 {
-    applied_ = true;
+    // do nothing
 }
 
 
@@ -337,13 +366,13 @@ void Foam::basicSource::setValue
     const label fieldI
 )
 {
-    applied_ = true;
+    // do nothing
 }
 
 
 void Foam::basicSource::setValue(fvMatrix<tensor>& eqn, const label fieldI)
 {
-    applied_ = true;
+    // do nothing
 }
 
 

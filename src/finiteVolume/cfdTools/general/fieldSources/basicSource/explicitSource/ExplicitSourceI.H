@@ -36,7 +36,7 @@ Foam::ExplicitSource<Type>::volumeMode() const
 
 
 template<class Type>
-inline const Type& Foam::ExplicitSource<Type>::fieldData() const
+inline const Foam::List<Type>& Foam::ExplicitSource<Type>::fieldData() const
 {
     return fieldData_;
 }
@@ -51,7 +51,7 @@ Foam::ExplicitSource<Type>::volumeMode()
 
 
 template<class Type>
-inline Type& Foam::ExplicitSource<Type>::fieldData()
+inline Foam::List<Type>& Foam::ExplicitSource<Type>::fieldData()
 {
     return fieldData_;
 }

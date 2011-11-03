@@ -33,13 +33,16 @@ License
 template<class Type>
 void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
 {
-    fieldData_.setSize(dict.toc().size());
+    fieldNames_.setSize(dict.toc().size());
+    fieldData_.setSize(fieldNames_.size());
+
+    applied_.setSize(fieldNames_.size(), false);
 
     label i = 0;
     forAllConstIter(dictionary, dict, iter)
     {
-        fieldData_[i].first() = iter().keyword();
-        dict.lookup(iter().keyword()) >> fieldData_[i].second();
+        fieldNames_[i] = iter().keyword();
+        dict.lookup(iter().keyword()) >> fieldData_[i];
         i++;
     }
 }
@@ -66,24 +69,6 @@ Foam::ExplicitSetValue<Type>::ExplicitSetValue
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::ExplicitSetValue<Type>::applyToField
-(
-    const word& fieldName
-) const
-{
-    forAll(fieldData_, i)
-    {
-        if (fieldData_[i].first() == fieldName)
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-template<class Type>
 void Foam::ExplicitSetValue<Type>::setValue
 (
     fvMatrix<Type>& eqn,
@@ -100,7 +85,7 @@ void Foam::ExplicitSetValue<Type>::setValue
     (
         IOobject
         (
-            name_ + fieldData_[fieldI].first() + "rhs",
+            name_ + fieldNames_[fieldI] + "rhs",
             eqn.psi().mesh().time().timeName(),
             eqn.psi().mesh(),
             IOobject::NO_READ,
@@ -120,12 +105,10 @@ void Foam::ExplicitSetValue<Type>::setValue
 
     forAll(values, i)
     {
-        values[i] = fieldData_[fieldI].second();
+        values[i] = fieldData_[fieldI];
     }
 
     eqn.setValues(cells_, values);
-
-    basicSource::setValue(eqn, fieldI);
 }
 
 
