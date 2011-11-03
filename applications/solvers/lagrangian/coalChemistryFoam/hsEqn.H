@@ -4,13 +4,13 @@
         fvm::ddt(rho, hs)
       + mvConvection->fvmDiv(phi, hs)
       - fvm::laplacian(turbulence->alphaEff(), hs)
-      + sources(rho, hs)
      ==
         DpDt
-     +  combustion->Sh()
-     +  coalParcels.Sh(hs)
-     +  limestoneParcels.Sh(hs)
-     +  radiation->Shs(thermo)
+      + combustion->Sh()
+      + coalParcels.Sh(hs)
+      + limestoneParcels.Sh(hs)
+      + radiation->Shs(thermo)
+      + sources(rho, hs)
     );
 
     hsEqn.relax();

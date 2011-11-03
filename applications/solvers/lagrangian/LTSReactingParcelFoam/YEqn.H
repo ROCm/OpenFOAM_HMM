@@ -28,10 +28,10 @@ if (solveSpecies)
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
-              + sources(Yi)
              ==
                 parcels.SYi(i, Yi)
               + combustion->R(Yi)
+              + sources(Yi)
             );
 
             sources.constrain(YEqn);

@@ -22,9 +22,9 @@ if (pimple.transonic())
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
           - fvm::laplacian(rho*rAU, p)
-          + sources(psi, p, rho.name())
          ==
             coalParcels.Srho()
+          + sources(psi, p, rho.name())
         );
 
         sources.constrain(pEqn, rho.name());
@@ -53,9 +53,9 @@ else
             fvm::ddt(psi, p)
           + fvc::div(phi)
           - fvm::laplacian(rho*rAU, p)
-          + sources(psi, p, rho.name())
          ==
             coalParcels.Srho()
+          + sources(psi, p, rho.name())
         );
 
         sources.constrain(pEqn, rho.name());

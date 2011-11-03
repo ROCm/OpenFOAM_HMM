@@ -5,7 +5,8 @@
         fvm::div(phi, Urel)
       + turbulence->divDevReff(Urel)
       + SRF->Su()
-      + sources(Urel)
+     ==
+        sources(Urel)
     );
 
     UrelEqn().relax();

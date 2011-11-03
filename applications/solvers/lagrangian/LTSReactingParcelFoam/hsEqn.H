@@ -4,12 +4,12 @@
         fvm::ddt(rho, hs)
       + mvConvection->fvmDiv(phi, hs)
       - fvm::laplacian(turbulence->alphaEff(), hs)
-      + sources(rho, hs)
      ==
         DpDt
       + parcels.Sh(hs)
       + radiation->Shs(thermo)
       + combustion->Sh()
+      + sources(rho, hs)
     );
 
     sources.constrain(hsEqn);

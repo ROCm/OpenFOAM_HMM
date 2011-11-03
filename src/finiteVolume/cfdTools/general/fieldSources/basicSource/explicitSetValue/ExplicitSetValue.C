@@ -81,32 +81,9 @@ void Foam::ExplicitSetValue<Type>::setValue
             << ">::setValue for source " << name_ << endl;
     }
 
-    DimensionedField<Type, volMesh> rhs
-    (
-        IOobject
-        (
-            name_ + fieldNames_[fieldI] + "rhs",
-            eqn.psi().mesh().time().timeName(),
-            eqn.psi().mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        eqn.psi().mesh(),
-        dimensioned<Type>
-        (
-            "zero",
-            dimless,
-            pTraits<Type>::zero
-        )
-    );
-
     List<Type> values(cells_.size());
 
-    forAll(values, i)
-    {
-        values[i] = injectionRate_[fieldI];
-    }
+    UIndirectList<Type>(values, cells_) = injectionRate_[fieldI];
 
     eqn.setValues(cells_, values);
 }

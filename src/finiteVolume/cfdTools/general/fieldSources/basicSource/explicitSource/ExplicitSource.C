@@ -137,7 +137,7 @@ void Foam::ExplicitSource<Type>::addSup
     const label fieldI
 )
 {
-//    if (debug)
+    if (debug)
     {
         Info<< "ExplicitSource<"<< pTraits<Type>::typeName
             << ">::addSup for source " << name_ << endl;
@@ -163,12 +163,9 @@ void Foam::ExplicitSource<Type>::addSup
         false
     );
 
-    forAll(cells_, i)
-    {
-        Su[cells_[i]] = injectionRate_[fieldI]/VDash_;
-    }
+    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldI]/VDash_;
 
-    eqn -= Su;
+    eqn += Su;
 }
 
 

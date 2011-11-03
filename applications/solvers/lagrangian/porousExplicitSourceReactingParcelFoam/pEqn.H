@@ -27,9 +27,9 @@
     (
         fvc::ddt(rho) + psi*correction(fvm::ddt(p))
       + fvc::div(phi)
-      + sources(psi, p, rho.name())
      ==
         parcels.Srho()
+      + sources(psi, p, rho.name())
     );
 
 

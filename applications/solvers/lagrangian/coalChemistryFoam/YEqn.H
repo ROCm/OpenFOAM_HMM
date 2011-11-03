@@ -27,10 +27,10 @@ tmp<fv::convectionScheme<scalar> > mvConvection
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
-              + sources(rho, Yi)
               ==
                 coalParcels.SYi(i, Yi)
               + combustion->R(Yi)
+              + sources(rho, Yi)
             );
 
             YiEqn.relax();

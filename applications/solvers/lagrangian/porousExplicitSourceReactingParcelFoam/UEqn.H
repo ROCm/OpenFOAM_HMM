@@ -4,10 +4,10 @@
         fvm::ddt(rho, U)
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
-      + sources(rho, U)
      ==
         rho.dimensionedInternalField()*g
       + parcels.SU(U)
+      + sources(rho, U)
     );
 
     sources.constrain(UEqn);

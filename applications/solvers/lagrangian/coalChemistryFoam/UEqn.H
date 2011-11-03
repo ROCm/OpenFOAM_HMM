@@ -3,11 +3,11 @@
         fvm::ddt(rho, U)
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
-      + sources(rho, U)
      ==
         rho.dimensionedInternalField()*g
       + coalParcels.SU(U)
       + limestoneParcels.SU(U)
+      + sources(rho, U)
     );
 
     UEqn.relax();
