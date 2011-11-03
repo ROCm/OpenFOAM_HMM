@@ -306,6 +306,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     DynamicList<label> zoneIDs;
     const faceZoneMesh& fzm = owner.mesh().faceZones();
     const surfaceScalarField& magSf = owner.mesh().magSf();
+    const polyBoundaryMesh& pbm = owner.mesh().boundaryMesh();
     forAll(faceZoneNames, i)
     {
         const word& zoneName = faceZoneNames[i];
@@ -314,16 +315,38 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
         {
             zoneIDs.append(zoneI);
             const faceZone& fz = fzm[zoneI];
+            mass_[i].setSize(fz.size(), 0.0);
+            massTotal_[i].setSize(fz.size(), 0.0);
+            massFlux_[i].setSize(fz.size(), 0.0);
+
             label nFaces = returnReduce(fz.size(), sumOp<label>());
-            mass_[i].setSize(nFaces, 0.0);
-            massTotal_[i].setSize(nFaces, 0.0);
-            massFlux_[i].setSize(nFaces, 0.0);
             Info<< "        " << zoneName << " faces: " << nFaces << nl;
 
             scalar totArea = 0.0;
             forAll(fz, j)
             {
-                totArea += magSf[fz[j]];
+                label faceI = fz[j];
+                label bFaceI = faceI - owner.mesh().nInternalFaces();
+                label patchI = pbm.patchID()[bFaceI];
+
+                if (patchI == -1)
+                {
+                    totArea += magSf[fz[j]];
+                }
+                else
+                {
+                    const polyPatch& pp = pbm[patchI];
+
+                    if
+                    (
+                        !pp.coupled()
+                     || refCast<const coupledPolyPatch>(pp).owner()
+                    )
+                    {
+                        label localFaceI = pp.whichFace(faceI);
+                        totArea += magSf.boundaryField()[patchI][localFaceI];
+                    }
+                }
             }
             totArea = returnReduce(totArea, sumOp<scalar>());
 
