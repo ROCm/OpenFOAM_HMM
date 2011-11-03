@@ -91,6 +91,9 @@ protected:
         //  radiation solver iteration
         label solverFreq_;
 
+        //- Flag to enable radiation model to be evaluated on first iteration
+        bool firstIter_;
+
 
         // References to the radiation sub-models
 
