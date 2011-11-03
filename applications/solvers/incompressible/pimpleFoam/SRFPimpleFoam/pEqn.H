@@ -1,7 +1,7 @@
 volScalarField rAUrel(1.0/UrelEqn().A());
 Urel = rAUrel*UrelEqn().H();
 
-if (pimple.nCorrPIMPLE() <= 1)
+if (pimple.nCorrPISO() <= 1)
 {
     UrelEqn.clear();
 }

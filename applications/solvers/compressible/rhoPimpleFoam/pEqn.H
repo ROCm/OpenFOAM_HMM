@@ -5,7 +5,7 @@ rho.relax();
 
 U = rAU*UEqn().H();
 
-if (pimple.nCorrPIMPLE() <= 1)
+if (pimple.nCorrPISO() <= 1)
 {
     UEqn.clear();
 }
