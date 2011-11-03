@@ -4,6 +4,7 @@
         fvm::ddt(rho, hs)
       + mvConvection->fvmDiv(phi, hs)
       - fvm::laplacian(turbulence->alphaEff(), hs)
+      + sources(rho, hs)
      ==
         DpDt
      +  combustion->Sh()
@@ -12,9 +13,10 @@
      +  radiation->Shs(thermo)
     );
 
-    sources.apply(hsEqn);
-
     hsEqn.relax();
+
+    sources.constrain(hsEqn);
+
     hsEqn.solve();
 
     thermo.correct();

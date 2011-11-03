@@ -34,6 +34,7 @@
             fvm::ddt(rho, hs)
           + mvConvection->fvmDiv(phi, hs)
           - fvm::laplacian(turbulence->alphaEff(), hs)
+          + sources(rho, hs)
          ==
             pWork()
           + parcels.Sh(hs)
@@ -41,7 +42,7 @@
           + combustion->Sh()
         );
 
-        sources.apply(hsEqn);
+        sources.constrain(hsEqn);
 
         hsEqn.solve();
 

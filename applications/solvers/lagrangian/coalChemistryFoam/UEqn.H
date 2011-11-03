@@ -3,15 +3,16 @@
         fvm::ddt(rho, U)
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
+      + sources(rho, U)
      ==
         rho.dimensionedInternalField()*g
       + coalParcels.SU(U)
       + limestoneParcels.SU(U)
     );
 
-    sources.apply(UEqn);
-
     UEqn.relax();
+
+    sources.constrain(UEqn);
 
     if (pimple.momentumPredictor())
     {
