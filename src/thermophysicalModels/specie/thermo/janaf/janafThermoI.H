@@ -120,6 +120,43 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::limit
 
 
 template<class EquationOfState>
+inline Foam::scalar Foam::janafThermo<EquationOfState>::Tlow() const
+{
+    return Tlow_;
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::janafThermo<EquationOfState>::Thigh() const
+{
+    return Thigh_;
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::janafThermo<EquationOfState>::Tcommon() const
+{
+    return Tcommon_;
+}
+
+
+template<class EquationOfState>
+inline const typename Foam::janafThermo<EquationOfState>::coeffArray&
+Foam::janafThermo<EquationOfState>::highCpCoeffs() const
+{
+    return highCpCoeffs_;
+}
+
+
+template<class EquationOfState>
+inline const typename Foam::janafThermo<EquationOfState>::coeffArray&
+Foam::janafThermo<EquationOfState>::lowCpCoeffs() const
+{
+    return lowCpCoeffs_;
+}
+
+
+template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::cp
 (
     const scalar T
