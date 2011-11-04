@@ -6,15 +6,17 @@
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
         DpDt
-     +  combustion->Sh()
-     +  coalParcels.Sh(hs)
-     +  limestoneParcels.Sh(hs)
-     +  radiation->Shs(thermo)
+      + combustion->Sh()
+      + coalParcels.Sh(hs)
+      + limestoneParcels.Sh(hs)
+      + radiation->Shs(thermo)
+      + sources(rho, hs)
     );
 
-    sources.apply(hsEqn);
-
     hsEqn.relax();
+
+    sources.constrain(hsEqn);
+
     hsEqn.solve();
 
     thermo.correct();

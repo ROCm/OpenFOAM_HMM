@@ -32,7 +32,7 @@ Description
         <Type>ExplicitSourceCoeffs
         {
             volumeMode      absolute; // specific
-            fieldData
+            injectionRate
             {
                 k           30.7;
                 epsilon     1.5;
@@ -111,7 +111,7 @@ protected:
         scalar VDash_;
 
         //- Source field values
-        List<Type> fieldData_;
+        List<Type> injectionRate_;
 
 
     // Protected functions
@@ -152,7 +152,7 @@ public:
             inline const volumeModeType& volumeMode() const;
 
             //- Return const access to the source field values
-            inline const List<Type>& fieldData() const;
+            inline const List<Type>& injectionRate() const;
 
 
         // Edit
@@ -161,7 +161,7 @@ public:
             inline volumeModeType& volumeMode();
 
             //- Return access to the source field values
-            inline List<Type>& fieldData();
+            inline List<Type>& injectionRate();
 
 
         // Evaluation

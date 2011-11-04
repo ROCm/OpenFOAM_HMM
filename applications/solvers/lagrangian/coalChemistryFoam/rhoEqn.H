@@ -36,9 +36,10 @@ Description
       + fvc::div(phi)
       ==
         coalParcels.Srho(rho)
+      + sources(rho)
     );
 
-    sources.apply(rhoEqn);
+    sources.constrain(rhoEqn);
 
     rhoEqn.solve();
 }

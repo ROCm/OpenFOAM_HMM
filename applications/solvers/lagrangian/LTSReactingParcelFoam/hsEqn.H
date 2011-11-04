@@ -9,9 +9,10 @@
       + parcels.Sh(hs)
       + radiation->Shs(thermo)
       + combustion->Sh()
+      + sources(rho, hs)
     );
 
-    sources.apply(hsEqn);
+    sources.constrain(hsEqn);
 
     hsEqn.solve();
 

@@ -7,11 +7,12 @@
         rho.dimensionedInternalField()*g
       + coalParcels.SU(U)
       + limestoneParcels.SU(U)
+      + sources(rho, U)
     );
 
-    sources.apply(UEqn);
-
     UEqn.relax();
+
+    sources.constrain(UEqn);
 
     if (pimple.momentumPredictor())
     {

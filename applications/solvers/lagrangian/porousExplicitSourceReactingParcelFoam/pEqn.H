@@ -29,9 +29,9 @@
       + fvc::div(phi)
      ==
         parcels.Srho()
+      + sources(psi, p, rho.name())
     );
 
-    sources.apply(pDDtEqn);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -40,6 +40,8 @@
             pDDtEqn
           - fvm::laplacian(rho*rAU, p)
         );
+
+        sources.constrain(pDDtEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

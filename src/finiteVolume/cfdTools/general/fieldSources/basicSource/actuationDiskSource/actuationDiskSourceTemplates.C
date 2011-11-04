@@ -55,7 +55,7 @@ void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
     }
     forAll(cells, i)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*T[i]*E) & U[cells[i]];
+        Usource[cells[i]] -= ((Vcells[cells[i]]/V())*T[i]*E) & U[cells[i]];
     }
 }
 

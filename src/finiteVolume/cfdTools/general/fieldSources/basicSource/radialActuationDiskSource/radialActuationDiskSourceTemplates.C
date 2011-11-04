@@ -79,7 +79,7 @@ addRadialActuationDiskAxialInertialResistance
 
     forAll(cells, i)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V_)*Tr[i]*E) & U[cells[i]];
+        Usource[cells[i]] -= ((Vcells[cells[i]]/V_)*Tr[i]*E) & U[cells[i]];
     }
 
     if (debug)

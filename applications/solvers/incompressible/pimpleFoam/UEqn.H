@@ -5,11 +5,13 @@ tmp<fvVectorMatrix> UEqn
     fvm::ddt(U)
   + fvm::div(phi, U)
   + turbulence->divDevReff(U)
+  ==
+    sources(U)
 );
 
-sources.apply(UEqn());
-
 UEqn().relax();
+
+sources.constrain(UEqn());
 
 volScalarField rAU(1.0/UEqn().A());
 

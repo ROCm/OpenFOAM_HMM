@@ -4,11 +4,13 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevReff(U)
+      ==
+        sources(U)
     );
 
     mrfZones.addCoriolis(UEqn());
 
-    sources.apply(UEqn());
+    sources.constrain(UEqn());
 
     UEqn().relax();
 

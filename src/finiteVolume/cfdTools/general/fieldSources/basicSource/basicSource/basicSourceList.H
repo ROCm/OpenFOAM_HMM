@@ -36,7 +36,8 @@ SourceFile
 #define basicSourceList_H
 
 #include "PtrList.H"
-#include "DimensionedField.H"
+#include "GeometricField.H"
+#include "fvPatchField.H"
 #include "basicSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,9 +53,9 @@ class basicSourceList
 :
     public PtrList<basicSource>
 {
-private:
+protected:
 
-    // Private data
+    // Protected data
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
@@ -63,7 +64,7 @@ private:
         label checkTimeIndex_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Check that all sources have been applied
         void checkApplied() const;
@@ -94,11 +95,50 @@ public:
 
     // Member Functions
 
-        // Evaluation
+        // Sources
 
-            //- Apply sources to equation
+            //- Return source for equation
             template<class Type>
-            void apply(fvMatrix<Type>& eqn);
+            tmp<fvMatrix<Type> > operator()
+            (
+                GeometricField<Type, fvPatchField, volMesh>& fld
+            );
+
+            //- Return source for equation with specified name
+            template<class Type>
+            tmp<fvMatrix<Type> > operator()
+            (
+                GeometricField<Type, fvPatchField, volMesh>& fld,
+                const word& fieldName
+            );
+
+            //- Return source for equation
+            template<class Type, class RhoType>
+            tmp<fvMatrix<Type> > operator()
+            (
+                const RhoType& rho,
+                GeometricField<Type, fvPatchField, volMesh>& fld
+            );
+
+            //- Return source for equation with specified name
+            template<class Type, class RhoType>
+            tmp<fvMatrix<Type> > operator()
+            (
+                const RhoType& rho,
+                GeometricField<Type, fvPatchField, volMesh>& fld,
+                const word& fieldName
+            );
+
+
+        // Constraints
+
+            //- Apply constraints to equation
+            template<class Type>
+            void constrain(fvMatrix<Type>& eqn);
+
+            //- Apply constraints to equation with specified name
+            template<class Type>
+            void constrain(fvMatrix<Type>& eqn, const word& fieldName);
 
 
         // I-O

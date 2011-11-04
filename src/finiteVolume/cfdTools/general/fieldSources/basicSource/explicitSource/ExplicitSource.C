@@ -88,7 +88,7 @@ template<class Type>
 void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
-    fieldData_.setSize(fieldNames_.size());
+    injectionRate_.setSize(fieldNames_.size());
 
     applied_.setSize(fieldNames_.size(), false);
 
@@ -96,7 +96,7 @@ void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
     forAllConstIter(dictionary, dict, iter)
     {
         fieldNames_[i] = iter().keyword();
-        dict.lookup(iter().keyword()) >> fieldData_[i];
+        dict.lookup(iter().keyword()) >> injectionRate_[i];
         i++;
     }
 
@@ -122,7 +122,7 @@ Foam::ExplicitSource<Type>::ExplicitSource
     basicSource(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
     VDash_(1.0),
-    fieldData_()
+    injectionRate_()
 {
     read(dict);
 }
@@ -137,7 +137,7 @@ void Foam::ExplicitSource<Type>::addSup
     const label fieldI
 )
 {
-//    if (debug)
+    if (debug)
     {
         Info<< "ExplicitSource<"<< pTraits<Type>::typeName
             << ">::addSup for source " << name_ << endl;
@@ -163,12 +163,9 @@ void Foam::ExplicitSource<Type>::addSup
         false
     );
 
-    forAll(cells_, i)
-    {
-        Su[cells_[i]] = fieldData_[fieldI]/VDash_;
-    }
+    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldI]/VDash_;
 
-    eqn -= Su;
+    eqn += Su;
 }
 
 

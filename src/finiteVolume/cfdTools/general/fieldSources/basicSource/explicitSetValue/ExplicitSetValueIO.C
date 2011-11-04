@@ -40,7 +40,7 @@ bool Foam::ExplicitSetValue<Type>::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        setFieldData(coeffs_.subDict("fieldData"));
+        setFieldData(coeffs_.subDict("injectionRate"));
         return true;
     }
     else

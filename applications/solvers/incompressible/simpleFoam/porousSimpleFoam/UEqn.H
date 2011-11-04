@@ -4,11 +4,13 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevReff(U)
+      ==
+        sources(U)
     );
 
-    sources.apply(UEqn());
-
     UEqn().relax();
+
+    sources.constrain(UEqn());
 
     // Include the porous media resistance and solve the momentum equation
     // either implicit in the tensorial resistance or transport using by

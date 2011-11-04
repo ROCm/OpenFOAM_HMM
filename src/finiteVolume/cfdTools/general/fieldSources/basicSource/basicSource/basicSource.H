@@ -33,6 +33,8 @@ Description
         duration        1000.0;                 // duration
         selectionMode   cellSet;                // cellSet // points //cellZone
 
+    On evaluation, source expects to be added to the rhs of the equation
+
 
 SourceFiles
     basicSource.C

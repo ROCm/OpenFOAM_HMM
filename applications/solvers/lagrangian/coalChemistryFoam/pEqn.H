@@ -24,9 +24,10 @@ if (pimple.transonic())
           - fvm::laplacian(rho*rAU, p)
          ==
             coalParcels.Srho()
+          + sources(psi, p, rho.name())
         );
 
-        sources.apply(pEqn);
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -39,8 +40,8 @@ if (pimple.transonic())
 else
 {
     phi =
-        fvc::interpolate(rho)*
-        (
+        fvc::interpolate(rho)
+       *(
             (fvc::interpolate(U) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
@@ -54,9 +55,10 @@ else
           - fvm::laplacian(rho*rAU, p)
          ==
             coalParcels.Srho()
+          + sources(psi, p, rho.name())
         );
 
-        sources.apply(pEqn);
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

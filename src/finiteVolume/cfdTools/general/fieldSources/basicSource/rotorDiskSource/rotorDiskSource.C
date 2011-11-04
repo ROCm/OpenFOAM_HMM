@@ -399,7 +399,7 @@ Foam::rotorDiskSource::~rotorDiskSource()
 
 void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
-    // add source to lhs of eqn
+    // add source to rhs of eqn
 
     const volVectorField& U = eqn.psi();
 
@@ -410,7 +410,7 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
         const volScalarField& rho =
             mesh_.lookupObject<volScalarField>(rhoName_);
 
-        eqn += calculateForces
+        eqn -= calculateForces
             (
                 rho.internalField(),
                 inflowVelocity(U),
@@ -419,7 +419,7 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
     }
     else
     {
-        eqn += calculateForces
+        eqn -= calculateForces
             (
                 oneField(),
                 inflowVelocity(U),

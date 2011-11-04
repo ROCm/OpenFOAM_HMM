@@ -27,7 +27,7 @@ source1
     scalarExplicitSourceCoeffs
     {
         volumeMode      absolute;
-        fieldData
+        injectionRate
         {
             hs              20000;
         }

@@ -7,9 +7,10 @@
      ==
         rho.dimensionedInternalField()*g
       + parcels.SU(U)
+      + sources(rho, U)
     );
 
-    sources.apply(UEqn);
+    sources.constrain(UEqn);
 
     pZones.addResistance(UEqn);
 

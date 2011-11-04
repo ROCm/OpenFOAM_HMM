@@ -4,10 +4,12 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevReff(U)
+      ==
+        sources(U)
     );
 
-    sources.apply(UEqn());
-
     UEqn().relax();
+
+    sources.constrain(UEqn());
 
     solve(UEqn() == -fvc::grad(p));
