@@ -1,5 +1,0 @@
-faceSet blockedFacesSet new boxToFace (1 1 0.99) (2 2 1)
-cellSet blockedCellsSet new boxToCell (2.4 2.4 0) (3 3 1)
-cellSet blockedCellsSet add boxToCell (0 0 0) (0.6 0.6 1)
-faceSet blockedFacesSet add cellToFace blockedCellsSet all
-faceSet coupledFacesSet new boxToFace (1.0 1.99 0) (2.0 2.09 0.6)

@@ -17,7 +17,7 @@ FoamFile
 
 dimensions      [ 0 -1 0 0 0 0 0 ];
 
-internalField   nonuniform List<symmTensor>
+internalField   nonuniform List<symmTensor> 
 8025
 (
 (98.997697 0 0 77.711245 0 30.754852)
