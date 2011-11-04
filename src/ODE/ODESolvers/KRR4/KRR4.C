@@ -164,8 +164,21 @@ void Foam::KRR4::solve
 
         if (x == xTemp)
         {
-            FatalErrorIn("ODES::KRR4")
-                << "stepsize not significant"
+            FatalErrorIn
+            (
+                "void Foam::KRR4::solve"
+                "("
+                    "const ODE&, "
+                    "scalar&, "
+                    "scalarField&, "
+                    "scalarField&, "
+                    "const scalar, "
+                    "const scalarField&, "
+                    "const scalar, "
+                    "scalar&, "
+                    "scalar&"
+                ") const"
+            )   << "solver stalled: step size = 0"
                 << exit(FatalError);
         }
 
@@ -189,8 +202,21 @@ void Foam::KRR4::solve
         }
     }
 
-    FatalErrorIn("ODES::KRR4")
-        << "exceeded maxtry"
+    FatalErrorIn
+    (
+        "void Foam::KRR4::solve"
+        "("
+            "const ODE&, "
+            "scalar&, "
+            "scalarField&, "
+            "scalarField&, "
+            "const scalar, "
+            "const scalarField&, "
+            "const scalar, "
+            "scalar&, "
+            "scalar&"
+        ") const"
+    )   << "Maximum number of solver iterations exceeded"
         << exit(FatalError);
 }
 
