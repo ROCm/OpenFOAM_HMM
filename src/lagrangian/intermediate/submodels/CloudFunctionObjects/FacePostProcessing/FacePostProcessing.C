@@ -326,15 +326,14 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
             forAll(fz, j)
             {
                 label faceI = fz[j];
-                label bFaceI = faceI - owner.mesh().nInternalFaces();
-                label patchI = pbm.patchID()[bFaceI];
-
-                if (patchI == -1)
+                if (faceI < owner.mesh().nInternalFaces())
                 {
                     totArea += magSf[fz[j]];
                 }
                 else
                 {
+                    label bFaceI = faceI - owner.mesh().nInternalFaces();
+                    label patchI = pbm.patchID()[bFaceI];
                     const polyPatch& pp = pbm[patchI];
 
                     if
