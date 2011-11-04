@@ -35,21 +35,21 @@ void Foam::janafThermo<EquationOfState>::checkInputData() const
     {
         FatalErrorIn("janafThermo<EquationOfState>::check()")
             << "Tlow(" << Tlow_ << ") >= Thigh(" << Thigh_ << ')'
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 
     if (Tcommon_ <= Tlow_)
     {
         FatalErrorIn("janafThermo<EquationOfState>::check()")
             << "Tcommon(" << Tcommon_ << ") <= Tlow(" << Tlow_ << ')'
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 
     if (Tcommon_ > Thigh_)
     {
         FatalErrorIn("janafThermo<EquationOfState>::check()")
             << "Tcommon(" << Tcommon_ << ") > Thigh(" << Thigh_ << ')'
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
 }
 
