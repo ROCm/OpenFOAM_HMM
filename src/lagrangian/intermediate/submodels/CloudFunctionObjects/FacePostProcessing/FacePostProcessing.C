@@ -80,12 +80,12 @@ void Foam::FacePostProcessing<CloudType>::write()
     const Time& time = mesh.time();
     const faceZoneMesh& fzm = mesh.faceZones();
     scalar timeNew = time.value();
-    scalar timeElapsed = timeNew-timeOld_;
+    scalar timeElapsed = timeNew - timeOld_;
 
     totalTime_ += timeElapsed;
 
     const scalar alpha = (totalTime_ - timeElapsed)/totalTime_;
-    const scalar beta = timeElapsed/totalTime_; //correct
+    const scalar beta = timeElapsed/totalTime_;
 
     forAll(faceZoneIDs_, zoneI)
     {
