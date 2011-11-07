@@ -179,7 +179,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
     const labelListList& dil = il_.dil();
 
-    const labelListList directWallFaces = il_.dwfil();
+    const labelListList& directWallFaces = il_.dwfil();
 
     const labelList& patchID = mesh.boundaryMesh().patchID();
 
