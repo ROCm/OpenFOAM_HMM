@@ -1,13 +1,5 @@
     word constProp(initialConditions.lookup("constantProperty"));
-    if (constProp == "pressure" || constProp == "volume")
-    {
-        Info << constProp << " will be held constant." << nl
-            << " p   = " << p[0] << " [Pa]" << nl
-            << " T   = " << thermo.T()[0] << " [K] " << nl
-            << " rho = " << rho[0] << " [kg/m3]" << nl
-            << endl;
-    }
-    else
+    if ((constProp != "pressure") && (constProp != "volume"))
     {
         FatalError << "in initialConditions, unknown constantProperty type "
             << constProp << nl << " Valid types are: pressure volume."
@@ -109,4 +101,11 @@
     Rspecific[0] = R0;
  
     scalar integratedHeat = 0.0;
+
+    Info << constProp << " will be held constant." << nl
+        << " p   = " << p[0] << " [Pa]" << nl
+        << " T   = " << thermo.T()[0] << " [K] " << nl
+        << " rho = " << rho[0] << " [kg/m3]" << nl
+        << endl;
+
 
