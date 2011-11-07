@@ -46,6 +46,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     label nPos = 0;
     label posI = -1;
     label negI = -1;
+    label copI = -1;
     forAll(tri, i)
     {
         d[i] = ((tri[i] - p.refPoint()) & p.normal());
@@ -54,6 +55,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
         {
             d[i] = 0.0;
             nCoPlanar++;
+            copI = i;
         }
         else
         {
@@ -69,12 +71,16 @@ void Foam::faceAreaIntersect::triSliceWithPlane
         }
     }
 
-    if ((nPos == 3) || ((nPos == 2) && (nCoPlanar == 1)))
+    if
+    (
+        (nPos == 3)
+     || ((nPos == 2) && (nCoPlanar == 1))
+     || ((nPos == 1) && (nCoPlanar == 2)))
     {
         // all points above cutting plane - add triangle to list
         tris[nTris++] = tri;
     }
-    else if ((nPos == 2) || ((nPos == 1) && (nCoPlanar == 1)))
+    else if ((nPos == 2) && (nCoPlanar == 0))
     {
         // 2 points above plane, 1 below
         // resulting quad above plane split into 2 triangles
@@ -95,25 +101,48 @@ void Foam::faceAreaIntersect::triSliceWithPlane
         setTriPoints(tri[i1], tri[i2], p02, nTris, tris);
         setTriPoints(tri[i1], p02, p01, nTris, tris);
     }
-    else if ((nPos == 1) && (nCoPlanar != 1))
+    else if (nPos == 1)
     {
-        // 1 point above plane, 2 below
-        // resulting quad below plane split into 2 triangles
-
         // point above the plane
         label i0 = posI;
 
-        // indices of remaining points
-        label i1 = d.fcIndex(i0);
-        label i2 = d.fcIndex(i1);
+        if (nCoPlanar == 0)
+        {
+            // 1 point above plane, 2 below
 
-        // determine the two intersection points
-        point p01 = planeIntersection(d, tri, i0, i1);
-        point p02 = planeIntersection(d, tri, i0, i2);
+            // indices of remaining points
+            label i1 = d.fcIndex(i0);
+            label i2 = d.fcIndex(i1);
 
-        // forget quad below plane
-        // - add triangle above plane to list
-        setTriPoints(tri[i0], p01, p02, nTris, tris);
+            // determine the two intersection points
+            point p01 = planeIntersection(d, tri, i0, i1);
+            point p02 = planeIntersection(d, tri, i0, i2);
+
+            // forget quad below plane
+            // - add triangle above plane to list
+            setTriPoints(tri[i0], p01, p02, nTris, tris);
+        }
+        else
+        {
+            // 1 point above plane, 1 on plane, 1 below
+
+            // point indices
+            label i1 = negI;
+            label i2 = copI;
+
+            // determine the intersection point
+            point p01 = planeIntersection(d, tri, i0, i1);
+
+            // add triangle above plane to list
+            if (d.fcIndex(i0) == i1)
+            {
+                setTriPoints(tri[i0], p01, tri[i2], nTris, tris);
+            }
+            else
+            {
+                setTriPoints(tri[i0], tri[i2], p01, nTris, tris);
+            }
+        }
     }
     else
     {

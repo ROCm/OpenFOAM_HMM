@@ -791,6 +791,7 @@ boundary
         type            cyclicAMI;
         neighbourPatch  AMI2;
         transform       noOrdering;
+/* optional
         surface
         {
             type            searchableCylinder; // none
@@ -798,6 +799,7 @@ boundary
             point2          (0 0 1);
             radius          0.5;
         }
+*/
         faces
         (
             quad2D(ri1, ri0)
@@ -816,6 +818,7 @@ boundary
         type            cyclicAMI;
         neighbourPatch  AMI1;
         transform       noOrdering;
+/* optional
         surface
         {
             type            searchableCylinder; // none
@@ -823,6 +826,7 @@ boundary
             point2          (0 0 1);
             radius          0.5;
         }
+*/
         faces
         (
             quad2D(ris1, ris0)

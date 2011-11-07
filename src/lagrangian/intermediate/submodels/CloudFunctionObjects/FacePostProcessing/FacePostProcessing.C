@@ -32,32 +32,6 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::FacePostProcessing<CloudType>::applyToFace
-(
-    const label faceIn,
-    label& zoneI,
-    label& faceI
-) const
-{
-    const faceZoneMesh& fzm = this->owner().mesh().faceZones();
-
-    forAll(faceZoneIDs_, i)
-    {
-        const faceZone& fz = fzm[faceZoneIDs_[i]];
-        forAll(fz, j)
-        {
-            if (fz[j] == faceIn)
-            {
-                zoneI = i;
-                faceI = j;
-                return;
-            }
-        }
-    }
-}
-
-
-template<class CloudType>
 void Foam::FacePostProcessing<CloudType>::makeLogFile
 (
     const word& zoneName,
@@ -93,7 +67,7 @@ void Foam::FacePostProcessing<CloudType>::makeLogFile
                 << "# Face zone : " << zoneName << nl
                 << "# Faces     : " << nFaces << nl
                 << "# Area      : " << totArea << nl
-                << "# Time" << tab << "mass" << tab << "massFlux" << endl;
+                << "# Time" << tab << "mass" << tab << "massFlowRate" << endl;
         }
     }
 }
@@ -105,25 +79,27 @@ void Foam::FacePostProcessing<CloudType>::write()
     const fvMesh& mesh = this->owner().mesh();
     const Time& time = mesh.time();
     const faceZoneMesh& fzm = mesh.faceZones();
-    const scalar dt = time.deltaTValue();
+    scalar timeNew = time.value();
+    scalar timeElapsed = timeNew-timeOld_;
 
-    totalTime_ += dt;
+    totalTime_ += timeElapsed;
 
-    const scalar alpha = (totalTime_ - dt)/totalTime_;
-    const scalar beta = dt/totalTime_;
+    const scalar alpha = (totalTime_ - timeElapsed)/totalTime_;
+    const scalar beta = timeElapsed/totalTime_; //correct
 
     forAll(faceZoneIDs_, zoneI)
     {
+        massFlowRate_[zoneI] =
+            alpha*massFlowRate_[zoneI] + beta*mass_[zoneI]/timeElapsed;
         massTotal_[zoneI] += mass_[zoneI];
-        massFlux_[zoneI] = alpha*massFlux_[zoneI] + beta*mass_[zoneI]/dt;
     }
 
     const label procI = Pstream::myProcNo();
 
-    Info<< "particleFaceFlux output:" << nl;
+    Info<< "particleFaceFlowRate output:" << nl;
 
     List<scalarField> zoneMassTotal(mass_.size());
-    List<scalarField> zoneMassFlux(massFlux_.size());
+    List<scalarField> zoneMassFlowRate(massFlowRate_.size());
     forAll(faceZoneIDs_, zoneI)
     {
         const word& zoneName = fzm[faceZoneIDs_[zoneI]].name();
@@ -138,26 +114,26 @@ void Foam::FacePostProcessing<CloudType>::write()
             );
         const scalar sumMassTotal = sum(zoneMassTotal[zoneI]);
 
-        scalarListList allProcMassFlux(Pstream::nProcs());
-        allProcMassFlux[procI] = massFlux_[zoneI];
-        Pstream::gatherList(allProcMassFlux);
-        zoneMassFlux[zoneI] =
+        scalarListList allProcMassFlowRate(Pstream::nProcs());
+        allProcMassFlowRate[procI] = massFlowRate_[zoneI];
+        Pstream::gatherList(allProcMassFlowRate);
+        zoneMassFlowRate[zoneI] =
             ListListOps::combine<scalarList>
             (
-                allProcMassFlux, accessOp<scalarList>()
+                allProcMassFlowRate, accessOp<scalarList>()
             );
-        const scalar sumMassFlux = sum(zoneMassFlux[zoneI]);
+        const scalar sumMassFlowRate = sum(zoneMassFlowRate[zoneI]);
 
         Info<< "    " << zoneName
             << ": total mass = " << sumMassTotal
-            << "; average mass flux = " << sumMassFlux
+            << "; average mass flow rate = " << sumMassFlowRate
             << nl;
 
         if (outputFilePtr_.set(zoneI))
         {
             OFstream& os = outputFilePtr_[zoneI];
             os  << time.timeName() << token::TAB << sumMassTotal << token::TAB
-                <<  sumMassFlux<< endl;
+                <<  sumMassFlowRate<< endl;
         }
     }
 
@@ -235,8 +211,8 @@ void Foam::FacePostProcessing<CloudType>::write()
                     fZone.name(),
                     allPoints,
                     allFaces,
-                    "massFlux",
-                    zoneMassFlux[zoneI],
+                    "massFlowRate",
+                    zoneMassFlowRate[zoneI],
                     false
                 );
             }
@@ -248,8 +224,9 @@ void Foam::FacePostProcessing<CloudType>::write()
     {
         forAll(faceZoneIDs_, zoneI)
         {
-            massFlux_[zoneI] = 0.0;
+            massFlowRate_[zoneI] = 0.0;
         }
+        timeOld_ = timeNew;
         totalTime_ = 0.0;
     }
 
@@ -278,15 +255,16 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     totalTime_(0.0),
     mass_(),
     massTotal_(),
-    massFlux_(),
+    massFlowRate_(),
     log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
-    outputDir_(owner.mesh().time().path())
+    outputDir_(owner.mesh().time().path()),
+    timeOld_(owner.mesh().time().value())
 {
     wordList faceZoneNames(this->coeffDict().lookup("faceZones"));
     mass_.setSize(faceZoneNames.size());
     massTotal_.setSize(faceZoneNames.size());
-    massFlux_.setSize(faceZoneNames.size());
+    massFlowRate_.setSize(faceZoneNames.size());
 
     outputFilePtr_.setSize(faceZoneNames.size());
 
@@ -317,7 +295,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
             const faceZone& fz = fzm[zoneI];
             mass_[i].setSize(fz.size(), 0.0);
             massTotal_[i].setSize(fz.size(), 0.0);
-            massFlux_[i].setSize(fz.size(), 0.0);
+            massFlowRate_[i].setSize(fz.size(), 0.0);
 
             label nFaces = returnReduce(fz.size(), sumOp<label>());
             Info<< "        " << zoneName << " faces: " << nFaces << nl;
@@ -372,10 +350,11 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),
-    massFlux_(pff.massFlux_),
+    massFlowRate_(pff.massFlowRate_),
     log_(pff.log_),
     outputFilePtr_(),
-    outputDir_(pff.outputDir_)
+    outputDir_(pff.outputDir_),
+    timeOld_(0.0)
 {}
 
 
@@ -401,13 +380,26 @@ void Foam::FacePostProcessing<CloudType>::postFace
      || this->owner().solution().transient()
     )
     {
-        label zoneId = -1;
-        label faceId = -1;
-        applyToFace(faceI, zoneId, faceId);
+        const faceZoneMesh& fzm = this->owner().mesh().faceZones();
 
-        if ((zoneId != -1) && (faceId != -1))
+        forAll(faceZoneIDs_, i)
         {
-            mass_[zoneId][faceId] += p.mass()*p.nParticle();
+            const faceZone& fz = fzm[faceZoneIDs_[i]];
+
+            label faceId = -1;
+            forAll(fz, j)
+            {
+                if (fz[j] == faceI)
+                {
+                    faceId = j;
+                    break;
+                }
+            }
+
+            if (faceId != -1)
+            {
+                mass_[i][faceId] += p.mass()*p.nParticle();
+            }
         }
     }
 }

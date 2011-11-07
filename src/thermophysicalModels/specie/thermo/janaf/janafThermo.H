@@ -153,6 +153,25 @@ public:
         //- Limit the temperature to be in the range Tlow_ to Thigh_
         inline scalar limit(const scalar T) const;
 
+
+        // Access
+
+            //- Return const access to the low temperature limit
+            inline scalar Tlow() const;
+
+            //- Return const access to the high temperature limit
+            inline scalar Thigh() const;
+
+            //- Return const access to the common temperature
+            inline scalar Tcommon() const;
+
+            //- Return const access to the high temperature poly coefficients
+            inline const coeffArray& highCpCoeffs() const;
+
+            //- Return const access to the low temperature poly coefficients
+            inline const coeffArray& lowCpCoeffs() const;
+
+
         // Fundamental properties
 
             //- Heat capacity at constant pressure [J/(kmol K)]

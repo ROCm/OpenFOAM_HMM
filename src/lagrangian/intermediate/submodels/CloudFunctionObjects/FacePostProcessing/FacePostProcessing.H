@@ -82,8 +82,8 @@ class FacePostProcessing
         //- Mass total storage
         List<scalarField> massTotal_;
 
-        //- Mass flux storage
-        List<scalarField> massFlux_;
+        //- Mass flow rate storage
+        List<scalarField> massFlowRate_;
 
         //- Flag to indicate whether data should be written to file
         Switch log_;
@@ -93,6 +93,9 @@ class FacePostProcessing
 
         //- Output directory
         fileName outputDir_;
+
+        //- Last calculation time
+        scalar timeOld_;
 
 
     // Private Member Functions
@@ -105,14 +108,6 @@ class FacePostProcessing
             const label nFaces,
             const scalar totArea
         );
-
-        //- Return index into storage lists if valid zone and face
-        void applyToFace
-        (
-            const label faceIn,
-            label& zoneI, label&
-            faceI
-        ) const;
 
 
 protected:

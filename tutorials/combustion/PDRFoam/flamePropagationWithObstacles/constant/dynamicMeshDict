@@ -52,7 +52,7 @@ dynamicRefineFvMeshCoeffs
     // gets estimated from an interpolated volVectorField ('velocity')
     // First is name of the flux to adapt, second is velocity that will
     // be interpolated and inner-producted with the face area vector.
-    correctFluxes ((phi U));
+     correctFluxes ((phi rhoU) (phi_0 none));
 }
 
 // ************************************************************************* //
