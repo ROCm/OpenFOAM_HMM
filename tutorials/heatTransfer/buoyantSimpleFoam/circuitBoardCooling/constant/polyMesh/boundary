@@ -1,0 +1,76 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+7
+(
+    floor
+    {
+        type            wall;
+        nFaces          50;
+        startFace       3896;
+    }
+    ceiling
+    {
+        type            wall;
+        nFaces          50;
+        startFace       3946;
+    }
+    inlet
+    {
+        type            patch;
+        nFaces          40;
+        startFace       3996;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          40;
+        startFace       4036;
+    }
+    fixedWalls
+    {
+        type            empty;
+        nFaces          4000;
+        startFace       4076;
+    }
+    baffle1Wall_0
+    {
+        type            directMappedWall;
+        nFaces          14;
+        startFace       8076;
+        sampleMode      nearestPatchFace;
+        sampleRegion    region0;
+        samplePatch     baffle1Wall_1;
+        offsetMode      uniform;
+        offset          ( 0 0 0 );
+        faces           ( );
+    }
+    baffle1Wall_1
+    {
+        type            directMappedWall;
+        nFaces          14;
+        startFace       8090;
+        sampleMode      nearestPatchFace;
+        sampleRegion    region0;
+        samplePatch     baffle1Wall_0;
+        offsetMode      uniform;
+        offset          ( 0 0 0 );
+        faces           ( );
+    }
+)
+
+// ************************************************************************* //

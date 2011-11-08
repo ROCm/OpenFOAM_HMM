@@ -8,7 +8,6 @@ wmake $makeType basic
 wmake $makeType solidParticle
 wmake $makeType intermediate
 wmake $makeType spray
-wmake $makeType dieselSpray
 wmake $makeType dsmc
 wmake $makeType coalCombustion
 

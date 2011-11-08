@@ -1,6 +1,0 @@
-# Create face set
-faceSet baffleFaces new boxToFace (0.29 0 0) (0.31 0.18 2)
-faceZoneSet baffleFaces new setToFaceZone baffleFaces
-
-faceSet baffleFaces2 new boxToFace (0.59 0.0 0.0)(0.61 0.18 2.0)
-faceZoneSet baffleFaces2 new setToFaceZone baffleFaces2
