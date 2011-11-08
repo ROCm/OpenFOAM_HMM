@@ -1,4 +1,4 @@
 
 foamToTetDualMesh.C
 
-EXE = $(FOAM_USER_APPBIN)/foamToTetDualMesh
+EXE = $(FOAM_APPBIN)/foamToTetDualMesh
