@@ -770,7 +770,15 @@ void deleteEmptyPatches(fvMesh& mesh)
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    labelList oldToNew(patches.size());
+    wordList masterNames;
+    if (Pstream::master())
+    {
+        masterNames = patches.names();
+    }
+    Pstream::scatter(masterNames);
+
+
+    labelList oldToNew(patches.size(), -1);
     label usedI = 0;
     label notUsedI = patches.size();
 
@@ -787,31 +795,55 @@ void deleteEmptyPatches(fvMesh& mesh)
 
 
     // Add all the non-empty, non-processor patches
-    forAll(patches, patchI)
+    forAll(masterNames, masterI)
     {
-        if (isA<processorPolyPatch>(patches[patchI]))
+        label patchI = patches.findPatchID(masterNames[masterI]);
+
+        if (patchI != -1)
         {
-            // Processor patches are unique per processor so look at local
-            // size only
-            if (patches[patchI].size() == 0)
+            if (isA<processorPolyPatch>(patches[patchI]))
             {
-                Pout<< "Deleting processor patch " << patchI
-                    << " name:" << patches[patchI].name()
-                    << endl;
-                oldToNew[patchI] = --notUsedI;
+                // Similar named processor patch? Not 'possible'.
+                if (patches[patchI].size() == 0)
+                {
+                    Pout<< "Deleting processor patch " << patchI
+                        << " name:" << patches[patchI].name()
+                        << endl;
+                    oldToNew[patchI] = --notUsedI;
+                }
+                else
+                {
+                    oldToNew[patchI] = usedI++;
+                }
             }
             else
             {
-                oldToNew[patchI] = usedI++;
+                // Common patch.
+                if (returnReduce(patches[patchI].size(), sumOp<label>()) == 0)
+                {
+                    Pout<< "Deleting patch " << patchI
+                        << " name:" << patches[patchI].name()
+                        << endl;
+                    oldToNew[patchI] = --notUsedI;
+                }
+                else
+                {
+                    oldToNew[patchI] = usedI++;
+                }
             }
         }
-        else
+    }
+
+    // Add remaining patches at the end
+    forAll(patches, patchI)
+    {
+        if (oldToNew[patchI] == -1)
         {
-            // All non-processor patches are present everywhere to reduce
-            // size
-            if (returnReduce(patches[patchI].size(), sumOp<label>()) == 0)
+            // Unique to this processor. Note: could check that these are
+            // only processor patches.
+            if (patches[patchI].size() == 0)
             {
-                Pout<< "Deleting patch " << patchI
+                Pout<< "Deleting processor patch " << patchI
                     << " name:" << patches[patchI].name()
                     << endl;
                 oldToNew[patchI] = --notUsedI;
@@ -2579,6 +2611,8 @@ int main(int argc, char *argv[])
 
         mesh.setInstance(meshInstance);
 
+        // Remove any unused patches
+        deleteEmptyPatches(mesh);
 
         Pout<< "Writing mesh " << mesh.name()
             << " to " << mesh.facesInstance() << nl
