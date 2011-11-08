@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-//#include "cyclicAMIPolyPatch.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -39,7 +37,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
     }
     else
     {
-        return nbrPatch().AMIPtr_->interpolateToTarget(fld);
+        return neighbPatch().AMIPtr_->interpolateToTarget(fld);
     }
 }
 
@@ -56,7 +54,7 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
     }
     else
     {
-        return nbrPatch().AMIPtr_->interpolateToTarget(tFld);
+        return neighbPatch().AMIPtr_->interpolateToTarget(tFld);
     }
 }
 

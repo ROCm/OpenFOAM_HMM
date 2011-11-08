@@ -165,6 +165,8 @@ twoDPointCorrector/twoDPointCorrector.C
 AMI=AMIInterpolation
 $(AMI)/AMIInterpolation/AMIInterpolationName.C
 $(AMI)/faceAreaIntersect/faceAreaIntersect.C
+$(AMI)/GAMG/interfaces/cyclicAMIGAMGInterface/cyclicAMIGAMGInterface.C
+$(AMI)/GAMG/interfaceFields/cyclicAMIGAMGInterfaceField/cyclicAMIGAMGInterfaceField.C
 
 AMICycPatches=$(AMI)/patches/cyclic
 $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C

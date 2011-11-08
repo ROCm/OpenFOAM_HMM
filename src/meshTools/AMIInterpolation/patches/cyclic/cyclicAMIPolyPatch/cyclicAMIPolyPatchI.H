@@ -25,16 +25,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::cyclicAMIPolyPatch::nbrPatchName() const
+inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
 {
     return nbrPatchName_;
 }
 
 
 inline const Foam::cyclicAMIPolyPatch&
-Foam::cyclicAMIPolyPatch::nbrPatch() const
+Foam::cyclicAMIPolyPatch::neighbPatch() const
 {
-    const polyPatch& pp = this->boundaryMesh()[nbrPatchID()];
+    const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
     return refCast<const cyclicAMIPolyPatch>(pp);
 }
 

@@ -36,6 +36,7 @@ SourceFiles
 #define cyclicAMILduInterface_H
 
 #include "primitiveFieldsFwd.H"
+#include "AMIPatchToPatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,8 @@ public:
 
             //- Return processor number
             virtual const cyclicAMILduInterface& neighbPatch() const = 0;
+
+            virtual const AMIPatchToPatchInterpolation& AMI() const = 0;
 
             //- Return face transformation tensor
             virtual const tensorField& forwardT() const = 0;

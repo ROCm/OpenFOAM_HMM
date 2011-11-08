@@ -86,10 +86,10 @@ private:
 
 
         //- AMI interpolation class
-        autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
+        mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
         //- Projection surface
-        autoPtr<searchableSurface> surfPtr_;
+        mutable autoPtr<searchableSurface> surfPtr_;
 
         //- Dictionary used during projection surface construction
         const dictionary surfDict_;
@@ -110,7 +110,7 @@ private:
         );
 
         //- Reset the AMI interpolator
-        void resetAMI();
+        void resetAMI() const;
 
 
 protected:
@@ -255,22 +255,22 @@ public:
         // Access
 
             //- Neighbour patch name
-            inline const word& nbrPatchName() const;
+            inline const word& neighbPatchName() const;
 
             //- Neighbour patch ID
-            virtual label nbrPatchID() const;
+            virtual label neighbPatchID() const;
 
             //- Does this side own the patch?
             virtual bool owner() const;
 
-            //- Return a reference to the neihgjbour patch
-            inline const cyclicAMIPolyPatch& nbrPatch() const;
+            //- Return a reference to the neighbour patch
+            inline const cyclicAMIPolyPatch& neighbPatch() const;
 
             //- Return a reference to the projection surface
-            const autoPtr<searchableSurface>& surfPtr();
+            const autoPtr<searchableSurface>& surfPtr() const;
 
             //- Return a reference to the AMI interpolator
-            const AMIPatchToPatchInterpolation& AMI();
+            const AMIPatchToPatchInterpolation& AMI() const;
 
 
             // Transformations

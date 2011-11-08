@@ -106,7 +106,15 @@ class AMIInterpolation
 
     // Private data
 
+
+        //- Index of processor that holds all of both sides. -1 in all other
+        //  cases
+        label singlePatchProc_;
+
         // Source patch
+
+            //- Source face areas
+            scalarField srcMagSf_;
 
             //- Addresses of target faces per source face
             labelListList srcAddress_;
@@ -116,6 +124,9 @@ class AMIInterpolation
 
 
         // Target patch
+
+            //- Target face areas
+            scalarField tgtMagSf_;
 
             //- Addresses of source faces per target face
             labelListList tgtAddress_;
@@ -168,8 +179,8 @@ class AMIInterpolation
 
         // Parallel functionality
 
-            //- Return true if faces are spread over multiple domains
-            bool distributed
+            //- Calculate if patches are on multiple processors
+            label calcDistribution
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
@@ -276,15 +287,32 @@ class AMIInterpolation
             //  NOTE: if area weights are incorrect by 'a significant amount'
             //     normalisation may stabilise the solution, but will introduce
             //     numerical error!
-            void normaliseWeights
+            static void normaliseWeights
             (
-                const primitivePatch& patch,
+                const scalarField& patchAreas,
                 const word& patchName,
                 const labelListList& addr,
                 scalarListList& wght,
                 const bool output
             );
 
+        // Constructor helper
+
+            static void agglomerate
+            (
+                const autoPtr<mapDistribute>& targetMap,
+                const scalarField& fineSrcMagSf,
+                const labelListList& fineSrcAddress,
+                const scalarListList& fineSrcWeights,
+
+                const labelList& sourceRestrictAddressing,
+                const labelList& targetRestrictAddressing,
+
+                scalarField& srcMagSf,
+                labelListList& srcAddress,
+                scalarListList& srcWeights,
+                autoPtr<mapDistribute>& tgtMap
+            );
 
 public:
 
@@ -307,6 +335,15 @@ public:
             const faceAreaIntersect::triangulationMode& triMode
         );
 
+        //- Construct from agglomeration of AMIInterpolation. Agglomeration
+        //  passed in as new coarse size and addressing from fine from coarse.
+        AMIInterpolation
+        (
+            const AMIInterpolation<SourcePatch, TargetPatch>& fineAMI,
+            const labelList& sourceRestrictAddressing,
+            const labelList& neighbourRestrictAddressing
+        );
+
 
     //- Destructor
     ~AMIInterpolation();
@@ -316,22 +353,43 @@ public:
 
         // Access
 
+            //- -1 or the processor holding all faces (both sides) of the AMI
+            label singlePatchProc() const;
+
             // Source patch
 
+                //- Return const access to source patch face areas
+                inline const scalarField& srcMagSf() const;
+
                 //- Return const access to source patch addressing
-                inline const labelListList& srcAddress();
+                inline const labelListList& srcAddress() const;
 
                 //- Return const access to source patch weights
-                inline const scalarListList& srcWeights();
+                inline const scalarListList& srcWeights() const;
+
+                //- Source map pointer - valid only if singlePatchProc=-1.
+                //  This gets
+                //  source data into a form to be consumed by
+                //  tgtAddress, tgtWeights
+                inline const mapDistribute& srcMap() const;
 
 
             // Target patch
 
+                //- Return const access to target patch face areas
+                inline const scalarField& tgtMagSf() const;
+
                 //- Return const access to target patch addressing
-                inline const labelListList& tgtAddress();
+                inline const labelListList& tgtAddress() const;
 
                 //- Return const access to target patch weights
-                inline const scalarListList& tgtWeights();
+                inline const scalarListList& tgtWeights() const;
+
+                //- Target map pointer -  valid only if singlePatchProc=-1.
+                //  This gets
+                //  target data into a form to be consumed by
+                //  srcAddress, srcWeights
+                inline const mapDistribute& tgtMap() const;
 
 
         // Manipulation
