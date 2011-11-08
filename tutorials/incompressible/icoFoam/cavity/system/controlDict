@@ -31,10 +31,6 @@ writeControl    timeStep;
 
 writeInterval   20;
 
-//- Additional dump every hour of cpuTime for e.g. restarts
-//secondaryWriteControl    cpuTime;
-//secondaryWriteInterval   3600;
-
 purgeWrite      0;
 
 writeFormat     ascii;
