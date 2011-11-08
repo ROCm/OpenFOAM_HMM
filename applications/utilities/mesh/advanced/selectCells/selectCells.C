@@ -381,7 +381,7 @@ int main(int argc, char *argv[])
     (void)edgeCalc.minLen(Info);
 
     // Search engine on mesh. Face decomposition since faces might be warped.
-    meshSearch queryMesh(mesh, polyMesh::FACEDIAGTETS);
+    meshSearch queryMesh(mesh);
 
     // Check all 'outside' points
     forAll(outsidePts, outsideI)

@@ -558,14 +558,14 @@ public:
             (
                 const point&,
                 label cellI,
-                const cellRepresentation
+                const cellRepresentation = FACEDIAGTETS
             ) const;
 
             //- Find cell enclosing this location (-1 if not in mesh)
             label findCell
             (
                 const point&,
-                const cellRepresentation
+                const cellRepresentation = FACEDIAGTETS
             ) const;
 };
 

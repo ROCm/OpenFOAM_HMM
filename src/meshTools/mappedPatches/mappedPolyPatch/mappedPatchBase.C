@@ -174,7 +174,7 @@ void Foam::mappedPatchBase::findSamples
             }
 
             // Octree based search engine
-            meshSearch meshSearchEngine(mesh, polyMesh::FACEDIAGTETS);
+            meshSearch meshSearchEngine(mesh);
 
             forAll(samples, sampleI)
             {
@@ -291,7 +291,7 @@ void Foam::mappedPatchBase::findSamples
             }
 
             // Octree based search engine
-            meshSearch meshSearchEngine(mesh, polyMesh::FACEDIAGTETS);
+            meshSearch meshSearchEngine(mesh);
 
             forAll(samples, sampleI)
             {

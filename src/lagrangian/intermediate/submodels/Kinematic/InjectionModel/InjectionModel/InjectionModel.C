@@ -205,15 +205,7 @@ bool Foam::InjectionModel<CloudType>::findCellAtPosition
         {
             position += SMALL*(cellCentres[cellI] - position);
 
-            if
-            (
-                this->owner().mesh().pointInCell
-                (
-                    position,
-                    cellI,
-                    polyMesh::FACEDIAGTETS
-                )
-            )
+            if (this->owner().mesh().pointInCell(position, cellI))
             {
                 procI = Pstream::myProcNo();
             }

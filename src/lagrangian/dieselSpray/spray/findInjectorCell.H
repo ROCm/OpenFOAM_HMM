@@ -6,12 +6,7 @@ if (injectorCell >= 0)
     const vector& C = mesh_.C()[injectorCell];
     injectionPosition += 1.0e-9*(C - injectionPosition);
 
-    foundCell = mesh_.pointInCell
-    (
-        injectionPosition,
-        injectorCell,
-        polyMesh::FACEDIAGTETS
-    );
+    foundCell = mesh_.pointInCell(injectionPosition, injectorCell);
 }
 
 reduce(foundCell, orOp<bool>());
@@ -37,12 +32,7 @@ if (!foundCell)
         const vector& C = mesh_.C()[injectorCell];
         injectionPosition += 1.0e-6*(C - injectionPosition);
 
-        foundCell = mesh_.pointInCell
-        (
-            injectionPosition,
-            injectorCell,
-            polyMesh::FACEDIAGTETS
-        );
+        foundCell = mesh_.pointInCell(injectionPosition, injectorCell);
     }
     reduce(foundCell, orOp<bool>());
 
@@ -60,12 +50,7 @@ if (!foundCell)
             const vector& C = mesh_.C()[injectorCell];
             injectionPosition += 1.0e-9*(C - injectionPosition);
 
-            foundCell = mesh_.pointInCell
-            (
-                injectionPosition,
-                injectorCell,
-                polyMesh::FACEDIAGTETS
-            );
+            foundCell = mesh_.pointInCell(injectionPosition, injectorCell);
         }
         reduce(foundCell, orOp<bool>());
 

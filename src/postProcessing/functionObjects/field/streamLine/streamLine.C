@@ -363,7 +363,7 @@ void Foam::streamLine::read(const dictionary& dict)
 
         const fvMesh& mesh = dynamic_cast<const fvMesh&>(obr_);
 
-        meshSearchPtr_.reset(new meshSearch(mesh, polyMesh::FACEDIAGTETS));
+        meshSearchPtr_.reset(new meshSearch(mesh));
 
         const dictionary& coeffsDict = dict.subDict(seedSet_ + "Coeffs");
         sampledSetPtr_ = sampledSet::New
