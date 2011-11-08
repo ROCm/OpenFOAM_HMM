@@ -183,7 +183,7 @@ Foam::tmp<Foam::labelField> Foam::pairGAMGAgglomeration::agglomerate
         }
     }
 
-    // Reverese the map ordering to improve the next level of agglomeration
+    // Reverse the map ordering to improve the next level of agglomeration
     // (doesn't always help and is sometimes detrimental)
     nCoarseCells--;
 
