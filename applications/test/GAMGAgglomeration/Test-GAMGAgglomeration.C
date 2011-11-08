@@ -53,18 +53,51 @@ int main(int argc, char *argv[])
     labelList cellToCoarse(identity(mesh.nCells()));
     labelListList coarseToCell(invertOneToMany(mesh.nCells(), cellToCoarse));
 
+    runTime++;
+
+    // Write initial agglomeration
+    {
+        volScalarField scalarAgglomeration
+        (
+            IOobject
+            (
+                "agglomeration",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("aggomeration", dimless, 0.0)
+        );
+        scalarField& fld = scalarAgglomeration.internalField();
+        forAll(fld, cellI)
+        {
+            fld[cellI] = cellToCoarse[cellI];
+        }
+        fld /= max(fld);
+        scalarAgglomeration.correctBoundaryConditions();
+        scalarAgglomeration.write();
+
+        Info<< "Writing initial cell distribution to "
+            << runTime.timeName() << endl;
+    }
+
+
     for (label level = 0; level < agglom.size(); level++)
     {
-        runTime.setTime(dimensionedScalar("time", dimTime, level), level);
+        runTime++;
 
-        Info<< "Level = " << runTime.timeName() << nl << endl;
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         const labelList& addr = agglom.restrictAddressing(level);
         label coarseSize = max(addr)+1;
 
-        Info<< "    current size      : "
-            << returnReduce(addr.size(), sumOp<label>()) << endl;
-        Info<< "    agglomerated size : "
+        Info<< "Level : " << level << endl
+            << returnReduce(addr.size(), sumOp<label>()) << endl
+            << "    current size      : "
+            << returnReduce(addr.size(), sumOp<label>()) << endl
+            << "    agglomerated size : "
             << returnReduce(coarseSize, sumOp<label>()) << endl;
 
         forAll(addr, fineI)
