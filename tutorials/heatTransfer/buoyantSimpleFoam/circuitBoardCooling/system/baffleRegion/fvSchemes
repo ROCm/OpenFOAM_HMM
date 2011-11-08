@@ -9,42 +9,31 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      alphat;
+    class       dictionary;
+    location    "system/baffleRegion";
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 1 -1 -1 0 0 0 0 ];
-
-internalField   uniform 0;
-
-boundaryField
+ddtSchemes
 {
-    floor
-    {
-        type            alphatWallFunction;
-        value           uniform 0;
-    }
-    ceiling
-    {
-        type            alphatWallFunction;
-        value           uniform 0;
-    }
-    inlet
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-    outlet
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-    fixedWalls
-    {
-        type            empty;
-    }
+    default         steadyState;
+}
+
+divSchemes
+{
+     default        none;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         none;
+    laplacian(K,T) Gauss linear uncorrected;
 }
 
 

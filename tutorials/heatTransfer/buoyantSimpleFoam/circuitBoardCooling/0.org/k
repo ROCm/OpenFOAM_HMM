@@ -11,38 +11,42 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      T;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 0 0 1 0 0 0 ];
+dimensions      [ 0 2 -2 0 0 0 0 ];
 
-internalField   uniform 300;
+internalField   uniform 0.1;
 
 boundaryField
 {
     floor
     {
-        type            zeroGradient;
+        type            compressible::kqRWallFunction;
+        value           uniform 0.1;
     }
     ceiling
     {
-        type            zeroGradient;
+        type            compressible::kqRWallFunction;
+        value           uniform 0.1;
     }
     inlet
     {
         type            fixedValue;
-        value           uniform 300;
+        value           uniform 0.1;
     }
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform 300;
-        value           uniform 300;
+        type            zeroGradient;
     }
     fixedWalls
     {
         type            empty;
+    }
+    "baffle1Wall.*"
+    {
+        type            calculated;
     }
 }
 

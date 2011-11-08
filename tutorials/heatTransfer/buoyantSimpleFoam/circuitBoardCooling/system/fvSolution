@@ -35,42 +35,36 @@ solvers
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-8;
-        relTol          0.1;
+        tolerance       1e-7;
+        relTol          0.01;
     }
 }
 
 SIMPLE
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       0;
 
     residualControl
     {
-        p_rgh           1e-2;
-        U               1e-3;
-        h               1e-3;
+        p_rgh           5e-3;
+        U               3e-4;
+        h               3e-4;
 
         // possibly check turbulence fields
-        "(k|epsilon|omega)" 1e-3;
+        "(k|epsilon|omega)" 5e-3;
     }
 }
 
 relaxationFactors
 {
-    fields
-    {
-        rho             1.0;
-        p_rgh           0.7;
-    }
-    equations
-    {
-        U               0.3;
-        h               0.3;
-        "(k|epsilon|omega)" 0.7;
-    }
+    rho             1.0;
+    p_rgh           0.7;
+    U               0.7;
+    h               0.3;
+    "(k|epsilon|omega)" 0.3;
 }
 
 

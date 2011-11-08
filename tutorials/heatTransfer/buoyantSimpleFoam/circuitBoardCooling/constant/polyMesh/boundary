@@ -15,81 +15,61 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-9
+7
 (
     floor
     {
         type            wall;
-        nFaces          40;
-        startFace       1526;
+        nFaces          50;
+        startFace       3896;
     }
     ceiling
     {
         type            wall;
-        nFaces          40;
-        startFace       1566;
+        nFaces          50;
+        startFace       3946;
     }
     inlet
     {
         type            patch;
-        nFaces          20;
-        startFace       1606;
+        nFaces          40;
+        startFace       3996;
     }
     outlet
     {
         type            patch;
-        nFaces          20;
-        startFace       1626;
+        nFaces          40;
+        startFace       4036;
     }
     fixedWalls
     {
         type            empty;
-        nFaces          1600;
-        startFace       1646;
+        nFaces          4000;
+        startFace       4076;
     }
     baffle1Wall_0
     {
-        type            mappedWall;
-        nFaces          7;
-        startFace       3246;
+        type            directMappedWall;
+        nFaces          14;
+        startFace       8076;
         sampleMode      nearestPatchFace;
         sampleRegion    region0;
         samplePatch     baffle1Wall_1;
         offsetMode      uniform;
-        offset          (0 0 0);
+        offset          ( 0 0 0 );
+        faces           ( );
     }
     baffle1Wall_1
     {
-        type            mappedWall;
-        nFaces          7;
-        startFace       3253;
+        type            directMappedWall;
+        nFaces          14;
+        startFace       8090;
         sampleMode      nearestPatchFace;
         sampleRegion    region0;
         samplePatch     baffle1Wall_0;
         offsetMode      uniform;
-        offset          (0 0 0);
-    }
-    baffle2Wall_0
-    {
-        type            mappedWall;
-        nFaces          7;
-        startFace       3260;
-        sampleMode      nearestPatchFace;
-        sampleRegion    region0;
-        samplePatch     baffle2Wall_1;
-        offsetMode      uniform;
-        offset          (0 0 0);
-    }
-    baffle2Wall_1
-    {
-        type            mappedWall;
-        nFaces          7;
-        startFace       3267;
-        sampleMode      nearestPatchFace;
-        sampleRegion    region0;
-        samplePatch     baffle2Wall_0;
-        offsetMode      uniform;
-        offset          (0 0 0);
+        offset          ( 0 0 0 );
+        faces           ( );
     }
 )
 
