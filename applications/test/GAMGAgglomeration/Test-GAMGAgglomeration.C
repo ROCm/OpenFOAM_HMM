@@ -31,14 +31,31 @@ Description
 
 #include "fvCFD.H"
 #include "GAMGAgglomeration.H"
+#include "OFstream.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
+    argList::addBoolOption
+    (
+        "writeObj",
+        "write obj files of agglomeration"
+    );
+    argList::addBoolOption
+    (
+        "normalise",
+        "normalise agglomeration (0..1)"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
+
+    bool writeObj = args.optionFound("writeObj");
+    bool normalise = args.optionFound("normalise");
+
     #include "createMesh.H"
 
     const fvSolution& sol = static_cast<const fvSolution&>(mesh);
@@ -130,9 +147,45 @@ int main(int argc, char *argv[])
             {
                 fld[cellI] = cellToCoarse[cellI];
             }
-            fld /= max(fld);
+            if (normalise)
+            {
+                fld /= max(fld);
+            }
             scalarAgglomeration.correctBoundaryConditions();
             scalarAgglomeration.write();
+        }
+
+        if (writeObj)
+        {
+            OFstream str(runTime.path()/runTime.timeName()/"aggomeration.obj");
+            label vertI = 0;
+
+            // Write all mesh cc
+            forAll(mesh.cellCentres(), cellI)
+            {
+                meshTools::writeOBJ(str, mesh.cellCentres()[cellI]);
+                vertI++;
+            }
+
+            // Determine coarse cc
+            forAll(coarseToCell, coarseI)
+            {
+                const labelList& cellLabels = coarseToCell[coarseI];
+
+                point coarseCc = average
+                (
+                    pointField(mesh.cellCentres(), cellLabels)
+                );
+                meshTools::writeOBJ(str, coarseCc);
+                vertI++;
+
+                forAll(cellLabels, i)
+                {
+                    label cellI = cellLabels[i];
+
+                    str << "l " << cellI+1 << ' ' << vertI << nl;
+                }
+            }
         }
 
         Info<< endl;
