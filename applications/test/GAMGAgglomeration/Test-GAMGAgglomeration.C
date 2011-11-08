@@ -1,0 +1,115 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Application
+    Test-GAMGAgglomeration
+
+Description
+    Test application for GAMG agglomeration. Hardcoded to expect GAMG on p.
+
+\*---------------------------------------------------------------------------*/
+
+#include "fvCFD.H"
+#include "GAMGAgglomeration.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
+
+int main(int argc, char *argv[])
+{
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+
+    const fvSolution& sol = static_cast<const fvSolution&>(mesh);
+    const dictionary& pDict = sol.subDict("solvers").subDict("p");
+
+    const GAMGAgglomeration& agglom = GAMGAgglomeration::New
+    (
+        mesh,
+        pDict
+    );
+
+    labelList cellToCoarse(identity(mesh.nCells()));
+    labelListList coarseToCell(invertOneToMany(mesh.nCells(), cellToCoarse));
+
+    for (label level = 0; level < agglom.size(); level++)
+    {
+        runTime.setTime(dimensionedScalar("time", dimTime, level), level);
+
+        Info<< "Level = " << runTime.timeName() << nl << endl;
+
+        const labelList& addr = agglom.restrictAddressing(level);
+        label coarseSize = max(addr)+1;
+
+        Info<< "    current size      : "
+            << returnReduce(addr.size(), sumOp<label>()) << endl;
+        Info<< "    agglomerated size : "
+            << returnReduce(coarseSize, sumOp<label>()) << endl;
+
+        forAll(addr, fineI)
+        {
+            const labelList& cellLabels = coarseToCell[fineI];
+            forAll(cellLabels, i)
+            {
+                cellToCoarse[cellLabels[i]] = addr[fineI];
+            }
+        }
+        coarseToCell = invertOneToMany(coarseSize, cellToCoarse);
+
+        // Write agglomeration
+        {
+            volScalarField scalarAgglomeration
+            (
+                IOobject
+                (
+                    "agglomeration",
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("aggomeration", dimless, 0.0)
+            );
+            scalarField& fld = scalarAgglomeration.internalField();
+            forAll(fld, cellI)
+            {
+                fld[cellI] = cellToCoarse[cellI];
+            }
+            fld /= max(fld);
+            scalarAgglomeration.correctBoundaryConditions();
+            scalarAgglomeration.write();
+        }
+
+        Info<< endl;
+    }
+
+
+    Info<< "End\n" << endl;
+
+    return 0;
+}
+
+
+// ************************************************************************* //
