@@ -40,15 +40,6 @@ $(patchWave)/patchEdgeFaceInfo.C
 
 regionSplit/regionSplit.C
 
-octree/octreeName.C
-octree/octreeDataPoint.C
-octree/octreeDataPointTreeLeaf.C
-octree/octreeDataEdges.C
-octree/octreeDataCell.C
-octree/octreeDataFace.C
-octree/treeNodeName.C
-octree/treeLeafName.C
-
 indexedOctree/treeDataEdge.C
 indexedOctree/treeDataFace.C
 indexedOctree/treeDataPoint.C
@@ -153,8 +144,6 @@ $(intersectedSurface)/intersectedSurface.C
 $(intersectedSurface)/edgeSurface.C
 
 triSurface/triSurfaceSearch/triSurfaceSearch.C
-triSurface/octreeData/octreeDataTriSurface.C
-triSurface/octreeData/octreeDataTriSurfaceTreeLeaf.C
 triSurface/triangleFuncs/triangleFuncs.C
 triSurface/surfaceFeatures/surfaceFeatures.C
 triSurface/triSurfaceTools/triSurfaceTools.C
