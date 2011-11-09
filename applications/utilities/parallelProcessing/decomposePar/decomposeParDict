@@ -24,13 +24,13 @@ numberOfSubdomains  2;
 //  (makes sense only for cyclic patches)
 //preservePatches (cyclic_half0 cyclic_half1);
 
-//- Keep all of faceZone on a single processor. This puts all cells
+//- Keep all of faceSet on a single processor. This puts all cells
 //  connected with a point, edge or face on the same processor.
 //  (just having face connected cells might not guarantee a balanced
 //  decomposition)
 // The processor can be -1 (the decompositionMethod chooses the processor
 // for a good load balance) or explicitly provided (upsets balance).
-//singleProcessorFaceZones ((f0 -1));
+//singleProcessorFaceSets ((f0 -1));
 
 
 //- Use the volScalarField named here as a weight for each cell in the

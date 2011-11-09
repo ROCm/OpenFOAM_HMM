@@ -29,6 +29,7 @@ License
 #include "cellSet.H"
 #include "regionSplit.H"
 #include "Tuple2.H"
+#include "faceSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,11 +111,9 @@ void Foam::domainDecomposition::distributeCells()
     Map<label> specifiedProcessorFaces;
     List<Tuple2<word, label> > zNameAndProcs;
 
-    if (decompositionDict_.found("singleProcessorFaceZones"))
+    if (decompositionDict_.found("singleProcessorFaceSets"))
     {
-        decompositionDict_.lookup("singleProcessorFaceZones") >> zNameAndProcs;
-
-        const faceZoneMesh& fZones = faceZones();
+        decompositionDict_.lookup("singleProcessorFaceSets") >> zNameAndProcs;
 
         label nCells = 0;
 
@@ -122,23 +121,12 @@ void Foam::domainDecomposition::distributeCells()
 
         forAll(zNameAndProcs, i)
         {
-            Info<< "Keeping all cells connected to faceZone "
+            Info<< "Keeping all cells connected to faceSet "
                 << zNameAndProcs[i].first()
                 << " on processor " << zNameAndProcs[i].second() << endl;
 
-            label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
-
-            if (zoneI == -1)
-            {
-                FatalErrorIn("domainDecomposition::distributeCells()")
-                    << "Unknown singleProcessorFaceZone "
-                    << zNameAndProcs[i].first()
-                    << endl << "Valid faceZones are " << fZones.names()
-                    << exit(FatalError);
-            }
-
-            const faceZone& fz = fZones[zoneI];
-
+            // Read faceSet
+            faceSet fz(*this, zNameAndProcs[i].first());
             nCells += fz.size();
         }
 
@@ -150,14 +138,13 @@ void Foam::domainDecomposition::distributeCells()
         // Fill
         forAll(zNameAndProcs, i)
         {
-            label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
-            const faceZone& fz = fZones[zoneI];
+            faceSet fz(*this, zNameAndProcs[i].first());
 
             label procI = zNameAndProcs[i].second();
 
-            forAll(fz, fzI)
+            forAllConstIter(faceSet, fz, iter)
             {
-                label faceI = fz[fzI];
+                label faceI = iter.key();
 
                 specifiedProcessorFaces.insert(faceI, procI);
             }
@@ -333,7 +320,7 @@ void Foam::domainDecomposition::distributeCells()
         // For specifiedProcessorFaces rework the cellToProc to enforce
         // all on one processor since we can't guarantee that the input
         // to regionSplit was a single region.
-        // E.g. faceZone 'a' with the cells split into two regions
+        // E.g. faceSet 'a' with the cells split into two regions
         // by a notch formed by two walls
         //
         //          \   /
@@ -345,12 +332,9 @@ void Foam::domainDecomposition::distributeCells()
         // unbalanced.
         if (specifiedProcessorFaces.size())
         {
-            const faceZoneMesh& fZones = faceZones();
-
             forAll(zNameAndProcs, i)
             {
-                label zoneI = fZones.findZoneID(zNameAndProcs[i].first());
-                const faceZone& fz = fZones[zoneI];
+                faceSet fz(*this, zNameAndProcs[i].first());
 
                 if (fz.size())
                 {
@@ -362,9 +346,9 @@ void Foam::domainDecomposition::distributeCells()
                         procI = cellToProc_[faceOwner()[fz[0]]];
                     }
 
-                    forAll(fz, fzI)
+                    forAllConstIter(faceSet, fz, iter)
                     {
-                        label faceI = fz[fzI];
+                        label faceI = iter.key();
 
                         cellToProc_[faceOwner()[faceI]] = procI;
                         if (isInternalFace(faceI))
