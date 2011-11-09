@@ -10,27 +10,26 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      decomposeParDict;
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-singleProcessorFaceSets ((AMI -1));
+actions
+(
+    // Get both sides of ami
+    // ~~~~~~~~~~~~~~~~~~~~~
 
-numberOfSubdomains 4;
-
-method          scotch;
-
-simpleCoeffs
-{
-    n               ( 2 2 1 );
-    delta           0.001;
-}
-
-
-distributed     no;
-
-roots           ( );
-
+    // Get all faces in cellSet
+    {
+        name    AMI;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        sourceInfo
+        {
+            name "AMI.*";
+        }
+    }
+);
 
 // ************************************************************************* //
