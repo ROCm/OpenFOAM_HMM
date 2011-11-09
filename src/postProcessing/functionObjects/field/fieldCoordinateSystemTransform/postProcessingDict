@@ -22,7 +22,7 @@ functions
         type            fieldCoordinateSystemTransform;
 
         // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldCoordinateSystemTransform.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
 
         // Function object enabled flag
         enabled         true;
