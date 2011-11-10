@@ -14,16 +14,12 @@ FoamFile
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-/*
-preservePatches
-(
-    AMI1
-    AMI2
-);
-*/
+
+singleProcessorFaceSets ((AMI -1));
+
 numberOfSubdomains 4;
 
-method          simple;
+method          scotch;
 
 simpleCoeffs
 {

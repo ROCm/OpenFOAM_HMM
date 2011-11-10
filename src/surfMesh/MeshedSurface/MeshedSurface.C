@@ -491,9 +491,6 @@ void Foam::MeshedSurface<Face>::clear()
 template<class Face>
 void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
-    // Remove all geometry dependent data
-    ParentType::clearTopology();
-
     // Adapt for new point position
     ParentType::movePoints(newPoints);
 
@@ -508,13 +505,12 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
     // avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
-        // Remove all geometry dependent data
-        ParentType::clearTopology();
+        pointField newPoints(scaleFactor*this->points());
 
         // Adapt for new point position
-        ParentType::movePoints(pointField());
+        ParentType::movePoints(newPoints);
 
-        storedPoints() *= scaleFactor;
+        storedPoints() = newPoints;
     }
 }
 

@@ -60,7 +60,7 @@ Foam::topoSetSource::addToUsageTable Foam::regionToCell::usage_
 
 void Foam::regionToCell::combine(topoSet& set, const bool add) const
 {
-    label cellI = mesh_.findCell(insidePoint_, polyMesh::FACEDIAGTETS);
+    label cellI = mesh_.findCell(insidePoint_);
 
     // Load the subset of cells
     boolList blockedFace(mesh_.nFaces(), false);

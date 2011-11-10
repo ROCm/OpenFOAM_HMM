@@ -104,11 +104,7 @@ void Foam::basicSource::setCellSet()
 
             forAll(points_, i)
             {
-                label cellI = mesh_.findCell
-                (
-                    points_[i],
-                    polyMesh::FACEDIAGTETS
-                );
+                label cellI = mesh_.findCell(points_[i]);
                 if (cellI >= 0)
                 {
                     selectedCells.insert(cellI);

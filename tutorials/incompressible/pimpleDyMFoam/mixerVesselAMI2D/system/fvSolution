@@ -19,16 +19,22 @@ solvers
 {
     pcorr
     {
-        solver          PCG;
-        preconditioner  DIC;
+        solver          GAMG;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        cacheAgglomeration off;
+        agglomerator    faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+
         tolerance       0.02;
         relTol          0;
     }
 
     p
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $pcorr;
         tolerance       1e-06;
         relTol          0.01;
     }
@@ -66,8 +72,8 @@ solvers
 
 PIMPLE
 {
-    correctPhi          yes;
-    nOuterCorrectors    3;
+    correctPhi          no;
+    nOuterCorrectors    2;
     nCorrectors         1;
     nNonOrthogonalCorrectors 0;
 

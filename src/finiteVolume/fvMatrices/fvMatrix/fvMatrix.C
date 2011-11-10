@@ -587,7 +587,41 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
         }
     }
 
+
+    if (debug)
+    {
+        // Calculate amount of non-dominance.
+        label nNon = 0;
+        scalar maxNon = 0.0;
+        scalar sumNon = 0.0;
+        forAll(D, celli)
+        {
+            scalar d = (sumOff[celli] - D[celli])/D[celli];
+
+            if (d > 0)
+            {
+                nNon++;
+                maxNon = max(maxNon, d);
+                sumNon += d;
+            }
+        }
+
+        reduce(nNon, sumOp<label>());
+        reduce(maxNon, maxOp<scalar>());
+        reduce(sumNon, sumOp<scalar>());
+        sumNon /= returnReduce(D.size(), sumOp<label>());
+
+        InfoIn("fvMatrix<Type>::relax(const scalar alpha)")
+            << "Matrix dominance test for " << psi_.name() << nl
+            << "    number of non-dominant cells   : " << nNon << nl
+            << "    maximum relative non-dominance : " << maxNon << nl
+            << "    average relative non-dominance : " << sumNon << nl
+            << endl;
+    }
+
+
     // Ensure the matrix is diagonally dominant...
+    // (assumes that the central coefficient is positive)
     max(D, D, sumOff);
 
     // ... then relax

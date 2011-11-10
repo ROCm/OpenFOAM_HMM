@@ -27,8 +27,6 @@ License
 #include "Time.H"
 #include "fvMesh.H"
 #include "IStringStream.H"
-#include "octree.H"
-#include "octreeDataCell.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "OFstream.H"
@@ -46,9 +44,13 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    label nReps = 100000;
+    //label nReps = 100000;
+    label nReps = 10000;
 
     const point sample = args.argRead<point>(1);
+
+    //const polyMesh::cellRepresentation decompMode = polyMesh::FACEPLANES;
+    const polyMesh::cellRepresentation decompMode = polyMesh::FACEDIAGTETS;
 
     treeBoundBox meshBb(mesh.bounds());
 
@@ -69,64 +71,51 @@ int main(int argc, char *argv[])
     Info<< "Initialised mesh in "
         << runTime.cpuTimeIncrement() << " s" << endl;
 
-    // Wrap indices and mesh information into helper object
-    octreeDataCell shapes(mesh);
-
-    octree<octreeDataCell> oc
-    (
-        shiftedBb,  // overall bounding box
-        shapes,     // all information needed to do checks on cells
-        1,          // min. levels
-        10.0,       // max. size of leaves
-        10.0        // maximum ratio of cubes v.s. cells
-    );
-
-    for (label i = 0; i < nReps - 1 ; i++)
     {
-        oc.find(sample);
+        indexedOctree<treeDataCell> ioc
+        (
+            treeDataCell(true, mesh, decompMode), //FACEDIAGTETS),
+            shiftedBb,
+            10,         // maxLevel
+            100,        // leafsize
+            10.0        // duplicity
+        );
+
+        for (label i = 0; i < nReps - 1 ; i++)
+        {
+            if ((i % 100) == 0)
+            {
+                Info<< "indexed octree for " << i << endl;
+            }
+            ioc.findInside(sample);
+        }
+
+        Info<< "Point:" << sample << " is in shape "
+            << ioc.findInside(sample)
+            << ", where the possible cells were:" << nl
+            << ioc.findIndices(sample)
+            << endl;
+
+        Info<< "Found in indexedOctree " << nReps << " times in "
+            << runTime.cpuTimeIncrement() << " s" << endl;
     }
 
-    Info<< "Point:" << sample << " is in shape "
-        << oc.find(sample) << endl;
-
-    oc.printStats(Info);
-
-    Info<< "Found in octree " << nReps << " times in "
-        << runTime.cpuTimeIncrement() << " s" << endl;
-
-    indexedOctree<treeDataCell> ioc
-    (
-        treeDataCell(true, mesh),
-        shiftedBb,
-        8,      // maxLevel
-        10,     // leafsize
-        3.0     // duplicity
-    );
-
-    for (label i = 0; i < nReps - 1 ; i++)
     {
-        ioc.findInside(sample);
+        for (label i = 0; i < nReps - 1 ; i++)
+        {
+            if ((i % 100) == 0)
+            {
+                Info<< "linear search for " << i << endl;
+            }
+            mesh.findCell(sample, decompMode);
+        }
+
+        Info<< "Point:" << sample << " is in cell  "
+            << mesh.findCell(sample, decompMode) << endl;
+
+        Info<< "Found in mesh.findCell " << nReps << " times in "
+            << runTime.cpuTimeIncrement() << " s" << endl;
     }
-
-    Info<< "Point:" << sample << " is in shape "
-        << ioc.findInside(sample)
-        << ", where the possible cells were:" << nl
-        << ioc.findIndices(sample)
-        << endl;
-
-    Info<< "Found in indexedOctree " << nReps << " times in "
-        << runTime.cpuTimeIncrement() << " s" << endl;
-
-    for (label i = 0; i < nReps - 1 ; i++)
-    {
-        mesh.findCell(sample);
-    }
-
-    Info<< "Point:" << sample << " is in cell  "
-        << mesh.findCell(sample) << endl;
-
-    Info<< "Found in mesh.findCell " << nReps << " times in "
-        << runTime.cpuTimeIncrement() << " s" << endl;
 
     Info<< "End\n" << endl;
 

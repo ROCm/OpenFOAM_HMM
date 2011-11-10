@@ -97,7 +97,7 @@ public:
             //- Return neighbour
             virtual label neighbPatchID() const
             {
-                return cyclicAMIPolyPatch_.nbrPatchID();
+                return cyclicAMIPolyPatch_.neighbPatchID();
             }
 
             virtual bool owner() const
@@ -110,8 +110,14 @@ public:
             {
                 return refCast<const cyclicAMIFvPatch>
                 (
-                    this->boundaryMesh()[cyclicAMIPolyPatch_.nbrPatchID()]
+                    this->boundaryMesh()[cyclicAMIPolyPatch_.neighbPatchID()]
                 );
+            }
+
+            //- Return a reference to the AMI interpolator
+            virtual const AMIPatchToPatchInterpolation& AMI() const
+            {
+                return cyclicAMIPolyPatch_.AMI();
             }
 
             //- Are the cyclic planes parallel
@@ -136,7 +142,7 @@ public:
             {
                 return refCast<const cyclicAMIFvPatch>
                 (
-                    this->boundaryMesh()[cyclicAMIPolyPatch_.nbrPatchID()]
+                    this->boundaryMesh()[cyclicAMIPolyPatch_.neighbPatchID()]
                 );
             }
 

@@ -24,8 +24,24 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class SourcePatch, class TargetPatch>
+inline Foam::label
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::singlePatchProc() const
+{
+    return singlePatchProc_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline const Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf() const
+{
+    return srcMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress()
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress() const
 {
     return srcAddress_;
 }
@@ -33,15 +49,31 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcAddress()
 
 template<class SourcePatch, class TargetPatch>
 inline const Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights()
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeights() const
 {
     return srcWeights_;
 }
 
 
 template<class SourcePatch, class TargetPatch>
+inline const Foam::mapDistribute&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
+{
+    return srcMapPtr_();
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline const Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf() const
+{
+    return tgtMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::labelListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress()
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress() const
 {
     return tgtAddress_;
 }
@@ -49,9 +81,17 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtAddress()
 
 template<class SourcePatch, class TargetPatch>
 inline const Foam::scalarListList&
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights()
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights() const
 {
     return tgtWeights_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline const Foam::mapDistribute&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMap() const
+{
+    return tgtMapPtr_();
 }
 
 

@@ -364,6 +364,7 @@ public:
             //  alpha = 1 : diagonally equal
             //  alpha < 1 : diagonally dominant
             //  alpha = 0 : do nothing
+            //  Note: Requires positive diagonal.
             void relax(const scalar alpha);
 
             //- Relax matrix (for steady-state solution).

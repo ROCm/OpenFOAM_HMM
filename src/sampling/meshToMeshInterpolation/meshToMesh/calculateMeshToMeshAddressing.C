@@ -267,7 +267,7 @@ void Foam::meshToMesh::cellAddresses
         cellAddressing_[toI] = -1;
 
         // Check point is actually in the nearest cell
-        if (fromMesh.pointInCell(p, curCell, polyMesh::FACEDIAGTETS))
+        if (fromMesh.pointInCell(p, curCell))
         {
             cellAddressing_[toI] = curCell;
         }
@@ -292,15 +292,7 @@ void Foam::meshToMesh::cellAddresses
                 {
                     // search through all the neighbours.
                     // If point is in neighbour reset current cell
-                    if
-                    (
-                        fromMesh.pointInCell
-                        (
-                            p,
-                            neighbours[nI],
-                            polyMesh::FACEDIAGTETS
-                        )
-                    )
+                    if (fromMesh.pointInCell(p, neighbours[nI]))
                     {
                         cellAddressing_[toI] = neighbours[nI];
                         found = true;
@@ -324,15 +316,7 @@ void Foam::meshToMesh::cellAddresses
                         {
                             // search through all the neighbours.
                             // If point is in neighbour reset current cell
-                            if
-                            (
-                                fromMesh.pointInCell
-                                (
-                                    p,
-                                    nn[nI],
-                                    polyMesh::FACEDIAGTETS
-                                )
-                            )
+                            if (fromMesh.pointInCell(p, nn[nI]))
                             {
                                 cellAddressing_[toI] = nn[nI];
                                 found = true;

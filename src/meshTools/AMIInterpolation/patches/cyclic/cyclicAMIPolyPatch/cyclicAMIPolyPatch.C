@@ -86,7 +86,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms()
         }
 
         // Half1
-        const cyclicAMIPolyPatch& half1 = nbrPatch();
+        const cyclicAMIPolyPatch& half1 = neighbPatch();
         vectorField half1Areas(half1.size());
         forAll(half1, facei)
         {
@@ -114,14 +114,14 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
     const vectorField& half1Areas
 )
 {
-    if (transform_ != nbrPatch().transform_)
+    if (transform_ != neighbPatch().transform_)
     {
         FatalErrorIn("cyclicAMIPolyPatch::calcTransforms()")
             << "Patch " << name()
             << " has transform type " << transformTypeNames[transform_]
             << ", neighbour patch " << nbrPatchName_
             << " has transform type "
-            << nbrPatch().transformTypeNames[nbrPatch().transform_]
+            << neighbPatch().transformTypeNames[neighbPatch().transform_]
             << exit(FatalError);
     }
 
@@ -221,19 +221,19 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 }
 
 
-void Foam::cyclicAMIPolyPatch::resetAMI()
+void Foam::cyclicAMIPolyPatch::resetAMI() const
 {
     if (owner())
     {
         AMIPtr_.clear();
 
-        const polyPatch& nbr = nbrPatch();
-        pointField nbrPoints = nbrPatch().localPoints();
+        const polyPatch& nbr = neighbPatch();
+        pointField nbrPoints = neighbPatch().localPoints();
 
         if (debug)
         {
             OFstream os(name() + "_neighbourPatch-org.obj");
-            meshTools::writeOBJ(os, nbrPatch().localFaces(), nbrPoints);
+            meshTools::writeOBJ(os, neighbPatch().localFaces(), nbrPoints);
         }
 
         // transform neighbour patch to local system
@@ -288,9 +288,9 @@ void Foam::cyclicAMIPolyPatch::calcGeometry(PstreamBuffers& pBufs)
         faceCentres(),
         faceAreas(),
         faceCellCentres(),
-        nbrPatch().faceCentres(),
-        nbrPatch().faceAreas(),
-        nbrPatch().faceCellCentres()
+        neighbPatch().faceCentres(),
+        neighbPatch().faceAreas(),
+        neighbPatch().faceCellCentres()
     );
 }
 
@@ -535,7 +535,7 @@ Foam::cyclicAMIPolyPatch::~cyclicAMIPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::cyclicAMIPolyPatch::nbrPatchID() const
+Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 {
     if (nbrPatchID_ == -1)
     {
@@ -543,7 +543,7 @@ Foam::label Foam::cyclicAMIPolyPatch::nbrPatchID() const
 
         if (nbrPatchID_ == -1)
         {
-            FatalErrorIn("cyclicPolyAMIPatch::nbrPatchID() const")
+            FatalErrorIn("cyclicPolyAMIPatch::neighbPatchID() const")
                 << "Illegal neighbourPatch name " << nbrPatchName_
                 << nl << "Valid patch names are "
                 << this->boundaryMesh().names()
@@ -557,13 +557,13 @@ Foam::label Foam::cyclicAMIPolyPatch::nbrPatchID() const
                 this->boundaryMesh()[nbrPatchID_]
             );
 
-        if (nbrPatch.nbrPatchName() != name())
+        if (nbrPatch.neighbPatchName() != name())
         {
-            WarningIn("cyclicAMIPolyPatch::nbrPatchID() const")
+            WarningIn("cyclicAMIPolyPatch::neighbPatchID() const")
                 << "Patch " << name()
-                << " specifies neighbour patch " << nbrPatchName()
+                << " specifies neighbour patch " << neighbPatchName()
                 << nl << " but that in return specifies "
-                << nbrPatch.nbrPatchName() << endl;
+                << nbrPatch.neighbPatchName() << endl;
         }
     }
 
@@ -573,12 +573,12 @@ Foam::label Foam::cyclicAMIPolyPatch::nbrPatchID() const
 
 bool Foam::cyclicAMIPolyPatch::owner() const
 {
-    return index() < nbrPatchID();
+    return index() < neighbPatchID();
 }
 
 
 const Foam::autoPtr<Foam::searchableSurface>&
-Foam::cyclicAMIPolyPatch::surfPtr()
+Foam::cyclicAMIPolyPatch::surfPtr() const
 {
     const word surfType(surfDict_.lookupOrDefault<word>("type", "none"));
 
@@ -609,7 +609,7 @@ Foam::cyclicAMIPolyPatch::surfPtr()
 }
 
 
-const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
+const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
 {
     if (!owner())
     {
@@ -624,6 +624,16 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI()
     if (!AMIPtr_.valid())
     {
         resetAMI();
+    }
+
+
+    if (debug)
+    {
+        Pout<< "cyclicAMIPolyPatch : " << name()
+            << " constructed AMI with " << endl
+            << "    " << ":srcAddress:" << AMIPtr_().srcAddress().size() << endl
+            << "    " << " tgAddress :" << AMIPtr_().tgtAddress().size() << endl
+            << endl;
     }
 
     return AMIPtr_();

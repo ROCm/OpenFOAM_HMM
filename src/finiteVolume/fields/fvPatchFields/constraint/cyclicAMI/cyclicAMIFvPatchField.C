@@ -143,7 +143,7 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
     const labelUList& nbrFaceCells =
-        cyclicAMIPatch_.cyclicAMIPatch().nbrPatch().faceCells();
+        cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().faceCells();
 
     Field<Type> pnf(iField, nbrFaceCells);
 
@@ -187,7 +187,7 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 ) const
 {
     const labelUList& nbrFaceCells =
-        cyclicAMIPatch_.cyclicAMIPatch().nbrPatch().faceCells();
+        cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().faceCells();
 
     scalarField pnf(psiInternal, nbrFaceCells);
 

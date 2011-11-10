@@ -235,7 +235,7 @@ void Foam::surfaceSets::getSurfaceSets
 )
 {
     // Construct search engine on mesh
-    meshSearch queryMesh(mesh, polyMesh::FACEDIAGTETS);
+    meshSearch queryMesh(mesh);
 
     // Cut faces with surface and classify cells
     cellClassification cellType
