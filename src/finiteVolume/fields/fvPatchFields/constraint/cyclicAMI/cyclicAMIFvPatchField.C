@@ -106,7 +106,10 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             << exit(FatalIOError);
     }
 
-    this->evaluate(Pstream::blocking);
+    if (cyclicAMIPatch_.coupled())
+    {
+        this->evaluate(Pstream::blocking);
+    }
 }
 
 
