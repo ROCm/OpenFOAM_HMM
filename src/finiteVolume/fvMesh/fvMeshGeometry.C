@@ -31,6 +31,7 @@ License
 #include "slicedSurfaceFields.H"
 #include "SubField.H"
 #include "cyclicFvPatchFields.H"
+#include "cyclicAMIFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -158,7 +159,11 @@ void fvMesh::makeC() const
 
     forAll(C.boundaryField(), patchi)
     {
-        if (isA<cyclicFvPatchVectorField>(C.boundaryField()[patchi]))
+        if
+        (
+            isA<cyclicFvPatchVectorField>(C.boundaryField()[patchi])
+         || isA<cyclicAMIFvPatchVectorField>(C.boundaryField()[patchi])
+        )
         {
             // Note: cyclic is not slice but proper field
             C.boundaryField()[patchi] == static_cast<const vectorField&>
