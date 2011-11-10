@@ -84,8 +84,8 @@ void Foam::rotatedBoxToCell::combine(topoSet& set, const bool add) const
     {
         boxFaceNormals[i] = boxFaces[i].normal(boxPoints);
 
-        Pout<< "Face:" << i << " position:" << boxFaces[i].centre(boxPoints)
-            << " normal:" << boxFaceNormals[i] << endl;
+        //Pout<< "Face:" << i << " position:" << boxFaces[i].centre(boxPoints)
+        //    << " normal:" << boxFaceNormals[i] << endl;
     }
 
     // Check whether cell centre is inside all faces of box.
