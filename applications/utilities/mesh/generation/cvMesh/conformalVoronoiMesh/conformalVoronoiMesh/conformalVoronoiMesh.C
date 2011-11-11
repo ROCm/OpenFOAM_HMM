@@ -1925,13 +1925,13 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     ),
     geometryToConformTo_
     (
-        *this,
+        runTime_,
+        rndGen_,
         allGeometry_,
         cvMeshDict.subDict("surfaceConformation")
     ),
     cellSizeControl_
     (
-        *this,
         allGeometry_,
         cvMeshDict.subDict("motionControl")
     ),

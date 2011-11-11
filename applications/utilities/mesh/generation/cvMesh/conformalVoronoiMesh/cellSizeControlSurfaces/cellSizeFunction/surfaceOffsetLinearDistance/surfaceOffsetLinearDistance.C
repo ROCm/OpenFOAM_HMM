@@ -46,11 +46,10 @@ addToRunTimeSelectionTable
 surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurface& surface
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
+    cellSizeFunction(typeName, initialPointsDict, surface),
     surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
     distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
     surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),

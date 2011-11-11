@@ -1,0 +1,4 @@
+patchTo2DpolyMesh/patchTo2DpolyMesh.C
+
+LIB = $(FOAM_LIBBIN)/libcv2DMesh
+

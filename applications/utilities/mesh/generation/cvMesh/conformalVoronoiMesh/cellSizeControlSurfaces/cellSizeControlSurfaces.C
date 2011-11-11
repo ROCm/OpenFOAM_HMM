@@ -152,12 +152,10 @@ bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
 
 Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
 (
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurfaces& allGeometry,
     const dictionary& motionControlDict
 )
 :
-    cvMesh_(cvMesh),
     allGeometry_(allGeometry),
     surfaces_(),
     cellSizeFunctions_(),
@@ -223,7 +221,6 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
             cellSizeFunction::New
             (
                 surfaceSubDict,
-                cvMesh,
                 surface
             )
         );
@@ -286,38 +283,38 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 
     bool anyFunctionFound = evalCellSizeFunctions(pt, size);
 
-    if (!anyFunctionFound)
-    {
-        // Check if the point in question was actually inside the domain, if
-        // not, then it may be falling back to an inappropriate default size.
+//    if (!anyFunctionFound)
+//    {
+//        // Check if the point in question was actually inside the domain, if
+//        // not, then it may be falling back to an inappropriate default size.
 
-        if (cvMesh_.geometryToConformTo().outside(pt))
-        {
-            pointIndexHit surfHit;
-            label hitSurface;
+//        if (cvMesh_.geometryToConformTo().outside(pt))
+//        {
+//            pointIndexHit surfHit;
+//            label hitSurface;
 
-            cvMesh_.geometryToConformTo().findSurfaceNearest
-            (
-                pt,
-                sqr(GREAT),
-                surfHit,
-                hitSurface
-            );
+//            cvMesh_.geometryToConformTo().findSurfaceNearest
+//            (
+//                pt,
+//                sqr(GREAT),
+//                surfHit,
+//                hitSurface
+//            );
 
-            if (!surfHit.hit())
-            {
-                FatalErrorIn
-                (
-                    "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
-                    "("
-                        "const point& pt"
-                    ") const"
-                )
-                    << "Point " << pt << " did not find a nearest surface point"
-                    << nl << exit(FatalError) << endl;
-            }
-        }
-    }
+//            if (!surfHit.hit())
+//            {
+//                FatalErrorIn
+//                (
+//                    "Foam::scalar Foam::cellSizeControlSurfaces::cellSize"
+//                    "("
+//                        "const point& pt"
+//                    ") const"
+//                )
+//                    << "Point " << pt << " did not find a nearest surface point"
+//                    << nl << exit(FatalError) << endl;
+//            }
+//        }
+//    }
 
     return size;
 }
