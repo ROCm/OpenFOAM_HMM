@@ -47,7 +47,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeIntersectionOBJ
     const pointField f1pts = f1.points(f1Points);
     const pointField f2pts = f2.points(f2Points);
 
-    Info<< "Face intersection area (" << count <<  "):" << nl
+    Pout<< "Face intersection area (" << count <<  "):" << nl
         << "    f1 face = " << f1 << nl
         << "    f1 pts  = " << f1pts << nl
         << "    f2 face = " << f2 << nl
@@ -95,7 +95,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 
     // check bounds of source and target
     boundBox bbSrc(srcPatch.points(), srcPatch.meshPoints());
+    reduce(bbSrc.min(), minOp<point>());
+    reduce(bbSrc.max(), maxOp<point>());
+
     boundBox bbTgt(tgtPatch.points(), tgtPatch.meshPoints());
+    reduce(bbTgt.min(), minOp<point>());
+    reduce(bbTgt.max(), maxOp<point>());
 
     boundBox bbTgtInf(bbTgt);
     bbTgtInf.inflate(maxBoundsError);
@@ -222,7 +227,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
                 pp.points()
             );
 
-            if (debug)
+            if (debug & 2)
             {
                 Pout<< "distributePatches: to processor " << domain
                     << " sending faces " << subPatch.faceCentres() << endl;
@@ -253,7 +258,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
         );
 
         // Receive
-        if (debug)
+        if (debug & 2)
         {
             Pout<< "distributePatches: to processor " << Pstream::myProcNo()
                 << " sending faces " << subPatch.faceCentres() << endl;
@@ -441,6 +446,18 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
     Pstream::gatherList(procBb);
     Pstream::scatterList(procBb);
 
+
+    if (debug)
+    {
+        Info<< "Determining extent of srcPatch per processor:" << nl
+            << "\tproc\tbb" << endl;
+        forAll(procBb, procI)
+        {
+            Info<< '\t' << procI << '\t' << procBb[procI] << endl;
+        }
+    }
+
+
     // Determine which faces of tgtPatch overlaps srcPatch per proc
     const faceList& faces = tgtPatch.localFaces();
     const pointField& points = tgtPatch.localPoints();
@@ -478,6 +495,17 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
         forAll(sendMap, procI)
         {
             sendMap[procI].transfer(dynSendMap[procI]);
+        }
+    }
+
+    // Debug printing
+    if (debug)
+    {
+        Pout<< "Of my " << faces.size() << " I need to send to:" << nl
+            << "\tproc\tfaces" << endl;
+        forAll(sendMap, procI)
+        {
+            Pout<< '\t' << procI << '\t' << sendMap[procI].size() << endl;
         }
     }
 
@@ -616,7 +644,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 
     if (debug)
     {
-        Info<< "Source point = " << srcPt << ", Sample point = "
+        Pout<< "Source point = " << srcPt << ", Sample point = "
             << sample.hitPoint() << ", Sample index = " << sample.index()
             << endl;
     }
@@ -753,7 +781,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
         // perform new search to find match
         if (debug)
         {
-            Info<< "Advancing front stalled: searching for new "
+            Pout<< "Advancing front stalled: searching for new "
                 << "target face" << endl;
         }
 
@@ -854,6 +882,21 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
                 << srcPatch.size() << ", target faces = " << tgtPatch.size()
                 << endl;
         }
+    }
+
+    if (!srcPatch.size())
+    {
+        return;
+    }
+    else if (!tgtPatch.size())
+    {
+        WarningIn
+        (
+            "AMIInterpolation::calcAddressing"
+            "(const primitivePatch&, const primitivePatch&, "
+            " label, label)"
+        ) << "Have " << srcPatch.size() << " source faces but no target faces."
+          << endl;
 
         return;
     }
@@ -901,7 +944,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
     if (debug)
     {
-        Info<< "AMI: initial target face = " << tgtFaceI << endl;
+        Pout<< "AMI: initial target face = " << tgtFaceI << endl;
     }
 
 
@@ -1312,7 +1355,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         "source",
         srcAddress,
         srcWeights,
-        true
+        false
     );
 }
 
@@ -1715,6 +1758,16 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         normaliseWeights(srcMagSf_, "source", srcAddress_, srcWeights_, true);
         normaliseWeights(tgtMagSf_, "target", tgtAddress_, tgtWeights_, true);
+    }
+
+    if (debug)
+    {
+        Info<< "AMIInterpolation : Constructed addressing and weights." << nl
+            << "    triMode        :" << triMode_ << nl
+            << "    singlePatchProc:" << singlePatchProc_ << nl
+            << "    srcMagSf       :" << gSum(srcMagSf_) << nl
+            << "    tgtMagSf       :" << gSum(tgtMagSf_) << nl
+            << endl;
     }
 }
 
