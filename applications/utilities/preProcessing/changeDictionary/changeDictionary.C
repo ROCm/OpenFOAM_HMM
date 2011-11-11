@@ -419,6 +419,7 @@ int main(int argc, char *argv[])
             wordList doneKeys(dictList.size());
 
             label nEntries = fieldDict.size();
+
             forAll(dictList, i)
             {
                 doneKeys[i] = dictList[i].keyword();
@@ -434,12 +435,13 @@ int main(int argc, char *argv[])
                 );
                 fieldDict.remove(doneKeys[i]);
             }
+
             // Add remaining entries
             label sz = dictList.size();
             dictList.setSize(nEntries);
             forAllConstIter(dictionary, fieldDict, iter)
             {
-                dictList.set(sz, iter().clone());
+                dictList.set(sz++, iter().clone());
             }
 
             Info<< "Writing modified fieldDict " << fieldName << endl;
