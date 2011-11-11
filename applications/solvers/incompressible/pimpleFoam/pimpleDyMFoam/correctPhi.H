@@ -1,22 +1,23 @@
 {
     if (mesh.changing())
     {
-        forAll(U.boundaryField(), patchi)
+        forAll(U.boundaryField(), patchI)
         {
-            if (U.boundaryField()[patchi].fixesValue())
+            if (U.boundaryField()[patchI].fixesValue())
             {
-                U.boundaryField()[patchi].initEvaluate();
+                U.boundaryField()[patchI].initEvaluate();
             }
         }
 
-        forAll(U.boundaryField(), patchi)
+        forAll(U.boundaryField(), patchI)
         {
-            if (U.boundaryField()[patchi].fixesValue())
+            if (U.boundaryField()[patchI].fixesValue())
             {
-                U.boundaryField()[patchi].evaluate();
+                U.boundaryField()[patchI].evaluate();
 
-                phi.boundaryField()[patchi] =
-                U.boundaryField()[patchi] & mesh.Sf().boundaryField()[patchi];
+                phi.boundaryField()[patchI] =
+                    U.boundaryField()[patchI]
+                  & mesh.Sf().boundaryField()[patchI];
             }
         }
     }
@@ -27,11 +28,11 @@
         zeroGradientFvPatchScalarField::typeName
     );
 
-    forAll(p.boundaryField(), i)
+    forAll(p.boundaryField(), patchI)
     {
-        if (p.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[patchI].fixesValue())
         {
-            pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
+            pcorrTypes[patchI] = fixedValueFvPatchScalarField::typeName;
         }
     }
 
