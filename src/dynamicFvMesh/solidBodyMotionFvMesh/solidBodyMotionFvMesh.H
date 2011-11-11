@@ -57,13 +57,16 @@ class solidBodyMotionFvMesh
     // Private data
 
         //- Dictionary of motion control parameters
-        dictionary dynamicMeshCoeffs_;
+        const dictionary dynamicMeshCoeffs_;
 
         //- The motion control function
         autoPtr<solidBodyMotionFunction> SBMFPtr_;
 
         //- The reference points which are transformed
         pointIOField undisplacedPoints_;
+
+        //- Specified cellZone or -1 for whole-body
+        label zoneID_;
 
         //- Points to move when cell zone is supplied
         labelList pointIDs_;

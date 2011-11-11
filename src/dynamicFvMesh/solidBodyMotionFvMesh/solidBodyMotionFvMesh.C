@@ -74,6 +74,7 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
             false
         )
     ),
+    zoneID_(-1),
     pointIDs_()
 {
     word cellZoneName =
@@ -81,11 +82,11 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
 
     if (cellZoneName != "none")
     {
-        label zoneI = cellZones().findZoneID(cellZoneName);
+        zoneID_ = cellZones().findZoneID(cellZoneName);
         Info<< "Applying solid body motion to cellZone " << cellZoneName
             << endl;
 
-        const cellZone& cz = cellZones()[zoneI];
+        const cellZone& cz = cellZones()[zoneID_];
 
 
         // collect point IDs of points in cell zone
@@ -139,7 +140,7 @@ bool Foam::solidBodyMotionFvMesh::update()
 {
     static bool hasWarned = false;
 
-    if (pointIDs_.size() > 0)
+    if (zoneID_ != -1)
     {
         pointField transformedPts(undisplacedPoints_);
 
