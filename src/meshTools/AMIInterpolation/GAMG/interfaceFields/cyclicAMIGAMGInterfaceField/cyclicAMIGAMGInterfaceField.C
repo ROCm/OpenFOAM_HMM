@@ -86,6 +86,9 @@ void Foam::cyclicAMIGAMGInterfaceField::updateInterfaceMatrix
         cyclicAMIInterface_.neighbPatch().interfaceInternalField(psiInternal)
     );
 
+    // Transform according to the transformation tensors
+    transformCoupleField(pnf, cmpt);
+
     if (cyclicAMIInterface_.owner())
     {
         pnf = cyclicAMIInterface_.AMI().interpolateToSource(pnf);

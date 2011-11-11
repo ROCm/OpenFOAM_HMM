@@ -194,10 +194,10 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 
     scalarField pnf(psiInternal, nbrFaceCells);
 
-    pnf = cyclicAMIPatch_.interpolate(pnf);
-
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
+
+    pnf = cyclicAMIPatch_.interpolate(pnf);
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = cyclicAMIPatch_.faceCells();
