@@ -148,7 +148,7 @@ void Foam::ParticleErosion<CloudType>::preEvolve()
                     this->owner().name() + "Q",
                     mesh.time().timeName(),
                     mesh,
-                    IOobject::NO_READ,
+                    IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
                 mesh,
