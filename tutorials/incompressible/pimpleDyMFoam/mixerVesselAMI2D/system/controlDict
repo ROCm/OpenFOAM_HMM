@@ -17,7 +17,7 @@ FoamFile
 
 application     pimpleDyMFoam;
 
-startFrom       startTime; // latestTime;
+startFrom       startTime;
 
 startTime       0;
 
@@ -47,6 +47,6 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-maxCo           2;
+maxCo           0.5;
 
 // ************************************************************************* //

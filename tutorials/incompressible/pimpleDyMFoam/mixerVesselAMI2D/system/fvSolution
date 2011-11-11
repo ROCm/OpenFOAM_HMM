@@ -28,8 +28,8 @@ solvers
         nCellsInCoarsestLevel 10;
         mergeLevels      1;
 
-        tolerance       0.02;
-        relTol          0;
+        tolerance        0.02;
+        relTol           0;
     }
 
     p
@@ -48,8 +48,8 @@ solvers
 
     U
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        GaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
@@ -73,8 +73,8 @@ solvers
 PIMPLE
 {
     correctPhi          no;
-    nOuterCorrectors    2;
-    nCorrectors         1;
+    nOuterCorrectors    1;
+    nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
     pRefCell            0;
