@@ -97,8 +97,8 @@ private:
 
     // Private Member Functions
 
-        //- Return face ID of face at max distance from rotation axis
-        label findFaceMaxRadius(const pointField& faceCentres) const;
+        //- Return normal of face at max distance from rotation axis
+        vector findFaceMaxRadius(const pointField& faceCentres) const;
 
         void calcTransforms
         (
@@ -253,6 +253,11 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return true only if is coupled. Note that for non-parallel
+            //  operation of a decomposed case this can return the wrong
+            //  result
+            virtual bool coupled() const;
 
             //- Neighbour patch name
             inline const word& neighbPatchName() const;

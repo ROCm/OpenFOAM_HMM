@@ -130,9 +130,8 @@ class cyclicPolyPatch
                 scalarField& tols
             ) const;
 
-            //- For rotational cases, try to find a unique face on each side
-            //  of the cyclic.
-            label getConsistentRotationFace(const pointField&) const;
+            //- Return normal of face at max distance from rotation axis
+            vector findFaceMaxRadius(const pointField& faceCentres) const;
 
 
 protected:

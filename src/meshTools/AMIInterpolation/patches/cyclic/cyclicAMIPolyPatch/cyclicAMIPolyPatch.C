@@ -30,6 +30,7 @@ License
 #include "Time.H"
 #include "addToRunTimeSelectionTable.H"
 #include "faceAreaIntersect.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,63 +45,68 @@ namespace Foam
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::label Foam::cyclicAMIPolyPatch::findFaceMaxRadius
+Foam::vector Foam::cyclicAMIPolyPatch::findFaceMaxRadius
 (
     const pointField& faceCentres
 ) const
 {
     // Determine a face furthest away from the axis
 
-    const scalarField magRadSqr
-    (
-        magSqr((faceCentres - rotationCentre_) ^ rotationAxis_)
-    );
+    const vectorField n((faceCentres - rotationCentre_) ^ rotationAxis_);
+
+    const scalarField magRadSqr(magSqr(n));
 
     label faceI = findMax(magRadSqr);
 
     if (debug)
     {
-        Info<< "findFaceMaxRadius(const pointField&)" << nl
+        Info<< "findFaceMaxRadius(const pointField&) : patch: " << name() << nl
             << "    rotFace  = " << faceI << nl
-            << "    point    =  " << faceCentres[faceI] << nl
+            << "    point    = " << faceCentres[faceI] << nl
             << "    distance = " << Foam::sqrt(magRadSqr[faceI])
             << endl;
     }
 
-    return faceI;
+    return n[faceI];
 }
 
 
-// * * * * * * * * * * * Protecetd Member Functions  * * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 void Foam::cyclicAMIPolyPatch::calcTransforms()
 {
-    if (size())
+    // Half0
+    const cyclicAMIPolyPatch& half0 = *this;
+    vectorField half0Areas(half0.size());
+    forAll(half0, facei)
     {
-        // Half0
-        const cyclicAMIPolyPatch& half0 = *this;
-        vectorField half0Areas(half0.size());
-        forAll(half0, facei)
-        {
-            half0Areas[facei] = half0[facei].normal(half0.points());
-        }
+        half0Areas[facei] = half0[facei].normal(half0.points());
+    }
 
-        // Half1
-        const cyclicAMIPolyPatch& half1 = neighbPatch();
-        vectorField half1Areas(half1.size());
-        forAll(half1, facei)
-        {
-            half1Areas[facei] = half1[facei].normal(half1.points());
-        }
+    // Half1
+    const cyclicAMIPolyPatch& half1 = neighbPatch();
+    vectorField half1Areas(half1.size());
+    forAll(half1, facei)
+    {
+        half1Areas[facei] = half1[facei].normal(half1.points());
+    }
 
-        calcTransforms
-        (
-            half0,
-            half0.faceCentres(),
-            half0Areas,
-            half1.faceCentres(),
-            half1Areas
-        );
+    calcTransforms
+    (
+        half0,
+        half0.faceCentres(),
+        half0Areas,
+        half1.faceCentres(),
+        half1Areas
+    );
+
+    if (debug)
+    {
+        Pout<< "calcTransforms() : patch: " << name() << nl
+            << "    forwardT = " << forwardT() << nl
+            << "    reverseT = " << reverseT() << nl
+            << "    separation = " << separation() << nl
+            << "    collocated = " << collocated() << nl << endl;
     }
 }
 
@@ -128,26 +134,30 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
 
     // Calculate transformation tensors
 
-    if ((half0Ctrs.size() <= 0) || (half1Ctrs.size() <= 0))
-    {
-        return;
-    }
-
     switch (transform_)
     {
         case ROTATIONAL:
         {
-            label face0 = findFaceMaxRadius(half0Ctrs);
-            label face1 = findFaceMaxRadius(half1Ctrs);
+            point n0 = vector::zero;
+            if (half0Ctrs.size())
+            {
+                n0 = findFaceMaxRadius(half0Ctrs);
+            }
+            point n1 = vector::zero;
+            if (half1Ctrs.size())
+            {
+                n1 = -findFaceMaxRadius(half1Ctrs);
+            }
 
-            vector n0 = ((half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_);
-            vector n1 = ((half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_);
+            reduce(n0, maxMagSqrOp<point>());
+            reduce(n1, maxMagSqrOp<point>());
+
             n0 /= mag(n0) + VSMALL;
             n1 /= mag(n1) + VSMALL;
 
             if (debug)
             {
-                Pout<< "cyclicAMIPolyPatch::calcTransforms :"
+                Pout<< "cyclicAMIPolyPatch::calcTransforms : patch:" << name()
                     << " Specified rotation :"
                     << " n0:" << n0 << " n1:" << n1 << endl;
             }
@@ -178,8 +188,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         {
             if (debug)
             {
-                Pout<< "cyclicAMIPolyPatch::calcTransforms :"
-                    << "Specified translation : " << separationVector_
+                Pout<< "cyclicAMIPolyPatch::calcTransforms : patch:" << name()
+                    << " Specified translation : " << separationVector_
                     << endl;
             }
 
@@ -198,7 +208,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         {
             if (debug)
             {
-                Pout<< "Assuming cyclic AMI pairs are colocated" << endl;
+                Pout<< " patch:" << name()
+                    << " Assuming cyclic AMI pairs are colocated" << endl;
             }
 
             const_cast<tensorField&>(forwardT()).clear();
@@ -232,7 +243,8 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
 
         if (debug)
         {
-            OFstream os(name() + "_neighbourPatch-org.obj");
+            const Time& t = boundaryMesh().mesh().time();
+            OFstream os(t.path()/name() + "_neighbourPatch-org.obj");
             meshTools::writeOBJ(os, neighbPatch().localFaces(), nbrPoints);
         }
 
@@ -250,10 +262,11 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
 
         if (debug)
         {
-            OFstream osN(name() + "_neighbourPatch-trans.obj");
+            const Time& t = boundaryMesh().mesh().time();
+            OFstream osN(t.path()/name() + "_neighbourPatch-trans.obj");
             meshTools::writeOBJ(osN, nbrPatch0.localFaces(), nbrPoints);
 
-            OFstream osO(name() + "_ownerPatch.obj");
+            OFstream osO(t.path()/name() + "_ownerPatch.obj");
             meshTools::writeOBJ(osO, this->localFaces(), localPoints());
         }
 
@@ -451,10 +464,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(pp, bm),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
-    transform_(UNKNOWN),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
-    separationVector_(vector::zero),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_),
+    separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
@@ -477,10 +490,10 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     nbrPatchName_(nbrPatchName),
     nbrPatchID_(-1),
-    transform_(UNKNOWN),
-    rotationAxis_(vector::zero),
-    rotationCentre_(point::zero),
-    separationVector_(vector::zero),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_),
+    separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
@@ -534,6 +547,23 @@ Foam::cyclicAMIPolyPatch::~cyclicAMIPolyPatch()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::cyclicAMIPolyPatch::coupled() const
+{
+    if
+    (
+        Pstream::parRun()
+     || (size() && neighbPatch().size())
+    )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 {
@@ -769,6 +799,7 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     coupledPolyPatch::write(os);
     os.writeKeyword("neighbourPatch") << nbrPatchName_
         << token::END_STATEMENT << nl;
+
     switch (transform_)
     {
         case ROTATIONAL:
@@ -801,8 +832,12 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         }
     }
 
-    os.writeKeyword(surfDict_.dictName());
-    os  << surfDict_;
+
+    if (surfDict_ != dictionary::null)
+    {
+        os.writeKeyword(surfDict_.dictName());
+        os  << surfDict_;
+    }
 }
 
 
