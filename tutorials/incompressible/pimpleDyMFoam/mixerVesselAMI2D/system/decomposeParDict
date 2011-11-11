@@ -15,18 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-singleProcessorFaceSets ((AMI -1));
+//- Force AMI to be on single processor. Can cause imbalance with some
+//  decomposers.
+//singleProcessorFaceSets ((AMI -1));
 
 numberOfSubdomains 4;
 
 method          scotch;
-
-simpleCoeffs
-{
-    n               ( 2 2 1 );
-    delta           0.001;
-}
-
 
 distributed     no;
 

@@ -8,6 +8,9 @@ cd ${0%/*} || exit 1    # run from this directory
 application=`getApplication`
 
 ./makeMesh
-runApplication $application
+
+#runApplication $application
+runApplication decomposePar
+runParallel $application 4
 
 # ----------------------------------------------------------------- end-of-file
