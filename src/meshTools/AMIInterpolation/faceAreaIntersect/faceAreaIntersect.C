@@ -36,7 +36,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     const scalar len
 )
 {
-    const scalar matchTol = 1e-4;
+    const scalar matchTol = 1e-6;
 
     // distance to cutting plane
     FixedList<scalar, 3> d;
@@ -103,6 +103,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
 
             2 points above plane, 1 below
             - resulting quad above plane split into 2 triangles
+            - forget triangle below plane
         */
 
         // point under the plane
@@ -135,7 +136,8 @@ void Foam::faceAreaIntersect::triSliceWithPlane
                 /______\
 
                 1 point above plane, 2 below
-                - keep triangle avove intersection plane
+                - keep triangle above intersection plane
+                - forget quad below plane
             */
 
             // indices of remaining points
@@ -146,8 +148,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
             point p01 = planeIntersection(d, tri, i0, i1);
             point p02 = planeIntersection(d, tri, i0, i2);
 
-            // forget quad below plane
-            // - add triangle above plane to list
+            // add triangle above plane to list
             setTriPoints(tri[i0], p01, p02, nTris, tris);
         }
         else
