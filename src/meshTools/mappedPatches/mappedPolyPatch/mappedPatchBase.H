@@ -290,190 +290,87 @@ public:
 
         void clearOut();
 
-        //- What to sample
-        const sampleMode& mode() const
-        {
-            return mode_;
-        }
+        // Access
 
-        //- Region to sample
-        const word& sampleRegion() const
-        {
-            return sampleRegion_;
-        }
+            //- What to sample
+            inline const sampleMode& mode() const;
 
-        //- Patch (only if NEARESTPATCHFACE)
-        const word& samplePatch() const
-        {
-            return samplePatch_;
-        }
+            //- Region to sample
+            inline const word& sampleRegion() const;
 
-        //- Offset vector (from patch faces to destination mesh objects)
-        const vector& offset() const
-        {
-            return offset_;
-        }
+            //- Patch (only if NEARESTPATCHFACE)
+            inline const word& samplePatch() const;
 
-        //- Offset vector (from patch faces to destination mesh objects)
-        const vectorField& offsets() const
-        {
-            return offsets_;
-        }
+            //- Offset vector (from patch faces to destination mesh objects)
+            inline const vector& offset() const;
 
-        //- Wrapper around map/interpolate data distribution
-        template<class Type>
-        void distribute(List<Type>& lst) const
-        {
-            switch (mode_)
-            {
-                case NEARESTPATCHFACEAMI:
-                {
-                    lst = AMI().interpolateToSource(Field<Type>(lst.xfer()));
-                    break;
-                }
-                default:
-                {
-                    map().distribute(lst);
-                }
-            }
-        }
+            //- Offset vector (from patch faces to destination mesh objects)
+            inline const vectorField& offsets() const;
+
+            //- Cached sampleRegion != mesh.name()
+            inline bool sameRegion() const;
+
+            //- Return reference to the parallel distribution map
+            inline const mapDistribute& map() const;
+
+            //- Return reference to the AMI interpolator
+            inline const AMIPatchToPatchInterpolation& AMI
+            (
+                const bool forceUpdate = false
+            ) const;
+
+            //- Return a pointer to the AMI projection surface
+            const autoPtr<Foam::searchableSurface>& surfPtr() const;
+
+            //- Get the region mesh
+            const polyMesh& sampleMesh() const;
+
+            //- Get the patch on the region
+            const polyPatch& samplePolyPatch() const;
+
+            //- Get the sample points
+            tmp<pointField> samplePoints() const;
 
 
-        //- Wrapper around map/interpolate data distribution with supplied op
-        template<class Type, class BinaryOp>
-        void distribute(List<Type>& lst, const BinaryOp& bop) const
-        {
-            switch (mode_)
-            {
-                case NEARESTPATCHFACEAMI:
-                {
-                    lst = AMI().interpolateToSource
-                        (
-                            Field<Type>(lst.xfer()),
-                            bop
-                        );
-                    break;
-                }
-                default:
-                {
-                    map().distribute
-                    (
-                        Pstream::defaultCommsType,
-                        map().schedule(),
-                        map().constructSize(),
-                        map().subMap(),
-                        map().constructMap(),
-                        lst,
-                        bop,
-                        pTraits<Type>::zero
-                    );
-                }
-            }
-        }
+        // Distribute
+
+            //- Wrapper around map/interpolate data distribution
+            template<class Type>
+            void distribute(List<Type>& lst) const;
+
+            //- Wrapper around map/interpolate data distribution with operation
+            template<class Type, class BinaryOp>
+            void distribute(List<Type>& lst, const BinaryOp& bop) const;
+
+            //- Wrapper around map/interpolate data distribution
+            template<class Type>
+            void reverseDistribute(List<Type>& lst) const;
+
+            //- Wrapper around map/interpolate data distribution with operation
+            template<class Type, class BinaryOp>
+            void reverseDistribute(List<Type>& lst, const BinaryOp& bop) const;
 
 
-        //- Wrapper around map/interpolate data distribution
-        template<class Type>
-        void reverseDistribute(List<Type>& lst) const
-        {
-            switch (mode_)
-            {
-                case NEARESTPATCHFACEAMI:
-                {
-                    lst = AMI().interpolateToTarget(Field<Type>(lst.xfer()));
-                    break;
-                }
-                default:
-                {
-                    label cSize = patch_.size();
-                    map().reverseDistribute(cSize, lst);
-                }
-            }
-        }
+        // I/O
 
-
-        //- Wrapper around map/interpolate data distribution with supplied op
-        template<class Type, class BinaryOp>
-        void reverseDistribute(List<Type>& lst, const BinaryOp& bop) const
-        {
-            switch (mode_)
-            {
-                case NEARESTPATCHFACEAMI:
-                {
-                    lst = AMI().interpolateToTarget
-                        (
-                            Field<Type>(lst.xfer()),
-                            bop
-                        );
-                    break;
-                }
-                default:
-                {
-                    label cSize = patch_.size();
-                    map().distribute
-                    (
-                        Pstream::defaultCommsType,
-                        map().schedule(),
-                        cSize,
-                        map().constructMap(),
-                        map().subMap(),
-                        lst,
-                        bop,
-                        pTraits<Type>::zero
-                    );
-                }
-            }
-        }
-
-
-        //- Return reference to the parallel distribution map
-        const mapDistribute& map() const
-        {
-            if (mapPtr_.empty())
-            {
-                calcMapping();
-            }
-
-            return mapPtr_();
-        }
-
-        //- Return reference to the AMI interpolator
-        const AMIPatchToPatchInterpolation& AMI(bool forceUpdate = false) const
-        {
-            if (forceUpdate || AMIPtr_.empty())
-            {
-                calcAMI();
-            }
-
-            return AMIPtr_();
-        }
-
-        //- Return a pointer to the AMI projection surface
-        const autoPtr<Foam::searchableSurface>& surfPtr() const;
-
-        //- Cached sampleRegion != mesh.name()
-        bool sameRegion() const
-        {
-            return sameRegion_;
-        }
-
-        //- Get the region mesh
-        const polyMesh& sampleMesh() const;
-
-        //- Get the patch on the region
-        const polyPatch& samplePolyPatch() const;
-
-        //- Get the sample points
-        tmp<pointField> samplePoints() const;
-
-        //- Write as a dictionary
-        virtual void write(Ostream&) const;
+            //- Write as a dictionary
+            virtual void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "mappedPatchBaseI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "mappedPatchBaseTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
