@@ -29,6 +29,7 @@ Description
 #include "dictionary.H"
 #include "Ostream.H"
 #include "Pstream.H"
+#include "unitConversion.H"
 
 //{{{ begin codeInclude
 ${codeInclude}
