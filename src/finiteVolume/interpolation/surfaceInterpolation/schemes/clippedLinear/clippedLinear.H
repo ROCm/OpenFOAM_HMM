@@ -157,7 +157,7 @@ public:
 
             forAll(mesh.boundary(), patchi)
             {
-                if (mesh.boundary()[patchi].coupled())
+                if (clippedLinearWeights.boundaryField()[patchi].coupled())
                 {
                     clippedLinearWeights.boundaryField()[patchi] =
                         max

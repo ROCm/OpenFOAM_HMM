@@ -285,7 +285,8 @@ public:
         //- Return boundaryMesh reference
         const polyBoundaryMesh& boundaryMesh() const;
 
-        //- Return true if this patch field is coupled
+        //- Return true if this patch is geometrically coupled (i.e. faces and
+        //  points correspondence)
         virtual bool coupled() const
         {
             return false;

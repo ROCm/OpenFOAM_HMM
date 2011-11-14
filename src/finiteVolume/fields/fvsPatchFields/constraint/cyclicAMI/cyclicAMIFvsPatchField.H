@@ -123,6 +123,14 @@ public:
                 new cyclicAMIFvsPatchField<Type>(*this, iF)
             );
         }
+
+    // Member functions
+
+        // Access
+
+            //- Return true if running parallel
+            virtual bool coupled() const;
+
 };
 
 

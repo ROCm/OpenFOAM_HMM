@@ -147,8 +147,12 @@ public:
 
         // Evaluation functions
 
+            //- Return true if coupled. Note that the underlying patch
+            //  is not coupled() - the points don't align.
+            virtual bool coupled() const;
+
             //- Return neighbour coupled internal cell data
-            tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type> > patchNeighbourField() const;
 
             //- Return reference to neighbour patchField
             const cyclicAMIFvPatchField<Type>& neighbourPatchField() const;

@@ -132,7 +132,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         // Build the d-vectors
         vectorField pd = p.delta();
 
-        if (p.coupled())
+        if (pw.coupled())
         {
             forAll(pd, patchFacei)
             {
@@ -185,7 +185,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
         // Build the d-vectors
         vectorField pd = p.delta();
 
-        if (p.coupled())
+        if (pw.coupled())
         {
             forAll(pd, patchFacei)
             {
@@ -256,7 +256,7 @@ void Foam::leastSquaresVectors::makeLeastSquaresVectors() const
                             label patchFacei =
                                 facei - mesh.boundaryMesh()[patchi].start();
 
-                            if (mesh.boundary()[patchi].coupled())
+                            if (w.boundaryField()[patchi].coupled())
                             {
                                 scalar wf = max
                                 (

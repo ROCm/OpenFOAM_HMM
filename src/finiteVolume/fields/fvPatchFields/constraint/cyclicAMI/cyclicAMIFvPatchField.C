@@ -106,7 +106,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             << exit(FatalIOError);
     }
 
-    if (cyclicAMIPatch_.coupled())
+    if (this->coupled())
     {
         this->evaluate(Pstream::blocking);
     }
@@ -139,6 +139,27 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::cyclicAMIFvPatchField<Type>::coupled() const
+{
+    if
+    (
+        Pstream::parRun()
+     || (
+            this->cyclicAMIPatch_.size()
+         && this->cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().size()
+        )
+    )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> >

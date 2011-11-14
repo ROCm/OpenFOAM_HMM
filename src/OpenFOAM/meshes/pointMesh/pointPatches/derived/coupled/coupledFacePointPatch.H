@@ -96,18 +96,6 @@ public:
 
     //- Destructor
     virtual ~coupledFacePointPatch();
-
-
-    // Member Functions
-
-        // Access
-
-            //- Return true because this patch is coupled
-            virtual bool coupled() const
-            {
-                return true;
-            }
-
 };
 
 

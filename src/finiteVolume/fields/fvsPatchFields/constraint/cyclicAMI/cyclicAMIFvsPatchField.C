@@ -123,4 +123,27 @@ Foam::cyclicAMIFvsPatchField<Type>::cyclicAMIFvsPatchField
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::cyclicAMIFvsPatchField<Type>::coupled() const
+{
+    if
+    (
+        Pstream::parRun()
+     || (
+            this->cyclicAMIPatch_.size()
+         && this->cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().size()
+        )
+    )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 // ************************************************************************* //

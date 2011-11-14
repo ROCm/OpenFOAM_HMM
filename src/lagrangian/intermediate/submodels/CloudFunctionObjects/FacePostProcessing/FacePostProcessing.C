@@ -316,7 +316,7 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
 
                     if
                     (
-                        !pp.coupled()
+                        !magSf.boundaryField()[patchI].coupled()
                      || refCast<const coupledPolyPatch>(pp).owner()
                     )
                     {

@@ -107,6 +107,17 @@ public:
 
     //- Destructor
     virtual ~cyclicAMIPointPatch();
+
+
+    // Member Functions
+
+        //- Is patch 'coupled'. Note that on AMI the geometry is not
+        //  coupled but the fields are!
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 };
 
 

@@ -254,10 +254,12 @@ public:
 
         // Access
 
-            //- Return true only if is coupled. Note that for non-parallel
-            //  operation of a decomposed case this can return the wrong
-            //  result
-            virtual bool coupled() const;
+            //- Is patch 'coupled'. Note that on AMI the geometry is not
+            //  coupled but the fields are!
+            virtual bool coupled() const
+            {
+                return false;
+            }
 
             //- Neighbour patch name
             inline const word& neighbPatchName() const;
