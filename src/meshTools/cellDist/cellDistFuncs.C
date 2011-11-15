@@ -330,7 +330,6 @@ void Foam::cellDistFuncs::correctBoundaryPointCells
 {
     // Correct all (non-visited) cells with point on wall
 
-    const labelListList& pointCells = mesh().pointCells();
     const vectorField& cellCentres = mesh().cellCentres();
 
     forAll(mesh().boundaryMesh(), patchI)
@@ -346,7 +345,7 @@ void Foam::cellDistFuncs::correctBoundaryPointCells
             {
                 label vertI = meshPoints[meshPointI];
 
-                const labelList& neighbours = pointCells[vertI];
+                const labelList& neighbours = mesh().pointCells(vertI);
 
                 forAll(neighbours, neighbourI)
                 {
