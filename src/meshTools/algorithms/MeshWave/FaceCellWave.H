@@ -105,7 +105,10 @@ class FaceCellWave
         label nChangedCells_;
 
         //- Contains cyclics
-        bool hasCyclicPatches_;
+        const bool hasCyclicPatches_;
+
+        //- Contains cyclicAMI
+        const bool hasCyclicAMIPatches_;
 
         //- Number of evaluations
         label nEvals_;
@@ -163,7 +166,8 @@ class FaceCellWave
             void checkCyclic(const polyPatch& pPatch) const;
 
             //- Has cyclic patch?
-            bool hasCyclicPatch() const;
+            template <class PatchType>
+            bool hasPatch() const;
 
             //- Merge received patch data into global data
             void mergeFaceInfo
@@ -224,6 +228,9 @@ class FaceCellWave
 
             //- Merge data from across cyclics
             void handleCyclicPatches();
+
+            //- Merge data from across AMI cyclics
+            void handleAMICyclicPatches();
 
 
       // Private static data

@@ -300,7 +300,7 @@ public:
 
         //- Slice list to patch
         template<class T>
-        const typename List<T>::subList patchSlice(const List<T>& l) const
+        const typename List<T>::subList patchSlice(const UList<T>& l) const
         {
             return typename List<T>::subList(l, this->size(), start_);
         }

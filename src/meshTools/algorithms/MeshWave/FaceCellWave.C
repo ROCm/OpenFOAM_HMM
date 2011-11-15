@@ -27,11 +27,14 @@ License
 #include "polyMesh.H"
 #include "processorPolyPatch.H"
 #include "cyclicPolyPatch.H"
+#include "cyclicAMIPolyPatch.H"
 #include "OPstream.H"
 #include "IPstream.H"
 #include "PstreamReduceOps.H"
 #include "debug.H"
 #include "typeInfo.H"
+#include "SubField.H"
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,6 +46,53 @@ Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
 
 template <class Type, class TrackingData>
 Foam::label Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
+
+namespace Foam
+{
+    //- Combine operator for AMIInterpolation
+    template<class Type, class TrackingData>
+    class combine
+    {
+        FaceCellWave<Type, TrackingData>& solver_;
+
+        const polyPatch& patch_;
+
+        public:
+
+            combine
+            (
+                FaceCellWave<Type, TrackingData>& solver,
+                const polyPatch& patch
+            )
+            :
+                solver_(solver),
+                patch_(patch)
+            {}
+
+
+            void operator()
+            (
+                Type& x,
+                const label faceI,
+                const Type& y,
+                const scalar weight
+            ) const
+            {
+                if (y.valid(solver_.data()))
+                {
+                    x.updateFace
+                    (
+                        solver_.mesh(),
+                        patch_.start() + faceI,
+                        y,
+                        solver_.propagationTol(),
+                        solver_.data()
+                    );
+                }
+            }
+    };
+}
+
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -244,11 +294,12 @@ void Foam::FaceCellWave<Type, TrackingData>::checkCyclic
 
 // Check if has cyclic patches
 template <class Type, class TrackingData>
-bool Foam::FaceCellWave<Type, TrackingData>::hasCyclicPatch() const
+template <class PatchType>
+bool Foam::FaceCellWave<Type, TrackingData>::hasPatch() const
 {
     forAll(mesh_.boundaryMesh(), patchI)
     {
-        if (isA<cyclicPolyPatch>(mesh_.boundaryMesh()[patchI]))
+        if (isA<PatchType>(mesh_.boundaryMesh()[patchI]))
         {
             return true;
         }
@@ -446,119 +497,117 @@ void Foam::FaceCellWave<Type, TrackingData>::offset
 template <class Type, class TrackingData>
 void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
 {
+    const globalMeshData& pData = mesh_.globalData();
+
+    // Which patches are processor patches
+    const labelList& procPatches = pData.processorPatches();
+
     // Send all
 
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
-    forAll(mesh_.boundaryMesh(), patchI)
+    forAll(procPatches, i)
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+        label patchI = procPatches[i];
 
-        if (isA<processorPolyPatch>(patch))
+        const processorPolyPatch& procPatch =
+            refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+
+        // Allocate buffers
+        label nSendFaces;
+        labelList sendFaces(procPatch.size());
+        List<Type> sendFacesInfo(procPatch.size());
+
+        // Determine which faces changed on current patch
+        nSendFaces = getChangedPatchFaces
+        (
+            procPatch,
+            0,
+            procPatch.size(),
+            sendFaces,
+            sendFacesInfo
+        );
+
+        // Adapt wallInfo for leaving domain
+        leaveDomain
+        (
+            procPatch,
+            nSendFaces,
+            sendFaces,
+            sendFacesInfo
+        );
+
+        if (debug)
         {
-            // Allocate buffers
-            label nSendFaces;
-            labelList sendFaces(patch.size());
-            List<Type> sendFacesInfo(patch.size());
-
-            // Determine which faces changed on current patch
-            nSendFaces = getChangedPatchFaces
-            (
-                patch,
-                0,
-                patch.size(),
-                sendFaces,
-                sendFacesInfo
-            );
-
-            // Adapt wallInfo for leaving domain
-            leaveDomain
-            (
-                patch,
-                nSendFaces,
-                sendFaces,
-                sendFacesInfo
-            );
-
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(patch);
-
-            if (debug)
-            {
-                Pout<< " Processor patch " << patchI << ' ' << patch.name()
-                    << " communicating with " << procPatch.neighbProcNo()
-                    << "  Sending:" << nSendFaces
-                    << endl;
-            }
-
-            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-            //writeFaces(nSendFaces, sendFaces, sendFacesInfo, toNeighbour);
-            toNeighbour
-                << SubList<label>(sendFaces, nSendFaces)
-                << SubList<Type>(sendFacesInfo, nSendFaces);
-
+            Pout<< " Processor patch " << patchI << ' ' << procPatch.name()
+                << " communicating with " << procPatch.neighbProcNo()
+                << "  Sending:" << nSendFaces
+                << endl;
         }
+
+        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
+        //writeFaces(nSendFaces, sendFaces, sendFacesInfo, toNeighbour);
+        toNeighbour
+            << SubList<label>(sendFaces, nSendFaces)
+            << SubList<Type>(sendFacesInfo, nSendFaces);
     }
 
     pBufs.finishedSends();
 
     // Receive all
 
-    forAll(mesh_.boundaryMesh(), patchI)
+    forAll(procPatches, i)
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+        label patchI = procPatches[i];
 
-        if (isA<processorPolyPatch>(patch))
+        const processorPolyPatch& procPatch =
+            refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchI]);
+
+        // Allocate buffers
+        labelList receiveFaces;
+        List<Type> receiveFacesInfo;
+
         {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(patch);
+            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
+            fromNeighbour >> receiveFaces >> receiveFacesInfo;
+        }
 
-            // Allocate buffers
-            labelList receiveFaces;
-            List<Type> receiveFacesInfo;
+        if (debug)
+        {
+            Pout<< " Processor patch " << patchI << ' ' << procPatch.name()
+                << " communicating with " << procPatch.neighbProcNo()
+                << "  Receiving:" << receiveFaces.size()
+                << endl;
+        }
 
-            {
-                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
-                fromNeighbour >> receiveFaces >> receiveFacesInfo;
-            }
-
-            if (debug)
-            {
-                Pout<< " Processor patch " << patchI << ' ' << patch.name()
-                    << " communicating with " << procPatch.neighbProcNo()
-                    << "  Receiving:" << receiveFaces.size()
-                    << endl;
-            }
-
-            // Apply transform to received data for non-parallel planes
-            if (!procPatch.parallel())
-            {
-                transform
-                (
-                    procPatch.forwardT(),
-                    receiveFaces.size(),
-                    receiveFacesInfo
-                );
-            }
-
-            // Adapt wallInfo for entering domain
-            enterDomain
+        // Apply transform to received data for non-parallel planes
+        if (!procPatch.parallel())
+        {
+            transform
             (
-                patch,
+                procPatch.forwardT(),
                 receiveFaces.size(),
-                receiveFaces,
-                receiveFacesInfo
-            );
-
-            // Merge received info
-            mergeFaceInfo
-            (
-                patch,
-                receiveFaces.size(),
-                receiveFaces,
                 receiveFacesInfo
             );
         }
+
+        // Adapt wallInfo for entering domain
+        enterDomain
+        (
+            procPatch,
+            receiveFaces.size(),
+            receiveFaces,
+            receiveFacesInfo
+        );
+
+        // Merge received info
+        mergeFaceInfo
+        (
+            procPatch,
+            receiveFaces.size(),
+            receiveFaces,
+            receiveFacesInfo
+        );
     }
 }
 
@@ -648,6 +697,93 @@ void Foam::FaceCellWave<Type, TrackingData>::handleCyclicPatches()
 }
 
 
+// Transfer information across cyclic halves.
+template <class Type, class TrackingData>
+void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
+{
+    forAll(mesh_.boundaryMesh(), patchI)
+    {
+        const polyPatch& patch = mesh_.boundaryMesh()[patchI];
+
+        if (isA<cyclicAMIPolyPatch>(patch))
+        {
+            const cyclicAMIPolyPatch& cycPatch =
+                refCast<const cyclicAMIPolyPatch>(patch);
+
+            List<Type> receiveInfo;
+
+            {
+                const cyclicAMIPolyPatch& nbrPatch =
+                    refCast<const cyclicAMIPolyPatch>(patch).neighbPatch();
+
+                // Get nbrPatch data (so not just changed faces)
+                typename List<Type>::subList sendInfo
+                (
+                    nbrPatch.patchSlice
+                    (
+                        allFaceInfo_
+                    )
+                );
+
+                // Adapt sendInfo for leaving domain
+                const vectorField::subField fc = nbrPatch.faceCentres();
+                forAll(sendInfo, i)
+                {
+                    sendInfo[i].leaveDomain(mesh_, nbrPatch, i, fc[i], td_);
+                }
+
+
+                // Transfer sendInfo to cycPatch
+                combine<Type, TrackingData> cmb(*this, cycPatch);
+
+                cycPatch.interpolate(sendInfo, cmb, receiveInfo);
+            }
+
+            // Apply transform to received data for non-parallel planes
+            if (!cycPatch.parallel())
+            {
+                transform
+                (
+                    cycPatch.forwardT(),
+                    receiveInfo.size(),
+                    receiveInfo
+                );
+            }
+
+            // Adapt receiveInfo for entering domain
+            const vectorField::subField fc = cycPatch.faceCentres();
+            forAll(receiveInfo, i)
+            {
+                receiveInfo[i].enterDomain(mesh_, cycPatch, i, fc[i], td_);
+            }
+
+            // Merge into global storage
+            forAll(receiveInfo, i)
+            {
+                label meshFaceI = cycPatch.start()+i;
+
+                Type& currentWallInfo = allFaceInfo_[meshFaceI];
+
+                if
+                (
+                    receiveInfo[i].valid(td_)
+                && !currentWallInfo.equal(receiveInfo[i], td_)
+                )
+                {
+                    updateFace
+                    (
+                        meshFaceI,
+                        receiveInfo[i],
+                        propagationTol_,
+                        currentWallInfo
+                    );
+                }
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Set up only. Use setFaceInfo and iterate() to do actual calculation.
@@ -670,7 +806,11 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     changedCell_(mesh_.nCells(), false),
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
-    hasCyclicPatches_(hasCyclicPatch()),
+    hasCyclicPatches_(hasPatch<cyclicPolyPatch>()),
+    hasCyclicAMIPatches_
+    (
+        returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+    ),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces())
@@ -701,7 +841,11 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     changedCell_(mesh_.nCells(), false),
     changedCells_(mesh_.nCells()),
     nChangedCells_(0),
-    hasCyclicPatches_(hasCyclicPatch()),
+    hasCyclicPatches_(hasPatch<cyclicPolyPatch>()),
+    hasCyclicAMIPatches_
+    (
+        returnReduce(hasPatch<cyclicAMIPolyPatch>(), orOp<bool>())
+    ),
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces())
@@ -888,6 +1032,12 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::cellToFace()
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
+
+    if (hasCyclicAMIPatches_)
+    {
+        handleAMICyclicPatches();
+    }
+
     if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.
@@ -917,6 +1067,12 @@ Foam::label Foam::FaceCellWave<Type, TrackingData>::iterate(const label maxIter)
         // Transfer changed faces across cyclic halves
         handleCyclicPatches();
     }
+
+    if (hasCyclicAMIPatches_)
+    {
+        handleAMICyclicPatches();
+    }
+
     if (Pstream::parRun())
     {
         // Transfer changed faces from neighbouring processors.

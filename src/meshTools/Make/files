@@ -30,13 +30,20 @@ meshSearch/meshSearch.C
 
 meshTools/meshTools.C
 
-pWave = PointEdgeWave
+algorithms = algorithms
+
+pWave = $(algorithms)/PointEdgeWave
 $(pWave)/PointEdgeWaveName.C
 $(pWave)/pointEdgePoint.C
 
-patchWave = PatchEdgeFaceWave
+patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
+
+meshWave = $(algorithms)/MeshWave
+$(meshWave)/MeshWaveName.C
+$(meshWave)/FaceCellWaveName.C
+
 
 regionSplit/regionSplit.C
 

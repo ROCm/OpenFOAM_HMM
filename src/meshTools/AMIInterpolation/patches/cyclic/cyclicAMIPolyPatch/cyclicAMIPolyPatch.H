@@ -318,6 +318,15 @@ public:
                     const tmp<Field<Type> >& tFld
                 ) const;
 
+                //- Low-level interpolate List
+                template<class Type, class BinaryOp>
+                void interpolate
+                (
+                    const UList<Type>& fld,
+                    const BinaryOp& bop,
+                    List<Type>& result
+                ) const;
+
 
         //- Calculate the patch geometry
         virtual void calcGeometry
