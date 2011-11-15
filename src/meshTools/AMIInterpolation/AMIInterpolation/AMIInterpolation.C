@@ -1094,18 +1094,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     const bool output
 )
 {
-    scalarList wghtSum(wght.size(), 0.0);
-
     scalar minBound = VGREAT;
     scalar maxBound = -VGREAT;
+
+    scalar tSum = 0.0;
 
     // Normalise the weights
     forAll(wght, faceI)
     {
         scalar s = sum(wght[faceI]);
-        wghtSum[faceI] = s;
-
         scalar t = s/patchAreas[faceI];
+
+        tSum += t;
+
         if (t < minBound)
         {
             minBound = t;
@@ -1122,11 +1123,16 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
         }
     }
 
+
     if (output)
     {
-        Info<< "AMI: Patch " << patchName << " weights min/max = "
+        const label nFace = returnReduce(wght.size(), sumOp<scalar>());
+        reduce(tSum, sumOp<scalar>());
+
+        Info<< "AMI: Patch " << patchName << " weights min/max/average = "
             << returnReduce(minBound, minOp<scalar>()) << ", "
-            << returnReduce(maxBound, maxOp<scalar>()) << endl;
+            << returnReduce(maxBound, maxOp<scalar>()) << ", "
+            << tSum/nFace << endl;
     }
 }
 
@@ -2011,7 +2017,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToSource(tFld, sumOp<Type>());
+    return interpolateToSource(tFld(), sumOp<Type>());
 }
 
 
@@ -2035,7 +2041,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToTarget(tFld, sumOp<Type>());
+    return interpolateToTarget(tFld(), sumOp<Type>());
 }
 
 

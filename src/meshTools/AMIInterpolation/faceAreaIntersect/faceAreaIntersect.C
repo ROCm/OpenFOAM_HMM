@@ -36,7 +36,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     const scalar len
 )
 {
-    const scalar matchTol = 1e-4;
+    const scalar matchTol = 1e-6;
 
     // distance to cutting plane
     FixedList<scalar, 3> d;
@@ -78,7 +78,8 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     (
         (nPos == 3)
      || ((nPos == 2) && (nCoPlanar == 1))
-     || ((nPos == 1) && (nCoPlanar == 2)))
+     || ((nPos == 1) && (nCoPlanar == 2))
+    )
     {
         /*
                 /\          _____
@@ -95,14 +96,16 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     else if ((nPos == 2) && (nCoPlanar == 0))
     {
         /*
-             ________
-             \      /
-            --\----/--
-               \  /
-                \/
+            i1________i2
+              \      /
+             --\----/--
+                \  /
+                 \/
+                 i0
 
             2 points above plane, 1 below
             - resulting quad above plane split into 2 triangles
+            - forget triangle below plane
         */
 
         // point under the plane
@@ -129,13 +132,16 @@ void Foam::faceAreaIntersect::triSliceWithPlane
         if (nCoPlanar == 0)
         {
             /*
-                   /\
-                  /  \
-               --/----\--
-                /______\
+                     i0
+                     /\
+                    /  \
+                 --/----\--
+                  /______\
+                i2        i1
 
                 1 point above plane, 2 below
-                - keep triangle avove intersection plane
+                - keep triangle above intersection plane
+                - forget quad below plane
             */
 
             // indices of remaining points
@@ -143,24 +149,23 @@ void Foam::faceAreaIntersect::triSliceWithPlane
             label i2 = d.fcIndex(i1);
 
             // determine the two intersection points
-            point p01 = planeIntersection(d, tri, i0, i1);
-            point p02 = planeIntersection(d, tri, i0, i2);
+            point p01 = planeIntersection(d, tri, i1, i0);
+            point p02 = planeIntersection(d, tri, i2, i0);
 
-            // forget quad below plane
-            // - add triangle above plane to list
+            // add triangle above plane to list
             setTriPoints(tri[i0], p01, p02, nTris, tris);
         }
         else
         {
             /*
-
+                  i0
                   |\
                   | \
-                __|__\__
+                __|__\_i2_
                   |  /
                   | /
                   |/
-
+                  i1
 
                 1 point above plane, 1 on plane, 1 below
                 - keep triangle above intersection plane
@@ -171,9 +176,9 @@ void Foam::faceAreaIntersect::triSliceWithPlane
             label i2 = copI;
 
             // determine the intersection point
-            point p01 = planeIntersection(d, tri, i0, i1);
+            point p01 = planeIntersection(d, tri, i1, i0);
 
-            // add triangle above plane to list
+            // add triangle above plane to list - clockwise points
             if (d.fcIndex(i0) == i1)
             {
                 setTriPoints(tri[i0], p01, tri[i2], nTris, tris);
