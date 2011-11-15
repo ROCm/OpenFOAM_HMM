@@ -141,7 +141,21 @@ faceZoneSet::~faceZoneSet()
 
 void faceZoneSet::invert(const label maxLen)
 {
+    // Count
     label n = 0;
+
+    for (label faceI = 0; faceI < maxLen; faceI++)
+    {
+        if (!found(faceI))
+        {
+            n++;
+        }
+    }
+
+    // Fill
+    addressing_.setSize(n);
+    flipMap_.setSize(n);
+    n = 0;
 
     for (label faceI = 0; faceI < maxLen; faceI++)
     {
@@ -152,8 +166,6 @@ void faceZoneSet::invert(const label maxLen)
             n++;
         }
     }
-    addressing_.setSize(n);
-    flipMap_.setSize(n);
     updateSet();
 }
 
