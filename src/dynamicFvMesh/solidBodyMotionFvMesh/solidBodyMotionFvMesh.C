@@ -77,6 +77,18 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
     zoneID_(-1),
     pointIDs_()
 {
+    if (undisplacedPoints_.size() != nPoints())
+    {
+        FatalIOErrorIn
+        (
+            "solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject&)",
+            dynamicMeshCoeffs_
+        )   << "Read " << undisplacedPoints_.size()
+            << " undisplaced points from " << undisplacedPoints_.objectPath()
+            << " but the current mesh has " << nPoints()
+            << exit(FatalError);
+    }
+
     word cellZoneName =
         dynamicMeshCoeffs_.lookupOrDefault<word>("cellZone", "none");
 
