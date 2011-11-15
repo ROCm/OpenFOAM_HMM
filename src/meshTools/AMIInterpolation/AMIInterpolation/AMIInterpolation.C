@@ -1950,7 +1950,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const BinaryOp& bop
 ) const
 {
-    return interpolateToSource(tFld, bop);
+    return interpolateToSource(tFld(), bop);
 }
 
 
@@ -1987,7 +1987,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const BinaryOp& bop
 ) const
 {
-    return interpolateToTarget(tFld, bop);
+    return interpolateToTarget(tFld(), bop);
 }
 
 
