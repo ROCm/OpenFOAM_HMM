@@ -129,7 +129,7 @@ public:
 
             forAll(mesh.boundary(), patchI)
             {
-                if (mesh.boundary()[patchI].coupled())
+                if (reverseLinearWeights.boundaryField()[patchI].coupled())
                 {
                     reverseLinearWeights.boundaryField()[patchI] =
                         1.0 - cdWeights.boundaryField()[patchI];

@@ -20,38 +20,42 @@ solvers
     p
     {
         solver          GAMG;
-        tolerance       1e-06;
-        relTol          0.01;
         smoother        GaussSeidel;
         cacheAgglomeration true;
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+
+        tolerance       1e-06;
+        relTol          0.05;
     }
 
     pFinal
     {
         solver          GAMG;
-        tolerance       1e-06;
-        relTol          0;
         smoother        GaussSeidel;
         cacheAgglomeration true;
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+
+        tolerance       1e-06;
+        relTol          0;
     }
 
     "(U|k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        solver          smoothSolver;
+        smoother        GaussSeidel;
         tolerance       1e-05;
         relTol          0.1;
     }
 
     "(U|k|epsilon)Final"
     {
-        $U;
+        solver          PBiCG;
+        preconditioner  DILU;
+
         tolerance       1e-05;
         relTol          0;
     }
@@ -59,24 +63,41 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors 1;
-    nCorrectors     2;
+    nOuterCorrectors 4;
+    nCorrectors     1;
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       0;
+}
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors 0;
+    residualControl
+    {
+        p               1e-2;
+        U               1e-3;
+        "(k|epsilon)"   1e-3;
+    }
 }
 
 relaxationFactors
 {
     fields
     {
+        p               0.3;
     }
     equations
     {
-        "U.*"           1;
-        "k.*"           1;
-        "epsilon.*"     1;
+        U               0.7;
+        k               0.7;
+        "epsilon.*"     0.7;
     }
+}
+
+cache
+{
+    grad(U);
 }
 
 

@@ -30,6 +30,37 @@ License
 #include "mergePoints.H"
 #include "mapDistribute.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //- Combine operator for interpolateToSource/Target
+    template<class Type, class BinaryOp>
+    class combineBinaryOp
+    {
+        const BinaryOp& bop_;
+
+        public:
+
+            combineBinaryOp(const BinaryOp& bop)
+            :
+                bop_(bop)
+            {}
+
+            void operator()
+            (
+                Type& x,
+                const label faceI,
+                const Type& y,
+                const scalar weight
+            ) const
+            {
+                x = bop_(x, weight*y);
+            }
+    };
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -1773,94 +1804,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
-Foam::tmp<Foam::Field<Type> >
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+template<class Type, class CombineOp>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
-    const Field<Type>& fld,
-    const BinaryOp& bop
-) const
-{
-    if (fld.size() != tgtAddress_.size())
-    {
-        FatalErrorIn
-        (
-            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
-        )   << "Supplied field size is not equal to target patch size" << nl
-            << "    source patch   = " << srcAddress_.size() << nl
-            << "    target patch   = " << tgtAddress_.size() << nl
-            << "    supplied field = " << fld.size()
-            << abort(FatalError);
-    }
-
-    tmp<Field<Type> > tresult
-    (
-        new Field<Type>
-        (
-            srcAddress_.size(),
-            pTraits<Type>::zero
-        )
-    );
-
-    Field<Type>& result = tresult();
-
-    if (singlePatchProc_ == -1)
-    {
-        const mapDistribute& map = tgtMapPtr_();
-
-        Field<Type> work(fld);
-        map.distribute(work);
-
-        forAll(result, faceI)
-        {
-            const labelList& faces = srcAddress_[faceI];
-            const scalarList& weights = srcWeights_[faceI];
-
-            forAll(faces, i)
-            {
-                result[faceI] = bop(result[faceI], work[faces[i]]*weights[i]);
-            }
-        }
-    }
-    else
-    {
-        forAll(result, faceI)
-        {
-            const labelList& faces = srcAddress_[faceI];
-            const scalarList& weights = srcWeights_[faceI];
-
-            forAll(faces, i)
-            {
-                result[faceI] = bop(result[faceI], fld[faces[i]]*weights[i]);
-            }
-        }
-    }
-
-    return tresult;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
-Foam::tmp<Foam::Field<Type> >
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
-(
-    const tmp<Field<Type> >& tFld,
-    const BinaryOp& bop
-) const
-{
-    return interpolateToSource(tFld(), bop);
-}
-
-
-
-template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
-Foam::tmp<Foam::Field<Type> >
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
-(
-    const Field<Type>& fld,
-    const BinaryOp& bop
+    const UList<Type>& fld,
+    const CombineOp& bop,
+    List<Type>& result
 ) const
 {
     if (fld.size() != srcAddress_.size())
@@ -1875,22 +1824,13 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
             << abort(FatalError);
     }
 
-    tmp<Field<Type> > tresult
-    (
-        new Field<Type>
-        (
-            tgtAddress_.size(),
-            pTraits<Type>::zero
-        )
-    );
-
-    Field<Type>& result = tresult();
+    result.setSize(tgtAddress_.size());
 
     if (singlePatchProc_ == -1)
     {
         const mapDistribute& map = srcMapPtr_();
 
-        Field<Type> work(fld);
+        List<Type> work(fld);
         map.distribute(work);
 
         forAll(result, faceI)
@@ -1900,7 +1840,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                result[faceI] = bop(result[faceI], work[faces[i]]*weights[i]);
+                bop(result[faceI], faceI, work[faces[i]], weights[i]);
             }
         }
     }
@@ -1913,10 +1853,126 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                result[faceI] = bop(result[faceI], fld[faces[i]]*weights[i]);
+                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
             }
         }
     }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type, class CombineOp>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+(
+    const UList<Type>& fld,
+    const CombineOp& bop,
+    List<Type>& result
+) const
+{
+    if (fld.size() != tgtAddress_.size())
+    {
+        FatalErrorIn
+        (
+            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
+        )   << "Supplied field size is not equal to target patch size" << nl
+            << "    source patch   = " << srcAddress_.size() << nl
+            << "    target patch   = " << tgtAddress_.size() << nl
+            << "    supplied field = " << fld.size()
+            << abort(FatalError);
+    }
+
+    result.setSize(srcAddress_.size());
+
+    if (singlePatchProc_ == -1)
+    {
+        const mapDistribute& map = tgtMapPtr_();
+
+        List<Type> work(fld);
+        map.distribute(work);
+
+        forAll(result, faceI)
+        {
+            const labelList& faces = srcAddress_[faceI];
+            const scalarList& weights = srcWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                bop(result[faceI], faceI, work[faces[i]], weights[i]);
+            }
+        }
+    }
+    else
+    {
+        forAll(result, faceI)
+        {
+            const labelList& faces = srcAddress_[faceI];
+            const scalarList& weights = srcWeights_[faceI];
+
+            forAll(faces, i)
+            {
+                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
+            }
+        }
+    }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type, class BinaryOp>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+(
+    const Field<Type>& fld,
+    const BinaryOp& bop
+) const
+{
+    tmp<Field<Type> > tresult
+    (
+        new Field<Type>
+        (
+            srcAddress_.size(),
+            pTraits<Type>::zero
+        )
+    );
+
+    interpolateToSource(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
+
+    return tresult;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type, class BinaryOp>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
+(
+    const tmp<Field<Type> >& tFld,
+    const BinaryOp& bop
+) const
+{
+    return interpolateToSource(tFld, bop);
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class Type, class BinaryOp>
+Foam::tmp<Foam::Field<Type> >
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
+(
+    const Field<Type>& fld,
+    const BinaryOp& bop
+) const
+{
+    tmp<Field<Type> > tresult
+    (
+        new Field<Type>
+        (
+            tgtAddress_.size(),
+            pTraits<Type>::zero
+        )
+    );
+
+    interpolateToTarget(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
 
     return tresult;
 }
@@ -1931,7 +1987,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const BinaryOp& bop
 ) const
 {
-    return interpolateToTarget(tFld(), bop);
+    return interpolateToTarget(tFld, bop);
 }
 
 

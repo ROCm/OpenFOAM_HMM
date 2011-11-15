@@ -59,4 +59,23 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 }
 
 
+template<class Type, class BinaryOp>
+void Foam::cyclicAMIPolyPatch::interpolate
+(
+    const UList<Type>& fld,
+    const BinaryOp& bop,
+    List<Type>& result
+) const
+{
+    if (owner())
+    {
+        AMIPtr_->interpolateToSource(fld, bop, result);
+    }
+    else
+    {
+        neighbPatch().AMIPtr_->interpolateToTarget(fld, bop, result);
+    }
+}
+
+
 // ************************************************************************* //

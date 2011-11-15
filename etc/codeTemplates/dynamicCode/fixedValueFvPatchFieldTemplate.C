@@ -28,6 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "unitConversion.H"
 //{{{ begin codeInclude
 ${codeInclude}
 //}}} end codeInclude

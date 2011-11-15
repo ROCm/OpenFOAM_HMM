@@ -103,7 +103,7 @@ Foam::extendedCellToFaceStencil::extendedCellToFaceStencil(const polyMesh& mesh)
 
     forAll(patches, patchI)
     {
-        if (isA<coupledPolyPatch>(patches[patchI]))
+        if (patches[patchI].coupled())
         {
             const coupledPolyPatch& cpp =
                 refCast<const coupledPolyPatch>(patches[patchI]);

@@ -1769,7 +1769,7 @@ Foam::isoSurface::isoSurface
         const polyPatch& pp = patches[patchI];
 
         // Adapt separated coupled (proc and cyclic) patches
-        if (isA<coupledPolyPatch>(pp))
+        if (pp.coupled())
         {
             fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
             (

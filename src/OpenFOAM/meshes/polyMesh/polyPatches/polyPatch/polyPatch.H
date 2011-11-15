@@ -285,7 +285,8 @@ public:
         //- Return boundaryMesh reference
         const polyBoundaryMesh& boundaryMesh() const;
 
-        //- Return true if this patch field is coupled
+        //- Return true if this patch is geometrically coupled (i.e. faces and
+        //  points correspondence)
         virtual bool coupled() const
         {
             return false;
@@ -299,7 +300,7 @@ public:
 
         //- Slice list to patch
         template<class T>
-        const typename List<T>::subList patchSlice(const List<T>& l) const
+        const typename List<T>::subList patchSlice(const UList<T>& l) const
         {
             return typename List<T>::subList(l, this->size(), start_);
         }

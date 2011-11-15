@@ -548,23 +548,6 @@ Foam::cyclicAMIPolyPatch::~cyclicAMIPolyPatch()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::cyclicAMIPolyPatch::coupled() const
-{
-    if
-    (
-        Pstream::parRun()
-     || (size() && neighbPatch().size())
-    )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
 Foam::label Foam::cyclicAMIPolyPatch::neighbPatchID() const
 {
     if (nbrPatchID_ == -1)

@@ -404,7 +404,30 @@ public:
 
         // Evaluation
 
-            //- Interpolate from target to source with supplied op
+            // Low-level
+
+                //- Interpolate from target to source with supplied op
+                //  to combine existing value with remote value and weight
+                template<class Type, class CombineOp>
+                void interpolateToSource
+                (
+                    const UList<Type>& fld,
+                    const CombineOp& bop,
+                    List<Type>& result
+                ) const;
+
+                //- Interpolate from source to target with supplied op
+                //  to combine existing value with remote value and weight
+                template<class Type, class CombineOp>
+                void interpolateToTarget
+                (
+                    const UList<Type>& fld,
+                    const CombineOp& bop,
+                    List<Type>& result
+                ) const;
+
+
+            //- Interpolate from target to source with supplied binary op
             template<class Type, class BinaryOp>
             tmp<Field<Type> > interpolateToSource
             (
@@ -412,7 +435,8 @@ public:
                 const BinaryOp& bop
             ) const;
 
-            //- Interpolate from target tmp field to source with supplied op
+            //- Interpolate from target tmp field to source with supplied
+            //  binary op
             template<class Type, class BinaryOp>
             tmp<Field<Type> > interpolateToSource
             (
@@ -463,7 +487,6 @@ public:
             (
                 const tmp<Field<Type> >& tFld
             ) const;
-
 
         // Checks
 

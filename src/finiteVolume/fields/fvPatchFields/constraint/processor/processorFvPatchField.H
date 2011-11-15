@@ -154,7 +154,7 @@ public:
             }
 
             //- Return neighbour field given internal field
-            tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type> > patchNeighbourField() const;
 
 
         // Evaluation functions
