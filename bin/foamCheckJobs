@@ -236,9 +236,9 @@ rm -f $TMPFILE; touch $TMPFILE
 RUNJOBS=`getAllJobs $FOAM_JOB_DIR/runningJobs`
 for f in $RUNJOBS
 do
-    machinePid=`basename $f`
-    machine=`echo $machinePid | sed -e 's/\.[0-9][0-9]*$//'`
-    pid=`echo $machinePid | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
+    machinePid=`basename $f  | sed -e 's/^"//' -e 's/"$//'`
+    machine=`echo "$machinePid" | sed -e 's/\.[0-9][0-9]*$//'`
+    pid=`echo "$machinePid" | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
 
     fgrep "$machine" $TMPFILE >/dev/null 2>&1
     if [ $? -ne 0 ]
