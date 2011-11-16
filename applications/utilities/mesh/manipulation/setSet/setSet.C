@@ -1018,7 +1018,7 @@ int main(int argc, char *argv[])
                     is
                 );
 
-                if (!ok)
+                if (!ok && batch)
                 {
                     // Exit with error.
                     quit = true;
