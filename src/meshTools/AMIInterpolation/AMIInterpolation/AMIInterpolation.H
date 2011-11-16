@@ -50,7 +50,8 @@ SourceFiles
 #include "boolList.H"
 #include "primitivePatch.H"
 #include "faceAreaIntersect.H"
-#include "treeBoundBox.H"
+#include "indexedOctree.H"
+#include "treeDataPrimitivePatch.H"
 #include "treeBoundBoxList.H"
 #include "globalIndex.H"
 #include "ops.H"
@@ -76,6 +77,8 @@ class AMIInterpolation
 :
     public AMIInterpolationName
 {
+    //- local typedef to octree tree-type
+    typedef treeDataPrimitivePatch<face, SubList, const pointField&> treeType;
 
     //- Helper class for list
     template<class T>
@@ -135,6 +138,9 @@ class AMIInterpolation
             scalarListList tgtWeights_;
 
 
+        //- Octree used to find face seeds
+        autoPtr<indexedOctree<treeType> > treePtr_;
+
         //- Starting face seed index
         label startSeedI_;
 
@@ -175,6 +181,10 @@ class AMIInterpolation
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
             );
+
+            //- Reset the octree for the traget patch face search
+            void resetTree(const primitivePatch& tgtPatch);
+
 
 
         // Parallel functionality
@@ -236,8 +246,7 @@ class AMIInterpolation
             label findTargetFace
             (
                 const label srcFaceI,
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const primitivePatch& srcPatch
             ) const;
 
             //- Add faces neighbouring faceI to the ID list
