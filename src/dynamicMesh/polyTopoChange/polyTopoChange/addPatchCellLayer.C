@@ -650,6 +650,9 @@ void Foam::addPatchCellLayer::calcSidePatch
     // ------------------------------------------------------
 
     const labelListList& edgeFaces = pp.edgeFaces();
+
+    DynamicList<label> dynMeshEdgeFaces;
+
     forAll(edgeFaces, edgeI)
     {
         if (edgeFaces[edgeI].size() == 1 && sidePatchID[edgeI] == -1)
@@ -660,7 +663,11 @@ void Foam::addPatchCellLayer::calcSidePatch
 
             // Pick up any boundary face on this edge and use its properties
             label meshEdgeI = meshEdges[edgeI];
-            const labelList& meshFaces = mesh.edgeFaces()[meshEdgeI];
+            const labelList& meshFaces = mesh.edgeFaces
+            (
+                meshEdgeI,
+                dynMeshEdgeFaces
+            );
 
             forAll(meshFaces, k)
             {
@@ -716,7 +723,11 @@ void Foam::addPatchCellLayer::calcSidePatch
 
             // Pick up any boundary face on this edge and use its properties
             label meshEdgeI = meshEdges[edgeI];
-            const labelList& meshFaces = mesh.edgeFaces()[meshEdgeI];
+            const labelList& meshFaces = mesh.edgeFaces
+            (
+                meshEdgeI,
+                dynMeshEdgeFaces
+            );
 
             forAll(meshFaces, k)
             {
