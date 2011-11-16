@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        surfaceScalarField phi("phi", aphiv_pos*rho_pos + aphiv_neg*rho_neg);
+        phi = aphiv_pos*rho_pos + aphiv_neg*rho_neg;
 
         surfaceVectorField phiUp
         (

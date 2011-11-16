@@ -35,6 +35,10 @@ Description
 #include "pointSet.H"
 #include "globalMeshData.H"
 #include "timeSelector.H"
+#include "IOobjectList.H"
+#include "cellZoneSet.H"
+#include "faceZoneSet.H"
+#include "pointZoneSet.H"
 
 using namespace Foam;
 
@@ -48,6 +52,96 @@ void printMesh(const Time& runTime, const polyMesh& mesh)
         << "  points:" << mesh.globalData().nTotalPoints()
         << "  patches:" << mesh.boundaryMesh().size()
         << "  bb:" << mesh.bounds() << nl;
+}
+
+
+template<class ZoneType>
+void removeZone
+(
+    ZoneMesh<ZoneType, polyMesh>& zones,
+    const word& setName
+)
+{
+    label zoneID = zones.findZoneID(setName);
+
+    if (zoneID != -1)
+    {
+        Info<< "Removing zone " << setName << " at index " << zoneID << endl;
+        // Shuffle to last position
+        labelList oldToNew(zones.size());
+        label newI = 0;
+        forAll(oldToNew, i)
+        {
+            if (i != zoneID)
+            {
+                oldToNew[i] = newI++;
+            }
+        }
+        oldToNew[zoneID] = newI;
+        zones.reorder(oldToNew);
+        // Remove last element
+        zones.setSize(zones.size()-1);
+        zones.clearAddressing();
+        zones.write();
+    }
+}
+
+
+// Physically remove a set
+void removeSet
+(
+    const polyMesh& mesh,
+    const word& setType,
+    const word& setName
+)
+{
+    // Remove the file
+    IOobjectList objects
+    (
+        mesh,
+        mesh.time().findInstance
+        (
+            polyMesh::meshSubDir/"sets",
+            word::null,
+            IOobject::READ_IF_PRESENT,
+            mesh.facesInstance()
+        ),
+        polyMesh::meshSubDir/"sets"
+    );
+
+    if (objects.found(setName))
+    {
+        // Remove file
+        fileName object = objects[setName]->objectPath();
+        Info<< "Removing file " << object << endl;
+        rm(object);
+    }
+
+    // See if zone
+    if (setType == cellZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<cellZoneMesh&>(mesh.cellZones()),
+            setName
+        );
+    }
+    else if (setType == faceZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<faceZoneMesh&>(mesh.faceZones()),
+            setName
+        );
+    }
+    else if (setType == pointZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<pointZoneMesh&>(mesh.pointZones()),
+            setName
+        );
+    }
 }
 
 
@@ -283,6 +377,12 @@ int main(int argc, char *argv[])
                     currentSet().invert(currentSet().maxSize(mesh));
                     currentSet().write();
                 break;
+
+                case topoSetSource::REMOVE:
+                    Info<< "    Removing set" << endl;
+                    removeSet(mesh, setType, setName);
+                break;
+
 
                 default:
                     WarningIn(args.executable())

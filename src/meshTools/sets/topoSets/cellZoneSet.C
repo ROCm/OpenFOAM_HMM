@@ -136,7 +136,20 @@ cellZoneSet::~cellZoneSet()
 
 void cellZoneSet::invert(const label maxLen)
 {
+    // Count
     label n = 0;
+
+    for (label cellI = 0; cellI < maxLen; cellI++)
+    {
+        if (!found(cellI))
+        {
+            n++;
+        }
+    }
+
+    // Fill
+    addressing_.setSize(n);
+    n = 0;
 
     for (label cellI = 0; cellI < maxLen; cellI++)
     {
@@ -146,7 +159,7 @@ void cellZoneSet::invert(const label maxLen)
             n++;
         }
     }
-    addressing_.setSize(n);
+
     updateSet();
 }
 

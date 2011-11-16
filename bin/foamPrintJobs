@@ -214,7 +214,7 @@ then
         fi
         nProcs=`rightStr 3 "$nProcs"`
 
-        user=`getEntry $f 'username'`
+        user=`getEntry $f 'userName'`
         user=${user:-'---'}
         user=`leftStr 8 "$user"`
 
@@ -273,7 +273,7 @@ then
         fi
         nProcs=`rightStr 3 "$nProcs"`
 
-        user=`getEntry $f 'username'`
+        user=`getEntry $f 'userName'`
         user=${user:-'---'}
         user=`leftStr 8 "$user"`
 

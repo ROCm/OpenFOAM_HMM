@@ -138,7 +138,20 @@ pointZoneSet::~pointZoneSet()
 
 void pointZoneSet::invert(const label maxLen)
 {
+    // Count
     label n = 0;
+
+    for (label pointI = 0; pointI < maxLen; pointI++)
+    {
+        if (!found(pointI))
+        {
+            n++;
+        }
+    }
+
+    // Fill
+    addressing_.setSize(n);
+    n = 0;
 
     for (label pointI = 0; pointI < maxLen; pointI++)
     {
@@ -148,7 +161,6 @@ void pointZoneSet::invert(const label maxLen)
             n++;
         }
     }
-    addressing_.setSize(n);
     updateSet();
 }
 
