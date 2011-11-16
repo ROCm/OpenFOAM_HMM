@@ -190,6 +190,8 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
     const primitivePatch& tgtPatch
 )
 {
+    label procI = 0;
+
     if (Pstream::parRun())
     {
         List<label> facesPresentOnProc(Pstream::nProcs(), 0);
@@ -209,16 +211,27 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 
         if (nHaveFaces > 1)
         {
-            return -1;
+            procI = -1;
+            if (debug)
+            {
+                Info<< "AMIInterpolation::calcDistribution: "
+                    << "AMI split across multiple processors" << endl;
+            }
         }
         else if (nHaveFaces == 1)
         {
-            return findIndex(facesPresentOnProc, 1);
+            procI = findIndex(facesPresentOnProc, 1);
+            if (debug)
+            {
+                Info<< "AMIInterpolation::calcDistribution: "
+                    << "AMI local to processor" << procI << endl;
+            }
         }
     }
 
+
     // Either not parallel or no faces on any processor
-    return 0;
+    return procI;
 }
 
 
@@ -1814,7 +1827,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
     if (debug)
     {
-        Info<< "AMIInterpolation : Constructed addressing and weights." << nl
+        Info<< "AMIInterpolation : Constructed addressing and weights" << nl
             << "    triMode        :" << triMode_ << nl
             << "    singlePatchProc:" << singlePatchProc_ << nl
             << "    srcMagSf       :" << gSum(srcMagSf_) << nl
