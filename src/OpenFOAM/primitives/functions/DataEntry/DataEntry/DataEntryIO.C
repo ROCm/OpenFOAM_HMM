@@ -31,7 +31,7 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const DataEntry<Type>&
+    const DataEntry<Type>& de
 )
 {
     // Check state of Ostream
@@ -40,7 +40,16 @@ Foam::Ostream& Foam::operator<<
         "Ostream& operator<<(Ostream&, const DataEntry<Type>&)"
     );
 
+    os  << de.name_;
+
     return os;
+}
+
+
+template<class Type>
+void Foam::DataEntry<Type>::writeData(Ostream& os) const
+{
+    os.writeKeyword(name_) << type();
 }
 
 
