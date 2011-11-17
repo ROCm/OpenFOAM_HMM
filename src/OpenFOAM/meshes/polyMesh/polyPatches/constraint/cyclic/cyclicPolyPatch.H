@@ -118,7 +118,9 @@ class cyclicPolyPatch
 
         // Face ordering
 
-            //- Calculate geometric factors of the two halves.
+            // Given a split of faces into left and right half calculate the
+            // centres and anchor points. Transform the left points so they
+            // align with the right ones
             void getCentresAndAnchors
             (
                 const primitivePatch& pp0,
