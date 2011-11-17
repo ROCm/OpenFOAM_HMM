@@ -2200,57 +2200,83 @@ void Foam::meshRefinement::dumpRefinementLevel() const
 {
     // Note: use time().timeName(), not meshRefinement::timeName()
     // so as to dump the fields to 0, not to constant.
-    volScalarField volRefLevel
-    (
-        IOobject
-        (
-            "cellLevel",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedScalar("zero", dimless, 0),
-        zeroGradientFvPatchScalarField::typeName
-    );
-
-    const labelList& cellLevel = meshCutter_.cellLevel();
-
-    forAll(volRefLevel, cellI)
     {
-        volRefLevel[cellI] = cellLevel[cellI];
+        volScalarField volRefLevel
+        (
+            IOobject
+            (
+                "cellLevel",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+        const labelList& cellLevel = meshCutter_.cellLevel();
+
+        forAll(volRefLevel, cellI)
+        {
+            volRefLevel[cellI] = cellLevel[cellI];
+        }
+
+        volRefLevel.write();
     }
 
-    volRefLevel.write();
-
-
-    const pointMesh& pMesh = pointMesh::New(mesh_);
-
-    pointScalarField pointRefLevel
-    (
-        IOobject
-        (
-            "pointLevel",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        pMesh,
-        dimensionedScalar("zero", dimless, 0)
-    );
-
-    const labelList& pointLevel = meshCutter_.pointLevel();
-
-    forAll(pointRefLevel, pointI)
+    // Dump pointLevel
     {
-        pointRefLevel[pointI] = pointLevel[pointI];
+        const pointMesh& pMesh = pointMesh::New(mesh_);
+
+        pointScalarField pointRefLevel
+        (
+            IOobject
+            (
+                "pointLevel",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pMesh,
+            dimensionedScalar("zero", dimless, 0)
+        );
+
+        const labelList& pointLevel = meshCutter_.pointLevel();
+
+        forAll(pointRefLevel, pointI)
+        {
+            pointRefLevel[pointI] = pointLevel[pointI];
+        }
+
+        pointRefLevel.write();
     }
 
-    pointRefLevel.write();
+    // Dump cell centres
+    {
+        for (direction i=0; i<vector::nComponents; i++)
+        {
+            volScalarField cci
+            (
+                IOobject
+                (
+                    "cc" + word(vector::componentNames[i]),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_.C().component(i)
+            );
+
+            cci.write();
+        }
+    }
 }
 
 
