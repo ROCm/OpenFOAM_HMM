@@ -37,6 +37,7 @@ SourceFiles
 
 #include "Random.H"
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,11 +58,14 @@ class oscillatingFixedValueFvPatchField
         //- Reference value
         Field<Type> refValue_;
 
+        //- Offset
+        Type offset_;
+
         //- Amplitude
-        scalar amplitude_;
+        autoPtr<DataEntry<scalar> > amplitude_;
 
         //- Frequency
-        scalar frequency_;
+        autoPtr<DataEntry<scalar> > frequency_;
 
         //- Current time index
         label curTimeIndex_;
