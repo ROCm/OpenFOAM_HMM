@@ -44,6 +44,7 @@ Description
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "unitConversion.H"
+#include "plane.H"
 
 using namespace Foam;
 
@@ -87,6 +88,35 @@ void deleteBox
         const point eMid = surf.edges()[edgeI].centre(surf.localPoints());
 
         if (removeInside ? bb.contains(eMid) : !bb.contains(eMid))
+        {
+            edgeStat[edgeI] = surfaceFeatures::NONE;
+        }
+    }
+}
+
+
+// Deletes all edges inside/outside bounding box from set.
+void deleteEdges
+(
+    const triSurface& surf,
+    const plane& cutPlane,
+    List<surfaceFeatures::edgeStatus>& edgeStat
+)
+{
+    const pointField& points = surf.points();
+    const labelList& meshPoints = surf.meshPoints();
+
+    forAll(edgeStat, edgeI)
+    {
+        const edge& e = surf.edges()[edgeI];
+        const point& p0 = points[meshPoints[e.start()]];
+        const point& p1 = points[meshPoints[e.end()]];
+        const linePointRef line(p0, p1);
+
+        // If edge does not intersect the plane, delete.
+        scalar intersect = cutPlane.lineIntersect(line);
+
+        if (mag(intersect) > line.mag())
         {
             edgeStat[edgeI] = surfaceFeatures::NONE;
         }
@@ -269,6 +299,12 @@ int main(int argc, char *argv[])
     (
         "manifoldEdgesOnly",
         "remove any non-manifold (open or more than two connected faces) edges"
+    );
+    argList::addOption
+    (
+        "plane",
+        "(nx ny nz)(z0 y0 z0)",
+        "used to create feature edges for 2D meshing"
     );
 
 #   ifdef ENABLE_CURVATURE
@@ -454,6 +490,21 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (args.optionFound("plane"))
+    {
+        plane cutPlane(args.optionLookup("plane")());
+
+        deleteEdges
+        (
+            surf,
+            cutPlane,
+            edgeStat
+        );
+
+        Info<< "Only edges that intersect the plane with normal "
+            << cutPlane.normal() << " and base point " << cutPlane.refPoint()
+            << " will be included as feature edges."<< endl;
+    }
 
     surfaceFeatures newSet(surf);
     newSet.setFromStatus(edgeStat);
@@ -475,7 +526,6 @@ int main(int argc, char *argv[])
         << endl;
 
     // Extracting and writing a extendedFeatureEdgeMesh
-
     extendedFeatureEdgeMesh feMesh
     (
         newSet,
