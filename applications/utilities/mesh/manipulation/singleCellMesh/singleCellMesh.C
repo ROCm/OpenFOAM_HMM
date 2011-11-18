@@ -25,13 +25,15 @@ Application
     singleCellMesh
 
 Description
-    Removes all but one cells of the mesh. Used to generate mesh and fields
+    Reads all fields and maps them to a mesh with all internal faces removed
+    (singleCellFvMesh) which gets written to region "singleCell".
+
+    Used to generate mesh and fields
     that can be used for boundary-only data.
     Might easily result in illegal mesh though so only look at boundaries
     in paraview.
 
 \*---------------------------------------------------------------------------*/
-
 
 #include "argList.H"
 #include "fvMesh.H"
@@ -39,10 +41,15 @@ Description
 #include "Time.H"
 #include "ReadFields.H"
 #include "singleCellFvMesh.H"
+#include "timeSelector.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Name of region to create
+const string singleCellName = "singleCell";
+
 
 template<class GeoField>
 void interpolateFields
@@ -65,72 +72,115 @@ void interpolateFields
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-#   include "addTimeOptions.H"
+    // constant, not false
+    timeSelector::addOptions(true, false);
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-    // Get times list
-    instantList Times = runTime.times();
-#   include "checkTimeOptions.H"
-    runTime.setTime(Times[startTime], startTime);
-#   include "createMesh.H"
-    const word oldInstance = mesh.pointsInstance();
 
-    const bool overwrite = args.optionFound("overwrite");
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
+#   include "createNamedMesh.H"
 
-    // Read objects in time directory
-    IOobjectList objects(mesh, runTime.timeName());
-
-    // Read vol fields.
-    PtrList<volScalarField> vsFlds;
-    ReadFields(mesh, objects, vsFlds);
-
-    PtrList<volVectorField> vvFlds;
-    ReadFields(mesh, objects, vvFlds);
-
-    PtrList<volSphericalTensorField> vstFlds;
-    ReadFields(mesh, objects, vstFlds);
-
-    PtrList<volSymmTensorField> vsymtFlds;
-    ReadFields(mesh, objects, vsymtFlds);
-
-    PtrList<volTensorField> vtFlds;
-    ReadFields(mesh, objects, vtFlds);
-
-
-    if (!overwrite)
+    if (regionName == singleCellName)
     {
-        runTime++;
+        FatalErrorIn(args.executable())
+            << "Cannot convert region " << singleCellName
+            << " since result would overwrite it. Please rename your region."
+            << exit(FatalError);
     }
 
     // Create the mesh
-    singleCellFvMesh scMesh
+    Info<< "Creating singleCell mesh" << nl << endl;
+    autoPtr<singleCellFvMesh> scMesh
     (
-        IOobject
+        new singleCellFvMesh
         (
-            mesh.name(),
-            mesh.polyMesh::instance(),
-            runTime,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
+            IOobject
+            (
+                singleCellName,
+                mesh.polyMesh::instance(),
+                runTime,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh
+        )
     );
+    // For convenience create any fv* files
+    if (!exists(scMesh().fvSolution::objectPath()))
+    {
+        mkDir(scMesh().fvSolution::path());
+        ln("../fvSolution", scMesh().fvSolution::objectPath());
+    }
+    if (!exists(scMesh().fvSchemes::objectPath()))
+    {
+        mkDir(scMesh().fvSolution::path());
+        ln("../fvSchemes", scMesh().fvSchemes::objectPath());
+    }
 
 
-    // Map and store the fields on the scMesh.
-    interpolateFields(scMesh, vsFlds);
-    interpolateFields(scMesh, vvFlds);
-    interpolateFields(scMesh, vstFlds);
-    interpolateFields(scMesh, vsymtFlds);
-    interpolateFields(scMesh, vtFlds);
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+
+        Info<< nl << "Time = " << runTime.timeName() << endl;
 
 
-    // Write
-    Info<< "Writing mesh to time " << runTime.timeName() << endl;
-    scMesh.write();
+        // Check for new mesh
+        if (mesh.readUpdate() != polyMesh::UNCHANGED)
+        {
+            Info<< "Detected changed mesh. Recreating singleCell mesh." << endl;
+            scMesh.clear(); // remove any registered objects
+            scMesh.reset
+            (
+                new singleCellFvMesh
+                (
+                    IOobject
+                    (
+                        singleCellName,
+                        mesh.polyMesh::instance(),
+                        runTime,
+                        IOobject::NO_READ,
+                        IOobject::AUTO_WRITE
+                    ),
+                    mesh
+                )
+            );
+        }
+
+
+        // Read objects in time directory
+        IOobjectList objects(mesh, runTime.timeName());
+
+        // Read vol fields.
+        PtrList<volScalarField> vsFlds;
+        ReadFields(mesh, objects, vsFlds);
+
+        PtrList<volVectorField> vvFlds;
+        ReadFields(mesh, objects, vvFlds);
+
+        PtrList<volSphericalTensorField> vstFlds;
+        ReadFields(mesh, objects, vstFlds);
+
+        PtrList<volSymmTensorField> vsymtFlds;
+        ReadFields(mesh, objects, vsymtFlds);
+
+        PtrList<volTensorField> vtFlds;
+        ReadFields(mesh, objects, vtFlds);
+
+        // Map and store the fields on the scMesh.
+        interpolateFields(scMesh(), vsFlds);
+        interpolateFields(scMesh(), vvFlds);
+        interpolateFields(scMesh(), vstFlds);
+        interpolateFields(scMesh(), vsymtFlds);
+        interpolateFields(scMesh(), vtFlds);
+
+
+        // Write
+        Info<< "Writing mesh to time " << runTime.timeName() << endl;
+        scMesh().write();
+    }
 
 
     Info<< "End\n" << endl;
