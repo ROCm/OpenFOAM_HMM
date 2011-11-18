@@ -112,6 +112,9 @@ public:
             //- Assignment from UList of addressed elements
             inline void operator=(const UList<T>&);
 
+            //- Assignment from UIndirectList of addressed elements
+            inline void operator=(const UIndirectList<T>&);
+
             //- Assignment of all entries to the given value
             inline void operator=(const T&);
 

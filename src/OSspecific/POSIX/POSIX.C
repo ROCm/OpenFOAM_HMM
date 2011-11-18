@@ -864,7 +864,7 @@ bool Foam::ln(const fileName& src, const fileName& dst)
         return false;
     }
 
-    if (!exists(src))
+    if (src.isAbsolute() && !exists(src))
     {
         WarningIn("ln(const fileName&, const fileName&)")
             << "source " << src << " does not exist." << endl;

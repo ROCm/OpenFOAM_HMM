@@ -396,7 +396,7 @@ meshQualityControls
 // Flags for optional output
 // 0 : only write final meshes
 // 1 : write intermediate meshes
-// 2 : write volScalarField with cellLevel for postprocessing
+// 2 : write volScalarFields with cellLevel and cell centres for postprocessing
 // 4 : write current intersections as .obj files
 debug 0;
 

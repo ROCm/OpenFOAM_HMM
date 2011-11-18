@@ -145,6 +145,25 @@ inline void Foam::UIndirectList<T>::operator=(const UList<T>& ae)
 
 
 template<class T>
+inline void Foam::UIndirectList<T>::operator=(const UIndirectList<T>& ae)
+{
+    if (addressing_.size() != ae.size())
+    {
+        FatalErrorIn("UIndirectList<T>::operator=(const UIndirectList<T>&)")
+            << "Addressing and list of addressed elements "
+               "have different sizes: "
+            << addressing_.size() << " " << ae.size()
+            << abort(FatalError);
+    }
+
+    forAll(addressing_, i)
+    {
+        completeList_[addressing_[i]] = ae[i];
+    }
+}
+
+
+template<class T>
 inline void Foam::UIndirectList<T>::operator=(const T& t)
 {
     forAll(addressing_, i)
