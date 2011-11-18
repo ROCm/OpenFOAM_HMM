@@ -37,6 +37,7 @@ SourceFiles
 
 #include "coupledFacePointPatch.H"
 #include "cyclicAMIPolyPatch.H"
+#include "pointBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,6 +119,43 @@ public:
             return false;
         }
 
+        //- Return the constraint type this pointPatch implements.
+        virtual const word& constraintType() const
+        {
+            return type();
+        }
+
+        //- Return the underlying cyclicAMIPolyPatch
+        const cyclicAMIPolyPatch& cyclicAMIPatch() const
+        {
+            return cyclicAMIPolyPatch_;
+        }
+
+        //- Return neighbour point patch
+        const cyclicAMIPointPatch& neighbPatch() const
+        {
+            label patchI = cyclicAMIPolyPatch_.neighbPatchID();
+            const pointPatch& pp = this->boundaryMesh()[patchI];
+            return refCast<const cyclicAMIPointPatch>(pp);
+        }
+
+        //- Are the cyclic planes parallel
+        bool parallel() const
+        {
+            return cyclicAMIPolyPatch_.parallel();
+        }
+
+        //- Return face transformation tensor
+        const tensorField& forwardT() const
+        {
+            return cyclicAMIPolyPatch_.forwardT();
+        }
+
+        //- Return neighbour-cell transformation tensor
+        const tensorField& reverseT() const
+        {
+            return cyclicAMIPolyPatch_.reverseT();
+        }
 };
 
 
