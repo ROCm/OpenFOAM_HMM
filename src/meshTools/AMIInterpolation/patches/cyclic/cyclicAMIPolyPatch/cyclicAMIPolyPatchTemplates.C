@@ -33,11 +33,11 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 {
     if (owner())
     {
-        return AMIPtr_->interpolateToSource(fld);
+        return AMI().interpolateToSource(fld);
     }
     else
     {
-        return neighbPatch().AMIPtr_->interpolateToTarget(fld);
+        return neighbPatch().AMI().interpolateToTarget(fld);
     }
 }
 
@@ -50,11 +50,11 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 {
     if (owner())
     {
-        return AMIPtr_->interpolateToSource(tFld);
+        return AMI().interpolateToSource(tFld);
     }
     else
     {
-        return neighbPatch().AMIPtr_->interpolateToTarget(tFld);
+        return neighbPatch().AMI().interpolateToTarget(tFld);
     }
 }
 
@@ -69,11 +69,11 @@ void Foam::cyclicAMIPolyPatch::interpolate
 {
     if (owner())
     {
-        AMIPtr_->interpolateToSource(fld, bop, result);
+        AMI().interpolateToSource(fld, bop, result);
     }
     else
     {
-        neighbPatch().AMIPtr_->interpolateToTarget(fld, bop, result);
+        neighbPatch().AMI().interpolateToTarget(fld, bop, result);
     }
 }
 

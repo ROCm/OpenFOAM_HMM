@@ -745,8 +745,6 @@ void Foam::cyclicAMIPolyPatch::calcGeometry
         nbrCtrs,
         nbrAreas
     );
-
-    resetAMI();
 }
 
 
