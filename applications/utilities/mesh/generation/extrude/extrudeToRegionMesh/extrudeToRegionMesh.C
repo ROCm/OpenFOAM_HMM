@@ -1281,7 +1281,7 @@ void addZoneSidePatches
         {
             // Reuse single empty patch.
             word patchName;
-            if (oneDPolyPatchType == "emptyPolyPatch")
+            if (oneDPolyPatchType == "empty")
             {
                 patchName = "oneDEmptyPatch";
                 zoneSidePatch[zoneI] = addPatch<emptyPolyPatch>
@@ -1291,7 +1291,7 @@ void addZoneSidePatches
                     newPatches
                 );
             }
-            else if (oneDPolyPatchType == "wedgePolyPatch")
+            else if (oneDPolyPatchType == "wedge")
             {
                 patchName = "oneDWedgePatch";
                 zoneSidePatch[zoneI] = addPatch<wedgePolyPatch>
