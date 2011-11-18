@@ -78,7 +78,12 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
     Info<< "Meshed surface stats before edge filtering :" << endl;
     ms_.writeStats(Info);
 
-    ms_.write("MeshedSurface_preFilter.obj");
+    if (debug)
+    {
+        writeInfo(Info);
+
+        ms_.write("MeshedSurface_preFilter.obj");
+    }
 }
 
 
@@ -93,11 +98,6 @@ Foam::shortEdgeFilter2D::~shortEdgeFilter2D()
 void
 Foam::shortEdgeFilter2D::filter()
 {
-    if (debug)
-    {
-        writeInfo(Info);
-    }
-
     // These are global indices.
     const pointField& points = ms_.points();
     const edgeList& edges = ms_.edges();
@@ -164,11 +164,12 @@ Foam::shortEdgeFilter2D::filter()
         const label startVertex = e.start();
         const label endVertex = e.end();
 
-        scalar edgeLength = mag
-        (
-            points[meshPoints[e.start()]]
-           -points[meshPoints[e.end()]]
-        );
+        scalar edgeLength =
+            mag
+            (
+                points[meshPoints[e.start()]]
+              - points[meshPoints[e.end()]]
+            );
 
         if (edgeAttachedToBoundary[edgeI])
         {
@@ -185,11 +186,12 @@ Foam::shortEdgeFilter2D::filter()
             const edge& psE = edges[psEdges[psEdgeI]];
             if (edgeI != psEdges[psEdgeI])
             {
-                shortEdgeFilterValue += mag
-                (
-                    points[meshPoints[psE.start()]]
-                   -points[meshPoints[psE.end()]]
-                );
+                shortEdgeFilterValue +=
+                    mag
+                    (
+                        points[meshPoints[psE.start()]]
+                       -points[meshPoints[psE.end()]]
+                    );
             }
         }
 
@@ -198,11 +200,12 @@ Foam::shortEdgeFilter2D::filter()
             const edge& peE = edges[peEdges[peEdgeI]];
             if (edgeI != peEdges[peEdgeI])
             {
-                shortEdgeFilterValue += mag
-                (
-                    points[meshPoints[peE.start()]]
-                   -points[meshPoints[peE.end()]]
-                );
+                shortEdgeFilterValue +=
+                    mag
+                    (
+                        points[meshPoints[peE.start()]]
+                       -points[meshPoints[peE.end()]]
+                    );
             }
         }
 

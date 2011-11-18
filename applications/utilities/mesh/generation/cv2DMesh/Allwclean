@@ -2,11 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake libso extrudeModel
-wmake extrudeMesh
-
-wmake libso extrudeToRegionMesh/createShellMesh
-wmake extrudeToRegionMesh
-
+wclean libso conformalVoronoi2DMesh
+wclean
 
 # ----------------------------------------------------------------- end-of-file

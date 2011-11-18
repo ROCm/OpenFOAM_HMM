@@ -1958,7 +1958,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         relaxationModel::New
         (
             cvMeshDict.subDict("motionControl"),
-            *this
+            runTime_
         )
     ),
     faceAreaWeightModel_

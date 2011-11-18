@@ -125,7 +125,7 @@ SourceFiles
 #include "Switch.H"
 #include "PackedBoolList.H"
 #include "EdgeMap.H"
-#include "controls.H"
+#include "cv2DControls.H"
 #include "tolerances.H"
 #include "meshTools.H"
 #include "triSurface.H"
@@ -165,13 +165,10 @@ private:
         conformationSurfaces qSurf_;
 
         //- Meshing controls
-        controls controls_;
+        cv2DControls controls_;
 
         //- The cell size control object
         cellSizeControlSurfaces cellSizeControl_;
-
-        //- Meshing tolerances
-        tolerances tols_;
 
         //- z-level
         scalar z_;
@@ -187,6 +184,9 @@ private:
         //  the boundary conform function is called more than once without
         //  removing and insertin the surface point-pairs
         label startOfBoundaryConformPointPairs_;
+
+        //- Store the feature points
+        std::list<Vb> featurePoints_;
 
         //- Temporary storage for a dual-cell
         static const label maxNvert = 20;
@@ -210,6 +210,21 @@ private:
             const label type
         );
 
+        //- Insert point and return it's index
+        inline label insertPoint
+        (
+            const point2D& pt,
+            const label index,
+            const label type
+        );
+
+        inline label insertPoint
+        (
+            const Point& p,
+            const label index,
+            const label type
+        );
+
         inline bool insertMirrorPoint
         (
             const point2D& nearSurfPt,
@@ -228,8 +243,14 @@ private:
         //- Create the initial mesh from the bounding-box
         void insertBoundingBox();
 
+        //- Check if a point is within a line.
+        bool on2DLine(const point2D& p, const linePointRef& line);
+
         //- Insert point groups at the feature points.
         void insertFeaturePoints();
+
+        //- Re-insert point groups at the feature points.
+        void reinsertFeaturePoints();
 
         //- Insert point-pairs at the given set of points using the surface
         //  normals corresponding to the given set of surface triangles
@@ -239,6 +260,7 @@ private:
             const DynamicList<point2D>& nearSurfacePoints,
             const DynamicList<point2D>& surfacePoints,
             const DynamicList<label>& surfaceTris,
+            const DynamicList<label>& surfaceHits,
             const fileName fName
         );
 
@@ -266,7 +288,8 @@ private:
         (
             Triangulation::Finite_vertices_iterator& vit,
             const point2D& p,
-            const label trii
+            const label trii,
+            const label hitSurface
         );
 
         //- Insert point-pair at the best intersection point between the lines
@@ -292,8 +315,15 @@ private:
         void external_flip(Face_handle& f, int i);
         bool internal_flip(Face_handle& f, int i);
 
+        //- Write all the faces and all the triangles at a particular stage.
+        void write(const word& stage) const;
+
 
 public:
+
+        //- Runtime type information
+        ClassName("CV2D");
+
 
     // Constructors
 
@@ -313,15 +343,13 @@ public:
 
         // Access
 
-            const controls& meshingControls() const
-            {
-                return controls_;
-            }
+            inline const cv2DControls& meshControls() const;
 
 
         // Conversion functions between point2D, point and Point
 
             inline const point2D& toPoint2D(const point&) const;
+            inline const point2DField toPoint2D(const pointField&) const;
             inline point toPoint3D(const point2D&) const;
 
             #ifdef CGAL_INEXACT

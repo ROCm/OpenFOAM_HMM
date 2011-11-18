@@ -31,12 +31,13 @@ void Foam::CV2D::insertPointPair
 (
     Triangulation::Finite_vertices_iterator& vit,
     const point2D& p,
-    const label trii
+    const label trii,
+    const label hitSurface
 )
 {
     if
     (
-        !controls_.mirrorPoints
+        !meshControls().mirrorPoints()
      || !insertMirrorPoint(toPoint2D(vit->point()), p)
     )
     {
@@ -48,7 +49,7 @@ void Foam::CV2D::insertPointPair
         );
 
         vectorField norm(1);
-        qSurf_.geometry()[trii].getNormal
+        qSurf_.geometry()[hitSurface].getNormal
         (
             List<pointIndexHit>(1, pHit),
             norm
@@ -56,7 +57,7 @@ void Foam::CV2D::insertPointPair
 
         insertPointPair
         (
-            tols_.ppDist,
+            meshControls().ppDist(),
             p,
             toPoint2D(norm[0])
         );
@@ -84,6 +85,7 @@ bool Foam::CV2D::insertPointPairAtIntersection
     bool found = false;
     point2D interPoint;
     label interTri = -1;
+    label interHitSurface = -1;
     scalar interDist2 = 0;
 
     Face_circulator fcStart = incident_faces(vit);
@@ -97,7 +99,7 @@ bool Foam::CV2D::insertPointPairAtIntersection
             pointIndexHit pHit;
             label hitSurface = -1;
 
-            qSurf_.findSurfaceAnyIntersection
+            qSurf_.findSurfaceNearestIntersection
             (
                 toPoint3D(defVert),
                 toPoint3D(vertices[vi]),
@@ -120,15 +122,16 @@ bool Foam::CV2D::insertPointPairAtIntersection
                     // vertex
                     if (boundaryTriangle(fc))
                     {
-                        mps2 = tols_.maxNotchLen2;
+                        mps2 = meshControls().maxNotchLen2();
                     }
 
                     if (dist2 > mps2)
                     {
                         found = true;
                         interPoint = toPoint2D(pHit.hitPoint());
-                        interTri = hitSurface;
+                        interTri = pHit.index();
                         interDist2 = dist2;
+                        interHitSurface = hitSurface;
                     }
                 }
             }
@@ -139,7 +142,7 @@ bool Foam::CV2D::insertPointPairAtIntersection
 
     if (found)
     {
-        insertPointPair(vit, interPoint, interTri);
+        insertPointPair(vit, interPoint, interTri, interHitSurface);
         return true;
     }
     else
@@ -217,7 +220,7 @@ Foam::label Foam::CV2D::insertBoundaryConformPointPairs
         // Convert triangle vertex to OpenFOAM point
         point2DFromPoint defVert = toPoint2D(vit->point());
 
-        scalar maxProtSize2 = tols_.maxNotchLen2;
+        scalar maxProtSize2 = meshControls().maxNotchLen2();
 
         if (vit->internalOrBoundaryPoint())
         {
@@ -239,7 +242,7 @@ Foam::label Foam::CV2D::insertBoundaryConformPointPairs
             }
 
             // If the dual-cell is very small reject refinement
-            if (areaT2 < tols_.minEdgeLen2) continue;
+            if (areaT2 < meshControls().minEdgeLen2()) continue;
 
             // Estimate the cell width
             scalar cellWidth = areaT2/perimeter;
@@ -248,25 +251,25 @@ Foam::label Foam::CV2D::insertBoundaryConformPointPairs
             // Check dimensions of dual-cell
             /*
             // Quick rejection of dual-cell refinement based on it's perimeter
-            if (perimeter < 2*tols_.minCellSize) continue;
+            if (perimeter < 2*meshControls().minCellSize()) continue;
 
             // Also check the area of the cell and reject refinement
             // if it is less than that allowed
-            if (areaT2 < tols_.minCellSize2) continue;
+            if (areaT2 < meshControls().minCellSize2()) continue;
 
             // Estimate the cell width and reject refinement if it is less than
             // that allowed
-            if (cellWidth < 0.5*tols_.minEdgeLen) continue;
+            if (cellWidth < 0.5*meshControls().minEdgeLen()) continue;
             */
 
             if
             (
-                perimeter > 2*controls_.minCellSize
-             && areaT2 > controls_.minCellSize2
-             && cellWidth > 0.5*tols_.minEdgeLen
+                perimeter > 2*meshControls().minCellSize()
+             && areaT2 > meshControls().minCellSize2()
+             && cellWidth > 0.5*meshControls().minEdgeLen()
             )
             {
-                maxProtSize2 = 0.25*tols_.maxNotchLen2;
+                maxProtSize2 = 0.25*meshControls().maxNotchLen2();
             }
         }
 
@@ -282,6 +285,7 @@ Foam::label Foam::CV2D::insertBoundaryConformPointPairs
 
 void Foam::CV2D::markNearBoundaryPoints()
 {
+    label count = 0;
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -299,7 +303,7 @@ void Foam::CV2D::markNearBoundaryPoints()
             qSurf_.findSurfaceNearest
             (
                 vert,
-                4*controls_.minCellSize2,
+                4*meshControls().minCellSize2(),
                 pHit,
                 hitSurface
             );
@@ -307,9 +311,12 @@ void Foam::CV2D::markNearBoundaryPoints()
             if (pHit.hit())
             {
                 vit->setNearBoundary();
+                ++count;
             }
         }
     }
+
+    Info<< count << " points marked as being near a boundary" << endl;
 }
 
 

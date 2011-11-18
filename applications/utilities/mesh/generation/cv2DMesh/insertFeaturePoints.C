@@ -28,170 +28,378 @@ License
 #include "triSurfaceTools.H"
 #include "unitConversion.H"
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+bool Foam::CV2D::on2DLine(const point2D& p, const linePointRef& line)
+{
+    const point2D& a = toPoint2D(line.start());
+    const point2D& b = toPoint2D(line.end());
+
+    if
+    (
+        p.x() < min(a.x(), b.x())
+     || p.x() > max(a.x(), b.x())
+     || p.y() < min(a.y(), b.y())
+     || p.y() > max(a.y(), b.y())
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 
 // Create feature points/edges by creating a triplet in the corner.
 // (this triplet will have as its circumcentre the feature)
 void Foam::CV2D::insertFeaturePoints()
 {
-    //labelList featEdges(qSurf_.extractFeatures2D(controls_.featAngle));
+    featurePoints_.clear();
+    label nVert = number_of_vertices();
 
-  /*  const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
     (
         qSurf_.features()
     );
 
-   // const pointField& localPts = qSurf_.localPoints();
+    if (feMeshes.empty())
+    {
+        WarningIn("CV2D::insertFeaturePoints")
+            << "Extended Feature Edge Mesh is empty so no feature points will "
+            << "be found." << nl
+            << "    Use: featureMethod extendedFeatureEdgeMesh;" << nl
+            << endl;
+    }
 
     forAll(feMeshes, i)
     {
         const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
+        const edgeList& edges = feMesh.edges();
+        const pointField& points = feMesh.points();
 
-        // Loop over convex points
-        for
-        (
-            label ptI = feMesh.convexStart();
-            ptI < feMesh.concaveStart();
-            ptI++
-        )
+        if (debug)
         {
+            label nConvex = feMesh.concaveStart() - feMesh.convexStart();
+            label nConcave = feMesh.mixedStart() - feMesh.concaveStart();
+            label nMixed = feMesh.nonFeatureStart() - feMesh.mixedStart();
+            label nExternal = feMesh.internalStart() - feMesh.externalStart();
+            label nInternal = feMesh.flatStart() - feMesh.internalStart();
+            label nFlat = feMesh.openStart() - feMesh.flatStart();
+            label nOpen = feMesh.multipleStart() - feMesh.openStart();
+            label nMultiple = edges.size() - feMesh.multipleStart();
 
-            const Foam::point& featPt = feMesh.points()[ptI];
+            Info<< "Inserting Feature Points:" << nl
+                << "    Convex points: " << nConvex << nl
+                << "   Concave points: " << nConcave << nl
+                << "     Mixed points: " << nMixed << nl
+                << "   External edges: " << nExternal << nl
+                << "   Internal edges: " << nInternal << nl
+                << "       Flat edges: " << nFlat << nl
+                << "       Open edges: " << nOpen << nl
+                << "   Multiple edges: " << nMultiple << endl;
         }
 
-        // Loop over concave points
-        for
-        (
-            label ptI = feMesh.concaveStart();
-            ptI < feMesh.mixedStart();
-            ptI++
-        )
-        {
+        // Args: (base point, normal)
+        // @todo allow user to input this
+        plane zPlane(vector(0, 0, z_), vector(0, 0, 1));
 
+        if (debug)
+        {
+            Info<< "    plane: " << zPlane << " " << z_ << endl;
         }
 
-        // Loop over mixed points
-        for
-        (
-            label ptI = feMesh.mixedStart();
-            ptI < feMesh.nonFeatureStart();
-            ptI++
-        )
+        forAll(edges, edgeI)
         {
+            const edge& e = feMesh.edges()[edgeI];
 
-        }
+            const point& ep0 = points[e.start()];
+            const point& ep1 = points[e.end()];
 
-        //label edgeI = featEdges[i];
-        //const edge& featEdge = qSurf_.edges()[edgeI];
+            const linePointRef line(ep0, ep1);
 
-        // Get the feature point as the mid-point of the edge and convert to 2D
-        //point2D featPt = toPoint2D(featEdge.centre(qSurf_.localPoints()));
+            scalar intersect = zPlane.lineIntersect(line);
 
-        // Pick up the two faces adjacent to the feature edge
-        const labelList& eFaces = qSurf_.edgeFaces()[edgeI];
+            point2D featPoint = toPoint2D(intersect * (ep1 - ep0) + ep0);
 
-        label faceA = eFaces[0];
-        vector2D nA = toPoint2D(qSurf_.faceNormals()[faceA]);
-
-        label faceB = eFaces[1];
-        vector2D nB = toPoint2D(qSurf_.faceNormals()[faceB]);
-
-        // Intersect planes parallel to faceA and faceB offset by ppDist.
-        plane planeA(toPoint3D(featPt - tols_.ppDist*nA), toPoint3D(nA));
-        plane planeB(toPoint3D(featPt - tols_.ppDist*nB), toPoint3D(nB));
-        plane::ray interLine(planeA.planeIntersect(planeB));
-
-        // The reference point is where this line intersects the z_ plane
-        point2D refPt = toPoint2D
-        (
-            interLine.refPoint()
-          + ((z_ - interLine.refPoint().z())/interLine.dir().z())
-           *interLine.dir()
-        );
-
-        point2D faceAVert = toPoint2D
-        (
-            localPts[triSurfaceTools::oppositeVertex(qSurf_, faceA, edgeI)]
-        );
-
-        // Determine convex or concave angle
-        if (((faceAVert - featPt) & nB) < 0)
-        {
-            // Convex. So refPt will be inside domain and hence a master point
-
-            // Insert the master point refering the the first slave
-            label masterPtIndex = insertPoint(refPt, number_of_vertices() + 1);
-
-            // Insert the slave points by reflecting refPt in both faces.
-            // with each slave refering to the master
-
-            point2D reflectedA = refPt + 2*((featPt - refPt) & nA)*nA;
-            insertPoint(reflectedA, masterPtIndex);
-
-            point2D reflectedB = refPt + 2*((featPt - refPt) & nB)*nB;
-            insertPoint(reflectedB, masterPtIndex);
-        }
-        else
-        {
-            // Concave. master and reflected points inside the domain.
-            // Generate reflected master to be outside.
-            point2D reflMasterPt = refPt + 2*(featPt - refPt);
-
-            // Reflect refPt in both faces.
-            point2D reflectedA =
-                reflMasterPt + 2*((featPt - reflMasterPt) & nA)*nA;
-
-            point2D reflectedB =
-                reflMasterPt + 2*((featPt - reflMasterPt) & nB)*nB;
-
-            // Total angle around the concave feature
-            scalar totalAngle =
-                radToDeg(constant::mathematical::pi + acos(mag(nA & nB)));
-
-            // Number of quadrants the angle should be split into
-            int nQuads = int(totalAngle/controls_.maxQuadAngle) + 1;
-
-            // The number of additional master points needed to obtain the
-            // required number of quadrants.
-            int nAddPoints = min(max(nQuads - 2, 0), 2);
-
-            // index of reflMaster
-            label reflectedMaster = number_of_vertices() + 2 + nAddPoints;
-
-            // Master A is inside.
-            label reflectedAI = insertPoint(reflectedA, reflectedMaster);
-
-            // Master B is inside.
-            insertPoint(reflectedB, reflectedMaster);
-
-            if (nAddPoints == 1)
+            if (on2DLine(featPoint, line))
             {
-                // One additinal point is the reflection of the slave point,
-                // i.e. the original reference point
-                insertPoint(refPt, reflectedMaster);
+                vector2DField fpn = toPoint2D(feMesh.edgeNormals(edgeI));
+
+                vector2D cornerNormal = sum(fpn);
+                cornerNormal /= mag(cornerNormal);
+
+                if (debug)
+                {
+                    Info<< nl << "    line: " << line << nl
+                        << "        vec: " << line.vec() << nl
+                        << "    featurePoint: " << featPoint << nl
+                        << "    line length: " << line.mag() << nl
+                        << "    intersect: " << intersect << endl;
+                }
+
+                if
+                (
+                    feMesh.getEdgeStatus(edgeI)
+                 == extendedFeatureEdgeMesh::EXTERNAL
+                )
+                {
+                    // Convex Point
+                    Foam::point2D internalPt =
+                        featPoint - meshControls().ppDist()*cornerNormal;
+
+                    if (debug)
+                    {
+                        Info<< "PREC: " << internalPt << nl
+                            << "    : " << featPoint << nl
+                            << "    : " << meshControls().ppDist() << nl
+                            << "    : " << cornerNormal << endl;
+                    }
+
+                    featurePoints_.push_back
+                    (
+                        Vb
+                        (
+                            toPoint(internalPt),
+                            nVert,
+                            nVert + 1
+                        )
+                    );
+                    label masterPtIndex = nVert++;
+
+                    forAll(fpn, nI)
+                    {
+                        const vector n3D(fpn[nI][0], fpn[nI][1], 0.0);
+
+                        plane planeN = plane(toPoint3D(featPoint), n3D);
+
+                        Foam::point2D externalPt =
+                            internalPt
+                          + (
+                                2.0
+                              * planeN.distance(toPoint3D(internalPt))
+                              * fpn[nI]
+                            );
+
+                        if (debug)
+                        {
+                            Info<< "PREC1: " << externalPt << nl
+                                << "    : "<< n3D << nl
+                                << "    : "<< planeN.distance(toPoint3D(internalPt)) << nl
+                                << "    : "<< planeN.normal() << nl
+                                << "    : "<< planeN.refPoint() << endl;
+                        }
+
+                        featurePoints_.push_back
+                        (
+                            Vb
+                            (
+                                toPoint(externalPt),
+                                nVert++,
+                                masterPtIndex
+                            )
+                        );
+
+                        if (debug)
+                        {
+                            Info<< "  side point: " << externalPt << endl;
+                        }
+                    }
+
+                    if (debug)
+                    {
+                        Info<< "Convex Point: " << featPoint << nl
+                            << "  corner norm: " << cornerNormal << nl
+                            << "    reference: " << internalPt << endl;
+                    }
+                }
+                else if
+                (
+                    feMesh.getEdgeStatus(edgeI)
+                 == extendedFeatureEdgeMesh::INTERNAL
+                )
+                {
+                    // Concave Point
+                    Foam::point2D externalPt =
+                        featPoint + meshControls().ppDist()*cornerNormal;
+
+                    Foam::point2D refPt =
+                        featPoint - meshControls().ppDist()*cornerNormal;
+
+                    label slavePointIndex = 0;
+
+                    scalar totalAngle =
+                        radToDeg
+                        (
+                            constant::mathematical::pi
+                          + acos(mag(fpn[0] & fpn[1]))
+                        );
+
+                    // Number of quadrants the angle should be split into
+                    int nQuads = int(totalAngle/meshControls().maxQuadAngle()) + 1;
+
+                    // The number of additional master points needed to
+                    //obtain the required number of quadrants.
+                    int nAddPoints = min(max(nQuads - 2, 0), 2);
+
+                    // index of reflMaster
+                    label reflectedMaster = nVert + 2 + nAddPoints;
+
+                    if (debug)
+                    {
+                        Info<< "Concave Point: " <<  featPoint << nl
+                            << "  corner norm: " << cornerNormal << nl
+                            << "     external: " << externalPt << nl
+                            << "    reference: " << refPt << nl
+                            << "        angle: " << totalAngle << nl
+                            << "       nQuads: " << nQuads << nl
+                            << "   nAddPoints: " << nAddPoints << endl;
+                    }
+
+                    forAll(fpn, nI)
+                    {
+                        const vector n3D(fpn[nI][0], fpn[nI][1], 0.0);
+
+                        plane planeN = plane(toPoint3D(featPoint), n3D);
+
+                        Foam::point2D internalPt =
+                            externalPt
+                          - (
+                                2.0
+                              * planeN.distance(toPoint3D(externalPt))
+                              * fpn[nI]
+                            );
+
+                        featurePoints_.push_back
+                        (
+                            Vb
+                            (
+                                toPoint(internalPt),
+                                nVert,
+                                reflectedMaster
+                            )
+                        );
+                        slavePointIndex = nVert++;
+
+                        if (debug)
+                        {
+                            Info<< "Internal Point: " <<  internalPt << endl;
+                        }
+                    }
+
+                    if (nAddPoints == 1)
+                    {
+                        // One additional point is the reflection of the slave point,
+                        // i.e. the original reference point
+                        featurePoints_.push_back
+                        (
+                            Vb
+                            (
+                                toPoint(refPt),
+                                nVert++,
+                                reflectedMaster
+                            )
+                        );
+
+                        if (debug)
+                        {
+                           Info<< "ref Point: " <<  refPt << endl;
+                        }
+                    }
+                    else if (nAddPoints == 2)
+                    {
+                       point2D reflectedAa =
+                           refPt - ((featPoint - externalPt) & fpn[1])*fpn[1];
+
+                       featurePoints_.push_back
+                       (
+                           Vb
+                           (
+                               toPoint(reflectedAa),
+                               nVert++,
+                               reflectedMaster
+                           )
+                       );
+
+                       point2D reflectedBb =
+                           refPt - ((featPoint - externalPt) & fpn[0])*fpn[0];
+
+                       featurePoints_.push_back
+                       (
+                           Vb
+                           (
+                               toPoint(reflectedBb),
+                               nVert++,
+                               reflectedMaster
+                           )
+                       );
+
+                       if (debug)
+                       {
+                           Info<< "refA Point: " <<  reflectedAa << nl
+                               << "refb Point: " <<  reflectedBb << endl;
+                       }
+                    }
+
+                    featurePoints_.push_back
+                    (
+                        Vb
+                        (
+                            toPoint(externalPt),
+                            nVert++,
+                            slavePointIndex
+                        )
+                    );
+                }
+                else
+                {
+                    WarningIn("void Foam::CV2D::insertFeaturePoints()")
+                        << "Feature Edge " << edges[edgeI] << nl
+                        << "    points(" << points[edges[edgeI].start()]
+                        << ", " << points[edges[edgeI].end()] << ")" << nl
+                        << "    is not labelled as either concave or convex, it"
+                        << " is labelled as (#2 = flat): "
+                        << feMesh.getEdgeStatus(edgeI) << endl;
+                }
             }
-            else if (nAddPoints == 2)
+            else
             {
-                point2D reflectedAa = refPt - ((featPt - reflMasterPt) & nB)*nB;
-                insertPoint(reflectedAa, reflectedMaster);
-
-                point2D reflectedBb = refPt - ((featPt - reflMasterPt) & nA)*nA;
-                insertPoint(reflectedBb, reflectedMaster);
+                WarningIn("void Foam::CV2D::insertFeaturePoints()")
+                      << "Point " << featPoint << " is not on the line "
+                      << line << endl;
             }
-
-            // Slave is outside.
-            insertPoint(reflMasterPt, reflectedAI);
         }
     }
 
-    if (controls_.writeFeatureTriangulation)
+    // Insert the feature points.
+    reinsertFeaturePoints();
+
+    if (meshControls().objOutput())
     {
         writePoints("feat_allPoints.obj", false);
         writeFaces("feat_allFaces.obj", false);
         writeFaces("feat_faces.obj", true);
         writeTriangles("feat_triangles.obj", true);
-    }*/
+    }
 }
 
 
+void Foam::CV2D::reinsertFeaturePoints()
+{
+    for
+    (
+        std::list<Vb>::iterator vit=featurePoints_.begin();
+        vit != featurePoints_.end();
+        ++vit
+    )
+    {
+        insertPoint
+        (
+            toPoint2D(vit->point()),
+            vit->index(),
+            vit->type()
+        );
+    }
+}
 // ************************************************************************* //

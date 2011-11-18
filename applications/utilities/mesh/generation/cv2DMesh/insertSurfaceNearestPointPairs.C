@@ -55,7 +55,7 @@ bool Foam::CV2D::dualCellSurfaceIntersection
                 return true;
             }
 
-            if (magSqr(e1 - e0) > tols_.minEdgeLen2)
+            if (magSqr(e1 - e0) > meshControls().minEdgeLen2())
             {
                 if (qSurf_.findSurfaceAnyIntersection(e0, e1))
                 {
@@ -75,10 +75,11 @@ void Foam::CV2D::insertPointPairs
     const DynamicList<point2D>& nearSurfacePoints,
     const DynamicList<point2D>& surfacePoints,
     const DynamicList<label>& surfaceTris,
+    const DynamicList<label>& surfaceHits,
     const fileName fName
 )
 {
-    if (controls_.mirrorPoints)
+    if (meshControls().mirrorPoints())
     {
         forAll(surfacePoints, ppi)
         {
@@ -101,7 +102,7 @@ void Foam::CV2D::insertPointPairs
             );
 
             vectorField norm(1);
-            qSurf_.geometry()[surfaceTris[ppi]].getNormal
+            qSurf_.geometry()[surfaceHits[ppi]].getNormal
             (
                 List<pointIndexHit>(1, pHit),
                 norm
@@ -109,7 +110,7 @@ void Foam::CV2D::insertPointPairs
 
             insertPointPair
             (
-                tols_.ppDist,
+                meshControls().ppDist(),
                 surfacePoints[ppi],
                 toPoint2D(norm[0])
             );
@@ -118,7 +119,7 @@ void Foam::CV2D::insertPointPairs
 
     Info<< surfacePoints.size() << " point-pairs inserted" << endl;
 
-    if (controls_.writeInsertedPointPairs)
+    if (meshControls().objOutput())
     {
         OFstream str(fName);
         label vertI = 0;
@@ -140,15 +141,17 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
 {
     Info<< "insertSurfaceNearestPointPairs: ";
 
-    label nSurfacePointsEst = min
-    (
-        number_of_vertices(),
-        size_t(10*sqrt(scalar(number_of_vertices())))
-    );
+    label nSurfacePointsEst =
+        min
+        (
+            number_of_vertices(),
+            size_t(10*sqrt(scalar(number_of_vertices())))
+        );
 
     DynamicList<point2D> nearSurfacePoints(nSurfacePointsEst);
     DynamicList<point2D> surfacePoints(nSurfacePointsEst);
     DynamicList<label> surfaceTris(nSurfacePointsEst);
+    DynamicList<label> surfaceHits(nSurfacePointsEst);
 
     // Local references to surface mesh addressing
 //    const pointField& localPoints = qSurf_.localPoints();
@@ -173,7 +176,7 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
             qSurf_.findSurfaceNearest
             (
                 toPoint3D(vert),
-                4*controls_.minCellSize2,
+                4*meshControls().minCellSize2(),
                 pHit,
                 hitSurface
             );
@@ -216,11 +219,12 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
 //                    }
 //                }
 
-//                if (!internalFeatureEdge && dualCellSurfaceIntersection(vit))
+                if (dualCellSurfaceIntersection(vit)) //&& !internalFeatureEdge)
                 {
                     nearSurfacePoints.append(vert);
                     surfacePoints.append(toPoint2D(pHit.hitPoint()));
-                    surfaceTris.append(hitSurface);
+                    surfaceTris.append(pHit.index());
+                    surfaceHits.append(hitSurface);
                 }
             }
         }
@@ -231,6 +235,7 @@ void Foam::CV2D::insertSurfaceNearestPointPairs()
         nearSurfacePoints,
         surfacePoints,
         surfaceTris,
+        surfaceHits,
         "surfaceNearestIntersections.obj"
     );
 }

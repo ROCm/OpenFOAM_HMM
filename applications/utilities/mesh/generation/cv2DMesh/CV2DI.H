@@ -33,16 +33,40 @@ inline Foam::label Foam::CV2D::insertPoint
 {
     uint nVert = number_of_vertices();
 
-    Vertex_handle vh = insert(toPoint(p));
+    return insertPoint(toPoint(p), nVert, type);
+}
+
+
+inline Foam::label Foam::CV2D::insertPoint
+(
+    const point2D& p,
+    const label index,
+    const label type
+)
+{
+    return insertPoint(toPoint(p), index, type);
+}
+
+
+inline Foam::label Foam::CV2D::insertPoint
+(
+    const Point& p,
+    const label index,
+    const label type
+)
+{
+    uint nVert = number_of_vertices();
+
+    Vertex_handle vh = insert(p);
 
     if (nVert == number_of_vertices())
     {
         WarningIn("Foam::CV2D::insertPoint")
-            << "Failed to insert point " << p << endl;
+            << "Failed to insert point " << toPoint2D(p) << endl;
     }
     else
     {
-        vh->index() = nVert;
+        vh->index() = index;
         vh->type() = type;
     }
 
@@ -91,9 +115,24 @@ inline void Foam::CV2D::insertPointPair
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline const Foam::cv2DControls& Foam::CV2D::meshControls() const
+{
+    return controls_;
+}
+
 inline const Foam::point2D& Foam::CV2D::toPoint2D(const point& p) const
 {
     return reinterpret_cast<const point2D&>(p);
+}
+
+inline const Foam::point2DField Foam::CV2D::toPoint2D(const pointField& p) const
+{
+    point2DField temp(p.size());
+    forAll(temp, pointI)
+    {
+        temp[pointI] = point2D(p[pointI].x(), p[pointI].y());
+    }
+    return temp;
 }
 
 inline Foam::point Foam::CV2D::toPoint3D(const point2D& p) const
@@ -151,8 +190,8 @@ inline void Foam::CV2D::movePoint(const Vertex_handle& vh, const Point& P)
     // move(vh, P);
     // vh->index() = i;
 
-    // vh->set_point(P);
-    // fast_restore_Delaunay(vh);
+     //vh->set_point(P);
+     //fast_restore_Delaunay(vh);
 }
 
 

@@ -33,16 +33,16 @@ Description
 
 #include "CV2D.H"
 #include "argList.H"
-#include "IFstream.H"
 
 #include "MeshedSurfaces.H"
 #include "shortEdgeFilter2D.H"
 #include "extrude2DMesh.H"
 #include "polyMesh.H"
-#include "PatchTools.H"
-#include "patchTo2DpolyMesh.H"
+#include "patchToPoly2DMesh.H"
 #include "extrudeModel.H"
 #include "polyTopoChange.H"
+#include "edgeCollapser.H"
+#include "relaxationModel.H"
 
 using namespace Foam;
 
@@ -53,8 +53,9 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validArgs.clear();
-    argList::validArgs.append("surface");
     argList::validOptions.insert("pointsFile", "<filename>");
+
+    #include "addOverwriteOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -66,19 +67,16 @@ int main(int argc, char *argv[])
     dictionary extrusionDict(controlDict.subDict("extrusion"));
 
     Switch extrude(extrusionDict.lookup("extrude"));
-    label nIterations(readLabel(controlDict.lookup("nIterations")));
-    label sefDebug(shortEdgeFilterDict.lookupOrDefault<label>("debug", 0));
+    const bool overwrite = args.optionFound("overwrite");
 
-    // Read the surface to conform to
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    querySurface surf(args.args()[1]);
-//    surf.writeTreeOBJ();
-
-//    Info<< nl
-//        << "Read surface with " << surf.size() << " triangles from file "
-//        << args.args()[1] << nl << endl;
-
-   // surf.write("surface.obj");
+    autoPtr<relaxationModel> relax
+    (
+        relaxationModel::New
+        (
+            controlDict.subDict("motionControl"),
+            runTime
+        )
+    );
 
     // Read and triangulation
     // ~~~~~~~~~~~~~~~~~~~~~~
@@ -97,24 +95,13 @@ int main(int argc, char *argv[])
         mesh.boundaryConform();
     }
 
-    for (int iter=1; iter<=nIterations; iter++)
+    while (runTime.loop())
     {
-        Info<< nl
-            << "Relaxation iteration " << iter << nl
-            << "~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
+        Info<< nl << "Time = " << runTime.timeName() << endl;
 
-        scalar relax =
-           mesh.meshingControls().relaxationFactorStart
-         +
-         (
-            mesh.meshingControls().relaxationFactorEnd
-          - mesh.meshingControls().relaxationFactorStart
-         )
-         *scalar(iter)/scalar(nIterations);
+        Info<< "Relaxation = " << relax->relaxation() << endl;
 
-        Info<< "Relaxation = " << relax << endl;
-
-        mesh.newPoints(relax);
+        mesh.newPoints(relax->relaxation());
     }
 
     mesh.write();
@@ -122,22 +109,23 @@ int main(int argc, char *argv[])
     Info<< "Finished Delaunay in = "
         << runTime.cpuTimeIncrement() << " s." << endl;
 
+    Info<< "Begin filtering short edges:" << endl;
     shortEdgeFilter2D sef(mesh, shortEdgeFilterDict);
-
-    shortEdgeFilter2D::debug = sefDebug;
 
     sef.filter();
 
     Info<< "Meshed surface after edge filtering :" << endl;
     sef.fMesh().writeStats(Info);
 
-    Info<< "Write .obj file : MeshedSurface.obj" << endl;
+    Info<< "Write .obj file of the 2D mesh: MeshedSurface.obj" << endl;
     sef.fMesh().write("MeshedSurface.obj");
 
     Info<< "Finished filtering in = "
         << runTime.cpuTimeIncrement() << " s." << endl;
 
-    patchTo2DpolyMesh poly2DMesh
+    Info<< "Begin constructing a polyMesh:" << endl;
+
+    patchToPoly2DMesh poly2DMesh
     (
         sef.fMesh(),
         sef.patchNames(),
@@ -183,21 +171,70 @@ int main(int argc, char *argv[])
 
     if (extrude)
     {
-        // Point generator
-        autoPtr<extrudeModel> model(extrudeModel::New(extrusionDict));
+        Info<< "Begin extruding the polyMesh:" << endl;
 
-        extrude2DMesh extruder(pMesh, extrusionDict, model());
+        {
+            // Point generator
+            autoPtr<extrudeModel> model(extrudeModel::New(extrusionDict));
 
-        polyTopoChange meshMod(pMesh.boundaryMesh().size());
+            extrude2DMesh extruder(pMesh, extrusionDict, model());
 
-        extruder.addFrontBackPatches();
-        extruder.setRefinement(meshMod);
+            extruder.addFrontBackPatches();
 
-        autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(pMesh, false);
+            polyTopoChange meshMod(pMesh.boundaryMesh().size());
 
-        pMesh.updateMesh(morphMap);
+            extruder.setRefinement(meshMod);
 
-        pMesh.setInstance("constant");
+            autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(pMesh, false);
+
+            pMesh.updateMesh(morphMap);
+        }
+
+        {
+            edgeCollapser collapser(pMesh);
+
+            const edgeList& edges = pMesh.edges();
+            const pointField& points = pMesh.points();
+
+            const boundBox& bb = pMesh.bounds();
+            const scalar mergeDim = 1E-4 * bb.minDim();
+
+            forAll(edges, edgeI)
+            {
+                const edge& e = edges[edgeI];
+
+                scalar d = e.mag(points);
+
+                if (d < mergeDim)
+                {
+                    Info<< "Merging edge " << e << " since length " << d
+                        << " << " << mergeDim << endl;
+
+                    // Collapse edge to e[0]
+                    collapser.collapseEdge(edgeI, e[0]);
+                }
+            }
+
+            polyTopoChange meshModCollapse(pMesh);
+
+            collapser.setRefinement(meshModCollapse);
+
+            // Create a mesh from topo changes.
+            autoPtr<mapPolyMesh> morphMap =
+                meshModCollapse.changeMesh(pMesh, false);
+
+            pMesh.updateMesh(morphMap);
+        }
+
+        if (!overwrite)
+        {
+            runTime++;
+        }
+        else
+        {
+            pMesh.setInstance("constant");
+        }
+
     }
 
     pMesh.write();

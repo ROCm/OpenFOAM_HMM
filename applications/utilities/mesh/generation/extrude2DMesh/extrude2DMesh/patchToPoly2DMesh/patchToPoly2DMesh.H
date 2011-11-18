@@ -22,25 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::patchTo2DpolyMesh
+    Foam::patchToPoly2DMesh
 
 Description
     Convert a primitivePatch into a 2D polyMesh.
 
 SourceFiles
-    patchTo2DpolyMeshI.H
-    patchTo2DpolyMesh.C
-    patchTo2DpolyMeshIO.C
+    patchToPoly2DMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchTo2DpolyMesh_H
-#define patchTo2DpolyMesh_H
+#ifndef patchToPoly2DMesh_H
+#define patchToPoly2DMesh_H
 
 #include "EdgeMap.H"
-#include "polyMesh.H"
 #include "MeshedSurface.H"
-#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,10 +44,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class patchTo2DpolyMesh Declaration
+                     Class patchToPoly2DMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class patchTo2DpolyMesh
+class patchToPoly2DMesh
 {
     // Private data
 
@@ -87,10 +83,10 @@ class patchTo2DpolyMesh
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        patchTo2DpolyMesh(const patchTo2DpolyMesh&);
+        patchToPoly2DMesh(const patchToPoly2DMesh&);
 
         //- Disallow default bitwise assignment
-        void operator=(const patchTo2DpolyMesh&);
+        void operator=(const patchToPoly2DMesh&);
 
 
 public:
@@ -98,7 +94,7 @@ public:
     // Constructors
 
         //- Construct from a primitivePatch
-        patchTo2DpolyMesh
+        patchToPoly2DMesh
         (
             const MeshedSurface<face>& patch,
             const wordList& patchNames,
@@ -108,7 +104,7 @@ public:
 
 
     //- Destructor
-    ~patchTo2DpolyMesh();
+    ~patchToPoly2DMesh();
 
 
     // Member Functions

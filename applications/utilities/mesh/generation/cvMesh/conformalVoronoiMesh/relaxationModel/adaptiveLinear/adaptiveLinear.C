@@ -41,13 +41,13 @@ addToRunTimeSelectionTable(relaxationModel, adaptiveLinear, dictionary);
 adaptiveLinear::adaptiveLinear
 (
     const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const Time& runTime
 )
 :
-    relaxationModel(typeName, relaxationDict, cvMesh),
+    relaxationModel(typeName, relaxationDict, runTime),
     relaxationStart_(readScalar(coeffDict().lookup("relaxationStart"))),
     relaxationEnd_(readScalar(coeffDict().lookup("relaxationEnd"))),
-    lastTimeValue_(cvMesh_.time().timeOutputValue()),
+    lastTimeValue_(runTime_.time().timeOutputValue()),
     relaxation_(relaxationStart_)
 {}
 
@@ -56,24 +56,24 @@ adaptiveLinear::adaptiveLinear
 
 scalar adaptiveLinear::relaxation()
 {
-    if (cvMesh_.time().timeOutputValue() > lastTimeValue_)
+    if (runTime_.time().timeOutputValue() > lastTimeValue_)
     {
-        scalar currentRelxation = relaxation_;
+        scalar currentRelaxation = relaxation_;
 
         relaxation_ -=
             (relaxation_ - relaxationEnd_)
            /(
                 (
-                    cvMesh_.time().endTime().value()
-                  - cvMesh_.time().timeOutputValue()
+                    runTime_.time().endTime().value()
+                  - runTime_.time().timeOutputValue()
                 )
-               /(cvMesh_.time().timeOutputValue() - lastTimeValue_)
+               /(runTime_.time().timeOutputValue() - lastTimeValue_)
               + 1
             );
 
-        lastTimeValue_ = cvMesh_.time().timeOutputValue();
+        lastTimeValue_ = runTime_.time().timeOutputValue();
 
-        return currentRelxation;
+        return currentRelaxation;
     }
 
     return relaxation_;

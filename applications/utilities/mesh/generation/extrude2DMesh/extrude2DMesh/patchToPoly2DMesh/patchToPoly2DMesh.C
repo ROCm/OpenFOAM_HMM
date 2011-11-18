@@ -23,9 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchTo2DpolyMesh.H"
+#include "patchToPoly2DMesh.H"
 #include "PatchTools.H"
-#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -35,7 +34,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::patchTo2DpolyMesh::flipFaceOrder()
+void Foam::patchToPoly2DMesh::flipFaceOrder()
 {
     const edgeList& edges = patch_.edges();
     const faceList& localFaces = patch_.localFaces();
@@ -69,7 +68,7 @@ void Foam::patchTo2DpolyMesh::flipFaceOrder()
 }
 
 
-void Foam::patchTo2DpolyMesh::createNeighbours()
+void Foam::patchToPoly2DMesh::createNeighbours()
 {
     const edgeList& edges = patch_.edges();
     const labelListList& edgeFaces = patch_.edgeFaces();
@@ -102,7 +101,7 @@ void Foam::patchTo2DpolyMesh::createNeighbours()
 }
 
 
-Foam::labelList Foam::patchTo2DpolyMesh::internalFaceOrder()
+Foam::labelList Foam::patchToPoly2DMesh::internalFaceOrder()
 {
     const labelListList& cellFaces = patch_.faceEdges();
 
@@ -151,7 +150,7 @@ Foam::labelList Foam::patchTo2DpolyMesh::internalFaceOrder()
 }
 
 
-void Foam::patchTo2DpolyMesh::addPatchFacesToFaces()
+void Foam::patchToPoly2DMesh::addPatchFacesToFaces()
 {
     const labelList& meshPoints = patch_.meshPoints();
 
@@ -175,7 +174,7 @@ void Foam::patchTo2DpolyMesh::addPatchFacesToFaces()
 }
 
 
-void Foam::patchTo2DpolyMesh::addPatchFacesToOwner()
+void Foam::patchToPoly2DMesh::addPatchFacesToOwner()
 {
     const label nInternalEdges = patch_.nInternalEdges();
     const faceList& faces = patch_.faces();
@@ -231,8 +230,8 @@ void Foam::patchTo2DpolyMesh::addPatchFacesToOwner()
             }
             else if
             (
-                e[0] == patch_.edges()[bEdgeI][1]
-             && e[1] == patch_.edges()[bEdgeI][0]
+                e[0] == meshPoints[patch_.edges()[bEdgeI][1]]
+             && e[1] == meshPoints[patch_.edges()[bEdgeI][0]]
             )
             {
                 Info<< "Warning: Wrong orientation." << endl;
@@ -257,7 +256,7 @@ void Foam::patchTo2DpolyMesh::addPatchFacesToOwner()
 }
 
 
-void Foam::patchTo2DpolyMesh::createPolyMeshComponents()
+void Foam::patchToPoly2DMesh::createPolyMeshComponents()
 {
     flipFaceOrder();
 
@@ -282,7 +281,7 @@ void Foam::patchTo2DpolyMesh::createPolyMeshComponents()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 //- Construct from a primitivePatch
-Foam::patchTo2DpolyMesh::patchTo2DpolyMesh
+Foam::patchToPoly2DMesh::patchToPoly2DMesh
 (
     const MeshedSurface<face>& patch,
     const wordList& patchNames,
@@ -304,13 +303,13 @@ Foam::patchTo2DpolyMesh::patchTo2DpolyMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::patchTo2DpolyMesh::~patchTo2DpolyMesh()
+Foam::patchToPoly2DMesh::~patchToPoly2DMesh()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::patchTo2DpolyMesh::createMesh()
+void Foam::patchToPoly2DMesh::createMesh()
 {
     createPolyMeshComponents();
 

@@ -1,8 +1,6 @@
 #include CGAL_FILES
 
 CV2D.C
-controls.C
-tolerances.C
 insertFeaturePoints.C
 insertSurfaceNearestPointPairs.C
 insertSurfaceNearPointPairs.C
@@ -11,5 +9,5 @@ CV2DIO.C
 shortEdgeFilter2D.C
 cv2DMesh.C
 
-EXE = $(FOAM_USER_APPBIN)/cv2DMesh
+EXE = $(FOAM_APPBIN)/cv2DMesh
 

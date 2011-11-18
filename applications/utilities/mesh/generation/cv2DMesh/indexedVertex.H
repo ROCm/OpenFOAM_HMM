@@ -99,6 +99,13 @@ public:
         type_(INTERNAL_POINT)
     {}
 
+    indexedVertex(const Point& p, const int index, const int& type)
+    :
+        Vb(p),
+        index_(index),
+        type_(type)
+    {}
+
     indexedVertex(const Point& p, Face_handle f)
     :
         Vb(f, p),
@@ -245,6 +252,7 @@ public:
             || (v1.farPoint() || v1.ppSlave())
             || (v2.farPoint() || v2.ppSlave());
     }
+
 };
 
 

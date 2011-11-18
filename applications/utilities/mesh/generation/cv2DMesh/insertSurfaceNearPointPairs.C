@@ -24,7 +24,6 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "CV2D.H"
-#include "treeDataTriSurface.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -51,7 +50,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
 
             // Check that the two triangle vertices are further apart than the
             // minimum cell size
-            if (magSqr(v1 - v0) > controls_.minCellSize2)
+            if (magSqr(v1 - v0) > meshControls().minCellSize2())
             {
                 point2D e0(toPoint2D(circumcenter(eit->first)));
 
@@ -63,7 +62,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
                 // Calculate the length^2 of the edge normal to the surface
                 scalar edgeLen2 = magSqr(e0 - e1);
 
-                if (edgeLen2 < tols_.minNearPointDist2)
+                if (edgeLen2 < meshControls().minNearPointDist2())
                 {
                     pointIndexHit pHit;
                     label hitSurface = -1;
@@ -71,7 +70,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
                     qSurf_.findSurfaceNearest
                     (
                         toPoint3D(e0),
-                        tols_.minEdgeLen2,
+                        meshControls().minEdgeLen2(),
                         pHit,
                         hitSurface
                     );
@@ -87,7 +86,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
 
                         insertPointPair
                         (
-                            tols_.ppDist,
+                            meshControls().ppDist(),
                             toPoint2D(pHit.hitPoint()),
                             toPoint2D(norm[0])
                         );
@@ -95,7 +94,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
                         nNearPoints++;
 
                         // Correct the edge iterator for the change in the 
-                        // number od edges following the point-pair insertion
+                        // number of edges following the point-pair insertion
                         eit = Finite_edges_iterator
                         (
                             finite_edges_end().base(),

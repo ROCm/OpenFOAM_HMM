@@ -95,6 +95,25 @@ void deleteBox
 }
 
 
+bool onLine(const point& p, const linePointRef& line)
+{
+    const point& a = line.start();
+    const point& b = line.end();
+
+    if
+    (
+        ( p.x() < min(a.x(), b.x()) || p.x() > max(a.x(), b.x()) )
+     || ( p.y() < min(a.y(), b.y()) || p.y() > max(a.y(), b.y()) )
+     || ( p.z() < min(a.z(), b.z()) || p.z() > max(a.z(), b.z()) )
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+
 // Deletes all edges inside/outside bounding box from set.
 void deleteEdges
 (
@@ -116,7 +135,9 @@ void deleteEdges
         // If edge does not intersect the plane, delete.
         scalar intersect = cutPlane.lineIntersect(line);
 
-        if (mag(intersect) > line.mag())
+        point featPoint = intersect * (p1 - p0) + p0;
+
+        if (!onLine(featPoint, line))
         {
             edgeStat[edgeI] = surfaceFeatures::NONE;
         }
@@ -304,7 +325,7 @@ int main(int argc, char *argv[])
     (
         "plane",
         "(nx ny nz)(z0 y0 z0)",
-        "used to create feature edges for 2D meshing"
+        "use a plane to create feature edges for 2D meshing"
     );
 
 #   ifdef ENABLE_CURVATURE

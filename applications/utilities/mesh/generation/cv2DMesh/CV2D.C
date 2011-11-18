@@ -30,12 +30,19 @@ License
 #include "uint.H"
 #include "ulong.H"
 
+namespace Foam
+{
+
+defineTypeNameAndDebug(CV2D, 0);
+
+}
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::CV2D::insertBoundingBox()
 {
     Info<< "insertBoundingBox: creating bounding mesh" << endl;
-    scalar bigSpan = 10*tols_.span;
+    scalar bigSpan = 10*meshControls().span();
     insertPoint(point2D(-bigSpan, -bigSpan), Vb::FAR_POINT);
     insertPoint(point2D(-bigSpan, bigSpan), Vb::FAR_POINT);
     insertPoint(point2D(bigSpan, -bigSpan), Vb::FAR_POINT);
@@ -125,22 +132,26 @@ Foam::CV2D::CV2D
         allGeometry_,
         cvMeshDict.subDict("surfaceConformation")
     ),
-    controls_(cvMeshDict),
+    controls_(cvMeshDict, qSurf_.globalBounds()),
     cellSizeControl_
     (
         allGeometry_,
         cvMeshDict.subDict("motionControl")
     ),
-    tols_(cvMeshDict, controls_.minCellSize, qSurf_.globalBounds()),
     z_
     (
-        (1.0/3.0)
-       *(qSurf_.globalBounds().min().z() + qSurf_.globalBounds().max().z())
+        point
+        (
+            cvMeshDict.subDict("surfaceConformation").lookup("locationInMesh")
+        ).z()
     ),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
-    startOfBoundaryConformPointPairs_(0)
+    startOfBoundaryConformPointPairs_(0),
+    featurePoints_()
 {
+    Info<< meshControls() << endl;
+
     insertBoundingBox();
     insertFeaturePoints();
 }
@@ -183,7 +194,7 @@ void Foam::CV2D::insertPoints
 
     Info<< nVert << " vertices inserted" << endl;
 
-    if (controls_.writeInitialTriangulation)
+    if (meshControls().objOutput())
     {
         // Checking validity of triangulation
         assert(is_valid());
@@ -200,7 +211,7 @@ void Foam::CV2D::insertPoints(const fileName& pointFileName)
 
     if (pointsFile.good())
     {
-        insertPoints(point2DField(pointsFile), 0.5*controls_.minCellSize2);
+        insertPoints(point2DField(pointsFile), 0.5*meshControls().minCellSize2());
     }
     else
     {
@@ -220,16 +231,16 @@ void Foam::CV2D::insertGrid()
 
     scalar x0 = qSurf_.globalBounds().min().x();
     scalar xR = qSurf_.globalBounds().max().x() - x0;
-    int ni = int(xR/controls_.minCellSize) + 1;
+    int ni = int(xR/meshControls().minCellSize()) + 1;
     scalar deltax = xR/ni;
 
     scalar y0 = qSurf_.globalBounds().min().y();
     scalar yR = qSurf_.globalBounds().max().y() - y0;
-    int nj = int(yR/controls_.minCellSize) + 1;
+    int nj = int(yR/meshControls().minCellSize()) + 1;
     scalar deltay = yR/nj;
 
     Random rndGen(1321);
-    scalar pert = controls_.randomPurturbation*min(deltax, deltay);
+    scalar pert = meshControls().randomPerturbation()*min(deltax, deltay);
 
     for (int i=0; i<ni; i++)
     {
@@ -237,13 +248,13 @@ void Foam::CV2D::insertGrid()
         {
             point p(x0 + i*deltax, y0 + j*deltay, 0);
 
-            if (controls_.randomiseInitialGrid)
+            if (meshControls().randomiseInitialGrid())
             {
                 p.x() += pert*(rndGen.scalar01() - 0.5);
                 p.y() += pert*(rndGen.scalar01() - 0.5);
             }
 
-            if (qSurf_.wellInside(p, 0.5*controls_.minCellSize2))
+            if (qSurf_.wellInside(p, 0.5*meshControls().minCellSize2()))
             {
                 insert(Point(p.x(), p.y()))->index() = nVert++;
             }
@@ -252,7 +263,7 @@ void Foam::CV2D::insertGrid()
 
     Info<< nVert << " vertices inserted" << endl;
 
-    if (controls_.writeInitialTriangulation)
+    if (meshControls().objOutput())
     {
         // Checking validity of triangulation
         assert(is_valid());
@@ -267,21 +278,16 @@ void Foam::CV2D::insertSurfacePointPairs()
 {
     startOfSurfacePointPairs_ = number_of_vertices();
 
-    if (controls_.insertSurfaceNearestPointPairs)
+    if (meshControls().insertSurfaceNearestPointPairs())
     {
         insertSurfaceNearestPointPairs();
     }
 
-    if (controls_.writeNearestTriangulation)
-    {
-        writeFaces("near_allFaces.obj", false);
-        writeFaces("near_faces.obj", true);
-        writeTriangles("near_triangles.obj", true);
-    }
+    write("nearest");
 
     // Insertion of point-pairs for near-points may cause protrusions
     // so insertBoundaryConformPointPairs must be executed last
-    if (controls_.insertSurfaceNearPointPairs)
+    if (meshControls().insertSurfaceNearPointPairs())
     {
         insertSurfaceNearPointPairs();
     }
@@ -292,7 +298,7 @@ void Foam::CV2D::insertSurfacePointPairs()
 
 void Foam::CV2D::boundaryConform()
 {
-    if (!controls_.insertSurfaceNearestPointPairs)
+    if (!meshControls().insertSurfaceNearestPointPairs())
     {
         markNearBoundaryPoints();
     }
@@ -308,7 +314,7 @@ void Foam::CV2D::boundaryConform()
         fit->faceIndex() = Fb::SAVE_CHANGED;
     }
 
-    for (label iter=1; iter<=controls_.maxBoundaryConformingIter; iter++)
+    for (label iter=1; iter<=meshControls().maxBoundaryConformingIter(); iter++)
     {
         label nIntersections = insertBoundaryConformPointPairs
         (
@@ -347,6 +353,8 @@ void Foam::CV2D::boundaryConform()
     }
 
     Info<< nl;
+
+    write("boundary");
 }
 
 
@@ -412,7 +420,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     scalarField sizes
     (
         number_of_vertices(),
-        controls_.minCellSize
+        meshControls().minCellSize()
     );
 
     Field<vector2D> alignments
@@ -439,14 +447,13 @@ void Foam::CV2D::newPoints(const scalar relaxation)
             qSurf_.findSurfaceNearest
             (
                 toPoint3D(vert),
-                tols_.span2,
+                meshControls().span2(),
                 pHit,
                 hitSurface
             );
 
             if (pHit.hit())
             {
-
                 vectorField norm(1);
                 allGeometry_[hitSurface].getNormal
                 (
@@ -456,23 +463,8 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
                 alignments[vit->index()] = toPoint2D(norm[0]);
 
-                scalar surfDist = mag(toPoint3D(vert) - pHit.hitPoint());
-
-                 /*if (surfDist < 0.2)
-                 {
-                     sizes[vit->index()] *= 0.4;
-                 }*/
-
-                if (surfDist < 0.2)
-                {
-                    sizes[vit->index()] *= (1 - 0.1)*surfDist/0.2 + 0.1;
-                }
+                sizes[vit->index()] = cellSizeControl_.cellSize(toPoint3D(vit->point()));
             }
-
-            // if (vert.x() > 0)
-            // {
-            //     sizes[vit->index()] *= 0.5;
-            // }
         }
     }
 
@@ -486,7 +478,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
     PackedBoolList pointToBeRetained(startOfSurfacePointPairs_, true);
 
-    DynamicList<point2D> pointsToInsert;
+    std::list<Point> pointsToInsert;
 
     for
     (
@@ -621,7 +613,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
                 )
                 {
                     // Point insertion
-                    pointsToInsert.append(0.5*(dVA + dVB));
+                    pointsToInsert.push_back(toPoint(0.5*(dVA + dVB)));
                 }
                 else if
                 (
@@ -640,7 +632,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        pointsToInsert.append(0.5*(dVA + dVB));
+                        pointsToInsert.push_back(toPoint(0.5*(dVA + dVB)));
                     }
 
                     if (vA->internalPoint())
@@ -675,6 +667,8 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     // Relax the calculated displacement
     displacementAccumulator *= relaxation;
 
+    label numberOfNewPoints = pointsToInsert.size();
+
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -684,52 +678,52 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     {
         if (vit->internalPoint())
         {
-            if (!pointToBeRetained[vit->index()])
+            if (pointToBeRetained[vit->index()])
             {
-                remove(vit);
-            }
-            else
-            {
-                movePoint
+                pointsToInsert.push_front
                 (
-                    vit,
-                    vit->point()
-                  + K::Vector_2
+                    toPoint
                     (
-                        displacementAccumulator[vit->index()].x(),
-                        displacementAccumulator[vit->index()].y()
+                        toPoint2D(vit->point())
+                      + displacementAccumulator[vit->index()]
                     )
                 );
             }
         }
     }
 
-    removeSurfacePointPairs();
+    // Clear the triangulation and reinsert the bounding box and feature points.
+    // This is faster than removing and moving points.
+    this->clear();
 
-    // Re-index internal points
+    insertBoundingBox();
+
+    reinsertFeaturePoints();
+
+    startOfInternalPoints_ = number_of_vertices();
 
     label nVert = startOfInternalPoints_;
 
+    Info<< "Inserting " << numberOfNewPoints << " new points" << endl;
+
+    // Use the range insert as it is faster than individually inserting points.
+    insert(pointsToInsert.begin(), pointsToInsert.end());
+
     for
     (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
         ++vit
     )
     {
-        if (vit->internalPoint())
+        if
+        (
+            vit->type() == Vb::INTERNAL_POINT
+         && vit->index() == Vb::INTERNAL_POINT
+        )
         {
             vit->index() = nVert++;
         }
-    }
-
-    // Insert new points
-
-    Info<< "Inserting " << pointsToInsert.size() << " new points" << endl;
-
-    forAll(pointsToInsert, i)
-    {
-        insertPoint(pointsToInsert[i], Vb::INTERNAL_POINT);
     }
 
     Info<< "    Total displacement = " << totalDisp << nl
@@ -737,8 +731,12 @@ void Foam::CV2D::newPoints(const scalar relaxation)
         << "    Points added = " << pointsToInsert.size()
         << endl;
 
+    write("internal");
+
     insertSurfacePointPairs();
+
     boundaryConform();
+
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Old Method
@@ -816,19 +814,19 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     //         // in in the x-y directions
     //         vector2D cd0(1, 0);
 
-    //         if (controls_.relaxOrientation)
+    //         if (meshControls().relaxOrientation())
     //         {
     //             // Get the longest edge from the array and use as the primary
     //             // direction of the coordinate system of the "square" cell
     //             cd0 = edges[edgecd0i];
     //         }
 
-    //         if (controls_.nearWallAlignedDist > 0)
+    //         if (meshControls().nearWallAlignedDist() > 0)
     //         {
     //             pointIndexHit pHit = qSurf_.tree().findNearest
     //             (
     //                 toPoint3D(defVert0),
-    //                 controls_.nearWallAlignedDist2
+    //                 meshControls().nearWallAlignedDist2()
     //             );
 
     //             if (pHit.hit())
@@ -871,7 +869,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
     //                 // Set the weight for this edge contribution
     //                 scalar w = 1;
 
-    //                 if (controls_.squares)
+    //                 if (meshControls().squares())
     //                 {
     //                     w = magSqr(deltai.x()*ei.y() - deltai.y()*ei.x());
     //                     // alternative weights
@@ -1014,13 +1012,41 @@ void Foam::CV2D::extractPatches
 
 void Foam::CV2D::write() const
 {
-    if (controls_.writeFinalTriangulation)
+    if (meshControls().objOutput())
     {
         writeFaces("allFaces.obj", false);
         writeFaces("faces.obj", true);
         writeTriangles("allTriangles.obj", false);
         writeTriangles("triangles.obj", true);
         writePatch("patch.pch");
+    }
+}
+
+
+void Foam::CV2D::write(const word& stage) const
+{
+    if (meshControls().objOutput())
+    {
+        Foam::mkDir(stage + "Faces");
+        Foam::mkDir(stage + "Triangles");
+
+        writeFaces
+        (
+            stage
+          + "Faces/allFaces_"
+          + runTime_.timeName()
+          + ".obj",
+            false
+        );
+
+        writeTriangles
+        (
+            stage
+          + "Triangles/allTriangles_"
+          + runTime_.timeName()
+          + ".obj",
+            false
+        );
     }
 }
 

@@ -10,26 +10,25 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
+    -I$(FOAM_APP)/utilities/mesh/generation/extrude/extrudeModel/lnInclude \
     -IconformalVoronoi2DMesh/lnInclude \
+    -I$(FOAM_APP)/utilities/mesh/generation/cvMesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
-    -I$(FOAM_APP)/utilities/mesh/generation/cvMesh/conformalVoronoiMesh/lnInclude \
-    -I$(FOAM_APP)/utilities/mesh/generation/extrude/extrudeModel/lnInclude \
-    -I$(LIB_SRC)/triSurface/lnInclude -DFULLDEBUG -g -O0
+    -I$(LIB_SRC)/triSurface/lnInclude
 
 EXE_LIBS = \
-    -L$(FOAM_USER_LIBBIN) \
     $(CGAL_LIBS) \
+    -lextrude2DMesh \
+    -lextrudeModel \
+    -lcv2DMesh \
+    -lconformalVoronoiMesh \
     -lmeshTools \
     -lsurfMesh \
     -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh \
-    -lextrude2DMesh \
-    -lextrudeModel \
-    -lconformalVoronoiMesh \
-    -lcv2DMesh \
     -ldecompositionMethods
