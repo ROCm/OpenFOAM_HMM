@@ -78,8 +78,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     heatSource_(hsPower),
     q_(p.size(), 0.0),
-    alphaEffName_("undefinedAlphaEff"),
-    CpName_("undefinedCp")
+    alphaEffName_("undefinedAlphaEff")
 {}
 
 
@@ -95,8 +94,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
     heatSource_(ptf.heatSource_),
     q_(ptf.q_, mapper),
-    alphaEffName_(ptf.alphaEffName_),
-    CpName_(ptf.CpName_)
+    alphaEffName_(ptf.alphaEffName_)
 {}
 
 
@@ -111,8 +109,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),
     heatSource_(heatSourceTypeNames_.read(dict.lookup("heatSource"))),
     q_("q", dict, p.size()),
-    alphaEffName_(dict.lookup("alphaEff")),
-    CpName_(dict.lookup("Cp"))
+    alphaEffName_(dict.lookup("alphaEff"))
 {
     fvPatchField<scalar>::operator=(patchInternalField());
     gradient() = 0.0;
@@ -128,8 +125,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(thftpsf),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_),
-    alphaEffName_(thftpsf.alphaEffName_),
-    CpName_(thftpsf.CpName_)
+    alphaEffName_(thftpsf.alphaEffName_)
 {}
 
 
@@ -143,8 +139,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
     fixedGradientFvPatchScalarField(thftpsf, iF),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_),
-    alphaEffName_(thftpsf.alphaEffName_),
-    CpName_(thftpsf.CpName_)
+    alphaEffName_(thftpsf.alphaEffName_)
 {}
 
 
