@@ -108,8 +108,17 @@ public:
         Type integrate(const scalar x1, const scalar x2) const;
 
 
-    //- Ostream Operator
-    friend Ostream& operator<< <Type>(Ostream&, const Constant<Type>&);
+    // I/O
+
+        //- Ostream Operator
+        friend Ostream& operator<< <Type>
+        (
+            Ostream& os,
+            const Constant<Type>& cnst
+        );
+
+        //- Write in dictionary format
+        virtual void writeData(Ostream& os) const;
 };
 
 

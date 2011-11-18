@@ -58,4 +58,12 @@ Foam::Ostream& Foam::operator<<
 }
 
 
+void Foam::polynomial::writeData(Ostream& os) const
+{
+    DataEntry<scalar>::writeData(os);
+
+    os  << nl << indent << coeffs_ << token::END_STATEMENT << nl;
+}
+
+
 // ************************************************************************* //

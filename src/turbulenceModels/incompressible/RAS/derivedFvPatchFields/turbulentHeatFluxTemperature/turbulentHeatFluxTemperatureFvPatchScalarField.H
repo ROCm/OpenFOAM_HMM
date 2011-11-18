@@ -98,9 +98,6 @@ private:
         //- Name of effective thermal diffusivity field
         word alphaEffName_;
 
-        //- Name of specific heat capacity field
-        word CpName_;
-
 
 public:
 

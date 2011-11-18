@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AMIInterpolation.H"
-#include "treeDataPrimitivePatch.H"
-#include "indexedOctree.H"
 #include "meshTools.H"
 #include "mergePoints.H"
 #include "mapDistribute.H"
@@ -156,12 +154,44 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 
 
 template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::resetTree
+(
+    const primitivePatch& tgtPatch
+)
+{
+    // Clear the old octree
+    treePtr_.clear();
+
+
+    treeBoundBox bb(tgtPatch.points());
+    bb.inflate(0.01);
+
+    if (!treePtr_.valid())
+    {
+        treePtr_.reset
+        (
+            new indexedOctree<treeType>
+            (
+                treeType(false, tgtPatch),
+                bb,                         // overall search domain
+                8,                          // maxLevel
+                10,                         // leaf size
+                3.0                         // duplicity
+            )
+        );
+    }
+}
+
+
+template<class SourcePatch, class TargetPatch>
 Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch
 )
 {
+    label procI = 0;
+
     if (Pstream::parRun())
     {
         List<label> facesPresentOnProc(Pstream::nProcs(), 0);
@@ -181,16 +211,27 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 
         if (nHaveFaces > 1)
         {
-            return -1;
+            procI = -1;
+            if (debug)
+            {
+                Info<< "AMIInterpolation::calcDistribution: "
+                    << "AMI split across multiple processors" << endl;
+            }
         }
         else if (nHaveFaces == 1)
         {
-            return findIndex(facesPresentOnProc, 1);
+            procI = findIndex(facesPresentOnProc, 1);
+            if (debug)
+            {
+                Info<< "AMIInterpolation::calcDistribution: "
+                    << "AMI local to processor" << procI << endl;
+            }
         }
     }
 
+
     // Either not parallel or no faces on any processor
-    return 0;
+    return procI;
 }
 
 
@@ -644,33 +685,18 @@ template<class SourcePatch, class TargetPatch>
 Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 (
     const label srcFaceI,
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const primitivePatch& srcPatch
 ) const
 {
     label targetFaceI = -1;
-
-    treeBoundBox bb(tgtPatch.points());
-    bb.inflate(0.01);
-
-    typedef treeDataPrimitivePatch<face, SubList, const pointField&> treeType;
-
-    indexedOctree<treeType> tree
-    (
-        treeType(false, tgtPatch),
-        bb,                         // overall search domain
-        8,                          // maxLevel
-        10,                         // leaf size
-        3.0                         // duplicity
-    );
 
     const pointField& srcPts = srcPatch.points();
     const face& srcFace = srcPatch[srcFaceI];
     const point& srcPt = srcFace.centre(srcPts);
     const scalar srcFaceArea = srcFace.mag(srcPts);
 
-//    pointIndexHit sample = tree.findNearest(srcPt, sqr(0.1*bb.mag()));
-    pointIndexHit sample = tree.findNearest(srcPt, 10.0*srcFaceArea);
+//    pointIndexHit sample = treePtr_->findNearest(srcPt, sqr(0.1*bb.mag()));
+    pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
 
 
     if (debug)
@@ -828,7 +854,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
                 }
 
                 srcFaceI = faceI;
-                tgtFaceI = findTargetFace(srcFaceI, srcPatch0, tgtPatch0);
+                tgtFaceI = findTargetFace(srcFaceI, srcPatch0);
 
                 if (tgtFaceI >= 0)
                 {
@@ -932,6 +958,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         return;
     }
 
+    resetTree(tgtPatch);
+
     // temporary storage for addressing and weights
     List<DynamicList<label> > srcAddr(srcPatch.size());
     List<DynamicList<scalar> > srcWght(srcPatch.size());
@@ -948,7 +976,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         bool foundFace = false;
         forAll(srcPatch, faceI)
         {
-            tgtFaceI = findTargetFace(faceI, srcPatch, tgtPatch);
+            tgtFaceI = findTargetFace(faceI, srcPatch);
             if (tgtFaceI >= 0)
             {
                 srcFaceI = faceI;
@@ -1799,7 +1827,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
     if (debug)
     {
-        Info<< "AMIInterpolation : Constructed addressing and weights." << nl
+        Info<< "AMIInterpolation : Constructed addressing and weights" << nl
             << "    triMode        :" << triMode_ << nl
             << "    singlePatchProc:" << singlePatchProc_ << nl
             << "    srcMagSf       :" << gSum(srcMagSf_) << nl

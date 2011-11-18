@@ -59,4 +59,13 @@ Foam::Ostream& Foam::operator<<
 }
 
 
+template<class Type>
+void Foam::Table<Type>::writeData(Ostream& os) const
+{
+    DataEntry<Type>::writeData(os);
+
+    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+}
+
+
 // ************************************************************************* //

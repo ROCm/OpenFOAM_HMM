@@ -1,17 +1,18 @@
-// Solve the Momentum equation
-
 tmp<fvVectorMatrix> UEqn
 (
     fvm::ddt(U)
   + fvm::div(phi, U)
   + turbulence->divDevReff(U)
+  ==
+    sources(U)
 );
+
 
 UEqn().relax();
 
-rAU = 1.0/UEqn().A();
+sources.constrain(UEqn());
 
 if (pimple.momentumPredictor())
 {
-    solve(UEqn() == -fvc::grad(p));
+    solve(UEqn() == -fvc::grad(p_gh));
 }

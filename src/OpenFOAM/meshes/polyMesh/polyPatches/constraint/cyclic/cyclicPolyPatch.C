@@ -393,9 +393,6 @@ void Foam::cyclicPolyPatch::calcTransforms
 }
 
 
-// Given a split of faces into left and right half calculate the centres
-// and anchor points. Transform the left points so they align with the
-// right ones.
 void Foam::cyclicPolyPatch::getCentresAndAnchors
 (
     const primitivePatch& pp0,
@@ -984,6 +981,7 @@ void Foam::cyclicPolyPatch::initMovePoints
     polyPatch::initMovePoints(pBufs, p);
 }
 
+
 void Foam::cyclicPolyPatch::movePoints
 (
     PstreamBuffers& pBufs,
@@ -994,10 +992,12 @@ void Foam::cyclicPolyPatch::movePoints
     calcTransforms();
 }
 
+
 void Foam::cyclicPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 {
     polyPatch::initUpdateMesh(pBufs);
 }
+
 
 void Foam::cyclicPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
@@ -1249,10 +1249,6 @@ void Foam::cyclicPolyPatch::initOrder
 }
 
 
-//  Return new ordering. Ordering is -faceMap: for every face index
-//  the new face -rotation:for every new face the clockwise shift
-//  of the original face. Return false if nothing changes (faceMap
-//  is identity, rotation is 0)
 bool Foam::cyclicPolyPatch::order
 (
     PstreamBuffers& pBufs,

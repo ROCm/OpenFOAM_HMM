@@ -22,22 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::oscillatingFixedValueFvPatchField
+    Foam::waveSurfacePressureFvPatchScalarField
 
 Description
-    Foam::oscillatingFixedValueFvPatchField
+    Applies the surface wave pressure, based on the wave height
+
+        p = -rho.g.zeta
+
+    Where
+
+        p = pressure - kinematic of dynamic depending on the flux units
+        zeta = wave height vector [m]
+        g = acceleration due to gravity [m/s2]
+
+
+    Note:
+
+        This boundary also updates the wave height boundary field, which
+        is accessed via lookup from the database
+
 
 SourceFiles
-    oscillatingFixedValueFvPatchField.C
+    waveSurfacePressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oscillatingFixedValueFvPatchField_H
-#define oscillatingFixedValueFvPatchField_H
+#ifndef waveSurfacePressureFvPatchScalarField_H
+#define waveSurfacePressureFvPatchScalarField_H
 
-#include "Random.H"
 #include "fixedValueFvPatchFields.H"
-#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,144 +58,100 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class oscillatingFixedValueFvPatch Declaration
+            Class waveSurfacePressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class oscillatingFixedValueFvPatchField
+class waveSurfacePressureFvPatchScalarField
 :
-    public fixedValueFvPatchField<Type>
+    public fixedValueFvPatchScalarField
 {
     // Private data
 
-        //- Reference value
-        Field<Type> refValue_;
+        //- Flux field name
+        word phiName_;
 
-        //- Offset
-        Type offset_;
+        //- Density field name (if compressible)
+        word rhoName_;
 
-        //- Amplitude
-        autoPtr<DataEntry<scalar> > amplitude_;
+        //- Wave height field name
+        word zetaName_;
 
-        //- Frequency
-        autoPtr<DataEntry<scalar> > frequency_;
+        //- Old-time zeta patch value
+        vectorField zeta0_;
 
-        //- Current time index
+        //- Current time index used to store ms0_
         label curTimeIndex_;
-
-
-    // Private Member Functions
-
-        //- Return current scale
-        scalar currentScale() const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("oscillatingFixedValue");
+    TypeName("waveSurfacePressure");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        oscillatingFixedValueFvPatchField
+        waveSurfacePressureFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        oscillatingFixedValueFvPatchField
+        waveSurfacePressureFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given oscillatingFixedValueFvPatchField
+        //- Construct by mapping given waveSurfacePressureFvPatchScalarField
         //  onto a new patch
-        oscillatingFixedValueFvPatchField
+        waveSurfacePressureFvPatchScalarField
         (
-            const oscillatingFixedValueFvPatchField<Type>&,
+            const waveSurfacePressureFvPatchScalarField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        oscillatingFixedValueFvPatchField
+        waveSurfacePressureFvPatchScalarField
         (
-            const oscillatingFixedValueFvPatchField<Type>&
+            const waveSurfacePressureFvPatchScalarField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchScalarField> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new oscillatingFixedValueFvPatchField<Type>(*this)
+                new waveSurfacePressureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        oscillatingFixedValueFvPatchField
+        waveSurfacePressureFvPatchScalarField
         (
-            const oscillatingFixedValueFvPatchField<Type>&,
-            const DimensionedField<Type, volMesh>&
+            const waveSurfacePressureFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchScalarField> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new oscillatingFixedValueFvPatchField<Type>(*this, iF)
+                new waveSurfacePressureFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
-
-        // Access
-
-            //- Return the ref value
-            const Field<Type>& refValue() const
-            {
-                return refValue_;
-            }
-
-            //- Return reference to the ref value to allow adjustment
-            Field<Type>& refValue()
-            {
-                return refValue_;
-            }
-
-            //- Return amplitude
-            scalar amplitude() const
-            {
-                return amplitude_;
-            }
-
-            scalar& amplitude()
-            {
-                return amplitude_;
-            }
-
-            //- Return frequency
-            scalar frequency() const
-            {
-                return frequency_;
-            }
-
-            scalar& frequency()
-            {
-                return frequency_;
-            }
-
 
         // Mapping functions
 
@@ -195,7 +164,7 @@ public:
             //- Reverse map the given fvPatchField onto this fvPatchField
             virtual void rmap
             (
-                const fvPatchField<Type>&,
+                const fvPatchScalarField&,
                 const labelList&
             );
 
@@ -214,12 +183,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "oscillatingFixedValueFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

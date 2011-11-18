@@ -36,10 +36,11 @@ namespace Foam
 template<class Type>
 scalar oscillatingFixedValueFvPatchField<Type>::currentScale() const
 {
-    return
-        1.0
-      + amplitude_
-       *sin(constant::mathematical::twoPi*frequency_*this->db().time().value());
+    const scalar t = this->db().time().value();
+    const scalar a = amplitude_->value(t);
+    const scalar f = frequency_->value(t);
+
+    return 1.0 + a*sin(constant::mathematical::twoPi*f*t);
 }
 
 
@@ -54,8 +55,9 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     refValue_(p.size()),
-    amplitude_(0.0),
-    frequency_(0.0),
+    offset_(pTraits<Type>::zero),
+    amplitude_(),
+    frequency_(),
     curTimeIndex_(-1)
 {}
 
@@ -71,8 +73,9 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
     refValue_(ptf.refValue_, mapper),
-    amplitude_(ptf.amplitude_),
-    frequency_(ptf.frequency_),
+    offset_(ptf.offset_),
+    amplitude_(ptf.amplitude_().clone().ptr()),
+    frequency_(ptf.frequency_().clone().ptr()),
     curTimeIndex_(-1)
 {}
 
@@ -87,8 +90,9 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(p, iF),
     refValue_("refValue", dict, p.size()),
-    amplitude_(readScalar(dict.lookup("amplitude"))),
-    frequency_(readScalar(dict.lookup("frequency"))),
+    offset_(dict.lookupOrDefault<Type>("offset", pTraits<Type>::zero)),
+    amplitude_(DataEntry<scalar>::New("amplitude", dict)),
+    frequency_(DataEntry<scalar>::New("frequency", dict)),
     curTimeIndex_(-1)
 {
     if (dict.found("value"))
@@ -113,8 +117,9 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf),
     refValue_(ptf.refValue_),
-    amplitude_(ptf.amplitude_),
-    frequency_(ptf.frequency_),
+    offset_(ptf.offset_),
+    amplitude_(ptf.amplitude_().clone().ptr()),
+    frequency_(ptf.frequency_().clone().ptr()),
     curTimeIndex_(-1)
 {}
 
@@ -128,8 +133,9 @@ oscillatingFixedValueFvPatchField<Type>::oscillatingFixedValueFvPatchField
 :
     fixedValueFvPatchField<Type>(ptf, iF),
     refValue_(ptf.refValue_),
-    amplitude_(ptf.amplitude_),
-    frequency_(ptf.frequency_),
+    offset_(ptf.offset_),
+    amplitude_(ptf.amplitude_().clone().ptr()),
+    frequency_(ptf.frequency_().clone().ptr()),
     curTimeIndex_(-1)
 {}
 
@@ -175,7 +181,7 @@ void oscillatingFixedValueFvPatchField<Type>::updateCoeffs()
     {
         Field<Type>& patchField = *this;
 
-        patchField = refValue_*currentScale();
+        patchField = refValue_*currentScale() + offset_;
 
         curTimeIndex_ = this->db().time().timeIndex();
     }
@@ -189,10 +195,9 @@ void oscillatingFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fixedValueFvPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);
-    os.writeKeyword("amplitude")
-        << amplitude_ << token::END_STATEMENT << nl;
-    os.writeKeyword("frequency")
-        << frequency_ << token::END_STATEMENT << nl;
+    os.writeKeyword("offset") << offset_ << token::END_STATEMENT << nl;
+    amplitude_->writeData(os);
+    frequency_->writeData(os);
 }
 
 
