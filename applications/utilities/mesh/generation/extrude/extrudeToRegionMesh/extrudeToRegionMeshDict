@@ -39,7 +39,7 @@ sampleMode      nearestPatchFace;
 oneD            false;
 
 // If oneD is true. Specify which boundary is wanted between the layers
-//oneDPolyPatchType emptyPolyPatch; //wedgePolyPatch
+//oneDPolyPatchType empty; //wedge
 
 
 //- Extrusion model to use. The only logical choice is linearNormal?
