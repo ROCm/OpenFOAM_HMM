@@ -169,6 +169,7 @@ $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterface.C
 $(AMICycPatches)/cyclicAMILduInterfaceField/cyclicAMILduInterfaceField.C
 $(AMICycPatches)/cyclicAMIPolyPatch/cyclicAMIPolyPatch.C
 $(AMICycPatches)/cyclicAMIPointPatch/cyclicAMIPointPatch.C
+$(AMICycPatches)/cyclicAMIPointPatchField/cyclicAMIPointPatchFields.C
 
 mappedPatches/mappedPolyPatch/mappedPatchBase.C
 mappedPatches/mappedPolyPatch/mappedPolyPatch.C
