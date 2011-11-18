@@ -127,7 +127,7 @@ public:
 
 
     //- Destructor
-    ~processorPointPatchField();
+    virtual ~processorPointPatchField();
 
 
     // Member functions
