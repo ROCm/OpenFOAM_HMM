@@ -43,7 +43,7 @@ boundaryField
     inlet
     {
         type            flowRateInletVelocity;
-        flowRate        0.1;
+        flowRate        constant 0.1;
         value           uniform (0 0 0);
     }
     outlet
