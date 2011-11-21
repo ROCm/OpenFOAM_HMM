@@ -33,11 +33,10 @@ Application
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
-
-#   include "createTime.H"
-#   include "createMesh.H"
+    #include "createTime.H"
+    #include "createMesh.H"
 
     Info<< "Reading field p\n" << endl;
     volScalarField p
@@ -67,9 +66,29 @@ int main(int argc, char *argv[])
         mesh
     );
 
+    const pointMesh& pMesh = pointMesh::New(mesh);
+    const pointBoundaryMesh& pbm = pMesh.boundary();
+
+    Info<< "pointMesh boundary" << nl;
+    forAll(pbm, patchI)
+    {
+        Info<< "patch=" << pbm[patchI].name()
+            << ", type=" << pbm[patchI].type()
+            << ", coupled=" << pbm[patchI].coupled()
+            << endl;
+    }
+
     const volPointInterpolation& pInterp = volPointInterpolation::New(mesh);
 
+
     pointScalarField pp(pInterp.interpolate(p));
+    Info<< pp.name() << " boundary" << endl;
+    forAll(pp.boundaryField(), patchI)
+    {
+        Info<< pbm[patchI].name() << " coupled="
+            << pp.boundaryField()[patchI].coupled()<< endl;
+    }
+
     pp.write();
 
     pointVectorField pU(pInterp.interpolate(U));
