@@ -36,6 +36,7 @@ SourceFiles
 #define rotatingWallVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class rotatingWallVelocityFvPatch Declaration
+                Class rotatingWallVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingWallVelocityFvPatchVectorField
@@ -59,7 +60,7 @@ class rotatingWallVelocityFvPatchVectorField
         vector axis_;
 
         //- Rotational speed
-        scalar omega_;
+        autoPtr<DataEntry<scalar> > omega_;
 
 
 public:
@@ -147,12 +148,6 @@ public:
                 return axis_;
             }
 
-            //- Return the rotational speed
-            scalar omega() const
-            {
-                return omega_;
-            }
-
             //- Return non-const access to the origin of the rotation
             vector& origin()
             {
@@ -163,12 +158,6 @@ public:
             vector& axis()
             {
                 return axis_;
-            }
-
-            //- Return non-const access to the rotational speed
-            scalar& omega()
-            {
-                return omega_;
             }
 
 

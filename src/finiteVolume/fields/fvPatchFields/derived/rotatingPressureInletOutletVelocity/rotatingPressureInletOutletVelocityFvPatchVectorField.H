@@ -40,6 +40,7 @@ SourceFiles
 
 #include "fvPatchFields.H"
 #include "pressureInletOutletVelocityFvPatchVectorField.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class rotatingPressureInletOutletVelocityFvPatch Declaration
+         Class rotatingPressureInletOutletVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingPressureInletOutletVelocityFvPatchVectorField
@@ -57,7 +58,7 @@ class rotatingPressureInletOutletVelocityFvPatchVectorField
     // Private data
 
         //- Angular velocity of the frame
-        vector omega_;
+        autoPtr<DataEntry<vector> > omega_;
 
 
     // Private Member Functions
@@ -140,23 +141,6 @@ public:
 
 
     // Member functions
-
-        // Access
-
-            //- Return the angular velocity of rotation
-            const vector& omega() const
-            {
-                return omega_;
-            }
-
-            //- Reset the angular velocity of rotation
-            //  and update the tangentialVelocity
-            void setOmega(const vector& omega)
-            {
-                omega_ = omega;
-                calcTangentialVelocity();
-            }
-
 
         //- Write
         virtual void write(Ostream&) const;

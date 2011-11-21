@@ -31,8 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::
-flowRateInletVelocityFvPatchVectorField::
+Foam::flowRateInletVelocityFvPatchVectorField::
 flowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -40,14 +39,13 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(0),
+    flowRate_(),
     phiName_("phi"),
     rhoName_("rho")
 {}
 
 
-Foam::
-flowRateInletVelocityFvPatchVectorField::
+Foam::flowRateInletVelocityFvPatchVectorField::
 flowRateInletVelocityFvPatchVectorField
 (
     const flowRateInletVelocityFvPatchVectorField& ptf,
@@ -57,14 +55,13 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    flowRate_(ptf.flowRate_),
+    flowRate_(ptf.flowRate_().clone().ptr()),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
 
 
-Foam::
-flowRateInletVelocityFvPatchVectorField::
+Foam::flowRateInletVelocityFvPatchVectorField::
 flowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -73,28 +70,26 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    flowRate_(readScalar(dict.lookup("flowRate"))),
+    flowRate_(DataEntry<scalar>::New("flowRate", dict)),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {}
 
 
-Foam::
-flowRateInletVelocityFvPatchVectorField::
+Foam::flowRateInletVelocityFvPatchVectorField::
 flowRateInletVelocityFvPatchVectorField
 (
     const flowRateInletVelocityFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_),
+    flowRate_(ptf.flowRate_().clone().ptr()),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
 
 
-Foam::
-flowRateInletVelocityFvPatchVectorField::
+Foam::flowRateInletVelocityFvPatchVectorField::
 flowRateInletVelocityFvPatchVectorField
 (
     const flowRateInletVelocityFvPatchVectorField& ptf,
@@ -102,7 +97,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    flowRate_(ptf.flowRate_),
+    flowRate_(ptf.flowRate_().clone().ptr()),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_)
 {}
@@ -117,8 +112,10 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
+    const scalar t = db().time().value();
+
     // a simpler way of doing this would be nice
-    const scalar avgU = -flowRate_/gSum(patch().magSf());
+    const scalar avgU = -flowRate_->value(t)/gSum(patch().magSf());
 
     tmp<vectorField> n = patch().nf();
 
@@ -157,7 +154,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
-    os.writeKeyword("flowRate") << flowRate_ << token::END_STATEMENT << nl;
+    flowRate_->writeData(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntry("value", os);
