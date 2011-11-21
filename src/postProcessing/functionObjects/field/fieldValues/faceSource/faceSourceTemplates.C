@@ -134,6 +134,25 @@ Type Foam::fieldValues::faceSource::processValues
             result = max(values);
             break;
         }
+        case opCoV:
+        {
+            Type meanValue = sum(values*magSf)/sum(magSf);
+
+            const label nComp = pTraits<Type>::nComponents;
+
+            for (direction d=0; d<nComp; ++d)
+            {
+                scalarField vals(values.component(d));
+                scalar mean = component(meanValue, d);
+                scalar& res = setComponent(result, d);
+
+                res =
+                    sqrt(sum(magSf*sqr(vals - mean))/(magSf.size()*sum(magSf)))
+                   /mean;
+            }
+
+            break;
+        }
         default:
         {
             // Do nothing
