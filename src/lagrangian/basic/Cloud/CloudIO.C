@@ -162,6 +162,8 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    checkPatches();
+
     initCloud(checkClass);
 }
 
@@ -180,6 +182,8 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    checkPatches();
+
     initCloud(checkClass);
 }
 

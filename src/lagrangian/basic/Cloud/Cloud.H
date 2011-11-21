@@ -93,6 +93,9 @@ class Cloud
 
     // Private Member Functions
 
+        //- Check patches
+        void checkPatches() const;
+
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
 
