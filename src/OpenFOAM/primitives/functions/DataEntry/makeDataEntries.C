@@ -23,27 +23,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DataEntry.H"
 #include "Constant.H"
+#include "CSV.H"
+#include "DataEntry.H"
 #include "Table.H"
 
 #include "label.H"
 #include "scalar.H"
 #include "vector.H"
+#include "sphericalTensor.H"
+#include "symmTensor.H"
+#include "tensor.H"
 
 namespace Foam
 {
     makeDataEntry(label);
     makeDataEntryType(Constant, label);
+//    makeDataEntryType(CSV, label);
     makeDataEntryType(Table, label);
 
     makeDataEntry(scalar);
     makeDataEntryType(Constant, scalar);
+    makeDataEntryType(CSV, scalar);
     makeDataEntryType(Table, scalar);
 
     makeDataEntry(vector);
     makeDataEntryType(Constant, vector);
+    makeDataEntryType(CSV, vector);
     makeDataEntryType(Table, vector);
+
+    makeDataEntry(sphericalTensor);
+    makeDataEntryType(Constant, sphericalTensor);
+    makeDataEntryType(CSV, sphericalTensor);
+    makeDataEntryType(Table, sphericalTensor);
+
+    makeDataEntry(symmTensor);
+    makeDataEntryType(Constant, symmTensor);
+    makeDataEntryType(CSV, symmTensor);
+    makeDataEntryType(Table, symmTensor);
+
+    makeDataEntry(tensor);
+    makeDataEntryType(Constant, tensor);
+    makeDataEntryType(CSV, tensor);
+    makeDataEntryType(Table, tensor);
 }
 
 

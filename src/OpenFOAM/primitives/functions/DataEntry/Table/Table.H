@@ -93,7 +93,7 @@ public:
     // Constructors
 
         //- Construct from entry name and Istream
-        Table(const word& entryName, Istream& is);
+        Table(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
         Table(const Table<Type>& tbl);

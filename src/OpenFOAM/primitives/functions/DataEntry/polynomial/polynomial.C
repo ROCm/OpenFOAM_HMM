@@ -34,12 +34,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::polynomial::polynomial(const word& entryName, Istream& is)
+Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
 :
     DataEntry<scalar>(entryName),
-    coeffs_(is),
+    coeffs_(),
     canIntegrate_(true)
 {
+    Istream& is(dict.lookup(entryName));
+    word entryType(is);
+
+    is  >> coeffs_;
+
     if (!coeffs_.size())
     {
         FatalErrorIn("Foam::polynomial::polynomial(const word&, Istream&)")

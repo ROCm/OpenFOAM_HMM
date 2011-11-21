@@ -35,7 +35,6 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 )
 {
     Istream& is(dict.lookup(entryName));
-
     word DataEntryType(is);
 
     typename dictionaryConstructorTable::iterator cstrIter =
@@ -54,7 +53,7 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
             << exit(FatalError);
     }
 
-    return autoPtr<DataEntry<Type> >(cstrIter()(entryName, is));
+    return autoPtr<DataEntry<Type> >(cstrIter()(entryName, dict));
 }
 
 

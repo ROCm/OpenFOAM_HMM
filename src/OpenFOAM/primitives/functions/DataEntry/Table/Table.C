@@ -28,11 +28,16 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Table<Type>::Table(const word& entryName, Istream& is)
+Foam::Table<Type>::Table(const word& entryName, const dictionary& dict)
 :
     DataEntry<Type>(entryName),
-    table_(is)
+    table_()
 {
+    Istream& is(dict.lookup(entryName));
+    word entryType(is);
+
+    is  >> table_;
+
     if (!table_.size())
     {
         FatalErrorIn("Foam::Table<Type>::Table(const Istream&)")
