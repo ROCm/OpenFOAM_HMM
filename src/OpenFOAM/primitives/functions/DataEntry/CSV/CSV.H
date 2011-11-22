@@ -29,13 +29,14 @@ Description
     e.g. time
 
     \verbatim
-        <entryName>   CSV
+        <entryName>   csvFile
         {
             hasHeaderLine   true;
-            refColumn       0;              // reference column index
-            componentColumns (0 1 2);       // component column indices
-            separator       ",";            // optional (defaults to ",")
-            fileName        fileXYZ;        // name of csv data file
+            refColumn       0;          // reference column index
+            componentColumns (0 1 2);   // component column indices
+            separator       ",";        // optional (defaults to ",")
+            fileName        fileXYZ;    // name of csv data file
+            outOfBounds     clamp;      // optional out-of-bounds handling
         }
     \endverbatim
 
@@ -48,6 +49,7 @@ SourceFiles
 #define CSV_H
 
 #include "DataEntry.H"
+#include "TableBase.H"
 #include "Tuple2.H"
 #include "labelList.H"
 #include "ISstream.H"
@@ -74,9 +76,13 @@ Ostream& operator<<
 template<class Type>
 class CSV
 :
-    public DataEntry<Type>
+    public DataEntry<Type>,
+    public TableBase<Type>
 {
     // Private data
+
+        //- Coefficients dictionary (for convenience on reading)
+        dictionary coeffs_;
 
         //- Does the file have a header line?
         bool headerLine_;
@@ -92,9 +98,6 @@ class CSV
 
         //- File name for csv table (optional)
         fileName fName_;
-
-        //- CSV data
-        List<Tuple2<scalar, Type> > table_;
 
 
     // Private Member Functions
@@ -112,7 +115,7 @@ class CSV
 public:
 
     //- Runtime type information
-    TypeName("csv");
+    TypeName("csvFile");
 
 
     // Constructors
@@ -136,11 +139,17 @@ public:
 
     // Member Functions
 
-        //- Return CSV value
-        Type value(const scalar x) const;
+        //- Return Table value
+        virtual Type value(const scalar x) const
+        {
+            return TableBase<Type>::value(x);
+        }
 
         //- Integrate between two (scalar) values
-        Type integrate(const scalar x1, const scalar x2) const;
+        virtual Type integrate(const scalar x1, const scalar x2) const
+        {
+            return TableBase<Type>::integrate(x1, x2);
+        }
 
 
     // I/O

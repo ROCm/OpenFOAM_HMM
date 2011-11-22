@@ -130,10 +130,10 @@ public:
         bool checkMaxBounds(const scalar x, scalar& xDash) const;
 
         //- Return Table value
-        Type value(const scalar x) const;
+        virtual Type value(const scalar x) const;
 
         //- Integrate between two (scalar) values
-        Type integrate(const scalar x1, const scalar x2) const;
+        virtual Type integrate(const scalar x1, const scalar x2) const;
 
 
     // I/O

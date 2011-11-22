@@ -46,11 +46,6 @@ Foam::Ostream& Foam::operator<<
     else
     {
         os  << static_cast<const DataEntry<Type>& >(tbl);
-        os.write
-        (
-            reinterpret_cast<const char*>(&tbl.table_),
-            sizeof(tbl.table_)
-        );
     }
 
     // Check state of Ostream
