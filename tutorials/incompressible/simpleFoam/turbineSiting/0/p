@@ -30,8 +30,8 @@ boundaryField
     outlet
     {
         type            uniformFixedValue;
-        value           constant $pressure;
-        uniformValue    $pressure;
+        value           $pressure;
+        uniformValue    constant $pressure;
     }
 
     "terrain_.*"
