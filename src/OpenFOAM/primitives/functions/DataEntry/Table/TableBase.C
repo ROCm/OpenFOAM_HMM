@@ -35,7 +35,7 @@ Foam::TableBase<Type>::TableBase(const word& name, const dictionary& dict)
     (
         wordToBoundsHandling
         (
-            dict.lookupOrDefault<word>("outOfBounds", "warn")
+            dict.lookupOrDefault<word>("outOfBounds", "clamp")
         )
     ),
     table_()
