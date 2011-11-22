@@ -57,6 +57,7 @@ SourceFiles
 #define flowRateInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,7 +74,7 @@ class flowRateInletVelocityFvPatchVectorField
     // Private data
 
         //- Inlet integral flow rate
-        scalar flowRate_;
+        autoPtr<DataEntry<scalar> > flowRate_;
 
         //- Name of the flux transporting the field
         word phiName_;
@@ -153,27 +154,11 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return the flux
-            scalar flowRate() const
-            {
-                return flowRate_;
-            }
-
-            //- Return reference to the flux to allow adjustment
-            scalar& flowRate()
-            {
-                return flowRate_;
-            }
-
-
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

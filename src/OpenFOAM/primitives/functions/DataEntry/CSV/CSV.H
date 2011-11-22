@@ -22,110 +22,143 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::polynomial
+    Foam::CSV
 
 Description
-    Polynomial container data entry for scalars. Items are stored in a list of
-    Tuple2's. Data is input in the form, e.g. for an entry \<entryName\> that
-    describes y = x^2 + 2x^3
+    Templated CSV container data entry.  Reference column is always a scalar,
+    e.g. time
 
     \verbatim
-        <entryName>   polynomial
-        (
-            (1    2)
-            (2    3)
-        );
+        <entryName>   csvFile
+        {
+            hasHeaderLine   true;
+            refColumn       0;          // reference column index
+            componentColumns (0 1 2);   // component column indices
+            separator       ",";        // optional (defaults to ",")
+            fileName        fileXYZ;    // name of csv data file
+            outOfBounds     clamp;      // optional out-of-bounds handling
+        }
     \endverbatim
 
 SourceFiles
-    polynomial.C
+    CSV.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polynomial_H
-#define polynomial_H
+#ifndef CSV_H
+#define CSV_H
 
 #include "DataEntry.H"
+#include "TableBase.H"
 #include "Tuple2.H"
+#include "labelList.H"
+#include "ISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class polynomial;
+template<class Type>
+class CSV;
 
-// Forward declaration of friend functions
+template<class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const polynomial&
+    const CSV<Type>&
 );
 
 /*---------------------------------------------------------------------------*\
-                        Class polynomial Declaration
+                           Class CSV Declaration
 \*---------------------------------------------------------------------------*/
 
-class polynomial
+template<class Type>
+class CSV
 :
-    public DataEntry<scalar>
+    public DataEntry<Type>,
+    public TableBase<Type>
 {
     // Private data
 
-        //- Polynomial coefficients - list of prefactor, exponent
-        List<Tuple2<scalar, scalar> > coeffs_;
+        //- Coefficients dictionary (for convenience on reading)
+        dictionary coeffs_;
 
-        //- Flag to indicate whether poly can be integrated
-        bool canIntegrate_;
+        //- Does the file have a header line?
+        bool headerLine_;
+
+        //- Column of the time
+        label refColumn_;
+
+        //- Labels of the components
+        labelList componentColumns_;
+
+        //- Separator character
+        char separator_;
+
+        //- File name for csv table (optional)
+        fileName fName_;
 
 
     // Private Member Functions
 
+        //- Read csv data table
+        void read();
+
+        //- Read the next value from the splitted string
+        Type readValue(const List<string>&);
+
         //- Disallow default bitwise assignment
-        void operator=(const polynomial&);
+        void operator=(const CSV<Type>&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("polynomial");
+    TypeName("csvFile");
 
 
     // Constructors
 
-        polynomial(const word& entryName, const dictionary& dict);
+        //- Construct from entry name and Istream
+        CSV(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
-        polynomial(const polynomial& poly);
+        CSV(const CSV<Type>& tbl);
 
         //- Construct and return a clone
-        virtual tmp<DataEntry<scalar> > clone() const
+        virtual tmp<DataEntry<Type> > clone() const
         {
-            return tmp<DataEntry<scalar> >(new polynomial(*this));
+            return tmp<DataEntry<Type> >(new CSV<Type>(*this));
         }
 
 
     //- Destructor
-    virtual ~polynomial();
+    virtual ~CSV();
 
 
     // Member Functions
 
-        //- Return polynomial value
-        scalar value(const scalar x) const;
+        //- Return Table value
+        virtual Type value(const scalar x) const
+        {
+            return TableBase<Type>::value(x);
+        }
 
         //- Integrate between two (scalar) values
-        scalar integrate(const scalar x1, const scalar x2) const;
+        virtual Type integrate(const scalar x1, const scalar x2) const
+        {
+            return TableBase<Type>::integrate(x1, x2);
+        }
 
 
     // I/O
 
         //- Ostream Operator
-        friend Ostream& operator<<
+        friend Ostream& operator<< <Type>
         (
             Ostream& os,
-            const polynomial& cnst
+            const CSV<Type>& cnst
         );
 
         //- Write in dictionary format
@@ -136,6 +169,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "CSV.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

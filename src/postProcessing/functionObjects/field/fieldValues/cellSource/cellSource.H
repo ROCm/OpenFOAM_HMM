@@ -52,6 +52,7 @@ Description
       - volAverage
       - volIntegrate
       - weightedAverage
+      - CoV (Coefficient of variation: standard deviation/mean)
 
 SourceFiles
     cellSource.C
@@ -106,11 +107,12 @@ public:
             opVolIntegrate,
             opWeightedAverage,
             opMin,
-            opMax
+            opMax,
+            opCoV
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 7> operationTypeNames_;
+        static const NamedEnum<operationType, 8> operationTypeNames_;
 
 
 private:

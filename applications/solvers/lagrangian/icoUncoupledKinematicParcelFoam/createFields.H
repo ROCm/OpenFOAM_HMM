@@ -47,16 +47,9 @@
 
     #include "createPhi.H"
 
-    Info<< "Creating turbulence model\n" << endl;
-
     singlePhaseTransportModel laminarTransport(U, phi);
 
     const volScalarField nu(laminarTransport.nu());
-
-    autoPtr<incompressible::turbulenceModel> turbulence
-    (
-        incompressible::turbulenceModel::New(U, phi, laminarTransport)
-    );
 
     volScalarField mu
     (

@@ -115,6 +115,23 @@ Type Foam::fieldValues::cellSource::processValues
             result = max(values);
             break;
         }
+        case opCoV:
+        {
+            Type meanValue = sum(values*V)/sum(V);
+
+            const label nComp = pTraits<Type>::nComponents;
+
+            for (direction d=0; d<nComp; ++d)
+            {
+                scalarField vals(values.component(d));
+                scalar mean = component(meanValue, d);
+                scalar& res = setComponent(result, d);
+
+                res = sqrt(sum(V*sqr(vals - mean))/(V.size()*sum(V)))/mean;
+            }
+
+            break;
+        }
         default:
         {
             // Do nothing

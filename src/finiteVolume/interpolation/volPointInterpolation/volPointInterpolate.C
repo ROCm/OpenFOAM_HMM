@@ -235,7 +235,11 @@ tmp<Field<Type> > volPointInterpolation::flatBoundaryField
     {
         label bFaceI = bm[patchI].patch().start() - mesh.nInternalFaces();
 
-        if (!isA<emptyFvPatch>(bm[patchI]) && !bm[patchI].coupled())
+        if
+        (
+           !isA<emptyFvPatch>(bm[patchI])
+        && !vf.boundaryField()[patchI].coupled()
+        )
         {
             SubList<Type>
             (

@@ -80,17 +80,12 @@ singleStepCombustion<CombThermoType, ThermoType>::R
 {
     const label specieI = this->thermo_->composition().species()[Y.name()];
 
-    const label fNorm = singleMixture_.specieProd()[specieI];
-
-    const volScalarField fres(singleMixture_.fres(specieI));
-
     const volScalarField wSpecie
     (
         wFuel_*singleMixture_.specieStoichCoeffs()[specieI]
-      / max(fNorm*(Y - fres), scalar(0.001))
     );
 
-    return -fNorm*wSpecie*fres + fNorm*fvm::Sp(wSpecie, Y);
+    return wSpecie + fvm::Sp(0.0*wSpecie, Y);
 }
 
 
