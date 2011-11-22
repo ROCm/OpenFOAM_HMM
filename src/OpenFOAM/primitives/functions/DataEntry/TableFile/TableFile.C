@@ -23,57 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Constant.H"
+#include "TableFile.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Constant<Type>::Constant(const word& entryName, const dictionary& dict)
+Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
 :
     DataEntry<Type>(entryName),
-    value_(pTraits<Type>::zero)
+    TableBase<Type>(entryName, dict.subDict(type() + "Coeffs")),
+    fName_("none")
 {
-    Istream& is(dict.lookup(entryName));
-    word entryType(is);
+    const dictionary coeffs(dict.subDict(type() + "Coeffs"));
+    coeffs.lookup("fileName") >> fName_;
 
-    is  >> value_;
+    IFstream is(fName_.expand());
+
+    is  >> this->table_;
+
+    TableBase<Type>::check();
 }
 
 
 template<class Type>
-Foam::Constant<Type>::Constant(const Constant<Type>& cnst)
+Foam::TableFile<Type>::TableFile(const TableFile<Type>& tbl)
 :
-    DataEntry<Type>(cnst),
-    value_(cnst.value_)
+    DataEntry<Type>(tbl),
+    TableBase<Type>(tbl),
+    fName_(tbl.fName_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Constant<Type>::~Constant()
+Foam::TableFile<Type>::~TableFile()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Type Foam::Constant<Type>::value(const scalar x) const
-{
-    return value_;
-}
-
-
-template<class Type>
-Type Foam::Constant<Type>::integrate(const scalar x1, const scalar x2) const
-{
-    return (x2 - x1)*value_;
-}
 
 
 // * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
 
-#include "ConstantIO.C"
+#include "TableFileIO.C"
 
 
 // ************************************************************************* //

@@ -83,7 +83,7 @@ public:
     // Constructors
 
         //- Construct from entry name and Istream
-        Constant(const word& entryName, Istream& is);
+        Constant(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
         Constant(const Constant<Type>& cnst);

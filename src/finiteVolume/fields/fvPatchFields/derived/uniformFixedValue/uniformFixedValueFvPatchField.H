@@ -37,6 +37,7 @@ SourceFiles
 
 #include "Random.H"
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class uniformFixedValueFvPatch Declaration
+                 Class uniformFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -54,7 +55,7 @@ class uniformFixedValueFvPatchField
 {
     // Private data
 
-        Type uniformValue_;
+        autoPtr<DataEntry<Type> > uniformValue_;
 
 
 public:
@@ -126,21 +127,6 @@ public:
 
 
     // Member functions
-
-        // Access
-
-            //- Return the fluctuation scale
-            const Type& uniformValue() const
-            {
-                return uniformValue_;
-            }
-
-            //- Return reference to the fluctuation scale to allow adjustment
-            Type& uniformValue()
-            {
-                return uniformValue_;
-            }
-
 
         // Mapping functions
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    redistributeMeshPar
+    redistributePar
 
 Description
     Redistributes existing decomposed mesh and fields according to the current
@@ -42,7 +42,7 @@ Description
         cp -r constant processor0
 
         # Distribute
-        mpirun -np ddd redistributeMeshPar -parallel
+        mpirun -np ddd redistributePar -parallel
     \endverbatim
 \*---------------------------------------------------------------------------*/
 

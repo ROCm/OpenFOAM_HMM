@@ -39,7 +39,7 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(p, iF),
-    omega_(vector::zero)
+    omega_()
 {}
 
 
@@ -53,7 +53,7 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(ptf, p, iF, mapper),
-    omega_(ptf.omega_)
+    omega_(ptf.omega_().clone().ptr())
 {}
 
 
@@ -66,30 +66,30 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(p, iF, dict),
-    omega_(dict.lookup("omega"))
+    omega_(DataEntry<vector>::New("omega", dict))
 {}
 
 
 Foam::rotatingTotalPressureFvPatchScalarField::
 rotatingTotalPressureFvPatchScalarField
 (
-    const rotatingTotalPressureFvPatchScalarField& tppsf
+    const rotatingTotalPressureFvPatchScalarField& rtppsf
 )
 :
-    totalPressureFvPatchScalarField(tppsf),
-    omega_(tppsf.omega_)
+    totalPressureFvPatchScalarField(rtppsf),
+    omega_(rtppsf.omega_().clone().ptr())
 {}
 
 
 Foam::rotatingTotalPressureFvPatchScalarField::
 rotatingTotalPressureFvPatchScalarField
 (
-    const rotatingTotalPressureFvPatchScalarField& tppsf,
+    const rotatingTotalPressureFvPatchScalarField& rtppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    totalPressureFvPatchScalarField(tppsf, iF),
-    omega_(tppsf.omega_)
+    totalPressureFvPatchScalarField(rtppsf, iF),
+    omega_(rtppsf.omega_().clone().ptr())
 {}
 
 
@@ -102,9 +102,12 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    vector axisHat = omega_/mag(omega_);
+    const scalar t = this->db().time().value();
+    const vector om = omega_->value(t);
+
+    vector axisHat = om/mag(om);
     tmp<vectorField> rotationVelocity =
-        omega_ ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()));
+        om ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()));
 
     const vectorField Up
     (
@@ -119,7 +122,7 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
 void Foam::rotatingTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     totalPressureFvPatchScalarField::write(os);
-    os.writeKeyword("omega")<< omega_ << token::END_STATEMENT << nl;
+    omega_->writeData(os);
 }
 
 

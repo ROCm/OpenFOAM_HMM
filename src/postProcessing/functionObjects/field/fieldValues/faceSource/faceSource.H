@@ -62,6 +62,7 @@ Description
       - weightedAverage
       - min
       - max
+      - CoV (Coefficient of variation: standard deviation/mean)
 
     Notes:
     - faces on empty patches get ignored
@@ -132,11 +133,12 @@ public:
             opAreaIntegrate,
             opWeightedAverage,
             opMin,
-            opMax
+            opMax,
+            opCoV
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 7> operationTypeNames_;
+        static const NamedEnum<operationType, 8> operationTypeNames_;
 
 
 private:

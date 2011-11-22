@@ -31,16 +31,27 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Table<Type>& tbl
+    const CSV<Type>& tbl
 )
 {
-    os  << static_cast<const DataEntry<Type>&>(tbl)
-        << static_cast<const TableBase<Type>&>(tbl);
+    if (os.format() == IOstream::ASCII)
+    {
+        os  << static_cast<const DataEntry<Type>& >(tbl)
+            << token::SPACE << tbl.headerLine_
+            << token::SPACE << tbl.timeColumn_
+            << token::SPACE << tbl.componentColumns_
+            << token::SPACE << tbl.separator_
+            << token::SPACE << tbl.fileName_;
+    }
+    else
+    {
+        os  << static_cast<const DataEntry<Type>& >(tbl);
+    }
 
     // Check state of Ostream
     os.check
     (
-        "Ostream& operator<<(Ostream&, const Table<Type>&)"
+        "Ostream& operator<<(Ostream&, const CSV<Type>&)"
     );
 
     return os;
@@ -48,10 +59,21 @@ Foam::Ostream& Foam::operator<<
 
 
 template<class Type>
-void Foam::Table<Type>::writeData(Ostream& os) const
+void Foam::CSV<Type>::writeData(Ostream& os) const
 {
     DataEntry<Type>::writeData(os);
-    TableBase<Type>::writeData(os);
+
+    os  << token::END_STATEMENT << nl;
+    os  << indent << word(type() + "Coeffs") << nl;
+    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+    os.writeKeyword("headerLine") << headerLine_ << token::END_STATEMENT << nl;
+    os.writeKeyword("refColumn") << refColumn_ << token::END_STATEMENT << nl;
+    os.writeKeyword("componentColumns") << componentColumns_
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("separator") << string(separator_)
+        << token::END_STATEMENT << nl;
+    os.writeKeyword("fileName") << fName_ << token::END_STATEMENT << nl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 

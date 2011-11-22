@@ -23,27 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFvPatchFields_H
-#define timeVaryingUniformFixedValueFvPatchFields_H
-
-#include "timeVaryingUniformFixedValueFvPatchField.H"
-#include "fieldTypes.H"
+#include "cyclicAMIPointPatchFields.H"
+#include "pointPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
+makePointPatchFields(cyclicAMI);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

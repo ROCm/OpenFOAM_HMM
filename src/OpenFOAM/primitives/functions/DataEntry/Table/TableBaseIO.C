@@ -23,21 +23,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFvPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "volFields.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const TableBase<Type>& tbl
+)
 {
+    if (os.format() == IOstream::ASCII)
+    {
+         os << token::SPACE << tbl.table_;
+    }
+    else
+    {
+        os.write
+        (
+            reinterpret_cast<const char*>(&tbl.table_),
+            sizeof(tbl.table_)
+        );
+    }
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const TableBase<Type>&, const bool)"
+    );
 
-makePatchFields(timeVaryingUniformFixedValue);
+    return os;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<class Type>
+void Foam::TableBase<Type>::writeData(Ostream& os) const
+{
+    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+}
+
 
 // ************************************************************************* //

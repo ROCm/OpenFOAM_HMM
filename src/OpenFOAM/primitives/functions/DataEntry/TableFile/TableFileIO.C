@@ -23,57 +23,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Constant.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Constant<Type>::Constant(const word& entryName, const dictionary& dict)
-:
-    DataEntry<Type>(entryName),
-    value_(pTraits<Type>::zero)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const TableFile<Type>& tbl
+)
 {
-    Istream& is(dict.lookup(entryName));
-    word entryType(is);
+    os  << static_cast<const DataEntry<Type>&>(tbl)
+        << static_cast<const TableBase<Type>&>(tbl);
 
-    is  >> value_;
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const TableFile<Type>&)"
+    );
+
+    return os;
 }
 
 
 template<class Type>
-Foam::Constant<Type>::Constant(const Constant<Type>& cnst)
-:
-    DataEntry<Type>(cnst),
-    value_(cnst.value_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Constant<Type>::~Constant()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Type Foam::Constant<Type>::value(const scalar x) const
+void Foam::TableFile<Type>::writeData(Ostream& os) const
 {
-    return value_;
+    DataEntry<Type>::writeData(os);
+
+    os  << token::END_STATEMENT << nl
+        << indent << word(type() + "Coeffs") << nl
+        << indent << token::BEGIN_BLOCK << nl << incrIndent;
+    os.writeKeyword("fileName")<< fName_ << token::END_STATEMENT << nl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
 }
-
-
-template<class Type>
-Type Foam::Constant<Type>::integrate(const scalar x1, const scalar x2) const
-{
-    return (x2 - x1)*value_;
-}
-
-
-// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
-
-#include "ConstantIO.C"
 
 
 // ************************************************************************* //

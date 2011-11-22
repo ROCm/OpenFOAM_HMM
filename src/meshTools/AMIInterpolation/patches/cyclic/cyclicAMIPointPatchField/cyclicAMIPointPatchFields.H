@@ -23,9 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFvPatchFieldsFwd_H
-#define timeVaryingUniformFixedValueFvPatchFieldsFwd_H
+#ifndef cyclicAMIPointPatchFields_H
+#define cyclicAMIPointPatchFields_H
 
+#include "cyclicAMIPointPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,9 +36,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type> class timeVaryingUniformFixedValueFvPatchField;
-
-makePatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
+makePointPatchFieldTypedefs(cyclicAMI);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

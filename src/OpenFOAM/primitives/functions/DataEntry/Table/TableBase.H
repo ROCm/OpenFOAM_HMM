@@ -22,28 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Table
+    Foam::TableBase
 
 Description
-    Templated table container data entry. Items are stored in a list of
-    Tuple2's. First column is always stored as scalar entries. Data is read
-    in the form, e.g. for an entry \<entryName\> that is (scalar, vector):
-
-    \verbatim
-        <entryName>   table
-        (
-            0.0 (1 2 3)
-            1.0 (4 5 6)
-        );
-    \endverbatim
+    Base class for table with bounds handling, interpolation and integration
 
 SourceFiles
-    Table.C
+    TableBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Table_H
-#define Table_H
+#ifndef TableBase_H
+#define TableBase_H
 
 #include "DataEntry.H"
 #include "Tuple2.H"
@@ -54,69 +44,96 @@ namespace Foam
 {
 
 template<class Type>
-class Table;
+class TableBase;
 
 template<class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const Table<Type>&
+    const TableBase<Type>&
 );
 
 /*---------------------------------------------------------------------------*\
-                           Class Table Declaration
+                        Class TableBase Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class Table
-:
-    public DataEntry<Type>,
-    public TableBase<Type>
+class TableBase
 {
-    // Private Member Functions
+public:
+
+    // Public data types
+
+        //- Enumeration for handling out-of-bound values
+        enum boundsHandling
+        {
+            ERROR,          /*!< Exit with a FatalError */
+            WARN,           /*!< Issue warning and clamp value (default) */
+            CLAMP,          /*!< Clamp value to the start/end value */
+            REPEAT          /*!< Treat as a repeating list */
+        };
+
+
+protected:
+
+    // Protected data
+
+        //- Table name
+        word name_;
+
+        //- Enumeration for handling out-of-bound values
+        boundsHandling boundsHandling_;
+
+        //- Table data
+        List<Tuple2<scalar, Type> > table_;
+
+
+    // Protected Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Table<Type>&);
+        void operator=(const TableBase<Type>&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("table");
-
-
     // Constructors
 
-        //- Construct from entry name and Istream
-        Table(const word& entryName, const dictionary& dict);
+        //- Construct from dictionary - note table is not populated
+        TableBase(const word& name, const dictionary& dict);
 
         //- Copy constructor
-        Table(const Table<Type>& tbl);
-
-        //- Construct and return a clone
-        virtual tmp<DataEntry<Type> > clone() const
-        {
-            return tmp<DataEntry<Type> >(new Table<Type>(*this));
-        }
+        TableBase(const TableBase<Type>& tbl);
 
 
     //- Destructor
-    virtual ~Table();
+    virtual ~TableBase();
 
 
     // Member Functions
 
+        //- Return the out-of-bounds handling as a word
+        word boundsHandlingToWord(const boundsHandling& bound) const;
+
+        //- Return the out-of-bounds handling as an enumeration
+        boundsHandling wordToBoundsHandling(const word& bound) const;
+
+        //- Set the out-of-bounds handling from enum, return previous setting
+        boundsHandling outOfBounds(const boundsHandling& bound);
+
+        //- Check the table for size and consistency
+        void check() const;
+
+        //- Check minimum table bounds
+        bool checkMinBounds(const scalar x, scalar& xDash) const;
+
+        //- Check maximum table bounds
+        bool checkMaxBounds(const scalar x, scalar& xDash) const;
+
         //- Return Table value
-        virtual Type value(const scalar x) const
-        {
-            return TableBase<Type>::value(x);
-        }
+        virtual Type value(const scalar x) const;
 
         //- Integrate between two (scalar) values
-        virtual Type integrate(const scalar x1, const scalar x2) const
-        {
-            return TableBase<Type>::integrate(x1, x2);
-        }
+        virtual Type integrate(const scalar x1, const scalar x2) const;
 
 
     // I/O
@@ -125,7 +142,7 @@ public:
         friend Ostream& operator<< <Type>
         (
             Ostream& os,
-            const Table<Type>& tbl
+            const TableBase<Type>& tbl
         );
 
         //- Write in dictionary format
@@ -140,7 +157,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Table.C"
+#   include "TableBase.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

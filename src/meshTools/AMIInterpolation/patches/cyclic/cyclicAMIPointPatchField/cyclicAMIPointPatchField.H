@@ -22,21 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::processorPointPatchField
+    Foam::cyclicAMIPointPatchField
 
 Description
-    Foam::processorPointPatchField
+    Cyclic AMI front and back plane patch field
 
 SourceFiles
-    processorPointPatchField.C
+    cyclicAMIPointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorPointPatchField_H
-#define processorPointPatchField_H
+#ifndef cyclicAMIPointPatchField_H
+#define cyclicAMIPointPatchField_H
 
 #include "coupledPointPatchField.H"
-#include "processorPointPatch.H"
+#include "cyclicAMIPointPatch.H"
+#include "PrimitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,37 +45,81 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class processorPointPatchField Declaration
+                  Class cyclicAMIPointPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class processorPointPatchField
+class cyclicAMIPointPatchField
 :
     public coupledPointPatchField<Type>
 {
     // Private data
 
-        //- Local reference to processor patch
-        const processorPointPatch& procPatch_;
+        //- Local reference cast into the cyclicAMI patch
+        const cyclicAMIPointPatch& cyclicAMIPatch_;
+
+        //- Owner side patch interpolation pointer
+        mutable autoPtr<PrimitivePatchInterpolation<primitivePatch> > ppiPtr_;
+
+        //- Neighbour side patch interpolation pointer
+        mutable autoPtr<PrimitivePatchInterpolation<primitivePatch> >
+            nbrPpiPtr_;
+
+
+    // Private Member Functions
+
+        //- Owner side patch interpolation
+        const PrimitivePatchInterpolation<primitivePatch>& ppi() const
+        {
+            if (!ppiPtr_.valid())
+            {
+                ppiPtr_.reset
+                (
+                    new PrimitivePatchInterpolation<primitivePatch>
+                    (
+                        cyclicAMIPatch_.cyclicAMIPatch()
+                    )
+                );
+            }
+
+            return ppiPtr_();
+        }
+
+        //- Neighbour side patch interpolation
+        const PrimitivePatchInterpolation<primitivePatch>& nbrPpi() const
+        {
+            if (!nbrPpiPtr_.valid())
+            {
+                nbrPpiPtr_.reset
+                (
+                    new PrimitivePatchInterpolation<primitivePatch>
+                    (
+                        cyclicAMIPatch_.cyclicAMIPatch().neighbPatch()
+                    )
+                );
+            }
+
+            return nbrPpiPtr_();
+        }
 
 
 public:
 
     //- Runtime type information
-    TypeName(processorPointPatch::typeName_());
+    TypeName(cyclicAMIPointPatch::typeName_());
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        processorPointPatchField
+        cyclicAMIPointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        processorPointPatchField
+        cyclicAMIPointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
@@ -82,9 +127,9 @@ public:
         );
 
         //- Construct by mapping given patchField<Type> onto a new patch
-        processorPointPatchField
+        cyclicAMIPointPatchField
         (
-            const processorPointPatchField<Type>&,
+            const cyclicAMIPointPatchField<Type>&,
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
             const pointPatchFieldMapper&
@@ -95,7 +140,7 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new processorPointPatchField<Type>
+                new cyclicAMIPointPatchField<Type>
                 (
                     *this
                 )
@@ -103,9 +148,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        processorPointPatchField
+        cyclicAMIPointPatchField
         (
-            const processorPointPatchField<Type>&,
+            const cyclicAMIPointPatchField<Type>&,
             const DimensionedField<Type, pointMesh>&
         );
 
@@ -117,53 +162,47 @@ public:
         {
             return autoPtr<pointPatchField<Type> >
             (
-                new processorPointPatchField<Type>
+                new cyclicAMIPointPatchField<Type>
                 (
-                    *this,
-                    iF
+                    *this, iF
                 )
             );
         }
 
 
-    //- Destructor
-    virtual ~processorPointPatchField();
-
-
     // Member functions
 
-        // Access
-
-            //- Return true if running parallel
-            virtual bool coupled() const
-            {
-                if (Pstream::parRun())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            //- Does the patch field perform the transformation
-            virtual bool doTransform() const
-            {
-                return
-                   !(
-                        procPatch_.procPolyPatch().parallel()
-                     || pTraits<Type>::rank == 0
-                    );
-            }
-
-
-        //- Constraint handling
+        // Constraint handling
 
             //- Return the constraint type this pointPatchField implements
             virtual const word& constraintType() const
             {
-                return type();
+                return cyclicAMIPointPatch::typeName;
+            }
+
+
+        // Cyclic AMI coupled interface functions
+
+            //- Does the patch field perform the transfromation
+            virtual bool doTransform() const
+            {
+                return
+                   !(
+                        cyclicAMIPatch_.parallel()
+                     || pTraits<Type>::rank == 0
+                    );
+            }
+
+            //- Return face transformation tensor
+            virtual const tensorField& forwardT() const
+            {
+                return cyclicAMIPatch_.forwardT();
+            }
+
+            //- Return neighbour-cell transformation tensor
+            virtual const tensorField& reverseT() const
+            {
+                return cyclicAMIPatch_.reverseT();
             }
 
 
@@ -175,13 +214,6 @@ public:
                 const Pstream::commsTypes commsType=Pstream::blocking
             )
             {}
-
-            //- Initialise swap of non-collocated patch point values
-            virtual void initSwapAddSeparated
-            (
-                const Pstream::commsTypes commsType,
-                Field<Type>&
-            ) const;
 
             //- Complete swap of patch point values and add to local values
             virtual void swapAddSeparated
@@ -199,7 +231,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#    include "processorPointPatchField.C"
+#    include "cyclicAMIPointPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

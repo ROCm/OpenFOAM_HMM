@@ -33,10 +33,13 @@ License
 void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
 calcTangentialVelocity()
 {
-    vector axisHat = omega_/mag(omega_);
+    const scalar t = this->db().time().value();
+    vector om = omega_->value(t);
+
+    vector axisHat = om/mag(om);
     const vectorField tangentialVelocity
     (
-        (-omega_) ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()))
+        (-om) ^ (patch().Cf() - axisHat*(axisHat & patch().Cf()))
     );
 
     const vectorField n(patch().nf());
@@ -54,7 +57,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 )
 :
     pressureInletOutletVelocityFvPatchVectorField(p, iF),
-    omega_(vector::zero)
+    omega_()
 {}
 
 
@@ -68,7 +71,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 )
 :
     pressureInletOutletVelocityFvPatchVectorField(ptf, p, iF, mapper),
-    omega_(ptf.omega_)
+    omega_(ptf.omega_().clone().ptr())
 {
     calcTangentialVelocity();
 }
@@ -83,7 +86,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 )
 :
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
-    omega_(dict.lookup("omega"))
+    omega_(DataEntry<vector>::New("omega", dict))
 {
     calcTangentialVelocity();
 }
@@ -92,11 +95,11 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
 rotatingPressureInletOutletVelocityFvPatchVectorField
 (
-    const rotatingPressureInletOutletVelocityFvPatchVectorField& pivpvf
+    const rotatingPressureInletOutletVelocityFvPatchVectorField& rppvf
 )
 :
-    pressureInletOutletVelocityFvPatchVectorField(pivpvf),
-    omega_(pivpvf.omega_)
+    pressureInletOutletVelocityFvPatchVectorField(rppvf),
+    omega_(rppvf.omega_().clone().ptr())
 {
     calcTangentialVelocity();
 }
@@ -105,12 +108,12 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
 Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::
 rotatingPressureInletOutletVelocityFvPatchVectorField
 (
-    const rotatingPressureInletOutletVelocityFvPatchVectorField& pivpvf,
+    const rotatingPressureInletOutletVelocityFvPatchVectorField& rppvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    pressureInletOutletVelocityFvPatchVectorField(pivpvf, iF),
-    omega_(pivpvf.omega_)
+    pressureInletOutletVelocityFvPatchVectorField(rppvf, iF),
+    omega_(rppvf.omega_().clone().ptr())
 {
     calcTangentialVelocity();
 }
@@ -125,7 +128,7 @@ void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::write
 {
     fvPatchVectorField::write(os);
     os.writeKeyword("phi") << phiName() << token::END_STATEMENT << nl;
-    os.writeKeyword("omega")<< omega_ << token::END_STATEMENT << nl;
+    omega_->writeData(os);
     writeEntry("value", os);
 }
 

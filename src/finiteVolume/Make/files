@@ -158,8 +158,6 @@ $(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVe
 $(derivedFvPatchFields)/syringePressure/syringePressureFvPatchScalarField.C
 $(derivedFvPatchFields)/timeVaryingMappedFixedValue/AverageIOFields.C
 $(derivedFvPatchFields)/timeVaryingMappedFixedValue/timeVaryingMappedFixedValueFvPatchFields.C
-$(derivedFvPatchFields)/timeVaryingFlowRateInletVelocity/timeVaryingFlowRateInletVelocityFvPatchVectorField.C
-$(derivedFvPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/totalPressure/totalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/timeVaryingUniformTotalPressure/timeVaryingUniformTotalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/totalTemperature/totalTemperatureFvPatchScalarField.C

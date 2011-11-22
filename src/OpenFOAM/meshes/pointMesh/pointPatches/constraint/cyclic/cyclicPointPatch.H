@@ -157,7 +157,6 @@ public:
             //  and/or mapping. First index is on this patch, second on the
             //  neighbour patch.
             virtual const edgeList& transformPairs() const;
-
 };
 
 
