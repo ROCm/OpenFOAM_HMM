@@ -13,4 +13,5 @@
     {
         U = invA & (UEqn.H() - betav*fvc::grad(p));
         U.correctBoundaryConditions();
+        K = 0.5*magSqr(U);
     }

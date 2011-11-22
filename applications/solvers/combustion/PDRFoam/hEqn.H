@@ -5,7 +5,8 @@
       + mvConvection->fvmDiv(phi, h)
       - fvm::laplacian(Db, h)
      ==
-        betav*DpDt
+        betav*dpdt
+      - betav*(fvc::ddt(rho, K) + fvc::div(phi, K))
     );
 
     thermo.correct();

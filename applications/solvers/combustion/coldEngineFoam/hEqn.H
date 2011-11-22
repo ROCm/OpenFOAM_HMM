@@ -5,7 +5,7 @@
       + fvm::div(phi, h)
       - fvm::laplacian(turbulence->alphaEff(), h)
      ==
-        DpDt
+      - fvc::div(phi, 0.5*magSqr(U))
     );
 
     thermo.correct();

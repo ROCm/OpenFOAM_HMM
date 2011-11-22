@@ -86,6 +86,7 @@
 
     U -= rAU*fvc::grad(p);
     U.correctBoundaryConditions();
+    K = 0.5*magSqr(U);
 
-    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    dpdt = fvc::ddt(p);
 }

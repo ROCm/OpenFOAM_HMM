@@ -5,8 +5,7 @@
       - fvm::Sp(fvc::div(phi), h)
       - fvm::laplacian(turbulence->alphaEff(), h)
      ==
-        fvc::div(phi/fvc::interpolate(rho)*fvc::interpolate(p))
-      - p*fvc::div(phi/fvc::interpolate(rho))
+      - fvc::div(phi, 0.5*magSqr(U), "div(phi,K)")
     );
 
     hEqn.relax();
