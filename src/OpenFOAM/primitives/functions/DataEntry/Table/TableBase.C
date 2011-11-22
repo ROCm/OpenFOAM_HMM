@@ -241,7 +241,7 @@ bool Foam::TableBase<Type>::checkMaxBounds
     scalar& xDash
 ) const
 {
-    if (x < table_.last().first())
+    if (x > table_.last().first())
     {
         switch (boundsHandling_)
         {
