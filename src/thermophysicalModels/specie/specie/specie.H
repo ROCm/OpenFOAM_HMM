@@ -74,6 +74,10 @@ class specie
 
 public:
 
+    //- Runtime type information
+    ClassName("specie");
+
+
     // Public constants
 
         // Thermodynamic constants
