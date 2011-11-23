@@ -1,5 +1,5 @@
-    fvMesh& mesh = procMeshes[solidToProc[i]];
-    basicSolidThermo& thermo = thermoSolid[i];
+    fvMesh& mesh = solidRegions[i];
+    basicSolidThermo& thermo = thermos[i];
 
     tmp<volScalarField> trho = thermo.rho();
     const volScalarField& rho = trho();
