@@ -31,8 +31,8 @@ dictionaryReplacement
             outlet
             {
                 type            uniformFixedValue;
+                uniformValue    constant $pressure;
                 value           $pressure;
-                uniformValue    $pressure;
             }
             inlet
             {
@@ -67,7 +67,7 @@ dictionaryReplacement
             inlet
             {
                 type            uniformFixedValue;
-                uniformValue    $turbulentKE;
+                uniformValue    constant $turbulentKE;
             }
             "terrain_.*"
             {
@@ -110,12 +110,12 @@ dictionaryReplacement
             "terrain_.*"
             {
                 type            uniformFixedValue;
-                uniformValue    $flowVelocity;
+                uniformValue    constant $flowVelocity;
             }
             ground
             {
                 type            uniformFixedValue;
-                uniformValue    $flowVelocity;
+                uniformValue    constant $flowVelocity;
             }
             #include "$FOAM_CASE/0/include/sideAndTopPatches"
             "procBoundary.*"
