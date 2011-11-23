@@ -1,6 +1,6 @@
     scalar DiNum = -GREAT;
 
-    forAll(solidToProc, i)
+    forAll(solidRegions, i)
     {
 #       include "setRegionSolidFields.H"
 
@@ -8,7 +8,7 @@
         (
             solidRegionDiffNo
             (
-                procMeshes[solidToProc[i]],
+                solidRegions[i],
                 runTime,
                 rho*cp,
                 K
