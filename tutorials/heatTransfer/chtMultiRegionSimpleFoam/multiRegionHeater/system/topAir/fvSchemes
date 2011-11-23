@@ -31,6 +31,7 @@ divSchemes
     div(phi,K)      Gauss upwind;
     div(phi,h)      Gauss upwind;
     div(phi,k)      Gauss upwind;
+    div(phi,K)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div(phi,R)      Gauss upwind;
     div(R)          Gauss linear;

@@ -37,7 +37,7 @@ boundaryField
     burner
     {
         type            flowRateInletVelocity;
-        flowRate        0.001294;     //60kW  C3H8
+        flowRate        constant 0.001294;     //60kW  C3H8
         value           uniform (0 0 0);
     }
 
