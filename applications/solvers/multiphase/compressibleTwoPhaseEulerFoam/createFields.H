@@ -357,6 +357,10 @@
     volScalarField dgdt =
         pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001));
 
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField Dp1Dt(fvc::DDt(phi1, p));
-    volScalarField Dp2Dt(fvc::DDt(phi2, p));
+
+    Info<< "Creating field dpdt\n" << endl;
+    volScalarField dpdt("dpdt", fvc::ddt(p));
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K1("K1", 0.5*magSqr(U1));
+    volScalarField K2("K2", 0.5*magSqr(U2));

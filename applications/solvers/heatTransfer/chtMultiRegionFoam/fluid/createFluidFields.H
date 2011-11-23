@@ -1,7 +1,7 @@
     // Initialise fluid field pointer lists
     PtrList<basicRhoThermo> thermoFluid(fluidRegions.size());
     PtrList<volScalarField> rhoFluid(fluidRegions.size());
-    PtrList<volScalarField> KFluid(fluidRegions.size());
+    PtrList<volScalarField> kappaFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
     PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
     PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
@@ -10,7 +10,8 @@
     PtrList<volScalarField> ghFluid(fluidRegions.size());
     PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
     PtrList<radiation::radiationModel> radiation(fluidRegions.size());
-    PtrList<volScalarField> DpDtFluid(fluidRegions.size());
+    PtrList<volScalarField> KFluid(fluidRegions.size());
+    PtrList<volScalarField> dpdtFluid(fluidRegions.size());
 
     List<scalar> initialMassFluid(fluidRegions.size());
 
@@ -45,15 +46,15 @@
             )
         );
 
-        Info<< "    Adding to KFluid\n" << endl;
-        KFluid.set
+        Info<< "    Adding to kappaFluid\n" << endl;
+        kappaFluid.set
         (
             i,
             new volScalarField
             (
                 IOobject
                 (
-                    "K",
+                    "kappa",
                     runTime.timeName(),
                     fluidRegions[i],
                     IOobject::NO_READ,
@@ -175,22 +176,25 @@
 
         initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
 
-        Info<< "    Adding to DpDtFluid\n" << endl;
-        DpDtFluid.set
+        Info<< "    Adding to KFluid\n" << endl;
+        KFluid.set
         (
             i,
             new volScalarField
             (
-                "DpDt",
-                fvc::DDt
-                (
-                    surfaceScalarField
-                    (
-                        "phiU",
-                        phiFluid[i]/fvc::interpolate(rhoFluid[i])
-                    ),
-                    thermoFluid[i].p()
-                )
+                "K",
+                0.5*magSqr(UFluid[i])
+            )
+        );
+
+        Info<< "    Adding to dpdtFluid\n" << endl;
+        dpdtFluid.set
+        (
+            i,
+            new volScalarField
+            (
+                "dpdt",
+                fvc::ddt(thermoFluid[i].p())
             )
         );
     }

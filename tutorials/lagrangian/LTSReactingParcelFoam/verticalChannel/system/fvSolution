@@ -79,8 +79,6 @@ PIMPLE
 
 additional
 {
-    pressureWork    true;
-    pressureWorkTimeDerivative false; // true;
     solveSpecies    true;
 }
 

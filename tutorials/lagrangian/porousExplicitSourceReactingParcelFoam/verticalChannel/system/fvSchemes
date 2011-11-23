@@ -33,7 +33,7 @@ divSchemes
     default         none;
     div(phi,U)      Gauss upwind;
     div(phid,p)     Gauss upwind;
-    div(phiU,p)     Gauss linear;
+    div(phi,K)      Gauss linear;
     div(phi,hs)     Gauss upwind;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;

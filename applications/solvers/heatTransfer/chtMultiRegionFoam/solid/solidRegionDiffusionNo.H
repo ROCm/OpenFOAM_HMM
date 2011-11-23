@@ -2,7 +2,7 @@
 
     forAll(solidRegions, i)
     {
-#       include "setRegionSolidFields.H"
+        #include "setRegionSolidFields.H"
 
         DiNum = max
         (
@@ -11,7 +11,7 @@
                 solidRegions[i],
                 runTime,
                 rho*cp,
-                K
+                kappa
             ),
             DiNum
         );

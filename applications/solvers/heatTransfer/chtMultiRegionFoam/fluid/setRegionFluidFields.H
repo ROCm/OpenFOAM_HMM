@@ -2,12 +2,13 @@
 
     basicRhoThermo& thermo = thermoFluid[i];
     volScalarField& rho = rhoFluid[i];
-    volScalarField& K = KFluid[i];
+    volScalarField& kappa = kappaFluid[i];
     volVectorField& U = UFluid[i];
     surfaceScalarField& phi = phiFluid[i];
 
     compressible::turbulenceModel& turb = turbulence[i];
-    volScalarField& DpDt = DpDtFluid[i];
+    volScalarField& K = KFluid[i];
+    volScalarField& dpdt = dpdtFluid[i];
 
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();

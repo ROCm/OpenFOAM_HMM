@@ -31,7 +31,7 @@ Foam::scalar Foam::solidRegionDiffNo
     const fvMesh& mesh,
     const Time& runTime,
     const volScalarField& Cprho,
-    const volScalarField& K
+    const volScalarField& kappa
 )
 {
     scalar DiNum = 0.0;
@@ -39,16 +39,16 @@ Foam::scalar Foam::solidRegionDiffNo
 
     //- Take care: can have fluid domains with 0 cells so do not test for
     //  zero internal faces.
-    surfaceScalarField KrhoCpbyDelta
+    surfaceScalarField kapparhoCpbyDelta
     (
         mesh.surfaceInterpolation::deltaCoeffs()
-      * fvc::interpolate(K)
+      * fvc::interpolate(kappa)
       / fvc::interpolate(Cprho)
     );
 
-    DiNum = gMax(KrhoCpbyDelta.internalField())*runTime.deltaT().value();
+    DiNum = gMax(kapparhoCpbyDelta.internalField())*runTime.deltaT().value();
 
-    meanDiNum = (average(KrhoCpbyDelta)).value()*runTime.deltaT().value();
+    meanDiNum = (average(kapparhoCpbyDelta)).value()*runTime.deltaT().value();
 
     Info<< "Region: " << mesh.name() << " Diffusion Number mean: " << meanDiNum
         << " max: " << DiNum << endl;
@@ -62,26 +62,26 @@ Foam::scalar Foam::solidRegionDiffNo
     const fvMesh& mesh,
     const Time& runTime,
     const volScalarField& Cprho,
-    const volSymmTensorField& Kdirectional
+    const volSymmTensorField& kappadirectional
 )
 {
     scalar DiNum = 0.0;
     scalar meanDiNum = 0.0;
 
-    volScalarField K(mag(Kdirectional));
+    volScalarField kappa(mag(kappadirectional));
 
     //- Take care: can have fluid domains with 0 cells so do not test for
     //  zero internal faces.
-    surfaceScalarField KrhoCpbyDelta
+    surfaceScalarField kapparhoCpbyDelta
     (
         mesh.surfaceInterpolation::deltaCoeffs()
-      * fvc::interpolate(K)
+      * fvc::interpolate(kappa)
       / fvc::interpolate(Cprho)
     );
 
-    DiNum = gMax(KrhoCpbyDelta.internalField())*runTime.deltaT().value();
+    DiNum = gMax(kapparhoCpbyDelta.internalField())*runTime.deltaT().value();
 
-    meanDiNum = (average(KrhoCpbyDelta)).value()*runTime.deltaT().value();
+    meanDiNum = (average(kapparhoCpbyDelta)).value()*runTime.deltaT().value();
 
     Info<< "Region: " << mesh.name() << " Diffusion Number mean: " << meanDiNum
         << " max: " << DiNum << endl;

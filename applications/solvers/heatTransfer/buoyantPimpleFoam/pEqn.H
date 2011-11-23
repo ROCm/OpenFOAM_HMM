@@ -47,6 +47,7 @@
             // calculated from the relaxed pressure
             U += rAU*fvc::reconstruct((buoyancyPhi + p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
+            K = 0.5*magSqr(U);
         }
     }
 
@@ -55,7 +56,7 @@
     // Second part of thermodynamic density update
     thermo.rho() += psi*p_rgh;
 
-    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    dpdt = fvc::ddt(p);
 
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"
