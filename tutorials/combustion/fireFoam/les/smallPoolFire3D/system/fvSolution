@@ -71,6 +71,7 @@ solvers
         nCellsInCoarsestLevel   10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+        maxIter         20;
     }
 
     G
@@ -99,7 +100,7 @@ relaxationFactors
     equations
     {
         "(U|k).*"                   1;
-        "(C3H8|O2|H2O|CO2|hs).*"    0.9;
+        "(CH4|O2|H2O|CO2|hs).*"    0.9;
     }
 }
 
