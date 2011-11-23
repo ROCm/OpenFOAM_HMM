@@ -1,2 +1,0 @@
-faceSet fLeft new boxToFace (-0.151 0 -0.3)(-0.14999 2.4 0.3)
-faceSet fRight new boxToFace (0.14999 0 -0.3)(0.151 2.4 0.3)

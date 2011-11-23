@@ -49,7 +49,7 @@ foreach cmake ( cmake-2.8.4 cmake-2.8.3 cmake-2.8.1 )
 end
 
 #- ParaView version, automatically determine major version:
-setenv ParaView_VERSION 3.10.1
+setenv ParaView_VERSION 3.12.0
 setenv ParaView_MAJOR detect
 
 

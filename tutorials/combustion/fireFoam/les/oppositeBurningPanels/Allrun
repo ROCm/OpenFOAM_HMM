@@ -9,20 +9,18 @@ application=`getApplication`
 
 runApplication blockMesh
 
-runApplication setSet -batch cRefine.setSet
+runApplication topoSet -dict cRefine.topoSetDict
 runApplication refineMesh -overwrite -dict
 
-rm log.setSet
-runApplication setSet -batch f.setSet
-rm log.setSet
-runApplication setSet -batch fZone.setSet
+rm log.topoSet
+runApplication topoSet -dict f.topoSetDict
 
 # create the pyrolysis region.
 runApplication extrudeToRegionMesh -overwrite
 
 
-rm log.setSet
-runApplication setSet -batch fBurner.setSet
+rm log.topoSet
+runApplication topoSet -dict fBurner.topoSetDict
 
 runApplication createPatch -overwrite
 

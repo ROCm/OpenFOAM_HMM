@@ -7,7 +7,7 @@
 application=`getApplication`
 
 runApplication blockMesh
-runApplication setSet -batch makeFaceSet.setSet
+runApplication topoSet
 runApplication createPatch -overwrite
 runApplication decomposePar -force
 
