@@ -1954,7 +1954,10 @@ void Foam::polyTopoChange::reorderCoupledFaces
         }
     }
 
-    pBufs.finishedSends();
+    if (syncParallel)
+    {
+        pBufs.finishedSends();
+    }
 
     // Receive and calculate ordering
 

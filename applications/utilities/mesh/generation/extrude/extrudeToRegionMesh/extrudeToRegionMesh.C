@@ -1015,6 +1015,8 @@ void addCouplingPatches
     const wordList& zoneNames,
     const wordList& zoneShadowNames,
     const boolList& isInternal,
+    const labelList& zoneIDs,
+
     DynamicList<polyPatch*>& newPatches,
     labelList& interRegionTopPatch,
     labelList& interRegionBottomPatch
@@ -1025,90 +1027,91 @@ void addCouplingPatches
         << "-------\t-----\t----"
         << endl;
 
-    interRegionTopPatch.setSize(zoneNames.size());
-    interRegionBottomPatch.setSize(zoneNames.size());
+    interRegionTopPatch.setSize(mesh.faceZones().size(), -1);
+    interRegionBottomPatch.setSize(mesh.faceZones().size(), -1);
 
     label nCoupled = 0;
     forAll(zoneNames, i)
     {
         word interName(regionName+"_to_"+shellRegionName+'_'+zoneNames[i]);
+        label zoneI = zoneIDs[i];
 
         if (isInternal[i])
         {
-            interRegionTopPatch[i] = addPatch<mappedWallPolyPatch>
+            interRegionTopPatch[zoneI] = addPatch<mappedWallPolyPatch>
             (
                 mesh.boundaryMesh(),
                 interName + "_top",
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionTopPatch[i]
-                << '\t' << newPatches[interRegionTopPatch[i]]->name()
-                << '\t' << newPatches[interRegionTopPatch[i]]->type()
+            Pout<< interRegionTopPatch[zoneI]
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
+            interRegionBottomPatch[zoneI] = addPatch<mappedWallPolyPatch>
             (
                 mesh.boundaryMesh(),
                 interName + "_bottom",
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionBottomPatch[i]
-                << '\t' << newPatches[interRegionBottomPatch[i]]->name()
-                << '\t' << newPatches[interRegionBottomPatch[i]]->type()
+            Pout<< interRegionBottomPatch[zoneI]
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->type()
                 << nl;
         }
         else if (zoneShadowNames.size() == 0)
         {
-            interRegionTopPatch[i] = addPatch<polyPatch>
+            interRegionTopPatch[zoneI] = addPatch<polyPatch>
             (
                 mesh.boundaryMesh(),
                 zoneNames[i] + "_top",
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionTopPatch[i]
-                << '\t' << newPatches[interRegionTopPatch[i]]->name()
-                << '\t' << newPatches[interRegionTopPatch[i]]->type()
+            Pout<< interRegionTopPatch[zoneI]
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
+            interRegionBottomPatch[zoneI] = addPatch<mappedWallPolyPatch>
             (
                 mesh.boundaryMesh(),
                 interName,
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionBottomPatch[i]
-                << '\t' << newPatches[interRegionBottomPatch[i]]->name()
-                << '\t' << newPatches[interRegionBottomPatch[i]]->type()
+            Pout<< interRegionBottomPatch[zoneI]
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->type()
                 << nl;
         }
         else    //patch using shadow face zones.
         {
-            interRegionTopPatch[i] = addPatch<mappedWallPolyPatch>
+            interRegionTopPatch[zoneI] = addPatch<mappedWallPolyPatch>
             (
                 mesh.boundaryMesh(),
                 zoneShadowNames[i] + "_top",
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionTopPatch[i]
-                << '\t' << newPatches[interRegionTopPatch[i]]->name()
-                << '\t' << newPatches[interRegionTopPatch[i]]->type()
+            Pout<< interRegionTopPatch[zoneI]
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionTopPatch[zoneI]]->type()
                 << nl;
 
-            interRegionBottomPatch[i] = addPatch<mappedWallPolyPatch>
+            interRegionBottomPatch[zoneI] = addPatch<mappedWallPolyPatch>
             (
                 mesh.boundaryMesh(),
                 interName,
                 newPatches
             );
             nCoupled++;
-            Pout<< interRegionBottomPatch[i]
-                << '\t' << newPatches[interRegionBottomPatch[i]]->name()
-                << '\t' << newPatches[interRegionBottomPatch[i]]->type()
+            Pout<< interRegionBottomPatch[zoneI]
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->name()
+                << '\t' << newPatches[interRegionBottomPatch[zoneI]]->type()
                 << nl;
         }
     }
@@ -1262,7 +1265,6 @@ void addZoneSidePatches
 (
     const fvMesh& mesh,
     const word& oneDPolyPatchType,
-    const wordList& zoneNames,
 
     DynamicList<polyPatch*>& newPatches,
     labelList& zoneSidePatch
@@ -1273,9 +1275,11 @@ void addZoneSidePatches
         << "-------\t-----"
         << endl;
 
+    const faceZoneMesh& faceZones = mesh.faceZones();
+
     label nSide = 0;
 
-    forAll(zoneNames, zoneI)
+    forAll(zoneSidePatch, zoneI)
     {
         if (oneDPolyPatchType != word::null)
         {
@@ -1314,7 +1318,7 @@ void addZoneSidePatches
         }
         else if (zoneSidePatch[zoneI] > 0)
         {
-            word patchName = zoneNames[zoneI] + "_" + "side";
+            word patchName = faceZones[zoneI].name() + "_" + "side";
 
             zoneSidePatch[zoneI] = addPatch<polyPatch>
             (
@@ -1336,7 +1340,6 @@ void addZoneSidePatches
 void addInterZonePatches
 (
     const fvMesh& mesh,
-    const wordList& zoneNames,
     const bool oneD,
 
     labelList& zoneZonePatch_min,
@@ -1348,6 +1351,8 @@ void addInterZonePatches
         << "patchID\tpatch" << nl
         << "-------\t-----"
         << endl;
+
+    const faceZoneMesh& faceZones = mesh.faceZones();
 
     dictionary transformDict;
     transformDict.add
@@ -1361,20 +1366,20 @@ void addInterZonePatches
     {
         forAll(zoneZonePatch_min, minZone)
         {
-            for (label maxZone = minZone; maxZone < zoneNames.size(); maxZone++)
+            for (label maxZone = minZone; maxZone < faceZones.size(); maxZone++)
             {
-                label index = minZone*zoneNames.size()+maxZone;
+                label index = minZone*faceZones.size()+maxZone;
 
                 if (zoneZonePatch_min[index] > 0)
                 {
                     word minToMax =
-                        zoneNames[minZone]
+                        faceZones[minZone].name()
                       + "_to_"
-                      + zoneNames[maxZone];
+                      + faceZones[maxZone].name();
                     word maxToMin =
-                        zoneNames[maxZone]
+                        faceZones[maxZone].name()
                       + "_to_"
-                      + zoneNames[minZone];
+                      + faceZones[minZone].name();
 
                     {
                         transformDict.set("neighbourPatch", maxToMin);
@@ -1457,22 +1462,25 @@ void setCouplingInfo
     {
         label patchI = zoneToPatch[zoneI];
 
-        const polyPatch& pp = patches[patchI];
-
-        if (isA<mappedWallPolyPatch>(pp))
+        if (patchI != -1)
         {
-            newPatches[patchI] = new mappedWallPolyPatch
-            (
-                pp.name(),
-                pp.size(),
-                pp.start(),
-                patchI,
-                sampleRegion,                           // sampleRegion
-                mode,                                   // sampleMode
-                pp.name(),                              // samplePatch
-                offsets[zoneI],                         // offset
-                patches
-            );
+            const polyPatch& pp = patches[patchI];
+
+            if (isA<mappedWallPolyPatch>(pp))
+            {
+                newPatches[patchI] = new mappedWallPolyPatch
+                (
+                    pp.name(),
+                    pp.size(),
+                    pp.start(),
+                    patchI,
+                    sampleRegion,                           // sampleRegion
+                    mode,                                   // sampleMode
+                    pp.name(),                              // samplePatch
+                    offsets[zoneI],                         // offset
+                    patches
+                );
+            }
         }
     }
 
@@ -1819,8 +1827,8 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~
 
     // From zone to interface patch (region side)
-    labelList interRegionTopPatch(zoneNames.size());
-    labelList interRegionBottomPatch(zoneNames.size());
+    labelList interRegionTopPatch;
+    labelList interRegionBottomPatch;
 
     addCouplingPatches
     (
@@ -1830,15 +1838,17 @@ int main(int argc, char *argv[])
         zoneNames,
         zoneShadowNames,
         isInternal,
+        zoneIDs,
 
         regionPatches,
         interRegionTopPatch,
         interRegionBottomPatch
     );
 
+
     // From zone to interface patch (mesh side)
-    labelList interMeshTopPatch(zoneNames.size());
-    labelList interMeshBottomPatch(zoneNames.size());
+    labelList interMeshTopPatch;
+    labelList interMeshBottomPatch;
 
     if (adaptMesh)
     {
@@ -1856,6 +1866,7 @@ int main(int argc, char *argv[])
             zoneNames,
             zoneShadowNames,
             isInternal,
+            zoneIDs,
 
             newPatches,
             interMeshTopPatch,
@@ -1872,13 +1883,14 @@ int main(int argc, char *argv[])
     labelList extrudeBottomPatchID(extrudePatch.size());
 
     nExtrudeFaces = 0;
-    forAll(zoneNames, i)
+    forAll(zoneIDs, i)
     {
-        const faceZone& fz = faceZones[zoneNames[i]];
+        label zoneI = zoneIDs[i];
+        const faceZone& fz = faceZones[zoneI];
         forAll(fz, j)
         {
-            extrudeTopPatchID[nExtrudeFaces] = interRegionTopPatch[i];
-            extrudeBottomPatchID[nExtrudeFaces] = interRegionBottomPatch[i];
+            extrudeTopPatchID[nExtrudeFaces] = interRegionTopPatch[zoneI];
+            extrudeBottomPatchID[nExtrudeFaces] = interRegionBottomPatch[zoneI];
             nExtrudeFaces++;
         }
     }
@@ -1917,7 +1929,6 @@ int main(int argc, char *argv[])
     (
         mesh,
         (oneD ? dict.lookup("oneDPolyPatchType") : word::null),
-        zoneNames,
 
         regionPatches,
         zoneSidePatch
@@ -1928,7 +1939,6 @@ int main(int argc, char *argv[])
     addInterZonePatches
     (
         mesh,
-        zoneNames,
         oneD,
 
         zoneZonePatch_min,
@@ -2279,31 +2289,25 @@ int main(int argc, char *argv[])
     // Calculate offsets from shell mesh back to original mesh
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    List<pointField> topOffsets(zoneIDs.size());
-    List<pointField> bottomOffsets(zoneIDs.size());
+    List<pointField> topOffsets(faceZones.size());
+    List<pointField> bottomOffsets(faceZones.size());
 
     forAll(regionMesh.boundaryMesh(), patchI)
     {
         const polyPatch& pp = regionMesh.boundaryMesh()[patchI];
 
-        if
-        (
-            isA<mappedWallPolyPatch>(pp)
-         && (findIndex(interRegionTopPatch, patchI) != -1)
-        )
+        if (isA<mappedWallPolyPatch>(pp))
         {
-            label zoneI = findIndex(interRegionTopPatch, patchI);
-            topOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
-        }
-        else if
-        (
-            isA<mappedWallPolyPatch>(pp)
-         && (findIndex(interRegionBottomPatch, patchI) != -1)
-        )
-        {
-            label zoneI = findIndex(interRegionBottomPatch, patchI);
-
-            bottomOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
+            if (findIndex(interRegionTopPatch, patchI) != -1)
+            {
+                label zoneI = findIndex(interRegionTopPatch, patchI);
+                topOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
+            }
+            else if (findIndex(interRegionBottomPatch, patchI) != -1)
+            {
+                label zoneI = findIndex(interRegionBottomPatch, patchI);
+                bottomOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
+            }
         }
     }
 

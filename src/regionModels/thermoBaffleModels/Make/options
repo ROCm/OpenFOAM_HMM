@@ -13,6 +13,7 @@ EXE_INC = \
 LIB_LIBS = \
     -lregionModels \
     -lbasicSolidThermo \
+    -lcompressibleTurbulenceModel \
     -lfiniteVolume \
     -lmeshTools \
     -lOpenFOAM \

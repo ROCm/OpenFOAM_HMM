@@ -696,16 +696,21 @@ void Foam::addPatchCellLayer::calcSidePatch
 
 
     // Now hopefully every boundary edge has a side patch. Check
-    forAll(edgeFaces, edgeI)
+    if (debug)
     {
-        if (edgeFaces[edgeI].size() == 1 && sidePatchID[edgeI] == -1)
+        forAll(edgeFaces, edgeI)
         {
-            const edge& e = pp.edges()[edgeI];
-            FatalErrorIn("addPatchCellLayer::calcSidePatch(..)")
-                << "Have no sidePatchID for edge " << edgeI << " points "
-                << pp.points()[pp.meshPoints()[e[0]]]
-                << pp.points()[pp.meshPoints()[e[1]]]
-                << abort(FatalError);
+            if (edgeFaces[edgeI].size() == 1 && sidePatchID[edgeI] == -1)
+            {
+                const edge& e = pp.edges()[edgeI];
+                //FatalErrorIn("addPatchCellLayer::calcSidePatch(..)")
+                WarningIn("addPatchCellLayer::calcSidePatch(..)")
+                    << "Have no sidePatchID for edge " << edgeI << " points "
+                    << pp.points()[pp.meshPoints()[e[0]]]
+                    << pp.points()[pp.meshPoints()[e[1]]]
+                    //<< abort(FatalError);
+                    << endl;
+            }
         }
     }
 
@@ -715,7 +720,12 @@ void Foam::addPatchCellLayer::calcSidePatch
     // from.
     forAll(edgeFaces, edgeI)
     {
-        if (edgeFaces[edgeI].size() == 1 && inflateFaceI[edgeI] == -1)
+        if
+        (
+            edgeFaces[edgeI].size() == 1
+         && sidePatchID[edgeI] != -1
+         && inflateFaceI[edgeI] == -1
+        )
         {
             // 1. Do we have a boundary face to inflate from
 
