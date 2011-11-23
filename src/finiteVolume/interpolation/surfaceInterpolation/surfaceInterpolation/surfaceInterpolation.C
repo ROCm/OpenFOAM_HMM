@@ -134,7 +134,7 @@ void Foam::surfaceInterpolation::makeWeights() const
 {
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeWeights() : "
+        Pout<< "surfaceInterpolation::makeWeights() : "
             << "Constructing weighting factors for face interpolation"
             << endl;
     }
@@ -188,7 +188,7 @@ void Foam::surfaceInterpolation::makeWeights() const
 
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeWeights() : "
+        Pout<< "surfaceInterpolation::makeWeights() : "
             << "Finished constructing weighting factors for face interpolation"
             << endl;
     }
@@ -199,7 +199,7 @@ void Foam::surfaceInterpolation::makeDeltaCoeffs() const
 {
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeDeltaCoeffs() : "
+        Pout<< "surfaceInterpolation::makeDeltaCoeffs() : "
             << "Constructing differencing factors array for face gradient"
             << endl;
     }
@@ -244,7 +244,7 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
 {
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeNonOrthDeltaCoeffs() : "
+        Pout<< "surfaceInterpolation::makeNonOrthDeltaCoeffs() : "
             << "Constructing differencing factors array for face gradient"
             << endl;
     }
@@ -306,7 +306,7 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
 {
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeNonOrthCorrectionVectors() : "
+        Pout<< "surfaceInterpolation::makeNonOrthCorrectionVectors() : "
             << "Constructing non-orthogonal correction vectors"
             << endl;
     }
@@ -377,7 +377,7 @@ void Foam::surfaceInterpolation::makeNonOrthCorrectionVectors() const
 
     if (debug)
     {
-        Info<< "surfaceInterpolation::makeNonOrthCorrectionVectors() : "
+        Pout<< "surfaceInterpolation::makeNonOrthCorrectionVectors() : "
             << "Finished constructing non-orthogonal correction vectors"
             << endl;
     }
