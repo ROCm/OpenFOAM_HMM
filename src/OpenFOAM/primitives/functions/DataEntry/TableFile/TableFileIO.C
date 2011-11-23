@@ -23,21 +23,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFvPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "volFields.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const TableFile<Type>& tbl
+)
 {
+    os  << static_cast<const DataEntry<Type>&>(tbl)
+        << static_cast<const TableBase<Type>&>(tbl);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const TableFile<Type>&)"
+    );
 
-makePatchFields(timeVaryingUniformFixedValue);
+    return os;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<class Type>
+void Foam::TableFile<Type>::writeData(Ostream& os) const
+{
+    DataEntry<Type>::writeData(os);
+
+    os  << token::END_STATEMENT << nl
+        << indent << word(type() + "Coeffs") << nl
+        << indent << token::BEGIN_BLOCK << nl << incrIndent;
+    os.writeKeyword("fileName")<< fName_ << token::END_STATEMENT << nl;
+    os  << decrIndent << indent << token::END_BLOCK << endl;
+}
+
 
 // ************************************************************************* //

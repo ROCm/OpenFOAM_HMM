@@ -34,20 +34,8 @@ Foam::Ostream& Foam::operator<<
     const Table<Type>& tbl
 )
 {
-    if (os.format() == IOstream::ASCII)
-    {
-        os  << static_cast<const DataEntry<Type>& >(tbl)
-            << token::SPACE << tbl.table_;
-    }
-    else
-    {
-        os  << static_cast<const DataEntry<Type>& >(tbl);
-        os.write
-        (
-            reinterpret_cast<const char*>(&tbl.table_),
-            sizeof(tbl.table_)
-        );
-    }
+    os  << static_cast<const DataEntry<Type>&>(tbl)
+        << static_cast<const TableBase<Type>&>(tbl);
 
     // Check state of Ostream
     os.check
@@ -63,8 +51,7 @@ template<class Type>
 void Foam::Table<Type>::writeData(Ostream& os) const
 {
     DataEntry<Type>::writeData(os);
-
-    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+    TableBase<Type>::writeData(os);
 }
 
 

@@ -31,8 +31,32 @@ License
 #include "Time.H"
 #include "OFstream.H"
 #include "wallPolyPatch.H"
+#include "cyclicAMIPolyPatch.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::checkPatches() const
+{
+    const polyBoundaryMesh& pbm = polyMesh_.boundaryMesh();
+    bool ok = true;
+    forAll(pbm, patchI)
+    {
+        if (isA<cyclicAMIPolyPatch>(pbm[patchI]))
+        {
+            ok = false;
+            break;
+        }
+    }
+
+    if (!ok)
+    {
+        WarningIn("void Foam::Cloud<ParticleType>::initCloud(const bool)")
+            << "Particle tracking across AMI patches is not currently "
+            << "supported" << endl;
+    }
+}
+
 
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::calcCellWallFaces() const
@@ -76,6 +100,8 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    checkPatches();
+
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
     // there is a comms mismatch.
@@ -100,6 +126,8 @@ Foam::Cloud<ParticleType>::Cloud
     nTrackingRescues_(),
     cellWallFacesPtr_()
 {
+    checkPatches();
+
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
     // there is a comms mismatch.

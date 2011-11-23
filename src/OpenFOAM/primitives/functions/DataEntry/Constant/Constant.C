@@ -28,11 +28,14 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Constant<Type>::Constant(const word& entryName, Istream& is)
+Foam::Constant<Type>::Constant(const word& entryName, const dictionary& dict)
 :
     DataEntry<Type>(entryName),
     value_(pTraits<Type>::zero)
 {
+    Istream& is(dict.lookup(entryName));
+    word entryType(is);
+
     is  >> value_;
 }
 

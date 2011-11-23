@@ -28,6 +28,7 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss limitedLinear 0.2;
+    div(phi,K)      Gauss limitedLinear 0.2;
     div(phi,h)      Gauss limitedLinear 0.2;
     div(phi,k)      Gauss limitedLinear 0.2;
     div(phi,epsilon) Gauss limitedLinear 0.2;

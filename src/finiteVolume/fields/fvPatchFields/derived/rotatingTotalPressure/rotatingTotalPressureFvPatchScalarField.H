@@ -36,6 +36,7 @@ SourceFiles
 #define rotatingTotalPressureFvPatchScalarField_H
 
 #include "totalPressureFvPatchScalarField.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class rotatingTotalPressureFvPatch Declaration
+               Class rotatingTotalPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingTotalPressureFvPatchScalarField
@@ -53,7 +54,7 @@ class rotatingTotalPressureFvPatchScalarField
     // Private data
 
         //- Angular velocity of the frame
-        vector omega_;
+        autoPtr<DataEntry<vector> > omega_;
 
 
 public:
@@ -125,21 +126,6 @@ public:
 
 
     // Member functions
-
-        // Access
-
-            //- Return the angular velocity of rotation
-            const vector& omega() const
-            {
-                return omega_;
-            }
-
-            //- Return the angular velocity of rotation
-            vector& omega()
-            {
-                return omega_;
-            }
-
 
         // Evaluation functions
 

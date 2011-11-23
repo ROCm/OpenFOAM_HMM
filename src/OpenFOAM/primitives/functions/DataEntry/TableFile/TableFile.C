@@ -23,27 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFvPatchFields_H
-#define timeVaryingUniformFixedValueFvPatchFields_H
+#include "TableFile.H"
 
-#include "timeVaryingUniformFixedValueFvPatchField.H"
-#include "fieldTypes.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
+:
+    DataEntry<Type>(entryName),
+    TableBase<Type>(entryName, dict.subDict(type() + "Coeffs")),
+    fName_("none")
 {
+    const dictionary coeffs(dict.subDict(type() + "Coeffs"));
+    coeffs.lookup("fileName") >> fName_;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    IFstream is(fName_.expand());
 
-makePatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
+    is  >> this->table_;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    TableBase<Type>::check();
+}
 
-} // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+Foam::TableFile<Type>::TableFile(const TableFile<Type>& tbl)
+:
+    DataEntry<Type>(tbl),
+    TableBase<Type>(tbl),
+    fName_(tbl.fName_)
+{}
 
-#endif
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::TableFile<Type>::~TableFile()
+{}
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "TableFileIO.C"
+
 
 // ************************************************************************* //

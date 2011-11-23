@@ -94,7 +94,7 @@ public:
 
     // Constructors
 
-        polynomial(const word& entryName, Istream& is);
+        polynomial(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
         polynomial(const polynomial& poly);

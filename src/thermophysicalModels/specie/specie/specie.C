@@ -38,6 +38,8 @@ const Foam::scalar Foam::specie::Pstd = constant::standard::Pstd.value();
 //- Standard temperature (default in [K])
 const Foam::scalar Foam::specie::Tstd = constant::standard::Tstd.value();
 
+defineTypeNameAndDebug(Foam::specie, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

@@ -40,7 +40,7 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    uniformValue_(pTraits<Type>::zero)
+    uniformValue_()
 {}
 
 
@@ -54,9 +54,10 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    uniformValue_(ptf.uniformValue_)
+    uniformValue_(ptf.uniformValue_().clone().ptr())
 {
-    fvPatchField<Type>::operator==(uniformValue_);
+    const scalar t = this->db().time().value();
+    fvPatchField<Type>::operator==(uniformValue_->value(t));
 }
 
 
@@ -69,9 +70,10 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),
-    uniformValue_(pTraits<Type>(dict.lookup("uniformValue")))
+    uniformValue_(DataEntry<Type>::New("uniformValue", dict))
 {
-    fvPatchField<Type>::operator==(uniformValue_);
+    const scalar t = this->db().time().value();
+    fvPatchField<Type>::operator==(uniformValue_->value(t));
 }
 
 
@@ -82,9 +84,10 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_)
+    uniformValue_(ptf.uniformValue_().clone().ptr())
 {
-    fvPatchField<Type>::operator==(uniformValue_);
+    const scalar t = this->db().time().value();
+    fvPatchField<Type>::operator==(uniformValue_->value(t));
 }
 
 
@@ -96,9 +99,10 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_)
+    uniformValue_(ptf.uniformValue_().clone().ptr())
 {
-    fvPatchField<Type>::operator==(uniformValue_);
+    const scalar t = this->db().time().value();
+    fvPatchField<Type>::operator==(uniformValue_->value(t));
 }
 
 
@@ -111,7 +115,8 @@ void uniformFixedValueFvPatchField<Type>::autoMap
 )
 {
     this->setSize(m.size());
-    fvPatchField<Type>::operator==(uniformValue_);
+    const scalar t = this->db().time().value();
+    fvPatchField<Type>::operator==(uniformValue_->value(t));
 }
 
 
@@ -119,8 +124,7 @@ template<class Type>
 void uniformFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("uniformValue")
-        << uniformValue_ << token::END_STATEMENT << nl;
+    uniformValue_->writeData(os);
 }
 
 

@@ -31,7 +31,7 @@ if (solveSpecies)
              ==
                 parcels.SYi(i, Yi)
               + combustion->R(Yi)
-              + sources(Yi)
+              + sources(rho, Yi)
             );
 
             sources.constrain(YEqn);

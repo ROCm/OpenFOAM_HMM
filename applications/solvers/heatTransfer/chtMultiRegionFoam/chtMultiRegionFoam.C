@@ -39,11 +39,6 @@ Description
 #include "solidRegionDiffNo.H"
 #include "basicSolidThermo.H"
 #include "radiationModel.H"
-#include "fvFieldReconstructor.H"
-#include "mixedFvPatchFields.H"
-#include "fvFieldDecomposer.H"
-#include "harmonic.H"
-#include "rmap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,39 +49,11 @@ int main(int argc, char *argv[])
 
     regionProperties rp(runTime);
 
-    const label nAllRegions =
-        rp.fluidRegionNames().size()
-      + rp.solidRegionNames().size();
-    PtrList<labelIOList> cellProcAddressing(nAllRegions);
-    PtrList<labelIOList> faceProcAddressing(nAllRegions);
-    PtrList<labelIOList> boundaryProcAddressing(nAllRegions);
-    PtrList<fvMesh> procMeshes(nAllRegions);
-
-    // Load meshes, fluid first
-    labelList fluidToProc(identity(rp.fluidRegionNames().size()));
-    labelList solidToProc(rp.solidRegionNames().size());
-    forAll(solidToProc, i)
-    {
-        solidToProc[i] = fluidToProc.size()+i;
-    }
-
-    // Get the coupled solution flag
-    #include "readPIMPLEControls.H"
-
-    if (temperatureCoupled)
-    {
-        Info<< "Solving single enthalpy for all equations" << nl << endl;
-    }
-
     #include "createFluidMeshes.H"
     #include "createSolidMeshes.H"
 
     #include "createFluidFields.H"
     #include "createSolidFields.H"
-
-    // Temperature solved on single mesh
-    #include "createAllMesh.H"
-    #include "createAllFields.H"
 
     #include "initContinuityErrs.H"
 
@@ -114,10 +81,9 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-
         if (nOuterCorr != 1)
         {
-            forAll(fluidToProc, i)
+            forAll(fluidRegions, i)
             {
                 #include "setRegionFluidFields.H"
                 #include "storeOldFluidFields.H"
@@ -130,133 +96,22 @@ int main(int argc, char *argv[])
         {
             bool finalIter = oCorr == nOuterCorr-1;
 
-            if (finalIter)
+            forAll(fluidRegions, i)
             {
-                forAll(procMeshes, procI)
-                {
-                    procMeshes[procI].data::add("finalIteration", true);
-                }
-            }
-
-
-            PtrList<surfaceScalarField> procPhi(nAllRegions);
-            PtrList<surfaceScalarField> procAlpha(nAllRegions);
-
-
-            // Solve (uncoupled) or set up (coupled) the temperature equation
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            forAll(solidToProc, i)
-            {
-                label procI = solidToProc[i];
-
-                Info<< "\nSolving temperature for solid region "
-                    << procMeshes[procI].name() << endl;
-                #include "setRegionSolidFields.H"
-                #include "readSolidMultiRegionPIMPLEControls.H"
-
-                if (temperatureCoupled)
-                {
-                    // Map my properties to overall h equation
-                    #include "rmapSolid.H"
-                }
-                else
-                {
-                    #include "solveSolid.H"
-                }
-            }
-
-
-            forAll(fluidToProc, i)
-            {
-                label procI = fluidToProc[i];
-
-                Info<< "\nSolving temperature for fluid region "
-                    << procMeshes[procI].name() << endl;
+                Info<< "\nSolving for fluid region "
+                    << fluidRegions[i].name() << endl;
                 #include "setRegionFluidFields.H"
                 #include "readFluidMultiRegionPIMPLEControls.H"
-
-                if (oCorr == 0)
-                {
-                    #include "rhoEqn.H"
-                }
-
-                if (temperatureCoupled)
-                {
-                    // Map my properties to overall h equation
-                    #include "rmapFluid.H"
-                }
-                else
-                {
-                    #include "hEqn.H"
-                }
+                #include "solveFluid.H"
             }
 
-
-            // Solve combined h equation
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            if (temperatureCoupled)
+            forAll(solidRegions, i)
             {
-                Info<< "\nSolving single enthalpy for all regions"
-                    << endl;
-
-                // Solve combined h
-                #include "allhEqn.H"
-
-                forAll(solidToProc, i)
-                {
-                    label procI = solidToProc[i];
-                    #include "setRegionSolidFields.H"
-                    #include "readSolidMultiRegionPIMPLEControls.H"
-
-                    #include "mapSolid.H"
-                }
-
-                forAll(fluidToProc, i)
-                {
-                    label procI = fluidToProc[i];
-                    #include "setRegionFluidFields.H"
-                    #include "readFluidMultiRegionPIMPLEControls.H"
-
-                    #include "mapFluid.H"
-                }
-            }
-
-
-            // Update thermos
-            // ~~~~~~~~~~~~~~
-
-            forAll(fluidToProc, i)
-            {
-                Info<< "\nUpdating thermo for fluid region "
-                    << procMeshes[fluidToProc[i]].name() << endl;
-
-                #include "setRegionFluidFields.H"
-                #include "readFluidMultiRegionPIMPLEControls.H"
-
-                thermo.correct();
-                rad.correct();
-                #include "solvePressureVelocityFluid.H"
-            }
-
-            forAll(solidToProc, i)
-            {
-                Info<< "\nUpdating thermo for solid region "
-                    << procMeshes[solidToProc[i]].name() << endl;
+                Info<< "\nSolving for solid region "
+                    << solidRegions[i].name() << endl;
                 #include "setRegionSolidFields.H"
                 #include "readSolidMultiRegionPIMPLEControls.H"
-
-                thermo.correct();
-            }
-
-
-            if (finalIter)
-            {
-                forAll(procMeshes, procI)
-                {
-                    procMeshes[procI].data::remove("finalIteration");
-                }
+                #include "solveSolid.H"
             }
         }
 

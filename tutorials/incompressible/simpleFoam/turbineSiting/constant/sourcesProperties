@@ -26,7 +26,7 @@ disk1
 
     actuationDiskSourceCoeffs
     {
-        fieldName   U;
+        fieldNames  (U);
         diskDir     (-1 0 0); // orientation of the disk
         Cp          0.53;     // Cp
         Ct          0.58;     // Ct
@@ -45,7 +45,7 @@ disk2
 
     actuationDiskSourceCoeffs
     {
-        fieldName   U;
+        fieldNames  (U);
         diskDir     (-1 0 0);
         Cp          0.53;
         Ct          0.58;

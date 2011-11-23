@@ -23,28 +23,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformFixedValueFvPatchFieldsFwd_H
-#define timeVaryingUniformFixedValueFvPatchFieldsFwd_H
+#include "DataEntry.H"
 
-#include "fieldTypes.H"
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const TableBase<Type>& tbl
+)
 {
+    if (os.format() == IOstream::ASCII)
+    {
+         os << token::SPACE << tbl.table_;
+    }
+    else
+    {
+        os.write
+        (
+            reinterpret_cast<const char*>(&tbl.table_),
+            sizeof(tbl.table_)
+        );
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const TableBase<Type>&, const bool)"
+    );
 
-template<class Type> class timeVaryingUniformFixedValueFvPatchField;
+    return os;
+}
 
-makePatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+void Foam::TableBase<Type>::writeData(Ostream& os) const
+{
+    os  << nl << indent << table_ << token::END_STATEMENT << nl;
+}
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

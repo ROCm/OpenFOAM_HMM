@@ -92,9 +92,9 @@ public:
         dictionary,
         (
             const word& entryName,
-            Istream& is
+            const dictionary& dict
         ),
-        (entryName, is)
+        (entryName, dict)
     );
 
 
