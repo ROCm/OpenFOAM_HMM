@@ -29,6 +29,7 @@ License
 #include "unitConversion.H"
 #include "geometricOneField.H"
 #include "fvMatrices.H"
+#include "syncTools.H"
 
 using namespace Foam::constant;
 
@@ -122,58 +123,116 @@ void Foam::rotorDiskSource::checkData()
 
 void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 {
-    // calculate rotor face areas
-    const vectorField& Sf = mesh_.Sf();
-    const scalarField& magSf = mesh_.magSf();
+    static const scalar tol = 0.8;
 
-    boolList selectedCells(mesh_.nCells(), false);
-    boolList processedFaces(mesh_.nFaces(), false);
-    UIndirectList<bool>(selectedCells, cells_) = boolList(cells_.size(), true);
+    const label nInternalFaces = mesh_.nInternalFaces();
+    const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
+    const vectorField& Sf = mesh_.Sf().internalField();
+    const scalarField& magSf = mesh_.magSf().internalField();
 
     vector n = vector::zero;
-
     label nFace = 0;
-    area_ = 0.0;
-    forAll(cells_, i)
+
+    // calculate cell addressing for selected cells
+    labelList cellAddr(mesh_.nCells(), -1);
+    UIndirectList<label>(cellAddr, cells_) = identity(cells_.size());
+    labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
+    forAll(pbm, patchI)
     {
-        const label cellI = cells_[i];
-        const cell& cFaces = mesh_.cells()[cellI];
-        forAll(cFaces, j)
+        const polyPatch& pp = pbm[patchI];
+
+        if (pp.coupled())
         {
-            const label faceI = cFaces[j];
-            label own = mesh_.owner()[faceI];
-            label nbr = mesh_.neighbour()[faceI];
-            if
-            (
-                !processedFaces[faceI]
-             && (selectedCells[own] != selectedCells[nbr])
-            )
+            forAll(pp, i)
             {
-                if (selectedCells[own])
-                {
-                    if (((Sf[faceI]/magSf[faceI]) & axis) > 0.8)
-                    {
-                        area_[i] += magSf[faceI];
-                        n += Sf[faceI];
-                        nFace++;
-                    }
-                }
-                else if (selectedCells[nbr])
-                {
-                    if (((-Sf[faceI]/magSf[faceI]) & axis) > 0.8)
-                    {
-                        area_[i] += magSf[faceI];
-                        n -= Sf[faceI];
-                        nFace++;
-                    }
-                }
-                processedFaces[faceI] = true;
+                label faceI = pp.start() + i;
+                label nbrFaceI = faceI - nInternalFaces;
+                label own = mesh_.faceOwner()[faceI];
+                nbrFaceCellAddr[nbrFaceI] = cellAddr[own];
             }
         }
     }
 
-    if (correct && (nFace > 0))
+    // correct for parallel running
+    syncTools::swapBoundaryFaceList(mesh_, nbrFaceCellAddr);
+
+
+    // add internal field contributions
+    for (label faceI = 0; faceI < nInternalFaces; faceI++)
     {
+        const label own = cellAddr[mesh_.faceOwner()[faceI]];
+        const label nbr = cellAddr[mesh_.faceNeighbour()[faceI]];
+
+        if ((own != -1) && (nbr == -1))
+        {
+            vector nf = Sf[faceI]/magSf[faceI];
+
+            if ((nf & axis) > tol)
+            {
+                area_[own] += magSf[faceI];
+                n += Sf[faceI];
+                nFace++;
+            }
+        }
+        else if ((own == -1) && (nbr != -1))
+        {
+            vector nf = Sf[faceI]/magSf[faceI];
+
+            if ((-nf & axis) > tol)
+            {
+                area_[nbr] += magSf[faceI];
+                n -= Sf[faceI];
+                nFace++;
+            }
+        }
+    }
+
+
+    // add boundary contributions
+    forAll(pbm, patchI)
+    {
+        const polyPatch& pp = pbm[patchI];
+        const vectorField& Sfp = mesh_.Sf().boundaryField()[patchI];
+        const scalarField& magSfp = mesh_.magSf().boundaryField()[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, j)
+            {
+                const label faceI = pp.start() + j;
+                const label own = cellAddr[mesh_.faceOwner()[faceI]];
+                const bool nbr = nbrFaceCellAddr[faceI - nInternalFaces];
+                const vector nf = Sfp[j]/magSfp[j];
+
+                if ((own != -1) && (nbr == -1) && ((nf & axis) > tol))
+                {
+                    area_[own] += magSfp[j];
+                    n += Sfp[j];
+                    nFace++;
+                }
+            }
+        }
+        else
+        {
+            forAll(pp, j)
+            {
+                const label faceI = pp.start() + j;
+                const label own = cellAddr[mesh_.faceOwner()[faceI]];
+                const vector nf = Sfp[j]/magSfp[j];
+
+                if ((own != -1) && ((nf & axis) > 0.8))
+                {
+                    area_[own] += magSfp[j];
+                    n += Sfp[j];
+                    nFace++;
+                }
+            }
+        }
+    }
+
+    if (correct)
+    {
+        reduce(n, sumOp<vector>());
         axis = n/mag(n);
     }
 }

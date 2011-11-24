@@ -192,6 +192,17 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
     }
 
 
+    if (mesh_.time().outputTime())
+    {
+        tForce().write();
+    }
+
+
+    reduce(AOAmin, minOp<scalar>());
+    reduce(AOAmax, maxOp<scalar>());
+    reduce(dragEff, sumOp<scalar>());
+    reduce(liftEff, sumOp<scalar>());
+
     Info<< type() << " output:" << nl
         << "    min/max(AOA)   = " << radToDeg(AOAmin) << ", "
         << radToDeg(AOAmax) << nl
