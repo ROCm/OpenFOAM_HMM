@@ -656,7 +656,8 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
                             rA*
                             (
                                 coefft0*rho.oldTime()*U.oldTime()
-                              - coefft00*rho.oldTime().oldTime()*U.oldTime().oldTime()
+                              - coefft00*rho.oldTime().oldTime()
+                               *U.oldTime().oldTime()
                             )
                         ) & mesh().Sf()
                     )
