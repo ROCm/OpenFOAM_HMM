@@ -1,8 +1,0 @@
-cellSet innerCylinderSmall new cylinderToCell (0 -0.08 0) (0 0.06 0) 0.12
-cellSet outerCells new cellToCell innerCylinderSmall
-cellSet outerCells invert
-cellZoneSet innerCylinderSmall new setToCellZone innerCylinderSmall
-
-faceSet innerCylinderSmallFace new cellToFace innerCylinderSmall all
-faceSet innerCylinderSmallFace subset cellToFace outerCells all
-faceZoneSet innerCylinderSmall new setsToFaceZone innerCylinderSmallFace innerCylinderSmall

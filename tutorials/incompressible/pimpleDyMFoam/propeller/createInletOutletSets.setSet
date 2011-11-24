@@ -1,5 +1,0 @@
-faceSet boundaryFaces new patchToFace outerCylinder
-faceSet outletFaces new faceToFace boundaryFaces
-faceSet inletFaces new faceToFace boundaryFaces
-faceSet outletFaces subset normalToFace (0 -1 0) 0.3
-faceSet inletFaces subset normalToFace (0 1 0) 0.3
