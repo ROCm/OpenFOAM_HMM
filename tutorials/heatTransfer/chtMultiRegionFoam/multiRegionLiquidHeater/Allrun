@@ -6,7 +6,7 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication blockMesh
-runApplication setSet -batch makeCellSets.setSet
+runApplication topoSet
 runApplication splitMeshRegions -cellZones -overwrite
 
 # remove fluid fields from solid regions (important for post-processing)
@@ -49,9 +49,6 @@ done
 echo
 echo "creating files for paraview post-processing"
 echo
-for i in bottomWater topAir heater leftSolid rightSolid
-do
-   paraFoam -touch -region $i
-done
+paraFoam -touchAll
 
 # ----------------------------------------------------------------- end-of-file
