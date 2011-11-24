@@ -22,5 +22,6 @@
                 )*mesh.magSf()
             ),
             mesh.solver(U.select(finalIter))
-        );
+         );
+         K = 0.5*magSqr(U);
     }

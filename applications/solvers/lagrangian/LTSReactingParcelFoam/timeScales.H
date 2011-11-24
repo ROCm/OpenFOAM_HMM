@@ -74,10 +74,10 @@ Info<< "Time scales min/max:" << endl;
             runTime.deltaTValue()
            *mag
             (
-                DpDt
-              + parcels.hsTrans()/(mesh.V()*runTime.deltaT())
-//              + sources(rho, hs)
+                parcels.hsTrans()/(mesh.V()*runTime.deltaT())
+           // + sources(rho, hs)
               + combustion->Sh()()
+              - fvc::div(phi, 0.5*magSqr(U), "div(phi,K)")()
             )
            /rho
         );

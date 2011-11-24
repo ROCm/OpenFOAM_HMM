@@ -68,11 +68,13 @@
     // Correct velocity field
     U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
     U.correctBoundaryConditions();
+    K = 0.5*magSqr(U);
 
     p = p_rgh + rho*gh;
 
-    // Update pressure substantive derivative
-    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    // Update pressure time derivative
+    dpdt = fvc::ddt(p);
+
 
     // Solve continuity
     #include "rhoEqn.H"
@@ -91,5 +93,5 @@
     }
 
     // Update thermal conductivity
-    K = thermoFluid[i].Cp()*turb.alphaEff();
+    kappa = thermoFluid[i].Cp()*turb.alphaEff();
 }

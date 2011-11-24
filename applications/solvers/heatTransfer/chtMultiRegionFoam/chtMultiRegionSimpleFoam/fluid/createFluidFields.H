@@ -1,7 +1,7 @@
     // Initialise fluid field pointer lists
     PtrList<basicRhoThermo> thermoFluid(fluidRegions.size());
     PtrList<volScalarField> rhoFluid(fluidRegions.size());
-    PtrList<volScalarField> KFluid(fluidRegions.size());
+    PtrList<volScalarField> kappaFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
     PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
     PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
@@ -50,15 +50,15 @@
             )
         );
 
-        Info<< "    Adding to KFluid\n" << endl;
-        KFluid.set
+        Info<< "    Adding to kappaFluid\n" << endl;
+        kappaFluid.set
         (
             i,
             new volScalarField
             (
                 IOobject
                 (
-                    "K",
+                    "kappa",
                     runTime.timeName(),
                     fluidRegions[i],
                     IOobject::NO_READ,

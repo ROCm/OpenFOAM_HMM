@@ -5,7 +5,8 @@
       + mvConvection->fvmDiv(phi, hs)
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
-        DpDt
+        dpdt
+      - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + combustion->Sh()
       + coalParcels.Sh(hs)
       + limestoneParcels.Sh(hs)

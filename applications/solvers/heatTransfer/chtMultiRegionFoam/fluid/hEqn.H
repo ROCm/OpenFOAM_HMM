@@ -5,7 +5,8 @@
       + fvm::div(phi, h)
       - fvm::laplacian(turb.alphaEff(), h)
      ==
-        DpDt
+        dpdt
+      - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + rad.Sh(thermo)
     );
 

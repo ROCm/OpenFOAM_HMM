@@ -124,20 +124,3 @@
         dimensionedScalar("one", dimless/dimTime, 1),
         zeroGradientFvPatchScalarField::typeName
     );
-
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt
-    (
-        IOobject
-        (
-            "DpDt",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimPressure/dimTime, 0.0)
-    );
-
-    #include "setPressureWork.H"

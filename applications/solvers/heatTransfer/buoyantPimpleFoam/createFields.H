@@ -74,9 +74,8 @@
     // Force p_rgh to be consistent with p
     p_rgh = p - rho*gh;
 
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt
-    (
-        "DpDt",
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
-    );
+    Info<< "Creating field dpdt\n" << endl;
+    volScalarField dpdt("dpdt", fvc::ddt(p));
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K("K", 0.5*magSqr(U));

@@ -5,7 +5,8 @@
       + mvConvection->fvmDiv(phi, hs)
       - fvm::laplacian(turbulence->alphaEff(), hs)
      ==
-        DpDt
+        dpdt
+      - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + parcels.Sh(hs)
       + surfaceFilm.Sh()
       + radiation->Shs(thermo)

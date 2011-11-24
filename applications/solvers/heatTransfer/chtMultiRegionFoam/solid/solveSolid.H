@@ -9,7 +9,7 @@ if (finalIter)
         tmp<fvScalarMatrix> TEqn
         (
             fvm::ddt(rho*cp, T)
-          - fvm::laplacian(K, T)
+          - fvm::laplacian(kappa, T)
         );
         TEqn().relax();
         TEqn().solve(mesh.solver(T.select(finalIter)));

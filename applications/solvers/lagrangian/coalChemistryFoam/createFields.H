@@ -115,12 +115,11 @@
     // Set the turbulence into the combustion model
     combustion->setTurbulence(turbulence());
 
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt
-    (
-        "DpDt",
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
-    );
+    Info<< "Creating field dpdt\n" << endl;
+    volScalarField dpdt("dpdt", fvc::ddt(p));
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K("K", 0.5*magSqr(U));
 
     Info<< "\nConstructing sources" << endl;
     IObasicSourceList sources(mesh);

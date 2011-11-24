@@ -11,7 +11,7 @@
      ==
         heatTransferCoeff*T2/Cp1/rho1
       - fvm::Sp(heatTransferCoeff/Cp1/rho1, T1)
-      + alpha1*Dp1Dt/Cp1/rho1
+      + alpha1*(dpdt/rho1 - (fvc::ddt(K1) + fvc::div(phi1, K1)))/Cp1
     );
 
     fvScalarMatrix T2Eqn
@@ -23,7 +23,7 @@
      ==
         heatTransferCoeff*T1/Cp2/rho2
       - fvm::Sp(heatTransferCoeff/Cp2/rho2, T2)
-      + alpha2*Dp2Dt/Cp2/rho2
+      + alpha2*(dpdt/rho2 - (fvc::ddt(K2) + fvc::div(phi2, K2)))/Cp2
     );
 
     T1Eqn.relax();

@@ -43,5 +43,6 @@ p = p_rgh + rho*gh;
 
 U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
 U.correctBoundaryConditions();
+K = 0.5*magSqr(U);
 
-DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+dpdt = fvc::ddt(p);

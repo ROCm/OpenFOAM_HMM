@@ -5,8 +5,7 @@
       - fvm::Sp(fvc::div(phi), h)
       - fvm::laplacian(turbulence->alphaEff(), h)
      ==
-        fvc::div(phi/fvc::interpolate(rho), rho/psi, "div(U,p)")
-      - (rho/psi)*fvc::div(phi/fvc::interpolate(rho))
+      - fvc::div(phi, 0.5*magSqr(U), "div(phi,K)")
     );
 
     pZones.addEnthalpySource(thermo, rho, hEqn);

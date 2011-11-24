@@ -44,8 +44,8 @@ divSchemes
     div(phi,Theta)      Gauss limitedLinear 1;
     div(phid1,p)        Gauss upwind;
     div(phid2,p)        Gauss upwind;
-    div(phi1,p)         Gauss linear;
-    div(phi2,p)         Gauss linear;
+    div(phi1,K1)        Gauss limitedLinear 1;
+    div(phi2,K2)        Gauss limitedLinear 1;
 }
 
 laplacianSchemes

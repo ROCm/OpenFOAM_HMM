@@ -65,7 +65,5 @@
     rho = max(rho, rhoMin);
     rho = min(rho, rhoMax);
 
-    #include "setPressureWork.H"
-
     Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
 }
