@@ -33,7 +33,8 @@ runParallel renumberMesh 4 -overwrite
 # without evaluation.
 #runParallel changeDictionary 4 -literalRE
 
-runParallel setSet 4 -batch makeZones
+#runParallel setSet 4 -batch makeZones
+runParallel topoSet 4
 runParallel `getApplication` 4
 
 runApplication reconstructParMesh -constant

@@ -29,14 +29,20 @@ runApplication snappyHexMesh -overwrite
 
 # - generate face/cell sets and zones
 
-runApplication setSet -batch removeRedundantZones.setSet
-mv log.setSet log.removeRedundantZones.setSet
+#runApplication setSet -batch removeRedundantZones.setSet
+#mv log.setSet log.removeRedundantZones.setSet
+runApplication topoSet -dict system/removeRedundantZones.topoSetDict
+mv log.topoSet log.removeRedundantZones.topoSet
 
-runApplication setSet -batch createInletOutletSets.setSet
-mv log.setSet log.createInletOutletSets.setSet
+#runApplication setSet -batch createInletOutletSets.setSet
+#mv log.setSet log.createInletOutletSets.setSet
+runApplication topoSet -dict system/createInletOutletSets.topoSetDict
+mv log.topoSet log.createInletOutletSets.topoSet
 
-runApplication setSet -batch createAMIFaces.setSet
-mv log.setSet log.createAMIFaces.setSet
+#runApplication setSet -batch createAMIFaces.setSet
+#mv log.setSet log.createAMIFaces.setSet
+runApplication topoSet -dict system/createAMIFaces.topoSetDict
+mv log.topoSet log.createAMIFaces.topoSet
 
 
 # - create the inlet/outlet patches
