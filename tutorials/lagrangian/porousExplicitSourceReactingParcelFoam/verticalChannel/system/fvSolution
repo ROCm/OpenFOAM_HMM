@@ -89,7 +89,6 @@ potentialFlow
 
 additional
 {
-    pressureWork    false;
     pressureWorkTimeDerivative false;
 }
 
@@ -97,11 +96,11 @@ relaxationFactors
 {
     fields
     {
-        ".*Final"       1;
+        ".*"       1;
     }
     equations
     {
-        ".*Final"       1;
+        ".*"       1;
     }
 }
 

@@ -1,56 +1,32 @@
 {
-    tmp<volScalarField> pWork
+    fvScalarMatrix hsEqn
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                "pWork",
-                runTime.timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh,
-            dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.0)
-        )
+        fvm::ddt(rho, hs)
+      + mvConvection->fvmDiv(phi, hs)
+      - fvm::laplacian(turbulence->alphaEff(), hs)
+     ==
+      - (fvc::ddt(rho, K) + fvc::div(phi, K))
+      + parcels.Sh(hs)
+      + radiation->Shs(thermo)
+      + combustion->Sh()
+      + sources(rho, hs)
     );
 
-    if (pressureWork)
+    if (pressureWorkTimeDerivative)
     {
-        surfaceScalarField phiU("phiU", phi/fvc::interpolate(rho));
-
-        pWork() += fvc::div(phiU*fvc::interpolate(p)) - p*fvc::div(phiU);
-
-        if (pressureWorkTimeDerivative)
-        {
-            pWork() += fvc::ddt(p);
-        }
+        hsEqn -= dpdt;
     }
 
-    {
-        fvScalarMatrix hsEqn
-        (
-            fvm::ddt(rho, hs)
-          + mvConvection->fvmDiv(phi, hs)
-          - fvm::laplacian(turbulence->alphaEff(), hs)
-         ==
-            pWork()
-          + parcels.Sh(hs)
-          + radiation->Shs(thermo)
-          + combustion->Sh()
-          + sources(rho, hs)
-        );
+    hsEqn.relax();
 
-        sources.constrain(hsEqn);
+    sources.constrain(hsEqn);
 
-        hsEqn.solve();
+    hsEqn.solve();
 
-        thermo.correct();
+    thermo.correct();
 
-        radiation->correct();
+    radiation->correct();
 
-        Info<< "T gas min/max   = " << min(T).value() << ", "
-            << max(T).value() << endl;
-    }
+    Info<< "T gas min/max   = " << min(T).value() << ", "
+        << max(T).value() << endl;
 }

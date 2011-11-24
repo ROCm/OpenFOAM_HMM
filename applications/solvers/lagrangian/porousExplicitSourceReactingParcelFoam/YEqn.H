@@ -35,6 +35,8 @@ if (solveSpecies)
               + sources(rho, Yi)
             );
 
+            YiEqn.relax();
+
             sources.constrain(YiEqn);
 
             YiEqn.solve(mesh.solver("Yi"));

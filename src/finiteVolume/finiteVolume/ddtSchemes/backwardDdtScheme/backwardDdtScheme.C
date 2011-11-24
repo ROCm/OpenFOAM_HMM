@@ -645,20 +645,18 @@ backwardDdtScheme<Type>::fvcDdtPhiCorr
                     phiAbs.oldTime()/fvc::interpolate(rho.oldTime())
                 )
                *(
-                    fvc::interpolate(rA*rho.oldTime())
+                    fvc::interpolate(rA)
                    *(
                        coefft0*phiAbs.oldTime()
-                      /fvc::interpolate(rho.oldTime())
                      - coefft00*phiAbs.oldTime().oldTime()
-                      /fvc::interpolate(rho.oldTime().oldTime())
                     )
                   - (
                         fvc::interpolate
                         (
-                            rA*rho.oldTime()*
+                            rA*
                             (
-                                coefft0*U.oldTime()
-                              - coefft00*U.oldTime().oldTime()
+                                coefft0*rho.oldTime()*U.oldTime()
+                              - coefft00*rho.oldTime().oldTime()*U.oldTime().oldTime()
                             )
                         ) & mesh().Sf()
                     )

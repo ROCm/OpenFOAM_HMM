@@ -59,4 +59,7 @@
 
     U -= rAU*fvc::grad(p);
     U.correctBoundaryConditions();
+    K = 0.5*magSqr(U);
+
+    dpdt = fvc::ddt(p);
 }

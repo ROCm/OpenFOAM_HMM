@@ -98,3 +98,9 @@
         mesh,
         dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
+
+    Info<< "Creating field dpdt\n" << endl;
+    volScalarField dpdt("dpdt", fvc::ddt(p));
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K("K", 0.5*magSqr(U));
