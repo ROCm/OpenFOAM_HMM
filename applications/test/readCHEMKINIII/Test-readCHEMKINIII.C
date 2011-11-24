@@ -42,7 +42,9 @@ int main(int argc, char *argv[])
     fileName thermoFileName = fileName::null;
     args.optionReadIfPresent("thermo", thermoFileName);
 
-    chemkinReader ck(args[1], thermoFileName);
+    speciesTable dummySpecies;
+
+    chemkinReader ck(args[1], dummySpecies, thermoFileName);
 
     //Info<< ck.isotopeAtomicWts() << nl
     //    << ck.specieNames() << nl
