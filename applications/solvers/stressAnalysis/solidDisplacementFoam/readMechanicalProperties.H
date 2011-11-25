@@ -185,7 +185,7 @@
     volScalarField& nu = nuPtr();
 
     Info<< "Normalising E : E/rho\n" << endl;
-    volScalarField E = rhoE/rho;
+    volScalarField E(rhoE/rho);
 
     Info<< "Calculating Lame's coefficients\n" << endl;
 

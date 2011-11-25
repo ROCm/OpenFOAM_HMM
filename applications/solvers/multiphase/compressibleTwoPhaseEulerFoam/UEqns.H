@@ -3,7 +3,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
 
 {
     {
-        volTensorField gradU1T = fvc::grad(U1)().T();
+        volTensorField gradU1T(fvc::grad(U1)().T());
 
         if (kineticTheory.on())
         {
@@ -45,7 +45,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
     }
 
     {
-        volTensorField gradU2T = fvc::grad(U2)().T();
+        volTensorField gradU2T(fvc::grad(U2)().T());
         volTensorField Rc2
         (
             "Rc2",

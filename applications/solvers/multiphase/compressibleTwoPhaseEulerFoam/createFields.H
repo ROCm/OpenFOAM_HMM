@@ -228,15 +228,19 @@
 
     Info<< "Calculating field DDtU1 and DDtU2\n" << endl;
 
-    volVectorField DDtU1 =
+    volVectorField DDtU1
+    (
         fvc::ddt(U1)
       + fvc::div(phi1, U1)
-      - fvc::div(phi1)*U1;
+      - fvc::div(phi1)*U1
+    );
 
-    volVectorField DDtU2 =
+    volVectorField DDtU2
+    (
         fvc::ddt(U2)
       + fvc::div(phi2, U2)
-      - fvc::div(phi2)*U2;
+      - fvc::div(phi2)*U2
+    );
 
 
     Info<< "Calculating field g.h\n" << endl;
@@ -354,8 +358,10 @@
     setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
 
-    volScalarField dgdt =
-        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001));
+    volScalarField dgdt
+    (
+        pos(alpha2)*fvc::div(phi)/max(alpha2, scalar(0.0001))
+    );
 
 
     Info<< "Creating field dpdt\n" << endl;

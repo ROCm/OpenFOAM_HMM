@@ -222,7 +222,7 @@ if (thermalStress)
     volScalarField& alpha = alphaPtr();
 
     Info<< "Normalising k : k/rho\n" << endl;
-    volScalarField k = rhoK/rho;
+    volScalarField k(rhoK/rho);
 
     Info<< "Calculating thermal coefficients\n" << endl;
 

@@ -35,8 +35,8 @@ volScalarField heatTransferCoeff
 );
 
 {
-    volVectorField Ur = U1 - U2;
-    volScalarField magUr = mag(Ur);
+    volVectorField Ur(U1 - U2);
+    volScalarField magUr(mag(Ur));
 
     if (dispersedPhase == "1")
     {

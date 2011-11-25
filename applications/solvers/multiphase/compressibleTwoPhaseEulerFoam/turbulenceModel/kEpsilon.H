@@ -1,12 +1,12 @@
-if(turbulence)
+if (turbulence)
 {
     if (mesh.changing())
     {
         y.correct();
     }
 
-    tmp<volTensorField> tgradU2 = fvc::grad(U2);
-    volScalarField G = 2*nut2*(tgradU2() && dev(symm(tgradU2())));
+    tmp<volTensorField> tgradU2(fvc::grad(U2));
+    volScalarField G(2*nut2*(tgradU2() && dev(symm(tgradU2()))));
     tgradU2.clear();
 
     #include "wallFunctions.H"

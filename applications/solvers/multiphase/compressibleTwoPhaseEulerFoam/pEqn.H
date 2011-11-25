@@ -24,14 +24,14 @@
           - fvc::Sp(fvc::div(phid2), p);
     }
 
-    surfaceScalarField alpha1f = fvc::interpolate(alpha1);
-    surfaceScalarField alpha2f = scalar(1) - alpha1f;
+    surfaceScalarField alpha1f(fvc::interpolate(alpha1));
+    surfaceScalarField alpha2f(scalar(1) - alpha1f);
 
     volVectorField U10 = U1;
     volVectorField U20 = U2;
 
-    volScalarField rAU1 = 1.0/U1Eqn.A();
-    volScalarField rAU2 = 1.0/U2Eqn.A();
+    volScalarField rAU1(1.0/U1Eqn.A());
+    volScalarField rAU2(1.0/U2Eqn.A());
 
     surfaceScalarField rAlphaAU1f = fvc::interpolate(alpha1*rAU1);
     surfaceScalarField rAlphaAU2f = fvc::interpolate(alpha2*rAU2);

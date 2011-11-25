@@ -72,7 +72,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::GidaspowErgunWenYu::K
 ) const
 {
     volScalarField beta(max(scalar(1) - alpha_, scalar(1.0e-6)));
-    volScalarField d = phase1_.d();
+    volScalarField d(phase1_.d());
     volScalarField bp(pow(beta, -2.65));
     volScalarField Re(max(Ur*d/phase2_.nu(), scalar(1.0e-3)));
 
@@ -87,7 +87,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::GidaspowErgunWenYu::K
     }
 
     // Wen and Yu (1966)
-    tmp<volScalarField> tKWenYu = 0.75*Cds*phase2_.rho()*Ur*bp/d;
+    tmp<volScalarField> tKWenYu(0.75*Cds*phase2_.rho()*Ur*bp/d);
     volScalarField& KWenYu = tKWenYu();
 
     // Ergun

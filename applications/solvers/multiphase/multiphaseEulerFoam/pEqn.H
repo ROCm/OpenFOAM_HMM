@@ -172,7 +172,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            surfaceScalarField mSfGradp = pEqnIncomp.flux()/Dp;
+            surfaceScalarField mSfGradp(pEqnIncomp.flux()/Dp);
 
             phasei = 0;
             phi = dimensionedScalar("phi", phi.dimensions(), 0);

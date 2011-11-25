@@ -159,10 +159,10 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
     const fvPatchField<scalar>& nu =
         patch().lookupPatchField<volScalarField, scalar>("nu");
 
-    scalarField E = rhoE/rho;
-    scalarField mu = E/(2.0*(1.0 + nu));
-    scalarField lambda = nu*E/((1.0 + nu)*(1.0 - 2.0*nu));
-    scalarField threeK = E/(1.0 - 2.0*nu);
+    scalarField E(rhoE/rho);
+    scalarField mu(E/(2.0*(1.0 + nu)));
+    scalarField lambda(nu*E/((1.0 + nu)*(1.0 - 2.0*nu)));
+    scalarField threeK(E/(1.0 - 2.0*nu));
 
     Switch planeStress(mechanicalProperties.lookup("planeStress"));
 
@@ -172,7 +172,7 @@ void tractionDisplacementFvPatchVectorField::updateCoeffs()
         threeK = E/(1.0 - nu);
     }
 
-    scalarField twoMuLambda = (2*mu + lambda);
+    scalarField twoMuLambda(2*mu + lambda);
 
     vectorField n(patch().nf());
 
