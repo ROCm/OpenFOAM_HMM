@@ -102,7 +102,7 @@ void Foam::rotatingTotalPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalar t = this->db().time().value();
+    const scalar t = this->db().time().timeOutputValue();
     const vector om = omega_->value(t);
 
     vector axisHat = om/mag(om);

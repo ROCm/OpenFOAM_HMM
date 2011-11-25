@@ -36,7 +36,7 @@ namespace Foam
 template<class Type>
 scalar oscillatingFixedValueFvPatchField<Type>::currentScale() const
 {
-    const scalar t = this->db().time().value();
+    const scalar t = this->db().time().timeOutputValue();
     const scalar a = amplitude_->value(t);
     const scalar f = frequency_->value(t);
 
