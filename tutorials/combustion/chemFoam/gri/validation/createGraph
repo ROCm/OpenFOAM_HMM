@@ -1,5 +1,10 @@
 #!/bin/sh
 
+type -P gnuplot &>/dev/null || {
+    echo "gnuplot not found - skipping graph creation" >&2
+    exit 1
+}
+
 gnuplot<<EOF
     set terminal postscript eps color enhanced "Helveicta,20"
     set output "OF_vs_CHEMKINII.eps"
