@@ -9,32 +9,34 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    location    "constant/polyMesh";
-    object      boundary;
+    class       dictionary;
+    object      topoSetDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-3
+actions
 (
-    filmWalls
     {
-        type            wall;
-        nFaces          1100;
-        startFace       62790;
+        name    wallFilmFaces;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        sourceInfo
+        {
+            name filmWalls;
+        }
     }
-    sides
     {
-        type            patch;
-        nFaces          1320;
-        startFace       63890;
+        name    wallFilmFaces;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        sourceInfo
+        {
+            faceSet wallFilmFaces;
+        }
     }
-    frontAndBack
-    {
-        type            wall;
-        nFaces          4000;
-        startFace       65210;
-    }
-)
+);
 
 // ************************************************************************* //
