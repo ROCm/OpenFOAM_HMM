@@ -10,8 +10,7 @@ cp -rf 0.org 0
 runApplication blockMesh
 
 # create the set for the obstacles
-runApplication setSet -batch createObstacle.setSet
-mv log.setSet log.setSet1
+runApplication topoSet
 
 # create the obstacles - add obstacle patches to wallFilm patch
 runApplication subsetMesh c0 -patch wallFilm -overwrite
