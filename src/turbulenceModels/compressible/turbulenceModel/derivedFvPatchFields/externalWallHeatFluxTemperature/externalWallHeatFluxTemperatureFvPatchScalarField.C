@@ -199,7 +199,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     }
 
     scalarField q(size(), 0.0);
-    scalarField KDelta = K(*this)*patch().deltaCoeffs();
+    scalarField KDelta(K(*this)*patch().deltaCoeffs());
 
     if (oldMode_ == fixedHeatFlux)
     {
