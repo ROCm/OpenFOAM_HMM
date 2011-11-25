@@ -22,27 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::timeVaryingUniformTotalPressureFvPatchScalarField
+    Foam::uniformTotalPressureFvPatchScalarField
 
 Description
     A time-varying form of a uniform total pressure boundary condition. The
-    variation is specified as an interpolationTable (see
-    Foam::interpolationTable).
+    variation is specified as an DataEntry (see Foam::DataEntry).
 
 See Also
-    Foam::timeVaryingUniformFixedValueFvPatchField
+    Foam::uniformFixedValueFvPatchField.H
     and Foam::totalPressureFvPatchScalarField.H
 
 SourceFiles
-    timeVaryingUniformTotalPressureFvPatchScalarField.C
+    uniformTotalPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeVaryingUniformTotalPressureFvPatchScalarField_H
-#define timeVaryingUniformTotalPressureFvPatchScalarField_H
+#ifndef uniformTotalPressureFvPatchScalarField_H
+#define uniformTotalPressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "interpolationTable.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,10 +50,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class timeVaryingTotalPressureFvPatch Declaration
+              Class uniformTotalPressureFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
-class timeVaryingUniformTotalPressureFvPatchScalarField
+class uniformTotalPressureFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -79,26 +79,26 @@ class timeVaryingUniformTotalPressureFvPatchScalarField
         scalar p0_;
 
         //- Table of time vs total pressure, including the bounding treatment
-        interpolationTable<scalar> timeSeries_;
+        autoPtr<DataEntry<scalar> > pressure_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("timeVaryingTotalPressure");
+    TypeName("uniformTotalPressure");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -106,18 +106,18 @@ public:
         );
 
         //- Construct by mapping given patch field onto a new patch
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
         (
-            const timeVaryingUniformTotalPressureFvPatchScalarField&,
+            const uniformTotalPressureFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
         (
-            const timeVaryingUniformTotalPressureFvPatchScalarField&
+            const uniformTotalPressureFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -125,14 +125,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new timeVaryingUniformTotalPressureFvPatchScalarField(*this)
+                new uniformTotalPressureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
         (
-            const timeVaryingUniformTotalPressureFvPatchScalarField&,
+            const uniformTotalPressureFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -144,7 +144,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new timeVaryingUniformTotalPressureFvPatchScalarField(*this, iF)
+                new uniformTotalPressureFvPatchScalarField(*this, iF)
             );
         }
 
@@ -188,12 +188,6 @@ public:
             scalar p0()
             {
                 return p0_;
-            }
-
-            //- Return the time series used
-            const interpolationTable<scalar>& totalPressureTimeSeries() const
-            {
-                return timeSeries_;
             }
 
 

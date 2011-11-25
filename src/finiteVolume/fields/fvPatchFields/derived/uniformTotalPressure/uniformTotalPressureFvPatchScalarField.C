@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformTotalPressureFvPatchScalarField.H"
+#include "uniformTotalPressureFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -31,8 +31,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-timeVaryingUniformTotalPressureFvPatchScalarField
+Foam::uniformTotalPressureFvPatchScalarField::
+uniformTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -45,12 +45,12 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_("none"),
     gamma_(0.0),
     p0_(0.0),
-    timeSeries_()
+    pressure_()
 {}
 
 
-Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-timeVaryingUniformTotalPressureFvPatchScalarField
+Foam::uniformTotalPressureFvPatchScalarField::
+uniformTotalPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -64,7 +64,7 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(dict.lookupOrDefault<word>("psi", "none")),
     gamma_(readScalar(dict.lookup("gamma"))),
     p0_(readScalar(dict.lookup("p0"))),
-    timeSeries_(dict)
+    pressure_(DataEntry<scalar>::New("pressure", dict))
 {
     if (dict.found("value"))
     {
@@ -80,10 +80,10 @@ timeVaryingUniformTotalPressureFvPatchScalarField
 }
 
 
-Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-timeVaryingUniformTotalPressureFvPatchScalarField
+Foam::uniformTotalPressureFvPatchScalarField::
+uniformTotalPressureFvPatchScalarField
 (
-    const timeVaryingUniformTotalPressureFvPatchScalarField& ptf,
+    const uniformTotalPressureFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -96,14 +96,14 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
     p0_(ptf.p0_),
-    timeSeries_(ptf.timeSeries_)
+    pressure_(ptf.pressure_().clone().ptr())
 {}
 
 
-Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-timeVaryingUniformTotalPressureFvPatchScalarField
+Foam::uniformTotalPressureFvPatchScalarField::
+uniformTotalPressureFvPatchScalarField
 (
-    const timeVaryingUniformTotalPressureFvPatchScalarField& tppsf
+    const uniformTotalPressureFvPatchScalarField& tppsf
 )
 :
     fixedValueFvPatchScalarField(tppsf),
@@ -113,14 +113,14 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     p0_(tppsf.p0_),
-    timeSeries_(tppsf.timeSeries_)
+    pressure_(tppsf.pressure_().clone().ptr())
 {}
 
 
-Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-timeVaryingUniformTotalPressureFvPatchScalarField
+Foam::uniformTotalPressureFvPatchScalarField::
+uniformTotalPressureFvPatchScalarField
 (
-    const timeVaryingUniformTotalPressureFvPatchScalarField& tppsf,
+    const uniformTotalPressureFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -131,13 +131,13 @@ timeVaryingUniformTotalPressureFvPatchScalarField
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
     p0_(tppsf.p0_),
-    timeSeries_(tppsf.timeSeries_)
+    pressure_(tppsf.pressure_().clone().ptr())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
+void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
 (
     const vectorField& Up
 )
@@ -147,7 +147,7 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    p0_ = timeSeries_(this->db().time().timeOutputValue());
+    p0_ = pressure_->value(this->db().time().timeOutputValue());
 
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
@@ -189,10 +189,8 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
     }
     else
     {
-        FatalErrorIn
-        (
-            "timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs()"
-        )   << " rho or psi set inconsitently, rho = " << rhoName_
+        FatalErrorIn("uniformTotalPressureFvPatchScalarField::updateCoeffs()")
+            << " rho or psi set inconsitently, rho = " << rhoName_
             << ", psi = " << psiName_ << ".\n"
             << "    Set either rho or psi or neither depending on the "
                "definition of total pressure.\n"
@@ -207,14 +205,13 @@ void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs
 }
 
 
-void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::updateCoeffs()
+void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs()
 {
     updateCoeffs(patch().lookupPatchField<volVectorField, vector>(UName_));
 }
 
 
-void Foam::timeVaryingUniformTotalPressureFvPatchScalarField::
-write(Ostream& os) const
+void Foam::uniformTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
@@ -223,7 +220,7 @@ write(Ostream& os) const
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
     os.writeKeyword("p0") << p0_ << token::END_STATEMENT << nl;
-    timeSeries_.write(os);
+    pressure_->writeData(os);
     writeEntry("value", os);
 }
 
@@ -235,7 +232,7 @@ namespace Foam
     makePatchTypeField
     (
         fvPatchScalarField,
-        timeVaryingUniformTotalPressureFvPatchScalarField
+        uniformTotalPressureFvPatchScalarField
     );
 }
 
