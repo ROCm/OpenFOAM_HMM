@@ -28,11 +28,14 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug
-(
-    Foam::IOPtrList<Foam::regionModels::pyrolysisModels::pyrolysisModel>,
-    0
-);
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug
+    (
+        IOPtrList<regionModels::pyrolysisModels::pyrolysisModel>,
+        0
+    );
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -130,7 +130,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
 
     const volVectorField& U = db().lookupObject<volVectorField>("U");
 
-    vectorField Uc = U.boundaryField()[patchI].patchInternalField();
+    vectorField Uc(U.boundaryField()[patchI].patchInternalField());
     Uc -= n()*(Uc & n());
 
     if (phi.dimensions() == dimVelocity*dimArea)
