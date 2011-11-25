@@ -187,7 +187,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 
         operator==(-g.value() & zetap);
     }
-    else if (phi.dimensions() = dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const scalarField& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
