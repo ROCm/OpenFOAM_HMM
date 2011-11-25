@@ -95,7 +95,7 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     Uref_(readScalar(dict.lookup("Uref"))),
     Href_(readScalar(dict.lookup("Href"))),
-    zGround_(readScalar(dict.lookup("zGround")))
+    zGround_("zGround", dict, p.size())
 {
     if (mag(n_) < SMALL || mag(z_) < SMALL || mag(z0_) < SMALL)
     {

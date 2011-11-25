@@ -113,7 +113,7 @@ class atmBoundaryLayerInletVelocityFvPatchVectorField
         const scalar Href_;
 
         //- Minimum corrdinate value in z direction
-        const scalarField zGround_;
+        scalarField zGround_;
 
 
 public:
