@@ -47,6 +47,9 @@ Description
 #    define FOAM_LABEL_MAX 2000000000
 #endif
 
+#include "pTraits.H"
+#include "direction.H"
+
 
 #if INT_MAX > FOAM_LABEL_MAX
 
@@ -126,8 +129,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "pTraits.H"
-#include "direction.H"
+//#include "pTraits.H"
+//#include "direction.H"
 
 namespace Foam
 {
@@ -188,6 +191,66 @@ public:
 };
 
 
+// For convenience's sake always define pTraits<int> (so even if label != int)
+#if (FOAM_LABEL_MAX != INT_MAX)
+//- template specialization for pTraits<int>
+template<>
+class pTraits<int>
+{
+    int p_;
+
+public:
+
+    //- Component type
+    typedef int cmptType;
+
+    // Member constants
+
+        enum
+        {
+            dim = 3,         //!< Dimensionality of space
+            rank = 0,        //!< Rank of int is 0
+            nComponents = 1  //!< Number of components in int is 1
+        };
+
+
+    // Static data members
+
+        static const char* const typeName;
+        static const char* componentNames[];
+        static const int zero;
+        static const int one;
+        static const int min;
+        static const int max;
+
+
+    // Constructors
+
+        //- Construct from primitive
+        explicit pTraits(const int&);
+
+        //- Construct from Istream
+        pTraits(Istream&);
+
+
+    // Member Functions
+
+        //- Access to the int value
+        operator int() const
+        {
+            return p_;
+        }
+
+        //- Access to the int value
+        operator int&()
+        {
+            return p_;
+        }
+};
+#endif
+
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Raise one label to the power of another
@@ -214,6 +277,7 @@ MAXMIN(char, char, char)
 MAXMIN(short, short, short)
 MAXMIN(int, int, int)
 MAXMIN(long, long, long)
+MAXMIN(long, long, int)
 MAXMIN(long long, long long, long long)
 
 MAXMIN(unsigned char, unsigned char, unsigned char)

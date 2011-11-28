@@ -68,7 +68,7 @@ class UIPstream
 
         const bool clearAtEnd_;
 
-        label messageSize_;
+        int messageSize_;
 
 
     // Private Member Functions

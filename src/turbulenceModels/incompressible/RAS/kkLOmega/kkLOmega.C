@@ -100,7 +100,7 @@ tmp<volScalarField> kkLOmega::fTaul
                     lambdaEff*omega_
                   + dimensionedScalar
                     (
-                        "ROTVSMALL",
+                        "ROOTVSMALL",
                         dimLength*inv(dimTime),
                         ROOTVSMALL
                     )
@@ -193,6 +193,7 @@ tmp<volScalarField> kkLOmega::gammaNAT
         )
     );
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -670,7 +671,7 @@ void kkLOmega::correct()
         alphaT(lambdaEff, fv(sqr(fw)*kt_/nu()/(omega_ + omegaMin_)), ktS)
     );
 
-    // By pass s0urce term divided by kl_
+    // By pass source term divided by kl_
 
     const dimensionedScalar fwMin("SMALL", dimless, ROOTVSMALL);
 

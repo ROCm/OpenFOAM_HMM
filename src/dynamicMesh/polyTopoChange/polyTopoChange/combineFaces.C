@@ -714,7 +714,7 @@ void Foam::combineFaces::setRefinement
         mesh_,
         nPointFaces,
         plusEqOp<label>(),
-        0                   // null value
+        label(0)            // null value
     );
 
     // Remove all unused points. Store position if undoable.
