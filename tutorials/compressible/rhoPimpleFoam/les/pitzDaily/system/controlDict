@@ -17,13 +17,13 @@ FoamFile
 
 application     rhoPimpleFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         10;
+endTime         0.3;
 
 deltaT          1e-05;
 
