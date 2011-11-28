@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  2.1.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,14 +22,13 @@ boundaryField
 {
     inlet
     {
-        //type            totalPressure;
-        //p0              uniform 40;
-
-        type            timeVaryingTotalPressure;
+        type            uniformTotalPressure;
+        pressure        table
+        (
+            (0 10)
+            (1 40)
+        );
         p0              40; // only used for restarts
-        outOfBounds     clamp;
-        fileName        "$FOAM_CASE/constant/p0vsTime";
-
         U               U;
         phi             phi;
         rho             none;
