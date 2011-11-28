@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
     object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -23,50 +22,37 @@ boundaryField
 {
     inlet
     {
-        type            timeVaryingTotalPressure;
+        type            uniformTotalPressure;
+        pressure        table
+        (
+            (0 10)
+            (1 40)
+        );
+        p0              40; // only used for restarts
+        U               U;
+        phi             phi;
         rho             none;
         psi             none;
         gamma           1;
-        p0              40;
-        fileName        "$FOAM_CASE/constant/p0vsTime";
-        outOfBounds     clamp;
         value           uniform 40;
     }
+
     outlet1
     {
         type            fixedValue;
         value           uniform 10;
     }
+
     outlet2
     {
         type            fixedValue;
         value           uniform 0;
     }
-    baffles
-    {
-        type            zeroGradient;
-    }
-    fan_half0
-    {
-        type            fan;
-        patchType       cyclic;
-        jump            uniform 0;
-        f               2(100 -0.1);
-        value           uniform 0;
-    }
-    fan_half1
-    {
-        type            fan;
-        patchType       cyclic;
-        jump            uniform 0;
-        f               2(100 -0.1);
-        value           uniform 0;
-    }
+
     defaultFaces
     {
         type            zeroGradient;
     }
 }
-
 
 // ************************************************************************* //
