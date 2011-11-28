@@ -1255,7 +1255,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
-            0                   // null value
+            label(0)            // null value
         );
 
         forAll(pointNormals, i)
@@ -1954,7 +1954,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
             pp.meshPoints(),
             nPatchPointLayers,
             maxEqOp<label>(),
-            0                   // null value
+            label(0)        // null value
         );
     }
 }

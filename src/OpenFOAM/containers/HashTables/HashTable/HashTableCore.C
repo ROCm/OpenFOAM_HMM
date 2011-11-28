@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HashTable.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,7 +48,7 @@ Foam::label Foam::HashTableCore::canonicalSize(const label size)
     }
 
     // enforce power of two
-    unsigned int goodSize = size;
+    uLabel goodSize = size;
 
     if (goodSize & (goodSize - 1))
     {

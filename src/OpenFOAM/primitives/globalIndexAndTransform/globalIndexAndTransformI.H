@@ -151,7 +151,7 @@ Foam::globalIndexAndTransform::decodeTransformIndex
     const label transformIndex
 ) const
 {
-    FixedList<label, 3> permutation(0);
+    FixedList<label, 3> permutation(label(0));
 
     label t = transformIndex;
     if (nIndependentTransforms() > 0)
@@ -520,7 +520,7 @@ Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
     }
 
     // Number of selected transformations
-    label nSelTrans = pow(2, nUsedTrans) - 1;
+    label nSelTrans = pow(label(2), nUsedTrans) - 1;
 
     // Pout<< nl << permutation << nl << endl;
 

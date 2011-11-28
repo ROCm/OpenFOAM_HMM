@@ -37,7 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(long val)
+Foam::word Foam::name(const long val)
 {
     std::ostringstream buf;
     buf << val;

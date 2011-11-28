@@ -587,7 +587,7 @@ void Foam::autoLayerDriver::findIsolatedRegions
         pp.meshPoints(),
         isolatedPoint,
         plusEqOp<label>(),
-        0        // null value
+        label(0)        // null value
     );
 
     // stop layer growth on isolated faces
@@ -730,7 +730,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
-            0                   // null value
+            label(0)            // null value
         );
 
         forAll(pointNormals, i)

@@ -114,7 +114,7 @@ Foam::fieldviewTopology::fieldviewTopology
     // Mark all faces that are to be seen as wall for particle
     // tracking and all cells that use one or more of these walls
 
-    labelList wallFace(mesh.nFaces(), NOT_A_WALL);
+    List<int> wallFace(mesh.nFaces(), NOT_A_WALL);
     boolList wallCell(mesh.nCells(), false);
 
     if (setWallInfo)
@@ -149,20 +149,20 @@ Foam::fieldviewTopology::fieldviewTopology
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
     // Pre calculate headers for cells not on walls
-    labelList notWallFlags(6, NOT_A_WALL);
-    label tetNotWall = fv_encode_elem_header
+    List<int> notWallFlags(6, NOT_A_WALL);
+    unsigned int tetNotWall = fv_encode_elem_header
     (
         FV_TET_ELEM_ID, notWallFlags.begin()
     );
-    label pyrNotWall = fv_encode_elem_header
+    unsigned int pyrNotWall = fv_encode_elem_header
     (
         FV_PYRA_ELEM_ID, notWallFlags.begin()
     );
-    label prismNotWall = fv_encode_elem_header
+    unsigned int prismNotWall = fv_encode_elem_header
     (
         FV_PRISM_ELEM_ID, notWallFlags.begin()
     );
-    label hexNotWall = fv_encode_elem_header
+    unsigned int hexNotWall = fv_encode_elem_header
     (
         FV_HEX_ELEM_ID, notWallFlags.begin()
     );
@@ -179,7 +179,7 @@ Foam::fieldviewTopology::fieldviewTopology
 
     const faceList& allFaces = mesh.faces();
 
-    labelList wallFlags(6);
+    List<int> wallFlags(6);
     forAll(cellShapes, celli)
     {
         const cellShape& cellShape = cellShapes[celli];

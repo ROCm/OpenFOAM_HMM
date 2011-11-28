@@ -42,6 +42,8 @@ Description
 
 namespace Foam
 {
+//template<class Type> class Hash;
+//template<> class Hash<label>;
 
 /*---------------------------------------------------------------------------*\
                             Class Hash Declaration
@@ -70,30 +72,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Hash specialization for hashing pointer addresses.
-//  Treat a pointer like a long.
-//  This should work for both 32-bit and 64-bit pointers.
-template<>
-class Hash<void*>
-{
-public:
-
-    Hash()
-    {}
-
-    unsigned operator()(const void* const& p, unsigned seed) const
-    {
-        return Hash<long>()(long(p), seed);
-    }
-
-    unsigned operator()(const void* const& p) const
-    {
-        return Hash<long>()(long(p));
-    }
-
-};
-
-
 //- Hash specialization for hashing labels
 template<>
 class Hash<Foam::label>
@@ -118,6 +96,30 @@ public:
     {
         return p;
     }
+};
+
+
+//- Hash specialization for hashing pointer addresses.
+//  Treat a pointer like a long.
+//  This should work for both 32-bit and 64-bit pointers.
+template<>
+class Hash<void*>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const void* const& p, unsigned seed) const
+    {
+        return Hash<long>()(long(p), seed);
+    }
+
+    unsigned operator()(const void* const& p) const
+    {
+        return Hash<long>()(long(p));
+    }
+
 };
 
 

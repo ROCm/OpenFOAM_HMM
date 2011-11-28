@@ -45,7 +45,7 @@ template <class Type, class TrackingData>
 Foam::scalar Foam::FaceCellWave<Type, TrackingData>::propagationTol_ = 0.01;
 
 template <class Type, class TrackingData>
-Foam::label Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
+int Foam::FaceCellWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
 namespace Foam
 {

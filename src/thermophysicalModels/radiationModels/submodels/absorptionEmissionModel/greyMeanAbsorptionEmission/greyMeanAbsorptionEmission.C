@@ -58,7 +58,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     absorptionEmissionModel(dict, mesh),
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
     speciesNames_(0),
-    specieIndex_(0),
+    specieIndex_(label(0)),
     lookUpTablePtr_(),
     thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
     EhrrCoeff_(readScalar(coeffsDict_.lookup("EhrrCoeff"))),

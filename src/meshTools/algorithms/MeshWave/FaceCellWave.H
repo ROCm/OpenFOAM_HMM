@@ -240,7 +240,7 @@ class FaceCellWave
 
             //- Used as default trackdata value to satisfy default template
             //  argument.
-            static label dummyTrackData_;
+            static int dummyTrackData_;
 
 
 public:

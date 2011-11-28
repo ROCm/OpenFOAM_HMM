@@ -75,6 +75,28 @@ template<class T>
 void transformList(const tensorField&, EdgeMap<T>&);
 
 
+// Specialisations for bool
+template<>
+inline void transformList(const tensor&, UList<bool>&)
+{}
+template<>
+inline void transformList(const tensorField&, UList<bool>&)
+{}
+template<>
+inline void transformList(const tensor&, Map<bool>&)
+{}
+template<>
+inline void transformList(const tensorField&, Map<bool>&)
+{}
+template<>
+inline void transformList(const tensor&, EdgeMap<bool>&)
+{}
+template<>
+inline void transformList(const tensorField&, EdgeMap<bool>&)
+{}
+
+
+// Specialisations for label
 template<>
 inline void transformList(const tensor&, labelUList&)
 {}
@@ -95,6 +117,7 @@ inline void transformList(const tensorField&, EdgeMap<label>&)
 {}
 
 
+// Specialisations for scalar
 template<>
 inline void transformList(const tensor&, UList<scalar>&)
 {}

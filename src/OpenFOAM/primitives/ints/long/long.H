@@ -48,7 +48,7 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a string representation of a long
-word name(long);
+word name(const long);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
