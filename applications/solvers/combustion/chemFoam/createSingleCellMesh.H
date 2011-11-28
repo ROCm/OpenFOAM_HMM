@@ -1,6 +1,6 @@
 Info<< "Constructing single cell mesh" << nl << endl;
 
-labelList owner(6, 0);
+labelList owner(6, label(0));
 labelList neighbour(0);
 
 pointField points(8);

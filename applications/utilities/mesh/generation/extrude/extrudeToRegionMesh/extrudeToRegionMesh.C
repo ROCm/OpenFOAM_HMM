@@ -1456,7 +1456,7 @@ void setCouplingInfo
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    List<polyPatch*> newPatches(patches.size(), NULL);
+    List<polyPatch*> newPatches(patches.size(), static_cast<polyPatch*>(NULL));
 
     forAll(zoneToPatch, zoneI)
     {
