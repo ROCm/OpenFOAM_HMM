@@ -862,7 +862,7 @@ void Foam::addPatchCellLayer::setRefinement
         {
             labelList n(mesh_.nPoints(), 0);
             UIndirectList<label>(n, meshPoints) = nPointLayers;
-            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0);
+            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), label(0));
 
             // Non-synced
             forAll(meshPoints, i)
@@ -906,7 +906,7 @@ void Foam::addPatchCellLayer::setRefinement
                 mesh_,
                 nFromFace,
                 maxEqOp<label>(),
-                0
+                label(0)
             );
 
             forAll(nPointLayers, i)
@@ -1418,7 +1418,7 @@ void Foam::addPatchCellLayer::setRefinement
             mesh_,
             meshEdgeLayers,
             maxEqOp<label>(),
-            0                   // initial value
+            label(0)            // initial value
         );
 
         forAll(meshEdges, edgeI)

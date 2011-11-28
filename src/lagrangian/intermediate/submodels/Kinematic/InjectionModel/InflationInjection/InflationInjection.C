@@ -239,8 +239,14 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
             break;
         }
 
-        label cI =
-            generationCells_[rnd.position(0, generationCells_.size() - 1)];
+        label cI = generationCells_
+        [
+            rnd.position
+            (
+                label(0),
+                generationCells_.size() - 1
+            )
+        ];
 
         // Pick a particle at random from the cell - if there are
         // none, insert one at the cell centre.  Otherwise, split an
@@ -268,7 +274,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
         }
         else
         {
-            label cPI = rnd.position(0, cellOccupancy[cI].size() - 1);
+            label cPI = rnd.position(label(0), cellOccupancy[cI].size() - 1);
 
             // This has to be a reference to the pointer so that it
             // can be set to NULL when the particle is deleted.

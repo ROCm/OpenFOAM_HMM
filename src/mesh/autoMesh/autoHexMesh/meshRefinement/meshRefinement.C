@@ -2002,7 +2002,7 @@ void Foam::meshRefinement::updateMesh
     );
 
     // Update surfaceIndex
-    updateList(map.faceMap(), -1, surfaceIndex_);
+    updateList(map.faceMap(), label(-1), surfaceIndex_);
 
     // Update cached intersection information
     updateIntersections(changedFaces);
@@ -2015,7 +2015,7 @@ void Foam::meshRefinement::updateMesh
         if (userFaceData_[i].first() == KEEPALL)
         {
             // extend list with face-from-face data
-            updateList(map.faceMap(), -1, data);
+            updateList(map.faceMap(), label(-1), data);
         }
         else if (userFaceData_[i].first() == MASTERONLY)
         {

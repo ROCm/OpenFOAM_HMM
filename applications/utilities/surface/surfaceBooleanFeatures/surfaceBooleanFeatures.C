@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 
     vectorField normals(2*nFeatEds, vector::zero);
     vectorField edgeDirections(nFeatEds, vector::zero);
-    labelListList edgeNormals(nFeatEds, labelList(2, -1));
+    labelListList edgeNormals(nFeatEds, labelList(2, label(-1)));
 
     triSurfaceSearch querySurf1(surf1);
     triSurfaceSearch querySurf2(surf2);

@@ -318,7 +318,7 @@ void Foam::globalIndexAndTransform::determineTransforms()
 
 void Foam::globalIndexAndTransform::determineTransformPermutations()
 {
-    label nTransformPermutations = pow(3, transforms_.size());
+    label nTransformPermutations = pow(label(3), transforms_.size());
 
     transformPermutations_.setSize(nTransformPermutations);
 

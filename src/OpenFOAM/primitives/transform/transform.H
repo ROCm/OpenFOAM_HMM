@@ -57,6 +57,12 @@ inline tensor rotationTensor
 }
 
 
+inline label transform(const tensor&, const bool i)
+{
+    return i;
+}
+
+
 inline label transform(const tensor&, const label i)
 {
     return i;

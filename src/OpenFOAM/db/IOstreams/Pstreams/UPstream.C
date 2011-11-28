@@ -222,7 +222,7 @@ int Foam::UPstream::myProcNo_(0);
 bool Foam::UPstream::parRun_(false);
 
 // List of process IDs
-Foam::List<int> Foam::UPstream::procIDs_(1, 0);
+Foam::List<int> Foam::UPstream::procIDs_(label(1), 0);
 
 // Standard transfer message type
 int Foam::UPstream::msgType_(1);

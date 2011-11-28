@@ -147,7 +147,7 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
         maxZone[pointI] = index();
         minZone[pointI] = index();
     }
-    syncTools::syncPointList(mesh, maxZone, maxEqOp<label>(), -1);
+    syncTools::syncPointList(mesh, maxZone, maxEqOp<label>(), label(-1));
     syncTools::syncPointList(mesh, minZone, minEqOp<label>(), labelMax);
 
     bool error = false;

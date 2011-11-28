@@ -221,7 +221,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
         pp.meshPoints(),
         nBoundary,
         plusEqOp<label>(),  // combine op
-        0                   // null value
+        label(0)            // null value
     );
 
     forAll(avgBoundary, i)
@@ -296,7 +296,7 @@ Foam::pointField Foam::autoSnapDriver::smoothPatchDisplacement
             mesh,
             globalNum,
             plusEqOp<label>(),  // combine op
-            0                   // null value
+            label(0)            // null value
         );
 
         avgInternal.setSize(meshPoints.size());

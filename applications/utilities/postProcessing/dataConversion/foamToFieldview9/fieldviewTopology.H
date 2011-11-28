@@ -55,13 +55,13 @@ class fieldviewTopology
     // Private data
 
         //- Hexes in fieldview format
-        labelList hexLabels_;
+        List<int> hexLabels_;
 
-        labelList prismLabels_;
+        List<int> prismLabels_;
 
-        labelList pyrLabels_;
+        List<int> pyrLabels_;
 
-        labelList tetLabels_;
+        List<int> tetLabels_;
 
         //- Number of non-hex/prism/pyr/tet labels
         label nPoly_;
@@ -108,22 +108,22 @@ public:
 
         // Access
 
-            const labelList& hexLabels() const
+            const List<int>& hexLabels() const
             {
                 return hexLabels_;
             }
 
-            const labelList& prismLabels() const
+            const List<int>& prismLabels() const
             {
                 return prismLabels_;
             }
 
-            const labelList& pyrLabels() const
+            const List<int>& pyrLabels() const
             {
                 return pyrLabels_;
             }
 
-            const labelList& tetLabels() const
+            const List<int>& tetLabels() const
             {
                 return tetLabels_;
             }

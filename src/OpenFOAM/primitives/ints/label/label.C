@@ -53,6 +53,28 @@ pTraits<label>::pTraits(Istream& is)
 }
 
 
+#if (FOAM_LABEL_MAX != INT_MAX)
+const char* const pTraits<int>::typeName = "int";
+const int pTraits<int>::zero = 0;
+const int pTraits<int>::one = 1;
+const int pTraits<int>::min = INT_MIN;
+const int pTraits<int>::max = INT_MAX;
+
+const char* pTraits<int>::componentNames[] = { "x" };
+
+pTraits<int>::pTraits(const int& p)
+:
+    p_(p)
+{}
+
+
+pTraits<int>::pTraits(Istream& is)
+{
+    is >> p_;
+}
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Raise one label to the power of another (overloaded function call)

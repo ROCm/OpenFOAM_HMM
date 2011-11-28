@@ -244,8 +244,8 @@ void Foam::domainDecomposition::decomposeMesh()
     {
         label nInterfaces = interPatchFaces[procI].size();
 
-        subPatchIDs[procI].setSize(nInterfaces, labelList(1, -1));
-        subPatchStarts[procI].setSize(nInterfaces, labelList(1, 0));
+        subPatchIDs[procI].setSize(nInterfaces, labelList(1, label(-1)));
+        subPatchStarts[procI].setSize(nInterfaces, labelList(1, label(0)));
     }
 
     // Processor boundaries from split cyclics
@@ -319,7 +319,7 @@ void Foam::domainDecomposition::decomposeMesh()
             {
                 label nIntfcs = interPatchFaces[procI].size();
                 subPatchIDs[procI].setSize(nIntfcs, labelList(1, patchi));
-                subPatchStarts[procI].setSize(nIntfcs, labelList(1, 0));
+                subPatchStarts[procI].setSize(nIntfcs, labelList(1, label(0)));
             }
         }
     }

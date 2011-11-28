@@ -41,7 +41,7 @@ template <class Type, class TrackingData>
 Foam::scalar Foam::PointEdgeWave<Type, TrackingData>::propagationTol_ = 0.01;
 
 template <class Type, class TrackingData>
-Foam::label Foam::PointEdgeWave<Type, TrackingData>::dummyTrackData_ = 12345;
+int Foam::PointEdgeWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
