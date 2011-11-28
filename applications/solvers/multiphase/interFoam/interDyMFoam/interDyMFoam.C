@@ -54,12 +54,12 @@ int main(int argc, char *argv[])
 
     pimpleControl pimple(mesh);
 
+    surfaceScalarField phiAbs("phiAbs", phi);
+    fvc::makeAbsolute(phiAbs, U);
+
     #include "correctPhi.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
-
-    surfaceScalarField phiAbs("phiAbs", phi);
-    fvc::makeAbsolute(phiAbs, U);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
