@@ -260,7 +260,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 //  Combustion progress variable (c).
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    List<label> productsIndex(2, -1);
+    List<label> productsIndex(2, label(-1));
     {
         label i = 0;
         forAll (this->singleMixture_.specieProd(), specieI)

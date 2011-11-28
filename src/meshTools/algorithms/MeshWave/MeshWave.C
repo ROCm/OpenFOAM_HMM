@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template <class Type, class TrackingData>
-Foam::label Foam::MeshWave<Type, TrackingData>::dummyTrackData_ = 12345;
+int Foam::MeshWave<Type, TrackingData>::dummyTrackData_ = 12345;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

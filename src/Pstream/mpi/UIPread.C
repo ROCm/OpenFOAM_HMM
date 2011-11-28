@@ -259,7 +259,7 @@ Foam::label Foam::UIPstream::read
 
         // Check size of message read
 
-        label messageSize;
+        int messageSize;
         MPI_Get_count(&status, MPI_BYTE, &messageSize);
 
         if (debug)
