@@ -15,19 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-2
+1
 (
-    blob.stl_patch1
+    walls
     {
         type            wall;
-        nFaces          64564;
-        startFace       459986;
-    }
-    cvMesh_defaultPatch
-    {
-        type            wall;
-        nFaces          0;
-        startFace       524550;
+        nFaces          638;
+        startFace       2948;
     }
 )
 
