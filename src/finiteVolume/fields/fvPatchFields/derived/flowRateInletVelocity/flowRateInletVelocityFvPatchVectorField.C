@@ -112,7 +112,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const scalar t = db().time().value();
+    const scalar t = db().time().timeOutputValue();
 
     // a simpler way of doing this would be nice
     const scalar avgU = -flowRate_->value(t)/gSum(patch().magSf());

@@ -136,6 +136,7 @@ class kkLOmega
             const volScalarField& fNatCrit
         ) const;
 
+
 protected:
 
     // Protected data

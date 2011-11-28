@@ -114,7 +114,7 @@ void Foam::rotatingWallVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const scalar t = this->db().time().value();
+    const scalar t = this->db().time().timeOutputValue();
     scalar om = omega_->value(t);
 
     // Calculate the rotating wall velocity from the specification of the motion
