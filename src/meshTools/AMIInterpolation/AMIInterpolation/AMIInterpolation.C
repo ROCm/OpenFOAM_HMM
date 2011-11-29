@@ -904,8 +904,17 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     // create intersection object
     faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
-    // crude resultant norm - face normals should be opposite
-    const vector n = 0.5*(tgt.normal(tgtPoints) - src.normal(srcPoints));
+    // crude resultant norm
+    vector n(-src.normal(srcPoints));
+    if (reverseTarget_)
+    {
+        n -= tgt.normal(tgtPoints);
+    }
+    else
+    {
+        n += tgt.normal(tgtPoints);
+    }
+    n *= 0.5;
 
     scalar area = 0;
     if (mag(n) > ROOTVSMALL)
