@@ -40,6 +40,7 @@ SourceFiles
 
 #include "mappedPatchBase.H"
 #include "fixedValueFvPatchFields.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,11 +70,20 @@ class mappedFieldFvPatchField
         //  setAverage_ is set true
         const Type average_;
 
+        //- Interpolation scheme to use for nearestCell mode
+        word interpolationScheme_;
+
+        //- Pointer to the cell interpolator
+        mutable autoPtr<interpolation<Type> > interpolator_;
+
 
     // Private Member Functions
 
         //- Field to sample. Either on my or nbr mesh
         const GeometricField<Type, fvPatchField, volMesh>& sampleField() const;
+
+        //- Access the interpolation method
+        const interpolation<Type>& interpolator() const;
 
 
 public:
@@ -115,7 +125,8 @@ public:
             // My settings
             const word& fieldName,
             const bool setAverage,
-            const Type average
+            const Type average,
+            const word& interpolationScheme
         );
 
         //- Construct by mapping given

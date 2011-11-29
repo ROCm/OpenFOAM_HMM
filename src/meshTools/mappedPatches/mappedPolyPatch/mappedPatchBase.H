@@ -192,6 +192,9 @@ protected:
             //- Pointer to AMI interpolator
             mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
+            //- Flag to indicate that slave patch should be reversed for AMI
+            const bool AMIReverse_;
+
             //- Pointer to projection surface employed by AMI interpolator
             mutable autoPtr<searchableSurface> surfPtr_;
 

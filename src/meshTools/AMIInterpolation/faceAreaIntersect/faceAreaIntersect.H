@@ -74,6 +74,9 @@ private:
         //- Reference to the points of sideB
         const pointField& pointsB_;
 
+        //- Flag to reverse B faces
+        const bool reverseB_;
+
 
     // Private Member Functions
 
@@ -142,7 +145,8 @@ public:
         faceAreaIntersect
         (
             const pointField& pointsA,
-            const pointField& pointsB
+            const pointField& pointsB,
+            const bool reverseB = false
         );
 
 

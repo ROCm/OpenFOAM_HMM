@@ -278,7 +278,8 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
                 *this,
                 nbrPatch0,
                 surfPtr(),
-                faceAreaIntersect::tmMesh
+                faceAreaIntersect::tmMesh,
+                AMIReverse_
             )
         );
     }
@@ -363,6 +364,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
+    AMIReverse_(false),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {
@@ -387,6 +389,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
     AMIPtr_(NULL),
+    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
     surfPtr_(NULL),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -469,6 +472,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIReverse_(pp.AMIReverse_),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {
@@ -495,6 +499,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIReverse_(pp.AMIReverse_),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {
@@ -535,6 +540,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
     AMIPtr_(NULL),
+    AMIReverse_(pp.AMIReverse_),
     surfPtr_(NULL),
     surfDict_(pp.surfDict_)
 {}
@@ -813,6 +819,11 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         }
     }
 
+    if (AMIReverse_)
+    {
+        os.writeKeyword("flipNormals") << AMIReverse_
+            << token::END_STATEMENT << nl;
+    }
 
     if (surfDict_ != dictionary::null)
     {

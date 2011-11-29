@@ -136,6 +136,7 @@ protected:
             PtrList<GeometricField<Type, fvPatchField, volMesh> >&
         ) const;
 
+
 public:
 
     //- Runtime type information

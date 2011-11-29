@@ -27,7 +27,6 @@ License
 
 #include "volFields.H"
 #include "interpolationCell.H"
-#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +46,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(p, iF),
     fieldName_(iF.name()),
     setAverage_(false),
-    average_(pTraits<Type>::zero)
+    average_(pTraits<Type>::zero),
+    interpolationScheme_(interpolationCell<Type>::typeName)
 {}
 
 
@@ -64,7 +64,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
     fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {}
 
 
@@ -80,8 +81,14 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(p, iF, dict),
     fieldName_(dict.template lookupOrDefault<word>("fieldName", iF.name())),
     setAverage_(readBool(dict.lookup("setAverage"))),
-    average_(pTraits<Type>(dict.lookup("average")))
-{}
+    average_(pTraits<Type>(dict.lookup("average"))),
+    interpolationScheme_(interpolationCell<Type>::typeName)
+{
+    if (mode() == mappedPatchBase::NEARESTCELL)
+    {
+        dict.lookup("interpolationScheme") >> interpolationScheme_;
+    }
+}
 
 
 template<class Type>
@@ -99,7 +106,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     // My settings
     const word& fieldName,
     const bool setAverage,
-    const Type average
+    const Type average,
+    const word& interpolationScheme
 )
 :
     mappedPatchBase
@@ -113,7 +121,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(p, iF),
     fieldName_(fieldName),
     setAverage_(setAverage),
-    average_(average)
+    average_(average),
+    interpolationScheme_(interpolationScheme)
 {}
 
 
@@ -127,7 +136,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(ptf),
     fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {}
 
 
@@ -142,7 +152,8 @@ mappedFieldFvPatchField<Type>::mappedFieldFvPatchField
     fixedValueFvPatchField<Type>(ptf, iF),
     fieldName_(ptf.fieldName_),
     setAverage_(ptf.setAverage_),
-    average_(ptf.average_)
+    average_(ptf.average_),
+    interpolationScheme_(ptf.interpolationScheme_)
 {}
 
 
@@ -181,6 +192,22 @@ mappedFieldFvPatchField<Type>::sampleField() const
 
 
 template<class Type>
+const interpolation<Type>&
+mappedFieldFvPatchField<Type>::interpolator() const
+{
+    if (!interpolator_.valid())
+    {
+        interpolator_ = interpolation<Type>::New
+        (
+            interpolationScheme_,
+            sampleField()
+        );
+    }
+    return interpolator_();
+}
+
+
+template<class Type>
 void mappedFieldFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
@@ -195,6 +222,7 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag + 1;
 
+    const fvMesh& thisMesh = this->patch().boundaryMesh().mesh();
     const fvMesh& nbrMesh = refCast<const fvMesh>(sampleMesh());
 
     // Result of obtaining remote values
@@ -204,9 +232,42 @@ void mappedFieldFvPatchField<Type>::updateCoeffs()
     {
         case NEARESTCELL:
         {
-            newValues = sampleField();
+            const mapDistribute& mapDist = this->mappedPatchBase::map();
 
-            this->distribute(newValues);
+            if (interpolationScheme_ != interpolationCell<Type>::typeName)
+            {
+                // Need to do interpolation so need cells to sample
+
+                // Send back sample points to the processor that holds the cell
+                vectorField samples(samplePoints());
+                mapDist.reverseDistribute
+                (
+                    (sameRegion() ? thisMesh.nCells() : nbrMesh.nCells()),
+                    point::max,
+                    samples
+                );
+
+                const interpolation<Type>& interp = interpolator();
+
+                newValues.setSize(samples.size(), pTraits<Type>::max);
+                forAll(samples, cellI)
+                {
+                    if (samples[cellI] != point::max)
+                    {
+                        newValues[cellI] = interp.interpolate
+                        (
+                            samples[cellI],
+                            cellI
+                        );
+                    }
+                }
+            }
+            else
+            {
+                newValues = sampleField();
+            }
+
+            mapDist.distribute(newValues);
 
             break;
         }
@@ -306,6 +367,8 @@ void mappedFieldFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("fieldName") << fieldName_ << token::END_STATEMENT << nl;
     os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
     os.writeKeyword("average") << average_ << token::END_STATEMENT << nl;
+    os.writeKeyword("interpolationScheme") << interpolationScheme_
+        << token::END_STATEMENT << nl;
     this->writeEntry("value", os);
 }
 

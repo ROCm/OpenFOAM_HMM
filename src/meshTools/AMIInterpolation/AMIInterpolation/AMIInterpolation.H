@@ -34,6 +34,10 @@ Description
         projection, Farrell PE and Maddison JR, 2011, Comput. Methods Appl.
         Mech Engrg, Volume 200, Issues 1-4, pp 89-100
 
+    Interpolation requires that the two patches should have opposite
+    orientations (opposite normals).  The 'reverseTarget' flag can be used to
+    reverse the orientation of the target patch.
+
 
 SourceFiles
     AMIInterpolation.C
@@ -109,6 +113,9 @@ class AMIInterpolation
 
     // Private data
 
+        //- Flag to indicate that the two patches are co-directional and
+        //  that the orientation of the target patch should be reversed
+        const bool reverseTarget_;
 
         //- Index of processor that holds all of both sides. -1 in all other
         //  cases
@@ -332,7 +339,8 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
-            const faceAreaIntersect::triangulationMode& triMode
+            const faceAreaIntersect::triangulationMode& triMode,
+            const bool reverseTarget = false
         );
 
         //- Construct from components, with projection surface
@@ -341,11 +349,12 @@ public:
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
             const autoPtr<searchableSurface>& surf,
-            const faceAreaIntersect::triangulationMode& triMode
+            const faceAreaIntersect::triangulationMode& triMode,
+            const bool reverseTarget = false
         );
 
         //- Construct from agglomeration of AMIInterpolation. Agglomeration
-        //  passed in as new coarse size and addressing from fine from coarse.
+        //  passed in as new coarse size and addressing from fine from coarse
         AMIInterpolation
         (
             const AMIInterpolation<SourcePatch, TargetPatch>& fineAMI,
@@ -362,8 +371,10 @@ public:
 
         // Access
 
-            //- -1 or the processor holding all faces (both sides) of the AMI
+            //- Set to -1, or the processor holding all faces (both sides) of
+            //  the AMI
             label singlePatchProc() const;
+
 
             // Source patch
 
@@ -496,6 +507,7 @@ public:
             (
                 const tmp<Field<Type> >& tFld
             ) const;
+
 
         // Checks
 
