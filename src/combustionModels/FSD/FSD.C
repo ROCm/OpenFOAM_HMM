@@ -199,7 +199,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
     );
 
     // Linear correlation between delta and flame thickness
-    volScalarField omegaF(max(deltaF*(4.0/3.0) + (2.0/3.0), 1.0));
+    volScalarField omegaF(max(deltaF*(4.0/3.0) + (2.0/3.0), scalar(1)));
 
     scalar deltaFt = 1.0/ftDim_;
 
@@ -319,9 +319,9 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
         products += Yp;
     }
 
-    volScalarField c(max(scalar(1.0) - products/max(pc, 1e-5), 0.0));
+    volScalarField c(max(scalar(1) - products/max(pc, scalar(1e-5)), scalar(0)));
 
-    pc = min(C_*c, scalar(1.0));
+    pc = min(C_*c, scalar(1));
 
     const volScalarField fres(this->singleMixture_.fres(fuelI));
 

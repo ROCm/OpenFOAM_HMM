@@ -202,8 +202,11 @@ if (ign.ignited())
         volScalarField XiEq
         (
             scalar(1.001)
-          + (scalar(1) + (2*XiShapeCoef)*(scalar(0.5) - min(max(b, 0.0), 1.0)))
-            *(XiEqStar - scalar(1.001))
+          + (
+                scalar(1)
+              + (2*XiShapeCoef)
+               *(scalar(0.5) - min(max(b, scalar(0)), scalar(1)))
+            )*(XiEqStar - scalar(1.001))
         );
 
         volScalarField Gstar(0.28/tauEta);
