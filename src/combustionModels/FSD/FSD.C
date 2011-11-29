@@ -319,7 +319,10 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
         products += Yp;
     }
 
-    volScalarField c(max(scalar(1) - products/max(pc, scalar(1e-5)), scalar(0)));
+    volScalarField c
+    (
+        max(scalar(1) - products/max(pc, scalar(1e-5)), scalar(0))
+    );
 
     pc = min(C_*c, scalar(1));
 
