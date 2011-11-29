@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nearWallFields.H"
-#include "selfContainedMappedFixedValueFvPatchFields.H"
+#include "mappedFieldFvPatchFields.H"
 #include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,7 +74,7 @@ void Foam::nearWallFields::createFields
                     sampleFld.boundaryField().set
                     (
                         patchI,
-                        new selfContainedMappedFixedValueFvPatchField<Type>
+                        new mappedFieldFvPatchField<Type>
                         (
                             sampleFld.mesh().boundary()[patchI],
                             sampleFld.dimensionedInternalField(),

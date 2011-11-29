@@ -82,10 +82,8 @@ void Foam::nearWallFields::read(const dictionary& dict)
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         dict.lookup("fields") >> fieldSet_;
-        patchSet_ = mesh.boundaryMesh().patchSet
-        (
-            wordReList(dict.lookup("patches"))
-        );
+        patchSet_ =
+            mesh.boundaryMesh().patchSet(wordReList(dict.lookup("patches")));
         distance_ = readScalar(dict.lookup("distance"));
 
 
@@ -99,7 +97,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
         reverseFieldMap_.clear();
 
 
-        // Generate fields with selfContainedMapped bc.
+        // Generate fields with mappedField boundary condition
 
         // Convert field to map
         fieldMap_.resize(2*fieldSet_.size());
