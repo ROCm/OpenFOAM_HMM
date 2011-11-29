@@ -902,7 +902,7 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     }
 
     // create intersection object
-    faceAreaIntersect inter(srcPoints, tgtPoints);
+    faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
     // crude resultant norm - face normals should be opposite
     const vector n = 0.5*(tgt.normal(tgtPoints) - src.normal(srcPoints));
@@ -1432,14 +1432,17 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const faceAreaIntersect::triangulationMode& triMode
+    const faceAreaIntersect::triangulationMode& triMode,
+    const bool reverseTarget
 )
 :
+    reverseTarget_(reverseTarget),
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
     tgtAddress_(),
     tgtWeights_(),
+    treePtr_(NULL),
     startSeedI_(0),
     triMode_(triMode),
     srcMapPtr_(NULL),
@@ -1462,14 +1465,17 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
     const autoPtr<searchableSurface>& surfPtr,
-    const faceAreaIntersect::triangulationMode& triMode
+    const faceAreaIntersect::triangulationMode& triMode,
+    const bool reverseTarget
 )
 :
+    reverseTarget_(reverseTarget),
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
     tgtAddress_(),
     tgtWeights_(),
+    treePtr_(NULL),
     startSeedI_(0),
     triMode_(triMode),
     srcMapPtr_(NULL),
@@ -1551,11 +1557,13 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const labelList& targetRestrictAddressing
 )
 :
+    reverseTarget_(fineAMI.reverseTarget_),
     singlePatchProc_(fineAMI.singlePatchProc_),
     srcAddress_(),
     srcWeights_(),
     tgtAddress_(),
     tgtWeights_(),
+    treePtr_(NULL),
     startSeedI_(0),
     triMode_(fineAMI.triMode_),
     srcMapPtr_(NULL),

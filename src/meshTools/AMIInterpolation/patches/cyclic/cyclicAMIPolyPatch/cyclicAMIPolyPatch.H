@@ -88,6 +88,9 @@ private:
         //- AMI interpolation class
         mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;
 
+        //- Flag to indicate that slave patch should be reversed for AMI
+        const bool AMIReverse_;
+
         //- Projection surface
         mutable autoPtr<searchableSurface> surfPtr_;
 

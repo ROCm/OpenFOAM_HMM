@@ -650,7 +650,8 @@ void Foam::mappedPatchBase::calcAMI() const
             patch_,
             samplePolyPatch(), // nbrPatch0,
             surfPtr(),
-            faceAreaIntersect::tmMesh
+            faceAreaIntersect::tmMesh,
+            AMIReverse_
         )
     );
 }
@@ -674,6 +675,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(false),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {}
@@ -699,6 +701,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(false),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {}
@@ -724,6 +727,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(false),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {}
@@ -749,6 +753,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(false),
     surfPtr_(NULL),
     surfDict_(dictionary::null)
 {}
@@ -778,6 +783,7 @@ Foam::mappedPatchBase::mappedPatchBase
     sameRegion_(sampleRegion_ == patch_.boundaryMesh().mesh().name()),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(dict.lookupOrDefault<bool>("flipNormals", false)),
     surfPtr_(NULL),
     surfDict_(dict.subOrEmptyDict("surface"))
 {
@@ -836,45 +842,47 @@ Foam::mappedPatchBase::mappedPatchBase
 Foam::mappedPatchBase::mappedPatchBase
 (
     const polyPatch& pp,
-    const mappedPatchBase& dmp
+    const mappedPatchBase& mpb
 )
 :
     patch_(pp),
-    sampleRegion_(dmp.sampleRegion_),
-    mode_(dmp.mode_),
-    samplePatch_(dmp.samplePatch_),
-    offsetMode_(dmp.offsetMode_),
-    offset_(dmp.offset_),
-    offsets_(dmp.offsets_),
-    distance_(dmp.distance_),
-    sameRegion_(dmp.sameRegion_),
+    sampleRegion_(mpb.sampleRegion_),
+    mode_(mpb.mode_),
+    samplePatch_(mpb.samplePatch_),
+    offsetMode_(mpb.offsetMode_),
+    offset_(mpb.offset_),
+    offsets_(mpb.offsets_),
+    distance_(mpb.distance_),
+    sameRegion_(mpb.sameRegion_),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(mpb.AMIReverse_),
     surfPtr_(NULL),
-    surfDict_(dmp.surfDict_)
+    surfDict_(mpb.surfDict_)
 {}
 
 
 Foam::mappedPatchBase::mappedPatchBase
 (
     const polyPatch& pp,
-    const mappedPatchBase& dmp,
+    const mappedPatchBase& mpb,
     const labelUList& mapAddressing
 )
 :
     patch_(pp),
-    sampleRegion_(dmp.sampleRegion_),
-    mode_(dmp.mode_),
-    samplePatch_(dmp.samplePatch_),
-    offsetMode_(dmp.offsetMode_),
-    offset_(dmp.offset_),
-    offsets_(dmp.offsets_, mapAddressing),
-    distance_(dmp.distance_),
-    sameRegion_(dmp.sameRegion_),
+    sampleRegion_(mpb.sampleRegion_),
+    mode_(mpb.mode_),
+    samplePatch_(mpb.samplePatch_),
+    offsetMode_(mpb.offsetMode_),
+    offset_(mpb.offset_),
+    offsets_(mpb.offsets_, mapAddressing),
+    distance_(mpb.distance_),
+    sameRegion_(mpb.sameRegion_),
     mapPtr_(NULL),
     AMIPtr_(NULL),
+    AMIReverse_(mpb.AMIReverse_),
     surfPtr_(NULL),
-    surfDict_(dmp.surfDict_)
+    surfDict_(mpb.surfDict_)
 {}
 
 
@@ -991,6 +999,12 @@ void Foam::mappedPatchBase::write(Ostream& os) const
 
     if (mode_ == NEARESTPATCHFACEAMI)
     {
+        if (AMIReverse_)
+        {
+            os.writeKeyword("flipNormals") << AMIReverse_
+                << token::END_STATEMENT << nl;
+        }
+
         os.writeKeyword(surfDict_.dictName());
         os  << surfDict_;
     }

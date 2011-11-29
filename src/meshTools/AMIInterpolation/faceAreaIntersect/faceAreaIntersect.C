@@ -298,11 +298,13 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
 Foam::faceAreaIntersect::faceAreaIntersect
 (
     const pointField& pointsA,
-    const pointField& pointsB
+    const pointField& pointsB,
+    const bool reverseB
 )
 :
     pointsA_(pointsA),
-    pointsB_(pointsB)
+    pointsB_(pointsB),
+    reverseB_(reverseB)
 {}
 
 
@@ -362,7 +364,7 @@ Foam::scalar Foam::faceAreaIntersect::calc
         {
             forAll(trisB, tB)
             {
-                triPoints tpB = getTriPoints(pointsB_, trisB[tB], true);
+                triPoints tpB = getTriPoints(pointsB_, trisB[tB], !reverseB_);
 
 //                if (triArea(tpB) > ROOTVSMALL)
                 {
