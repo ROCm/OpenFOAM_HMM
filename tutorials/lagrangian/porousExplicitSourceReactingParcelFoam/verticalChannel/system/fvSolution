@@ -59,6 +59,7 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+        maxIter         50;
     }
 
     pFinal
@@ -84,7 +85,7 @@ PIMPLE
 potentialFlow
 {
     // used for potentialFoam initialisation
-    nNonOrthogonalCorrectors 10;
+    nNonOrthogonalCorrectors 5;
 }
 
 additional
