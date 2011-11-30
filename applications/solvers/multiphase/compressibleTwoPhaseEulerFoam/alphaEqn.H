@@ -86,7 +86,7 @@ surfaceScalarField alphaPhi2("alphaPhi2", phi2);
         alpha1Eqn.solve();
 
         //***HGW temporary boundedness-fix pending the introduction of MULES
-        alpha1 = max(min(alpha1, 1.0), 0.0);
+        alpha1 = max(min(alpha1, scalar(1)), scalar(0));
 
         #include "packingLimiter.H"
 

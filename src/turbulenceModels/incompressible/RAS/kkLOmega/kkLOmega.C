@@ -77,7 +77,7 @@ tmp<volScalarField> kkLOmega::Cmu(const volScalarField& S) const
 
 tmp<volScalarField> kkLOmega::BetaTS(const volScalarField& Rew) const
 {
-    return(scalar(1.0) - exp(-sqr(max(Rew - CtsCrit_, 0.0))/Ats_));
+    return(scalar(1) - exp(-sqr(max(Rew - CtsCrit_, scalar(0)))/Ats_));
 }
 
 
@@ -89,7 +89,7 @@ tmp<volScalarField> kkLOmega::fTaul
 {
     return
     (
-        scalar(1.0)
+        scalar(1)
       - exp
         (
             -CtauL_*ktL
@@ -130,7 +130,7 @@ tmp<volScalarField> kkLOmega::fOmega
 {
     return
     (
-        scalar(1.0)
+        scalar(1)
       - exp
         (
             -0.41
@@ -159,15 +159,12 @@ tmp<volScalarField> kkLOmega::gammaBP(const volScalarField& omega) const
         max
         (
             kt_/nu()
-          /
-            (
+          / (
                 omega
               + dimensionedScalar("ROTVSMALL", omega.dimensions(), ROOTVSMALL)
             )
-          -
-            CbpCrit_
-        ,
-            0.0
+          - CbpCrit_,
+            scalar(0)
         )
     );
 }
@@ -187,9 +184,8 @@ tmp<volScalarField> kkLOmega::gammaNAT
           - CnatCrit_
           / (
                 fNatCrit + dimensionedScalar("ROTVSMALL", dimless, ROOTVSMALL)
-            )
-          ,
-            0.0
+            ),
+            scalar(0)
         )
     );
 }
