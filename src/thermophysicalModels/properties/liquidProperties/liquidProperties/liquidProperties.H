@@ -251,6 +251,10 @@ public:
             //- Vapour diffussivity [m2/s] with specified binary pair
             virtual scalar D(scalar p, scalar T, scalar Wb) const;
 
+            //- Invert the vapour pressure relationship to retrieve the
+            //  boiling temperuture as a function of temperature
+            virtual scalar pvInvert(scalar p);
+
 
     // I-O
 
