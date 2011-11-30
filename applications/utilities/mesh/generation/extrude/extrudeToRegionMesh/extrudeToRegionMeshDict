@@ -17,11 +17,16 @@ FoamFile
 // Name of region to create
 region          liquidFilm;
 
-// FaceZones to extrude
-faceZones       (f0);
+// Specification of faces to extrude. Either faceZones (either exclusively
+// internal faces or boundary faces) or faceSets (boundary faces only).
 
-// FaceZone shadow
-//faceZonesShadow (fBaffleShadow);
+// FaceZones to extrude
+faceZones       (f0 f1);
+//faceZonesShadow (f0Shadow f1Shadow);
+
+// faceSets to extrude
+//faceSets       (f0 f1);
+//faceSetsShadow (f0Shadow f1Shadow);
 
 // Adapt the original mesh to have mapped patches at where the
 // faceZones are?
