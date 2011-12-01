@@ -77,6 +77,13 @@ class pqPV3FoamReaderPanel
     //- IncludeZones checkbox
     QCheckBox* IncludeZones_;
 
+    //- InterpolateVolFields checkbox
+    QCheckBox* InterpolateVolFields_;
+
+    //- ExtrapolatePatches checkbox
+    QCheckBox* ExtrapolatePatches_;
+
+
 protected slots:
 
     void CacheMeshToggled();
@@ -85,6 +92,8 @@ protected slots:
     void ShowPatchNamesToggled();
     void IncludeSetsToggled();
     void IncludeZonesToggled();
+    void InterpolateVolFieldsToggled();
+    void ExtrapolatePatchesToggled();
 
 
 public:
@@ -97,7 +106,6 @@ public:
 
     //- Destructor
     // virtual ~pqPV3FoamReaderPanel();
-
 };
 
 

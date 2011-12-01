@@ -505,6 +505,7 @@ class vtkPV3Foam
                 const fvMesh&,
                 const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
                 const IOobjectList&,
+                const bool interpFields,
                 vtkMultiBlockDataSet* output
             );
 

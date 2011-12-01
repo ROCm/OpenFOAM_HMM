@@ -120,25 +120,27 @@ void Foam::vtkPV3Foam::convertVolFields
     }
 
 
+    bool interpFields = reader_->GetInterpolateVolFields();
+
     convertVolFields<scalar>
     (
-        mesh, ppInterpList, objects, output
+        mesh, ppInterpList, objects, interpFields, output
     );
     convertVolFields<vector>
     (
-        mesh, ppInterpList, objects, output
+        mesh, ppInterpList, objects, interpFields, output
     );
     convertVolFields<sphericalTensor>
     (
-        mesh, ppInterpList, objects, output
+        mesh, ppInterpList, objects, interpFields, output
     );
     convertVolFields<symmTensor>
     (
-        mesh, ppInterpList, objects, output
+        mesh, ppInterpList, objects, interpFields, output
     );
     convertVolFields<tensor>
     (
-        mesh, ppInterpList, objects, output
+        mesh, ppInterpList, objects, interpFields, output
     );
 
     if (debug)
