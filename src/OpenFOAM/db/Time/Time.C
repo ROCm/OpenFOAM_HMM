@@ -219,11 +219,13 @@ void Foam::Time::setControls()
     scalar timeValue;
     if (timeDict.readIfPresent("value", timeValue))
     {
-        if (mag(timeValue - value()) > SMALL)
+        word storedTimeName(timeName(timeValue));
+
+        if (storedTimeName != timeName())
         {
             IOWarningIn("Time::setControls()", timeDict)
-                << "Time read from time dictionary " << timeValue
-                << " differs from actual time " << value() << '.' << nl
+                << "Time read from time dictionary " << storedTimeName
+                << " differs from actual time " << timeName() << '.' << nl
                 << "    This may cause unexpected database behaviour."
                 << " If you are not interested" << nl
                 << "    in preserving time state delete the time dictionary."
