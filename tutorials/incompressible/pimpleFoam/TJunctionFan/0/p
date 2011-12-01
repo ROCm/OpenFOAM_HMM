@@ -29,13 +29,10 @@ boundaryField
         gamma           1;
         p0              40;
         pressure        table
-        
-2
-(
-(0 10)
-(1 40)
-)
-;
+        (
+            (0 10)
+            (1 40)
+        );
         value           uniform 40;
     }
     outlet1
