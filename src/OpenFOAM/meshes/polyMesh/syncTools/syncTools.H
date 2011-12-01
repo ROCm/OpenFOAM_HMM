@@ -145,6 +145,18 @@ public:
                 const TransformOp& top
             );
 
+            //- Synchronize values on selected mesh edges.
+            template <class T, class CombineOp, class TransformOp>
+            static void syncEdgeList
+            (
+                const polyMesh&,
+                const labelList& meshEdges,
+                List<T>&,
+                const CombineOp& cop,
+                const T& nullValue,
+                const TransformOp& top
+            );
+
             //- Synchronize values on boundary faces only.
             template <class T, class CombineOp, class TransformOp>
             static void syncBoundaryFaceList
@@ -265,7 +277,7 @@ public:
                 );
             }
 
-            //- Synchronize values on all mesh edges.
+            //- Synchronize locations on all mesh edges.
             template <class CombineOp>
             static void syncEdgePositions
             (
@@ -284,6 +296,51 @@ public:
                     mapDistribute::transformPosition()
                 );
             }
+
+            //- Synchronize values on selected mesh edges.
+            template <class T, class CombineOp>
+            static void syncEdgeList
+            (
+                const polyMesh& mesh,
+                const labelList& meshEdges,
+                List<T>& l,
+                const CombineOp& cop,
+                const T& nullValue
+            )
+            {
+                syncEdgeList
+                (
+                    mesh,
+                    meshEdges,
+                    l,
+                    cop,
+                    nullValue,
+                    mapDistribute::transform()
+                );
+            }
+
+            //- Synchronize locations on selected mesh edges.
+            template <class CombineOp>
+            static void syncEdgePositions
+            (
+                const polyMesh& mesh,
+                const labelList& meshEdges,
+                List<point>& l,
+                const CombineOp& cop,
+                const point& nullValue
+            )
+            {
+                syncEdgeList
+                (
+                    mesh,
+                    meshEdges,
+                    l,
+                    cop,
+                    nullValue,
+                    mapDistribute::transformPosition()
+                );
+            }
+
 
 
         // Synchronise face-wise data

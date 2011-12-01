@@ -342,7 +342,7 @@ Foam::topoSet::topoSet
             name,
             mesh.time().findInstance
             (
-                polyMesh::meshSubDir/"sets",
+                mesh.dbDir()/polyMesh::meshSubDir/"sets",
                 word::null,
                 IOobject::MUST_READ,
                 mesh.facesInstance()
@@ -389,7 +389,7 @@ Foam::topoSet::topoSet
             name,
             mesh.time().findInstance
             (
-                polyMesh::meshSubDir/"sets",
+                mesh.dbDir()/polyMesh::meshSubDir/"sets",
                 word::null,
                 IOobject::NO_READ,
                 mesh.facesInstance()
@@ -419,7 +419,7 @@ Foam::topoSet::topoSet
             name,
             mesh.time().findInstance
             (
-                polyMesh::meshSubDir/"sets",
+                mesh.dbDir()/polyMesh::meshSubDir/"sets",
                 word::null,
                 IOobject::NO_READ,
                 mesh.facesInstance()

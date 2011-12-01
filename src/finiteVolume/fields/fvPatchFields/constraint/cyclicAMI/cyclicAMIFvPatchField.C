@@ -94,7 +94,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             "cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField"
             "("
                 "const fvPatch&, "
-                "const Field<Type>&, "
+                "const DimensionedField<Type, volMesh>&, "
                 "const dictionary&"
             ")",
             dict
@@ -106,7 +106,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             << exit(FatalIOError);
     }
 
-    if (this->coupled())
+    if (!dict.found("value") && this->coupled())
     {
         this->evaluate(Pstream::blocking);
     }

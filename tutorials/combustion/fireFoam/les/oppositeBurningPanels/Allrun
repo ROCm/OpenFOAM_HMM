@@ -26,7 +26,7 @@ runApplication createPatch -overwrite
 
 decomposePar -force > log.decomposePar.log 2>&1
 
-decomposePar -region panelRegion > log.decomposParPanelRegion.log 2>&1
+decomposePar -region panelRegion > log.decomposeParPanelRegion.log 2>&1
 
 runParallel `getApplication` 6
 

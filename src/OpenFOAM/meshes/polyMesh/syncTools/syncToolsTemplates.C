@@ -1252,6 +1252,65 @@ void Foam::syncTools::syncEdgeList
 
 
 template <class T, class CombineOp, class TransformOp>
+void Foam::syncTools::syncEdgeList
+(
+    const polyMesh& mesh,
+    const labelList& meshEdges,
+    List<T>& edgeValues,
+    const CombineOp& cop,
+    const T& nullValue,
+    const TransformOp& top
+)
+{
+    if (edgeValues.size() != meshEdges.size())
+    {
+        FatalErrorIn
+        (
+            "syncTools<class T, class CombineOp>::syncEdgeList"
+            "(const polyMesh&, List<T>&, const CombineOp&, const T&)"
+        )   << "Number of values " << edgeValues.size()
+            << " is not equal to the number of meshEdges "
+            << meshEdges.size() << abort(FatalError);
+    }
+    const globalMeshData& gd = mesh.globalData();
+    const indirectPrimitivePatch& cpp = gd.coupledPatch();
+    const Map<label>& mpm = gd.coupledPatchMeshEdgeMap();
+
+    List<T> cppFld(cpp.nEdges(), nullValue);
+
+    forAll(meshEdges, i)
+    {
+        label edgeI = meshEdges[i];
+        Map<label>::const_iterator iter = mpm.find(edgeI);
+        if (iter != mpm.end())
+        {
+            cppFld[iter()] = edgeValues[i];
+        }
+    }
+
+    globalMeshData::syncData
+    (
+        cppFld,
+        gd.globalEdgeSlaves(),
+        gd.globalEdgeTransformedSlaves(),
+        gd.globalEdgeSlavesMap(),
+        gd.globalTransforms(),
+        cop,
+        top
+    );
+
+    forAll(meshEdges, i)
+    {
+        label edgeI = meshEdges[i];
+        Map<label>::const_iterator iter = mpm.find(edgeI);
+        if (iter != mpm.end())
+        {
+            edgeValues[i] = cppFld[iter()];
+        }
+    }
+}
+
+template <class T, class CombineOp, class TransformOp>
 void Foam::syncTools::syncBoundaryFaceList
 (
     const polyMesh& mesh,
