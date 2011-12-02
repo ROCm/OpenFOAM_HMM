@@ -104,16 +104,20 @@ Foam::tmp<Foam::volScalarField> Foam::consumptionSpeed::omega0Sigma
 
     volScalarField& omega0 = tomega0();
 
-    forAll(omega0, celli)
+    volScalarField::InternalField& iomega0 = omega0.internalField();
+
+    forAll(iomega0, celli)
     {
-        omega0[celli] = omega0Sigma(sigma[celli], 1.0);
+        iomega0[celli] = omega0Sigma(sigma[celli], 1.0);
     }
 
-    forAll(omega0.boundaryField(), patchi)
+    volScalarField::GeometricBoundaryField& bomega0 = omega0.boundaryField();
+
+    forAll(bomega0, patchi)
     {
-        forAll(omega0.boundaryField()[patchi], facei)
+        forAll(bomega0[patchi], facei)
         {
-            omega0.boundaryField()[patchi][facei] =
+            bomega0[patchi][facei] =
                 omega0Sigma
                 (
                     sigma.boundaryField()[patchi][facei],

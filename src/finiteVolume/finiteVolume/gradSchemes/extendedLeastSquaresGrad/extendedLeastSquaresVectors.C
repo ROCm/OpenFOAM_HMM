@@ -130,9 +130,11 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     // Visit the boundaries. Coupled boundaries are taken into account
     // in the construction of d vectors.
-    forAll(lsP.boundaryField(), patchi)
+    surfaceVectorField::GeometricBoundaryField& blsP = lsP.boundaryField();
+
+    forAll(blsP, patchi)
     {
-        const fvPatch& p = lsP.boundaryField()[patchi].patch();
+        const fvPatch& p = blsP[patchi].patch();
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
@@ -242,9 +244,9 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
             ((-1.0)/magSqr(d[facei]))*(invDd[neighbour[facei]] & d);
     }
 
-    forAll(lsP.boundaryField(), patchI)
+    forAll(blsP, patchI)
     {
-        fvsPatchVectorField& patchLsP = lsP.boundaryField()[patchI];
+        fvsPatchVectorField& patchLsP = blsP[patchI];
 
         const fvPatch& p = patchLsP.patch();
         const labelUList& faceCells = p.faceCells();

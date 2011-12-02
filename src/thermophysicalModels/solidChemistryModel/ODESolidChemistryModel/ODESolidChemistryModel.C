@@ -760,11 +760,11 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::gasHs
         )
     );
 
-    volScalarField& gasHs = tHs();
+    volScalarField::InternalField& gasHs = tHs().internalField();
 
     const GasThermo& mixture = gasThermo_[index];
 
-    forAll(gasHs.internalField(), cellI)
+    forAll(gasHs, cellI)
     {
         gasHs[cellI] = mixture.Hs(T[cellI]);
     }

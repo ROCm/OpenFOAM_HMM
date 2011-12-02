@@ -146,6 +146,9 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
     decompositionMethod& decomposer = decomposerPtr_();
 
+    volScalarField::InternalField& icellWeights = cellWeights.internalField();
+
+
     // For each cell in the mesh has it been determined if it is fully
     // inside, outside, or overlaps the surface
     labelList volumeStatus
@@ -214,10 +217,10 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                         volumeStatus[cellI] = searchableSurface::UNKNOWN;
                     }
 
-                    cellWeights.internalField()[cellI] = max
+                    icellWeights[cellI] = max
                     (
                         1.0,
-                        cellWeights.internalField()[cellI]/8.0
+                        icellWeights[cellI]/8.0
                     );
                 }
 
@@ -405,7 +408,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             (
                 mesh_,
                 mesh_.cellCentres(),
-                cellWeights
+                icellWeights
             );
 
             fvMeshDistribute distributor(mesh_, mergeDist_);
@@ -629,6 +632,8 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
     volScalarField& cellWeights
 ) const
 {
+    volScalarField::InternalField& icellWeights = cellWeights.internalField();
+
     labelHashSet cellsToRefine;
 
     // Determine/update the status of each cell
@@ -650,7 +655,7 @@ Foam::labelList Foam::backgroundMeshDecomposition::selectRefinementCells
                 (
                     cellI,
                     volumeStatus[cellI],
-                    cellWeights.internalField()[cellI]
+                    icellWeights[cellI]
                 )
             )
             {
@@ -871,15 +876,17 @@ Foam::backgroundMeshDecomposition::distribute
         mesh_.write();
     }
 
+    volScalarField::InternalField& icellWeights = cellWeights.internalField();
+
     while (true)
     {
         // Refine large cells if necessary
 
         label nOccupiedCells = 0;
 
-        forAll(cellWeights.internalField(), cI)
+        forAll(icellWeights, cI)
         {
-            if (cellWeights.internalField()[cI] > 1 - SMALL)
+            if (icellWeights[cI] > 1 - SMALL)
             {
                 nOccupiedCells++;
             }
@@ -910,9 +917,9 @@ Foam::backgroundMeshDecomposition::distribute
 
         labelHashSet cellsToRefine;
 
-        forAll(cellWeights, cWI)
+        forAll(icellWeights, cWI)
         {
-            if (cellWeights.internalField()[cWI] > cellWeightLimit)
+            if (icellWeights[cWI] > cellWeightLimit)
             {
                 cellsToRefine.insert(cWI);
             }
@@ -943,7 +950,7 @@ Foam::backgroundMeshDecomposition::distribute
         {
             label cellI = newCellsToRefine[nCTRI];
 
-            cellWeights.internalField()[cellI] /= 8.0;
+            icellWeights[cellI] /= 8.0;
         }
 
         // Mesh changing engine.
@@ -1075,9 +1082,9 @@ Foam::backgroundMeshDecomposition::distribute
         printMeshData(mesh_);
 
         Pout<< "    Pre distribute sum(cellWeights) "
-            << sum(cellWeights.internalField())
+            << sum(icellWeights)
             << " max(cellWeights) "
-            << max(cellWeights.internalField())
+            << max(icellWeights)
             << endl;
     }
 
@@ -1085,7 +1092,7 @@ Foam::backgroundMeshDecomposition::distribute
     (
         mesh_,
         mesh_.cellCentres(),
-        cellWeights
+        icellWeights
     );
 
     Info<< "    Redistributing background mesh cells" << endl;
@@ -1101,9 +1108,9 @@ Foam::backgroundMeshDecomposition::distribute
         printMeshData(mesh_);
 
         Pout<< "    Post distribute sum(cellWeights) "
-            << sum(cellWeights.internalField())
+            << sum(icellWeights)
             << " max(cellWeights) "
-            << max(cellWeights.internalField())
+            << max(icellWeights)
             << endl;
 
         // const_cast<Time&>(mesh_.time())++;

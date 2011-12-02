@@ -39,16 +39,20 @@ void Foam::solidMixtureThermo<MixtureType>::calculate()
     scalarField& sigmaSCells = sigmaS_.internalField();
     scalarField& emissivityCells = emissivity_.internalField();
 
-    forAll(T_.internalField(), celli)
+    const volScalarField::InternalField& iT = T_.internalField();
+
+    forAll(iT, celli)
     {
-        rhoCells[celli] = MixtureType::rho(T_[celli], celli);
-        kappaCells[celli] = MixtureType::kappa(T_[celli], celli);
-        sigmaSCells[celli] = MixtureType::sigmaS(T_[celli], celli);
-        KCells[celli] = MixtureType::K(T_[celli], celli);
-        emissivityCells[celli] = MixtureType::emissivity(T_[celli], celli);
+        rhoCells[celli] = MixtureType::rho(iT[celli], celli);
+        kappaCells[celli] = MixtureType::kappa(iT[celli], celli);
+        sigmaSCells[celli] = MixtureType::sigmaS(iT[celli], celli);
+        KCells[celli] = MixtureType::K(iT[celli], celli);
+        emissivityCells[celli] = MixtureType::emissivity(iT[celli], celli);
     }
 
-    forAll(T_.boundaryField(), patchI)
+    const volScalarField::GeometricBoundaryField& bT = T_.boundaryField();
+
+    forAll(bT, patchI)
     {
         rho_.boundaryField()[patchI] == this->rho(patchI)();
         K_.boundaryField()[patchI] == this->K(patchI)();
@@ -158,14 +162,18 @@ Foam::solidMixtureThermo<MixtureType>::Cp() const
     );
     volScalarField& Cp = tCp();
 
-    forAll(T_.internalField(), celli)
+    const volScalarField::InternalField& iT = T_.internalField();
+
+    forAll(iT, celli)
     {
         Cp[celli] = MixtureType::Cp(T_[celli], celli);
     }
 
-    forAll(Cp.boundaryField(), patchI)
+    volScalarField::GeometricBoundaryField& bCp = Cp.boundaryField();
+
+    forAll(bCp, patchI)
     {
-        Cp.boundaryField()[patchI] == this->Cp(patchI)();
+        bCp[patchI] == this->Cp(patchI)();
     }
 
     return tCp;
@@ -194,14 +202,18 @@ Foam::solidMixtureThermo<MixtureType>::hs() const
     );
     volScalarField& hs = ths();
 
-    forAll(T_.internalField(), celli)
+    const volScalarField::InternalField& iT = T_.internalField();
+
+    forAll(iT, celli)
     {
         hs[celli] = MixtureType::hs(T_[celli], celli);
     }
 
-    forAll(hs.boundaryField(), patchI)
+    volScalarField::GeometricBoundaryField& bHs = hs.boundaryField();
+
+    forAll(bHs, patchI)
     {
-        hs.boundaryField()[patchI] == this->hs(patchI)();
+        bHs[patchI] == this->hs(patchI)();
     }
 
     return ths;
@@ -230,14 +242,18 @@ Foam::solidMixtureThermo<MixtureType>::Hf() const
     );
     volScalarField& hf = thF();
 
-    forAll(T_.internalField(), celli)
+    const volScalarField::InternalField& iT = T_.internalField();
+
+    forAll(iT, celli)
     {
         hf[celli] = MixtureType::hf(T_[celli], celli);
     }
 
-    forAll(hf.boundaryField(), patchI)
+    volScalarField::GeometricBoundaryField& bhf = hf.boundaryField();
+
+    forAll(bhf, patchI)
     {
-        hf.boundaryField()[patchI] == this->Hf(patchI)();
+        bhf[patchI] == this->Hf(patchI)();
     }
 
     return thF;
