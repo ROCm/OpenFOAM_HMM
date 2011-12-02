@@ -122,6 +122,11 @@ public:
     vtkGetMacro(ShowPatchNames, int);
 
     // Description:
+    // OpenFOAM volField interpolation
+    vtkSetMacro(InterpolateVolFields, int);
+    vtkGetMacro(InterpolateVolFields, int);
+
+    // Description:
     // Get the current timestep
     int  GetTimeStep();
 
@@ -170,6 +175,7 @@ public:
 
     void SelectionModified();
 
+
 protected:
 
     //- Construct null
@@ -203,6 +209,7 @@ protected:
     //- The file name for this case
     char* FileName;
 
+
 private:
 
     //- Disallow default bitwise copy construct
@@ -224,6 +231,7 @@ private:
     int IncludeSets;
     int IncludeZones;
     int ShowPatchNames;
+    int InterpolateVolFields;
 
     //- Dummy variable/switch to invoke a reader update
     int UpdateGUI;

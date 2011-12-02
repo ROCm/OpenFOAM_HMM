@@ -367,6 +367,52 @@ Foam::scalar Foam::liquidProperties::D(scalar p, scalar T, scalar Wb) const
 }
 
 
+Foam::scalar Foam::liquidProperties::pvInvert(scalar p)
+{
+    scalar T = Tc_;
+    scalar deltaT = 10.0;
+    scalar dp0 = pv(p, T) - p;
+
+
+    label n = 0;
+
+    while ((n < 200) && (mag(deltaT) > 1.0e-3))
+    {
+        n++;
+        scalar pBoil = pv(p, T);
+        scalar dp = pBoil - p;
+
+        if ((dp > 0.0) && (dp0 > 0.0))
+        {
+            T -= deltaT;
+        }
+        else
+        {
+            if ((dp < 0.0) && (dp0 < 0.0))
+            {
+                T += deltaT;
+            }
+            else
+            {
+                deltaT *= 0.5;
+                if ((dp > 0.0) && (dp0 < 0.0))
+                {
+                    T -= deltaT;
+                }
+                else
+                {
+                    T += deltaT;
+                }
+            }
+        }
+
+        dp0 = dp;
+    }
+
+    return T;
+}
+
+
 void Foam::liquidProperties::writeData(Ostream& os) const
 {
 

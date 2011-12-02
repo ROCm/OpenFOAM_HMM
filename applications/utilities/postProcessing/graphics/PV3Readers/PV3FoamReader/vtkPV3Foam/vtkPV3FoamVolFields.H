@@ -48,6 +48,7 @@ void Foam::vtkPV3Foam::convertVolFields
     const fvMesh& mesh,
     const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
     const IOobjectList& objects,
+    const bool interpFields,
     vtkMultiBlockDataSet* output
 )
 {
@@ -74,6 +75,19 @@ void Foam::vtkPV3Foam::convertVolFields
 
         // Interpolated field (demand driven)
         autoPtr<GeometricField<Type, pointPatchField, pointMesh> > ptfPtr;
+        if (interpFields)
+        {
+            if (debug)
+            {
+                Info<< "convertVolFieldBlock interpolating:" << tf.name()
+                    << endl;
+            }
+
+            ptfPtr.reset
+            (
+                volPointInterpolation::New(tf.mesh()).interpolate(tf).ptr()
+            );
+        }
 
 
         // Convert activated internalMesh regions
@@ -154,14 +168,17 @@ void Foam::vtkPV3Foam::convertVolFields
                     datasetNo
                 );
 
-                convertPatchPointField
-                (
-                    tf.name(),
-                    ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
-                    output,
-                    arrayRangePatches_,
-                    datasetNo
-                );
+                if (interpFields)
+                {
+                    convertPatchPointField
+                    (
+                        tf.name(),
+                        ppInterpList[patchId].faceToPointInterpolate(tpptf)(),
+                        output,
+                        arrayRangePatches_,
+                        datasetNo
+                    );
+                }
             }
             else
             {
@@ -174,14 +191,17 @@ void Foam::vtkPV3Foam::convertVolFields
                     datasetNo
                 );
 
-                convertPatchPointField
-                (
-                    tf.name(),
-                    ppInterpList[patchId].faceToPointInterpolate(ptf)(),
-                    output,
-                    arrayRangePatches_,
-                    datasetNo
-                );
+                if (interpFields)
+                {
+                    convertPatchPointField
+                    (
+                        tf.name(),
+                        ppInterpList[patchId].faceToPointInterpolate(ptf)(),
+                        output,
+                        arrayRangePatches_,
+                        datasetNo
+                    );
+                }
             }
         }
 
@@ -285,29 +305,18 @@ void Foam::vtkPV3Foam::convertVolFieldBlock
                 decompLst[datasetNo]
             );
 
-            if (!ptfPtr.valid())
+            if (ptfPtr.valid())
             {
-                if (debug)
-                {
-                    Info<< "convertVolFieldBlock interpolating:" << tf.name()
-                        << endl;
-                }
-
-                ptfPtr.reset
+                convertPointField
                 (
-                    volPointInterpolation::New(tf.mesh()).interpolate(tf).ptr()
+                    ptfPtr(),
+                    tf,
+                    output,
+                    range,
+                    datasetNo,
+                    decompLst[datasetNo]
                 );
             }
-
-            convertPointField
-            (
-                ptfPtr(),
-                tf,
-                output,
-                range,
-                datasetNo,
-                decompLst[datasetNo]
-            );
         }
     }
 }

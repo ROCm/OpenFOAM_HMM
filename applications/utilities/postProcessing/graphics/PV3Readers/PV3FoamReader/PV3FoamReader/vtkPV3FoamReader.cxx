@@ -85,6 +85,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;
+    InterpolateVolFields = 1;
 
     UpdateGUI = 0;
 

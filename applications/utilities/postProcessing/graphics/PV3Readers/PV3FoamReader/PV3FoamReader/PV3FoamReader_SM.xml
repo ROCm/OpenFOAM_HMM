@@ -69,11 +69,26 @@
       </Documentation>
     </IntVectorProperty>
 
+    <!-- Interpolate Fields check-box -->
+    <IntVectorProperty
+      name="UiInterpolateVolFields"
+      command="SetInterpolateVolFields"
+      number_of_elements="1"
+      is_internal="1"
+      default_values="1"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Interpolate volume fields into point fields
+      </Documentation>
+    </IntVectorProperty>
+
     <!-- Extrapolate Patches check-box -->
     <IntVectorProperty
-      name="ExtrapolatePatches"
+      name="UiExtrapolatePatches"
       command="SetExtrapolatePatches"
       number_of_elements="1"
+      is_internal="1"
       default_values="0"
       animateable="0">
       <BooleanDomain name="bool"/>
