@@ -71,16 +71,19 @@ drag
         air
         {
             type SchillerNaumann;
-            residualDrag 0;
+            residualPhaseFraction 0;
+            residualSlip 0;
         }
 
         water
         {
             type SchillerNaumann;
-            residualDrag 0;
+            residualPhaseFraction 0;
+            residualSlip 0;
         }
 
-        residualDrag 1;
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
     }
 );
 

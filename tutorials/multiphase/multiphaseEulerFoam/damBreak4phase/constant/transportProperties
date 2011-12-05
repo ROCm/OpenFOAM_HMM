@@ -109,19 +109,22 @@ drag
     (air water)
     {
         type SchillerNaumann;
-        residualDrag 100;
+        residualPhaseFraction 1e-6;
+        residualSlip 1e-6;
     }
 
     (air oil)
     {
         type SchillerNaumann;
-        residualDrag 100;
+        residualPhaseFraction 1e-6;
+        residualSlip 1e-6;
     }
 
     (air mercury)
     {
         type SchillerNaumann;
-        residualDrag 100;
+        residualPhaseFraction 1e-6;
+        residualSlip 1e-6;
     }
 );
 
