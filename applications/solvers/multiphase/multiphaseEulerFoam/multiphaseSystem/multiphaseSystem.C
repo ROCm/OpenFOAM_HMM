@@ -30,6 +30,7 @@ License
 #include "MULES.H"
 #include "fvcSnGrad.H"
 #include "fvcFlux.H"
+#include "fvcAverage.H"
 
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
@@ -626,9 +627,20 @@ Foam::multiphaseSystem::dragCoeffs() const
         (
             iter.key(),
             (
-                dm.phase1()*dm.phase2()
-               *dm.K(mag(dm.phase1().U() - dm.phase2().U()))
-              + dm.residualDrag()
+                max
+                (
+                    fvc::average(dm.phase1())*fvc::average(dm.phase2()),
+                    //dm.phase1()*dm.phase2(),
+                    dm.residualPhaseFraction()
+                )
+               *dm.K
+                (
+                    max
+                    (
+                        mag(dm.phase1().U() - dm.phase2().U()),
+                        dm.residualSlip()
+                    )
+                )
             ).ptr()
         );
     }

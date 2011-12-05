@@ -46,11 +46,17 @@ Foam::dragModel::dragModel
     interfaceDict_(interfaceDict),
     phase1_(phase1),
     phase2_(phase2),
-    residualDrag_
+    residualPhaseFraction_
     (
-        "residualDrag",
-        dimensionSet(1, -3, -1, 0, 0),
-        interfaceDict.lookup("residualDrag")
+        "residualPhaseFraction",
+        dimless,
+        interfaceDict.lookup("residualPhaseFraction")
+    ),
+    residualSlip_
+    (
+        "residualSlip",
+        dimVelocity,
+        interfaceDict.lookup("residualSlip")
     )
 {}
 
