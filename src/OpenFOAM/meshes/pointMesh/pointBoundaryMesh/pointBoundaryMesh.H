@@ -96,6 +96,9 @@ public:
             return mesh_;
         }
 
+        //- Find patch indices given a name
+        labelList findIndices(const keyType&, const bool useGroups) const;
+
         //- Correct polyBoundaryMesh after moving points
         void movePoints(const pointField&);
 

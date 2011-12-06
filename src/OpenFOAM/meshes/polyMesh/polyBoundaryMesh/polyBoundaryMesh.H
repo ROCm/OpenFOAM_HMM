@@ -70,6 +70,8 @@ class polyBoundaryMesh
 
         mutable autoPtr<labelList> patchIDPtr_;
 
+        mutable autoPtr<HashTable<labelList, word> > groupPatchIDsPtr_;
+
         //- Edges of neighbouring patches
         mutable autoPtr<List<labelPairList> > neighbourEdgesPtr_;
 
@@ -153,8 +155,12 @@ public:
         //- Return a list of physical types
         wordList physicalTypes() const;
 
-        //- Return patch indices for all matches
-        labelList findIndices(const keyType&) const;
+        //- Return patch indices for all matches. Optionally matches patchGroups
+        labelList findIndices
+        (
+            const keyType&,
+            const bool usePatchGroups = false
+        ) const;
 
         //- Return patch index for the first match, return -1 if not found
         label findIndex(const keyType&) const;
@@ -168,12 +174,17 @@ public:
         //- Per boundary face label the patch index
         const labelList& patchID() const;
 
+        //- Per patch group the patch indices
+        const HashTable<labelList, word>& groupPatchIDs() const;
+
         //- Return the set of patch IDs corresponding to the given names
-        //  By default warns if given names are not found.
+        //  By default warns if given names are not found. Optionally
+        //  matches to patchGroups as well as patchNames
         labelHashSet patchSet
         (
             const UList<wordRe>& patchNames,
-            const bool warnNotFound = true
+            const bool warnNotFound = true,
+            const bool usePatchGroups = false
         ) const;
 
         //- Check whether all procs have all patches and in same order. Return

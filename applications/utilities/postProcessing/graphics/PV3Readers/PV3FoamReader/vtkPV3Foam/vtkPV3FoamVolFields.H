@@ -271,7 +271,7 @@ void Foam::vtkPV3Foam::convertVolFields
                 arrayRangeFaceSets_,
                 datasetNo,
                 mesh,
-                fSet
+                fSet.toc()
             );
 
             // TODO: points

@@ -248,15 +248,81 @@ GeometricBoundaryField
             << endl;
     }
 
+
+    // Check for groups first. (using non-wild card entries of dictionaries)
+    forAllConstIter(dictionary, dict, iter)
+    {
+        if (iter().isDict())
+        {
+            const labelList patchIDs = bmesh_.findIndices
+            (
+                iter().keyword(),
+                true
+            );
+
+            forAll(patchIDs, i)
+            {
+                label patchi = patchIDs[i];
+                this->set
+                (
+                    patchi,
+                    PatchField<Type>::New
+                    (
+                        bmesh_[patchi],
+                        field,
+                        iter().dict()
+                    )
+                );
+            }
+        }
+    }
+
+    // Check for explicit patch overrides
     forAll(bmesh_, patchi)
     {
-        if (bmesh_[patchi].type() != emptyPolyPatch::typeName)
+        if (bmesh_[patchi].type() == emptyPolyPatch::typeName)
         {
-            if
-            (
-                bmesh_[patchi].type() == cyclicPolyPatch::typeName
-             && !dict.found(bmesh_[patchi].name())
-            )
+            if (!this->set(patchi))
+            {
+                this->set
+                (
+                    patchi,
+                    PatchField<Type>::New
+                    (
+                        emptyPolyPatch::typeName,
+                        bmesh_[patchi],
+                        field
+                    )
+                );
+            }
+        }
+        else
+        {
+            bool found = dict.found(bmesh_[patchi].name());
+
+            if (found)
+            {
+                this->set
+                (
+                    patchi,
+                    PatchField<Type>::New
+                    (
+                        bmesh_[patchi],
+                        field,
+                        dict.subDict(bmesh_[patchi].name())
+                    )
+                );
+            }
+        }
+    }
+
+
+    // Check for any unset patches
+    forAll(bmesh_, patchi)
+    {
+        if (!this->set(patchi))
+        {
+            if (bmesh_[patchi].type() == cyclicPolyPatch::typeName)
             {
                 FatalIOErrorIn
                 (
@@ -274,30 +340,21 @@ GeometricBoundaryField
                     << "Run foamUpgradeCyclics to convert mesh and fields"
                     << " to split cyclics." << exit(FatalIOError);
             }
-
-            this->set
-            (
-                patchi,
-                PatchField<Type>::New
+            else
+            {
+                FatalIOErrorIn
                 (
-                    bmesh_[patchi],
-                    field,
-                    dict.subDict(bmesh_[patchi].name())
-                )
-            );
-        }
-        else
-        {
-            this->set
-            (
-                patchi,
-                PatchField<Type>::New
-                (
-                    emptyPolyPatch::typeName,
-                    bmesh_[patchi],
-                    field
-                )
-            );
+                    "GeometricField<Type, PatchField, GeoMesh>::\n"
+                    "GeometricBoundaryField::GeometricBoundaryField\n"
+                    "(\n"
+                    "    const BoundaryMesh&,\n"
+                    "    const DimensionedField<Type, GeoMesh>&,\n"
+                    "    const dictionary&\n"
+                    ")",
+                    dict
+                )   << "Cannot find patchField entry for "
+                    << bmesh_[patchi].name() << exit(FatalIOError);
+            }
         }
     }
 }

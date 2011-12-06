@@ -87,8 +87,6 @@ void Foam::vtkPV3Foam::reduceMemory()
 }
 
 
-
-
 int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
 {
     Time& runTime = dbPtr_();
@@ -213,6 +211,7 @@ void Foam::vtkPV3Foam::updateMeshPartsStatus()
         Info<< "<end> Foam::vtkPV3Foam::updateMeshPartsStatus" << endl;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -378,7 +377,7 @@ void Foam::vtkPV3Foam::updateInfo()
 
     // Update mesh parts list - add Lagrangian at the bottom
     updateInfoInternalMesh(partSelection);
-    updateInfoPatches(partSelection);
+    updateInfoPatches(partSelection, enabledEntries);
     updateInfoSets(partSelection);
     updateInfoZones(partSelection);
     updateInfoLagrangian(partSelection);

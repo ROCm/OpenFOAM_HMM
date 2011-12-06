@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMesh.H"
 #include "fvBoundaryMesh.H"
+#include "fvMesh.H"
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -84,6 +84,16 @@ Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
 
     // Not found, return -1
     return -1;
+}
+
+
+Foam::labelList Foam::fvBoundaryMesh::findIndices
+(
+    const keyType& key,
+    const bool usePatchGroups
+) const
+{
+    return mesh().boundaryMesh().findIndices(key, usePatchGroups);
 }
 
 

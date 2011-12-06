@@ -58,6 +58,16 @@ Foam::pointBoundaryMesh::pointBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::labelList Foam::pointBoundaryMesh::findIndices
+(
+    const keyType& key,
+    const bool usePatchGroups
+) const
+{
+    return mesh()().boundaryMesh().findIndices(key, usePatchGroups);
+}
+
+
 void Foam::pointBoundaryMesh::calcGeometry()
 {
     PstreamBuffers pBufs(Pstream::defaultCommsType);
