@@ -79,9 +79,9 @@ sigmas
     (air water)     0.07
     (air oil)       0.07
     (air mercury)   0.07
-    (water oil)     0.07
-    (water mercury) 0.07
-    (oil mercury)   0.07
+    (water oil)     0
+    (water mercury) 0
+    (oil mercury)   0
 );
 
 interfaceCompression
@@ -109,22 +109,22 @@ drag
     (air water)
     {
         type SchillerNaumann;
-        residualPhaseFraction 1e-6;
-        residualSlip 1e-6;
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
     }
 
     (air oil)
     {
         type SchillerNaumann;
-        residualPhaseFraction 1e-6;
-        residualSlip 1e-6;
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
     }
 
     (air mercury)
     {
         type SchillerNaumann;
-        residualPhaseFraction 1e-6;
-        residualSlip 1e-6;
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
     }
 );
 
