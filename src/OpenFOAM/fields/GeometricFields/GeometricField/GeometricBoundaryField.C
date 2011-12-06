@@ -249,7 +249,7 @@ GeometricBoundaryField
     }
 
 
-    // Check for groups first. (using non-wild card entries of dictionaries)
+    // Patch or patch-groups. (using non-wild card entries of dictionaries)
     forAllConstIter(dictionary, dict, iter)
     {
         if (iter().isDict())
@@ -277,12 +277,12 @@ GeometricBoundaryField
         }
     }
 
-    // Check for explicit patch overrides
+    // Check for wildcard patch overrides
     forAll(bmesh_, patchi)
     {
-        if (bmesh_[patchi].type() == emptyPolyPatch::typeName)
+        if (!this->set(patchi))
         {
-            if (!this->set(patchi))
+            if (bmesh_[patchi].type() == emptyPolyPatch::typeName)
             {
                 this->set
                 (
@@ -295,23 +295,23 @@ GeometricBoundaryField
                     )
                 );
             }
-        }
-        else
-        {
-            bool found = dict.found(bmesh_[patchi].name());
-
-            if (found)
+            else
             {
-                this->set
-                (
-                    patchi,
-                    PatchField<Type>::New
+                bool found = dict.found(bmesh_[patchi].name());
+
+                if (found)
+                {
+                    this->set
                     (
-                        bmesh_[patchi],
-                        field,
-                        dict.subDict(bmesh_[patchi].name())
-                    )
-                );
+                        patchi,
+                        PatchField<Type>::New
+                        (
+                            bmesh_[patchi],
+                            field,
+                            dict.subDict(bmesh_[patchi].name())
+                        )
+                    );
+                }
             }
         }
     }
