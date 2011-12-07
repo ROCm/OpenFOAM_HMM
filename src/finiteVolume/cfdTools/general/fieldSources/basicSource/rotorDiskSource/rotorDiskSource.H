@@ -131,17 +131,18 @@ public:
 protected:
 
     // Helper structures to encapsulate flap and trim data
+    // Note: all input in degrees (converted to radians internally)
 
         struct flapData
         {
-            scalar beta0;   // coning angle [deg]
+            scalar beta0;   // coning angle
             scalar beta1;   // lateral flapping coeff
             scalar beta2;   // longitudinal flapping coeff
         };
 
         struct trimData
         {
-            scalar alphaC;  // collective pitch angle [deg]
+            scalar alphaC;  // collective pitch angle
             scalar A;       // lateral cyclic coeff
             scalar B;       // longitudinal cyclic coeff
         };
@@ -185,6 +186,9 @@ protected:
 
         //- Rotation tensor for flap angle
         List<tensor> R_;
+
+        //- Inverse rotation tensor for flap angle
+        List<tensor> invR_;
 
         //- Geometric angle of attack [deg]
         List<scalar> alphag_;
