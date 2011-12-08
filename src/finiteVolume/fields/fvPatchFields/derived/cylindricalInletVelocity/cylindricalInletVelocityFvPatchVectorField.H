@@ -36,12 +36,15 @@ Description
         type            cylindricalInletVelocity;
         axis            (0 0 1);
         centre          (0 0 0);
-        axialVelocity   30;
-        rpm             100;
-        radialVelocity  -10;
+        axialVelocity   constant 30;
+        radialVelocity  constant -10;
+        rpm             constant 100;
     }
     \endverbatim
 
+    The axialVelocity, radialVelocity and rpm entries are DataEntry types, able
+    to describe time varying functions.  The example above gives the usage for
+    supplying constant values.
 
 SourceFiles
     cylindricalInletVelocityFvPatchVectorField.C
@@ -52,6 +55,7 @@ SourceFiles
 #define cylindricalInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,20 +71,20 @@ class cylindricalInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Axial velocity
-        const scalar axialVelocity_;
-
         //- Central point
         const vector centre_;
 
         //- Axis
         const vector axis_;
 
-        //- RPM
-        const scalar rpm_;
+        //- Axial velocity
+        autoPtr<DataEntry<scalar> > axialVelocity_;
 
         //- Radial velocity
-        const scalar radialVelocity_;
+        autoPtr<DataEntry<scalar> > radialVelocity_;
+
+        //- RPM
+        autoPtr<DataEntry<scalar> > rpm_;
 
 
 public:
@@ -154,13 +158,11 @@ public:
 
     // Member functions
 
-
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 
