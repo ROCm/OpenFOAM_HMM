@@ -76,18 +76,18 @@ if (runTime.outputTime())
         }
     }
 
-    forAll(totalVelocity.internalField(), tV)
+    volVectorField::InternalField& itotalVelocity =
+        totalVelocity.internalField();
+
+    forAll(itotalVelocity, tV)
     {
         if (totalMass_sum[tV] > VSMALL)
         {
-            totalVelocity.internalField()[tV] =
-                totalMomentum_sum[tV]
-                /totalMass_sum[tV];
+            itotalVelocity[tV] = totalMomentum_sum[tV]/totalMass_sum[tV];
         }
         else
         {
-            totalVelocity.internalField()[tV] =
-            vector::zero;
+            itotalVelocity[tV] = vector::zero;
         }
     }
 
@@ -150,17 +150,20 @@ if (runTime.outputTime())
         }
     }
 
-    forAll(totalTemperature.internalField(), tT)
+    volScalarField::InternalField& itotalTemperature =
+        totalTemperature.internalField();
+
+    forAll(itotalTemperature, tT)
     {
         if (totalN_sum[tT] > 0)
         {
-            totalTemperature.internalField()[tT] =
+            itotalTemperature[tT] =
                 totalTemperatureVTerms_sum[tT]
                 /(3.0 * moleculeCloud::kb * totalN_sum[tT]);
         }
         else
         {
-            totalTemperature.internalField()[tT] = 0.0;
+            itotalTemperature[tT] = 0.0;
         }
     }
 
@@ -206,17 +209,19 @@ if (runTime.outputTime())
         }
     }
 
-    forAll(totalMeanKE.internalField(), tMKE)
+    volScalarField::InternalField& itotalMeanKE = totalMeanKE.internalField();
+
+    forAll(itotalMeanKE, tMKE)
     {
         if (totalN_sum[tMKE] > 0)
         {
-            totalMeanKE.internalField()[tMKE] =
+            itotalMeanKE[tMKE] =
                 totalKE_sum[tMKE]
                 /totalN_sum[tMKE];
         }
         else
         {
-            totalMeanKE.internalField()[tMKE] = 0.0;
+            itotalMeanKE[tMKE] = 0.0;
         }
     }
 }

@@ -131,17 +131,16 @@ void MapGeometricFields
             );
 
             // Map the patch fields
-            forAll(field.boundaryField(), patchi)
+            typename GeometricField<Type, PatchField, GeoMesh>
+            ::GeometricBoundaryField& bfield = field.boundaryField();
+            forAll(bfield, patchi)
             {
                 // Cannot check sizes for patch fields because of
                 // empty fields in FV and because point fields get their size
                 // from the patch which has already been resized
                 //
 
-                field.boundaryField()[patchi].autoMap
-                (
-                    mapper.boundaryMap()[patchi]
-                );
+                bfield[patchi].autoMap(mapper.boundaryMap()[patchi]);
             }
 
             field.instance() = field.time().timeName();

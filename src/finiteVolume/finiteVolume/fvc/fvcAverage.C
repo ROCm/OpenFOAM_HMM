@@ -73,9 +73,12 @@ average
         surfaceSum(mesh.magSf()*ssf)/surfaceSum(mesh.magSf())
     )().internalField();
 
-    forAll(av.boundaryField(), patchi)
+    typename GeometricField<Type, fvPatchField, volMesh>::
+    GeometricBoundaryField& bav = av.boundaryField();
+
+    forAll(bav, patchi)
     {
-        av.boundaryField()[patchi] = ssf.boundaryField()[patchi];
+        bav[patchi] = ssf.boundaryField()[patchi];
     }
 
     av.correctBoundaryConditions();

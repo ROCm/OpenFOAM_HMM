@@ -668,9 +668,12 @@ void Foam::MULES::limitSum(SurfaceScalarFieldList& phiPsiCorrs)
         limitSum(phiPsiCorrsInternal);
     }
 
-    forAll(phiPsiCorrs[0].boundaryField(), patchi)
+    surfaceScalarField::GeometricBoundaryField& bfld =
+        phiPsiCorrs[0].boundaryField();
+
+    forAll(bfld, patchi)
     {
-        if (phiPsiCorrs[0].boundaryField()[patchi].coupled())
+        if (bfld[patchi].coupled())
         {
             UPtrList<scalarField> phiPsiCorrsPatch(phiPsiCorrs.size());
             forAll(phiPsiCorrs, phasei)

@@ -347,7 +347,7 @@ class vtkPV3Foam
             void updateInfoLagrangian(vtkDataArraySelection*);
 
             //- Patch info
-            void updateInfoPatches(vtkDataArraySelection*);
+            void updateInfoPatches(vtkDataArraySelection*, stringList&);
 
             //- Set info
             void updateInfoSets(vtkDataArraySelection*);
@@ -552,18 +552,6 @@ class vtkPV3Foam
                 const label datasetNo,
                 const fvMesh&,
                 const labelList& faceLabels
-            );
-
-            //- face set/zone field
-            template<class Type>
-            void convertFaceField
-            (
-                const GeometricField<Type, fvPatchField, volMesh>&,
-                vtkMultiBlockDataSet* output,
-                const arrayRange&,
-                const label datasetNo,
-                const fvMesh&,
-                const faceSet&
             );
 
             //- Lagrangian fields - all types

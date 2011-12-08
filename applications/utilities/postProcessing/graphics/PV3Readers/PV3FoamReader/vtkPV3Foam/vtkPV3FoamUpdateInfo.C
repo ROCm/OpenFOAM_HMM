@@ -221,7 +221,8 @@ void Foam::vtkPV3Foam::updateInfoLagrangian
 
 void Foam::vtkPV3Foam::updateInfoPatches
 (
-    vtkDataArraySelection* arraySelection
+    vtkDataArraySelection* arraySelection,
+    stringList& enabledEntries
 )
 {
     if (debug)
@@ -230,12 +231,63 @@ void Foam::vtkPV3Foam::updateInfoPatches
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
+
+    HashSet<string> enabledEntriesSet(enabledEntries);
+
     arrayRangePatches_.reset(arraySelection->GetNumberOfArrays());
 
     int nPatches = 0;
     if (meshPtr_)
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
+        const HashTable<labelList, word>& groups = patches.groupPatchIDs();
+
+        const wordList allPatchNames = patches.names();
+
+        // Add patch groups
+        // ~~~~~~~~~~~~~~~~
+
+        for
+        (
+            HashTable<labelList, word>::const_iterator iter = groups.begin();
+            iter != groups.end();
+            ++iter
+        )
+        {
+            const word& groupName = iter.key();
+            const labelList& patchIDs = iter();
+
+            label nFaces = 0;
+            forAll(patchIDs, i)
+            {
+                nFaces += patches[patchIDs[i]].size();
+            }
+
+            // Valid patch if nFace > 0 - add patch to GUI list
+            if (nFaces)
+            {
+                string vtkGrpName = groupName + " - group";
+                arraySelection->AddArray(vtkGrpName.c_str());
+
+                ++nPatches;
+
+                if (enabledEntriesSet.found(vtkGrpName))
+                {
+                    forAll(patchIDs, i)
+                    {
+                        const polyPatch& pp = patches[patchIDs[i]];
+                        string vtkPatchName = pp.name() + " - patch";
+                        enabledEntriesSet.insert(vtkPatchName);
+                    }
+                    enabledEntriesSet.erase(vtkGrpName);
+                }
+            }
+        }
+
+
+        // Add patches
+        // ~~~~~~~~~~~
+
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
@@ -277,20 +329,101 @@ void Foam::vtkPV3Foam::updateInfoPatches
         {
             polyBoundaryMeshEntries patchEntries(ioObj);
 
-            // Add (non-zero) patches to the list of mesh parts
-            forAll(patchEntries, entryI)
+
+            // Read patches and determine sizes
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            wordList names(patchEntries.size());
+            labelList sizes(patchEntries.size());
+
+            forAll(patchEntries, patchI)
             {
-                label nFaces
-                (
-                    readLabel(patchEntries[entryI].dict().lookup("nFaces"))
-                );
+                const dictionary& patchDict = patchEntries[patchI].dict();
+
+                sizes[patchI] = readLabel(patchDict.lookup("nFaces"));
+                names[patchI] = patchEntries[patchI].keyword();
+            }
+
+
+            // Add (non-zero) patch groups to the list of mesh parts
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            HashTable<labelList, word> groups(patchEntries.size());
+
+            forAll(patchEntries, patchI)
+            {
+                const dictionary& patchDict = patchEntries[patchI].dict();
+
+                wordList groupNames;
+                patchDict.readIfPresent("inGroups", groupNames);
+                forAll(groupNames, groupI)
+                {
+                    HashTable<labelList, word>::iterator iter = groups.find
+                    (
+                        groupNames[groupI]
+                    );
+                    if (iter != groups.end())
+                    {
+                        iter().append(patchI);
+                    }
+                    else
+                    {
+                        groups.insert(groupNames[groupI], labelList(1, patchI));
+                    }
+                }
+            }
+
+            for
+            (
+                HashTable<labelList, word>::const_iterator iter =
+                    groups.begin();
+                iter != groups.end();
+                ++iter
+            )
+            {
+                const word& groupName = iter.key();
+                const labelList& patchIDs = iter();
+
+                label nFaces = 0;
+                forAll(patchIDs, i)
+                {
+                    nFaces += sizes[patchIDs[i]];
+                }
 
                 // Valid patch if nFace > 0 - add patch to GUI list
                 if (nFaces)
                 {
+                    string vtkGrpName = groupName + " - group";
+
+                    arraySelection->AddArray(vtkGrpName.c_str());
+
+                    ++nPatches;
+
+                    if (enabledEntriesSet.found(vtkGrpName))
+                    {
+                        forAll(patchIDs, i)
+                        {
+                            string vtkPatchName =
+                                names[patchIDs[i]] + " - patch";
+                            enabledEntriesSet.insert(vtkPatchName);
+                        }
+                        enabledEntriesSet.erase(vtkGrpName);
+                    }
+                }
+            }
+
+
+            // Add (non-zero) patches to the list of mesh parts
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            forAll(names, patchI)
+            {
+                // Valid patch if nFace > 0 - add patch to GUI list
+                if (sizes[patchI])
+                {
                     arraySelection->AddArray
                     (
-                        (patchEntries[entryI].keyword() + " - patch").c_str()
+                        (names[patchI] + " - patch").c_str()
                     );
 
                     ++nPatches;
@@ -299,6 +432,9 @@ void Foam::vtkPV3Foam::updateInfoPatches
         }
     }
     arrayRangePatches_ += nPatches;
+
+    // Update enabled entries in case of group selection
+    enabledEntries = enabledEntriesSet.toc();
 
     if (debug)
     {

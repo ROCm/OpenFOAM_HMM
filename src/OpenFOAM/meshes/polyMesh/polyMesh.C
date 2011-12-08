@@ -703,11 +703,11 @@ void Foam::polyMesh::resetPrimitives
     {
         boundary_[patchI] = polyPatch
         (
-            boundary_[patchI].name(),
-            patchSizes[patchI],
-            patchStarts[patchI],
+            boundary_[patchI],
+            boundary_,
             patchI,
-            boundary_
+            patchSizes[patchI],
+            patchStarts[patchI]
         );
     }
 

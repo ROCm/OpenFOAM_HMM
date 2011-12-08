@@ -125,13 +125,6 @@ void Foam::MULES::limitSum(UPtrList<scalarField>& phiPsiCorrs)
                 }
             }
         }
-        else
-        {
-            for (int phasei=0; phasei<phiPsiCorrs.size(); phasei++)
-            {
-                phiPsiCorrs[phasei][facei] = 0;
-            }
-        }
     }
 }
 

@@ -120,11 +120,17 @@ do
     -archOption | --archOption)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         archOption="$2"
-        # replace WM_ARCH_OPTION=...
-        _inlineSed \
-            etc/bashrc \
-            '/^[^#]/s@WM_ARCH_OPTION=.*@WM_ARCH_OPTION='"$archOption@" \
-             "Replacing WM_ARCH_OPTION setting by '$archOption'"
+        current_archOption=`grep WM_ARCH_OPTION= etc/bashrc | sed "s/export WM_ARCH_OPTION=//"`
+        if [ "$archOption" != "$current_archOption" ]
+        then
+            # replace WM_ARCH_OPTION=...
+            _inlineSed \
+                etc/bashrc \
+                '/^[^#]/s@WM_ARCH_OPTION=.*@WM_ARCH_OPTION='"$archOption@" \
+                 "Replacing WM_ARCH_OPTION setting by '$archOption'"
+        else
+            echo "WM_ARCH_OPTION already set to $archOption"
+        fi
         shift 2
         ;;
     -paraviewInstall | --paraviewInstall)

@@ -75,7 +75,10 @@ tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
             max(corDeltaT[neighbour[faceI]], cofrDeltaT[faceI]);
     }
 
-    forAll(corDeltaT.boundaryField(), patchi)
+    volScalarField::GeometricBoundaryField& bcorDeltaT =
+        corDeltaT.boundaryField();
+
+    forAll(bcorDeltaT, patchi)
     {
         const fvsPatchScalarField& pcofrDeltaT =
             cofrDeltaT.boundaryField()[patchi];

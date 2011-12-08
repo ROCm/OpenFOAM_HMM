@@ -57,7 +57,8 @@ protected:
         const dictionary& interfaceDict_;
         const phaseModel& phase1_;
         const phaseModel& phase2_;
-        dimensionedScalar residualDrag_;
+        dimensionedScalar residualPhaseFraction_;
+        dimensionedScalar residualSlip_;
 
 public:
 
@@ -117,9 +118,14 @@ public:
             return phase2_;
         }
 
-        const dimensionedScalar& residualDrag() const
+        const dimensionedScalar& residualPhaseFraction() const
         {
-            return residualDrag_;
+            return residualPhaseFraction_;
+        }
+
+        const dimensionedScalar& residualSlip() const
+        {
+            return residualSlip_;
         }
 
         //- the dragfunction K used in the momentum eq.

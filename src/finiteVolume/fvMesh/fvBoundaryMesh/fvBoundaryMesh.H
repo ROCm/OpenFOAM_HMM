@@ -109,6 +109,9 @@ public:
             //- Find patch index given a name
             label findPatchID(const word& patchName) const;
 
+            //- Find patch indices given a name
+            labelList findIndices(const keyType&, const bool useGroups) const;
+
 
         //- Correct patches after moving points
         void movePoints();
