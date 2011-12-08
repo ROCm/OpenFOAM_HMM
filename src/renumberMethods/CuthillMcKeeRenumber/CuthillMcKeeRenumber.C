@@ -52,7 +52,7 @@ Foam::CuthillMcKeeRenumber::CuthillMcKeeRenumber(const dictionary& renumberDict)
     (
         renumberDict.found(typeName + "Coeffs")
       ? Switch(renumberDict.subDict(typeName + "Coeffs").lookup("reverse"))
-      : Switch(true)
+      : Switch(false)
     )
 {}
 
