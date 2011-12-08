@@ -63,27 +63,26 @@ Foam::label Foam::autoSnapDriver::getCollocatedPoints
 )
 {
     labelList pointMap;
-    pointField newPoints;
-    bool hasMerged = mergePoints
+    label nUnique = mergePoints
     (
         points,                         // points
         tol,                            // mergeTol
         false,                          // verbose
-        pointMap,
-        newPoints
+        pointMap
     );
+    bool hasMerged = (nUnique < points.size());
 
     if (!returnReduce(hasMerged, orOp<bool>()))
     {
         return 0;
     }
 
-    // Determine which newPoints are referenced more than once
+    // Determine which merged points are referenced more than once
     label nCollocated = 0;
 
     // Per old point the newPoint. Or -1 (not set yet) or -2 (already seen
     // twice)
-    labelList firstOldPoint(newPoints.size(), -1);
+    labelList firstOldPoint(nUnique, -1);
     forAll(pointMap, oldPointI)
     {
         label newPointI = pointMap[oldPointI];

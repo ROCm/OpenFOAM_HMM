@@ -2096,7 +2096,8 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
         (
             newTriangles,
             surf.patches(),
-            newPoints
+            newPoints,
+            true                //reuse storage
         );
     }
     else

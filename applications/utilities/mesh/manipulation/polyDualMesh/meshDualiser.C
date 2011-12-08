@@ -49,19 +49,17 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
     }
 
     labelList oldToNew;
-    pointField newPoints;
-    bool hasMerged = mergePoints
+    label nUnique = mergePoints
     (
         points,
         1E-6,
         false,
-        oldToNew,
-        newPoints
+        oldToNew
     );
 
-    if (hasMerged)
+    if (nUnique < points.size())
     {
-        labelListList newToOld(invertOneToMany(newPoints.size(), oldToNew));
+        labelListList newToOld(invertOneToMany(nUnique, oldToNew));
 
         forAll(newToOld, newI)
         {
@@ -225,17 +223,15 @@ Foam::label Foam::meshDualiser::addInternalFace
         pointField facePoints(meshMod.points(), newFace);
 
         labelList oldToNew;
-        pointField newPoints;
-        bool hasMerged = mergePoints
+        label nUnique = mergePoints
         (
             facePoints,
             1E-6,
             false,
-            oldToNew,
-            newPoints
+            oldToNew
         );
 
-        if (hasMerged)
+        if (nUnique < facePoints.size())
         {
             FatalErrorIn("addInternalFace(..)")
                 << "verts:" << verts << " newFace:" << newFace
