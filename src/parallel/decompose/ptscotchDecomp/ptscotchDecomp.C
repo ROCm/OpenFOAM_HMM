@@ -755,7 +755,14 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 
 
     CompactListList<label> cellCells;
-    calcCellCells(mesh, identity(mesh.nCells()), mesh.nCells(), cellCells);
+    calcCellCells
+    (
+        mesh,
+        identity(mesh.nCells()),
+        mesh.nCells(),
+        true,
+        cellCells
+    );
 
     // Decompose using default weights
     List<int> finalDecomp;
@@ -807,7 +814,14 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
     CompactListList<label> cellCells;
-    calcCellCells(mesh, agglom, agglomPoints.size(), cellCells);
+    calcCellCells
+    (
+        mesh,
+        agglom,
+        agglomPoints.size(),
+        true,
+        cellCells
+    );
 
     // Decompose using weights
     List<int> finalDecomp;
