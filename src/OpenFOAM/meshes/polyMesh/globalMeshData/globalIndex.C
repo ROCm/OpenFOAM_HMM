@@ -36,7 +36,7 @@ Foam::globalIndex::globalIndex
 :
     offsets_(Pstream::nProcs()+1)
 {
-    labelList localSizes(Pstream::nProcs());
+    labelList localSizes(Pstream::nProcs(), 0);
     localSizes[Pstream::myProcNo()] = localSize;
     if (parallel)
     {
