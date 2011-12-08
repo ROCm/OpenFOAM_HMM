@@ -46,6 +46,8 @@ namespace Foam
 
 //- Renumbers the addressing to reduce the band of the matrix.
 //  The algorithm uses a simple search through the neighbour list
+//  Returns the order in which the cells need to be visited (i.e. ordered to
+//  original)
 labelList bandCompression(const labelListList& addressing);
 
 } // End namespace Foam
