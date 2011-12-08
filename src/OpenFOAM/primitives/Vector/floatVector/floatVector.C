@@ -22,63 +22,49 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Merge points. See below.
-
-SourceFiles
-    mergePoints.C
+    Vector of floats.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mergePoints_H
-#define mergePoints_H
-
-#include "scalar.H"
-#include "labelList.H"
+#include "floatVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                           Function mergePoints Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//- Sorts and merges points. All points closer than/equal mergeTol get merged.
-//  Returns the number of unique points and a map from old to new.
-template<class Type>
-label mergePoints
+template<>
+const char* const floatVector::typeName = "floatVector";
+
+template<>
+const char* floatVector::componentNames[] = {"x", "y", "z"};
+
+template<>
+const floatVector floatVector::zero(0, 0, 0);
+
+template<>
+const floatVector floatVector::one(1, 1, 1);
+
+template<>
+const floatVector floatVector::max
 (
-    const UList<Type>& points,
-    const scalar mergeTol,
-    const bool verbose,
-    labelList& pointMap,
-    const Type& origin = Type::zero
+    floatScalarVGREAT,
+    floatScalarVGREAT,
+    floatScalarVGREAT
 );
 
-//- Sorts and merges points. Determines new points. Returns true if anything
-//  merged (though newPoints still sorted even if not merged).
-template<class Type>
-bool mergePoints
+template<>
+const floatVector floatVector::min
 (
-    const UList<Type>& points,
-    const scalar mergeTol,
-    const bool verbose,
-    labelList& pointMap,
-    List<Type>& newPoints,
-    const Type& origin = Type::zero
+    -floatScalarVGREAT,
+    -floatScalarVGREAT,
+    -floatScalarVGREAT
 );
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "mergePoints.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

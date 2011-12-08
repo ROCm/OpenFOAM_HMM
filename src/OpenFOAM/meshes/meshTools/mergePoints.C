@@ -23,25 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mergePoints.H"
-#include "SortableList.H"
 #include "ListOps.H"
+#include "point.H"
+#include "Field.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::mergePoints
+template<class Type>
+Foam::label Foam::mergePoints
 (
-    const UList<point>& points,
+    const UList<Type>& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    List<point>& newPoints,
-    const point& origin
+    const Type& origin
 )
 {
-    point compareOrigin = origin;
+    Type compareOrigin = origin;
 
-    if (origin == point(VGREAT, VGREAT, VGREAT))
+    if (origin == Type::max)
     {
         if (points.size())
         {
@@ -53,12 +53,9 @@ bool Foam::mergePoints
     pointMap.setSize(points.size());
     pointMap = -1;
 
-    // Storage for merged points
-    newPoints.setSize(points.size());
-
     if (points.empty())
     {
-        return false;
+        return points.size();
     }
 
     // We're comparing distance squared to origin first.
@@ -70,33 +67,56 @@ bool Foam::mergePoints
     //     x^2+y^2+z^2 + 2*mergeTol*(x+z+y) + mergeTol^2*...
     // so the difference will be 2*mergeTol*(x+y+z)
 
-    const scalar mergeTolSqr = sqr(mergeTol);
+    const scalar mergeTolSqr = Foam::sqr(scalar(mergeTol));
 
     // Sort points by magSqr
-    const pointField d(points - compareOrigin);
-    SortableList<scalar> sortedMagSqr(magSqr(d));
-    scalarField sortedTol(points.size());
-    forAll(sortedMagSqr.indices(), sortI)
+    const Field<Type> d(points - compareOrigin);
+
+    List<scalar> magSqrD(d.size());
+    forAll(d, pointI)
     {
-        const point& pt = d[sortedMagSqr.indices()[sortI]];
+        magSqrD[pointI] = magSqr(d[pointI]);
+    }
+    labelList order;
+    sortedOrder(magSqrD, order);
+
+
+    Field<scalar> sortedTol(points.size());
+    forAll(order, sortI)
+    {
+        label pointI = order[sortI];
+
+        // Convert to scalar precision
+        const point pt
+        (
+            scalar(d[pointI].x()),
+            scalar(d[pointI].y()),
+            scalar(d[pointI].z())
+        );
         sortedTol[sortI] = 2*mergeTol*(mag(pt.x())+mag(pt.y())+mag(pt.z()));
     }
-
-    bool hasMerged = false;
 
     label newPointI = 0;
 
 
     // Handle 0th point separately (is always unique)
-    label pointI = sortedMagSqr.indices()[0];
-    pointMap[pointI] = newPointI;
-    newPoints[newPointI++] = points[pointI];
+    label pointI = order[0];
+    pointMap[pointI] = newPointI++;
 
 
-    for (label sortI = 1; sortI < sortedMagSqr.size(); sortI++)
+    for (label sortI = 1; sortI < order.size(); sortI++)
     {
         // Get original point index
-        label pointI = sortedMagSqr.indices()[sortI];
+        label pointI = order[sortI];
+        const scalar mag2 = magSqrD[order[sortI]];
+        // Convert to scalar precision
+        const point pt
+        (
+            scalar(points[pointI].x()),
+            scalar(points[pointI].y()),
+            scalar(points[pointI].z())
+        );
+
 
         // Compare to previous points to find equal one.
         label equalPointI = -1;
@@ -105,17 +125,19 @@ bool Foam::mergePoints
         (
             label prevSortI = sortI - 1;
             prevSortI >= 0
-         && mag
-            (
-                sortedMagSqr[prevSortI]
-             -  sortedMagSqr[sortI]
-            ) <= sortedTol[sortI];
+         && (mag(magSqrD[order[prevSortI]] - mag2) <= sortedTol[sortI]);
             prevSortI--
         )
         {
-            label prevPointI = sortedMagSqr.indices()[prevSortI];
+            label prevPointI = order[prevSortI];
+            const point prevPt
+            (
+                scalar(points[prevPointI].x()),
+                scalar(points[prevPointI].y()),
+                scalar(points[prevPointI].z())
+            );
 
-            if (magSqr(points[pointI] - points[prevPointI]) <= mergeTolSqr)
+            if (magSqr(pt - prevPt) <= mergeTolSqr)
             {
                 // Found match.
                 equalPointI = prevPointI;
@@ -130,8 +152,6 @@ bool Foam::mergePoints
             // Same coordinate as equalPointI. Map to same new point.
             pointMap[pointI] = pointMap[equalPointI];
 
-            hasMerged = true;
-
             if (verbose)
             {
                 Pout<< "Foam::mergePoints : Merging points "
@@ -144,14 +164,41 @@ bool Foam::mergePoints
         else
         {
             // Differs. Store new point.
-            pointMap[pointI] = newPointI;
-            newPoints[newPointI++] = points[pointI];
+            pointMap[pointI] = newPointI++;
         }
     }
 
-    newPoints.setSize(newPointI);
+    return newPointI;
+}
 
-    return hasMerged;
+
+template<class Type>
+bool Foam::mergePoints
+(
+    const UList<Type>& points,
+    const scalar mergeTol,
+    const bool verbose,
+    labelList& pointMap,
+    List<Type>& newPoints,
+    const Type& origin = Type::zero
+)
+{
+    label nUnique = mergePoints
+    (
+        points,
+        mergeTol,
+        verbose,
+        pointMap,
+        origin
+    );
+
+    newPoints.setSize(nUnique);
+    forAll(pointMap, pointI)
+    {
+        newPoints[pointMap[pointI]] = points[pointI];
+    }
+
+    return (nUnique != points.size());
 }
 
 

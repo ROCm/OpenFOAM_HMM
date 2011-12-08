@@ -21,61 +21,41 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::floatVector
+
 Description
-    Merge points. See below.
+    A float version of vector
 
 SourceFiles
-    mergePoints.C
+    floatVector.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mergePoints_H
-#define mergePoints_H
+#ifndef floatVector_H
+#define floatVector_H
 
-#include "scalar.H"
-#include "labelList.H"
+#include "Vector.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                           Function mergePoints Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Sorts and merges points. All points closer than/equal mergeTol get merged.
-//  Returns the number of unique points and a map from old to new.
-template<class Type>
-label mergePoints
-(
-    const UList<Type>& points,
-    const scalar mergeTol,
-    const bool verbose,
-    labelList& pointMap,
-    const Type& origin = Type::zero
-);
+typedef Vector<float> floatVector;
 
-//- Sorts and merges points. Determines new points. Returns true if anything
-//  merged (though newPoints still sorted even if not merged).
-template<class Type>
-bool mergePoints
-(
-    const UList<Type>& points,
-    const scalar mergeTol,
-    const bool verbose,
-    labelList& pointMap,
-    List<Type>& newPoints,
-    const Type& origin = Type::zero
-);
 
-} // End namespace Foam
+//- Data associated with floatVector type are contiguous
+template<>
+inline bool contiguous<floatVector>() {return true;}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "mergePoints.C"
-#endif
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
