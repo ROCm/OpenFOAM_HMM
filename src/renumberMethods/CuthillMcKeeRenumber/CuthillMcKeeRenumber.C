@@ -79,7 +79,6 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
 
     if (reverse_)
     {
-Pout<< "** REverseing.." << endl;
         for (label i = 0; i < orderedToOld.size()/2; i++)
         {
             Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
@@ -100,7 +99,6 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
 
     if (reverse_)
     {
-Pout<< "** REverseing.." << endl;
         for (label i = 0; i < orderedToOld.size()/2; i++)
         {
             Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
