@@ -72,7 +72,12 @@ public:
     // Constructors
 
         //- Construct from local max size
-        globalIndex(const label localSize, const int tag = Pstream::msgType());
+        globalIndex
+        (
+            const label localSize,
+            const int tag = Pstream::msgType(),
+            const bool parallel = true              // use parallel comms
+        );
 
         //- Construct from Istream
         globalIndex(Istream& is);
