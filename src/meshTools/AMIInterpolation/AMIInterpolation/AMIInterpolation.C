@@ -693,7 +693,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
     const pointField& srcPts = srcPatch.points();
     const face& srcFace = srcPatch[srcFaceI];
     const point& srcPt = srcFace.centre(srcPts);
-    const scalar srcFaceArea = srcFace.mag(srcPts);
+    const scalar srcFaceArea = srcMagSf_[srcFaceI];
 
 //    pointIndexHit sample = treePtr_->findNearest(srcPt, sqr(0.1*bb.mag()));
     pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
@@ -1611,11 +1611,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     {
         FatalErrorIn
         (
-            "AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation\n"
-            "(\n"
-            "    const AMIInterpolation<SourcePatch, TargetPatch>&,\n"
-            "    const label,\n"
-            "    const labelList&\n"
+            "AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation"
+            "("
+            "    const AMIInterpolation<SourcePatch, TargetPatch>&, "
+            "    const label, "
+            "    const labelList&"
             ")"
         )   << "Size mismatch." << nl
             << "Source patch size:" << fineAMI.srcAddress().size() << nl
@@ -1868,7 +1868,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToTarget(const Field<Type>&) const"
+            "AMIInterpolation::interpolateToTarget"
+            "("
+                "const UList<Type>&, "
+                "const CombineOp&, "
+                "List<Type>&"
+            ") const"
         )   << "Supplied field size is not equal to source patch size" << nl
             << "    source patch   = " << srcAddress_.size() << nl
             << "    target patch   = " << tgtAddress_.size() << nl
@@ -1925,7 +1930,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     {
         FatalErrorIn
         (
-            "AMIInterpolation::interpolateToSource(const Field<Type>) const"
+            "AMIInterpolation::interpolateToSource"
+            "("
+                "const UList<Type>&, "
+                "const CombineOp&, "
+                "List<Type>&"
+            ") const"
         )   << "Supplied field size is not equal to target patch size" << nl
             << "    source patch   = " << srcAddress_.size() << nl
             << "    target patch   = " << tgtAddress_.size() << nl
