@@ -1925,13 +1925,13 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     ),
     geometryToConformTo_
     (
-        *this,
+        runTime_,
+        rndGen_,
         allGeometry_,
         cvMeshDict.subDict("surfaceConformation")
     ),
     cellSizeControl_
     (
-        *this,
         allGeometry_,
         cvMeshDict.subDict("motionControl")
     ),
@@ -1958,7 +1958,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         relaxationModel::New
         (
             cvMeshDict.subDict("motionControl"),
-            *this
+            runTime_
         )
     ),
     faceAreaWeightModel_

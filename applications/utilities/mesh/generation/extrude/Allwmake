@@ -4,6 +4,8 @@ set -x
 
 wmake libso extrudeModel
 wmake extrudeMesh
+
+wmake libso extrudeToRegionMesh/createShellMesh
 wmake extrudeToRegionMesh
 
 

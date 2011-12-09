@@ -56,8 +56,9 @@ class conformationSurfaces
 {
     // Private data
 
-        //- Reference to the conformalVoronoiMesh holding this object
-        const conformalVoronoiMesh& cvMesh_;
+        const Time& runTime_;
+
+        Random& rndGen_;
 
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;
@@ -114,7 +115,8 @@ public:
         //  searchableSurfaces
         conformationSurfaces
         (
-            const conformalVoronoiMesh& cvMesh,
+            const Time& runTime,
+            Random& rndGen,
             const searchableSurfaces& allGeometry,
             const dictionary& surfaceConformationDict
         );

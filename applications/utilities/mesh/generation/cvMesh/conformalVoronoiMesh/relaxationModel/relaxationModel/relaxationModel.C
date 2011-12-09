@@ -43,11 +43,11 @@ relaxationModel::relaxationModel
 (
     const word& type,
     const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const Time& runTime
 )
 :
     dictionary(relaxationDict),
-    cvMesh_(cvMesh),
+    runTime_(runTime),
     coeffDict_(subDict(type + "Coeffs"))
 {}
 
@@ -57,7 +57,7 @@ relaxationModel::relaxationModel
 autoPtr<relaxationModel> relaxationModel::New
 (
     const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const Time& runTime
 )
 {
     word relaxationModelTypeName
@@ -85,7 +85,7 @@ autoPtr<relaxationModel> relaxationModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<relaxationModel>(cstrIter()(relaxationDict, cvMesh));
+    return autoPtr<relaxationModel>(cstrIter()(relaxationDict, runTime));
 }
 
 

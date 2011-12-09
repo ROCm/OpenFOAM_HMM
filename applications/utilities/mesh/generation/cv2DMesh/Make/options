@@ -1,0 +1,34 @@
+EXE_DEBUG = -DFULLDEBUG -g -O0
+EXE_FROUNDING_MATH = -frounding-math
+EXE_NDEBUG = -DNDEBUG
+
+include $(GENERAL_RULES)/CGAL
+FFLAGS = -DCGAL_FILES='"${CGAL_ARCH_PATH}/share/files"'
+
+EXE_INC = \
+    ${EXE_FROUNDING_MATH} \
+    ${EXE_NDEBUG} \
+    ${CGAL_INC} \
+    -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
+    -I$(FOAM_APP)/utilities/mesh/generation/extrude/extrudeModel/lnInclude \
+    -IconformalVoronoi2DMesh/lnInclude \
+    -I$(FOAM_APP)/utilities/mesh/generation/cvMesh/conformalVoronoiMesh/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude
+
+EXE_LIBS = \
+    $(CGAL_LIBS) \
+    -lextrude2DMesh \
+    -lextrudeModel \
+    -lcv2DMesh \
+    -lconformalVoronoiMesh \
+    -lmeshTools \
+    -lsurfMesh \
+    -ledgeMesh \
+    -ltriSurface \
+    -ldynamicMesh \
+    -ldecompositionMethods

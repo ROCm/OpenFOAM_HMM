@@ -75,7 +75,6 @@ public:
         uniformDistance
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& cvMesh,
             const searchableSurface& surface
         );
 

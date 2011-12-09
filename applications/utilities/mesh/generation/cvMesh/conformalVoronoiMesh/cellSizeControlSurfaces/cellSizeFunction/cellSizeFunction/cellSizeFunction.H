@@ -81,9 +81,6 @@ protected:
 
     // Protected data
 
-        //- Reference to the conformalVoronoiMesh holding this cvs object
-        const conformalVoronoiMesh& cvMesh_;
-
         //- Reference to the searchableSurface that cellSizeFunction
         //  relates to
         const searchableSurface& surface_;
@@ -120,10 +117,9 @@ public:
             dictionary,
             (
                 const dictionary& cellSizeFunctionDict,
-                const conformalVoronoiMesh& cvMesh,
                 const searchableSurface& surface
             ),
-            (cellSizeFunctionDict, cvMesh, surface)
+            (cellSizeFunctionDict, surface)
         );
 
 
@@ -134,7 +130,6 @@ public:
         (
             const word& type,
             const dictionary& cellSizeFunctionDict,
-            const conformalVoronoiMesh& cvMesh,
             const searchableSurface& surface
         );
 
@@ -145,7 +140,6 @@ public:
         static autoPtr<cellSizeFunction> New
         (
             const dictionary& cellSizeFunctionDict,
-            const conformalVoronoiMesh& cvMesh,
             const searchableSurface& surface
         );
 
