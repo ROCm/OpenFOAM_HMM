@@ -33,6 +33,9 @@ Description
 #include "motionSmoother.H"
 #include "pointData.H"
 #include "PointEdgeWave.H"
+#include "OFstream.H"
+#include "meshTools.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -334,11 +337,25 @@ bool Foam::autoLayerDriver::isMaxEdge
         return false;
     }
 
-    v0 /= magV0;
-    v1 /= magV1;
 
-    // Test angle.
-    if ((v0 & v1) < minCos)
+    //- Detect based on vector to nearest point differing for both endpoints
+    //v0 /= magV0;
+    //v1 /= magV1;
+    //
+    //// Test angle.
+    //if ((v0 & v1) < minCos)
+    //{
+    //    return true;
+    //}
+    //else
+    //{
+    //    return false;
+    //}
+
+    //- Detect based on extrusion vector differing for both endpoints
+    //  the idea is that e.g. a sawtooth wall can still be extruded
+    //  successfully as long as it is done all to the same direction.
+    if ((pointWallDist[e[0]].v() & pointWallDist[e[1]].v()) < minCos)
     {
         return true;
     }
@@ -670,7 +687,6 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     const pointField& points = mesh.points();
 
     const indirectPrimitivePatch& pp = meshMover.patch();
-    const vectorField& faceNormals = pp.faceNormals();
     const labelList& meshPoints = pp.meshPoints();
 
     // Predetermine mesh edges
@@ -700,44 +716,15 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     // Determine pointNormal
     // ~~~~~~~~~~~~~~~~~~~~~
 
-    pointField pointNormals(pp.nPoints(), vector::zero);
-    {
-        labelList nPointFaces(pp.nPoints(), 0);
-
-        forAll(faceNormals, faceI)
-        {
-            const face& f = pp.localFaces()[faceI];
-
-            forAll(f, fp)
-            {
-                pointNormals[f[fp]] += faceNormals[faceI];
-                nPointFaces[f[fp]] ++;
-            }
-        }
-
-        syncTools::syncPointList
+    pointField pointNormals
+    (
+        PatchTools::pointNormals
         (
             mesh,
-            meshPoints,
-            pointNormals,
-            plusEqOp<vector>(),
-            vector::zero        // null value
-        );
-
-        syncTools::syncPointList
-        (
-            mesh,
-            meshPoints,
-            nPointFaces,
-            plusEqOp<label>(),
-            label(0)            // null value
-        );
-
-        forAll(pointNormals, i)
-        {
-            pointNormals[i] /= nPointFaces[i];
-        }
-    }
+            pp,
+            pp.addressing()
+        )
+    );
 
     // Smooth patch normal vectors
     smoothPatchNormals
@@ -1012,6 +999,26 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     label numThicknessRatioExclude = 0;
 
     // reduce thickness where thickness/medial axis distance large
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    autoPtr<OFstream> str;
+    label vertI = 0;
+    if (debug)
+    {
+        str.reset
+        (
+            new OFstream
+            (
+                mesh.time().path()
+              / "thicknessRatioExcludePoints_"
+              + meshRefiner_.timeName()
+              + ".obj"
+            )
+        );
+        Info<< "Writing points with too large a extrusion distance to "
+            << str().name() << endl;
+    }
+
     forAll(meshPoints, patchPointI)
     {
         if (extrudeStatus[patchPointI] != NOEXTRUDE)
@@ -1025,6 +1032,20 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             if (thicknessRatio > maxThicknessToMedialRatio)
             {
                 // Truncate thickness.
+                if (debug)
+                {
+                    Pout<< "truncating displacement at "
+                        << mesh.points()[pointI]
+                        << " from " << thickness[patchPointI]
+                        << " to "
+                        <<  0.5
+                           *(
+                                minThickness[patchPointI]
+                               +thickness[patchPointI]
+                            )
+                        << endl;
+                }
+
                 thickness[patchPointI] =
                     0.5*(minThickness[patchPointI]+thickness[patchPointI]);
 
@@ -1033,6 +1054,16 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                   * patchDisp[patchPointI]
                   / (mag(patchDisp[patchPointI]) + VSMALL);
                 numThicknessRatioExclude++;
+
+                if (str.valid())
+                {
+                    const point& pt = mesh.points()[pointI];
+                    meshTools::writeOBJ(str(), pt);
+                    vertI++;
+                    meshTools::writeOBJ(str(), pt+patchDisp[patchPointI]);
+                    vertI++;
+                    str()<< "l " << vertI-1 << ' ' << vertI << nl;
+                }
             }
         }
     }
@@ -1120,6 +1151,31 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             *pointWallDist[pointI].s()
             *dispVec[pointI];
     }
+
+    if (debug)
+    {
+        const_cast<Time&>(mesh.time())++;
+        Info<< "Writing wanted-displacement mesh (possibly illegal) to "
+            << meshRefiner_.timeName() << endl;
+        pointField oldPoints(mesh.points());
+        meshMover.movePoints
+        (
+            (
+                mesh.points()
+         +      (
+                    meshMover.scale().internalField()
+                  * displacement.internalField()
+                )
+            )()
+        );
+        meshRefiner_.write
+        (
+            debug,
+            mesh.time().path()/meshRefiner_.timeName()
+        );
+        meshMover.movePoints(oldPoints);
+    }
+
 
     // Current faces to check. Gets modified in meshMover.scaleMesh
     labelList checkFaces(identity(mesh.nFaces()));

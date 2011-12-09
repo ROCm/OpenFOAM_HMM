@@ -159,7 +159,7 @@ public:
         labelList findIndices
         (
             const keyType&,
-            const bool usePatchGroups = false
+            const bool usePatchGroups = true
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
@@ -184,7 +184,7 @@ public:
         (
             const UList<wordRe>& patchNames,
             const bool warnNotFound = true,
-            const bool usePatchGroups = false
+            const bool usePatchGroups = true
         ) const;
 
         //- Check whether all procs have all patches and in same order. Return

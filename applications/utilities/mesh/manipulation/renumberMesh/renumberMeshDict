@@ -37,11 +37,11 @@ manualCoeffs
 springCoeffs
 {
     // Maximum jump of cell indices. Is fraction of number of cells
-    maxCo 0.1;
+    maxCo 0.01;
 
     // Limit the amount of movement; the fraction maxCo gets decreased
     // with every iteration
-    freezeFraction 0.9;
+    freezeFraction 0.999;
 
     // Maximum number of iterations
     maxIter 1000;

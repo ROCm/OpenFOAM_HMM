@@ -28,6 +28,9 @@ Description
     Renumbers the cell list in order to reduce the bandwidth, reading and
     renumbering all fields from all the time directories.
 
+    By default uses bandCompression (CuthillMcKee) but will
+    read system/renumberMeshDict if present and use the method from there.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -41,6 +44,7 @@ Description
 #include "decompositionMethod.H"
 #include "renumberMethod.H"
 #include "zeroGradientFvPatchFields.H"
+#include "CuthillMcKeeRenumber.H"
 
 using namespace Foam;
 
@@ -535,20 +539,33 @@ int main(int argc, char *argv[])
 
 
     // Construct renumberMethod
-    IOdictionary renumberDict
+    IOobject io
     (
-        IOobject
-        (
-            "renumberMeshDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
+        "renumberMeshDict",
+        runTime.system(),
+        mesh,
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE
     );
-    autoPtr<renumberMethod> renumberPtr = renumberMethod::New(renumberDict);
 
-    Info<< "Selecting renumberMethod " << renumberPtr().type() << endl;
+    autoPtr<renumberMethod> renumberPtr;
+
+    if (io.headerOk())
+    {
+        Info<< "Detected local " << runTime.system()/io.name() << "." << nl
+            << "Using this to select renumberMethod." << nl << endl;
+        renumberPtr = renumberMethod::New(IOdictionary(io));
+    }
+    else
+    {
+        Info<< "No local " << runTime.system()/io.name()
+            << " dictionary found. Using default renumberMethod." << nl
+            << endl;
+        dictionary renumberDict;
+        renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
+    }
+
+    Info<< "Selecting renumberMethod " << renumberPtr().type() << nl << endl;
 
 
 
@@ -641,6 +658,7 @@ int main(int argc, char *argv[])
     PtrList<surfaceTensorField> stFlds;
     ReadFields(mesh, objects, stFlds);
 
+    Info<< endl;
 
     // From renumbering:
     // - from new cell/face back to original cell/face
