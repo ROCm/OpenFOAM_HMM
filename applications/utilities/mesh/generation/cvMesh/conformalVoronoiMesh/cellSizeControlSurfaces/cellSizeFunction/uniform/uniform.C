@@ -41,11 +41,10 @@ addToRunTimeSelectionTable(cellSizeFunction, uniform, dictionary);
 uniform::uniform
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurface& surface
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
+    cellSizeFunction(typeName, initialPointsDict, surface),
     cellSize_(readScalar(coeffsDict().lookup("cellSize")))
 {}
 

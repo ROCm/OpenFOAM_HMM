@@ -83,7 +83,7 @@ public:
         adaptiveLinear
         (
             const dictionary& relaxationDict,
-            const conformalVoronoiMesh& cvMesh
+            const Time& runTime
         );
 
 

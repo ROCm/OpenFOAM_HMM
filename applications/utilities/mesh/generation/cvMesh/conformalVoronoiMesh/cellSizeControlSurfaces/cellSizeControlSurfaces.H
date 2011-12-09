@@ -57,9 +57,6 @@ class cellSizeControlSurfaces
 {
     // Private data
 
-        //- Reference to the conformalVoronoiMesh holding this object
-        const conformalVoronoiMesh& cvMesh_;
-
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;
 
@@ -106,7 +103,6 @@ public:
         //  searchableSurfaces
         cellSizeControlSurfaces
         (
-            const conformalVoronoiMesh& cvMesh,
             const searchableSurfaces& allGeometry,
             const dictionary& motionControlDict
         );
