@@ -47,6 +47,7 @@ Description
 #include "IOmanip.H"
 #include "globalIndex.H"
 #include "DynamicField.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -369,7 +370,16 @@ void Foam::autoLayerDriver::handleFeatureAngle
         autoPtr<OFstream> str;
         if (debug)
         {
-            str.reset(new OFstream(mesh.time().path()/"featureEdges.obj"));
+            str.reset
+            (
+                new OFstream
+                (
+                    mesh.time().path()
+                  / "featureEdges_"
+                  + meshRefiner_.timeName()
+                  + ".obj"
+                )
+            );
             Info<< "Writing feature edges to " << str().name() << endl;
         }
 
@@ -1220,49 +1230,19 @@ void Foam::autoLayerDriver::getPatchDisplacement
     const vectorField& faceNormals = pp.faceNormals();
     const labelListList& pointFaces = pp.pointFaces();
     const pointField& localPoints = pp.localPoints();
-    const labelList& meshPoints = pp.meshPoints();
 
     // Determine pointNormal
     // ~~~~~~~~~~~~~~~~~~~~~
 
-    pointField pointNormals(pp.nPoints(), vector::zero);
-    {
-        labelList nPointFaces(pp.nPoints(), 0);
-
-        forAll(faceNormals, faceI)
-        {
-            const face& f = pp.localFaces()[faceI];
-
-            forAll(f, fp)
-            {
-                pointNormals[f[fp]] += faceNormals[faceI];
-                nPointFaces[f[fp]] ++;
-            }
-        }
-
-        syncTools::syncPointList
+    pointField pointNormals
+    (
+        PatchTools::pointNormals
         (
             mesh,
-            meshPoints,
-            pointNormals,
-            plusEqOp<vector>(),
-            vector::zero        // null value
-        );
-
-        syncTools::syncPointList
-        (
-            mesh,
-            meshPoints,
-            nPointFaces,
-            plusEqOp<label>(),
-            label(0)            // null value
-        );
-
-        forAll(pointNormals, i)
-        {
-            pointNormals[i] /= nPointFaces[i];
-        }
-    }
+            pp,
+            pp.addressing()
+        )
+    );
 
 
     // Determine local length scale on patch
@@ -2266,7 +2246,11 @@ void Foam::autoLayerDriver::addLayers
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing baffled mesh to " << meshRefiner_.timeName() << endl;
-        mesh.write();
+        meshRefiner_.write
+        (
+            debug,
+            mesh.time().path()/meshRefiner_.timeName()
+        );
     }
 
 
@@ -2732,7 +2716,7 @@ void Foam::autoLayerDriver::addLayers
         {
             dumpDisplacement
             (
-                mesh.time().path()/"layer",
+                mesh.time().path()/"layer_" + meshRefiner_.timeName(),
                 pp(),
                 patchDisp,
                 extrudeStatus
@@ -2744,7 +2728,11 @@ void Foam::autoLayerDriver::addLayers
             // See comment in autoSnapDriver why we should not remove meshPhi
             // using mesh.clearPout().
 
-            mesh.write();
+            meshRefiner_.write
+            (
+                debug,
+                mesh.time().path()/meshRefiner_.timeName()
+            );
         }
 
 
