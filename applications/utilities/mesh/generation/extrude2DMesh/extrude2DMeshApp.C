@@ -111,8 +111,6 @@ static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
 
 int main(int argc, char *argv[])
 {
-    #include "addOverwriteOption.H"
-
     argList::validArgs.append("surfaceFormat");
 
     #include "setRootCase.H"
@@ -128,11 +126,10 @@ int main(int argc, char *argv[])
 
     runTimeExtruded.functionObjects().off();
 
-    const bool overwrite = args.optionFound("overwrite");
-
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
 
-    Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat] << endl;
+    Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat]
+        << " at time " << runTimeExtruded.timeName() << endl;
 
     IOdictionary extrude2DMeshDict
     (
@@ -164,12 +161,12 @@ int main(int argc, char *argv[])
 
         EdgeMap<label> edgeRegionMap;
         wordList patchNames(1, "default");
-        labelList patchSizes(1, fMesh->nEdges() - fMesh->nInternalEdges());
+        labelList patchSizes(1, fMesh().nEdges() - fMesh().nInternalEdges());
 
-        const edgeList& edges = fMesh->edges();
+        const edgeList& edges = fMesh().edges();
         forAll(edges, edgeI)
         {
-            if (!fMesh->isInternalEdge(edgeI))
+            if (!fMesh().isInternalEdge(edgeI))
             {
                 edgeRegionMap.insert(edges[edgeI], 0);
             }
@@ -216,11 +213,11 @@ int main(int argc, char *argv[])
                 poly2DMesh.patchSizes()[patchI],
                 poly2DMesh.patchStarts()[patchI],
                 patchI,
-                mesh->boundaryMesh()
+                mesh().boundaryMesh()
             );
         }
 
-        mesh->addPatches(patches);
+        mesh().addPatches(patches);
     }
     else if (surfaceFormat == POLYMESH2D)
     {
@@ -249,17 +246,17 @@ int main(int argc, char *argv[])
     extruder.setRefinement(meshMod());
 
     // Create a mesh from topo changes.
-    autoPtr<mapPolyMesh> morphMap = meshMod->changeMesh(mesh(), false);
+    autoPtr<mapPolyMesh> morphMap = meshMod().changeMesh(mesh(), false);
 
-    mesh->updateMesh(morphMap);
+    mesh().updateMesh(morphMap);
 
     {
         edgeCollapser collapser(mesh());
 
-        const edgeList& edges = mesh->edges();
-        const pointField& points = mesh->points();
+        const edgeList& edges = mesh().edges();
+        const pointField& points = mesh().points();
 
-        const boundBox& bb = mesh->bounds();
+        const boundBox& bb = mesh().bounds();
         const scalar mergeDim = 1E-4 * bb.minDim();
 
         forAll(edges, edgeI)
@@ -286,14 +283,11 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap
             = meshModCollapse.changeMesh(mesh(), false);
 
-        mesh->updateMesh(morphMap);
+        mesh().updateMesh(morphMap);
     }
 
-
-    mesh->setInstance(runTimeExtruded.constant());
-
     // Take over refinement levels and write to new time directory.
-    Pout<< "Writing extruded mesh to time = " << runTimeExtruded.timeName()
+    Pout<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
         << nl << endl;
 
     mesh().write();
