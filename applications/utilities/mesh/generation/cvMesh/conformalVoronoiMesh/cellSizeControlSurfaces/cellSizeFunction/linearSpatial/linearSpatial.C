@@ -42,11 +42,10 @@ addToRunTimeSelectionTable(cellSizeFunction, linearSpatial, dictionary);
 linearSpatial::linearSpatial
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurface& surface
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
+    cellSizeFunction(typeName, initialPointsDict, surface),
     referencePoint_(coeffsDict().lookup("referencePoint")),
     referenceCellSize_(readScalar(coeffsDict().lookup("referenceCellSize"))),
     direction_(coeffsDict().lookup("direction")),

@@ -25,8 +25,8 @@ Class
     Foam::extrude2DMesh
 
 Description
-    Given 2D mesh insert all the topology changes to extrude. Does not work
-    in parallel
+    Given a 2D mesh insert all the topology changes to extrude. Does not work
+    in parallel.
 
 SourceFiles
     extrude2DMesh.C
@@ -36,9 +36,12 @@ SourceFiles
 #ifndef extrude2DMesh_H
 #define extrude2DMesh_H
 
+#include "typeInfo.H"
 #include "label.H"
 #include "scalar.H"
-#include "typeInfo.H"
+#include "labelList.H"
+#include "dictionary.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +53,7 @@ class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
 class mapDistributePolyMesh;
+class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class extrude2DMesh Declaration
@@ -60,8 +64,34 @@ class extrude2DMesh
     // Private data
 
         //- Reference to 2D mesh
-        const polyMesh& mesh_;
+        polyMesh& mesh_;
 
+        const dictionary dict_;
+
+        //const dictionary patchDict_;
+
+        const extrudeModel& model_;
+
+        const word modelType_;
+
+        const word patchType_;
+
+        label frontPatchI_;
+        label backPatchI_;
+
+    // Private Member Functions
+
+        //- Check the mesh is 2D
+        void check2D() const;
+
+        //- Find extrusion direction
+        //void findExtrudeDirection();
+
+        //- Disallow default bitwise copy construct
+        extrude2DMesh(const extrude2DMesh&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const extrude2DMesh&);
 
 public:
 
@@ -70,21 +100,25 @@ public:
 
 
     // Constructors
+        extrude2DMesh
+        (
+            polyMesh&,
+            const dictionary& dict,
+            const extrudeModel& model
+        );
 
-        //- Construct from mesh
-        extrude2DMesh(const polyMesh&);
+
+    //- Destructor
+    ~extrude2DMesh();
 
 
     // Member Functions
 
+        //- Add front and back patches
+        void addFrontBackPatches();
+
         //- Play commands into polyTopoChange to extrude mesh.
-        void setRefinement
-        (
-            const direction extrudeDir,
-            const scalar thickness,
-            const label frontPatchI,
-            polyTopoChange&
-        ) const;
+        void setRefinement(polyTopoChange&);
 
         //- Force recalculation of locally stored data on topological change
         void updateMesh(const mapPolyMesh&)
@@ -93,6 +127,17 @@ public:
         //- Force recalculation of locally stored data for mesh distribution
         void distribute(const mapDistributePolyMesh&)
         {}
+
+        label frontPatchI() const
+        {
+            return frontPatchI_;
+        }
+
+        label backPatchI() const
+        {
+            return backPatchI_;
+        }
+
 };
 
 

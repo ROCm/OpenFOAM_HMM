@@ -41,10 +41,10 @@ addToRunTimeSelectionTable(relaxationModel, rampHoldFall, dictionary);
 rampHoldFall::rampHoldFall
 (
     const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const Time& runTime
 )
 :
-    relaxationModel(typeName, relaxationDict, cvMesh),
+    relaxationModel(typeName, relaxationDict, runTime),
     rampStartRelaxation_(readScalar(coeffDict().lookup("rampStartRelaxation"))),
     holdRelaxation_(readScalar(coeffDict().lookup("holdRelaxation"))),
     fallEndRelaxation_(readScalar(coeffDict().lookup("fallEndRelaxation"))),
@@ -62,10 +62,10 @@ rampHoldFall::rampHoldFall
 
 scalar rampHoldFall::relaxation()
 {
-    scalar t = cvMesh_.time().timeOutputValue();
+    scalar t = runTime_.time().timeOutputValue();
 
-    scalar tStart = cvMesh_.time().startTime().value();
-    scalar tEnd = cvMesh_.time().endTime().value();
+    scalar tStart = runTime_.time().startTime().value();
+    scalar tEnd = runTime_.time().endTime().value();
     scalar tSpan = tEnd - tStart;
 
     if (tSpan < VSMALL)

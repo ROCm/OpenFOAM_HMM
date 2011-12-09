@@ -88,7 +88,7 @@ public:
         rampHoldFall
         (
             const dictionary& relaxationDict,
-            const conformalVoronoiMesh& cvMesh
+            const Time& runTime
         );
 
 

@@ -509,7 +509,6 @@ void Foam::createShellMesh::setRefinement
         }
     }
 
-
     // Introduce original points
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -526,12 +525,11 @@ void Foam::createShellMesh::setRefinement
         );
         pointToPointMap.append(pointI);
 
-        //Pout<< "Added bottom point " << addedPointI
-        //    << " at " << patch_.localPoints()[pointI]
-        //    << "  from point " << pointI
-        //    << endl;
+//        Pout<< "Added bottom point " << pointToPointMap[pointI]
+//            << " at " << patch_.localPoints()[pointI]
+//            << "  from point " << pointI
+//            << endl;
     }
-
 
     // Introduce new points (one for every region)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -543,6 +541,7 @@ void Foam::createShellMesh::setRefinement
 
         point pt = patch_.localPoints()[pointI];
         point disp = firstLayerDisp[regionI];
+
         for (label layerI = 0; layerI < nLayers; layerI++)
         {
             pt += disp;
@@ -676,7 +675,7 @@ void Foam::createShellMesh::setRefinement
             {
                 FatalErrorIn("createShellMesh::setRefinement(..)")
                     << "external/feature edge:" << edgeI
-                    << " has " << eFaces.size() << " connected extruded faces "
+                    << " has " << eFaces.size() << " connected extruded faces"
                     << " but only " << ePatches.size()
                     << " boundary faces defined." << exit(FatalError);
             }
