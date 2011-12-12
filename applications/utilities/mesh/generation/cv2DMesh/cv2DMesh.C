@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2007-2011 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,6 @@ Description
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -62,9 +61,23 @@ int main(int argc, char *argv[])
 
     // Read control dictionary
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    dictionary controlDict(IFstream("system/" + args.executable() + "Dict")());
-    dictionary shortEdgeFilterDict(controlDict.subDict("shortEdgeFilter"));
-    dictionary extrusionDict(controlDict.subDict("extrusion"));
+    IOdictionary controlDict
+    (
+        IOobject
+        (
+            args.executable() + "Dict",
+            runTime.system(),
+            runTime,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    );
+
+    const dictionary& shortEdgeFilterDict
+    (
+        controlDict.subDict("shortEdgeFilter")
+    );
+    const dictionary& extrusionDict(controlDict.subDict("extrusion"));
 
     Switch extrude(extrusionDict.lookup("extrude"));
     const bool overwrite = args.optionFound("overwrite");
@@ -97,17 +110,16 @@ int main(int argc, char *argv[])
 
     while (runTime.loop())
     {
-        Info<< nl << "Time = " << runTime.timeName() << endl;
-
-        Info<< "Relaxation = " << relax->relaxation() << endl;
+        Info<< nl << "Time = " << runTime.timeName() << nl
+            << "Relaxation = " << relax->relaxation() << endl;
 
         mesh.newPoints(relax->relaxation());
     }
 
     mesh.write();
 
-    Info<< "Finished Delaunay in = "
-        << runTime.cpuTimeIncrement() << " s." << endl;
+    Info<< "Finished Delaunay in = " << runTime.cpuTimeIncrement() << " s."
+        << endl;
 
     Info<< "Begin filtering short edges:" << endl;
     shortEdgeFilter2D sef(mesh, shortEdgeFilterDict);
@@ -120,8 +132,8 @@ int main(int argc, char *argv[])
     Info<< "Write .obj file of the 2D mesh: MeshedSurface.obj" << endl;
     sef.fMesh().write("MeshedSurface.obj");
 
-    Info<< "Finished filtering in = "
-        << runTime.cpuTimeIncrement() << " s." << endl;
+    Info<< "Finished filtering in = " << runTime.cpuTimeIncrement() << " s."
+        << endl;
 
     Info<< "Begin constructing a polyMesh:" << endl;
 
