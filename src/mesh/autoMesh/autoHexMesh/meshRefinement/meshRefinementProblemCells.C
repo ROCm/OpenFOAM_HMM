@@ -31,7 +31,6 @@ License
 #include "pointSet.H"
 #include "faceSet.H"
 #include "indirectPrimitivePatch.H"
-#include "OFstream.H"
 #include "cellSet.H"
 #include "searchableSurfaces.H"
 #include "polyMeshGeometry.H"

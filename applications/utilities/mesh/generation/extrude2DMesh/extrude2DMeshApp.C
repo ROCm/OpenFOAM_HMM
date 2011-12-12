@@ -28,13 +28,6 @@ Description
     Takes 2D mesh (all faces 2 points only, no front and back faces) and
     creates a 3D mesh by extruding with specified thickness.
 
-Usage
-
-    - extrude2DMesh thickness
-
-    \param thickness \n
-    Thickness (in metre) of slab.
-
 Note
     Not sure about the walking of the faces to create the front and back faces.
 
@@ -43,155 +36,261 @@ Note
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "polyTopoChange.H"
 #include "extrude2DMesh.H"
-#include "emptyPolyPatch.H"
+#include "extrudeModel.H"
+#include "polyTopoChange.H"
+#include "MeshedSurface.H"
+#include "edgeCollapser.H"
+#include "addPatchCellLayer.H"
+#include "patchToPoly2DMesh.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+enum ExtrudeMode
+{
+    POLYMESH2D,
+    MESHEDSURFACE
+};
+
+namespace Foam
+{
+    template<>
+    const char* NamedEnum<ExtrudeMode, 2>::names[] =
+    {
+        "polyMesh2D",
+        "MeshedSurface"
+    };
+}
+
+static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
+
+
+//pointField moveInitialPoints
+//(
+//    primitiveFacePatch& fMesh,
+//    const extrudeModel& model
+//)
+//{
+//    pointField layer0Points(fMesh.nPoints());
+//    pointField layer1Points(fMesh.nPoints());
+//    pointField displacement(fMesh.nPoints());
+
+//    forAll(layer0Points, pointI)
+//    {
+//        const labelList& meshPoints = fMesh.meshPoints();
+//        label meshPointI = meshPoints[pointI];
+
+//        layer0Points[meshPointI] = model
+//        (
+//            fMesh.points()[meshPointI],
+//            fMesh.pointNormals()[pointI],
+//            0
+//        );
+
+//        layer1Points[meshPointI] = model
+//        (
+//            fMesh.points()[meshPointI],
+//            fMesh.pointNormals()[pointI],
+//            1
+//        );
+
+//        displacement[pointI] =
+//            layer1Points[meshPointI]
+//          - layer0Points[meshPointI];
+//    }
+
+//    fMesh.movePoints(layer0Points);
+
+//    return displacement;
+//}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
-#   include "addOverwriteOption.H"
-    argList::validArgs.append("thickness");
+    argList::validArgs.append("surfaceFormat");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-    runTime.functionObjects().off();
-#   include "createPolyMesh.H"
-    const word oldInstance = mesh.pointsInstance();
+    #include "setRootCase.H"
 
-    const scalar thickness = args.argRead<scalar>(1);
-    const bool overwrite   = args.optionFound("overwrite");
+    Info<< "Create time\n" << endl;
 
+    Time runTimeExtruded
+    (
+        Time::controlDictName,
+        args.rootPath(),
+        args.caseName()
+    );
 
-    // Check that mesh is 2D
-    // ~~~~~~~~~~~~~~~~~~~~~
+    runTimeExtruded.functionObjects().off();
 
-    const faceList& faces = mesh.faces();
-    forAll(faces, faceI)
+    const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
+
+    Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat]
+        << " at time " << runTimeExtruded.timeName() << endl;
+
+    IOdictionary extrude2DMeshDict
+    (
+        IOobject
+        (
+            "extrude2DMeshDict",
+            runTimeExtruded.system(),
+            runTimeExtruded,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    // Point generator
+    autoPtr<extrudeModel> model(extrudeModel::New(extrude2DMeshDict));
+
+    autoPtr<MeshedSurface<face> > fMesh;
+
+    autoPtr<polyMesh> mesh;
+
+    autoPtr<polyTopoChange> meshMod;
+
+    labelListList extrudeEdgePatches;
+
+    if (surfaceFormat == MESHEDSURFACE)
     {
-        if (faces[faceI].size() != 2)
+        fMesh.set(new MeshedSurface<face>("MeshedSurface.obj"));
+
+        EdgeMap<label> edgeRegionMap;
+        wordList patchNames(1, "default");
+        labelList patchSizes(1, fMesh().nEdges() - fMesh().nInternalEdges());
+
+        const edgeList& edges = fMesh().edges();
+        forAll(edges, edgeI)
         {
-            FatalErrorIn(args.executable())
-                << "Face " << faceI << " size " << faces[faceI].size()
-                << " is not of size 2 so mesh is not proper two-dimensional."
-                << exit(FatalError);
+            if (!fMesh().isInternalEdge(edgeI))
+            {
+                edgeRegionMap.insert(edges[edgeI], 0);
+            }
         }
-    }
 
+        patchToPoly2DMesh poly2DMesh
+        (
+            fMesh(),
+            patchNames,
+            patchSizes,
+            edgeRegionMap
+        );
 
-    // Find extrude direction
-    // ~~~~~~~~~~~~~~~~~~~~~~
+        poly2DMesh.createMesh();
 
-    scalar minRange = GREAT;
-    direction extrudeDir = 4;   //illegal value.
+        mesh.set
+        (
+            new polyMesh
+            (
+                IOobject
+                (
+                    polyMesh::defaultRegion,
+                    runTimeExtruded.constant(),
+                    runTimeExtruded,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                xferMove(poly2DMesh.points()),
+                xferMove(poly2DMesh.faces()),
+                xferMove(poly2DMesh.owner()),
+                xferMove(poly2DMesh.neighbour())
+            )
+        );
 
-    for (direction dir = 0; dir < 3; dir++)
-    {
-        scalarField cmpts(mesh.points().component(dir));
-
-        scalar range = max(cmpts)-min(cmpts);
-
-        Info<< "Direction:" << dir << " range:" << range << endl;
-
-        if (range < minRange)
-        {
-            minRange = range;
-            extrudeDir = dir;
-        }
-    }
-
-    Info<< "Extruding in direction " << extrudeDir
-        << " with thickness " << thickness << nl
-        << endl;
-
-
-
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-
-    // Add front and back patch
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    label frontPatchI = patches.findPatchID("frontAndBack");
-
-    if (frontPatchI == -1)
-    {
-        // Add patch.
-        List<polyPatch*> newPatches(patches.size()+1);
+        Info<< "Constructing patches." << endl;
+        List<polyPatch*> patches(poly2DMesh.patchNames().size());
 
         forAll(patches, patchI)
         {
-            const polyPatch& pp = patches[patchI];
-
-            newPatches[patchI] = pp.clone
+            patches[patchI] = new polyPatch
             (
-                patches,
-                newPatches.size(),
-                pp.size(),
-                pp.start()
-            ).ptr();
+                poly2DMesh.patchNames()[patchI],
+                poly2DMesh.patchSizes()[patchI],
+                poly2DMesh.patchStarts()[patchI],
+                patchI,
+                mesh().boundaryMesh()
+            );
         }
 
-        frontPatchI = patches.size();
-
-        newPatches[frontPatchI] = new emptyPolyPatch
-        (
-            "frontAndBack",
-            0,
-            mesh.nFaces(),
-            frontPatchI,
-            patches
-        );
-
-        Info<< "Adding empty patch " << newPatches[frontPatchI]->name()
-            << " at index " << frontPatchI
-            << " for front and back faces." << nl << endl;
-
-        mesh.removeBoundary();
-        mesh.addPatches(newPatches);
+        mesh().addPatches(patches);
     }
-
-
-
-    // Topo changes container. Initialise with number of patches.
-    polyTopoChange meshMod(mesh.boundaryMesh().size());
+    else if (surfaceFormat == POLYMESH2D)
+    {
+        mesh.set
+        (
+            new polyMesh
+            (
+                Foam::IOobject
+                (
+                    Foam::polyMesh::defaultRegion,
+                    runTimeExtruded.timeName(),
+                    runTimeExtruded,
+                    Foam::IOobject::MUST_READ
+                )
+            )
+        );
+    }
 
     // Engine to extrude mesh
-    extrude2DMesh extruder(mesh);
+    extrude2DMesh extruder(mesh(), extrude2DMeshDict, model());
 
-    // Insert changes into meshMod
-    extruder.setRefinement
-    (
-        extrudeDir,
-        thickness,
-        frontPatchI,
-        meshMod
-    );
+    extruder.addFrontBackPatches();
+
+    meshMod.set(new polyTopoChange(mesh().boundaryMesh().size()));
+
+    extruder.setRefinement(meshMod());
 
     // Create a mesh from topo changes.
-    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
+    autoPtr<mapPolyMesh> morphMap = meshMod().changeMesh(mesh(), false);
 
-    mesh.updateMesh(morphMap);
+    mesh().updateMesh(morphMap);
 
-    if (!overwrite)
     {
-        runTime++;
-    }
-    else
-    {
-        mesh.setInstance(oldInstance);
+        edgeCollapser collapser(mesh());
+
+        const edgeList& edges = mesh().edges();
+        const pointField& points = mesh().points();
+
+        const boundBox& bb = mesh().bounds();
+        const scalar mergeDim = 1E-4 * bb.minDim();
+
+        forAll(edges, edgeI)
+        {
+            const edge& e = edges[edgeI];
+
+            scalar d = e.mag(points);
+
+            if (d < mergeDim)
+            {
+                Info<< "Merging edge " << e << " since length " << d
+                    << " << " << mergeDim << nl;
+
+                // Collapse edge to e[0]
+                collapser.collapseEdge(edgeI, e[0]);
+            }
+        }
+
+        polyTopoChange meshModCollapse(mesh());
+
+        collapser.setRefinement(meshModCollapse);
+
+        // Create a mesh from topo changes.
+        autoPtr<mapPolyMesh> morphMap
+            = meshModCollapse.changeMesh(mesh(), false);
+
+        mesh().updateMesh(morphMap);
     }
 
     // Take over refinement levels and write to new time directory.
-    Pout<< "Writing extruded mesh to time " << runTime.timeName() << nl
-        << endl;
+    Pout<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
+        << nl << endl;
 
-    mesh.write();
+    mesh().write();
 
     Pout<< "End\n" << endl;
 

@@ -49,6 +49,7 @@ Note
 #include "triSurface.H"
 #include "OFstream.H"
 #include "OSspecific.H"
+#include "Time.H"
 
 using namespace Foam;
 
@@ -83,8 +84,24 @@ int main(int argc, char *argv[])
         "factor",
         "geometry scaling factor - default is 1"
     );
+    argList::addOption
+    (
+        "writePrecision",
+        "label",
+        "write to output with the specified precision"
+    );
 
     argList args(argc, argv);
+
+    if (args.optionFound("writePrecision"))
+    {
+        label writePrecision = args.optionRead<label>("writePrecision");
+
+        IOstream::defaultPrecision(writePrecision);
+        Sout.precision(writePrecision);
+
+        Info<< "Output write precision set to " << writePrecision << endl;
+    }
 
     const fileName importName = args[1];
     const fileName exportName = args[2];

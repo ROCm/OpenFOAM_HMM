@@ -57,15 +57,6 @@ protected:
         label nProcessors_;
 
 
-        //- Helper: determine (global) cellCells from mesh agglomeration.
-        static void calcCellCells
-        (
-            const polyMesh& mesh,
-            const labelList& agglom,
-            const label nCoarse,
-            CompactListList<label>& cellCells
-        );
-
 private:
 
     // Private Member Functions
@@ -222,6 +213,24 @@ public:
             (
                 const labelListList& globalCellCells,
                 const pointField& cc
+            );
+
+
+        // Other
+
+            //- Helper: determine (local or global) cellCells from mesh
+            //  agglomeration.
+            //  local  : connections are in local indices. Coupled across
+            //           cyclics but not processor patches.
+            //  global : connections are in global indices. Coupled across
+            //            cyclics and processor patches.
+            static void calcCellCells
+            (
+                const polyMesh& mesh,
+                const labelList& agglom,
+                const label nCoarse,
+                const bool global,
+                CompactListList<label>& cellCells
             );
 
 };

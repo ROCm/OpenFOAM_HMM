@@ -383,7 +383,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
 )
 {
     CompactListList<label> cellCells;
-    calcCellCells(mesh, identity(cc.size()), cc.size(), cellCells);
+    calcCellCells(mesh, identity(cc.size()), cc.size(), true, cellCells);
 
     labelField finalDecomp(cc.size(), 0);
     labelList cellMap(identity(cc.size()));

@@ -26,6 +26,7 @@ Description
     matrix is reduced. The algorithm uses a simple search through the
     neighbour list
 
+    See http://en.wikipedia.org/wiki/Cuthill-McKee_algorithm
 
 \*---------------------------------------------------------------------------*/
 

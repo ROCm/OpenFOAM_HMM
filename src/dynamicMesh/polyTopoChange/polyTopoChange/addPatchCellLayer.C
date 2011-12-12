@@ -34,7 +34,6 @@ License
 #include "polyModifyFace.H"
 #include "polyAddCell.H"
 #include "globalIndex.H"
-#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

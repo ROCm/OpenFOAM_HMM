@@ -45,12 +45,10 @@ cellSizeFunction::cellSizeFunction
 (
     const word& type,
     const dictionary& cellSizeFunctionDict,
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurface& surface
 )
 :
     dictionary(cellSizeFunctionDict),
-    cvMesh_(cvMesh),
     surface_(surface),
     coeffsDict_(subDict(type + "Coeffs")),
     sideMode_(),
@@ -99,7 +97,6 @@ cellSizeFunction::cellSizeFunction
 autoPtr<cellSizeFunction> cellSizeFunction::New
 (
     const dictionary& cellSizeFunctionDict,
-    const conformalVoronoiMesh& cvMesh,
     const searchableSurface& surface
 )
 {
@@ -130,7 +127,7 @@ autoPtr<cellSizeFunction> cellSizeFunction::New
 
     return autoPtr<cellSizeFunction>
     (
-        cstrIter()(cellSizeFunctionDict, cvMesh, surface)
+        cstrIter()(cellSizeFunctionDict, surface)
     );
 }
 

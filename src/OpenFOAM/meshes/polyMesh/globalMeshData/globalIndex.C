@@ -27,14 +27,22 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::globalIndex::globalIndex(const label localSize, const int tag)
+Foam::globalIndex::globalIndex
+(
+    const label localSize,
+    const int tag,
+    const bool parallel
+)
 :
     offsets_(Pstream::nProcs()+1)
 {
-    labelList localSizes(Pstream::nProcs());
+    labelList localSizes(Pstream::nProcs(), 0);
     localSizes[Pstream::myProcNo()] = localSize;
-    Pstream::gatherList(localSizes, tag);
-    Pstream::scatterList(localSizes, tag);
+    if (parallel)
+    {
+        Pstream::gatherList(localSizes, tag);
+        Pstream::scatterList(localSizes, tag);
+    }
 
     label offset = 0;
     offsets_[0] = 0;

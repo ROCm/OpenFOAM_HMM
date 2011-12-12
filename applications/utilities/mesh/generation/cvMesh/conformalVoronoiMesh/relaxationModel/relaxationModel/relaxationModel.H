@@ -37,7 +37,7 @@ SourceFiles
 #define relaxationModel_H
 
 #include "point.H"
-#include "conformalVoronoiMesh.H"
+#include "Time.H"
 #include "dictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -61,7 +61,7 @@ protected:
     // Protected data
 
         //- Reference to the conformalVoronoiMesh holding this cvControls object
-        const conformalVoronoiMesh& cvMesh_;
+        const Time& runTime_;
 
         //- Method coeffs dictionary
         dictionary coeffDict_;
@@ -92,9 +92,9 @@ public:
             dictionary,
             (
                 const dictionary& relaxationDict,
-                const conformalVoronoiMesh& cvMesh
+                const Time& runTime
             ),
-            (relaxationDict, cvMesh)
+            (relaxationDict, runTime)
         );
 
 
@@ -105,7 +105,7 @@ public:
         (
             const word& type,
             const dictionary& relaxationDict,
-            const conformalVoronoiMesh& cvMesh
+            const Time& runTime
         );
 
 
@@ -115,7 +115,7 @@ public:
         static autoPtr<relaxationModel> New
         (
             const dictionary& relaxationDict,
-            const conformalVoronoiMesh& cvMesh
+            const Time& runTime
         );
 
 

@@ -28,6 +28,9 @@ Description
     Renumbers the cell list in order to reduce the bandwidth, reading and
     renumbering all fields from all the time directories.
 
+    By default uses bandCompression (CuthillMcKee) but will
+    read system/renumberMeshDict if present and use the method from there.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -37,14 +40,50 @@ Description
 #include "ReadFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "bandCompression.H"
-#include "faceSet.H"
 #include "SortableList.H"
 #include "decompositionMethod.H"
-#include "fvMeshSubset.H"
+#include "renumberMethod.H"
 #include "zeroGradientFvPatchFields.H"
+#include "CuthillMcKeeRenumber.H"
 
 using namespace Foam;
+
+
+// Create named field from labelList for postprocessing
+tmp<volScalarField> createScalarField
+(
+    const fvMesh& mesh,
+    const word& name,
+    const labelList& elems
+)
+{
+    tmp<volScalarField> tfld
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                name,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, 0),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
+    volScalarField& fld = tfld();
+
+    forAll(fld, cellI)
+    {
+       fld[cellI] = elems[cellI];
+    }
+
+    return tfld;
+}
 
 
 // Calculate band of matrix
@@ -65,56 +104,111 @@ label getBand(const labelList& owner, const labelList& neighbour)
 }
 
 
-// Return new to old cell numbering
-labelList regionBandCompression
+// Determine upper-triangular face order
+labelList getFaceOrder
 (
-    const fvMesh& mesh,
-    const labelList& cellToRegion
+    const primitiveMesh& mesh,
+    const labelList& cellOrder      // new to old cell
 )
 {
-    Pout<< "Determining cell order:" << endl;
+    labelList reverseCellOrder(invert(cellOrder.size(), cellOrder));
 
-    labelList cellOrder(cellToRegion.size());
+    labelList oldToNewFace(mesh.nFaces(), -1);
 
-    label nRegions = max(cellToRegion)+1;
+    label newFaceI = 0;
 
-    labelListList regionToCells(invertOneToMany(nRegions, cellToRegion));
+    labelList nbr;
+    labelList order;
 
-    label cellI = 0;
-
-    forAll(regionToCells, regionI)
+    forAll(cellOrder, newCellI)
     {
-        Pout<< "    region " << regionI << " starts at " << cellI << endl;
+        label oldCellI = cellOrder[newCellI];
 
-        // Per region do a reordering.
-        fvMeshSubset subsetter(mesh);
-        subsetter.setLargeCellSubset(cellToRegion, regionI);
-        const fvMesh& subMesh = subsetter.subMesh();
-        labelList subCellOrder(bandCompression(subMesh.cellCells()));
+        const cell& cFaces = mesh.cells()[oldCellI];
 
-        const labelList& cellMap = subsetter.cellMap();
+        // Neighbouring cells
+        nbr.setSize(cFaces.size());
 
-        forAll(subCellOrder, i)
+        forAll(cFaces, i)
         {
-            cellOrder[cellI++] = cellMap[subCellOrder[i]];
+            label faceI = cFaces[i];
+
+            if (mesh.isInternalFace(faceI))
+            {
+                // Internal face. Get cell on other side.
+                label nbrCellI = reverseCellOrder[mesh.faceNeighbour()[faceI]];
+                if (nbrCellI == newCellI)
+                {
+                    nbrCellI = reverseCellOrder[mesh.faceOwner()[faceI]];
+                }
+
+                if (newCellI < nbrCellI)
+                {
+                    // CellI is master
+                    nbr[i] = nbrCellI;
+                }
+                else
+                {
+                    // nbrCell is master. Let it handle this face.
+                    nbr[i] = -1;
+                }
+            }
+            else
+            {
+                // External face. Do later.
+                nbr[i] = -1;
+            }
+        }
+
+        order.setSize(nbr.size());
+        sortedOrder(nbr, order);
+
+        forAll(order, i)
+        {
+            label index = order[i];
+            if (nbr[index] != -1)
+            {
+                oldToNewFace[cFaces[index]] = newFaceI++;
+            }
         }
     }
-    Pout<< endl;
 
-    return cellOrder;
+    // Leave patch faces intact.
+    for (label faceI = newFaceI; faceI < mesh.nFaces(); faceI++)
+    {
+        oldToNewFace[faceI] = faceI;
+    }
+
+
+    // Check done all faces.
+    forAll(oldToNewFace, faceI)
+    {
+        if (oldToNewFace[faceI] == -1)
+        {
+            FatalErrorIn
+            (
+                "getFaceOrder"
+                "(const primitiveMesh&, const labelList&, const labelList&)"
+            )   << "Did not determine new position"
+                << " for face " << faceI
+                << abort(FatalError);
+        }
+    }
+
+    return invert(mesh.nFaces(), oldToNewFace);
 }
 
 
 // Determine face order such that inside region faces are sorted
 // upper-triangular but inbetween region faces are handled like boundary faces.
-labelList regionFaceOrder
+labelList getRegionFaceOrder
 (
     const primitiveMesh& mesh,
     const labelList& cellOrder,     // new to old cell
     const labelList& cellToRegion   // old cell to region
 )
 {
-    Pout<< "Determining face order:" << endl;
+    //Pout<< "Determining face order:" << endl;
 
     labelList reverseCellOrder(invert(cellOrder.size(), cellOrder));
 
@@ -131,8 +225,8 @@ labelList regionFaceOrder
         if (cellToRegion[oldCellI] != prevRegion)
         {
             prevRegion = cellToRegion[oldCellI];
-            Pout<< "    region " << prevRegion << " internal faces start at "
-                << newFaceI << endl;
+            //Pout<< "    region " << prevRegion << " internal faces start at "
+            //    << newFaceI << endl;
         }
 
         const cell& cFaces = mesh.cells()[oldCellI];
@@ -219,9 +313,9 @@ labelList regionFaceOrder
 
             if (prevKey != key)
             {
-                Pout<< "    faces inbetween region " << key/nRegions
-                    << " and " << key%nRegions
-                    << " start at " << newFaceI << endl;
+                //Pout<< "    faces inbetween region " << key/nRegions
+                //    << " and " << key%nRegions
+                //    << " start at " << newFaceI << endl;
                 prevKey = key;
             }
 
@@ -243,14 +337,14 @@ labelList regionFaceOrder
         {
             FatalErrorIn
             (
-                "polyDualMesh::getFaceOrder"
-                "(const labelList&, const labelList&, const label) const"
+                "getRegionFaceOrder"
+                "(const primitveMesh&, const labelList&, const labelList&)"
             )   << "Did not determine new position"
                 << " for face " << faceI
                 << abort(FatalError);
         }
     }
-    Pout<< endl;
+    //Pout<< endl;
 
     return invert(mesh.nFaces(), oldToNewFace);
 }
@@ -365,10 +459,11 @@ autoPtr<mapPolyMesh> reorderMesh
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption
+    argList::addOption
     (
-        "blockOrder",
-        "order cells into regions (using decomposition)"
+        "blockSize",
+        "block size",
+        "order cells into blocks (using decomposition) before ordering"
     );
     argList::addBoolOption
     (
@@ -400,12 +495,23 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const bool blockOrder = args.optionFound("blockOrder");
-    if (blockOrder)
+    label blockSize = 0;
+    args.optionReadIfPresent("blockSize", blockSize, 0);
+
+    if (blockSize > 0)
     {
-        Info<< "Ordering cells into regions (using decomposition);"
+        Info<< "Ordering cells into regions of size " << blockSize
+            << " (using decomposition);"
             << " ordering faces into region-internal and region-external." << nl
             << endl;
+
+        if (blockSize < 0 || blockSize >= mesh.nCells())
+        {
+            FatalErrorIn(args.executable())
+                << "Block size " << blockSize << " should be positive integer"
+                << " and less than the number of cells in the mesh."
+                << exit(FatalError);
+        }
     }
 
     const bool orderPoints = args.optionFound("orderPoints");
@@ -430,6 +536,37 @@ int main(int argc, char *argv[])
     Info<< "Mesh size: " << returnReduce(mesh.nCells(), sumOp<label>()) << nl
         << "Band before renumbering: "
         << returnReduce(band, maxOp<label>()) << nl << endl;
+
+
+    // Construct renumberMethod
+    IOobject io
+    (
+        "renumberMeshDict",
+        runTime.system(),
+        mesh,
+        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::NO_WRITE
+    );
+
+    autoPtr<renumberMethod> renumberPtr;
+
+    if (io.headerOk())
+    {
+        Info<< "Detected local " << runTime.system()/io.name() << "." << nl
+            << "Using this to select renumberMethod." << nl << endl;
+        renumberPtr = renumberMethod::New(IOdictionary(io));
+    }
+    else
+    {
+        Info<< "No local " << runTime.system()/io.name()
+            << " dictionary found. Using default renumberMethod." << nl
+            << endl;
+        dictionary renumberDict;
+        renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
+    }
+
+    Info<< "Selecting renumberMethod " << renumberPtr().type() << nl << endl;
+
 
 
     // Read parallel reconstruct maps
@@ -521,13 +658,20 @@ int main(int argc, char *argv[])
     PtrList<surfaceTensorField> stFlds;
     ReadFields(mesh, objects, stFlds);
 
+    Info<< endl;
 
-    autoPtr<mapPolyMesh> map;
+    // From renumbering:
+    // - from new cell/face back to original cell/face
+    labelList cellOrder;
+    labelList faceOrder;
 
-    if (blockOrder)
+    if (blockSize > 0)
     {
         // Renumbering in two phases. Should be done in one so mapping of
         // fields is done correctly!
+
+        label nBlocks = mesh.nCells() / blockSize;
+        Info<< "nBlocks = " << nBlocks << endl;
 
         // Read decomposePar dictionary
         IOdictionary decomposeDict
@@ -541,6 +685,8 @@ int main(int argc, char *argv[])
                 IOobject::NO_WRITE
             )
         );
+        decomposeDict.set("numberOfSubdomains", nBlocks);
+
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
             decomposeDict
@@ -556,79 +702,98 @@ int main(int argc, char *argv[])
         );
 
         // For debugging: write out region
+        createScalarField
+        (
+            mesh,
+            "cellDist",
+            cellToRegion
+        )().write();
+
+        Info<< nl << "Written decomposition as volScalarField to "
+            << "cellDist for use in postprocessing."
+            << nl << endl;
+
+
+        // Find point per region
+        pointField regionPoints(nBlocks, vector::zero);
+        forAll(cellToRegion, cellI)
         {
-            volScalarField cellDist
-            (
-                IOobject
-                (
-                    "cellDist",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh,
-                dimensionedScalar("cellDist", dimless, 0),
-                zeroGradientFvPatchScalarField::typeName
-            );
-
-            forAll(cellToRegion, cellI)
-            {
-               cellDist[cellI] = cellToRegion[cellI];
-            }
-
-            cellDist.write();
-
-            Info<< nl << "Written decomposition as volScalarField to "
-                << cellDist.name() << " for use in postprocessing."
-                << nl << endl;
+            regionPoints[cellToRegion[cellI]] = mesh.cellCentres()[cellI];
         }
 
         // Use block based renumbering.
-        //labelList cellOrder(bandCompression(mesh.cellCells()));
-        labelList cellOrder(regionBandCompression(mesh, cellToRegion));
-
-        // Determine new to old face order with new cell numbering
-        labelList faceOrder
+        // Detemines old to new cell ordering
+        labelList reverseCellOrder = renumberPtr().renumber
         (
-            regionFaceOrder
-            (
-                mesh,
-                cellOrder,
-                cellToRegion
-            )
+            mesh,
+            cellToRegion,
+            regionPoints
         );
 
-        if (!overwrite)
-        {
-            runTime++;
-        }
+        cellOrder = invert(mesh.nCells(), reverseCellOrder);
 
-        // Change the mesh.
-        map = reorderMesh(mesh, cellOrder, faceOrder);
+        // Determine new to old face order with new cell numbering
+        faceOrder = getRegionFaceOrder
+        (
+            mesh,
+            cellOrder,
+            cellToRegion
+        );
     }
     else
     {
-        // Use built-in renumbering.
-
-        polyTopoChange meshMod(mesh);
-
-        if (!overwrite)
-        {
-            runTime++;
-        }
-
-        // Change the mesh.
-        map = meshMod.changeMesh
+        // Detemines old to new cell ordering
+        labelList reverseCellOrder = renumberPtr().renumber
         (
             mesh,
-            false,      // inflate
-            true,       // parallel sync
-            true,       // cell ordering
-            orderPoints // point ordering
+            mesh.cellCentres()
+        );
+
+        cellOrder = invert(mesh.nCells(), reverseCellOrder);
+
+        // Determine new to old face order with new cell numbering
+        faceOrder = getFaceOrder
+        (
+            mesh,
+            cellOrder      // new to old cell
         );
     }
+
+
+    if (!overwrite)
+    {
+        runTime++;
+    }
+
+
+    // Change the mesh.
+    autoPtr<mapPolyMesh> map = reorderMesh(mesh, cellOrder, faceOrder);
+
+
+    if (orderPoints)
+    {
+        polyTopoChange meshMod(mesh);
+        autoPtr<mapPolyMesh> pointOrderMap = meshMod.changeMesh
+        (
+            mesh,
+            false,      //inflate
+            true,       //syncParallel
+            false,      //orderCells
+            orderPoints //orderPoints
+        );
+        // Combine point reordering into map.
+        const_cast<labelList&>(map().pointMap()) = UIndirectList<label>
+        (
+            map().pointMap(),
+            pointOrderMap().pointMap()
+        )();
+        inplaceRenumber
+        (
+            pointOrderMap().reversePointMap(),
+            const_cast<labelList&>(map().reversePointMap())
+        );
+    }
+
 
     // Update fields
     mesh.updateMesh(map);
@@ -767,6 +932,24 @@ int main(int argc, char *argv[])
 
     if (writeMaps)
     {
+        // For debugging: write out region
+        createScalarField
+        (
+            mesh,
+            "origCellID",
+            map().cellMap()
+        )().write();
+        createScalarField
+        (
+            mesh,
+            "cellID",
+            identity(mesh.nCells())
+        )().write();
+        Info<< nl << "Written current cellID and origCellID as volScalarField"
+            << " for use in postprocessing."
+            << nl << endl;
+
+
         labelIOList
         (
             IOobject

@@ -69,7 +69,6 @@ public:
         uniform
         (
             const dictionary& initialPointsDict,
-            const conformalVoronoiMesh& cvMesh,
             const searchableSurface& surface
         );
 

@@ -32,8 +32,8 @@ SourceFiles
 #ifndef mergePoints_H
 #define mergePoints_H
 
-#include "scalarField.H"
-#include "pointField.H"
+#include "scalar.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,20 +44,38 @@ namespace Foam
                            Function mergePoints Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Sort & merge points. All points closer than/equal mergeTol get merged.
-//  Outputs the new unique points and a map from old to new. Returns
-//  true if anything merged, false otherwise.
-bool mergePoints
+//- Sorts and merges points. All points closer than/equal mergeTol get merged.
+//  Returns the number of unique points and a map from old to new.
+template<class Type>
+label mergePoints
 (
-    const UList<point>& points,
+    const UList<Type>& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    List<point>& newPoints,
-    const point& origin = point::zero
+    const Type& origin = Type::zero
+);
+
+//- Sorts and merges points. Determines new points. Returns true if anything
+//  merged (though newPoints still sorted even if not merged).
+template<class Type>
+bool mergePoints
+(
+    const UList<Type>& points,
+    const scalar mergeTol,
+    const bool verbose,
+    labelList& pointMap,
+    List<Type>& newPoints,
+    const Type& origin = Type::zero
 );
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "mergePoints.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

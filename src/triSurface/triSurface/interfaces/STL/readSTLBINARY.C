@@ -28,7 +28,8 @@ License
 #include "IFstream.H"
 #include "OSspecific.H"
 #include "gzstream.h"
-
+#include "floatVector.H"
+#include "mergePoints.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -94,40 +95,55 @@ bool Foam::triSurface::readSTLBINARY(const fileName& STLfileName)
     // Everything OK so go ahead and read the triangles.
 
     // Allocate storage for raw points
-    pointField rawPoints(3*nTris);
-
-    // Allocate storage for triangles
+    List<floatVector> STLpoints(3*nTris);
     setSize(nTris);
 
-    label rawPointI = 0;
+    label pointI = 0;
 
-    // Read the triangles
-    forAll(*this, i)
+    for (label i = 0; i < nTris; i++)
     {
         // Read an STL triangle
         STLtriangle stlTri(STLfile);
 
-        // Set the rawPoints to the vertices of the STL triangle
-        // and set the point labels of the labelledTri
-        rawPoints[rawPointI] = stlTri.a();
-        operator[](i)[0] = rawPointI++;
-
-        rawPoints[rawPointI] = stlTri.b();
-        operator[](i)[1] = rawPointI++;
-
-        rawPoints[rawPointI] = stlTri.c();
-        operator[](i)[2] = rawPointI++;
-
+        // Set the STLpoints to the vertices of the STL triangle
+        STLpoints[pointI++] = stlTri.a();
+        STLpoints[pointI++] = stlTri.b();
+        STLpoints[pointI++] = stlTri.c();
         operator[](i).region() = stlTri.region();
     }
 
-    //STLfile.close();
+    // Stitch points
+    labelList pointMap;
+    label nUniquePoints = mergePoints
+    (
+        STLpoints,
+        10*SMALL,               // merge distance
+        false,                  // verbose
+        pointMap                // old to new
+    );
 
-    // Assign coordinates
-    storedPoints().transfer(rawPoints);
+    pointField& sp = storedPoints();
 
-    // Stitch all points within SMALL meters.
-    stitchTriangles();
+    sp.setSize(nUniquePoints);
+    forAll(STLpoints, pointI)
+    {
+        const floatVector& pt = STLpoints[pointI];
+        sp[pointMap[pointI]] = vector
+        (
+            scalar(pt.x()),
+            scalar(pt.y()),
+            scalar(pt.z())
+        );
+    }
+
+    // Assign triangles
+    pointI = 0;
+    forAll(*this, i)
+    {
+        operator[](i)[0] = pointMap[pointI++];
+        operator[](i)[1] = pointMap[pointI++];
+        operator[](i)[2] = pointMap[pointI++];
+    }
 
     return true;
 }

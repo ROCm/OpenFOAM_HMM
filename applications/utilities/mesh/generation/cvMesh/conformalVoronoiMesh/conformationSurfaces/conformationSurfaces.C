@@ -30,12 +30,14 @@ License
 
 Foam::conformationSurfaces::conformationSurfaces
 (
-    const conformalVoronoiMesh& cvMesh,
+    const Time& runTime,
+    Random& rndGen,
     const searchableSurfaces& allGeometry,
     const dictionary& surfaceConformationDict
 )
 :
-    cvMesh_(cvMesh),
+    runTime_(runTime),
+    rndGen_(rndGen),
     allGeometry_(allGeometry),
     features_(),
     locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
@@ -139,9 +141,9 @@ Foam::conformationSurfaces::conformationSurfaces
                     IOobject
                     (
                         feMeshName,
-                        cvMesh_.time().constant(),
+                        runTime_.time().constant(),
                         "extendedFeatureEdgeMesh",
-                        cvMesh_.time(),
+                        runTime_.time(),
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE
                     )
@@ -211,9 +213,9 @@ Foam::conformationSurfaces::conformationSurfaces
                     IOobject
                     (
                         feMeshName,
-                        cvMesh_.time().constant(),
+                        runTime_.time().constant(),
                         "extendedFeatureEdgeMesh",
-                        cvMesh_.time(),
+                        runTime_.time(),
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE
                     )
@@ -232,7 +234,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Extend the global bounds to stop the bound box sitting on the surfaces
     // to be conformed to
-    globalBounds_ = globalBounds_.extend(cvMesh_.rndGen(), 1e-4);
+    globalBounds_ = globalBounds_.extend(rndGen_, 1e-4);
 
     // Look at all surfaces at determine whether the locationInMesh point is
     // inside or outside each, to establish a signature for the domain to be
@@ -730,7 +732,7 @@ void Foam::conformationSurfaces::findEdgeNearestByType
 
 void Foam::conformationSurfaces::writeFeatureObj(const fileName& prefix) const
 {
-    OFstream ftStr(cvMesh_.time().path()/prefix + "_allFeatures.obj");
+    OFstream ftStr(runTime_.time().path()/prefix + "_allFeatures.obj");
 
     Pout<< nl << "Writing all features to " << ftStr.name() << endl;
 

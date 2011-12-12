@@ -33,8 +33,10 @@ License
 
 #include "IFstream.H"
 #include "triSurface.H"
-#include "STLpoint.H"
+#include "floatVector.H"
 #include "OSspecific.H"
+#include "mergePoints.H"
+//#include "memInfo.H"
 
 using namespace Foam;
 
@@ -77,8 +79,8 @@ class STLLexer
         label lineNo_;
         word startError_;
 
-        DynamicList<STLpoint> STLpoints_;
-        //DynamicList<STLpoint> STLnormals_;
+        DynamicList<floatVector> STLpoints_;
+        //DynamicList<floatVector > STLnormals_;
         DynamicList<label> STLlabels_;
         HashTable<label, word> STLsolidNames_;
 
@@ -103,12 +105,12 @@ public:
             return nTriangles_;
         }
 
-        DynamicList<STLpoint>& STLpoints()
+        DynamicList<floatVector>& STLpoints()
         {
             return STLpoints_;
         }
 
-        //DynamicList<STLpoint>& STLnormals()
+        //DynamicList<floatVector>& STLnormals()
         //{
         //    return STLnormals_;
         //}
@@ -202,8 +204,8 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
     // End of read character pointer returned by strtof
     // char* endPtr;
 
-    STLpoint normal;
-    STLpoint vertex;
+    floatVector normal;
+    floatVector vertex;
     label cmpt = 0;   // component index used for reading vertex
 
     static const char* stateNames[7] =
@@ -387,16 +389,25 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
             << exit(FatalError);
     }
 
+    //memInfo memStat;
+
+    //memStat.update();
+    //Pout<< "At start:" << memStat.rss() << endl;
+
     // Create the lexer obtaining the approximate number of vertices in the STL
     // from the file size
     STLLexer lexer(&STLstream.stdStream(), Foam::fileSize(STLfileName)/400);
     while (lexer.lex() != 0)
     {}
 
-    DynamicList<STLpoint>& STLpoints = lexer.STLpoints();
+    //memStat.update();
+    //Pout<< "After lexing:" << memStat.rss() << endl;
+
+    DynamicList<floatVector>& STLpoints = lexer.STLpoints();
+    DynamicList<label>& STLlabels = lexer.STLlabels();
 
     /*
-    DynamicList<STLpoint>& STLnormals = lexer.STLnormals();
+    DynamicList<floatVector>& STLnormals = lexer.STLnormals();
 
     if (STLpoints.size() != 3*STLnormals.size())
     {
@@ -410,35 +421,51 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
     }
     */
 
-    pointField rawPoints(STLpoints.size());
+    labelList pointMap;
+    label nUniquePoints = mergePoints
+    (
+        STLpoints,
+        100*SMALL,              // merge distance
+        false,                  // verbose
+        pointMap
+    );
 
-    forAll(rawPoints, i)
-    {
-        rawPoints[i] = STLpoints[i];
-    }
+    //memStat.update();
+    //Pout<< "After merging:" << memStat.rss() << endl;
 
-    STLpoints.clear();
+
+    pointField& sp = storedPoints();
 
     setSize(lexer.nTriangles());
-    DynamicList<label>& STLlabels = lexer.STLlabels();
+    sp.setSize(nUniquePoints);
+    forAll(STLpoints, pointI)
+    {
+        const floatVector& pt = STLpoints[pointI];
+        sp[pointMap[pointI]] = vector
+        (
+            scalar(pt.x()),
+            scalar(pt.y()),
+            scalar(pt.z())
+        );
+    }
 
     // Assign triangles
-    label pointi = 0;
+    label pointI = 0;
     forAll(*this, i)
     {
-        operator[](i)[0] = pointi++;
-        operator[](i)[1] = pointi++;
-        operator[](i)[2] = pointi++;
+        operator[](i)[0] = pointMap[pointI++];
+        operator[](i)[1] = pointMap[pointI++];
+        operator[](i)[2] = pointMap[pointI++];
         operator[](i).region() = STLlabels[i];
     }
 
+    //memStat.update();
+    //Pout<< "After assigning:" << memStat.rss() << endl;
+
+
+    STLpoints.clear();
     STLlabels.clear();
 
-    // Assign coordinates
-    storedPoints().transfer(rawPoints);
-
-    // Stitch all points within SMALL meters.
-    stitchTriangles();
 
     // Convert solidNames into regionNames
     patches_.setSize(lexer.STLsolidNames().size());
@@ -456,6 +483,9 @@ bool triSurface::readSTLASCII(const fileName& STLfileName)
 
     // Fill in the missing information in the patches
     setDefaultPatches();
+
+    //memStat.update();
+    //Pout<< "After patchifying:" << memStat.rss() << endl;
 
     return true;
 }

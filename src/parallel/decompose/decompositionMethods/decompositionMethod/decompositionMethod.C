@@ -96,6 +96,7 @@ Foam::labelList Foam::decompositionMethod::decompose
         mesh,
         fineToCoarse,
         coarsePoints.size(),
+        true,                       // use global cell labels
         coarseCellCells
     );
 
@@ -158,6 +159,7 @@ void Foam::decompositionMethod::calcCellCells
     const polyMesh& mesh,
     const labelList& agglom,
     const label nCoarse,
+    const bool parallel,
     CompactListList<label>& cellCells
 )
 {
@@ -169,7 +171,7 @@ void Foam::decompositionMethod::calcCellCells
     // Create global cell numbers
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    globalIndex globalAgglom(nCoarse);
+    globalIndex globalAgglom(nCoarse, Pstream::msgType(), parallel);
 
 
     // Get agglomerate owner on other side of coupled faces
@@ -181,7 +183,7 @@ void Foam::decompositionMethod::calcCellCells
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
+        if (pp.coupled() && (parallel || !isA<processorPolyPatch>(pp)))
         {
             label faceI = pp.start();
             label bFaceI = pp.start() - mesh.nInternalFaces();
@@ -203,77 +205,6 @@ void Foam::decompositionMethod::calcCellCells
     syncTools::swapBoundaryFaceList(mesh, globalNeighbour);
 
 
-
-    //// Determine the cellCells (in agglomeration numbering) on coupled faces
-    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
-    //labelListList globalCellCells(mesh.nFaces()-mesh.nInternalFaces());
-    //
-    //// Current set of face neighbours for the current cell
-    //labelHashSet cCells;
-    //
-    //forAll(patches, patchI)
-    //{
-    //    const polyPatch& pp = patches[patchI];
-    //
-    //    if (pp.coupled())
-    //    {
-    //        label faceI = pp.start();
-    //        label bFaceI = pp.start() - mesh.nInternalFaces();
-    //
-    //        forAll(pp, i)
-    //        {
-    //            label cellI = faceOwner[faceI];
-    //            label globalCellI = globalAgglom.toGlobal(agglom[cellI]);
-    //
-    //            // First check if agglomerated across coupled patches at all
-    //            // so we don't use memory if not needed
-    //            if (globalNeighbour[bFaceI] == globalCellI)
-    //            {
-    //                cCells.clear();
-    //
-    //                const cell& cFaces = mesh.cells()[cellI];
-    //
-    //                forAll(cFaces, i)
-    //                {
-    //                    if (mesh.isInternalFace(cFaces[i]))
-    //                    {
-    //                        label otherCellI = faceOwner[cFaces[i]];
-    //                        if (otherCellI == cellI)
-    //                        {
-    //                            otherCellI = faceNeighbour[cFaces[i]];
-    //                        }
-    //
-    //                        cCells.insert
-    //                        (
-    //                            globalAgglom.toGlobal
-    //                            (
-    //                                agglom[otherCellI]
-    //                            )
-    //                        );
-    //                    }
-    //                }
-    //                globalCellCells[bFaceI] = cCells.toc();
-    //            }
-    //
-    //            bFaceI++;
-    //            faceI++;
-    //        }
-    //    }
-    //}
-    //
-    //// Get the cell on the other side of coupled patches
-    //syncTools::syncBoundaryFaceList
-    //(
-    //    mesh,
-    //    globalCellCells,
-    //    eqOp<labelList>(),
-    //    dummyTransform()
-    //);
-
-
-
-
     // Count number of faces (internal + coupled)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -293,7 +224,7 @@ void Foam::decompositionMethod::calcCellCells
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
+        if (pp.coupled() && (parallel || !isA<processorPolyPatch>(pp)))
         {
             label faceI = pp.start();
             label bFaceI = pp.start()-mesh.nInternalFaces();
@@ -302,18 +233,6 @@ void Foam::decompositionMethod::calcCellCells
             {
                 label own = agglom[faceOwner[faceI]];
 
-                //const labelList& cCells = globalCellCells[bFaceI];
-                //
-                //forAll(cCells, i)
-                //{
-                //    label globalNei = cCells[i];
-                //
-                //    // Allow only processor-local agglomeration
-                //    if (globalAgglom.isLocal(globalNei))
-                //    {
-                //        nFacesPerCell[own]++;
-                //    }
-                //}
                 label globalNei = globalNeighbour[bFaceI];
                 if
                 (
@@ -365,18 +284,6 @@ void Foam::decompositionMethod::calcCellCells
             {
                 label own = agglom[faceOwner[faceI]];
 
-                //const labelList& cCells = globalCellCells[bFaceI];
-                //
-                //forAll(cCells, i)
-                //{
-                //    label globalNei = cCells[i];
-                //
-                //    // Allow only processor-local agglomeration
-                //    if (globalAgglom.isLocal(globalNei))
-                //    {
-                //        m[offsets[own] + nFacesPerCell[own]++] = globalNei;
-                //    }
-                //}
                 label globalNei = globalNeighbour[bFaceI];
                 if
                 (

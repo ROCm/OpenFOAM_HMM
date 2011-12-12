@@ -1,11 +1,13 @@
 EXE_INC = \
     -I../extrudeModel/lnInclude \
+    -IcreateShellMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude
 
 EXE_LIBS = \
     -lextrudeModel \
+    -lcreateShellMesh \
     -lfiniteVolume \
     -lmeshTools \
     -ldynamicMesh

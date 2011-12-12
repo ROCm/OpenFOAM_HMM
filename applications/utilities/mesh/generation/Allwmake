@@ -4,12 +4,15 @@ set -x
 
 wmake blockMesh
 wmake all extrude
-wmake extrude2DMesh
+
+extrude2DMesh/Allwmake
+
 wmake snappyHexMesh
 
 if [ -d "$CGAL_ARCH_PATH" ]
 then
-    cd cvMesh && ./Allwmake
+    cvMesh/Allwmake
+    cv2DMesh/Allwmake
 fi
 
 # ----------------------------------------------------------------- end-of-file

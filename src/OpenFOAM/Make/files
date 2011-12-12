@@ -45,6 +45,7 @@ primitives/Tensor/lists/symmTensorList.C
 primitives/Tensor/lists/tensorList.C
 
 primitives/Vector/complexVector/complexVector.C
+primitives/Vector/floatVector/floatVector.C
 primitives/Vector/labelVector/labelVector.C
 primitives/Vector/vector/vector.C
 primitives/Vector/lists/vectorList.C
@@ -501,7 +502,6 @@ meshes/treeBoundBox/treeBoundBox.C
 
 meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
-$(meshTools)/mergePoints.C
 
 fields/UniformDimensionedFields/uniformDimensionedFields.C
 fields/cloud/cloud.C

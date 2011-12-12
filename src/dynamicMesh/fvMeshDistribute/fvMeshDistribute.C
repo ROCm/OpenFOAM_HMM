@@ -36,7 +36,6 @@ License
 #include "removeCells.H"
 #include "polyModifyFace.H"
 #include "polyRemovePoint.H"
-#include "mergePoints.H"
 #include "mapDistributePolyMesh.H"
 #include "surfaceFields.H"
 #include "syncTools.H"
