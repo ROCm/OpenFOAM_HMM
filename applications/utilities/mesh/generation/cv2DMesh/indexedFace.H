@@ -46,7 +46,7 @@ namespace CGAL
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Fb=CGAL::Triangulation_face_base_2<Gt> >
-class indexedFace 
+class indexedFace
 :
     public Fb
 {
@@ -78,67 +78,55 @@ public:
     };
 
 
-    indexedFace()
-    :
-        Fb(),
-        index_(CHANGED)
-    {}
+    // Constructors
 
-    indexedFace(Vertex_handle v0, Vertex_handle v1, Vertex_handle v2)
-    :
-        Fb(v0, v1, v2),
-        index_(CHANGED)
-    {}
+        inline indexedFace();
 
-    indexedFace
-    (
-        Vertex_handle v0, 
-        Vertex_handle v1,
-        Vertex_handle v2, 
-        Face_handle n0, 
-        Face_handle n1,
-        Face_handle n2
-    )
-    :
-        Fb(v0, v1, v2, n0, n1, n2),
-        index_(CHANGED)
-    {}
+        inline indexedFace
+        (
+            Vertex_handle v0,
+            Vertex_handle v1,
+            Vertex_handle v2
+        );
+
+        inline indexedFace
+        (
+            Vertex_handle v0,
+            Vertex_handle v1,
+            Vertex_handle v2,
+            Face_handle n0,
+            Face_handle n1,
+            Face_handle n2
+        );
 
 
-    void set_vertex(int i, Vertex_handle v)
-    {
-        index_ = CHANGED;
-        Fb::set_vertex(i, v);
-    }
+    // Member Functions
 
-    void set_vertices()
-    {
-        index_ = CHANGED;
-        Fb::set_vertices();
-    }
+        inline void set_vertex(int i, Vertex_handle v);
 
-    void set_vertices(Vertex_handle v0, Vertex_handle v1, Vertex_handle v2)
-    {
-        index_ = CHANGED;
-        Fb::set_vertices(v0, v1, v2);
-    }
+        inline void set_vertices();
 
+        inline void set_vertices
+        (
+            Vertex_handle v0,
+            Vertex_handle v1,
+            Vertex_handle v2
+        );
 
-    int& faceIndex()
-    {
-        return index_;
-    }
+        inline int& faceIndex();
 
-    int faceIndex() const
-    {
-        return index_;
-    }
+        inline int faceIndex() const;
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace CGAL
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "indexedFaceI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
