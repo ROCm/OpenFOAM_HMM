@@ -152,7 +152,7 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
             scalar alphaEff = pi + atan2(Uc.z(), Uc.y()) - (alphag_[i] + twist);
             if (alphaEff > pi)
             {
-	        alphaEff -= twoPi;
+                alphaEff -= twoPi;
             }
             if (alphaEff < -pi)
             {
