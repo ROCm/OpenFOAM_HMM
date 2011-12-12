@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,6 @@ class shortEdgeFilter2D
 {
     // Private data
 
-        //- Description of data_
         const CV2D& cv2Dmesh_;
 
         MeshedSurface<face> ms_;
@@ -83,11 +82,7 @@ public:
 
     // Constructors
 
-        shortEdgeFilter2D
-        (
-            const CV2D& cv2Dmesh,
-            const dictionary& dict
-        );
+        shortEdgeFilter2D(const CV2D& cv2Dmesh, const dictionary& dict);
 
 
     //- Destructor
@@ -116,12 +111,12 @@ public:
             return ms_;
         }
 
+
     // Member Functions
 
         void filter();
 
         void writeInfo(Ostream& os);
-
 };
 
 

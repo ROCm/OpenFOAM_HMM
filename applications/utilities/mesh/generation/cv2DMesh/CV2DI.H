@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2007-2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,10 +120,12 @@ inline const Foam::cv2DControls& Foam::CV2D::meshControls() const
     return controls_;
 }
 
+
 inline const Foam::point2D& Foam::CV2D::toPoint2D(const point& p) const
 {
     return reinterpret_cast<const point2D&>(p);
 }
+
 
 inline const Foam::point2DField Foam::CV2D::toPoint2D(const pointField& p) const
 {
@@ -134,6 +136,7 @@ inline const Foam::point2DField Foam::CV2D::toPoint2D(const pointField& p) const
     }
     return temp;
 }
+
 
 inline Foam::point Foam::CV2D::toPoint3D(const point2D& p) const
 {
@@ -148,6 +151,7 @@ inline Foam::CV2D::point2DFromPoint Foam::CV2D::toPoint2D(const Point& P) const
     return reinterpret_cast<point2DFromPoint>(P);
 }
 
+
 inline Foam::CV2D::PointFromPoint2D Foam::CV2D::toPoint(const point2D& p) const
 {
     return reinterpret_cast<PointFromPoint2D>(p);
@@ -159,6 +163,7 @@ inline Foam::CV2D::point2DFromPoint Foam::CV2D::toPoint2D(const Point& P) const
 {
     return point2D(CGAL::to_double(P.x()), CGAL::to_double(P.y()));
 }
+
 
 inline Foam::CV2D::PointFromPoint2D Foam::CV2D::toPoint(const point2D& p) const
 {
@@ -206,6 +211,7 @@ inline bool Foam::boundaryTriangle(const CV2D::Face_handle fc)
         *fc->vertex(2)
     );
 }
+
 
 inline bool Foam::outsideTriangle(const CV2D::Face_handle fc)
 {

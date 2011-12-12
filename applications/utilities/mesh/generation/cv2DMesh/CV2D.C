@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2007-2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,9 +32,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(CV2D, 0);
-
+    defineTypeNameAndDebug(CV2D, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -67,6 +65,7 @@ void Foam::CV2D::fast_restore_Delaunay(Vertex_handle vh)
     } while (f != start);
 }
 
+
 void Foam::CV2D::external_flip(Face_handle& f, int i)
 {
     Face_handle n = f->neighbor(i);
@@ -81,6 +80,7 @@ void Foam::CV2D::external_flip(Face_handle& f, int i)
     i = n->index(f->vertex(i));
     external_flip(n, i);
 }
+
 
 bool Foam::CV2D::internal_flip(Face_handle& f, int i)
 {
