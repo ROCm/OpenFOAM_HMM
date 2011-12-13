@@ -329,6 +329,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         dt,
         cellI,
         Res,
+        Prs,
         Ts,
         mus/rhos,
         d0,
@@ -464,6 +465,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar dt,
     const label cellI,
     const scalar Re,
+    const scalar Pr,
     const scalar Ts,
     const scalar nus,
     const scalar d,
@@ -500,11 +502,14 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         dt,
         cellI,
         Re,
+        Pr,
         d,
         nus,
         T,
         Ts,
         pc_,
+        this->Tc_,
+        YComponents,
         dMassPC
     );
 

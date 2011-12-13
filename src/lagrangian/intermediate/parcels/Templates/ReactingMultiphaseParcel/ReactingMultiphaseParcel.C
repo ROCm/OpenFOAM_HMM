@@ -240,6 +240,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         dt,
         cellI,
         Res,
+        Prs,
         Ts,
         mus/rhos,
         d0,

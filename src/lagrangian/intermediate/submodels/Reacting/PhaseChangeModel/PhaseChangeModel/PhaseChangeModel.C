@@ -135,6 +135,9 @@ void Foam::PhaseChangeModel<CloudType>::calculate
     const scalar,
     const scalar,
     const scalar,
+    const scalar,
+    const scalar,
+    const scalarField&,
     scalarField&
 ) const
 {
@@ -150,6 +153,9 @@ void Foam::PhaseChangeModel<CloudType>::calculate
             "const scalar, "
             "const scalar, "
             "const scalar, "
+            "const scalar, "
+            "const scalar, "
+            "const scalarField&,"
             "scalarField&"
         ") const"
     );
