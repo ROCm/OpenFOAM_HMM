@@ -27,6 +27,8 @@ polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
 
 meshSearch/meshSearch.C
+meshSearch/meshSearchFACECENTRETETSMeshObject.C
+meshSearch/meshSearchMeshObject.C
 
 meshTools/meshTools.C
 
