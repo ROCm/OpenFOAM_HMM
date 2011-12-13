@@ -468,6 +468,9 @@ public:
             //- Mean diameter Dij
             inline scalar Dij(const label i, const label j) const;
 
+            //- Max diameter
+            inline scalar Dmax() const;
+
 
             // Fields
 

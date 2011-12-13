@@ -303,6 +303,22 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dij
 
 
 template<class CloudType>
+inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
+{
+    scalar d = -GREAT;
+    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        d = max(d, p.d());
+    }
+
+    reduce(d, maxOp<scalar>());
+
+    return d;
+}
+
+
+template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
 (
     const scalar& prc
