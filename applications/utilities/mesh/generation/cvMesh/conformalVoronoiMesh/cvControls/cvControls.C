@@ -30,11 +30,9 @@ License
 
 Foam::cvControls::cvControls
 (
-    const conformalVoronoiMesh& cvMesh,
     const dictionary& cvMeshDict
 )
 :
-    cvMesh_(cvMesh),
     cvMeshDict_(cvMeshDict)
 {
     // Surface conformation controls
@@ -59,6 +57,11 @@ Foam::cvControls::cvControls
     featureEdgeExclusionDistanceCoeff_ = readScalar
     (
         surfDict.lookup("featureEdgeExclusionDistanceCoeff")
+    );
+
+    specialiseFeaturePoints_ = Switch
+    (
+        surfDict.lookupOrDefault<Switch>("specialiseFeaturePoints", false)
     );
 
     surfaceSearchDistanceCoeff_ = readScalar

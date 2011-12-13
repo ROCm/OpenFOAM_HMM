@@ -203,10 +203,13 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
                 if (surfHit.hit())
                 {
-                    vit->setNearBoundary();
-
                     if (dualCellSurfaceAnyIntersection(vit))
                     {
+                        // This used to be just before this if statement.
+                        // Moved because a point is only near the boundary if
+                        // the dual cell intersects the surface.
+                        vit->setNearBoundary();
+
                         // meshTools::writeOBJ(Pout, vert);
                         // meshTools::writeOBJ(Pout, surfHit.hitPoint());
                         // Pout<< "l cr0 cr1" << endl;
@@ -497,8 +500,8 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 
         if (Pstream::parRun())
         {
-            Foam::point a = dE0;
-            Foam::point b = dE1;
+            Foam::point& a = dE0;
+            Foam::point& b = dE1;
 
             bool inProc = clipLineToProc(a, b);
 

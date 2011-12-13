@@ -620,6 +620,8 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     writeCellSizes(mesh);
 
+    writeCellCentres(mesh);
+
     findRemainingProtrusionSet(mesh);
 }
 
@@ -802,6 +804,34 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 
     //     ptTargetCellSize.write();
     // }
+}
+
+
+void Foam::conformalVoronoiMesh::writeCellCentres
+(
+    const fvMesh& mesh
+) const
+{
+    Info<< "Writing components of cellCentre positions to volScalarFields"
+        << " ccx, ccy, ccz in " <<  runTime_.timeName() << endl;
+
+    for (direction i=0; i<vector::nComponents; i++)
+    {
+        volScalarField cci
+        (
+            IOobject
+            (
+                "cc" + word(vector::componentNames[i]),
+                runTime_.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh.C().component(i)
+        );
+
+        cci.write();
+    }
 }
 
 

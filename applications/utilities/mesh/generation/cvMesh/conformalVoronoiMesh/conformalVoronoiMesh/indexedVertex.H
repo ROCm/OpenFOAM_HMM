@@ -33,6 +33,10 @@ Description
     An indexed form of CGAL::Triangulation_vertex_base_3<K> used to keep
     track of the Delaunay vertices in the tessellation.
 
+SourceFiles
+    indexedVertexI.H
+    indexedVertex.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef indexedVertex_H
@@ -116,267 +120,99 @@ public:
     };
 
 
-    indexedVertex()
-    :
-        Vb(),
-        index_(vtInternal),
-        type_(vtInternal),
-        alignment_(),
-        targetCellSize_(0.0)
-    {}
+    // Constructors
 
+        inline indexedVertex();
 
-    indexedVertex(const Point& p)
-    :
-        Vb(p),
-        index_(vtInternal),
-        type_(vtInternal),
-        alignment_(),
-        targetCellSize_(0.0)
-    {}
+        inline indexedVertex(const Point& p);
 
+        inline indexedVertex(const Point& p, int index, int type);
 
-    indexedVertex(const Point& p, int index, int type)
-    :
-        Vb(p),
-        index_(index),
-        type_(type),
-        alignment_(),
-        targetCellSize_(0.0)
-    {}
+        inline indexedVertex(const Point& p, Cell_handle f);
 
+        inline indexedVertex(Cell_handle f);
 
-    indexedVertex(const Point& p, Cell_handle f)
-    :
-        Vb(f, p),
-        index_(vtInternal),
-        type_(vtInternal),
-        alignment_(),
-        targetCellSize_(0.0)
-    {}
 
+    // Member Functions
 
-    indexedVertex(Cell_handle f)
-    :
-        Vb(f),
-        index_(vtInternal),
-        type_(vtInternal),
-        alignment_(),
-        targetCellSize_(0.0)
-    {}
+        inline int& index();
 
+        inline int index() const;
 
-    int& index()
-    {
-        return index_;
-    }
+        inline int& type();
 
+        inline int type() const;
 
-    int index() const
-    {
-        return index_;
-    }
+        inline Foam::tensor& alignment();
 
+        inline const Foam::tensor& alignment() const;
 
-    int& type()
-    {
-        return type_;
-    }
+        inline Foam::scalar& targetCellSize();
 
+        inline Foam::scalar targetCellSize() const;
 
-    int type() const
-    {
-        return type_;
-    }
+        inline bool uninitialised() const;
 
+        //- Is point a far-point
+        inline bool farPoint() const;
 
-    inline Foam::tensor& alignment()
-    {
-        return alignment_;
-    }
+        //- Is point internal, i.e. not on boundary
+        inline bool internalPoint() const;
 
+        //- Is point internal, i.e. not on boundary, external query.
+        inline static bool internalPoint(int type);
 
-    inline const Foam::tensor& alignment() const
-    {
-        return alignment_;
-    }
+        // is this a referred vertex
+        inline bool referred() const;
 
+        // is this a referred internal or boundary vertex
+        inline bool referredInternalOrBoundaryPoint() const;
 
-    inline Foam::scalar& targetCellSize()
-    {
-        return targetCellSize_;
-    }
+        // is this a referred external (pair slave) vertex
+        inline bool referredExternal() const;
 
+        // Is this a "real" point on this processor, i.e. is it internal or part
+        // of the boundary description, and not a "far" or "referred" point
+        inline bool real() const;
 
-    inline Foam::scalar targetCellSize() const
-    {
-        return targetCellSize_;
-    }
+        // For referred vertices, what is the original processor index
+        inline int procIndex() const;
 
+        inline static int encodeProcIndex(int procI);
 
-    inline bool uninitialised() const
-    {
-        return type_ == vtInternal && index_ == vtInternal;
-    }
+        //- Set the point to be internal
+        inline void setInternal();
 
+        //- Is point internal and near the boundary
+        inline bool nearBoundary() const;
 
-    //- Is point a far-point
-    inline bool farPoint() const
-    {
-        return type_ == vtFar;
-    }
+        //- Set the point to be near the boundary
+        inline void setNearBoundary();
 
+        //- Either master or slave of pointPair.
+        inline bool pairPoint() const;
 
-    //- Is point internal, i.e. not on boundary
-    inline bool internalPoint() const
-    {
-        return internalPoint(type_);
-    }
+        //- Master of a pointPair is the lowest numbered one.
+        inline bool ppMaster() const;
 
+        //- Master of a pointPair is the lowest numbered one, external query.
+        inline static bool ppMaster(int index, int type);
 
-    //- Is point internal, i.e. not on boundary, external query.
-    inline static bool internalPoint(int type)
-    {
-        return type <= vtInternal;
-    }
+        //- Slave of a pointPair is the highest numbered one.
+        inline bool ppSlave() const;
 
+        //- Either original internal point or master of pointPair.
+        inline bool internalOrBoundaryPoint() const;
 
-    // is this a referred vertex
-    inline bool referred() const
-    {
-        return (type_ < 0 && type_ > vtFar);
-    }
+        //- Either original internal point or master of pointPair.
+        //  External query.
+        inline static bool internalOrBoundaryPoint(int index, int type);
 
+        //- Is point near the boundary or part of the boundary definition
+        inline bool nearOrOnBoundary() const;
 
-    // is this a referred internal or boundary vertex
-    inline bool referredInternalOrBoundaryPoint() const
-    {
-        return referred() && index_ >= 0;
-    }
-
-
-    // is this a referred external (pair slave) vertex
-    inline bool referredExternal() const
-    {
-        return referred() && index_ < 0;
-    }
-
-
-    // is this a "real" point on this processor, i.e. is it internal or part of
-    // the boundary description, and not a "far" or "referred" point
-    inline bool real() const
-    {
-        return internalPoint() || pairPoint();
-    }
-
-
-    // For referred vertices, what is the original processor index
-    inline int procIndex() const
-    {
-        if (referred())
-        {
-            return -(type_ + 1);
-        }
-        else
-        {
-            return -1;
-        }
-    }
-
-
-    inline static int encodeProcIndex(int procI)
-    {
-        return -(procI + 1);
-    }
-
-
-    //- Set the point to be internal
-    inline void setInternal()
-    {
-        type_ = vtInternal;
-    }
-
-
-    //- Is point internal and near the boundary
-    inline bool nearBoundary() const
-    {
-        return type_ == vtNearBoundary;
-    }
-
-
-    //- Set the point to be near the boundary
-    inline void setNearBoundary()
-    {
-        type_ = vtNearBoundary;
-    }
-
-
-    //- Either master or slave of pointPair.
-    inline bool pairPoint() const
-    {
-        return type_ >= 0;
-    }
-
-
-    //- Master of a pointPair is the lowest numbered one.
-    inline bool ppMaster() const
-    {
-        return ppMaster(index_, type_);
-    }
-
-
-    //- Master of a pointPair is the lowest numbered one, external query.
-    inline static bool ppMaster(int index, int type)
-    {
-        if (index >= 0 && type > index)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-
-    //- Slave of a pointPair is the highest numbered one.
-    inline bool ppSlave() const
-    {
-        if (type_ >= 0 && type_ < index_)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-
-    //- Either original internal point or master of pointPair.
-    inline bool internalOrBoundaryPoint() const
-    {
-        return internalOrBoundaryPoint(index_, type_);
-    }
-
-
-    //- Either original internal point or master of pointPair, external query.
-    inline static bool internalOrBoundaryPoint(int index, int type)
-    {
-        return internalPoint(type) || ppMaster(index, type);
-    }
-
-
-    //- Is point near the boundary or part of the boundary definition
-    inline bool nearOrOnBoundary() const
-    {
-        return pairPoint() || nearBoundary();
-    }
-
-
-    //- Either a real or referred internal or boundary point
-    inline bool anyInternalOrBoundaryPoint() const
-    {
-        return internalOrBoundaryPoint() || referredInternalOrBoundaryPoint();
-    }
+        //- Either a real or referred internal or boundary point
+        inline bool anyInternalOrBoundaryPoint() const;
 
 
     // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
@@ -413,6 +249,8 @@ public:
 } // End namespace CGAL
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "indexedVertexI.H"
 
 #ifdef NoRepository
 #   include "indexedVertex.C"

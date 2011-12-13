@@ -21,21 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+    As a special exception, you have permission to link this program with the
+    CGAL library and distribute executables, as long as you follow the
+    requirements of the GNU GPL in regard to all of the software in the
+    executable aside from CGAL.
+
 Class
-    Foam::piecewiseLinearRamp
+    pointFeatureEdgesTypes
 
 Description
-    A linear ramp between 0 and 1 with definable start and end points.
-
-SourceFiles
-    piecewiseLinearRamp.C
+    struct for holding information on the types of feature edges attached to
+    feature points
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef piecewiseLinearRamp_H
-#define piecewiseLinearRamp_H
-
-#include "faceAreaWeightModel.H"
+#ifndef pointFeatureEdgesTypes_H
+#define pointFeatureEdgesTypes_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,47 +44,35 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class piecewiseLinearRamp Declaration
+                   Class pointFeatureEdgesTypes Declaration
 \*---------------------------------------------------------------------------*/
 
-class piecewiseLinearRamp
-:
-    public faceAreaWeightModel
+//- Hold the types of feature edges attached to the point.
+struct pointFeatureEdgesTypes
 {
+    label ptI;
+    label nExternal, nInternal;
+    label nFlat, nOpen, nMultiple, nNonFeature;
 
-private:
+    pointFeatureEdgesTypes(const label pointLabel)
+    {
+        ptI = pointLabel;
+        nExternal = nInternal = 0;
+        nFlat = nOpen = nMultiple = nNonFeature = 0;
+    }
 
-    // Private data
+    friend Ostream& operator<<(Ostream& os, const pointFeatureEdgesTypes& p)
+    {
+        os  << "E " << "I " << "F " << "O " << "M " << "N "
+            << "Pt" << nl
+            << p.nExternal << " " << p.nInternal << " "
+            << p.nFlat << " " << p.nOpen << " "
+            << p.nMultiple << " " << p.nNonFeature << " "
+            << p.ptI
+            << endl;
 
-        //- Face area fraction below which a weight of 0 is returned
-        scalar lAF_;
-
-        //- Face area fraction above which a which of 1 is returned
-        scalar uAF_;
-
-public:
-
-    //- Runtime type information
-    TypeName("piecewiseLinearRamp");
-
-    // Constructors
-
-        //- Construct from components
-        piecewiseLinearRamp
-        (
-            const dictionary& faceAreaWeightDict
-        );
-
-
-    //- Destructor
-    virtual ~piecewiseLinearRamp()
-    {}
-
-
-    // Member Functions
-
-        //- Return the faceAreaWeight
-        virtual scalar faceAreaWeight(scalar faceAreaFraction) const;
+        return os;
+    }
 };
 
 

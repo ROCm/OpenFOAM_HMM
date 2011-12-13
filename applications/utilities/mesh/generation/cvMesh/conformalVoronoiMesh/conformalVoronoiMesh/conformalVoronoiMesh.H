@@ -35,6 +35,10 @@ SourceFiles
     conformalVoronoiMeshI.H
     conformalVoronoiMesh.C
     conformalVoronoiMeshIO.C
+    conformalVoronoiMeshConformToSurface.C
+    conformalVoronoiMeshFeaturePoints.C
+    conformalVoronoiMeshFeaturePointSpecialisations.C
+    conformalVoronoiMeshCalcDualMesh.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,6 +77,7 @@ SourceFiles
 #include "processorPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "globalIndex.H"
+#include "pointFeatureEdgesTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -420,12 +425,24 @@ private:
             DynamicList<label>& types
         );
 
+        //- Fill the pointFeatureEdgesType struct with the types of feature
+        //  edges that are attached to the point.
+        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const labelList& pEds,
+            pointFeatureEdgesTypes& pFEdgeTypes
+        );
+
         //- Create feature point groups if a specialisation exists for the
         //  structure
         bool createSpecialisedFeaturePoint
         (
             const extendedFeatureEdgeMesh& feMesh,
-            label ptI,
+            const labelList& pEds,
+            const pointFeatureEdgesTypes& pFEdgeTypes,
+            const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
+            const label ptI,
             DynamicList<Foam::point>& pts,
             DynamicList<label>& indices,
             DynamicList<label>& types
@@ -443,12 +460,17 @@ private:
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
 
-        //- Clear the entire tesselation and insert bounding points
-        void reset();
+        //- Clear the entire tesselation
+        //  Reinsert bounding points, feature points and recalculate
+        //  startOfInternalPoints_
+        void reset(const bool distribute = false);
 
         //- Insert far points in a large bounding box to avoid dual edges
         //  spanning huge distances
         void insertBoundingPoints();
+
+        //- Reinsert the bounding points
+        void reinsertBoundingPoints();
 
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
@@ -1044,6 +1066,9 @@ public:
             //  target cell volume, actual cell volume and equivalent
             //  actual cell size (cbrt(actual cell volume)).
             void writeCellSizes(const fvMesh& mesh) const;
+
+            //- Calculate and write the cell centres.
+            void writeCellCentres(const fvMesh& mesh) const;
 
             //- Find the cellSet of the boundary cells which have points that
             //  protrude out of the surface beyond a tolerance.

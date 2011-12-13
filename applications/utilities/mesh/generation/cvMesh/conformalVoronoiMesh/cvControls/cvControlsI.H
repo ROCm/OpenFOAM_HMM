@@ -54,6 +54,10 @@ inline Foam::scalar Foam::cvControls::featureEdgeExclusionDistanceCoeff() const
     return featureEdgeExclusionDistanceCoeff_;
 }
 
+inline Foam::Switch Foam::cvControls::specialiseFeaturePoints() const
+{
+    return specialiseFeaturePoints_;
+}
 
 inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
 {
