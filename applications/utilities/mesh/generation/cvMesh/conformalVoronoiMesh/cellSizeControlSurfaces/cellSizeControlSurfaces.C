@@ -281,7 +281,8 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 {
     scalar size = defaultCellSize_;
 
-    bool anyFunctionFound = evalCellSizeFunctions(pt, size);
+//  bool anyFunctionFound = evalCellSizeFunctions(pt, size);
+    evalCellSizeFunctions(pt, size);
 
 //if (!anyFunctionFound)
 //{

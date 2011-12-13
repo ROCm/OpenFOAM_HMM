@@ -39,10 +39,14 @@ Description
     inlet
     {
         type            swirlFlowRateInletVelocity;
-        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        rpm             100;
+        flowRate        constant 0.2;      // Vol/mass flow rate [m3/s or kg/s]
+        rpm             constant 100;
     }
     \endverbatim
+
+    The flowRate and rpm entries are DataEntry types, able to describe time
+    varying functions.  The example above gives the usage for supplying
+    constant values.
 
 Note
     - The value is positive inwards
@@ -56,6 +60,7 @@ SourceFiles
 #define swirlFlowRateInletVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,17 +76,17 @@ class swirlFlowRateInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Inlet integral flow rate
-        const scalar flowRate_;
-
         //- Name of the flux transporting the field
         const word phiName_;
 
         //- Name of the density field used to normalize the mass flux
         const word rhoName_;
 
+        //- Inlet integral flow rate
+        autoPtr<DataEntry<scalar> > flowRate_;
+
         //- RPM
-        const scalar rpm_;
+        autoPtr<DataEntry<scalar> > rpm_;
 
 
 public:
@@ -157,18 +162,11 @@ public:
 
         // Access
 
-            //- Return the flux
-            scalar flowRate() const
-            {
-                return flowRate_;
-            }
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
 
-
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
-
-        //- Write
-        virtual void write(Ostream&) const;
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 

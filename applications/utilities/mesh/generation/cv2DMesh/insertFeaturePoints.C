@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2007-2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,9 @@ License
 
 #include "CV2D.H"
 #include "plane.H"
-#include "triSurfaceTools.H"
 #include "unitConversion.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 bool Foam::CV2D::on2DLine(const point2D& p, const linePointRef& line)
 {
@@ -52,8 +49,6 @@ bool Foam::CV2D::on2DLine(const point2D& p, const linePointRef& line)
 }
 
 
-// Create feature points/edges by creating a triplet in the corner.
-// (this triplet will have as its circumcentre the feature)
 void Foam::CV2D::insertFeaturePoints()
 {
     featurePoints_.clear();
@@ -394,4 +389,6 @@ void Foam::CV2D::reinsertFeaturePoints()
         );
     }
 }
+
+
 // ************************************************************************* //

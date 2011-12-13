@@ -25,7 +25,21 @@ Class
     Foam::uniformFixedValueFvPatchField
 
 Description
-    Foam::uniformFixedValueFvPatchField
+    Enables the specification of a uniform fixed value boundary condition.
+
+    Example of the boundary condition specification:
+    \verbatim
+    inlet
+    {
+        type            uniformFixedValue;
+        uniformValue    constant 0.2;
+    }
+    \endverbatim
+
+    The uniformValue entry is a DataEntry type, able to describe time
+    varying functions.  The example above gives the usage for supplying a
+    constant value.
+
 
 SourceFiles
     uniformFixedValueFvPatchField.C

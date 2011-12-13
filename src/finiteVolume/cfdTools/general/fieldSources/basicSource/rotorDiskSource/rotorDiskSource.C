@@ -354,25 +354,33 @@ void Foam::rotorDiskSource::constructGeometry()
     {
         const label cellI = cells_[i];
 
-        // position in rotor co-ordinate system
+        // position in (planar) rotor co-ordinate system
         x_[i] = coordSys_.localPosition(C[cellI]);
 
         // cache max radius
         rMax_ = max(rMax_, x_[i].x());
 
-        // determine swept angle relative to rDir axis
-        scalar psi = x_[i].y() - rDir.y();
+        // swept angle relative to rDir axis [radians] in range 0 -> 2*pi
+        scalar psi = x_[i].y();
+        if (psi < 0)
+        {
+            psi += mathematical::twoPi;
+        }
 
-        // blade flap angle
+        // blade flap angle [radians]
         scalar beta = flap_.beta0 - flap_.beta1*cos(psi) - flap_.beta2*sin(psi);
 
-        // determine rotation tensor to convert into the rotor cone plane
-        scalar c = cos(-beta);
-        scalar s = sin(-beta);
-        R_[i] = tensor(1, 0, 0, 0, c, s, 0, -s, c);
+        // determine rotation tensor to convert from planar system into the
+        // rotor cone system
+        scalar cNeg = cos(-beta);
+        scalar sNeg = sin(-beta);
+        R_[i] = tensor(cNeg, 0.0, -sNeg, 0.0, 1.0, 0.0, sNeg, 0.0, cNeg);
+        scalar cPos = cos(beta);
+        scalar sPos = sin(beta);
+        invR_[i] = tensor(cPos, 0.0, -sPos, 0.0, 1.0, 0.0, sPos, 0.0, cPos);
 
-        // geometric angle of attack - not including twist
-        alphag_[i] = trim_.alphaC - trim_.A*cos(psi) - trim_.B*sin(psi);
+        // geometric angle of attack - not including twist [radians]
+        alphag_[i] = trim_.alphaC + trim_.A*cos(psi) + trim_.B*sin(psi);
     }
 }
 
@@ -439,6 +447,7 @@ Foam::rotorDiskSource::rotorDiskSource
     profiles_(coeffs_.subDict("profiles")),
     x_(cells_.size(), vector::zero),
     R_(cells_.size(), I),
+    invR_(cells_.size(), I),
     alphag_(cells_.size(), 0.0),
     area_(cells_.size(), 0.0),
     coordSys_(false),

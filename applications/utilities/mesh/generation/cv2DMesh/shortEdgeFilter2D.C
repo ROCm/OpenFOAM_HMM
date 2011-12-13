@@ -27,12 +27,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(shortEdgeFilter2D, 0);
-
+    defineTypeNameAndDebug(shortEdgeFilter2D, 0);
 }
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

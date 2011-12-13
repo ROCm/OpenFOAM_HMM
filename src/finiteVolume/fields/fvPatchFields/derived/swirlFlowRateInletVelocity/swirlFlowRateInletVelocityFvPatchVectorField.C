@@ -32,8 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::
-swirlFlowRateInletVelocityFvPatchVectorField::
+Foam::swirlFlowRateInletVelocityFvPatchVectorField::
 swirlFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -41,15 +40,14 @@ swirlFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(0),
     phiName_("phi"),
     rhoName_("rho"),
-    rpm_(0)
+    flowRate_(),
+    rpm_()
 {}
 
 
-Foam::
-swirlFlowRateInletVelocityFvPatchVectorField::
+Foam::swirlFlowRateInletVelocityFvPatchVectorField::
 swirlFlowRateInletVelocityFvPatchVectorField
 (
     const swirlFlowRateInletVelocityFvPatchVectorField& ptf,
@@ -59,15 +57,14 @@ swirlFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    rpm_(ptf.rpm_)
+    flowRate_(ptf.flowRate_().clone().ptr()),
+    rpm_(ptf.rpm_().clone().ptr())
 {}
 
 
-Foam::
-swirlFlowRateInletVelocityFvPatchVectorField::
+Foam::swirlFlowRateInletVelocityFvPatchVectorField::
 swirlFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
@@ -76,30 +73,28 @@ swirlFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    flowRate_(readScalar(dict.lookup("flowRate"))),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    rpm_(readScalar(dict.lookup("rpm")))
+    flowRate_(DataEntry<scalar>::New("flowRate", dict)),
+    rpm_(DataEntry<scalar>::New("rpm", dict))
 {}
 
 
-Foam::
-swirlFlowRateInletVelocityFvPatchVectorField::
+Foam::swirlFlowRateInletVelocityFvPatchVectorField::
 swirlFlowRateInletVelocityFvPatchVectorField
 (
     const swirlFlowRateInletVelocityFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    rpm_(ptf.rpm_)
+    flowRate_(ptf.flowRate_().clone().ptr()),
+    rpm_(ptf.rpm_().clone().ptr())
 {}
 
 
-Foam::
-swirlFlowRateInletVelocityFvPatchVectorField::
+Foam::swirlFlowRateInletVelocityFvPatchVectorField::
 swirlFlowRateInletVelocityFvPatchVectorField
 (
     const swirlFlowRateInletVelocityFvPatchVectorField& ptf,
@@ -107,10 +102,10 @@ swirlFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    flowRate_(ptf.flowRate_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    rpm_(ptf.rpm_)
+    flowRate_(ptf.flowRate_().clone().ptr()),
+    rpm_(ptf.rpm_().clone().ptr())
 {}
 
 
@@ -123,19 +118,22 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
+    const scalar t = this->db().time().timeOutputValue();
+    const scalar flowRate = flowRate_->value(t);
+    const scalar rpm = rpm_->value(t);
+
     const scalar totArea   = gSum(patch().magSf());
-    // a simpler way of doing this would be nice
-    const scalar avgU = -flowRate_/totArea;
+    const scalar avgU = -flowRate/totArea;
 
     const vector avgCenter = gSum(patch().Cf()*patch().magSf())/totArea;
     const vector avgNormal = gSum(patch().Sf())/totArea;
 
     // Update angular velocity - convert [rpm] to [rad/s]
-    tmp<vectorField> tangentialVelocity =
-    (
-        (rpm_*constant::mathematical::pi/30.0)
-      * (patch().Cf() - avgCenter) ^ avgNormal
-    );
+    tmp<vectorField> tangentialVelocity
+        (
+            (rpm*constant::mathematical::pi/30.0)
+          * (patch().Cf() - avgCenter) ^ avgNormal
+        );
 
     tmp<vectorField> n = patch().nf();
 
@@ -177,10 +175,10 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchField<vector>::write(os);
-    os.writeKeyword("flowRate") << flowRate_ << token::END_STATEMENT << nl;
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("rpm") << rpm_ << token::END_STATEMENT << nl;
+    flowRate_->writeData(os);
+    rpm_->writeData(os);
     writeEntry("value", os);
 }
 

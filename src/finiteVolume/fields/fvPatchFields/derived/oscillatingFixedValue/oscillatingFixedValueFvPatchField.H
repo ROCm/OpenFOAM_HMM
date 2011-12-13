@@ -25,7 +25,24 @@ Class
     Foam::oscillatingFixedValueFvPatchField
 
 Description
-    Foam::oscillatingFixedValueFvPatchField
+    Describes an oscillating boundary condition in terms of amplitude and
+    frequency.
+
+    Example of the boundary condition specification:
+    \verbatim
+    inlet
+    {
+        type            oscillatingFixedValue;
+        refValue        uniform 5.0;
+        offset          0.0;                    // optional
+        amplitude       constant 0.5;
+        frequency       constant 10;
+    }
+    \endverbatim
+
+    The amplitude and frequency entries are DataEntry types, able to describe
+    time varying functions.  The example above gives the usage for supplying
+    constant values.
 
 SourceFiles
     oscillatingFixedValueFvPatchField.C

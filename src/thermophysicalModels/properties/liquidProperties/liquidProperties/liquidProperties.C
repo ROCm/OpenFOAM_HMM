@@ -148,20 +148,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New(Istream& is)
     }
     else if (coeffs == "coeffs")
     {
-        IstreamConstructorTable::iterator cstrIter =
-            IstreamConstructorTablePtr_->find(liquidPropertiesType);
-
-        if (cstrIter == IstreamConstructorTablePtr_->end())
-        {
-            FatalErrorIn("liquidProperties::New(Istream&)")
-                << "Unknown liquidProperties type "
-                << liquidPropertiesType << nl << nl
-                << "Valid liquidProperties types are:" << nl
-                << IstreamConstructorTablePtr_->sortedToc()
-                << abort(FatalError);
-        }
-
-        return autoPtr<liquidProperties>(cstrIter()(is));
+        return autoPtr<liquidProperties>(new liquidProperties(is));
     }
     else
     {
@@ -212,24 +199,12 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
     }
     else
     {
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(liquidPropertiesTypeName);
-
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
-        {
-            FatalErrorIn
-            (
-                "liquidProperties::New(const dictionary&, const word&)"
-            )   << "Unknown liquidProperties type "
-                << liquidPropertiesTypeName << nl << nl
-                << "Valid liquidProperties types are:" << nl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << abort(FatalError);
-        }
-
         return autoPtr<liquidProperties>
         (
-            cstrIter()(dict.subDict(liquidPropertiesTypeName + "Coeffs"))
+            new liquidProperties
+            (
+                dict.subDict(liquidPropertiesTypeName + "Coeffs")
+            )
         );
     }
 }

@@ -29,7 +29,7 @@ License
 #include "unitConversion.H"
 #include "volFields.H"
 
-using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -124,11 +124,11 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
 
             const scalar radius = x_[i].x();
 
-            // apply correction due to flap in cartesian frame
-            vector Uc = R_[i] & U[cellI];
+            // velocity in local cylindrical reference frame
+            vector Uc = coordSys_.localVector(U[cellI]);
 
-            // velocity in local reference frame
-            Uc = coordSys_.localVector(Uc);
+            // apply correction in local system due to coning
+            Uc = R_[i] & Uc;
 
             // set radial component of velocity to zero
             Uc.x() = 0.0;
@@ -149,7 +149,16 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
             blade_.interpolate(radius, twist, chord, i1, i2, invDr);
 
             // effective angle of attack
-            scalar alphaEff = alphag_[i] + twist - atan(Uc.z()/Uc.y());
+            scalar alphaEff = pi + atan2(Uc.z(), Uc.y()) - (alphag_[i] + twist);
+            if (alphaEff > pi)
+            {
+                alphaEff -= twoPi;
+            }
+            if (alphaEff < -pi)
+            {
+                alphaEff += twoPi;
+            }
+
             AOAmin = min(AOAmin, alphaEff);
             AOAmax = max(AOAmax, alphaEff);
 
@@ -175,10 +184,13 @@ Foam::tmp<Foam::volVectorField> Foam::rotorDiskSource::calculateForces
                 tipFactor = 0.0;
             }
 
-            // calculate forces
-            const scalar pDyn = 0.5*rho[cellI]*sqr(magUc);
-            const scalar f = pDyn*chord*nBlades_*area_[i]/(mathematical::twoPi);
-            const vector localForce(0.0, f*Cd, tipFactor*f*Cl);
+            // calculate forces perpendicular to blade
+            scalar pDyn = 0.5*rho[cellI]*sqr(magUc);
+            scalar f = pDyn*chord*nBlades_*area_[i]/twoPi;
+            vector localForce = vector(0.0, f*Cd, tipFactor*f*Cl);
+
+            // convert force from local coning system into rotor cylindrical
+            localForce = invR_[i] & localForce;
 
             // accumulate forces
             dragEff += localForce.y();

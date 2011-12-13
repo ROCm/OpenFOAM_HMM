@@ -31,9 +31,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(extrude2DMesh, 0);
-
+    defineTypeNameAndDebug(extrude2DMesh, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -45,10 +43,10 @@ void Foam::extrude2DMesh::check2D() const
     {
         if (faces[faceI].size() != 2)
         {
-            FatalErrorIn("extrude2DMesh.C")
+            FatalErrorIn("void Foam::extrude2DMesh::check2D() const")
                 << "Face " << faceI << " size " << faces[faceI].size()
-                << " is not of size 2 so mesh is not proper two-dimensional."
-                << exit(FatalError);
+                << " is not of size 2: mesh is not a valid two-dimensional "
+                << "mesh" << exit(FatalError);
         }
     }
 }
@@ -537,7 +535,7 @@ void Foam::extrude2DMesh::setRefinement
             -1,                             // nei
             -1,                             // masterPointID
             -1,                             // masterEdgeID
-            nFaces++,                      // masterFaceID
+            nFaces++,                       // masterFaceID
             false,                          // flipFaceFlux
             backPatchI_,                    // patchID
             -1,                             // zoneID
@@ -567,7 +565,7 @@ void Foam::extrude2DMesh::setRefinement
             -1,                             // nei
             -1,                             // masterPointID
             -1,                             // masterEdgeID
-            nFaces++, // masterFaceID
+            nFaces++,                       // masterFaceID
             false,                          // flipFaceFlux
             frontPatchI_,                   // patchID
             -1,                             // zoneID

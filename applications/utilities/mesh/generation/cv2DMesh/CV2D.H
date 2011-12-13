@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2007-2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -321,18 +321,14 @@ private:
 
 public:
 
-        //- Runtime type information
-        ClassName("CV2D");
+    //- Runtime type information
+    ClassName("CV2D");
 
 
     // Constructors
 
         //- Construct for given surface
-        CV2D
-        (
-            const Time& runTime,
-            const dictionary& controlDict
-        );
+        CV2D(const Time& runTime, const dictionary& controlDict);
 
 
     //- Destructor
@@ -419,6 +415,7 @@ public:
                 labelList& patchSizes,
                 EdgeMap<label>& mapEdgesRegion
             ) const;
+
 
         // Write
 
