@@ -187,7 +187,7 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         const scalar pSat = liquids_.properties()[lid].pv(pc, Td);
 
         // carrier phase concentration
-        scalar Xc = XcMix[gid];
+        const scalar Xc = XcMix[gid];
 
         if (Xc*pc > pSat)
         {
@@ -221,7 +221,7 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
                 // evaporation
 
                 // surface molar fraction - Raoult's Law
-                scalar Xs = X[lid]*pSat/pc;
+                const scalar Xs = X[lid]*pSat/pc;
 
                 // molar ratio
                 const scalar Xr = (Xs - Xc)/max(SMALL, 1.0 - Xs);
