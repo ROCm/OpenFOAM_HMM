@@ -1172,8 +1172,6 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
             )
         ).movePoints(points_);
     }
-    meshSearchMeshObject::Delete(*this);
-    meshSearchFACECENTRETETSMeshObject::Delete(*this);
 
     return sweptVols;
 }

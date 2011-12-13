@@ -95,8 +95,6 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
             )
         ).updateMesh(mpm);
     }
-    meshSearchMeshObject::Delete(*this);
-    meshSearchFACECENTRETETSMeshObject::Delete(*this);
 }
 
 
