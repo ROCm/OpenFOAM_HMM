@@ -196,6 +196,9 @@ public:
                 inline const BreakupModel<SprayCloud<CloudType> >&
                     breakup() const;
 
+                //- Return non-const-access to the breakup model
+                inline BreakupModel<SprayCloud<CloudType> >& breakup();
+
                 //- Return const-access to the breakup model
                 inline const StochasticCollisionModel<SprayCloud<CloudType> >&
                     stochasticCollision() const;

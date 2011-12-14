@@ -50,6 +50,14 @@ Foam::SprayCloud<CloudType>::breakup() const
 
 
 template<class CloudType>
+inline Foam::BreakupModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::breakup()
+{
+    return breakupModel_();
+}
+
+
+template<class CloudType>
 inline const Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
 Foam::SprayCloud<CloudType>::stochasticCollision() const
 {
@@ -63,3 +71,5 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::averageParcelMass() const
     return averageParcelMass_;
 }
 
+
+// ************************************************************************* //
