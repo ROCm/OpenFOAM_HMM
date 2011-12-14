@@ -134,7 +134,6 @@ bool Foam::SHF<CloudType>::update
     const vector& Urel,
     const scalar Urmag,
     const scalar tMom,
-    const scalar averageParcelMass,
     scalar& dChild,
     scalar& massChild,
     cachedRandom& rndGen
@@ -232,7 +231,7 @@ bool Foam::SHF<CloudType>::update
 
                 scalar p =
                     x
-                   /(2.0*sqrt(2.0*constant::mathematical::pi)*sigma_)
+                   /(2.0*sqrt(constant::mathematical::twoPi)*sigma_)
                    *exp(-0.5*sqr((x - mu_)/sigma_));
 
                 if (yGuess < p)
@@ -264,7 +263,7 @@ bool Foam::SHF<CloudType>::update
 
                 scalar p =
                     x
-                   /(2.0*sqrt(2.0*constant::mathematical::pi)*sigma_)
+                   /(2.0*sqrt(constant::mathematical::twoPi)*sigma_)
                    *exp(-0.5*sqr((x - mu_)/sigma_));
 
                 if (yGuess<p)

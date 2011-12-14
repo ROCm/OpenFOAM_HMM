@@ -86,7 +86,6 @@ bool Foam::PilchErdman<CloudType>::update
     const vector& Urel,
     const scalar Urmag,
     const scalar tMom,
-    const scalar averageParcelMass,
     scalar& dChild,
     scalar& massChild,
     cachedRandom& rndGen
@@ -94,7 +93,7 @@ bool Foam::PilchErdman<CloudType>::update
 {
     scalar semiMass = nParticle*pow3(d);
     scalar We = 0.5*rhoc*sqr(Urmag)*d/sigma;
-    scalar Oh = mu/pow(rho*d*sigma, 0.5);
+    scalar Oh = mu/sqrt(rho*d*sigma);
 
     scalar Wec = 6.0*(1.0 + 1.077*pow(Oh, 1.6));
 

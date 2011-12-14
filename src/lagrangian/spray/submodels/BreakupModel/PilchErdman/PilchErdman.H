@@ -47,7 +47,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class PilchErdman Declaration
+                        Class PilchErdman Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -115,7 +115,6 @@ public:
             const vector& Urel,
             const scalar Urmag,
             const scalar tMom,
-            const scalar averageParcelMass,
             scalar& dChild,
             scalar& massChild,
             cachedRandom& rndGen

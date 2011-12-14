@@ -84,7 +84,6 @@ bool Foam::NoBreakup<CloudType>::update
     const vector& Urel,
     const scalar Urmag,
     const scalar tMom,
-    const scalar averageParcelMass,
     scalar& dChild,
     scalar& massChild,
     cachedRandom& rndGen
