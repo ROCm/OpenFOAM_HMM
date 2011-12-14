@@ -143,9 +143,8 @@ public:
             const scalar Urmag,
             const scalar tMom,
             scalar& dChild,
-            scalar& massChild,
-            cachedRandom& rndGen
-    ) const;
+            scalar& massChild
+    );
 };
 
 

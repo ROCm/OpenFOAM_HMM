@@ -135,10 +135,11 @@ bool Foam::SHF<CloudType>::update
     const scalar Urmag,
     const scalar tMom,
     scalar& dChild,
-    scalar& massChild,
-    cachedRandom& rndGen
-) const
+    scalar& massChild
+)
 {
+    cachedRandom& rndGen = this->owner().rndGen();
+
     bool addChild = false;
 
     scalar d03 = pow3(d);

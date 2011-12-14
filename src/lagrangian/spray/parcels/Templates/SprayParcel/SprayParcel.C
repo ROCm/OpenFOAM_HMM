@@ -275,8 +275,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
             Urmag,
             tMom,
             dChild,
-            massChild,
-            td.cloud().rndGen()
+            massChild
         )
     )
     {

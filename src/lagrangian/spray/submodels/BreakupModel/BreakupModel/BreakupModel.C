@@ -121,9 +121,8 @@ bool Foam::BreakupModel<CloudType>::update
     const scalar Urmag,
     const scalar tMom,
     scalar& dChild,
-    scalar& massChild,
-    cachedRandom& rndGen
-) const
+    scalar& massChild
+)
 {
     notImplemented
     (
@@ -149,9 +148,8 @@ bool Foam::BreakupModel<CloudType>::update
             "const scalar, "
             "const scalar, "
             "scalar&, "
-            "scalar&, "
-            "cachedRandom&"
-        ") const;"
+            "scalar&"
+        ");"
     );
 
     return false;

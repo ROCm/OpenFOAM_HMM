@@ -123,10 +123,11 @@ bool Foam::TAB<CloudType>::update
     const scalar Urmag,
     const scalar tMom,
     scalar& dChild,
-    scalar& massChild,
-    cachedRandom& rndGen
-) const
+    scalar& massChild
+)
 {
+    cachedRandom& rndGen = this->owner().rndGen();
+
     scalar r = 0.5*d;
     scalar r2 = r*r;
     scalar r3 = r*r2;

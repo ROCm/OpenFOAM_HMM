@@ -113,9 +113,8 @@ bool Foam::ETAB<CloudType>::update
     const scalar Urmag,
     const scalar tMom,
     scalar& dChild,
-    scalar& massChild,
-    cachedRandom& rndGen
-) const
+    scalar& massChild
+)
 {
     scalar r  = 0.5*d;
     scalar r2 = r*r;

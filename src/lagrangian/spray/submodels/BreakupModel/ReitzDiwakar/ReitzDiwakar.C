@@ -93,9 +93,8 @@ bool Foam::ReitzDiwakar<CloudType>::update
     const scalar Urmag,
     const scalar tMom,
     scalar& dChild,
-    scalar& massChild,
-    cachedRandom& rndGen
-) const
+    scalar& massChild
+)
 {
     scalar d1 = d;
     scalar nuc = muc/rhoc;
