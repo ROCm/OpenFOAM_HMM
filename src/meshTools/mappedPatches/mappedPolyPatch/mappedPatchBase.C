@@ -87,67 +87,22 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::facePoints
 ) const
 {
     const polyMesh& mesh = pp.boundaryMesh().mesh();
-    const labelList& tetBasePts = mesh.tetBasePtIs();
-    const pointField& p = pp.points();
-    const pointField& cellCentres = mesh.cellCentres();
-    const labelList& faceCells = pp.faceCells();
+
+    // Force construction of min-tet decomp
+    (void)mesh.tetBasePtIs();
 
     // Initialise to face-centre
-    tmp<pointField> tfacePoints(new pointField(patch_.faceCentres()));
+    tmp<pointField> tfacePoints(new pointField(patch_.size()));
     pointField& facePoints = tfacePoints();
 
     forAll(pp, faceI)
     {
-        const face& f = pp[faceI];
-
-        if (f.size() <= 3)
-        {
-            // Point already on tets of cell.
-        }
-        else
-        {
-            // Find intersection of (face-centre-decomposition) centre to
-            // cell-centre with face-diagonal-decomposition triangles.
-            const point& cc = cellCentres[faceCells[faceI]];
-            vector d = facePoints[faceI]-cc;
-
-            const label fp0 = tetBasePts[faceI];
-            const point& basePoint = p[f[fp0]];
-
-            //bool foundPoint = false;
-
-            label fp = f.fcIndex(fp0);
-            for (label i = 2; i < f.size(); i++)
-            {
-                const point& thisPoint = p[f[fp]];
-                label nextFp = f.fcIndex(fp);
-                const point& nextPoint = p[f[nextFp]];
-
-                const triPointRef tri(basePoint, thisPoint, nextPoint);
-                pointHit hitInfo = tri.intersection
-                (
-                    cc,
-                    d,
-                    intersection::HALF_RAY
-                );
-
-                if (hitInfo.hit() && hitInfo.distance() > 0)
-                {
-                    facePoints[faceI] = hitInfo.hitPoint();
-                    //foundPoint = true;
-                    break;
-                }
-
-                fp = nextFp;
-            }
-
-            //if (!foundPoint)
-            //{
-            //    Pout<< "cell:" << faceCells[faceI] << " at:" << cc
-            //        << " face-centre:" << patch_.faceCentres()[faceI]
-            //        << " did not find any intersection." << endl;
-            //}
-        }
+        facePoints[faceI] = facePoint
+        (
+            mesh,
+            pp.start()+faceI,
+            polyMesh::FACEDIAGTETS
+        ).rawPoint();
     }
 
     return tfacePoints;
@@ -572,11 +527,13 @@ void Foam::mappedPatchBase::calcMapping() const
                 )   << "Did not find " << nNotFound
                     << " out of " << sampleProcs.size() << " total samples."
                     << " Sampling these on owner cell centre instead." << endl
-                    << "patch_:" << patch_.name() << endl
-                    << "sampleRegion_:" << sampleRegion_ << endl
-                    << "mode_:" << sampleModeNames_[mode_] << endl
-                    << "samplePatch_:" << samplePatch_ << endl
-                    << "offsetMode_:" << offsetModeNames_[offsetMode_] << endl;
+                    << "On patch " << patch_.name()
+                    << " on region " << sampleRegion_
+                    << " in mode " << sampleModeNames_[mode_] << endl
+                    << "whilst sampling patch " << samplePatch_ << endl
+                    << " with offset mode " << offsetModeNames_[offsetMode_]
+                    << endl
+                    << "Suppressing further warnings from " << type() << endl;
 
                 hasWarned = true;
             }
@@ -1134,6 +1091,87 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::samplePoints
 Foam::tmp<Foam::pointField> Foam::mappedPatchBase::samplePoints() const
 {
     return samplePoints(facePoints(patch_));
+}
+
+
+Foam::pointIndexHit Foam::mappedPatchBase::facePoint
+(
+    const polyMesh& mesh,
+    const label faceI,
+    const polyMesh::cellRepresentation decompMode
+)
+{
+    const point& fc = mesh.faceCentres()[faceI];
+
+    switch (decompMode)
+    {
+        case polyMesh::FACEPLANES:
+        case polyMesh::FACECENTRETETS:
+        {
+            // For both decompositions the face centre is guaranteed to be
+            // on the face
+            return pointIndexHit(true, fc, faceI);
+        }
+        break;
+
+        case polyMesh::FACEDIAGTETS:
+        {
+            // Find the intersection of a ray from face centre to cell
+            // centre
+            // Find intersection of (face-centre-decomposition) centre to
+            // cell-centre with face-diagonal-decomposition triangles.
+
+            const pointField& p = mesh.points();
+            const face& f = mesh.faces()[faceI];
+
+            if (f.size() <= 3)
+            {
+                // Return centre of triangle.
+                return pointIndexHit(true, fc, 0);
+            }
+
+            label cellI = mesh.faceOwner()[faceI];
+            const point& cc = mesh.cellCentres()[cellI];
+            vector d = fc-cc;
+
+            const label fp0 = mesh.tetBasePtIs()[faceI];
+            const point& basePoint = p[f[fp0]];
+
+            label fp = f.fcIndex(fp0);
+            for (label i = 2; i < f.size(); i++)
+            {
+                const point& thisPoint = p[f[fp]];
+                label nextFp = f.fcIndex(fp);
+                const point& nextPoint = p[f[nextFp]];
+
+                const triPointRef tri(basePoint, thisPoint, nextPoint);
+                pointHit hitInfo = tri.intersection
+                (
+                    cc,
+                    d,
+                    intersection::HALF_RAY
+                );
+
+                if (hitInfo.hit() && hitInfo.distance() > 0)
+                {
+                    return pointIndexHit(true, hitInfo.hitPoint(), i-2);
+                }
+
+                fp = nextFp;
+            }
+
+            // Fall-back
+            return pointIndexHit(false, fc, -1);
+        }
+        break;
+
+        default:
+        {
+            FatalErrorIn("mappedPatchBase::facePoint()")
+                << "problem" << abort(FatalError);
+            return pointIndexHit();
+        }
+    }
 }
 
 

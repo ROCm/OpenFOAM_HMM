@@ -339,8 +339,23 @@ public:
             //- Get the patch on the region
             const polyPatch& samplePolyPatch() const;
 
+        // Helpers
+
             //- Get the sample points
             tmp<pointField> samplePoints() const;
+
+            //- Get a point on the face given a face decomposition method:
+            //  face-centre-tet : face centre. Returns index of face.
+            //  face-planes     : face centre. Returns index of face.
+            //  face-diagonal   : intersection of ray from cellcentre to
+            //                    facecentre with any of the triangles.
+            //                    Returns index (0..size-2) of triangle.
+            static pointIndexHit facePoint
+            (
+                const polyMesh&,
+                const label faceI,
+                const polyMesh::cellRepresentation
+            );
 
 
         // Distribute
