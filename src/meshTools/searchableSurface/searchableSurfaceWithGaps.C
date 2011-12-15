@@ -187,6 +187,8 @@ Foam::searchableSurfaceWithGaps::searchableSurfaceWithGaps
         io.db().lookupObject<searchableSurface>(subGeomName);
 
     subGeom_.set(0, &const_cast<searchableSurface&>(s));
+
+    bounds() = subGeom_[0].bounds();
 }
 
 
