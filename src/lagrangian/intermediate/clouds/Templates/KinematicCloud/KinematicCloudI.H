@@ -51,6 +51,21 @@ Foam::KinematicCloud<CloudType>::particleProperties() const
 
 
 template<class CloudType>
+inline const Foam::IOdictionary&
+Foam::KinematicCloud<CloudType>::outputProperties() const
+{
+    return outputProperties_;
+}
+
+
+template<class CloudType>
+inline Foam::IOdictionary& Foam::KinematicCloud<CloudType>::outputProperties()
+{
+    return outputProperties_;
+}
+
+
+template<class CloudType>
 inline const Foam::cloudSolution&
 Foam::KinematicCloud<CloudType>::solution() const
 {

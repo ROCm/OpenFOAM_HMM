@@ -67,7 +67,7 @@ Foam::BreakupModel<CloudType>::BreakupModel
     const word& type
 )
 :
-    SubModelBase<CloudType>(owner, dict, type),
+    SubModelBase<CloudType>(owner, dict, typeName, type),
     solveOscillationEq_(this->coeffDict().lookup("solveOscillationEq")),
     y0_(0.0),
     yDot0_(0.0),

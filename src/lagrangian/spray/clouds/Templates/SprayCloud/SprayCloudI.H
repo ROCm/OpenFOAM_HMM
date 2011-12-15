@@ -42,6 +42,14 @@ Foam::SprayCloud<CloudType>::atomization() const
 
 
 template<class CloudType>
+inline Foam::AtomizationModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::atomization()
+{
+    return atomizationModel_();
+}
+
+
+template<class CloudType>
 inline const Foam::BreakupModel<Foam::SprayCloud<CloudType> >&
 Foam::SprayCloud<CloudType>::breakup() const
 {
@@ -62,6 +70,14 @@ inline const Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
 Foam::SprayCloud<CloudType>::stochasticCollision() const
 {
     return stochasticCollisionModel_;
+}
+
+
+template<class CloudType>
+inline Foam::StochasticCollisionModel<Foam::SprayCloud<CloudType> >&
+Foam::SprayCloud<CloudType>::stochasticCollision()
+{
+    return stochasticCollisionModel_();
 }
 
 

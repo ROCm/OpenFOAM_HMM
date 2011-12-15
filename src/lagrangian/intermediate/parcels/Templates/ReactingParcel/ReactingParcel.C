@@ -385,7 +385,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             }
             td.cloud().UTrans()[cellI] += dm*U0;
 
-            td.cloud().addToMassPhaseChange(dm);
+            td.cloud().phaseChange().addToPhaseChangeMass(dm);
         }
 
         return;
@@ -519,7 +519,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
-    td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
+    td.cloud().phaseChange().addToPhaseChangeMass(this->nParticle_*dMassTot);
 
     forAll(dMassPC, i)
     {

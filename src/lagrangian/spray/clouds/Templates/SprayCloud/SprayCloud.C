@@ -358,7 +358,7 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
 
 
 template<class CloudType>
-void Foam::SprayCloud<CloudType>::info() const
+void Foam::SprayCloud<CloudType>::info()
 {
     CloudType::info();
     scalar d32 = 1.0e+6*this->Dij(3, 2);
