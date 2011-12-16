@@ -54,33 +54,34 @@ Foam::topoSetSource::addToUsageTable Foam::patchToFace::usage_
 
 void Foam::patchToFace::combine(topoSet& set, const bool add) const
 {
-    bool hasMatched = false;
+    labelHashSet patchIDs = mesh_.boundaryMesh().patchSet
+    (
+        List<wordRe>(1, patchName_),
+        true,           // warn if not found
+        true            // use patch groups if available
+    );
 
-    forAll(mesh_.boundaryMesh(), patchI)
+    forAllConstIter(labelHashSet, patchIDs, iter)
     {
+        label patchI = iter.key();
+
         const polyPatch& pp = mesh_.boundaryMesh()[patchI];
 
-        if (patchName_.match(pp.name()))
+        Info<< "    Found matching patch " << pp.name()
+            << " with " << pp.size() << " faces." << endl;
+
+        for
+        (
+            label faceI = pp.start();
+            faceI < pp.start() + pp.size();
+            faceI++
+        )
         {
-            Info<< "    Found matching patch " << pp.name()
-                << " with " << pp.size() << " faces." << endl;
-
-            hasMatched = true;
-
-
-            for
-            (
-                label faceI = pp.start();
-                faceI < pp.start() + pp.size();
-                faceI++
-            )
-            {
-                addOrDelete(set, faceI, add);
-            }
+            addOrDelete(set, faceI, add);
         }
     }
 
-    if (!hasMatched)
+    if (patchIDs.empty())
     {
         WarningIn("patchToFace::combine(topoSet&, const bool)")
             << "Cannot find any patch named " << patchName_ << endl

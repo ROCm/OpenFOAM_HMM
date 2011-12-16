@@ -459,6 +459,11 @@ autoPtr<mapPolyMesh> reorderMesh
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Renumber mesh to minimise bandwidth"
+    );
+
     argList::addOption
     (
         "blockSize",
@@ -479,6 +484,11 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
+    argList::addBoolOption
+    (
+        "dict",
+        "renumber according to system/renumberMeshDict"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -494,6 +504,9 @@ int main(int argc, char *argv[])
 
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
+
+    const bool readDict = args.optionFound("dict");
+
 
     label blockSize = 0;
     args.optionReadIfPresent("blockSize", blockSize, 0);
@@ -539,28 +552,29 @@ int main(int argc, char *argv[])
 
 
     // Construct renumberMethod
-    IOobject io
-    (
-        "renumberMeshDict",
-        runTime.system(),
-        mesh,
-        IOobject::MUST_READ_IF_MODIFIED,
-        IOobject::NO_WRITE
-    );
-
     autoPtr<renumberMethod> renumberPtr;
 
-    if (io.headerOk())
+    if (readDict)
     {
-        Info<< "Detected local " << runTime.system()/io.name() << "." << nl
-            << "Using this to select renumberMethod." << nl << endl;
-        renumberPtr = renumberMethod::New(IOdictionary(io));
+        Info<< "Renumber according to renumberMeshDict." << nl << endl;
+
+        IOdictionary renumberDict
+        (
+            IOobject
+            (
+                "renumberMeshDict",
+                runTime.system(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            )
+        );
+
+        renumberPtr = renumberMethod::New(renumberDict);
     }
     else
     {
-        Info<< "No local " << runTime.system()/io.name()
-            << " dictionary found. Using default renumberMethod." << nl
-            << endl;
+        Info<< "Using default renumberMethod." << nl << endl;
         dictionary renumberDict;
         renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
     }

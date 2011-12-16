@@ -32,6 +32,7 @@ Description
 #include "volFields.H"
 #include "PatchEdgeFaceWave.H"
 #include "patchEdgeFaceInfo.H"
+#include "patchDist.H"
 
 using namespace Foam;
 
@@ -49,80 +50,115 @@ int main(int argc, char *argv[])
 
     // Get name of patch
     const word patchName = args[1];
-
     const polyPatch& patch = patches[patchName];
 
-    // Data on all edges and faces
-    List<patchEdgeFaceInfo> allEdgeInfo(patch.nEdges());
-    List<patchEdgeFaceInfo> allFaceInfo(patch.size());
-
-    // Initial seed
-    DynamicList<label> initialEdges;
-    DynamicList<patchEdgeFaceInfo> initialEdgesInfo;
-
-
-    // Just set an edge on the master
-    if (Pstream::master())
+    // 1. Walk from a single edge
     {
-        label edgeI = 0;
-        Info<< "Starting walk on edge " << edgeI << endl;
+        // Data on all edges and faces
+        List<patchEdgeFaceInfo> allEdgeInfo(patch.nEdges());
+        List<patchEdgeFaceInfo> allFaceInfo(patch.size());
 
-        initialEdges.append(edgeI);
-        const edge& e = patch.edges()[edgeI];
-        initialEdgesInfo.append
-        (
-            patchEdgeFaceInfo
+        // Initial seed
+        DynamicList<label> initialEdges;
+        DynamicList<patchEdgeFaceInfo> initialEdgesInfo;
+
+
+        // Just set an edge on the master
+        if (Pstream::master())
+        {
+            label edgeI = 0;
+            Info<< "Starting walk on edge " << edgeI << endl;
+
+            initialEdges.append(edgeI);
+            const edge& e = patch.edges()[edgeI];
+            initialEdgesInfo.append
             (
-                e.centre(patch.localPoints()),
-                0.0
-            )
-        );
-    }
+                patchEdgeFaceInfo
+                (
+                    e.centre(patch.localPoints()),
+                    0.0
+                )
+            );
+        }
 
 
-    // Walk
-    PatchEdgeFaceWave
-    <
-        primitivePatch,
-        patchEdgeFaceInfo
-    > calc
-    (
-        mesh,
-        patch,
-        initialEdges,
-        initialEdgesInfo,
-        allEdgeInfo,
-        allFaceInfo,
-        returnReduce(patch.nEdges(), sumOp<label>())
-    );
-
-
-    // Extract as patchField
-    volScalarField vsf
-    (
-        IOobject
+        // Walk
+        PatchEdgeFaceWave
+        <
+            primitivePatch,
+            patchEdgeFaceInfo
+        > calc
         (
-            "patchDist",
-            runTime.timeName(),
             mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("patchDist", dimLength, 0.0)
-    );
-    scalarField pf(vsf.boundaryField()[patch.index()].size());
-    forAll(pf, faceI)
-    {
-        pf[faceI] = Foam::sqrt(allFaceInfo[faceI].distSqr());
+            patch,
+            initialEdges,
+            initialEdgesInfo,
+            allEdgeInfo,
+            allFaceInfo,
+            returnReduce(patch.nEdges(), sumOp<label>())
+        );
+
+
+        // Extract as patchField
+        volScalarField vsf
+        (
+            IOobject
+            (
+                "patchDist",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("patchDist", dimLength, 0.0)
+        );
+        scalarField pf(vsf.boundaryField()[patch.index()].size());
+        forAll(pf, faceI)
+        {
+            pf[faceI] = Foam::sqrt(allFaceInfo[faceI].distSqr());
+        }
+        vsf.boundaryField()[patch.index()] = pf;
+
+        Info<< "Writing patchDist volScalarField to " << runTime.value()
+            << endl;
+
+        vsf.write();
     }
-    vsf.boundaryField()[patch.index()] = pf;
 
-    Info<< "Writing patchDist volScalarField to " << runTime.value()
-        << endl;
 
-    vsf.write();
+    // 2. Use a wrapper to walk from all boundary edges on selected patches
+    {
+        labelHashSet otherPatchIDs(identity(mesh.boundaryMesh().size()));
+        otherPatchIDs.erase(patch.index());
 
+        Info<< "Walking on patch " << patch.index()
+            << " from edges shared with patches " << otherPatchIDs
+            << endl;
+
+        patchDist pwd(patch, otherPatchIDs);
+
+        // Extract as patchField
+        volScalarField vsf
+        (
+            IOobject
+            (
+                "otherPatchDist",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("otherPatchDist", dimLength, 0.0)
+        );
+        vsf.boundaryField()[patch.index()] = pwd;
+
+        Info<< "Writing otherPatchDist volScalarField to " << runTime.value()
+            << endl;
+
+        vsf.write();
+    }
 
     Info<< "\nEnd\n" << endl;
     return 0;
