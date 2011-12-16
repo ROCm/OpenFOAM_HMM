@@ -36,31 +36,21 @@ const Foam::scalar Foam::liquidMixtureProperties::TrMax = 0.999;
 
 Foam::liquidMixtureProperties::liquidMixtureProperties
 (
-    const dictionary& thermophysicalProperties
+    const dictionary& dict
 )
 :
-    components_(thermophysicalProperties.lookup("liquidComponents")),
-    properties_(components_.size())
+    components_(),
+    properties_()
 {
-    // can use sub-dictionary "liquidProperties" to avoid
-    // collisions with identically named gas-phase entries
-    // (eg, H2O liquid vs. gas)
-    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
-    (
-        "liquidProperties"
-    );
-
-    const dictionary& props =
-    (
-        subDictPtr ? *subDictPtr : thermophysicalProperties
-    );
+    components_ = dict.toc();
+    properties_.setSize(components_.size());
 
     forAll(components_, i)
     {
         properties_.set
         (
             i,
-            liquidProperties::New(props.subDict(components_[i]))
+            liquidProperties::New(dict.subDict(components_[i]))
         );
     }
 }

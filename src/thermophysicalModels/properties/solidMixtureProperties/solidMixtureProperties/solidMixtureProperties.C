@@ -27,29 +27,16 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidMixtureProperties::solidMixtureProperties
-(
-    const dictionary& thermophysicalProperties
-)
+Foam::solidMixtureProperties::solidMixtureProperties(const dictionary& dict)
 :
-    components_(thermophysicalProperties.lookup("solidComponents")),
-    properties_(components_.size())
+    components_(),
+    properties_()
 {
-    // can use sub-dictionary "solidProperties" to avoid
-    // collisions with identically named gas-phase entries
-    const dictionary* subDictPtr = thermophysicalProperties.subDictPtr
-    (
-        "solidProperties"
-    );
-
-    const dictionary& props =
-    (
-        subDictPtr ? *subDictPtr : thermophysicalProperties
-    );
-
+    components_ = dict.toc();
+    properties_.setSize(components_.size());
     forAll(components_, i)
     {
-        properties_.set(i, solidProperties::New(props.subDict(components_[i])));
+        properties_.set(i, solidProperties::New(dict.subDict(components_[i])));
     }
 }
 
