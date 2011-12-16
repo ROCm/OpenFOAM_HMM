@@ -49,7 +49,6 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 //        DataEntryType = CompatibilityConstant<Type>::typeName;
         DataEntryType = "CompatibilityConstant";
     }
-    
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(DataEntryType);
