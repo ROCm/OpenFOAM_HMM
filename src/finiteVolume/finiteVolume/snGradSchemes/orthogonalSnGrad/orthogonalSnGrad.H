@@ -65,7 +65,7 @@ class orthogonalSnGrad
 public:
 
     //- Runtime type information
-    TypeName("uncorrected");
+    TypeName("orthogonal");
 
 
     // Constructors
