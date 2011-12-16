@@ -27,7 +27,6 @@ inertSpecie     N2;
 
 liquids
 {
-    liquidComponents ( H2O );
     H2O
     {
         defaultCoeffs   yes;
@@ -36,7 +35,7 @@ liquids
 
 solids
 {
-    solidComponents ( );
+    // none
 }
 
 
