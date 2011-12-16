@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class springRenumber Declaration
+                       Class springRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
 class springRenumber
@@ -87,6 +87,7 @@ public:
         //- Construct given the renumber dictionary
         springRenumber(const dictionary& renumberDict);
 
+
     //- Destructor
     virtual ~springRenumber()
     {}
@@ -117,7 +118,6 @@ public:
             const labelListList& cellCells,
             const pointField& cc
         );
-
 };
 
 

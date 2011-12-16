@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class randomRenumber Declaration
+                      Class randomRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
 class randomRenumber
@@ -65,6 +65,7 @@ public:
 
         //- Construct given the renumber dictionary
         randomRenumber(const dictionary& renumberDict);
+
 
     //- Destructor
     virtual ~randomRenumber()

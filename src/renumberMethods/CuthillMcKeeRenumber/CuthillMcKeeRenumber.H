@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class CuthillMcKeeRenumber Declaration
+                   Class CuthillMcKeeRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
 class CuthillMcKeeRenumber
@@ -71,6 +71,7 @@ public:
 
         //- Construct given the renumber dictionary
         CuthillMcKeeRenumber(const dictionary& renumberDict);
+
 
     //- Destructor
     virtual ~CuthillMcKeeRenumber()
@@ -103,7 +104,6 @@ public:
             const labelListList& cellCells,
             const pointField& cc
         );
-
 };
 
 
