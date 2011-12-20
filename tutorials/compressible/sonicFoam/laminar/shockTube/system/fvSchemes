@@ -40,9 +40,9 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian((rho*(1|A(U))),p) Gauss linear corrected;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(alphaEff,e) Gauss linear corrected;
+    laplacian((rho*(1|A(U))),p) Gauss linear orthogonal;
+    laplacian(muEff,U) Gauss linear orthogonal;
+    laplacian(alphaEff,e) Gauss linear orthogonal;
 }
 
 interpolationSchemes
@@ -52,7 +52,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default         orthogonal;
 }
 
 fluxRequired

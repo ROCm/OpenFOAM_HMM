@@ -35,8 +35,8 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian(nu,U) Gauss linear corrected;
-    laplacian((1|A(U)),p) Gauss linear corrected;
+    laplacian(nu,U) Gauss linear orthogonal;
+    laplacian((1|A(U)),p) Gauss linear orthogonal;
 }
 
 interpolationSchemes
@@ -47,7 +47,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default         orthogonal;
 }
 
 fluxRequired

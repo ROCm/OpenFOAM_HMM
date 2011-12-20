@@ -41,13 +41,13 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;
-    laplacian(muEff,U) Gauss linear uncorrected;
-    laplacian(mut,U) Gauss linear uncorrected;
-    laplacian(DkEff,k) Gauss linear uncorrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear uncorrected;
-    laplacian((rho*(1|A(U))),p) Gauss linear uncorrected;
-    laplacian(alphaEff,h) Gauss linear uncorrected;
+    default         Gauss linear orthogonal;
+    laplacian(muEff,U) Gauss linear orthogonal;
+    laplacian(mut,U) Gauss linear orthogonal;
+    laplacian(DkEff,k) Gauss linear orthogonal;
+    laplacian(DepsilonEff,epsilon) Gauss linear orthogonal;
+    laplacian((rho*(1|A(U))),p) Gauss linear orthogonal;
+    laplacian(alphaEff,h) Gauss linear orthogonal;
 }
 
 interpolationSchemes
@@ -57,7 +57,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;
+    default         orthogonal;
 }
 
 fluxRequired

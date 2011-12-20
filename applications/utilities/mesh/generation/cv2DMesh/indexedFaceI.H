@@ -106,3 +106,5 @@ inline int CGAL::indexedFace<Gt, Fb>::faceIndex() const
     return index_;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

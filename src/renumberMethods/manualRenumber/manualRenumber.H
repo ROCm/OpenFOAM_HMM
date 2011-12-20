@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class manualRenumber Declaration
+                      Class manualRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
 class manualRenumber
@@ -70,6 +70,7 @@ public:
 
         //- Construct given the renumber dictionary
         manualRenumber(const dictionary& renumberDict);
+
 
     //- Destructor
     virtual ~manualRenumber()
@@ -110,7 +111,6 @@ public:
             );
             return labelList(0);
         }
-
 };
 
 

@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 inline Foam::scalar Foam::cv2DControls::minCellSize() const
 {
     return minCellSize_;

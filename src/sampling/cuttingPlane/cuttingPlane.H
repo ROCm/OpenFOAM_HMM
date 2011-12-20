@@ -63,13 +63,15 @@ class cuttingPlane
     public plane,
     public MeshedSurface<face>
 {
-    //- Private typedefs for convenience
-        typedef MeshedSurface<face> MeshStorage;
+    //- Private typedef for convenience
+    typedef MeshedSurface<face> MeshStorage;
+
 
     // Private data
 
         //- List of cells cut by the plane
         labelList cutCells_;
+
 
     // Private Member Functions
 
@@ -128,6 +130,7 @@ protected:
 
         //- remap action on triangulation or cleanup
         virtual void remapFaces(const labelUList& faceMap);
+
 
 public:
 
