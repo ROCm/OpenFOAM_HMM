@@ -148,9 +148,6 @@ class AMIInterpolation
         //- Octree used to find face seeds
         autoPtr<indexedOctree<treeType> > treePtr_;
 
-        //- Starting face seed index
-        label startSeedI_;
-
         //- Face triangulation mode
         const faceAreaIntersect::triangulationMode triMode_;
 
@@ -268,6 +265,7 @@ class AMIInterpolation
             //- Set the source and target seed faces
             void setNextFaces
             (
+                label& startSeedI,
                 label& srcFaceI,
                 label& tgtFaceI,
                 const primitivePatch& srcPatch0,
@@ -275,7 +273,7 @@ class AMIInterpolation
                 const boolList& mapFlag,
                 labelList& seedFaces,
                 const DynamicList<label>& visitedFaces
-            );
+            ) const;
 
 
         // Evaluation

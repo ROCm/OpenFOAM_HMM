@@ -764,6 +764,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::appendNbrFaces
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
 (
+    label& startSeedI,
     label& srcFaceI,
     label& tgtFaceI,
     const primitivePatch& srcPatch0,
@@ -771,7 +772,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
     const boolList& mapFlag,
     labelList& seedFaces,
     const DynamicList<label>& visitedFaces
-)
+) const
 {
 //    const labelList& srcNbrFaces = srcPatch0.pointFaces()[srcFaceI];
     const labelList& srcNbrFaces = srcPatch0.faceFaces()[srcFaceI];
@@ -815,13 +816,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
     {
         // try to use existing seed
         bool foundNextSeed = false;
-        for (label faceI = startSeedI_; faceI < mapFlag.size(); faceI++)
+        for (label faceI = startSeedI; faceI < mapFlag.size(); faceI++)
         {
             if (mapFlag[faceI])
             {
                 if (!foundNextSeed)
                 {
-                    startSeedI_ = faceI;
+                    startSeedI = faceI;
                     foundNextSeed = true;
                 }
 
@@ -843,13 +844,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
         }
 
 //        foundNextSeed = false;
-        for (label faceI = startSeedI_; faceI < mapFlag.size(); faceI++)
+        for (label faceI = startSeedI; faceI < mapFlag.size(); faceI++)
         {
             if (mapFlag[faceI])
             {
                 if (!foundNextSeed)
                 {
-                    startSeedI_ = faceI + 1;
+                    startSeedI = faceI + 1;
                     foundNextSeed = true;
                 }
 
@@ -867,6 +868,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
         (
             "void Foam::cyclicAMIPolyPatch::setNextFaces"
             "("
+                "label&, "
                 "label&, "
                 "label&, "
                 "const primitivePatch&, "
@@ -1035,7 +1037,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     boolList mapFlag(nFacesRemaining, true);
 
     // reset starting seed
-    startSeedI_ = 0;
+    label startSeedI = 0;
 
     label nNonOverlap = 0;
     do
@@ -1086,6 +1088,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         {
             setNextFaces
             (
+                startSeedI,
                 srcFaceI,
                 tgtFaceI,
                 srcPatch,
@@ -1453,7 +1456,6 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),
-    startSeedI_(0),
     triMode_(triMode),
     srcMapPtr_(NULL),
     tgtMapPtr_(NULL)
@@ -1486,7 +1488,6 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),
-    startSeedI_(0),
     triMode_(triMode),
     srcMapPtr_(NULL),
     tgtMapPtr_(NULL)
@@ -1574,7 +1575,6 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),
-    startSeedI_(0),
     triMode_(fineAMI.triMode_),
     srcMapPtr_(NULL),
     tgtMapPtr_(NULL)
