@@ -15,6 +15,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Write maps from renumbered back to original mesh
+writeMaps true;
+
+// Optional entry: sort cells on coupled boundaries to last for use with
+// e.g. nonBlockingGaussSeidel.
+sortCoupledFaceCells false;
+
+// Optional entry: renumber on a block-by-block basis. This can be used on
+// large cases to keep the blocks fitting in cache with all the the cache
+// missed bunched at the end.
+//blockSize 0;
+
+// Optional entry: sort points into internal and boundary points
+//orderPoints false;
+
+
+
 method          CuthillMcKee;
 //method          manual;
 //method          random;

@@ -464,23 +464,6 @@ int main(int argc, char *argv[])
         "Renumber mesh to minimise bandwidth"
     );
 
-    argList::addOption
-    (
-        "blockSize",
-        "block size",
-        "order cells into blocks (using decomposition) before ordering"
-    );
-    argList::addBoolOption
-    (
-        "orderPoints",
-        "order points into internal and boundary points"
-    );
-    argList::addBoolOption
-    (
-        "writeMaps",
-        "write cellMap, faceMap, pointMap in polyMesh/"
-    );
-
 #   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
@@ -507,41 +490,6 @@ int main(int argc, char *argv[])
 
     const bool readDict = args.optionFound("dict");
 
-
-    label blockSize = 0;
-    args.optionReadIfPresent("blockSize", blockSize, 0);
-
-    if (blockSize > 0)
-    {
-        Info<< "Ordering cells into regions of size " << blockSize
-            << " (using decomposition);"
-            << " ordering faces into region-internal and region-external." << nl
-            << endl;
-
-        if (blockSize < 0 || blockSize >= mesh.nCells())
-        {
-            FatalErrorIn(args.executable())
-                << "Block size " << blockSize << " should be positive integer"
-                << " and less than the number of cells in the mesh."
-                << exit(FatalError);
-        }
-    }
-
-    const bool orderPoints = args.optionFound("orderPoints");
-    if (orderPoints)
-    {
-        Info<< "Ordering points into internal and boundary points." << nl
-            << endl;
-    }
-
-    const bool writeMaps = args.optionFound("writeMaps");
-
-    if (writeMaps)
-    {
-        Info<< "Writing renumber maps (new to old) to polyMesh." << nl
-            << endl;
-    }
-
     const bool overwrite = args.optionFound("overwrite");
 
     label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
@@ -550,6 +498,11 @@ int main(int argc, char *argv[])
         << "Band before renumbering: "
         << returnReduce(band, maxOp<label>()) << nl << endl;
 
+
+    bool sortCoupledFaceCells = false;
+    bool writeMaps = false;
+    bool orderPoints = false;
+    label blockSize = 0;
 
     // Construct renumberMethod
     autoPtr<renumberMethod> renumberPtr;
@@ -571,6 +524,51 @@ int main(int argc, char *argv[])
         );
 
         renumberPtr = renumberMethod::New(renumberDict);
+
+
+        sortCoupledFaceCells = renumberDict.lookupOrDefault
+        (
+            "sortCoupledFaceCells",
+            false
+        );
+        if (sortCoupledFaceCells)
+        {
+            Info<< "Sorting cells on coupled boundaries to be last." << nl
+                << endl;
+        }
+
+        blockSize = renumberDict.lookupOrDefault("blockSize", 0);
+        if (blockSize > 0)
+        {
+            Info<< "Ordering cells into regions of size " << blockSize
+                << " (using decomposition);"
+                << " ordering faces into region-internal and region-external."
+                << nl << endl;
+
+            if (blockSize < 0 || blockSize >= mesh.nCells())
+            {
+                FatalErrorIn(args.executable())
+                    << "Block size " << blockSize
+                    << " should be positive integer"
+                    << " and less than the number of cells in the mesh."
+                    << exit(FatalError);
+            }
+        }
+
+        orderPoints = renumberDict.lookupOrDefault("orderPoints", false);
+        if (orderPoints)
+        {
+            Info<< "Ordering points into internal and boundary points." << nl
+                << endl;
+        }
+
+        writeMaps = readLabel(renumberDict.lookup("writeMaps"));
+        if (writeMaps)
+        {
+            Info<< "Writing renumber maps (new to old) to polyMesh." << nl
+                << endl;
+        }
+
     }
     else
     {
@@ -764,6 +762,76 @@ int main(int argc, char *argv[])
         );
 
         cellOrder = invert(mesh.nCells(), reverseCellOrder);
+
+
+        if (sortCoupledFaceCells)
+        {
+            // Change order so all coupled patch faceCells are at the end.
+            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+            // Collect all boundary cells on coupled patches
+            label nBndCells = 0;
+            forAll(pbm, patchI)
+            {
+                if (pbm[patchI].coupled())
+                {
+                    nBndCells += pbm[patchI].size();
+                }
+            }
+
+            labelList bndCellMap(nBndCells);
+            labelList bndCells(bndCellMap);
+            nBndCells = 0;
+            forAll(pbm, patchI)
+            {
+                if (pbm[patchI].coupled())
+                {
+                    const labelUList& faceCells = pbm[patchI].faceCells();
+                    forAll(faceCells, i)
+                    {
+                        label cellI = faceCells[i];
+                        bndCells[nBndCells] = cellI;
+                        bndCellMap[nBndCells++] = reverseCellOrder[cellI];
+                    }
+                }
+            }
+            bndCells.setSize(nBndCells);
+            bndCellMap.setSize(nBndCells);
+
+
+            // Sort
+            labelList order;
+            sortedOrder(bndCellMap, order);
+
+            // Redo newReverseCellOrder
+            labelList newReverseCellOrder(mesh.nCells(), -1);
+
+            label sortedI = mesh.nCells();
+            forAllReverse(order, i)
+            {
+                label origCellI = bndCells[order[i]];
+                newReverseCellOrder[origCellI] = --sortedI;
+            }
+
+            Info<< "Ordered all " << nBndCells << " cells with a coupled face"
+                << "  to the end of the cell list, starting at " << sortedI
+                << endl;
+
+            // Compact
+            sortedI = 0;
+            forAll(cellOrder, newCellI)
+            {
+                label origCellI = cellOrder[newCellI];
+                if (newReverseCellOrder[origCellI] == -1)
+                {
+                    newReverseCellOrder[origCellI] = sortedI++;
+                }
+            }
+
+            // Update sorted back to original (unsorted) map
+            cellOrder = invert(mesh.nCells(), newReverseCellOrder);
+        }
+
 
         // Determine new to old face order with new cell numbering
         faceOrder = getFaceOrder
