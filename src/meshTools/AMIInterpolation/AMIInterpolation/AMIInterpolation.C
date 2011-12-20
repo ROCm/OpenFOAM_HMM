@@ -118,7 +118,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch
-)
+) const
 {
     const scalar maxBoundsError = 0.05;
 
@@ -188,7 +188,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch
-)
+) const
 {
     label procI = 0;
 
@@ -242,7 +242,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
     const List<treeBoundBoxList>& procBb,
     const treeBoundBox& bb,
     boolList& overlaps
-)
+) const
 {
     overlaps.setSize(procBb.size());
     overlaps = false;
@@ -276,7 +276,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
     List<faceList>& faces,
     List<pointField>& points,
     List<labelList>& faceIDs
-)
+) const
 {
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
@@ -373,7 +373,7 @@ distributeAndMergePatches
     faceList& tgtFaces,
     pointField& tgtPoints,
     labelList& tgtFaceIDs
-)
+) const
 {
     // Exchange per-processor data
     List<faceList> allFaces;
@@ -485,7 +485,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
 (
     const primitivePatch& srcPatch,
     const primitivePatch& tgtPatch
-)
+) const
 {
     // Get decomposition of patch
     List<treeBoundBoxList> procBb(Pstream::nProcs());

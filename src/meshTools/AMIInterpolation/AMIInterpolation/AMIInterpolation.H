@@ -187,7 +187,7 @@ class AMIInterpolation
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
-            );
+            ) const;
 
             //- Reset the octree for the traget patch face search
             void resetTree(const primitivePatch& tgtPatch);
@@ -201,14 +201,14 @@ class AMIInterpolation
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
-            );
+            ) const;
 
             label calcOverlappingProcs
             (
                 const List<treeBoundBoxList>& procBb,
                 const treeBoundBox& bb,
                 boolList& overlaps
-            );
+            ) const;
 
             void distributePatches
             (
@@ -218,7 +218,7 @@ class AMIInterpolation
                 List<faceList>& faces,
                 List<pointField>& points,
                 List<labelList>& tgtFaceIDs
-            );
+            ) const;
 
             void distributeAndMergePatches
             (
@@ -228,13 +228,13 @@ class AMIInterpolation
                 faceList& tgtFaces,
                 pointField& tgtPoints,
                 labelList& tgtFaceIDs
-            );
+            ) const;
 
             autoPtr<mapDistribute> calcProcMap
             (
                 const primitivePatch& srcPatch,
                 const primitivePatch& tgtPatch
-            );
+            ) const;
 
 
         // Initialisation
