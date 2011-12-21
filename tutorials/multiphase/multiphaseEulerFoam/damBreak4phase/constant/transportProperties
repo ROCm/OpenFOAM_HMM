@@ -69,7 +69,7 @@ phases
          diameterModel constant;
          constantCoeffs
          {
-             d               1e-3;
+             d              3e-3;
          }
      }
 );
@@ -96,9 +96,9 @@ interfaceCompression
 
 virtualMass
 (
-    (air water)     0.5
-    (air oil)       0.5
-    (air mercury)   0.5
+    (air water)     0
+    (air oil)       0
+    (air mercury)   0
     (water oil)     0.5
     (water mercury) 0.5
     (oil mercury)   0.5
@@ -108,21 +108,132 @@ drag
 (
     (air water)
     {
-        type SchillerNaumann;
+        type blended;
+
+        air
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        water
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
         residualPhaseFraction 1e-3;
         residualSlip 1e-3;
     }
 
     (air oil)
     {
-        type SchillerNaumann;
+        type blended;
+
+        air
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        oil
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
         residualPhaseFraction 1e-3;
         residualSlip 1e-3;
     }
 
     (air mercury)
     {
-        type SchillerNaumann;
+        type blended;
+
+        air
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        mercury
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
+    }
+
+    (water oil)
+    {
+        type blended;
+
+        water
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        oil
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
+    }
+
+    (water mercury)
+    {
+        type blended;
+
+        water
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        mercury
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        residualPhaseFraction 1e-3;
+        residualSlip 1e-3;
+    }
+
+    (oil mercury)
+    {
+        type blended;
+
+        oil
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
+        mercury
+        {
+            type SchillerNaumann;
+            residualPhaseFraction 0;
+            residualSlip 0;
+        }
+
         residualPhaseFraction 1e-3;
         residualSlip 1e-3;
     }
