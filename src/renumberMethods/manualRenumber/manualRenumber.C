@@ -61,7 +61,7 @@ Foam::labelList Foam::manualRenumber::renumber
 (
     const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
     labelIOList oldToNew
     (

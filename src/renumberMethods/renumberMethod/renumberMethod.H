@@ -111,7 +111,7 @@ public:
 
         //- Return for every cell the new cell label.
         //  This is only defined for geometric renumberMethods.
-        virtual labelList renumber(const pointField&)
+        virtual labelList renumber(const pointField&) const
         {
             notImplemented
             (
@@ -122,7 +122,7 @@ public:
 
         //- Return for every cell the new cell label. Use the
         //  mesh connectivity (if needed)
-        virtual labelList renumber(const polyMesh&, const pointField&);
+        virtual labelList renumber(const polyMesh&, const pointField&) const;
 
         //- Return for every cell the new cell label. Gets
         //  passed agglomeration map (from fine to coarse cells) and coarse
@@ -136,7 +136,7 @@ public:
             const polyMesh& mesh,
             const labelList& cellToRegion,
             const pointField& regionPoints
-        );
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -145,7 +145,7 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        ) = 0;
+        ) const = 0;
 
 };
 
