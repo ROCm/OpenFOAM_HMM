@@ -28,8 +28,15 @@ streamLines
     // Steps particles can travel before being removed
     lifeTime        10000;
 
-    // Number of steps per cell (estimate). Set to 1 to disable subcycling.
-    nSubCycle 5;
+    //- Specify either absolute length of steps (trackLength) or a number
+    //  of subcycling steps per cell (nSubCycle)
+
+        // Size of single track segment [m]
+        //trackLength 1e-3;
+
+        // Number of steps per cell (estimate). Set to 1 to disable subcycling.
+        nSubCycle 5;
+
 
     // Cloud name to use
     cloudName       particleTracks;
