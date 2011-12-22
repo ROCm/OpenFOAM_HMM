@@ -29,7 +29,7 @@ Description
     renumbering all fields from all the time directories.
 
     By default uses bandCompression (CuthillMcKee) but will
-    read system/renumberMeshDict if present and use the method from there.
+    read system/renumberMeshDict if -dict option is present
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +45,7 @@ Description
 #include "renumberMethod.H"
 #include "zeroGradientFvPatchFields.H"
 #include "CuthillMcKeeRenumber.H"
+#include "fvMeshSubset.H"
 
 using namespace Foam;
 
@@ -455,6 +456,69 @@ autoPtr<mapPolyMesh> reorderMesh
 }
 
 
+// Return new to old cell numbering
+labelList regionRenumber
+(
+    const renumberMethod& method,
+    const fvMesh& mesh,
+    const labelList& cellToRegion
+)
+{
+    Info<< "Determining cell order:" << endl;
+
+    labelList cellOrder(cellToRegion.size());
+
+    label nRegions = max(cellToRegion)+1;
+
+    labelListList regionToCells(invertOneToMany(nRegions, cellToRegion));
+
+    label cellI = 0;
+
+    forAll(regionToCells, regionI)
+    {
+        Info<< "    region " << regionI << " starts at " << cellI << endl;
+
+        // Make sure no parallel comms
+        bool oldParRun = UPstream::parRun();
+        UPstream::parRun() = false;
+
+        // Per region do a reordering.
+        fvMeshSubset subsetter(mesh);
+        subsetter.setLargeCellSubset(cellToRegion, regionI);
+
+        const fvMesh& subMesh = subsetter.subMesh();
+
+        labelList subReverseCellOrder = method.renumber
+        (
+            subMesh,
+            subMesh.cellCentres()
+        );
+
+        labelList subCellOrder
+        (
+            invert
+            (
+                subMesh.nCells(),
+                subReverseCellOrder
+            )
+        );
+
+        // Restore state
+        UPstream::parRun() = oldParRun;
+
+        const labelList& cellMap = subsetter.cellMap();
+
+        forAll(subCellOrder, i)
+        {
+            cellOrder[cellI++] = cellMap[subCellOrder[i]];
+        }
+    }
+    Info<< endl;
+
+    return cellOrder;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -505,23 +569,28 @@ int main(int argc, char *argv[])
     label blockSize = 0;
 
     // Construct renumberMethod
+    autoPtr<IOdictionary> renumberDictPtr;
     autoPtr<renumberMethod> renumberPtr;
 
     if (readDict)
     {
         Info<< "Renumber according to renumberMeshDict." << nl << endl;
 
-        IOdictionary renumberDict
+        renumberDictPtr.reset
         (
-            IOobject
+            new IOdictionary
             (
-                "renumberMeshDict",
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
+                IOobject
+                (
+                    "renumberMeshDict",
+                    runTime.system(),
+                    mesh,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE
+                )
             )
         );
+        const IOdictionary renumberDict = renumberDictPtr();
 
         renumberPtr = renumberMethod::New(renumberDict);
 
@@ -562,7 +631,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        writeMaps = readLabel(renumberDict.lookup("writeMaps"));
+        renumberDict.lookup("writeMaps") >> writeMaps;
         if (writeMaps)
         {
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl
@@ -683,21 +752,14 @@ int main(int argc, char *argv[])
         // fields is done correctly!
 
         label nBlocks = mesh.nCells() / blockSize;
-        Info<< "nBlocks = " << nBlocks << endl;
+        Info<< "nBlocks   = " << nBlocks << endl;
 
-        // Read decomposePar dictionary
-        IOdictionary decomposeDict
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
+        // Read decompositionMethod dictionary
+        dictionary decomposeDict(renumberDictPtr().subDict("blockCoeffs"));
         decomposeDict.set("numberOfSubdomains", nBlocks);
+
+        bool oldParRun = UPstream::parRun();
+        UPstream::parRun() = false;
 
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
@@ -713,6 +775,9 @@ int main(int argc, char *argv[])
             )
         );
 
+        // Restore state
+        UPstream::parRun() = oldParRun;
+
         // For debugging: write out region
         createScalarField
         (
@@ -726,23 +791,7 @@ int main(int argc, char *argv[])
             << nl << endl;
 
 
-        // Find point per region
-        pointField regionPoints(nBlocks, vector::zero);
-        forAll(cellToRegion, cellI)
-        {
-            regionPoints[cellToRegion[cellI]] = mesh.cellCentres()[cellI];
-        }
-
-        // Use block based renumbering.
-        // Detemines old to new cell ordering
-        labelList reverseCellOrder = renumberPtr().renumber
-        (
-            mesh,
-            cellToRegion,
-            regionPoints
-        );
-
-        cellOrder = invert(mesh.nCells(), reverseCellOrder);
+        cellOrder = regionRenumber(renumberPtr(), mesh, cellToRegion);
 
         // Determine new to old face order with new cell numbering
         faceOrder = getRegionFaceOrder

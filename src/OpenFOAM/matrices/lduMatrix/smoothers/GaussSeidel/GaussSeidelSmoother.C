@@ -107,15 +107,28 @@ void Foam::GaussSeidelSmoother::smooth
     // To compensate for this, it is necessary to turn the
     // sign of the contribution.
 
-    FieldField<Field, scalar> mBouCoeffs(interfaceBouCoeffs_.size());
-
+    //FieldField<Field, scalar> mBouCoeffs(interfaceBouCoeffs_.size());
+    //
+    //forAll(mBouCoeffs, patchi)
+    //{
+    //    if (interfaces_.set(patchi))
+    //    {
+    //        mBouCoeffs.set(patchi, -interfaceBouCoeffs_[patchi]);
+    //    }
+    //}
+    FieldField<Field, scalar>& mBouCoeffs =
+        const_cast<FieldField<Field, scalar>&>
+        (
+            interfaceBouCoeffs_
+        );
     forAll(mBouCoeffs, patchi)
     {
         if (interfaces_.set(patchi))
         {
-            mBouCoeffs.set(patchi, -interfaceBouCoeffs_[patchi]);
+            mBouCoeffs[patchi].negate();
         }
     }
+
 
     for (label sweep=0; sweep<nSweeps; sweep++)
     {
@@ -168,6 +181,15 @@ void Foam::GaussSeidelSmoother::smooth
             }
 
             psiPtr[cellI] = curPsi;
+        }
+    }
+
+    // Restore interfaceBouCoeffs_
+    forAll(mBouCoeffs, patchi)
+    {
+        if (interfaces_.set(patchi))
+        {
+            mBouCoeffs[patchi].negate();
         }
     }
 }

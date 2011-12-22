@@ -34,12 +34,64 @@ License
 #include "globalIndex.H"
 #include "mapDistribute.H"
 #include "interpolationCellPoint.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(Foam::streamLine, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::indirectPrimitivePatch>
+Foam::streamLine::wallPatch() const
+{
+    const fvMesh& mesh = dynamic_cast<const fvMesh&>(obr_);
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    label nFaces = 0;
+
+    forAll(patches, patchI)
+    {
+        //if (!polyPatch::constraintType(patches[patchI].type()))
+        if (isA<wallPolyPatch>(patches[patchI]))
+        {
+            nFaces += patches[patchI].size();
+        }
+    }
+
+    labelList addressing(nFaces);
+
+    nFaces = 0;
+
+    forAll(patches, patchI)
+    {
+        //if (!polyPatch::constraintType(patches[patchI].type()))
+        if (isA<wallPolyPatch>(patches[patchI]))
+        {
+            const polyPatch& pp = patches[patchI];
+
+            forAll(pp, i)
+            {
+                addressing[nFaces++] = pp.start()+i;
+            }
+        }
+    }
+
+    return autoPtr<indirectPrimitivePatch>
+    (
+        new indirectPrimitivePatch
+        (
+            IndirectList<face>
+            (
+                mesh.faces(),
+                addressing
+            ),
+            mesh.points()
+        )
+    );
+}
+
 
 void Foam::streamLine::track()
 {
@@ -72,7 +124,7 @@ void Foam::streamLine::track()
 
     label nSeeds = returnReduce(particles.size(), sumOp<label>());
 
-    Info<< "Seeded " << nSeeds << " particles." << endl;
+    Info<< type() << " : seeded " << nSeeds << " particles." << endl;
 
     // Read or lookup fields
     PtrList<volScalarField> vsFlds;
@@ -163,7 +215,6 @@ void Foam::streamLine::track()
                 vsInterp.set
                 (
                     nScalar++,
-                    //new interpolationCellPoint<scalar>(f)
                     interpolation<scalar>::New
                     (
                         interpolationScheme_,
@@ -186,7 +237,6 @@ void Foam::streamLine::track()
                 vvInterp.set
                 (
                     nVector++,
-                    //new interpolationCellPoint<vector>(f)
                     interpolation<vector>::New
                     (
                         interpolationScheme_,
@@ -241,6 +291,120 @@ void Foam::streamLine::track()
         allVectors_[i].setCapacity(nSeeds);
     }
 
+
+    //- For surface following: per face the normal to constrain the velocity
+    //  with.
+    pointField patchNormals;
+
+
+    if (followSurface_)
+    {
+        // Determine geometric data on the non-constraint patches
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // - point normals
+        // - neighbouring cells
+        autoPtr<indirectPrimitivePatch> boundaryPatch(wallPatch());
+
+        // Calculate parallel consistent normal (on boundaryPatch points only)
+        pointField boundaryNormals
+        (
+            PatchTools::pointNormals
+            (
+                mesh,
+                boundaryPatch(),
+                boundaryPatch().addressing()
+            )
+        );
+        // Make sure all points know about point normal. There might be points
+        // which are not on boundaryPatch() but coupled to points that are.
+        pointField pointNormals(mesh.nPoints(), vector::zero);
+        UIndirectList<point>
+        (
+            pointNormals,
+            boundaryPatch().meshPoints()
+        ) = boundaryNormals;
+        boundaryNormals.clear();
+
+        mesh.globalData().syncPointData
+        (
+            pointNormals,
+            maxMagSqrEqOp<point>(),
+            mapDistribute::transform()
+        );
+
+        // Calculate per-face a single constraint normal:
+        // - faces on patch: face-normal
+        // - faces on cell with point on patch: point-normal
+        // - rest: vector::zero
+        //
+        // Note: the disadvantage is that we can only handle faces with one
+        //       point on the patch - otherwise we might pick up the wrong
+        //       velocity.
+
+
+
+        patchNormals.setSize(mesh.nFaces(), vector::zero);
+        label nPointNormals = 0;
+
+        // 1. faces on patch
+        UIndirectList<point>(patchNormals, boundaryPatch().addressing()) =
+             boundaryPatch().faceNormals();
+
+        // 2. faces with a point on the patch
+        forAll(mesh.faces(), faceI)
+        {
+            if (patchNormals[faceI] == vector::zero)
+            {
+                const face& f = mesh.faces()[faceI];
+                forAll(f, fp)
+                {
+                    label pointI = f[fp];
+                    if (pointNormals[pointI] != vector::zero)
+                    {
+                        patchNormals[faceI] = pointNormals[pointI];
+                        nPointNormals++;
+                    }
+                }
+            }
+        }
+
+        // 3. cells on faces with a point on the patch
+        forAll(mesh.points(), pointI)
+        {
+            if (pointNormals[pointI] != vector::zero)
+            {
+                const labelList& pCells = mesh.pointCells(pointI);
+                forAll(pCells, i)
+                {
+                    const cell& cFaces = mesh.cells()[pCells[i]];
+                    forAll(cFaces, j)
+                    {
+                        label faceI = cFaces[j];
+
+                        if (patchNormals[faceI] == vector::zero)
+                        {
+                            patchNormals[faceI] = pointNormals[pointI];
+                            nPointNormals++;
+                        }
+                    }
+                }
+            }
+        }
+
+        Info<< type() << " : calculated constrained-tracking normals" << nl
+            << "Number of faces in mesh                     : "
+            << returnReduce(mesh.nFaces(), sumOp<label>()) << nl
+            << "    of which on walls                       : "
+            <<  returnReduce
+                (
+                    boundaryPatch().addressing().size(),
+                    sumOp<label>()
+                ) << nl
+            << "    of which on cell with point on boundary : "
+            << returnReduce(nPointNormals, sumOp<label>()) << nl
+            << endl;
+    }
+
     // additional particle info
     streamLineParticle::trackingData td
     (
@@ -248,8 +412,16 @@ void Foam::streamLine::track()
         vsInterp,
         vvInterp,
         UIndex,         // index of U in vvInterp
-        trackForward_,  // track in +u direction
-        nSubCycle_,     // step through cells in steps?
+        trackForward_,  // track in +u direction?
+        nSubCycle_,     // automatic track control:step through cells in steps?
+        trackLength_,   // fixed track length
+
+        //- For surface-constrained streamlines
+        followSurface_, // stay on surface?
+        patchNormals,   // per face normal to constrain tracking to
+        //pointNormals,   // per point          ,,
+        trackHeight_,   // track height
+
         allTracks_,
         allScalars_,
         allVectors_
@@ -279,7 +451,8 @@ Foam::streamLine::streamLine
     name_(name),
     obr_(obr),
     loadFromFiles_(loadFromFiles),
-    active_(true)
+    active_(true),
+    nSubCycle_(0)
 {
     // Only active if a fvMesh is available
     if (isA<fvMesh>(obr_))
@@ -334,6 +507,16 @@ void Foam::streamLine::read(const dictionary& dict)
                 dict.lookup("U") >> UName_;
             }
         }
+
+        if (findIndex(fields_, UName_) == -1)
+        {
+            FatalIOErrorIn("streamLine::read(const dictionary&)", dict)
+                << "Velocity field for tracking " << UName_
+                << " should be present in the list of fields " << fields_
+                << exit(FatalIOError);
+        }
+
+
         dict.lookup("trackForward") >> trackForward_;
         dict.lookup("lifeTime") >> lifeTime_;
         if (lifeTime_ < 1)
@@ -343,10 +526,48 @@ void Foam::streamLine::read(const dictionary& dict)
                 << exit(FatalError);
         }
 
-        dict.lookup("nSubCycle") >> nSubCycle_;
-        if (nSubCycle_ < 1)
+
+        bool subCycling = dict.found("nSubCycle");
+        bool fixedLength = dict.found("trackLength");
+
+        if (subCycling && fixedLength)
         {
-            nSubCycle_ = 1;
+            FatalIOErrorIn("streamLine::read(const dictionary&)", dict)
+                << "Cannot both specify automatic time stepping (through '"
+                << "nSubCycle' specification) and fixed track length (through '"
+                << "trackLength')"
+                << exit(FatalIOError);
+        }
+
+
+        nSubCycle_ = 1;
+        if (dict.readIfPresent("nSubCycle", nSubCycle_))
+        {
+            trackLength_ = VGREAT;
+            if (nSubCycle_ < 1)
+            {
+                nSubCycle_ = 1;
+            }
+            Info<< type() << " : automatic track length specified through"
+                << " number of sub cycles : " << nSubCycle_ << nl << endl;
+        }
+        else
+        {
+            dict.lookup("trackLength") >> trackLength_;
+
+            Info<< type() << " : fixed track length specified : "
+                << trackLength_ << nl << endl;
+        }
+
+
+        followSurface_ = false;
+        trackHeight_ = VGREAT;
+        if (dict.readIfPresent("followSurface", followSurface_))
+        {
+            dict.lookup("trackHeight") >> trackHeight_;
+
+            Info<< type() << " : surface-constrained streamline at "
+                << trackHeight_ << " distance above the surface" << nl << endl;
         }
 
         interpolationScheme_ = dict.lookupOrDefault

@@ -63,7 +63,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
 (
     const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
     CompactListList<label> cellCells;
     decompositionMethod::calcCellCells
@@ -79,10 +79,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
 
     if (reverse_)
     {
-        for (label i = 0; i < orderedToOld.size()/2; i++)
-        {
-            Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
-        }
+        reverse(orderedToOld);
     }
 
     return invert(orderedToOld.size(), orderedToOld);
@@ -93,16 +90,13 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
 (
     const labelListList& cellCells,
     const pointField& points
-)
+) const
 {
     labelList orderedToOld = bandCompression(cellCells);
 
     if (reverse_)
     {
-        for (label i = 0; i < orderedToOld.size()/2; i++)
-        {
-            Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
-        }
+        reverse(orderedToOld);
     }
 
     return invert(orderedToOld.size(), orderedToOld);

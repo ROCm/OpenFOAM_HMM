@@ -60,7 +60,7 @@ Foam::labelList Foam::springRenumber::renumber
 (
     const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
     CompactListList<label> cellCells;
     decompositionMethod::calcCellCells
@@ -80,7 +80,7 @@ Foam::labelList Foam::springRenumber::renumber
 (
     const labelListList& cellCells,
     const pointField& points
-)
+) const
 {
     // Look at cell index as a 1D position parameter.
     // Move cells to the average 'position' of their neighbour.

@@ -55,7 +55,7 @@ Foam::randomRenumber::randomRenumber(const dictionary& renumberDict)
 Foam::labelList Foam::randomRenumber::renumber
 (
     const pointField& points
-)
+) const
 {
     Random rndGen(0);
 
@@ -77,7 +77,7 @@ Foam::labelList Foam::randomRenumber::renumber
 (
     const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
     return renumber(points);
 }
@@ -87,7 +87,7 @@ Foam::labelList Foam::randomRenumber::renumber
 (
     const labelListList& cellCells,
     const pointField& points
-)
+) const
 {
     return renumber(points);
 }

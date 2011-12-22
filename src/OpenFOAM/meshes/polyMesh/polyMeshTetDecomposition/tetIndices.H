@@ -144,11 +144,13 @@ public:
             inline tetPointRef oldTet(const polyMesh& mesh) const;
 
             //- Return the geometry corresponding to the tri on the
-            //  mesh face for this tet from the supplied mesh
+            //  mesh face for this tet from the supplied mesh. Normal of
+            //  the tri points out of the cell.
             inline triPointRef faceTri(const polyMesh& mesh) const;
 
             //- Return the point indices corresponding to the tri on the mesh
-            //  face for this tet from the supplied mesh
+            //  face for this tet from the supplied mesh. Normal of
+            //  the tri points out of the cell.
             inline triFace faceTriIs(const polyMesh& mesh) const;
 
             //- Return the geometry corresponding to the tri on the

@@ -22,53 +22,59 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::randomRenumber
+    Foam::boundaryFirstRenumber
 
 Description
-    Random renumber. Just to see effect of renumbering.
+    Cuthill-McKee renumbering
 
 SourceFiles
-    randomRenumber.C
+    boundaryFirstRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef randomRenumber_H
-#define randomRenumber_H
+#ifndef boundaryFirstRenumber_H
+#define boundaryFirstRenumber_H
 
 #include "renumberMethod.H"
+#include "Switch.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class randomRenumber Declaration
+                   Class boundaryFirstRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class randomRenumber
+class boundaryFirstRenumber
 :
     public renumberMethod
 {
+    // Private data
+
+        const Switch reverse_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const randomRenumber&);
-        randomRenumber(const randomRenumber&);
+        void operator=(const boundaryFirstRenumber&);
+        boundaryFirstRenumber(const boundaryFirstRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("random");
+    TypeName("boundaryFirst");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        randomRenumber(const dictionary& renumberDict);
+        boundaryFirstRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~randomRenumber()
+    virtual ~boundaryFirstRenumber()
     {}
 
 
@@ -76,7 +82,14 @@ public:
 
         //- Return for every coordinate the wanted processor number.
         //  We need a polyMesh (to be able to load the file)
-        virtual labelList renumber(const pointField&) const;
+        virtual labelList renumber(const pointField&) const
+        {
+            notImplemented
+            (
+                "boundaryFirstRenumber::renumber(const pointField&)"
+            );
+            return labelList(0);
+        }
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
@@ -93,7 +106,15 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        ) const;
+        ) const
+        {
+            notImplemented
+            (
+                "boundaryFirstRenumber::renumber"
+                "(const labelListList&, const pointField&)"
+            );
+            return labelList(0);
+        }
 };
 
 

@@ -43,6 +43,7 @@ SourceFiles
 #include "vectorList.H"
 #include "polyMesh.H"
 #include "writer.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,8 +96,16 @@ class streamLine
         //- Maximum lifetime (= number of cells) of particle
         label lifeTime_;
 
+        //- Surface-constrained?
+        bool followSurface_;
+
+        scalar trackHeight_;
+
         //- Number of subcycling steps
         label nSubCycle_;
+
+        //- Track length
+        scalar trackLength_;
 
         //- Optional specified name of particles
         word cloudName_;
@@ -141,6 +150,8 @@ class streamLine
             List<DynamicList<vectorList> > allVectors_;
 
 
+        //- Construct patch out of all wall patch faces
+        autoPtr<indirectPrimitivePatch> wallPatch() const;
 
         //- Do all seeding and tracking
         void track();

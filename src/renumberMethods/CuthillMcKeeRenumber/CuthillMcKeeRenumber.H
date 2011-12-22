@@ -82,7 +82,7 @@ public:
 
         //- Return for every coordinate the wanted processor number.
         //  We need a polyMesh (to be able to load the file)
-        virtual labelList renumber(const pointField&)
+        virtual labelList renumber(const pointField&) const
         {
             notImplemented("CuthillMcKeeRenumber::renumber(const pointField&)");
             return labelList(0);
@@ -94,7 +94,7 @@ public:
         (
             const polyMesh& mesh,
             const pointField& cc
-        );
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -103,7 +103,7 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        );
+        ) const;
 };
 
 
