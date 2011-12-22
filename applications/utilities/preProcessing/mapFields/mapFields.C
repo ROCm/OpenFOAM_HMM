@@ -34,11 +34,8 @@ Description
 
 #include "fvCFD.H"
 #include "meshToMesh.H"
-#include "MapVolFields.H"
-#include "MapConsistentVolFields.H"
-#include "UnMapped.H"
 #include "processorFvPatch.H"
-#include "mapLagrangian.H"
+#include "MapMeshes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,56 +43,28 @@ void mapConsistentMesh
 (
     const fvMesh& meshSource,
     const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder
+    const meshToMesh::order& mapOrder,
+    const bool subtract
 )
 {
-    // Create the interpolation scheme
-    meshToMesh meshToMeshInterp(meshSource, meshTarget);
-
-    Info<< nl
-        << "Consistently creating and mapping fields for time "
-        << meshSource.time().timeName() << nl << endl;
-
+    if (subtract)
     {
-        // Search for list of objects for this time
-        IOobjectList objects(meshSource, meshSource.time().timeName());
-
-        // Map volFields
-        // ~~~~~~~~~~~~~
-        MapConsistentVolFields<scalar>(objects, meshToMeshInterp, mapOrder);
-        MapConsistentVolFields<vector>(objects, meshToMeshInterp, mapOrder);
-        MapConsistentVolFields<sphericalTensor>
+        MapConsistentMesh<minusEqOp>
         (
-            objects,
-            meshToMeshInterp,
+            meshSource,
+            meshTarget,
             mapOrder
         );
-        MapConsistentVolFields<symmTensor>(objects, meshToMeshInterp, mapOrder);
-        MapConsistentVolFields<tensor>(objects, meshToMeshInterp, mapOrder);
     }
-
+    else
     {
-        // Search for list of target objects for this time
-        IOobjectList objects(meshTarget, meshTarget.time().timeName());
-
-        // Mark surfaceFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<surfaceScalarField>(objects);
-        UnMapped<surfaceVectorField>(objects);
-        UnMapped<surfaceSphericalTensorField>(objects);
-        UnMapped<surfaceSymmTensorField>(objects);
-        UnMapped<surfaceTensorField>(objects);
-
-        // Mark pointFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<pointScalarField>(objects);
-        UnMapped<pointVectorField>(objects);
-        UnMapped<pointSphericalTensorField>(objects);
-        UnMapped<pointSymmTensorField>(objects);
-        UnMapped<pointTensorField>(objects);
+        MapConsistentMesh<eqOp>
+        (
+            meshSource,
+            meshTarget,
+            mapOrder
+        );
     }
-
-    mapLagrangian(meshToMeshInterp);
 }
 
 
@@ -105,57 +74,32 @@ void mapSubMesh
     const fvMesh& meshTarget,
     const HashTable<word>& patchMap,
     const wordList& cuttingPatches,
-    const meshToMesh::order& mapOrder
+    const meshToMesh::order& mapOrder,
+    const bool subtract
 )
 {
-    // Create the interpolation scheme
-    meshToMesh meshToMeshInterp
-    (
-        meshSource,
-        meshTarget,
-        patchMap,
-        cuttingPatches
-    );
-
-    Info<< nl
-        << "Mapping fields for time " << meshSource.time().timeName()
-        << nl << endl;
-
+    if (subtract)
     {
-        // Search for list of source objects for this time
-        IOobjectList objects(meshSource, meshSource.time().timeName());
-
-        // Map volFields
-        // ~~~~~~~~~~~~~
-        MapVolFields<scalar>(objects, meshToMeshInterp, mapOrder);
-        MapVolFields<vector>(objects, meshToMeshInterp, mapOrder);
-        MapVolFields<sphericalTensor>(objects, meshToMeshInterp, mapOrder);
-        MapVolFields<symmTensor>(objects, meshToMeshInterp, mapOrder);
-        MapVolFields<tensor>(objects, meshToMeshInterp, mapOrder);
+        MapSubMesh<minusEqOp>
+        (
+            meshSource,
+            meshTarget,
+            patchMap,
+            cuttingPatches,
+            mapOrder
+        );
     }
-
+    else
     {
-        // Search for list of target objects for this time
-        IOobjectList objects(meshTarget, meshTarget.time().timeName());
-
-        // Mark surfaceFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<surfaceScalarField>(objects);
-        UnMapped<surfaceVectorField>(objects);
-        UnMapped<surfaceSphericalTensorField>(objects);
-        UnMapped<surfaceSymmTensorField>(objects);
-        UnMapped<surfaceTensorField>(objects);
-
-        // Mark pointFields as unmapped
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        UnMapped<pointScalarField>(objects);
-        UnMapped<pointVectorField>(objects);
-        UnMapped<pointSphericalTensorField>(objects);
-        UnMapped<pointSymmTensorField>(objects);
-        UnMapped<pointTensorField>(objects);
+        MapSubMesh<eqOp>
+        (
+            meshSource,
+            meshTarget,
+            patchMap,
+            cuttingPatches,
+            mapOrder
+        );
     }
-
-    mapLagrangian(meshToMeshInterp);
 }
 
 
@@ -163,40 +107,28 @@ void mapConsistentSubMesh
 (
     const fvMesh& meshSource,
     const fvMesh& meshTarget,
-    const meshToMesh::order& mapOrder
+    const meshToMesh::order& mapOrder,
+    const bool subtract
 )
 {
-    HashTable<word> patchMap;
-    HashTable<label> cuttingPatchTable;
-
-    forAll(meshTarget.boundary(), patchi)
+    if (subtract)
     {
-        if (!isA<processorFvPatch>(meshTarget.boundary()[patchi]))
-        {
-            patchMap.insert
-            (
-                meshTarget.boundary()[patchi].name(),
-                meshTarget.boundary()[patchi].name()
-            );
-        }
-        else
-        {
-            cuttingPatchTable.insert
-            (
-                meshTarget.boundaryMesh()[patchi].name(),
-                -1
-            );
-        }
+        MapConsistentSubMesh<minusEqOp>
+        (
+            meshSource,
+            meshTarget,
+            mapOrder
+        );
     }
-
-    mapSubMesh
-    (
-        meshSource,
-        meshTarget,
-        patchMap,
-        cuttingPatchTable.toc(),
-        mapOrder
-    );
+    else
+    {
+        MapConsistentSubMesh<eqOp>
+        (
+            meshSource,
+            meshTarget,
+            mapOrder
+        );
+    }
 }
 
 
@@ -288,6 +220,11 @@ int main(int argc, char *argv[])
         "word",
         "specify the mapping method"
     );
+    argList::addBoolOption
+    (
+        "subtract",
+        "subtract mapped source from target"
+    );
 
     argList args(argc, argv);
 
@@ -349,6 +286,13 @@ int main(int argc, char *argv[])
 
         Info<< "Mapping method: " << mapMethod << endl;
     }
+
+    const bool subtract = args.optionFound("subtract");
+    if (subtract)
+    {
+        Info<< "Subtracting mapped source field from target" << endl;
+    }
+
 
     #include "createTimes.H"
 
@@ -431,7 +375,13 @@ int main(int argc, char *argv[])
 
             if (consistent)
             {
-                mapConsistentSubMesh(meshSource, meshTarget, mapOrder);
+                mapConsistentSubMesh
+                (
+                    meshSource,
+                    meshTarget,
+                    mapOrder,
+                    subtract
+                );
             }
             else
             {
@@ -441,7 +391,8 @@ int main(int argc, char *argv[])
                     meshTarget,
                     patchMap,
                     cuttingPatches,
-                    mapOrder
+                    mapOrder,
+                    subtract
                 );
             }
         }
@@ -503,7 +454,13 @@ int main(int argc, char *argv[])
 
             if (consistent)
             {
-                mapConsistentSubMesh(meshSource, meshTarget, mapOrder);
+                mapConsistentSubMesh
+                (
+                    meshSource,
+                    meshTarget,
+                    mapOrder,
+                    subtract
+                );
             }
             else
             {
@@ -513,7 +470,8 @@ int main(int argc, char *argv[])
                     meshTarget,
                     patchMap,
                     addProcessorPatches(meshTarget, cuttingPatches),
-                    mapOrder
+                    mapOrder,
+                    subtract
                 );
             }
         }
@@ -629,7 +587,8 @@ int main(int argc, char *argv[])
                             (
                                 meshSource,
                                 meshTarget,
-                                mapOrder
+                                mapOrder,
+                                subtract
                             );
                         }
                         else
@@ -640,7 +599,8 @@ int main(int argc, char *argv[])
                                 meshTarget,
                                 patchMap,
                                 addProcessorPatches(meshTarget, cuttingPatches),
-                                mapOrder
+                                mapOrder,
+                                subtract
                             );
                         }
                     }
@@ -679,7 +639,7 @@ int main(int argc, char *argv[])
 
         if (consistent)
         {
-            mapConsistentMesh(meshSource, meshTarget, mapOrder);
+            mapConsistentMesh(meshSource, meshTarget, mapOrder, subtract);
         }
         else
         {
@@ -689,7 +649,8 @@ int main(int argc, char *argv[])
                 meshTarget,
                 patchMap,
                 cuttingPatches,
-                mapOrder
+                mapOrder,
+                subtract
             );
         }
     }
