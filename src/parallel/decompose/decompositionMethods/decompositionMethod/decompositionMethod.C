@@ -236,8 +236,8 @@ void Foam::decompositionMethod::calcCellCells
                 label globalNei = globalNeighbour[bFaceI];
                 if
                 (
-                    globalAgglom.isLocal(globalNei)
-                 && globalAgglom.toLocal(globalNei) != own
+                   !globalAgglom.isLocal(globalNei)
+                 || globalAgglom.toLocal(globalNei) != own
                 )
                 {
                     nFacesPerCell[own]++;
@@ -285,10 +285,11 @@ void Foam::decompositionMethod::calcCellCells
                 label own = agglom[faceOwner[faceI]];
 
                 label globalNei = globalNeighbour[bFaceI];
+
                 if
                 (
-                    globalAgglom.isLocal(globalNei)
-                 && globalAgglom.toLocal(globalNei) != own
+                   !globalAgglom.isLocal(globalNei)
+                 || globalAgglom.toLocal(globalNei) != own
                 )
                 {
                     m[offsets[own] + nFacesPerCell[own]++] = globalNei;
@@ -304,15 +305,15 @@ void Foam::decompositionMethod::calcCellCells
     // Check for duplicates connections between cells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Done as postprocessing step since we now have cellCells.
-    label startIndex = 0;
     label newIndex = 0;
     labelHashSet nbrCells;
     forAll(cellCells, cellI)
     {
         nbrCells.clear();
-        nbrCells.insert(cellI);
+        nbrCells.insert(globalAgglom.toGlobal(cellI));
 
-        label& endIndex = cellCells.offsets()[cellI+1];
+        label startIndex = cellCells.offsets()[cellI];
+        label endIndex = cellCells.offsets()[cellI+1];
 
         for (label i = startIndex; i < endIndex; i++)
         {
@@ -321,9 +322,7 @@ void Foam::decompositionMethod::calcCellCells
                 cellCells.m()[newIndex++] = cellCells.m()[i];
             }
         }
-
-        startIndex = endIndex;
-        endIndex = newIndex;
+        cellCells.offsets()[cellI+1] = newIndex;
     }
 
     cellCells.m().setSize(newIndex);
