@@ -1,6 +1,6 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
-set -x
+#set -x
 
 if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
 then
@@ -15,6 +15,8 @@ then
     wmake libso vtkPV3Readers
     PV3blockMeshReader/Allwmake
     PV3FoamReader/Allwmake
+else
+    echo "ERROR: ParaView not found in $ParaView_DIR"
 fi
 
 # ----------------------------------------------------------------- end-of-file
