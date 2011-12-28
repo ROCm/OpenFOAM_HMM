@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-LESModel        Smagorinsky;
+LESModel        laminar;
 
 printCoeffs     on;
 
@@ -25,62 +25,5 @@ cubeRootVolCoeffs
 {
     deltaCoeff      1;
 }
-
-PrandtlCoeffs
-{
-    delta           cubeRootVol;
-    cubeRootVolCoeffs
-    {
-        deltaCoeff      1;
-    }
-
-    smoothCoeffs
-    {
-        delta           cubeRootVol;
-        cubeRootVolCoeffs
-        {
-            deltaCoeff      1;
-        }
-
-        maxDeltaRatio   1.1;
-    }
-
-    Cdelta          0.158;
-}
-
-vanDriestCoeffs
-{
-    delta           cubeRootVol;
-    cubeRootVolCoeffs
-    {
-        deltaCoeff      1;
-    }
-
-    smoothCoeffs
-    {
-        delta           cubeRootVol;
-        cubeRootVolCoeffs
-        {
-            deltaCoeff      1;
-        }
-
-        maxDeltaRatio   1.1;
-    }
-
-    Aplus           26;
-    Cdelta          0.158;
-}
-
-smoothCoeffs
-{
-    delta           cubeRootVol;
-    cubeRootVolCoeffs
-    {
-        deltaCoeff      1;
-    }
-
-    maxDeltaRatio   1.1;
-}
-
 
 // ************************************************************************* //
