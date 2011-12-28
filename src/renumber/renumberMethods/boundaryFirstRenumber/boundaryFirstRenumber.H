@@ -22,83 +22,72 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::springRenumber
+    Foam::boundaryFirstRenumber
 
 Description
-    Use spring analogy - attract neighbouring cells according to the distance
-    of their cell indices.
-
-    // Maximum jump of cell indices. Is fraction of number of cells
-    maxCo 0.1;
-
-    // Limit the amount of movement; the fraction maxCo gets decreased
-    // with every iteration.
-    freezeFraction 0.9;
-
-    // Maximum number of iterations
-    maxIter 1000;
+    Cuthill-McKee renumbering
 
 SourceFiles
-    springRenumber.C
+    boundaryFirstRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef springRenumber_H
-#define springRenumber_H
+#ifndef boundaryFirstRenumber_H
+#define boundaryFirstRenumber_H
 
 #include "renumberMethod.H"
+#include "Switch.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class springRenumber Declaration
+                   Class boundaryFirstRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class springRenumber
+class boundaryFirstRenumber
 :
     public renumberMethod
 {
     // Private data
 
-        const dictionary& dict_;
+        const Switch reverse_;
 
-        const scalar maxCo_;
-
-        const label maxIter_;
-
-        const scalar freezeFraction_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const springRenumber&);
-        springRenumber(const springRenumber&);
+        void operator=(const boundaryFirstRenumber&);
+        boundaryFirstRenumber(const boundaryFirstRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("spring");
+    TypeName("boundaryFirst");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        springRenumber(const dictionary& renumberDict);
+        boundaryFirstRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~springRenumber()
+    virtual ~boundaryFirstRenumber()
     {}
 
 
     // Member Functions
 
         //- Return for every coordinate the wanted processor number.
-        virtual labelList renumber(const pointField&)
+        //  We need a polyMesh (to be able to load the file)
+        virtual labelList renumber(const pointField&) const
         {
-            notImplemented("springRenumber::renumber(const pointField&)");
+            notImplemented
+            (
+                "boundaryFirstRenumber::renumber(const pointField&)"
+            );
             return labelList(0);
         }
 
@@ -108,7 +97,7 @@ public:
         (
             const polyMesh& mesh,
             const pointField& cc
-        );
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -117,7 +106,15 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        );
+        ) const
+        {
+            notImplemented
+            (
+                "boundaryFirstRenumber::renumber"
+                "(const labelListList&, const pointField&)"
+            );
+            return labelList(0);
+        }
 };
 
 

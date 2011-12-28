@@ -11,4 +11,4 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
     -lrenumberMethods \
-    -ldecompositionMethods
+    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp

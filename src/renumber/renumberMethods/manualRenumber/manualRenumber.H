@@ -22,121 +22,78 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::renumberMethod
+    Foam::manualRenumber
 
 Description
-    Abstract base class for renumbering
+    Renumber given a cell-to-new cell association in a file
 
 SourceFiles
-    renumberMethod.C
+    manualRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef renumberMethod_H
-#define renumberMethod_H
+#ifndef manualRenumber_H
+#define manualRenumber_H
 
-#include "polyMesh.H"
-#include "pointField.H"
-#include "CompactListList.H"
+#include "renumberMethod.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class renumberMethod Declaration
+                      Class manualRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class renumberMethod
+class manualRenumber
+:
+    public renumberMethod
 {
+    // Private data
 
-protected:
+        const fileName dataFile_;
 
-    // Protected data
-
-        const dictionary& renumberDict_;
-
-private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        renumberMethod(const renumberMethod&);
-        void operator=(const renumberMethod&);
+        void operator=(const manualRenumber&);
+        manualRenumber(const manualRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("renumberMethod");
-
-
-    // Declare run-time constructor selection tables
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            renumberMethod,
-            dictionary,
-            (
-                const dictionary& renumberDict
-            ),
-            (renumberDict)
-        );
-
-
-    // Selectors
-
-        //- Return a reference to the selected renumbering method
-        static autoPtr<renumberMethod> New
-        (
-            const dictionary& renumberDict
-        );
+    TypeName("manual");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        renumberMethod(const dictionary& renumberDict)
-        :
-            renumberDict_(renumberDict)
-        {}
+        manualRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~renumberMethod()
+    virtual ~manualRenumber()
     {}
 
 
     // Member Functions
 
-        //- Return for every cell the new cell label.
-        //  This is only defined for geometric renumberMethods.
-        virtual labelList renumber(const pointField&)
+        //- Return for every coordinate the wanted processor number.
+        //  We need a polyMesh (to be able to load the file)
+        virtual labelList renumber(const pointField&) const
         {
-            notImplemented
-            (
-                "renumberMethod:renumber(const pointField&)"
-            );
+            notImplemented("manualRenumber::renumber(const pointField&)");
             return labelList(0);
         }
 
-        //- Return for every cell the new cell label. Use the
+        //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        virtual labelList renumber(const polyMesh&, const pointField&);
-
-        //- Return for every cell the new cell label. Gets
-        //  passed agglomeration map (from fine to coarse cells) and coarse
-        //  cell
-        //  location. Can be overridden by renumberMethods that provide this
-        //  functionality natively. Coarse cells are local to the processor
-        //  (if in parallel). If you want to have coarse cells spanning
-        //  processors use the globalCellCells instead.
         virtual labelList renumber
         (
             const polyMesh& mesh,
-            const labelList& cellToRegion,
-            const pointField& regionPoints
-        );
+            const pointField& cc
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -145,8 +102,15 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        ) = 0;
-
+        ) const
+        {
+            notImplemented
+            (
+                "manualRenumber::renumber"
+                "(const labelListList&, const pointField&)"
+            );
+            return labelList(0);
+        }
 };
 
 

@@ -22,59 +22,53 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CuthillMcKeeRenumber
+    Foam::randomRenumber
 
 Description
-    Cuthill-McKee renumbering
+    Random renumber. Just to see effect of renumbering.
 
 SourceFiles
-    CuthillMcKeeRenumber.C
+    randomRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CuthillMcKeeRenumber_H
-#define CuthillMcKeeRenumber_H
+#ifndef randomRenumber_H
+#define randomRenumber_H
 
 #include "renumberMethod.H"
-#include "Switch.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class CuthillMcKeeRenumber Declaration
+                      Class randomRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class CuthillMcKeeRenumber
+class randomRenumber
 :
     public renumberMethod
 {
-    // Private data
-
-        const Switch reverse_;
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const CuthillMcKeeRenumber&);
-        CuthillMcKeeRenumber(const CuthillMcKeeRenumber&);
+        void operator=(const randomRenumber&);
+        randomRenumber(const randomRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("CuthillMcKee");
+    TypeName("random");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        CuthillMcKeeRenumber(const dictionary& renumberDict);
+        randomRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~CuthillMcKeeRenumber()
+    virtual ~randomRenumber()
     {}
 
 
@@ -82,11 +76,7 @@ public:
 
         //- Return for every coordinate the wanted processor number.
         //  We need a polyMesh (to be able to load the file)
-        virtual labelList renumber(const pointField&)
-        {
-            notImplemented("CuthillMcKeeRenumber::renumber(const pointField&)");
-            return labelList(0);
-        }
+        virtual labelList renumber(const pointField&) const;
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
@@ -94,7 +84,7 @@ public:
         (
             const polyMesh& mesh,
             const pointField& cc
-        );
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -103,7 +93,7 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        );
+        ) const;
 };
 
 

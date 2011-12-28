@@ -22,18 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::manualRenumber
+    Foam::springRenumber
 
 Description
-    Renumber given a cell-to-new cell association in a file
+    Use spring analogy - attract neighbouring cells according to the distance
+    of their cell indices.
+
+    // Maximum jump of cell indices. Is fraction of number of cells
+    maxCo 0.1;
+
+    // Limit the amount of movement; the fraction maxCo gets decreased
+    // with every iteration.
+    freezeFraction 0.9;
+
+    // Maximum number of iterations
+    maxIter 1000;
 
 SourceFiles
-    manualRenumber.C
+    springRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualRenumber_H
-#define manualRenumber_H
+#ifndef springRenumber_H
+#define springRenumber_H
 
 #include "renumberMethod.H"
 
@@ -41,49 +52,53 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class manualRenumber Declaration
+                       Class springRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class manualRenumber
+class springRenumber
 :
     public renumberMethod
 {
     // Private data
 
-        const fileName dataFile_;
+        const dictionary& dict_;
 
+        const scalar maxCo_;
+
+        const label maxIter_;
+
+        const scalar freezeFraction_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const manualRenumber&);
-        manualRenumber(const manualRenumber&);
+        void operator=(const springRenumber&);
+        springRenumber(const springRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("manual");
+    TypeName("spring");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        manualRenumber(const dictionary& renumberDict);
+        springRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~manualRenumber()
+    virtual ~springRenumber()
     {}
 
 
     // Member Functions
 
         //- Return for every coordinate the wanted processor number.
-        //  We need a polyMesh (to be able to load the file)
-        virtual labelList renumber(const pointField&)
+        virtual labelList renumber(const pointField&) const
         {
-            notImplemented("manualRenumber::renumber(const pointField&)");
+            notImplemented("springRenumber::renumber(const pointField&)");
             return labelList(0);
         }
 
@@ -93,7 +108,7 @@ public:
         (
             const polyMesh& mesh,
             const pointField& cc
-        );
+        ) const;
 
         //- Return for every cell the new cell label.
         //  The connectivity is equal to mesh.cellCells() except
@@ -102,15 +117,7 @@ public:
         (
             const labelListList& cellCells,
             const pointField& cc
-        )
-        {
-            notImplemented
-            (
-                "manualRenumber::renumber"
-                "(const labelListList&, const pointField&)"
-            );
-            return labelList(0);
-        }
+        ) const;
 };
 
 

@@ -23,21 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CuthillMcKeeRenumber.H"
+#include "randomRenumber.H"
 #include "addToRunTimeSelectionTable.H"
-#include "bandCompression.H"
-#include "decompositionMethod.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(CuthillMcKeeRenumber, 0);
+    defineTypeNameAndDebug(randomRenumber, 0);
 
     addToRunTimeSelectionTable
     (
         renumberMethod,
-        CuthillMcKeeRenumber,
+        randomRenumber,
         dictionary
     );
 }
@@ -45,67 +44,52 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::CuthillMcKeeRenumber::CuthillMcKeeRenumber(const dictionary& renumberDict)
+Foam::randomRenumber::randomRenumber(const dictionary& renumberDict)
 :
-    renumberMethod(renumberDict),
-    reverse_
-    (
-        renumberDict.found(typeName + "Coeffs")
-      ? Switch(renumberDict.subDict(typeName + "Coeffs").lookup("reverse"))
-      : Switch(false)
-    )
+    renumberMethod(renumberDict)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::labelList Foam::CuthillMcKeeRenumber::renumber
+Foam::labelList Foam::randomRenumber::renumber
 (
-    const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
-    CompactListList<label> cellCells;
-    decompositionMethod::calcCellCells
-    (
-        mesh,
-        identity(mesh.nCells()),
-        mesh.nCells(),
-        false,                      // local only
-        cellCells
-    );
+    Random rndGen(0);
 
-    labelList orderedToOld = bandCompression(cellCells());
+    labelList oldToNew(identity(points.size()));
 
-    if (reverse_)
+    for (label iter = 0; iter < 10; iter++)
     {
-        for (label i = 0; i < orderedToOld.size()/2; i++)
+        forAll(oldToNew, i)
         {
-            Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
+            label j = rndGen.integer(0, oldToNew.size()-1);
+            Swap(oldToNew[i], oldToNew[j]);
         }
     }
-
-    return invert(orderedToOld.size(), orderedToOld);
+    return oldToNew;
 }
 
 
-Foam::labelList Foam::CuthillMcKeeRenumber::renumber
+Foam::labelList Foam::randomRenumber::renumber
+(
+    const polyMesh& mesh,
+    const pointField& points
+) const
+{
+    return renumber(points);
+}
+
+
+Foam::labelList Foam::randomRenumber::renumber
 (
     const labelListList& cellCells,
     const pointField& points
-)
+) const
 {
-    labelList orderedToOld = bandCompression(cellCells);
-
-    if (reverse_)
-    {
-        for (label i = 0; i < orderedToOld.size()/2; i++)
-        {
-            Swap(orderedToOld[i], orderedToOld[orderedToOld.size()-i-1]);
-        }
-    }
-
-    return invert(orderedToOld.size(), orderedToOld);
+    return renumber(points);
 }
 
 

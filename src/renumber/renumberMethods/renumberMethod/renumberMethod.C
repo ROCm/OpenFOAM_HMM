@@ -72,7 +72,7 @@ Foam::labelList Foam::renumberMethod::renumber
 (
     const polyMesh& mesh,
     const pointField& points
-)
+) const
 {
     CompactListList<label> cellCells;
     decompositionMethod::calcCellCells
@@ -94,7 +94,7 @@ Foam::labelList Foam::renumberMethod::renumber
     const polyMesh& mesh,
     const labelList& fineToCoarse,
     const pointField& coarsePoints
-)
+) const
 {
     CompactListList<label> coarseCellCells;
     decompositionMethod::calcCellCells

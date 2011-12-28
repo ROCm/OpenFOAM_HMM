@@ -43,7 +43,7 @@ Foam::scalar Foam::streamLineParticle::calcSubCycleDeltaT
     const vector& U
 ) const
 {
-    streamLineParticle testParticle(*this);
+    particle testParticle(*this);
 
     bool oldKeepParticle = td.keepParticle;
     bool oldSwitchProcessor = td.switchProcessor;
@@ -59,7 +59,8 @@ Foam::vector Foam::streamLineParticle::interpolateFields
 (
     const trackingData& td,
     const point& position,
-    const label cellI
+    const label cellI,
+    const label faceI
 )
 {
     if (cellI == -1)
@@ -76,7 +77,8 @@ Foam::vector Foam::streamLineParticle::interpolateFields
             td.vsInterp_[scalarI].interpolate
             (
                 position,
-                cellI
+                cellI,
+                faceI
             )
         );
     }
@@ -89,7 +91,8 @@ Foam::vector Foam::streamLineParticle::interpolateFields
             td.vvInterp_[vectorI].interpolate
             (
                 position,
-                cellI
+                cellI,
+                faceI
             )
         );
     }
@@ -201,11 +204,22 @@ bool Foam::streamLineParticle::move
 
             // Store current position and sampled velocity.
             sampledPositions_.append(position());
-            vector U = interpolateFields(td, position(), cell());
+            vector U = interpolateFields(td, position(), cell(), face());
 
             if (!td.trackForward_)
             {
                 U = -U;
+            }
+
+            if (td.followSurface_)
+            {
+                //- Simple: remove wall-normal component. Should keep particle
+                //  at same height. Does not work well on warped faces.
+                const vector& n = td.patchNormals_[tetFaceI_];
+                if (n != vector::zero)
+                {
+                    U -= (U&n)*n;
+                }
             }
 
             scalar magU = mag(U);
@@ -219,7 +233,13 @@ bool Foam::streamLineParticle::move
 
             U /= magU;
 
-            if (subIter == 0 && td.nSubCycle_ > 1)
+            if (td.trackLength_ < GREAT)
+            {
+                dt = td.trackLength_;
+                //Pout<< "    subiteration " << subIter
+                //    << " : fixed length: updated dt:" << dt << endl;
+            }
+            else if (subIter == 0 && td.nSubCycle_ > 1)
             {
                 // Adapt dt to cross cell in a few steps
                 dt = calcSubCycleDeltaT(td, dt, U);
@@ -264,7 +284,8 @@ bool Foam::streamLineParticle::move
             if (debug)
             {
                 Pout<< "streamLineParticle : Removing stagnant particle:"
-                    << p << " sampled positions:" << sampledPositions_.size()
+                    << p.position()
+                    << " sampled positions:" << sampledPositions_.size()
                     << endl;
             }
             td.keepParticle = false;
@@ -273,12 +294,13 @@ bool Foam::streamLineParticle::move
         {
             // Normal exit. Store last position and fields
             sampledPositions_.append(position());
-            interpolateFields(td, position(), cell());
+            interpolateFields(td, position(), cell(), face());
 
             if (debug)
             {
                 Pout<< "streamLineParticle : Removing particle:"
-                    << p << " sampled positions:" << sampledPositions_.size()
+                    << p.position()
+                    << " sampled positions:" << sampledPositions_.size()
                     << endl;
             }
         }
@@ -374,8 +396,42 @@ void Foam::streamLineParticle::hitWallPatch
     const tetIndices&
 )
 {
-    // Remove particle
-    td.keepParticle = false;
+    if (td.followSurface_)
+    {
+        // Push slightly in. Since we're pushing to tet centre we should still
+        // be in the same tet.
+        tetPointRef tet = currentTet();
+
+        const point oldPosition(position());
+
+        position() += trackingCorrectionTol*(tet.centre() - position());
+
+        if (debug)
+        {
+            label patchID = patch(face());
+
+            Pout<< "hitWallPatch : on wall "
+                << mesh().boundaryMesh()[patchID].name()
+                << " moved from " << oldPosition
+                << " to " << position()
+                << " due to centre " << tet.centre() << endl;
+        }
+
+        // Check that still in tet (should always be the case
+        if (debug && !tet.inside(position()))
+        {
+            FatalErrorIn("streamLineParticle::hitWallPatch()")
+                << "Pushing particle " << *this
+                << " away from wall " << wpp.name()
+                << " moved it outside of tet."
+                << exit(FatalError);
+        }
+    }
+    else
+    {
+        // Remove particle
+        td.keepParticle = false;
+    }
 }
 
 
