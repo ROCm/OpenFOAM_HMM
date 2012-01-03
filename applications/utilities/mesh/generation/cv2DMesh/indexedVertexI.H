@@ -228,3 +228,6 @@ bool CGAL::outsideTriangle
         || (v1.farPoint() || v1.ppSlave())
         || (v2.farPoint() || v2.ppSlave());
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

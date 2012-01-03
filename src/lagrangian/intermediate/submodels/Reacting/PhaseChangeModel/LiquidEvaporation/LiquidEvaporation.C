@@ -140,19 +140,19 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     const scalar dt,
     const label cellI,
     const scalar Re,
+    const scalar Pr,
     const scalar d,
     const scalar nu,
     const scalar T,
     const scalar Ts,
     const scalar pc,
+    const scalar Tc,
+    const scalarField& Yl,
     scalarField& dMassPC
 ) const
 {
     // construct carrier phase species volume fractions for cell, cellI
     const scalarField Xc(calcXc(cellI));
-
-    // droplet surface area
-    const scalar A = pi*sqr(d);
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
@@ -180,7 +180,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // mass transfer coefficient [m/s]
         const scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
-        // vapour concentration at droplet surface [kmol/m3] at film temperature
+        // vapour concentration at surface [kmol/m3] at film temperature
         const scalar Cs = pSat/(specie::RR*Ts);
 
         // vapour concentration in bulk gas [kmol/m3] at film temperature
@@ -190,7 +190,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         const scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        dMassPC[lid] += Ni*A*liquids_.properties()[lid].W()*dt;
+        dMassPC[lid] += Ni*pi*sqr(d)*liquids_.properties()[lid].W()*dt;
     }
 }
 

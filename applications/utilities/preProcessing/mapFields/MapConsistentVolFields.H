@@ -35,12 +35,13 @@ License
 namespace Foam
 {
 
-template<class Type>
+template<class Type, class CombineOp>
 void MapConsistentVolFields
 (
     const IOobjectList& objects,
     const meshToMesh& meshToMeshInterp,
-    const meshToMesh::order& mapOrder
+    const meshToMesh::order& mapOrder,
+    const CombineOp& cop
 )
 {
     const fvMesh& meshSource = meshToMeshInterp.fromMesh();
@@ -84,7 +85,13 @@ void MapConsistentVolFields
             );
 
             // Interpolate field
-            meshToMeshInterp.interpolate(fieldTarget, fieldSource, mapOrder);
+            meshToMeshInterp.interpolate//<Type, eqOp<Type> >
+            (
+                fieldTarget,
+                fieldSource,
+                mapOrder,
+                cop
+            );
 
             // Write field
             fieldTarget.write();
@@ -97,7 +104,12 @@ void MapConsistentVolFields
             GeometricField<Type, fvPatchField, volMesh> fieldTarget
             (
                 fieldTargetIOobject,
-                meshToMeshInterp.interpolate(fieldSource, mapOrder)
+                meshToMeshInterp.interpolate//<Type, eqOp<Type> >
+                (
+                    fieldSource,
+                    mapOrder,
+                    cop
+                )
             );
 
             // Write field

@@ -237,8 +237,6 @@ public:
                 Ostream& os,
                 const cv2DControls& s
             );
-
-
 };
 
 

@@ -33,7 +33,7 @@ Description
         sampleRegion region0;
 
         // What to sample:
-        // - nearestCell         : sample nearest cell
+        // - nearestCell         : sample cell containing point
         // - nearestPatchFace    : nearest face on selected patch
         // - nearestPatchFaceAMI : nearest face on selected patch
                                    - patches need not conform
@@ -204,9 +204,14 @@ protected:
 
     // Protected Member Functions
 
+        //- Get the points from face-centre-decomposition face centres
+        //  and project them onto the face-diagonal-decomposition triangles.
+        tmp<pointField> facePoints(const polyPatch&) const;
+
         //- Collect single list of samples and originating processor+face.
         void collectSamples
         (
+            const pointField& facePoints,
             pointField&,
             labelList& patchFaceProcs,
             labelList& patchFaces,
@@ -221,6 +226,9 @@ protected:
             labelList& sampleIndices,   // local index of cell/face
             pointField& sampleLocations // actual representative location
         ) const;
+
+        //- Get the sample points given the face points
+        tmp<pointField> samplePoints(const pointField&) const;
 
         //- Calculate mapping
         void calcMapping() const;
@@ -331,8 +339,23 @@ public:
             //- Get the patch on the region
             const polyPatch& samplePolyPatch() const;
 
+        // Helpers
+
             //- Get the sample points
             tmp<pointField> samplePoints() const;
+
+            //- Get a point on the face given a face decomposition method:
+            //  face-centre-tet : face centre. Returns index of face.
+            //  face-planes     : face centre. Returns index of face.
+            //  face-diagonal   : intersection of ray from cellcentre to
+            //                    facecentre with any of the triangles.
+            //                    Returns index (0..size-2) of triangle.
+            static pointIndexHit facePoint
+            (
+                const polyMesh&,
+                const label faceI,
+                const polyMesh::cellRepresentation
+            );
 
 
         // Distribute

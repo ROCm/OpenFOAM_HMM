@@ -25,7 +25,6 @@ foamChemistryThermoFile "$FOAM_CASE/constant/thermo.incompressiblePoly";
 
 liquids
 {
-    liquidComponents ( H2O );
     H2O
     {
         defaultCoeffs   yes;
@@ -34,7 +33,7 @@ liquids
 
 solids
 {
-    solidComponents ( );
+    // none
 }
 
 inertSpecie     N2;

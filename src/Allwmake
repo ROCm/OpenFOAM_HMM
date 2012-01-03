@@ -46,6 +46,8 @@ wmake $makeType genericPatchFields
 # Build the proper scotchDecomp, metisDecomp etc.
 parallel/Allwmake $*
 
+renumber/Allwmake $*
+
 wmake $makeType conversion
 
 wmake $makeType sampling

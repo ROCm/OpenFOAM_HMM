@@ -26,7 +26,6 @@ inertSpecie     N2;
 
 liquids
 {
-    liquidComponents ( C7H16 );
     C7H16
     {
         defaultCoeffs   yes;
@@ -35,7 +34,7 @@ liquids
 
 solids
 {
-    solidComponents ( );
+    // none
 }
 
 // ************************************************************************* //

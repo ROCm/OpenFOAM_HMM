@@ -15,16 +15,37 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Write maps from renumbered back to original mesh
+writeMaps true;
+
+// Optional entry: sort cells on coupled boundaries to last for use with
+// e.g. nonBlockingGaussSeidel.
+sortCoupledFaceCells false;
+
+// Optional entry: renumber on a block-by-block basis. It uses a
+// blockCoeffs dictionary to construct a decompositionMethod to do
+// a block subdivision) and then applies the renumberMethod to each
+// block in turn. This can be used in large cases to keep the blocks
+// fitting in cache with all the the cache misses bunched at the end.
+// This number is the approximate size of the blocks - this gets converted
+// to a number of blocks that is the input to the decomposition method.
+//blockSize 1000;
+
+// Optional entry: sort points into internal and boundary points
+//orderPoints false;
+
+
+
 method          CuthillMcKee;
 //method          manual;
 //method          random;
 //method          spring;
 
-CuthillMcKeeCoeffs
-{
-    // Reverse CuthillMcKee (RCM) or plain
-    reverse true;
-}
+//CuthillMcKeeCoeffs
+//{
+//    // Reverse CuthillMcKee (RCM) or plain
+//    reverse true;
+//}
 
 
 manualCoeffs
@@ -45,6 +66,19 @@ springCoeffs
 
     // Maximum number of iterations
     maxIter 1000;
+}
+
+
+blockCoeffs
+{
+    method          scotch;
+    //method hierarchical;
+    //hierarchicalCoeffs
+    //{
+    //    n           (1 2 1);
+    //    delta       0.001;
+    //    order       xyz;
+    //}
 }
 
 

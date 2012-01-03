@@ -35,12 +35,13 @@ License
 namespace Foam
 {
 
-template<class Type>
+template<class Type, class CombineOp>
 void MapVolFields
 (
     const IOobjectList& objects,
     const meshToMesh& meshToMeshInterp,
-    const meshToMesh::order& mapOrder
+    const meshToMesh::order& mapOrder,
+    const CombineOp& cop
 )
 {
     const fvMesh& meshSource = meshToMeshInterp.fromMesh();
@@ -84,7 +85,13 @@ void MapVolFields
             );
 
             // Interpolate field
-            meshToMeshInterp.interpolate(fieldTarget, fieldSource, mapOrder);
+            meshToMeshInterp.interpolate//<Type, eqOp<Type> >
+            (
+                fieldTarget,
+                fieldSource,
+                mapOrder,
+                cop
+            );
 
             // Write field
             fieldTarget.write();

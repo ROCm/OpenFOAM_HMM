@@ -48,14 +48,14 @@ gradSchemes
 laplacianSchemes
 {
     default none;
-    laplacian(sigmaf,deltaf) Gauss linear uncorrected;
-    laplacian(deltaCoeff,deltaf) Gauss linear uncorrected;
+    laplacian(sigmaf,deltaf) Gauss linear orthogonal;
+    laplacian(deltaCoeff,deltaf) Gauss linear orthogonal;
 }
 
 snGradSchemes
 {
-    snGrad(p) uncorrected;
-    snGrad(deltaf) uncorrected;
+    snGrad(p) orthogonal;
+    snGrad(deltaf) orthogonal;
 }
 
 fluxRequired

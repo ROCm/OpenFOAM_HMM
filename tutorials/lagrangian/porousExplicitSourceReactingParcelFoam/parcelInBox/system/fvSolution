@@ -66,6 +66,7 @@ solvers
         $p;
         tolerance       1e-06;
         relTol          0;
+        maxIter         20;
     }
 
     "(Yi|O2|N2|H2O)"

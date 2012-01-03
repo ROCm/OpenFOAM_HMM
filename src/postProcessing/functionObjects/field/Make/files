@@ -18,6 +18,9 @@ fieldValues/cellSource/cellSourceFunctionObject.C
 nearWallFields/nearWallFields.C
 nearWallFields/nearWallFieldsFunctionObject.C
 
+processorField/processorField.C
+processorField/processorFieldFunctionObject.C
+
 readFields/readFields.C
 readFields/readFieldsFunctionObject.C
 

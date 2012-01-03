@@ -29,7 +29,7 @@ Description
     renumbering all fields from all the time directories.
 
     By default uses bandCompression (CuthillMcKee) but will
-    read system/renumberMeshDict if present and use the method from there.
+    read system/renumberMeshDict if -dict option is present
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +45,7 @@ Description
 #include "renumberMethod.H"
 #include "zeroGradientFvPatchFields.H"
 #include "CuthillMcKeeRenumber.H"
+#include "fvMeshSubset.H"
 
 using namespace Foam;
 
@@ -455,30 +456,86 @@ autoPtr<mapPolyMesh> reorderMesh
 }
 
 
+// Return new to old cell numbering
+labelList regionRenumber
+(
+    const renumberMethod& method,
+    const fvMesh& mesh,
+    const labelList& cellToRegion
+)
+{
+    Info<< "Determining cell order:" << endl;
+
+    labelList cellOrder(cellToRegion.size());
+
+    label nRegions = max(cellToRegion)+1;
+
+    labelListList regionToCells(invertOneToMany(nRegions, cellToRegion));
+
+    label cellI = 0;
+
+    forAll(regionToCells, regionI)
+    {
+        Info<< "    region " << regionI << " starts at " << cellI << endl;
+
+        // Make sure no parallel comms
+        bool oldParRun = UPstream::parRun();
+        UPstream::parRun() = false;
+
+        // Per region do a reordering.
+        fvMeshSubset subsetter(mesh);
+        subsetter.setLargeCellSubset(cellToRegion, regionI);
+
+        const fvMesh& subMesh = subsetter.subMesh();
+
+        labelList subReverseCellOrder = method.renumber
+        (
+            subMesh,
+            subMesh.cellCentres()
+        );
+
+        labelList subCellOrder
+        (
+            invert
+            (
+                subMesh.nCells(),
+                subReverseCellOrder
+            )
+        );
+
+        // Restore state
+        UPstream::parRun() = oldParRun;
+
+        const labelList& cellMap = subsetter.cellMap();
+
+        forAll(subCellOrder, i)
+        {
+            cellOrder[cellI++] = cellMap[subCellOrder[i]];
+        }
+    }
+    Info<< endl;
+
+    return cellOrder;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-    argList::addOption
+    argList::addNote
     (
-        "blockSize",
-        "block size",
-        "order cells into blocks (using decomposition) before ordering"
-    );
-    argList::addBoolOption
-    (
-        "orderPoints",
-        "order points into internal and boundary points"
-    );
-    argList::addBoolOption
-    (
-        "writeMaps",
-        "write cellMap, faceMap, pointMap in polyMesh/"
+        "Renumber mesh to minimise bandwidth"
     );
 
 #   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
+    argList::addBoolOption
+    (
+        "dict",
+        "renumber according to system/renumberMeshDict"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -495,39 +552,7 @@ int main(int argc, char *argv[])
 #   include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    label blockSize = 0;
-    args.optionReadIfPresent("blockSize", blockSize, 0);
-
-    if (blockSize > 0)
-    {
-        Info<< "Ordering cells into regions of size " << blockSize
-            << " (using decomposition);"
-            << " ordering faces into region-internal and region-external." << nl
-            << endl;
-
-        if (blockSize < 0 || blockSize >= mesh.nCells())
-        {
-            FatalErrorIn(args.executable())
-                << "Block size " << blockSize << " should be positive integer"
-                << " and less than the number of cells in the mesh."
-                << exit(FatalError);
-        }
-    }
-
-    const bool orderPoints = args.optionFound("orderPoints");
-    if (orderPoints)
-    {
-        Info<< "Ordering points into internal and boundary points." << nl
-            << endl;
-    }
-
-    const bool writeMaps = args.optionFound("writeMaps");
-
-    if (writeMaps)
-    {
-        Info<< "Writing renumber maps (new to old) to polyMesh." << nl
-            << endl;
-    }
+    const bool readDict = args.optionFound("dict");
 
     const bool overwrite = args.optionFound("overwrite");
 
@@ -538,29 +563,85 @@ int main(int argc, char *argv[])
         << returnReduce(band, maxOp<label>()) << nl << endl;
 
 
-    // Construct renumberMethod
-    IOobject io
-    (
-        "renumberMeshDict",
-        runTime.system(),
-        mesh,
-        IOobject::MUST_READ_IF_MODIFIED,
-        IOobject::NO_WRITE
-    );
+    bool sortCoupledFaceCells = false;
+    bool writeMaps = false;
+    bool orderPoints = false;
+    label blockSize = 0;
 
+    // Construct renumberMethod
+    autoPtr<IOdictionary> renumberDictPtr;
     autoPtr<renumberMethod> renumberPtr;
 
-    if (io.headerOk())
+    if (readDict)
     {
-        Info<< "Detected local " << runTime.system()/io.name() << "." << nl
-            << "Using this to select renumberMethod." << nl << endl;
-        renumberPtr = renumberMethod::New(IOdictionary(io));
+        Info<< "Renumber according to renumberMeshDict." << nl << endl;
+
+        renumberDictPtr.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    "renumberMeshDict",
+                    runTime.system(),
+                    mesh,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+        const IOdictionary renumberDict = renumberDictPtr();
+
+        renumberPtr = renumberMethod::New(renumberDict);
+
+
+        sortCoupledFaceCells = renumberDict.lookupOrDefault
+        (
+            "sortCoupledFaceCells",
+            false
+        );
+        if (sortCoupledFaceCells)
+        {
+            Info<< "Sorting cells on coupled boundaries to be last." << nl
+                << endl;
+        }
+
+        blockSize = renumberDict.lookupOrDefault("blockSize", 0);
+        if (blockSize > 0)
+        {
+            Info<< "Ordering cells into regions of size " << blockSize
+                << " (using decomposition);"
+                << " ordering faces into region-internal and region-external."
+                << nl << endl;
+
+            if (blockSize < 0 || blockSize >= mesh.nCells())
+            {
+                FatalErrorIn(args.executable())
+                    << "Block size " << blockSize
+                    << " should be positive integer"
+                    << " and less than the number of cells in the mesh."
+                    << exit(FatalError);
+            }
+        }
+
+        orderPoints = renumberDict.lookupOrDefault("orderPoints", false);
+        if (orderPoints)
+        {
+            Info<< "Ordering points into internal and boundary points." << nl
+                << endl;
+        }
+
+        renumberDict.lookup("writeMaps") >> writeMaps;
+        if (writeMaps)
+        {
+            Info<< "Writing renumber maps (new to old) to polyMesh." << nl
+                << endl;
+        }
+
     }
     else
     {
-        Info<< "No local " << runTime.system()/io.name()
-            << " dictionary found. Using default renumberMethod." << nl
-            << endl;
+        Info<< "Using default renumberMethod." << nl << endl;
         dictionary renumberDict;
         renumberPtr.reset(new CuthillMcKeeRenumber(renumberDict));
     }
@@ -671,21 +752,14 @@ int main(int argc, char *argv[])
         // fields is done correctly!
 
         label nBlocks = mesh.nCells() / blockSize;
-        Info<< "nBlocks = " << nBlocks << endl;
+        Info<< "nBlocks   = " << nBlocks << endl;
 
-        // Read decomposePar dictionary
-        IOdictionary decomposeDict
-        (
-            IOobject
-            (
-                "decomposeParDict",
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
+        // Read decompositionMethod dictionary
+        dictionary decomposeDict(renumberDictPtr().subDict("blockCoeffs"));
         decomposeDict.set("numberOfSubdomains", nBlocks);
+
+        bool oldParRun = UPstream::parRun();
+        UPstream::parRun() = false;
 
         autoPtr<decompositionMethod> decomposePtr = decompositionMethod::New
         (
@@ -701,6 +775,9 @@ int main(int argc, char *argv[])
             )
         );
 
+        // Restore state
+        UPstream::parRun() = oldParRun;
+
         // For debugging: write out region
         createScalarField
         (
@@ -714,23 +791,7 @@ int main(int argc, char *argv[])
             << nl << endl;
 
 
-        // Find point per region
-        pointField regionPoints(nBlocks, vector::zero);
-        forAll(cellToRegion, cellI)
-        {
-            regionPoints[cellToRegion[cellI]] = mesh.cellCentres()[cellI];
-        }
-
-        // Use block based renumbering.
-        // Detemines old to new cell ordering
-        labelList reverseCellOrder = renumberPtr().renumber
-        (
-            mesh,
-            cellToRegion,
-            regionPoints
-        );
-
-        cellOrder = invert(mesh.nCells(), reverseCellOrder);
+        cellOrder = regionRenumber(renumberPtr(), mesh, cellToRegion);
 
         // Determine new to old face order with new cell numbering
         faceOrder = getRegionFaceOrder
@@ -750,6 +811,76 @@ int main(int argc, char *argv[])
         );
 
         cellOrder = invert(mesh.nCells(), reverseCellOrder);
+
+
+        if (sortCoupledFaceCells)
+        {
+            // Change order so all coupled patch faceCells are at the end.
+            const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+            // Collect all boundary cells on coupled patches
+            label nBndCells = 0;
+            forAll(pbm, patchI)
+            {
+                if (pbm[patchI].coupled())
+                {
+                    nBndCells += pbm[patchI].size();
+                }
+            }
+
+            labelList bndCellMap(nBndCells);
+            labelList bndCells(bndCellMap);
+            nBndCells = 0;
+            forAll(pbm, patchI)
+            {
+                if (pbm[patchI].coupled())
+                {
+                    const labelUList& faceCells = pbm[patchI].faceCells();
+                    forAll(faceCells, i)
+                    {
+                        label cellI = faceCells[i];
+                        bndCells[nBndCells] = cellI;
+                        bndCellMap[nBndCells++] = reverseCellOrder[cellI];
+                    }
+                }
+            }
+            bndCells.setSize(nBndCells);
+            bndCellMap.setSize(nBndCells);
+
+
+            // Sort
+            labelList order;
+            sortedOrder(bndCellMap, order);
+
+            // Redo newReverseCellOrder
+            labelList newReverseCellOrder(mesh.nCells(), -1);
+
+            label sortedI = mesh.nCells();
+            forAllReverse(order, i)
+            {
+                label origCellI = bndCells[order[i]];
+                newReverseCellOrder[origCellI] = --sortedI;
+            }
+
+            Info<< "Ordered all " << nBndCells << " cells with a coupled face"
+                << "  to the end of the cell list, starting at " << sortedI
+                << endl;
+
+            // Compact
+            sortedI = 0;
+            forAll(cellOrder, newCellI)
+            {
+                label origCellI = cellOrder[newCellI];
+                if (newReverseCellOrder[origCellI] == -1)
+                {
+                    newReverseCellOrder[origCellI] = sortedI++;
+                }
+            }
+
+            // Update sorted back to original (unsorted) map
+            cellOrder = invert(mesh.nCells(), newReverseCellOrder);
+        }
+
 
         // Determine new to old face order with new cell numbering
         faceOrder = getFaceOrder

@@ -70,13 +70,23 @@ Foam::nearWallFields::nearWallFields
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::nearWallFields::~nearWallFields()
-{}
+{
+    if (debug)
+    {
+        Info<< "nearWallFields::~nearWallFields()" << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::nearWallFields::read(const dictionary& dict)
 {
+    if (debug)
+    {
+        Info<< "nearWallFields::read(const dictionary&)" << endl;
+    }
+
     if (active_)
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
@@ -122,6 +132,11 @@ void Foam::nearWallFields::read(const dictionary& dict)
 
 void Foam::nearWallFields::execute()
 {
+    if (debug)
+    {
+        Info<< "nearWallFields:execute()" << endl;
+    }
+
     if (active_)
     {
         sampleFields(vsf_);
@@ -135,12 +150,22 @@ void Foam::nearWallFields::execute()
 
 void Foam::nearWallFields::end()
 {
-    // Do nothing
+    if (debug)
+    {
+        Info<< "nearWallFields:end()" << endl;
+    }
+    // Update fields
+    execute();
 }
 
 
 void Foam::nearWallFields::write()
 {
+    if (debug)
+    {
+        Info<< "nearWallFields:write()" << endl;
+    }
+
     // Do nothing
     if (active_)
     {

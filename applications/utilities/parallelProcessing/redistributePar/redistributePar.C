@@ -795,9 +795,9 @@ int main(int argc, char *argv[])
     );
     fvMesh& mesh = meshPtr();
 
-    //Pout<< "Read mesh:" << endl;
-    //printMeshData(Pout, mesh);
-    //Pout<< endl;
+    // Print some statistics
+    Info<< "Before distribution:" << endl;
+    printMeshData(mesh);
 
 
 
@@ -1022,7 +1022,6 @@ int main(int argc, char *argv[])
     //map().distributeFaceData(faceCc);
 
 
-    // Print a bit
     // Print some statistics
     Info<< "After distribution:" << endl;
     printMeshData(mesh);

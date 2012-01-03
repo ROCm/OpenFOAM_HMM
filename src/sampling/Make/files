@@ -11,6 +11,7 @@ sampledSet/polyLine/polyLineSet.C
 sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
+/* sampledSet/patchSeed/patchSeedSet.C */
 sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSets/sampledSetsGrouping.C
@@ -21,6 +22,7 @@ sampledSet/uniform/uniformSet.C
 setWriters = sampledSet/writers
 
 $(setWriters)/writers.C
+$(setWriters)/ensight/ensightSetWriterRunTime.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C

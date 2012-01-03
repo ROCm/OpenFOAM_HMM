@@ -73,6 +73,13 @@ public:
         const label UIndex_;
         const bool trackForward_;
         const label nSubCycle_;
+        const scalar trackLength_;
+
+        //- For surface-constrained tracking
+        const bool followSurface_;
+        const pointField& patchNormals_;
+        const scalar trackHeight_;
+
 
         DynamicList<vectorList>& allPositions_;
         List<DynamicList<scalarList> >& allScalars_;
@@ -89,6 +96,12 @@ public:
                 const label UIndex,
                 const bool trackForward,
                 const label nSubCycle,
+                const scalar trackLength,
+                const bool followSurface,
+
+                const pointField& patchNormals,
+                const scalar trackHeight,
+
                 DynamicList<List<point> >& allPositions,
                 List<DynamicList<scalarList> >& allScalars,
                 List<DynamicList<vectorList> >& allVectors
@@ -100,6 +113,12 @@ public:
                 UIndex_(UIndex),
                 trackForward_(trackForward),
                 nSubCycle_(nSubCycle),
+                trackLength_(trackLength),
+                followSurface_(followSurface),
+
+                patchNormals_(patchNormals),
+                trackHeight_(trackHeight),
+
                 allPositions_(allPositions),
                 allScalars_(allScalars),
                 allVectors_(allVectors)
@@ -135,12 +154,20 @@ private:
             const vector& U
         ) const;
 
+        void constrainVelocity
+        (
+            trackingData& td,
+            const scalar dt,
+            vector& U
+        );
+
         //- Interpolate all quantities; return interpolated velocity.
         vector interpolateFields
         (
             const trackingData&,
             const point&,
-            const label cellI
+            const label cellI,
+            const label faceI
         );
 
 

@@ -35,17 +35,28 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
 )
 {
     Istream& is(dict.lookup(entryName));
-    word DataEntryType(is);
+
+    token firstToken(is);
+
+    word DataEntryType;
+    if (firstToken.isWord())
+    {
+        DataEntryType = firstToken.wordToken();
+    }
+    else
+    {
+        is.putBack(firstToken);
+//        DataEntryType = CompatibilityConstant<Type>::typeName;
+        DataEntryType = "CompatibilityConstant";
+    }
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(DataEntryType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "DataEntry<Type>::New(Istream&)"
-        )   << "Unknown DataEntry type "
+        FatalErrorIn("DataEntry<Type>::New(const word&, const dictionary&)")
+            << "Unknown DataEntry type "
             << DataEntryType << " for DataEntry "
             << entryName << nl << nl
             << "Valid DataEntry types are:" << nl

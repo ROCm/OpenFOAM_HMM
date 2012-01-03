@@ -27,6 +27,8 @@ polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
 
 meshSearch/meshSearch.C
+meshSearch/meshSearchFACECENTRETETSMeshObject.C
+meshSearch/meshSearchMeshObject.C
 
 meshTools/meshTools.C
 
@@ -39,6 +41,7 @@ $(pWave)/pointEdgePoint.C
 patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
+$(patchWave)/patchDist.C
 
 meshWave = $(algorithms)/MeshWave
 $(meshWave)/MeshWaveName.C

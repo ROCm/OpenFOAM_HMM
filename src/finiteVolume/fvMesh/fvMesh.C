@@ -59,6 +59,8 @@ License
 #include "upwindFECCellToFaceStencilObject.H"
 
 #include "centredCFCFaceToCellStencilObject.H"
+#include "meshSearchMeshObject.H"
+#include "meshSearchFACECENTRETETSMeshObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -99,6 +101,11 @@ void Foam::fvMesh::clearGeom()
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
     //quadraticFitSnGradData::Delete(*this);
+
+    // Note: should be in polyMesh::clearGeom but meshSearch not in OpenFOAM
+    // library
+    meshSearchMeshObject::Delete(*this);
+    meshSearchFACECENTRETETSMeshObject::Delete(*this);
 }
 
 
@@ -128,6 +135,11 @@ void Foam::fvMesh::clearAddressing()
     upwindFECCellToFaceStencilObject::Delete(*this);
 
     centredCFCFaceToCellStencilObject::Delete(*this);
+
+    // Note: should be in polyMesh::clearGeom but meshSearch not in OpenFOAM
+    // library
+    meshSearchMeshObject::Delete(*this);
+    meshSearchFACECENTRETETSMeshObject::Delete(*this);
 }
 
 
