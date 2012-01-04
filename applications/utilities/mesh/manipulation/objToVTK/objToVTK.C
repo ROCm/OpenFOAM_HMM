@@ -127,6 +127,7 @@ int main(int argc, char *argv[])
 
     // Points and lines
     DynamicList<point> points;
+    DynamicList<vector> pointNormals;
     DynamicList<labelList> polyLines;
     DynamicList<labelList> polygons;
 
@@ -150,6 +151,14 @@ int main(int argc, char *argv[])
             lineStream >> x >> y >> z;
 
             points.append(point(x, y, z));
+        }
+        else if (cmd == "vn")
+        {
+            scalar x, y, z;
+
+            lineStream >> x >> y >> z;
+
+            pointNormals.append(vector(x, y, z));
         }
         else if (cmd == "l")
         {
@@ -262,6 +271,14 @@ int main(int argc, char *argv[])
         {
             outFile << ' ';
         }
+    }
+
+    outFile << nl << "NORMALS pointNormals float\n";
+    forAll(pointNormals, i)
+    {
+        const vector& n = pointNormals[i];
+
+        outFile << n.x() << ' ' << n.y() << ' ' << n.z() << nl;
     }
 
     Info<< "End\n" << endl;
