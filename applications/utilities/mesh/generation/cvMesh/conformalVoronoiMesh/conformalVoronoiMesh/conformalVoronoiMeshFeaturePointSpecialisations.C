@@ -161,6 +161,13 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         const vector& concaveEdgePlaneBNormal =
             normals[edgeNormals[concaveEdgeI][1]];
 
+        if (debug)
+        {
+            Info<< featPt << nl
+                << concaveEdgePlaneANormal << nl
+                << concaveEdgePlaneBNormal << endl;
+        }
+
          // Intersect planes parallel to the concave edge planes offset
          // by ppDist and the plane defined by featPt and the edge vector.
          plane planeA
@@ -180,6 +187,12 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             concaveEdgeI,
             ptI
         );
+
+        Info<< "pt " << featPt << nl
+            << "concave edge dir " << concaveEdgeDir << nl
+            << "convex edge dir 1 " << feMesh.edgeDirection(convexEdgesI[0], ptI) << nl
+            << "convex edge dir 2 " << feMesh.edgeDirection(convexEdgesI[1], ptI) << nl<<endl;
+
 
         // Todo,needed later but want to get rid of this.
         const Foam::point concaveEdgeLocalFeatPt = featPt + ppDist*concaveEdgeDir;
@@ -203,7 +216,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         const Foam::point internalPtA =
             concaveEdgeExternalPt
-          - 2*planeA.distance(concaveEdgeExternalPt)
+          - 2.0*planeA.distance(concaveEdgeExternalPt)
             *concaveEdgePlaneANormal;
 
         pts.append(internalPtA);
@@ -212,7 +225,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         const Foam::point internalPtB =
             concaveEdgeExternalPt
-          - 2*planeB.distance(concaveEdgeExternalPt)
+          - 2.0*planeB.distance(concaveEdgeExternalPt)
             *concaveEdgePlaneBNormal;
 
         pts.append(internalPtB);
@@ -293,6 +306,15 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             constant::mathematical::pi +
             acos(mag(concaveEdgePlaneANormal & concaveEdgePlaneBNormal))
         );
+
+        if (debug)
+        {
+            Info<< internalPtA << " " << internalPtB << nl
+                << externalPtD << " " << externalPtE << endl;
+            Info<< "normals: " << nl
+                << normals[concaveEdgeNormals[0]] << nl
+                << normals[concaveEdgeNormals[1]] << endl;
+        }
 
         if (totalAngle > cvMeshControls().maxQuadAngle())
         {

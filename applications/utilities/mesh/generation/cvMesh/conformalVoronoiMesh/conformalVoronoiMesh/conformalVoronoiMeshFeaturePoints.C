@@ -328,7 +328,7 @@ void Foam::conformalVoronoiMesh::createFlatEdgePointGroup
 
     // Average normal to remove any bias to one side, although as this
     // is a flat edge, the normals should be essentially the same
-    vector n = 0.5*(nA + nB);
+    const vector n = 0.5*(nA + nB);
 
     // Direction along the surface to the control point, sense of edge
     // direction not important, as +s and -s can be used because this
@@ -391,7 +391,7 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
 
         for
         (
-            std::list<Vb>::iterator vit=featureVertices_.begin();
+            List<Vb>::iterator vit=featureVertices_.begin();
             vit != featureVertices_.end();
             ++vit
         )
@@ -406,20 +406,19 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
 
         // Save points in new distribution
         featureVertices_.clear();
+        featureVertices_.setSize(pointsToInsert.size());
 
         forAll(pointsToInsert, pI)
         {
-            featureVertices_.push_back
-            (
-                Vb(toPoint(pointsToInsert[pI]), indices[pI], types[pI])
-            );
+            featureVertices_[pI] =
+                Vb(toPoint(pointsToInsert[pI]), indices[pI], types[pI]);
         }
     }
     else
     {
         for
         (
-            std::list<Vb>::iterator vit=featureVertices_.begin();
+            List<Vb>::iterator vit=featureVertices_.begin();
             vit != featureVertices_.end();
             ++vit
         )
@@ -476,13 +475,13 @@ void Foam::conformalVoronoiMesh::createConvexFeaturePoints
                 continue;
             }
 
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
+            const vectorField& featPtNormals = feMesh.featurePointNormals(ptI);
+            const scalar ppDist = - pointPairDistance(featPt);
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
 
-            Foam::point internalPt =
-                featPt - pointPairDistance(featPt)*cornerNormal;
+            Foam::point internalPt = featPt + ppDist*cornerNormal;
 
             // Result when the points are eventually inserted (example n = 4)
             // Add number_of_vertices() at insertion of first vertex to all
@@ -548,13 +547,13 @@ void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
                 continue;
             }
 
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
+            const vectorField& featPtNormals = feMesh.featurePointNormals(ptI);
+            const scalar ppDist = pointPairDistance(featPt);
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
 
-            Foam::point externalPt =
-                featPt + pointPairDistance(featPt)*cornerNormal;
+            Foam::point externalPt = featPt + ppDist*cornerNormal;
 
             label externalPtIndex = featPtNormals.size();
 
@@ -573,9 +572,9 @@ void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
             {
                 const vector& n = featPtNormals[nI];
 
-                plane planeN = plane(featPt, n);
+                const plane planeN = plane(featPt, n);
 
-                Foam::point internalPt =
+                const Foam::point internalPt =
                     externalPt - 2.0 * planeN.distance(externalPt) * n;
 
                 pts.append(internalPt);
@@ -600,7 +599,7 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
 {
     if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
     {
-        Info<<nl << "Skipping specialised handling for mixed feature points"
+        Info<< nl << "Skipping specialised handling for mixed feature points"
             << endl;
         return;
     }
@@ -654,8 +653,8 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
                 {
                     const label edgeI = pEds[e];
 
-                    const extendedFeatureEdgeMesh::edgeStatus edStatus =
-                        feMesh.getEdgeStatus(edgeI);
+                    const extendedFeatureEdgeMesh::edgeStatus edStatus
+                        = feMesh.getEdgeStatus(edgeI);
 
                     if
                     (
@@ -743,13 +742,11 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
     }
 
     featureVertices_.clear();
+    featureVertices_.setSize(pts.size());
 
     forAll(pts, pI)
     {
-        featureVertices_.push_back
-        (
-            Vb(toPoint(pts[pI]), indices[pI], types[pI])
-        );
+        featureVertices_[pI] = Vb(toPoint(pts[pI]), indices[pI], types[pI]);
     }
 
     constructFeaturePointLocations();
@@ -768,7 +765,6 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
     forAll(feMeshes, i)
     {
         const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
-
 
         if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
         {

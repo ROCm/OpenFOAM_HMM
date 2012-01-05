@@ -167,10 +167,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // Initial surface protrusion conformation - nearest surface point
     {
-        scalar edgeSearchDistCoeffSqr =
+        const scalar edgeSearchDistCoeffSqr =
             cvMeshControls().edgeSearchDistCoeffSqrInitial(reconfMode);
 
-        scalar surfacePtReplaceDistCoeffSqr =
+        const scalar surfacePtReplaceDistCoeffSqr =
             cvMeshControls().surfacePtReplaceDistCoeffSqrInitial(reconfMode);
 
         DynamicList<pointIndexHit> surfaceHits;
@@ -188,8 +188,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         {
             if (vit->internalPoint())
             {
-                Foam::point vert(topoint(vit->point()));
-                scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
+                const Foam::point vert = topoint(vit->point());
+                const scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
+
                 pointIndexHit surfHit;
                 label hitSurface;
 
@@ -342,7 +343,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
              || vit->referredInternalOrBoundaryPoint()
             )
             {
-                Foam::point vert(topoint(vit->point()));
+                const Foam::point vert = topoint(vit->point());
+
                 pointIndexHit surfHit;
                 label hitSurface;
 
@@ -372,7 +374,8 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
             else if (vit->ppSlave() || vit->referredExternal())
             {
-                Foam::point vert(topoint(vit->point()));
+                const Foam::point vert = topoint(vit->point());
+
                 pointIndexHit surfHit;
                 label hitSurface;
 
@@ -1222,7 +1225,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
 
     for
     (
-        std::list<Facet>::iterator fit=facets.begin();
+        std::list<Facet>::iterator fit = facets.begin();
         fit != facets.end();
         ++fit
     )
@@ -1314,7 +1317,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
 
     for
     (
-        std::list<Facet>::iterator fit=facets.begin();
+        std::list<Facet>::iterator fit = facets.begin();
         fit != facets.end();
         ++fit
     )
@@ -1738,7 +1741,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
     labelList featuresHit;
 
-    scalar targetCellSizeSqr = sqr(targetCellSize(vert));
+    const scalar targetCellSizeSqr = sqr(targetCellSize(vert));
 
     geometryToConformTo_.findEdgeNearestByType
     (
@@ -1756,9 +1759,9 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
     forAll(edHits, i)
     {
-        const pointIndexHit& edHit(edHits[i]);
+        const pointIndexHit& edHit = edHits[i];
 
-        label featureHit = featuresHit[i];
+        const label featureHit = featuresHit[i];
 
         if (edHit.hit())
         {
@@ -1838,7 +1841,7 @@ void Foam::conformalVoronoiMesh::storeSurfaceConformation()
          && vit->index() >= startOfInternalPoints_
         )
         {
-            surfaceConformationVertices_.push_back
+            surfaceConformationVertices_.append
             (
                 Vb
                 (
@@ -1871,7 +1874,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 
     for
     (
-        std::list<Vb>::iterator vit=surfaceConformationVertices_.begin();
+        List<Vb>::iterator vit=surfaceConformationVertices_.begin();
         vit != surfaceConformationVertices_.end();
         ++vit
     )

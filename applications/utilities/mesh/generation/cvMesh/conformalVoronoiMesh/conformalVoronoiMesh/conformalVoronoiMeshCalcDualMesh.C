@@ -93,7 +93,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
         for
         (
-            std::list<Cell_handle>::iterator cit=cells.begin();
+            std::list<Cell_handle>::iterator cit = cells.begin();
             cit != cells.end();
             ++cit
         )
@@ -116,7 +116,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         {
             for
             (
-                std::list<Cell_handle>::iterator cit=cells.begin();
+                std::list<Cell_handle>::iterator cit = cells.begin();
                 cit != cells.end();
                 ++cit
             )

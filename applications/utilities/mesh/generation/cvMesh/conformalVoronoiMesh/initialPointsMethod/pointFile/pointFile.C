@@ -51,7 +51,7 @@ pointFile::pointFile
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::list<Vb::Point> pointFile::initialPoints() const
+List<Vb::Point> pointFile::initialPoints() const
 {
     pointIOField points
     (
@@ -69,7 +69,7 @@ std::list<Vb::Point> pointFile::initialPoints() const
 
     if (points.empty())
     {
-        FatalErrorIn("std::list<Vb::Point> pointFile::initialPoints() const")
+        FatalErrorIn("List<Vb::Point> pointFile::initialPoints() const")
             << "Point file contain no points"
             << exit(FatalError) << endl;
     }
@@ -126,7 +126,7 @@ std::list<Vb::Point> pointFile::initialPoints() const
         }
     }
 
-    std::list<Vb::Point> initialPoints;
+    List<Vb::Point> initialPoints;
 
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
     (
@@ -144,7 +144,7 @@ std::list<Vb::Point> pointFile::initialPoints() const
         {
             const point& p(points[i]);
 
-            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+            initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
         }
     }
 

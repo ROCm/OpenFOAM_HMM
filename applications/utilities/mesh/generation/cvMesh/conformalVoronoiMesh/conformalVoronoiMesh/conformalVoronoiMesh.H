@@ -151,7 +151,7 @@ private:
 
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear. Maintained with relative types and indices.
-        std::list<Vb> featureVertices_;
+        List<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.
         //  Single pointField required by the featurePointTree.
@@ -175,7 +175,7 @@ private:
 
         //- Store the surface and feature edge conformation locations to be
         //  reinserted
-        std::list<Vb> surfaceConformationVertices_;
+        List<Vb> surfaceConformationVertices_;
 
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
@@ -284,7 +284,7 @@ private:
         //  processors
         void insertPoints
         (
-            std::list<Point>& points,
+            List<Point>& points,
             bool distribute = true
         );
 
@@ -490,10 +490,10 @@ private:
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
-        void storeSizesAndAlignments(const std::list<Point>& storePts);
+        void storeSizesAndAlignments(const List<Point>& storePts);
 
         //- Restore the sizes and alignments if required
-        void updateSizesAndAlignments(const std::list<Point>& storePts);
+        void updateSizesAndAlignments(const List<Point>& storePts);
 
         //- Demand driven construction of octree for and alignment points
         const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
@@ -1017,6 +1017,9 @@ public:
 
             //- Write Delaunay points to .obj file
             void writePoints(const fileName& fName, bool internalOnly) const;
+
+            //- Write the boundary Delaunay points to .obj file
+            void writeBoundaryPoints(const fileName& fName) const;
 
             //- Write list of points to file
             void writePoints

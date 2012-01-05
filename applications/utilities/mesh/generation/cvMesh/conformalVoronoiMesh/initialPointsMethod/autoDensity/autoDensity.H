@@ -116,7 +116,7 @@ private:
         //- Descend into octants of the supplied bound box
         void recurseAndFill
         (
-            std::list<Vb::Point>& initialPoints,
+            List<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
             label levelLimit,
             word recursionName
@@ -127,7 +127,7 @@ private:
         //  in favour of further recursion.
         bool fillBox
         (
-            std::list<Vb::Point>& initialPoints,
+            List<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
             bool overlapping
         ) const;
@@ -156,7 +156,7 @@ public:
     // Member Functions
 
         //- Return the initial points for the conformalVoronoiMesh
-        virtual std::list<Vb::Point> initialPoints() const;
+        virtual List<Vb::Point> initialPoints() const;
 };
 
 

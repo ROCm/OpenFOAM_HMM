@@ -78,17 +78,17 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
         norm
     );
 
-    vector np = norm[0];
+    const vector np = norm[0];
 
     // Generate equally spaced 'spokes' in a circle normal to the
     // direction from the vertex to the closest point on the surface
     // and look for a secondary intersection.
 
-    vector d = surfHit.hitPoint() - pt;
+    const vector d = surfHit.hitPoint() - pt;
 
-    tensor Rp = rotationTensor(vector(0,0,1), np);
+    const tensor Rp = rotationTensor(vector(0,0,1), np);
 
-    label s = cvMeshControls().alignmentSearchSpokes();
+    const label s = cvMeshControls().alignmentSearchSpokes();
 
     scalar closestSpokeHitDistance = GREAT;
 
@@ -96,7 +96,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
     label closestSpokeSurface = -1;
 
-    scalar spanMag = geometryToConformTo_.globalBounds().mag();
+    const scalar spanMag = geometryToConformTo_.globalBounds().mag();
 
     for (label i = 0; i < s; i++)
     {
@@ -198,7 +198,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     // Secondary alignment
     vector ns = np ^ na;
 
-    if (mag(ns) <  SMALL)
+    if (mag(ns) < SMALL)
     {
         FatalErrorIn("conformalVoronoiMesh::requiredAlignment")
             << "Parallel normals detected in spoke search." << nl
@@ -220,7 +220,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
 void Foam::conformalVoronoiMesh::insertPoints
 (
-    std::list<Point>& points,
+    List<Point>& points,
     bool distribute
 )
 {
@@ -241,11 +241,13 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         DynamicList<Foam::point> transferPoints;
 
+        List<Point> pointsOnProcessor;
+
         for
         (
-            std::list<Point>::iterator pit=points.begin();
+            List<Point>::iterator pit = points.begin();
             pit != points.end();
-            // No action
+            ++pit
         )
         {
             Foam::point p(topoint(*pit));
@@ -253,14 +255,19 @@ void Foam::conformalVoronoiMesh::insertPoints
             if (!positionOnThisProc(p))
             {
                 transferPoints.append(p);
-
-                pit = points.erase(pit);
             }
             else
             {
-                ++pit;
+                pointsOnProcessor.append(*pit);
             }
         }
+
+        points.setSize(pointsOnProcessor.size());
+        forAll(pointsOnProcessor, pI)
+        {
+            points[pI] = pointsOnProcessor[pI];
+        }
+        pointsOnProcessor.clear();
 
         // Send the points that are not on this processor to the appropriate
         // place
@@ -271,7 +278,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         forAll(transferPoints, tPI)
         {
-            points.push_back(toPoint(transferPoints[tPI]));
+            points.append(toPoint(transferPoints[tPI]));
         }
 
         label sizeChange = preDistributionSize - label(points.size());
@@ -310,7 +317,7 @@ void Foam::conformalVoronoiMesh::insertPoints
     // Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
     // for
     // (
-    //     std::list<Point>::iterator pit=points.begin();
+    //List:list<Point>::iterator pit=points.begin();
     //     pit != points.end();
     //     ++pit
     // )
@@ -569,7 +576,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     timeCheck("Before initial points call");
 
-    std::list<Point> initPts = initialPointsMethod_->initialPoints();
+    List<Point> initPts = initialPointsMethod_->initialPoints();
 
     timeCheck("After initial points call");
 
@@ -784,7 +791,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
 {
-    std::list<Point> storePts;
+    List<Point> storePts;
 
     for
     (
@@ -795,7 +802,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
     {
         if (vit->internalPoint())
         {
-            storePts.push_back(vit->point());
+            storePts.append(vit->point());
         }
     }
 
@@ -805,7 +812,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 (
-    const std::list<Point>& storePts
+    const List<Point>& storePts
 )
 {
     timeCheck("Start of storeSizesAndAlignments");
@@ -822,7 +829,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     for
     (
-        std::list<Point>::const_iterator pit=storePts.begin();
+        List<Point>::const_iterator pit = storePts.begin();
         pit != storePts.end();
         ++pit
     )
@@ -849,7 +856,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
 void Foam::conformalVoronoiMesh::updateSizesAndAlignments
 (
-    const std::list<Point>& storePts
+    const List<Point>& storePts
 )
 {
     // This function is only used in serial, the background redistribution
@@ -1352,7 +1359,7 @@ void Foam::conformalVoronoiMesh::move()
         true
     );
 
-    std::list<Point> pointsToInsert;
+    List<Point> pointsToInsert;
 
     for
     (
@@ -1389,15 +1396,15 @@ void Foam::conformalVoronoiMesh::move()
 
             forAll(alignmentDirsA, aA)
             {
-                const vector& a(alignmentDirsA[aA]);
+                const vector& a = alignmentDirsA[aA];
 
                 scalar maxDotProduct = 0.0;
 
                 forAll(alignmentDirsB, aB)
                 {
-                    const vector& b(alignmentDirsB[aB]);
+                    const vector& b = alignmentDirsB[aB];
 
-                    scalar dotProduct = a & b;
+                    const scalar dotProduct = a & b;
 
                     if (mag(dotProduct) > maxDotProduct)
                     {
@@ -1431,7 +1438,7 @@ void Foam::conformalVoronoiMesh::move()
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        pointsToInsert.push_back
+                        pointsToInsert.append
                         (
                             toPoint(0.5*(dVA + dVB))
                         );
@@ -1464,7 +1471,7 @@ void Foam::conformalVoronoiMesh::move()
                     alignmentDir *= -1;
                 }
 
-                scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+                const scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
 
                 if
                 (
@@ -1472,9 +1479,9 @@ void Foam::conformalVoronoiMesh::move()
                   > cvMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
-                    scalar targetCellSize = averageCellSize(vA, vB);
+                    const scalar targetCellSize = averageCellSize(vA, vB);
 
-                    scalar targetFaceArea = sqr(targetCellSize);
+                    const scalar targetFaceArea = sqr(targetCellSize);
 
                     alignmentDir *= 0.5*targetCellSize;
 
@@ -1483,7 +1490,7 @@ void Foam::conformalVoronoiMesh::move()
                     // directions.
                     vector delta = alignmentDir - 0.5*rAB;
 
-                    scalar faceArea = dualFace.mag(dualVertices);
+                    const scalar faceArea = dualFace.mag(dualVertices);
 
                     delta *= faceAreaWeightModel_->faceAreaWeight
                     (
@@ -1514,8 +1521,7 @@ void Foam::conformalVoronoiMesh::move()
                         )
                         {
                             // Prevent insertions spanning surfaces
-
-                            pointsToInsert.push_back
+                            pointsToInsert.append
                             (
                                 toPoint(0.5*(dVA + dVB))
                             );
@@ -1537,14 +1543,13 @@ void Foam::conformalVoronoiMesh::move()
                             // the short edge if neither attached
                             // point has already been identified to be
                             // removed.
-
                             if
                             (
                                 pointToBeRetained[vA->index()] == true
                              && pointToBeRetained[vB->index()] == true
                             )
                             {
-                                pointsToInsert.push_back
+                                pointsToInsert.append
                                 (
                                     toPoint(0.5*(dVA + dVB))
                                 );
@@ -1623,7 +1628,7 @@ void Foam::conformalVoronoiMesh::move()
                 // Only necessary if using an exact constructions kernel
                 // (extended precision)
 
-                pointsToInsert.push_back
+                pointsToInsert.append
                 (
                     toPoint
                     (
@@ -1634,6 +1639,42 @@ void Foam::conformalVoronoiMesh::move()
             }
         }
     }
+
+    // Save displacements to file. To view, convert to vtk so that the times can
+    // be viewed in paraview:
+    //
+    // for i in {0..N}
+    // do
+    //     objToVTK displacements$i.obj displacement$i.vtk
+    // done
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        Pout<< "Writing point displacement vectors to file." << endl;
+        OFstream str("displacements_" + runTime_.timeName() + ".obj");
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if (vit->internalPoint())
+            {
+                if (pointToBeRetained[vit->index()] == true)
+                {
+                    meshTools::writeOBJ(str, topoint(vit->point()));
+
+                    str << "vn "
+                        << displacementAccumulator[vit->index()][0] << " "
+                        << displacementAccumulator[vit->index()][1] << " "
+                        << displacementAccumulator[vit->index()][2] << " "
+                        << endl;
+                }
+            }
+        }
+    }
+
 
     // Remove the entire tessellation
     reset();
@@ -1656,6 +1697,7 @@ void Foam::conformalVoronoiMesh::move()
     if (cvMeshControls().objOutput() && runTime_.outputTime())
     {
         writePoints("points_" + runTime_.timeName() + ".obj", false);
+        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
     }
 
     timeCheck("After conformToSurface");
