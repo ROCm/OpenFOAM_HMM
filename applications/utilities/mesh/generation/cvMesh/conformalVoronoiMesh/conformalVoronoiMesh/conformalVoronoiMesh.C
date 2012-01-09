@@ -1260,8 +1260,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     buildSurfaceConformation(rmCoarse);
 
-    is_valid(true);
-
     // The introduction of the surface conformation may have distorted the
     // balance of vertices, distribute if necessary.
     if (distributeBackground())
@@ -1675,6 +1673,10 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
+    }
 
     // Remove the entire tessellation
     reset();
@@ -1690,15 +1692,14 @@ void Foam::conformalVoronoiMesh::move()
 
     insertPoints(pointsToInsert);
 
-    timeCheck("Internal points inserted");
-
-    conformToSurface();
-
     if (cvMeshControls().objOutput() && runTime_.outputTime())
     {
         writePoints("points_" + runTime_.timeName() + ".obj", false);
-        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
     }
+
+    timeCheck("Internal points inserted");
+
+    conformToSurface();
 
     timeCheck("After conformToSurface");
 

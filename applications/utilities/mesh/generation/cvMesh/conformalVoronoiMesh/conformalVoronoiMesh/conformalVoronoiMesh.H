@@ -548,6 +548,14 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
+        //- Return all intersections
+        void dualCellSurfaceAllIntersections
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            DynamicList<pointIndexHit>& info,
+            DynamicList<label>& hitSurface
+        ) const;
+
         //- Return false if the line is entirely outside the current processor
         //  domain, true is either point is inside, or the processor domain
         //  bounadry is intersected (i.e. the points are box outside but the
@@ -672,8 +680,8 @@ private:
         (
             const Delaunay::Finite_vertices_iterator& vit,
             const Foam::point& vert,
-            const pointIndexHit& surfHit,
-            label hitSurface,
+            const DynamicList<pointIndexHit>& surfHit,
+            DynamicList<label>& hitSurface,
             scalar surfacePtReplaceDistCoeffSqr,
             scalar edgeSearchDistCoeffSqr,
             DynamicList<pointIndexHit>& surfaceHits,
