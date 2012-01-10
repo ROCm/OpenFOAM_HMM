@@ -157,17 +157,23 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     // liquid volume fraction
     const scalarField X(liquids_.X(Yl));
 
-    // droplet surface pressure
-    scalar ps = liquids_.pv(pc, T, X);
+    // droplet surface pressure assumed to surface vapour pressure
+    scalar ps = liquids_.pv(pc, Ts, X);
 
     // vapour density at droplet surface [kg/m3]
     scalar rhos = ps*liquids_.W(X)/(specie::RR*Ts);
 
-    // thermal conductivity of carrier [W/m/K]
+    // carrier thermo properties
+    scalar Hsc = 0.0;
+    scalar Hc = 0.0;
+    scalar Cpc = 0.0;
     scalar kappac = 0.0;
     forAll(this->owner().thermo().carrier().Y(), i)
     {
-        const scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
+        scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
+        Hc += Yc*this->owner().thermo().carrier().H(i, Tc);
+        Hsc += Yc*this->owner().thermo().carrier().H(i, Ts);
+        Cpc += Yc*this->owner().thermo().carrier().Cp(i, Ts);
         kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
     }
 
@@ -189,32 +195,77 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         // carrier phase concentration
         const scalar Xc = XcMix[gid];
 
+
         if (Xc*pc > pSat)
         {
             // saturated vapour - no phase change
         }
         else
         {
+            // vapour diffusivity [m2/s]
+            const scalar Dab = liquids_.properties()[lid].D(ps, Ts);
+
+            // Schmidt number
+            const scalar Sc = nu/(Dab + ROOTVSMALL);
+
+            // Sherwood number
+            const scalar Sh = this->Sh(Re, Sc);
+
+
             if (pSat > 0.999*pc)
             {
                 // boiling
 
-//                const scalar deltaT = max(Tc - Td, 0.5);
-                const scalar deltaT = max(Tc - T, 0.5);
+                const scalar deltaT = max(T - TBoil, 0.5);
 
-                // liquid specific heat capacity
-                const scalar Cp = liquids_.properties()[lid].Cp(pc, Td);
-
-                // vapour heat of fomation
+                // vapour heat of formation
                 const scalar hv = liquids_.properties()[lid].hl(pc, Td);
 
-                // Nusselt number
-                const scalar Nu = 2.0 + 0.6*sqrt(Re)*cbrt(Pr);
+                // empirical heat transfer coefficient W/m2/K
+                scalar alphaS = 0.0;
+                if (deltaT < 5.0)
+                {
+                    alphaS = 760.0*pow(deltaT, 0.26);
+                }
+                else if (deltaT < 25.0)
+                {
+                    alphaS = 27.0*pow(deltaT, 2.33);
+                }
+                else
+                {
+                    alphaS = 13800.0*pow(deltaT, 0.39);
+                }
 
-                const scalar lg = log(1.0 + Cp*deltaT/max(SMALL, hv));
+                // flash-boil vaporisation rate
+                const scalar Gf = alphaS*deltaT*pi*sqr(d)/hv;
 
-                // mass transfer [kg]
-                dMassPC[lid] += pi*kappac*Nu*lg*d/Cp*dt;
+                // model constants
+                // NOTE: using Sherwood number instead of Nusselt number
+                const scalar A = (Hc - Hsc)/hv;
+                const scalar B = pi*kappac/Cpc*d*Sh;
+
+                scalar G = 0.0;
+                if (A > 0.0)
+                {
+                    // heat transfer from the surroundings contributes
+                    // to the vaporisation process
+                    scalar Gr = 1e-5;
+
+                    for (label i=0; i<50; i++)
+                    {
+                        scalar GrDash = Gr;
+
+                        G = B/(1.0 + Gr)*log(1.0 + A*(1.0 + Gr));
+                        Gr = Gf/G;
+
+                        if (mag(Gr - GrDash)/GrDash < 1e-3)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                dMassPC[lid] += (G + Gf)*dt;
             }
             else
             {
@@ -226,23 +277,10 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
                 // molar ratio
                 const scalar Xr = (Xs - Xc)/max(SMALL, 1.0 - Xs);
 
-
                 if (Xr > 0)
                 {
-                    // vapour diffusivity [m2/s]
-                    const scalar Dab = liquids_.properties()[lid].D(pc, Td);
-
-                    // Schmidt number
-                    const scalar Sc = nu/(Dab + ROOTVSMALL);
-
-                    // Sherwood number
-                    const scalar Sh = this->Sh(Re, Sc);
-
-                    // mass transfer coefficient [m/s]
-                    const scalar kc = Sh*Dab/(d + ROOTVSMALL);
-
                     // mass transfer [kg]
-                    dMassPC[lid] += pi*sqr(d)*kc*rhos*log(1.0 + Xr)*dt;
+                    dMassPC[lid] += pi*d*Sh*Dab*rhos*log(1.0 + Xr)*dt;
                 }
             }
         }
@@ -261,18 +299,24 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::dh
 {
     scalar dh = 0;
 
+    scalar TDash = T;
+    if (liquids_.properties()[idl].pv(p, T) >= 0.999*p)
+    {
+        TDash = liquids_.properties()[idl].pvInvert(p);
+    }
+
     typedef PhaseChangeModel<CloudType> parent;
     switch (parent::enthalpyTransfer_)
     {
         case (parent::etLatentHeat):
         {
-            dh = liquids_.properties()[idl].hl(p, T);
+            dh = liquids_.properties()[idl].hl(p, TDash);
             break;
         }
         case (parent::etEnthalpyDifference):
         {
-            scalar hc = this->owner().composition().carrier().H(idc, T);
-            scalar hp = liquids_.properties()[idl].h(p, T);
+            scalar hc = this->owner().composition().carrier().H(idc, TDash);
+            scalar hp = liquids_.properties()[idl].h(p, TDash);
 
             dh = hc - hp;
             break;
@@ -287,7 +331,7 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::dh
                     "const label, "
                     "const label, "
                     "const label"
-                ")"
+                ") const"
             )   << "Unknown enthalpyTransfer type" << abort(FatalError);
         }
     }
