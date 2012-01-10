@@ -291,7 +291,8 @@ public:
             inline const word secondarySourceName() const;
 
             //- Return const access to the mapToMap Ptr
-            inline const autoPtr<meshToMesh> secondaryToPrimaryInterpPtr() const;
+            inline const autoPtr<meshToMesh>
+                secondaryToPrimaryInterpPtr() const;
 
             //- Return const referenc to the mapRegion
             inline const word mapRegionName() const;
