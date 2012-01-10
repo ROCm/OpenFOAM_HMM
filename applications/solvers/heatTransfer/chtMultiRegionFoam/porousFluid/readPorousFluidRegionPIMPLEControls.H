@@ -1,4 +1,4 @@
-    const dictionary& pimple = mesh.solutionDict().subDict("PIMPLE");
+    const dictionary& pimple = porousMesh.solutionDict().subDict("PIMPLE");
 
     const int nCorr =
         pimple.lookupOrDefault<int>("nCorrectors", 1);
@@ -8,3 +8,4 @@
 
     const bool momentumPredictor =
         pimple.lookupOrDefault("momentumPredictor", true);
+

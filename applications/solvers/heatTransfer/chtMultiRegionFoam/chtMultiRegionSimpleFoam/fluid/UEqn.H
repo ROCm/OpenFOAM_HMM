@@ -3,9 +3,13 @@
     (
         fvm::div(phi, U)
       + turb.divDevRhoReff(U)
+      + sources(rho, U)
     );
 
     UEqn().relax();
+
+    // Add porous resistance
+    pZones.addResistance(UEqn());
 
     solve
     (

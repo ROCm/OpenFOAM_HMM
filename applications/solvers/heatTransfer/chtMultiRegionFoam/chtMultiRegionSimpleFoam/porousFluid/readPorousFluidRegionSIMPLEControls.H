@@ -1,5 +1,4 @@
-    const dictionary& simple = fluidRegions[i].solutionDict().subDict("SIMPLE");
+    const dictionary& simple = porousMesh.solutionDict().subDict("SIMPLE");
 
     const int nNonOrthCorr =
         simple.lookupOrDefault<int>("nNonOrthogonalCorrectors", 0);
-

@@ -1,20 +1,20 @@
-    const wordList fluidNames(rp["fluid"]);
+    const wordList porousSolidNames(rp["porousSolid"]);
 
-    PtrList<fvMesh> fluidRegions(fluidNames.size());
+    PtrList<fvMesh> porousSolidRegions(porousSolidNames.size());
 
-    forAll(fluidNames, i)
+    forAll(porousSolidNames, i)
     {
-        Info<< "Create fluid mesh for region " << fluidNames[i]
+        Info<< "Create solid mesh for region " << porousSolidNames[i]
             << " for time = " << runTime.timeName() << nl << endl;
 
-        fluidRegions.set
+        porousSolidRegions.set
         (
             i,
             new fvMesh
             (
                 IOobject
                 (
-                    fluidNames[i],
+                    porousSolidNames[i],
                     runTime.timeName(),
                     runTime,
                     IOobject::MUST_READ

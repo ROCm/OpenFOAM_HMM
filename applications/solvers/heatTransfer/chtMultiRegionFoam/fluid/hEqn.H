@@ -8,6 +8,7 @@
         dpdt
       - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + rad.Sh(thermo)
+      + sources(rho, h)
     );
 
     hEqn.relax();
@@ -19,4 +20,5 @@
 
     Info<< "Min/max T:" << min(thermo.T()).value() << ' '
         << max(thermo.T()).value() << endl;
+
 }
