@@ -157,19 +157,12 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     // liquid volume fraction
     const scalarField X(liquids_.X(Yl));
 
-    // droplet vapour surface pressure
+    // droplet surface pressure assumed to surface vapour pressure
     scalar ps = liquids_.pv(pc, Ts, X);
 
     // vapour density at droplet surface [kg/m3]
     scalar rhos = ps*liquids_.W(X)/(specie::RR*Ts);
 
-    // thermal conductivity of carrier [W/m/K]
-    scalar kappac = 0.0;
-    forAll(this->owner().thermo().carrier().Y(), i)
-    {
-        const scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
-        kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
-    }
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
@@ -178,13 +171,13 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         const label lid = liqToLiqMap_[i];
 
         // boiling temperature at cell pressure for liquid species lid [K]
-        const scalar TBoil = liquids_.properties()[lid].pvInvert(ps);
+        const scalar TBoil = liquids_.properties()[lid].pvInvert(pc);
 
         // limit droplet temperature to boiling/critical temperature
         const scalar Td = min(T, 0.999*TBoil);
 
         // saturation pressure for liquid species lid [Pa]
-        const scalar pSat = liquids_.properties()[lid].pv(ps, Td);
+        const scalar pSat = liquids_.properties()[lid].pv(pc, Td);
 
         // carrier phase concentration
         const scalar Xc = XcMix[gid];
@@ -197,7 +190,7 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         else
         {
             // vapour diffusivity [m2/s]
-            const scalar Dab = liquids_.properties()[lid].D(ps, Td);
+            const scalar Dab = liquids_.properties()[lid].D(ps, Ts);
 
             // Schmidt number
             const scalar Sc = nu/(Dab + ROOTVSMALL);
@@ -212,35 +205,82 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
 
                 const scalar deltaT = max(T - TBoil, 0.5);
 
-                // liquid specific heat capacity
-                const scalar Cp = liquids_.properties()[lid].Cp(pc, Td);
+                scalar Hsc = 0.0;
+                scalar Hc = 0.0;
+                scalar Cpc = 0.0;
+                scalar kappac = 0.0;
+                forAll(this->owner().thermo().carrier().Y(), i)
+                {
+                    scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
+                    Hc += Yc*this->owner().thermo().carrier().H(i, Tc);
+                    Hsc += Yc*this->owner().thermo().carrier().H(i, Ts);
+                    Cpc += Yc*this->owner().thermo().carrier().Cp(i, Ts);
+                    kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
+                }
 
                 // vapour heat of formation
                 const scalar hv = liquids_.properties()[lid].hl(pc, Td);
 
-                const scalar lg = log(1.0 + Cp*deltaT/max(SMALL, hv));
+                // empirical heat transfer coefficient W/m2/K
+                scalar alphaS = 0.0;
+                if (deltaT < 5.0)
+                {
+                    alphaS = 760.0*pow(deltaT, 0.26);
+                }
+                else if (deltaT < 25.0)
+                {
+                    alphaS = 27.0*pow(deltaT, 2.33);
+                }
+                else
+                {
+                    alphaS = 13800.0*pow(deltaT, 0.39);
+                }
 
-                // mass transfer [kg]
-                // NOTE: Using Sherwood number instead of Nusselt number
-                dMassPC[lid] += pi*kappac*Sh*lg*d/Cp*dt;
+                // flash-boil vaporisation rate
+                const scalar Gf = alphaS*deltaT*pi*sqr(d)/hv;
+
+                // model constants
+                // NOTE: using Sherwood number instead of Nusselt number
+                const scalar A = (Hc - Hsc)/hv;
+                const scalar B = pi*kappac/Cpc*d*Sh;
+
+                scalar G = 0.0;
+                if (A > 0.0)
+                {
+                    // heat transfer from the surroundings contributes
+                    // to the vaporisation process
+                    scalar Gr = 1e-5;
+
+                    for (label i=0; i<50; i++)
+                    {
+                        scalar GrDash = Gr;
+
+                        G = B/(1.0 + Gr)*log(1.0 + A*(1.0 + Gr));
+                        Gr = Gf/G;
+
+                        if (mag(Gr - GrDash)/GrDash < 1e-3)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                dMassPC[lid] += (G + Gf)*dt;
             }
             else
             {
                 // evaporation
 
                 // surface molar fraction - Raoult's Law
-                const scalar Xs = X[lid]*pSat/ps;
+                const scalar Xs = X[lid]*pSat/pc;
 
                 // molar ratio
                 const scalar Xr = (Xs - Xc)/max(SMALL, 1.0 - Xs);
 
                 if (Xr > 0)
                 {
-                    // mass transfer coefficient [m/s]
-                    const scalar kc = Sh*Dab/(d + ROOTVSMALL);
-
                     // mass transfer [kg]
-                    dMassPC[lid] += pi*sqr(d)*kc*rhos*log(1.0 + Xr)*dt;
+                    dMassPC[lid] += pi*d*Sh*Dab*rhos*log(1.0 + Xr)*dt;
                 }
             }
         }
@@ -291,7 +331,7 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::dh
                     "const label, "
                     "const label, "
                     "const label"
-                ")"
+                ") const"
             )   << "Unknown enthalpyTransfer type" << abort(FatalError);
         }
     }
