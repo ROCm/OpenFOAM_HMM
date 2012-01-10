@@ -32,6 +32,7 @@ Description
         timeStart       0.0;                    // start time
         duration        1000.0;                 // duration
         selectionMode   cellSet;                // cellSet // points //cellZone
+                                                // mapRegion
 
     On evaluation, source expects to be added to the rhs of the equation
 
@@ -48,6 +49,8 @@ SourceFiles
 #include "fvMatricesFwd.H"
 #include "cellSet.H"
 #include "autoPtr.H"
+#include "meshToMesh.H"
+
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,6 +59,7 @@ namespace Foam
 {
 
 class fvMesh;
+
 
 /*---------------------------------------------------------------------------*\
                          Class basicSource Declaration
@@ -73,11 +77,13 @@ public:
             smPoints,
             smCellSet,
             smCellZone,
+            smMapRegion,
             smAll
         };
 
         //- Word list of selection mode type names
-        static const NamedEnum<selectionModeType, 4> selectionModeTypeNames_;
+        static const NamedEnum<selectionModeType, 5>
+            selectionModeTypeNames_;
 
 
 protected:
@@ -119,6 +125,21 @@ protected:
 
         //- Sum of cell volumes
         scalar V_;
+
+        // Data for smMapRegion only
+
+            //- Mesh to mesh mapping for map optiom
+            autoPtr<meshToMesh> secondaryToPrimaryInterpPtr_;
+
+            //- Name of the source in the secondary mesh
+            word secondarySourceName_;
+
+            //- Name of the region to map
+            word mapRegionName_;
+
+            //- Master or slave region
+            bool master_;
+
 
         //- Field names to apply source to - populated by derived models
         wordList fieldNames_;
@@ -227,8 +248,8 @@ public:
 
 
     //- Destructor
-    virtual ~basicSource()
-    {}
+    virtual ~basicSource();
+
 
 
     // Member Functions
@@ -265,6 +286,15 @@ public:
 
             //- Return const access to the total cell volume
             inline scalar V() const;
+
+            //- Return const access to the secondarySourceName
+            inline const word secondarySourceName() const;
+
+            //- Return const access to the mapToMap Ptr
+            inline const autoPtr<meshToMesh> secondaryToPrimaryInterpPtr() const;
+
+            //- Return const referenc to the mapRegion
+            inline const word mapRegionName() const;
 
             //- Return const access to the cell set
             inline const labelList& cells() const;
