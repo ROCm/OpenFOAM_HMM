@@ -88,6 +88,12 @@ class meshToMesh
         //- Inverse-distance interpolation weights
         mutable scalarListList* inverseDistanceWeightsPtr_;
 
+        //- Inverse-volume interpolation weights
+        mutable scalarListList* inverseVolumeWeightsPtr_;
+
+        //- Cell to cell overlap addressing
+        mutable labelListList* cellToCellAddressingPtr_;
+
 
     // Private Member Functions
 
@@ -104,7 +110,15 @@ class meshToMesh
 
         void calculateInverseDistanceWeights() const;
 
+        void calculateInverseVolumeWeights() const;
+
+        void calculateCellToCellAddressing() const;
+
         const scalarListList& inverseDistanceWeights() const;
+
+        const scalarListList& inverseVolumeWeights() const;
+
+        const labelListList& cellToCellAddressing() const;
 
 
     // Private static data members
@@ -124,7 +138,8 @@ public:
     {
         MAP,
         INTERPOLATE,
-        CELL_POINT_INTERPOLATE
+        CELL_POINT_INTERPOLATE,
+        CELL_VOLUME_WEIGHT
     };
 
 
@@ -238,6 +253,18 @@ public:
                 const scalarListList& weights,
                 const CombineOp& cop
             ) const;
+
+            //- Interpolate field using inverse-volume weights
+            template<class Type, class CombineOp>
+            void interpolateField
+            (
+                Field<Type>&,
+                const GeometricField<Type, fvPatchField, volMesh>&,
+                const labelListList& adr,
+                const scalarListList& weights,
+                const CombineOp& cop
+            ) const;
+
 
             //- Interpolate field using cell-point interpolation
             template<class Type, class CombineOp>

@@ -59,6 +59,33 @@ void Foam::meshToMesh::interpolateField
 (
     Field<Type>& toF,
     const GeometricField<Type, fvPatchField, volMesh>& fromVf,
+    const labelListList& adr,
+    const scalarListList& weights,
+    const CombineOp& cop
+) const
+{
+    // Inverse volume weighted interpolation
+    forAll(toF, celli)
+    {
+        const labelList& overlapCells = adr[celli];
+        const scalarList& w = weights[celli];
+
+        Type f = pTraits<Type>::zero;
+        forAll(overlapCells, i)
+        {
+            label fromCelli = overlapCells[i];
+            f += fromVf[fromCelli]*w[i];
+            cop(toF[celli], f);
+        }
+    }
+}
+
+
+template<class Type, class CombineOp>
+void Foam::meshToMesh::interpolateField
+(
+    Field<Type>& toF,
+    const GeometricField<Type, fvPatchField, volMesh>& fromVf,
     const labelList& adr,
     const scalarListList& weights,
     const CombineOp& cop
@@ -162,6 +189,7 @@ void Foam::meshToMesh::interpolateInternalField
         break;
 
         case INTERPOLATE:
+        {
             interpolateField
             (
                 toF,
@@ -170,9 +198,10 @@ void Foam::meshToMesh::interpolateInternalField
                 inverseDistanceWeights(),
                 cop
             );
-        break;
-
+            break;
+        }
         case CELL_POINT_INTERPOLATE:
+        {
             interpolateField
             (
                 toF,
@@ -181,8 +210,24 @@ void Foam::meshToMesh::interpolateInternalField
                 toMesh_.cellCentres(),
                 cop
             );
-        break;
 
+            break;
+        }
+        case CELL_VOLUME_WEIGHT:
+        {
+            const labelListList& cellToCell = cellToCellAddressing();
+            const scalarListList& invVolWeights = inverseVolumeWeights();
+
+            interpolateField
+            (
+                toF,
+                fromVf,
+                cellToCell,
+                invVolWeights,
+                cop
+            );
+            break;
+        }
         default:
             FatalErrorIn
             (
@@ -229,6 +274,7 @@ void Foam::meshToMesh::interpolate
             switch(ord)
             {
                 case MAP:
+                {
                     mapField
                     (
                         toVf.boundaryField()[patchi],
@@ -236,9 +282,11 @@ void Foam::meshToMesh::interpolate
                         boundaryAddressing_[patchi],
                         cop
                     );
-                break;
+                    break;
+                }
 
                 case INTERPOLATE:
+                {
                     interpolateField
                     (
                         toVf.boundaryField()[patchi],
@@ -247,9 +295,11 @@ void Foam::meshToMesh::interpolate
                         toPatch.Cf(),
                         cop
                     );
-                break;
+                    break;
+                }
 
                 case CELL_POINT_INTERPOLATE:
+                {
                     interpolateField
                     (
                         toVf.boundaryField()[patchi],
@@ -258,7 +308,13 @@ void Foam::meshToMesh::interpolate
                         toPatch.Cf(),
                         cop
                     );
-                break;
+                    break;
+                }
+                case CELL_VOLUME_WEIGHT:
+                {
+                    // Do nothing
+                    break;
+                }
 
                 default:
                     FatalErrorIn
