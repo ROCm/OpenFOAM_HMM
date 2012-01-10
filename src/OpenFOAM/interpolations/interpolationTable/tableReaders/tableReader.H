@@ -103,6 +103,13 @@ public:
             List<Tuple2<scalar, Type> >&
         ) = 0;
 
+        //- Read the 2D table
+        virtual void operator()
+        (
+            const fileName&,
+            List<Tuple2<scalar, List<Tuple2<scalar, Type> > > >&
+        ) = 0;
+
         //- Write additional information
         virtual void write(Ostream& os) const;
 };

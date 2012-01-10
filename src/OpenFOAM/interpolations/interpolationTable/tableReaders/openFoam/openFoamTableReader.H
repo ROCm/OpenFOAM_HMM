@@ -84,6 +84,13 @@ public:
 
         //- Read the table
         virtual void operator()(const fileName&, List<Tuple2<scalar, Type> > &);
+
+        //- Read 2D table
+        virtual void operator()
+        (
+            const fileName&,
+            List<Tuple2<scalar, List<Tuple2<scalar, Type> > > >&
+        );
 };
 
 
