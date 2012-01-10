@@ -157,8 +157,8 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     // liquid volume fraction
     const scalarField X(liquids_.X(Yl));
 
-    // droplet surface pressure
-    scalar ps = liquids_.pv(pc, T, X);
+    // droplet vapour surface pressure
+    scalar ps = liquids_.pv(pc, Ts, X);
 
     // vapour density at droplet surface [kg/m3]
     scalar rhos = ps*liquids_.W(X)/(specie::RR*Ts);
@@ -178,16 +178,17 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         const label lid = liqToLiqMap_[i];
 
         // boiling temperature at cell pressure for liquid species lid [K]
-        const scalar TBoil = liquids_.properties()[lid].pvInvert(pc);
+        const scalar TBoil = liquids_.properties()[lid].pvInvert(ps);
 
         // limit droplet temperature to boiling/critical temperature
         const scalar Td = min(T, 0.999*TBoil);
 
         // saturation pressure for liquid species lid [Pa]
-        const scalar pSat = liquids_.properties()[lid].pv(pc, Td);
+        const scalar pSat = liquids_.properties()[lid].pv(ps, Td);
 
         // carrier phase concentration
         const scalar Xc = XcMix[gid];
+
 
         if (Xc*pc > pSat)
         {
@@ -195,49 +196,46 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
         }
         else
         {
+            // vapour diffusivity [m2/s]
+            const scalar Dab = liquids_.properties()[lid].D(ps, Td);
+
+            // Schmidt number
+            const scalar Sc = nu/(Dab + ROOTVSMALL);
+
+            // Sherwood number
+            const scalar Sh = this->Sh(Re, Sc);
+
+
             if (pSat > 0.999*pc)
             {
                 // boiling
 
-//                const scalar deltaT = max(Tc - Td, 0.5);
-                const scalar deltaT = max(Tc - T, 0.5);
+                const scalar deltaT = max(T - TBoil, 0.5);
 
                 // liquid specific heat capacity
                 const scalar Cp = liquids_.properties()[lid].Cp(pc, Td);
 
-                // vapour heat of fomation
+                // vapour heat of formation
                 const scalar hv = liquids_.properties()[lid].hl(pc, Td);
-
-                // Nusselt number
-                const scalar Nu = 2.0 + 0.6*sqrt(Re)*cbrt(Pr);
 
                 const scalar lg = log(1.0 + Cp*deltaT/max(SMALL, hv));
 
                 // mass transfer [kg]
-                dMassPC[lid] += pi*kappac*Nu*lg*d/Cp*dt;
+                // NOTE: Using Sherwood number instead of Nusselt number
+                dMassPC[lid] += pi*kappac*Sh*lg*d/Cp*dt;
             }
             else
             {
                 // evaporation
 
                 // surface molar fraction - Raoult's Law
-                const scalar Xs = X[lid]*pSat/pc;
+                const scalar Xs = X[lid]*pSat/ps;
 
                 // molar ratio
                 const scalar Xr = (Xs - Xc)/max(SMALL, 1.0 - Xs);
 
-
                 if (Xr > 0)
                 {
-                    // vapour diffusivity [m2/s]
-                    const scalar Dab = liquids_.properties()[lid].D(pc, Td);
-
-                    // Schmidt number
-                    const scalar Sc = nu/(Dab + ROOTVSMALL);
-
-                    // Sherwood number
-                    const scalar Sh = this->Sh(Re, Sc);
-
                     // mass transfer coefficient [m/s]
                     const scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
@@ -261,18 +259,24 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::dh
 {
     scalar dh = 0;
 
+    scalar TDash = T;
+    if (liquids_.properties()[idl].pv(p, T) >= 0.999*p)
+    {
+        TDash = liquids_.properties()[idl].pvInvert(p);
+    }
+
     typedef PhaseChangeModel<CloudType> parent;
     switch (parent::enthalpyTransfer_)
     {
         case (parent::etLatentHeat):
         {
-            dh = liquids_.properties()[idl].hl(p, T);
+            dh = liquids_.properties()[idl].hl(p, TDash);
             break;
         }
         case (parent::etEnthalpyDifference):
         {
-            scalar hc = this->owner().composition().carrier().H(idc, T);
-            scalar hp = liquids_.properties()[idl].h(p, T);
+            scalar hc = this->owner().composition().carrier().H(idc, TDash);
+            scalar hp = liquids_.properties()[idl].h(p, TDash);
 
             dh = hc - hp;
             break;
