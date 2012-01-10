@@ -163,6 +163,19 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     // vapour density at droplet surface [kg/m3]
     scalar rhos = ps*liquids_.W(X)/(specie::RR*Ts);
 
+    // carrier thermo properties
+    scalar Hsc = 0.0;
+    scalar Hc = 0.0;
+    scalar Cpc = 0.0;
+    scalar kappac = 0.0;
+    forAll(this->owner().thermo().carrier().Y(), i)
+    {
+        scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
+        Hc += Yc*this->owner().thermo().carrier().H(i, Tc);
+        Hsc += Yc*this->owner().thermo().carrier().H(i, Ts);
+        Cpc += Yc*this->owner().thermo().carrier().Cp(i, Ts);
+        kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
+    }
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
@@ -204,19 +217,6 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
                 // boiling
 
                 const scalar deltaT = max(T - TBoil, 0.5);
-
-                scalar Hsc = 0.0;
-                scalar Hc = 0.0;
-                scalar Cpc = 0.0;
-                scalar kappac = 0.0;
-                forAll(this->owner().thermo().carrier().Y(), i)
-                {
-                    scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
-                    Hc += Yc*this->owner().thermo().carrier().H(i, Tc);
-                    Hsc += Yc*this->owner().thermo().carrier().H(i, Ts);
-                    Cpc += Yc*this->owner().thermo().carrier().Cp(i, Ts);
-                    kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
-                }
 
                 // vapour heat of formation
                 const scalar hv = liquids_.properties()[lid].hl(pc, Td);
