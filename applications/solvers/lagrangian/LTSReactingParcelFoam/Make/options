@@ -20,7 +20,10 @@ EXE_INC = \
     -I$(LIB_SRC)/ODE/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
-    -I$(LIB_SRC)/combustionModels/lnInclude
+    -I$(LIB_SRC)/combustionModels/lnInclude \
+    -I$(LIB_SRC)/fieldSources/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude
+
 
 EXE_LIBS = \
     -lfiniteVolume \
@@ -44,4 +47,6 @@ EXE_LIBS = \
     -lODE \
     -lregionModels \
     -lsurfaceFilmModels \
-    -lcombustionModels
+    -lcombustionModels \
+    -lfieldSources \
+    -lsampling
