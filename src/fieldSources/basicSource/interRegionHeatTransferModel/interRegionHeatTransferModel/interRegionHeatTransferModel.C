@@ -167,16 +167,13 @@ void Foam::interRegionHeatTransferModel::addSup
     const fvMesh& secondaryMesh =
         mesh_.time().lookupObject<fvMesh>(mapRegionName_);
 
-    basicThermo&  secondaryThermo =
-        const_cast<basicThermo&>
-        (
-            secondaryMesh.lookupObject<basicThermo>("thermophysicalProperties")
-        );
+    const volScalarField& Tsecondary =
+        secondaryMesh.lookupObject<volScalarField>("T");
 
     secondaryToPrimaryInterpPtr_->interpolateInternalField
     (
         Tmapped,
-        secondaryThermo.T(),
+        Tsecondary,
         meshToMesh::MAP,
         eqOp<scalar>()
     );

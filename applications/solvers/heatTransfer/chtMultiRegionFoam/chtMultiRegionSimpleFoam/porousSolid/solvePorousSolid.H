@@ -3,7 +3,7 @@
     {
         tmp<fvScalarMatrix> TEqn
         (
-          - fvm::laplacian(kappa, T, "laplacian(K,T)")
+          - fvm::laplacian(betav*kappa, T, "laplacian(K,T)")
           + sources(rho, T)
         );
 

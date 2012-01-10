@@ -9,7 +9,7 @@
     tmp<volScalarField> tcp = thermo.Cp();
     const volScalarField& cp = tcp();
 
-    tmp<volScalarField> tkappa = betav*thermo.K();
+    tmp<volScalarField> tkappa = thermo.K();
     //tmp<volSymmTensorField> tkappa = thermo.directionalK()*betav;
 
     const volScalarField& kappa = tkappa();

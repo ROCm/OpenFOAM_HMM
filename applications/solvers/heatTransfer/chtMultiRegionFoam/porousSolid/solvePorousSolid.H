@@ -9,7 +9,7 @@ if (finalIter)
         tmp<fvScalarMatrix> TEqn
         (
             fvm::ddt(betav*rho*cp, T)
-          - fvm::laplacian(kappa, T, "laplacian(K,T)")
+          - fvm::laplacian(betav*kappa, T, "laplacian(K,T)")
           + sources(rho, T)
         );
 
