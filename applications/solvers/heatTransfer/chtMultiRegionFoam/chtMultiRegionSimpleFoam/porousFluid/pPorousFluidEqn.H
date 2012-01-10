@@ -33,16 +33,11 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     }
 }
 
-//#include "incompressible/continuityErrs.H"
-
-// Explicitly relax pressure for momentum corrector
 porousP.relax();
 
 porousU -= rAUPorous*fvc::grad(porousP);
 porousU.correctBoundaryConditions();
 
-// For closed-volume cases adjust the pressure and density levels
-// to obey overall mass continuity
 if (closedVolume)
 {
     porousP += (initialMass - fvc::domainIntegrate(porousPsi*porousP))
