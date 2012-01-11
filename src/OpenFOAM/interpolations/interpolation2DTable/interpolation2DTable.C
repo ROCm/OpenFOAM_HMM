@@ -299,8 +299,8 @@ Foam::interpolation2DTable<Type>::wordToBoundsHandling
     {
         WarningIn
         (
-            "Foam::interpolation2DTable<Type>::wordToBoundsHandling
-            "(
+            "Foam::interpolation2DTable<Type>::wordToBoundsHandling"
+            "("
             "    const word&"
             ")"
         )   << "bad outOfBounds specifier " << bound << " using 'warn'" << endl;
