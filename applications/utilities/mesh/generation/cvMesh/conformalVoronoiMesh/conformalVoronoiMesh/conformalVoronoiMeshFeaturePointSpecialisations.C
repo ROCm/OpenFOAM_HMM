@@ -168,19 +168,19 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 << concaveEdgePlaneBNormal << endl;
         }
 
-         // Intersect planes parallel to the concave edge planes offset
-         // by ppDist and the plane defined by featPt and the edge vector.
-         plane planeA
-         (
-             featPt + ppDist*concaveEdgePlaneANormal,
-             concaveEdgePlaneANormal
-         );
+        // Intersect planes parallel to the concave edge planes offset
+        // by ppDist and the plane defined by featPt and the edge vector.
+        plane planeA
+        (
+            featPt + ppDist*concaveEdgePlaneANormal,
+            concaveEdgePlaneANormal
+        );
 
-         plane planeB
-         (
-             featPt + ppDist*concaveEdgePlaneBNormal,
-             concaveEdgePlaneBNormal
-         );
+        plane planeB
+        (
+            featPt + ppDist*concaveEdgePlaneBNormal,
+            concaveEdgePlaneBNormal
+        );
 
         const vector& concaveEdgeDir = feMesh.edgeDirection
         (

@@ -166,7 +166,7 @@ public:
 
             //- Check if point is closer to the surfaces to conform to than
             //  testDistSqr, in which case return false, otherwise assess in or
-            //  outside and erturn a result depending on the testForInside flag
+            //  outside and return a result depending on the testForInside flag
             Field<bool> wellInOutSide
             (
                 const pointField& samplePts,
@@ -228,7 +228,7 @@ public:
                 label& hitSurface
             ) const;
 
-                //- Find the nearest point to the sample and return it to the
+            //- Find the nearest point to the sample and return it to the
             //  pointIndexHit
             void findSurfaceNearest
             (

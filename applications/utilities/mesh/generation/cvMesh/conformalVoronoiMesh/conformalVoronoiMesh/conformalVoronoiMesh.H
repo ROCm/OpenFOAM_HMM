@@ -549,7 +549,7 @@ private:
         ) const;
 
         //- Return all intersections
-        void dualCellSurfaceAllIntersections
+        bool dualCellSurfaceAllIntersections
         (
             const Delaunay::Finite_vertices_iterator& vit,
             DynamicList<pointIndexHit>& info,
@@ -681,7 +681,7 @@ private:
             const Delaunay::Finite_vertices_iterator& vit,
             const Foam::point& vert,
             const DynamicList<pointIndexHit>& surfHit,
-            DynamicList<label>& hitSurface,
+            const DynamicList<label>& hitSurface,
             scalar surfacePtReplaceDistCoeffSqr,
             scalar edgeSearchDistCoeffSqr,
             DynamicList<pointIndexHit>& surfaceHits,

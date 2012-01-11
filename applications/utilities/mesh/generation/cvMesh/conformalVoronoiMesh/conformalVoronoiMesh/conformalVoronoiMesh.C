@@ -1673,11 +1673,6 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    if (cvMeshControls().objOutput() && runTime_.outputTime())
-    {
-        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
-    }
-
     // Remove the entire tessellation
     reset();
 
@@ -1701,15 +1696,20 @@ void Foam::conformalVoronoiMesh::move()
 
     conformToSurface();
 
-    timeCheck("After conformToSurface");
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
+    }
 
-    updateSizesAndAlignments(pointsToInsert);
+    timeCheck("After conformToSurface");
 
     // Write the intermediate mesh, do not filter the dual faces.
     if (runTime_.outputTime())
     {
         writeMesh(runTime_.timeName(), false);
     }
+
+    updateSizesAndAlignments(pointsToInsert);
 
     Info<< nl
         << "Total displacement = " << totalDisp << nl
