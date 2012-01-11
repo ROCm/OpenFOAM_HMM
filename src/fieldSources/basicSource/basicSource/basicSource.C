@@ -38,16 +38,17 @@ namespace Foam
     template<> const char* NamedEnum
     <
         basicSource::selectionModeType,
-        4
+        5
         >::names[] =
     {
         "points",
         "cellSet",
         "cellZone",
+        "mapRegion",
         "all"
     };
 
-    const NamedEnum<basicSource::selectionModeType, 4>
+    const NamedEnum<basicSource::selectionModeType, 5>
         basicSource::selectionModeTypeNames_;
 }
 
@@ -71,6 +72,13 @@ void Foam::basicSource::setSelection(const dictionary& dict)
         case smCellZone:
         {
             dict.lookup("cellZone") >> cellSetName_;
+            break;
+        }
+        case smMapRegion:
+        {
+            dict_.lookup("secondarySourceName") >> secondarySourceName_;
+            dict_.lookup("mapRegionName") >> mapRegionName_;
+            master_  = readBool(dict_.lookup("master"));
             break;
         }
         case smAll:
@@ -151,6 +159,47 @@ void Foam::basicSource::setCellSet()
 
             break;
         }
+        case smMapRegion:
+        {
+            if(active_)
+            {
+                Info<< indent << "- selecting inter region mapping" << endl;
+                const fvMesh& secondaryMesh =
+                    mesh_.time().lookupObject<fvMesh>(mapRegionName_);
+                const boundBox primaryBB = mesh_.bounds();
+                const boundBox secondaryBB = secondaryMesh.bounds();
+                if (secondaryBB.overlaps(primaryBB))
+                {
+
+                    // Dummy patches
+                    wordList cuttingPatches;
+                    HashTable<word> patchMap;
+
+                    secondaryToPrimaryInterpPtr_.reset
+                    (
+                        new meshToMesh
+                        (
+                            secondaryMesh,
+                            mesh_,
+                            patchMap,
+                            cuttingPatches
+                        )
+                    );
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "Foam::basicSource::setCellSet()"
+                    )   << "regions dont overlap "
+                        << secondaryMesh.name()
+                        << " in region " << mesh_.name()
+                        << nl
+                        << exit(FatalError);
+                }
+            }
+            break;
+        }
         case smAll:
         {
             Info<< indent << "- selecting all cells" << endl;
@@ -169,16 +218,19 @@ void Foam::basicSource::setCellSet()
     }
 
     // Set volume information
-    V_ = 0.0;
-    forAll(cells_, i)
+    if(selectionMode_ != smMapRegion)
     {
-        V_ += mesh_.V()[cells_[i]];
-    }
-    reduce(V_, sumOp<scalar>());
+        V_ = 0.0;
+        forAll(cells_, i)
+        {
+            V_ += mesh_.V()[cells_[i]];
+        }
+        reduce(V_, sumOp<scalar>());
 
-    Info<< indent << "- selected "
-        << returnReduce(cells_.size(), sumOp<label>())
-        << " cell(s) with volume " << V_ << nl << decrIndent << endl;
+        Info<< indent << "- selected "
+            << returnReduce(cells_.size(), sumOp<label>())
+            << " cell(s) with volume " << V_ << nl << decrIndent << endl;
+    }
 }
 
 
@@ -205,6 +257,11 @@ Foam::basicSource::basicSource
     ),
     cellSetName_("none"),
     V_(0.0),
+    secondaryToPrimaryInterpPtr_(),
+    secondarySourceName_("none"),
+    mapRegionName_("none"),
+    master_(false),
+
     fieldNames_(),
     applied_()
 {
@@ -246,6 +303,13 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     return autoPtr<basicSource>(cstrIter()(name, modelType, coeffs, mesh));
 }
 
+Foam::basicSource::~basicSource()
+{
+    if (!secondaryToPrimaryInterpPtr_.empty())
+    {
+        secondaryToPrimaryInterpPtr_.clear();
+    }
+}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

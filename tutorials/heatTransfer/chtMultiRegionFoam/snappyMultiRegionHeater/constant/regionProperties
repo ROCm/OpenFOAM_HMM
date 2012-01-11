@@ -15,8 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fluidRegionNames ( bottomAir topAir );
+regions
+(
+    fluid       (bottomAir topAir)
+    solid       (heater leftSolid rightSolid)
+    porousFluid ()
+    porousSolid ()
+);
 
-solidRegionNames ( heater leftSolid rightSolid );
 
 // ************************************************************************* //

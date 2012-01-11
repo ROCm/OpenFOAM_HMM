@@ -18,6 +18,9 @@
     PtrList<dimensionedScalar> rhoMax(fluidRegions.size());
     PtrList<dimensionedScalar> rhoMin(fluidRegions.size());
 
+    PtrList<IObasicSourceList> heatSources(fluidRegions.size());
+    PtrList<porousZones> porousZonesFluid(fluidRegions.size());
+
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
     {
@@ -208,6 +211,20 @@
                     "rhoMin"
                 )
             )
+        );
+
+        Info<< "    Adding sources\n" << endl;
+        heatSources.set
+        (
+            i,
+            new IObasicSourceList(fluidRegions[i])
+        );
+
+        Info<< "    Adding porous zones\n" << endl;
+        porousZonesFluid.set
+        (
+            i,
+            new porousZones(fluidRegions[i])
         );
     }
 

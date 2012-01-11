@@ -15,6 +15,9 @@
 
     List<scalar> initialMassFluid(fluidRegions.size());
 
+    PtrList<IObasicSourceList> heatSources(fluidRegions.size());
+    PtrList<porousZones> porousZonesFluid(fluidRegions.size());
+
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
     {
@@ -22,6 +25,7 @@
             << fluidRegions[i].name() << nl << endl;
 
         Info<< "    Adding to thermoFluid\n" << endl;
+
         thermoFluid.set
         (
             i,
@@ -118,19 +122,16 @@
             )
         );
 
-        Info<< "    Adding to turbulence\n" << endl;
+        Info<< "    Adding turbulence \n" << endl;
         turbulence.set
         (
             i,
-            autoPtr<compressible::turbulenceModel>
+            compressible::turbulenceModel::New
             (
-                compressible::turbulenceModel::New
-                (
-                    rhoFluid[i],
-                    UFluid[i],
-                    phiFluid[i],
-                    thermoFluid[i]
-                )
+                rhoFluid[i],
+                UFluid[i],
+                phiFluid[i],
+                thermoFluid[i]
             ).ptr()
         );
 
@@ -197,4 +198,20 @@
                 fvc::ddt(thermoFluid[i].p())
             )
         );
+
+        Info<< "    Adding sources\n" << endl;
+        heatSources.set
+        (
+            i,
+            new IObasicSourceList(fluidRegions[i])
+        );
+
+        Info<< "    Adding porous zones\n" << endl;
+        porousZonesFluid.set
+        (
+            i,
+            new porousZones(fluidRegions[i])
+        );
     }
+
+

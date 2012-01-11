@@ -56,4 +56,16 @@ void Foam::openFoamTableReader<Type>::operator()
 }
 
 
+template<class Type>
+void Foam::openFoamTableReader<Type>::operator()
+(
+    const fileName& fName,
+    List<Tuple2<scalar, List<Tuple2<scalar, Type> > > >& data
+)
+{
+    // Read data from file
+    IFstream(fName)() >> data;
+}
+
+
 // ************************************************************************* //

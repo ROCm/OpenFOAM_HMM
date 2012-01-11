@@ -7,6 +7,7 @@
      ==
       - fvc::div(phi, 0.5*magSqr(U), "div(phi,K)")
       + rad.Sh(thermo)
+      + sources(rho, h)
     );
 
     hEqn.relax();

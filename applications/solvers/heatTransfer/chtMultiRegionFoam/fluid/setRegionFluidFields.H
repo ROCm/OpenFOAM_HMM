@@ -20,6 +20,10 @@
 
     radiation::radiationModel& rad = radiation[i];
 
+    IObasicSourceList& sources = heatSources[i];
+
+    const porousZones& pZones = porousZonesFluid[i];
+
     const dimensionedScalar initialMass
     (
         "initialMass",

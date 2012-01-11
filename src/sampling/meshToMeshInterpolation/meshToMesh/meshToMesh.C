@@ -48,7 +48,9 @@ Foam::meshToMesh::meshToMesh
     patchMap_(patchMap),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
-    inverseDistanceWeightsPtr_(NULL)
+    inverseDistanceWeightsPtr_(NULL),
+    inverseVolumeWeightsPtr_(NULL),
+    cellToCellAddressingPtr_(NULL)
 {
     forAll(fromMesh_.boundaryMesh(), patchi)
     {
@@ -118,7 +120,9 @@ Foam::meshToMesh::meshToMesh
     toMesh_(meshTo),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
-    inverseDistanceWeightsPtr_(NULL)
+    inverseDistanceWeightsPtr_(NULL),
+    inverseVolumeWeightsPtr_(NULL),
+    cellToCellAddressingPtr_(NULL)
 {
     // check whether both meshes have got the same number
     // of boundary patches
@@ -198,6 +202,8 @@ Foam::meshToMesh::meshToMesh
 Foam::meshToMesh::~meshToMesh()
 {
     deleteDemandDrivenData(inverseDistanceWeightsPtr_);
+    deleteDemandDrivenData(inverseVolumeWeightsPtr_);
+    deleteDemandDrivenData(cellToCellAddressingPtr_);
 }
 
 

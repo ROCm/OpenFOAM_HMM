@@ -72,6 +72,10 @@ void Foam::basicSource::writeData(Ostream& os) const
         {
             break;
         }
+        case smMapRegion:
+        {
+            break;
+        }
         default:
         {
             FatalErrorIn("basicSource::writeData(Ostream&) const")

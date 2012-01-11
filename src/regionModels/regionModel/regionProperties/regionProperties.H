@@ -21,48 +21,63 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    regionProperties
+
+Description
+    Simple class to hold region information for coupled region simulations
+
+SourceFiles
+    regionProperties.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "regionProperties.H"
+#ifndef regionProperties_H
+#define regionProperties_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "Time.H"
+#include "HashTable.H"
 
-Foam::regionProperties::regionProperties(const Time& runTime)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                       Class regionProperties Declaration
+\*---------------------------------------------------------------------------*/
+
+class regionProperties
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            "regionProperties",
-            runTime.time().constant(),
-            runTime.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-    fluidRegionNames_(lookup("fluidRegionNames")),
-    solidRegionNames_(lookup("solidRegionNames"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regionProperties::~regionProperties()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::List<Foam::word>& Foam::regionProperties::fluidRegionNames() const
+    public HashTable<wordList>
 {
-    return fluidRegionNames_;
-}
+
+        //- Disallow default bitwise copy construct
+        regionProperties(const regionProperties&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const regionProperties&);
+
+public:
+
+    // Constructors
+
+        //- Construct from components
+        regionProperties(const Time& runTime);
 
 
-const Foam::List<Foam::word>& Foam::regionProperties::solidRegionNames() const
-{
-    return solidRegionNames_;
-}
+    //- Destructor
+    ~regionProperties();
 
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

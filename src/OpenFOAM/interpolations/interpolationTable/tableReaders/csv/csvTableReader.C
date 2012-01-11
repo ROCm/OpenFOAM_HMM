@@ -163,6 +163,17 @@ void Foam::csvTableReader<Type>::operator()
 
 
 template<class Type>
+void Foam::csvTableReader<Type>::operator()
+(
+    const fileName& fName,
+    List<Tuple2<scalar, List<Tuple2<scalar, Type> > > >& data
+)
+{
+    notImplemented("csvTableReader<Type>::operator()");
+}
+
+
+template<class Type>
 void Foam::csvTableReader<Type>::write(Ostream& os) const
 {
     tableReader<Type>::write(os);

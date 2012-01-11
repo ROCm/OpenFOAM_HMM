@@ -69,4 +69,8 @@ $(meshToMesh)/meshToMesh.C
 $(meshToMesh)/calculateMeshToMeshAddressing.C
 $(meshToMesh)/calculateMeshToMeshWeights.C
 
+tetOverlapVolume = meshToMeshInterpolation/tetOverlapVolume
+$(tetOverlapVolume)/tetOverlapVolume.C
+
+
 LIB = $(FOAM_LIBBIN)/libsampling
