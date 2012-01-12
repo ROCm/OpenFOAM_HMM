@@ -24,6 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "conformalVoronoiMesh.H"
+#include "vectorTools.H"
+
+using namespace Foam::vectorTools;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -117,7 +120,7 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
 
-    if (mag(nA & nB) > 1 - SMALL)
+    if (areParallel(nA, nB))
     {
         // The normals are nearly parallel, so this is too sharp a feature to
         // conform to.
@@ -195,7 +198,7 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
 
-    if (mag(nA & nB) > 1 - SMALL)
+    if (areParallel(nA, nB))
     {
         // The normals are nearly parallel, so this is too sharp a feature to
         // conform to.
@@ -234,7 +237,7 @@ void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
     Foam::point reflectedB = reflMasterPt - 2*ppDist*nB;
 
     scalar totalAngle =
-        radToDeg(constant::mathematical::pi + acos(nA & nB));
+        radToDeg(constant::mathematical::pi + radAngleBetween(nA, nB));
 
     // Number of quadrants the angle should be split into
     int nQuads = int(totalAngle/cvMeshControls().maxQuadAngle()) + 1;

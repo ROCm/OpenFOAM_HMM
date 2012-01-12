@@ -25,6 +25,9 @@ License
 
 #include "conformalVoronoiMesh.H"
 #include "backgroundMeshDecomposition.H"
+#include "vectorTools.H"
+
+using namespace Foam::vectorTools;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -644,31 +647,40 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
             continue;
         }
 
-        const Foam::point dE0 = topoint(dual(fit->first));
+        Foam::point dE0 = topoint(dual(fit->first));
 
-        const Foam::point dE1
-            = topoint(dual(fit->first->neighbor(fit->second)));
+        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
 
-        pointIndexHit info;
-        label hitSurface = -1;
+        pointIndexHit infoIntersection;
+        label hitSurfaceIntersection = -1;
 
-        geometryToConformTo_.findSurfaceAnyIntersection
+        if (Pstream::parRun())
+        {
+            bool inProc = clipLineToProc(dE0, dE1);
+
+            if (!inProc)
+            {
+                continue;
+            }
+        }
+
+        geometryToConformTo_.findSurfaceNearestIntersection
         (
             dE0,
             dE1,
-            info,
-            hitSurface
+            infoIntersection,
+            hitSurfaceIntersection
         );
 
-        if (info.hit())
+        if (infoIntersection.hit())
         {
             flagIntersection = true;
 
             vectorField norm(1);
 
-            allGeometry_[hitSurface].getNormal
+            allGeometry_[hitSurfaceIntersection].getNormal
             (
-                List<pointIndexHit>(1, info),
+                List<pointIndexHit>(1, infoIntersection),
                 norm
             );
 
@@ -676,7 +688,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
             const Foam::point vertex = topoint(vit->point());
 
-            const plane p(info.hitPoint(), n);
+            const plane p(infoIntersection.hitPoint(), n);
 
             const plane::ray r(vertex, n);
 
@@ -684,10 +696,13 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
             const Foam::point newPoint = vertex + d*n;
 
-            geometryToConformTo_.findSurfaceAnyIntersection
+            pointIndexHit info;
+            label hitSurface = -1;
+
+            geometryToConformTo_.findSurfaceNearestIntersection
             (
                 vertex,
-                vertex + 1.1*(newPoint - vertex),
+                newPoint + SMALL*n,
                 info,
                 hitSurface
             );
@@ -1951,17 +1966,17 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
             continue;
         }
 
-        vectorField norm(1);
+        vectorField norm1(1);
 
         allGeometry_[hitSurf].getNormal
         (
             List<pointIndexHit>(1, hitInfo),
-            norm
+            norm1
         );
 
-        const vector& n = norm[0];
+        const vector& n1 = norm1[0];
 
-        const plane surfPlane(hitInfo.hitPoint(), n);
+        const plane surfPlane(hitInfo.hitPoint(), n1);
 
         pointsUsed.append(hI);
 
@@ -2004,18 +2019,19 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                 norm2
             );
 
+            const vector& n2 = norm2[0];
+
             // If the normals are nearly parallel then ignore.
-            if (mag(mag(norm2[0] & n) - 1.0) < SMALL)
+            if (areParallel(n1, n2))
             {
                continue;
             }
 
-            const Foam::point newEdgePoint = surfPoint + n*d;
+            const Foam::point newEdgePoint = surfPoint + n1*d;
 
             pointIndexHit edHit;
             label featureHit = -1;
 
-            // This is a bit lazy...
             geometryToConformTo_.findEdgeNearest
             (
                 newEdgePoint,
