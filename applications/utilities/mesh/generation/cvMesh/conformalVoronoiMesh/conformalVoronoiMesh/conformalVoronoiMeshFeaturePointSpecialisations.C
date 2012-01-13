@@ -248,7 +248,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeANormals[edgeAnormalI]];
 
-                if (areParallel(concaveNormal, convexNormal))
+                if (areParallel(concaveNormal, convexNormal, tolParallel))
                 {
                     convexEdgeA = true;
                 }
@@ -263,7 +263,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
-                if (areParallel(concaveNormal, convexNormal))
+                if (areParallel(concaveNormal, convexNormal, tolParallel))
                 {
                     convexEdgeB = true;
                 }
@@ -291,8 +291,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
                     if
                     (
-                        areObtuse(concaveNormal, convexNormal)
-                     || areOrthogonal(concaveNormal, convexNormal)
+                        !areParallel(concaveNormal, convexNormal, tolParallel)
                     )
                     {
                         convexEdgePlaneCNormal = convexNormal;
@@ -322,8 +321,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
                     if
                     (
-                        areObtuse(concaveNormal, convexNormal)
-                     || areOrthogonal(concaveNormal, convexNormal)
+                        !areParallel(concaveNormal, convexNormal, tolParallel)
                     )
                     {
                         convexEdgePlaneDNormal = convexNormal;
@@ -400,14 +398,14 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             pts.append(externalPtG);
             indices.append(0);
             types.append(-1);
+        }
 
-            if (debug)
+        if (debug)
+        {
+            for (label ptI = initialNumOfPoints; ptI < pts.size(); ++ptI)
             {
-                for (label ptI = initialNumOfPoints; ptI < pts.size(); ++ptI)
-                {
-                    Info<< "Point " << ptI << " : ";
-                    meshTools::writeOBJ(Info, pts[ptI]);
-                }
+                Info<< "Point " << ptI << " : ";
+                meshTools::writeOBJ(Info, pts[ptI]);
             }
         }
 

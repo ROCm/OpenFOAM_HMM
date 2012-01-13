@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Class
     Foam::vectorTools
 
@@ -54,8 +49,9 @@ namespace Foam
 //- Collection of functions for testing relationships between two vectors.
 namespace vectorTools
 {
-
     //- Test if a and b are parallel: a.b = 1
+    //  Uses the cross product, so the tolerance is proportional to
+    //  the sine of the angle between a and b in radians
     template <typename T>
     bool areParallel
     (
@@ -71,6 +67,8 @@ namespace vectorTools
     }
 
     //- Test if a and b are orthogonal: a.b = 0
+    //  Uses the dot product, so the tolerance is proportional to
+    //  the cosine of the angle between a and b in radians
     template <typename T>
     bool areOrthogonal
     (
@@ -127,7 +125,6 @@ namespace vectorTools
     {
         return Foam::radToDeg(radAngleBetween(a, b, tolerance));
     }
-
 } // End namespace vectorTools
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

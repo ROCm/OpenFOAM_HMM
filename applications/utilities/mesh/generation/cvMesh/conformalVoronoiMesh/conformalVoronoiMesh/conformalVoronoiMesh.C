@@ -39,6 +39,8 @@ defineTypeNameAndDebug(conformalVoronoiMesh, 0);
 
 }
 
+const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
+
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 

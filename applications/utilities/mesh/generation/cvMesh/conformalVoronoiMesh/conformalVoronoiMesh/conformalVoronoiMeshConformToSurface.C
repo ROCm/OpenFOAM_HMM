@@ -1821,40 +1821,45 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
 bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 (
-    const Foam::point& pt,
+    pointIndexHit& pHit,
     DynamicList<Foam::point>& newEdgeLocations,
     pointField& existingEdgeLocations,
     autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
 {
+    const Foam::point pt = pHit.hitPoint();
+
     scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
 
     // 0.01 and 1000 determined from speed tests, varying the indexedOctree
     // rebuild frequency and balance of additions to queries.
 
-    if
-    (
-        newEdgeLocations.size()
-     >= max(0.01*existingEdgeLocations.size(), 1000)
-    )
-    {
+//    if
+//    (
+//        newEdgeLocations.size()
+//     >= max(0.01*existingEdgeLocations.size(), 1000)
+//    )
+//    {
+        const label originalSize = existingEdgeLocations.size();
+
         existingEdgeLocations.append(newEdgeLocations);
 
         buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
 
         newEdgeLocations.clear();
-    }
-    else
-    {
-        // Search for the nearest point in newEdgeLocations.
-        // Searching here first, because the intention is that the value of
-        // newEdgeLocationsSizeLimit should make this faster by design.
-
-        if (min(magSqr(newEdgeLocations - pt)) <= exclusionRangeSqr)
-        {
-            return true;
-        }
-    }
+//    }
+//    else
+//    {
+//        // Search for the nearest point in newEdgeLocations.
+//        // Searching here first, because the intention is that the value of
+//        // newEdgeLocationsSizeLimit should make this faster by design.
+//
+//        if (min(magSqr(newEdgeLocations - pt)) <= exclusionRangeSqr)
+//        {
+//            // Average the points...
+//            return true;
+//        }
+//    }
 
     // Searching for the nearest point in existingEdgeLocations using the
     // indexedOctree
@@ -1862,6 +1867,44 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
     pointIndexHit info = edgeLocationTree().findNearest(pt, exclusionRangeSqr);
 
     // Average the points...
+//    if (info.hit())
+//    {
+//        Foam::point newPt = 0.5*(info.hitPoint() + pt);
+//
+//        pHit.setPoint(newPt);
+//
+//        boolList toRemove(existingEdgeLocations.size(), false);
+//
+//        forAll(existingEdgeLocations, pI)
+//        {
+//            const Foam::point& existingPoint = existingEdgeLocations[pI];
+//
+//            if (existingPoint == info.hitPoint())
+//            {
+//                toRemove[pI] = true;
+//                //Info<< "Replace " << pt << " and " << info.hitPoint() << " with " << newPt << endl;
+//            }
+//        }
+//
+//        pointField newExistingEdgeLocations(existingEdgeLocations.size());
+//
+//        label count = 0;
+//        forAll(existingEdgeLocations, pI)
+//        {
+//            if (toRemove[pI] == false)
+//            {
+//                newExistingEdgeLocations[count++] = existingEdgeLocations[pI];
+//            }
+//        }
+//
+//        newExistingEdgeLocations.resize(count);
+//
+//        existingEdgeLocations = newExistingEdgeLocations;
+//
+//        existingEdgeLocations.append(newPt);
+//
+//        return !info.hit();
+//    }
 
     return info.hit();
 }
@@ -2048,7 +2091,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                     (
                         !nearFeatureEdgeLocation
                         (
-                            edHit.hitPoint(),
+                            edHit,
                             newEdgeLocations,
                             existingEdgeLocations,
                             edgeLocationTree
@@ -2114,9 +2157,9 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                 continue;
             }
 
-            const pointIndexHit& edHit = edHits[i];
+            pointIndexHit& edHit = edHits[i];
 
-            const label featureHit = featuresHit[i];
+            label featureHit = featuresHit[i];
 
             if (edHit.hit())
             {
@@ -2144,7 +2187,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                     (
                         !nearFeatureEdgeLocation
                         (
-                            edHit.hitPoint(),
+                            edHit,
                             newEdgeLocations,
                             existingEdgeLocations,
                             edgeLocationTree

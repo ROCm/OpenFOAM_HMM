@@ -121,6 +121,8 @@ public:
 
 private:
 
+        static const scalar tolParallel;
+
     // Private data
 
         //- The time registry of the application
@@ -658,7 +660,7 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            const Foam::point& pt,
+            pointIndexHit& pHit,
             DynamicList<Foam::point>& newEdgeLocations,
             pointField& existingEdgeLocations,
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
