@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshToMesh.H"
+#include "tetOverlapVolume.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -99,6 +100,108 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
 }
 
 
+void Foam::meshToMesh::calculateInverseVolumeWeights() const
+{
+    if (debug)
+    {
+        Info<< "meshToMesh::calculateInverseVolumeWeights() : "
+            << "calculating inverse volume weighting factors" << endl;
+    }
+
+    if (inverseVolumeWeightsPtr_)
+    {
+        FatalErrorIn("meshToMesh::calculateInverseVolumeWeights()")
+            << "weighting factors already calculated"
+            << exit(FatalError);
+    }
+
+    inverseVolumeWeightsPtr_ = new scalarListList(toMesh_.nCells());
+    scalarListList& invVolCoeffs = *inverseVolumeWeightsPtr_;
+
+    labelListList& cellToCell = *cellToCellAddressingPtr_;
+
+    tetOverlapVolume overlapEngine;
+
+    forAll(cellToCell, celli)
+    {
+        const labelList& overlapCells = cellToCell[celli];
+
+        if (overlapCells.size() > 0)
+        {
+            invVolCoeffs[celli].setSize(overlapCells.size());
+            scalar v(0);
+            forAll (overlapCells, j)
+            {
+                label cellFrom = overlapCells[j];
+                treeBoundBox bbFromMesh
+                (
+                    pointField
+                    (
+                        fromMesh_.points(),
+                        fromMesh_.cellPoints()[cellFrom]
+                    )
+                );
+
+                v = overlapEngine.cellCellOverlapVolumeMinDecomp
+                (
+                    toMesh_,
+                    celli,
+
+                    fromMesh_,
+                    cellFrom,
+                    bbFromMesh
+                );
+                invVolCoeffs[celli][j] =  v/toMesh_.V()[celli];
+            }
+            if (celli == 2)
+            {
+                Info << "cellToCell :" << cellToCell[celli] << endl;
+                Info << "invVolCoeffs :" << invVolCoeffs[celli] << endl;
+            }
+        }
+    }
+}
+
+
+void  Foam::meshToMesh::calculateCellToCellAddressing() const
+{
+    if (debug)
+    {
+        Info<< "meshToMesh::calculateCellToCellAddressing() : "
+            << "calculating cell to cell addressing" << endl;
+    }
+
+    if (cellToCellAddressingPtr_)
+    {
+        FatalErrorIn("meshToMesh::calculateCellToCellAddressing()")
+            << "addressing already calculated"
+            << exit(FatalError);
+    }
+
+    tetOverlapVolume overlapEngine;
+
+    cellToCellAddressingPtr_ = new labelListList(toMesh_.nCells());
+    labelListList& cellToCell = *cellToCellAddressingPtr_;
+
+
+    forAll(cellToCell, iTo)
+    {
+        const labelList overLapCells =
+            overlapEngine.overlappingCells(fromMesh_, toMesh_, iTo);
+        if (overLapCells.size() > 0)
+        {
+            //Info << "To " << iTo << endl;
+            //Info << "cellToCell " << overLapCells << endl;
+
+            cellToCell[iTo].setSize(overLapCells.size());
+            forAll(overLapCells, j)
+            {
+                cellToCell[iTo][j] = overLapCells[j];
+            }
+        }
+    }
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 const Foam::scalarListList& Foam::meshToMesh::inverseDistanceWeights() const
@@ -111,5 +214,25 @@ const Foam::scalarListList& Foam::meshToMesh::inverseDistanceWeights() const
     return *inverseDistanceWeightsPtr_;
 }
 
+
+const Foam::scalarListList& Foam::meshToMesh::inverseVolumeWeights() const
+{
+    if (!inverseVolumeWeightsPtr_)
+    {
+        calculateInverseVolumeWeights();
+    }
+
+    return *inverseVolumeWeightsPtr_;
+}
+
+const Foam::labelListList& Foam::meshToMesh::cellToCellAddressing() const
+{
+    if (!cellToCellAddressingPtr_)
+    {
+        calculateCellToCellAddressing();
+    }
+
+    return *cellToCellAddressingPtr_;
+}
 
 // ************************************************************************* //

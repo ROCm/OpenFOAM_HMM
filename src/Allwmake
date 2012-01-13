@@ -73,4 +73,6 @@ fvAgglomerationMethods/Allwmake $*
 wmake $makeType fvMotionSolver
 wmake $makeType engine
 
+wmake $makeType fieldSources
+
 # ----------------------------------------------------------------- end-of-file

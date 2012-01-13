@@ -273,12 +273,16 @@ int main(int argc, char *argv[])
         }
     }
 
-    outFile << nl << "NORMALS pointNormals float\n";
-    forAll(pointNormals, i)
+    if (!pointNormals.empty())
     {
-        const vector& n = pointNormals[i];
+        outFile << nl << "NORMALS pointNormals float\n";
 
-        outFile << n.x() << ' ' << n.y() << ' ' << n.z() << nl;
+        forAll(pointNormals, i)
+        {
+            const vector& n = pointNormals[i];
+
+            outFile << n.x() << ' ' << n.y() << ' ' << n.z() << nl;
+        }
     }
 
     Info<< "End\n" << endl;

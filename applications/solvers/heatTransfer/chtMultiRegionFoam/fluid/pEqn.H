@@ -68,13 +68,10 @@
     // Correct velocity field
     U += rAU*fvc::reconstruct((phi - phiU)/rhorAUf);
     U.correctBoundaryConditions();
-    K = 0.5*magSqr(U);
-
     p = p_rgh + rho*gh;
 
     // Update pressure time derivative
     dpdt = fvc::ddt(p);
-
 
     // Solve continuity
     #include "rhoEqn.H"

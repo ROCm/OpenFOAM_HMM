@@ -26,7 +26,13 @@ Application
 
 Description
     Combination of heatConductionFoam and buoyantFoam for conjugate heat
-    transfer between a solid region and fluid region
+    transfer between a solid region and fluid region. It includes
+    porous media in the primary fluid region treated explicitly.
+
+    It handles secondary fluid or solid circuits which can be coupled
+    thermally with the main fluid region. i.e radiators, etc.
+
+    The secondary fluid region is
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +45,9 @@ Description
 #include "solidRegionDiffNo.H"
 #include "basicSolidThermo.H"
 #include "radiationModel.H"
+#include "porousZones.H"
+#include "IObasicSourceList.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,12 +60,16 @@ int main(int argc, char *argv[])
 
     #include "createFluidMeshes.H"
     #include "createSolidMeshes.H"
+    #include "createPorousFluidRegions.H"
+    #include "createPorousSolidMeshes.H"
 
     #include "createFluidFields.H"
     #include "createSolidFields.H"
+    #include "createPorousFluidFields.H"
+    #include "createPorousSolidFields.H"
+
 
     #include "initContinuityErrs.H"
-
     #include "readTimeControls.H"
     #include "readSolidTimeControls.H"
 
@@ -65,13 +78,11 @@ int main(int argc, char *argv[])
     #include "solidRegionDiffusionNo.H"
     #include "setInitialMultiRegionDeltaT.H"
 
-
     while (runTime.run())
     {
         #include "readTimeControls.H"
         #include "readSolidTimeControls.H"
         #include "readPIMPLEControls.H"
-
 
         #include "compressibleMultiRegionCourantNo.H"
         #include "solidRegionDiffusionNo.H"
@@ -105,6 +116,24 @@ int main(int argc, char *argv[])
                 #include "solveFluid.H"
             }
 
+            forAll(porousFluidRegions, i)
+            {
+                Info<< "\nSolving for fluid porous region "
+                    << porousFluidRegions[i].name() << endl;
+                #include "setPorousFluidFields.H"
+                #include "readPorousFluidRegionPIMPLEControls.H"
+                #include "solvePorousFluid.H"
+            }
+
+            forAll(porousSolidRegions, i)
+            {
+                Info<< "\nSolving for porous solid region "
+                    << porousSolidRegions[i].name() << endl;
+                #include "setPorousRegionSolidFields.H"
+                #include "readPorousSolidMultiRegionPIMPLEControls.H"
+                #include "solvePorousSolid.H"
+            }
+
             forAll(solidRegions, i)
             {
                 Info<< "\nSolving for solid region "
@@ -113,6 +142,7 @@ int main(int argc, char *argv[])
                 #include "readSolidMultiRegionPIMPLEControls.H"
                 #include "solveSolid.H"
             }
+
         }
 
         runTime.write();

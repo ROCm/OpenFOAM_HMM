@@ -8,4 +8,3 @@
 
     const bool momentumPredictor =
         pimple.lookupOrDefault("momentumPredictor", true);
-

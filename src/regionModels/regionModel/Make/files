@@ -6,4 +6,6 @@ regionModel1D/regionModel1D.C
 /* Boundary conditions */
 derivedFvPatches/mappedVariableThicknessWall/mappedVariableThicknessWallFvPatch.C
 
+regionProperties/regionProperties.C
+
 LIB = $(FOAM_LIBBIN)/libregionModels

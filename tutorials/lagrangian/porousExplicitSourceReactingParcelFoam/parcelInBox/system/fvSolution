@@ -59,6 +59,7 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator    faceAreaPair;
         mergeLevels     1;
+        maxIter         20;
     }
 
     pFinal
@@ -66,7 +67,6 @@ solvers
         $p;
         tolerance       1e-06;
         relTol          0;
-        maxIter         20;
     }
 
     "(Yi|O2|N2|H2O)"

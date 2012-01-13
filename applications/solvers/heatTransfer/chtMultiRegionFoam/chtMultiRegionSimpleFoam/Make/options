@@ -1,16 +1,21 @@
 EXE_INC = \
-    -I.. \
     -Ifluid \
     -Isolid \
+    -I./porousFluid \
+    -I./porousSolid \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/cfdTools \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basicSolidThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel/lnInclude \
-    -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude
+    -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
+    -I$(LIB_SRC)/fieldSources/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/regionModels/regionModel/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \
@@ -20,4 +25,7 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lradiationModels
+    -lradiationModels \
+    -lfieldSources \
+    -lregionModels \
+    -lsampling

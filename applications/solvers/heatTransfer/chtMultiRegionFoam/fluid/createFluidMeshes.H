@@ -1,8 +1,10 @@
-    PtrList<fvMesh> fluidRegions(rp.fluidRegionNames().size());
+    const wordList fluidNames(rp["fluid"]);
 
-    forAll(rp.fluidRegionNames(), i)
+    PtrList<fvMesh> fluidRegions(fluidNames.size());
+
+    forAll(fluidNames, i)
     {
-        Info<< "Create fluid mesh for region " << rp.fluidRegionNames()[i]
+        Info<< "Create fluid mesh for region " << fluidNames[i]
             << " for time = " << runTime.timeName() << nl << endl;
 
         fluidRegions.set
@@ -12,7 +14,7 @@
             (
                 IOobject
                 (
-                    rp.fluidRegionNames()[i],
+                    fluidNames[i],
                     runTime.timeName(),
                     runTime,
                     IOobject::MUST_READ

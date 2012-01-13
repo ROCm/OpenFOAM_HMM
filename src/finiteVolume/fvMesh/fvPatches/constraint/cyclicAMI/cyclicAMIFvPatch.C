@@ -75,8 +75,8 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
     {
         forAll(patchD, faceI)
         {
-            vector ddi = patchD[faceI];
-            vector dni = nbrPatchD[faceI];
+            const vector& ddi = patchD[faceI];
+            const vector& dni = nbrPatchD[faceI];
 
             pdv[faceI] = ddi - dni;
         }
@@ -85,8 +85,8 @@ Foam::tmp<Foam::vectorField> Foam::cyclicAMIFvPatch::delta() const
     {
         forAll(patchD, faceI)
         {
-            vector ddi = patchD[faceI];
-            vector dni = nbrPatchD[faceI];
+            const vector& ddi = patchD[faceI];
+            const vector& dni = nbrPatchD[faceI];
 
             pdv[faceI] = ddi - transform(forwardT()[0], dni);
         }

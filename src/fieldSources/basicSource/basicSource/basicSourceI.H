@@ -118,4 +118,21 @@ inline Foam::scalar& Foam::basicSource::duration()
 }
 
 
+inline const Foam::word Foam::basicSource::secondarySourceName() const
+{
+    return secondarySourceName_;
+}
+
+
+inline const Foam::autoPtr<Foam::meshToMesh> Foam::basicSource::
+secondaryToPrimaryInterpPtr() const
+{
+    return secondaryToPrimaryInterpPtr_;
+}
+
+inline const Foam::word Foam::basicSource::mapRegionName() const
+{
+    return mapRegionName_;
+}
+
 // ************************************************************************* //

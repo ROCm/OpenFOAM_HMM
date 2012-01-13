@@ -22,74 +22,97 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    regionProperties
+    Foam::variableHeatTransfer
 
 Description
-    Simple class to hold region information for coupled region simulations
+    Variable heat transfer model depending on local values. The area of contact
+    between regions (area) must be provided. The Nu number is calculated as:
 
-SourceFiles
-    regionProperties.C
+        Nu = a*pow(Re, b)*pow(Pr, c)
+
+        and the heat transfer coefficient as:
+
+        htc = Nu*K/ds
+
+        where:
+            K is the heat conduction
+            ds is the strut diameter
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regionProperties_H
-#define regionProperties_H
+#ifndef variableHeatTransfer_H
+#define variableHeatTransfer_H
 
-#include "IOdictionary.H"
-#include "Time.H"
+#include "interRegionHeatTransferModel.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                       Class regionProperties Declaration
+                        Class variableHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
-class regionProperties
+class variableHeatTransfer
 :
-    public IOdictionary
+    public interRegionHeatTransferModel
 {
+private:
+
     // Private data
 
-        //- List of the fluid region names
-        List<word> fluidRegionNames_;
+        //- Model constants
+        scalar a_;
+        scalar b_;
+        scalar c_;
 
-        //- List of the solid region names
-        List<word> solidRegionNames_;
+        //- Strut diameter
+        scalar ds_;
 
+        //- Fluid Prandt number
+        scalar Pr_;
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        regionProperties(const regionProperties&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const regionProperties&);
+        //- Area of heat exchange
+        autoPtr<volScalarField> area_;
 
 
 public:
 
+    //- Runtime type information
+        TypeName("variableHeatTransfer");
+
+
     // Constructors
 
-        //- Construct from components
-        regionProperties(const Time& runTime);
+        //- Construct from dictionary
+        variableHeatTransfer
+        (
+            const word& name,
+            const word& modelType,
+            const dictionary& dict,
+            const fvMesh& mesh
+        );
 
 
     //- Destructor
-    ~regionProperties();
+    virtual ~variableHeatTransfer();
 
 
-    // Member Functions
+    // Public Functions
 
-        // Access
+        //- Calculate the heat transfer coefficient
+        virtual const tmp<volScalarField> calculateHtc();
 
-            //- Return const reference to the list of fluid region names
-            const List<word>& fluidRegionNames() const;
 
-            //- Return const reference to the list of solid region names
-            const List<word>& solidRegionNames() const;
+        // I-O
+
+            //- Write data
+            virtual void writeData(Ostream&) const;
+
+            //- Read dictionary
+            virtual bool read(const dictionary& dict) ;
+
 };
 
 
@@ -98,6 +121,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 #endif
 

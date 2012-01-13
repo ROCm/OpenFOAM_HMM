@@ -232,7 +232,7 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::dh
                     "const label, "
                     "const label, "
                     "const label"
-                ")"
+                ") const"
             )   << "Unknown enthalpyTransfer type" << abort(FatalError);
         }
     }

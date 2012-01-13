@@ -4,24 +4,28 @@
         fvm::ddt(rho, U)
       + fvm::div(phi, U)
       + turb.divDevRhoReff(U)
+      + sources(rho, U)
     );
 
     UEqn().relax();
 
+    // Add porous resistance
+    pZones.addResistance(UEqn());
+
     if (momentumPredictor)
     {
-         solve
-         (
+        solve
+        (
             UEqn()
-         ==
+          ==
             fvc::reconstruct
             (
                 (
-                  - ghf*fvc::snGrad(rho)
-                  - fvc::snGrad(p_rgh)
+                    - ghf*fvc::snGrad(rho)
+                    - fvc::snGrad(p_rgh)
                 )*mesh.magSf()
             ),
             mesh.solver(U.select(finalIter))
-         );
-         K = 0.5*magSqr(U);
+        );
+        K = 0.5*magSqr(U);
     }
