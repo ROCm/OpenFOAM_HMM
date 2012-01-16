@@ -139,6 +139,25 @@ bool Foam::treeDataEdge::overlaps
 }
 
 
+// Check if any point on shape is inside sphere.
+bool Foam::treeDataEdge::overlaps
+(
+    const label index,
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    if (cacheBb_)
+    {
+        return bbs_[index].overlaps(centre, radiusSqr);
+    }
+    else
+    {
+        return calcBb(edgeLabels_[index]).overlaps(centre, radiusSqr);
+    }
+}
+
+
 // Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
 // nearestPoint.
 void Foam::treeDataEdge::findNearest
