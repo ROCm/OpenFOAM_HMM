@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -220,6 +220,13 @@ void processorFvPatchField<Type>::initInterfaceMatrixUpdate
         commsType,
         this->patch().patchInternalField(psiInternal)()
     );
+}
+
+
+template<class Type>
+bool processorFvPatchField<Type>::ready() const
+{
+    return true;
 }
 
 

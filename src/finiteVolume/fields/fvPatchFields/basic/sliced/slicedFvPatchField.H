@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,6 +147,9 @@ public:
 
             //- Return internal field next to patch as patch field
             virtual tmp<Field<Type> > patchInternalField() const;
+
+            //- Return internal field next to patch as patch field
+            virtual void patchInternalField(Field<Type>&) const;
 
             //- Return neighbour coupled given internal cell data
             virtual tmp<Field<Type> > patchNeighbourField

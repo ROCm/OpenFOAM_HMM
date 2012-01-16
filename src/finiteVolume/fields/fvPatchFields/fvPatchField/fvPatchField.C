@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -187,6 +187,13 @@ Foam::tmp<Foam::Field<Type> >
 Foam::fvPatchField<Type>::patchInternalField() const
 {
     return patch_.patchInternalField(internalField_);
+}
+
+
+template<class Type>
+void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pif) const
+{
+    patch_.patchInternalField(internalField_, pif);
 }
 
 

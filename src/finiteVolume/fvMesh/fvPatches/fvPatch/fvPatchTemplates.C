@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,24 @@ Foam::tmp<Foam::Field<Type> > Foam::fvPatch::patchInternalField
     }
 
     return tpif;
+}
+
+
+template<class Type>
+void Foam::fvPatch::patchInternalField
+(
+    const UList<Type>& f,
+    Field<Type>& pif
+) const
+{
+    pif.setSize(size());
+
+    const labelUList& faceCells = this->faceCells();
+
+    forAll(pif, facei)
+    {
+        pif[facei] = f[faceCells[facei]];
+    }
 }
 
 
