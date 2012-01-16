@@ -128,14 +128,14 @@ bool Foam::treeDataEdge::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    if (cacheBb_)
-    {
-        return cubeBb.overlaps(bbs_[index]);
-    }
-    else
-    {
-        return cubeBb.overlaps(calcBb(edgeLabels_[index]));
-    }
+    const edge& e = edges_[edgeLabels_[index]];
+
+    const point& start = points_[e.start()];
+    const point& end = points_[e.end()];
+
+    point intersect;
+
+    return cubeBb.intersects(start, end, intersect);
 }
 
 
@@ -147,14 +147,18 @@ bool Foam::treeDataEdge::overlaps
     const scalar radiusSqr
 ) const
 {
-    if (cacheBb_)
+    const edge& e = edges_[edgeLabels_[index]];
+
+    const pointHit nearHit = e.line(points_).nearestDist(centre);
+
+    const scalar distSqr = sqr(nearHit.distance());
+
+    if (distSqr <= radiusSqr)
     {
-        return bbs_[index].overlaps(centre, radiusSqr);
+        return true;
     }
-    else
-    {
-        return calcBb(edgeLabels_[index]).overlaps(centre, radiusSqr);
-    }
+
+    return false;
 }
 
 

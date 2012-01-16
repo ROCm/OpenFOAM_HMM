@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    fileName sFeatFileName("unit_cube.extendedFeatureEdgeMesh");
+    fileName sFeatFileName("unit_cube_rotated.extendedFeatureEdgeMesh");
 
     extendedFeatureEdgeMesh efem
     (
@@ -87,20 +87,43 @@ int main(int argc, char *argv[])
     );
 
     Info<< "Points: " << efem.points() << nl << endl;
+    Info<< "Edges: " << efem.edges() << nl << endl;
 
     Info<< "Find edge labels within sphere from point (0, 0, 0):" << endl;
 
-    Info<< "    Radius = 0   : "
+    Info<< "    Radius = 0            : "
         << edgeTree.findSphere(point(0, 0, 0), 0) << endl;
 
-    Info<< "    Radius = 0.5 : "
-        << edgeTree.findSphere(point(0, 0, 0), 0.5) << endl;
-
-    Info<< "    Radius = 1   : "
+    Info<< "    Radius = 1            : "
         << edgeTree.findSphere(point(0, 0, 0), 1) << endl;
 
-    Info<< "    Radius = 2   : "
+    Info<< "    Radius = root(1.5)    : "
+        << edgeTree.findSphere(point(0, 0, 0), 1.5) << endl;
+
+    Info<< "    Radius = root(2)      : "
         << edgeTree.findSphere(point(0, 0, 0), 2) << endl;
+
+    Info<< "    Radius = root(0.5)    : "
+        << edgeTree.findSphere(point(1, 0, 0), 0.5) << endl;
+
+    Info<< "    Radius = root(0.25)   : "
+        << edgeTree.findSphere(point(0, 0, 0.5), 0.25) << endl;
+
+    treeBoundBox tbb(point(0,0,0), point(0.1,0.1,0.1));
+    Info<< "    Box = " << tbb << "    : "
+        << edgeTree.findBox(tbb) << endl;
+
+    treeBoundBox tbb1(point(0,0,0), point(1,1,0.1));
+    Info<< "    Box = " << tbb1 << "        : "
+        << edgeTree.findBox(tbb1) << endl;
+
+    treeBoundBox tbb2(point(0.3,0,0), point(1,0.3,1));
+    Info<< "    Box = " << tbb2 << "      : "
+        << edgeTree.findBox(tbb2) << endl;
+
+    treeBoundBox tbb3(point(-0.2,0.5,0), point(0.3,0.9,1));
+    Info<< "    Box = " << tbb3 << " : "
+        << edgeTree.findBox(tbb3) << endl;
 
     Info<< "End\n" << endl;
 
