@@ -42,7 +42,7 @@ SourceFiles
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"
 #include "syncTools.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

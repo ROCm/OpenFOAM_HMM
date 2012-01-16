@@ -35,7 +35,7 @@ Description
 #include "polyMesh.H"
 #include "ListOps.H"
 #include "face.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "triFaceList.H"
 #include "OFstream.H"
 #include "meshTools.H"

@@ -35,11 +35,10 @@ Description
 #include "vector.H"
 #include "Cloud.H"
 #include "IDLList.H"
-#include "labelList.H"
 #include "pointField.H"
 #include "faceList.H"
 #include "OFstream.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "FixedList.H"
 #include "polyMeshTetDecomposition.H"
 

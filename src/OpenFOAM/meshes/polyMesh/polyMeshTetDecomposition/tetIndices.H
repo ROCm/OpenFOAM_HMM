@@ -38,7 +38,7 @@ SourceFiles
 #define tetIndices_H
 
 #include "label.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "triPointRef.H"
 #include "polyMesh.H"
 #include "triFace.H"

@@ -25,7 +25,6 @@ License
 
 #include "cellPointWeight.H"
 #include "polyMesh.H"
-#include "tetPointRef.H"
 #include "polyMeshTetDecomposition.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

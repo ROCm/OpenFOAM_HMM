@@ -41,9 +41,6 @@ SourceFiles
 #include "IOField.H"
 #include "CompactIOField.H"
 #include "polyMesh.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
-#include "tetPointRef.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

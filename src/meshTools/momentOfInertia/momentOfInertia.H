@@ -37,7 +37,6 @@ SourceFiles
 #ifndef momentOfInertia_H
 #define momentOfInertia_H
 
-#include "tetPointRef.H"
 #include "triFaceList.H"
 #include "triSurface.H"
 #include "polyMesh.H"

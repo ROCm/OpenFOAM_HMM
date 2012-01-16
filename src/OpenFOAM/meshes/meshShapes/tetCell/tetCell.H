@@ -43,7 +43,7 @@ SourceFiles
 #include "triFace.H"
 #include "edge.H"
 #include "pointField.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
