@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -252,6 +252,12 @@ int Foam::UPstream::nProcsSimpleSum
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
     commsTypeNames.read(debug::optimisationSwitches().lookup("commsType"))
+);
+
+// Number of polling cycles in processor updates
+int Foam::UPstream::nPollProcInterfaces
+(
+    debug::optimisationSwitch("nPollProcInterfaces", 0)
 );
 
 
