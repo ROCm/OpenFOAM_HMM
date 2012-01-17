@@ -270,7 +270,17 @@ public:
                 const point& sample,
                 scalar nearestDistSqr,
                 List<pointIndexHit>& edgeHit,
-                List<label>& featureHit
+                List<label>& featuresHit
+            ) const;
+
+            //- Find the nearest points on each feature edge that is within
+            //  a given distance from the sample point
+            void findAllNearestEdges
+            (
+                const point& sample,
+                const scalar searchRadiusSqr,
+                List<List<pointIndexHit> >& edgeHitsByFeature,
+                List<label>& featuresHit
             ) const;
 
             //- Find which patch is intersected by the line from one point to
