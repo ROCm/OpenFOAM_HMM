@@ -271,6 +271,14 @@ public:
                 List<pointIndexHit>& info
             ) const;
 
+            //- Find all the feature edges within searchDistSqr of sample
+            void allNearestFeatureEdges
+            (
+                const point& sample,
+                const scalar searchRadiusSqr,
+                List<pointIndexHit>& info
+            ) const;
+
         // Access
 
             //- Return the index of the start of the convex feature points
