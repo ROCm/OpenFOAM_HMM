@@ -177,7 +177,7 @@ bool Foam::autoDensity::combinedWellInside
 
 void Foam::autoDensity::recurseAndFill
 (
-    List<Vb::Point>& initialPoints,
+    DynamicList<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     label levelLimit,
     word recursionName
@@ -272,7 +272,7 @@ void Foam::autoDensity::recurseAndFill
 
 bool Foam::autoDensity::fillBox
 (
-    List<Vb::Point>& initialPoints,
+    DynamicList<Vb::Point>& initialPoints,
     const treeBoundBox& bb,
     bool overlapping
 ) const
@@ -849,10 +849,7 @@ autoDensity::autoDensity
 :
     initialPointsMethod(typeName, initialPointsDict, cvMesh),
     globalTrialPoints_(0),
-    minCellSizeLimit_
-    (
-        detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
-    ),
+    minCellSizeLimit_(readScalar(detailsDict().lookup("minCellSizeLimit"))),
     minLevels_(readLabel(detailsDict().lookup("minLevels"))),
     maxSizeRatio_(readScalar(detailsDict().lookup("maxSizeRatio"))),
     volRes_(readLabel(detailsDict().lookup("sampleResolution"))),
@@ -902,7 +899,18 @@ List<Vb::Point> autoDensity::initialPoints() const
         );
     }
 
-    List<Vb::Point> initialPoints;
+    // Initialise size of points list.
+    const scalar volumeBoundBox = Foam::pow3(hierBB.typDim());
+    const scalar volumeSmallestCell = Foam::pow3(minCellSizeLimit_);
+
+    const int initialPointEstimate
+        = min
+          (
+              static_cast<int>(volumeBoundBox/(volumeSmallestCell + SMALL)/10),
+              1e6
+          );
+
+    DynamicList<Vb::Point> initialPoints(initialPointEstimate);
 
     Info<< nl << "    " << typeName << endl;
 
@@ -918,6 +926,8 @@ List<Vb::Point> autoDensity::initialPoints() const
         minLevels_ - 1,
         "recursionBox"
     );
+
+    initialPoints.shrink();
 
     label nInitialPoints = initialPoints.size();
 

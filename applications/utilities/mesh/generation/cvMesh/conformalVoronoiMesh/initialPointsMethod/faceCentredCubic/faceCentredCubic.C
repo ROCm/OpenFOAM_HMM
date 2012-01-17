@@ -91,7 +91,7 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    List<Vb::Point> initialPoints;
+    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
@@ -244,7 +244,7 @@ List<Vb::Point> faceCentredCubic::initialPoints() const
         }
     }
 
-    return initialPoints;
+    return initialPoints.shrink();
 }
 
 

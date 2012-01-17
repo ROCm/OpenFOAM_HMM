@@ -91,7 +91,8 @@ List<Vb::Point> uniformGrid::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    List<Vb::Point> initialPoints;
+    // Initialise points list
+    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
@@ -159,7 +160,7 @@ List<Vb::Point> uniformGrid::initialPoints() const
         }
     }
 
-    return initialPoints;
+    return initialPoints.shrink();
 }
 
 

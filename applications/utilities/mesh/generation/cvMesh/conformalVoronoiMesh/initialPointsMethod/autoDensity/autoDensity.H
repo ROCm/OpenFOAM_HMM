@@ -116,7 +116,7 @@ private:
         //- Descend into octants of the supplied bound box
         void recurseAndFill
         (
-            List<Vb::Point>& initialPoints,
+            DynamicList<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
             label levelLimit,
             word recursionName
@@ -127,7 +127,7 @@ private:
         //  in favour of further recursion.
         bool fillBox
         (
-            List<Vb::Point>& initialPoints,
+            DynamicList<Vb::Point>& initialPoints,
             const treeBoundBox& bb,
             bool overlapping
         ) const;

@@ -126,8 +126,6 @@ List<Vb::Point> pointFile::initialPoints() const
         }
     }
 
-    List<Vb::Point> initialPoints;
-
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
     (
         points,
@@ -138,6 +136,8 @@ List<Vb::Point> pointFile::initialPoints() const
         )
     );
 
+    DynamicList<Vb::Point> initialPoints(insidePoints.size()/10);
+
     forAll(insidePoints, i)
     {
         if (insidePoints[i])
@@ -147,6 +147,8 @@ List<Vb::Point> pointFile::initialPoints() const
             initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
         }
     }
+
+    initialPoints.shrink();
 
     label nPointsRejected = points.size() - initialPoints.size();
 

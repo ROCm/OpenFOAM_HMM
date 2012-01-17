@@ -91,7 +91,7 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    List<Vb::Point> initialPoints;
+    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
@@ -183,7 +183,7 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
         }
     }
 
-    return initialPoints;
+    return initialPoints.shrink();
 }
 
 

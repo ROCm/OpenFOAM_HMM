@@ -793,7 +793,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
 {
-    List<Point> storePts;
+    DynamicList<Point> storePts(number_of_vertices());
 
     for
     (
@@ -807,6 +807,8 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
             storePts.append(vit->point());
         }
     }
+
+    storePts.shrink();
 
     storeSizesAndAlignments(storePts);
 }
@@ -1359,7 +1361,7 @@ void Foam::conformalVoronoiMesh::move()
         true
     );
 
-    List<Point> pointsToInsert;
+    DynamicList<Point> pointsToInsert(number_of_vertices());
 
     for
     (
@@ -1640,13 +1642,9 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // Save displacements to file. To view, convert to vtk so that the times can
-    // be viewed in paraview:
-    //
-    // for i in {0..N}
-    // do
-    //     objToVTK displacements$i.obj displacement$i.vtk
-    // done
+    pointsToInsert.shrink();
+
+    // Save displacements to file.
     if (cvMeshControls().objOutput() && runTime_.outputTime())
     {
         Pout<< "Writing point displacement vectors to file." << endl;
