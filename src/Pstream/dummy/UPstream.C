@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,10 @@ void Foam::UPstream::resetRequests(const label i)
 
 
 void Foam::UPstream::waitRequests(const label start)
+{}
+
+
+void Foam::UPstream::waitRequest(const label i)
 {}
 
 

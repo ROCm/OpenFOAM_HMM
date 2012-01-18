@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -242,6 +242,8 @@ public:
         //- Default commsType
         static commsTypes defaultCommsType;
 
+        //- Number of polling cycles in processor updates
+        static int nPollProcInterfaces;
 
     // Constructors
 
@@ -272,6 +274,9 @@ public:
 
             //- Wait until all requests (from start onwards) have finished.
             static void waitRequests(const label start = 0);
+
+            //- Wait until request i has finished.
+            static void waitRequest(const label i);
 
             //- Non-blocking comms: has request i finished?
             static bool finishedRequest(const label i);

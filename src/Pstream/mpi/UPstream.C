@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -516,11 +516,55 @@ void Foam::UPstream::waitRequests(const label start)
 }
 
 
+void Foam::UPstream::waitRequest(const label i)
+{
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequest : starting wait for request:" << i
+            << endl;
+    }
+
+    if (i >= PstreamGlobals::outstandingRequests_.size())
+    {
+        FatalErrorIn
+        (
+            "UPstream::waitRequest(const label)"
+        )   << "There are " << PstreamGlobals::outstandingRequests_.size()
+            << " outstanding send requests and you are asking for i=" << i
+            << nl
+            << "Maybe you are mixing blocking/non-blocking comms?"
+            << Foam::abort(FatalError);
+    }
+
+    int flag;
+    if
+    (
+        MPI_Wait
+        (
+           &PstreamGlobals::outstandingRequests_[i],
+            MPI_STATUS_IGNORE
+        )
+    )
+    {
+        FatalErrorIn
+        (
+            "UPstream::waitRequest()"
+        )   << "MPI_Wait returned with error" << Foam::endl;
+    }
+
+    if (debug)
+    {
+        Pout<< "UPstream::waitRequest : finished wait for request:" << i
+            << endl;
+    }
+}
+
+
 bool Foam::UPstream::finishedRequest(const label i)
 {
     if (debug)
     {
-        Pout<< "UPstream::waitRequests : starting wait for request:" << i
+        Pout<< "UPstream::waitRequests : checking finishedRequest:" << i
             << endl;
     }
 
@@ -546,14 +590,12 @@ bool Foam::UPstream::finishedRequest(const label i)
 
     if (debug)
     {
-        Pout<< "UPstream::waitRequests : finished wait for request:" << i
+        Pout<< "UPstream::waitRequests : finished finishedRequest:" << i
             << endl;
     }
 
     return flag != 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -35,9 +35,9 @@ SourceFiles
 #ifndef tetPoints_H
 #define tetPoints_H
 
+#include "tetrahedron.H"
 #include "FixedList.H"
 #include "treeBoundBox.H"
-#include "tetPointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

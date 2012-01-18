@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2012 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ Description
 #include "polyMesh.H"
 #include "ListOps.H"
 #include "face.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "triFaceList.H"
 #include "OFstream.H"
 #include "meshTools.H"
