@@ -60,6 +60,11 @@ class lduInterfaceField
         //- Reference to the coupled patch this field is defined for
         const lduInterface& interface_;
 
+        //- Update index used so that updateInterfaceMatrix is called only once
+        //  during the construction of the matrix
+        bool updatedMatrix_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -67,12 +72,6 @@ class lduInterfaceField
 
         //- Disallow default bitwise assignment
         void operator=(const lduInterfaceField&);
-
-protected:
-
-        //- Update index used so that updateInterfaceMatrix is called only once
-        //  during the construction of the matrix
-        bool updatedMatrix_;
 
 public:
 
