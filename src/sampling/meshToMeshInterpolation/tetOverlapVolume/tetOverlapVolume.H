@@ -77,10 +77,10 @@ class tetOverlapVolume
         );
 
 
-        //- Helping cľasses
+        //- Helper classes
         class dummyTetOp
         {
-         public:
+        public:
 
             inline void operator()(const tetPoints&){}
         };
@@ -88,7 +88,8 @@ class tetOverlapVolume
 
         class sumTetVolOp
         {
-         public:
+        public:
+
             scalar vol_;
 
             inline sumTetVolOp()
@@ -108,7 +109,7 @@ class tetOverlapVolume
             FixedList<tetPoints, 200>& tets_;
             label& nTets_;
 
-         public:
+        public:
 
             inline storeTetOp(FixedList<tetPoints, 200>& tets, label& nTets)
             :
@@ -178,7 +179,7 @@ public:
 
 
     //- Destructor
-     virtual ~tetOverlapVolume();
+    virtual ~tetOverlapVolume();
 
 
     // Public members
@@ -209,7 +210,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
