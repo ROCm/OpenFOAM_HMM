@@ -114,6 +114,16 @@ Linux)
         export WM_LDFLAGS='-mabi=64 -G0'
         ;;
 
+    armv7l)
+        WM_ARCH=linuxARM7
+        export WM_COMPILER_LIB_ARCH=32
+        export WM_CC='gcc'
+        export WM_CXX='g++'
+        export WM_CFLAGS='-fPIC'
+        export WM_CXXFLAGS='-fPIC'
+        export WM_LDFLAGS=
+        ;;
+
     ppc64)
         WM_ARCH=linuxPPC64
         export WM_COMPILER_LIB_ARCH=64
@@ -393,7 +403,7 @@ unset MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 case "$WM_MPLIB" in
 OPENMPI)
-    export FOAM_MPI=openmpi-1.5.3
+    export FOAM_MPI=openmpi-1.5.4
     # optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.sh`
 
