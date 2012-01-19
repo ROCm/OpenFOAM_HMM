@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -290,18 +290,6 @@ int main(int argc, char *argv[])
 
     // Whether first use of face (modify) or consecutive (add)
     PackedBoolList modifiedFace(mesh.nFaces());
-    // Never modify coupled faces
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-        if (pp.coupled())
-        {
-            forAll(pp, i)
-            {
-                modifiedFace[pp.start()+i] = 1;
-            }
-        }
-    }
     label nModified = 0;
 
     forAll(newMasterPatches, i)

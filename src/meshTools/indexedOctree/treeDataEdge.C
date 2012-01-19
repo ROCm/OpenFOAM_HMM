@@ -128,14 +128,37 @@ bool Foam::treeDataEdge::overlaps
     const treeBoundBox& cubeBb
 ) const
 {
-    if (cacheBb_)
+    const edge& e = edges_[edgeLabels_[index]];
+
+    const point& start = points_[e.start()];
+    const point& end = points_[e.end()];
+
+    point intersect;
+
+    return cubeBb.intersects(start, end, intersect);
+}
+
+
+// Check if any point on shape is inside sphere.
+bool Foam::treeDataEdge::overlaps
+(
+    const label index,
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    const edge& e = edges_[edgeLabels_[index]];
+
+    const pointHit nearHit = e.line(points_).nearestDist(centre);
+
+    const scalar distSqr = sqr(nearHit.distance());
+
+    if (distSqr <= radiusSqr)
     {
-        return cubeBb.overlaps(bbs_[index]);
+        return true;
     }
-    else
-    {
-        return cubeBb.overlaps(calcBb(edgeLabels_[index]));
-    }
+
+    return false;
 }
 
 

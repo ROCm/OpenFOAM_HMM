@@ -148,6 +148,14 @@ public:
                 const treeBoundBox& sampleBb
             ) const;
 
+            //- Does (bb of) shape at index overlap bb
+            bool overlaps
+            (
+                const label index,
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
+
             //- Calculates nearest (to sample) point in shape.
             //  Returns actual point and distance (squared)
             void findNearest

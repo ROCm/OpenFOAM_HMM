@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -186,6 +186,14 @@ public:
             tmp<Field<Type> > interfaceInternalField
             (
                 const UList<Type>& internalData
+            ) const;
+
+            //- Get the interface internal field of the given field
+            template<class Type>
+            void interfaceInternalField
+            (
+                const UList<Type>& internalData,
+                List<Type>&
             ) const;
 
             //- Return the values of the given internal data adjacent to

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ SourceFiles
 #define tetIndices_H
 
 #include "label.H"
-#include "tetPointRef.H"
+#include "tetrahedron.H"
 #include "triPointRef.H"
 #include "polyMesh.H"
 #include "triFace.H"
