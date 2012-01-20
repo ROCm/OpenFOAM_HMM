@@ -105,8 +105,8 @@ PIMPLE
 
 relaxationFactors
 {
-    U               1;
-    nuTilda         1;
+    "U.*"               1;
+    "nuTilda.*"         1;
 }
 
 
