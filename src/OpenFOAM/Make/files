@@ -45,7 +45,9 @@ primitives/Tensor/lists/symmTensorList.C
 primitives/Tensor/lists/tensorList.C
 
 primitives/Vector/complexVector/complexVector.C
+#if !defined(WM_SP)
 primitives/Vector/floatVector/floatVector.C
+#endif
 primitives/Vector/labelVector/labelVector.C
 primitives/Vector/vector/vector.C
 primitives/Vector/lists/vectorList.C
