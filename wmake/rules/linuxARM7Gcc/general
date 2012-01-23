@@ -1,5 +1,5 @@
 CPP        = cpp -traditional-cpp $(GFLAGS)
-LD         = ld -melf_i386
+LD         = ld
 
 PROJECT_LIBS = -l$(WM_PROJECT) -ldl
 
