@@ -128,7 +128,7 @@ void Foam::regionSplit::fillSeedMask
     changedFaces.setSize(nFaces);
 
 
-    // Loop over changed faces. MeshWave in small.
+    // Loop over changed faces. FaceCellWave in small.
 
     while (changedFaces.size())
     {
@@ -260,7 +260,7 @@ void Foam::regionSplit::fillSeedMask
 }
 
 
-Foam::label Foam::regionSplit::calcRegionSplit
+Foam::label Foam::regionSplit::calcLocalRegionSplit
 (
     const boolList& blockedFace,
     const List<labelPair>& explicitConnections,
@@ -282,7 +282,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
                 {
                     FatalErrorIn
                     (
-                        "regionSplit::calcRegionSplit(..)"
+                        "regionSplit::calcLocalRegionSplit(..)"
                     )   << "Face " << faceI << " not synchronised. My value:"
                         << blockedFace[faceI] << "  coupled value:"
                         << syncBlockedFace[faceI]
@@ -313,7 +313,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
     // ~~~~~~~~~~~~~~~~~~~~
 
     // Start with region 0
-    label nRegions = 0;
+    label nLocalRegions = 0;
 
     label unsetCellI = 0;
 
@@ -340,11 +340,11 @@ Foam::label Foam::regionSplit::calcRegionSplit
             cellRegion,
             faceRegion,
             unsetCellI,
-            nRegions
+            nLocalRegions
         );
 
         // Current unsetCell has now been handled. Go to next region.
-        nRegions++;
+        nLocalRegions++;
         unsetCellI++;
     }
     while (true);
@@ -356,7 +356,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
         {
             if (cellRegion[cellI] < 0)
             {
-                FatalErrorIn("regionSplit::calcRegionSplit(..)")
+                FatalErrorIn("regionSplit::calcLocalRegionSplit(..)")
                     << "cell:" << cellI << " region:" << cellRegion[cellI]
                     << abort(FatalError);
             }
@@ -366,34 +366,62 @@ Foam::label Foam::regionSplit::calcRegionSplit
         {
             if (faceRegion[faceI] == -1)
             {
-                FatalErrorIn("regionSplit::calcRegionSplit(..)")
+                FatalErrorIn("regionSplit::calcLocalRegionSplit(..)")
                     << "face:" << faceI << " region:" << faceRegion[faceI]
                     << abort(FatalError);
             }
         }
     }
 
+    return nLocalRegions;
+}
 
 
-    // Assign global regions
-    // ~~~~~~~~~~~~~~~~~~~~~
+Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
+(
+    const boolList& blockedFace,
+    const List<labelPair>& explicitConnections,
+
+    labelList& cellRegion
+) const
+{
+    // See header in regionSplit.H
+
+    // 1. Do local analysis
+    label nLocalRegions = calcLocalRegionSplit
+    (
+        blockedFace,
+        explicitConnections,
+        cellRegion
+    );
+
+    if (!Pstream::parRun())
+    {
+        return autoPtr<globalIndex>(new globalIndex(nLocalRegions));
+    }
+
+
+    // 2. Assign global regions
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
     // Offset local regions to create unique global regions.
 
-    globalIndex globalRegions(nRegions);
+    globalIndex globalRegions(nLocalRegions);
 
 
-    // Merge global regions
-    // ~~~~~~~~~~~~~~~~~~~~
+    // Convert regions to global ones
+    forAll(cellRegion, cellI)
+    {
+        cellRegion[cellI] = globalRegions.toGlobal(cellRegion[cellI]);
+    }
+
+
+    // 3. Merge global regions
+    // ~~~~~~~~~~~~~~~~~~~~~~~
     // Regions across non-blocked proc patches get merged.
     // This will set merged global regions to be the min of both.
     // (this will create gaps in the global region list so they will get
     // merged later on)
 
-    // Map from global to merged global
-    labelList mergedGlobal(identity(globalRegions.size()));
-
-
-    // See if any regions get merged. Only nessecary for parallel
     while (Pstream::parRun())
     {
         if (debug)
@@ -401,123 +429,81 @@ Foam::label Foam::regionSplit::calcRegionSplit
             Pout<< nl << "-- Starting Iteration --" << endl;
         }
 
+
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-        // Send global regions across (or -2 if blocked face)
+        labelList nbrRegion(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
-            if (isA<processorPolyPatch>(pp))
+            if (pp.coupled())
             {
-                labelList myGlobalRegions(pp.size());
-
-                label faceI = pp.start();
-
-                forAll(pp, i)
-                {
-                    if (faceRegion[faceI] < 0)
-                    {
-                        myGlobalRegions[i] = faceRegion[faceI];
-                    }
-                    else
-                    {
-                        myGlobalRegions[i] = mergedGlobal
-                        [globalRegions.toGlobal(faceRegion[faceI])];
-                    }
-
-                    faceI++;
-                }
-
-                OPstream toProcNbr
+                const labelList& patchCells = pp.faceCells();
+                SubList<label> patchNbrRegion
                 (
-                    Pstream::blocking,
-                    refCast<const processorPolyPatch>(pp).neighbProcNo()
+                    nbrRegion,
+                    pp.size(),
+                    pp.start()-mesh_.nInternalFaces()
                 );
 
-                toProcNbr << myGlobalRegions;
+                forAll(patchCells, i)
+                {
+                    label faceI = pp.start()+i;
+                    if (!blockedFace.size() || !blockedFace[faceI])
+                    {
+                        patchNbrRegion[i] = cellRegion[patchCells[i]];
+                    }
+                }
             }
         }
+        syncTools::swapBoundaryFaceList(mesh_, nbrRegion);
 
-
-        // Receive global regions
-
-        label nMerged = 0;
+        Map<label> globalToMerged(mesh_.nFaces()-mesh_.nInternalFaces());
 
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
-            if (isA<processorPolyPatch>(pp))
+            if (pp.coupled())
             {
-                const processorPolyPatch& procPp =
-                    refCast<const processorPolyPatch>(pp);
+                const labelList& patchCells = pp.faceCells();
+                SubList<label> patchNbrRegion
+                (
+                    nbrRegion,
+                    pp.size(),
+                    pp.start()-mesh_.nInternalFaces()
+                );
 
-                IPstream fromProcNbr(Pstream::blocking, procPp.neighbProcNo());
-
-                labelList nbrRegions(fromProcNbr);
-
-
-                // Compare with my regions to see which get merged.
-
-                label faceI = pp.start();
-
-                forAll(pp, i)
+                forAll(patchCells, i)
                 {
-                    if
-                    (
-                        faceRegion[faceI] < 0
-                     || nbrRegions[i] < 0
-                    )
+                    label faceI = pp.start()+i;
+
+                    if (!blockedFace.size() || !blockedFace[faceI])
                     {
-                        if (faceRegion[faceI] != nbrRegions[i])
+                        if (patchNbrRegion[i] < cellRegion[patchCells[i]])
                         {
-                            FatalErrorIn("regionSplit::calcRegionSplit(..)")
-                                << "On patch:" << pp.name()
-                                << " face:" << faceI
-                                << " my local region:" << faceRegion[faceI]
-                                << " neighbouring region:"
-                                << nbrRegions[i] << nl
-                                << "Maybe your blockedFaces are not"
-                                << " synchronized across coupled faces?"
-                                << abort(FatalError);
+                            //Pout<< "on patch:" << pp.name()
+                            //    << " cell:" << patchCells[i]
+                            //    << " at:"
+                            // << mesh_.cellCentres()[patchCells[i]]
+                            //    << " was:" << cellRegion[patchCells[i]]
+                            //    << " nbr:" << patchNbrRegion[i]
+                            //    << endl;
+
+                            globalToMerged.insert
+                            (
+                                cellRegion[patchCells[i]],
+                                patchNbrRegion[i]
+                            );
                         }
                     }
-                    else
-                    {
-                        label uncompactGlobal =
-                            globalRegions.toGlobal(faceRegion[faceI]);
-
-                        label myGlobal = mergedGlobal[uncompactGlobal];
-
-                        if (myGlobal != nbrRegions[i])
-                        {
-                            label minRegion = min(myGlobal, nbrRegions[i]);
-
-                            if (debug)
-                            {
-                                Pout<< "Merging region " << myGlobal
-                                    << " (on proc " << Pstream::myProcNo()
-                                    << ") and region " << nbrRegions[i]
-                                    << " (on proc " << procPp.neighbProcNo()
-                                    << ") into region " << minRegion << endl;
-                            }
-
-                            mergedGlobal[uncompactGlobal] = minRegion;
-                            mergedGlobal[myGlobal] = minRegion;
-                            mergedGlobal[nbrRegions[i]] = minRegion;
-
-                            nMerged++;
-                        }
-                    }
-
-                    faceI++;
                 }
             }
         }
 
 
-        reduce(nMerged, sumOp<label>());
+        label nMerged = returnReduce(globalToMerged.size(), sumOp<label>());
 
         if (debug)
         {
@@ -529,51 +515,176 @@ Foam::label Foam::regionSplit::calcRegionSplit
             break;
         }
 
-        // Merge the compacted regions.
-        Pstream::listCombineGather(mergedGlobal, minEqOp<label>());
-        Pstream::listCombineScatter(mergedGlobal);
+        // Renumber the regions according to the globalToMerged
+        forAll(cellRegion, cellI)
+        {
+            label regionI = cellRegion[cellI];
+            Map<label>::const_iterator iter = globalToMerged.find(regionI);
+            if (iter != globalToMerged.end())
+            {
+                 cellRegion[cellI] = iter();
+            }
+        }
     }
 
 
-    // Compact global regions
-    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Now our cellRegion will have non-local elements in it. So compact
+    // it.
 
-    // All procs will have the same global mergedGlobal region.
-    // There might be gaps in it however so compact.
-
-    labelList mergedToCompacted(globalRegions.size(), -1);
-
-    label compactI = 0;
-
-    forAll(mergedGlobal, i)
+    // 4a: count. Use a labelHashSet to count regions only once.
+    label nCompact = 0;
     {
-        label merged = mergedGlobal[i];
-
-        if (mergedToCompacted[merged] == -1)
+        labelHashSet localRegion(mesh_.nFaces()-mesh_.nInternalFaces());
+        forAll(cellRegion, cellI)
         {
-            mergedToCompacted[merged] = compactI++;
+            if
+            (
+                globalRegions.isLocal(cellRegion[cellI])
+             && localRegion.insert(cellRegion[cellI])
+            )
+            {
+                nCompact++;
+            }
         }
     }
 
     if (debug)
     {
-        Pout<< "Compacted down to " << compactI << " regions." << endl;
+        Pout<< "Compacted from " << nLocalRegions
+            << " down to " << nCompact << " local regions." << endl;
     }
 
-    // Renumber cellRegion to be global regions
+
+    // Global numbering for compacted local regions
+    autoPtr<globalIndex> globalCompactPtr(new globalIndex(nCompact));
+    const globalIndex& globalCompact = globalCompactPtr();
+
+
+    // 4b: renumber
+    // Renumber into compact indices. Note that since we've already made
+    // all regions global we now need a Map to store the compacting information
+    // instead of a labelList - otherwise we could have used a straight
+    // labelList.
+
+    // Local compaction map
+    Map<label> globalToCompact(2*nCompact);
+    // Remote regions we want the compact number for
+    List<labelHashSet> nonLocal(Pstream::nProcs());
+    forAll(nonLocal, procI)
+    {
+        nonLocal[procI].resize((nLocalRegions-nCompact)/Pstream::nProcs());
+    }
+
     forAll(cellRegion, cellI)
     {
         label region = cellRegion[cellI];
-
-        if (region >= 0)
+        if (globalRegions.isLocal(region))
         {
-            label merged = mergedGlobal[globalRegions.toGlobal(region)];
-
-            cellRegion[cellI] = mergedToCompacted[merged];
+            Map<label>::const_iterator iter = globalToCompact.find(region);
+            if (iter == globalToCompact.end())
+            {
+                label compactRegion = globalCompact.toGlobal
+                (
+                    globalToCompact.size()
+                );
+                globalToCompact.insert(region, compactRegion);
+            }
+        }
+        else
+        {
+            nonLocal[globalRegions.whichProcID(region)].insert(region);
         }
     }
 
-    return compactI;
+
+    // Now we have all the local regions compacted. Now we need to get the
+    // non-local ones from the processors to whom they are local.
+    // Convert the nonLocal (labelHashSets) to labelLists.
+
+    labelListList sendNonLocal(Pstream::nProcs());
+    labelList nNonLocal(Pstream::nProcs(), 0);
+    forAll(sendNonLocal, procI)
+    {
+        sendNonLocal[procI].setSize(nonLocal[procI].size());
+        forAllConstIter(labelHashSet, nonLocal[procI], iter)
+        {
+            sendNonLocal[procI][nNonLocal[procI]++] = iter.key();
+        }
+    }
+
+    if (debug)
+    {
+        forAll(nNonLocal, procI)
+        {
+            Pout<< "    from processor " << procI
+                << " want " << nNonLocal[procI]
+                << " region numbers."
+                << endl;
+        }
+        Pout<< endl;
+    }
+
+
+    // Get the wanted region labels into recvNonLocal
+    labelListList recvNonLocal;
+    labelListList sizes;
+    Pstream::exchange<labelList, label>
+    (
+        sendNonLocal,
+        recvNonLocal,
+        sizes
+    );
+
+    // Now we have the wanted compact region labels that procI wants in
+    // recvNonLocal[procI]. Construct corresponding list of compact
+    // region labels to send back.
+
+    labelListList sendWantedLocal(Pstream::nProcs());
+    forAll(recvNonLocal, procI)
+    {
+        const labelList& nonLocal = recvNonLocal[procI];
+        sendWantedLocal[procI].setSize(nonLocal.size());
+
+        forAll(nonLocal, i)
+        {
+            sendWantedLocal[procI][i] = globalToCompact[nonLocal[i]];
+        }
+    }
+
+
+    // Send back (into recvNonLocal)
+    recvNonLocal.clear();
+    sizes.clear();
+    Pstream::exchange<labelList, label>
+    (
+        sendWantedLocal,
+        recvNonLocal,
+        sizes
+    );
+    sendWantedLocal.clear();
+
+    // Now recvNonLocal contains for every element in setNonLocal the
+    // corresponding compact number. Insert these into the local compaction
+    // map.
+
+    forAll(recvNonLocal, procI)
+    {
+        const labelList& wantedRegions = sendNonLocal[procI];
+        const labelList& compactRegions = recvNonLocal[procI];
+
+        forAll(wantedRegions, i)
+        {
+            globalToCompact.insert(wantedRegions[i], compactRegions[i]);
+        }
+    }
+
+    // Finally renumber the regions
+    forAll(cellRegion, cellI)
+    {
+        cellRegion[cellI] = globalToCompact[cellRegion[cellI]];
+    }
+
+    return globalCompactPtr;
 }
 
 
@@ -582,9 +693,15 @@ Foam::label Foam::regionSplit::calcRegionSplit
 Foam::regionSplit::regionSplit(const polyMesh& mesh)
 :
     labelList(mesh.nCells(), -1),
-    mesh_(mesh),
-    nRegions_(calcRegionSplit(boolList(0, false), List<labelPair>(0), *this))
-{}
+    mesh_(mesh)
+{
+    globalNumberingPtr_ = calcRegionSplit
+    (
+        boolList(0, false), //blockedFaces
+        List<labelPair>(0), //explicitConnections,
+        *this
+    );
+}
 
 
 Foam::regionSplit::regionSplit
@@ -594,9 +711,15 @@ Foam::regionSplit::regionSplit
 )
 :
     labelList(mesh.nCells(), -1),
-    mesh_(mesh),
-    nRegions_(calcRegionSplit(blockedFace, List<labelPair>(0), *this))
-{}
+    mesh_(mesh)
+{
+    globalNumberingPtr_ = calcRegionSplit
+    (
+        blockedFace,        //blockedFaces
+        List<labelPair>(0), //explicitConnections,
+        *this
+    );
+}
 
 
 Foam::regionSplit::regionSplit
@@ -607,12 +730,20 @@ Foam::regionSplit::regionSplit
 )
 :
     labelList(mesh.nCells(), -1),
-    mesh_(mesh),
-    nRegions_(calcRegionSplit(blockedFace, explicitConnections, *this))
-{}
+    mesh_(mesh)
+{
+    globalNumberingPtr_ = calcRegionSplit
+    (
+        blockedFace,            //blockedFaces
+        explicitConnections,    //explicitConnections,
+        *this
+    );
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
 
 
 // ************************************************************************* //
