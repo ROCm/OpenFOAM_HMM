@@ -229,8 +229,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         Foam::point externalPtD;
         Foam::point externalPtE;
 
-        vector convexEdgePlaneCNormal;
-        vector convexEdgePlaneDNormal;
+        vector convexEdgePlaneCNormal(0,0,0);
+        vector convexEdgePlaneDNormal(0,0,0);
 
         const labelList& concaveEdgeNormals = edgeNormals[concaveEdgeI];
         const labelList& convexEdgeANormals = edgeNormals[convexEdgesI[0]];
@@ -248,6 +248,11 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeANormals[edgeAnormalI]];
 
+                Info<< "Angle between vectors = "
+                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+
+                // Need a looser tolerance, because sometimes adjacent triangles
+                // on the same surface will be slightly out of alignment.
                 if (areParallel(concaveNormal, convexNormal, tolParallel))
                 {
                     convexEdgeA = true;
@@ -261,6 +266,9 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 const vector& convexNormal
                     = normals[convexEdgeBNormals[edgeBnormalI]];
 
+                Info<< "Angle between vectors = "
+                    << degAngleBetween(concaveNormal, convexNormal) << endl;
+
                 // Need a looser tolerance, because sometimes adjacent triangles
                 // on the same surface will be slightly out of alignment.
                 if (areParallel(concaveNormal, convexNormal, tolParallel))
@@ -269,15 +277,28 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 }
             }
 
-            if (convexEdgeA && convexEdgeB)
+            if ((convexEdgeA && convexEdgeB) || (!convexEdgeA && !convexEdgeB))
             {
-                FatalErrorIn
+                WarningIn
                     (
                      "Foam::conformalVoronoiMesh"
                      "::createSpecialisedFeaturePoint"
                     )
-                    << "Both convex edges share the concave edges normal!"
-                    << exit(FatalError);
+                    << "Both or neither of the convex edges share the concave "
+                    << "edge's normal."
+                    << " convexEdgeA = " << convexEdgeA
+                    << " convexEdgeB = " << convexEdgeB
+                    << endl;
+
+                // Remove points that have just been added before returning
+                for (label i = 0; i < 2; ++i)
+                {
+                    pts.remove();
+                    indices.remove();
+                    types.remove();
+                }
+
+                return false;
             }
 
             if (convexEdgeA)
@@ -356,8 +377,9 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             // Add additional mitering points
             //scalar angleSign = 1.0;
 
-            vector convexEdgesPlaneNormal = convexEdgePlaneCNormal;
+            Info<<convexEdgePlaneCNormal << " " <<convexEdgePlaneDNormal << endl;
 
+            vector convexEdgesPlaneNormal = 0.5*(convexEdgePlaneCNormal + convexEdgePlaneDNormal);
             plane planeM(featPt, convexEdgesPlaneNormal);
 
 //            if
