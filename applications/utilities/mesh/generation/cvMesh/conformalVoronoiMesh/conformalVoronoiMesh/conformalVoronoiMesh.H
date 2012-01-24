@@ -658,6 +658,17 @@ private:
             label callCount = 0
         ) const;
 
+        //- Find angle between the normals of two close surface points.
+        scalar angleBetweenSurfacePoints(Foam::point pA, Foam::point pB) const;
+
+        //- Check if a surface point is near another.
+        bool nearSurfacePoint
+        (
+            const pointIndexHit& pHit,
+            DynamicList<Foam::point>& existingSurfacePtLocations,
+            dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
+        ) const;
+
         //- Check if a location is in the exclusion range of an existing feature
         //- edge conformation location
         bool nearFeatureEdgeLocation
@@ -694,7 +705,9 @@ private:
             DynamicList<label>& featureEdgeFeaturesHit,
             DynamicList<Foam::point>& newEdgeLocations,
             DynamicList<Foam::point>& existingEdgeLocations,
-            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
+            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree,
+            DynamicList<Foam::point>& existingSurfacePtLocations,
+            dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
         ) const;
 
         //- Store the surface conformation with the indices offset to be

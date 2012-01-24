@@ -127,25 +127,31 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
     // Initialise containers to store the edge conformation locations
     DynamicList<Foam::point> newEdgeLocations;
-
     DynamicList<Foam::point> existingEdgeLocations;
+    DynamicList<Foam::point> existingSurfacePtLocations;
 
     treeBoundBox overallBb
     (
         geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
     );
 
-    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
     dynamicIndexedOctree<dynamicTreeDataPoint> edgeLocationTree
     (
         dynamicTreeDataPoint(existingEdgeLocations),
         overallBb,  // overall search domain
-        10,         // max levels
-        10.0,       // maximum ratio of cubes v.s. cells
+        10,         // max levels; n/a for dynamic tree
+        100.0,      // maximum ratio of cubes v.s. cells
         100.0       // max. duplicity; n/a since no bounding boxes.
     );
+
+    dynamicIndexedOctree<dynamicTreeDataPoint> surfacePtLocationTree
+	(
+		dynamicTreeDataPoint(existingSurfacePtLocations),
+		overallBb,  // overall search domain
+		10,         // max levels; n/a for dynamic tree
+		100.0,      // maximum ratio of cubes v.s. cells
+		100.0       // max. duplicity; n/a since no bounding boxes.
+	);
 
     // Initialise the edgeLocationTree
     //buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
@@ -249,7 +255,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         featureEdgeFeaturesHit,
                         newEdgeLocations,
                         existingEdgeLocations,
-                        edgeLocationTree
+                        edgeLocationTree,
+                        existingSurfacePtLocations,
+                        surfacePtLocationTree
                     );
                 }
             }
@@ -466,7 +474,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         featureEdgeFeaturesHit,
                         newEdgeLocations,
                         existingEdgeLocations,
-                        edgeLocationTree
+                        edgeLocationTree,
+                        existingSurfacePtLocations,
+                        surfacePtLocationTree
                     );
                 }
             }
@@ -503,7 +513,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         featureEdgeFeaturesHit,
                         newEdgeLocations,
                         existingEdgeLocations,
-                        edgeLocationTree
+                        edgeLocationTree,
+                        existingSurfacePtLocations,
+                        surfacePtLocationTree
                     );
                 }
             }
@@ -1841,6 +1853,97 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 }
 
 
+Foam::scalar Foam::conformalVoronoiMesh::angleBetweenSurfacePoints
+(
+    Foam::point pA,
+    Foam::point pB
+) const
+{
+    pointIndexHit pAhit;
+    label pAsurfaceHit = -1;
+
+    const scalar searchDist = 1.0*targetCellSize(pA);
+
+    geometryToConformTo_.findSurfaceNearest
+    (
+        pA,
+        searchDist,
+        pAhit,
+        pAsurfaceHit
+    );
+
+    vectorField norm(1);
+
+    allGeometry_[pAsurfaceHit].getNormal
+    (
+        List<pointIndexHit>(1, pAhit),
+        norm
+    );
+
+    const vector nA = norm[0];
+
+    pointIndexHit pBhit;
+    label pBsurfaceHit = -1;
+
+    geometryToConformTo_.findSurfaceNearest
+    (
+        pB,
+        searchDist,
+        pBhit,
+        pBsurfaceHit
+    );
+
+    allGeometry_[pBsurfaceHit].getNormal
+    (
+        List<pointIndexHit>(1, pBhit),
+        norm
+    );
+
+    const vector nB = norm[0];
+
+    return vectorTools::degAngleBetween(nA, nB);
+}
+
+
+bool Foam::conformalVoronoiMesh::nearSurfacePoint
+(
+    const pointIndexHit& pHit,
+    DynamicList<Foam::point>& existingSurfacePtLocations,
+    dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
+) const
+{
+    const Foam::point pt = pHit.hitPoint();
+
+    scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
+
+    pointIndexHit info = surfacePtLocationTree.findNearest(pt, exclusionRangeSqr);
+
+
+    // Add the point to the surface point tree if it will be added.
+    label startIndex = existingSurfacePtLocations.size();
+
+    existingSurfacePtLocations.append(pHit.hitPoint());
+
+    label endIndex = existingSurfacePtLocations.size();
+
+    surfacePtLocationTree.insert(startIndex, endIndex);
+
+
+    if (info.hit())
+    {
+        const scalar angle = angleBetweenSurfacePoints(pt, info.hitPoint());
+
+        if (angle > 170.0)
+        {
+            return false;
+        }
+    }
+
+
+    return info.hit();
+}
+
+
 bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 (
     pointIndexHit& pHit,
@@ -1852,11 +1955,6 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
     const Foam::point pt = pHit.hitPoint();
 
     scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
-
-    // 0.01 and 1000 determined from speed tests, varying the indexedOctree
-    // rebuild frequency and balance of additions to queries.
-
-
 
     label startIndex = existingEdgeLocations.size();
 
@@ -1870,11 +1968,8 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 
     pointIndexHit info = edgeLocationTree.findNearest(pt, exclusionRangeSqr);
 
-
-
     // Searching for the nearest point in existingEdgeLocations using the
     // indexedOctree
-
 
     // Average the points...
 //    if (info.hit())
@@ -1883,35 +1978,33 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 //
 //        pHit.setPoint(newPt);
 //
-//        boolList toRemove(existingEdgeLocations.size(), false);
+//        //boolList toRemove(existingEdgeLocations.size(), false);
 //
 //        forAll(existingEdgeLocations, pI)
 //        {
-//            const Foam::point& existingPoint = existingEdgeLocations[pI];
-//
-//            if (existingPoint == info.hitPoint())
+//            if (pI == info.index())
 //            {
-//                toRemove[pI] = true;
-//                //Info<< "Replace " << pt << " and " << info.hitPoint() << " with " << newPt << endl;
+//                //toRemove[pI] = true;
+//                edgeLocationTree.remove(pI);
 //            }
 //        }
-//
-//        pointField newExistingEdgeLocations(existingEdgeLocations.size());
-//
-//        label count = 0;
-//        forAll(existingEdgeLocations, pI)
-//        {
-//            if (toRemove[pI] == false)
-//            {
-//                newExistingEdgeLocations[count++] = existingEdgeLocations[pI];
-//            }
-//        }
-//
-//        newExistingEdgeLocations.resize(count);
-//
-//        existingEdgeLocations = newExistingEdgeLocations;
-//
-//        existingEdgeLocations.append(newPt);
+////
+////        pointField newExistingEdgeLocations(existingEdgeLocations.size());
+////
+////        label count = 0;
+////        forAll(existingEdgeLocations, pI)
+////        {
+////            if (toRemove[pI] == false)
+////            {
+////                newExistingEdgeLocations[count++] = existingEdgeLocations[pI];
+////            }
+////        }
+////
+////        newExistingEdgeLocations.resize(count);
+////
+////        existingEdgeLocations = newExistingEdgeLocations;
+////
+////        existingEdgeLocations.append(newPt);
 //
 //        return !info.hit();
 //    }
@@ -1994,7 +2087,9 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<label>& featureEdgeFeaturesHit,
     DynamicList<Foam::point>& newEdgeLocations,
     DynamicList<Foam::point>& existingEdgeLocations,
-    dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
+    dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree,
+    DynamicList<Foam::point>& existingSurfacePtLocations,
+    dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
 ) const
 {
     bool keepSurfacePoint = true;
@@ -2024,6 +2119,19 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
                 hitSurfaces.append(hitSurfaceI);
             }
+        }
+
+        if
+        (
+            nearSurfacePoint
+            (
+                surfHitI,
+                existingSurfacePtLocations,
+                surfacePtLocationTree
+            )
+        )
+        {
+            keepSurfacePoint = false;
         }
 
         List<List<pointIndexHit> > edHitsByFeature;

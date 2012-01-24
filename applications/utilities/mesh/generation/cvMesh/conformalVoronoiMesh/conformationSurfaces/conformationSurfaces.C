@@ -729,6 +729,7 @@ void Foam::conformationSurfaces::findEdgeNearestByType
     }
 }
 
+
 void Foam::conformationSurfaces::findAllNearestEdges
 (
     const point& sample,

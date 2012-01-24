@@ -191,7 +191,7 @@ void Foam::conformalVoronoiMesh::writeBoundaryPoints
         ++vit
     )
     {
-        if (vit->pairPoint())
+        if (!vit->internalPoint())
         {
             meshTools::writeOBJ(str, topoint(vit->point()));
         }
