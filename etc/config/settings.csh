@@ -372,7 +372,7 @@ unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    setenv FOAM_MPI openmpi-1.5.3
+    setenv FOAM_MPI openmpi-1.5.4
     # optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
 

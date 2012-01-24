@@ -81,8 +81,8 @@ class tetOverlapVolume
             const point& fc
         ) const;
 
-public:
 
+public:
 
     //- Runtime type information
     ClassName("tetOverlapVolume");
