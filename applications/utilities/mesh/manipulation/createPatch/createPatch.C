@@ -618,6 +618,11 @@ int main(int argc, char *argv[])
                     ).ptr()
                 );
             }
+            else
+            {
+                Info<< "Patch '" << patchName << "' already exists.  Only "
+                    << "moving patch faces - type will remain the same" << endl;
+            }
         }
 
         // Copy old patches.
