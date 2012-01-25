@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Description
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 #include "incompressible/RAS/RASModel/RASModel.H"
 #include "incompressible/LES/LESModel/LESModel.H"
-#include "basicPsiThermo.H"
+#include "basicThermo.H"
 #include "compressible/RAS/RASModel/RASModel.H"
 #include "compressible/LES/LESModel/LESModel.H"
 
@@ -204,7 +204,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             {
                 IOdictionary RASProperties(RASPropertiesHeader);
 
-                autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
+                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
 
                 volScalarField rho
                 (
@@ -252,7 +252,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             {
                 IOdictionary LESProperties(LESPropertiesHeader);
 
-                autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
+                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
 
                 volScalarField rho
                 (
