@@ -99,6 +99,11 @@ Foam::cvControls::cvControls
         coarseDict.subDict("iteration")
     );
 
+    surfacePtExclusionDistanceCoeff_ = readScalar
+    (
+        coarseInitialDict.lookup("surfacePtExclusionDistanceCoeff")
+    );
+
     edgeSearchDistCoeffSqr_coarse_initial_ = sqr
     (
         readScalar

@@ -99,6 +99,11 @@ class cvControls
 
             // Controls for coarse surface conformation
 
+                //- Distance to an existing surface conformation point location
+                //  within which other surface point locations are excluded
+                //  - fraction of the local target cell size
+                scalar surfacePtExclusionDistanceCoeff_;
+
                 //- Distance to search for feature edges near to
                 //  surface protrusions - fraction of the local target
                 //  cell size. Coarse conformation, initial protrusion
@@ -317,6 +322,9 @@ public:
 
             //- Return the featureEdgeExclusionDistanceCoeff
             inline scalar featureEdgeExclusionDistanceCoeff() const;
+
+            //- Return the surfacePtExclusionDistanceCoeff
+            inline scalar surfacePtExclusionDistanceCoeff() const;
 
             //- Return whether to use specialised feature points
             inline Switch specialiseFeaturePoints() const;

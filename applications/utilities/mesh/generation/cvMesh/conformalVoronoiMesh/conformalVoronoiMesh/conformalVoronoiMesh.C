@@ -316,16 +316,16 @@ void Foam::conformalVoronoiMesh::insertPoints
     // using the range insert (faster than inserting points one by one)
     insert(points.begin(), points.end());
 
-    // Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
-    // for
-    // (
-    //List:list<Point>::iterator pit=points.begin();
-    //     pit != points.end();
-    //     ++pit
-    // )
-    // {
-    //     insertPoint(topoint(*pit), Vb::vtInternal);
-    // }
+//     Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
+//     for
+//     (
+//         List<Point>::iterator pit=points.begin();
+//         pit != points.end();
+//         ++pit
+//     )
+//     {
+//         insertPoint(topoint(*pit), Vb::vtInternal);
+//     }
 
     label nInserted(number_of_vertices() - preInsertionSize);
 
@@ -395,31 +395,14 @@ void Foam::conformalVoronoiMesh::insertPoints
         //     << " points in total" << endl;
     }
 
-    // Using index is actually pointless, it is always zero.  Keep for clarity
-    // of code.
-
-    forAll(pts, pI)
-    {
-        // creation of points and indices is done assuming that it will be
-        // relative to the instantaneous number_of_vertices() at insertion.
-
-        label type = types[pI];
-
-        if (type > Vb::vtFar)
-        {
-            // This is a member of a point pair, don't use the type directly
-            // (note that this routine never gets called for referredPoints
-            //  so type will never be -procI)
-            type += number_of_vertices();
-        }
-
-        insertPoint
-        (
-            pts[pI],
-            indices[pI] + number_of_vertices(),
-            type
-        );
-    }
+    rangeInsertWithInfo
+    (
+        pts.begin(),
+        pts.end(),
+        *this,
+        indices,
+        types
+    );
 }
 
 
@@ -1202,6 +1185,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     featureVertices_(),
     featurePointLocations_(),
     featurePointTreePtr_(),
+    edgeLocationTreePtr_(),
+    surfacePtLocationTreePtr_(),
     sizeAndAlignmentLocations_(),
     storedSizes_(),
     storedAlignments_(),

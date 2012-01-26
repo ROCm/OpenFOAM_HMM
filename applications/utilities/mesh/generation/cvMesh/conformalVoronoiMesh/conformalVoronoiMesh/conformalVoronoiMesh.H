@@ -48,6 +48,7 @@ SourceFiles
 #define CGAL_INEXACT
 
 #include "CGALTriangulation3Ddefs.H"
+#include <CGAL/Spatial_sort_traits_adapter_3.h>
 #include "uint.H"
 #include "ulong.H"
 #include "searchableSurfaces.H"
@@ -164,6 +165,14 @@ private:
         //- Search tree for feature point locations
         mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTreePtr_;
 
+        //- Search tree for edge point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+        edgeLocationTreePtr_;
+
+        //- Search tree for surface point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+        surfacePtLocationTreePtr_;
+
         //- Store locations where the cell size and alignments will be
         //  pre-calculated and looked up
         pointField sizeAndAlignmentLocations_;
@@ -240,6 +249,12 @@ private:
 
         //- Return the square of the local feature edge exclusion distance
         inline scalar featureEdgeExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
+
+        //- Return the square of the local surface point exclusion distance
+        inline scalar surfacePtExclusionDistanceSqr
         (
             const Foam::point& pt
         ) const;
@@ -664,9 +679,41 @@ private:
         //- Check if a surface point is near another.
         bool nearSurfacePoint
         (
-            const pointIndexHit& pHit,
-            DynamicList<Foam::point>& existingSurfacePtLocations,
-            dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
+            pointIndexHit& pHit,
+            label& surfaceHit,
+            DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
+
+        //- Append a point to the surface point tree and the existing list
+        bool appendToSurfacePtTree
+        (
+            const Foam::point& pt,
+            DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
+
+        //- Append a point to the edge location tree and the existing list
+        bool appendToEdgeLocationTree
+        (
+            const Foam::point& pt,
+            DynamicList<Foam::point>& existingEdgeLocations
+        ) const;
+
+        //- Check if a point is near any feature edge points.
+        bool pointIsNearFeatureEdge(const Foam::point& pt) const;
+
+        bool pointIsNearFeatureEdge
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
+        ) const;
+
+        //- Check if a point is near any surface conformation points.
+        bool pointIsNearSurfaceLocation(const Foam::point& pt) const;
+
+        bool pointIsNearSurfaceLocation
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
         ) const;
 
         //- Check if a location is in the exclusion range of an existing feature
@@ -674,17 +721,20 @@ private:
         bool nearFeatureEdgeLocation
         (
             pointIndexHit& pHit,
-            DynamicList<Foam::point>& newEdgeLocations,
-            DynamicList<Foam::point>& existingEdgeLocations,
-            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
+            DynamicList<Foam::point>& existingEdgeLocations
         ) const;
 
-        //- Build or rebuild the edgeLocationTree
-//        void buildEdgeLocationTree
-//        (
-//            autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >& edgeLocationTree,
-//            const pointField& existingEdgeLocations
-//        ) const;
+        //- Build or rebuild the edge location tree
+        void buildEdgeLocationTree
+        (
+            const DynamicList<Foam::point>& existingEdgeLocations
+        ) const;
+
+        //- Build or rebuild the surface point location tree
+        void buildSurfacePtLocationTree
+        (
+            const DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
 
         //- Build or rebuild the sizeAndAlignmentTree
         void buildSizeAndAlignmentTree() const;
@@ -705,9 +755,7 @@ private:
             DynamicList<label>& featureEdgeFeaturesHit,
             DynamicList<Foam::point>& newEdgeLocations,
             DynamicList<Foam::point>& existingEdgeLocations,
-            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree,
-            DynamicList<Foam::point>& existingSurfacePtLocations,
-            dynamicIndexedOctree<dynamicTreeDataPoint>& surfacePtLocationTree
+            DynamicList<Foam::point>& existingSurfacePtLocations
         ) const;
 
         //- Store the surface conformation with the indices offset to be
@@ -1101,6 +1149,87 @@ public:
             //- Find the cellSet of the boundary cells which have points that
             //  protrude out of the surface beyond a tolerance.
             void findRemainingProtrusionSet(const fvMesh& mesh) const;
+
+
+            //- Function inserting points into a triangulation and setting the
+            //  index and type data of the point in the correct order. This is
+            //  faster than inserting points individually.
+            //
+            //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
+            //  Sebastien Loriot (Geometry Factory).
+            //
+            //  @todo problems putting declaration in the .C file. Function
+            //        prototype is not recognised.
+            template<class Triangulation, class Point_iterator>
+            void rangeInsertWithInfo
+            (
+                Point_iterator begin,
+                Point_iterator end,
+                Triangulation& T,
+                DynamicList<label>& indices,
+                DynamicList<label>& types
+            )
+            {
+                typedef std::vector
+                <
+                    std::pair<const typename Triangulation::Point*, label>
+                > vectorPairPointIndex;
+
+                vectorPairPointIndex points;
+                label index = 0;
+
+                for (Point_iterator it = begin; it != end; ++it)
+                {
+                    points.push_back
+                    (
+                        std::make_pair(&(toPoint(*it)), index++)
+                    );
+                }
+
+                std::random_shuffle(points.begin(), points.end());
+
+                spatial_sort
+                (
+                    points.begin(),
+                    points.end(),
+                    Traits_for_spatial_sort<Triangulation>()
+                );
+
+                typename Triangulation::Cell_handle hint;
+
+                for
+                (
+                    typename vectorPairPointIndex::const_iterator
+                    p = points.begin();
+                    p != points.end();
+                    ++p
+                )
+                {
+                    typename Triangulation::Locate_type lt;
+                    typename Triangulation::Cell_handle c;
+                    label li, lj;
+
+                    c = T.locate(*(p->first), lt, li, lj, hint);
+
+                    typename Triangulation::Vertex_handle v
+                        = T.insert(*(p->first), lt, c, li, lj);
+
+                    label oldIndex = p->second;
+
+                    label type = types[oldIndex];
+
+                    if (type > Vb::vtFar)
+                    {
+                        // This is a member of a point pair, don't use the type
+                        // directly (note that this routine never gets called
+                        // for referredPoints so type will never be -procI)
+                        type += T.number_of_vertices() - 1;
+                    }
+
+                    v->index() = indices[oldIndex] + T.number_of_vertices() - 1;
+                    v->type() = type;
+                }
+            }
 };
 
 
@@ -1111,6 +1240,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "conformalVoronoiMeshI.H"
+
+//#ifdef NoRepository
+//#   include "conformalVoronoiMeshTemplates.C"
+//#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
