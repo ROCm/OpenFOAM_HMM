@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    wallHeatFlux
+    solidWallHeatFlux
 
 Description
     Calculates and writes the heat flux for all patches as the boundary field
@@ -32,9 +32,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
-#include "RASModel.H"
 #include "wallFvPatch.H"
+#include "basicSolidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,19 +52,30 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << endl;
         mesh.readUpdate();
 
+        // Read temperature
         #include "createFields.H"
 
-        surfaceScalarField heatFlux
+        // Create heat flux as volScalarField with as boundary values
+        // the heat flux
+        volScalarField wallHeatFlux
         (
-            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h)
+            IOobject
+            (
+                "solidWallHeatFlux",
+                runTime.timeName(),
+                mesh
+            ),
+            mesh,
+            dimensionedScalar("solidWallHeatFlux", dimPower/dimArea, 0.0)
         );
 
-        const surfaceScalarField::GeometricBoundaryField& patchHeatFlux =
-            heatFlux.boundaryField();
-
         Info<< "\nWall heat fluxes [W]" << endl;
-        forAll(patchHeatFlux, patchi)
+        forAll(wallHeatFlux.boundaryField(), patchi)
         {
+            wallHeatFlux.boundaryField()[patchi] =
+                thermo().K(patchi)
+               *T.boundaryField()[patchi].snGrad();
+
             if (isA<wallFvPatch>(mesh.boundary()[patchi]))
             {
                 Info<< mesh.boundary()[patchi].name()
@@ -73,31 +83,15 @@ int main(int argc, char *argv[])
                     << gSum
                        (
                            mesh.magSf().boundaryField()[patchi]
-                          *patchHeatFlux[patchi]
+                          *wallHeatFlux.boundaryField()[patchi]
                        )
                     << endl;
             }
         }
-        Info<< endl;
-
-        volScalarField wallHeatFlux
-        (
-            IOobject
-            (
-                "wallHeatFlux",
-                runTime.timeName(),
-                mesh
-            ),
-            mesh,
-            dimensionedScalar("wallHeatFlux", heatFlux.dimensions(), 0.0)
-        );
-
-        forAll(wallHeatFlux.boundaryField(), patchi)
-        {
-            wallHeatFlux.boundaryField()[patchi] = patchHeatFlux[patchi];
-        }
 
         wallHeatFlux.write();
+
+        Info<< endl;
     }
 
     Info<< "End" << endl;
