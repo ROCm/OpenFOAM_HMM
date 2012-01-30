@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     channelFoam;
+application     pimpleFoam;
 
 startFrom       startTime;
 

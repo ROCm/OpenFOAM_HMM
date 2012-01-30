@@ -1,0 +1,35 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      sourcesProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+momentumSource
+{
+    type            pressureGradientExplicitSource;
+    active          on;            //on/off switch
+    timeStart       0.0;           //start time
+    duration        1000000.0;     //duration
+    selectionMode   all;       //cellSet // points //cellZone
+
+    pressureGradientExplicitSourceCoeffs
+    {
+        fieldNames  (U);
+        Ubar        ( 0.1335 0 0 );
+        gradPini    gradPIni [0 1 -2 0 0 ] 0;
+    }
+}
+
+
+// ************************************************************************* //
