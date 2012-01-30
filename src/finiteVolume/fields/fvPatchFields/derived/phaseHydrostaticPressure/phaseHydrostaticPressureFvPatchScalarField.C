@@ -163,7 +163,8 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::write(Ostream& os) const
     fvPatchScalarField::write(os);
     if (phaseName_ != "alpha")
     {
-        os.writeKeyword("phaseName") << phaseName_ << token::END_STATEMENT << nl;
+        os.writeKeyword("phaseName")
+            << phaseName_ << token::END_STATEMENT << nl;
     }
     os.writeKeyword("rho") << rho_ << token::END_STATEMENT << nl;
     os.writeKeyword("pRefValue") << pRefValue_ << token::END_STATEMENT << nl;
