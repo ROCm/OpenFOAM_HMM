@@ -45,11 +45,7 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 {
     this->patch().patchInternalField(psiInternal, scalarSendBuf_);
 
-    if
-    (
-        Pstream::defaultCommsType == Pstream::nonBlocking
-    && !Pstream::floatTransfer
-    )
+    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
     {
         // Fast path.
         if (debug && !this->ready())
@@ -122,6 +118,7 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
         {
             UPstream::waitRequest(outstandingRecvRequest_);
         }
+        // Recv finished so assume sending finished as well.
         outstandingSendRequest_ = -1;
         outstandingRecvRequest_ = -1;
 
