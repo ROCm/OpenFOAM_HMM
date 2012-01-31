@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,7 @@ SourceFiles
 #define basicSource_H
 
 #include "fvMatricesFwd.H"
+#include "volFieldsFwd.H"
 #include "cellSet.H"
 #include "autoPtr.H"
 #include "meshToMesh.H"
@@ -59,7 +60,6 @@ namespace Foam
 {
 
 class fvMesh;
-
 
 /*---------------------------------------------------------------------------*\
                          Class basicSource Declaration
@@ -329,6 +329,24 @@ public:
 
 
         // Evaluation
+
+            // Correct
+
+                //- Scalar
+                virtual void correct(volScalarField& fld);
+
+                //- Vector
+                virtual void correct(volVectorField& fld);
+
+                //- Spherical tensor
+                virtual void correct(volSphericalTensorField& fld);
+
+                //- Symmetric tensor
+                virtual void correct(volSymmTensorField& fld);
+
+                //- Tensor
+                virtual void correct(volTensorField& fld);
+
 
             // Add explicit and implicit contributions
 

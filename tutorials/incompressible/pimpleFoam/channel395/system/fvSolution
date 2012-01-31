@@ -33,41 +33,25 @@ solvers
         relTol          0;
     }
 
-    U
+    "(U|k)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
-    k
+    "(U|k)Final"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    B
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    nuTilda
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $U;
         tolerance       1e-05;
         relTol          0;
     }
 }
 
-PISO
+PIMPLE
 {
+    nOuterCorrectors 1;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     pRefCell        1001;
