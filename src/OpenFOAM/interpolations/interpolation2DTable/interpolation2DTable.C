@@ -36,7 +36,6 @@ void Foam::interpolation2DTable<Type>::readTable()
 
     // Read data from file
     reader_()(fName, *this);
-    //IFstream(fName)() >> *this;
 
     if (this->empty())
     {
@@ -299,8 +298,8 @@ Foam::interpolation2DTable<Type>::wordToBoundsHandling
     {
         WarningIn
         (
-            "Foam::interpolation2DTable<Type>::wordToBoundsHandling
-            "(
+            "Foam::interpolation2DTable<Type>::wordToBoundsHandling"
+            "("
             "    const word&"
             ")"
         )   << "bad outOfBounds specifier " << bound << " using 'warn'" << endl;
@@ -361,7 +360,6 @@ void Foam::interpolation2DTable<Type>::write(Ostream& os) const
     {
         reader_->write(os);
     }
-    //*this >> os;
 }
 
 
@@ -649,100 +647,6 @@ Type Foam::interpolation2DTable<Type>::operator()
             else
             {
                 hiY1 = i;
-                break;
-            }
-        }
-    }
-
-    label loY2 = 0;
-    label hiY2 = 0;
-
-    nY = matrix::operator[](hiX).second().size();
-
-    minLimit = matrix::operator[](loX).second()[0].first();
-    maxLimit = matrix::operator[](loX).second()[nY-1].first();
-
-    if (lookupValue < minLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << "    Continuing with the first entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                loY2 = 0;
-                loY2 = 1;
-                break;
-            }
-        }
-    }
-    else if (lookupValue >= maxLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << "    Continuing with the last entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                loY2 = nY-1;
-                loY2 = nY;
-                break;
-            }
-        }
-    }
-    else
-    {
-        // Finds the lo and hi of Y on the high x
-        for (label i = 0; i < nY; ++i)
-        {
-            if
-            (
-                lookupValue >= matrix::operator[](hiX).second()[i].first()
-            )
-            {
-                loY2 = hiY2 = i;
-            }
-            else
-            {
-                hiY2 = i;
                 break;
             }
         }
