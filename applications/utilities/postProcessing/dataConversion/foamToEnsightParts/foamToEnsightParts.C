@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,9 @@ Usage
     \param -ascii \n
     Write Ensight data in ASCII format instead of "C Binary"
 
+    \parm -name \<subdir\>\n
+    define sub-directory name to use for Ensight data (default: "Ensight")
+
     \param -noZero \n
     Exclude the often incomplete initial conditions.
 
@@ -45,6 +48,9 @@ Usage
     \param -noMesh \n
     Suppress writing the geometry. Can be useful for converting partial
     results for a static geometry.
+
+    \param -width \<n\>\n
+    width of Ensight data subdir
 
 Note
     - no parallel data.
@@ -96,6 +102,19 @@ int main(int argc, char *argv[])
         "suppress writing the geometry. "
         "Can be useful for converting partial results for a static geometry"
     );
+    argList::addOption
+    (
+        "name",
+        "subdir",
+        "define sub-directory name to use for Ensight data "
+        "(default: \"Ensight\")"
+    );
+    argList::addOption
+    (
+        "width",
+        "n",
+        "width of Ensight data subdir"
+    );
 
     // the volume field types that we handle
     wordHashSet volFieldTypes;
@@ -133,7 +152,21 @@ int main(int argc, char *argv[])
     // always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
 
-    fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
+    // adjust output width
+    if (args.optionFound("width"))
+    {
+        ensightFile::subDirWidth(args.optionRead<label>("width"));
+    }
+
+    // define sub-directory name to use for Ensight data
+    fileName ensightDir = "Ensight";
+    args.optionReadIfPresent("name", ensightDir);
+
+    if (!ensightDir.isAbsolute())
+    {
+        ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
+    }
+
     fileName dataDir = ensightDir/"data";
     fileName caseFileName = "Ensight.case";
     fileName dataMask = fileName("data")/ensightFile::mask();

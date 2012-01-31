@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,22 @@ class processorFvPatchField
         //- Local reference cast into the processor patch
         const processorFvPatch& procPatch_;
 
+        // Sending and receiving
+
+            //- Send buffer.
+            mutable Field<Type> sendBuf_;
+
+            //- Outstanding request
+            mutable label outstandingSendRequest_;
+
+            //- Outstanding request
+            mutable label outstandingRecvRequest_;
+
+            //- Scalar send buffer
+            mutable Field<scalar> scalarSendBuf_;
+
+            //- Scalar receive buffer
+            mutable Field<scalar> scalarReceiveBuf_;
 
 public:
 
@@ -179,6 +195,9 @@ public:
                 const Pstream::commsTypes commsType
             ) const;
 
+            //- Is all data available
+            virtual bool ready() const;
+
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
@@ -221,6 +240,7 @@ public:
             {
                 return pTraits<Type>::rank;
             }
+
 };
 
 

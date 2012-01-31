@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -195,6 +195,17 @@ tmp<Field<Type> > slicedFvPatchField<Type>::patchInternalField() const
     );
 
     return Field<Type>::null();
+}
+
+
+template<class Type>
+void slicedFvPatchField<Type>::patchInternalField(Field<Type>&) const
+{
+    notImplemented
+    (
+        "slicedFvPatchField<Type>::"
+        "patchInternalField(Field<Type>&)"
+    );
 }
 
 

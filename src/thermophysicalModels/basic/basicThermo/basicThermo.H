@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
 SourceFiles
     basicThermo.C
-    newBasicThermo.C
+    basicThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -109,11 +109,24 @@ public:
     TypeName("basicThermo");
 
 
+    //- Declare run-time constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        basicThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
+
     // Constructors
 
         //- Construct from mesh
         basicThermo(const fvMesh&);
 
+
+    //- Selector
+    static autoPtr<basicThermo> New(const fvMesh&);
 
     //- Destructor
     virtual ~basicThermo();

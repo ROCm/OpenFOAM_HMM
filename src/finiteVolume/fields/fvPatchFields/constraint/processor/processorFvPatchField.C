@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,12 @@ processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF),
-    procPatch_(refCast<const processorFvPatch>(p))
+    procPatch_(refCast<const processorFvPatch>(p)),
+    sendBuf_(0),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(0),
+    scalarReceiveBuf_(0)
 {}
 
 
@@ -56,7 +61,12 @@ processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF, f),
-    procPatch_(refCast<const processorFvPatch>(p))
+    procPatch_(refCast<const processorFvPatch>(p)),
+    sendBuf_(0),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(0),
+    scalarReceiveBuf_(0)
 {}
 
 
@@ -71,7 +81,12 @@ processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
-    procPatch_(refCast<const processorFvPatch>(p))
+    procPatch_(refCast<const processorFvPatch>(p)),
+    sendBuf_(0),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(0),
+    scalarReceiveBuf_(0)
 {
     if (!isA<processorFvPatch>(this->patch()))
     {
@@ -91,6 +106,12 @@ processorFvPatchField<Type>::processorFvPatchField
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalIOError);
     }
+    if (debug && !ptf.ready())
+    {
+        FatalErrorIn("processorFvPatchField<Type>::processorFvPatchField(..)")
+            << "On patch " << procPatch_.name() << " outstanding request."
+            << abort(FatalError);
+    }
 }
 
 
@@ -103,7 +124,12 @@ processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorFvPatch>(p))
+    procPatch_(refCast<const processorFvPatch>(p)),
+    sendBuf_(0),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(0),
+    scalarReceiveBuf_(0)
 {
     if (!isA<processorFvPatch>(p))
     {
@@ -134,8 +160,20 @@ processorFvPatchField<Type>::processorFvPatchField
 :
     processorLduInterfaceField(),
     coupledFvPatchField<Type>(ptf),
-    procPatch_(refCast<const processorFvPatch>(ptf.patch()))
-{}
+    procPatch_(refCast<const processorFvPatch>(ptf.patch())),
+    sendBuf_(ptf.sendBuf_.xfer()),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(ptf.scalarSendBuf_.xfer()),
+    scalarReceiveBuf_(ptf.scalarReceiveBuf_.xfer())
+{
+    if (debug && !ptf.ready())
+    {
+        FatalErrorIn("processorFvPatchField<Type>::processorFvPatchField(..)")
+            << "On patch " << procPatch_.name() << " outstanding request."
+            << abort(FatalError);
+    }
+}
 
 
 template<class Type>
@@ -146,8 +184,20 @@ processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(ptf, iF),
-    procPatch_(refCast<const processorFvPatch>(ptf.patch()))
-{}
+    procPatch_(refCast<const processorFvPatch>(ptf.patch())),
+    sendBuf_(0),
+    outstandingSendRequest_(-1),
+    outstandingRecvRequest_(-1),
+    scalarSendBuf_(0),
+    scalarReceiveBuf_(0)
+{
+    if (debug && !ptf.ready())
+    {
+        FatalErrorIn("processorFvPatchField<Type>::processorFvPatchField(..)")
+            << "On patch " << procPatch_.name() << " outstanding request."
+            << abort(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
@@ -162,6 +212,13 @@ processorFvPatchField<Type>::~processorFvPatchField()
 template<class Type>
 tmp<Field<Type> > processorFvPatchField<Type>::patchNeighbourField() const
 {
+    if (debug && !this->ready())
+    {
+        FatalErrorIn("processorFvPatchField<Type>::patchNeighbourField()")
+            << "On patch " << procPatch_.name()
+            << " outstanding request."
+            << abort(FatalError);
+    }
     return *this;
 }
 
@@ -174,7 +231,36 @@ void processorFvPatchField<Type>::initEvaluate
 {
     if (Pstream::parRun())
     {
-        procPatch_.compressedSend(commsType, this->patchInternalField()());
+        this->patchInternalField(sendBuf_);
+
+        if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+        {
+            // Fast path. Receive into *this
+            this->setSize(sendBuf_.size());
+            outstandingRecvRequest_ = UPstream::nRequests();
+            IPstream::read
+            (
+                Pstream::nonBlocking,
+                procPatch_.neighbProcNo(),
+                reinterpret_cast<char*>(this->begin()),
+                this->byteSize(),
+                procPatch_.tag()
+            );
+
+            outstandingSendRequest_ = UPstream::nRequests();
+            OPstream::write
+            (
+                Pstream::nonBlocking,
+                procPatch_.neighbProcNo(),
+                reinterpret_cast<const char*>(sendBuf_.begin()),
+                this->byteSize(),
+                procPatch_.tag()
+            );
+        }
+        else
+        {
+            procPatch_.compressedSend(commsType, sendBuf_);
+        }
     }
 }
 
@@ -187,7 +273,25 @@ void processorFvPatchField<Type>::evaluate
 {
     if (Pstream::parRun())
     {
-        procPatch_.compressedReceive<Type>(commsType, *this);
+        if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+        {
+            // Fast path. Received into *this
+
+            if
+            (
+                outstandingRecvRequest_ >= 0
+             && outstandingRecvRequest_ < Pstream::nRequests()
+            )
+            {
+                UPstream::waitRequest(outstandingRecvRequest_);
+            }
+            outstandingSendRequest_ = -1;
+            outstandingRecvRequest_ = -1;
+        }
+        else
+        {
+            procPatch_.compressedReceive<Type>(commsType, *this);
+        }
 
         if (doTransform())
         {
@@ -215,11 +319,49 @@ void processorFvPatchField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    procPatch_.compressedSend
-    (
-        commsType,
-        this->patch().patchInternalField(psiInternal)()
-    );
+    this->patch().patchInternalField(psiInternal, scalarSendBuf_);
+
+    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    {
+        // Fast path.
+        if (debug && !this->ready())
+        {
+            FatalErrorIn
+            (
+                "processorFvPatchField<Type>::initInterfaceMatrixUpdate(..)"
+            )   << "On patch " << procPatch_.name()
+                << " outstanding request."
+                << abort(FatalError);
+        }
+
+
+        scalarReceiveBuf_.setSize(scalarSendBuf_.size());
+        outstandingRecvRequest_ = UPstream::nRequests();
+        IPstream::read
+        (
+            Pstream::nonBlocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
+            scalarReceiveBuf_.byteSize(),
+            procPatch_.tag()
+        );
+
+        outstandingSendRequest_ = UPstream::nRequests();
+        OPstream::write
+        (
+            Pstream::nonBlocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<const char*>(scalarSendBuf_.begin()),
+            scalarSendBuf_.byteSize(),
+            procPatch_.tag()
+        );
+    }
+    else
+    {
+        procPatch_.compressedSend(commsType, scalarSendBuf_);
+    }
+
+    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
 }
 
 
@@ -234,22 +376,92 @@ void processorFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf
-    (
-        procPatch_.compressedReceive<scalar>(commsType, this->size())()
-    );
-
-    // Transform according to the transformation tensor
-    transformCoupleField(pnf, cmpt);
-
-    // Multiply the field by coefficients and add into the result
+    if (this->updatedMatrix())
+    {
+        return;
+    }
 
     const labelUList& faceCells = this->patch().faceCells();
 
-    forAll(faceCells, elemI)
+    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
     {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+        // Fast path.
+        if
+        (
+            outstandingRecvRequest_ >= 0
+         && outstandingRecvRequest_ < Pstream::nRequests()
+        )
+        {
+            UPstream::waitRequest(outstandingRecvRequest_);
+        }
+        // Recv finished so assume sending finished as well.
+        outstandingSendRequest_ = -1;
+        outstandingRecvRequest_ = -1;
+
+        // Consume straight from scalarReceiveBuf_
+
+        // Transform according to the transformation tensor
+        transformCoupleField(scalarReceiveBuf_, cmpt);
+
+        // Multiply the field by coefficients and add into the result
+        forAll(faceCells, elemI)
+        {
+            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
+        }
     }
+    else
+    {
+        scalarField pnf
+        (
+            procPatch_.compressedReceive<scalar>(commsType, this->size())()
+        );
+
+        // Transform according to the transformation tensor
+        transformCoupleField(pnf, cmpt);
+
+        // Multiply the field by coefficients and add into the result
+        forAll(faceCells, elemI)
+        {
+            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+        }
+    }
+
+    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+}
+
+
+template<class Type>
+bool processorFvPatchField<Type>::ready() const
+{
+    if
+    (
+        outstandingSendRequest_ >= 0
+     && outstandingSendRequest_ < Pstream::nRequests()
+    )
+    {
+        bool finished = UPstream::finishedRequest(outstandingSendRequest_);
+        if (!finished)
+        {
+            return false;
+        }
+    }
+    outstandingSendRequest_ = -1;
+
+    if
+    (
+        outstandingRecvRequest_ >= 0
+     && outstandingRecvRequest_ < Pstream::nRequests()
+    )
+    {
+        bool finished = UPstream::finishedRequest(outstandingRecvRequest_);
+        if (!finished)
+        {
+            return false;
+        }
+    }
+    outstandingRecvRequest_ = -1;
+
+    return true;
 }
 
 

@@ -39,6 +39,7 @@ usage()
 usage: ${0##*/} [OPTION]
 
 options:
+  -root <dir>       specify root folder to run tests from
   -default          sets up a default scheme on all schemes
   -help             print the usage
 
@@ -52,16 +53,22 @@ USAGE
 
 unset DEFAULT_SCHEMES
 
+ROOT="./"
+
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
+    -r | -root)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        ROOT="$2"
+        shift
+        ;;
     -h | -help)
         usage
         ;;
     -d | -default)
         DEFAULT_SCHEMES=true
-        shift
         ;;
     -*)
         usage "unknown option: '$*'"
@@ -70,6 +77,7 @@ do
         break
         ;;
     esac
+    shift
 done
 
 
@@ -123,7 +131,7 @@ done
 [ -f "$MAIN_CONTROL_DICT" ] || usage "main controlDict not found"
 
 
-TUTORIALS_DIR=.
+TUTORIALS_DIR=$ROOT
 TEST_RUN_DIR=../tutorialsTest
 FV_SCHEMES=\
 " \
@@ -198,7 +206,9 @@ then
     done
 fi
 
+cp -f $FOAM_TUTORIALS/Allrun .
 ./Allrun
+
 
 sed -e :a -e '/\\$/N; s/\\\n//; ta' Allrun > temp
 APPLICATIONS=\

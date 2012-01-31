@@ -155,7 +155,6 @@
         phasei++;
     }
     Dp = mag(Dp);
-    adjustPhi(phi0, U, p);
 
     while (pimple.correctNonOrthogonal())
     {

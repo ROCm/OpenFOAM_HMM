@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,14 @@ addToRunTimeSelectionTable                                                    \
     basicPsiThermo,                                                           \
     Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
     fvMesh                                                                    \
-)
+);                                                                            \
+                                                                              \
+addToRunTimeSelectionTable                                                    \
+(                                                                             \
+    basicThermo,                                                              \
+    Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
+    fvMesh                                                                    \
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

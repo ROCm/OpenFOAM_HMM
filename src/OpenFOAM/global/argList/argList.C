@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -772,10 +772,11 @@ Foam::argList::argList
                 Info<< "Roots  : " << roots << nl;
             }
             Info<< "Pstream initialized with:" << nl
-                << "    floatTransfer     : " << Pstream::floatTransfer << nl
-                << "    nProcsSimpleSum   : " << Pstream::nProcsSimpleSum << nl
-                << "    commsType         : "
-                << Pstream::commsTypeNames[Pstream::defaultCommsType]
+                << "    floatTransfer      : " << Pstream::floatTransfer << nl
+                << "    nProcsSimpleSum    : " << Pstream::nProcsSimpleSum << nl
+                << "    commsType          : "
+                << Pstream::commsTypeNames[Pstream::defaultCommsType] << nl
+                << "    polling iterations : " << Pstream::nPollProcInterfaces
                 << endl;
         }
     }

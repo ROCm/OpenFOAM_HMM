@@ -203,10 +203,15 @@ void Foam::Time::setControls()
         )
     );
 
-    if (timeDict.readIfPresent("deltaT", deltaT_))
+    // Read and set the deltaT only if time-step adjustment is active
+    // otherwise use the deltaT from the controlDict
+    if (controlDict_.lookupOrDefault<Switch>("adjustTimeStep", false))
     {
-        deltaTSave_ = deltaT_;
-        deltaT0_ = deltaT_;
+        if (timeDict.readIfPresent("deltaT", deltaT_))
+        {
+            deltaTSave_ = deltaT_;
+            deltaT0_ = deltaT_;
+        }
     }
 
     timeDict.readIfPresent("deltaT0", deltaT0_);
@@ -984,6 +989,17 @@ Foam::Time& Foam::Time::operator++()
             << " to " << precision_
             << " to distinguish between timeNames at time " << value()
             << endl;
+
+        if (precision_ == 100 && precision_ != oldPrecision)
+        {
+            // Reached limit.
+            WarningIn("Time::operator++()")
+                << "Current time name " << dimensionedScalar::name()
+                << " is the old as the previous one " << oldTimeName
+                << endl
+                << "    This might result in overwriting old results."
+                << endl;
+        }
     }
 
 

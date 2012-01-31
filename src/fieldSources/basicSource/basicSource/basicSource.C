@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "basicSource.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
+#include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -161,7 +162,7 @@ void Foam::basicSource::setCellSet()
         }
         case smMapRegion:
         {
-            if(active_)
+            if (active_)
             {
                 Info<< indent << "- selecting inter region mapping" << endl;
                 const fvMesh& secondaryMesh =
@@ -170,7 +171,6 @@ void Foam::basicSource::setCellSet()
                 const boundBox secondaryBB = secondaryMesh.bounds();
                 if (secondaryBB.overlaps(primaryBB))
                 {
-
                     // Dummy patches
                     wordList cuttingPatches;
                     HashTable<word> patchMap;
@@ -218,7 +218,7 @@ void Foam::basicSource::setCellSet()
     }
 
     // Set volume information
-    if(selectionMode_ != smMapRegion)
+    if (selectionMode_ != smMapRegion)
     {
         V_ = 0.0;
         forAll(cells_, i)
@@ -303,6 +303,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     return autoPtr<basicSource>(cstrIter()(name, modelType, coeffs, mesh));
 }
 
+
 Foam::basicSource::~basicSource()
 {
     if (!secondaryToPrimaryInterpPtr_.empty())
@@ -361,6 +362,36 @@ void Foam::basicSource::checkApplied() const
                 << fieldNames_[i] << " but never used" << endl;
         }
     }
+}
+
+
+void Foam::basicSource::correct(volScalarField& fld)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::correct(volVectorField& fld)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::correct(volSphericalTensorField& fld)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::correct(volSymmTensorField& fld)
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::correct(volTensorField& fld)
+{
+    // do nothing
 }
 
 

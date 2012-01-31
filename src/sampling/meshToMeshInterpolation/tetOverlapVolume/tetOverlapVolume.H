@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,20 +36,16 @@ SourceFiles
 #ifndef tetOverlapVolume_H
 #define tetOverlapVolume_H
 
-#include "tetrahedron.H"
-#include "fvMesh.H"
-#include "plane.H"
-#include "tetPointRef.H"
-#include "OFstream.H"
-#include "meshTools.H"
-#include "indexedOctree.H"
-#include "treeDataCell.H"
-#include "tetPoints.H"
-#include "tetCell.H"
-#include "EdgeMap.H"
+#include "FixedList.H"
+#include "labelList.H"
+#include "treeBoundBox.H"
 
 namespace Foam
 {
+
+class primitiveMesh;
+class polyMesh;
+class tetPoints;
 
 /*---------------------------------------------------------------------------*\
                          Class tetOverlapVolume Declaration
@@ -58,82 +54,6 @@ namespace Foam
 class tetOverlapVolume
 {
     // Private member functions
-
-        //- Plane intersection
-        inline point planeIntersection
-        (
-            const FixedList<scalar, 4>& d,
-            const tetPoints& t,
-            const label negI,
-            const label posI
-        );
-
-
-        //- Decompose prism
-        template <class TetOp> inline void decomposePrism
-        (
-            const FixedList<point, 6>& points,
-            TetOp& op
-        );
-
-
-        //- Helping cľasses
-        class dummyTetOp
-        {
-         public:
-
-            inline void operator()(const tetPoints&){}
-        };
-
-
-        class sumTetVolOp
-        {
-         public:
-            scalar vol_;
-
-            inline sumTetVolOp()
-            :
-                vol_(0.0)
-            {}
-
-            inline void operator()(const tetPoints& tet)
-            {
-                vol_ += tet.tet().mag();
-            }
-        };
-
-
-        class storeTetOp
-        {
-            FixedList<tetPoints, 200>& tets_;
-            label& nTets_;
-
-         public:
-
-            inline storeTetOp(FixedList<tetPoints, 200>& tets, label& nTets)
-            :
-                tets_(tets),
-                nTets_(nTets)
-            {}
-
-            inline void operator()(const tetPoints& tet)
-            {
-                tets_[nTets_++] = tet;
-            }
-        };
-
-
-        //- Slice. Split tet into subtets above and below plane
-        template <class AboveTetOp, class BelowTetOp>
-        inline void tetSliceWithPlane
-        (
-            const tetPoints& tet,
-            const plane& pl,
-
-            AboveTetOp& aboveOp,
-            BelowTetOp& belowOp
-        );
-
 
         //- Tet overlap
         void tetTetOverlap
@@ -144,31 +64,28 @@ class tetOverlapVolume
             label& nInside,
             FixedList<tetPoints, 200>& outsideTets,
             label& nOutside
-        );
-
+        ) const;
 
         //- Tet Overlap Vol
-        inline scalar tetTetOverlapVol
+        scalar tetTetOverlapVol
         (
             const tetPoints& tetA,
             const tetPoints& tetB
-        );
-
+        ) const;
 
         //- Return a const treeBoundBox
-        inline const treeBoundBox pyrBb
+        treeBoundBox pyrBb
         (
             const pointField& points,
             const face& f,
             const point& fc
-        );
+        ) const;
 
 
 public:
 
-
     //- Runtime type information
-    TypeName("tetOverlapVolume");
+    ClassName("tetOverlapVolume");
 
 
     // Constructors
@@ -177,18 +94,14 @@ public:
         tetOverlapVolume();
 
 
-    //- Destructor
-     virtual ~tetOverlapVolume();
-
-
     // Public members
 
         //- Return a list of cells in meshA which overlaps with cellBI in
         // meshB
         labelList overlappingCells
         (
-            const fvMesh& meshA,
-            const fvMesh& meshB,
+            const polyMesh& meshA,
+            const polyMesh& meshB,
             const label cellBI
         ) const;
 

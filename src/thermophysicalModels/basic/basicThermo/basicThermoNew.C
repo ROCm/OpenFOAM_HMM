@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,32 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::tetPointRef
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef tetPointRef_H
-#define tetPointRef_H
-
-#include "point.H"
-#include "tetrahedron.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
+(
+    const fvMesh& mesh
+)
 {
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).lookup("thermoType")
+    );
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    Info<< "Selecting thermodynamics package " << modelType << endl;
 
-typedef tetrahedron<point, const point&> tetPointRef;
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(modelType);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("basicThermo::New(const fvMesh&)")
+            << "Unknown basicThermo type " << modelType << nl << nl
+            << "Valid basicThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->sortedToc() << nl
+            << exit(FatalError);
+    }
 
-} // End namespace Foam
+    return autoPtr<basicThermo>(cstrIter()(mesh));
+}
 
-#endif
 
 // ************************************************************************* //

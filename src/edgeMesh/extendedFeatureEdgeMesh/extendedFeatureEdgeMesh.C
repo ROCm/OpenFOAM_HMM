@@ -756,6 +756,66 @@ void Foam::extendedFeatureEdgeMesh::nearestFeatureEdgeByType
 }
 
 
+void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
+(
+    const point& sample,
+    const scalar searchRadiusSqr,
+    List<pointIndexHit>& info
+) const
+{
+    const PtrList<indexedOctree<treeDataEdge> >& edgeTrees = edgeTreesByType();
+
+    info.setSize(edgeTrees.size());
+
+    labelList sliceStarts(edgeTrees.size());
+
+    sliceStarts[0] = externalStart_;
+    sliceStarts[1] = internalStart_;
+    sliceStarts[2] = flatStart_;
+    sliceStarts[3] = openStart_;
+    sliceStarts[4] = multipleStart_;
+
+    DynamicList<pointIndexHit> dynEdgeHit;
+
+    // Loop over all the feature edge types
+    forAll(edgeTrees, i)
+    {
+        // Pick up all the edges that intersect the search sphere
+        labelList elems = edgeTrees[i].findSphere
+        (
+            sample,
+            searchRadiusSqr
+        );
+
+        forAll(elems, elemI)
+        {
+            label index = elems[elemI];
+            label edgeI = edgeTrees[i].shapes().edgeLabels()[index];
+            const edge& e = edges()[edgeI];
+
+            pointHit hitPoint = e.line(points()).nearestDist(sample);
+
+            label hitIndex = index + sliceStarts[i];
+
+            pointIndexHit nearHit;
+
+            if (!hitPoint.hit())
+            {
+                nearHit = pointIndexHit(true, hitPoint.missPoint(), hitIndex);
+            }
+            else
+            {
+                nearHit = pointIndexHit(true, hitPoint.hitPoint(), hitIndex);
+            }
+
+            dynEdgeHit.append(nearHit);
+        }
+    }
+
+    info.transfer(dynEdgeHit);
+}
+
+
 const Foam::indexedOctree<Foam::treeDataEdge>&
 Foam::extendedFeatureEdgeMesh::edgeTree() const
 {
