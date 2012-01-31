@@ -1,3 +1,0 @@
-channelFoam.C
-
-EXE = $(FOAM_APPBIN)/channelFoam
