@@ -961,9 +961,14 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     {
         WarningIn
         (
-            "AMIInterpolation::calcAddressing"
-            "(const primitivePatch&, const primitivePatch&, "
-            " label, label)"
+            "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+            "calcAddressing"
+            "("
+                "const primitivePatch&, "
+                "const primitivePatch&, "
+                "label, "
+                "label"
+            ")"
         ) << "Have " << srcPatch.size() << " source faces but no target faces."
           << endl;
 
@@ -1614,7 +1619,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
             "AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation"
             "("
             "    const AMIInterpolation<SourcePatch, TargetPatch>&, "
-            "    const label, "
+            "    const labelList&, "
             "    const labelList&"
             ")"
         )   << "Size mismatch." << nl

@@ -310,6 +310,7 @@ class AMIInterpolation
                 const bool output
             );
 
+
         // Constructor helper
 
             static void agglomerate
@@ -327,6 +328,7 @@ class AMIInterpolation
                 scalarListList& srcWeights,
                 autoPtr<mapDistribute>& tgtMap
             );
+
 
 public:
 
@@ -385,9 +387,8 @@ public:
                 //- Return const access to source patch weights
                 inline const scalarListList& srcWeights() const;
 
-                //- Source map pointer - valid only if singlePatchProc=-1.
-                //  This gets
-                //  source data into a form to be consumed by
+                //- Source map pointer - valid only if singlePatchProc = -1
+                //  This gets source data into a form to be consumed by
                 //  tgtAddress, tgtWeights
                 inline const mapDistribute& srcMap() const;
 
@@ -403,9 +404,8 @@ public:
                 //- Return const access to target patch weights
                 inline const scalarListList& tgtWeights() const;
 
-                //- Target map pointer -  valid only if singlePatchProc=-1.
-                //  This gets
-                //  target data into a form to be consumed by
+                //- Target map pointer - valid only if singlePatchProc = -1
+                //  This gets target data into a form to be consumed by
                 //  srcAddress, srcWeights
                 inline const mapDistribute& tgtMap() const;
 
