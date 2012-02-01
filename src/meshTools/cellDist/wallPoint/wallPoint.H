@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ Istream& operator>>(Istream&, wallPoint&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class wallPoint Declaration
+                          Class wallPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallPoint
@@ -70,6 +70,7 @@ class wallPoint
 
         //- normal distance (squared) from cellcenter to origin
         scalar distSqr_;
+
 
     // Private Member Functions
 
@@ -94,17 +95,10 @@ public:
         inline wallPoint();
 
         //- Construct from origin, distance
-        inline wallPoint
-        (
-            const point& origin,
-            const scalar distSqr
-        );
+        inline wallPoint(const point& origin, const scalar distSqr);
 
         //- Construct as copy
-        inline wallPoint
-        (
-            const wallPoint&
-        );
+        inline wallPoint(const wallPoint&);
 
 
     // Member Functions
