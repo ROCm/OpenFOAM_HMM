@@ -57,7 +57,7 @@ functions
         outputControl   outputTime;
         // outputInterval 10;
 
-        setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot;
+        setFormat       vtk; //gnuplot, raw etc. See sampleDict.
 
         // Velocity field to use for tracking.
         UName U;
