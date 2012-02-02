@@ -181,7 +181,7 @@ public:
     // Member functions
 
         //- Return Ustar
-        scalar& Ustar()
+        scalarField& Ustar()
         {
             return Ustar_;
         }
