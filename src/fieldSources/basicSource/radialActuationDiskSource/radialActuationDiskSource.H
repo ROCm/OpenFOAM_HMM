@@ -53,6 +53,7 @@ Description
             Ct              0.5;        // thrust coefficient
             diskArea        5.0;        // disk area
             coeffs          (0.1 0.5 0.01); // radial distribution coefficients
+            upstreamPoint   (0 0 0);    // upstream point
         }
 
 
