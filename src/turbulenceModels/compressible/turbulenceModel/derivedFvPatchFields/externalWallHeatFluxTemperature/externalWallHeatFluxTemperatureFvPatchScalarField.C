@@ -264,7 +264,6 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     q_.writeEntry("q", os);
     h_.writeEntry("h", os);
     Ta_.writeEntry("Ta", os);
-    this->writeEntry("value", os);
 }
 
 
