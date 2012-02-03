@@ -128,12 +128,27 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     // Initialise containers to store the edge conformation locations
     DynamicList<Foam::point> newEdgeLocations;
 
-    pointField existingEdgeLocations(0);
+    DynamicList<Foam::point> existingEdgeLocations;
 
-    autoPtr<indexedOctree<treeDataPoint> > edgeLocationTree;
+    treeBoundBox overallBb
+    (
+        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
+    );
+
+    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    dynamicIndexedOctree<dynamicTreeDataPoint> edgeLocationTree
+    (
+        dynamicTreeDataPoint(existingEdgeLocations),
+        overallBb,  // overall search domain
+        10,         // max levels
+        10.0,       // maximum ratio of cubes v.s. cells
+        100.0       // max. duplicity; n/a since no bounding boxes.
+    );
 
     // Initialise the edgeLocationTree
-    buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
+    //buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
 
     label initialTotalHits = 0;
 
@@ -1830,8 +1845,8 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 (
     pointIndexHit& pHit,
     DynamicList<Foam::point>& newEdgeLocations,
-    pointField& existingEdgeLocations,
-    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+    DynamicList<Foam::point>& existingEdgeLocations,
+    dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
 ) const
 {
     const Foam::point pt = pHit.hitPoint();
@@ -1841,37 +1856,25 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
     // 0.01 and 1000 determined from speed tests, varying the indexedOctree
     // rebuild frequency and balance of additions to queries.
 
-    if
-    (
-        newEdgeLocations.size()
-     >= max(0.01*existingEdgeLocations.size(), 1000)
-    )
-    {
-        const label originalSize = existingEdgeLocations.size();
 
-        existingEdgeLocations.append(newEdgeLocations);
 
-        buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
+    label startIndex = existingEdgeLocations.size();
 
-        newEdgeLocations.clear();
-    }
-    else
-    {
-        // Search for the nearest point in newEdgeLocations.
-        // Searching here first, because the intention is that the value of
-        // newEdgeLocationsSizeLimit should make this faster by design.
+    existingEdgeLocations.append(newEdgeLocations);
 
-        if (min(magSqr(newEdgeLocations - pt)) <= exclusionRangeSqr)
-        {
-            // Average the points...
-            return true;
-        }
-    }
+    label endIndex = existingEdgeLocations.size();
+
+    edgeLocationTree.insert(startIndex, endIndex);
+
+    newEdgeLocations.clear();
+
+    pointIndexHit info = edgeLocationTree.findNearest(pt, exclusionRangeSqr);
+
+
 
     // Searching for the nearest point in existingEdgeLocations using the
     // indexedOctree
 
-    pointIndexHit info = edgeLocationTree().findNearest(pt, exclusionRangeSqr);
 
     // Average the points...
 //    if (info.hit())
@@ -1917,32 +1920,32 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 }
 
 
-void Foam::conformalVoronoiMesh::buildEdgeLocationTree
-(
-    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
-    const pointField& existingEdgeLocations
-) const
-{
-    treeBoundBox overallBb
-    (
-        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
-    );
-
-    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-    edgeLocationTree.reset
-    (
-        new indexedOctree<treeDataPoint>
-        (
-            treeDataPoint(existingEdgeLocations),
-            overallBb,  // overall search domain
-            10,         // max levels
-            10.0,       // maximum ratio of cubes v.s. cells
-            100.0       // max. duplicity; n/a since no bounding boxes.
-        )
-    );
-}
+//void Foam::conformalVoronoiMesh::buildEdgeLocationTree
+//(
+//    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
+//    DynamicList<Foam::point>& existingEdgeLocations
+//) const
+//{
+//    treeBoundBox overallBb
+//    (
+//        geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
+//    );
+//
+//    overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+//    overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+//
+//    edgeLocationTree.reset
+//    (
+//        new indexedOctree<treeDataPoint>
+//        (
+//            treeDataPoint(existingEdgeLocations),
+//            overallBb,  // overall search domain
+//            10,         // max levels
+//            10.0,       // maximum ratio of cubes v.s. cells
+//            100.0       // max. duplicity; n/a since no bounding boxes.
+//        )
+//    );
+//}
 
 
 void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
@@ -1990,8 +1993,8 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<pointIndexHit>& featureEdgeHits,
     DynamicList<label>& featureEdgeFeaturesHit,
     DynamicList<Foam::point>& newEdgeLocations,
-    pointField& existingEdgeLocations,
-    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+    DynamicList<Foam::point>& existingEdgeLocations,
+    dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
 ) const
 {
     bool keepSurfacePoint = true;

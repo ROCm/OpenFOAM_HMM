@@ -61,6 +61,8 @@ SourceFiles
 #include "plane.H"
 #include "SortableList.H"
 #include "meshTools.H"
+#include "dynamicIndexedOctree.H"
+#include "dynamicTreeDataPoint.H"
 #include "indexedOctree.H"
 #include "treeDataPoint.H"
 #include "unitConversion.H"
@@ -662,16 +664,16 @@ private:
         (
             pointIndexHit& pHit,
             DynamicList<Foam::point>& newEdgeLocations,
-            pointField& existingEdgeLocations,
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+            DynamicList<Foam::point>& existingEdgeLocations,
+            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
         ) const;
 
         //- Build or rebuild the edgeLocationTree
-        void buildEdgeLocationTree
-        (
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
-            const pointField& existingEdgeLocations
-        ) const;
+//        void buildEdgeLocationTree
+//        (
+//            autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >& edgeLocationTree,
+//            const pointField& existingEdgeLocations
+//        ) const;
 
         //- Build or rebuild the sizeAndAlignmentTree
         void buildSizeAndAlignmentTree() const;
@@ -691,8 +693,8 @@ private:
             DynamicList<pointIndexHit>& featureEdgeHits,
             DynamicList<label>& featureEdgeFeaturesHit,
             DynamicList<Foam::point>& newEdgeLocations,
-            pointField& existingEdgeLocations,
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+            DynamicList<Foam::point>& existingEdgeLocations,
+            dynamicIndexedOctree<dynamicTreeDataPoint>& edgeLocationTree
         ) const;
 
         //- Store the surface conformation with the indices offset to be
