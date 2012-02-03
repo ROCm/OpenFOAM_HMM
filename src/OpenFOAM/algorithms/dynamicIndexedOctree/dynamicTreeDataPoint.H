@@ -150,7 +150,7 @@ public:
             {
                 notImplemented
                 (
-                    "dynamicTreeDataPoint::intersects
+                    "dynamicTreeDataPoint::intersects"
                     "(const label, const point&, const point&, point&)"
                 );
                 return false;
