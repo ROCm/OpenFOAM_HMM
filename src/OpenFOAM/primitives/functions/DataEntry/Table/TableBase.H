@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -145,8 +145,12 @@ public:
             const TableBase<Type>& tbl
         );
 
-        //- Write in dictionary format
+        //- Write all table data in dictionary format
         virtual void writeData(Ostream& os) const;
+
+        //- Write keywords only in dictionary format. Used for non-inline
+        //  table types
+        virtual void writeEntries(Ostream& os) const;
 };
 
 

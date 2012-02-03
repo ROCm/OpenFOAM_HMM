@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,8 @@ Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
     const dictionary coeffs(dict.subDict(type() + "Coeffs"));
     coeffs.lookup("fileName") >> fName_;
 
-    IFstream is(fName_.expand());
+    fileName expandedFile(fName_);
+    IFstream is(expandedFile.expand());
 
     is  >> this->table_;
 

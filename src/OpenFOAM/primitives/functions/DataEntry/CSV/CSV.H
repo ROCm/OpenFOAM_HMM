@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,14 @@ Description
     e.g. time
 
     \verbatim
-        <entryName>   csvFile
+        <entryName>   csvFile;
+        csvFileCoeffs
         {
             hasHeaderLine   true;
             refColumn       0;          // reference column index
-            componentColumns (0 1 2);   // component column indices
+            componentColumns (1 2 3);   // component column indices
             separator       ",";        // optional (defaults to ",")
-            fileName        fileXYZ;    // name of csv data file
+            fileName        "fileXYZ";  // name of csv data file
             outOfBounds     clamp;      // optional out-of-bounds handling
         }
     \endverbatim
