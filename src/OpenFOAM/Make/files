@@ -584,6 +584,8 @@ algorithms/indexedOctree/indexedOctreeName.C
 algorithms/indexedOctree/treeDataCell.C
 
 
+algorithms/dynamicIndexedOctree/dynamicIndexedOctreeName.C
+algorithms/dynamicIndexedOctree/dynamicTreeDataPoint.C
 
 graph/curve/curve.C
 graph/graph.C
