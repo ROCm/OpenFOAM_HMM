@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,9 @@ namespace Foam
     {
         "none",
         "sum",
+        "average",
         "areaAverage",
         "areaIntegrate",
-        "weightedAverage",
         "min",
         "max",
         "CoV"
@@ -282,9 +282,8 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
         << "    total area   = " << totalArea
         << nl;
 
-    if (operation_ == opWeightedAverage)
+    if (dict.readIfPresent("weightField", weightFieldName_))
     {
-        dict.lookup("weightField") >> weightFieldName_;
         Info<< "    weight field = " << weightFieldName_;
     }
 
@@ -326,7 +325,7 @@ Foam::fieldValues::faceSource::faceSource
     fieldValue(name, obr, dict, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
-    weightFieldName_("undefinedWeightedFieldName"),
+    weightFieldName_("none"),
     nFaces_(0),
     faceId_(),
     facePatchId_(),

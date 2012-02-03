@@ -40,6 +40,7 @@ Description
                                     // faceZone,patch,sampledSurface
         sourceName      f0;         // faceZone name, see below
         operation       sum;
+        weightField     alpha1;     // optional weight field
         fields
         (
             p
@@ -57,19 +58,20 @@ Description
     operation is one of:
       - none
       - sum
+      - average
       - areaAverage
       - areaIntegrate
-      - weightedAverage
       - min
       - max
       - CoV (Coefficient of variation: standard deviation/mean)
 
+
     Notes:
     - faces on empty patches get ignored
     - if the field is a volField the faceZone can only consist of boundary
-    faces.
+      faces.
     - all fields get oriented according to the faceZone (so you might e.g. see
-    negative pressure)
+      negative pressure)
     - using sampledSurfaces:
             - they do not do surface fields
             - they use cell values - they do not do any interpolation.
@@ -129,9 +131,9 @@ public:
         {
             opNone,
             opSum,
+            opAverage,
             opAreaAverage,
             opAreaIntegrate,
-            opWeightedAverage,
             opMin,
             opMax,
             opCoV
@@ -165,7 +167,7 @@ protected:
         //- Operation to apply to values
         operationType operation_;
 
-        //- Weight field name - only used for opWeightedAverage mode
+        //- Weight field name - optional
         word weightFieldName_;
 
         //- Global number of faces
@@ -213,8 +215,7 @@ protected:
         Type processValues
         (
             const Field<Type>& values,
-            const scalarField& magSf,
-            const scalarField& weightField
+            const scalarField& magSf
         ) const;
 
         //- Output file header information

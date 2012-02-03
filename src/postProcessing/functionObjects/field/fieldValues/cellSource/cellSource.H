@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,7 @@ Description
         source          cellZone;   // Type of cell source
         sourceName      c0;
         operation       volAverage;
+        weightField     alpha1;     // optional weight field
         fields
         (
             p
@@ -49,9 +50,9 @@ Description
     where operation is one of:
       - none
       - sum
+      - average
       - volAverage
       - volIntegrate
-      - weightedAverage
       - CoV (Coefficient of variation: standard deviation/mean)
 
 SourceFiles
@@ -103,9 +104,9 @@ public:
         {
             opNone,
             opSum,
+            opAverage,
             opVolAverage,
             opVolIntegrate,
-            opWeightedAverage,
             opMin,
             opMax,
             opCoV
@@ -168,8 +169,7 @@ protected:
         Type processValues
         (
             const Field<Type>& values,
-            const scalarField& V,
-            const scalarField& weightField
+            const scalarField& V
         ) const;
 
         //- Output file header information

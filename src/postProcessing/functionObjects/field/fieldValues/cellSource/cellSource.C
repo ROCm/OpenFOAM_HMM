@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,9 +55,9 @@ namespace Foam
     {
         "none",
         "sum",
+        "average",
         "volAverage",
         "volIntegrate",
-        "weightedAverage",
         "min",
         "max",
         "CoV"
@@ -143,9 +143,8 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
         << "    total volume = " << gSum(filterField(mesh().V()))
         << nl << endl;
 
-    if (operation_ == opWeightedAverage)
+    if (dict.readIfPresent("weightField", weightFieldName_))
     {
-        dict.lookup("weightField") >> weightFieldName_;
         Info<< "    weight field = " << weightFieldName_;
     }
 

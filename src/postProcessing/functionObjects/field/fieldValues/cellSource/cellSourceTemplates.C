@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,8 +78,7 @@ template<class Type>
 Type Foam::fieldValues::cellSource::processValues
 (
     const Field<Type>& values,
-    const scalarField& V,
-    const scalarField& weightField
+    const scalarField& V
 ) const
 {
     Type result = pTraits<Type>::zero;
@@ -90,6 +89,11 @@ Type Foam::fieldValues::cellSource::processValues
             result = sum(values);
             break;
         }
+        case opAverage:
+        {
+            result = sum(values)/values.size();
+            break;
+        }
         case opVolAverage:
         {
             result = sum(values*V)/sum(V);
@@ -98,11 +102,6 @@ Type Foam::fieldValues::cellSource::processValues
         case opVolIntegrate:
         {
             result = sum(values*V);
-            break;
-        }
-        case opWeightedAverage:
-        {
-            result = sum(values*weightField)/sum(weightField);
             break;
         }
         case opMin:
@@ -152,23 +151,25 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
     if (ok)
     {
         Field<Type> values(setFieldValues<Type>(fieldName));
-        combineFields(values);
-
         scalarField V(filterField(mesh().V()));
-        combineFields(V);
+        scalarField weightField(values.size(), 1.0);
 
-        scalarField weightField;
-
-        if (operation_ == opWeightedAverage)
+        if (weightFieldName_ != "none")
         {
             weightField = setFieldValues<scalar>(weightFieldName_, true);
         }
 
+        // Combine onto master
+        combineFields(values);
+        combineFields(V);
         combineFields(weightField);
+
+        // apply weight field
+        values *= weightField;
 
         if (Pstream::master())
         {
-            Type result = processValues(values, V, weightField);
+            Type result = processValues(values, V);
 
             if (valueOutput_)
             {
