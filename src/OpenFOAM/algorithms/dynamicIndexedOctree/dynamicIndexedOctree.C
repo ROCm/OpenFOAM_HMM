@@ -2525,7 +2525,10 @@ Foam::labelBits Foam::dynamicIndexedOctree<Type>::findNode
 
 
 template <class Type>
-Foam::label Foam::dynamicIndexedOctree<Type>::findInside(const point& sample) const
+Foam::label Foam::dynamicIndexedOctree<Type>::findInside
+(
+    const point& sample
+) const
 {
     labelBits index = findNode(0, sample);
 
@@ -2873,7 +2876,8 @@ Foam::label Foam::dynamicIndexedOctree<Type>::removeIndex
                 if (newContent.size() == 0)
                 {
                     // Set to empty.
-                    nodes_[nodIndex].subNodes_[octant] = emptyPlusOctant(octant);
+                    nodes_[nodIndex].subNodes_[octant]
+                        = emptyPlusOctant(octant);
                 }
 
                 contentList.transfer(newContent);
@@ -3002,7 +3006,8 @@ bool Foam::dynamicIndexedOctree<Type>::write(Ostream& os) const
 
 
 template <class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const dynamicIndexedOctree<Type>& t)
+Foam::Ostream&
+Foam::operator<<(Ostream& os, const dynamicIndexedOctree<Type>& t)
 {
     os  << t.bb() << token::SPACE << t.nodes() << endl;
 

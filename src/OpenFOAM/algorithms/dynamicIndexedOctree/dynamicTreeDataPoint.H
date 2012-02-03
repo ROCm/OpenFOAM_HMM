@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -150,8 +150,8 @@ public:
             {
                 notImplemented
                 (
-                    "dynamicTreeDataPoint::intersects(const label, const point&,"
-                    "const point&, point&)"
+                    "dynamicTreeDataPoint::intersects
+                    "(const label, const point&, const point&, point&)"
                 );
                 return false;
             }
