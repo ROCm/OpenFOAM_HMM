@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,18 @@ template<class Type>
 void Foam::TableBase<Type>::writeData(Ostream& os) const
 {
     os  << nl << indent << table_ << token::END_STATEMENT << nl;
+    writeEntries(os);
+}
+
+
+template<class Type>
+void Foam::TableBase<Type>::writeEntries(Ostream& os) const
+{
+    if (boundsHandling_ != CLAMP)
+    {
+        os.writeKeyword("outOfBounds") << boundsHandlingToWord(boundsHandling_)
+            << token::END_STATEMENT << nl;
+    }
 }
 
 

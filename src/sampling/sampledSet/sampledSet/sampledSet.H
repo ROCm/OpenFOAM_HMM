@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ class sampledSet
         const polyMesh& mesh_;
 
         //- Reference to mesh searching class
-        meshSearch& searchEngine_;
+        const meshSearch& searchEngine_;
 
 
 protected:
@@ -159,7 +159,7 @@ public:
             (
                 const word& name,
                 const polyMesh& mesh,
-                meshSearch& searchEngine,
+                const meshSearch& searchEngine,
                 const dictionary& dict
             ),
             (name, mesh, searchEngine, dict)
@@ -171,11 +171,11 @@ public:
         class iNew
         {
             const polyMesh& mesh_;
-            meshSearch& searchEngine_;
+            const meshSearch& searchEngine_;
 
         public:
 
-            iNew(const polyMesh& mesh, meshSearch& searchEngine)
+            iNew(const polyMesh& mesh, const meshSearch& searchEngine)
             :
                 mesh_(mesh),
                 searchEngine_(searchEngine)
@@ -204,7 +204,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const word& axis
         );
 
@@ -213,7 +213,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const dictionary& dict
         );
 
@@ -232,7 +232,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const dictionary& dict
         );
 
@@ -248,7 +248,7 @@ public:
             return mesh_;
         }
 
-        meshSearch& searchEngine() const
+        const meshSearch& searchEngine() const
         {
             return searchEngine_;
         }

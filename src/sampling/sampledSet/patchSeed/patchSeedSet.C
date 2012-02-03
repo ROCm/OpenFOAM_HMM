@@ -205,7 +205,7 @@ Foam::patchSeedSet::patchSeedSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const dictionary& dict
 )
 :

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,15 @@ namespace Foam
 template<class Type>
 void Foam::CSV<Type>::read()
 {
-    IFstream is(fName_.expand());
+    fileName expandedFile(fName_);
+    IFstream is(expandedFile.expand());
+
+    if (!is.good())
+    {
+        FatalIOErrorIn("CSV<Type>::read()", is)
+            << "Cannot open CSV file for reading."
+            << exit(FatalIOError);
+    }
 
     DynamicList<Tuple2<scalar, Type> > values;
 
