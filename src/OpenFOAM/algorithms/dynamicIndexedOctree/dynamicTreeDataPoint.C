@@ -75,6 +75,27 @@ bool Foam::dynamicTreeDataPoint::overlaps
 }
 
 
+// Check if any point on shape is inside sphere.
+bool Foam::dynamicTreeDataPoint::overlaps
+(
+    const label index,
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    const point& p = points_[index];
+
+    const scalar distSqr = magSqr(p - centre);
+
+    if (distSqr <= radiusSqr)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
 // Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
 // nearestPoint.
 void Foam::dynamicTreeDataPoint::findNearest

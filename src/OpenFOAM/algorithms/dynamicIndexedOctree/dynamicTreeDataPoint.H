@@ -105,6 +105,14 @@ public:
                 const treeBoundBox& sampleBb
             ) const;
 
+            //- Check if any point on shape is inside sphere.
+            bool overlaps
+            (
+                const label index,
+                const point& centre,
+                const scalar radiusSqr
+            ) const;
+
             //- Calculates nearest (to sample) point in shape.
             //  Returns actual point and distance (squared)
             void findNearest
