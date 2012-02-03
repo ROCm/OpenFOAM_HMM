@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ Foam::triSurfaceMeshPointSet::triSurfaceMeshPointSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const dictionary& dict
 )
 :

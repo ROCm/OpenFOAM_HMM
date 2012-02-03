@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -117,7 +117,7 @@ Foam::midPointSet::midPointSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const word& axis,
     const point& start,
     const point& end
@@ -138,7 +138,7 @@ Foam::midPointSet::midPointSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const dictionary& dict
 )
 :

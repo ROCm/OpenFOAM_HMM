@@ -95,24 +95,12 @@ public:
 
     // Constructors
 
-//        //- Construct from components
-//        patchSeedSet
-//        (
-//            const word& name,
-//            const polyMesh& mesh,
-//            meshSearch& searchEngine,
-//            const word& axis,
-//            const List<point>& sampleCoords,
-//            const labelHashSet& patchSet,
-//            const scalar searchDist
-//        );
-
         //- Construct from dictionary
         patchSeedSet
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const dictionary& dict
         );
 

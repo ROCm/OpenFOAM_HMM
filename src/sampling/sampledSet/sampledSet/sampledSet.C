@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -406,7 +406,7 @@ Foam::sampledSet::sampledSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const word& axis
 )
 :
@@ -423,7 +423,7 @@ Foam::sampledSet::sampledSet
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const dictionary& dict
 )
 :
@@ -448,7 +448,7 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 (
     const word& name,
     const polyMesh& mesh,
-    meshSearch& searchEngine,
+    const meshSearch& searchEngine,
     const dictionary& dict
 )
 {
@@ -462,7 +462,8 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
         FatalErrorIn
         (
             "sampledSet::New"
-            "(const word&, const polyMesh&, meshSearch&, const dictionary&)"
+            "(const word&, const polyMesh&, const meshSearch&"
+            ", const dictionary&)"
         )   << "Unknown sample type "
             << sampleType << nl << nl
             << "Valid sample types : " << endl

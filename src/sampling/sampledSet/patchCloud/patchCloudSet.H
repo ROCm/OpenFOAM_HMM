@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const word& axis,
             const List<point>& sampleCoords,
             const labelHashSet& patchSet,
@@ -106,7 +106,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            meshSearch& searchEngine,
+            const meshSearch& searchEngine,
             const dictionary& dict
         );
 
