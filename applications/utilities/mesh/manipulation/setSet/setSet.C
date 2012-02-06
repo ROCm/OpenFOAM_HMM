@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
 
     // Read history if interactive
 #   ifdef HAS_READLINE
-    if (!batch && !read_history(runTime.path()/historyFile))
+    if (!batch && !read_history((runTime.path()/historyFile).c_str()))
     {
         Info<< "Successfully read history from " << historyFile << endl;
     }
