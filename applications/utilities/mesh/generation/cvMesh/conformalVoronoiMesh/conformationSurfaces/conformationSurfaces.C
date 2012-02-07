@@ -730,6 +730,49 @@ void Foam::conformationSurfaces::findEdgeNearestByType
 }
 
 
+void Foam::conformationSurfaces::findAllNearestEdges
+(
+    const point& sample,
+    const scalar searchRadiusSqr,
+    List<List<pointIndexHit> >& edgeHitsByFeature,
+    List<label>& featuresHit
+) const
+{
+    // Initialise
+    //featuresHit.setSize(features_.size());
+    //featuresHit = -1;
+    //edgeHitsByFeature.setSize(features_.size());
+
+    // Work arrays
+    List<pointIndexHit> hitInfo(extendedFeatureEdgeMesh::nEdgeTypes);
+
+    forAll(features_, testI)
+    {
+        features_[testI].allNearestFeatureEdges
+        (
+            sample,
+            searchRadiusSqr,
+            hitInfo
+        );
+
+        bool anyHit = false;
+        forAll(hitInfo, hitI)
+        {
+            if (hitInfo[hitI].hit())
+            {
+                anyHit = true;
+            }
+        }
+
+        if (anyHit)
+        {
+            edgeHitsByFeature.append(hitInfo);
+            featuresHit.append(testI);
+        }
+    }
+}
+
+
 void Foam::conformationSurfaces::writeFeatureObj(const fileName& prefix) const
 {
     OFstream ftStr(runTime_.time().path()/prefix + "_allFeatures.obj");

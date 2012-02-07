@@ -186,6 +186,20 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featureEdgeExclusionDistanceSqr
 }
 
 
+inline Foam::scalar Foam::conformalVoronoiMesh::surfacePtExclusionDistanceSqr
+(
+    const Foam::point& pt
+) const
+{
+    return
+        sqr
+        (
+            targetCellSize(pt)
+           *cvMeshControls().surfacePtExclusionDistanceCoeff()
+        );
+}
+
+
 inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
 (
     const Foam::point& pt

@@ -59,6 +59,8 @@ int main(int argc, char *argv[])
         )
     );
 
+    conformalVoronoiMesh::debug = true;
+
     conformalVoronoiMesh mesh(runTime, cvMeshDict);
 
     while (runTime.loop())
@@ -72,7 +74,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    mesh.writeMesh(runTime.constant());
+    mesh.writeMesh(runTime.constant(), true);
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

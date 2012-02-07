@@ -175,6 +175,30 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
+void Foam::conformalVoronoiMesh::writeBoundaryPoints
+(
+    const fileName& fName
+) const
+{
+    OFstream str(runTime_.path()/fName);
+
+    Pout<< nl << "Writing boundary points to " << str.name() << endl;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (!vit->internalPoint())
+        {
+            meshTools::writeOBJ(str, topoint(vit->point()));
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::writePoints
 (
     const fileName& fName,
@@ -597,28 +621,9 @@ void Foam::conformalVoronoiMesh::writeMesh
             << exit(FatalError);
     }
 
-    // pointIOField cellCs
-    // (
-    //     IOobject
-    //     (
-    //         "cellCentres",
-    //         mesh.pointsInstance(),
-    //         polyMesh::meshSubDir,
-    //         mesh,
-    //         IOobject::NO_READ,
-    //         IOobject::AUTO_WRITE
-    //     ),
-    //     cellCentres
-    // );
-
-    // Info<< nl
-    //     << "Writing " << cellCs.name()
-    //     << " to " << cellCs.instance()
-    //     << endl;
-
-    // cellCs.write();
-
     writeCellSizes(mesh);
+
+    writeCellCentres(mesh);
 
     findRemainingProtrusionSet(mesh);
 }
@@ -802,6 +807,34 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 
     //     ptTargetCellSize.write();
     // }
+}
+
+
+void Foam::conformalVoronoiMesh::writeCellCentres
+(
+    const fvMesh& mesh
+) const
+{
+    Info<< "Writing components of cellCentre positions to volScalarFields"
+        << " ccx, ccy, ccz in " <<  runTime_.timeName() << endl;
+
+    for (direction i=0; i<vector::nComponents; i++)
+    {
+        volScalarField cci
+        (
+            IOobject
+            (
+                "cc" + word(vector::componentNames[i]),
+                runTime_.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh.C().component(i)
+        );
+
+        cci.write();
+    }
 }
 
 

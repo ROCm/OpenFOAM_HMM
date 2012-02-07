@@ -56,7 +56,7 @@ uniformGrid::uniformGrid
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::list<Vb::Point> uniformGrid::initialPoints() const
+List<Vb::Point> uniformGrid::initialPoints() const
 {
     boundBox bb;
 
@@ -91,7 +91,8 @@ std::list<Vb::Point> uniformGrid::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::list<Vb::Point> initialPoints;
+    // Initialise points list
+    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
@@ -153,13 +154,13 @@ std::list<Vb::Point> uniformGrid::initialPoints() const
                 {
                     const point& p(points[i]);
 
-                    initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+                    initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
                 }
             }
         }
     }
 
-    return initialPoints;
+    return initialPoints.shrink();
 }
 
 

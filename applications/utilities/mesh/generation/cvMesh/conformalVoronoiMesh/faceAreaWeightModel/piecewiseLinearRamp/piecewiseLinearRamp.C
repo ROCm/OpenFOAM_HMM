@@ -45,11 +45,10 @@ addToRunTimeSelectionTable
 
 piecewiseLinearRamp::piecewiseLinearRamp
 (
-    const dictionary& faceAreaWeightDict,
-    const conformalVoronoiMesh& cvMesh
+    const dictionary& faceAreaWeightDict
 )
 :
-    faceAreaWeightModel(typeName, faceAreaWeightDict, cvMesh),
+    faceAreaWeightModel(typeName, faceAreaWeightDict),
     lAF_(readScalar(coeffDict().lookup("lowerAreaFraction"))),
     uAF_(readScalar(coeffDict().lookup("upperAreaFraction")))
 {}
