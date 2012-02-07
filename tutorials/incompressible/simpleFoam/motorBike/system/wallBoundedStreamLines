@@ -20,6 +20,7 @@ near
 
     // Fields to be sampled. Per field original name and mapped field to
     // create.
+    // Note: fields only get updated when writing!
     fields
     (
         (U UNear)
@@ -85,7 +86,7 @@ wallBoundedStreamLines
     }
     patchSeedCoeffs
     {
-        type        patchSeed;//patchCloud; //cloud;  //uniform;
+        type        patchSeed;
         patches     (motorBike);
         axis        x;  //distance;
         maxPoints   20000;
