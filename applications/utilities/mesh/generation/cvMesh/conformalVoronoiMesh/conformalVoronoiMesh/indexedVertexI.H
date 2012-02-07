@@ -37,7 +37,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex()
     index_(vtInternal),
     type_(vtInternal),
     alignment_(),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -48,7 +49,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p)
     index_(vtInternal),
     type_(vtInternal),
     alignment_(),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -64,7 +66,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     index_(index),
     type_(type),
     alignment_(),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -75,7 +78,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p, Cell_handle f)
     index_(vtInternal),
     type_(vtInternal),
     alignment_(),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -86,7 +90,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(Cell_handle f)
     index_(vtInternal),
     type_(vtInternal),
     alignment_(),
-    targetCellSize_(0.0)
+    targetCellSize_(0.0),
+    vertexFixed_(false)
 {}
 
 
@@ -315,6 +320,20 @@ template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::anyInternalOrBoundaryPoint() const
 {
     return internalOrBoundaryPoint() || referredInternalOrBoundaryPoint();
+}
+
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::isVertexFixed() const
+{
+    return vertexFixed_;
+}
+
+
+template<class Gt, class Vb>
+inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed() const
+{
+    vertexFixed_ = true;
 }
 
 

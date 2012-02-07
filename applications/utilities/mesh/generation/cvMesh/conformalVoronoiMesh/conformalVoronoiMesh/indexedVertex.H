@@ -92,11 +92,14 @@ class indexedVertex
         //                         Lowest numbered is inside one (master).
         int type_;
 
-        // Required alignment of the dual cell of this vertex
+        //- Required alignment of the dual cell of this vertex
         Foam::tensor alignment_;
 
-        // Target size of the dual cell of this vertex
+        //- Target size of the dual cell of this vertex
         Foam::scalar targetCellSize_;
+
+        //- Specify whether the vertex is fixed or movable.
+        bool vertexFixed_;
 
 
 public:
@@ -106,6 +109,12 @@ public:
         vtNearBoundary  = INT_MIN,
         vtInternal      = INT_MIN + 1,
         vtFar           = INT_MIN + 2
+    };
+
+    enum vertexMotion
+    {
+        fixed   = 0,
+        movable = 1
     };
 
     typedef typename Vb::Vertex_handle      Vertex_handle;
@@ -214,6 +223,11 @@ public:
         //- Either a real or referred internal or boundary point
         inline bool anyInternalOrBoundaryPoint() const;
 
+        //- Is the vertex fixed or movable
+        inline bool isVertexFixed() const;
+
+        //- Fix the vertex so that it can't be moved
+        inline void setVertexFixed() const;
 
     // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
     // {
