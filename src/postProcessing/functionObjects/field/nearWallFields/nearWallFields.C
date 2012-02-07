@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,6 +121,7 @@ void Foam::nearWallFields::read(const dictionary& dict)
             reverseFieldMap_.insert(sampleFldName, fldName);
         }
 
+        Info<< "Creating " << fieldMap_.size() << " fields" << endl;
         createFields(vsf_);
         createFields(vvf_);
         createFields(vSpheretf_);
@@ -137,14 +138,14 @@ void Foam::nearWallFields::execute()
         Info<< "nearWallFields:execute()" << endl;
     }
 
-    if (active_)
-    {
-        sampleFields(vsf_);
-        sampleFields(vvf_);
-        sampleFields(vSpheretf_);
-        sampleFields(vSymmtf_);
-        sampleFields(vtf_);
-    }
+    //if (active_)
+    //{
+    //    sampleFields(vsf_);
+    //    sampleFields(vvf_);
+    //    sampleFields(vSpheretf_);
+    //    sampleFields(vSymmtf_);
+    //    sampleFields(vtf_);
+    //}
 }
 
 
@@ -171,6 +172,12 @@ void Foam::nearWallFields::write()
     {
         Info<< "Writing sampled fields to " << obr_.time().timeName()
             << endl;
+
+        sampleFields(vsf_);
+        sampleFields(vvf_);
+        sampleFields(vSpheretf_);
+        sampleFields(vSymmtf_);
+        sampleFields(vtf_);
 
         // Write fields
         forAll(vsf_, i)

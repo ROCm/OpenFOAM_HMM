@@ -571,11 +571,11 @@ void Foam::wallBoundedStreamLine::read(const dictionary& dict)
             {
                 label nFaces = returnReduce(faces.size(), sumOp<label>());
 
-                FatalErrorIn("wallBoundedStreamLine::track()")
+                WarningIn("wallBoundedStreamLine::track()")
                     << "Found " << nFaces
                     <<" faces with low quality or negative volume "
                     << "decomposition tets. Writing to faceSet " << faces.name()
-                    << exit(FatalError);
+                    << endl;    //exit(FatalError);
             }
 
             // 2. all edges on a cell having two faces

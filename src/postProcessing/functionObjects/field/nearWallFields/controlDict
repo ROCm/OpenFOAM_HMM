@@ -59,6 +59,7 @@ functions
 
         // Fields to be sampled. Per field original name and mapped field to
         // create.
+        // Note: fields only get updated when writing!
         fields
         (
             (p pNear)

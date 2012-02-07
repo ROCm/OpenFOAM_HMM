@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,12 +75,6 @@ public:
         const label nSubCycle_;
         const scalar trackLength_;
 
-        //- For surface-constrained tracking
-        const bool followSurface_;
-        const pointField& patchNormals_;
-        const scalar trackHeight_;
-
-
         DynamicList<vectorList>& allPositions_;
         List<DynamicList<scalarList> >& allScalars_;
         List<DynamicList<vectorList> >& allVectors_;
@@ -97,10 +91,6 @@ public:
                 const bool trackForward,
                 const label nSubCycle,
                 const scalar trackLength,
-                const bool followSurface,
-
-                const pointField& patchNormals,
-                const scalar trackHeight,
 
                 DynamicList<List<point> >& allPositions,
                 List<DynamicList<scalarList> >& allScalars,
@@ -114,10 +104,6 @@ public:
                 trackForward_(trackForward),
                 nSubCycle_(nSubCycle),
                 trackLength_(trackLength),
-                followSurface_(followSurface),
-
-                patchNormals_(patchNormals),
-                trackHeight_(trackHeight),
 
                 allPositions_(allPositions),
                 allScalars_(allScalars),

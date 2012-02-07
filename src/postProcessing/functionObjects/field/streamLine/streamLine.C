@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -292,119 +292,6 @@ void Foam::streamLine::track()
     }
 
 
-    //- For surface following: per face the normal to constrain the velocity
-    //  with.
-    pointField patchNormals;
-
-
-    if (followSurface_)
-    {
-        // Determine geometric data on the non-constraint patches
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // - point normals
-        // - neighbouring cells
-        autoPtr<indirectPrimitivePatch> boundaryPatch(wallPatch());
-
-        // Calculate parallel consistent normal (on boundaryPatch points only)
-        pointField boundaryNormals
-        (
-            PatchTools::pointNormals
-            (
-                mesh,
-                boundaryPatch(),
-                boundaryPatch().addressing()
-            )
-        );
-        // Make sure all points know about point normal. There might be points
-        // which are not on boundaryPatch() but coupled to points that are.
-        pointField pointNormals(mesh.nPoints(), vector::zero);
-        UIndirectList<point>
-        (
-            pointNormals,
-            boundaryPatch().meshPoints()
-        ) = boundaryNormals;
-        boundaryNormals.clear();
-
-        mesh.globalData().syncPointData
-        (
-            pointNormals,
-            maxMagSqrEqOp<point>(),
-            mapDistribute::transform()
-        );
-
-        // Calculate per-face a single constraint normal:
-        // - faces on patch: face-normal
-        // - faces on cell with point on patch: point-normal
-        // - rest: vector::zero
-        //
-        // Note: the disadvantage is that we can only handle faces with one
-        //       point on the patch - otherwise we might pick up the wrong
-        //       velocity.
-
-
-
-        patchNormals.setSize(mesh.nFaces(), vector::zero);
-        label nPointNormals = 0;
-
-        // 1. faces on patch
-        UIndirectList<point>(patchNormals, boundaryPatch().addressing()) =
-             boundaryPatch().faceNormals();
-
-        // 2. faces with a point on the patch
-        forAll(mesh.faces(), faceI)
-        {
-            if (patchNormals[faceI] == vector::zero)
-            {
-                const face& f = mesh.faces()[faceI];
-                forAll(f, fp)
-                {
-                    label pointI = f[fp];
-                    if (pointNormals[pointI] != vector::zero)
-                    {
-                        patchNormals[faceI] = pointNormals[pointI];
-                        nPointNormals++;
-                    }
-                }
-            }
-        }
-
-        // 3. cells on faces with a point on the patch
-        forAll(mesh.points(), pointI)
-        {
-            if (pointNormals[pointI] != vector::zero)
-            {
-                const labelList& pCells = mesh.pointCells(pointI);
-                forAll(pCells, i)
-                {
-                    const cell& cFaces = mesh.cells()[pCells[i]];
-                    forAll(cFaces, j)
-                    {
-                        label faceI = cFaces[j];
-
-                        if (patchNormals[faceI] == vector::zero)
-                        {
-                            patchNormals[faceI] = pointNormals[pointI];
-                            nPointNormals++;
-                        }
-                    }
-                }
-            }
-        }
-
-        Info<< type() << " : calculated constrained-tracking normals" << nl
-            << "Number of faces in mesh                     : "
-            << returnReduce(mesh.nFaces(), sumOp<label>()) << nl
-            << "    of which on walls                       : "
-            <<  returnReduce
-                (
-                    boundaryPatch().addressing().size(),
-                    sumOp<label>()
-                ) << nl
-            << "    of which on cell with point on boundary : "
-            << returnReduce(nPointNormals, sumOp<label>()) << nl
-            << endl;
-    }
-
     // additional particle info
     streamLineParticle::trackingData td
     (
@@ -415,12 +302,6 @@ void Foam::streamLine::track()
         trackForward_,  // track in +u direction?
         nSubCycle_,     // automatic track control:step through cells in steps?
         trackLength_,   // fixed track length
-
-        //- For surface-constrained streamlines
-        followSurface_, // stay on surface?
-        patchNormals,   // per face normal to constrain tracking to
-        //pointNormals,   // per point          ,,
-        trackHeight_,   // track height
 
         allTracks_,
         allScalars_,
@@ -559,16 +440,6 @@ void Foam::streamLine::read(const dictionary& dict)
                 << trackLength_ << nl << endl;
         }
 
-
-        followSurface_ = false;
-        trackHeight_ = VGREAT;
-        if (dict.readIfPresent("followSurface", followSurface_))
-        {
-            dict.lookup("trackHeight") >> trackHeight_;
-
-            Info<< type() << " : surface-constrained streamline at "
-                << trackHeight_ << " distance above the surface" << nl << endl;
-        }
 
         interpolationScheme_ = dict.lookupOrDefault
         (

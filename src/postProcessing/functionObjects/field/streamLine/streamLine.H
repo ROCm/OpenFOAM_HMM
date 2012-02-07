@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,11 +95,6 @@ class streamLine
 
         //- Maximum lifetime (= number of cells) of particle
         label lifeTime_;
-
-        //- Surface-constrained?
-        bool followSurface_;
-
-        scalar trackHeight_;
 
         //- Number of subcycling steps
         label nSubCycle_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -211,17 +211,6 @@ bool Foam::streamLineParticle::move
                 U = -U;
             }
 
-            if (td.followSurface_)
-            {
-                //- Simple: remove wall-normal component. Should keep particle
-                //  at same height. Does not work well on warped faces.
-                const vector& n = td.patchNormals_[tetFaceI_];
-                if (n != vector::zero)
-                {
-                    U -= (U&n)*n;
-                }
-            }
-
             scalar magU = mag(U);
 
             if (magU < SMALL)
@@ -396,42 +385,8 @@ void Foam::streamLineParticle::hitWallPatch
     const tetIndices&
 )
 {
-    if (td.followSurface_)
-    {
-        // Push slightly in. Since we're pushing to tet centre we should still
-        // be in the same tet.
-        tetPointRef tet = currentTet();
-
-        const point oldPosition(position());
-
-        position() += trackingCorrectionTol*(tet.centre() - position());
-
-        if (debug)
-        {
-            label patchID = patch(face());
-
-            Pout<< "hitWallPatch : on wall "
-                << mesh().boundaryMesh()[patchID].name()
-                << " moved from " << oldPosition
-                << " to " << position()
-                << " due to centre " << tet.centre() << endl;
-        }
-
-        // Check that still in tet (should always be the case
-        if (debug && !tet.inside(position()))
-        {
-            FatalErrorIn("streamLineParticle::hitWallPatch()")
-                << "Pushing particle " << *this
-                << " away from wall " << wpp.name()
-                << " moved it outside of tet."
-                << exit(FatalError);
-        }
-    }
-    else
-    {
-        // Remove particle
-        td.keepParticle = false;
-    }
+    // Remove particle
+    td.keepParticle = false;
 }
 
 
