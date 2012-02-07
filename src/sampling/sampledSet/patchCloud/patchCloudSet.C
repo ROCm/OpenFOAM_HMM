@@ -114,6 +114,8 @@ void Foam::patchCloudSet::calcSamples
         10,             // leafsize
         3.0             // duplicity
     );
+
+    // Force calculation of face-diagonal decomposition
     (void)mesh().tetBasePtIs();
 
 
