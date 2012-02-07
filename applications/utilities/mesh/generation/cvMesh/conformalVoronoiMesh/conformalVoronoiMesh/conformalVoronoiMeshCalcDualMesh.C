@@ -102,14 +102,14 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 //        )
 //        {
 //            // Allow filtering if any vertices are far points. Otherwise faces
-//            // with boundary points attached to a cell with a far point will not
-//            // be filtered.
+//            // with boundary points attached to a cell with a far point will
+//            // not be filtered.
 //            if
 //            (
-//                ( !(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint() )
-//             || ( !(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint() )
-//             || ( !(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint() )
-//             || ( !(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint() )
+//                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
+//             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
+//             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
+//             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
 //            )
 //            {
 //                hasProcPt = true;

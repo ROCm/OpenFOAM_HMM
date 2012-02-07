@@ -773,8 +773,11 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
 //
 //            const scalar searchRadiusSqr = 5.0*targetCellSize(featPt);
 //
-//            labelList indices =
-//                surfacePtLocationTreePtr_().findSphere(featPt, searchRadiusSqr);
+//            labelList indices = surfacePtLocationTreePtr_().findSphere
+//            (
+//                featPt,
+//                searchRadiusSqr
+//            );
 //
 //            pointField nearestSurfacePoints(indices.size());
 //

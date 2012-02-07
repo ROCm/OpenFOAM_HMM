@@ -187,7 +187,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         );
 
         // Todo,needed later but want to get rid of this.
-        const Foam::point concaveEdgeLocalFeatPt = featPt + ppDist*concaveEdgeDir;
+        const Foam::point concaveEdgeLocalFeatPt =
+            featPt + ppDist*concaveEdgeDir;
 
         // Finding the nearest point on the intersecting line to the edge
         // point. Floating point errors often occur using planePlaneIntersect
@@ -377,9 +378,9 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             // Add additional mitering points
             //scalar angleSign = 1.0;
 
-            Info<<convexEdgePlaneCNormal << " " <<convexEdgePlaneDNormal << endl;
 
-            vector convexEdgesPlaneNormal = 0.5*(convexEdgePlaneCNormal + convexEdgePlaneDNormal);
+            vector convexEdgesPlaneNormal =
+                0.5*(convexEdgePlaneCNormal + convexEdgePlaneDNormal);
             plane planeM(featPt, convexEdgesPlaneNormal);
 
 //            if

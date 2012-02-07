@@ -2048,7 +2048,8 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 ////        {
 ////            if (toRemove[pI] == false)
 ////            {
-////                newExistingEdgeLocations[count++] = existingEdgeLocations[pI];
+////                newExistingEdgeLocations[count++] =
+////                    existingEdgeLocations[pI];
 ////            }
 ////        }
 ////
