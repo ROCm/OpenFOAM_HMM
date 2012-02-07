@@ -108,6 +108,10 @@ functions
         // Steps particles can travel before being removed
         lifeTime        100;
 
+        // Optional absolute length of steps (trackLength)
+        // Size of single track segment [m]
+        //trackLength 1e-3;
+
         // Cloud name to use
         cloudName       particleTracks;
 

@@ -98,6 +98,9 @@ class wallBoundedStreamLine
         //- Maximum lifetime (= number of cells) of particle
         label lifeTime_;
 
+        //- Track length
+        scalar trackLength_;
+
         //- Optional specified name of particles
         word cloudName_;
 

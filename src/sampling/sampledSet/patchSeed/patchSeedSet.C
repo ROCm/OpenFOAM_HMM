@@ -114,7 +114,7 @@ void Foam::patchSeedSet::calcSamples
 
         if (debug)
         {
-            Pout<< "In random mode : selected " << patchFaces
+            Pout<< "In random mode : selected " << patchFaces.size()
                 << " faces out of " << sz << endl;
         }
     }

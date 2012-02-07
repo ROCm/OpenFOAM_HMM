@@ -408,6 +408,7 @@ void Foam::wallBoundedStreamLine::track()
         vvInterp,
         UIndex,         // index of U in vvInterp
         trackForward_,  // track in +u direction?
+        trackLength_,   // fixed track length
         isWallPatch,    // which faces are to follow
 
         allTracks_,
@@ -517,6 +518,14 @@ void Foam::wallBoundedStreamLine::read(const dictionary& dict)
             FatalErrorIn(":wallBoundedStreamLine::read(const dictionary&)")
                 << "Illegal value " << lifeTime_ << " for lifeTime"
                 << exit(FatalError);
+        }
+        trackLength_ = VGREAT;
+        if (dict.found("trackLength"))
+        {
+            dict.lookup("trackLength") >> trackLength_;
+
+            Info<< type() << " : fixed track length specified : "
+                << trackLength_ << nl << endl;
         }
 
 

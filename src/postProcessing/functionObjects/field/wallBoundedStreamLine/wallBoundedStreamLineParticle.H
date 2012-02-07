@@ -73,6 +73,7 @@ public:
         const PtrList<interpolation<vector> >& vvInterp_;
         const label UIndex_;
         const bool trackForward_;
+        const scalar trackLength_;
 
         const PackedBoolList& isWallPatch_;
 
@@ -90,6 +91,7 @@ public:
                 const PtrList<interpolation<vector> >& vvInterp,
                 const label UIndex,
                 const bool trackForward,
+                const scalar trackLength,
                 const PackedBoolList& isWallPatch,
 
                 DynamicList<List<point> >& allPositions,
@@ -105,6 +107,7 @@ public:
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
                 trackForward_(trackForward),
+                trackLength_(trackLength),
                 isWallPatch_(isWallPatch),
 
                 allPositions_(allPositions),

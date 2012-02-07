@@ -651,6 +651,8 @@ Foam::scalar Foam::wallBoundedStreamLineParticle::trackToEdge
             {
                 // Reached endpoint
                 //checkInside();
+                diagEdge_ = -1;
+                meshEdgeStart_ = -1;
                 return trackFraction;
             }
 
@@ -797,38 +799,61 @@ Foam::vector Foam::wallBoundedStreamLineParticle::interpolateFields
 
     const tetIndices ti = currentTetIndices();
 
+    const vector U = td.vvInterp_[td.UIndex_].interpolate
+    (
+        position,
+        ti,     //cellI,
+        faceI
+    );
 
-    sampledScalars_.setSize(td.vsInterp_.size());
-    forAll(td.vsInterp_, scalarI)
+    // Check if at different position
+    if
+    (
+       !sampledPositions_.size()
+     || magSqr(sampledPositions_.last()-position) > Foam::sqr(SMALL)
+    )
     {
-        sampledScalars_[scalarI].append
-        (
-            td.vsInterp_[scalarI].interpolate
+        // Store the location
+        sampledPositions_.append(position);
+
+        // Store the scalar fields
+        sampledScalars_.setSize(td.vsInterp_.size());
+        forAll(td.vsInterp_, scalarI)
+        {
+            sampledScalars_[scalarI].append
             (
-                position,
-                ti,     //cellI,
-                faceI
-            )
-        );
+                td.vsInterp_[scalarI].interpolate
+                (
+                    position,
+                    ti,     //cellI,
+                    faceI
+                )
+            );
+        }
+
+        // Store the vector fields
+        sampledVectors_.setSize(td.vvInterp_.size());
+        forAll(td.vvInterp_, vectorI)
+        {
+            vector positionU;
+            if (vectorI == td.UIndex_)
+            {
+                positionU = U;
+            }
+            else
+            {
+                positionU = td.vvInterp_[vectorI].interpolate
+                (
+                    position,
+                    ti,     //cellI,
+                    faceI
+                );
+            }
+            sampledVectors_[vectorI].append(positionU);
+        }
     }
 
-    sampledVectors_.setSize(td.vvInterp_.size());
-    forAll(td.vvInterp_, vectorI)
-    {
-        sampledVectors_[vectorI].append
-        (
-            td.vvInterp_[vectorI].interpolate
-            (
-                position,
-                ti,     //cellI,
-                faceI
-            )
-        );
-    }
-
-    const DynamicList<vector>& U = sampledVectors_[td.UIndex_];
-
-    return U.last();
+    return U;
 }
 
 
@@ -837,7 +862,6 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
     trackingData& td
 )
 {
-    sampledPositions_.append(position());
     vector U = interpolateFields(td, position(), cell(), tetFace());
 
     if (!td.trackForward_)
@@ -979,7 +1003,7 @@ bool Foam::wallBoundedStreamLineParticle::move
 
         --lifeTime_;
 
-        // Update sampled velocity and fields if position changed
+        // Get sampled velocity and fields. Store if position changed.
         vector U = sample(td);
 
         // !user parameter!
@@ -988,6 +1012,12 @@ bool Foam::wallBoundedStreamLineParticle::move
             // Force removal
             lifeTime_ = 0;
             break;
+        }
+
+
+        if (td.trackLength_ < GREAT)
+        {
+            dt = td.trackLength_;
         }
 
 
