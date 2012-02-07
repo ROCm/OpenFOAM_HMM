@@ -63,17 +63,18 @@ surfaceConformation
 
     surfaceConformationRebuildFrequency 10;
 
-    coarseConformationControls
+    conformationControls
     {
         initial
         {
-            edgeSearchDistCoeff         1.1;
+            edgeSearchDistCoeff         2;
             surfacePtReplaceDistCoeff   0.5;
+            surfacePtExclusionDistanceCoeff 0.5;
         }
 
         iteration
         {
-            edgeSearchDistCoeff         1.25;
+            edgeSearchDistCoeff         1.5;
             surfacePtReplaceDistCoeff   0.7;
         }
 
@@ -82,23 +83,14 @@ surfaceConformation
         iterationToInitialHitRatioLimit 0.001;
     }
 
+    coarseConformationControls
+    {
+        $conformationControls;
+    }
+
     fineConformationControls
     {
-        initial
-        {
-            edgeSearchDistCoeff         1.1;
-            surfacePtReplaceDistCoeff   0.5;
-        }
-
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
-
-        maxIterations 15;
-
-        iterationToInitialHitRatioLimit 0.001;
+        $conformationControls;
     }
 
     geometryToConformTo
@@ -125,6 +117,7 @@ initialPoints
 
     autoDensityCoeffs
     {
+        minCellSizeLimit 0.001;
         minLevels 1;
         maxSizeRatio 3.0;
         sampleResolution 4;
@@ -221,18 +214,18 @@ polyMeshFiltering
 
 meshQualityControls
 {
-    maxNonOrtho 65;
+    maxNonOrtho         65;
     maxBoundarySkewness 50;
     maxInternalSkewness 10;
-    maxConcave 80;
-    minTetQuality 1e-30;
-    minVol 0;
-    minArea -1;
-    minTwist 0.001;
-    minDeterminant 0.001;
-    minFaceWeight 0.02;
-    minVolRatio 0.01;
-    minTriangleTwist -1;
+    maxConcave          80;
+    minTetQuality       1e-30;
+    minVol              0;
+    minArea             -1;
+    minTwist            0.001;
+    minDeterminant      0.001;
+    minFaceWeight       0.02;
+    minVolRatio         0.01;
+    minTriangleTwist    -1;
 }
 
 

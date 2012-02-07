@@ -121,7 +121,7 @@ surfaceConformation
     surfaceConformationRebuildFrequency 10;
 
     // Initial and intermediate controls
-    coarseConformationControls
+    conformationControls
     {
         // Initial conformation
         initial
@@ -138,6 +138,9 @@ surfaceConformation
             // - fraction of the local target cell size. Coarse
             // conformation, initial protrusion tests.
             surfacePtReplaceDistCoeff   0.5;
+
+            
+            surfacePtExclusionDistanceCoeff 0.5;
         }
 
         // Same for iterations
@@ -156,24 +159,14 @@ surfaceConformation
         iterationToInitialHitRatioLimit 0.001;
     }
 
-    // Final (at endTime) controls
+    coarseConformationControls
+    {
+        $conformationControls;
+    }
+
     fineConformationControls
     {
-        initial
-        {
-            edgeSearchDistCoeff         1.1;
-            surfacePtReplaceDistCoeff   0.5;
-        }
-
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
-
-        maxIterations 15;
-
-        iterationToInitialHitRatioLimit 0.001;
+        $conformationControls;
     }
 
     // Geometry to mesh to
@@ -213,6 +206,7 @@ initialPoints
     // samples (due to target cell size) in box split box.
     autoDensityCoeffs
     {
+        minCellSizeLimit 0.1;
         // Initial number of refinement levels. Needs to be enough to pick
         // up features due to size ratio. If not enough it will take longer
         // to determine point seeding.
