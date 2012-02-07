@@ -104,6 +104,21 @@ namespace vectorTools
 
     //- Calculate angle between a and b in radians
     template <typename T>
+    T cosPhi
+    (
+        const Vector<T>& a,
+        const Vector<T>& b,
+        const T& tolerance = SMALL
+    )
+    {
+        scalar cosPhi = (a & b)/(mag(a)*mag(b) + tolerance);
+
+        // Enforce bounding between -1 and 1
+        return min(max(cosPhi, -1), 1);
+    }
+
+    //- Calculate angle between a and b in radians
+    template <typename T>
     T radAngleBetween
     (
         const Vector<T>& a,
@@ -111,7 +126,10 @@ namespace vectorTools
         const T& tolerance = SMALL
     )
     {
-        return Foam::acos( (a & b)/(mag(a)*mag(b) + tolerance) );
+        scalar cosPhi = (a & b)/(mag(a)*mag(b) + tolerance);
+
+        // Enforce bounding between -1 and 1
+        return acos( min(max(cosPhi, -1), 1) );
     }
 
     //- Calculate angle between a and b in degrees
@@ -123,8 +141,9 @@ namespace vectorTools
         const T& tolerance = SMALL
     )
     {
-        return Foam::radToDeg(radAngleBetween(a, b, tolerance));
+        return radToDeg(radAngleBetween(a, b, tolerance));
     }
+
 } // End namespace vectorTools
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
