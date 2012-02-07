@@ -79,53 +79,59 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        std::list<Cell_handle> cells;
-        incident_cells(vit, std::back_inserter(cells));
-
-        bool hasProcPt = false;
-
-        for
-        (
-            std::list<Cell_handle>::iterator cit=cells.begin();
-            cit != cells.end();
-            ++cit
-        )
-        {
-            if
-            (
-                !(*cit)->vertex(0)->real()
-             || !(*cit)->vertex(1)->real()
-             || !(*cit)->vertex(2)->real()
-             || !(*cit)->vertex(3)->real()
-            )
-            {
-                hasProcPt = true;
-
-                break;
-            }
-        }
-
-        if (hasProcPt)
-        {
-            for
-            (
-                std::list<Cell_handle>::iterator cit=cells.begin();
-                cit != cells.end();
-                ++cit
-            )
-            {
-                (*cit)->filterCount() =
-                     cvMeshControls().filterCountSkipThreshold() + 1;
-            }
-        }
-    }
+// REMOVED BECAUSE THIS CODE STOPS ALL FACES NEAR ANY BOUNDARY (PROC OR REAL)
+// FROM BEING FILTERED.
+//
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        vit++
+//    )
+//    {
+//        std::list<Cell_handle> cells;
+//        incident_cells(vit, std::back_inserter(cells));
+//
+//        bool hasProcPt = false;
+//
+//        for
+//        (
+//            std::list<Cell_handle>::iterator cit = cells.begin();
+//            cit != cells.end();
+//            ++cit
+//        )
+//        {
+//            // Allow filtering if any vertices are far points. Otherwise faces
+//            // with boundary points attached to a cell with a far point will
+//            // not be filtered.
+//            if
+//            (
+//                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
+//             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
+//             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
+//             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
+//            )
+//            {
+//                hasProcPt = true;
+//
+//                break;
+//            }
+//        }
+//
+//        if (hasProcPt)
+//        {
+//            for
+//            (
+//                std::list<Cell_handle>::iterator cit = cells.begin();
+//                cit != cells.end();
+//                ++cit
+//            )
+//            {
+//                (*cit)->filterCount() =
+//                     cvMeshControls().filterCountSkipThreshold() + 1;
+//            }
+//        }
+//    }
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
@@ -250,7 +256,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                 timeCheck("End of filtering iteration");
 
-            } while (nBadQualityFaces > nInitialBadQualityFaces);
+            } while (nBadQualityFaces > 0); //nInitialBadQualityFaces);
         }
     }
 
@@ -987,7 +993,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
             if (dualFace.size() < 3)
             {
-                // This face has been collapsed already
                 continue;
             }
 
@@ -995,8 +1000,6 @@ Foam::label Foam::conformalVoronoiMesh::collapseFaces
 
             if (maxFC > cvMeshControls().filterCountSkipThreshold())
             {
-                // A vertex on this face has been limited too many
-                // times, skip
                 continue;
             }
 
@@ -1900,7 +1903,6 @@ void Foam::conformalVoronoiMesh::indexDualVertices
             )
             {
                 // This is a boundary dual vertex
-
                 boundaryPts[dualVertI] = true;
             }
 

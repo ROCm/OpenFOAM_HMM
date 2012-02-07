@@ -42,12 +42,10 @@ defineRunTimeSelectionTable(faceAreaWeightModel, dictionary);
 faceAreaWeightModel::faceAreaWeightModel
 (
     const word& type,
-    const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const dictionary& relaxationDict
 )
 :
     dictionary(relaxationDict),
-    cvMesh_(cvMesh),
     coeffDict_(subDict(type + "Coeffs"))
 {}
 
@@ -56,8 +54,7 @@ faceAreaWeightModel::faceAreaWeightModel
 
 autoPtr<faceAreaWeightModel> faceAreaWeightModel::New
 (
-    const dictionary& relaxationDict,
-    const conformalVoronoiMesh& cvMesh
+    const dictionary& relaxationDict
 )
 {
     word faceAreaWeightModelTypeName
@@ -85,7 +82,7 @@ autoPtr<faceAreaWeightModel> faceAreaWeightModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<faceAreaWeightModel>(cstrIter()(relaxationDict, cvMesh));
+    return autoPtr<faceAreaWeightModel>(cstrIter()(relaxationDict));
 }
 
 

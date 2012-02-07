@@ -35,6 +35,10 @@ SourceFiles
     conformalVoronoiMeshI.H
     conformalVoronoiMesh.C
     conformalVoronoiMeshIO.C
+    conformalVoronoiMeshConformToSurface.C
+    conformalVoronoiMeshFeaturePoints.C
+    conformalVoronoiMeshFeaturePointSpecialisations.C
+    conformalVoronoiMeshCalcDualMesh.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,6 +48,7 @@ SourceFiles
 #define CGAL_INEXACT
 
 #include "CGALTriangulation3Ddefs.H"
+#include <CGAL/Spatial_sort_traits_adapter_3.h>
 #include "uint.H"
 #include "ulong.H"
 #include "searchableSurfaces.H"
@@ -57,6 +62,8 @@ SourceFiles
 #include "plane.H"
 #include "SortableList.H"
 #include "meshTools.H"
+#include "dynamicIndexedOctree.H"
+#include "dynamicTreeDataPoint.H"
 #include "indexedOctree.H"
 #include "treeDataPoint.H"
 #include "unitConversion.H"
@@ -73,6 +80,7 @@ SourceFiles
 #include "processorPolyPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "globalIndex.H"
+#include "pointFeatureEdgesTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,6 +124,15 @@ public:
 
 private:
 
+    // Static data
+
+        static const scalar tolParallel;
+
+        static const scalar searchConeAngle;
+
+        static const scalar searchAngleOppositeSurface;
+
+
     // Private data
 
         //- The time registry of the application
@@ -146,7 +163,7 @@ private:
 
         //- Store the feature constraining points to be reinserted after a
         //  triangulation clear. Maintained with relative types and indices.
-        std::list<Vb> featureVertices_;
+        List<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.
         //  Single pointField required by the featurePointTree.
@@ -154,6 +171,14 @@ private:
 
         //- Search tree for feature point locations
         mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTreePtr_;
+
+        //- Search tree for edge point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+        edgeLocationTreePtr_;
+
+        //- Search tree for surface point locations
+        mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
+        surfacePtLocationTreePtr_;
 
         //- Store locations where the cell size and alignments will be
         //  pre-calculated and looked up
@@ -170,7 +195,7 @@ private:
 
         //- Store the surface and feature edge conformation locations to be
         //  reinserted
-        std::list<Vb> surfaceConformationVertices_;
+        List<Vb> surfaceConformationVertices_;
 
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
@@ -235,6 +260,12 @@ private:
             const Foam::point& pt
         ) const;
 
+        //- Return the square of the local surface point exclusion distance
+        inline scalar surfacePtExclusionDistanceSqr
+        (
+            const Foam::point& pt
+        ) const;
+
         //- Return the square of the local surface search distance
         inline scalar surfaceSearchDistanceSqr(const Foam::point& pt) const;
 
@@ -279,7 +310,7 @@ private:
         //  processors
         void insertPoints
         (
-            std::list<Point>& points,
+            List<Point>& points,
             bool distribute = true
         );
 
@@ -396,6 +427,8 @@ private:
         //- Determine and insert point groups at the feature points
         void insertFeaturePoints();
 
+        bool edgesShareNormal(const label e1, const label e2) const;
+
         //- Create point groups at convex feature points
         void createConvexFeaturePoints
         (
@@ -420,12 +453,24 @@ private:
             DynamicList<label>& types
         );
 
+        //- Fill the pointFeatureEdgesType struct with the types of feature
+        //  edges that are attached to the point.
+        List<extendedFeatureEdgeMesh::edgeStatus> calcPointFeatureEdgesTypes
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const labelList& pEds,
+            pointFeatureEdgesTypes& pFEdgeTypes
+        );
+
         //- Create feature point groups if a specialisation exists for the
         //  structure
         bool createSpecialisedFeaturePoint
         (
             const extendedFeatureEdgeMesh& feMesh,
-            label ptI,
+            const labelList& pEds,
+            const pointFeatureEdgesTypes& pFEdgeTypes,
+            const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
+            const label ptI,
             DynamicList<Foam::point>& pts,
             DynamicList<label>& indices,
             DynamicList<label>& types
@@ -433,6 +478,11 @@ private:
 
         //- Store the locations of all of the features to be conformed to
         void constructFeaturePointLocations();
+
+        List<pointIndexHit> findSurfacePtLocationsNearFeaturePoint
+        (
+            const Foam::point& featurePoint
+        ) const;
 
         //- Reinsert stored feature point defining points
         void reinsertFeaturePoints(bool distribute = false);
@@ -443,12 +493,17 @@ private:
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
 
-        //- Clear the entire tesselation and insert bounding points
-        void reset();
+        //- Clear the entire tesselation
+        //  Reinsert bounding points, feature points and recalculate
+        //  startOfInternalPoints_
+        void reset(const bool distribute = false);
 
         //- Insert far points in a large bounding box to avoid dual edges
         //  spanning huge distances
         void insertBoundingPoints();
+
+        //- Reinsert the bounding points
+        void reinsertBoundingPoints();
 
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
@@ -468,10 +523,10 @@ private:
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_
-        void storeSizesAndAlignments(const std::list<Point>& storePts);
+        void storeSizesAndAlignments(const List<Point>& storePts);
 
         //- Restore the sizes and alignments if required
-        void updateSizesAndAlignments(const std::list<Point>& storePts);
+        void updateSizesAndAlignments(const List<Point>& storePts);
 
         //- Demand driven construction of octree for and alignment points
         const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
@@ -526,6 +581,14 @@ private:
             const Delaunay::Finite_vertices_iterator& vit
         ) const;
 
+        //- Return all intersections
+        bool dualCellSurfaceAllIntersections
+        (
+            const Delaunay::Finite_vertices_iterator& vit,
+            DynamicList<pointIndexHit>& info,
+            DynamicList<label>& hitSurface
+        ) const;
+
         //- Return false if the line is entirely outside the current processor
         //  domain, true is either point is inside, or the processor domain
         //  bounadry is intersected (i.e. the points are box outside but the
@@ -533,6 +596,7 @@ private:
         //  intersect.
         bool clipLineToProc
         (
+            const Foam::point& pt,
             Foam::point& a,
             Foam::point& b
         ) const;
@@ -624,21 +688,67 @@ private:
             label callCount = 0
         ) const;
 
+        //- Find angle between the normals of two close surface points.
+        scalar angleBetweenSurfacePoints(Foam::point pA, Foam::point pB) const;
+
+        //- Check if a surface point is near another.
+        bool nearSurfacePoint
+        (
+            pointIndexHit& pHit,
+            label& surfaceHit,
+            DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
+
+        //- Append a point to the surface point tree and the existing list
+        bool appendToSurfacePtTree
+        (
+            const Foam::point& pt,
+            DynamicList<Foam::point>& existingSurfacePtLocations
+        ) const;
+
+        //- Append a point to the edge location tree and the existing list
+        bool appendToEdgeLocationTree
+        (
+            const Foam::point& pt,
+            DynamicList<Foam::point>& existingEdgeLocations
+        ) const;
+
+        //- Check if a point is near any feature edge points.
+        bool pointIsNearFeatureEdgeLocation(const Foam::point& pt) const;
+
+        bool pointIsNearFeatureEdgeLocation
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
+        ) const;
+
+        //- Check if a point is near any surface conformation points.
+        bool pointIsNearSurfaceLocation(const Foam::point& pt) const;
+
+        bool pointIsNearSurfaceLocation
+        (
+            const Foam::point& pt,
+            pointIndexHit& info
+        ) const;
+
         //- Check if a location is in the exclusion range of an existing feature
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            const Foam::point& pt,
-            DynamicList<Foam::point>& newEdgeLocations,
-            pointField& existingEdgeLocations,
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+            pointIndexHit& pHit,
+            DynamicList<Foam::point>& existingEdgeLocations
         ) const;
 
-        //- Build or rebuild the edgeLocationTree
+        //- Build or rebuild the edge location tree
         void buildEdgeLocationTree
         (
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
-            const pointField& existingEdgeLocations
+            const DynamicList<Foam::point>& existingEdgeLocations
+        ) const;
+
+        //- Build or rebuild the surface point location tree
+        void buildSurfacePtLocationTree
+        (
+            const DynamicList<Foam::point>& existingSurfacePtLocations
         ) const;
 
         //- Build or rebuild the sizeAndAlignmentTree
@@ -650,8 +760,8 @@ private:
         (
             const Delaunay::Finite_vertices_iterator& vit,
             const Foam::point& vert,
-            const pointIndexHit& surfHit,
-            label hitSurface,
+            const DynamicList<pointIndexHit>& surfHit,
+            const DynamicList<label>& hitSurface,
             scalar surfacePtReplaceDistCoeffSqr,
             scalar edgeSearchDistCoeffSqr,
             DynamicList<pointIndexHit>& surfaceHits,
@@ -659,8 +769,8 @@ private:
             DynamicList<pointIndexHit>& featureEdgeHits,
             DynamicList<label>& featureEdgeFeaturesHit,
             DynamicList<Foam::point>& newEdgeLocations,
-            pointField& existingEdgeLocations,
-            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+            DynamicList<Foam::point>& existingEdgeLocations,
+            DynamicList<Foam::point>& existingSurfacePtLocations
         ) const;
 
         //- Store the surface conformation with the indices offset to be
@@ -996,6 +1106,9 @@ public:
             //- Write Delaunay points to .obj file
             void writePoints(const fileName& fName, bool internalOnly) const;
 
+            //- Write the boundary Delaunay points to .obj file
+            void writeBoundaryPoints(const fileName& fName) const;
+
             //- Write list of points to file
             void writePoints
             (
@@ -1045,9 +1158,93 @@ public:
             //  actual cell size (cbrt(actual cell volume)).
             void writeCellSizes(const fvMesh& mesh) const;
 
+            //- Calculate and write the cell centres.
+            void writeCellCentres(const fvMesh& mesh) const;
+
             //- Find the cellSet of the boundary cells which have points that
             //  protrude out of the surface beyond a tolerance.
             void findRemainingProtrusionSet(const fvMesh& mesh) const;
+
+
+            //- Function inserting points into a triangulation and setting the
+            //  index and type data of the point in the correct order. This is
+            //  faster than inserting points individually.
+            //
+            //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
+            //  Sebastien Loriot (Geometry Factory).
+            //
+            //  @todo problems putting declaration in the .C file. Function
+            //        prototype is not recognised.
+            template<class Triangulation, class Point_iterator>
+            void rangeInsertWithInfo
+            (
+                Point_iterator begin,
+                Point_iterator end,
+                Triangulation& T,
+                DynamicList<label>& indices,
+                DynamicList<label>& types
+            )
+            {
+                typedef std::vector
+                <
+                    std::pair<const typename Triangulation::Point*, label>
+                > vectorPairPointIndex;
+
+                vectorPairPointIndex points;
+                label index = 0;
+
+                for (Point_iterator it = begin; it != end; ++it)
+                {
+                    points.push_back
+                    (
+                        std::make_pair(&(toPoint(*it)), index++)
+                    );
+                }
+
+                std::random_shuffle(points.begin(), points.end());
+
+                spatial_sort
+                (
+                    points.begin(),
+                    points.end(),
+                    Traits_for_spatial_sort<Triangulation>()
+                );
+
+                typename Triangulation::Cell_handle hint;
+
+                for
+                (
+                    typename vectorPairPointIndex::const_iterator
+                    p = points.begin();
+                    p != points.end();
+                    ++p
+                )
+                {
+                    typename Triangulation::Locate_type lt;
+                    typename Triangulation::Cell_handle c;
+                    label li, lj;
+
+                    c = T.locate(*(p->first), lt, li, lj, hint);
+
+                    typename Triangulation::Vertex_handle v
+                        = T.insert(*(p->first), lt, c, li, lj);
+
+                    label oldIndex = p->second;
+
+                    label type = types[oldIndex];
+
+                    if (type > Vb::vtFar)
+                    {
+                        // This is a member of a point pair, don't use the type
+                        // directly (note that this routine never gets called
+                        // for referredPoints so type will never be -procI)
+                        type += T.number_of_vertices() - 1;
+                    }
+
+                    v->index() = indices[oldIndex] + T.number_of_vertices() - 1;
+                    v->type() = type;
+                }
+            }
 };
 
 
@@ -1058,6 +1255,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "conformalVoronoiMeshI.H"
+
+//#ifdef NoRepository
+//#   include "conformalVoronoiMeshTemplates.C"
+//#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

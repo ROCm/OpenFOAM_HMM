@@ -39,6 +39,8 @@ defineTypeNameAndDebug(conformalVoronoiMesh, 0);
 
 }
 
+const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
+
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -78,17 +80,17 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
         norm
     );
 
-    vector np = norm[0];
+    const vector np = norm[0];
 
     // Generate equally spaced 'spokes' in a circle normal to the
     // direction from the vertex to the closest point on the surface
     // and look for a secondary intersection.
 
-    vector d = surfHit.hitPoint() - pt;
+    const vector d = surfHit.hitPoint() - pt;
 
-    tensor Rp = rotationTensor(vector(0,0,1), np);
+    const tensor Rp = rotationTensor(vector(0,0,1), np);
 
-    label s = cvMeshControls().alignmentSearchSpokes();
+    const label s = cvMeshControls().alignmentSearchSpokes();
 
     scalar closestSpokeHitDistance = GREAT;
 
@@ -96,7 +98,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
     label closestSpokeSurface = -1;
 
-    scalar spanMag = geometryToConformTo_.globalBounds().mag();
+    const scalar spanMag = geometryToConformTo_.globalBounds().mag();
 
     for (label i = 0; i < s; i++)
     {
@@ -176,8 +178,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
             "("
                 "const Foam::point& pt"
             ") const"
-        )
-            << "No secondary surface hit found in spoke search "
+        )   << "No secondary surface hit found in spoke search "
             << "using " << s
             << " spokes, try increasing alignmentSearchSpokes."
             << endl;
@@ -198,7 +199,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     // Secondary alignment
     vector ns = np ^ na;
 
-    if (mag(ns) <  SMALL)
+    if (mag(ns) < SMALL)
     {
         FatalErrorIn("conformalVoronoiMesh::requiredAlignment")
             << "Parallel normals detected in spoke search." << nl
@@ -220,7 +221,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 
 void Foam::conformalVoronoiMesh::insertPoints
 (
-    std::list<Point>& points,
+    List<Point>& points,
     bool distribute
 )
 {
@@ -241,11 +242,13 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         DynamicList<Foam::point> transferPoints;
 
+        List<Point> pointsOnProcessor;
+
         for
         (
-            std::list<Point>::iterator pit=points.begin();
+            List<Point>::iterator pit = points.begin();
             pit != points.end();
-            // No action
+            ++pit
         )
         {
             Foam::point p(topoint(*pit));
@@ -253,14 +256,19 @@ void Foam::conformalVoronoiMesh::insertPoints
             if (!positionOnThisProc(p))
             {
                 transferPoints.append(p);
-
-                pit = points.erase(pit);
             }
             else
             {
-                ++pit;
+                pointsOnProcessor.append(*pit);
             }
         }
+
+        points.setSize(pointsOnProcessor.size());
+        forAll(pointsOnProcessor, pI)
+        {
+            points[pI] = pointsOnProcessor[pI];
+        }
+        pointsOnProcessor.clear();
 
         // Send the points that are not on this processor to the appropriate
         // place
@@ -271,7 +279,7 @@ void Foam::conformalVoronoiMesh::insertPoints
 
         forAll(transferPoints, tPI)
         {
-            points.push_back(toPoint(transferPoints[tPI]));
+            points.append(toPoint(transferPoints[tPI]));
         }
 
         label sizeChange = preDistributionSize - label(points.size());
@@ -307,16 +315,16 @@ void Foam::conformalVoronoiMesh::insertPoints
     // using the range insert (faster than inserting points one by one)
     insert(points.begin(), points.end());
 
-    // Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
-    // for
-    // (
-    //     std::list<Point>::iterator pit=points.begin();
-    //     pit != points.end();
-    //     ++pit
-    // )
-    // {
-    //     insertPoint(topoint(*pit), Vb::vtInternal);
-    // }
+//     Info<< "USING INDIVIDUAL INSERTION TO DETECT FAILURE" << endl;
+//     for
+//     (
+//         List<Point>::iterator pit=points.begin();
+//         pit != points.end();
+//         ++pit
+//     )
+//     {
+//         insertPoint(topoint(*pit), Vb::vtInternal);
+//     }
 
     label nInserted(number_of_vertices() - preInsertionSize);
 
@@ -386,31 +394,14 @@ void Foam::conformalVoronoiMesh::insertPoints
         //     << " points in total" << endl;
     }
 
-    // Using index is actually pointless, it is always zero.  Keep for clarity
-    // of code.
-
-    forAll(pts, pI)
-    {
-        // creation of points and indices is done assuming that it will be
-        // relative to the instantaneous number_of_vertices() at insertion.
-
-        label type = types[pI];
-
-        if (type > Vb::vtFar)
-        {
-            // This is a member of a point pair, don't use the type directly
-            // (note that this routine never gets called for referredPoints
-            //  so type will never be -procI)
-            type += number_of_vertices();
-        }
-
-        insertPoint
-        (
-            pts[pI],
-            indices[pI] + number_of_vertices(),
-            type
-        );
-    }
+    rangeInsertWithInfo
+    (
+        pts.begin(),
+        pts.end(),
+        *this,
+        indices,
+        types
+    );
 }
 
 
@@ -507,734 +498,6 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 }
 
 
-void Foam::conformalVoronoiMesh::createEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    label edgeI = edHit.index();
-
-    extendedFeatureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
-
-    switch (edStatus)
-    {
-        case extendedFeatureEdgeMesh::EXTERNAL:
-        {
-            createExternalEdgePointGroup(feMesh, edHit, pts, indices, types);
-            break;
-        }
-        case extendedFeatureEdgeMesh::INTERNAL:
-        {
-            createInternalEdgePointGroup(feMesh, edHit, pts, indices, types);
-            break;
-        }
-        case extendedFeatureEdgeMesh::FLAT:
-        {
-            createFlatEdgePointGroup(feMesh, edHit, pts, indices, types);
-            break;
-        }
-        case extendedFeatureEdgeMesh::OPEN:
-        {
-            createOpenEdgePointGroup(feMesh, edHit, pts, indices, types);
-            break;
-        }
-        case extendedFeatureEdgeMesh::MULTIPLE:
-        {
-            createMultipleEdgePointGroup(feMesh, edHit, pts, indices, types);
-            break;
-        }
-        case extendedFeatureEdgeMesh::NONE:
-        {
-            break;
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    const Foam::point& edgePt = edHit.hitPoint();
-
-    scalar ppDist = pointPairDistance(edgePt);
-
-    const vectorField& feNormals = feMesh.normals();
-    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
-
-    // As this is an external edge, there are two normals by definition
-    const vector& nA = feNormals[edNormalIs[0]];
-    const vector& nB = feNormals[edNormalIs[1]];
-
-    if (mag(nA & nB) > 1 - SMALL)
-    {
-        // The normals are nearly parallel, so this is too sharp a feature to
-        // conform to.
-
-        return;
-    }
-
-    // Normalised distance of reference point from edge point
-    vector refVec((nA + nB)/(1 + (nA & nB)));
-
-    if (magSqr(refVec) > sqr(5.0))
-    {
-        // Limit the size of the conformation
-        ppDist *= 5.0/mag(refVec);
-
-        // Pout<< nl << "createExternalEdgePointGroup limit "
-        //     << "edgePt " << edgePt << nl
-        //     << "refVec " << refVec << nl
-        //     << "mag(refVec) " << mag(refVec) << nl
-        //     << "ppDist " << ppDist << nl
-        //     << "nA " << nA << nl
-        //     << "nB " << nB << nl
-        //     << "(nA & nB) " << (nA & nB) << nl
-        //     << endl;
-    }
-
-    // Convex. So refPt will be inside domain and hence a master point
-    Foam::point refPt = edgePt - ppDist*refVec;
-
-    // Result when the points are eventually inserted.
-    // Add number_of_vertices() at insertion of first vertex to all numbers:
-    // pt           index type
-    // refPt        0     1
-    // reflectedA   1     0
-    // reflectedB   2     0
-
-    // Insert the master point pairing the the first slave
-
-    pts.append(refPt);
-    indices.append(0);
-    types.append(1);
-
-    // Insert the slave points by reflecting refPt in both faces.
-    // with each slave refering to the master
-
-    Foam::point reflectedA = refPt + 2*ppDist*nA;
-    pts.append(reflectedA);
-    indices.append(0);
-    types.append(-1);
-
-    Foam::point reflectedB = refPt + 2*ppDist*nB;
-    pts.append(reflectedB);
-    indices.append(0);
-    types.append(-2);
-}
-
-
-void Foam::conformalVoronoiMesh::createInternalEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    const Foam::point& edgePt = edHit.hitPoint();
-
-    scalar ppDist = pointPairDistance(edgePt);
-
-    const vectorField& feNormals = feMesh.normals();
-    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
-
-    // As this is an external edge, there are two normals by definition
-    const vector& nA = feNormals[edNormalIs[0]];
-    const vector& nB = feNormals[edNormalIs[1]];
-
-    if (mag(nA & nB) > 1 - SMALL)
-    {
-        // The normals are nearly parallel, so this is too sharp a feature to
-        // conform to.
-
-        return;
-    }
-
-    // Normalised distance of reference point from edge point
-    vector refVec((nA + nB)/(1 + (nA & nB)));
-
-    if (magSqr(refVec) > sqr(5.0))
-    {
-        // Limit the size of the conformation
-        ppDist *= 5.0/mag(refVec);
-
-        // Pout<< nl << "createInternalEdgePointGroup limit "
-        //     << "edgePt " << edgePt << nl
-        //     << "refVec " << refVec << nl
-        //     << "mag(refVec) " << mag(refVec) << nl
-        //     << "ppDist " << ppDist << nl
-        //     << "nA " << nA << nl
-        //     << "nB " << nB << nl
-        //     << "(nA & nB) " << (nA & nB) << nl
-        //     << endl;
-    }
-
-    // Concave. master and reflected points inside the domain.
-    Foam::point refPt = edgePt - ppDist*refVec;
-
-    // Generate reflected master to be outside.
-    Foam::point reflMasterPt = refPt + 2*(edgePt - refPt);
-
-    // Reflect reflMasterPt in both faces.
-    Foam::point reflectedA = reflMasterPt - 2*ppDist*nA;
-
-    Foam::point reflectedB = reflMasterPt - 2*ppDist*nB;
-
-    scalar totalAngle =
-        radToDeg(constant::mathematical::pi + acos(nA & nB));
-
-    // Number of quadrants the angle should be split into
-    int nQuads = int(totalAngle/cvMeshControls().maxQuadAngle()) + 1;
-
-    // The number of additional master points needed to obtain the
-    // required number of quadrants.
-    int nAddPoints = min(max(nQuads - 2, 0), 2);
-
-    // index of reflMaster
-    label reflectedMaster = 2 + nAddPoints;
-
-    // Add number_of_vertices() at insertion of first vertex to all numbers:
-    // Result for nAddPoints 1 when the points are eventually inserted
-    // pt           index type
-    // reflectedA   0     2
-    // reflectedB   1     2
-    // reflMasterPt 2     0
-
-    // Result for nAddPoints 1 when the points are eventually inserted
-    // pt           index type
-    // reflectedA   0     3
-    // reflectedB   1     3
-    // refPt        2     3
-    // reflMasterPt 3     0
-
-    // Result for nAddPoints 2 when the points are eventually inserted
-    // pt           index type
-    // reflectedA   0     4
-    // reflectedB   1     4
-    // reflectedAa  2     4
-    // reflectedBb  3     4
-    // reflMasterPt 4     0
-
-    // Master A is inside.
-    pts.append(reflectedA);
-    indices.append(0);
-    types.append(reflectedMaster--);
-
-    // Master B is inside.
-    pts.append(reflectedB);
-    indices.append(0);
-    types.append(reflectedMaster--);
-
-    if (nAddPoints == 1)
-    {
-        // One additinal point is the reflection of the slave point,
-        // i.e. the original reference point
-        pts.append(refPt);
-        indices.append(0);
-        types.append(reflectedMaster--);
-    }
-    else if (nAddPoints == 2)
-    {
-        Foam::point reflectedAa = refPt + ppDist*nB;
-        pts.append(reflectedAa);
-        indices.append(0);
-        types.append(reflectedMaster--);
-
-        Foam::point reflectedBb = refPt + ppDist*nA;
-        pts.append(reflectedBb);
-        indices.append(0);
-        types.append(reflectedMaster--);
-    }
-
-    // Slave is outside.
-    pts.append(reflMasterPt);
-    indices.append(0);
-    types.append(-(nAddPoints + 2));
-}
-
-
-void Foam::conformalVoronoiMesh::createFlatEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    const Foam::point& edgePt = edHit.hitPoint();
-
-    scalar ppDist = pointPairDistance(edgePt);
-
-    const vectorField& feNormals = feMesh.normals();
-    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
-
-    // As this is a flat edge, there are two normals by definition
-    const vector& nA = feNormals[edNormalIs[0]];
-    const vector& nB = feNormals[edNormalIs[1]];
-
-    // Average normal to remove any bias to one side, although as this
-    // is a flat edge, the normals should be essentially the same
-    vector n = 0.5*(nA + nB);
-
-    // Direction along the surface to the control point, sense of edge
-    // direction not important, as +s and -s can be used because this
-    // is a flat edge
-    vector s = 2.0*ppDist*(feMesh.edgeDirections()[edHit.index()] ^ n);
-
-    createPointPair(ppDist, edgePt + s, n, pts, indices, types);
-    createPointPair(ppDist, edgePt - s, n, pts, indices, types);
-}
-
-
-void Foam::conformalVoronoiMesh::createOpenEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    Info<< "NOT INSERTING OPEN EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::createMultipleEdgePointGroup
-(
-    const extendedFeatureEdgeMesh& feMesh,
-    const pointIndexHit& edHit,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    Info<< "NOT INSERTING MULTIPLE EDGE POINT GROUP, NOT IMPLEMENTED"
-        << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::insertFeaturePoints()
-{
-    Info<< nl << "Conforming to feature points" << endl;
-
-    DynamicList<Foam::point> pts;
-    DynamicList<label> indices;
-    DynamicList<label> types;
-
-    label preFeaturePointSize = number_of_vertices();
-
-    createConvexFeaturePoints(pts, indices, types);
-
-    createConcaveFeaturePoints(pts, indices, types);
-
-    createMixedFeaturePoints(pts, indices, types);
-
-    // Insert the created points, distributing to the appropriate processor
-    insertPoints(pts, indices, types, true);
-
-    if (cvMeshControls().objOutput())
-    {
-        writePoints("featureVertices.obj", pts);
-    }
-
-    label nFeatureVertices = number_of_vertices() - preFeaturePointSize;
-
-    if (Pstream::parRun())
-    {
-        reduce(nFeatureVertices, sumOp<label>());
-    }
-
-    if (nFeatureVertices > 0)
-    {
-        Info<< "    Inserted " << nFeatureVertices
-            << " feature vertices" << endl;
-    }
-
-    featureVertices_.clear();
-
-    forAll(pts, pI)
-    {
-        featureVertices_.push_back
-        (
-            Vb(toPoint(pts[pI]), indices[pI], types[pI])
-        );
-    }
-
-    constructFeaturePointLocations();
-}
-
-
-void Foam::conformalVoronoiMesh::createConvexFeaturePoints
-(
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    const PtrList<extendedFeatureEdgeMesh>& feMeshes
-    (
-        geometryToConformTo_.features()
-    );
-
-    forAll(feMeshes, i)
-    {
-        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
-
-        for
-        (
-            label ptI = feMesh.convexStart();
-            ptI < feMesh.concaveStart();
-            ptI++
-        )
-        {
-            const Foam::point& featPt = feMesh.points()[ptI];
-
-            if (!positionOnThisProc(featPt))
-            {
-                continue;
-            }
-
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
-
-            vector cornerNormal = sum(featPtNormals);
-            cornerNormal /= mag(cornerNormal);
-
-            Foam::point internalPt =
-                featPt - pointPairDistance(featPt)*cornerNormal;
-
-            // Result when the points are eventually inserted (example n = 4)
-            // Add number_of_vertices() at insertion of first vertex to all
-            // numbers:
-            // pt           index type
-            // internalPt   0     1
-            // externalPt0  1     0
-            // externalPt1  2     0
-            // externalPt2  3     0
-            // externalPt3  4     0
-
-            pts.append(internalPt);
-            indices.append(0);
-            types.append(1);
-
-            label internalPtIndex = -1;
-
-            forAll(featPtNormals, nI)
-            {
-                const vector& n = featPtNormals[nI];
-
-                plane planeN = plane(featPt, n);
-
-                Foam::point externalPt =
-                    internalPt + 2.0 * planeN.distance(internalPt) * n;
-
-                pts.append(externalPt);
-                indices.append(0);
-                types.append(internalPtIndex--);
-            }
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::createConcaveFeaturePoints
-(
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    const PtrList<extendedFeatureEdgeMesh>& feMeshes
-    (
-        geometryToConformTo_.features()
-    );
-
-    forAll(feMeshes, i)
-    {
-        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
-
-        for
-        (
-            label ptI = feMesh.concaveStart();
-            ptI < feMesh.mixedStart();
-            ptI++
-        )
-        {
-            const Foam::point& featPt = feMesh.points()[ptI];
-
-            if (!positionOnThisProc(featPt))
-            {
-                continue;
-            }
-
-            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
-
-            vector cornerNormal = sum(featPtNormals);
-            cornerNormal /= mag(cornerNormal);
-
-            Foam::point externalPt =
-                featPt + pointPairDistance(featPt)*cornerNormal;
-
-            label externalPtIndex = featPtNormals.size();
-
-            // Result when the points are eventually inserted (example n = 5)
-            // Add number_of_vertices() at insertion of first vertex to all
-            // numbers:
-            // pt           index type
-            // internalPt0  0     5
-            // internalPt1  1     5
-            // internalPt2  2     5
-            // internalPt3  3     5
-            // internalPt4  4     5
-            // externalPt   5     4
-
-            forAll(featPtNormals, nI)
-            {
-                const vector& n = featPtNormals[nI];
-
-                plane planeN = plane(featPt, n);
-
-                Foam::point internalPt =
-                    externalPt - 2.0 * planeN.distance(externalPt) * n;
-
-                pts.append(internalPt);
-                indices.append(0);
-                types.append(externalPtIndex--);
-            }
-
-            pts.append(externalPt);
-            indices.append(0);
-            types.append(-1);
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::createMixedFeaturePoints
-(
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
-)
-{
-    if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
-    {
-        Info<<nl << "Skipping specialised handling for mixed feature points"
-            << endl;
-        return;
-    }
-
-    const PtrList<extendedFeatureEdgeMesh>& feMeshes
-    (
-        geometryToConformTo_.features()
-    );
-
-    forAll(feMeshes, i)
-    {
-        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
-
-        for
-        (
-            label ptI = feMesh.mixedStart();
-            ptI < feMesh.nonFeatureStart();
-            ptI++
-        )
-        {
-            if
-            (
-                !createSpecialisedFeaturePoint(feMesh, ptI, pts, indices, types)
-            )
-            {
-                // Specialisations available for some mixed feature points.  For
-                // non-specialised feature points, inserting mixed internal and
-                // external edge groups at feature point.
-
-                const labelList& pEds(feMesh.pointEdges()[ptI]);
-
-                // Skipping unsupported mixed feature point types
-
-                bool skipEdge = false;
-
-                forAll(pEds, e)
-                {
-                    label edgeI = pEds[e];
-
-                    extendedFeatureEdgeMesh::edgeStatus edStatus =
-                        feMesh.getEdgeStatus(edgeI);
-
-                    if
-                    (
-                        edStatus == extendedFeatureEdgeMesh::OPEN
-                     || edStatus == extendedFeatureEdgeMesh::MULTIPLE
-                    )
-                    {
-                        Info<< "Edge type " << edStatus
-                            << " found for mixed feature point " << ptI
-                            << ". Not supported."
-                            << endl;
-
-                        skipEdge = true;
-                    }
-                }
-
-                if (skipEdge)
-                {
-                    Info<< "Skipping point " << ptI << nl << endl;
-
-                    continue;
-                }
-
-                const Foam::point& pt(feMesh.points()[ptI]);
-
-                if (!positionOnThisProc(pt))
-                {
-                    continue;
-                }
-
-                scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
-
-                forAll(pEds, e)
-                {
-                    label edgeI = pEds[e];
-
-                    Foam::point edgePt =
-                        pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
-
-                    pointIndexHit edgeHit(true, edgePt, edgeI);
-
-                    createEdgePointGroup(feMesh, edgeHit, pts, indices, types);
-                }
-            }
-        }
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
-{
-    DynamicList<Foam::point> ftPtLocs;
-
-    const PtrList<extendedFeatureEdgeMesh>& feMeshes
-    (
-        geometryToConformTo_.features()
-    );
-
-    forAll(feMeshes, i)
-    {
-        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
-
-
-        if (cvMeshControls().mixedFeaturePointPPDistanceCoeff() < 0)
-        {
-            // Ignoring mixed feature points
-            for
-            (
-                label ptI = feMesh.convexStart();
-                ptI < feMesh.mixedStart();
-                ptI++
-            )
-            {
-                ftPtLocs.append(feMesh.points()[ptI]);
-            }
-        }
-        else
-        {
-            for
-            (
-                label ptI = feMesh.convexStart();
-                ptI < feMesh.nonFeatureStart();
-                ptI++
-            )
-            {
-                ftPtLocs.append(feMesh.points()[ptI]);
-            }
-        }
-    }
-
-    featurePointLocations_.transfer(ftPtLocs);
-}
-
-
-void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
-{
-    Info<< nl << "Reinserting stored feature points" << endl;
-
-    label preReinsertionSize(number_of_vertices());
-
-    if (distribute)
-    {
-        DynamicList<Foam::point> pointsToInsert;
-        DynamicList<label> indices;
-        DynamicList<label> types;
-
-        for
-        (
-            std::list<Vb>::iterator vit=featureVertices_.begin();
-            vit != featureVertices_.end();
-            ++vit
-        )
-        {
-            pointsToInsert.append(topoint(vit->point()));
-            indices.append(vit->index());
-            types.append(vit->type());
-        }
-
-        // Insert distributed points
-        insertPoints(pointsToInsert, indices, types, true);
-
-        // Save points in new distribution
-        featureVertices_.clear();
-
-        forAll(pointsToInsert, pI)
-        {
-            featureVertices_.push_back
-            (
-                Vb(toPoint(pointsToInsert[pI]), indices[pI], types[pI])
-            );
-        }
-    }
-    else
-    {
-        for
-        (
-            std::list<Vb>::iterator vit=featureVertices_.begin();
-            vit != featureVertices_.end();
-            ++vit
-        )
-        {
-            // Assuming that all of the reinsertions are pair points, and that
-            // the index and type are relative, i.e. index 0 and type relative
-            // to it.
-            insertPoint
-            (
-                vit->point(),
-                vit->index() + number_of_vertices(),
-                vit->type() + number_of_vertices()
-            );
-        }
-    }
-
-    Info<< "    Reinserted "
-        << returnReduce
-        (
-            label(number_of_vertices()) - preReinsertionSize,
-            sumOp<label>()
-        )
-        << " vertices" << endl;
-}
-
-
 const Foam::indexedOctree<Foam::treeDataPoint>&
 Foam::conformalVoronoiMesh::featurePointTree() const
 {
@@ -1277,33 +540,17 @@ bool Foam::conformalVoronoiMesh::nearFeaturePt(const Foam::point& pt) const
 }
 
 
-void Foam::conformalVoronoiMesh::reset()
+void Foam::conformalVoronoiMesh::reset(const bool distribute)
 {
     this->clear();
 
-    insertBoundingPoints();
-}
+    reinsertBoundingPoints();
 
+    // Reinsert feature points, distributing them as necessary.
+    reinsertFeaturePoints(distribute);
+    //insertFeaturePoints();
 
-void Foam::conformalVoronoiMesh::insertBoundingPoints()
-{
-    pointField farPts = geometryToConformTo_.globalBounds().points();
-
-    // Shift corners of bounds relative to origin
-    farPts -= geometryToConformTo_.globalBounds().midpoint();
-
-    // Scale the box up
-    farPts *= 10.0;
-
-    // Shift corners of bounds back to be relative to midpoint
-    farPts += geometryToConformTo_.globalBounds().midpoint();
-
-    limitBounds_ = treeBoundBox(farPts);
-
-    forAll(farPts, fPI)
-    {
-        insertPoint(farPts[fPI], Vb::vtFar);
-    }
+    startOfInternalPoints_ = number_of_vertices();
 }
 
 
@@ -1313,7 +560,7 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     timeCheck("Before initial points call");
 
-    std::list<Point> initPts = initialPointsMethod_->initialPoints();
+    List<Point> initPts = initialPointsMethod_->initialPoints();
 
     timeCheck("After initial points call");
 
@@ -1466,13 +713,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
             cellVertexTypes
         );
 
-        // Remove the entire tessellation
-        reset();
-
-        // Reinsert feature points, distributing them as necessary.
-        reinsertFeaturePoints(true);
-
-        startOfInternalPoints_ = number_of_vertices();
+        // Reset the entire tessellation
+        reset(true);
 
         timeCheck("Distribution performed");
 
@@ -1533,7 +775,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
 {
-    std::list<Point> storePts;
+    DynamicList<Point> storePts(number_of_vertices());
 
     for
     (
@@ -1544,9 +786,11 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
     {
         if (vit->internalPoint())
         {
-            storePts.push_back(vit->point());
+            storePts.append(vit->point());
         }
     }
+
+    storePts.shrink();
 
     storeSizesAndAlignments(storePts);
 }
@@ -1554,7 +798,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments()
 
 void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 (
-    const std::list<Point>& storePts
+    const List<Point>& storePts
 )
 {
     timeCheck("Start of storeSizesAndAlignments");
@@ -1571,7 +815,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     for
     (
-        std::list<Point>::const_iterator pit=storePts.begin();
+        List<Point>::const_iterator pit = storePts.begin();
         pit != storePts.end();
         ++pit
     )
@@ -1598,7 +842,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
 void Foam::conformalVoronoiMesh::updateSizesAndAlignments
 (
-    const std::list<Point>& storePts
+    const List<Point>& storePts
 )
 {
     // This function is only used in serial, the background redistribution
@@ -1909,7 +1153,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     Delaunay(),
     runTime_(runTime),
     rndGen_(64293*Pstream::myProcNo()),
-    cvMeshControls_(*this, cvMeshDict),
+    cvMeshControls_(cvMeshDict),
     allGeometry_
     (
         IOobject
@@ -1940,6 +1184,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     featureVertices_(),
     featurePointLocations_(),
     featurePointTreePtr_(),
+    edgeLocationTreePtr_(),
+    surfacePtLocationTreePtr_(),
     sizeAndAlignmentLocations_(),
     storedSizes_(),
     storedAlignments_(),
@@ -1965,8 +1211,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     (
         faceAreaWeightModel::New
         (
-            cvMeshDict.subDict("motionControl"),
-            *this
+            cvMeshDict.subDict("motionControl")
         )
     ),
     decomposition_()
@@ -2100,7 +1345,7 @@ void Foam::conformalVoronoiMesh::move()
         true
     );
 
-    std::list<Point> pointsToInsert;
+    DynamicList<Point> pointsToInsert(number_of_vertices());
 
     for
     (
@@ -2137,15 +1382,15 @@ void Foam::conformalVoronoiMesh::move()
 
             forAll(alignmentDirsA, aA)
             {
-                const vector& a(alignmentDirsA[aA]);
+                const vector& a = alignmentDirsA[aA];
 
                 scalar maxDotProduct = 0.0;
 
                 forAll(alignmentDirsB, aB)
                 {
-                    const vector& b(alignmentDirsB[aB]);
+                    const vector& b = alignmentDirsB[aB];
 
-                    scalar dotProduct = a & b;
+                    const scalar dotProduct = a & b;
 
                     if (mag(dotProduct) > maxDotProduct)
                     {
@@ -2179,7 +1424,7 @@ void Foam::conformalVoronoiMesh::move()
                      && pointToBeRetained[vB->index()] == true
                     )
                     {
-                        pointsToInsert.push_back
+                        pointsToInsert.append
                         (
                             toPoint(0.5*(dVA + dVB))
                         );
@@ -2212,7 +1457,7 @@ void Foam::conformalVoronoiMesh::move()
                     alignmentDir *= -1;
                 }
 
-                scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+                const scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
 
                 if
                 (
@@ -2220,9 +1465,9 @@ void Foam::conformalVoronoiMesh::move()
                   > cvMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
-                    scalar targetCellSize = averageCellSize(vA, vB);
+                    const scalar targetCellSize = averageCellSize(vA, vB);
 
-                    scalar targetFaceArea = sqr(targetCellSize);
+                    const scalar targetFaceArea = sqr(targetCellSize);
 
                     alignmentDir *= 0.5*targetCellSize;
 
@@ -2231,7 +1476,7 @@ void Foam::conformalVoronoiMesh::move()
                     // directions.
                     vector delta = alignmentDir - 0.5*rAB;
 
-                    scalar faceArea = dualFace.mag(dualVertices);
+                    const scalar faceArea = dualFace.mag(dualVertices);
 
                     delta *= faceAreaWeightModel_->faceAreaWeight
                     (
@@ -2262,8 +1507,7 @@ void Foam::conformalVoronoiMesh::move()
                         )
                         {
                             // Prevent insertions spanning surfaces
-
-                            pointsToInsert.push_back
+                            pointsToInsert.append
                             (
                                 toPoint(0.5*(dVA + dVB))
                             );
@@ -2285,14 +1529,13 @@ void Foam::conformalVoronoiMesh::move()
                             // the short edge if neither attached
                             // point has already been identified to be
                             // removed.
-
                             if
                             (
                                 pointToBeRetained[vA->index()] == true
                              && pointToBeRetained[vB->index()] == true
                             )
                             {
-                                pointsToInsert.push_back
+                                pointsToInsert.append
                                 (
                                     toPoint(0.5*(dVA + dVB))
                                 );
@@ -2371,7 +1614,7 @@ void Foam::conformalVoronoiMesh::move()
                 // Only necessary if using an exact constructions kernel
                 // (extended precision)
 
-                pointsToInsert.push_back
+                pointsToInsert.append
                 (
                     toPoint
                     (
@@ -2383,12 +1626,44 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
+    pointsToInsert.shrink();
+
+    // Save displacements to file.
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        Pout<< "Writing point displacement vectors to file." << endl;
+        OFstream str("displacements_" + runTime_.timeName() + ".obj");
+
+        for
+        (
+            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+            vit != finite_vertices_end();
+            ++vit
+        )
+        {
+            if (vit->internalPoint())
+            {
+                if (pointToBeRetained[vit->index()] == true)
+                {
+                    meshTools::writeOBJ(str, topoint(vit->point()));
+
+                    str << "vn "
+                        << displacementAccumulator[vit->index()][0] << " "
+                        << displacementAccumulator[vit->index()][1] << " "
+                        << displacementAccumulator[vit->index()][2] << " "
+                        << endl;
+                }
+            }
+        }
+    }
+
     // Remove the entire tessellation
     reset();
 
-    reinsertFeaturePoints();
-
-    startOfInternalPoints_ = number_of_vertices();
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        writePoints("featurePoints_" + runTime_.timeName() + ".obj", false);
+    }
 
     timeCheck("Displacement calculated");
 
@@ -2396,19 +1671,29 @@ void Foam::conformalVoronoiMesh::move()
 
     insertPoints(pointsToInsert);
 
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        writePoints("points_" + runTime_.timeName() + ".obj", false);
+    }
+
     timeCheck("Internal points inserted");
 
     conformToSurface();
 
-    timeCheck("After conformToSurface");
+    if (cvMeshControls().objOutput() && runTime_.outputTime())
+    {
+        writeBoundaryPoints("boundaryPoints_" + runTime_.timeName() + ".obj");
+    }
 
-    updateSizesAndAlignments(pointsToInsert);
+    timeCheck("After conformToSurface");
 
     // Write the intermediate mesh, do not filter the dual faces.
     if (runTime_.outputTime())
     {
         writeMesh(runTime_.timeName(), false);
     }
+
+    updateSizesAndAlignments(pointsToInsert);
 
     Info<< nl
         << "Total displacement = " << totalDisp << nl

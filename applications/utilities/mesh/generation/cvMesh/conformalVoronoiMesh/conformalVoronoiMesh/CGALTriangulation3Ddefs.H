@@ -72,6 +72,48 @@ typedef Delaunay::Cell_handle      Cell_handle;
 typedef Delaunay::Point            Point;
 
 
+//- Spatial sort traits to use with a pair of point pointers and an integer.
+//  Taken from a post on the CGAL lists: 2010-01/msg00004.html by
+//  Sebastien Loriot (Geometry Factory).
+template<class Triangulation>
+struct Traits_for_spatial_sort
+:
+    public Triangulation::Geom_traits
+{
+    typedef typename Triangulation::Geom_traits Gt;
+
+    typedef std::pair<const typename Triangulation::Point*, int> Point_3;
+
+    struct Less_x_3
+    {
+        bool operator()(const Point_3& p, const Point_3& q) const
+        {
+            return typename Gt::Less_x_3()(*(p.first), *(q.first));
+        }
+    };
+
+    struct Less_y_3
+    {
+        bool operator()(const Point_3& p, const Point_3& q) const
+        {
+            return typename Gt::Less_y_3()(*(p.first), *(q.first));
+        }
+    };
+
+    struct Less_z_3
+    {
+        bool operator()(const Point_3& p, const Point_3& q) const
+        {
+            return typename Gt::Less_z_3()(*(p.first), *(q.first));
+        }
+    };
+
+    Less_x_3  less_x_3_object () const {return Less_x_3();}
+    Less_y_3  less_y_3_object () const {return Less_y_3();}
+    Less_z_3  less_z_3_object () const {return Less_z_3();}
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

@@ -39,7 +39,6 @@ SourceFiles
 #define faceAreaWeightModel_H
 
 #include "point.H"
-#include "conformalVoronoiMesh.H"
 #include "dictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -61,9 +60,6 @@ class faceAreaWeightModel
 protected:
 
     // Protected data
-
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
-        const conformalVoronoiMesh& cvMesh_;
 
         //- Method coeffs dictionary
         dictionary coeffDict_;
@@ -93,10 +89,9 @@ public:
             faceAreaWeightModel,
             dictionary,
             (
-                const dictionary& faceAreaWeightDict,
-                const conformalVoronoiMesh& cvMesh
+                const dictionary& faceAreaWeightDict
             ),
-            (faceAreaWeightDict, cvMesh)
+            (faceAreaWeightDict)
         );
 
 
@@ -106,8 +101,7 @@ public:
         faceAreaWeightModel
         (
             const word& type,
-            const dictionary& faceAreaWeightDict,
-            const conformalVoronoiMesh& cvMesh
+            const dictionary& faceAreaWeightDict
         );
 
 
@@ -116,8 +110,7 @@ public:
         //- Return a reference to the selected faceAreaWeightModel
         static autoPtr<faceAreaWeightModel> New
         (
-            const dictionary& faceAreaWeightDict,
-            const conformalVoronoiMesh& cvMesh
+            const dictionary& faceAreaWeightDict
         );
 
 

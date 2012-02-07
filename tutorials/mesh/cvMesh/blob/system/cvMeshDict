@@ -59,6 +59,7 @@ initialPoints
 
     autoDensityCoeffs
     {
+        minCellSizeLimit 0.04;
         minLevels 0;
         maxSizeRatio 5.0;
         sampleResolution 5;
@@ -92,44 +93,34 @@ surfaceConformation
 
     surfaceConformationRebuildFrequency 10;
 
-    coarseConformationControls
+    conformationControls
     {
         initial
         {
-            edgeSearchDistCoeff         1.1;
-            surfacePtReplaceDistCoeff   0.5;
+            edgeSearchDistCoeff             2;
+            surfacePtReplaceDistCoeff       0.5;
+            surfacePtExclusionDistanceCoeff 0.5;
         }
 
         iteration
         {
-            edgeSearchDistCoeff         1.25;
+            edgeSearchDistCoeff         1.5;
             surfacePtReplaceDistCoeff   0.7;
         }
 
         maxIterations 15;
 
-        iterationToIntialHitRatioLimit 0.01;
-        iterationToInitialHitRatioLimit 0.01;
+        iterationToInitialHitRatioLimit 0.0001;
+    }
+
+    coarseConformationControls
+    {
+        $conformationControls;
     }
 
     fineConformationControls
     {
-        initial
-        {
-            edgeSearchDistCoeff         1.1;
-            surfacePtReplaceDistCoeff   0.5;
-        }
-
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
-
-        maxIterations 15;
-
-        iterationToInitialHitRatioLimit 0.002;
-        iterationToIntialHitRatioLimit 0.002;
+        $conformationControls;
     }
 
     geometryToConformTo
@@ -197,7 +188,7 @@ motionControl
 
     pointRemovalCriteria
     {
-        cellCentreDistCoeff  0.65;
+        cellCentreDistCoeff     0.65;
     }
 
     faceAreaWeightModel piecewiseLinearRamp;
@@ -225,20 +216,21 @@ polyMeshFiltering
     maxCollapseFaceToPointSideLengthCoeff   0.35;
 }
 
+
 meshQualityControls
 {
-    maxNonOrtho 65;
+    maxNonOrtho         65;
     maxBoundarySkewness 50;
     maxInternalSkewness 10;
-    maxConcave 80;
-    minVol 1e-20;
-    minTetQuality 1e-30;
-    minArea -1;
-    minTwist 0.0;
-    minDeterminant 0.001;
-    minFaceWeight 0.02;
-    minVolRatio 0.01;
-    minTriangleTwist -1;
+    maxConcave          80;
+    minVol              1e-20;
+    minTetQuality       1e-30;
+    minArea             -1;
+    minTwist            0.0;
+    minDeterminant      0.001;
+    minFaceWeight       0.02;
+    minVolRatio         0.01;
+    minTriangleTwist    -1;
 }
 
 // ************************************************************************* //

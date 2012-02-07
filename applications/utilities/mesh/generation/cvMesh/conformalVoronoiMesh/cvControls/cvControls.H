@@ -54,9 +54,6 @@ class cvControls
 {
     // Private data
 
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
-        const conformalVoronoiMesh& cvMesh_;
-
         //- Reference to the cvMeshDict
         const dictionary& cvMeshDict_;
 
@@ -80,6 +77,9 @@ class cvControls
             //  fraction of the local target cell size
             scalar featureEdgeExclusionDistanceCoeff_;
 
+            //- Switch for using specialised feature points
+            Switch specialiseFeaturePoints_;
+
             //- Surface search distance coefficient - fraction of the local
             //  target cell size
             scalar surfaceSearchDistanceCoeff_;
@@ -98,6 +98,11 @@ class cvControls
 
 
             // Controls for coarse surface conformation
+
+                //- Distance to an existing surface conformation point location
+                //  within which other surface point locations are excluded
+                //  - fraction of the local target cell size
+                scalar surfacePtExclusionDistanceCoeff_;
 
                 //- Distance to search for feature edges near to
                 //  surface protrusions - fraction of the local target
@@ -291,7 +296,6 @@ public:
         //- Construct from references to conformalVoronoiMesh and dictionary
         cvControls
         (
-            const conformalVoronoiMesh& cvMesh,
             const dictionary& cvMeshDict
         );
 
@@ -318,6 +322,12 @@ public:
 
             //- Return the featureEdgeExclusionDistanceCoeff
             inline scalar featureEdgeExclusionDistanceCoeff() const;
+
+            //- Return the surfacePtExclusionDistanceCoeff
+            inline scalar surfacePtExclusionDistanceCoeff() const;
+
+            //- Return whether to use specialised feature points
+            inline Switch specialiseFeaturePoints() const;
 
             //- Return the surfaceSearchDistanceCoeff
             inline scalar surfaceSearchDistanceCoeff() const;

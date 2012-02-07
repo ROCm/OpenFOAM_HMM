@@ -56,7 +56,7 @@ bodyCentredCubic::bodyCentredCubic
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::list<Vb::Point> bodyCentredCubic::initialPoints() const
+List<Vb::Point> bodyCentredCubic::initialPoints() const
 {
     boundBox bb;
 
@@ -91,7 +91,7 @@ std::list<Vb::Point> bodyCentredCubic::initialPoints() const
 
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::list<Vb::Point> initialPoints;
+    DynamicList<Vb::Point> initialPoints(ni*nj*nk/10);
 
     for (label i = 0; i < ni; i++)
     {
@@ -177,13 +177,13 @@ std::list<Vb::Point> bodyCentredCubic::initialPoints() const
                 {
                     const point& p(points[i]);
 
-                    initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+                    initialPoints.append(Vb::Point(p.x(), p.y(), p.z()));
                 }
             }
         }
     }
 
-    return initialPoints;
+    return initialPoints.shrink();
 }
 
 
