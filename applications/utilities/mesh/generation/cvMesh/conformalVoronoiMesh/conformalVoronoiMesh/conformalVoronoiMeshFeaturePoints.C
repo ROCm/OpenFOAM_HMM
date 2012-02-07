@@ -84,12 +84,12 @@ void Foam::conformalVoronoiMesh::createEdgePointGroup
         }
         case extendedFeatureEdgeMesh::OPEN:
         {
-            createOpenEdgePointGroup(feMesh, edHit, pts, indices, types);
+            //createOpenEdgePointGroup(feMesh, edHit, pts, indices, types);
             break;
         }
         case extendedFeatureEdgeMesh::MULTIPLE:
         {
-            createMultipleEdgePointGroup(feMesh, edHit, pts, indices, types);
+            //createMultipleEdgePointGroup(feMesh, edHit, pts, indices, types);
             break;
         }
         case extendedFeatureEdgeMesh::NONE:
@@ -124,7 +124,6 @@ void Foam::conformalVoronoiMesh::createExternalEdgePointGroup
     {
         // The normals are nearly parallel, so this is too sharp a feature to
         // conform to.
-
         return;
     }
 
@@ -448,6 +447,40 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints(bool distribute)
 }
 
 
+bool Foam::conformalVoronoiMesh::edgesShareNormal
+(
+    const label e1,
+    const label e2
+) const
+{
+    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+    (
+        geometryToConformTo_.features()
+    );
+
+    forAll(feMeshes, i)
+    {
+        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
+
+        const vectorField& e1normals = feMesh.edgeNormals(e1);
+        const vectorField& e2normals = feMesh.edgeNormals(e2);
+
+        forAll(e1normals, nI1)
+        {
+            forAll(e2normals, nI2)
+            {
+                if (degAngleBetween(e1normals[nI1], e2normals[nI2]) < 1)
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
 void Foam::conformalVoronoiMesh::createConvexFeaturePoints
 (
     DynamicList<Foam::point>& pts,
@@ -479,6 +512,7 @@ void Foam::conformalVoronoiMesh::createConvexFeaturePoints
             }
 
             const vectorField& featPtNormals = feMesh.featurePointNormals(ptI);
+
             const scalar ppDist = - pointPairDistance(featPt);
 
             vector cornerNormal = sum(featPtNormals);
@@ -706,6 +740,61 @@ void Foam::conformalVoronoiMesh::createMixedFeaturePoints
     }
 }
 
+//
+//void Foam::conformalVoronoiMesh::createFeaturePoints
+//(
+//    DynamicList<Foam::point>& pts,
+//    DynamicList<label>& indices,
+//    DynamicList<label>& types
+//)
+//{
+//    const PtrList<extendedFeatureEdgeMesh>& feMeshes
+//    (
+//        geometryToConformTo_.features()
+//    );
+//
+//    forAll(feMeshes, i)
+//    {
+//        const extendedFeatureEdgeMesh& feMesh(feMeshes[i]);
+//
+//        for
+//        (
+//            label ptI = feMesh.convexStart();
+//            ptI < feMesh.mixedStart();
+//            ++ptI
+//        )
+//        {
+//            const Foam::point& featPt = feMesh.points()[ptI];
+//
+//            if (!positionOnThisProc(featPt))
+//            {
+//                continue;
+//            }
+//
+//            const scalar searchRadiusSqr = 5.0*targetCellSize(featPt);
+//
+//            labelList indices =
+//                surfacePtLocationTreePtr_().findSphere(featPt, searchRadiusSqr);
+//
+//            pointField nearestSurfacePoints(indices.size());
+//
+//            forAll(indices, pI)
+//            {
+//                nearestSurfacePoints[pI] =
+//                    surfaceConformationVertices_[indices[pI]];
+//            }
+//
+//            forAll()
+//
+//            // Now find the nearest points within the edge cones.
+//
+//            // Calculate preliminary surface point locations
+//
+//
+//        }
+//    }
+//}
+
 
 void Foam::conformalVoronoiMesh::insertFeaturePoints()
 {
@@ -720,6 +809,8 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
     createConvexFeaturePoints(pts, indices, types);
 
     createConcaveFeaturePoints(pts, indices, types);
+
+//    createFeaturePoints(pts, indices, types);
 
     createMixedFeaturePoints(pts, indices, types);
 
@@ -797,4 +888,36 @@ void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
     }
 
     featurePointLocations_.transfer(ftPtLocs);
+}
+
+
+Foam::List<Foam::pointIndexHit>
+Foam::conformalVoronoiMesh::findSurfacePtLocationsNearFeaturePoint
+(
+    const Foam::point& featurePoint
+) const
+{
+    DynamicList<pointIndexHit> dynPointList;
+
+    const scalar searchRadiusSqr = 3*targetCellSize(featurePoint);
+
+    labelList surfacePtList = surfacePtLocationTreePtr_().findSphere
+    (
+       featurePoint,
+       searchRadiusSqr
+    );
+
+    forAll(surfacePtList, elemI)
+    {
+       label index = surfacePtList[elemI];
+
+       const Foam::point& p
+           = surfacePtLocationTreePtr_().shapes().shapePoints()[index];
+
+       pointIndexHit nearHit(true, p, index);
+
+       dynPointList.append(nearHit);
+    }
+
+    return dynPointList.shrink();
 }

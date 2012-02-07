@@ -178,8 +178,7 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
             "("
                 "const Foam::point& pt"
             ") const"
-        )
-            << "No secondary surface hit found in spoke search "
+        )   << "No secondary surface hit found in spoke search "
             << "using " << s
             << " spokes, try increasing alignmentSearchSpokes."
             << endl;

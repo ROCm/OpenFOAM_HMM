@@ -124,7 +124,14 @@ public:
 
 private:
 
+    // Static data
+
         static const scalar tolParallel;
+
+        static const scalar searchConeAngle;
+
+        static const scalar searchAngleOppositeSurface;
+
 
     // Private data
 
@@ -420,6 +427,8 @@ private:
         //- Determine and insert point groups at the feature points
         void insertFeaturePoints();
 
+        bool edgesShareNormal(const label e1, const label e2) const;
+
         //- Create point groups at convex feature points
         void createConvexFeaturePoints
         (
@@ -469,6 +478,11 @@ private:
 
         //- Store the locations of all of the features to be conformed to
         void constructFeaturePointLocations();
+
+        List<pointIndexHit> findSurfacePtLocationsNearFeaturePoint
+        (
+            const Foam::point& featurePoint
+        ) const;
 
         //- Reinsert stored feature point defining points
         void reinsertFeaturePoints(bool distribute = false);
@@ -582,6 +596,7 @@ private:
         //  intersect.
         bool clipLineToProc
         (
+            const Foam::point& pt,
             Foam::point& a,
             Foam::point& b
         ) const;
@@ -699,9 +714,9 @@ private:
         ) const;
 
         //- Check if a point is near any feature edge points.
-        bool pointIsNearFeatureEdge(const Foam::point& pt) const;
+        bool pointIsNearFeatureEdgeLocation(const Foam::point& pt) const;
 
-        bool pointIsNearFeatureEdge
+        bool pointIsNearFeatureEdgeLocation
         (
             const Foam::point& pt,
             pointIndexHit& info
