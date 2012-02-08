@@ -240,9 +240,9 @@ void Foam::conformalVoronoiMesh::insertPoints
     {
         label preDistributionSize(points.size());
 
-        DynamicList<Foam::point> transferPoints;
+        DynamicList<Foam::point> transferPoints(points.size()/2);
 
-        List<Point> pointsOnProcessor;
+        DynamicList<Point> pointsOnProcessor(points.size()/2);
 
         for
         (
@@ -393,6 +393,30 @@ void Foam::conformalVoronoiMesh::insertPoints
         // Info<< returnReduce(pts.size(), sumOp<label>())
         //     << " points in total" << endl;
     }
+//
+//    forAll(pts, pI)
+//    {
+//        // creation of points and indices is done assuming that it will be
+//        // relative to the instantaneous number_of_vertices() at insertion.
+//
+//        label type = types[pI];
+//
+//        if (type > Vb::vtFar)
+//        {
+//            // This is a member of a point pair, don't use the type directly
+//            // (note that this routine never gets called for referredPoints
+//            //  so type will never be -procI)
+//            type += number_of_vertices();
+//        }
+//
+//        insertPoint
+//        (
+//            pts[pI],
+//            indices[pI] + number_of_vertices(),
+//            type
+//        );
+//    }
+
 
     rangeInsertWithInfo
     (
@@ -402,6 +426,8 @@ void Foam::conformalVoronoiMesh::insertPoints
         indices,
         types
     );
+
+    Pout<< pts.size() << " " << indices.size() << " " << types.size() << endl;
 }
 
 

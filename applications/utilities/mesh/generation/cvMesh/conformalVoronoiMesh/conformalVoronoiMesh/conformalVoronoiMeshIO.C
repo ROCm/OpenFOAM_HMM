@@ -220,6 +220,37 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
+void Foam::conformalVoronoiMesh::writeProcessorInterface
+(
+    const fileName& fName,
+    const faceList& faces
+) const
+{
+    OFstream str(runTime_.path()/fName);
+
+    Pout<< "Writing processor interface" << endl;
+
+    pointField points(number_of_cells(), point::max);
+
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (!cit->farCell())
+        {
+            points[cit->cellIndex()] = topoint(dual(cit));
+        }
+    }
+
+    meshTools::writeOBJ(str, faces, points);
+
+    Pout<< "Written processor interface" << endl;
+}
+
+
 void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 (
     const fileName& instance

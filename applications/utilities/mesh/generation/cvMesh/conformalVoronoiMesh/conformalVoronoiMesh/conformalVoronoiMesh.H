@@ -970,8 +970,8 @@ private:
             labelList& owner,
             labelList& patchSizes,
             labelList& patchStarts,
-            List<DynamicList<face> >& patchFaces,
-            List<DynamicList<label> >& patchOwners
+            const List<DynamicList<face> >& patchFaces,
+            const List<DynamicList<label> >& patchOwners
         ) const;
 
         //- Remove points that are no longer used by any faces
@@ -1165,6 +1165,11 @@ public:
             //  protrude out of the surface beyond a tolerance.
             void findRemainingProtrusionSet(const fvMesh& mesh) const;
 
+            void writeProcessorInterface
+            (
+                const fileName& fName,
+                const faceList& faces
+            ) const;
 
             //- Function inserting points into a triangulation and setting the
             //  index and type data of the point in the correct order. This is
@@ -1226,23 +1231,35 @@ public:
 
                     c = T.locate(*(p->first), lt, li, lj, hint);
 
+                    const size_t checkInsertion = T.number_of_vertices();
+
                     typename Triangulation::Vertex_handle v
                         = T.insert(*(p->first), lt, c, li, lj);
 
-                    label oldIndex = p->second;
-
-                    label type = types[oldIndex];
-
-                    if (type > Vb::vtFar)
+                    if (checkInsertion != T.number_of_vertices() - 1)
                     {
-                        // This is a member of a point pair, don't use the type
-                        // directly (note that this routine never gets called
-                        // for referredPoints so type will never be -procI)
-                        type += T.number_of_vertices() - 1;
+                        Pout<< "Failed to insert point "
+                            << topoint(*(p->first)) << endl;
                     }
+                    else
+                    {
+                        label oldIndex = p->second;
 
-                    v->index() = indices[oldIndex] + T.number_of_vertices() - 1;
-                    v->type() = type;
+                        label type = types[oldIndex];
+
+                        if (type > Vb::vtFar)
+                        {
+                            // This is a member of a point pair, don't use the
+                            // type directly (note that this routine never gets
+                            // called for referredPoints so type will never be
+                            // -procI
+                            type += T.number_of_vertices() - 1;
+                        }
+
+                        v->index() = indices[oldIndex]
+                                   + T.number_of_vertices() - 1;
+                        v->type() = type;
+                    }
                 }
             }
 };
