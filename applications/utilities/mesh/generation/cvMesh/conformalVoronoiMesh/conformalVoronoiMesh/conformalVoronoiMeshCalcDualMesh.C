@@ -82,56 +82,56 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 // REMOVED BECAUSE THIS CODE STOPS ALL FACES NEAR ANY BOUNDARY (PROC OR REAL)
 // FROM BEING FILTERED.
 //
-//    for
-//    (
-//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-//        vit != finite_vertices_end();
-//        vit++
-//    )
-//    {
-//        std::list<Cell_handle> cells;
-//        incident_cells(vit, std::back_inserter(cells));
-//
-//        bool hasProcPt = false;
-//
-//        for
-//        (
-//            std::list<Cell_handle>::iterator cit = cells.begin();
-//            cit != cells.end();
-//            ++cit
-//        )
-//        {
-//            // Allow filtering if any vertices are far points. Otherwise faces
-//            // with boundary points attached to a cell with a far point will
-//            // not be filtered.
-//            if
-//            (
-//                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
-//             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
-//             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
-//             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
-//            )
-//            {
-//                hasProcPt = true;
-//
-//                break;
-//            }
-//        }
-//
-//        if (hasProcPt)
-//        {
-//            for
-//            (
-//                std::list<Cell_handle>::iterator cit = cells.begin();
-//                cit != cells.end();
-//                ++cit
-//            )
-//            {
-//                (*cit)->filterCount() =
-//                     cvMeshControls().filterCountSkipThreshold() + 1;
-//            }
-//        }
-//    }
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        std::list<Cell_handle> cells;
+        incident_cells(vit, std::back_inserter(cells));
+
+        bool hasProcPt = false;
+
+        for
+        (
+            std::list<Cell_handle>::iterator cit = cells.begin();
+            cit != cells.end();
+            ++cit
+        )
+        {
+            // Allow filtering if any vertices are far points. Otherwise faces
+            // with boundary points attached to a cell with a far point will
+            // not be filtered.
+            if
+            (
+                (!(*cit)->vertex(0)->real())// && !(*cit)->vertex(0)->farPoint())
+             || (!(*cit)->vertex(1)->real())// && !(*cit)->vertex(1)->farPoint())
+             || (!(*cit)->vertex(2)->real())// && !(*cit)->vertex(2)->farPoint())
+             || (!(*cit)->vertex(3)->real())// && !(*cit)->vertex(3)->farPoint())
+            )
+            {
+                hasProcPt = true;
+
+                break;
+            }
+        }
+
+        if (hasProcPt)
+        {
+            for
+            (
+                std::list<Cell_handle>::iterator cit = cells.begin();
+                cit != cells.end();
+                ++cit
+            )
+            {
+                (*cit)->filterCount() =
+                     cvMeshControls().filterCountSkipThreshold() + 1;
+            }
+        }
+    }
 
     PackedBoolList boundaryPts(number_of_cells(), false);
 
@@ -2157,9 +2157,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                         // Did not find a surface patch between
                         // between Dv pair, finding nearest patch
 
-                        // Pout<< "Did not find a surface patch between "
-                        //     << "for face, finding nearest patch to"
-                        //     << 0.5*(ptA + ptB) << endl;
+//                         Pout<< "Did not find a surface patch between "
+//                             << "for face, finding nearest patch to"
+//                             << 0.5*(ptA + ptB) << endl;
 
                         patchIndex = geometryToConformTo_.findPatch
                         (
@@ -2239,6 +2239,37 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     forAll(patchPPSlaves, patchI)
     {
         patchPointPairSlaves[patchI].transfer(patchPPSlaves[patchI]);
+    }
+
+    if (cvMeshControls().objOutput())
+    {
+        forAll(procNeighbours, nbI)
+        {
+            if (patchFaces[nbI].size() > 0)
+            {
+                const label neighbour = procNeighbours[nbI];
+
+                if (neighbour != -1)
+                {
+                    word fName =
+                        "processor_"
+                      + name(Pstream::myProcNo())
+                      + "_to_"
+                      + name(neighbour)
+                      + "_interface.obj";
+
+                    writeProcessorInterface
+                    (
+                        fName,
+                        patchFaces[nbI]
+                    );
+                }
+            }
+        }
+
+        Pout<< "Patch Names:     " << patchNames << endl;
+        Pout<< "Patch Sizes:     " << patchSizes << endl;
+        Pout<< "Proc Neighbours: " << procNeighbours << endl;
     }
 }
 
@@ -2527,8 +2558,8 @@ void Foam::conformalVoronoiMesh::addPatches
     labelList& owner,
     labelList& patchSizes,
     labelList& patchStarts,
-    List<DynamicList<face> >& patchFaces,
-    List<DynamicList<label> >& patchOwners
+    const List<DynamicList<face> >& patchFaces,
+    const List<DynamicList<label> >& patchOwners
 ) const
 {
     label nPatches = patchFaces.size();
