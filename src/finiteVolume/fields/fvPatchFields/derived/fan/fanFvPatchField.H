@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,43 @@ Class
     Foam::fanFvPatchField
 
 Description
-    Foam::fanFvPatchField
+    Jump boundary condition. Operates on cyclic. Jump specified as a DataEntry.
+    (table, fileTable, csv etc.)
+
+    Example of the boundary condition specification:
+    \verbatim
+        fan_half0
+        {
+            type            fan;
+            patchType       cyclic;
+            jump            uniform 0;
+            jumpTable       csvFile;
+            csvFileCoeffs
+            {
+                hasHeaderLine   1;
+                refColumn       0;
+                componentColumns 1(1);
+                separator       ",";
+                fileName        "$FOAM_CASE/constant/pressureVsU";
+            }
+            value           uniform 0;
+        }
+    \endverbatim
+
+
+    Backwards compatibility: if the 'f' keyword is detected it assumes
+    it is a power of the flowrate.
+
+    \verbatim
+        fan_half0
+        {
+            type            fan;
+            patchType       cyclic;
+            jump            uniform 0;
+            f               2(100 -0.1);
+            value           uniform 0;
+        }
+    \endverbatim
 
 SourceFiles
     fanFvPatchField.C
@@ -36,6 +72,7 @@ SourceFiles
 #define fanFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,8 +90,8 @@ class fanFvPatchField
 {
     // Private data
 
-        //- Fan pressure rise polynomial coefficients
-        List<scalar> f_;
+        //- Interpolation table
+        autoPtr<DataEntry<Type> > jumpTable_;
 
 
 public:
@@ -126,15 +163,6 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return the polynomial coefficients
-            const List<scalar>& f() const
-            {
-                return f_;
-            }
-
-
         // Evaluation functions
 
             //- Update the coefficients associated with the patch field
@@ -147,6 +175,13 @@ public:
 
 
 //- Specialisation of the jump-condition for the pressure
+template<>
+fanFvPatchField<scalar>::fanFvPatchField
+(
+    const fvPatch&,
+    const DimensionedField<scalar, volMesh>&,
+    const dictionary&
+);
 template<>
 void fanFvPatchField<scalar>::updateCoeffs();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,8 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "Tuple2.H"
+#include "polynomial.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,24 +43,87 @@ makeTemplatePatchTypeField
     fanFvPatchScalarField
 );
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<>
+Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedJumpFvPatchField<scalar>(p, iF),
+    jumpTable_(new DataEntry<scalar>("jumpTable"))
+{
+    if (this->cyclicPatch().owner())
+    {
+        if (dict.found("f"))
+        {
+            // Backwards compatibility
+            Istream& is = dict.lookup("f");
+            is.format(IOstream::ASCII);
+            scalarList f(is);
+
+            label nPows = 0;
+            forAll(f, powI)
+            {
+                if (mag(f[powI]) > VSMALL)
+                {
+                    nPows++;
+                }
+            }
+            List<Tuple2<scalar, scalar> > coeffs(nPows);
+            nPows = 0;
+            forAll(f, powI)
+            {
+                if (mag(f[powI]) > VSMALL)
+                {
+                    coeffs[nPows++] = Tuple2<scalar, scalar>(f[powI], powI);
+                }
+            }
+
+            Pout<< "** coeffss:" << coeffs << endl;
+
+            jumpTable_.reset
+            (
+                new polynomial("jumpTable", coeffs)
+            );
+        }
+        else
+        {
+            // Generic input constructed from dictionary
+            jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
+        }
+    }
+
+
+    if (dict.found("value"))
+    {
+        fvPatchScalarField::operator=
+        (
+            scalarField("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate(Pstream::blocking);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 //- Specialisation of the jump-condition for the pressure
 template<>
 void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
 {
-    if (updated())
+    if (this->updated())
     {
         return;
     }
 
-    // Note that the neighbour side jump_ data is never actually used; the
-    // jump() function just calls the owner side jump().
-
-    // Constant
-    jump_ = f_[0];
-
-    if (f_.size() > 1)
+    if (this->cyclicPatch().owner())
     {
         const surfaceScalarField& phi =
             db().lookupObject<surfaceScalarField>("phi");
@@ -73,12 +138,7 @@ void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
             Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
         }
 
-        for (label i=1; i<f_.size(); i++)
-        {
-            jump_ += f_[i]*pow(Un, i);
-        }
-
-        jump_ = max(jump_, scalar(0));
+        jump_ = jumpTable_->value(Un);
     }
 
     fixedJumpFvPatchField<scalar>::updateCoeffs();
