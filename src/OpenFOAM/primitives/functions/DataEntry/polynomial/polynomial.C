@@ -31,7 +31,10 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(polynomial, 0);
+    DataEntry<scalar>::adddictionaryConstructorToTable<polynomial>
+        addpolynomialConstructorToTable_;
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -48,7 +51,7 @@ Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
 
     if (!coeffs_.size())
     {
-        FatalErrorIn("Foam::polynomial::polynomial(const word&, Istream&)")
+        FatalErrorIn("Foam::polynomial::polynomial(const word&, dictionary&)")
             << "polynomial coefficients for entry " << this->name_
             << " are invalid (empty)" << nl << exit(FatalError);
     }
@@ -66,8 +69,52 @@ Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
     {
         if (!canIntegrate_)
         {
-            WarningIn("Foam::polynomial::polynomial(const word&, Istream&)")
+            WarningIn("Foam::polynomial::polynomial(const word&, dictionary&)")
                 << "Polynomial " << this->name_ << " cannot be integrated"
+                << endl;
+        }
+    }
+}
+
+
+Foam::polynomial::polynomial
+(
+    const word& entryName,
+    const List<Tuple2<scalar, scalar> >& coeffs
+)
+:
+    DataEntry<scalar>(entryName),
+    coeffs_(coeffs),
+    canIntegrate_(true)
+{
+    if (!coeffs_.size())
+    {
+        FatalErrorIn
+        (
+            "Foam::polynomial::polynomial"
+            "(const word&, const List<Tuple2<scalar, scalar> >&&)"
+        )   << "polynomial coefficients for entry " << this->name_
+            << " are invalid (empty)" << nl << exit(FatalError);
+    }
+
+    forAll(coeffs_, i)
+    {
+        if (mag(coeffs_[i].second() + 1) < ROOTVSMALL)
+        {
+            canIntegrate_ = false;
+            break;
+        }
+    }
+
+    if (debug)
+    {
+        if (!canIntegrate_)
+        {
+            WarningIn
+            (
+                "Foam::polynomial::polynomial"
+                "(const word&, const List<Tuple2<scalar, scalar> >&&)"
+            )   << "Polynomial " << this->name_ << " cannot be integrated"
                 << endl;
         }
     }

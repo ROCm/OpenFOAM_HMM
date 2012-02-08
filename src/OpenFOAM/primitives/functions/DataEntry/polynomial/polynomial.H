@@ -96,6 +96,9 @@ public:
 
         polynomial(const word& entryName, const dictionary& dict);
 
+        //- Construct from components
+        polynomial(const word& entryName, const List<Tuple2<scalar, scalar> >&);
+
         //- Copy constructor
         polynomial(const polynomial& poly);
 
