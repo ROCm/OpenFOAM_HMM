@@ -83,8 +83,6 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
                 }
             }
 
-            Pout<< "** coeffss:" << coeffs << endl;
-
             jumpTable_.reset
             (
                 new polynomial("jumpTable", coeffs)
