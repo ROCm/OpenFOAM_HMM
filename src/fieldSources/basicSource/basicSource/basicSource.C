@@ -167,8 +167,10 @@ void Foam::basicSource::setCellSet()
                 Info<< indent << "- selecting inter region mapping" << endl;
                 const fvMesh& secondaryMesh =
                     mesh_.time().lookupObject<fvMesh>(mapRegionName_);
-                const boundBox primaryBB = mesh_.bounds();
-                const boundBox secondaryBB = secondaryMesh.bounds();
+
+                boundBox primaryBB(mesh_.points(), false);
+                boundBox secondaryBB(secondaryMesh.points(), false);
+
                 if (secondaryBB.overlaps(primaryBB))
                 {
                     // Dummy patches

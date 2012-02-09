@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fanFvPatchField.H"
-#include "IOmanip.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -36,7 +35,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    f_(0)
+    jumpTable_(0)
 {}
 
 
@@ -50,7 +49,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    f_(ptf.f_)
+    jumpTable_(ptf.jumpTable_().clone().ptr())
 {}
 
 
@@ -63,28 +62,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    f_()
-{
-    {
-        Istream& is = dict.lookup("f");
-        is.format(IOstream::ASCII);
-        is >> f_;
-
-        // Check that f_ table is same on both sides.?
-    }
-
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::blocking);
-    }
-}
+    jumpTable_(DataEntry<Type>::New("jumpTable", dict))
+{}
 
 
 template<class Type>
@@ -95,7 +74,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 :
     cyclicLduInterfaceField(),
     fixedJumpFvPatchField<Type>(ptf),
-    f_(ptf.f_)
+    jumpTable_(ptf.jumpTable_().clone().ptr())
 {}
 
 
@@ -107,7 +86,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(ptf, iF),
-    f_(ptf.f_)
+    jumpTable_(ptf.jumpTable_().clone().ptr())
 {}
 
 
@@ -119,11 +98,10 @@ void Foam::fanFvPatchField<Type>::write(Ostream& os) const
 {
 
     fixedJumpFvPatchField<Type>::write(os);
-
-    IOstream::streamFormat fmt0 = os.format(IOstream::ASCII);
-    os.writeKeyword("f") << f_ << token::END_STATEMENT << nl;
-    os.format(fmt0);
-
+    if (this->cyclicPatch().owner())
+    {
+        jumpTable_->writeData(os);
+    }
     this->writeEntry("value", os);
 }
 

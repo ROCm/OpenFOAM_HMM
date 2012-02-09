@@ -137,100 +137,103 @@ void Foam::interRegionHeatTransferModel::addSup
     const label fieldI
 )
 {
-    if (firstIter_)
+    if (secondaryToPrimaryInterpPtr_.valid())
     {
-        check();
-        firstIter_ = false;
-    }
+        if (firstIter_)
+        {
+            check();
+            firstIter_ = false;
+        }
 
-    const volScalarField& h = eEqn.psi();
+        const volScalarField& h = eEqn.psi();
 
-    tmp<volScalarField> tTmapped
-    (
-        new volScalarField
+        tmp<volScalarField> tTmapped
         (
-            IOobject
+            new volScalarField
             (
-                "Tmapped" + mesh_.name(),
-                mesh_.time().timeName(),
+                IOobject
+                (
+                    "Tmapped" + mesh_.name(),
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("T", dimTemperature, 0.0)
-        )
-    );
+                dimensionedScalar("T", dimTemperature, 0.0)
+            )
+        );
 
-    volScalarField& Tmapped = tTmapped();
+        volScalarField& Tmapped = tTmapped();
 
-    const fvMesh& secondaryMesh =
-        mesh_.time().lookupObject<fvMesh>(mapRegionName_);
+        const fvMesh& secondaryMesh =
+            mesh_.time().lookupObject<fvMesh>(mapRegionName_);
 
-    const volScalarField& Tsecondary =
-        secondaryMesh.lookupObject<volScalarField>("T");
+        const volScalarField& Tsecondary =
+            secondaryMesh.lookupObject<volScalarField>("T");
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        Tmapped,
-        Tsecondary,
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
-
-    if (!master_)
-    {
         secondaryToPrimaryInterpPtr_->interpolateInternalField
         (
-            htc_,
-            secIrht_->calculateHtc(),
-            meshToMesh::CELL_VOLUME_WEIGHT,
+            Tmapped,
+            Tsecondary,
+            meshToMesh::MAP,
             eqOp<scalar>()
         );
-    }
 
-    if (debug)
-    {
-        Info<< " Volumetric integral of htc : "
-            << fvc::domainIntegrate(htc_).value()
-            << endl;
-    }
-
-    //SAF: temporarily output
-    if (mesh_.time().outputTime())
-    {
-        Tmapped.write();
-        htc_.write();
-    }
-
-    if (h.dimensions() == dimEnergy/dimMass)
-    {
-        const basicThermo& primaryThermo =
-            mesh_.lookupObject<basicThermo>("thermophysicalProperties");
-
-        eEqn += htc_*Tmapped - fvm::Sp(htc_/primaryThermo.Cp(), h);
+        if (!master_)
+        {
+            secondaryToPrimaryInterpPtr_->interpolateInternalField
+            (
+                htc_,
+                secIrht_->calculateHtc(),
+                meshToMesh::CELL_VOLUME_WEIGHT,
+                eqOp<scalar>()
+            );
+        }
 
         if (debug)
         {
-            Info<< " Energy exchange from region " << secondaryMesh.name()
-                << " To " << mesh_.name() << " : "
-                <<  fvc::domainIntegrate
-                    (
-                        htc_*(h/primaryThermo.Cp() - Tmapped)
-                    ).value()
+            Info<< " Volumetric integral of htc : "
+                << fvc::domainIntegrate(htc_).value()
                 << endl;
         }
-    }
-    else if(h.dimensions() == dimTemperature)
-    {
-        eEqn += htc_*Tmapped - fvm::Sp(htc_, h);
 
-        if (debug)
+        //SAF: temporarily output
+        if (mesh_.time().outputTime())
         {
-            Info<< " Enegy exchange from region " << secondaryMesh.name()
-                << " To " << mesh_.name() << " : "
-                <<  fvc::domainIntegrate(htc_*(h - Tmapped)).value()
-                << endl;
+            Tmapped.write();
+            htc_.write();
+        }
+
+        if (h.dimensions() == dimEnergy/dimMass)
+        {
+            const basicThermo& primaryThermo =
+                mesh_.lookupObject<basicThermo>("thermophysicalProperties");
+
+            eEqn += htc_*Tmapped - fvm::Sp(htc_/primaryThermo.Cp(), h);
+
+            if (debug)
+            {
+                Info<< " Energy exchange from region " << secondaryMesh.name()
+                    << " To " << mesh_.name() << " : "
+                    <<  fvc::domainIntegrate
+                        (
+                            htc_*(h/primaryThermo.Cp() - Tmapped)
+                        ).value()
+                    << endl;
+            }
+        }
+        else if(h.dimensions() == dimTemperature)
+        {
+            eEqn += htc_*Tmapped - fvm::Sp(htc_, h);
+
+            if (debug)
+            {
+                Info<< " Enegy exchange from region " << secondaryMesh.name()
+                    << " To " << mesh_.name() << " : "
+                    <<  fvc::domainIntegrate(htc_*(h - Tmapped)).value()
+                    << endl;
+            }
         }
     }
 }
