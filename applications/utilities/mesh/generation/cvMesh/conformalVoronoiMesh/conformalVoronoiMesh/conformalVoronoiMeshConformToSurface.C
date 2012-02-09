@@ -175,7 +175,34 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     //   \    .    /
     //     ---x----
 
+    label countNearBoundaryVertices = 0;
 
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalPoint())
+        {
+            const Foam::point& pt = topoint(vit->point());
+            const scalar range = sqr(2.0*targetCellSize(pt));
+
+            bool closeToBoundary = geometryToConformTo_.wellInside(pt, range);
+
+            if (!closeToBoundary)
+            {
+                vit->setNearBoundary();
+                countNearBoundaryVertices++;
+            }
+        }
+    }
+
+    Info<< "    Vertices marked as being near a boundary: "
+        << countNearBoundaryVertices << " (estimated)" << endl;
+
+    timeCheck("After set near boundary");
 
     // Initial surface protrusion conformation - nearest surface point
     {
@@ -198,7 +225,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             vit++
         )
         {
-            if (vit->internalPoint())
+            if (vit->internalPoint() && vit->nearBoundary())
             {
                 const Foam::point vert = topoint(vit->point());
 
@@ -220,11 +247,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     )
                 )
                 {
-                    // This used to be just before this if statement.
-                    // Moved because a point is only near the boundary if
-                    // the dual cell intersects the surface.
-                    vit->setNearBoundary();
-
                     // meshTools::writeOBJ(Pout, vert);
                     // meshTools::writeOBJ(Pout, surfHit.hitPoint());
                     // Pout<< "l cr0 cr1" << endl;
@@ -246,8 +268,17 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+                else
+                {
+                    vit->setInternal();
+                    countNearBoundaryVertices--;
+                }
             }
         }
+
+        Info<< "    Vertices marked as being near a boundary: "
+            << countNearBoundaryVertices
+            << " (after dual surface intersection)" << endl;
 
         label nVerts = number_of_vertices();
         label nSurfHits = surfaceHits.size();
@@ -1179,12 +1210,16 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         cIOuter++;
     }
 
+    timeCheck("End of testing cell influence");
+
     // Increasing the circumspheres to increase the overlaps and compensate for
     // floating point errors missing some referrals
     labelListList circumsphereOverlaps
     (
         overlapsProc(circumcentre, sqr(1.01)*circumradiusSqr)
     );
+
+    timeCheck("End of increasing overlaps");
 
     // Reset counters
     cIOuter = 0;

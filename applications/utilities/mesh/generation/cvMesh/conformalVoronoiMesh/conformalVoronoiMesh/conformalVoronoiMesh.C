@@ -426,8 +426,6 @@ void Foam::conformalVoronoiMesh::insertPoints
         indices,
         types
     );
-
-    Pout<< pts.size() << " " << indices.size() << " " << types.size() << endl;
 }
 
 
