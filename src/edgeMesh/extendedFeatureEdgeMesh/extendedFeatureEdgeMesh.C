@@ -72,6 +72,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
     edgeNormals_(0),
     featurePointNormals_(0),
     regionEdges_(0),
+    pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {
@@ -159,6 +160,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeNormals_(fem.edgeNormals()),
     featurePointNormals_(fem.featurePointNormals()),
     regionEdges_(fem.regionEdges()),
+    pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {}
@@ -185,6 +187,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeNormals_(0),
     featurePointNormals_(0),
     regionEdges_(0),
+    pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {}
@@ -222,6 +225,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeNormals_(0),
     featurePointNormals_(0),
     regionEdges_(0),
+    pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {
@@ -578,6 +582,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeNormals_(edgeNormals),
     featurePointNormals_(featurePointNormals),
     regionEdges_(regionEdges),
+    pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {}
@@ -683,6 +688,21 @@ Foam::extendedFeatureEdgeMesh::classifyEdge
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::extendedFeatureEdgeMesh::nearestFeaturePoint
+(
+    const point& sample,
+    scalar searchDistSqr,
+    pointIndexHit& info
+) const
+{
+    info = pointTree().findNearest
+    (
+        sample,
+        searchDistSqr
+    );
+}
+
 
 void Foam::extendedFeatureEdgeMesh::nearestFeatureEdge
 (
@@ -813,6 +833,42 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
     }
 
     info.transfer(dynEdgeHit);
+}
+
+
+const Foam::indexedOctree<Foam::treeDataPoint>&
+Foam::extendedFeatureEdgeMesh::pointTree() const
+{
+    if (pointTree_.empty())
+    {
+        Random rndGen(17301893);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points()).extend(rndGen, 1E-4)
+        );
+
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        labelList allPoints(identity(points().size()));
+
+        pointTree_.reset
+        (
+            new indexedOctree<treeDataPoint>
+            (
+                treeDataPoint(points()),
+                bb,     // bb
+                8,      // maxLevel
+                10,     // leafsize
+                3.0     // duplicity
+            )
+        );
+    }
+
+    return pointTree_();
 }
 
 
