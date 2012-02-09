@@ -2212,13 +2212,13 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<Foam::point>& existingSurfacePtLocations
 ) const
 {
-    bool keepSurfacePoint = true;
-
     const scalar cellSize = targetCellSize(vert);
     const scalar cellSizeSqr = sqr(cellSize);
 
     forAll(surfHit, sI)
     {
+        bool keepSurfacePoint = true;
+
         pointIndexHit surfHitI = surfHit[sI];
         label hitSurfaceI = hitSurface[sI];
 
