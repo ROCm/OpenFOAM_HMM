@@ -184,14 +184,23 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         vit++
     )
     {
-        if (vit->internalPoint())
+        if (vit->internalPoint() && !vit->nearBoundary())
         {
             const Foam::point& pt = topoint(vit->point());
             const scalar range = sqr(2.0*targetCellSize(pt));
 
-            bool closeToBoundary = geometryToConformTo_.wellInside(pt, range);
+            pointIndexHit pHit;
+            label hitSurface;
 
-            if (!closeToBoundary)
+            geometryToConformTo_.findSurfaceNearest
+            (
+                pt,
+                range,
+                pHit,
+                hitSurface
+            );
+
+            if (pHit.hit())
             {
                 vit->setNearBoundary();
                 countNearBoundaryVertices++;
@@ -2179,7 +2188,7 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
             treeDataPoint(sizeAndAlignmentLocations_),
             overallBb,  // overall search domain
             10,         // max levels
-            10.0,       // maximum ratio of cubes v.s. cells
+            20.0,       // maximum ratio of cubes v.s. cells
             100.0       // max. duplicity; n/a since no bounding boxes.
         )
     );
