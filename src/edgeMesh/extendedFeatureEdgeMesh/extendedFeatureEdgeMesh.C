@@ -853,13 +853,17 @@ Foam::extendedFeatureEdgeMesh::pointTree() const
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
-        labelList allPoints(identity(points().size()));
+        const labelList featurePointLabels = identity(nonFeatureStart_);
 
         pointTree_.reset
         (
             new indexedOctree<treeDataPoint>
             (
-                treeDataPoint(points()),
+                treeDataPoint
+                (
+                    points(),
+                    featurePointLabels
+                ),
                 bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
