@@ -175,7 +175,43 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     //   \    .    /
     //     ---x----
 
+    label countNearBoundaryVertices = 0;
 
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalPoint() && !vit->nearBoundary())
+        {
+            const Foam::point& pt = topoint(vit->point());
+            const scalar range = sqr(2.0*targetCellSize(pt));
+
+            pointIndexHit pHit;
+            label hitSurface;
+
+            geometryToConformTo_.findSurfaceNearest
+            (
+                pt,
+                range,
+                pHit,
+                hitSurface
+            );
+
+            if (pHit.hit())
+            {
+                vit->setNearBoundary();
+                countNearBoundaryVertices++;
+            }
+        }
+    }
+
+    Info<< "    Vertices marked as being near a boundary: "
+        << countNearBoundaryVertices << " (estimated)" << endl;
+
+    timeCheck("After set near boundary");
 
     // Initial surface protrusion conformation - nearest surface point
     {
@@ -198,7 +234,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             vit++
         )
         {
-            if (vit->internalPoint())
+            if (vit->internalPoint() && vit->nearBoundary())
             {
                 const Foam::point vert = topoint(vit->point());
 
@@ -220,11 +256,6 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                     )
                 )
                 {
-                    // This used to be just before this if statement.
-                    // Moved because a point is only near the boundary if
-                    // the dual cell intersects the surface.
-                    vit->setNearBoundary();
-
                     // meshTools::writeOBJ(Pout, vert);
                     // meshTools::writeOBJ(Pout, surfHit.hitPoint());
                     // Pout<< "l cr0 cr1" << endl;
@@ -246,8 +277,17 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+                else
+                {
+                    vit->setInternal();
+                    countNearBoundaryVertices--;
+                }
             }
         }
+
+        Info<< "    Vertices marked as being near a boundary: "
+            << countNearBoundaryVertices
+            << " (after dual surface intersection)" << endl;
 
         label nVerts = number_of_vertices();
         label nSurfHits = surfaceHits.size();
@@ -1179,12 +1219,16 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         cIOuter++;
     }
 
+    timeCheck("End of testing cell influence");
+
     // Increasing the circumspheres to increase the overlaps and compensate for
     // floating point errors missing some referrals
     labelListList circumsphereOverlaps
     (
         overlapsProc(circumcentre, sqr(1.01)*circumradiusSqr)
     );
+
+    timeCheck("End of increasing overlaps");
 
     // Reset counters
     cIOuter = 0;
@@ -2144,7 +2188,7 @@ void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
             treeDataPoint(sizeAndAlignmentLocations_),
             overallBb,  // overall search domain
             10,         // max levels
-            10.0,       // maximum ratio of cubes v.s. cells
+            20.0,       // maximum ratio of cubes v.s. cells
             100.0       // max. duplicity; n/a since no bounding boxes.
         )
     );
@@ -2168,13 +2212,13 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<Foam::point>& existingSurfacePtLocations
 ) const
 {
-    bool keepSurfacePoint = true;
-
     const scalar cellSize = targetCellSize(vert);
     const scalar cellSizeSqr = sqr(cellSize);
 
     forAll(surfHit, sI)
     {
+        bool keepSurfacePoint = true;
+
         pointIndexHit surfHitI = surfHit[sI];
         label hitSurfaceI = hitSurface[sI];
 

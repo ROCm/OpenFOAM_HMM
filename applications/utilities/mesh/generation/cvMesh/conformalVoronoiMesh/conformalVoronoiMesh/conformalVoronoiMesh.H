@@ -169,9 +169,6 @@ private:
         //  Single pointField required by the featurePointTree.
         pointField featurePointLocations_;
 
-        //- Search tree for feature point locations
-        mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTreePtr_;
-
         //- Search tree for edge point locations
         mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
         edgeLocationTreePtr_;
@@ -486,9 +483,6 @@ private:
 
         //- Reinsert stored feature point defining points
         void reinsertFeaturePoints(bool distribute = false);
-
-        //- Demand driven construction of octree for feature points
-        const indexedOctree<treeDataPoint>& featurePointTree() const;
 
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
