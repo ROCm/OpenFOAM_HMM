@@ -61,6 +61,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
+#include "treeDataPoint.H"
 #include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -155,6 +156,9 @@ private:
         //- Feature edges which are on the boundary between regions
         labelList regionEdges_;
 
+        //- Search tree for all feature points
+        mutable autoPtr<indexedOctree<treeDataPoint> > pointTree_;
+
         //- Search tree for all edges
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
 
@@ -246,6 +250,14 @@ public:
     // Member Functions
 
         // Find
+
+            //- Find nearest surface edge for the sample point.
+            void nearestFeaturePoint
+            (
+                const point& sample,
+                scalar searchDistSqr,
+                pointIndexHit& info
+            ) const;
 
             //- Find nearest surface edge for the sample point.
             void nearestFeatureEdge
@@ -348,6 +360,9 @@ public:
 
             //- Return the edgeStatus of a specified edge
             inline edgeStatus getEdgeStatus(label edgeI) const;
+
+            //- Demand driven construction of octree for feature points
+            const indexedOctree<treeDataPoint>& pointTree() const;
 
             //- Demand driven construction of octree for boundary edges
             const indexedOctree<treeDataEdge>& edgeTree() const;

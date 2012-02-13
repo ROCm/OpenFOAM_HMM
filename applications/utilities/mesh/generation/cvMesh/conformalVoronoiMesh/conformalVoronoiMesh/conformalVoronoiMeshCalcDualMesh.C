@@ -79,9 +79,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-// REMOVED BECAUSE THIS CODE STOPS ALL FACES NEAR ANY BOUNDARY (PROC OR REAL)
-// FROM BEING FILTERED.
-//
+    // THIS CODE STOPS ALL FACES NEAR ANY PROCESSOR BOUNDARY BEING FILTERED.
     for
     (
         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -104,19 +102,12 @@ void Foam::conformalVoronoiMesh::calcDualMesh
             // Allow filtering if any vertices are far points. Otherwise faces
             // with boundary points attached to a cell with a far point will
             // not be filtered.
-//            if
-//            (
-//                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
-//             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
-//             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
-//             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
-//            )
             if
             (
-                (!(*cit)->vertex(0)->real())
-             || (!(*cit)->vertex(1)->real())
-             || (!(*cit)->vertex(2)->real())
-             || (!(*cit)->vertex(3)->real())
+                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
+             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
+             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
+             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
             )
             {
                 hasProcPt = true;

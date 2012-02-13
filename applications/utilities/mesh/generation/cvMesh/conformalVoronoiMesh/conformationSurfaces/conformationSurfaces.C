@@ -619,6 +619,37 @@ void Foam::conformationSurfaces::findSurfaceNearest
 }
 
 
+void Foam::conformationSurfaces::findFeaturePointNearest
+(
+    const point& sample,
+    scalar nearestDistSqr,
+    pointIndexHit& fpHit,
+    label& featureHit
+) const
+{
+    // Work arrays
+    scalar minDistSqr = nearestDistSqr;
+    pointIndexHit hitInfo;
+
+    forAll(features_, testI)
+    {
+        features_[testI].nearestFeaturePoint
+        (
+            sample,
+            minDistSqr,
+            hitInfo
+        );
+
+        if (hitInfo.hit())
+        {
+            minDistSqr = magSqr(hitInfo.hitPoint()- sample);
+            fpHit = hitInfo;
+            featureHit = testI;
+        }
+    }
+}
+
+
 void Foam::conformationSurfaces::findEdgeNearest
 (
     const point& sample,

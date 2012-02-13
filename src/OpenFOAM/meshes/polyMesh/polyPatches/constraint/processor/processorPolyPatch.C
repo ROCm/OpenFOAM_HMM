@@ -369,6 +369,24 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
                 >> nbrPointIndex
                 >> nbrEdgeFace
                 >> nbrEdgeIndex;
+
+            if
+            (
+                nbrPointIndex.size() != nPoints()
+             || nbrEdgeIndex.size() != nEdges()
+            )
+            {
+                FatalErrorIn
+                (
+                    "processorPolyPatch::updateMesh(PstreamBuffers&)"
+                )   << "Size of data from processor " << neighbProcNo()
+                    << " does not match size of data on processor "
+                    << Pstream::myProcNo() << "." << nl
+                    << "    Neighbour has " << nbrPointFace.size()
+                    << " points and " << nbrEdgeFace.size() << " edges." << nl
+                    << "    This proc has " << nPoints() << " points and "
+                    << nEdges() << " edges." << exit(FatalError);
+            }
         }
 
         // Convert neighbour faces and indices into face back into

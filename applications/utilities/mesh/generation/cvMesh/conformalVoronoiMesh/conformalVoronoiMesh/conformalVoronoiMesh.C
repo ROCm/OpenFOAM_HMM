@@ -426,8 +426,6 @@ void Foam::conformalVoronoiMesh::insertPoints
         indices,
         types
     );
-
-    Pout<< pts.size() << " " << indices.size() << " " << types.size() << endl;
 }
 
 
@@ -524,43 +522,20 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
 }
 
 
-const Foam::indexedOctree<Foam::treeDataPoint>&
-Foam::conformalVoronoiMesh::featurePointTree() const
-{
-    if (featurePointTreePtr_.empty())
-    {
-        treeBoundBox overallBb
-        (
-            geometryToConformTo_.globalBounds().extend(rndGen_, 1e-4)
-        );
-
-        overallBb.min() -= Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        overallBb.max() += Foam::point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        featurePointTreePtr_.reset
-        (
-            new indexedOctree<treeDataPoint>
-            (
-                treeDataPoint(featurePointLocations_),
-                overallBb,  // overall search domain
-                10,         // max levels
-                10.0,       // maximum ratio of cubes v.s. cells
-                100.0       // max. duplicity; n/a since no bounding boxes.
-            )
-        );
-    }
-
-    return featurePointTreePtr_();
-}
-
-
 bool Foam::conformalVoronoiMesh::nearFeaturePt(const Foam::point& pt) const
 {
-    const indexedOctree<treeDataPoint>& tree = featurePointTree();
-
     scalar exclusionRangeSqr = featurePointExclusionDistanceSqr(pt);
 
-    pointIndexHit info = tree.findNearest(pt, exclusionRangeSqr);
+    pointIndexHit info;
+    label featureHit;
+
+    geometryToConformTo_.findFeaturePointNearest
+    (
+        pt,
+        exclusionRangeSqr,
+        info,
+        featureHit
+    );
 
     return info.hit();
 }
@@ -1209,7 +1184,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     limitBounds_(),
     featureVertices_(),
     featurePointLocations_(),
-    featurePointTreePtr_(),
     edgeLocationTreePtr_(),
     surfacePtLocationTreePtr_(),
     sizeAndAlignmentLocations_(),

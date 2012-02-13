@@ -246,6 +246,14 @@ public:
                 labelList& hitSurfaces
             ) const;
 
+            //- Find the nearest point on any feature edge
+            void findFeaturePointNearest
+            (
+                const point& sample,
+                scalar nearestDistSqr,
+                pointIndexHit& fpHit,
+                label& featureHit
+            ) const;
 
             //- Find the nearest point on any feature edge
             void findEdgeNearest
