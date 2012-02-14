@@ -479,7 +479,19 @@ Foam::wallBoundedParticle::wallBoundedParticle
 {
     if (readFields)
     {
-        is  >> meshEdgeStart_ >> diagEdge_;
+        if (is.format() == IOstream::ASCII)
+        {
+            is  >> meshEdgeStart_ >> diagEdge_;
+        }
+        else
+        {
+            is.read
+            (
+                reinterpret_cast<char*>(&meshEdgeStart_),
+                sizeof(meshEdgeStart_)
+              + sizeof(diagEdge_)
+            );
+        }
     }
 
     // Check state of Istream
@@ -503,71 +515,6 @@ Foam::wallBoundedParticle::wallBoundedParticle
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//void Foam::wallBoundedParticle::readFields
-//(
-//    Cloud<wallBoundedParticle>& c
-//)
-//{
-//    if (!c.size())
-//    {
-//        return;
-//    }
-//
-//    particle::readFields(c);
-//
-//    IOField<label> meshEdgeStart
-//    (
-//        c.fieldIOobject("meshEdgeStart", IOobject::MUST_READ)
-//    );
-//
-//    IOField<label> diagEdge
-//    (
-//        c.fieldIOobject("diagEdge_", IOobject::MUST_READ)
-//    );
-//    c.checkFieldIOobject(c, diagEdge);
-//
-//    label i = 0;
-//    forAllIter(Cloud<wallBoundedParticle>, c, iter)
-//    {
-//        iter().meshEdgeStart_ = meshEdgeStart[i];
-//        iter().diagEdge_ = diagEdge[i];
-//        i++;
-//    }
-//}
-//
-//
-//void Foam::wallBoundedParticle::writeFields
-//(
-//    const Cloud<wallBoundedParticle>& c
-//)
-//{
-//    particle::writeFields(c);
-//
-//    label np =  c.size();
-//
-//    IOField<label> meshEdgeStart
-//    (
-//        c.fieldIOobject("meshEdgeStart", IOobject::NO_READ),
-//        np
-//    );
-//    IOField<label> diagEdge
-//    (
-//        c.fieldIOobject("diagEdge", IOobject::NO_READ),
-//        np
-//    );
-//
-//    label i = 0;
-//    forAllConstIter(Cloud<wallBoundedParticle>, c, iter)
-//    {
-//        meshEdgeStart[i] = iter().meshEdgeStart_;
-//        diagEdge[i] = iter().diagEdge_;
-//        i++;
-//    }
-//
-//    meshEdgeStart.write();
-//    diagEdge.write();
-//}
 
 void Foam::wallBoundedParticle::write(Ostream& os, bool writeFields) const
 {
