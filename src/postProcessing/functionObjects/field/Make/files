@@ -33,6 +33,7 @@ wallBoundedStreamLine/wallBoundedStreamLine.C
 wallBoundedStreamLine/wallBoundedStreamLineFunctionObject.C
 wallBoundedStreamLine/wallBoundedStreamLineParticle.C
 wallBoundedStreamLine/wallBoundedStreamLineParticleCloud.C
+wallBoundedStreamLine/wallBoundedParticle.C
 
 surfaceInterpolateFields/surfaceInterpolateFields.C
 surfaceInterpolateFields/surfaceInterpolateFieldsFunctionObject.C
