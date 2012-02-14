@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ void Foam::UList<T>::swap(UList<T>& a)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::label Foam::UList<T>::byteSize() const
+std::streamsize Foam::UList<T>::byteSize() const
 {
     if (!contiguous<T>())
     {
@@ -113,7 +113,7 @@ Foam::label Foam::UList<T>::byteSize() const
             << abort(FatalError);
     }
 
-    return this->size_*label(sizeof(T));
+    return this->size_*sizeof(T);
 }
 
 

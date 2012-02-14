@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,8 +137,9 @@ public:
 
             //- Return the binary size in number of characters of the UList
             //  if the element is a primitive type
-            //  i.e. contiguous<T>() == true
-            label byteSize() const;
+            //  i.e. contiguous<T>() == true.
+            //  Note that is of type streamsize since used in stream ops
+            std::streamsize byteSize() const;
 
 
             //- Return a const pointer to the first data element,
