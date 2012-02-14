@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,6 +135,9 @@ public:
 
             //- Return the object holding the feature points and edges
             inline const PtrList<extendedFeatureEdgeMesh>& features() const;
+
+            //- Return the location to mesh
+            inline const point& locationInMesh() const;
 
             //- Return the surface indices
             inline const labelList& surfaces() const;
