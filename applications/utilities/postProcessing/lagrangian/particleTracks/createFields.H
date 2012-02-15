@@ -20,3 +20,4 @@ label maxPositions(readLabel(propsDict.lookup("maxPositions")));
 
 // outputFormat: raw, vtk
 //word outputFormat(propsDict.lookup("outputFormat"));
+word setFormat(propsDict.lookupOrDefault<word>("setFormat", "vtk"));
