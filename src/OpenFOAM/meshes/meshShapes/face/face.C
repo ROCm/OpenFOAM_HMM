@@ -633,6 +633,27 @@ Foam::face Foam::face::reverseFace() const
 }
 
 
+Foam::face Foam::face::rotateFace(const label nPos) const
+{
+    const labelList& f = *this;
+    labelList newList(size());
+
+    forAll(f, fp)
+    {
+        label fp1 = (fp + nPos) % f.size();
+
+        if (fp1 < 0)
+        {
+            fp1 += f.size();
+        }
+
+        newList[fp1] = f[fp];
+    }
+
+    return face(xferMove(newList));
+}
+
+
 Foam::label Foam::face::which(const label globalIndex) const
 {
     const labelList& f = *this;

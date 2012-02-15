@@ -1890,30 +1890,6 @@ void Foam::polyTopoChange::calcFaceZonePointMap
 }
 
 
-Foam::face Foam::polyTopoChange::rotateFace
-(
-    const face& f,
-    const label nPos
-)
-{
-    face newF(f.size());
-
-    forAll(f, fp)
-    {
-        label fp1 = (fp + nPos) % f.size();
-
-        if (fp1 < 0)
-        {
-            fp1 += f.size();
-        }
-
-        newF[fp1] = f[fp];
-    }
-
-    return newF;
-}
-
-
 void Foam::polyTopoChange::reorderCoupledFaces
 (
     const bool syncParallel,
@@ -2024,7 +2000,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
         {
             if (rotation[faceI] != 0)
             {
-                faces_[faceI] = rotateFace(faces_[faceI], rotation[faceI]);
+                faces_[faceI] = faces_[faceI].rotateFace(rotation[faceI]);
             }
         }
     }

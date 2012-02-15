@@ -197,6 +197,9 @@ public:
         //  The starting points of the original and reverse face are identical.
         face reverseFace() const;
 
+        //- Rotate face by number of positions
+        face rotateFace(const label nPos) const;
+
         //- Navigation through face vertices
 
             //- Which vertex on face (face index given a global index)
