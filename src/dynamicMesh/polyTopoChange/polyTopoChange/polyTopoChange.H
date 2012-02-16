@@ -363,9 +363,6 @@ class polyTopoChange
 
         // Coupling
 
-            //- Rotate face by number of positions
-            static face rotateFace(const face& f, const label nPos);
-
             //- Do all coupled patch face reordering
             void reorderCoupledFaces
             (

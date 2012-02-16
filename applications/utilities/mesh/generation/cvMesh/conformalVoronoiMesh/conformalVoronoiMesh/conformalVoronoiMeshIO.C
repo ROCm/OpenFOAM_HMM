@@ -562,27 +562,61 @@ void Foam::conformalVoronoiMesh::writeMesh
 }
 
 
-Foam::face Foam::conformalVoronoiMesh::rotateFace
+Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
 (
-    const face& f,
-    const label nPos
+    const IOobject& io,
+    const wordList& patchTypes,
+    const wordList& patchNames,
+    const labelList& patchSizes,
+    const labelList& patchStarts,
+    const labelList& procNeighbours
 ) const
 {
-    face newF(f.size());
+    autoPtr<fvMesh> meshPtr
+    (
+        new fvMesh
+        (
+            io,
+            xferCopy(pointField()),
+            xferCopy(faceList()),
+            xferCopy(cellList())
+        )
+    );
+    fvMesh& mesh = meshPtr();
 
-    forAll(f, fp)
+    List<polyPatch*> patches(patchStarts.size());
+
+    forAll(patches, patchI)
     {
-        label fp1 = (fp + nPos) % f.size();
-
-        if (fp1 < 0)
+        if (patchTypes[patchI] == processorPolyPatch::typeName)
         {
-            fp1 += f.size();
+            patches[patchI] = new processorPolyPatch
+            (
+                patchNames[patchI],
+                0,          //patchSizes[p],
+                0,          //patchStarts[p],
+                patchI,
+                mesh.boundaryMesh(),
+                Pstream::myProcNo(),
+                procNeighbours[patchI]
+            );
         }
-
-        newF[fp1] = f[fp];
+        else
+        {
+            patches[patchI] = polyPatch::New
+            (
+                patchTypes[patchI],
+                patchNames[patchI],
+                0,          //patchSizes[p],
+                0,          //patchStarts[p],
+                patchI,
+                mesh.boundaryMesh()
+            ).ptr();
+        }
     }
+    mesh.addFvPatches(patches);
 
-    return newF;
+    return meshPtr;
 }
 
 
@@ -599,51 +633,28 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const labelList& procNeighbours
 ) const
 {
-    fvMesh tempMesh
+    // Create dummy mesh with correct proc boundaries to do sorting
+    autoPtr<fvMesh> sortMeshPtr
     (
-        IOobject
+        createDummyMesh
         (
-            meshName,
-            instance,
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(cellList())
+            IOobject
+            (
+                meshName,
+                instance,
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            patchTypes,
+            patchNames,
+            patchSizes,
+            patchStarts,
+            procNeighbours
+        )
     );
-
-    List<polyPatch*> patches(patchStarts.size());
-
-    forAll(patches, p)
-    {
-        if (patchTypes[p] == processorPolyPatch::typeName)
-        {
-            patches[p] = new processorPolyPatch
-            (
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                p,
-                tempMesh.boundaryMesh(),
-                Pstream::myProcNo(),
-                procNeighbours[p]
-            );
-        }
-        else
-        {
-            patches[p] = polyPatch::New
-            (
-                patchTypes[p],
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                p,
-                tempMesh.boundaryMesh()
-            ).ptr();
-        }
-    }
+    const fvMesh& sortMesh = sortMeshPtr();
 
     // Rotation on new faces.
     labelList rotation(faces.size(), 0);
@@ -651,11 +662,13 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
     // Send ordering
-    forAll(patches, patchI)
+    forAll(sortMesh.boundaryMesh(), patchI)
     {
-        if (isA<processorPolyPatch>(*patches[patchI]))
+        const polyPatch& pp = sortMesh.boundaryMesh()[patchI];
+
+        if (isA<processorPolyPatch>(pp))
         {
-            static_cast<processorPolyPatch*>(patches[patchI])->initOrder
+            refCast<const processorPolyPatch>(pp).initOrder
             (
                 pBufs,
                 primitivePatch
@@ -677,15 +690,17 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     // Receive and calculate ordering
     bool anyChanged = false;
 
-    forAll(patches, patchI)
+    forAll(sortMesh.boundaryMesh(), patchI)
     {
-        if (isA<processorPolyPatch>(*patches[patchI]))
+        const polyPatch& pp = sortMesh.boundaryMesh()[patchI];
+
+        if (isA<processorPolyPatch>(pp))
         {
             labelList patchFaceMap(patchSizes[patchI], -1);
             labelList patchFaceRotation(patchSizes[patchI], 0);
 
             bool changed =
-                static_cast<processorPolyPatch*>(patches[patchI])->order
+                refCast<const processorPolyPatch>(pp).order
                 (
                     pBufs,
                     primitivePatch
@@ -727,7 +742,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
         {
             if (rotation[faceI] != 0)
             {
-                faces[faceI] = rotateFace(faces[faceI], rotation[faceI]);
+                faces[faceI] = faces[faceI].rotateFace(rotation[faceI]);
             }
         }
     }

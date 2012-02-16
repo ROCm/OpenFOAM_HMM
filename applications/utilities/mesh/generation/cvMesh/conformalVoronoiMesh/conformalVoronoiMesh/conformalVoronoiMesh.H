@@ -989,11 +989,15 @@ private:
             labelList& neighbour
         ) const;
 
-        //- Rotates a face by an amount nPos
-        face rotateFace
+        //- Create an empty fvMesh
+        autoPtr<fvMesh> createDummyMesh
         (
-            const face& f,
-            const label nPos
+            const IOobject& io,
+            const wordList& patchTypes,
+            const wordList& patchNames,
+            const labelList& patchSizes,
+            const labelList& patchStarts,
+            const labelList& procNeighbours
         ) const;
 
         //- Rotate the faces on processor patches if necessary
