@@ -236,7 +236,10 @@ LienCubicKELowRe::LienCubicKELowRe
     C5viscosity_
     (
         -2.0*pow3(Cmu_)*pow4(k_)/pow3(epsilon_)
-       *(magSqr(fvc::grad(U) + T(fvc::grad(U))) - magSqr(fvc::grad(U) - T(fvc::grad(U))))
+       *(
+           magSqr(fvc::grad(U) + T(fvc::grad(U)))
+         - magSqr(fvc::grad(U) - T(fvc::grad(U)))
+        )
     ),
 
     yStar_(sqrt(k_)*y_/nu() + SMALL),
