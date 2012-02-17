@@ -77,11 +77,6 @@ Foam::XiEqModel::XiEqModel
             IOobject::NO_WRITE
         ),
         Su.mesh()
-    ),
-    uPrimeCoef_(XiEqModelCoeffs_.lookupOrDefault<scalar>("uPrimeCoef", 0.0)),
-    subGridSchelkin_
-    (
-        XiEqModelCoeffs_.lookupOrDefault<bool>("subGridSchelkin", false)
     )
 {}
 
@@ -97,10 +92,6 @@ Foam::XiEqModel::~XiEqModel()
 bool Foam::XiEqModel::read(const dictionary& XiEqProperties)
 {
     XiEqModelCoeffs_ = XiEqProperties.subDict(type() + "Coeffs");
-
-    uPrimeCoef_ = XiEqModelCoeffs_.lookupOrDefault<scalar>("uPrimeCoef", 0.0);
-    subGridSchelkin_ =
-        XiEqModelCoeffs_.lookupOrDefault<bool>("subGridSchelkin", false);
 
     return true;
 }

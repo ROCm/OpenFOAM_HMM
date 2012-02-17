@@ -157,6 +157,8 @@ bool Foam::XiEqModels::SCOPEXiEq::read(const dictionary& XiEqProperties)
     XiEqModelCoeffs_.lookup("XiEqCoef") >> XiEqCoef_;
     XiEqModelCoeffs_.lookup("XiEqExp") >> XiEqExp_;
     XiEqModelCoeffs_.lookup("lCoef") >> lCoef_;
+    XiEqModelCoeffs_.lookup("uPrimeCoef") >> uPrimeCoef_;
+    XiEqModelCoeffs_.lookup("subGridSchelkin") >> subGridSchelkin_;
 
     return true;
 }
