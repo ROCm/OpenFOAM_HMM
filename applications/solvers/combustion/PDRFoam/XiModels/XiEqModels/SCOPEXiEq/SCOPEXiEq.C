@@ -53,6 +53,11 @@ Foam::XiEqModels::SCOPEXiEq::SCOPEXiEq
     XiEqExp_(readScalar(XiEqModelCoeffs_.lookup("XiEqExp"))),
     lCoef_(readScalar(XiEqModelCoeffs_.lookup("lCoef"))),
     SuMin_(0.01*Su.average()),
+    uPrimeCoef_(readScalar(XiEqModelCoeffs_.lookup("uPrimeCoef"))),
+    subGridSchelkin_
+    (
+        readBool(XiEqModelCoeffs_.lookup("subGridSchelkin"))
+    ),
     MaModel
     (
         IOdictionary
@@ -84,9 +89,9 @@ Foam::tmp<Foam::volScalarField> Foam::XiEqModels::SCOPEXiEq::XiEq() const
     const volScalarField& epsilon = turbulence_.epsilon();
 
     volScalarField up(sqrt((2.0/3.0)*k));
-    if (subGridSchelkin())
+    if (subGridSchelkin_)
     {
-        up.internalField() += calculateSchelkinEffect();
+        up.internalField() += calculateSchelkinEffect(uPrimeCoef_);
     }
 
     volScalarField l(lCoef_*sqrt(3.0/2.0)*up*k/epsilon);
