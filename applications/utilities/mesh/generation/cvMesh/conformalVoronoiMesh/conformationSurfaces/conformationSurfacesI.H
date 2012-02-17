@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,12 @@ const Foam::PtrList<Foam::extendedFeatureEdgeMesh>&
 Foam::conformationSurfaces::features() const
 {
     return features_;
+}
+
+
+const Foam::point& Foam::conformationSurfaces::locationInMesh() const
+{
+    return locationInMesh_;
 }
 
 

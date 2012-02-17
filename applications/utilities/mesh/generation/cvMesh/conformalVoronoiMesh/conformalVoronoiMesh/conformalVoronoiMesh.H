@@ -707,6 +707,12 @@ private:
             DynamicList<Foam::point>& existingEdgeLocations
         ) const;
 
+        //- Return a list of the nearest feature edge locations
+        List<pointIndexHit> nearestFeatureEdgeLocations
+        (
+            const Foam::point& pt
+        ) const;
+
         //- Check if a point is near any feature edge points.
         bool pointIsNearFeatureEdgeLocation(const Foam::point& pt) const;
 
@@ -981,6 +987,31 @@ private:
         (
             labelList& owner,
             labelList& neighbour
+        ) const;
+
+        //- Create an empty fvMesh
+        autoPtr<fvMesh> createDummyMesh
+        (
+            const IOobject& io,
+            const wordList& patchTypes,
+            const wordList& patchNames,
+            const labelList& patchSizes,
+            const labelList& patchStarts,
+            const labelList& procNeighbours
+        ) const;
+
+        //- Rotate the faces on processor patches if necessary
+        void reorderProcessorPatches
+        (
+            const word& meshName,
+            const fileName& instance,
+            const pointField& points,
+            faceList& faces,
+            const wordList& patchTypes,
+            const wordList& patchNames,
+            const labelList& patchSizes,
+            const labelList& patchStarts,
+            const labelList& procNeighbours
         ) const;
 
         //- Disallow default bitwise copy construct

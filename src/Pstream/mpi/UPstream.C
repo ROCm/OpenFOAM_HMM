@@ -305,39 +305,48 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
         scalar sum;
         MPI_Allreduce(&Value, &sum, 1, MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
         Value = sum;
+    }
 
-        /*
-        int myProcNo = UPstream::myProcNo();
-        int nProcs = UPstream::nProcs();
+    if (Pstream::debug)
+    {
+        Pout<< "Foam::reduce : reduced value:" << Value << endl;
+    }
+}
 
-        //
-        // receive from children
-        //
-        int level = 1;
-        int thisLevelOffset = 2;
-        int childLevelOffset = thisLevelOffset/2;
-        int childProcId = 0;
 
-        while
-        (
-            (childLevelOffset < nProcs)
-         && (myProcNo % thisLevelOffset) == 0
-        )
+void Foam::reduce(vector2D& Value, const sumOp<vector2D>& bop, const int tag)
+{
+    if (Pstream::debug)
+    {
+        Pout<< "Foam::reduce : value:" << Value << endl;
+    }
+
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    if (UPstream::nProcs() <= UPstream::nProcsSimpleSum)
+    {
+        if (UPstream::master())
         {
-            childProcId = myProcNo + childLevelOffset;
-
-            scalar value;
-
-            if (childProcId < nProcs)
+            for
+            (
+                int slave=UPstream::firstSlave();
+                slave<=UPstream::lastSlave();
+                slave++
+            )
             {
+                vector2D value;
+
                 if
                 (
                     MPI_Recv
                     (
                         &value,
-                        1,
+                        2,
                         MPI_SCALAR,
-                        UPstream::procID(childProcId),
+                        UPstream::procID(slave),
                         tag,
                         MPI_COMM_WORLD,
                         MPI_STATUS_IGNORE
@@ -346,34 +355,24 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
                 {
                     FatalErrorIn
                     (
-                        "reduce(scalar& Value, const sumOp<scalar>& sumOp)"
+                        "reduce(vector2D& Value, const sumOp<vector2D>& sumOp)"
                     )   << "MPI_Recv failed"
                         << Foam::abort(FatalError);
                 }
 
                 Value = bop(Value, value);
             }
-
-            level++;
-            thisLevelOffset <<= 1;
-            childLevelOffset = thisLevelOffset/2;
         }
-
-        //
-        // send and receive from parent
-        //
-        if (!UPstream::master())
+        else
         {
-            int parentId = myProcNo - (myProcNo % thisLevelOffset);
-
             if
             (
                 MPI_Send
                 (
                     &Value,
-                    1,
+                    2,
                     MPI_SCALAR,
-                    UPstream::procID(parentId),
+                    UPstream::procID(UPstream::masterNo()),
                     tag,
                     MPI_COMM_WORLD
                 )
@@ -381,19 +380,53 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
             {
                 FatalErrorIn
                 (
-                    "reduce(scalar& Value, const sumOp<scalar>& sumOp)"
+                    "reduce(vector2D& Value, const sumOp<vector2D>& sumOp)"
                 )   << "MPI_Send failed"
                     << Foam::abort(FatalError);
             }
+        }
 
+
+        if (UPstream::master())
+        {
+            for
+            (
+                int slave=UPstream::firstSlave();
+                slave<=UPstream::lastSlave();
+                slave++
+            )
+            {
+                if
+                (
+                    MPI_Send
+                    (
+                        &Value,
+                        2,
+                        MPI_SCALAR,
+                        UPstream::procID(slave),
+                        tag,
+                        MPI_COMM_WORLD
+                    )
+                )
+                {
+                    FatalErrorIn
+                    (
+                        "reduce(vector2D& Value, const sumOp<vector2D>& sumOp)"
+                    )   << "MPI_Send failed"
+                        << Foam::abort(FatalError);
+                }
+            }
+        }
+        else
+        {
             if
             (
                 MPI_Recv
                 (
                     &Value,
-                    1,
+                    2,
                     MPI_SCALAR,
-                    UPstream::procID(parentId),
+                    UPstream::procID(UPstream::masterNo()),
                     tag,
                     MPI_COMM_WORLD,
                     MPI_STATUS_IGNORE
@@ -402,52 +435,17 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
             {
                 FatalErrorIn
                 (
-                    "reduce(scalar& Value, const sumOp<scalar>& sumOp)"
+                    "reduce(vector2D& Value, const sumOp<vector2D>& sumOp)"
                 )   << "MPI_Recv failed"
                     << Foam::abort(FatalError);
             }
         }
-
-
-        //
-        // distribute to my children
-        //
-        level--;
-        thisLevelOffset >>= 1;
-        childLevelOffset = thisLevelOffset/2;
-
-        while (level > 0)
-        {
-            childProcId = myProcNo + childLevelOffset;
-
-            if (childProcId < nProcs)
-            {
-                if
-                (
-                    MPI_Send
-                    (
-                        &Value,
-                        1,
-                        MPI_SCALAR,
-                        UPstream::procID(childProcId),
-                        tag,
-                        MPI_COMM_WORLD
-                    )
-                )
-                {
-                    FatalErrorIn
-                    (
-                        "reduce(scalar& Value, const sumOp<scalar>& sumOp)"
-                    )   << "MPI_Send failed"
-                        << Foam::abort(FatalError);
-                }
-            }
-
-            level--;
-            thisLevelOffset >>= 1;
-            childLevelOffset = thisLevelOffset/2;
-        }
-        */
+    }
+    else
+    {
+        vector2D sum;
+        MPI_Allreduce(&Value, &sum, 2, MPI_SCALAR, MPI_SUM, MPI_COMM_WORLD);
+        Value = sum;
     }
 
     if (Pstream::debug)

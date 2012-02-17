@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -945,7 +945,7 @@ inline Foam::label Foam::PackedList<nBits>::packedLength() const
 
 
 template<unsigned nBits>
-inline Foam::label Foam::PackedList<nBits>::byteSize() const
+inline std::streamsize Foam::PackedList<nBits>::byteSize() const
 {
     return packedLength() * sizeof(StorageType);
 }

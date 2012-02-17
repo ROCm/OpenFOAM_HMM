@@ -562,6 +562,193 @@ void Foam::conformalVoronoiMesh::writeMesh
 }
 
 
+Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
+(
+    const IOobject& io,
+    const wordList& patchTypes,
+    const wordList& patchNames,
+    const labelList& patchSizes,
+    const labelList& patchStarts,
+    const labelList& procNeighbours
+) const
+{
+    autoPtr<fvMesh> meshPtr
+    (
+        new fvMesh
+        (
+            io,
+            xferCopy(pointField()),
+            xferCopy(faceList()),
+            xferCopy(cellList())
+        )
+    );
+    fvMesh& mesh = meshPtr();
+
+    List<polyPatch*> patches(patchStarts.size());
+
+    forAll(patches, patchI)
+    {
+        if (patchTypes[patchI] == processorPolyPatch::typeName)
+        {
+            patches[patchI] = new processorPolyPatch
+            (
+                patchNames[patchI],
+                0,          //patchSizes[p],
+                0,          //patchStarts[p],
+                patchI,
+                mesh.boundaryMesh(),
+                Pstream::myProcNo(),
+                procNeighbours[patchI]
+            );
+        }
+        else
+        {
+            patches[patchI] = polyPatch::New
+            (
+                patchTypes[patchI],
+                patchNames[patchI],
+                0,          //patchSizes[p],
+                0,          //patchStarts[p],
+                patchI,
+                mesh.boundaryMesh()
+            ).ptr();
+        }
+    }
+    mesh.addFvPatches(patches);
+
+    return meshPtr;
+}
+
+
+void Foam::conformalVoronoiMesh::reorderProcessorPatches
+(
+    const word& meshName,
+    const fileName& instance,
+    const pointField& points,
+    faceList& faces,
+    const wordList& patchTypes,
+    const wordList& patchNames,
+    const labelList& patchSizes,
+    const labelList& patchStarts,
+    const labelList& procNeighbours
+) const
+{
+    // Create dummy mesh with correct proc boundaries to do sorting
+    autoPtr<fvMesh> sortMeshPtr
+    (
+        createDummyMesh
+        (
+            IOobject
+            (
+                meshName,
+                instance,
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            patchTypes,
+            patchNames,
+            patchSizes,
+            patchStarts,
+            procNeighbours
+        )
+    );
+    const fvMesh& sortMesh = sortMeshPtr();
+
+    // Rotation on new faces.
+    labelList rotation(faces.size(), 0);
+
+    PstreamBuffers pBufs(Pstream::nonBlocking);
+
+    // Send ordering
+    forAll(sortMesh.boundaryMesh(), patchI)
+    {
+        const polyPatch& pp = sortMesh.boundaryMesh()[patchI];
+
+        if (isA<processorPolyPatch>(pp))
+        {
+            refCast<const processorPolyPatch>(pp).initOrder
+            (
+                pBufs,
+                primitivePatch
+                (
+                    SubList<face>
+                    (
+                        faces,
+                        patchSizes[patchI],
+                        patchStarts[patchI]
+                    ),
+                    points
+                )
+            );
+        }
+    }
+
+    pBufs.finishedSends();
+
+    // Receive and calculate ordering
+    bool anyChanged = false;
+
+    forAll(sortMesh.boundaryMesh(), patchI)
+    {
+        const polyPatch& pp = sortMesh.boundaryMesh()[patchI];
+
+        if (isA<processorPolyPatch>(pp))
+        {
+            labelList patchFaceMap(patchSizes[patchI], -1);
+            labelList patchFaceRotation(patchSizes[patchI], 0);
+
+            bool changed =
+                refCast<const processorPolyPatch>(pp).order
+                (
+                    pBufs,
+                    primitivePatch
+                    (
+                        SubList<face>
+                        (
+                            faces,
+                            patchSizes[patchI],
+                            patchStarts[patchI]
+                        ),
+                        points
+                    ),
+                    patchFaceMap,
+                    patchFaceRotation
+                );
+
+            if (changed)
+            {
+                // Merge patch face reordering into mesh face reordering table
+                label start = patchStarts[patchI];
+
+                forAll(patchFaceRotation, patchFaceI)
+                {
+                    rotation[patchFaceI + start] =
+                        patchFaceRotation[patchFaceI];
+                }
+
+                anyChanged = true;
+            }
+        }
+    }
+
+    reduce(anyChanged, orOp<bool>());
+
+    if (anyChanged)
+    {
+        // Rotate faces (rotation is already in new face indices).
+        forAll(rotation, faceI)
+        {
+            if (rotation[faceI] != 0)
+            {
+                faces[faceI] = faces[faceI].rotateFace(rotation[faceI]);
+            }
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::writeMesh
 (
     const word& meshName,
@@ -581,6 +768,22 @@ void Foam::conformalVoronoiMesh::writeMesh
     if (cvMeshControls().objOutput())
     {
         writeObjMesh(points, faces, word(meshName + ".obj"));
+    }
+
+    if (Pstream::parRun())
+    {
+        reorderProcessorPatches
+        (
+            meshName,
+            instance,
+            points,
+            faces,
+            patchTypes,
+            patchNames,
+            patchSizes,
+            patchStarts,
+            procNeighbours
+        );
     }
 
     fvMesh mesh

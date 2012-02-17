@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ Description
 #include "timeSelector.H"
 #include "OFstream.H"
 #include "passiveParticleCloud.H"
+#include "writer.H"
 
 using namespace Foam;
 
@@ -79,9 +80,23 @@ int main(int argc, char *argv[])
             label origId = iter().origId();
             label origProc = iter().origProc();
 
+            if (origProc >= maxIds.size())
+            {
+                // Expand size
+                maxIds.setSize(origProc+1, -1);
+            }
+
             maxIds[origProc] = max(maxIds[origProc], origId);
         }
     }
+
+    label maxNProcs = returnReduce(maxIds.size(), maxOp<label>());
+
+    Info<< "Detected particles originating from " << maxNProcs
+        << " processors." << nl << endl;
+
+    maxIds.setSize(maxNProcs, -1);
+
     Pstream::listCombineGather(maxIds, maxEqOp<label>());
     Pstream::listCombineScatter(maxIds);
 
@@ -178,56 +193,58 @@ int main(int argc, char *argv[])
         }
     }
 
+
     if (Pstream::master())
     {
-        OFstream vtkTracks(vtkPath/"particleTracks.vtk");
+        PtrList<coordSet> tracks(allTracks.size());
+        forAll(allTracks, trackI)
+        {
+            tracks.set
+            (
+                trackI,
+                new coordSet
+                (
+                    "track" + Foam::name(trackI),
+                    "distance"
+                )
+            );
+            tracks[trackI].transfer(allTracks[trackI]);
+        }
 
-        Info<< "\nWriting particle tracks to " << vtkTracks.name()
+        autoPtr<writer<scalar> > scalarFormatterPtr = writer<scalar>::New
+        (
+            setFormat
+        );
+
+        //OFstream vtkTracks(vtkPath/"particleTracks.vtk");
+        fileName vtkFile
+        (
+            scalarFormatterPtr().getFileName
+            (
+                tracks[0],
+                wordList(0)
+            )
+        );
+
+        OFstream vtkTracks
+        (
+            vtkPath
+          / "particleTracks." + vtkFile.ext()
+        );
+
+        Info<< "\nWriting particle tracks in " << setFormat
+            << " format to " << vtkTracks.name()
             << nl << endl;
 
-        // Total number of points in tracks + 1 per track
-        label nPoints = 0;
-        forAll(allTracks, trackI)
-        {
-            nPoints += allTracks[trackI].size();
-        }
 
-        vtkTracks
-            << "# vtk DataFile Version 2.0" << nl
-            << "particleTracks" << nl
-            << "ASCII" << nl
-            << "DATASET POLYDATA" << nl
-            << "POINTS " << nPoints << " float" << nl;
-
-        // Write track points to file
-        forAll(allTracks, trackI)
-        {
-            forAll(allTracks[trackI], i)
-            {
-                const vector& pt = allTracks[trackI][i];
-                vtkTracks << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
-            }
-        }
-
-        // write track (line) connectivity to file
-        vtkTracks << "LINES " << nTracks << ' ' << nPoints+nTracks << nl;
-
-        // Write ids of track points to file
-        label globalPtI = 0;
-        forAll(allTracks, trackI)
-        {
-            vtkTracks << allTracks[trackI].size();
-
-            forAll(allTracks[trackI], i)
-            {
-                vtkTracks << ' ' << globalPtI;
-                globalPtI++;
-            }
-
-            vtkTracks << nl;
-        }
-
-        Info<< "end" << endl;
+        scalarFormatterPtr().write
+        (
+            true,           // writeTracks
+            tracks,
+            wordList(0),
+            List<List<scalarField> >(0),
+            vtkTracks
+        );
     }
 
     return 0;

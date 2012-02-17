@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ inline Foam::triFace Foam::tetCell::face(const label faceI) const
 #   ifdef FULLDEBUG
     if (faceI >= 4)
     {
-        FatalErrorIn("tetCell::tetEdge(const label faceI) const")
+        FatalErrorIn("tetCell::face(const label faceI) const")
             << "index out of range 0 -> 3. faceI = " << faceI
             << abort(FatalError);
     }

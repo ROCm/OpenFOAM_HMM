@@ -36,7 +36,7 @@ SourceFiles
 #ifndef wallBoundedStreamLineParticle_H
 #define wallBoundedStreamLineParticle_H
 
-#include "particle.H"
+#include "wallBoundedParticle.H"
 #include "autoPtr.H"
 #include "interpolation.H"
 #include "vectorList.H"
@@ -50,20 +50,23 @@ namespace Foam
 class wallBoundedStreamLineParticleCloud;
 
 /*---------------------------------------------------------------------------*\
-                     Class wallBoundedStreamLineParticle Declaration
+                 Class wallBoundedStreamLineParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallBoundedStreamLineParticle
 :
-    public particle
+    public wallBoundedParticle
 {
 
 public:
 
-    //- Class used to pass tracking data to the trackToFace function
+    //- Class used to pass tracking data to the trackToEdge function
     class trackingData
     :
-        public particle::TrackingData<Cloud<wallBoundedStreamLineParticle> >
+        public wallBoundedParticle::TrackingData
+        <
+            Cloud<wallBoundedStreamLineParticle>
+        >
     {
 
     public:
@@ -74,8 +77,6 @@ public:
         const label UIndex_;
         const bool trackForward_;
         const scalar trackLength_;
-
-        const PackedBoolList& isWallPatch_;
 
         DynamicList<vectorList>& allPositions_;
         List<DynamicList<scalarList> >& allScalars_;
@@ -99,16 +100,19 @@ public:
                 List<DynamicList<vectorList> >& allVectors
             )
             :
-                particle::TrackingData<Cloud<wallBoundedStreamLineParticle> >
+                wallBoundedParticle::TrackingData
+                <
+                    Cloud<wallBoundedStreamLineParticle>
+                >
                 (
-                    cloud
+                    cloud,
+                    isWallPatch
                 ),
                 vsInterp_(vsInterp),
                 vvInterp_(vvInterp),
                 UIndex_(UIndex),
                 trackForward_(trackForward),
                 trackLength_(trackLength),
-                isWallPatch_(isWallPatch),
 
                 allPositions_(allPositions),
                 allScalars_(allScalars),
@@ -120,21 +124,6 @@ public:
 private:
 
     // Private data
-
-        //- Particle is on mesh edge:
-        //      const face& f = mesh.faces()[tetFace()]
-        //      const edge e(f[meshEdgeStart_], f.nextLabel(meshEdgeStart_));
-        //  Note that this real edge
-        //  is also one of the edges of the face-triangle (from
-        //  tetFace()+tetPt()).
-        label meshEdgeStart_;
-
-        //- Particle is on diagonal edge:
-        //      const face& f = mesh.faces()[tetFace()]
-        //      label faceBasePtI = mesh.tetBasePtIs()[faceI];
-        //      label diagPtI = (faceBasePtI+diagEdge_)%f.size();
-        //      const edge e(f[faceBasePtI], f[diagPtI]);
-        label diagEdge_;
 
         //- Lifetime of particle. Particle dies when reaches 0.
         label lifeTime_;
@@ -151,51 +140,16 @@ private:
 
     // Private Member Functions
 
-        //- Construct current edge
-        edge currentEdge() const;
-
-        //- Check if inside current tet
-        //void checkInside() const;
-
-        //- Check if on current edge
-        //void checkOnEdge() const;
-
-        //- Check if point on triangle
-        //void checkOnTriangle(const point&) const;
-
-        //- Cross mesh edge into different face on same cell
-        void crossEdgeConnectedFace(const edge& meshEdge);
-
-        //- Cross diagonal edge into different triangle on same face,cell
-        void crossDiagonalEdge();
-
-        //- Track through single triangle
-        scalar trackFaceTri(const vector& endPosition, label& minEdgeI);
-
-        //- Do all patch interaction
-        void patchInteraction(trackingData& td, const scalar trackFraction);
-
-        //- Is current triangle in the track direction
-        bool isTriAlongTrack(const point& endPosition) const;
-
-        //- Equivalent of trackToFace
-        scalar trackToEdge
-        (
-            trackingData& td,
-            const vector& endPosition
-        );
-
-        //- Interpolate all quantities; return interpolated velocity.
         vector interpolateFields
         (
-            const trackingData&,
-            const point&,
+            const trackingData& td,
+            const point& position,
             const label cellI,
             const label faceI
         );
 
-        //- Interpolate all quantities, return updated velocity.
         vector sample(trackingData& td);
+
 
 public:
 
@@ -265,73 +219,6 @@ public:
             bool move(trackingData&, const scalar trackTime);
 
 
-            //- Overridable function to handle the particle hitting a patch
-            //  Executed before other patch-hitting functions
-            bool hitPatch
-            (
-                const polyPatch&,
-                trackingData& td,
-                const label patchI,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-            );
-
-            //- Overridable function to handle the particle hitting a wedge
-            void hitWedgePatch
-            (
-                const wedgePolyPatch&,
-                trackingData& td
-            );
-
-            //- Overridable function to handle the particle hitting a
-            //  symmetryPlane
-            void hitSymmetryPatch
-            (
-                const symmetryPolyPatch&,
-                trackingData& td
-            );
-
-            //- Overridable function to handle the particle hitting a cyclic
-            void hitCyclicPatch
-            (
-                const cyclicPolyPatch&,
-                trackingData& td
-            );
-
-            //- Overridable function to handle the particle hitting a
-            //- processorPatch
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                trackingData& td
-            );
-
-            //- Overridable function to handle the particle hitting a wallPatch
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            void hitPatch
-            (
-                const polyPatch&,
-                trackingData& td
-            );
-
-
-        // Info
-
-            //- Return info proxy.
-            //  Used to print particle information to a stream
-            InfoProxy<wallBoundedStreamLineParticle> info() const
-            {
-                return *this;
-            }
-
-
         // I-O
 
             //- Read
@@ -350,12 +237,6 @@ public:
         (
             Ostream&,
             const wallBoundedStreamLineParticle&
-        );
-
-        friend Ostream& operator<<
-        (
-            Ostream&,
-            const InfoProxy<wallBoundedStreamLineParticle>&
         );
 };
 

@@ -14,6 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+libs
+(
+    "libOpenFOAM.so"
+    "libincompressibleTurbulenceModel.so"
+    "libincompressibleRASModels.so"
+);
+
 application     simpleFoam;
 
 startFrom       latestTime;

@@ -43,9 +43,20 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addBoolOption
+    (
+        "noFilter",
+        "Do not filter the mesh"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
+
     runTime.functionObjects().off();
+
+    const bool noFilter = !args.optionFound("noFilter");
+
+    Info<< "Mesh filtering is " << (noFilter ? "on" : "off") << endl;
 
     IOdictionary cvMeshDict
     (
@@ -74,7 +85,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    mesh.writeMesh(runTime.constant(), true);
+    mesh.writeMesh(runTime.constant(), noFilter);
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"
