@@ -117,6 +117,9 @@ protected:
             //- List of patch IDs internally coupled with the primary region
             labelList intCoupledPatchIDs_;
 
+        //- Region name
+        word regionName_;
+
 
     // Protected member functions
 

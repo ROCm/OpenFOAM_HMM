@@ -102,8 +102,12 @@ protected:
 
     // Protected member functions
 
-        //- Read control parameters from dictionary
+        //- Read control parameters IO dictionary
         virtual bool read();
+
+        //- Read control parameters from dictionary
+        virtual bool read(const dictionary& dict);
+
 
         // Equations
 

@@ -39,7 +39,6 @@ namespace regionModels
 
 void Foam::regionModels::regionModel1D::constructMeshObjects()
 {
-    const fvMesh& regionMesh = regionMeshPtr_();
 
     nMagSfPtr_.reset
     (
@@ -49,11 +48,11 @@ void Foam::regionModels::regionModel1D::constructMeshObjects()
             (
                 "nMagSf",
                 time().timeName(),
-                regionMesh,
+                regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            regionMesh,
+            regionMesh(),
             dimensionedScalar("zero", dimArea, 0.0)
         )
     );
@@ -163,7 +162,7 @@ bool Foam::regionModels::regionModel1D::read(const dictionary& dict)
 {
     if (regionModel::read(dict))
     {
-        moveMesh_.readIfPresent("moveMesh", dict);
+        moveMesh_.readIfPresent("moveMesh", coeffs_);
 
         return true;
     }
