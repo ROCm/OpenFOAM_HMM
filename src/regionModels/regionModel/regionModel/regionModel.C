@@ -44,19 +44,22 @@ namespace regionModels
 void Foam::regionModels::regionModel::constructMeshObjects()
 {
     // construct region mesh
-    regionMeshPtr_.reset
-    (
-        new fvMesh
+    if (!time_.foundObject<fvMesh>(regionName_))
+    {
+        regionMeshPtr_.reset
         (
-            IOobject
+            new fvMesh
             (
-                lookup("regionName"),
-                time_.timeName(),
-                time_,
-                IOobject::MUST_READ
+                IOobject
+                (
+                    regionName_,
+                    time_.timeName(),
+                    time_,
+                    IOobject::MUST_READ
+                )
             )
-        )
-    );
+        );
+    }
 }
 
 
@@ -66,19 +69,22 @@ void Foam::regionModels::regionModel::constructMeshObjects
 )
 {
     // construct region mesh
-    regionMeshPtr_.reset
-    (
-        new fvMesh
+    if (!time_.foundObject<fvMesh>(regionName_))
+    {
+        regionMeshPtr_.reset
         (
-            IOobject
+            new fvMesh
             (
-                dict.lookup("regionName"),
-                time_.timeName(),
-                time_,
-                IOobject::MUST_READ
+                IOobject
+                (
+                    regionName_,
+                    time_.timeName(),
+                    time_,
+                    IOobject::MUST_READ
+                )
             )
-        )
-    );
+        );
+    }
 }
 
 
@@ -109,11 +115,18 @@ void Foam::regionModels::regionModel::initialise()
 
             nBoundaryFaces += regionPatch.faceCells().size();
 
-            const mappedWallPolyPatch& mapPatch =
-                refCast<const mappedWallPolyPatch>(regionPatch);
+            const mappedPatchBase& mapPatch =
+                refCast<const mappedPatchBase>(regionPatch);
 
-            const label primaryPatchI = mapPatch.samplePolyPatch().index();
-            primaryPatchIDs.append(primaryPatchI);
+            if
+            (
+                primaryMesh_.time().foundObject<polyMesh>(mapPatch.sampleRegion())
+            )
+            {
+
+                const label primaryPatchI = mapPatch.samplePolyPatch().index();
+                primaryPatchIDs.append(primaryPatchI);
+            }
         }
     }
 
@@ -197,7 +210,8 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
     regionMeshPtr_(NULL),
     coeffs_(dictionary::null),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_()
+    intCoupledPatchIDs_(),
+    regionName_("none")
 {}
 
 
@@ -228,7 +242,8 @@ Foam::regionModels::regionModel::regionModel
     regionMeshPtr_(NULL),
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_()
+    intCoupledPatchIDs_(),
+    regionName_(lookup("regionName"))
 {
     if (active_)
     {
@@ -273,7 +288,8 @@ Foam::regionModels::regionModel::regionModel
     regionMeshPtr_(NULL),
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
-    intCoupledPatchIDs_()
+    intCoupledPatchIDs_(),
+    regionName_(dict.lookup("regionName"))
 {
     if (active_)
     {
@@ -312,13 +328,6 @@ void Foam::regionModels::regionModel::evolve()
 {
     if (active_)
     {
-        if (primaryMesh_.changing())
-        {
-            FatalErrorIn("regionModel::evolve()")
-                << "Currently not possible to apply " << modelName_
-                << " model to moving mesh cases" << nl << abort(FatalError);
-        }
-
         Info<< "\nEvolving " << modelName_ << " for region "
             << regionMesh().name() << endl;
 

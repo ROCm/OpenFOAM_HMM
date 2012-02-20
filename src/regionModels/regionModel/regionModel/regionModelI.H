@@ -60,7 +60,11 @@ inline const Foam::word& Foam::regionModels::regionModel::modelName() const
 
 inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
 {
-    if (!regionMeshPtr_.valid())
+    if (time_.foundObject<fvMesh>(regionName_))
+    {
+        return time_.lookupObject<fvMesh>(regionName_);
+    }
+    else if (!regionMeshPtr_.valid())
     {
         FatalErrorIn
         (
@@ -75,7 +79,14 @@ inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
 
 inline Foam::fvMesh& Foam::regionModels::regionModel::regionMesh()
 {
-    if (!regionMeshPtr_.valid())
+    if (time_.foundObject<fvMesh>(regionName_))
+    {
+        return const_cast<fvMesh&>
+        (
+            time_.lookupObject<fvMesh>(regionName_)
+        );
+    }
+    else if (!regionMeshPtr_.valid())
     {
         FatalErrorIn
         (

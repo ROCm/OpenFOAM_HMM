@@ -230,7 +230,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         else //out
         {
             this->refGrad()[i] = 0.0;
-            this->refValue()[i] = KDelta[i]*q[i] + patchInternalField()()[i];
+            this->refValue()[i] = q[i]/KDelta[i] + patchInternalField()()[i];
             this->valueFraction()[i] = 1.0;
         }
     }
