@@ -120,7 +120,10 @@ void Foam::regionModels::regionModel::initialise()
 
             if
             (
-                primaryMesh_.time().foundObject<polyMesh>(mapPatch.sampleRegion())
+                primaryMesh_.time().foundObject<polyMesh>
+                (
+                    mapPatch.sampleRegion()
+                )
             )
             {
 
