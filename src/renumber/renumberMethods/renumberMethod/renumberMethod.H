@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,8 @@ public:
 
     // Member Functions
 
-        //- Return for every cell the new cell label.
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
         //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
@@ -120,12 +121,14 @@ public:
             return labelList(0);
         }
 
-        //- Return for every cell the new cell label. Use the
-        //  mesh connectivity (if needed)
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
+        //  Use the mesh connectivity (if needed)
         virtual labelList renumber(const polyMesh&, const pointField&) const;
 
-        //- Return for every cell the new cell label. Gets
-        //  passed agglomeration map (from fine to coarse cells) and coarse
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
+        //  Gets passed agglomeration map (from fine to coarse cells) and coarse
         //  cell
         //  location. Can be overridden by renumberMethods that provide this
         //  functionality natively. Coarse cells are local to the processor
@@ -138,7 +141,8 @@ public:
             const pointField& regionPoints
         ) const;
 
-        //- Return for every cell the new cell label.
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
         //  The connectivity is equal to mesh.cellCells() except
         //  - the connections are across coupled patches
         virtual labelList renumber

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
         reverse(orderedToOld);
     }
 
-    return invert(orderedToOld.size(), orderedToOld);
+    return orderedToOld;
 }
 
 
@@ -99,7 +99,7 @@ Foam::labelList Foam::CuthillMcKeeRenumber::renumber
         reverse(orderedToOld);
     }
 
-    return invert(orderedToOld.size(), orderedToOld);
+    return orderedToOld;
 }
 
 

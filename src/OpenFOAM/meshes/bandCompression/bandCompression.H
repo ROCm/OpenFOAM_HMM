@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,8 @@ InNamespace
 Description
     The bandCompression function renumbers the addressing such that the
     band of the matrix is reduced. The algorithm uses a simple search
-    through the neighbour list
+    through the neighbour list in order of connectivity.
+    (CutHill-McKee algorithm)
 
 SourceFiles
     bandCompression.C

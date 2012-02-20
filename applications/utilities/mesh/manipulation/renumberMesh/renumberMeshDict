@@ -50,7 +50,7 @@ method          CuthillMcKee;
 
 manualCoeffs
 {
-    // In system directory: old to new labelIOList
+    // In system directory: new-to-original (i.e. order) labelIOList
     dataFile "cellMap";
 }
 

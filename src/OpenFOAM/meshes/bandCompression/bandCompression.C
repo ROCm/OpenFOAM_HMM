@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,10 @@ Description
 
 #include "bandCompression.H"
 #include "SLList.H"
+#include "IOstreams.H"
+#include "DynamicList.H"
+#include "ListOps.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,57 +47,96 @@ Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
     // the business bit of the renumbering
     SLList<label> nextCell;
 
-    labelList visited(cellCellAddressing.size());
+    PackedBoolList visited(cellCellAddressing.size());
 
-    label currentCell;
     label cellInOrder = 0;
 
-    // reset the visited cells list
-    forAll(visited, cellI)
-    {
-        visited[cellI] = 0;
-    }
 
-    // loop over the cells
-    forAll(visited, cellI)
+    // Work arrays. Kept outside of loop to minimise allocations.
+    // - neighbour cells
+    DynamicList<label> nbrs;
+    // - corresponding weights
+    DynamicList<label> weights;
+
+    // - ordering
+    labelList order;
+
+
+    while (true)
     {
-        // find the first cell that has not been visited yet
-        if (visited[cellI] == 0)
+        // For a disconnected region find the lowest connected cell.
+
+        label currentCell = -1;
+        label minWeight = labelMax;
+
+        forAll(visited, cellI)
         {
-            currentCell = cellI;
-
-            // use this cell as a start
-            nextCell.append(currentCell);
-
-            // loop through the nextCell list. Add the first cell into the
-            // cell order if it has not already been visited and ask for its
-            // neighbours. If the neighbour in question has not been visited,
-            // add it to the end of the nextCell list
-
-            while (nextCell.size())
+            // find the lowest connected cell that has not been visited yet
+            if (!visited[cellI])
             {
-                currentCell = nextCell.removeHead();
-
-                if (visited[currentCell] == 0)
+                if (cellCellAddressing[cellI].size() < minWeight)
                 {
-                    visited[currentCell] = 1;
+                    minWeight = cellCellAddressing[cellI].size();
+                    currentCell = cellI;
+                }
+            }
+        }
 
-                    // add into cellOrder
-                    newOrder[cellInOrder] = currentCell;
-                    cellInOrder++;
 
-                    // find if the neighbours have been visited
-                    const labelList& neighbours =
-                        cellCellAddressing[currentCell];
+        if (currentCell == -1)
+        {
+            break;
+        }
 
-                    forAll(neighbours, nI)
+
+        // Starting from currentCell walk breadth-first
+
+
+        // use this cell as a start
+        nextCell.append(currentCell);
+
+        // loop through the nextCell list. Add the first cell into the
+        // cell order if it has not already been visited and ask for its
+        // neighbours. If the neighbour in question has not been visited,
+        // add it to the end of the nextCell list
+
+        while (nextCell.size())
+        {
+            currentCell = nextCell.removeHead();
+
+            if (!visited[currentCell])
+            {
+                visited[currentCell] = 1;
+
+                // add into cellOrder
+                newOrder[cellInOrder] = currentCell;
+                cellInOrder++;
+
+                // find if the neighbours have been visited
+                const labelList& neighbours = cellCellAddressing[currentCell];
+
+                // Add in increasing order of connectivity
+
+                // 1. Count neighbours of unvisited neighbours
+                nbrs.clear();
+                weights.clear();
+
+                forAll(neighbours, nI)
+                {
+                    label nbr = neighbours[nI];
+                    if (!visited[nbr])
                     {
-                        if (visited[neighbours[nI]] == 0)
-                        {
-                            // not visited, add to the list
-                            nextCell.append(neighbours[nI]);
-                        }
+                        // not visited, add to the list
+                        nbrs.append(nbr);
+                        weights.append(cellCellAddressing[nbr].size());
                     }
+                }
+                // 2. Sort
+                sortedOrder(weights, order);
+                // 3. Add in sorted order
+                forAll(order, i)
+                {
+                    nextCell.append(nbrs[i]);
                 }
             }
         }

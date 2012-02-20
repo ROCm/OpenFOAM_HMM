@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -275,7 +275,7 @@ void Foam::decompositionMethod::calcCellCells
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
+        if (pp.coupled() && (parallel || !isA<processorPolyPatch>(pp)))
         {
             label faceI = pp.start();
             label bFaceI = pp.start()-mesh.nInternalFaces();
