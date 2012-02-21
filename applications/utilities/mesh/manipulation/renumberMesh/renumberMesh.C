@@ -131,9 +131,9 @@ void getBand
 
     forAll(nIntersect, cellI)
     {
-        for (label rowI = cellI-cellBandwidth[cellI]; rowI < cellI; rowI++)
+        for (label colI = cellI-cellBandwidth[cellI]; colI <= cellI; colI++)
         {
-            nIntersect[rowI]++;
+            nIntersect[colI]++;
         }
     }
 
@@ -597,14 +597,6 @@ int main(int argc, char *argv[])
         profile,
         sumSqrIntersect
     );
-
-    if (band != getBand(mesh.faceOwner(), mesh.faceNeighbour()))
-    {
-        FatalErrorIn(args.executable())
-            << "band:" << band
-            << abort(FatalError);
-    }
-
 
     reduce(band, maxOp<label>());
     reduce(profile, sumOp<scalar>());

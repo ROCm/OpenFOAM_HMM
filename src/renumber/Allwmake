@@ -18,6 +18,16 @@ set -x
 
 wmake $makeType renumberMethods
 
+if [ -n "$BOOST_ARCH_PATH" ]
+then
+    wmake $makeType SloanRenumber
+else
+    echo
+    echo "Skipping SloanRenumber"
+    echo
+fi
+
+
 #if [ -n "$ZOLTAN_ARCH_PATH" ]
 #then
 #    wmake $makeType zoltanRenumber

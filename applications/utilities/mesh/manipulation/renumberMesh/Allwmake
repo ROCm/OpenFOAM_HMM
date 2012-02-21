@@ -1,0 +1,14 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+export SLOAN_LINK_FLAGS=''
+
+if [ -f "${FOAM_LIBBIN}/libSloanRenumber.so" ]
+then
+    echo "Found libSloanRenumber.so  --  enabling Sloan renumbering support."
+    export SLOAN_LINK_FLAGS="-lSloanRenumber"
+fi
+
+wmake
+
+# ----------------------------------------------------------------- end-of-file

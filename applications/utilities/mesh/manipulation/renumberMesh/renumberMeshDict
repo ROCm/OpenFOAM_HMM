@@ -37,6 +37,7 @@ sortCoupledFaceCells false;
 
 
 method          CuthillMcKee;
+//method          Sloan;
 //method          manual;
 //method          random;
 //method          spring;
@@ -46,7 +47,6 @@ method          CuthillMcKee;
 //    // Reverse CuthillMcKee (RCM) or plain
 //    reverse true;
 //}
-
 
 manualCoeffs
 {
