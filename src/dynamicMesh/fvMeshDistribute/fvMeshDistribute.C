@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -553,6 +553,12 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
     saveBoundaryFields<tensor, surfaceMesh>(tFlds);
 
     // Change the mesh (no inflation). Note: parallel comms allowed.
+    //
+    // NOTE: there is one very particular problem with this ordering.
+    // We first create the processor patches and use these to merge out
+    // shared points (see mergeSharedPoints below). So temporarily points
+    // and edges do not match!
+
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
 
     // Update fields. No inflation, parallel sync.
@@ -2429,10 +2435,14 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
     // Change patches. Since this might change ordering of coupled faces
     // we also need to adapt our constructMaps.
+    // NOTE: there is one very particular problem with this structure.
+    // We first create the processor patches and use these to merge out
+    // shared points (see mergeSharedPoints below). So temporarily points
+    // and edges do not match!
     repatch(newPatchID, constructFaceMap);
 
     // See if any geometrically shared points need to be merged. Note: does
-    // parallel comms.
+    // parallel comms. After this points and edges should again be consistent.
     mergeSharedPoints(constructPointMap);
 
     // Bit of hack: processorFvPatchField does not get reset since created
