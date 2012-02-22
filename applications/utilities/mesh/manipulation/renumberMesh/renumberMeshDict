@@ -41,6 +41,7 @@ method          CuthillMcKee;
 //method          manual;
 //method          random;
 //method          spring;
+//method          boundaryFirst;
 
 //CuthillMcKeeCoeffs
 //{

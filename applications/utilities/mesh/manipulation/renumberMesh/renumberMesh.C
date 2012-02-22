@@ -108,6 +108,7 @@ label getBand(const labelList& owner, const labelList& neighbour)
 // Calculate band of matrix
 void getBand
 (
+    const bool calculateIntersect,
     const label nCells,
     const labelList& owner,
     const labelList& neighbour,
@@ -129,17 +130,22 @@ void getBand
         cellBandwidth[nei] = max(cellBandwidth[nei], diff);
     }
 
-    forAll(nIntersect, cellI)
-    {
-        for (label colI = cellI-cellBandwidth[cellI]; colI <= cellI; colI++)
-        {
-            nIntersect[colI]++;
-        }
-    }
-
     bandwidth = max(cellBandwidth);
-    profile = sum(cellBandwidth);
-    sumSqrIntersect = sum(Foam::sqr(nIntersect));
+    profile = sum(1.0*cellBandwidth);
+
+    sumSqrIntersect = 0.0;
+    if (calculateIntersect)
+    {
+        forAll(nIntersect, cellI)
+        {
+            for (label colI = cellI-cellBandwidth[cellI]; colI <= cellI; colI++)
+            {
+                nIntersect[colI] += 1.0;
+            }
+        }
+
+        sumSqrIntersect = sum(Foam::sqr(nIntersect));
+    }
 }
 
 
@@ -565,6 +571,11 @@ int main(int argc, char *argv[])
         "dict",
         "renumber according to system/renumberMeshDict"
     );
+    argList::addBoolOption
+    (
+        "frontWidth",
+        "calculate the rms of the frontwidth"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -582,7 +593,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     const bool readDict = args.optionFound("dict");
-
+    const bool doFrontWidth = args.optionFound("frontWidth");
     const bool overwrite = args.optionFound("overwrite");
 
     label band;
@@ -590,6 +601,7 @@ int main(int argc, char *argv[])
     scalar sumSqrIntersect;
     getBand
     (
+        doFrontWidth,
         mesh.nCells(),
         mesh.faceOwner(),
         mesh.faceNeighbour(),
@@ -1028,6 +1040,7 @@ int main(int argc, char *argv[])
         scalar sumSqrIntersect;
         getBand
         (
+            doFrontWidth,
             mesh.nCells(),
             mesh.faceOwner(),
             mesh.faceNeighbour(),
