@@ -96,6 +96,20 @@ T returnReduce
 }
 
 
+// Non-blocking version of reduce. Sets request.
+template <class T, class BinaryOp>
+void reduce
+(
+    T& Value,
+    const BinaryOp& bop,
+    const int tag,
+    label& request
+)
+{
+    notImplemented("reduce(T&, const BinaryOp&, const int, label&");
+}
+
+
 // Insist there is a specialisation for the sum reduction of scalar(s)
 void reduce
 (
@@ -109,6 +123,14 @@ void reduce
     vector2D& Value,
     const sumOp<vector2D>& bop,
     const int tag = Pstream::msgType()
+);
+
+void reduce
+(
+    scalar& Value,
+    const sumOp<scalar>& bop,
+    const int tag,
+    label& request
 );
 
 
