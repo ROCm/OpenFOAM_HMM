@@ -56,6 +56,10 @@ class boundaryFirstRenumber
 
     // Private Member Functions
 
+        //- Count the number of internal faces of a cell
+        label countInternalFaces(const primitiveMesh&, const label) const;
+
+
         //- Disallow default bitwise copy construct and assignment
         void operator=(const boundaryFirstRenumber&);
         boundaryFirstRenumber(const boundaryFirstRenumber&);
