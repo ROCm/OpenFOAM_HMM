@@ -131,7 +131,7 @@ Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
                         weights.append(cellCellAddressing[nbr].size());
                     }
                 }
-                // 2. Sort
+                // 2. Sort in ascending order
                 sortedOrder(weights, order);
                 // 3. Add in sorted order
                 forAll(order, i)
