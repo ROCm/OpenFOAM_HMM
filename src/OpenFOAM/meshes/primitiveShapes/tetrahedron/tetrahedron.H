@@ -46,6 +46,7 @@ SourceFiles
 #include "Random.H"
 #include "FixedList.H"
 #include "UList.H"
+#include "triPointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,6 +197,8 @@ public:
 
             inline const Point& d() const;
 
+            //- Return i-th face
+            inline triPointRef tri(const label faceI) const;
 
         // Properties
 
@@ -242,7 +245,8 @@ public:
                 List<scalar>& bary
             ) const;
 
-            //- Return nearest point to p on tetrahedron
+            //- Return nearest point to p on  tetrahedron. Is p itself
+            //  if inside.
             inline pointHit nearestPoint(const point& p) const;
 
             //- Return true if point is inside tetrahedron
