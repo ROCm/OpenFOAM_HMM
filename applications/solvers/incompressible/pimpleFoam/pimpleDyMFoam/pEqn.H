@@ -1,29 +1,34 @@
-U = rAU*(UEqn() == sources(U))().H();
+volVectorField HbyA("HbyA", U);
+HbyA = rAU*(UEqn() == sources(U))().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
     UEqn.clear();
 }
 
-phi = (fvc::interpolate(U) & mesh.Sf());
+surfaceScalarField phiHbyA
+(
+    "phiHbyA",
+    (fvc::interpolate(HbyA) & mesh.Sf())
+);
 
 if (ddtPhiCorr)
 {
-    phi += fvc::ddtPhiCorr(rAU, U, phi);
+    phiHbyA += fvc::ddtPhiCorr(rAU, U, phi);
 }
 
 if (p.needReference())
 {
-    fvc::makeRelative(phi, U);
-    adjustPhi(phi, U, p);
-    fvc::makeAbsolute(phi, U);
+    fvc::makeRelative(phiHbyA, U);
+    adjustPhi(phiHbyA, U, p);
+    fvc::makeAbsolute(phiHbyA, U);
 }
 
 while (pimple.correctNonOrthogonal())
 {
     fvScalarMatrix pEqn
     (
-        fvm::laplacian(rAU, p) == fvc::div(phi)
+        fvm::laplacian(rAU, p) == fvc::div(phiHbyA)
     );
 
     pEqn.setReference(pRefCell, pRefValue);
@@ -32,7 +37,7 @@ while (pimple.correctNonOrthogonal())
 
     if (pimple.finalNonOrthogonalIter())
     {
-        phi -= pEqn.flux();
+        phi = phiHbyA - pEqn.flux();
     }
 }
 
@@ -44,6 +49,6 @@ p.relax();
 // Make the fluxes relative to the mesh motion
 fvc::makeRelative(phi, U);
 
-U -= rAU*fvc::grad(p);
+U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 sources.correct(U);

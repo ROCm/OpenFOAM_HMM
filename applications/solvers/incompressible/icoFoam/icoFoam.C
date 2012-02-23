@@ -68,17 +68,22 @@ int main(int argc, char *argv[])
         {
             volScalarField rAU(1.0/UEqn.A());
 
-            U = rAU*UEqn.H();
-            phi = (fvc::interpolate(U) & mesh.Sf())
-                + fvc::ddtPhiCorr(rAU, U, phi);
+            volVectorField HbyA("HbyA", U);
+            HbyA = rAU*UEqn.H();
+            surfaceScalarField phiHbyA
+            (
+                "phiHbyA",
+                (fvc::interpolate(HbyA) & mesh.Sf())
+              + fvc::ddtPhiCorr(rAU, U, phi)
+            );
 
-            adjustPhi(phi, U, p);
+            adjustPhi(phiHbyA, U, p);
 
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             {
                 fvScalarMatrix pEqn
                 (
-                    fvm::laplacian(rAU, p) == fvc::div(phi)
+                    fvm::laplacian(rAU, p) == fvc::div(phiHbyA)
                 );
 
                 pEqn.setReference(pRefCell, pRefValue);
@@ -86,13 +91,13 @@ int main(int argc, char *argv[])
 
                 if (nonOrth == nNonOrthCorr)
                 {
-                    phi -= pEqn.flux();
+                    phi = phiHbyA - pEqn.flux();
                 }
             }
 
             #include "continuityErrs.H"
 
-            U -= rAU*fvc::grad(p);
+            U = HbyA - rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 

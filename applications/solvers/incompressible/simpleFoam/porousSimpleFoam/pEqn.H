@@ -1,15 +1,16 @@
+volVectorField HbyA("HbyA", U);
 if (pressureImplicitPorosity)
 {
-    U = trTU()&UEqn().H();
+    HbyA = trTU()&UEqn().H();
 }
 else
 {
-    U = trAU()*UEqn().H();
+    HbyA = trAU()*UEqn().H();
 }
 
 UEqn.clear();
-phi = fvc::interpolate(U) & mesh.Sf();
-adjustPhi(phi, U, p);
+surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
+adjustPhi(phiHbyA, U, p);
 
 while (simple.correctNonOrthogonal())
 {
@@ -17,11 +18,11 @@ while (simple.correctNonOrthogonal())
 
     if (pressureImplicitPorosity)
     {
-        tpEqn = (fvm::laplacian(trTU(), p) == fvc::div(phi));
+        tpEqn = (fvm::laplacian(trTU(), p) == fvc::div(phiHbyA));
     }
     else
     {
-        tpEqn = (fvm::laplacian(trAU(), p) == fvc::div(phi));
+        tpEqn = (fvm::laplacian(trAU(), p) == fvc::div(phiHbyA));
     }
 
     tpEqn().setReference(pRefCell, pRefValue);
@@ -30,7 +31,7 @@ while (simple.correctNonOrthogonal())
 
     if (simple.finalNonOrthogonalIter())
     {
-        phi -= tpEqn().flux();
+        phi = phiHbyA - tpEqn().flux();
     }
 }
 
@@ -41,11 +42,11 @@ p.relax();
 
 if (pressureImplicitPorosity)
 {
-    U -= trTU()&fvc::grad(p);
+    U = HbyA - (trTU()&fvc::grad(p));
 }
 else
 {
-    U -= trAU()*fvc::grad(p);
+    U = HbyA - (trAU()*fvc::grad(p));
 }
 
 U.correctBoundaryConditions();
