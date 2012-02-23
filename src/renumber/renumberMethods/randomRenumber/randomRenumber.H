@@ -76,7 +76,7 @@ public:
 
         //- Return the order in which cells need to be visited, i.e.
         //  from ordered back to original cell label.
-        //  Use the mesh connectivity (if needed)
+        //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const;
 
         //- Return the order in which cells need to be visited, i.e.
