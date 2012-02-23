@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,19 +72,13 @@ void Foam::inversePointDistanceDiffusivity::correct()
     const polyMesh& mesh = mSolver().mesh();
     const polyBoundaryMesh& bdry = mesh.boundaryMesh();
 
-    labelHashSet patchSet(bdry.size());
+    labelHashSet patchSet(bdry.patchSet(patchNames_));
 
     label nPatchEdges = 0;
 
-    forAll(patchNames_, i)
+    forAllConstIter(labelHashSet, patchSet, iter)
     {
-        const label pID = bdry.findPatchID(patchNames_[i]);
-
-        if (pID > -1)
-        {
-            patchSet.insert(pID);
-            nPatchEdges += bdry[pID].nEdges();
-        }
+        nPatchEdges += bdry[iter.key()].nEdges();
     }
 
     // Distance to wall on points and edges.

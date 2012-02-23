@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::manualRenumber
 
 Description
-    Renumber given a cell-to-new cell association in a file
+    Renumber given a ordered-to-original cell association in a file
 
 SourceFiles
     manualRenumber.C
@@ -79,23 +79,26 @@ public:
 
     // Member Functions
 
-        //- Return for every coordinate the wanted processor number.
-        //  We need a polyMesh (to be able to load the file)
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
+        //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
             notImplemented("manualRenumber::renumber(const pointField&)");
             return labelList(0);
         }
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
+        //  Use the mesh connectivity (if needed)
         virtual labelList renumber
         (
             const polyMesh& mesh,
             const pointField& cc
         ) const;
 
-        //- Return for every cell the new cell label.
+        //- Return the order in which cells need to be visited, i.e.
+        //  from ordered back to original cell label.
         //  The connectivity is equal to mesh.cellCells() except
         //  - the connections are across coupled patches
         virtual labelList renumber

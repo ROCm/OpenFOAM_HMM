@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,30 @@ namespace Foam
         boundaryFirstRenumber,
         dictionary
     );
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::label Foam::boundaryFirstRenumber::countInternalFaces
+(
+    const primitiveMesh& mesh,
+    const label cellI
+) const
+{
+    const cell& cFaces = mesh.cells()[cellI];
+
+    label nInt = 0;
+
+    forAll(cFaces, i)
+    {
+        label faceI = cFaces[i];
+        if (mesh.isInternalFace(faceI))
+        {
+            nInt++;
+        }
+    }
+    return nInt;
 }
 
 
@@ -99,11 +123,19 @@ Foam::labelList Foam::boundaryFirstRenumber::renumber
         }
     }
 
+
+    DynamicList<label> frontCells(frontFaces.size());
+    DynamicList<label> frontCellWeights(frontFaces.size());
+
+    // - ordering
+    labelList order;
+
     // Loop over all frontFaces
     label currentDistance = 0;
     while (frontFaces.size() > 0)
     {
-        DynamicList<label> frontCells(frontFaces.size());
+        frontCells.clear();
+        frontCellWeights.clear();
 
         // Set all of frontFaces' neighbours to current distance
 
@@ -118,12 +150,28 @@ Foam::labelList Foam::boundaryFirstRenumber::renumber
                 {
                     distance[ownCellI] = currentDistance;
                     frontCells.append(ownCellI);
+                    frontCellWeights.append
+                    (
+                        countInternalFaces
+                        (
+                            mesh,
+                            ownCellI
+                        )
+                    );
                 }
                 label neiCellI = nei[faceI];
                 if (distance[neiCellI] == -1)
                 {
                     distance[neiCellI] = currentDistance;
                     frontCells.append(neiCellI);
+                    frontCellWeights.append
+                    (
+                        countInternalFaces
+                        (
+                            mesh,
+                            neiCellI
+                        )
+                    );
                 }
             }
             else
@@ -133,6 +181,14 @@ Foam::labelList Foam::boundaryFirstRenumber::renumber
                 {
                     distance[ownCellI] = currentDistance;
                     frontCells.append(ownCellI);
+                    frontCellWeights.append
+                    (
+                        countInternalFaces
+                        (
+                            mesh,
+                            ownCellI
+                        )
+                    );
                 }
             }
         }
@@ -142,11 +198,12 @@ Foam::labelList Foam::boundaryFirstRenumber::renumber
         //    << frontCells.size() << " cells." << endl;
 
 
-        // TBD. Determine order within current shell (frontCells). For now
-        // just add them.
-        forAll(frontCells, i)
+        // Determine order within current shell (frontCells) and add them
+        sortedOrder(frontCellWeights, order);
+        // 3. Add in sorted order
+        forAll(order, i)
         {
-            newOrder[cellInOrder] = frontCells[i];
+            newOrder[cellInOrder] = frontCells[order[i]];
             cellInOrder++;
         }
 
@@ -194,7 +251,7 @@ Foam::labelList Foam::boundaryFirstRenumber::renumber
     //        << endl;
     //}
 
-    return invert(newOrder.size(), newOrder);
+    return newOrder;
 }
 
 

@@ -37,6 +37,7 @@ sortCoupledFaceCells false;
 
 
 method          CuthillMcKee;
+//method          Sloan;
 //method          manual;
 //method          random;
 //method          spring;
@@ -47,10 +48,9 @@ method          CuthillMcKee;
 //    reverse true;
 //}
 
-
 manualCoeffs
 {
-    // In system directory: old to new labelIOList
+    // In system directory: new-to-original (i.e. order) labelIOList
     dataFile "cellMap";
 }
 

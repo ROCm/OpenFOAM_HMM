@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ Foam::labelList Foam::manualRenumber::renumber
     const pointField& points
 ) const
 {
-    labelIOList oldToNew
+    labelIOList newToOld
     (
         IOobject
         (
@@ -78,14 +78,14 @@ Foam::labelList Foam::manualRenumber::renumber
 
     // check if the final renumbering is OK
 
-    if (oldToNew.size() != points.size())
+    if (newToOld.size() != points.size())
     {
         FatalErrorIn
         (
             "manualRenumber::renumber(const pointField&, const scalarField&)"
         )   << "Size of renumber list does not correspond "
             << "to the number of points.  Size: "
-            << oldToNew.size() << " Number of points: "
+            << newToOld.size() << " Number of points: "
             << points.size()
             << ".\n" << "Manual renumbering data read from file "
             << dataFile_ << "." << endl
@@ -93,27 +93,27 @@ Foam::labelList Foam::manualRenumber::renumber
     }
 
     // Invert to see if one to one
-    labelList newToOld(points.size(), -1);
-    forAll(oldToNew, i)
+    labelList oldToNew(points.size(), -1);
+    forAll(newToOld, i)
     {
-        label newI = oldToNew[i];
+        label origCellI = newToOld[i];
 
-        if (newI < 0 || newI >= oldToNew.size())
+        if (origCellI < 0 || origCellI >= points.size())
         {
             FatalErrorIn
             (
                 "manualRenumber::renumber(const pointField&"
                 ", const scalarField&)"
             )   << "Renumbering is not one-to-one. Index "
-                << i << " maps onto " << newI
+                << i << " maps onto original cell " << origCellI
                 << ".\n" << "Manual renumbering data read from file "
                 << dataFile_ << "." << endl
                 << exit(FatalError);
         }
 
-        if (newToOld[newI] == -1)
+        if (oldToNew[origCellI] == -1)
         {
-            newToOld[newI] = i;
+            oldToNew[origCellI] = i;
         }
         else
         {
@@ -122,15 +122,15 @@ Foam::labelList Foam::manualRenumber::renumber
                 "manualRenumber::renumber(const pointField&"
                 ", const scalarField&)"
             )   << "Renumbering is not one-to-one. Both index "
-                << newToOld[newI]
-                << " and " << i << " map onto " << newI
+                << oldToNew[origCellI]
+                << " and " << i << " map onto " << origCellI
                 << ".\n" << "Manual renumbering data read from file "
                 << dataFile_ << "." << endl
                 << exit(FatalError);
         }
     }
 
-    return oldToNew;
+    return newToOld;
 }
 
 

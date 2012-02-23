@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -360,8 +360,14 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
         labelList nbrEdgeIndex;
 
         {
-            // Note cannot predict exact size since opposite nPoints might
-            // be different from one over here.
+            // !Note: there is one situation where the opposite points and
+            // do not exactly match and that is while we are distributing
+            // meshes and multiple parts come together from different
+            // processors. This can temporarily create the situation that
+            // we have points which will be merged out later but we still
+            // need the face connectivity to be correct.
+            // So: cannot check here on same points and edges.
+
             UIPstream fromNeighbProc(neighbProcNo(), pBufs);
 
             fromNeighbProc
@@ -369,24 +375,6 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
                 >> nbrPointIndex
                 >> nbrEdgeFace
                 >> nbrEdgeIndex;
-
-            if
-            (
-                nbrPointIndex.size() != nPoints()
-             || nbrEdgeIndex.size() != nEdges()
-            )
-            {
-                FatalErrorIn
-                (
-                    "processorPolyPatch::updateMesh(PstreamBuffers&)"
-                )   << "Size of data from processor " << neighbProcNo()
-                    << " does not match size of data on processor "
-                    << Pstream::myProcNo() << "." << nl
-                    << "    Neighbour has " << nbrPointFace.size()
-                    << " points and " << nbrEdgeFace.size() << " edges." << nl
-                    << "    This proc has " << nPoints() << " points and "
-                    << nEdges() << " edges." << exit(FatalError);
-            }
         }
 
         // Convert neighbour faces and indices into face back into

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anispulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,6 +102,44 @@ label getBand(const labelList& owner, const labelList& neighbour)
         }
     }
     return band;
+}
+
+
+// Calculate band of matrix
+void getBand
+(
+    const label nCells,
+    const labelList& owner,
+    const labelList& neighbour,
+    label& bandwidth,
+    scalar& profile,            // scalar to avoid overflow
+    scalar& sumSqrIntersect     // scalar to avoid overflow
+)
+{
+    labelList cellBandwidth(nCells, 0);
+    scalarField nIntersect(nCells, 0.0);
+
+    forAll(neighbour, faceI)
+    {
+        label own = owner[faceI];
+        label nei = neighbour[faceI];
+
+        // Note: mag not necessary for correct (upper-triangular) ordering.
+        label diff = nei-own;
+        cellBandwidth[nei] = max(cellBandwidth[nei], diff);
+    }
+
+    forAll(nIntersect, cellI)
+    {
+        for (label colI = cellI-cellBandwidth[cellI]; colI <= cellI; colI++)
+        {
+            nIntersect[colI]++;
+        }
+    }
+
+    bandwidth = max(cellBandwidth);
+    profile = sum(cellBandwidth);
+    sumSqrIntersect = sum(Foam::sqr(nIntersect));
 }
 
 
@@ -488,19 +526,10 @@ labelList regionRenumber
 
         const fvMesh& subMesh = subsetter.subMesh();
 
-        labelList subReverseCellOrder = method.renumber
+        labelList subCellOrder = method.renumber
         (
             subMesh,
             subMesh.cellCentres()
-        );
-
-        labelList subCellOrder
-        (
-            invert
-            (
-                subMesh.nCells(),
-                subReverseCellOrder
-            )
         );
 
         // Restore state
@@ -556,12 +585,37 @@ int main(int argc, char *argv[])
 
     const bool overwrite = args.optionFound("overwrite");
 
-    label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
+    label band;
+    scalar profile;
+    scalar sumSqrIntersect;
+    getBand
+    (
+        mesh.nCells(),
+        mesh.faceOwner(),
+        mesh.faceNeighbour(),
+        band,
+        profile,
+        sumSqrIntersect
+    );
 
-    Info<< "Mesh size: " << returnReduce(mesh.nCells(), sumOp<label>()) << nl
-        << "Band before renumbering: "
-        << returnReduce(band, maxOp<label>()) << nl << endl;
+    reduce(band, maxOp<label>());
+    reduce(profile, sumOp<scalar>());
+    scalar rmsFrontwidth = Foam::sqrt
+    (
+        returnReduce
+        (
+            sumSqrIntersect,
+            sumOp<scalar>()
+        )
+      / mesh.globalData().nTotalCells()
+    );
 
+    Info<< "Mesh size: " << mesh.globalData().nTotalCells() << nl
+        << "Before renumbering :" << nl
+        << "    band           : " << band << nl
+        << "    profile        : " << profile << nl
+        << "    rms frontwidth : " << rmsFrontwidth << nl
+        << endl;
 
     bool sortCoupledFaceCells = false;
     bool writeMaps = false;
@@ -803,14 +857,13 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // Detemines old to new cell ordering
-        labelList reverseCellOrder = renumberPtr().renumber
+        // Detemines sorted back to original cell ordering
+        cellOrder = renumberPtr().renumber
         (
             mesh,
             mesh.cellCentres()
         );
-
-        cellOrder = invert(mesh.nCells(), reverseCellOrder);
+        labelList reverseCellOrder = invert(mesh.nCells(), cellOrder);
 
 
         if (sortCoupledFaceCells)
@@ -969,11 +1022,36 @@ int main(int argc, char *argv[])
     }
 
 
-    band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
-
-    Info<< "Band after renumbering: "
-        << returnReduce(band, maxOp<label>()) << nl << endl;
-
+    {
+        label band;
+        scalar profile;
+        scalar sumSqrIntersect;
+        getBand
+        (
+            mesh.nCells(),
+            mesh.faceOwner(),
+            mesh.faceNeighbour(),
+            band,
+            profile,
+            sumSqrIntersect
+        );
+        reduce(band, maxOp<label>());
+        reduce(profile, sumOp<scalar>());
+        scalar rmsFrontwidth = Foam::sqrt
+        (
+            returnReduce
+            (
+                sumSqrIntersect,
+                sumOp<scalar>()
+            )
+          / mesh.globalData().nTotalCells()
+        );
+        Info<< "After renumbering :" << nl
+            << "    band           : " << band << nl
+            << "    profile        : " << profile << nl
+            << "    rms frontwidth : " << rmsFrontwidth << nl
+            << endl;
+    }
 
     if (orderPoints)
     {

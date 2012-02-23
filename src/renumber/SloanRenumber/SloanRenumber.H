@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CuthillMcKeeRenumber
+    Foam::SloanRenumber
 
 Description
-    Cuthill-McKee renumbering
+    Sloan renumbering algorithm
+
+    E.g. http://www.apav.it/sito_ratio/file_pdf/ratio_4/capitolo_1.pdf
 
 SourceFiles
-    CuthillMcKeeRenumber.C
+    SloanRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CuthillMcKeeRenumber_H
-#define CuthillMcKeeRenumber_H
+#ifndef SloanRenumber_H
+#define SloanRenumber_H
 
 #include "renumberMethod.H"
 #include "Switch.H"
@@ -42,10 +44,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class CuthillMcKeeRenumber Declaration
+                   Class SloanRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class CuthillMcKeeRenumber
+class SloanRenumber
 :
     public renumberMethod
 {
@@ -57,24 +59,24 @@ class CuthillMcKeeRenumber
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const CuthillMcKeeRenumber&);
-        CuthillMcKeeRenumber(const CuthillMcKeeRenumber&);
+        void operator=(const SloanRenumber&);
+        SloanRenumber(const SloanRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("CuthillMcKee");
+    TypeName("Sloan");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        CuthillMcKeeRenumber(const dictionary& renumberDict);
+        SloanRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~CuthillMcKeeRenumber()
+    virtual ~SloanRenumber()
     {}
 
 
@@ -85,7 +87,7 @@ public:
         //  This is only defined for geometric renumberMethods.
         virtual labelList renumber(const pointField&) const
         {
-            notImplemented("CuthillMcKeeRenumber::renumber(const pointField&)");
+            notImplemented("SloanRenumber::renumber(const pointField&)");
             return labelList(0);
         }
 

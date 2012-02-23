@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -452,6 +452,41 @@ void Foam::reduce(vector2D& Value, const sumOp<vector2D>& bop, const int tag)
     {
         Pout<< "Foam::reduce : reduced value:" << Value << endl;
     }
+}
+
+
+void Foam::reduce
+(
+    scalar& Value,
+    const sumOp<scalar>& bop,
+    const int tag,
+    label& requestID
+)
+{
+#ifdef MPIX_COMM_TYPE_SHARED
+    // Assume mpich2 with non-blocking collectives extensions. Once mpi3
+    // is available this will change.
+    MPI_Request request;
+    scalar v = Value;
+    MPIX_Ireduce
+    (
+        &v,
+        &Value,
+        1,
+        MPI_SCALAR,
+        MPI_SUM,
+        0,              //root
+        MPI_COMM_WORLD,
+        &request
+    );
+
+    requestID = PstreamGlobals::outstandingRequests_.size();
+    PstreamGlobals::outstandingRequests_.append(request);
+#else
+    // Non-blocking not yet implemented in mpi
+    reduce(Value, bop, tag);
+    requestID = -1;
+#endif
 }
 
 

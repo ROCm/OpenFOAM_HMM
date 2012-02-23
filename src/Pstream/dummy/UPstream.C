@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,10 @@ void Foam::reduce(scalar&, const sumOp<scalar>&, const int)
 
 
 void Foam::reduce(vector2D&, const sumOp<vector2D>&, const int)
+{}
+
+
+void Foam::reduce(scalar&, const sumOp<scalar>&, const int, label&)
 {}
 
 
