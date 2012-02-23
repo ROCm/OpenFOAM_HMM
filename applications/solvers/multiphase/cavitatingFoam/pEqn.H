@@ -13,12 +13,10 @@
 
     volScalarField rAU(1.0/UEqn.A());
     surfaceScalarField rAUf("rAUf", rhof*fvc::interpolate(rAU));
-    volVectorField HbyA(rAU*UEqn.H());
+    volVectorField HbyA("HbyA", rAU*UEqn.H());
 
     phiv = (fvc::interpolate(HbyA) & mesh.Sf())
          + fvc::ddtPhiCorr(rAU, rho, U, phiv);
-
-    p.boundaryField().updateCoeffs();
 
     surfaceScalarField phiGradp(rAUf*mesh.magSf()*fvc::snGrad(p));
 
