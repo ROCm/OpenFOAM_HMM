@@ -127,6 +127,7 @@ $(derivedFvPatchFields)/mappedFlowRate/mappedFlowRateFvPatchVectorField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fanPressure/fanPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/buoyantPressure/buoyantPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/multiphaseFixedFluxPressure/multiphaseFixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
