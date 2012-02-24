@@ -5,8 +5,10 @@
     volScalarField rUaA(1.0/UaEqn.A());
     volScalarField rUbA(1.0/UbEqn.A());
 
-    phia == (fvc::interpolate(Ua) & mesh.Sf());
-    phib == (fvc::interpolate(Ub) & mesh.Sf());
+    phia.boundaryField() ==
+        (fvc::interpolate(Ua) & mesh.Sf())().boundaryField();
+    phib.boundaryField() ==
+        (fvc::interpolate(Ub) & mesh.Sf())().boundaryField();
 
     rUaAf = fvc::interpolate(rUaA);
     surfaceScalarField rUbAf(fvc::interpolate(rUbA));
