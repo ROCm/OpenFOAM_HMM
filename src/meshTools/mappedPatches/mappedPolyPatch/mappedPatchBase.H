@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,6 +236,13 @@ protected:
         //- Calculate AMI interpolator
         void calcAMI() const;
 
+        //- Helper to read field or non-uniform list from dictionary
+        static tmp<pointField> readListOrField
+        (
+            const word& keyword,
+            const dictionary& dict,
+            const label size
+        );
 
 public:
 
