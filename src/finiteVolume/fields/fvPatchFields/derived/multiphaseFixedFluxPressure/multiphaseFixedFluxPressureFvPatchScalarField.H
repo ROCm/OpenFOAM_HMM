@@ -55,7 +55,7 @@ class multiphaseFixedFluxPressureFvPatchScalarField
     // Private data
 
         //- Name of the predicted flux transporting the field
-        word phi0Name_;
+        word phiHbyAName_;
 
         //- Name of the flux transporting the field
         word phiName_;

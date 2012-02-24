@@ -11,8 +11,11 @@
     rUaAf = fvc::interpolate(rUaA);
     surfaceScalarField rUbAf(fvc::interpolate(rUbA));
 
-    Ua = rUaA*UaEqn.H();
-    Ub = rUbA*UbEqn.H();
+    volVectorField HbyAa("HbyAa", Ua);
+    HbyAa = rUaA*UaEqn.H();
+
+    volVectorField HbyAb("HbyAb", Ub);
+    HbyAb = rUbA*UbEqn.H();
 
     surfaceScalarField phiDraga
     (
@@ -46,24 +49,19 @@
 
     surfaceScalarField phiHbyAa
     (
-        (fvc::interpolate(Ua) & mesh.Sf())
+        (fvc::interpolate(HbyAa) & mesh.Sf())
       + fvc::ddtPhiCorr(rUaA, Ua, phia)
       + phiDraga
     );
 
     surfaceScalarField phiHbyAb
     (
-        (fvc::interpolate(Ub) & mesh.Sf())
+        (fvc::interpolate(HbyAb) & mesh.Sf())
       + fvc::ddtPhiCorr(rUbA, Ub, phib)
       + phiDragb
     );
 
-    surfaceScalarField phi0("phi0", alphaf*phiHbyAa + betaf*phiHbyAb);
-
-    phia = phiHbyAa;
-    phib = phiHbyAb;
-
-    phi = alphaf*phia + betaf*phib;
+    surfaceScalarField phiHbyA("phiHbyA", alphaf*phiHbyAa + betaf*phiHbyAb);
 
     surfaceScalarField Dp
     (
@@ -75,7 +73,7 @@
     {
         fvScalarMatrix pEqn
         (
-            fvm::laplacian(Dp, p) == fvc::div(phi0)
+            fvm::laplacian(Dp, p) == fvc::div(phiHbyA)
         );
 
         pEqn.setReference(pRefCell, pRefValue);
@@ -86,17 +84,17 @@
         {
             surfaceScalarField SfGradp(pEqn.flux()/Dp);
 
-            phia -= rUaAf*SfGradp/rhoa;
-            phib -= rUbAf*SfGradp/rhob;
+            phia = phiHbyAa - rUaAf*SfGradp/rhoa;
+            phib = phiHbyAb - rUbAf*SfGradp/rhob;
             phi = alphaf*phia + betaf*phib;
 
             p.relax();
             SfGradp = pEqn.flux()/Dp;
 
-            Ua += fvc::reconstruct(phiDraga - rUaAf*SfGradp/rhoa);
+            Ua = HbyAa + fvc::reconstruct(phiDraga - rUaAf*SfGradp/rhoa);
             Ua.correctBoundaryConditions();
 
-            Ub += fvc::reconstruct(phiDragb - rUbAf*SfGradp/rhob);
+            Ub = HbyAb + fvc::reconstruct(phiDragb - rUbAf*SfGradp/rhob);
             Ub.correctBoundaryConditions();
 
             U = alpha*Ua + beta*Ub;
