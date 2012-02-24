@@ -28,9 +28,9 @@ boundaryField
 
     top
     {
-        type                inletOutlet;
-        value               uniform (0 0 0);
-        inletValue          uniform ( 0 0 0 );
+        type               pressureInletOutletVelocity;
+        phi                phib;
+        value              $internalField;
     }
 
     walls
