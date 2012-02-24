@@ -1901,7 +1901,8 @@ boundaryField
 {
     inlet
     {
-        type            zeroGradient;
+        type            multiphaseFixedFluxPressure;
+        value           uniform 0;
     }
 
     outlet
@@ -1912,7 +1913,7 @@ boundaryField
 
     walls
     {
-        type            buoyantPressure;
+        type            multiphaseFixedFluxPressure;
         value           uniform 0;
     }
 

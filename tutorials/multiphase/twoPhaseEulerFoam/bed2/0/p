@@ -22,16 +22,18 @@ boundaryField
 {
     walls
     {
-        type               zeroGradient;
+        type               multiphaseFixedFluxPressure;
+        value              $internalField;
     }
     outlet
     {
         type               fixedValue;
-        value              uniform 0;
+        value              $internalField;
     }
     inlet
     {
-        type               zeroGradient;
+        type               multiphaseFixedFluxPressure;
+        value              $internalField;
     }
     frontAndBackPlanes
     {

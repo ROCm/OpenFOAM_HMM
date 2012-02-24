@@ -59,12 +59,13 @@
         );
     }
 
-    phi = alpha1f*phi1 + alpha2f*phi2;
+    surfaceScalarField phi0("phi0", alpha1f*phi1 + alpha2f*phi2);
+    phi = phi0;
     adjustPhi(phi, U, p);
 
     surfaceScalarField Dp
     (
-        "(rho*1|A(U))",
+        "Dp",
         mag(alpha1f*rAlphaAU1f/fvc::interpolate(rho1)
       + alpha2f*rAlphaAU2f/fvc::interpolate(rho2))
     );
