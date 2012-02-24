@@ -44,14 +44,26 @@
         }
     }
 
-    phia = (fvc::interpolate(Ua) & mesh.Sf()) + fvc::ddtPhiCorr(rUaA, Ua, phia)
-         + phiDraga;
+    surfaceScalarField phiHbyAa
+    (
+        (fvc::interpolate(Ua) & mesh.Sf())
+      + fvc::ddtPhiCorr(rUaA, Ua, phia)
+      + phiDraga
+    );
 
-    phib = (fvc::interpolate(Ub) & mesh.Sf()) + fvc::ddtPhiCorr(rUbA, Ub, phib)
-         + phiDragb;
+    surfaceScalarField phiHbyAb
+    (
+        (fvc::interpolate(Ub) & mesh.Sf())
+      + fvc::ddtPhiCorr(rUbA, Ub, phib)
+      + phiDragb
+    );
 
-    surfaceScalarField phi0("phi0", alphaf*phia + betaf*phib);
-    phi = phi0;
+    surfaceScalarField phi0("phi0", alphaf*phiHbyAa + betaf*phiHbyAb);
+
+    phia = phiHbyAa;
+    phib = phiHbyAb;
+
+    phi = alphaf*phia + betaf*phib;
 
     surfaceScalarField Dp
     (
@@ -63,7 +75,7 @@
     {
         fvScalarMatrix pEqn
         (
-            fvm::laplacian(Dp, p) == fvc::div(phi)
+            fvm::laplacian(Dp, p) == fvc::div(phi0)
         );
 
         pEqn.setReference(pRefCell, pRefValue);
