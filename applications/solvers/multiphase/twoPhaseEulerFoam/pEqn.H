@@ -5,11 +5,6 @@
     volScalarField rUaA(1.0/UaEqn.A());
     volScalarField rUbA(1.0/UbEqn.A());
 
-    phia.boundaryField() ==
-        (fvc::interpolate(Ua) & mesh.Sf())().boundaryField();
-    phib.boundaryField() ==
-        (fvc::interpolate(Ub) & mesh.Sf())().boundaryField();
-
     rUaAf = fvc::interpolate(rUaA);
     surfaceScalarField rUbAf(fvc::interpolate(rUbA));
 
@@ -51,6 +46,7 @@
 
     surfaceScalarField phiHbyAa
     (
+        "phiHbyAa",
         (fvc::interpolate(HbyAa) & mesh.Sf())
       + fvc::ddtPhiCorr(rUaA, Ua, phia)
       + phiDraga
@@ -58,6 +54,7 @@
 
     surfaceScalarField phiHbyAb
     (
+        "phiHbyAb",
         (fvc::interpolate(HbyAb) & mesh.Sf())
       + fvc::ddtPhiCorr(rUbA, Ub, phib)
       + phiDragb
@@ -86,8 +83,14 @@
         {
             surfaceScalarField SfGradp(pEqn.flux()/Dp);
 
+            phia.boundaryField() ==
+                (fvc::interpolate(Ua) & mesh.Sf())().boundaryField();
             phia = phiHbyAa - rUaAf*SfGradp/rhoa;
+
+            phib.boundaryField() ==
+                (fvc::interpolate(Ub) & mesh.Sf())().boundaryField();
             phib = phiHbyAb - rUbAf*SfGradp/rhob;
+
             phi = alphaf*phia + betaf*phib;
 
             p.relax();
