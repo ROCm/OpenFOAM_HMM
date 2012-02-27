@@ -244,6 +244,7 @@ protected:
             const label size
         );
 
+
 public:
 
     //- Runtime type information
@@ -318,6 +319,9 @@ public:
 
             //- Patch (only if NEARESTPATCHFACE)
             inline const word& samplePatch() const;
+
+            //- Return size of mapped mesh/patch/boundary
+            inline label sampleSize() const;
 
             //- Offset vector (from patch faces to destination mesh objects)
             inline const vector& offset() const;
