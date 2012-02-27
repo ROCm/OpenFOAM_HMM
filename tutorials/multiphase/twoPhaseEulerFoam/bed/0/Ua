@@ -23,20 +23,20 @@ boundaryField
     bottom
     {
         type               fixedValue;
-        value              uniform ( 0 0 0 );
+        value              uniform (0 0 0);
     }
 
     top
     {
-        type                inletOutlet;
-        inletValue          uniform (0 0 0);
-        value               uniform ( 0 0 0 );
+        type               pressureInletOutletVelocity;
+        phi                phia;
+        value              $internalField;
     }
 
     walls
     {
         type               fixedValue;
-        value              uniform ( 0 0 0 );
+        value              uniform (0 0 0);
     }
 
     frontBack

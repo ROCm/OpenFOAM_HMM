@@ -1907,8 +1907,8 @@ boundaryField
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform (0 0 0);
+        type            pressureInletOutletVelocity;
+        phi             phib;
         value           nonuniform List<vector>
 25
 (
