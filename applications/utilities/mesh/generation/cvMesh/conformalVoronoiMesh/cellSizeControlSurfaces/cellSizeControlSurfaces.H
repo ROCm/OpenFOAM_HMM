@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,6 +121,10 @@ public:
 
             //- Return the surface indices
             inline const labelList& surfaces() const;
+
+            //- In regions where no cell size function is specified
+            // use defaultCellSize
+            inline scalar defaultCellSize() const;
 
         // Query
 
