@@ -198,9 +198,13 @@
 
     dimensionedScalar residualSlip
     (
-        "residualSlip",
-        dimVelocity,
-        interfacialProperties.lookup("residualSlip")
+        dimensionedScalar::lookupOrDefault
+        (
+            "residualSlip",
+            interfacialProperties,
+            0,
+            dimVelocity
+        )
     );
 
     Info << "dragPhase is " << dragPhase << endl;
