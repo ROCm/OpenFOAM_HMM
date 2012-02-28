@@ -18,7 +18,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
         volTensorField Rca
         (
             "Rca",
-            ((2.0/3.0)*I)*(sqr(Ct)*k + nuEffa*tr(gradUaT)) - nuEffa*gradUaT
+            (((2.0/3.0)*I)*nuEffa)*tr(gradUaT) - nuEffa*gradUaT
         );
 
         if (kineticTheory.on())
@@ -62,7 +62,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
         volTensorField Rcb
         (
             "Rcb",
-            ((2.0/3.0)*I)*(k + nuEffb*tr(gradUbT)) - nuEffb*gradUbT
+            (((2.0/3.0)*I)*nuEffb)*tr(gradUbT) - nuEffb*gradUbT
         );
 
         surfaceScalarField phiRb
