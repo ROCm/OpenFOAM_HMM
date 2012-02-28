@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
             if (pimple.turbCorr())
             {
                 #include "kEpsilon.H"
+                nuEffa = sqr(Ct)*nutb + nua;
             }
         }
 
