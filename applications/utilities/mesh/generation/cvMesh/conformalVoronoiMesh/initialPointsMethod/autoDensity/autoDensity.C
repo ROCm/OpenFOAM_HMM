@@ -849,7 +849,10 @@ autoDensity::autoDensity
 :
     initialPointsMethod(typeName, initialPointsDict, cvMesh),
     globalTrialPoints_(0),
-    minCellSizeLimit_(readScalar(detailsDict().lookup("minCellSizeLimit"))),
+    minCellSizeLimit_
+    (
+        detailsDict().lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
+    ),
     minLevels_(readLabel(detailsDict().lookup("minLevels"))),
     maxSizeRatio_(readScalar(detailsDict().lookup("maxSizeRatio"))),
     volRes_(readLabel(detailsDict().lookup("sampleResolution"))),
@@ -899,18 +902,7 @@ List<Vb::Point> autoDensity::initialPoints() const
         );
     }
 
-    // Initialise size of points list.
-    const scalar volumeBoundBox = Foam::pow3(hierBB.typDim());
-    const scalar volumeSmallestCell = Foam::pow3(minCellSizeLimit_);
-
-    const int initialPointEstimate
-        = min
-          (
-              static_cast<int>(volumeBoundBox/(volumeSmallestCell + SMALL)/10),
-              1e6
-          );
-
-    DynamicList<Vb::Point> initialPoints(initialPointEstimate);
+    DynamicList<Vb::Point> initialPoints;
 
     Info<< nl << "    " << typeName << endl;
 
