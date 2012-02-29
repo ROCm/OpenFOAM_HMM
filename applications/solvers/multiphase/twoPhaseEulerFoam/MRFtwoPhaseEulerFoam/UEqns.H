@@ -53,7 +53,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
         //+ beta/rhoa*K*Ub             // Explicit drag transfered to p-equation
           - beta/rhoa*(liftCoeff - Cvm*rhob*DDtUb)
         );
-
+        mrfZones.addCoriolis(UaEqn);
         UaEqn.relax();
     }
 
@@ -93,7 +93,7 @@ fvVectorMatrix UbEqn(Ub, Ub.dimensions()*dimVol/dimTime);
         //+ alpha/rhob*K*Ua            // Explicit drag transfered to p-equation
           + alpha/rhob*(liftCoeff + Cvm*rhob*DDtUa)
         );
-
+        mrfZones.addCoriolis(UbEqn);
         UbEqn.relax();
     }
 }

@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    bubbleFoam
+    twoPhaseEulerFoam
 
 Description
     Solver for a system of 2 incompressible fluid phases with one phase
-    dispersed, e.g. gas bubbles in a liquid.
+    dispersed, e.g. gas bubbles in a liquid or solid particles in a gas.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,7 +35,15 @@ Description
 #include "wallFvPatch.H"
 #include "Switch.H"
 
+#include "IFstream.H"
+#include "OFstream.H"
+
+#include "dragModel.H"
+#include "phaseModel.H"
+#include "kineticTheoryModel.H"
+
 #include "pimpleControl.H"
+#include "MRFZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +55,9 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "readPPProperties.H"
     #include "initContinuityErrs.H"
+    #include "createMRFZones.H"
     #include "readTimeControls.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
@@ -60,8 +70,8 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readBubbleFoamControls.H"
-        #include "CourantNo.H"
+        #include "readTwoPhaseEulerFoamControls.H"
+        #include "CourantNos.H"
         #include "setDeltaT.H"
 
         runTime++;
@@ -90,7 +100,6 @@ int main(int argc, char *argv[])
             if (pimple.turbCorr())
             {
                 #include "kEpsilon.H"
-                nuEffa = sqr(Ct)*nutb + nua;
             }
         }
 

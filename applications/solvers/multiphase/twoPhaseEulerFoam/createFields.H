@@ -112,7 +112,9 @@
         (
             "phi",
             runTime.timeName(),
-            mesh
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         fvc::interpolate(alpha)*phia + fvc::interpolate(beta)*phib
     );
@@ -193,6 +195,17 @@
                 << exit(FatalError);
         }
     }
+
+    dimensionedScalar residualSlip
+    (
+        dimensionedScalar::lookupOrDefault
+        (
+            "residualSlip",
+            interfacialProperties,
+            0,
+            dimVelocity
+        )
+    );
 
     Info << "dragPhase is " << dragPhase << endl;
     kineticTheoryModel kineticTheory

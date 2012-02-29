@@ -33,6 +33,7 @@ Description
 #define boundBox_H
 
 #include "pointField.H"
+#include "faceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -159,6 +160,9 @@ public:
 
             //- Return corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
+
+            //- Return faces with correct point order
+            static faceList faces();
 
 
         // Manipulate
