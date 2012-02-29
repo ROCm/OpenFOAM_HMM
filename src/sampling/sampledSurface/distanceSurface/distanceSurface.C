@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,8 @@ void Foam::distanceSurface::createGeometry()
 
     // Clear any stored topologies
     facesPtr_.clear();
+    isoSurfCellPtr_.clear();
+    isoSurfPtr_.clear();
 
     // Clear derived data
     clearGeom();
@@ -265,24 +267,33 @@ void Foam::distanceSurface::createGeometry()
 
 
     //- Direct from cell field and point field.
-    isoSurfPtr_.reset
-    (
-        new isoSurface
+    if (cell_)
+    {
+        isoSurfCellPtr_.reset
         (
-            cellDistance,
-            pointDistance_,
-            distance_,
-            regularise_
-        )
-        //new isoSurfaceCell
-        //(
-        //    fvm,
-        //    cellDistance,
-        //    pointDistance_,
-        //    distance_,
-        //    regularise_
-        //)
-    );
+            new isoSurfaceCell
+            (
+                fvm,
+                cellDistance,
+                pointDistance_,
+                distance_,
+                regularise_
+            )
+        );
+    }
+    else
+    {
+        isoSurfPtr_.reset
+        (
+            new isoSurface
+            (
+                cellDistance,
+                pointDistance_,
+                distance_,
+                regularise_
+            )
+        );
+    }
 
     if (debug)
     {
@@ -321,10 +332,12 @@ Foam::distanceSurface::distanceSurface
     ),
     distance_(readScalar(dict.lookup("distance"))),
     signed_(readBool(dict.lookup("signed"))),
+    cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
     zoneKey_(keyType::null),
     needsUpdate_(true),
+    isoSurfCellPtr_(NULL),
     isoSurfPtr_(NULL),
     facesPtr_(NULL)
 {
@@ -336,6 +349,52 @@ Foam::distanceSurface::distanceSurface
 //            << " not found - using entire mesh" << endl;
 //    }
 }
+
+
+
+Foam::distanceSurface::distanceSurface
+(
+    const word& name,
+    const polyMesh& mesh,
+    const bool interpolate,
+    const word& surfaceType,
+    const word& surfaceName,
+    const scalar distance,
+    const bool signedDistance,
+    const bool cell,
+    const Switch regularise,
+    const Switch average
+)
+:
+    sampledSurface(name, mesh, interpolate),
+    surfPtr_
+    (
+        searchableSurface::New
+        (
+            surfaceType,
+            IOobject
+            (
+                surfaceName,  // name
+                mesh.time().constant(),                     // directory
+                "triSurface",                               // instance
+                mesh.time(),                                // registry
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            dictionary()
+        )
+    ),
+    distance_(distance),
+    signed_(signedDistance),
+    cell_(cell),
+    regularise_(regularise),
+    average_(average),
+    zoneKey_(keyType::null),
+    needsUpdate_(true),
+    isoSurfCellPtr_(NULL),
+    isoSurfPtr_(NULL),
+    facesPtr_(NULL)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

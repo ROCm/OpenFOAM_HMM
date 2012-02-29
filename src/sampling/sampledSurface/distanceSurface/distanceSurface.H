@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,8 @@ Class
 Description
     A sampledSurface defined by a distance to a surface.
 
+    Uses either isoSurfaceCell or isoSurface.
+
 SourceFiles
     distanceSurface.C
 
@@ -37,7 +39,7 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "searchableSurface.H"
-//#include "isoSurfaceCell.H"
+#include "isoSurfaceCell.H"
 #include "isoSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,6 +66,9 @@ class distanceSurface
         //- signed distance
         const bool signed_;
 
+        //- Whether to use isoSurfaceCell or isoSurface
+        const bool cell_;
+
         //- Whether to coarsen
         const Switch regularise_;
 
@@ -84,7 +89,9 @@ class distanceSurface
         scalarField pointDistance_;
 
         //- Constructed iso surface
-        //autoPtr<isoSurfaceCell> isoSurfPtr_;
+        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
+
+        //- Constructed iso surface
         autoPtr<isoSurface> isoSurfPtr_;
 
         //- triangles converted to faceList
@@ -123,6 +130,21 @@ public:
             const word& name,
             const polyMesh& mesh,
             const dictionary& dict
+        );
+
+        //- Construct from components
+        distanceSurface
+        (
+            const word& name,
+            const polyMesh& mesh,
+            const bool interpolate,
+            const word& surfaceType,
+            const word& surfaceName,
+            const scalar distance,
+            const bool signedDistance,
+            const bool cell,
+            const Switch regularise,
+            const Switch average
         );
 
 
@@ -167,11 +189,16 @@ public:
             return facesPtr_;
         }
 
-
-        //const isoSurfaceCell& surface() const
-        const isoSurface& surface() const
+        const triSurface& surface() const
         {
-            return isoSurfPtr_();
+            if (cell_)
+            {
+                return isoSurfCellPtr_();
+            }
+            else
+            {
+                return isoSurfPtr_();
+            }
         }
 
         //- sample field on surface
