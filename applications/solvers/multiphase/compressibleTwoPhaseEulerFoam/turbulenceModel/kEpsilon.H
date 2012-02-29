@@ -15,10 +15,10 @@ if (turbulence)
     fvScalarMatrix epsEqn
     (
         fvm::ddt(alpha2, epsilon)
-      + fvm::div(alphaPhi2, epsilon)
+      + fvm::div(alpha1Phi2, epsilon)
       - fvm::laplacian
         (
-            alphaEps*nuEff2, epsilon,
+            alpha1Eps*nuEff2, epsilon,
             "laplacian(DepsilonEff,epsilon)"
         )
       ==
@@ -40,10 +40,10 @@ if (turbulence)
     fvScalarMatrix kEqn
     (
         fvm::ddt(alpha2, k)
-      + fvm::div(alphaPhi2, k)
+      + fvm::div(alpha1Phi2, k)
       - fvm::laplacian
         (
-            alphak*nuEff2, k,
+            alpha1k*nuEff2, k,
             "laplacian(DkEff,k)"
         )
       ==

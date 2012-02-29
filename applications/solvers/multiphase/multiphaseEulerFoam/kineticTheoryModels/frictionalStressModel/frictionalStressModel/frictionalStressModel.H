@@ -106,9 +106,9 @@ public:
 
         virtual tmp<volScalarField> frictionalPressure
         (
-            const volScalarField& alpha,
-            const dimensionedScalar& alphaMinFriction,
-            const dimensionedScalar& alphaMax,
+            const volScalarField& alpha1,
+            const dimensionedScalar& alpha1MinFriction,
+            const dimensionedScalar& alpha1Max,
             const dimensionedScalar& Fr,
             const dimensionedScalar& eta,
             const dimensionedScalar& p
@@ -116,9 +116,9 @@ public:
 
         virtual tmp<volScalarField> frictionalPressurePrime
         (
-            const volScalarField& alphaf,
-            const dimensionedScalar& alphaMinFriction,
-            const dimensionedScalar& alphaMax,
+            const volScalarField& alpha1f,
+            const dimensionedScalar& alpha1MinFriction,
+            const dimensionedScalar& alpha1Max,
             const dimensionedScalar& Fr,
             const dimensionedScalar& eta,
             const dimensionedScalar& p
@@ -126,8 +126,8 @@ public:
 
         virtual tmp<volScalarField> muf
         (
-            const volScalarField& alpha,
-            const dimensionedScalar& alphaMax,
+            const volScalarField& alpha1,
+            const dimensionedScalar& alpha1Max,
             const volScalarField& pf,
             const volSymmTensorField& D,
             const dimensionedScalar& phi

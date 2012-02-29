@@ -1,24 +1,24 @@
-    IOobject phibHeader
+    IOobject phi2Header
     (
-        "phib",
+        "phi2",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ
     );
 
-    autoPtr<surfaceScalarField> phibPtr(NULL);
+    autoPtr<surfaceScalarField> phi2Ptr(NULL);
 
-    if (phibHeader.headerOk())
+    if (phi2Header.headerOk())
     {
-        Info<< "Reading face flux field phib\n" << endl;
+        Info<< "Reading face flux field phi2\n" << endl;
 
-        phibPtr.reset
+        phi2Ptr.reset
         (
             new surfaceScalarField
             (
                 IOobject
                 (
-                    "phib",
+                    "phi2",
                     runTime.timeName(),
                     mesh,
                     IOobject::MUST_READ,
@@ -30,38 +30,38 @@
     }
     else
     {
-        Info<< "Calculating face flux field phib\n" << endl;
+        Info<< "Calculating face flux field phi2\n" << endl;
 
         wordList phiTypes
         (
-            Ub.boundaryField().size(),
+            U2.boundaryField().size(),
             calculatedFvPatchScalarField::typeName
         );
 
-        forAll(Ub.boundaryField(), i)
+        forAll(U2.boundaryField(), i)
         {
-            if (isA<fixedValueFvPatchVectorField>(Ub.boundaryField()[i]))
+            if (isA<fixedValueFvPatchVectorField>(U2.boundaryField()[i]))
             {
                 phiTypes[i] = fixedValueFvPatchScalarField::typeName;
             }
         }
 
-        phibPtr.reset
+        phi2Ptr.reset
         (
             new surfaceScalarField
             (
                 IOobject
                 (
-                    "phib",
+                    "phi2",
                     runTime.timeName(),
                     mesh,
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
-                fvc::interpolate(Ub) & mesh.Sf(),
+                fvc::interpolate(U2) & mesh.Sf(),
                 phiTypes
             )
         );
     }
 
-    surfaceScalarField& phib = phibPtr();
+    surfaceScalarField& phi2 = phi2Ptr();

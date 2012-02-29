@@ -1,5 +1,5 @@
-surfaceScalarField alphaPhi1("alphaPhi1", phi1);
-surfaceScalarField alphaPhi2("alphaPhi2", phi2);
+surfaceScalarField alpha1Phi1("alpha1Phi1", phi1);
+surfaceScalarField alpha1Phi2("alpha1Phi2", phi2);
 
 {
     word scheme("div(phi,alpha1)");
@@ -68,17 +68,17 @@ surfaceScalarField alphaPhi2("alphaPhi2", phi2);
 
         if (g0.value() > 0.0)
         {
-            ppMagf = rU1Af*fvc::interpolate
+            ppMagf = rAU1f*fvc::interpolate
             (
                 (1.0/(rho1*(alpha1 + scalar(0.0001))))
-               *g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
+               *g0*min(exp(preAlphaExp*(alpha1 - alpha1Max)), expMax)
             );
 
             alpha1Eqn -= fvm::laplacian
             (
                 (fvc::interpolate(alpha1) + scalar(0.0001))*ppMagf,
                 alpha1,
-                "laplacian(alphaPpMag,alpha1)"
+                "laplacian(alpha1PpMag,alpha1)"
             );
         }
 
@@ -90,8 +90,8 @@ surfaceScalarField alphaPhi2("alphaPhi2", phi2);
 
         #include "packingLimiter.H"
 
-        alphaPhi1 = alpha1Eqn.flux();
-        alphaPhi2 = phi - alphaPhi1;
+        alpha1Phi1 = alpha1Eqn.flux();
+        alpha1Phi2 = phi - alpha1Phi1;
         alpha2 = scalar(1) - alpha1;
 
         Info<< "Dispersed phase volume fraction = "

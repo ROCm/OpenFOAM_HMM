@@ -66,9 +66,9 @@ public:
         Ergun
         (
             const dictionary& interfaceDict,
-            const volScalarField& alpha,
-            const phaseModel& phasea,
-            const phaseModel& phaseb
+            const volScalarField& alpha1,
+            const phaseModel& phase1,
+            const phaseModel& phase2
         );
 
 

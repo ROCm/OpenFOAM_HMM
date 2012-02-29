@@ -63,7 +63,7 @@ solvers
         relTol          0.1;
     }
 
-    alphaFinal
+    alpha1Final
     {
         solver          PBiCG;
         preconditioner  DILU;

@@ -30,18 +30,18 @@ License
 Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 (
     const dictionary& interfaceDict,
-    const volScalarField& alpha,
-    const phaseModel& phasea,
-    const phaseModel& phaseb
+    const volScalarField& alpha1,
+    const phaseModel& phase1,
+    const phaseModel& phase2
 )
 {
     word dragModelType
     (
-        interfaceDict.lookup("dragModel" + phasea.name())
+        interfaceDict.lookup("dragModel" + phase1.name())
     );
 
     Info << "Selecting dragModel for phase "
-        << phasea.name()
+        << phase1.name()
         << ": "
         << dragModelType << endl;
 
@@ -60,7 +60,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
              << abort(FatalError);
     }
 
-    return cstrIter()(interfaceDict, alpha, phasea, phaseb);
+    return cstrIter()(interfaceDict, alpha1, phase1, phase2);
 }
 
 

@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      Ub;
+    object      U2;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1907,8 +1907,8 @@ boundaryField
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform (0 0 0);
+        type            pressureInletOutletVelocity;
+        phi             phi2;
         value           nonuniform List<vector>
 25
 (

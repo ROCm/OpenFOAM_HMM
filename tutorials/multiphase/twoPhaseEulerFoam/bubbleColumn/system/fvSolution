@@ -63,7 +63,7 @@ solvers
         relTol          0.1;
     }
 
-    alphaFinal
+    alpha1Final
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -86,7 +86,7 @@ relaxationFactors
 {
     "U.*"           1;
     "T.*"           1;
-    "alpha.*"       1;
+    "alpha1.*"       1;
     "Theta.*"       1;
     "k.*"           1;
     "epsilon.*"     1;
