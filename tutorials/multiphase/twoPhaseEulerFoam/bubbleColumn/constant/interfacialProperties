@@ -21,5 +21,6 @@ dragModelb      SchillerNaumann;
 
 dragPhase       blended;
 
+residualSlip    0;
 
 // ************************************************************************* //

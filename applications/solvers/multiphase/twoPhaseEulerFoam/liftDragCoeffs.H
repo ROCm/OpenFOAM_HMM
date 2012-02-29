@@ -1,5 +1,5 @@
     volVectorField Ur(Ua - Ub);
-    volScalarField magUr(mag(Ur));
+    volScalarField magUr(mag(Ur) + residualSlip);
 
     volScalarField Ka(draga->K(magUr));
     volScalarField K(Ka);

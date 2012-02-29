@@ -14,16 +14,17 @@ if (turbulence)
     // Dissipation equation
     fvScalarMatrix epsEqn
     (
-        fvm::ddt(beta, epsilon)
+        fvm::ddt(epsilon)
       + fvm::div(phib, epsilon)
+      - fvm::Sp(fvc::div(phib), epsilon)
       - fvm::laplacian
         (
             alphaEps*nuEffb, epsilon,
             "laplacian(DepsilonEff,epsilon)"
         )
       ==
-         C1*beta*G*epsilon/k
-       - fvm::Sp(C2*beta*epsilon/k, epsilon)
+         C1*G*epsilon/k
+       - fvm::Sp(C2*epsilon/k, epsilon)
     );
 
     #include "wallDissipation.H"
@@ -37,16 +38,17 @@ if (turbulence)
     // Turbulent kinetic energy equation
     fvScalarMatrix kEqn
     (
-        fvm::ddt(beta, k)
+        fvm::ddt(k)
       + fvm::div(phib, k)
+      - fvm::Sp(fvc::div(phib), k)
       - fvm::laplacian
         (
             alphak*nuEffb, k,
             "laplacian(DkEff,k)"
         )
       ==
-        beta*G
-      - fvm::Sp(beta*epsilon/k, k)
+        G
+      - fvm::Sp(epsilon/k, k)
     );
     kEqn.relax();
     kEqn.solve();
@@ -59,5 +61,4 @@ if (turbulence)
     #include "wallViscosity.H"
 }
 
-nuEffa = sqr(Ct)*nutb + nua;
 nuEffb = nutb + nub;
