@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,7 +81,7 @@ class sampledSurface
         const polyMesh& mesh_;
 
         //- Do we intend to interpolate the information?
-        bool interpolate_;
+        const bool interpolate_;
 
 
     // Demand-driven data
@@ -197,7 +197,8 @@ public:
         sampledSurface
         (
             const word& name,
-            const polyMesh&
+            const polyMesh&,
+            const bool interpolate = false
         );
 
         //- Construct from dictionary
