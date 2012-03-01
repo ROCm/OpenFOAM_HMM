@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,8 +107,8 @@ public:
         virtual tmp<volScalarField> frictionalPressure
         (
             const volScalarField& alpha1,
-            const dimensionedScalar& alpha1MinFriction,
-            const dimensionedScalar& alpha1Max,
+            const dimensionedScalar& alphaMinFriction,
+            const dimensionedScalar& alphaMax,
             const dimensionedScalar& Fr,
             const dimensionedScalar& eta,
             const dimensionedScalar& p
@@ -117,8 +117,8 @@ public:
         virtual tmp<volScalarField> frictionalPressurePrime
         (
             const volScalarField& alpha1f,
-            const dimensionedScalar& alpha1MinFriction,
-            const dimensionedScalar& alpha1Max,
+            const dimensionedScalar& alphaMinFriction,
+            const dimensionedScalar& alphaMax,
             const dimensionedScalar& Fr,
             const dimensionedScalar& eta,
             const dimensionedScalar& p
@@ -127,7 +127,7 @@ public:
         virtual tmp<volScalarField> muf
         (
             const volScalarField& alpha1,
-            const dimensionedScalar& alpha1Max,
+            const dimensionedScalar& alphaMax,
             const volScalarField& pf,
             const volSymmTensorField& D,
             const dimensionedScalar& phi

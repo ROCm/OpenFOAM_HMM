@@ -12,7 +12,7 @@
 
     scalar preAlphaExp(readScalar(ppProperties.lookup("preAlphaExp")));
 
-    scalar alpha1Max(readScalar(ppProperties.lookup("alpha1Max")));
+    scalar alphaMax(readScalar(ppProperties.lookup("alphaMax")));
 
     scalar expMax(readScalar(ppProperties.lookup("expMax")));
 

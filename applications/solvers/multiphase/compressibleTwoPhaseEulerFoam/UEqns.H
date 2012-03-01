@@ -31,8 +31,8 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
             (scalar(1) + Cvm*rho2*alpha2/rho1)*
             (
                 fvm::ddt(alpha1, U1)
-              + fvm::div(alpha1Phi1, U1)
-              - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alpha1Phi1), U1)
+              + fvm::div(alphaPhi1, U1)
+              - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), U1)
             )
           - fvm::laplacian(alpha1*nuEff1, U1)
           + fvc::div(alpha1*Rc1)
@@ -57,8 +57,8 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
             (scalar(1) + Cvm*rho2*alpha1/rho2)*
             (
                 fvm::ddt(alpha2, U2)
-              + fvm::div(alpha1Phi2, U2)
-              - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alpha1Phi2), U2)
+              + fvm::div(alphaPhi2, U2)
+              - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), U2)
             )
           - fvm::laplacian(alpha2*nuEff2, U2)
           + fvc::div(alpha2*Rc2)
