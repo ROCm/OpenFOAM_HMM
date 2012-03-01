@@ -63,9 +63,9 @@ Foam::JohnsonJacksonFrictionalStress::~JohnsonJacksonFrictionalStress()
 Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::
 frictionalPressure
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMinFriction,
-    const dimensionedScalar& alphaMax,
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1MinFriction,
+    const dimensionedScalar& alpha1Max,
     const dimensionedScalar& Fr,
     const dimensionedScalar& eta,
     const dimensionedScalar& p
@@ -73,17 +73,17 @@ frictionalPressure
 {
 
     return
-        Fr*pow(max(alpha - alphaMinFriction, scalar(0)), eta)
-       /pow(max(alphaMax - alpha, scalar(5.0e-2)), p);
+        Fr*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta)
+       /pow(max(alpha1Max - alpha1, scalar(5.0e-2)), p);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::
 frictionalPressurePrime
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMinFriction,
-    const dimensionedScalar& alphaMax,
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1MinFriction,
+    const dimensionedScalar& alpha1Max,
     const dimensionedScalar& Fr,
     const dimensionedScalar& eta,
     const dimensionedScalar& p
@@ -91,16 +91,17 @@ frictionalPressurePrime
 {
     return Fr*
     (
-        eta*pow(max(alpha - alphaMinFriction, scalar(0)), eta - 1.0)
-       *(alphaMax-alpha) + p*pow(max(alpha - alphaMinFriction, scalar(0)), eta)
-    )/pow(max(alphaMax - alpha, scalar(5.0e-2)), p + 1.0);
+        eta*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta - 1.0)
+       *(alpha1Max-alpha1)
+      + p*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta)
+    )/pow(max(alpha1Max - alpha1, scalar(5.0e-2)), p + 1.0);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::muf
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMax,
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1Max,
     const volScalarField& pf,
     const volSymmTensorField& D,
     const dimensionedScalar& phi

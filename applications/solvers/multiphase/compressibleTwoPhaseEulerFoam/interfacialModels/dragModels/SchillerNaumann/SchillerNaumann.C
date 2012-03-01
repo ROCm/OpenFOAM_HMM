@@ -49,12 +49,12 @@ namespace dragModels
 Foam::dragModels::SchillerNaumann::SchillerNaumann
 (
     const dictionary& interfaceDict,
-    const volScalarField& alpha,
+    const volScalarField& alpha1,
     const phaseModel& phase1,
     const phaseModel& phase2
 )
 :
-    dragModel(interfaceDict, alpha, phase1, phase2)
+    dragModel(interfaceDict, alpha1, phase1, phase2)
 {}
 
 

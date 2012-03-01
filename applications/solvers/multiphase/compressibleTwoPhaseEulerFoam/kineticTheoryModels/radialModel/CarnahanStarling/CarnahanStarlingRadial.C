@@ -69,30 +69,30 @@ Foam::kineticTheoryModels::radialModels::CarnahanStarling::~CarnahanStarling()
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMax
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1Max
 ) const
 {
 
     return
-        1.0/(1.0 - alpha)
-      + 3.0*alpha/(2.0*sqr(1.0 - alpha))
-      + sqr(alpha)/(2.0*pow(1.0 - alpha, 3));
+        1.0/(1.0 - alpha1)
+      + 3.0*alpha1/(2.0*sqr(1.0 - alpha1))
+      + sqr(alpha1)/(2.0*pow(1.0 - alpha1, 3));
 }
 
 
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0prime
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMax
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1Max
 ) const
 {
     return
-        - alpha/sqr(1.0 - alpha)
-        + (3.0*(1.0 - alpha) + 6.0*sqr(alpha))/(2.0*(1.0 - alpha))
-        + (2.0*alpha*(1.0 - alpha) + 3.0*pow(alpha, 3))
-         /(2.0*pow(1.0 - alpha, 4));
+        - alpha1/sqr(1.0 - alpha1)
+        + (3.0*(1.0 - alpha1) + 6.0*sqr(alpha1))/(2.0*(1.0 - alpha1))
+        + (2.0*alpha1*(1.0 - alpha1) + 3.0*pow(alpha1, 3))
+         /(2.0*pow(1.0 - alpha1, 4));
 }
 
 

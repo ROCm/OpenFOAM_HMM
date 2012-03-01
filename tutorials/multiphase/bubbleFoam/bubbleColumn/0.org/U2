@@ -10,35 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      Ub;
+    object      U2;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform (0 0.25 0);
+internalField   uniform (0 0 0);
 
 boundaryField
 {
+    inlet
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      uniform (0 0 0);
+        value           uniform (0 0 0);
+    }
+
     walls
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
-    outlet
+
+    defaultFaces
     {
-        type               pressureInletOutletVelocity;
-        phi                phib;
-        value              $internalField;
-    }
-    inlet
-    {
-        type               fixedValue;
-        value              uniform (0 0.25 0);
-    }
-    frontAndBackPlanes
-    {
-        type               empty;
+        type            empty;
     }
 }
 

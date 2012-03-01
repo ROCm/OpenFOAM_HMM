@@ -1,45 +1,45 @@
 {
-    surfaceScalarField alphaf(fvc::interpolate(alpha));
-    surfaceScalarField betaf(scalar(1) - alphaf);
+    surfaceScalarField alpha1f(fvc::interpolate(alpha1));
+    surfaceScalarField alpha2f(scalar(1) - alpha1f);
 
-    volScalarField rUaA(1.0/UaEqn.A());
-    volScalarField rUbA(1.0/UbEqn.A());
+    volScalarField rAU1(1.0/U1Eqn.A());
+    volScalarField rAU2(1.0/U2Eqn.A());
 
-    surfaceScalarField rUaAf(fvc::interpolate(rUaA));
-    surfaceScalarField rUbAf(fvc::interpolate(rUbA));
+    surfaceScalarField rAU1f(fvc::interpolate(rAU1));
+    surfaceScalarField rAU2f(fvc::interpolate(rAU2));
 
-    Ua = rUaA*UaEqn.H();
-    Ub = rUbA*UbEqn.H();
+    U1 = rAU1*U1Eqn.H();
+    U2 = rAU2*U2Eqn.H();
 
-    surfaceScalarField phiDraga
+    surfaceScalarField phiDrag1
     (
-        fvc::interpolate(beta/rhoa*dragCoef*rUaA)*phib + rUaAf*(g & mesh.Sf())
+        fvc::interpolate(alpha2/rho1*dragCoef*rAU1)*phi2 + rAU1f*(g & mesh.Sf())
     );
-    surfaceScalarField phiDragb
+    surfaceScalarField phiDrag2
     (
-        fvc::interpolate(alpha/rhob*dragCoef*rUbA)*phia + rUbAf*(g & mesh.Sf())
+        fvc::interpolate(alpha1/rho2*dragCoef*rAU2)*phi1 + rAU2f*(g & mesh.Sf())
     );
 
     forAll(p.boundaryField(), patchi)
     {
         if (isA<zeroGradientFvPatchScalarField>(p.boundaryField()[patchi]))
         {
-            phiDraga.boundaryField()[patchi] = 0.0;
-            phiDragb.boundaryField()[patchi] = 0.0;
+            phiDrag1.boundaryField()[patchi] = 0.0;
+            phiDrag2.boundaryField()[patchi] = 0.0;
         }
     }
 
-    phia = (fvc::interpolate(Ua) & mesh.Sf()) + fvc::ddtPhiCorr(rUaA, Ua, phia)
-        + phiDraga;
-    phib = (fvc::interpolate(Ub) & mesh.Sf()) + fvc::ddtPhiCorr(rUbA, Ub, phib)
-        + phiDragb;
+    phi1 = (fvc::interpolate(U1) & mesh.Sf()) + fvc::ddtPhiCorr(rAU1, U1, phi1)
+        + phiDrag1;
+    phi2 = (fvc::interpolate(U2) & mesh.Sf()) + fvc::ddtPhiCorr(rAU2, U2, phi2)
+        + phiDrag2;
 
-    phi = alphaf*phia + betaf*phib;
+    phi = alpha1f*phi1 + alpha2f*phi2;
 
     surfaceScalarField Dp
     (
         "(rho*(1|A(U)))",
-        alphaf*rUaAf/rhoa + betaf*rUbAf/rhob
+        alpha1f*rAU1f/rho1 + alpha2f*rAU2f/rho2
     );
 
     while (pimple.correctNonOrthogonal())
@@ -57,22 +57,22 @@
         {
             surfaceScalarField SfGradp(pEqn.flux()/Dp);
 
-            phia -= rUaAf*SfGradp/rhoa;
-            phib -= rUbAf*SfGradp/rhob;
-            phi = alphaf*phia + betaf*phib;
+            phi1 -= rAU1f*SfGradp/rho1;
+            phi2 -= rAU2f*SfGradp/rho2;
+            phi = alpha1f*phi1 + alpha2f*phi2;
 
             p.relax();
             SfGradp = pEqn.flux()/Dp;
 
-            Ua += (fvc::reconstruct(phiDraga - rUaAf*SfGradp/rhoa));
-            //Ua += rUaA*(fvc::reconstruct(phiDraga/rUaAf - SfGradp/rhoa));
-            Ua.correctBoundaryConditions();
+            U1 += (fvc::reconstruct(phiDrag1 - rAU1f*SfGradp/rho1));
+            //U1 += rAU1*(fvc::reconstruct(phiDrag1/rAU1f - SfGradp/rho1));
+            U1.correctBoundaryConditions();
 
-            Ub += (fvc::reconstruct(phiDragb - rUbAf*SfGradp/rhob));
-            //Ub += rUbA*(fvc::reconstruct(phiDragb/rUbAf - SfGradp/rhob));
-            Ub.correctBoundaryConditions();
+            U2 += (fvc::reconstruct(phiDrag2 - rAU2f*SfGradp/rho2));
+            //U2 += rAU2*(fvc::reconstruct(phiDrag2/rAU2f - SfGradp/rho2));
+            U2.correctBoundaryConditions();
 
-            U = alpha*Ua + beta*Ub;
+            U = alpha1*U1 + alpha2*U2;
         }
     }
 }

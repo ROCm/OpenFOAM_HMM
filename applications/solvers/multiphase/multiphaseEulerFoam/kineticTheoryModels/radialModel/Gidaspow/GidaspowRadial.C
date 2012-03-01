@@ -69,24 +69,24 @@ Foam::kineticTheoryModels::radialModels::Gidaspow::~Gidaspow()
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::Gidaspow::g0
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMax
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1Max
 ) const
 {
-    return 0.6/(1.0 - pow(alpha/alphaMax, 1.0/3.0));
+    return 0.6/(1.0 - pow(alpha1/alpha1Max, 1.0/3.0));
 }
 
 
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::Gidaspow::g0prime
 (
-    const volScalarField& alpha,
-    const dimensionedScalar& alphaMax
+    const volScalarField& alpha1,
+    const dimensionedScalar& alpha1Max
 ) const
 {
     return
-        (-1.0/5.0)*pow(alpha/alphaMax, -2.0/3.0)
-       /(alphaMax*sqr(1.0 - pow(alpha/alphaMax, 1.0/3.0)));
+        (-1.0/5.0)*pow(alpha1/alpha1Max, -2.0/3.0)
+       /(alpha1Max*sqr(1.0 - pow(alpha1/alpha1Max, 1.0/3.0)));
 }
 
 

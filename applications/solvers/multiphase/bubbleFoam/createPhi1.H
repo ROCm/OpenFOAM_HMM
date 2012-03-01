@@ -1,24 +1,24 @@
-    IOobject phiaHeader
+    IOobject phi1Header
     (
-        "phia",
+        "phi1",
         runTime.timeName(),
         mesh,
         IOobject::NO_READ
     );
 
-    autoPtr<surfaceScalarField> phiaPtr(NULL);
+    autoPtr<surfaceScalarField> phi1Ptr(NULL);
 
-    if (phiaHeader.headerOk())
+    if (phi1Header.headerOk())
     {
-        Info<< "Reading face flux field phia\n" << endl;
+        Info<< "Reading face flux field phi1\n" << endl;
 
-        phiaPtr.reset
+        phi1Ptr.reset
         (
             new surfaceScalarField
             (
                 IOobject
                 (
-                    "phia",
+                    "phi1",
                     runTime.timeName(),
                     mesh,
                     IOobject::MUST_READ,
@@ -30,38 +30,38 @@
     }
     else
     {
-        Info<< "Calculating face flux field phia\n" << endl;
+        Info<< "Calculating face flux field phi1\n" << endl;
 
         wordList phiTypes
         (
-            Ua.boundaryField().size(),
+            U1.boundaryField().size(),
             calculatedFvPatchScalarField::typeName
         );
 
-        forAll(Ua.boundaryField(), i)
+        forAll(U1.boundaryField(), i)
         {
-            if (isA<fixedValueFvPatchVectorField>(Ua.boundaryField()[i]))
+            if (isA<fixedValueFvPatchVectorField>(U1.boundaryField()[i]))
             {
                 phiTypes[i] = fixedValueFvPatchScalarField::typeName;
             }
         }
 
-        phiaPtr.reset
+        phi1Ptr.reset
         (
             new surfaceScalarField
             (
                 IOobject
                 (
-                    "phia",
+                    "phi1",
                     runTime.timeName(),
                     mesh,
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
-                fvc::interpolate(Ua) & mesh.Sf(),
+                fvc::interpolate(U1) & mesh.Sf(),
                 phiTypes
             )
         );
     }
 
-    surfaceScalarField& phia = phiaPtr();
+    surfaceScalarField& phi1 = phi1Ptr();
