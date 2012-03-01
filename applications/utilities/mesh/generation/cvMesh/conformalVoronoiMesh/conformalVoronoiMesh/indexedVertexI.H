@@ -38,7 +38,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex()
     type_(vtInternal),
     alignment_(),
     targetCellSize_(0.0),
-    vertexFixed_(false)
+    vertexFixed_(false),
+    nearProcBoundary_(false)
 {}
 
 
@@ -50,7 +51,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p)
     type_(vtInternal),
     alignment_(),
     targetCellSize_(0.0),
-    vertexFixed_(false)
+    vertexFixed_(false),
+    nearProcBoundary_(false)
 {}
 
 
@@ -67,7 +69,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
     type_(type),
     alignment_(),
     targetCellSize_(0.0),
-    vertexFixed_(false)
+    vertexFixed_(false),
+    nearProcBoundary_(false)
 {}
 
 
@@ -79,7 +82,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p, Cell_handle f)
     type_(vtInternal),
     alignment_(),
     targetCellSize_(0.0),
-    vertexFixed_(false)
+    vertexFixed_(false),
+    nearProcBoundary_(false)
 {}
 
 
@@ -91,7 +95,8 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(Cell_handle f)
     type_(vtInternal),
     alignment_(),
     targetCellSize_(0.0),
-    vertexFixed_(false)
+    vertexFixed_(false),
+    nearProcBoundary_(false)
 {}
 
 
@@ -252,6 +257,20 @@ inline void CGAL::indexedVertex<Gt, Vb>::setNearBoundary()
 
 
 template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::nearProcBoundary() const
+{
+    return nearProcBoundary_;
+}
+
+
+template<class Gt, class Vb>
+inline void CGAL::indexedVertex<Gt, Vb>::setNearProcBoundary()
+{
+    nearProcBoundary_ = true;
+}
+
+
+template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::pairPoint() const
 {
     return type_ >= 0;
@@ -331,7 +350,7 @@ inline bool CGAL::indexedVertex<Gt, Vb>::isVertexFixed() const
 
 
 template<class Gt, class Vb>
-inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed() const
+inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed()
 {
     vertexFixed_ = true;
 }

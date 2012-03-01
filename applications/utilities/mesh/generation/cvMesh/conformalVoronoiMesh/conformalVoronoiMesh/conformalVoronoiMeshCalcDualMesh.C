@@ -1890,7 +1890,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         {
             cit->cellIndex() = dualVertI;
 
-            pts[dualVertI] = topoint(dual(cit));
+            pts[dualVertI] = cit->dual();
 
             if
             (
