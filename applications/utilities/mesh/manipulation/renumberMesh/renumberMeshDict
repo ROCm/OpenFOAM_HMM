@@ -42,6 +42,7 @@ method          CuthillMcKee;
 //method          random;
 //method          spring;
 //method          boundaryFirst;
+//method          zoltan;             // only if compiled with zoltan support
 
 //CuthillMcKeeCoeffs
 //{
@@ -80,6 +81,12 @@ blockCoeffs
     //    delta       0.001;
     //    order       xyz;
     //}
+}
+
+
+zoltanCoeffs
+{
+    ORDER_METHOD    LOCAL_HSFC;
 }
 
 
