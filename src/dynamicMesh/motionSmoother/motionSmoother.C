@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -271,9 +271,28 @@ Foam::labelHashSet Foam::motionSmoother::getPoints
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::motionSmoother::calcEdgeWeights
+(
+    const pointField& points
+) const
+{
+    const edgeList& edges = mesh_.edges();
+
+    tmp<scalarField> twght(new scalarField(edges.size()));
+    scalarField& wght = twght();
+
+    forAll(edges, edgeI)
+    {
+        wght[edgeI] = min(GREAT, 1.0/edges[edgeI].mag(points));
+    }
+    return twght;
+}
+
+
 // Smooth on selected points (usually patch points)
 void Foam::motionSmoother::minSmooth
 (
+    const scalarField& edgeWeights,
     const PackedBoolList& isAffectedPoint,
     const labelList& meshPoints,
     const pointScalarField& fld,
@@ -283,7 +302,7 @@ void Foam::motionSmoother::minSmooth
     tmp<pointScalarField> tavgFld = avg
     (
         fld,
-        scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
+        edgeWeights //scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
     );
     const pointScalarField& avgFld = tavgFld();
 
@@ -308,6 +327,7 @@ void Foam::motionSmoother::minSmooth
 // Smooth on all internal points
 void Foam::motionSmoother::minSmooth
 (
+    const scalarField& edgeWeights,
     const PackedBoolList& isAffectedPoint,
     const pointScalarField& fld,
     pointScalarField& newFld
@@ -316,7 +336,7 @@ void Foam::motionSmoother::minSmooth
     tmp<pointScalarField> tavgFld = avg
     (
         fld,
-        scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
+        edgeWeights //scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
     );
     const pointScalarField& avgFld = tavgFld();
 
@@ -337,7 +357,7 @@ void Foam::motionSmoother::minSmooth
 }
 
 
-// Scale on selected points
+// Scale on all internal points
 void Foam::motionSmoother::scaleField
 (
     const labelHashSet& pointLabels,
@@ -373,6 +393,47 @@ void Foam::motionSmoother::scaleField
         if (pointLabels.found(pointI))
         {
             fld[pointI] *= scale;
+        }
+    }
+}
+
+
+// Lower on internal points
+void Foam::motionSmoother::subtractField
+(
+    const labelHashSet& pointLabels,
+    const scalar f,
+    pointScalarField& fld
+) const
+{
+    forAllConstIter(labelHashSet, pointLabels, iter)
+    {
+        if (isInternalPoint(iter.key()))
+        {
+            fld[iter.key()] = max(0.0, fld[iter.key()]-f);
+        }
+    }
+    fld.correctBoundaryConditions();
+    applyCornerConstraints(fld);
+}
+
+
+// Scale on selected points (usually patch points)
+void Foam::motionSmoother::subtractField
+(
+    const labelList& meshPoints,
+    const labelHashSet& pointLabels,
+    const scalar f,
+    pointScalarField& fld
+) const
+{
+    forAll(meshPoints, i)
+    {
+        label pointI = meshPoints[i];
+
+        if (pointLabels.found(pointI))
+        {
+            fld[pointI] = max(0.0, fld[pointI]-f);
         }
     }
 }
@@ -1081,12 +1142,16 @@ bool Foam::motionSmoother::scaleMesh
         {
             // Scale conflicting patch points
             scaleField(pp_.meshPoints(), usedPoints, errorReduction, scale_);
+            //subtractField(pp_.meshPoints(), usedPoints, 0.1, scale_);
         }
         if (smoothMesh)
         {
             // Scale conflicting internal points
             scaleField(usedPoints, errorReduction, scale_);
+            //subtractField(usedPoints, 0.1, scale_);
         }
+
+        scalarField eWeights(calcEdgeWeights(oldPoints_));
 
         for (label i = 0; i < nSmoothScale; i++)
         {
@@ -1096,6 +1161,7 @@ bool Foam::motionSmoother::scaleMesh
                 pointScalarField oldScale(scale_);
                 minSmooth
                 (
+                    eWeights,
                     isAffectedPoint,
                     pp_.meshPoints(),
                     oldScale,
@@ -1107,7 +1173,7 @@ bool Foam::motionSmoother::scaleMesh
             {
                 // Smooth internal values
                 pointScalarField oldScale(scale_);
-                minSmooth(isAffectedPoint, oldScale, scale_);
+                minSmooth(eWeights, isAffectedPoint, oldScale, scale_);
                 checkFld(scale_);
             }
         }

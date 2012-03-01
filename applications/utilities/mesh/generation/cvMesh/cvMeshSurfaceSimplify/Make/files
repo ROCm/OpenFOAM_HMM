@@ -1,0 +1,6 @@
+cvMeshSurfaceSimplify.C
+
+MarchingCubes/MarchingCubes.cpp
+MarchingCubes/ply.c
+
+EXE = $(FOAM_APPBIN)/cvMeshSurfaceSimplify

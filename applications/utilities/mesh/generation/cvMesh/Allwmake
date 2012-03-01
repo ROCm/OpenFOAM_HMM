@@ -4,5 +4,6 @@ set -x
 
 wmake libso conformalVoronoiMesh
 wmake
+wmake cvMeshSurfaceSimplify
 
 # ----------------------------------------------------------------- end-of-file

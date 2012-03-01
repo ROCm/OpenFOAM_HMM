@@ -1,0 +1,17 @@
+include $(GENERAL_RULES)/CGAL
+
+EXE_INC = \
+    -IMarchingCubes \
+    -I../conformalVoronoiMesh/lnInclude \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/triSurface/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude
+
+EXE_LIBS = \
+    $(CGAL_LIBS) \
+    -lconformalVoronoiMesh \
+    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
+    -ledgeMesh \
+    -ltriSurface \
+    -lmeshTools \
+    -ldynamicMesh

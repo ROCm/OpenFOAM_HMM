@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,8 @@ void Foam::autoLayerDriver::sumWeights
     scalarField& invSumWeight
 ) const
 {
+    const pointField& pts = meshRefiner_.mesh().points();
+
     invSumWeight = 0;
 
     forAll(edges, edgeI)
@@ -57,7 +59,18 @@ void Foam::autoLayerDriver::sumWeights
         {
             const edge& e = edges[edgeI];
             //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight = 1.0;
+            //scalar eWeight = 1.0;
+
+            scalar eMag = max
+            (
+                VSMALL,
+                mag
+                (
+                    pts[meshPoints[e[1]]]
+                  - pts[meshPoints[e[0]]]
+                )
+            );
+            scalar eWeight = 1.0/eMag;
 
             invSumWeight[e[0]] += eWeight;
             invSumWeight[e[1]] += eWeight;
@@ -799,25 +812,54 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                 // Both end points of edge have very different nearest wall
                 // point. Mark both points as medial axis points.
                 const edge& e = edges[edgeI];
-
-                forAll(e, ep)
+                // Approximate medial axis location on edge.
+                //const point medialAxisPt = e.centre(points);
+                vector eVec = e.vec(mesh.points());
+                scalar eMag = mag(eVec);
+                if (eMag > VSMALL)
                 {
-                    label pointI = e[ep];
+                    eVec /= eMag;
 
-                    if (!pointMedialDist[pointI].valid(dummyTrackData))
+                    // Calculate distance along edge
+                    const point& p0 = points[e[0]];
+                    const point& p1 = points[e[1]];
+                    scalar dist0 = (p0-pointWallDist[e[0]].origin()) & eVec;
+                    scalar dist1 = (pointWallDist[e[1]].origin()-p1) & eVec;
+                    scalar s = 0.5*(dist1+eMag+dist0);
+
+                    point medialAxisPt;
+                    if (s <= dist0)
                     {
-                        maxPoints.append(pointI);
-                        maxInfo.append
-                        (
-                            pointData
+                        medialAxisPt = p0;
+                    }
+                    else if (s >= dist0+eMag)
+                    {
+                        medialAxisPt = p1;
+                    }
+                    else
+                    {
+                        medialAxisPt = p0+(s-dist0)*eVec;
+                    }
+
+                    forAll(e, ep)
+                    {
+                        label pointI = e[ep];
+
+                        if (!pointMedialDist[pointI].valid(dummyTrackData))
+                        {
+                            maxPoints.append(pointI);
+                            maxInfo.append
                             (
-                                points[pointI],
-                                0.0,
-                                pointI,         // passive data
-                                vector::zero    // passive data
-                            )
-                        );
-                        pointMedialDist[pointI] = maxInfo.last();
+                                pointData
+                                (
+                                    medialAxisPt,   //points[pointI],
+                                    magSqr(points[pointI]-medialAxisPt),//0.0,
+                                    pointI,         // passive data
+                                    vector::zero    // passive data
+                                )
+                            );
+                            pointMedialDist[pointI] = maxInfo.last();
+                        }
                     }
                 }
             }
@@ -887,6 +929,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         forAll(pointMedialDist, pointI)
         {
             medialDist[pointI] = Foam::sqrt(pointMedialDist[pointI].distSqr());
+            //medialVec[pointI] = pointMedialDist[pointI].origin();
         }
     }
 
@@ -923,11 +966,14 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             << " : normalised direction of nearest displacement" << nl
             << "    " << medialDist.name()
             << " : distance to medial axis" << nl
+            //<< "    " << medialVec.name()
+            //<< " : nearest point on medial axis" << nl
             << "    " << medialRatio.name()
             << " : ratio of medial distance to wall distance" << nl
             << endl;
         dispVec.write();
         medialDist.write();
+        //medialVec.write();
         medialRatio.write();
     }
 }
@@ -950,6 +996,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     const pointVectorField& dispVec,
     const pointScalarField& medialRatio,
     const pointScalarField& medialDist,
+    //const pointVectorField& medialVec,
 
     List<extrudeMode>& extrudeStatus,
     pointField& patchDisp,
@@ -1025,9 +1072,22 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         {
             label pointI = meshPoints[patchPointI];
 
+            //- Option 1: look only at extrusion thickness v.s. distance
+            //  to nearest (medial axis or static) point.
             scalar mDist = medialDist[pointI];
-
             scalar thicknessRatio = thickness[patchPointI]/(mDist+VSMALL);
+
+            //- Option 2: Look at component in the direction
+            //  of nearest (medial axis or static) point.
+            vector n =
+                patchDisp[patchPointI]
+              / (mag(patchDisp[patchPointI]) + VSMALL);
+            //vector mVec = mesh.points()[pointI]-medialVec[pointI];
+            //scalar mDist = mag(mVec);
+            //scalar thicknessRatio =
+            //    (n&mVec)
+            //   *thickness[patchPointI]
+            //   /(mDist+VSMALL);
 
             if (thicknessRatio > maxThicknessToMedialRatio)
             {
@@ -1043,16 +1103,16 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                                 minThickness[patchPointI]
                                +thickness[patchPointI]
                             )
+                        //<< " since near medial at:" << medialVec[pointI]
+                        //<< " with thicknessRatio:" << thicknessRatio
                         << endl;
                 }
 
                 thickness[patchPointI] =
                     0.5*(minThickness[patchPointI]+thickness[patchPointI]);
 
-                patchDisp[patchPointI] =
-                    thickness[patchPointI]
-                  * patchDisp[patchPointI]
-                  / (mag(patchDisp[patchPointI]) + VSMALL);
+                patchDisp[patchPointI] = thickness[patchPointI]*n;
+
                 numThicknessRatioExclude++;
 
                 if (str.valid())

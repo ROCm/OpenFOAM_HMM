@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2067,8 +2067,10 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
         // The important thing, however, is that when only a few faces
         // are disabled, their coordinates are printed, and this should be
         // the case
-        label nReportLocal =
-            min
+        label nReportLocal = nChanged;
+        if (nChangedTotal > nReportMax)
+        {
+            nReportLocal = min
             (
                 max(nChangedTotal / Pstream::nProcs(), 1),
                 min
@@ -2077,11 +2079,15 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
                     max(nReportMax / Pstream::nProcs(), 1)
                 )
             );
+        }
 
-        Pout<< "Checked mesh with layers. Disabled extrusion at " << endl;
-        for (label i=0; i < nReportLocal; i++)
+        if (nReportLocal)
         {
-            Pout<< "    " << disabledFaceCentres[i] << endl;
+            Pout<< "Checked mesh with layers. Disabled extrusion at " << endl;
+            for (label i=0; i < nReportLocal; i++)
+            {
+                Pout<< "    " << disabledFaceCentres[i] << endl;
+            }
         }
 
         label nReportTotal = returnReduce(nReportLocal, sumOp<label>());
@@ -2546,7 +2552,7 @@ void Foam::autoLayerDriver::addLayers
             false
         ),
         meshMover().pMesh(),
-        dimensionedScalar("pointMedialDist", dimless, 0.0)
+        dimensionedScalar("pointMedialDist", dimLength, 0.0)
     );
 
     pointVectorField dispVec
@@ -2561,7 +2567,7 @@ void Foam::autoLayerDriver::addLayers
             false
         ),
         meshMover().pMesh(),
-        dimensionedVector("dispVec", dimless, vector::zero)
+        dimensionedVector("dispVec", dimLength, vector::zero)
     );
 
     pointScalarField medialRatio

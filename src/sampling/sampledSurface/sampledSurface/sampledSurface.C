@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,12 +152,13 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 Foam::sampledSurface::sampledSurface
 (
     const word& name,
-    const polyMesh& mesh
+    const polyMesh& mesh,
+    const bool interpolate
 )
 :
     name_(name),
     mesh_(mesh),
-    interpolate_(false),
+    interpolate_(interpolate),
     SfPtr_(NULL),
     magSfPtr_(NULL),
     CfPtr_(NULL),

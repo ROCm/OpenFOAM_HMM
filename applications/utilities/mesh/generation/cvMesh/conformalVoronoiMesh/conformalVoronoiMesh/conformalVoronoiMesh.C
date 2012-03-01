@@ -240,9 +240,9 @@ void Foam::conformalVoronoiMesh::insertPoints
     {
         label preDistributionSize(points.size());
 
-        DynamicList<Foam::point> transferPoints(points.size()/2);
+        DynamicList<Foam::point> transferPoints;
 
-        DynamicList<Point> pointsOnProcessor(points.size()/2);
+        DynamicList<Point> pointsOnProcessor;
 
         for
         (
@@ -277,12 +277,16 @@ void Foam::conformalVoronoiMesh::insertPoints
             decomposition_().distributePoints(transferPoints)
         );
 
+        const label oldSize = points.size();
+
+        points.setSize(oldSize + transferPoints.size());
+
         forAll(transferPoints, tPI)
         {
-            points.append(toPoint(transferPoints[tPI]));
+            points[tPI + oldSize] = toPoint(transferPoints[tPI]);
         }
 
-        label sizeChange = preDistributionSize - label(points.size());
+        label sizeChange = preDistributionSize - points.size();
 
         // if (mag(sizeChange) > 0)
         // {
@@ -416,7 +420,6 @@ void Foam::conformalVoronoiMesh::insertPoints
 //            type
 //        );
 //    }
-
 
     rangeInsertWithInfo
     (
@@ -1246,6 +1249,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     // better balance the surface conformation load.
     distributeBackground();
 
+//    conformToSurface();
+
     buildSurfaceConformation(rmCoarse);
 
     // The introduction of the surface conformation may have distorted the
@@ -1313,7 +1318,7 @@ void Foam::conformalVoronoiMesh::move()
         {
             cit->cellIndex() = dualVertI;
 
-            dualVertices[dualVertI] = topoint(dual(cit));
+            dualVertices[dualVertI] = cit->dual();
 
             dualVertI++;
         }
@@ -1511,7 +1516,6 @@ void Foam::conformalVoronoiMesh::move()
                             (
                                 toPoint(0.5*(dVA + dVB))
                             );
-
                         }
                     }
                     else if
@@ -1671,9 +1675,57 @@ void Foam::conformalVoronoiMesh::move()
 
     insertPoints(pointsToInsert);
 
+    // Remove internal points that have been inserted outside the surface.
+    label internalPtIsOutside = 0;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint())
+        {
+            bool inside
+                = geometryToConformTo_.inside(topoint(vit->point()));
+
+            if (!inside)
+            {
+                remove(vit);
+                internalPtIsOutside++;
+            }
+        }
+    }
+
+    Info<< "    " << internalPtIsOutside
+        << " internal points were inserted outside the domain. "
+        << "They have been removed." << endl;
+
+    // Fix points that have not been significantly displaced
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (vit->internalPoint())
+//        {
+//            if
+//            (
+//                mag(displacementAccumulator[vit->index()])
+//              < 0.1*targetCellSize(topoint(vit->point()))
+//            )
+//            {
+//                vit->setVertexFixed();
+//            }
+//        }
+//    }
+
     if (cvMeshControls().objOutput() && runTime_.outputTime())
     {
-        writePoints("points_" + runTime_.timeName() + ".obj", false);
+        writePoints("points_" + runTime_.timeName() + ".obj", true);
     }
 
     timeCheck("Internal points inserted");

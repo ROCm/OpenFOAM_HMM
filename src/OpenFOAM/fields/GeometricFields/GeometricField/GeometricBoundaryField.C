@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -252,7 +252,7 @@ GeometricBoundaryField
     // Patch or patch-groups. (using non-wild card entries of dictionaries)
     forAllConstIter(dictionary, dict, iter)
     {
-        if (iter().isDict())
+        if (iter().isDict() && !iter().keyword().isPattern())
         {
             const labelList patchIDs = bmesh_.findIndices
             (

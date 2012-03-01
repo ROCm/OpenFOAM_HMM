@@ -201,6 +201,16 @@ private:
                 label& compactI
             );
 
+            scalar calcNearestDistance(const label nodeI) const;
+
+            bool quickCircumsphereRejection
+            (
+                const label nodeI,
+                const point& cc,
+                const scalar crSqr,
+                const List<scalar>& nearestDistances
+            ) const;
+
             //- Determine inside/outside per node (mixed if cannot be
             //  determined). Only valid for closed shapes.
             volumeType calcVolumeType(const label nodeI) const;
@@ -319,6 +329,13 @@ private:
                 const direction startOctantI,
                 const bool verbose = false
             ) const;
+
+//            bool isLineInsideOrOutside
+//            (
+//                const label nodeI,
+//                const point& start,
+//                const point& end
+//            ) const;
 
             //- Find any or nearest intersection of line between start and end.
             pointIndexHit findLine
@@ -532,6 +549,19 @@ public:
                 const scalar nearestDistSqr
             ) const;
 
+//            bool findAnyOverlap
+//            (
+//                const point& sample,
+//                const scalar nearestDistSqr
+//            ) const;
+//
+//            bool findAnyOverlap
+//            (
+//                const label nodeI,
+//                const point& sample,
+//                const scalar nearestDistSqr
+//            ) const;
+
             //- Low level: calculate nearest starting from subnode.
             void findNearest
             (
@@ -628,6 +658,16 @@ public:
                 CompareOp& cop
             ) const;
 
+            //- Return a list containing the nearest distance of nodes to any
+            //  shapes
+            List<scalar> calcNearestDistance() const;
+
+            bool quickCircumsphereRejection
+            (
+                const point& cc,
+                const scalar crSqr,
+                const List<scalar>& nearestDistances
+            ) const;
 
         // Write
 

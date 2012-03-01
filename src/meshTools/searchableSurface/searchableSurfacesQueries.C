@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "ListOps.H"
 #include "OFstream.H"
 #include "meshTools.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -680,6 +681,81 @@ void Foam::searchableSurfacesQueries::findNearest
                 );
                 nearestInfo[pointI] = hitInfo[pointI];
                 nearestSurfaces[pointI] = testI;
+            }
+        }
+    }
+}
+
+
+void Foam::searchableSurfacesQueries::signedDistance
+(
+    const PtrList<searchableSurface>& allSurfaces,
+    const labelList& surfacesToTest,
+    const pointField& samples,
+    const scalarField& nearestDistSqr,
+    labelList& nearestSurfaces,
+    scalarField& distance
+)
+{
+    // Initialise
+    distance.setSize(samples.size());
+    distance = -GREAT;
+
+    // Find nearest
+    List<pointIndexHit> nearestInfo;
+    findNearest
+    (
+        allSurfaces,
+        surfacesToTest,
+        samples,
+        nearestDistSqr,
+        nearestSurfaces,
+        nearestInfo
+    );
+
+    // Determine sign of nearest. Sort by surface to do this.
+    DynamicField<point> surfPoints(samples.size());
+    DynamicList<label> surfIndices(samples.size());
+
+    forAll(surfacesToTest, testI)
+    {
+        // Extract samples on this surface
+        surfPoints.clear();
+        surfIndices.clear();
+        forAll(nearestSurfaces, i)
+        {
+            if (nearestSurfaces[i] == testI)
+            {
+                surfPoints.append(samples[i]);
+                surfIndices.append(i);
+            }
+        }
+
+        // Calculate sideness of these surface points
+        List<searchableSurface::volumeType> volType;
+        allSurfaces[surfacesToTest[testI]].getVolumeType(surfPoints, volType);
+
+        // Push back to original
+        forAll(volType, i)
+        {
+            label pointI = surfIndices[i];
+            scalar dist = mag(samples[pointI] - nearestInfo[pointI].hitPoint());
+
+            searchableSurface::volumeType vT = volType[i];
+
+            if (vT == searchableSurface::OUTSIDE)
+            {
+                distance[pointI] = dist;
+            }
+            else if (vT == searchableSurface::INSIDE)
+            {
+                distance[i] = -dist;
+            }
+            else
+            {
+                FatalErrorIn("signedDistance()")
+                    << "getVolumeType failure, neither INSIDE or OUTSIDE"
+                    << exit(FatalError);
             }
         }
     }

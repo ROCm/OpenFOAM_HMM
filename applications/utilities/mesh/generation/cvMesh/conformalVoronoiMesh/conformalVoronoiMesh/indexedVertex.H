@@ -45,6 +45,7 @@ SourceFiles
 #include <CGAL/Triangulation_3.h>
 #include "tensor.H"
 #include "InfoProxy.H"
+#include "point.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,6 +101,8 @@ class indexedVertex
 
         //- Specify whether the vertex is fixed or movable.
         bool vertexFixed_;
+
+        bool nearProcBoundary_;
 
 
 public:
@@ -198,6 +201,12 @@ public:
         //- Set the point to be near the boundary
         inline void setNearBoundary();
 
+        //- Is point internal and near a proc boundary
+        inline bool nearProcBoundary() const;
+
+        //- Set the point to be near a proc boundary
+        inline void setNearProcBoundary();
+
         //- Either master or slave of pointPair.
         inline bool pairPoint() const;
 
@@ -227,7 +236,7 @@ public:
         inline bool isVertexFixed() const;
 
         //- Fix the vertex so that it can't be moved
-        inline void setVertexFixed() const;
+        inline void setVertexFixed();
 
     // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
     // {

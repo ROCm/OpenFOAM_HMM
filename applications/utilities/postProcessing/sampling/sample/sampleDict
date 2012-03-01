@@ -272,10 +272,12 @@ surfaces
         // Distance to surface
         distance        0.0;
 
+        //cell            false;// optional: use isoSurface instead
+                                // of isoSurfaceCell
         interpolate     false;
-        regularise      false;       // Optional: do not simplify
-        // mergeTol        1e-10;    // Optional: fraction of mesh bounding box
-                                     // to merge points (default=1e-6)
+        regularise      false;  // Optional: do not simplify
+        // mergeTol 1e-10;      // Optional: fraction of mesh bounding box
+                                // to merge points (default=1e-6)
     }
 
     triSurfaceSampling
