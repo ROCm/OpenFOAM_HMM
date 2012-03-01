@@ -1,0 +1,3 @@
+checkCvMesh.C
+
+EXE = $(FOAM_APPBIN)/checkCvMesh

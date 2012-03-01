@@ -724,6 +724,8 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 
     globalBackgroundBounds_ = treeBoundBox(bbMin, bbMax);
 
+    octreeNearestDistances_ = bFTreePtr_().calcNearestDistance();
+
     if (cvMesh_.cvMeshControls().objOutput())
     {
         OFstream fStr
@@ -795,6 +797,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     ),
     boundaryFacesPtr_(),
     bFTreePtr_(),
+    octreeNearestDistances_(),
     allBackgroundMeshBounds_(Pstream::nProcs()),
     globalBackgroundBounds_(),
     decomposeDict_
@@ -1150,6 +1153,8 @@ bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
     const point& pt
 ) const
 {
+//    return bFTreePtr_().findAnyOverlap(pt, 0.0);
+
     return
         bFTreePtr_().getVolumeType(pt)
      == indexedOctree<treeDataBPatch>::INSIDE;
@@ -1176,6 +1181,7 @@ bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
     const treeBoundBox& box
 ) const
 {
+//    return !procBounds().contains(box);
     return !bFTreePtr_().findBox(box).empty();
 }
 
@@ -1183,9 +1189,11 @@ bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
 bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
 (
     const point& centre,
-    scalar radiusSqr
+    const scalar radiusSqr
 ) const
 {
+    //return bFTreePtr_().findAnyOverlap(centre, radiusSqr);
+
     return bFTreePtr_().findNearest(centre, radiusSqr).hit();
 }
 
@@ -1645,6 +1653,7 @@ Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
 
         // If the sphere finds a nearest element of the patch, then it overlaps
         sphereOverlapsCandidate[sI] = bFTreePtr_().findNearest(c, rSqr).hit();
+        //sphereOverlapsCandidate[sI] = bFTreePtr_().findAnyOverlap(c, rSqr);
     }
 
     map().reverseDistribute
