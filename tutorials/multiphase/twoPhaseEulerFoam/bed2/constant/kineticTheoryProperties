@@ -21,9 +21,9 @@ equilibrium     on;
 
 e               e [ 0 0 0 0 0 0 0 ] 0.8;
 
-alphaMax        alphaMax [ 0 0 0 0 0 0 0 ] 0.62;
+alpha1Max        alpha1Max [ 0 0 0 0 0 0 0 ] 0.62;
 
-alphaMinFriction alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.65;
+alpha1MinFriction alpha1MinFriction [ 0 0 0 0 0 0 0 ] 0.65;
 
 Fr              Fr [ 1 -1 -2 0 0 0 0 ] 0.05;
 

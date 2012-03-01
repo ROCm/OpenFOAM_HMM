@@ -10,38 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha;
+    object      alpha1;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions          [ 0 0 0 0 0 0 0 ];
 
-internalField   uniform 0;
+internalField       uniform 0.33;
 
 boundaryField
 {
-    inlet
+    bottom
     {
-        type            fixedValue;
-        value           uniform 0.5;
+        type               fixedValue;
+        value              uniform 0;
     }
 
-    outlet
+    top
     {
-        type            inletOutlet;
-        inletValue      uniform 1;
-        value           uniform 1;
+        type               inletOutlet;
+        inletValue         uniform 0;
     }
 
     walls
     {
-        type            zeroGradient;
+        type               zeroGradient;
     }
 
-    defaultFaces
+    frontBack
     {
-        type            empty;
+        type               empty;
     }
+
 }
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

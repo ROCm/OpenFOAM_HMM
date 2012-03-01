@@ -74,10 +74,10 @@ public:
 
         tmp<volScalarField> kappa
         (
-            const volScalarField& alpha,
+            const volScalarField& alpha1,
             const volScalarField& Theta,
             const volScalarField& g0,
-            const dimensionedScalar& rhoa,
+            const dimensionedScalar& rho1,
             const volScalarField& da,
             const dimensionedScalar& e
         ) const;

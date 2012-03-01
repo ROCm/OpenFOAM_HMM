@@ -1,3 +1,3 @@
     MRFZones mrfZones(mesh);
-    mrfZones.correctBoundaryVelocity(Ua);
-    mrfZones.correctBoundaryVelocity(Ub);
+    mrfZones.correctBoundaryVelocity(U1);
+    mrfZones.correctBoundaryVelocity(U2);

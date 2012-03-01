@@ -57,15 +57,15 @@ class kineticTheoryModel
     // Private data
 
         const phaseModel& phase1_;
-        const volVectorField& Ua_;
-        const volVectorField& Ub_;
-        const volScalarField& alpha_;
-        const surfaceScalarField& phia_;
+        const volVectorField& U1_;
+        const volVectorField& U2_;
+        const volScalarField& alpha1_;
+        const surfaceScalarField& phi1_;
 
         const dragModel& draga_;
 
-        const dimensionedScalar& rhoa_;
-        const dimensionedScalar& nua_;
+        const dimensionedScalar& rho1_;
+        const dimensionedScalar& nu1_;
 
         //- dictionary holding the modeling info
         IOdictionary kineticTheoryProperties_;
@@ -92,10 +92,10 @@ class kineticTheoryModel
         const dimensionedScalar e_;
 
         //- maximum packing
-        const dimensionedScalar alphaMax_;
+        const dimensionedScalar alpha1Max_;
 
         //- min value for which the frictional stresses are zero
-        const dimensionedScalar alphaMinFriction_;
+        const dimensionedScalar alpha1MinFriction_;
 
         //- material constant for frictional normal stress
         const dimensionedScalar Fr_;
@@ -113,7 +113,7 @@ class kineticTheoryModel
         volScalarField Theta_;
 
         //- The granular viscosity
-        volScalarField mua_;
+        volScalarField mu1_;
 
         //- The granular bulk viscosity
         volScalarField lambda_;
@@ -145,8 +145,8 @@ public:
         kineticTheoryModel
         (
             const phaseModel& phase1,
-            const volVectorField& Ub,
-            const volScalarField& alpha,
+            const volVectorField& U2,
+            const volScalarField& alpha1,
             const dragModel& draga
         );
 
@@ -157,16 +157,16 @@ public:
 
     // Member Functions
 
-        void solve(const volTensorField& gradUat);
+        void solve(const volTensorField& gradU1t);
 
         bool on() const
         {
             return kineticTheory_;
         }
 
-        const volScalarField& mua() const
+        const volScalarField& mu1() const
         {
-            return mua_;
+            return mu1_;
         }
 
         const volScalarField& pa() const

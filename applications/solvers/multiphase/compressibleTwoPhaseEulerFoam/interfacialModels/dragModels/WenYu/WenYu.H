@@ -78,7 +78,7 @@ public:
         WenYu
         (
             const dictionary& interfaceDict,
-            const volScalarField& alpha,
+            const volScalarField& alpha1,
             const phaseModel& phase1,
             const phaseModel& phase2
         );

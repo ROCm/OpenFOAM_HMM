@@ -5,8 +5,8 @@
     fvScalarMatrix T1Eqn
     (
         fvm::ddt(alpha1, T1)
-      + fvm::div(alphaPhi1, T1)
-      - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), T1)
+      + fvm::div(alpha1Phi1, T1)
+      - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alpha1Phi1), T1)
       - fvm::laplacian(kByCp1, T1)
      ==
         heatTransferCoeff*T2/Cp1/rho1
@@ -17,8 +17,8 @@
     fvScalarMatrix T2Eqn
     (
         fvm::ddt(alpha2, T2)
-      + fvm::div(alphaPhi2, T2)
-      - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), T2)
+      + fvm::div(alpha1Phi2, T2)
+      - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alpha1Phi2), T2)
       - fvm::laplacian(kByCp2, T2)
      ==
         heatTransferCoeff*T1/Cp2/rho2

@@ -53,12 +53,12 @@ Foam::kineticTheoryModels::noneViscosity::~noneViscosity()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::noneViscosity::mua
+Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::noneViscosity::mu1
 (
-    const volScalarField& alpha,
+    const volScalarField& alpha1,
     const volScalarField& Theta,
     const volScalarField& g0,
-    const dimensionedScalar& rhoa,
+    const dimensionedScalar& rho1,
     const dimensionedScalar& da,
     const dimensionedScalar& e
 ) const
@@ -68,7 +68,7 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::noneViscosity::mua
         "0",
         dimensionSet(1, -1, -1, 0, 0, 0, 0),
         0.0
-    )*alpha;
+    )*alpha1;
 }
 
 

@@ -25,8 +25,8 @@
     // }
 
     PtrList<surfaceScalarField> alphafs(fluid.phases().size());
-    PtrList<volVectorField> U0s(fluid.phases().size());
-    PtrList<surfaceScalarField> phi0s(fluid.phases().size());
+    PtrList<volVectorField> HbyAs(fluid.phases().size());
+    PtrList<surfaceScalarField> phiHbyAs(fluid.phases().size());
     PtrList<volScalarField> rAUs(fluid.phases().size());
     PtrList<surfaceScalarField> rAlphaAUfs(fluid.phases().size());
 
@@ -35,26 +35,28 @@
     {
         phaseModel& phase = iter();
 
-        U0s.set(phasei, new volVectorField(phase.U()));
-        phi0s.set(phasei, new surfaceScalarField(phase.phi()));
-        mrfZones.absoluteFlux(phi0s[phasei]);
+        phase.phi().oldTime();
+        mrfZones.absoluteFlux(phase.phi().oldTime());
+        mrfZones.absoluteFlux(phase.phi());
+
+        HbyAs.set(phasei, new volVectorField(phase.U()));
+        phiHbyAs.set(phasei, new surfaceScalarField(1.0*phase.phi()));
 
         phasei++;
-
     }
 
-    surfaceScalarField phi0
+    surfaceScalarField phiHbyA
     (
         IOobject
         (
-            "phi0",
+            "phiHbyA",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("phi0", dimArea*dimVelocity, 0)
+        dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
     );
 
     phasei = 0;
@@ -67,20 +69,15 @@
         rAUs.set(phasei, (1.0/UEqns[phasei].A()).ptr());
         rAlphaAUfs.set(phasei, fvc::interpolate(alpha*rAUs[phasei]).ptr());
 
-        phase.U() = rAUs[phasei]*UEqns[phasei].H();
+        HbyAs[phasei] = rAUs[phasei]*UEqns[phasei].H();
 
-        phase.phi().oldTime();
-        mrfZones.absoluteFlux(phase.phi().oldTime());
-        mrfZones.absoluteFlux(phase.phi());
-        phase.phi() =
+        phiHbyAs[phasei] =
         (
-            (fvc::interpolate(phase.U()) & mesh.Sf())
+            (fvc::interpolate(HbyAs[phasei]) & mesh.Sf())
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
+          + rAlphaAUfs[phasei]*(g & mesh.Sf())
         );
-        mrfZones.relativeFlux(phase.phi());
-        mrfZones.relativeFlux(phase.phi().oldTime());
-        surfaceScalarField pphi0("pphi0", 1.0*phase.phi());
-        pphi0 += rAlphaAUfs[phasei]*(g & mesh.Sf());
+        mrfZones.relativeFlux(phiHbyAs[phasei]);
 
         multiphaseSystem::dragModelTable::const_iterator dmIter =
             fluid.dragModels().begin();
@@ -93,46 +90,36 @@
             ++dmIter, ++dcIter
         )
         {
-            if
-            (
-                &phase == &dmIter()->phase1()
-             || &phase == &dmIter()->phase2()
-            )
+            const phaseModel *phase2Ptr = &dmIter()->phase2();
+            if (phase2Ptr == &phase)
             {
-                int phasej = 0;
-                forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter2)
-                {
-                    phaseModel& phase2 = iter2();
-
-                    if
-                    (
-                        (
-                            &phase == &dmIter()->phase1()
-                         && &phase2 == &dmIter()->phase2()
-                        )
-                     || (
-                            &phase == &dmIter()->phase2()
-                         && &phase2 == &dmIter()->phase1()
-                        )
-                    ) break;
-
-                    phasej++;
-                }
-
-                pphi0 +=
-                    fvc::interpolate
-                    ((1.0/phase.rho())*rAUs[phasei]*(*dcIter()))
-                   *phi0s[phasej];
+                phase2Ptr = &dmIter()->phase1();
             }
+
+            phiHbyAs[phasei] +=
+                fvc::interpolate
+                (
+                    (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
+                )*phase2Ptr->phi();
+
+            HbyAs[phasei] +=
+                (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
+               *phase2Ptr->U();
+
+            // HbyAs[phasei] += fvc::reconstruct
+            // (
+            //     fvc::interpolate
+            //     (
+            //         (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
+            //     )*phase2Ptr->phi()
+            // );
         }
 
-        phi0 += alphafs[phasei]*pphi0;
-        phase.phi() = pphi0;
+        phiHbyA += alphafs[phasei]*phiHbyAs[phasei];
 
         phasei++;
     }
 
-    phi = dimensionedScalar("phi", phi.dimensions(), 0);
     surfaceScalarField Dp
     (
         IOobject
@@ -149,7 +136,6 @@
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
         phaseModel& phase = iter();
-        phi += alphafs[phasei]*phase.phi();
         Dp += alphafs[phasei]*rAlphaAUfs[phasei]/phase.rho();
 
         phasei++;
@@ -160,7 +146,7 @@
     {
         fvScalarMatrix pEqnIncomp
         (
-            fvc::div(phi0)
+            fvc::div(phiHbyA)
           - fvm::laplacian(Dp, p)
         );
 
@@ -184,7 +170,11 @@
             {
                 phaseModel& phase = iter();
 
-                phase.phi() += rAlphaAUfs[phasei]*mSfGradp/phase.rho();
+                phase.phi() =
+                    phiHbyAs[phasei]
+                  + rAlphaAUfs[phasei]*mSfGradp/phase.rho();
+                mrfZones.relativeFlux(phase.phi());
+                mrfZones.relativeFlux(phase.phi().oldTime());
                 phi += alphafs[phasei]*phase.phi();
 
                 phasei++;
@@ -208,70 +198,15 @@
                 phaseModel& phase = iter();
                 const volScalarField& alpha = phase;
 
-                phase.U() +=
-                    fvc::reconstruct
+                phase.U() =
+                    HbyAs[phasei]
+                  + fvc::reconstruct
                     (
                         rAlphaAUfs[phasei]*(g & mesh.Sf())
                       + rAlphaAUfs[phasei]*mSfGradp/phase.rho()
                     );
 
-                multiphaseSystem::dragModelTable::const_iterator dmIter =
-                    fluid.dragModels().begin();
-                multiphaseSystem::dragCoeffFields::const_iterator dcIter =
-                    dragCoeffs().begin();
-                for
-                (
-                    ;
-                    dmIter != fluid.dragModels().end()
-                 && dcIter != dragCoeffs().end();
-                    ++dmIter, ++dcIter
-                )
-                {
-                    if
-                    (
-                        &phase == &dmIter()->phase1()
-                     || &phase == &dmIter()->phase2()
-                    )
-                    {
-                        int phasej = 0;
-                        forAllIter
-                        (
-                            PtrDictionary<phaseModel>,
-                            fluid.phases(),
-                            iter2
-                        )
-                        {
-                            phaseModel& phase2 = iter2();
-
-                            if
-                            (
-                                (
-                                    &phase == &dmIter()->phase1()
-                                 && &phase2 == &dmIter()->phase2()
-                                )
-                             || (
-                                    &phase == &dmIter()->phase2()
-                                 && &phase2 == &dmIter()->phase1()
-                                 )
-                            ) break;
-
-                            phasej++;
-                        }
-
-                        // phase.U() +=
-                        //     (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
-                        //    *U0s[phasej];
-
-                        phase.U() += fvc::reconstruct
-                        (
-                            fvc::interpolate
-                            (
-                                (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
-                            )*phi0s[phasej]
-                        );
-                    }
-                }
-
+                phase.U() = fvc::reconstruct(phase.phi());
                 phase.U().correctBoundaryConditions();
 
                 U += alpha*phase.U();

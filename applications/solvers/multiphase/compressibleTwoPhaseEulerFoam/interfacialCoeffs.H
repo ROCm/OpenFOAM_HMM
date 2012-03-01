@@ -69,12 +69,12 @@ volScalarField heatTransferCoeff
             << exit(FatalError);
     }
 
-    volScalarField alphaCoeff
+    volScalarField alpha1Coeff
     (
         (alpha1 + minInterfaceAlpha)*(alpha2 + minInterfaceAlpha)
     );
-    dragCoeff *= alphaCoeff;
-    heatTransferCoeff *= alphaCoeff;
+    dragCoeff *= alpha1Coeff;
+    heatTransferCoeff *= alpha1Coeff;
 
     liftForce = Cl*(alpha1*rho1 + alpha2*rho2)*(Ur ^ fvc::curl(U));
 }
