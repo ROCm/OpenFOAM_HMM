@@ -285,7 +285,9 @@ public:
             ) const;
 
             //- Find the nearest points on each feature edge that is within
-            //  a given distance from the sample point
+            //  a given distance from the sample point. Will need to check for
+            //  a hit or a miss because near edges may not have a nearest point
+            //  on them which is perpendicular to the sample point.
             void findAllNearestEdges
             (
                 const point& sample,
