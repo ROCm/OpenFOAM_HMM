@@ -48,7 +48,6 @@ SourceFiles
 #define CGAL_INEXACT
 
 #include "CGALTriangulation3Ddefs.H"
-#include <CGAL/Spatial_sort_traits_adapter_3.h>
 #include "uint.H"
 #include "ulong.H"
 #include "searchableSurfaces.H"
@@ -594,6 +593,12 @@ private:
             Foam::point& a,
             Foam::point& b
         ) const;
+
+        label removeProcessorBoundarySeeds(bool reinsertBoundPts);
+
+        void seedProcessorBoundarySurfaces(bool seedProcessors);
+
+        label numberOfUnusedReferredPoints() const;
 
         //- Build the parallelInterfaces of the mesh
         void buildParallelInterface
@@ -1240,7 +1245,7 @@ public:
                     Traits_for_spatial_sort<Triangulation>()
                 );
 
-                typename Triangulation::Cell_handle hint;
+                typename Triangulation::Vertex_handle hint;
 
                 for
                 (
@@ -1250,16 +1255,9 @@ public:
                     ++p
                 )
                 {
-                    typename Triangulation::Locate_type lt;
-                    typename Triangulation::Cell_handle c;
-                    label li, lj;
-
-                    c = T.locate(*(p->first), lt, li, lj, hint);
-
                     const size_t checkInsertion = T.number_of_vertices();
 
-                    typename Triangulation::Vertex_handle v
-                        = T.insert(*(p->first), lt, c, li, lj);
+                    hint = T.insert(*(p->first), hint);
 
                     if (checkInsertion != T.number_of_vertices() - 1)
                     {
@@ -1278,12 +1276,11 @@ public:
                             // type directly (note that this routine never gets
                             // called for referredPoints so type will never be
                             // -procI
-                            type += T.number_of_vertices() - 1;
+                            type += checkInsertion;
                         }
 
-                        v->index() = indices[oldIndex]
-                                   + T.number_of_vertices() - 1;
-                        v->type() = type;
+                        hint->index() = indices[oldIndex] + checkInsertion;
+                        hint->type() = type;
                     }
                 }
             }

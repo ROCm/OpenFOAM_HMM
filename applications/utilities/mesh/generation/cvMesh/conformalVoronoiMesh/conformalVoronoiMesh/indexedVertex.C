@@ -29,7 +29,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "indexedVertex.H"
-//#include "conformalVoronoiMesh.H"
 #include "point.H"
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //

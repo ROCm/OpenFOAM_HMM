@@ -87,6 +87,24 @@ int CGAL::indexedCell<Gt, Cb>::cellIndex() const
 
 
 template<class Gt, class Cb>
+const Foam::point& CGAL::indexedCell<Gt, Cb>::dual()
+{
+#ifdef CGAL_INEXACT
+    return reinterpret_cast<const Foam::point&>(this->circumcenter());
+#else
+    const typename Gt::Point_3& P = this->circumcenter();
+
+    return
+    (
+        CGAL::to_double(P.x()),
+        CGAL::to_double(P.y()),
+        CGAL::to_double(P.z())
+    );
+#endif
+}
+
+
+template<class Gt, class Cb>
 inline bool CGAL::indexedCell<Gt, Cb>::farCell() const
 {
     return index_ == ctFar;
@@ -112,10 +130,45 @@ inline bool CGAL::indexedCell<Gt, Cb>::real() const
 {
     return
     (
-        this->vertex(0)->real()
-     || this->vertex(1)->real()
-     || this->vertex(2)->real()
-     || this->vertex(3)->real()
+        (
+            this->vertex(0)->real()
+         || this->vertex(1)->real()
+         || this->vertex(2)->real()
+         || this->vertex(3)->real()
+        )
+        &&
+        !(
+            this->vertex(0)->farPoint()
+         || this->vertex(1)->farPoint()
+         || this->vertex(2)->farPoint()
+         || this->vertex(3)->farPoint()
+        )
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasFarPoint() const
+{
+    return
+    (
+        this->vertex(0)->farPoint()
+     || this->vertex(1)->farPoint()
+     || this->vertex(2)->farPoint()
+     || this->vertex(3)->farPoint()
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::hasInternalPoint() const
+{
+    return
+    (
+        this->vertex(0)->internalPoint()
+     || this->vertex(1)->internalPoint()
+     || this->vertex(2)->internalPoint()
+     || this->vertex(3)->internalPoint()
     );
 }
 
@@ -281,6 +334,19 @@ inline bool CGAL::indexedCell<Gt, Cb>::boundaryDualVertex() const
         || !this->vertex(2)->internalOrBoundaryPoint()
         || !this->vertex(3)->internalOrBoundaryPoint()
         )
+    );
+}
+
+
+template<class Gt, class Cb>
+inline bool CGAL::indexedCell<Gt, Cb>::nearProcBoundary() const
+{
+    return
+    (
+        this->vertex(0)->nearProcBoundary()
+     || this->vertex(1)->nearProcBoundary()
+     || this->vertex(2)->nearProcBoundary()
+     || this->vertex(3)->nearProcBoundary()
     );
 }
 

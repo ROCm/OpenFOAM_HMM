@@ -41,6 +41,11 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 {
     reconformationMode reconfMode = reconformationControl();
 
+    if (Pstream::parRun())
+    {
+        seedProcessorBoundarySurfaces(true);
+    }
+
     if (reconfMode == rmNone)
     {
         // Reinsert stored surface conformation
@@ -67,6 +72,16 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         // Do not store the surface conformation until after it has been
         // (potentially) redistributed.
         storeSurfaceConformation();
+    }
+
+    if (Pstream::parRun())
+    {
+        label nFarPoints = removeProcessorBoundarySeeds(true);
+
+        reduce(nFarPoints, sumOp<label>());
+
+        Info<< "    Removed " << nFarPoints
+            << " far points from the mesh." << endl;
     }
 
     // reportSurfaceConformationQuality();
@@ -140,12 +155,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     buildEdgeLocationTree(existingEdgeLocations);
     buildSurfacePtLocationTree(existingSurfacePtLocations);
 
-
-    // Initialise the edgeLocationTree
-    //buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
-
     label initialTotalHits = 0;
-
 
     // Surface protrusion conformation is done in two steps.
     // 1. the dual edges (of all internal vertices) can stretch to
@@ -382,7 +392,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
         (
             Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
             vit != finite_vertices_end();
-            vit++
+            ++vit
         )
         {
             // The initial surface conformation has already identified the
@@ -511,14 +521,18 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         timeCheck("Conformation iteration " + name(iterationNo));
 
-        // Update the parallel interface
-        buildParallelInterface
-        (
-            referralVertices,
-            receivedVertices,
-            false,
-            name(iterationNo)
-        );
+        // Only need to update the interface if there are surface/edge hits
+        if (totalHits > 0)
+        {
+            // Update the parallel interface
+            buildParallelInterface
+            (
+                referralVertices,
+                receivedVertices,
+                false,
+                name(iterationNo)
+            );
+        }
 
         iterationNo++;
 
@@ -563,8 +577,8 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
             continue;
         }
 
-        Foam::point dE0 = topoint(dual(fit->first));
-        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+        Foam::point dE0 = fit->first->dual();
+        Foam::point dE1 = fit->first->neighbor(fit->second)->dual();
 
         if (Pstream::parRun())
         {
@@ -631,8 +645,8 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
         // Construct the dual edge and search for intersections of the edge
         // with the surface
-        Foam::point dE0 = topoint(dual(fit->first));
-        Foam::point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+        Foam::point dE0 = fit->first->dual();
+        Foam::point dE1 = fit->first->neighbor(fit->second)->dual();
 
         pointIndexHit infoIntersection;
         label hitSurfaceIntersection = -1;
@@ -801,6 +815,144 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
 }
 
 
+Foam::label Foam::conformalVoronoiMesh::removeProcessorBoundarySeeds
+(
+    bool reinsertBoundPts
+)
+{
+    label nFarPoints = 0;
+
+
+
+    std::list<Vertex_handle> toRemove;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->farPoint())
+        {
+            //remove(vit);
+            toRemove.push_back(vit);
+            nFarPoints++;
+        }
+    }
+
+    // This function removes the points in the iterator range and then
+    // retriangulates.
+    timeCheck("Start Removing Seeded Points " + name(toRemove.size()));
+
+    remove_cluster(toRemove.begin(), toRemove.end());
+
+
+    // Need to do this to make sure the triangulation is well-behaved
+    if (reinsertBoundPts)
+    {
+        reinsertBoundingPoints();
+    }
+
+
+
+//    DynamicList<Foam::point> toAdd;
+//    DynamicList<label> indices;
+//    DynamicList<label> types;
+//
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (!vit->farPoint())
+//        {
+//            toAdd.append(topoint(vit->point()));
+//            indices.append(vit->index());
+//            types.append(vit->type());
+//
+//            nFarPoints++;
+//        }
+//    }
+//
+//    this->clear();
+//
+//    // Need to do this to make sure the triangulation is well-behaved
+//    if (reinsertBoundPts)
+//    {
+//        reinsertBoundingPoints();
+//    }
+//
+//    forAll(toAdd, pI)
+//    {
+//        insertPoint(toAdd[pI], indices[pI], types[pI]);
+//    }
+
+
+    timeCheck("End Removing Seeded Points");
+
+    return nFarPoints;
+}
+
+
+void Foam::conformalVoronoiMesh::seedProcessorBoundarySurfaces
+(
+    bool seedProcessors
+)
+{
+    //removeProcessorBoundarySeeds(false);
+
+    // Loop over processor patch faces and insert a point in the centre of the
+    // face
+    const fvMesh& mesh = decomposition_().mesh();
+    const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
+
+    DynamicList<Foam::point> pts;
+    DynamicList<label> indices;
+    DynamicList<label> types;
+
+    label nFarPoints = 0;
+
+    const scalar normalDistance = 5.0;
+    const scalar pert = 0.1*(rndGen_.scalar01() - 0.5);
+
+    forAll(bMesh, patchI)
+    {
+        const polyPatch& patch = bMesh[patchI];
+
+        if (!seedProcessors && isA<processorPolyPatch>(patch))
+        {
+            continue;
+        }
+
+        forAll(patch, faceI)
+        {
+            if (faceI % 1 == 0)
+            {
+                const face& f = patch[faceI];
+
+                pts.append
+                (
+                    f.centre(mesh.points())
+                  + pert*normalDistance*f.normal(mesh.points())
+                );
+                indices.append(nFarPoints++);
+                types.append(Vb::vtFar);
+            }
+        }
+    }
+
+    insertPoints(pts, indices, types, false);
+
+    reduce(nFarPoints, sumOp<label>());
+
+    Info<< "    Inserted " << nFarPoints
+        << " far points into the mesh." << endl;
+}
+
+
 void Foam::conformalVoronoiMesh::buildParallelInterface
 (
     List<labelHashSet>& referralVertices,
@@ -835,22 +987,88 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
         timeCheck("After buildParallelInterfaceAll");
     }
 
-    if (initialEdgeReferral)
-    {
-        // Used as an initial pass to localise the vertex referring - find
-        // vertices whose dual edges pierce nearby processor volumes and refer
-        // them to establish a sensible boundary interface region before
-        // running a circumsphere assessment.
 
-        buildParallelInterfaceIntersection
-        (
-            referralVertices,
-            receivedVertices,
-            outputName
-        );
+    // Reject points that are not near the boundary from the subsequent
+    // searches
 
-        timeCheck("After buildParallelInterfaceIntersection");
-    }
+//    label nearProcCount = 0;
+//    label notNearProcCount = 0;
+//    boundBox quickRejectionBox(decomposition_().procBounds());
+//
+////    Pout<< "Processor boundBox: " << quickRejectionBox << endl;
+//
+//    quickRejectionBox.inflate(-0.1);
+//
+//    OFstream str("rejectionBox_" + name(Pstream::myProcNo()) + ".obj");
+//
+//    meshTools::writeOBJ
+//    (
+//        str,
+//        boundBox::faces(),
+//        quickRejectionBox.points()
+//    );
+//
+//    Pout<< "Inflated rejection boundBox: " << quickRejectionBox << endl;
+
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        vit++
+//    )
+//    {
+//        if (vit->real() && !vit->nearProcBoundary())
+//        {
+//            const Foam::point& pt = topoint(vit->point());
+//            const scalar range = targetCellSize(pt);
+//
+////            if
+////            (
+////                decomposition_().overlapsThisProcessor
+////                (
+////                    pt,
+////                    range
+////                )
+////            )
+//            if (!quickRejectionBox.contains(pt))
+//            {
+//                vit->setNearProcBoundary();
+//                nearProcCount++;
+//            }
+//            else
+//            {
+//                //vit->setNearProcBoundary();
+//                notNearProcCount++;
+//            }
+//        }
+//    }
+//
+//    reduce(nearProcCount, sumOp<label>());
+//    reduce(notNearProcCount, sumOp<label>());
+//
+//    timeCheck
+//    (
+//        "End of potential intersection search. "
+//      + name(nearProcCount) + " are near a processor boundary. "
+//      + name(notNearProcCount) + " are not."
+//    );
+
+//    if (initialEdgeReferral)
+//    {
+//        // Used as an initial pass to localise the vertex referring - find
+//        // vertices whose dual edges pierce nearby processor volumes and refer
+//        // them to establish a sensible boundary interface region before
+//        // running a circumsphere assessment.
+//
+//        buildParallelInterfaceIntersection
+//        (
+//            referralVertices,
+//            receivedVertices,
+//            outputName
+//        );
+//
+//        timeCheck("After buildParallelInterfaceIntersection");
+//    }
 
     buildParallelInterfaceInfluence
     (
@@ -860,6 +1078,56 @@ void Foam::conformalVoronoiMesh::buildParallelInterface
     );
 
     timeCheck("After buildParallelInterface");
+
+    // Check all referred vertices are actually used on the processor.
+    label nUnusedReferred = numberOfUnusedReferredPoints();
+
+    reduce(nUnusedReferred, sumOp<label>());
+
+    Info<< "    Number of referred points that are not used : "
+        << nUnusedReferred << " (approximate)" << endl;
+}
+
+
+Foam::label Foam::conformalVoronoiMesh::numberOfUnusedReferredPoints() const
+{
+    label nUnusedPoints = 0;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->referred())
+        {
+            std::list<Vertex_handle> adjVertices;
+            finite_adjacent_vertices(vit, std::back_inserter(adjVertices));
+
+            bool isUsed = false;
+
+            for
+            (
+                std::list<Vertex_handle>::iterator adjVit = adjVertices.begin();
+                adjVit != adjVertices.end();
+                ++adjVit
+            )
+            {
+                if ((*adjVit)->real())
+                {
+                    isUsed = true;
+                }
+            }
+
+            if (!isUsed)
+            {
+                nUnusedPoints++;
+            }
+        }
+    }
+
+    return nUnusedPoints;
 }
 
 
@@ -880,7 +1148,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceAll
     (
         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
         vit != finite_vertices_end();
-        vit++
+        ++vit
     )
     {
         if (!vit->farPoint())
@@ -966,7 +1234,10 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
 
         // If either Delaunay cell at the end of the Dual edge is infinite,
         // skip.
-        if (!is_infinite(c1) && !is_infinite(c2))
+        if
+        (
+            !is_infinite(c1) && !is_infinite(c2)
+        )
         {
             // The Delaunauy cells at either end of the dual edge need to be
             // real, i.e. all vertices form part of the internal or boundary
@@ -977,12 +1248,14 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
              && c2->internalOrBoundaryDualVertex()
             )
             {
-                Foam::point a = topoint(dual(c1));
-                Foam::point b = topoint(dual(c2));
+                const Foam::point& a = c1->dual();
+                const Foam::point& b = c2->dual();
 
                 // Only if the dual edge cuts the boundary of this processor is
                 // it going to be counted.
-                if (decomposition_().findLineAny(a, b).hit())
+                pointIndexHit info = decomposition_().findLineAny(a, b);
+
+                if (info.hit())
                 {
                     dE0.append(a);
                     dE1.append(b);
@@ -995,10 +1268,21 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceIntersection
         fIOuter++;
     }
 
+    reduce(fIOuter, sumOp<label>());
+
+    timeCheck
+    (
+        "End of actual intersection search over "
+      + name(fIOuter)
+      + " faces."
+    );
+
     // Preform intersections in both directions, as there is no sense
     // associated with the Dual edge
     List<List<pointIndexHit> > intersectionForward(intersectsProc(dE0, dE1));
     List<List<pointIndexHit> > intersectionReverse(intersectsProc(dE1, dE0));
+
+    timeCheck("End of find processor intersection");
 
     // Reset counter
     fIOuter = 0;
@@ -1175,12 +1459,57 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     DynamicList<Foam::point> circumcentre;
     DynamicList<scalar> circumradiusSqr;
 
-    PackedBoolList testCellInfluence(number_of_cells(), false);
 
     // Index outer (all) Delaunauy cells for whether they are potential
     // overlaps, index (inner) the list of tests an results.
     label cIInner = 0;
     label cIOuter = 0;
+
+
+    label cellIndexCount = 0;
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        cit->cellIndex() = cellIndexCount++;
+    }
+
+    timeCheck("End of cell Indexing");
+
+    labelList testCellInfluence(number_of_cells(), 0);
+
+    label nQuickRejections = 0;
+
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        const Foam::point& cc = cit->dual();
+
+        const scalar crSqr = magSqr(cc - topoint(cit->vertex(0)->point()));
+
+        if
+        (
+            decomposition_().tree().quickCircumsphereRejection
+            (
+                cc,
+                crSqr,
+                decomposition_().octreeNearestDistances()
+            )
+        )
+        {
+            nQuickRejections++;
+            testCellInfluence[cit->cellIndex()] = -1;
+        }
+    }
+
+    timeCheck("End of octreeNearestDistances calculation");
 
     for
     (
@@ -1196,14 +1525,15 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 
         // The Delaunay cells to assess have to be real, i.e. all vertices form
         // part of the internal or any part of the boundary definition
-        if (cit->real())
+        if
+        (
+            (testCellInfluence[cit->cellIndex()] == 0)
+         && (cit->real() || cit->hasFarPoint())
+        )
         {
-            Foam::point cc(topoint(dual(cit)));
+            const Foam::point& cc = cit->dual();
 
-            scalar crSqr
-            (
-                magSqr(cc - topoint(cit->vertex(0)->point()))
-            );
+            const scalar crSqr = magSqr(cc - topoint(cit->vertex(0)->point()));
 
             // Only if the circumsphere overlaps the boundary of this processor
             // is there a chance of it overlapping others
@@ -1212,7 +1542,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
                 circumcentre.append(cc);
                 circumradiusSqr.append(crSqr);
 
-                testCellInfluence[cIOuter] = true;
+                testCellInfluence[cit->cellIndex()] = 1;
             }
         }
 
@@ -1220,6 +1550,9 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     }
 
     timeCheck("End of testing cell influence");
+
+    Pout<< "Number of quick rejections = " << nQuickRejections << endl;
+    Pout<< "Number of influences = " << circumcentre.size() << endl;
 
     // Increasing the circumspheres to increase the overlaps and compensate for
     // floating point errors missing some referrals
@@ -1242,7 +1575,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     )
     {
         // Pre-tested circumsphere potential influence
-        if (testCellInfluence[cIOuter])
+        if (testCellInfluence[cit->cellIndex()] == 1)
         {
             const labelList& citOverlaps = circumsphereOverlaps[cIInner];
 
@@ -1288,6 +1621,70 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 
         cIOuter++;
     }
+
+
+//    label nFarPoints = removeProcessorBoundarySeeds(true);
+//
+//    reduce(nFarPoints, sumOp<label>());
+//
+//    Info<< "    Removed " << nFarPoints
+//        << " far points from the mesh." << endl;
+
+
+//    seedProcessorBoundarySurfaces(false);
+
+//    cIInner = 0;
+//    cIOuter = 0;
+
+
+    // Relying on the order of iteration of cells being the same as before
+//    for
+//    (
+//        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+//        cit != finite_cells_end();
+//        ++cit
+//    )
+//    {
+//        // Pre-tested circumsphere potential influence
+//        if (testCellInfluence[cIOuter])
+//        {
+//            const labelList& citOverlaps = circumsphereOverlaps[cIInner];
+//
+//            forAll(citOverlaps, cOI)
+//            {
+//                label procI = citOverlaps[cOI];
+//
+//                recursiveCircumsphereSearch
+//                (
+//                    cit,
+//                    procI,
+//                    referralVertices,
+//                    checkedCells,
+//                    parallelInfluencePoints,
+//                    parallelInfluenceIndices,
+//                    targetProcessor
+//                );
+//            }
+//
+//            cIInner++;
+//        }
+//
+//        cIOuter++;
+//    }
+
+//    for
+//    (
+//        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+//        vit != finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (vit->referred())
+//        {
+//            //Pout << "REMOVE: " << topoint(vit->point()) << endl;
+//            remove(vit);
+//        }
+//    }
 
     referVertices
     (
@@ -1344,6 +1741,8 @@ void Foam::conformalVoronoiMesh::referVertices
         );
     }
 
+    timeCheck("Start of referVertices " + stageName + " insertion.");
+
     for (label procI = 0; procI < Pstream::nProcs(); procI++)
     {
         const labelList& constructMap = pointMap.constructMap()[procI];
@@ -1397,7 +1796,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     hitSurfaceLargest = -1;
 
     std::list<Facet> facets;
-    incident_facets(vit, std::back_inserter(facets));
+    finite_incident_facets(vit, std::back_inserter(facets));
 
     const Foam::point vert = topoint(vit->point());
 
@@ -1410,52 +1809,45 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
         ++fit
     )
     {
-        if
-        (
-            !is_infinite(fit->first)
-         && !is_infinite(fit->first->neighbor(fit->second))
-        )
-        {
-            const Foam::point edgeMid =
-                0.5
-               *(
-                    topoint(dual(fit->first))
-                  + topoint(dual(fit->first->neighbor(fit->second)))
-                );
-
-            pointIndexHit surfHit;
-            label hitSurface;
-
-            geometryToConformTo_.findSurfaceAnyIntersection
-            (
-                vert,
-                edgeMid,
-                surfHit,
-                hitSurface
+        const Foam::point edgeMid =
+            0.5
+           *(
+                fit->first->dual()
+              + fit->first->neighbor(fit->second)->dual()
             );
 
-            if (surfHit.hit())
+        pointIndexHit surfHit;
+        label hitSurface;
+
+        geometryToConformTo_.findSurfaceAnyIntersection
+        (
+            vert,
+            edgeMid,
+            surfHit,
+            hitSurface
+        );
+
+        if (surfHit.hit())
+        {
+            vectorField norm(1);
+
+            allGeometry_[hitSurface].getNormal
+            (
+                List<pointIndexHit>(1, surfHit),
+                norm
+            );
+
+            const vector& n = norm[0];
+
+            const scalar normalProtrusionDistance =
+                (edgeMid - surfHit.hitPoint()) & n;
+
+            if (normalProtrusionDistance > maxProtrusionDistance)
             {
-                vectorField norm(1);
+                surfHitLargest = surfHit;
+                hitSurfaceLargest = hitSurface;
 
-                allGeometry_[hitSurface].getNormal
-                (
-                    List<pointIndexHit>(1, surfHit),
-                    norm
-                );
-
-                const vector& n = norm[0];
-
-                const scalar normalProtrusionDistance =
-                    (edgeMid - surfHit.hitPoint()) & n;
-
-                if (normalProtrusionDistance > maxProtrusionDistance)
-                {
-                    surfHitLargest = surfHit;
-                    hitSurfaceLargest = hitSurface;
-
-                    maxProtrusionDistance = normalProtrusionDistance;
-                }
+                maxProtrusionDistance = normalProtrusionDistance;
             }
         }
     }
@@ -1489,9 +1881,9 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
     hitSurfaceLargest = -1;
 
     std::list<Facet> facets;
-    incident_facets(vit, std::back_inserter(facets));
+    finite_incident_facets(vit, std::back_inserter(facets));
 
-    Foam::point vert(topoint(vit->point()));
+    const Foam::point vert = topoint(vit->point());
 
     scalar minIncursionDistance = -maxSurfaceProtrusion(vert);
 
@@ -1502,57 +1894,50 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceIncursion
         ++fit
     )
     {
-        if
-        (
-            !is_infinite(fit->first)
-         && !is_infinite(fit->first->neighbor(fit->second))
-        )
-        {
-            Foam::point edgeMid =
-                0.5
-               *(
-                    topoint(dual(fit->first))
-                  + topoint(dual(fit->first->neighbor(fit->second)))
-                );
-
-            pointIndexHit surfHit;
-            label hitSurface;
-
-            geometryToConformTo_.findSurfaceAnyIntersection
-            (
-                vert,
-                edgeMid,
-                surfHit,
-                hitSurface
+        const Foam::point edgeMid =
+            0.5
+           *(
+                fit->first->dual()
+              + fit->first->neighbor(fit->second)->dual()
             );
 
-            if (surfHit.hit())
+        pointIndexHit surfHit;
+        label hitSurface;
+
+        geometryToConformTo_.findSurfaceAnyIntersection
+        (
+            vert,
+            edgeMid,
+            surfHit,
+            hitSurface
+        );
+
+        if (surfHit.hit())
+        {
+            vectorField norm(1);
+
+            allGeometry_[hitSurface].getNormal
+            (
+                List<pointIndexHit>(1, surfHit),
+                norm
+            );
+
+            const vector& n = norm[0];
+
+            scalar normalIncursionDistance =
+                (edgeMid - surfHit.hitPoint()) & n;
+
+            if (normalIncursionDistance < minIncursionDistance)
             {
-                vectorField norm(1);
+                surfHitLargest = surfHit;
+                hitSurfaceLargest = hitSurface;
 
-                allGeometry_[hitSurface].getNormal
-                (
-                    List<pointIndexHit>(1, surfHit),
-                    norm
-                );
+                minIncursionDistance = normalIncursionDistance;
 
-                const vector& n = norm[0];
-
-                scalar normalIncursionDistance =
-                    (edgeMid - surfHit.hitPoint()) & n;
-
-                if (normalIncursionDistance < minIncursionDistance)
-                {
-                    surfHitLargest = surfHit;
-                    hitSurfaceLargest = hitSurface;
-
-                    minIncursionDistance = normalIncursionDistance;
-
-                    // Info<< nl << "# Incursion: " << endl;
-                    // meshTools::writeOBJ(Info, vert);
-                    // meshTools::writeOBJ(Info, edgeMid);
-                    // Info<< "l Na Nb" << endl;
-                }
+                // Info<< nl << "# Incursion: " << endl;
+                // meshTools::writeOBJ(Info, vert);
+                // meshTools::writeOBJ(Info, edgeMid);
+                // Info<< "l Na Nb" << endl;
             }
         }
     }
@@ -1948,6 +2333,35 @@ bool Foam::conformalVoronoiMesh::appendToEdgeLocationTree
 }
 
 
+Foam::List<Foam::pointIndexHit>
+Foam::conformalVoronoiMesh::nearestFeatureEdgeLocations
+(
+    const Foam::point& pt
+) const
+{
+    const scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
+
+    labelList elems
+        = edgeLocationTreePtr_().findSphere(pt, exclusionRangeSqr);
+
+    DynamicList<pointIndexHit> dynPointHit;
+
+    forAll(elems, elemI)
+    {
+        label index = elems[elemI];
+
+        const Foam::point& pointI
+            = edgeLocationTreePtr_().shapes().shapePoints()[index];
+
+        pointIndexHit nearHit(true, pointI, index);
+
+        dynPointHit.append(nearHit);
+    }
+
+    return dynPointHit;
+}
+
+
 bool Foam::conformalVoronoiMesh::pointIsNearFeatureEdgeLocation
 (
     const Foam::point& pt
@@ -2009,103 +2423,77 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
     DynamicList<Foam::point>& existingEdgeLocations
 ) const
 {
-    const Foam::point pt = pHit.hitPoint();
+    Foam::point pt = pHit.hitPoint();
 
     const scalar exclusionRangeSqr = featureEdgeExclusionDistanceSqr(pt);
 
-    pointIndexHit info;
+    bool closeToFeatureEdge = pointIsNearFeatureEdgeLocation(pt);
 
-    bool closeToFeatureEdge = pointIsNearFeatureEdgeLocation(pt, info);
+    if (closeToFeatureEdge)
+    {
+        List<pointIndexHit> nearHits = nearestFeatureEdgeLocations(pt);
+
+        forAll(nearHits, elemI)
+        {
+            pointIndexHit& info = nearHits[elemI];
+
+            // Check if the edge location that the new edge location is near to
+            // "might" be on a different edge. If so, add it anyway.
+            pointIndexHit edgeHit;
+            label featureHit = -1;
+
+            geometryToConformTo_.findEdgeNearest
+            (
+                pt,
+                exclusionRangeSqr,
+                edgeHit,
+                featureHit
+            );
+
+            const extendedFeatureEdgeMesh& eMesh
+                = geometryToConformTo_.features()[featureHit];
+
+            const vector& edgeDir = eMesh.edgeDirections()[edgeHit.index()];
+
+            const vector lineBetweenPoints = pt - info.hitPoint();
+
+            const scalar cosAngle
+                = vectorTools::cosPhi(edgeDir, lineBetweenPoints);
+
+            // Allow the point to be added if it is almost at right angles to
+            // the other point. Also check it is not the same point.
+    //        Info<< cosAngle<< " "
+    //            << radToDeg(acos(cosAngle)) << " "
+    //            << searchConeAngle << " "
+    //            << radToDeg(acos(searchConeAngle)) << endl;
+
+            if
+            (
+                mag(cosAngle) < searchConeAngle
+             && (
+                    mag(lineBetweenPoints)
+                  > cvMeshControls().pointPairDistanceCoeff()*targetCellSize(pt)
+                )
+            )
+            {
+                pt = edgeHit.hitPoint();
+                pHit.setPoint(pt);
+                closeToFeatureEdge = false;
+            }
+            else
+            {
+                closeToFeatureEdge = true;
+                break;
+            }
+        }
+    }
 
     if (!closeToFeatureEdge)
     {
         appendToEdgeLocationTree(pt, existingEdgeLocations);
     }
-    else
-    {
-        // Check if the edge location that the new edge location is near to
-        // "might" be on a different edge. If so, add it anyway.
-        pointIndexHit edgeHit;
-        label featureHit = -1;
-
-        geometryToConformTo_.findEdgeNearest
-        (
-            pt,
-            exclusionRangeSqr,
-            edgeHit,
-            featureHit
-        );
-
-        const extendedFeatureEdgeMesh& eMesh
-            = geometryToConformTo_.features()[featureHit];
-
-        const vector& edgeDir = eMesh.edgeDirections()[edgeHit.index()];
-
-        const vector lineBetweenPoints = pt - info.hitPoint();
-
-        const scalar cosAngle = vectorTools::cosPhi(edgeDir, lineBetweenPoints);
-
-        // Allow the point to be added if it is almost at right angles to the
-        // other point. Also check it is not the same point.
-//        Info<< cosAngle<< " "
-//            << radToDeg(acos(cosAngle)) << " "
-//            << searchConeAngle << " "
-//            << radToDeg(acos(searchConeAngle)) << endl;
-        if
-        (
-            mag(cosAngle) < searchConeAngle
-         && mag(lineBetweenPoints) > SMALL
-        )
-        {
-            closeToFeatureEdge = false;
-            appendToEdgeLocationTree(pt, existingEdgeLocations);
-        }
-    }
 
     return closeToFeatureEdge;
-
-    // Searching for the nearest point in existingEdgeLocations using the
-    // indexedOctree
-
-    // Average the points...
-//    if (info.hit())
-//    {
-//        Foam::point newPt = 0.5*(info.hitPoint() + pt);
-//
-//        pHit.setPoint(newPt);
-//
-//        //boolList toRemove(existingEdgeLocations.size(), false);
-//
-//        forAll(existingEdgeLocations, pI)
-//        {
-//            if (pI == info.index())
-//            {
-//                //toRemove[pI] = true;
-//                edgeLocationTree.remove(pI);
-//            }
-//        }
-////
-////        pointField newExistingEdgeLocations(existingEdgeLocations.size());
-////
-////        label count = 0;
-////        forAll(existingEdgeLocations, pI)
-////        {
-////            if (toRemove[pI] == false)
-////            {
-////                newExistingEdgeLocations[count++] =
-////                    existingEdgeLocations[pI];
-////            }
-////        }
-////
-////        newExistingEdgeLocations.resize(count);
-////
-////        existingEdgeLocations = newExistingEdgeLocations;
-////
-////        existingEdgeLocations.append(newPt);
-//
-//        return !info.hit();
-//    }
-
 }
 
 
@@ -2265,12 +2653,6 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
             featuresHit
         );
 
-        // Gather edge locations but do not add them to newEdgeLocations inside
-        // the loop as they will prevent nearby edge locations of different
-        // types being conformed to.
-
-        DynamicList<Foam::point> currentEdgeLocations;
-
         forAll(edHitsByFeature, i)
         {
             const label featureHit = featuresHit[i];
@@ -2281,39 +2663,43 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
             {
                 pointIndexHit& edHit = edHits[eHitI];
 
-                if (!nearFeaturePt(edHit.hitPoint()) && keepSurfacePoint)
+                if (edHit.hit())
                 {
-                    if
-                    (
-                        magSqr(edHit.hitPoint() - surfHitI.hitPoint())
-                      < surfacePtReplaceDistCoeffSqr*cellSizeSqr
-                    )
+                    if (!nearFeaturePt(edHit.hitPoint()))
                     {
-                        // If the point is within a given distance of a feature
-                        // edge, give control to edge control points instead,
-                        // this will prevent "pits" forming.
-
-                        keepSurfacePoint = false;
-
-                        // NEED TO REMOVE FROM THE SURFACE TREE...
-                    }
-
-                    if
-                    (
-                        !nearFeatureEdgeLocation
+                        if
                         (
-                            edHit,
-                            existingEdgeLocations
+                            magSqr(edHit.hitPoint() - surfHitI.hitPoint())
+                          < surfacePtReplaceDistCoeffSqr*cellSizeSqr
                         )
-                    )
-                    {
-                        // Do not place edge control points too close to a
-                        // feature point or existing edge control points
+                        {
+                            // If the point is within a given distance of a
+                            // feature edge, give control to edge control points
+                            // instead, this will prevent "pits" forming.
 
-                        featureEdgeHits.append(edHit);
-                        featureEdgeFeaturesHit.append(featureHit);
+                            keepSurfacePoint = false;
 
-                        currentEdgeLocations.append(edHit.hitPoint());
+                            // NEED TO REMOVE FROM THE SURFACE TREE...
+                            surfacePtLocationTreePtr_().remove
+                            (
+                                existingSurfacePtLocations.size()
+                            );
+                        }
+
+                        if
+                        (
+                            !nearFeatureEdgeLocation
+                            (
+                                edHit,
+                                existingEdgeLocations
+                            )
+                        )
+                        {
+                            // Do not place edge control points too close to a
+                            // feature point or existing edge control points
+                            featureEdgeHits.append(edHit);
+                            featureEdgeFeaturesHit.append(featureHit);
+                        }
                     }
                 }
             }
@@ -2322,7 +2708,6 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
         if (keepSurfacePoint)
         {
             surfaceHits.append(surfHitI);
-
             hitSurfaces.append(hitSurfaceI);
         }
     }

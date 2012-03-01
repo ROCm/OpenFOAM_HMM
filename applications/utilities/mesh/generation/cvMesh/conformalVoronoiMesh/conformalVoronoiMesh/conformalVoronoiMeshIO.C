@@ -125,7 +125,7 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
     os  << "# cell index: " << label(c->cellIndex()) << endl;
 
     os  << "# circumradius "
-        << mag(topoint(dual(c)) - topoint(c->vertex(0)->point()))
+        << mag(c->dual() - topoint(c->vertex(0)->point()))
         << endl;
 
     for (int i = 0; i < 4; i++)
@@ -144,7 +144,7 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
 
     os  << "# cicumcentre " << endl;
 
-    meshTools::writeOBJ(os, topoint(dual(c)));
+    meshTools::writeOBJ(os, c->dual());
 
     os  << "l " << 1 + offset << " " << 5 + offset << endl;
 }
@@ -167,7 +167,7 @@ void Foam::conformalVoronoiMesh::writePoints
         ++vit
     )
     {
-        if (!internalOnly || vit->internalOrBoundaryPoint())
+        if (!internalOnly || vit->internalPoint())
         {
             meshTools::writeOBJ(str, topoint(vit->point()));
         }
@@ -241,7 +241,7 @@ void Foam::conformalVoronoiMesh::writeProcessorInterface
     {
         if (!cit->farCell())
         {
-            points[cit->cellIndex()] = topoint(dual(cit));
+            points[cit->cellIndex()] = cit->dual();
         }
     }
 

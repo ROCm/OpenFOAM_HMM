@@ -546,6 +546,49 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     }
 
     featurePointNormals_ = featurePointNormals;
+
+
+    // Create featurePointEdges_
+    // For each feature point, stores a list of edges which are arranged in
+    // order according to their connectivity
+
+//    featurePointEdges_.setSize(nonFeatureStart_);
+//
+//    Info<< sFeatEds.size() << " " << surf.pointEdges().size() << " "
+//        << edges().size() << endl;
+//
+//    forAll(sFeatEds, eI)
+//    {
+//        Info<< "Edge " << eI << " " << sFeatEds[eI] << " "
+//            << edges()[eI] << endl;
+//    }
+//
+//    const edgeList& edges = eds;
+//
+//    for (label i = 0; i < nonFeatureStart_; i++)
+//    {
+//        const labelList& ptEds = surf.pointEdges()[i];
+//
+//        DynamicList<label> tmpFtEdges;
+//
+//        forAll(ptEds, eI)
+//        {
+//            const label edgeI = ptEds[eI];
+//            const edge& e = sFeatEds[edgeI];
+//
+//            Info<< "Edges: " << edgeI << " " << e << endl;
+//
+//            forAll(sFeatEds, fEdgeI)
+//            {
+//                if (edges[fEdgeI] == e)
+//                {
+//                    tmpFtEdges.append(fEdgeI);
+//                }
+//            }
+//        }
+//
+//        featurePointEdges_[i] = tmpFtEdges;
+//    }
 }
 
 
@@ -821,7 +864,7 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
 
             if (!hitPoint.hit())
             {
-                nearHit = pointIndexHit(true, hitPoint.missPoint(), hitIndex);
+                nearHit = pointIndexHit(false, hitPoint.missPoint(), hitIndex);
             }
             else
             {

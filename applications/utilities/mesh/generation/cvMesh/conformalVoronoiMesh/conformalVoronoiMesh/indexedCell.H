@@ -51,6 +51,7 @@ SourceFiles
 #include "Swap.H"
 #include "InfoProxy.H"
 #include "tetCell.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -154,6 +155,8 @@ public:
 
         inline int cellIndex() const;
 
+        inline const Foam::point& dual();
+
         inline bool farCell() const;
 
         inline int& filterCount();
@@ -162,6 +165,11 @@ public:
 
         //- Is the Delaunay cell real, i.e. any real vertex
         inline bool real() const;
+
+        //- Does the Delaunay cell have a far point
+        inline bool hasFarPoint() const;
+
+        inline bool hasInternalPoint() const;
 
         //- Does the Dual vertex form part of a processor patch
         inline bool parallelDualVertex() const;
@@ -189,6 +197,8 @@ public:
         //- A dual vertex on the boundary will result from a Delaunay cell with
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
+
+        inline bool nearProcBoundary() const;
 
 
     // Info

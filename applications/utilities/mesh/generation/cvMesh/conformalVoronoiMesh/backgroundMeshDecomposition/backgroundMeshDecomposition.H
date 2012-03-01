@@ -111,6 +111,8 @@ class backgroundMeshDecomposition
         //- Search tree for the boundaryFaces_ patch
         autoPtr<indexedOctree<treeDataBPatch> > bFTreePtr_;
 
+        List<scalar> octreeNearestDistances_;
+
         //- The bounds of all background meshes on all processors
         treeBoundBoxList allBackgroundMeshBounds_;
 
@@ -225,16 +227,16 @@ public:
         //- Are the given positions inside the domain of this decomposition
         boolList positionOnThisProcessor(const List<point>& pts) const;
 
-        //- Does the given box overlap the faces of the bounday of this
+        //- Does the given box overlap the faces of the boundary of this
         //  processor
         bool overlapsThisProcessor(const treeBoundBox& box) const;
 
-        //- Does the given sphere overlap the faces of the bounday of this
+        //- Does the given sphere overlap the faces of the boundary of this
         //  processor
         bool overlapsThisProcessor
         (
             const point& centre,
-            scalar radiusSqr
+            const scalar radiusSqr
         ) const;
 
         //- Find nearest intersection of line between start and end, (exposing
@@ -288,6 +290,12 @@ public:
 
             //- Return access to the underlying mesh
             inline const fvMesh& mesh() const;
+
+            //- Return access to the underlying tree
+            inline const indexedOctree<treeDataBPatch>& tree() const;
+
+            //- Return access to the nearest distance of the octree nodes
+            inline const List<scalar>& octreeNearestDistances() const;
 
             //- Return the boundBox of this processor
             inline const treeBoundBox& procBounds() const;
