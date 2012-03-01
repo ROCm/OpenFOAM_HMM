@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -229,9 +229,13 @@ class motionSmoother
         //- Get points used by given faces
         labelHashSet getPoints(const labelHashSet&) const;
 
+        //- Calculate per-edge weight
+        tmp<scalarField> calcEdgeWeights(const pointField&) const;
+
         //- explicit smoothing and min on all affected internal points
         void minSmooth
         (
+            const scalarField& edgeWeights,
             const PackedBoolList& isAffectedPoint,
             const pointScalarField& fld,
             pointScalarField& newFld
@@ -240,6 +244,7 @@ class motionSmoother
         //- same but only on selected points (usually patch points)
         void minSmooth
         (
+            const scalarField& edgeWeights,
             const PackedBoolList& isAffectedPoint,
             const labelList& meshPoints,
             const pointScalarField& fld,
@@ -257,6 +262,24 @@ class motionSmoother
         //- As above but points have to be in meshPoints as well
         //  (usually to scale patch points)
         void scaleField
+        (
+            const labelList& meshPoints,
+            const labelHashSet& pointLabels,
+            const scalar scale,
+            pointScalarField&
+        ) const;
+
+        //- Lower on internal points
+        void subtractField
+        (
+            const labelHashSet& pointLabels,
+            const scalar f,
+            pointScalarField&
+        ) const;
+
+        //- As above but points have to be in meshPoints as well
+        //  (usually to scale patch points)
+        void subtractField
         (
             const labelList& meshPoints,
             const labelHashSet& pointLabels,
