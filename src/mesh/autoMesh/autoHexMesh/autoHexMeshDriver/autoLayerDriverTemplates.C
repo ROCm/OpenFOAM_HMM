@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,8 @@ void Foam::autoLayerDriver::averageNeighbours
     Field<Type>& average
 )
 {
+    const pointField& pts = mesh.points();
+
     average = pTraits<Type>::zero;
 
     forAll(edges, edgeI)
@@ -49,7 +51,18 @@ void Foam::autoLayerDriver::averageNeighbours
         {
             const edge& e = edges[edgeI];
             //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight =  1.0;
+            //scalar eWeight =  1.0;
+            scalar eMag = max
+            (
+                VSMALL,
+                mag
+                (
+                    pts[meshPoints[e[1]]]
+                  - pts[meshPoints[e[0]]]
+                )
+            );
+            scalar eWeight = 1.0/eMag;
+
             label v0 = e[0];
             label v1 = e[1];
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,8 @@ void Foam::autoLayerDriver::sumWeights
     scalarField& invSumWeight
 ) const
 {
+    const pointField& pts = meshRefiner_.mesh().points();
+
     invSumWeight = 0;
 
     forAll(edges, edgeI)
@@ -57,7 +59,18 @@ void Foam::autoLayerDriver::sumWeights
         {
             const edge& e = edges[edgeI];
             //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight = 1.0;
+            //scalar eWeight = 1.0;
+
+            scalar eMag = max
+            (
+                VSMALL,
+                mag
+                (
+                    pts[meshPoints[e[1]]]
+                  - pts[meshPoints[e[0]]]
+                )
+            );
+            scalar eWeight = 1.0/eMag;
 
             invSumWeight[e[0]] += eWeight;
             invSumWeight[e[1]] += eWeight;
@@ -799,6 +812,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                 // Both end points of edge have very different nearest wall
                 // point. Mark both points as medial axis points.
                 const edge& e = edges[edgeI];
+                const point eMid = e.centre(points);
 
                 forAll(e, ep)
                 {
@@ -811,8 +825,8 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                         (
                             pointData
                             (
-                                points[pointI],
-                                0.0,
+                                eMid,   //points[pointI],
+                                magSqr(points[pointI]-eMid),    //0.0,
                                 pointI,         // passive data
                                 vector::zero    // passive data
                             )
