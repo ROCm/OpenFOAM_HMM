@@ -1,7 +1,7 @@
     if (packingLimiter)
     {
         // Calculating exceeding volume fractions
-        volScalarField alpha1Ex(max(alpha1 - alpha1Max, scalar(0)));
+        volScalarField alpha1Ex(max(alpha1 - alphaMax, scalar(0)));
 
         // Finding neighbouring cells of the whole domain
         labelListList neighbour = mesh.cellCells();

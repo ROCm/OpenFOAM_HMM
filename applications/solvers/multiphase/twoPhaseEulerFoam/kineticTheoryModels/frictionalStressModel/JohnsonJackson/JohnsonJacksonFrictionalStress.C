@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,8 +64,8 @@ Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::
 frictionalPressure
 (
     const volScalarField& alpha1,
-    const dimensionedScalar& alpha1MinFriction,
-    const dimensionedScalar& alpha1Max,
+    const dimensionedScalar& alphaMinFriction,
+    const dimensionedScalar& alphaMax,
     const dimensionedScalar& Fr,
     const dimensionedScalar& eta,
     const dimensionedScalar& p
@@ -73,8 +73,8 @@ frictionalPressure
 {
 
     return
-        Fr*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta)
-       /pow(max(alpha1Max - alpha1, scalar(5.0e-2)), p);
+        Fr*pow(max(alpha1 - alphaMinFriction, scalar(0)), eta)
+       /pow(max(alphaMax - alpha1, scalar(5.0e-2)), p);
 }
 
 
@@ -82,8 +82,8 @@ Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::
 frictionalPressurePrime
 (
     const volScalarField& alpha1,
-    const dimensionedScalar& alpha1MinFriction,
-    const dimensionedScalar& alpha1Max,
+    const dimensionedScalar& alphaMinFriction,
+    const dimensionedScalar& alphaMax,
     const dimensionedScalar& Fr,
     const dimensionedScalar& eta,
     const dimensionedScalar& p
@@ -91,17 +91,17 @@ frictionalPressurePrime
 {
     return Fr*
     (
-        eta*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta - 1.0)
-       *(alpha1Max-alpha1)
-      + p*pow(max(alpha1 - alpha1MinFriction, scalar(0)), eta)
-    )/pow(max(alpha1Max - alpha1, scalar(5.0e-2)), p + 1.0);
+        eta*pow(max(alpha1 - alphaMinFriction, scalar(0)), eta - 1.0)
+       *(alphaMax-alpha1)
+      + p*pow(max(alpha1 - alphaMinFriction, scalar(0)), eta)
+    )/pow(max(alphaMax - alpha1, scalar(5.0e-2)), p + 1.0);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::JohnsonJacksonFrictionalStress::muf
 (
     const volScalarField& alpha1,
-    const dimensionedScalar& alpha1Max,
+    const dimensionedScalar& alphaMax,
     const volScalarField& pf,
     const volSymmTensorField& D,
     const dimensionedScalar& phi

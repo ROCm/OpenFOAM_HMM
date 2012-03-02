@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,8 +99,8 @@ Foam::kineticTheoryModel::kineticTheoryModel
         )
     ),
     e_(kineticTheoryProperties_.lookup("e")),
-    alpha1Max_(kineticTheoryProperties_.lookup("alpha1Max")),
-    alpha1MinFriction_(kineticTheoryProperties_.lookup("alpha1MinFriction")),
+    alphaMax_(kineticTheoryProperties_.lookup("alphaMax")),
+    alphaMinFriction_(kineticTheoryProperties_.lookup("alphaMinFriction")),
     Fr_(kineticTheoryProperties_.lookup("Fr")),
     eta_(kineticTheoryProperties_.lookup("eta")),
     p_(kineticTheoryProperties_.lookup("p")),
@@ -218,8 +218,8 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradU1t)
     //  The solution is higly unstable close to the packing limit.
     gs0_ = radialModel_->g0
     (
-        min(max(alpha1_, scalar(1e-6)), alpha1Max_ - 0.01),
-        alpha1Max_
+        min(max(alpha1_, scalar(1e-6)), alphaMax_ - 0.01),
+        alphaMax_
     );
 
     // particle pressure - coefficient in front of Theta (Eq. 3.22, p. 45)
@@ -340,8 +340,8 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradU1t)
         frictionalStressModel_->frictionalPressure
         (
             alpha1_,
-            alpha1MinFriction_,
-            alpha1Max_,
+            alphaMinFriction_,
+            alphaMax_,
             Fr_,
             eta_,
             p_
@@ -362,7 +362,7 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradU1t)
         frictionalStressModel_->muf
         (
             alpha1_,
-            alpha1Max_,
+            alphaMax_,
             pf,
             D,
             phi_
