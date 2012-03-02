@@ -28,6 +28,11 @@ boundaryField
         emissivity      uniform 1.0;
         value           uniform 0;
     }
+
+    frontAndBack
+    {
+        type            empty;
+    }
 }
 
 // ************************************************************************* //

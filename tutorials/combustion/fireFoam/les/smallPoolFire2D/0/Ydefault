@@ -45,7 +45,8 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }

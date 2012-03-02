@@ -28,26 +28,29 @@ boundaryField
         inletValue      uniform 0;
         value           uniform 0;
     }
+
     sides
     {
         type            inletOutlet;
         inletValue      uniform 0;
         value           uniform 0;
     }
+
     base
     {
         type            zeroGradient;
     }
+
     inlet
     {
         type            fixedValue;
         value           uniform 0.0;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }
-
 }
 
 // ************************************************************************* //

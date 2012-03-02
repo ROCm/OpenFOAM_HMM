@@ -25,19 +25,23 @@ boundaryField
     {
         type            calculated;
     }
+
     sides
     {
         type            calculated;
     }
+
     base
     {
         type            calculated;
     }
+
     inlet
     {
         type            calculated;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }
