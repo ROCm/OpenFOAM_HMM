@@ -1,7 +1,8 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-U = rAU*(UEqn == sources(rho, U))().H();
+volVectorField HbyA("HbyA", U);
+HbyA = rAU*(UEqn == sources(rho, U))().H();
 
 if (pimple.transonic())
 {
@@ -10,7 +11,7 @@ if (pimple.transonic())
         "phid",
         fvc::interpolate(psi)
        *(
-            (fvc::interpolate(U) & mesh.Sf())
+            (fvc::interpolate(HbyA) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
@@ -39,19 +40,22 @@ if (pimple.transonic())
 }
 else
 {
-    phi =
+    surfaceScalarField phiHbyA
+    (
+        "phiHbyA",
         fvc::interpolate(rho)
        *(
-            (fvc::interpolate(U) & mesh.Sf())
+            (fvc::interpolate(HbyA) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        );
+        )
+    );
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
-          + fvc::div(phi)
+          + fvc::div(phiHbyA)
           - fvm::laplacian(rho*rAU, p)
          ==
             coalParcels.Srho()
@@ -64,7 +68,7 @@ else
 
         if (pimple.finalNonOrthogonalIter())
         {
-            phi += pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 }
@@ -72,7 +76,7 @@ else
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-U -= rAU*fvc::grad(p);
+U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 sources.correct(U);
 
