@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::VTKsurfaceFormat
 
 Description
-    Provide a means of writing VTK legacy format.
+    Provide a means of reading/writing VTK legacy format.
     The output is never sorted by zone.
 
 SourceFiles
@@ -74,9 +74,20 @@ public:
 
     // Constructors
 
-        //- Construct null
-        VTKsurfaceFormat();
+        //- Construct from file name
+        VTKsurfaceFormat(const fileName&);
 
+
+    // Selectors
+
+        //- Read file and return surface
+        static autoPtr<MeshedSurface<Face> > New(const fileName& name)
+        {
+            return autoPtr<MeshedSurface<Face> >
+            (
+                new VTKsurfaceFormat<Face>(name)
+            );
+        }
 
     //- Destructor
     virtual ~VTKsurfaceFormat()
@@ -87,24 +98,20 @@ public:
 
         // Write
 
-            //- Write surface mesh components by proxy
-            static void write
-            (
-                const fileName&, const MeshedSurfaceProxy<Face>&
-            );
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
 
-            //- Write UnsortedMeshedSurface, the output remains unsorted
-            static void write
-            (
-                const fileName&, const UnsortedMeshedSurface<Face>&
-            );
+        //- Write UnsortedMeshedSurface, the output remains unsorted
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
+        //- Read from file
+        virtual bool read(const fileName&);
 
-            //- Write object
-            virtual void write(Ostream& os) const
-            {
-                write(os, MeshedSurfaceProxy<Face>(*this));
-            }
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this));
+        }
 };
 
 
