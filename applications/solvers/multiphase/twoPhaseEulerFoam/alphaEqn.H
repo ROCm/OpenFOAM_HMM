@@ -27,7 +27,7 @@
             ppMagf = rAU1f*fvc::interpolate
             (
                 (1.0/(rho1*(alpha1 + scalar(0.0001))))
-               *g0*min(exp(preAlphaExp*(alpha1 - alpha1Max)), expMax)
+               *g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
             );
 
             alpha1Eqn -= fvm::laplacian

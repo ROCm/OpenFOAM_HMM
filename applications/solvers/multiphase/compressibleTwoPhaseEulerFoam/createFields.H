@@ -206,7 +206,9 @@
         (
             "phi",
             runTime.timeName(),
-            mesh
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         fvc::interpolate(alpha1)*phi1 + fvc::interpolate(alpha2)*phi2
     );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,10 +92,10 @@ class kineticTheoryModel
         const dimensionedScalar e_;
 
         //- maximum packing
-        const dimensionedScalar alpha1Max_;
+        const dimensionedScalar alphaMax_;
 
         //- min value for which the frictional stresses are zero
-        const dimensionedScalar alpha1MinFriction_;
+        const dimensionedScalar alphaMinFriction_;
 
         //- material constant for frictional normal stress
         const dimensionedScalar Fr_;

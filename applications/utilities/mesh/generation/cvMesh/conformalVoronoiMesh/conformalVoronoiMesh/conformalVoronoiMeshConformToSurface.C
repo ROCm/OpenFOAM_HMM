@@ -1465,6 +1465,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     label cIInner = 0;
     label cIOuter = 0;
 
+//    seedProcessorBoundarySurfaces(true);
 
     label cellIndexCount = 0;
     for
@@ -1476,6 +1477,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     {
         cit->cellIndex() = cellIndexCount++;
     }
+
 
     timeCheck("End of cell Indexing");
 
@@ -1505,7 +1507,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         )
         {
             nQuickRejections++;
-            testCellInfluence[cit->cellIndex()] = -1;
+            //testCellInfluence[cit->cellIndex()] = -1;
         }
     }
 
@@ -1528,7 +1530,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         if
         (
             (testCellInfluence[cit->cellIndex()] == 0)
-         && (cit->real() || cit->hasFarPoint())
+         //&& (cit->real() || cit->hasFarPoint())
         )
         {
             const Foam::point& cc = cit->dual();

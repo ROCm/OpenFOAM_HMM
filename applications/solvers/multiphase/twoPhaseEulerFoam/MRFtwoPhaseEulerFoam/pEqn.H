@@ -96,11 +96,13 @@
                 (fvc::interpolate(U1) & mesh.Sf())().boundaryField();
             mrfZones.relativeFlux(phi1);
             phi1 = phiHbyA1 - rAU1f*SfGradp/rho1;
+            mrfZones.relativeFlux(phi1.oldTime());
 
             phi2.boundaryField() ==
                 (fvc::interpolate(U2) & mesh.Sf())().boundaryField();
             mrfZones.relativeFlux(phi2);
             phi2 = phiHbyA2 - rAU2f*SfGradp/rho2;
+            mrfZones.relativeFlux(phi2.oldTime());
 
             phi = alpha1f*phi1 + alpha2f*phi2;
 

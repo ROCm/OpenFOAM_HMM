@@ -47,6 +47,11 @@ Description
 #include "CuthillMcKeeRenumber.H"
 #include "fvMeshSubset.H"
 
+#ifdef FOAM_USE_ZOLTAN
+#   include "zoltanRenumber.H"
+#endif
+
+
 using namespace Foam;
 
 
@@ -576,6 +581,15 @@ int main(int argc, char *argv[])
         "frontWidth",
         "calculate the rms of the frontwidth"
     );
+
+
+// Force linker to include zoltan symbols. This section is only needed since
+// Zoltan is a static library
+#ifdef FOAM_USE_ZOLTAN
+    Info<< "renumberMesh built with zoltan support." << nl << endl;
+    (void)zoltanRenumber::typeName;
+#endif
+
 
 #   include "setRootCase.H"
 #   include "createTime.H"
