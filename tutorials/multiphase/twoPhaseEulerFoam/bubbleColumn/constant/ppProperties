@@ -19,7 +19,7 @@ preAlphaExp     300;
 
 expMax          10;
 
-alpha1Max        0.6;
+alphaMax        0.6;
 
 g0              g0 [ 1 -1 -2 0 0 0 0 ] 0;
 
