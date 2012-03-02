@@ -86,7 +86,7 @@ relaxationFactors
 {
     "U.*"           1;
     "T.*"           1;
-    "alpha1.*"       1;
+    "alpha1.*"      1;
     "Theta.*"       1;
     "k.*"           1;
     "epsilon.*"     1;

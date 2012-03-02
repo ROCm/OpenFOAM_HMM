@@ -28,13 +28,13 @@ else
 fi
 
 
-#if [ -n "$ZOLTAN_ARCH_PATH" ]
-#then
-#    wmake $makeType zoltanRenumber
-#else
-#    echo
-#    echo "Skipping zoltanRenumber"
-#    echo
-#fi
+if [ -n "$ZOLTAN_ARCH_PATH" ]
+then
+    wmake $makeType zoltanRenumber
+else
+    echo
+    echo "Skipping zoltanRenumber"
+    echo
+fi
 
 # ----------------------------------------------------------------- end-of-file
