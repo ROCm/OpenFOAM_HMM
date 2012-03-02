@@ -50,12 +50,13 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::fieldValues::cellSource::operationType,
-        8
+        9
     >::names[] =
     {
         "none",
         "sum",
         "average",
+        "weightedAverage",
         "volAverage",
         "volIntegrate",
         "min",
@@ -68,7 +69,7 @@ namespace Foam
 const Foam::NamedEnum<Foam::fieldValues::cellSource::sourceType, 2>
     Foam::fieldValues::cellSource::sourceTypeNames_;
 
-const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 8>
+const Foam::NamedEnum<Foam::fieldValues::cellSource::operationType, 9>
     Foam::fieldValues::cellSource::operationTypeNames_;
 
 

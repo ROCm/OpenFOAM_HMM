@@ -59,6 +59,7 @@ Description
       - none
       - sum
       - average
+      - weightedAverage
       - areaAverage
       - areaIntegrate
       - min
@@ -132,6 +133,7 @@ public:
             opNone,
             opSum,
             opAverage,
+            opWeightedAverage,
             opAreaAverage,
             opAreaIntegrate,
             opMin,
@@ -140,7 +142,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 8> operationTypeNames_;
+        static const NamedEnum<operationType, 9> operationTypeNames_;
 
 
 private:
@@ -215,7 +217,8 @@ protected:
         Type processValues
         (
             const Field<Type>& values,
-            const scalarField& magSf
+            const scalarField& magSf,
+            const scalarField& weightField
         ) const;
 
         //- Output file header information

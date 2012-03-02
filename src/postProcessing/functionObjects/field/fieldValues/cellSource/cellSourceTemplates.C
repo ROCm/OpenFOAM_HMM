@@ -78,7 +78,8 @@ template<class Type>
 Type Foam::fieldValues::cellSource::processValues
 (
     const Field<Type>& values,
-    const scalarField& V
+    const scalarField& V,
+    const scalarField& weightField
 ) const
 {
     Type result = pTraits<Type>::zero;
@@ -92,6 +93,11 @@ Type Foam::fieldValues::cellSource::processValues
         case opAverage:
         {
             result = sum(values)/values.size();
+            break;
+        }
+        case opWeightedAverage:
+        {
+            result = sum(values)/sum(weightField);
             break;
         }
         case opVolAverage:
@@ -169,7 +175,7 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
 
         if (Pstream::master())
         {
-            Type result = processValues(values, V);
+            Type result = processValues(values, V, weightField);
 
             if (valueOutput_)
             {
