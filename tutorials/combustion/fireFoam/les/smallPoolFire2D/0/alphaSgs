@@ -25,19 +25,23 @@ boundaryField
     {
         type            zeroGradient;
     }
+
     sides
     {
         type            zeroGradient;
     }
+
     base
     {
         type            zeroGradient;
     }
+
     inlet
     {
         type            zeroGradient;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }

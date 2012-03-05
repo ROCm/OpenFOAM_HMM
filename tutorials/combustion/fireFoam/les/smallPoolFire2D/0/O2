@@ -27,22 +27,26 @@ boundaryField
         inletValue      $internalField;
         value           $internalField;
     }
+
     sides
     {
         type            inletOutlet;
         inletValue      $internalField;
         value           $internalField;
     }
+
     base
     {
         type            zeroGradient;
     }
+
     inlet
     {
         type            fixedValue;
         value           uniform 0;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }

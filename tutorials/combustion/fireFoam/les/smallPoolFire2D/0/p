@@ -32,17 +32,20 @@ boundaryField
         type            calculated;
         value           $internalField;
     }
+
     base
     {
         type            calculated;
         value           $internalField;
     }
+
     inlet
     {
         type            calculated;
         value           $internalField;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }

@@ -27,23 +27,27 @@ boundaryField
         inletValue      uniform 1e-4;
         value           uniform 1e-4;
     }
+
     sides
     {
         type            inletOutlet;
         inletValue      uniform 1e-4;
         value           uniform 1e-4;
     }
+
     base
     {
         type            fixedValue;
         value           uniform 1e-4;
     }
+
     inlet
     {
         type            fixedValue;
         value           uniform 1e-4;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }
