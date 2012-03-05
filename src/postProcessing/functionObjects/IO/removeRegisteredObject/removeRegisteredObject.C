@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "writeRegisteredObject.H"
+#include "removeRegisteredObject.H"
 #include "dictionary.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::writeRegisteredObject, 0);
+defineTypeNameAndDebug(Foam::removeRegisteredObject, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::writeRegisteredObject::writeRegisteredObject
+Foam::removeRegisteredObject::removeRegisteredObject
 (
     const word& name,
     const objectRegistry& obr,
@@ -52,53 +52,54 @@ Foam::writeRegisteredObject::writeRegisteredObject
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::writeRegisteredObject::~writeRegisteredObject()
+Foam::removeRegisteredObject::~removeRegisteredObject()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::writeRegisteredObject::read(const dictionary& dict)
+void Foam::removeRegisteredObject::read(const dictionary& dict)
 {
     dict.lookup("objectNames") >> objectNames_;
 }
 
 
-void Foam::writeRegisteredObject::execute()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::writeRegisteredObject::end()
-{
-    // Do nothing - only valid on write
-}
-
-
-void Foam::writeRegisteredObject::write()
+void Foam::removeRegisteredObject::execute()
 {
     forAll(objectNames_, i)
     {
         if (obr_.foundObject<regIOobject>(objectNames_[i]))
         {
-            regIOobject& obj =
-                const_cast<regIOobject&>
-                (
-                    obr_.lookupObject<regIOobject>(objectNames_[i])
-                );
-            // Switch off automatic writing to prevent double write
-            obj.writeOpt() = IOobject::NO_WRITE;
-            obj.write();
+            const regIOobject& obj =
+                obr_.lookupObject<regIOobject>(objectNames_[i]);
+
+            if (obj.ownedByRegistry())
+            {
+                const_cast<regIOobject&>(obj).release();
+                delete &obj;
+            }
         }
         else
         {
-            WarningIn("Foam::writeRegisteredObject::write()")
+            WarningIn("Foam::removeRegisteredObject::write()")
                 << "Object " << objectNames_[i] << " not found in "
                 << "database. Available objects:" << nl << obr_.sortedToc()
                 << endl;
         }
+
     }
+}
+
+
+void Foam::removeRegisteredObject::end()
+{
+    // Do nothing - only valid on execute
+}
+
+
+void Foam::removeRegisteredObject::write()
+{
+    // Do nothing - only valid on execute
 }
 
 

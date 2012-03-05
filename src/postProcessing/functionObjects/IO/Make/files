@@ -1,6 +1,9 @@
 partialWrite/partialWrite.C
 partialWrite/partialWriteFunctionObject.C
 
+removeRegisteredObject/removeRegisteredObject.C
+removeRegisteredObject/removeRegisteredObjectFunctionObject.C
+
 writeRegisteredObject/writeRegisteredObject.C
 writeRegisteredObject/writeRegisteredObjectFunctionObject.C
 
