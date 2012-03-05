@@ -74,8 +74,10 @@ primitives/functions/Polynomial/polynomialFunction.C
 strings = primitives/strings
 $(strings)/string/string.C
 $(strings)/string/stringIO.C
+$(strings)/string/stringIOList.C
 $(strings)/word/word.C
 $(strings)/word/wordIO.C
+$(strings)/word/wordIOList.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
