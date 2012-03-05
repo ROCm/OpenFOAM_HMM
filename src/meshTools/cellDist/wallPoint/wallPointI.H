@@ -85,7 +85,7 @@ inline bool Foam::wallPoint::update
 inline Foam::wallPoint::wallPoint()
 :
     origin_(point::max),
-    distSqr_(GREAT)
+    distSqr_(-GREAT)
 {}
 
 

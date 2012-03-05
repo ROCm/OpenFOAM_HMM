@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,40 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::wordIOList
+
+Description
+    IO of a list of words
+
 \*---------------------------------------------------------------------------*/
 
-#include "VTKedgeFormat.H"
+#ifndef wordIOList_H
+#define wordIOList_H
 
-#include "addToRunTimeSelectionTable.H"
-#include "addToMemberFunctionSelectionTable.H"
+#include "wordList.H"
+#include "IOList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
-
-// read edgeMesh
-addNamedToRunTimeSelectionTable
-(
-    edgeMesh,
-    VTKedgeFormat,
-    fileExtension,
-    vtk
-);
-
-// write edgeMesh
-addNamedToMemberFunctionSelectionTable
-(
-    edgeMesh,
-    VTKedgeFormat,
-    write,
-    fileExtension,
-    vtk
-);
-
+    typedef IOList<word> wordIOList;
+    typedef IOList<wordList> wordListIOList;
 }
-}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "VTKedgeFormat.H"
-
+#include "stringIOList.H"
 #include "addToRunTimeSelectionTable.H"
-#include "addToMemberFunctionSelectionTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
+    defineCompoundTypeName(List<string>, stringList);
+    addCompoundToRunTimeSelectionTable(List<string>, stringList);
 
-// read edgeMesh
-addNamedToRunTimeSelectionTable
-(
-    edgeMesh,
-    VTKedgeFormat,
-    fileExtension,
-    vtk
-);
-
-// write edgeMesh
-addNamedToMemberFunctionSelectionTable
-(
-    edgeMesh,
-    VTKedgeFormat,
-    write,
-    fileExtension,
-    vtk
-);
-
-}
+    defineTemplateTypeNameAndDebugWithName(stringIOList, "stringList", 0);
+    defineTemplateTypeNameAndDebugWithName
+    (
+        stringListIOList,
+        "stringListList",
+        0
+    );
 }
 
 // ************************************************************************* //

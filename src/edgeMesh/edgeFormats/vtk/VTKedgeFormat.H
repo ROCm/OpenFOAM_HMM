@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,10 +78,23 @@ protected:
 
 public:
 
+
     // Constructors
 
-        //- Construct null
-        VTKedgeFormat();
+        //- Construct from file name
+        VTKedgeFormat(const fileName&);
+
+
+    // Selectors
+
+        //- Read file and return surface
+        static autoPtr<edgeMesh> New(const fileName& name)
+        {
+            return autoPtr<edgeMesh>
+            (
+                new VTKedgeFormat(name)
+            );
+        }
 
 
     //- Destructor
@@ -91,16 +104,17 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const edgeMesh&);
 
-            //- Write edgeMesh
-            static void write(const fileName&, const edgeMesh&);
+        //- Read from file
+        virtual bool read(const fileName&);
 
-//            //- Write object
-//            virtual void write(Ostream& os) const
-//            {
-//                write(os, *this);
-//            }
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, *this);
+        }
 };
 
 
