@@ -19,7 +19,7 @@
 
     bool closedVolume = adjustPhi(phiHbyA, U, p_rgh);
 
-    phiHbyA -= phig
+    phiHbyA -= phig;
 
     while (simple.correctNonOrthogonal())
     {
