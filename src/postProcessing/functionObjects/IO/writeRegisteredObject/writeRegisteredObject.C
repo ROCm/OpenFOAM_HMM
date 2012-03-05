@@ -98,7 +98,6 @@ void Foam::writeRegisteredObject::write()
                 << "database. Available objects:" << nl << obr_.sortedToc()
                 << endl;
         }
-
     }
 }
 
