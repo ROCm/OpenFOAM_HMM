@@ -51,11 +51,11 @@ surfaceConformation
 
     mixedFeaturePointPPDistanceCoeff    5.0;
 
-    featurePointExclusionDistanceCoeff  0.4;
+    featurePointExclusionDistanceCoeff  0.65;
 
-    featureEdgeExclusionDistanceCoeff   0.2;
+    featureEdgeExclusionDistanceCoeff   0.8;
 
-    surfaceSearchDistanceCoeff  2.5;
+    surfaceSearchDistanceCoeff  3;
 
     maxSurfaceProtrusionCoeff   0.1;
 
@@ -67,15 +67,15 @@ surfaceConformation
     {
         initial
         {
-            edgeSearchDistCoeff         2;
+            edgeSearchDistCoeff         5;
             surfacePtReplaceDistCoeff   0.5;
             surfacePtExclusionDistanceCoeff 0.5;
         }
 
         iteration
         {
-            edgeSearchDistCoeff         1.5;
-            surfacePtReplaceDistCoeff   0.7;
+            edgeSearchDistCoeff         2;
+            surfacePtReplaceDistCoeff   0.5;
         }
 
         maxIterations 15;
@@ -117,7 +117,6 @@ initialPoints
 
     autoDensityCoeffs
     {
-        minCellSizeLimit 0.001;
         minLevels 1;
         maxSizeRatio 3.0;
         sampleResolution 4;
@@ -143,7 +142,7 @@ motionControl
         flange.obj
         {
             priority            1;
-            mode                bothSides;
+            mode                inside;
             cellSizeFunction    linearDistance;
             linearDistanceCoeffs
             {
@@ -168,7 +167,7 @@ motionControl
 
     maxLoadUnbalance            0.05;
 
-    alignmentSearchSpokes       24;
+    alignmentSearchSpokes       36;
 
     alignmentAcceptanceAngle    48;
 
