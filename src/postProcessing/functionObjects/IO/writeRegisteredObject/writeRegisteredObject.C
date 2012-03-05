@@ -93,10 +93,8 @@ void Foam::writeRegisteredObject::write()
         }
         else
         {
-            WarningIn
-            (
-                "Foam::writeRegisteredObject::read(const dictionary&)"
-            )   << "Object " << objectNames_[i] << " not found in "
+            WarningIn("Foam::writeRegisteredObject::write()")
+                << "Object " << objectNames_[i] << " not found in "
                 << "database. Available objects:" << nl << obr_.sortedToc()
                 << endl;
         }
