@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,7 @@ class triSurface
         bool readTRI(const fileName&);
         bool readAC(const fileName&);
         bool readNAS(const fileName&);
+        bool readVTK(const fileName&);
 
         //- Generic write routine. Chooses writer based on extension.
         void write(const fileName&, const word& ext, const bool sort) const;
@@ -256,6 +257,14 @@ public:
             const geometricSurfacePatchList&,
             pointField&,
             const bool reUse
+        );
+
+        //- Construct from triangles, patches, points.
+        triSurface
+        (
+            const Xfer<List<labelledTri> >&,
+            const geometricSurfacePatchList&,
+            const Xfer<List<point> >&
         );
 
         //- Construct from triangles, points. Set patchnames to default.

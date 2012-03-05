@@ -125,8 +125,11 @@ void Foam::vtkUnstructuredReader::extractCells
 
 
     cells_.setSize(cellTypes.size());
+    cellMap_.setSize(cellTypes.size(), -1);
     faces_.setSize(cellTypes.size());
+    faceMap_.setSize(cellTypes.size(), -1);
     lines_.setSize(cellTypes.size());
+    lineMap_.setSize(cellTypes.size(), -1);
 
     label dataIndex = 0;
     label cellI = 0;
@@ -179,6 +182,7 @@ void Foam::vtkUnstructuredReader::extractCells
                     )   << "Expected size 2 for VTK_LINE but found "
                         << nRead << exit(FatalIOError);
                 }
+                lineMap_[lineI] = i;
                 labelList& segment = lines_[lineI++];
                 segment.setSize(2);
                 segment[0] = cellVertData[dataIndex++];
@@ -190,6 +194,7 @@ void Foam::vtkUnstructuredReader::extractCells
             {
                 //warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
+                lineMap_[lineI] = i;
                 labelList& segment = lines_[lineI++];
                 segment.setSize(nRead);
                 forAll(segment, i)
@@ -201,6 +206,7 @@ void Foam::vtkUnstructuredReader::extractCells
 
             case VTK_TRIANGLE:
             {
+                faceMap_[faceI] = i;
                 face& f = faces_[faceI++];
                 f.setSize(3);
                 label nRead = cellVertData[dataIndex++];
@@ -221,6 +227,7 @@ void Foam::vtkUnstructuredReader::extractCells
 
             case VTK_QUAD:
             {
+                faceMap_[faceI] = i;
                 face& f = faces_[faceI++];
                 f.setSize(4);
                 label nRead = cellVertData[dataIndex++];
@@ -242,6 +249,7 @@ void Foam::vtkUnstructuredReader::extractCells
 
             case VTK_POLYGON:
             {
+                faceMap_[faceI] = i;
                 face& f = faces_[faceI++];
                 label nRead = cellVertData[dataIndex++];
                 f.setSize(nRead);
@@ -268,6 +276,7 @@ void Foam::vtkUnstructuredReader::extractCells
                 tetPoints[1] = cellVertData[dataIndex++];
                 tetPoints[2] = cellVertData[dataIndex++];
                 tetPoints[3] = cellVertData[dataIndex++];
+                cellMap_[cellI] = i;
                 cells_[cellI++] = cellShape(tet, tetPoints, true);
             }
             break;
@@ -289,6 +298,7 @@ void Foam::vtkUnstructuredReader::extractCells
                 pyrPoints[2] = cellVertData[dataIndex++];
                 pyrPoints[3] = cellVertData[dataIndex++];
                 pyrPoints[4] = cellVertData[dataIndex++];
+                cellMap_[cellI] = i;
                 cells_[cellI++] = cellShape(pyr, pyrPoints, true);
             }
             break;
@@ -311,6 +321,7 @@ void Foam::vtkUnstructuredReader::extractCells
                 prismPoints[3] = cellVertData[dataIndex++];
                 prismPoints[4] = cellVertData[dataIndex++];
                 prismPoints[5] = cellVertData[dataIndex++];
+                cellMap_[cellI] = i;
                 cells_[cellI++] = cellShape(prism, prismPoints, true);
             }
             break;
@@ -335,6 +346,7 @@ void Foam::vtkUnstructuredReader::extractCells
                 hexPoints[5] = cellVertData[dataIndex++];
                 hexPoints[6] = cellVertData[dataIndex++];
                 hexPoints[7] = cellVertData[dataIndex++];
+                cellMap_[cellI] = i;
                 cells_[cellI++] = cellShape(hex, hexPoints, true);
             }
             break;
@@ -351,8 +363,11 @@ void Foam::vtkUnstructuredReader::extractCells
         Info<< "Read " << cellI << " cells;" << faceI << " faces." << endl;
     }
     cells_.setSize(cellI);
+    cellMap_.setSize(cellI);
     faces_.setSize(faceI);
+    faceMap_.setSize(faceI);
     lines_.setSize(lineI);
+    lineMap_.setSize(lineI);
 }
 
 
@@ -655,9 +670,11 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             labelList lineVerts;
             readBlock(inFile, nNumbers, lineVerts);
             lines_.setSize(nLines);
+            lineMap_.setSize(nLines);
             label elemI = 0;
             forAll(lines_, lineI)
             {
+                lineMap_[lineI] = lineI;
                 labelList& f = lines_[lineI];
                 f.setSize(lineVerts[elemI++]);
                 forAll(f, fp)
@@ -682,6 +699,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             label elemI = 0;
             forAll(faces_, faceI)
             {
+                faceMap_[faceI] = faceI;
                 face& f = faces_[faceI];
                 f.setSize(faceVerts[elemI++]);
                 forAll(f, fp)
