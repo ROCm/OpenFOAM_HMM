@@ -27,6 +27,7 @@ License
 #include "mergePoints.H"
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -112,35 +113,7 @@ void Foam::edgeMesh::calcPointEdges() const
     pointEdgesPtr_.reset(new labelListList(points_.size()));
     labelListList& pointEdges = pointEdgesPtr_();
 
-    // Count
-    labelList nEdgesPerPoint(points_.size(), 0);
-
-    forAll(edges_, edgeI)
-    {
-        const edge& e = edges_[edgeI];
-
-        nEdgesPerPoint[e[0]]++;
-        nEdgesPerPoint[e[1]]++;
-    }
-
-    // Size
-    forAll(pointEdges, pointI)
-    {
-        pointEdges[pointI].setSize(nEdgesPerPoint[pointI]);
-    }
-
-    // Fill
-    nEdgesPerPoint = 0;
-
-    forAll(edges_, edgeI)
-    {
-        const edge& e = edges_[edgeI];
-        const label p0 = e[0];
-        const label p1 = e[1];
-
-        pointEdges[p0][nEdgesPerPoint[p0]++] = edgeI;
-        pointEdges[p1][nEdgesPerPoint[p1]++] = edgeI;
-    }
+    invertManyToMany(pointEdges.size(), edges_, pointEdges);
 }
 
 
