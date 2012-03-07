@@ -432,6 +432,7 @@ autoPtr<mapPolyMesh> reorderMesh
     );
 
     // Check if any faces need swapping.
+    labelHashSet flipFaceFlux(newOwner.size());
     forAll(newNeighbour, faceI)
     {
         label own = newOwner[faceI];
@@ -441,6 +442,7 @@ autoPtr<mapPolyMesh> reorderMesh
         {
             newFaces[faceI].flip();
             Swap(newOwner[faceI], newNeighbour[faceI]);
+            flipFaceFlux.insert(faceI);
         }
     }
 
@@ -491,7 +493,7 @@ autoPtr<mapPolyMesh> reorderMesh
             identity(mesh.nPoints()),   // reversePointMap,
             reverseFaceOrder,           // reverseFaceMap,
             reverseCellOrder,           // reverseCellMap,
-            labelHashSet(0),            // flipFaceFlux,
+            flipFaceFlux,               // flipFaceFlux,
             patchPointMap,              // patchPointMap,
             labelListList(0),           // pointZoneMap,
             labelListList(0),           // faceZonePointMap,
