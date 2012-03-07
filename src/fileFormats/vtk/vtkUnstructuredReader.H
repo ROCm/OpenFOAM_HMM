@@ -25,7 +25,8 @@ Class
     Foam::vtkUnstructuredReader
 
 Description
-    Reader for vtk unstructured legacy files
+    Reader for vtk unstructured legacy files. Supports single CELLS, POINTS
+    etc. entry only.
 
 SourceFiles
     vtkUnstructuredReader.C
@@ -44,9 +45,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of friend functions and operators
-
 
 /*---------------------------------------------------------------------------*\
                      Class vtkUnstructuredReader Declaration
@@ -137,11 +135,19 @@ private:
         //- 3D cells.
         cellShapeList cells_;
 
+        //- Map from cells back to original ID
+        labelList cellMap_;
+
         //- 2D cells (=faces)
         faceList faces_;
 
+        //- Map from faces back to original ID
+        labelList faceMap_;
+
         //- 1D cells (=edges)
         labelListList lines_;
+
+        labelList lineMap_;
 
 
     // Data
@@ -258,6 +264,11 @@ public:
             return cells_;
         }
 
+        const labelList& cellMap() const
+        {
+            return cellMap_;
+        }
+
         //- 2D cells (=faces)
         const faceList& faces() const
         {
@@ -269,6 +280,11 @@ public:
             return faces_;
         }
 
+        const labelList& faceMap() const
+        {
+            return faceMap_;
+        }
+
         //- 1D cells (=open lines)
         const labelListList& lines() const
         {
@@ -278,6 +294,11 @@ public:
         labelListList& lines()
         {
             return lines_;
+        }
+
+        const labelList& lineMap() const
+        {
+            return lineMap_;
         }
 
         //- cell based fields

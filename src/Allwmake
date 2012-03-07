@@ -28,10 +28,10 @@ OSspecific/${WM_OSTYPE:-POSIX}/Allwmake
 wmake $makeType OpenFOAM
 
 wmake $makeType fileFormats
+wmake $makeType surfMesh
 wmake $makeType triSurface
 wmake $makeType meshTools
 wmake $makeType edgeMesh
-wmake $makeType surfMesh
 
 # Decomposition methods needed by dummyThirdParty
 parallel/decompose/AllwmakeLnInclude

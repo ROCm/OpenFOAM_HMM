@@ -25,6 +25,7 @@ $(interfaces)/TRI/readTRI.C
 $(interfaces)/DX/writeDX.C
 $(interfaces)/AC3D/readAC.C
 $(interfaces)/AC3D/writeAC.C
+$(interfaces)/VTK/readVTK.C
 $(interfaces)/VTK/writeVTK.C
 $(interfaces)/NAS/readNAS.C
 

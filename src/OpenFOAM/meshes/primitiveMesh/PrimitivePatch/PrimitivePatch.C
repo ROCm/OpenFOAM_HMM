@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,42 @@ PrimitivePatch
 (
     const FaceList<Face>& faces,
     const Field<PointType>& points
+)
+:
+    FaceList<Face>(faces),
+    points_(points),
+    edgesPtr_(NULL),
+    nInternalEdges_(-1),
+    boundaryPointsPtr_(NULL),
+    faceFacesPtr_(NULL),
+    edgeFacesPtr_(NULL),
+    faceEdgesPtr_(NULL),
+    pointEdgesPtr_(NULL),
+    pointFacesPtr_(NULL),
+    localFacesPtr_(NULL),
+    meshPointsPtr_(NULL),
+    meshPointMapPtr_(NULL),
+    edgeLoopsPtr_(NULL),
+    localPointsPtr_(NULL),
+    localPointOrderPtr_(NULL),
+    faceCentresPtr_(NULL),
+    faceNormalsPtr_(NULL),
+    pointNormalsPtr_(NULL)
+{}
+
+
+template
+<
+    class Face,
+    template<class> class FaceList,
+    class PointField,
+    class PointType
+>
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+PrimitivePatch
+(
+    const Xfer<FaceList<Face> >& faces,
+    const Xfer<List<PointType> >& points
 )
 :
     FaceList<Face>(faces),
