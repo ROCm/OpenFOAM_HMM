@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solidBodyMotionFvMesh.H"
+#include "multiSolidBodyMotionFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "transformField.H"
@@ -35,14 +35,19 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(solidBodyMotionFvMesh, 0);
-    addToRunTimeSelectionTable(dynamicFvMesh, solidBodyMotionFvMesh, IOobject);
+    defineTypeNameAndDebug(multiSolidBodyMotionFvMesh, 0);
+    addToRunTimeSelectionTable
+    (
+        dynamicFvMesh,
+        multiSolidBodyMotionFvMesh,
+        IOobject
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
+Foam::multiSolidBodyMotionFvMesh::multiSolidBodyMotionFvMesh(const IOobject& io)
 :
     dynamicFvMesh(io),
     dynamicMeshCoeffs_
@@ -60,7 +65,6 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
             )
         ).subDict(typeName + "Coeffs")
     ),
-    SBMFPtr_(solidBodyMotionFunction::New(dynamicMeshCoeffs_, io.time())),
     undisplacedPoints_
     (
         IOobject
@@ -73,15 +77,14 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
             IOobject::NO_WRITE,
             false
         )
-    ),
-    zoneID_(-1),
-    pointIDs_()
+    )
 {
     if (undisplacedPoints_.size() != nPoints())
     {
         FatalIOErrorIn
         (
-            "solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject&)",
+            "multiSolidBodyMotionFvMesh::multiSolidBodyMotionFvMesh"
+            "(const IOobject&)",
             dynamicMeshCoeffs_
         )   << "Read " << undisplacedPoints_.size()
             << " undisplaced points from " << undisplacedPoints_.objectPath()
@@ -89,94 +92,111 @@ Foam::solidBodyMotionFvMesh::solidBodyMotionFvMesh(const IOobject& io)
             << exit(FatalIOError);
     }
 
-    word cellZoneName =
-        dynamicMeshCoeffs_.lookupOrDefault<word>("cellZone", "none");
 
-    if (cellZoneName != "none")
+    zoneIDs_.setSize(dynamicMeshCoeffs_.size());
+    SBMFs_.setSize(dynamicMeshCoeffs_.size());
+    pointIDs_.setSize(dynamicMeshCoeffs_.size());
+    label zoneI = 0;
+
+    forAllConstIter(dictionary, dynamicMeshCoeffs_, iter)
     {
-        zoneID_ = cellZones().findZoneID(cellZoneName);
-        Info<< "Applying solid body motion to cellZone " << cellZoneName
-            << endl;
-
-        const cellZone& cz = cellZones()[zoneID_];
-
-
-        // collect point IDs of points in cell zone
-
-        boolList movePts(nPoints(), false);
-
-        forAll(cz, i)
+        if (iter().isDict())
         {
-            label cellI = cz[i];
-            const cell& c = cells()[cellI];
-            forAll(c, j)
+            zoneIDs_[zoneI] = cellZones().findZoneID(iter().keyword());
+
+            if (zoneIDs_[zoneI] == -1)
             {
-                const face& f = faces()[c[j]];
-                forAll(f, k)
+                FatalIOErrorIn
+                (
+                    "multiSolidBodyMotionFvMesh::"
+                    "multiSolidBodyMotionFvMesh(const IOobject&)",
+                    dynamicMeshCoeffs_
+                )   << "Cannot find cellZone named " << iter().keyword()
+                    << ". Valid zones are " << cellZones().names()
+                    << exit(FatalIOError);
+            }
+
+            const dictionary& subDict = iter().dict();
+
+            SBMFs_.set
+            (
+                zoneI,
+                solidBodyMotionFunction::New(subDict, io.time())
+            );
+
+            // Collect points of cell zone.
+            const cellZone& cz = cellZones()[zoneIDs_[zoneI]];
+
+            boolList movePts(nPoints(), false);
+
+            forAll(cz, i)
+            {
+                label cellI = cz[i];
+                const cell& c = cells()[cellI];
+                forAll(c, j)
                 {
-                    label pointI = f[k];
-                    movePts[pointI] = true;
+                    const face& f = faces()[c[j]];
+                    forAll(f, k)
+                    {
+                        label pointI = f[k];
+                        movePts[pointI] = true;
+                    }
                 }
             }
-        }
 
-        syncTools::syncPointList(*this, movePts, orEqOp<bool>(), false);
+            syncTools::syncPointList(*this, movePts, orEqOp<bool>(), false);
 
-        DynamicList<label> ptIDs(nPoints());
-        forAll(movePts, i)
-        {
-            if (movePts[i])
+            DynamicList<label> ptIDs(nPoints());
+            forAll(movePts, i)
             {
-                ptIDs.append(i);
+                if (movePts[i])
+                {
+                    ptIDs.append(i);
+                }
             }
-        }
 
-        pointIDs_.transfer(ptIDs);
+            pointIDs_[zoneI].transfer(ptIDs);
+
+            Info<< "Applying solid body motion " << SBMFs_[zoneI].type()
+                << " to " << pointIDs_[zoneI].size() << " points of cellZone "
+                << iter().keyword() << endl;
+
+            zoneI++;
+        }
     }
-    else
-    {
-        Info<< "Applying solid body motion to entire mesh" << endl;
-    }
+    zoneIDs_.setSize(zoneI);
+    SBMFs_.setSize(zoneI);
+    pointIDs_.setSize(zoneI);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFvMesh::~solidBodyMotionFvMesh()
+Foam::multiSolidBodyMotionFvMesh::~multiSolidBodyMotionFvMesh()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::solidBodyMotionFvMesh::update()
+bool Foam::multiSolidBodyMotionFvMesh::update()
 {
     static bool hasWarned = false;
 
-    if (zoneID_ != -1)
-    {
-        pointField transformedPts(undisplacedPoints_);
+    pointField transformedPts(undisplacedPoints_);
 
-        UIndirectList<point>(transformedPts, pointIDs_) =
+    forAll(zoneIDs_, i)
+    {
+        const labelList& zonePoints = pointIDs_[i];
+
+        UIndirectList<point>(transformedPts, zonePoints) =
             transform
             (
-                SBMFPtr_().transformation(),
-                pointField(transformedPts, pointIDs_)
+                SBMFs_[i].transformation(),
+                pointField(transformedPts, zonePoints)
             );
-
-        fvMesh::movePoints(transformedPts);
-    }
-    else
-    {
-        fvMesh::movePoints
-        (
-            transform
-            (
-                SBMFPtr_().transformation(),
-                undisplacedPoints_
-            )
-        );
     }
 
+    fvMesh::movePoints(transformedPts);
 
     if (foundObject<volVectorField>("U"))
     {
@@ -187,7 +207,7 @@ bool Foam::solidBodyMotionFvMesh::update()
     {
         hasWarned = true;
 
-        WarningIn("solidBodyMotionFvMesh::update()")
+        WarningIn("multiSolidBodyMotionFvMesh::update()")
             << "Did not find volVectorField U."
             << " Not updating U boundary conditions." << endl;
     }

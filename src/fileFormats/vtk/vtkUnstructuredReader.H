@@ -25,8 +25,17 @@ Class
     Foam::vtkUnstructuredReader
 
 Description
-    Reader for vtk unstructured legacy files. Supports single CELLS, POINTS
+    Reader for vtk unstructured_grid legacy files. Supports single CELLS, POINTS
     etc. entry only.
+
+    - POINTS becomes OpenFOAM points
+    - CELLS gets split into OpenFOAM
+        - cells
+        - faces
+        - lines
+    - CELL_DATA or POINT_DATA gets stored on the corresponding objectRegistry
+      in original vtk numbering order so use e.g. faceMap() to go from entry
+      in faces() back to vtk numbering.
 
 SourceFiles
     vtkUnstructuredReader.C
@@ -61,10 +70,11 @@ public:
         {
             VTK_INT,
             VTK_FLOAT,
-            VTK_STRING
+            VTK_STRING,
+            VTK_ID
         };
 
-        static const NamedEnum<vtkDataType, 3> vtkDataTypeNames;
+        static const NamedEnum<vtkDataType, 4> vtkDataTypeNames;
 
 
         //- Enumeration defining the vtk dataset types

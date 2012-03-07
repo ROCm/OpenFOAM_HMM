@@ -36,13 +36,14 @@ defineTypeNameAndDebug(Foam::vtkUnstructuredReader, 0);
 
 template<>
 const char*
-Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 3>::names[] =
+Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 4>::names[] =
 {
     "int",
     "float",
-    "string"
+    "string",
+    "vtkIdType"
 };
-const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 3>
+const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 4>
 Foam::vtkUnstructuredReader::vtkDataTypeNames;
 
 
@@ -384,6 +385,7 @@ void Foam::vtkUnstructuredReader::readField
     switch (vtkDataTypeNames[dataType])
     {
         case VTK_INT:
+        case VTK_ID:
         {
             autoPtr<labelIOField> fieldVals
             (
@@ -724,7 +726,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
         else if (tag == "CELL_DATA")
         {
             readMode = CELL_DATA;
-            wantedSize = cells_.size()+faces_.size();
+            wantedSize = cells_.size()+faces_.size()+lines_.size();
 
             label nCells(readLabel(inFile));
             if (nCells != wantedSize)
