@@ -79,14 +79,6 @@ void Foam::removeRegisteredObject::execute()
                 delete &obj;
             }
         }
-        else
-        {
-            WarningIn("Foam::removeRegisteredObject::write()")
-                << "Object " << objectNames_[i] << " not found in "
-                << "database. Available objects:" << nl << obr_.sortedToc()
-                << endl;
-        }
-
     }
 }
 
