@@ -85,20 +85,6 @@ bool Foam::turbulenceFields::compressible()
 }
 
 
-Foam::IOobject Foam::turbulenceFields::io(const word& fieldName) const
-{
-    return
-        IOobject
-        (
-            fieldName,
-            obr_.time().timeName(),
-            obr_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        );
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::turbulenceFields::turbulenceFields
@@ -147,7 +133,22 @@ void Foam::turbulenceFields::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("fields") >> fieldSet_;
+        fieldSet_.insert(wordList(dict.lookup("fields")));
+
+        Info<< type() << ": ";
+        if (fieldSet_.size())
+        {
+            Info<< "storing fields:" << nl;
+            forAllConstIter(wordHashSet, fieldSet_, iter)
+            {
+                Info<< "    " << modelName << "::" << iter.key() << nl;
+            }
+            Info<< endl;
+        }
+        else
+        {
+            Info<< "no fields requested to be stored" << nl << endl;
+        }
 
         execute();
     }
@@ -168,9 +169,9 @@ void Foam::turbulenceFields::execute()
         const compressible::turbulenceModel& model =
             obr_.lookupObject<compressible::turbulenceModel>(modelName);
 
-        forAll(fieldSet_, fieldI)
+        forAllConstIter(wordHashSet, fieldSet_, iter)
         {
-            const word& f = fieldSet_[fieldI];
+            const word& f = iter.key();
             switch (compressibleFieldNames_[f])
             {
                 case cfR:
@@ -216,9 +217,9 @@ void Foam::turbulenceFields::execute()
         const incompressible::turbulenceModel& model =
             obr_.lookupObject<incompressible::turbulenceModel>(modelName);
 
-        forAll(fieldSet_, fieldI)
+        forAllConstIter(wordHashSet, fieldSet_, iter)
         {
-            const word& f = fieldSet_[fieldI];
+            const word& f = iter.key();
             switch (incompressibleFieldNames_[f])
             {
                 case ifR:

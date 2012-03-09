@@ -27,16 +27,20 @@ Class
 Description
     Stores turbulence fields on the mesh database for further manipulation.
 
+    Fields are stored as copies of the original, with the prefix
+    "tubulenceModel::", e.g.
+
+        turbulenceModel::R
+
 SourceFiles
     turbulenceFields.C
-    IOturbulenceFields.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef turbulenceFields_H
 #define turbulenceFields_H
 
-#include "wordList.H"
+#include "HashSet.H"
 #include "IOobject.H"
 #include "NamedEnum.H"
 #include "pointField.H"
@@ -96,7 +100,7 @@ protected:
         bool active_;
 
         //- Fields to load
-        wordList fieldSet_;
+        wordHashSet fieldSet_;
 
 
     // Protected Member Functions
@@ -110,15 +114,12 @@ protected:
         //- Return true if compressible turbulence model is identified
         bool compressible();
 
-        //- Helper function to return IOobject
-        IOobject io(const word& fieldName) const;
-
         //- Process the turbulence field
         template<class Type>
         void processField
         (
             const word& fieldName,
-            const GeometricField<Type, fvPatchField, volMesh>& value
+            const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvalue
         );
 
 
