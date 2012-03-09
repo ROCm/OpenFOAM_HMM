@@ -1,5 +1,8 @@
 codedFunctionObject/codedFunctionObject.C
 
+pressureCoefficient/pressureCoefficient.C
+pressureCoefficient/pressureCoefficientFunctionObject.C
+
 staticPressure/staticPressure.C
 staticPressure/staticPressureFunctionObject.C
 
