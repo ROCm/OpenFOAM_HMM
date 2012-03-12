@@ -34,9 +34,16 @@ defineTypeNameAndDebug(Foam::pressureCoefficient, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::pressureCoefficient::rho() const
+Foam::tmp<Foam::volScalarField> Foam::pressureCoefficient::rho
+(
+    const volScalarField& p
+) const
 {
-    if (rhoName_ == "rhoInf")
+    if (p.dimensions() == dimPressure)
+    {
+        return(obr_.lookupObject<volScalarField>(rhoName_));
+    }
+    else
     {
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
@@ -51,13 +58,9 @@ Foam::tmp<Foam::volScalarField> Foam::pressureCoefficient::rho() const
                     mesh
                 ),
                 mesh,
-                dimensionedScalar("rho", dimDensity, rhoRef_)
+                dimensionedScalar("rho", dimless, 1.0)
             )
         );
-    }
-    else
-    {
-        return(obr_.lookupObject<volScalarField>(rhoName_));
     }
 }
 
@@ -76,8 +79,7 @@ Foam::pressureCoefficient::pressureCoefficient
     obr_(obr),
     active_(true),
     pName_("p"),
-    rhoName_(word::null),
-    rhoRef_(-GREAT),
+    rhoName_("rho"),
     magUinf_(0.0)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -114,12 +116,7 @@ void Foam::pressureCoefficient::read(const dictionary& dict)
     if (active_)
     {
         pName_ = dict.lookupOrDefault<word>("pName", "p");
-
         rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
-        if (rhoName_ == "rhoInf")
-        {
-            dict.lookup("rhoInf") >> rhoRef_;
-        }
 
         dict.lookup("magUinf") >> magUinf_;
     }
@@ -153,7 +150,7 @@ void Foam::pressureCoefficient::write()
                 obr_,
                 IOobject::NO_READ
             ),
-            p/(0.5*rho()*sqr(magUinf_))
+            p/(0.5*rho(p)*sqr(magUinf_))
         );
 
         pressureCoefficient.write();

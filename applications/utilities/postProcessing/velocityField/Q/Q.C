@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,8 @@ Application
 
 Description
     Calculates and writes the second invariant of the velocity gradient tensor.
+
+        Q = 0.5*(sqr(tr(gradU)) - tr(((gradU)&(gradU))))      [1/s^2]
 
     The -noWrite option just outputs the max/min values without writing
     the field.

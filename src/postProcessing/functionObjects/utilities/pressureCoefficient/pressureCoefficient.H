@@ -77,21 +77,15 @@ class pressureCoefficient
         //- Name of density field (optional)
         word rhoName_;
 
-        //- Reference density needed for incompressible calculations [kg/m3]
-        scalar rhoRef_;
-
         //- Free stream velocity magnitude [m/s]
         scalar magUinf_;
 
 
     // Private Member Functions
 
-        //- Return rho if rhoName is specified otherwise rhoRef
-        tmp<volScalarField> rho() const;
-
-        //- Return rhoRef if the pressure field is dynamic, i.e. p/rho
-        //  otherwise return 1
-        scalar rho(const volScalarField& p) const;
+        //- Return 1 if the pressure field is kinematic, i.e. p/rho
+        //  otherwise return rho from database
+        tmp<volScalarField> rho(const volScalarField& p) const;
 
         //- Disallow default bitwise copy construct
         pressureCoefficient(const pressureCoefficient&);
