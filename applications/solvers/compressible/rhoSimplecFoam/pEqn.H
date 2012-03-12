@@ -7,7 +7,10 @@ volScalarField p0(p);
 
 volScalarField AU(UEqn().A());
 volScalarField AtU(AU - UEqn().H1());
-U = UEqn().H()/AU;
+
+volVectorField HbyA("HbyA", U);
+HbyA = UEqn().H()/AU;
+
 UEqn.clear();
 
 bool closedVolume = false;
@@ -19,7 +22,7 @@ if (simple.transonic())
         surfaceScalarField phid
         (
             "phid",
-            fvc::interpolate(psi*U) & mesh.Sf()
+            fvc::interpolate(psi*HbyA) & mesh.Sf()
         );
 
         surfaceScalarField phic
@@ -56,13 +59,18 @@ else
 {
     while (simple.correctNonOrthogonal())
     {
-        phi = fvc::interpolate(rho*U) & mesh.Sf();
+        surfaceScalarField phiHbyA
+        (
+            "phiHbyA",
+            fvc::interpolate(rho*HbyA) & mesh.Sf()
+        );
+
         closedVolume = adjustPhi(phi, U, p);
         phi += fvc::interpolate(rho/AtU - rho/AU)*fvc::snGrad(p)*mesh.magSf();
 
         fvScalarMatrix pEqn
         (
-            fvc::div(phi)
+            fvc::div(phiHbyA)
         //- fvm::laplacian(rho/AU, p)
           - fvm::laplacian(rho/AtU, p)
         );
@@ -73,7 +81,7 @@ else
 
         if (simple.finalNonOrthogonalIter())
         {
-            phi += pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 }
@@ -85,8 +93,8 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-U -= (fvc::grad(p0)*(1.0/AU - 1.0/AtU) + fvc::grad(p)/AtU);
-//U -= fvc::grad(p)/AU;
+U = HbyA - (fvc::grad(p0)*(1.0/AU - 1.0/AtU) + fvc::grad(p)/AtU);
+//U = HbyA - fvc::grad(p)/AU;
 
 U.correctBoundaryConditions();
 

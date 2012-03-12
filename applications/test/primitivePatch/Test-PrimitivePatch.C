@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "PrimitivePatch.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -223,25 +224,40 @@ int main(int argc, char *argv[])
 
     Info<< "Patch:" << patch.name() << endl;
 
-    PrimitivePatch<face, List, const pointField&> pp(patch, patch.points());
+    // Test addressing
+    {
+        myPrimitivePatch pp(patch, patch.points());
 
-    const pointField& localPoints = pp.localPoints();
-    const faceList& localFaces = pp.localFaces();
-    const labelListList& faceFaces = pp.faceFaces();
-    const edgeList& edges = pp.edges();
-    const labelListList& edgeFaces = pp.edgeFaces();
-    const labelListList& faceEdges = pp.faceEdges();
+        const pointField& localPoints = pp.localPoints();
+        const faceList& localFaces = pp.localFaces();
+        const labelListList& faceFaces = pp.faceFaces();
+        const edgeList& edges = pp.edges();
+        const labelListList& edgeFaces = pp.edgeFaces();
+        const labelListList& faceEdges = pp.faceEdges();
 
 
-    checkFaceEdges(localFaces, edges, faceEdges);
+        checkFaceEdges(localFaces, edges, faceEdges);
 
-    writeEdges(localPoints, edges, pp.nInternalEdges());
+        writeEdges(localPoints, edges, pp.nInternalEdges());
 
-    writeFaceEdges(localPoints, edges, faceEdges);
+        writeFaceEdges(localPoints, edges, faceEdges);
 
-    writeEdgeFaces(localPoints, localFaces, edges, edgeFaces);
+        writeEdgeFaces(localPoints, localFaces, edges, edgeFaces);
 
-    writeFaceFaces(localPoints, localFaces, faceFaces);
+        writeFaceFaces(localPoints, localFaces, faceFaces);
+    }
+
+    // Test construction from Xfer
+    {
+        faceList patchFaces = patch;
+        pointField allPoints = patch.points();
+
+        PrimitivePatch<face, List, pointField, point> storedPatch
+        (
+            patchFaces.xfer(),
+            allPoints.xfer()
+        );
+    }
 
     Info<< "End\n" << endl;
 

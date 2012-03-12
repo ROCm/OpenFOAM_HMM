@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,24 @@ namespace Foam
 {
 namespace fileFormats
 {
+
+// read MeshedSurface
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    VTKsurfaceFormat,
+    face,
+    fileExtension,
+    vtk
+);
+addNamedTemplatedToRunTimeSelectionTable
+(
+    MeshedSurface,
+    VTKsurfaceFormat,
+    triFace,
+    fileExtension,
+    vtk
+);
 
 // write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable

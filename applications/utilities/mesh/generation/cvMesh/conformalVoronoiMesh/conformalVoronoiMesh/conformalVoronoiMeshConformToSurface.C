@@ -41,10 +41,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 {
     reconformationMode reconfMode = reconformationControl();
 
-    if (Pstream::parRun())
-    {
-        seedProcessorBoundarySurfaces(true);
-    }
+//    if (Pstream::parRun())
+//    {
+//        seedProcessorBoundarySurfaces(true);
+//    }
 
     if (reconfMode == rmNone)
     {
@@ -74,15 +74,15 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         storeSurfaceConformation();
     }
 
-    if (Pstream::parRun())
-    {
-        label nFarPoints = removeProcessorBoundarySeeds(true);
-
-        reduce(nFarPoints, sumOp<label>());
-
-        Info<< "    Removed " << nFarPoints
-            << " far points from the mesh." << endl;
-    }
+//    if (Pstream::parRun())
+//    {
+//        label nFarPoints = removeProcessorBoundarySeeds(true);
+//
+//        reduce(nFarPoints, sumOp<label>());
+//
+//        Info<< "    Removed " << nFarPoints
+//            << " far points from the mesh." << endl;
+//    }
 
     // reportSurfaceConformationQuality();
 }
@@ -915,7 +915,7 @@ void Foam::conformalVoronoiMesh::seedProcessorBoundarySurfaces
 
     label nFarPoints = 0;
 
-    const scalar normalDistance = 5.0;
+    const scalar normalDistance = 2.0;
     const scalar pert = 0.1*(rndGen_.scalar01() - 0.5);
 
     forAll(bMesh, patchI)
@@ -1465,6 +1465,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     label cIInner = 0;
     label cIOuter = 0;
 
+    seedProcessorBoundarySurfaces(true);
 
     label cellIndexCount = 0;
     for
@@ -1476,6 +1477,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
     {
         cit->cellIndex() = cellIndexCount++;
     }
+
 
     timeCheck("End of cell Indexing");
 
@@ -1505,7 +1507,7 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         )
         {
             nQuickRejections++;
-            testCellInfluence[cit->cellIndex()] = -1;
+            //testCellInfluence[cit->cellIndex()] = -1;
         }
     }
 
@@ -1551,15 +1553,18 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
 
     timeCheck("End of testing cell influence");
 
-    Pout<< "Number of quick rejections = " << nQuickRejections << endl;
+//    Pout<< "Number of quick rejections = " << nQuickRejections << endl;
     Pout<< "Number of influences = " << circumcentre.size() << endl;
 
     // Increasing the circumspheres to increase the overlaps and compensate for
     // floating point errors missing some referrals
     labelListList circumsphereOverlaps
-    (
-        overlapsProc(circumcentre, sqr(1.01)*circumradiusSqr)
-    );
+        = decomposition_().overlapsProcessors
+          (
+              circumcentre,
+              sqr(1.01)*circumradiusSqr,
+              false
+          );
 
     timeCheck("End of increasing overlaps");
 
@@ -1622,13 +1627,12 @@ void Foam::conformalVoronoiMesh::buildParallelInterfaceInfluence
         cIOuter++;
     }
 
+    label nFarPoints = removeProcessorBoundarySeeds(true);
 
-//    label nFarPoints = removeProcessorBoundarySeeds(true);
-//
-//    reduce(nFarPoints, sumOp<label>());
-//
-//    Info<< "    Removed " << nFarPoints
-//        << " far points from the mesh." << endl;
+    reduce(nFarPoints, sumOp<label>());
+
+    Info<< "    Removed " << nFarPoints
+        << " far points from the mesh." << endl;
 
 
 //    seedProcessorBoundarySurfaces(false);
@@ -1743,6 +1747,8 @@ void Foam::conformalVoronoiMesh::referVertices
 
     timeCheck("Start of referVertices " + stageName + " insertion.");
 
+    label inserted = 0;
+
     for (label procI = 0; procI < Pstream::nProcs(); procI++)
     {
         const labelList& constructMap = pointMap.constructMap()[procI];
@@ -1772,11 +1778,17 @@ void Foam::conformalVoronoiMesh::referVertices
                         encodedProcI
                     );
 
+                    inserted++;
+
                     receivedVertices[procI].insert(origIndex);
                 }
             }
         }
     }
+
+    reduce(inserted, sumOp<label>());
+
+    Info<< "    Inserted " << stageName << " vertices " << inserted << endl;
 
     Info<< "    Total " << stageName << " vertices " << totalVertices << endl;
 

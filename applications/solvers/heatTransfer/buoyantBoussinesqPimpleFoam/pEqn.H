@@ -2,19 +2,24 @@
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rAUf("(1|A(U))", fvc::interpolate(rAU));
 
-    U = rAU*UEqn.H();
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*UEqn.H();
 
-    phi = (fvc::interpolate(U) & mesh.Sf())
-        + fvc::ddtPhiCorr(rAU, U, phi);
+    surfaceScalarField phig(rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf());
 
-    surfaceScalarField buoyancyPhi(rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf());
-    phi -= buoyancyPhi;
+    surfaceScalarField phiHbyA
+    (
+        "phiHbyA",
+        (fvc::interpolate(HbyA) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU, U, phi)
+      - phig
+    );
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqn
         (
-            fvm::laplacian(rAUf, p_rgh) == fvc::div(phi)
+            fvm::laplacian(rAUf, p_rgh) == fvc::div(phiHbyA)
         );
 
         p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
@@ -24,14 +29,14 @@
         if (pimple.finalNonOrthogonalIter())
         {
             // Calculate the conservative fluxes
-            phi -= p_rghEqn.flux();
+            phi = phiHbyA - p_rghEqn.flux();
 
             // Explicitly relax pressure for momentum corrector
             p_rgh.relax();
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U -= rAU*fvc::reconstruct((buoyancyPhi + p_rghEqn.flux())/rAUf);
+            U = HbyA - rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rAUf);
             U.correctBoundaryConditions();
         }
     }

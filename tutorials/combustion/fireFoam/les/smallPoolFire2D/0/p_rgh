@@ -26,6 +26,7 @@ boundaryField
         type            buoyantPressure;
         value           $internalField;
     }
+
     sides
     {
         type            totalPressure;
@@ -37,17 +38,20 @@ boundaryField
         gamma           1;
         value           $internalField;
     }
+
     base
     {
         type            buoyantPressure;
         value           $internalField;
     }
+
     inlet
     {
         type            buoyantPressure;
         value           $internalField;
     }
-    frontBack
+
+    frontAndBack
     {
         type            empty;
     }

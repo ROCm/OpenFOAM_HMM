@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,9 @@ License
 #include "VTKedgeFormat.H"
 #include "OFstream.H"
 #include "clock.H"
+#include "IFstream.H"
+#include "vtkUnstructuredReader.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -72,11 +75,83 @@ void Foam::fileFormats::VTKedgeFormat::writeEdges
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileFormats::VTKedgeFormat::VTKedgeFormat()
-{}
+Foam::fileFormats::VTKedgeFormat::VTKedgeFormat
+(
+    const fileName& filename
+)
+{
+    read(filename);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::fileFormats::VTKedgeFormat::read
+(
+    const fileName& filename
+)
+{
+    IFstream is(filename);
+    if (!is.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::VTKedgeFormat::read(const fileName&)"
+        )   << "Cannot read file " << filename
+            << exit(FatalError);
+    }
+
+    // Construct dummy time so we have something to create an objectRegistry
+    // from
+    Time dummyTime
+    (
+        "dummyRoot",
+        "dummyCase",
+        "system",
+        "constant",
+        false           // enableFunctionObjects
+    );
+
+    // Make dummy object registry
+    objectRegistry obr
+    (
+        IOobject
+        (
+            "dummy",
+            dummyTime,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    // Construct reader to read file
+    vtkUnstructuredReader reader(obr, is);
+
+
+    // Extract lines
+    storedPoints().transfer(reader.points());
+
+    label nEdges = 0;
+    forAll(reader.lines(), lineI)
+    {
+        nEdges += reader.lines()[lineI].size()-1;
+    }
+    storedEdges().setSize(nEdges);
+
+    nEdges = 0;
+    forAll(reader.lines(), lineI)
+    {
+        const labelList& verts = reader.lines()[lineI];
+        for (label i = 1; i < verts.size(); i++)
+        {
+            storedEdges()[nEdges++] = edge(verts[i-1], verts[i]);
+        }
+    }
+
+    return true;
+}
+
 
 void Foam::fileFormats::VTKedgeFormat::write
 (
@@ -91,8 +166,7 @@ void Foam::fileFormats::VTKedgeFormat::write
         (
             "fileFormats::VTKedgeFormat::write"
             "(const fileName&, const edgeMesh&)"
-        )
-            << "Cannot open file for writing " << filename
+        )   << "Cannot open file for writing " << filename
             << exit(FatalError);
     }
 

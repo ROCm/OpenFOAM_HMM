@@ -86,23 +86,28 @@ int main(int argc, char *argv[])
         for (int corr=1; corr<=1; corr++)
         {
             volScalarField rAU(1.0/UEqn.A());
+            volVectorField HbyA("HbyA", U);
+            HbyA = rAU*UEqn.H();
 
-            U = rAU*UEqn.H();
-            phi = (fvc::interpolate(U) & mesh.Sf())
-                + fvc::ddtPhiCorr(rAU, U, phi);
+            surfaceScalarField phiHbyA
+            (
+                "phiHbyA",
+                (fvc::interpolate(HbyA) & mesh.Sf())
+              + fvc::ddtPhiCorr(rAU, U, phi)
+            );
 
             fvScalarMatrix pEqn
             (
-                fvm::laplacian(rAU, p) == fvc::div(phi)
+                fvm::laplacian(rAU, p) == fvc::div(phiHbyA)
             );
 
             pEqn.solve();
 
-            phi -= pEqn.flux();
+            phi = phiHbyA - pEqn.flux();
 
             #include "continuityErrs.H"
 
-            U -= rAU*fvc::grad(p);
+            U = HbyA - rAU*fvc::grad(p);
             U.correctBoundaryConditions();
         }
 

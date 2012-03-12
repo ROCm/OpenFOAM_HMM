@@ -80,7 +80,7 @@ setenv WM_COMPILE_OPTION Opt
 
 #- MPI implementation:
 #    WM_MPLIB = SYSTEMOPENMPI | OPENMPI | MPICH | MPICH-GM | HPMPI
-#               | GAMMA | MPI | QSMPI
+#               | GAMMA | MPI | QSMPI | SGIMPI
 setenv WM_MPLIB OPENMPI
 
 #- Operating System:

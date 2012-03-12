@@ -87,14 +87,8 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
 {
     // Private data
 
-        //- Frictional velocity
-        scalarField Ustar_;
-
         //- Direction of the z-coordinate
         vector z_;
-
-        //- Surface roughness lenght
-        scalarField z0_;
 
         //- Von Karman constant
         const scalar kappa_;
@@ -105,8 +99,14 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
         //- Reference hight
         const scalar Href_;
 
+        //- Surface roughness length
+        scalarField z0_;
+
         //- Minimum corrdinate value in z direction
-        const scalarField zGround_;
+        scalarField zGround_;
+
+        //- Frictional velocity
+        scalarField Ustar_;
 
 
 public:
@@ -173,20 +173,42 @@ public:
 
     // Member functions
 
-        //- Return max value
-        scalarField Ustar() const
-        {
-            return Ustar_;
-        }
+        // Access
 
-        //- Return z direction
-        const vector& z() const
-        {
-            return z_;
-        }
+            //- Return max value
+            scalarField Ustar() const
+            {
+                return Ustar_;
+            }
 
-        //- Update coefficients
-        virtual void updateCoeffs();
+            //- Return z direction
+            const vector& z() const
+            {
+                return z_;
+            }
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
+
+
+        // Evaluation functions
+
+            //- Update coefficients
+            virtual void updateCoeffs();
+
 
         //- Write
         virtual void write(Ostream&) const;

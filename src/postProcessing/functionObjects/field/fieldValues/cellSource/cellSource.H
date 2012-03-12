@@ -51,9 +51,12 @@ Description
       - none
       - sum
       - average
+      - weightedAverage
       - volAverage
       - volIntegrate
       - CoV (Coefficient of variation: standard deviation/mean)
+      - min
+      - max
 
 SourceFiles
     cellSource.C
@@ -105,6 +108,7 @@ public:
             opNone,
             opSum,
             opAverage,
+            opWeightedAverage,
             opVolAverage,
             opVolIntegrate,
             opMin,
@@ -113,7 +117,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 8> operationTypeNames_;
+        static const NamedEnum<operationType, 9> operationTypeNames_;
 
 
 private:
@@ -169,7 +173,8 @@ protected:
         Type processValues
         (
             const Field<Type>& values,
-            const scalarField& V
+            const scalarField& V,
+            const scalarField& weightField
         ) const;
 
         //- Output file header information

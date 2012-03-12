@@ -70,7 +70,8 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     Info<< "    faces:            " << nFaces << nl
         << "    internal faces:   " << nIntFaces << nl
         << "    cells:            " << nCells << nl
-        << "    faces per cell:   " << scalar(nFaces + nIntFaces)/nCells << nl
+        << "    faces per cell:   "
+        << scalar(nFaces + nIntFaces)/max(1, nCells) << nl
         << "    boundary patches: " << mesh.boundaryMesh().size() << nl
         << "    point zones:      " << mesh.pointZones().size() << nl
         << "    face zones:       " << mesh.faceZones().size() << nl

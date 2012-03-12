@@ -4,7 +4,8 @@ rho = min(rho, rhoMax);
 rho.relax();
 
 volScalarField rAU(1.0/UEqn().A());
-U = rAU*UEqn().H();
+volVectorField HbyA("HbyA", U);
+HbyA = rAU*UEqn().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -18,7 +19,7 @@ if (pimple.transonic())
         "phid",
         fvc::interpolate(psi)
        *(
-            (fvc::interpolate(U) & mesh.Sf())
+            (fvc::interpolate(HbyA) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
@@ -43,13 +44,17 @@ if (pimple.transonic())
 }
 else
 {
-    phi =
-        fvc::interpolate(rho)*
-        (
-            (fvc::interpolate(U) & mesh.Sf())
+    surfaceScalarField phiHbyA
+    (
+        "phiHbyA",
+        fvc::interpolate(rho)
+       *(
+            (fvc::interpolate(HbyA) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        );
-    mrfZones.relativeFlux(fvc::interpolate(rho), phi);
+        )
+    );
+
+    mrfZones.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -57,7 +62,7 @@ else
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
-          + fvc::div(phi)
+          + fvc::div(phiHbyA)
           - fvm::laplacian(rho*rAU, p)
         );
 
@@ -65,7 +70,7 @@ else
 
         if (pimple.finalNonOrthogonalIter())
         {
-            phi += pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 }
@@ -83,7 +88,7 @@ rho.relax();
 Info<< "rho max/min : " << max(rho).value()
     << " " << min(rho).value() << endl;
 
-U -= rAU*fvc::grad(p);
+U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
 K = 0.5*magSqr(U);
 

@@ -6,27 +6,25 @@
     thermo.rho() -= psi*p;
 
     volScalarField rAU(1.0/UEqn.A());
-    U = rAU*UEqn.H();
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*UEqn.H();
 
     if (pimple.transonic())
     {
-        surfaceScalarField phiv
+        surfaceScalarField phiHbyA
         (
-            (fvc::interpolate(U) & mesh.Sf())
+            "phiHbyA",
+            (fvc::interpolate(HbyA) & mesh.Sf())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
-        phi = fvc::interpolate(rho)*phiv;
+        surfaceScalarField phid("phid", fvc::interpolate(thermo.psi())*phiHbyA);
 
-        surfaceScalarField phid
-        (
-            "phid",
-            fvc::interpolate(thermo.psi())*phiv
-        );
+        phiHbyA *= fvc::interpolate(rho);
 
         fvScalarMatrix pDDtEqn
         (
-            fvc::ddt(rho) + fvc::div(phi)
+            fvc::ddt(rho) + fvc::div(phiHbyA)
           + correction(fvm::ddt(psi, p) + fvm::div(phid, p))
         );
 
@@ -42,23 +40,26 @@
 
             if (pimple.finalNonOrthogonalIter())
             {
-                phi += pEqn.flux();
+                phi = phiHbyA + pEqn.flux();
             }
         }
     }
     else
     {
-        phi =
+        surfaceScalarField phiHbyA
+        (
+            "phiHbyA",
             fvc::interpolate(rho)
            *(
-                (fvc::interpolate(U) & mesh.Sf())
+                (fvc::interpolate(HbyA) & mesh.Sf())
               + fvc::ddtPhiCorr(rAU, rho, U, phi)
-            );
+            )
+        );
 
         fvScalarMatrix pDDtEqn
         (
             fvc::ddt(rho) + psi*correction(fvm::ddt(p))
-          + fvc::div(phi)
+          + fvc::div(phiHbyA)
         );
 
         while (pimple.correctNonOrthogonal())
@@ -73,7 +74,7 @@
 
             if (pimple.finalNonOrthogonalIter())
             {
-                phi += pEqn.flux();
+                phi = phiHbyA + pEqn.flux();
             }
         }
     }
@@ -84,7 +85,7 @@
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"
 
-    U -= rAU*fvc::grad(p);
+    U = HbyA - rAU*fvc::grad(p);
     U.correctBoundaryConditions();
     K = 0.5*magSqr(U);
 

@@ -6,27 +6,23 @@
     thermo.rho() -= psi*p;
 
     volScalarField rAU(1.0/UEqn.A());
-    U = rAU*(UEqn == sources(rho, U))().H();
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*(UEqn == sources(rho, U))().H();
 
-    if (pZones.size() > 0)
+    surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
+    if (pZones.size() == 0)
     {
-        // ddtPhiCorr not well defined for cases with porosity
-        phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
+        // ddtPhiCorr only used without porosity
+        phiHbyA += fvc::ddtPhiCorr(rAU, rho, U, phi);
     }
-    else
-    {
-        phi =
-            fvc::interpolate(rho)
-           *(
-                (fvc::interpolate(U) & mesh.Sf())
-              + fvc::ddtPhiCorr(rAU, rho, U, phi)
-            );
-    }
+
+    phiHbyA *= fvc::interpolate(rho);
+
 
     fvScalarMatrix pDDtEqn
     (
         fvc::ddt(rho) + psi*correction(fvm::ddt(p))
-      + fvc::div(phi)
+      + fvc::div(phiHbyA)
      ==
         parcels.Srho()
       + sources(psi, p, rho.name())
@@ -47,7 +43,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            phi += pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 
@@ -57,7 +53,7 @@
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"
 
-    U -= rAU*fvc::grad(p);
+    U = HbyA - rAU*fvc::grad(p);
     U.correctBoundaryConditions();
     sources.correct(U);
 

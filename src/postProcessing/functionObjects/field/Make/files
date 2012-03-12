@@ -29,6 +29,9 @@ streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C
 streamLine/streamLineFunctionObject.C
 
+turbulenceFields/turbulenceFields.C
+turbulenceFields/turbulenceFieldsFunctionObject.C
+
 wallBoundedStreamLine/wallBoundedStreamLine.C
 wallBoundedStreamLine/wallBoundedStreamLineFunctionObject.C
 wallBoundedStreamLine/wallBoundedStreamLineParticle.C

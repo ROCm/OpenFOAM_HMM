@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
     os  << nl
         << "CELL_DATA " << nFaces << nl
         << "FIELD attributes 1" << nl
-        << "zone 1 " << nFaces << " float" << nl;
+        << "region 1 " << nFaces << " float" << nl;
 
 
     forAll(zoneLst, zoneI)
@@ -103,7 +103,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
     os  << nl
         << "CELL_DATA " << zoneIds.size() << nl
         << "FIELD attributes 1" << nl
-        << "zone 1 " << zoneIds.size() << " float" << nl;
+        << "region 1 " << zoneIds.size() << " float" << nl;
 
     forAll(zoneIds, faceI)
     {

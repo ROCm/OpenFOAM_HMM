@@ -307,12 +307,20 @@ void Foam::decompositionMethod::calcCellCells
     // Done as postprocessing step since we now have cellCells.
     label newIndex = 0;
     labelHashSet nbrCells;
+
+
+    if (cellCells.size() == 0)
+    {
+        return;
+    }
+
+    label startIndex = cellCells.offsets()[0];
+
     forAll(cellCells, cellI)
     {
         nbrCells.clear();
         nbrCells.insert(globalAgglom.toGlobal(cellI));
 
-        label startIndex = cellCells.offsets()[cellI];
         label endIndex = cellCells.offsets()[cellI+1];
 
         for (label i = startIndex; i < endIndex; i++)
@@ -322,16 +330,21 @@ void Foam::decompositionMethod::calcCellCells
                 cellCells.m()[newIndex++] = cellCells.m()[i];
             }
         }
+        startIndex = endIndex;
         cellCells.offsets()[cellI+1] = newIndex;
     }
 
     cellCells.m().setSize(newIndex);
 
-
     //forAll(cellCells, cellI)
     //{
-    //    const labelUList cCells = cellCells[cellI];
+    //    Pout<< "Original: Coarse cell " << cellI << endl;
+    //    forAll(mesh.cellCells()[cellI], i)
+    //    {
+    //        Pout<< "    nbr:" << mesh.cellCells()[cellI][i] << endl;
+    //    }
     //    Pout<< "Compacted: Coarse cell " << cellI << endl;
+    //    const labelUList cCells = cellCells[cellI];
     //    forAll(cCells, i)
     //    {
     //        Pout<< "    nbr:" << cCells[i] << endl;

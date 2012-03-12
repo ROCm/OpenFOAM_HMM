@@ -153,8 +153,14 @@ motionControl
             cellSizeFunction    uniformDistance;
             uniformDistanceCoeffs
             {
-                cellSize        0.02;
+                cellSize        0.04;
                 distance        0.1;
+            }
+            linearDistanceCoeffs
+            {
+                surfaceCellSize         0.02;
+                distanceCellSize        $defaultCellSize;
+                distance                0.1;
             }
         }
     }

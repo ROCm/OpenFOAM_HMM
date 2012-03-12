@@ -9,5 +9,4 @@ CGAL_LIBS = \
     -L$(MPFR_ARCH_PATH)/lib \
     -L$(BOOST_ARCH_PATH)/lib \
     -lmpfr \
-    -I/usr/lib64 \
-    -lboost_thread-mt
+    -lboost_thread

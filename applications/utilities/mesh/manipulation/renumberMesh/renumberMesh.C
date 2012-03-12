@@ -432,6 +432,7 @@ autoPtr<mapPolyMesh> reorderMesh
     );
 
     // Check if any faces need swapping.
+    labelHashSet flipFaceFlux(newOwner.size());
     forAll(newNeighbour, faceI)
     {
         label own = newOwner[faceI];
@@ -441,6 +442,7 @@ autoPtr<mapPolyMesh> reorderMesh
         {
             newFaces[faceI].flip();
             Swap(newOwner[faceI], newNeighbour[faceI]);
+            flipFaceFlux.insert(faceI);
         }
     }
 
@@ -491,7 +493,7 @@ autoPtr<mapPolyMesh> reorderMesh
             identity(mesh.nPoints()),   // reversePointMap,
             reverseFaceOrder,           // reverseFaceMap,
             reverseCellOrder,           // reverseCellMap,
-            labelHashSet(0),            // flipFaceFlux,
+            flipFaceFlux,               // flipFaceFlux,
             patchPointMap,              // patchPointMap,
             labelListList(0),           // pointZoneMap,
             labelListList(0),           // faceZonePointMap,
@@ -717,7 +719,6 @@ int main(int argc, char *argv[])
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl
                 << endl;
         }
-
     }
     else
     {
@@ -889,8 +890,6 @@ int main(int argc, char *argv[])
             mesh,
             mesh.cellCentres()
         );
-        labelList reverseCellOrder = invert(mesh.nCells(), cellOrder);
-
 
         if (sortCoupledFaceCells)
         {
@@ -907,8 +906,10 @@ int main(int argc, char *argv[])
                 }
             }
 
+            labelList reverseCellOrder = invert(mesh.nCells(), cellOrder);
+
+            labelList bndCells(nBndCells);
             labelList bndCellMap(nBndCells);
-            labelList bndCells(bndCellMap);
             nBndCells = 0;
             forAll(pbm, patchI)
             {
@@ -918,14 +919,18 @@ int main(int argc, char *argv[])
                     forAll(faceCells, i)
                     {
                         label cellI = faceCells[i];
-                        bndCells[nBndCells] = cellI;
-                        bndCellMap[nBndCells++] = reverseCellOrder[cellI];
+
+                        if (reverseCellOrder[cellI] != -1)
+                        {
+                            bndCells[nBndCells] = cellI;
+                            bndCellMap[nBndCells++] = reverseCellOrder[cellI];
+                            reverseCellOrder[cellI] = -1;
+                        }
                     }
                 }
             }
             bndCells.setSize(nBndCells);
             bndCellMap.setSize(nBndCells);
-
 
             // Sort
             labelList order;
@@ -942,7 +947,7 @@ int main(int argc, char *argv[])
             }
 
             Info<< "Ordered all " << nBndCells << " cells with a coupled face"
-                << "  to the end of the cell list, starting at " << sortedI
+                << " to the end of the cell list, starting at " << sortedI
                 << endl;
 
             // Compact
