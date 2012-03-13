@@ -35,7 +35,7 @@ namespace Foam
 
 bool Foam::triSurface::readVTK(const fileName& fName)
 {
-    // Read (and triagulate) point, faces, zone info
+    // Read (and triangulate) point, faces, zone info
     fileFormats::VTKsurfaceFormat<triFace> surf(fName);
 
     List<labelledTri> tris(surf.faces().size());
