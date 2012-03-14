@@ -137,9 +137,11 @@ void Foam::forceCoeffs::write()
             if (log_)
             {
                 Info<< "forceCoeffs output:" << nl
-                    << "    Cd = " << Cd << nl
-                    << "    Cl = " << Cl << nl
-                    << "    Cm = " << Cm << nl
+                    << "    Cm    = " << Cm << nl
+                    << "    Cd    = " << Cd << nl
+                    << "    Cl    = " << Cl << nl
+                    << "    Cl(f) = " << Cl/2.0 - Cm << nl
+                    << "    Cl(r) = " << Cl/2.0 + Cm << nl
                     << endl;
             }
         }
