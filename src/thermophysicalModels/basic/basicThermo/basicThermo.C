@@ -350,6 +350,38 @@ Foam::tmp<Foam::volScalarField> Foam::basicThermo::hc() const
 }
 
 
+Foam::tmp<Foam::scalarField> Foam::basicThermo::TH
+(
+    const scalarField& h,
+    const scalarField& T0,      // starting temperature
+    const labelList& cells
+) const
+{
+    notImplemented
+    (
+        "basicThermo::TH"
+        "(const scalarField&, const scalarField&, const labelList&) const"
+    );
+    return tmp<scalarField>(NULL);
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::basicThermo::TH
+(
+    const scalarField& h,
+    const scalarField& T0,      // starting temperature
+    const label patchi
+) const
+{
+    notImplemented
+    (
+        "basicThermo::TH"
+        "(const scalarField&, const scalarField&, const label) const"
+    );
+    return tmp<scalarField>(NULL);
+}
+
+
 Foam::volScalarField& Foam::basicThermo::e()
 {
     notImplemented("basicThermo::e()");

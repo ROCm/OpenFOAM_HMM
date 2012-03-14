@@ -198,6 +198,22 @@ public:
             //- Chemical enthalpy [J/kg]
             virtual tmp<volScalarField> hc() const;
 
+            //- Temperature from enthalpy for cell-set
+            virtual tmp<scalarField> TH
+            (
+                const scalarField& h,
+                const scalarField& T0,      // starting temperature
+                const labelList& cells
+            ) const;
+
+            //- Temperature from enthalpy for patch
+            virtual tmp<scalarField> TH
+            (
+                const scalarField& h,
+                const scalarField& T0,      // starting temperature
+                const label patchi
+            ) const;
+
             //- Internal energy [J/kg]
             //  Non-const access allowed for transport equations
             virtual volScalarField& e();

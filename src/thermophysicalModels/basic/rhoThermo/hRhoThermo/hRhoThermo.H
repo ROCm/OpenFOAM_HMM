@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,22 @@ public:
             virtual tmp<scalarField> h
             (
                 const scalarField& T,
+                const label patchi
+            ) const;
+
+            //- Temperature from enthalpy for cell-set
+            virtual tmp<scalarField> TH
+            (
+                const scalarField& h,
+                const scalarField& T0,      // starting temperature
+                const labelList& cells
+            ) const;
+
+            //- Temperature from enthalpy for patch
+            virtual tmp<scalarField> TH
+            (
+                const scalarField& h,
+                const scalarField& T0,      // starting temperature
                 const label patchi
             ) const;
 
