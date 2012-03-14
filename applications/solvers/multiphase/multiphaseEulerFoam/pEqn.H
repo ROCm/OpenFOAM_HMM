@@ -76,6 +76,7 @@
           + fvc::ddtPhiCorr(rAUs[phasei], alpha, phase.U(), phase.phi())
           + rAlphaAUfs[phasei]*(g & mesh.Sf())
         );
+
         mrfZones.relativeFlux(phiHbyAs[phasei]);
 
         multiphaseSystem::dragModelTable::const_iterator dmIter =
@@ -89,10 +90,19 @@
             ++dmIter, ++dcIter
         )
         {
-            const phaseModel *phase2Ptr = &dmIter()->phase2();
-            if (phase2Ptr == &phase)
+            const phaseModel *phase2Ptr = NULL;
+
+            if (&phase == &dmIter()->phase1())
+            {
+                phase2Ptr = &dmIter()->phase2();
+            }
+            else if (&phase == &dmIter()->phase2())
             {
                 phase2Ptr = &dmIter()->phase1();
+            }
+            else
+            {
+                continue;
             }
 
             phiHbyAs[phasei] +=
