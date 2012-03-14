@@ -35,7 +35,6 @@
     {
         phaseModel& phase = iter();
 
-        phase.phi().oldTime();
         mrfZones.absoluteFlux(phase.phi().oldTime());
         mrfZones.absoluteFlux(phase.phi());
 
@@ -173,7 +172,6 @@
                 phase.phi() =
                     phiHbyAs[phasei]
                   + rAlphaAUfs[phasei]*mSfGradp/phase.rho();
-                mrfZones.relativeFlux(phase.phi());
                 mrfZones.relativeFlux(phase.phi().oldTime());
                 phi += alphafs[phasei]*phase.phi();
 
@@ -206,7 +204,7 @@
                       + rAlphaAUfs[phasei]*mSfGradp/phase.rho()
                     );
 
-                phase.U() = fvc::reconstruct(phase.phi());
+                // phase.U() = fvc::reconstruct(phase.phi());
                 phase.U().correctBoundaryConditions();
 
                 U += alpha*phase.U();
