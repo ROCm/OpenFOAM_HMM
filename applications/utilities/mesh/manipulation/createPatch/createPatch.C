@@ -111,10 +111,18 @@ void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
         // Note: reduce possible since non-proc patches guaranteed in same order
         if (!isA<processorPolyPatch>(pp))
         {
+
+            // Add if
+            // - non zero size
+            // - or added from the createPatchDict
+            // - or cyclic (since referred to by other cyclic half or
+            //   proccyclic)
+
             if
             (
                 addedPatchNames.found(pp.name())
              || returnReduce(pp.size(), sumOp<label>()) > 0
+             || isA<coupledPolyPatch>(pp)
             )
             {
                 allPatches.append
@@ -131,6 +139,7 @@ void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
             else
             {
                 Info<< "Removing zero-sized patch " << pp.name()
+                    << " type " << pp.type()
                     << " at position " << patchI << endl;
             }
         }
