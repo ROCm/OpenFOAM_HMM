@@ -424,9 +424,6 @@ public:
 
         // Check
 
-            //- Total mass injected
-            inline scalar massInjected() const;
-
             //- Total mass in system
             inline scalar massInSystem() const;
 
