@@ -115,6 +115,8 @@
                 (1.0/phase.rho())*rAUs[phasei]*(*dcIter())
                *phase2Ptr->U();
 
+            // Alternative flux-pressure consistent drag but not momentum conservative
+            //
             // HbyAs[phasei] += fvc::reconstruct
             // (
             //     fvc::interpolate
