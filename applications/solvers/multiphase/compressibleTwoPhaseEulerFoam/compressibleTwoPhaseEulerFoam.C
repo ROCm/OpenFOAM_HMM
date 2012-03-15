@@ -45,6 +45,8 @@ Description
 
 #include "pimpleControl.H"
 
+#include "MRFZones.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -55,6 +57,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createMRFZones.H"
     #include "readPPProperties.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
