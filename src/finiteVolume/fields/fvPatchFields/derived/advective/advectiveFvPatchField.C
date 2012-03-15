@@ -304,21 +304,13 @@ void Foam::advectiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
 
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
-    if (rhoName_ != "rho")
-    {
-        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
-    }
+    this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    this->template writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
 
     if (lInf_ > SMALL)
     {
-        os.writeKeyword("fieldInf") << fieldInf_
-            << token::END_STATEMENT << nl;
-        os.writeKeyword("lInf") << lInf_
-            << token::END_STATEMENT << nl;
+        os.writeKeyword("fieldInf") << fieldInf_ << token::END_STATEMENT << nl;
+        os.writeKeyword("lInf") << lInf_ << token::END_STATEMENT << nl;
     }
 
     this->writeEntry("value", os);
