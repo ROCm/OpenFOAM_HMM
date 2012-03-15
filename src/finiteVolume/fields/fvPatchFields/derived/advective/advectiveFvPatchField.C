@@ -45,7 +45,7 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_("phi"),
     rhoName_("rho"),
     fieldInf_(pTraits<Type>::zero),
-    lInf_(0.0)
+    lInf_(-GREAT)
 {
     this->refValue() = pTraits<Type>::zero;
     this->refGrad() = pTraits<Type>::zero;
@@ -82,7 +82,7 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     fieldInf_(pTraits<Type>::zero),
-    lInf_(0.0)
+    lInf_(-GREAT)
 {
     if (dict.found("value"))
     {
@@ -110,9 +110,13 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
             (
                 "advectiveFvPatchField<Type>::"
                 "advectiveFvPatchField"
-                "(const fvPatch&, const Field<Type>&, const dictionary&)",
+                "("
+                    "const fvPatch&, "
+                    "const DimensionedField<Type, volMesh>&, "
+                    "const dictionary&"
+                ")",
                 dict
-            )   << "unphysical lInf specified (lInf < 0)\n"
+            )   << "unphysical lInf specified (lInf < 0)" << nl
                 << "    on patch " << this->patch().name()
                 << " of field " << this->dimensionedInternalField().name()
                 << " in file " << this->dimensionedInternalField().objectPath()
@@ -217,7 +221,7 @@ void Foam::advectiveFvPatchField<Type>::updateCoeffs()
 
     // Non-reflecting outflow boundary
     // If lInf_ defined setup relaxation to the value fieldInf_.
-    if (lInf_ > SMALL)
+    if (lInf_ > 0)
     {
         // Calculate the field relaxation coefficient k (See notes)
         const scalarField k(w*deltaT/lInf_);
@@ -248,12 +252,10 @@ void Foam::advectiveFvPatchField<Type>::updateCoeffs()
         }
         else
         {
-            FatalErrorIn
-            (
-                "advectiveFvPatchField<Type>::updateCoeffs()"
-            )   << "    Unsupported temporal differencing scheme : "
-                << ddtScheme
-                << "\n    on patch " << this->patch().name()
+            FatalErrorIn("advectiveFvPatchField<Type>::updateCoeffs()")
+                << "    Unsupported temporal differencing scheme : "
+                << ddtScheme << nl
+                << "    on patch " << this->patch().name()
                 << " of field " << this->dimensionedInternalField().name()
                 << " in file " << this->dimensionedInternalField().objectPath()
                 << exit(FatalError);
@@ -307,7 +309,7 @@ void Foam::advectiveFvPatchField<Type>::write(Ostream& os) const
     this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     this->template writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
 
-    if (lInf_ > SMALL)
+    if (lInf_ > 0)
     {
         os.writeKeyword("fieldInf") << fieldInf_ << token::END_STATEMENT << nl;
         os.writeKeyword("lInf") << lInf_ << token::END_STATEMENT << nl;
