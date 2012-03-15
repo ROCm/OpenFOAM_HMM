@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -224,6 +224,13 @@ inline const Foam::vectorIntegrationScheme&
 Foam::KinematicCloud<CloudType>::UIntegrator() const
 {
     return UIntegrator_;
+}
+
+
+template<class CloudType>
+inline Foam::label Foam::KinematicCloud<CloudType>::nParcels() const
+{
+    return this->size();
 }
 
 

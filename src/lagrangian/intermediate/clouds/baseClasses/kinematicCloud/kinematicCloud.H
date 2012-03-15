@@ -36,6 +36,7 @@ SourceFiles
 #define kinematicCloud_H
 
 #include "typeInfo.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
