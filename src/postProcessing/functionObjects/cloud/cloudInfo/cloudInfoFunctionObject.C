@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeCombustionTypes.H"
-#include "psiCombustionModel.H"
+#include "cloudInfoFunctionObject.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace combustionModels
-{
-    makeCombustionTypes
+    defineNamedTemplateTypeNameAndDebug(cloudInfoFunctionObject, 0);
+
+    addToRunTimeSelectionTable
     (
-        infinitelyFastChemistry,
-        psiCombustionModel
+        functionObject,
+        cloudInfoFunctionObject,
+        dictionary
     );
 }
-}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

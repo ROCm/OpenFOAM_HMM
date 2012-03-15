@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,24 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::cloudInfoFunctionObject
+
+Description
+    FunctionObject wrapper around cloudInfo to allow them to be created via
+    the functions entry within controlDict.
+
+SourceFiles
+    cloudInfoFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "makeCombustionTypes.H"
-#include "psiCombustionModel.H"
+#ifndef cloudInfoFunctionObject_H
+#define cloudInfoFunctionObject_H
+
+#include "cloudInfo.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace combustionModels
-{
-    makeCombustionTypes
-    (
-        infinitelyFastChemistry,
-        psiCombustionModel
-    );
+    typedef OutputFilterFunctionObject<cloudInfo>
+        cloudInfoFunctionObject;
 }
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

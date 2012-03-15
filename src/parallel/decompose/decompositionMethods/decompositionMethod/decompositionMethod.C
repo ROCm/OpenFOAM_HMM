@@ -46,7 +46,13 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
     const dictionary& decompositionDict
 )
 {
-    const word methodType(decompositionDict.lookup("method"));
+    word methodType(decompositionDict.lookup("method"));
+
+    if (methodType == "scotch" && Pstream::parRun())
+    {
+        methodType = "ptscotch";
+    }
+
 
     Info<< "Selecting decompositionMethod " << methodType << endl;
 
