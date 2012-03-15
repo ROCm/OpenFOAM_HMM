@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,6 +202,50 @@ Foam::tmp<Foam::scalarField> Foam::hRhoThermo<MixtureType>::h
     }
 
     return th;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::hRhoThermo<MixtureType>::TH
+(
+    const scalarField& h,
+    const scalarField& T0,
+    const labelList& cells
+) const
+{
+    tmp<scalarField> tT(new scalarField(h.size()));
+    scalarField& T = tT();
+
+    forAll(h, celli)
+    {
+        T[celli] = this->cellMixture(cells[celli]).TH(h[celli], T0[celli]);
+    }
+
+    return tT;
+}
+
+
+template<class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::hRhoThermo<MixtureType>::TH
+(
+    const scalarField& h,
+    const scalarField& T0,
+    const label patchi
+) const
+{
+    tmp<scalarField> tT(new scalarField(h.size()));
+    scalarField& T = tT();
+
+    forAll(h, facei)
+    {
+        T[facei] = this->patchFaceMixture
+        (
+            patchi,
+            facei
+        ).TH(h[facei], T0[facei]);
+    }
+
+    return tT;
 }
 
 

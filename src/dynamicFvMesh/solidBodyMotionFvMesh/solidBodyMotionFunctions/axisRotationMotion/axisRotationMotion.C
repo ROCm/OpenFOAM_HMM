@@ -73,8 +73,6 @@ Foam::solidBodyMotionFunctions::axisRotationMotion::transformation() const
 {
     scalar t = time_.value();
 
-    // Motion around a centre of gravity
-
     // Rotation around centre of gravity (in radians)
     vector omega
     (
@@ -84,10 +82,7 @@ Foam::solidBodyMotionFunctions::axisRotationMotion::transformation() const
     );
 
     scalar magOmega = mag(omega);
-
-    scalar cosHalfTheta = cos(0.5*magOmega);
-
-    quaternion R(cosHalfTheta, omega/magOmega);
+    quaternion R(omega/magOmega, magOmega);
     septernion TR(septernion(CofG_)*R*septernion(-CofG_));
 
     Info<< "solidBodyMotionFunctions::axisRotationMotion::transformation(): "

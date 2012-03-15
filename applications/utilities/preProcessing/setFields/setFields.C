@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -216,14 +216,20 @@ bool setFaceFieldType
         }
 
         // Override
+        bool hasWarned = false;
         labelList nChanged(field.boundaryField().size(), 0);
         forAll(selectedFaces, i)
         {
             label facei = selectedFaces[i];
             if (mesh.isInternalFace(facei))
             {
-                WarningIn("setFaceFieldType(..)")
-                    << "Ignoring internal face " << facei << endl;
+                if (!hasWarned)
+                {
+                    hasWarned = true;
+                    WarningIn("setFaceFieldType(..)")
+                        << "Ignoring internal face " << facei
+                        << ". Suppressing further warnings." << endl;
+                }
             }
             else
             {
