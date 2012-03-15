@@ -37,6 +37,9 @@
 
     surfaceScalarField phiHbyA("phiHbyA", alpha1f*phiHbyA1 + alpha2f*phiHbyA2);
 
+    HbyA1 += (1.0/rho1)*rAU1*dragCoeff*U2;
+    HbyA2 += (1.0/rho2)*rAU2*dragCoeff*U1;
+
     surfaceScalarField Dp
     (
         "Dp",
@@ -110,10 +113,7 @@
             p.relax();
             mSfGradp = pEqnIncomp.flux()/Dp;
 
-            volVectorField U10 = U1;
-
             U1 = HbyA1
-               + (1.0/rho1)*rAU1*dragCoeff*U2
                + fvc::reconstruct
                  (
                      rAlphaAU1f*(g & mesh.Sf())
@@ -122,7 +122,6 @@
             U1.correctBoundaryConditions();
 
             U2 = HbyA2
-               + (1.0/rho2)*rAU2*dragCoeff*U10
                + fvc::reconstruct
                  (
                      rAlphaAU2f*(g & mesh.Sf())
