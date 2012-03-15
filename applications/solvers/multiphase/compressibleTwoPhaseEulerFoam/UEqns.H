@@ -18,7 +18,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
         volTensorField Rc1
         (
             "Rc1",
-            ((2.0/3.0)*I)*(sqr(Ct)*k + nuEff1*tr(gradU1T)) - nuEff1*gradU1T
+            (((2.0/3.0)*I)*nuEff1)*tr(gradU1T) - nuEff1*gradU1T
         );
 
         if (kineticTheory.on())
@@ -45,7 +45,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
           - fvm::Sp(dragCoeff/rho1, U1)
           - alpha1*alpha2/rho1*(liftForce - Cvm*rho2*DDtU2)
         );
-
+        mrfZones.addCoriolis(alpha1, U1Eqn);
         U1Eqn.relax();
     }
 
@@ -54,7 +54,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
         volTensorField Rc2
         (
             "Rc2",
-            ((2.0/3.0)*I)*(k + nuEff2*tr(gradU2T)) - nuEff2*gradU2T
+            (((2.0/3.0)*I)*nuEff2)*tr(gradU2T) - nuEff2*gradU2T
         );
 
         U2Eqn =
@@ -76,7 +76,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
           - fvm::Sp(dragCoeff/rho2, U2)
           + alpha1*alpha2/rho2*(liftForce + Cvm*rho2*DDtU1)
         );
-
+        mrfZones.addCoriolis(alpha2, U2Eqn);
         U2Eqn.relax();
     }
 }
