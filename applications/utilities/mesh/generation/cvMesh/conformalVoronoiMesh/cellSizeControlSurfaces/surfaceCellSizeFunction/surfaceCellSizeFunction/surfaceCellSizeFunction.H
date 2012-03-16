@@ -22,26 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSizeFunction
+    Foam::surfaceCellSizeFunction
 
 Description
     Abstract base class for specifying target cell sizes
 
 SourceFiles
-    cellSizeFunction.C
+    surfaceCellSizeFunction.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSizeFunction_H
-#define cellSizeFunction_H
+#ifndef surfaceCellSizeFunction_H
+#define surfaceCellSizeFunction_H
 
-#include "point.H"
-#include "conformalVoronoiMesh.H"
 #include "searchableSurface.H"
 #include "dictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "surfaceCellSizeFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,56 +46,27 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class cellSizeFunction Declaration
+                     Class surfaceCellSizeFunction Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellSizeFunction
+class surfaceCellSizeFunction
 :
     public dictionary
 {
 
-public:
-
-    //- Runtime type information
-    TypeName("cellSizeFunction");
-
-    //- Surface side mode
-    enum sideMode
-    {
-        smInside,         // Control inside the surface
-        smOutside,        // Control outside the surface
-        rmBothsides       // Control on both sides of a surface
-    };
-
-
 protected:
-
-    // Static data
-
-        //- Point closeness tolerance to a surface where the function "snaps" to
-        //  including the surface
-        static scalar snapToSurfaceTol_;
-
 
     // Protected data
 
-        //- Reference to the searchableSurface that cellSizeFunction
+        //- Reference to the searchableSurface that surfaceCellSizeFunction
         //  relates to
         const searchableSurface& surface_;
 
-        //- Cell size at the surface
-        scalarField surfaceCellSize_;
+        const dictionary coeffsDict_;
 
-        autoPtr<surfaceCellSizeFunction> surfaceCellSizeFunction_;
-
-        //- Method details dictionary
-        dictionary coeffsDict_;
-
-        //- Mode of size specification, i.e. inside, outside or bothSides
-        sideMode sideMode_;
-
-        //- Priority of this cellSizeFunction
-        label priority_;
+        //- If cell resizing is allowed, this is the factor of the old cell size
+        //  to get the new cell size
+        scalar refinementFactor_;
 
 
 private:
@@ -106,52 +74,56 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        cellSizeFunction(const cellSizeFunction&);
+        surfaceCellSizeFunction(const surfaceCellSizeFunction&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cellSizeFunction&);
+        void operator=(const surfaceCellSizeFunction&);
 
 
 public:
+
+    //- Runtime type information
+    TypeName("surfaceCellSizeFunction");
+
 
     // Declare run-time constructor selection table
 
         declareRunTimeSelectionTable
         (
             autoPtr,
-            cellSizeFunction,
+            surfaceCellSizeFunction,
             dictionary,
             (
-                const dictionary& cellSizeFunctionDict,
+                const dictionary& surfaceCellSizeFunctionDict,
                 const searchableSurface& surface
             ),
-            (cellSizeFunctionDict, surface)
+            (surfaceCellSizeFunctionDict, surface)
         );
 
 
     // Constructors
 
         //- Construct from components
-        cellSizeFunction
+        surfaceCellSizeFunction
         (
             const word& type,
-            const dictionary& cellSizeFunctionDict,
+            const dictionary& surfaceCellSizeFunctionDict,
             const searchableSurface& surface
         );
 
 
     // Selectors
 
-        //- Return a reference to the selected cellSizeFunction
-        static autoPtr<cellSizeFunction> New
+        //- Return a reference to the selected surfaceCellSizeFunction
+        static autoPtr<surfaceCellSizeFunction> New
         (
-            const dictionary& cellSizeFunctionDict,
+            const dictionary& surfaceCellSizeFunctionDict,
             const searchableSurface& surface
         );
 
 
     //- Destructor
-    virtual ~cellSizeFunction();
+    virtual ~surfaceCellSizeFunction();
 
 
     // Member Functions
@@ -162,32 +134,17 @@ public:
             return coeffsDict_;
         }
 
-        inline label priority() const
-        {
-            return priority_;
-        }
+        virtual const scalar& surfaceSize(const label index) const = 0;
 
-        //- Modify scalar argument to the cell size specified by function.
-        //  Return a boolean specifying if the function was used, i.e. false if
-        //  the point was not in range of the surface for a spatially varying
-        //  size.
-        virtual bool cellSize
+        virtual const scalar& refineSurfaceSize(const label index) = 0;
+
+        virtual scalar interpolate
         (
             const point& pt,
-            scalar& size
+            const label index
         ) const = 0;
 
-
-        virtual bool setCellSize
-        (
-            const pointField& pts
-        )
-        {
-            WarningIn("cellSizeFunction::setCellSize(const point&, const scalar)")
-                << "Not overloaded."
-                << endl;
-            return false;
-        }
+        virtual void recalculateInterpolation() const = 0;
 };
 
 

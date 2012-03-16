@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,8 @@ License
 
 #include "linearDistance.H"
 #include "addToRunTimeSelectionTable.H"
+#include "triSurfaceMesh.H"
+#include "triSurfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,29 +48,37 @@ linearDistance::linearDistance
 )
 :
     cellSizeFunction(typeName, initialPointsDict, surface),
-    surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
     distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
     distance_(readScalar(coeffsDict().lookup("distance"))),
-    distanceSqr_(sqr(distance_)),
-    gradient_((distanceCellSize_ - surfaceCellSize_)/distance_)
+    distanceSqr_(sqr(distance_))
 {}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar linearDistance::sizeFunction(scalar d) const
+scalar linearDistance::sizeFunction
+(
+    const point& pt,
+    scalar d,
+    label index
+) const
 {
-    return gradient_*d + surfaceCellSize_;
+    const scalar interpolatedSize
+        = surfaceCellSizeFunction_().interpolate(pt, index);
+
+    scalar gradient
+        = (distanceCellSize_ - interpolatedSize)
+          /distance_;
+
+    scalar size = gradient*d + interpolatedSize;
+
+    return size;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool linearDistance::cellSize
-(
-    const point& pt,
-    scalar& size
-) const
+bool linearDistance::cellSize(const point& pt, scalar& size) const
 {
     size = 0;
 
@@ -85,18 +95,23 @@ bool linearDistance::cellSize
 
     if (hitInfo.hit())
     {
+        const point& hitPt = hitInfo.hitPoint();
+        const label hitIndex = hitInfo.index();
+
+        const scalar dist = mag(pt - hitPt);
+
         if (sideMode_ == rmBothsides)
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             return true;
         }
 
         // If the nearest point is essentially on the surface, do not do a
         // getVolumeType calculation, as it will be prone to error.
-        if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
+        if (dist < snapToSurfaceTol_)
         {
-            size = sizeFunction(0);
+            size = sizeFunction(hitPt, 0, hitIndex);
 
             return true;
         }
@@ -114,7 +129,7 @@ bool linearDistance::cellSize
          && vTL[0] == searchableSurface::INSIDE
         )
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             functionApplied = true;
         }
@@ -124,7 +139,7 @@ bool linearDistance::cellSize
          && vTL[0] == searchableSurface::OUTSIDE
         )
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             functionApplied = true;
         }
@@ -133,6 +148,48 @@ bool linearDistance::cellSize
     }
 
     return false;
+}
+
+
+bool linearDistance::setCellSize(const pointField& pts)
+{
+    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
+
+    forAll(pts, ptI)
+    {
+        const Foam::point& pt = pts[ptI];
+
+        List<pointIndexHit> hits;
+
+        surface_.findNearest
+        (
+            pointField(1, pt),
+            scalarField(1, distanceSqr_),
+            hits
+        );
+
+        const label surfHitI = hits[0].index();
+
+        if
+        (
+            hits[0].hit()
+         && !surfaceAlreadyHit.found(surfHitI)
+        )
+        {
+            // Halving cell size is arbitrary
+            surfaceCellSizeFunction_().refineSurfaceSize(surfHitI);
+
+            surfaceAlreadyHit.insert(surfHitI);
+        }
+    }
+
+    // Force recalculation of the interpolation
+    if (!pts.empty())
+    {
+        surfaceCellSizeFunction_().recalculateInterpolation();
+    }
+
+    return true;
 }
 
 

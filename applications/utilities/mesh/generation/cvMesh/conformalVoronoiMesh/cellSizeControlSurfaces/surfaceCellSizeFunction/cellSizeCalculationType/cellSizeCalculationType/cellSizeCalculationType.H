@@ -22,89 +22,104 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::linearSpatial
+    Foam::cellSizeCalculationType
 
 Description
+    Abstract base class for specifying target cell sizes
 
 SourceFiles
-    linearSpatial.C
+    cellSizeCalculationType.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearSpatial_H
-#define linearSpatial_H
+#ifndef cellSizeCalculationType_H
+#define cellSizeCalculationType_H
 
-#include "cellSizeFunction.H"
+#include "searchableSurface.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
+#include "triSurfaceFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class triSurfaceMesh;
+
 /*---------------------------------------------------------------------------*\
-                         Class linearSpatial Declaration
+                     Class cellSizeCalculationType Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearSpatial
-:
-    public cellSizeFunction
+class cellSizeCalculationType
 {
+
+protected:
+
+        const dictionary& cellSizeCalculationTypeDict_;
+
 
 private:
 
-    // Private data
-
-        //- Reference point for spatial size grading
-        point referencePoint_;
-
-        //- Cell size at reference point
-        scalar referenceCellSize_;
-
-        //- Direction of cell size grading, stored as unit vector, may be
-        //  supplied with any magnitude
-        vector direction_;
-
-        //- Gradient of cell size change in direction of direction_
-        scalar cellSizeGradient_;
-
-
     // Private Member Functions
 
-        //- Calculate the cell size as a function of the given position
-        scalar sizeFunction(const point& pt) const;
+        //- Disallow default bitwise copy construct
+        cellSizeCalculationType(const cellSizeCalculationType&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const cellSizeCalculationType&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearSpatial");
+    TypeName("cellSizeCalculationType");
+
+
+    // Declare run-time constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            cellSizeCalculationType,
+            dictionary,
+            (
+                const dictionary& cellSizeCalculationTypeDict,
+                const triSurfaceMesh& surface
+            ),
+            (cellSizeCalculationTypeDict, surface)
+        );
+
 
     // Constructors
 
         //- Construct from components
-        linearSpatial
+        cellSizeCalculationType
         (
-            const dictionary& initialPointsDict,
-            const searchableSurface& surface
+            const word& type,
+            const dictionary& cellSizeCalculationTypeDict,
+            const triSurfaceMesh& surface
+        );
+
+
+    // Selectors
+
+        //- Return a reference to the selected cellSizeCalculationType
+        static autoPtr<cellSizeCalculationType> New
+        (
+            const dictionary& cellSizeCalculationTypeDict,
+            const triSurfaceMesh& surface
         );
 
 
     //- Destructor
-    virtual ~linearSpatial()
-    {}
+    virtual ~cellSizeCalculationType();
 
 
     // Member Functions
 
-        //- Modify scalar argument to the cell size specified by function.
-        //  Return a boolean specifying if the function was used, i.e. false if
-        //  the point was not in range of the surface for a spatially varying
-        //  size.
-        virtual bool cellSize
-        (
-            const point& pt,
-            scalar& size
-        ) const;
+        //- Load the cell size
+        virtual triSurfaceScalarField load() = 0;
 };
 
 

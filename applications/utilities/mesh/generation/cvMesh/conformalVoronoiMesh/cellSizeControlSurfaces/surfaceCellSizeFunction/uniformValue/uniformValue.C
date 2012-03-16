@@ -23,24 +23,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "uniformValue.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(uniformValue, 0);
+    addToRunTimeSelectionTable
+    (
+        surfaceCellSizeFunction,
+        uniformValue,
+        dictionary
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::uniformValue::uniformValue
+(
+    const dictionary& cellSizeFunctionDict,
+    const searchableSurface& surface
+)
+:
+    surfaceCellSizeFunction(typeName, cellSizeFunctionDict, surface),
+    surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize")))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::searchableSurfaces& Foam::cellSizeControlSurfaces::geometry() const
+const Foam::scalar& Foam::uniformValue::surfaceSize(const label index) const
 {
-    return allGeometry_;
+    return surfaceCellSize_;
 }
 
 
-const Foam::labelList& Foam::cellSizeControlSurfaces::surfaces() const
+const Foam::scalar& Foam::uniformValue::refineSurfaceSize(const label index)
 {
-    return surfaces_;
+    surfaceCellSize_ *= refinementFactor_;
+
+    return surfaceCellSize_;
 }
 
 
-Foam::scalar Foam::cellSizeControlSurfaces::defaultCellSize() const
+Foam::scalar Foam::uniformValue::interpolate
+(
+    const point& pt,
+    const label index
+) const
 {
-    return defaultCellSize_;
+    return surfaceCellSize_;
 }
+
+
+void Foam::uniformValue::recalculateInterpolation() const
+{}
 
 
 // ************************************************************************* //

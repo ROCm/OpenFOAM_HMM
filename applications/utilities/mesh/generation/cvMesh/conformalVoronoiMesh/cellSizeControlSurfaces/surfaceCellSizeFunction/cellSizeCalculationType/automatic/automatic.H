@@ -22,89 +22,94 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::linearSpatial
+    Foam::automatic
 
 Description
 
 SourceFiles
-    linearSpatial.C
+    automatic.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearSpatial_H
-#define linearSpatial_H
+#ifndef automatic_H
+#define automatic_H
 
-#include "cellSizeFunction.H"
+#include "cellSizeCalculationType.H"
+#include "triSurfaceFields.H"
+#include "PrimitivePatchInterpolation.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class triSurfaceMesh;
+
 /*---------------------------------------------------------------------------*\
-                         Class linearSpatial Declaration
+                         Class automatic Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearSpatial
+class automatic
 :
-    public cellSizeFunction
+    public cellSizeCalculationType
 {
 
 private:
 
     // Private data
 
-        //- Reference point for spatial size grading
-        point referencePoint_;
+        //- Dictionary of coefficients for automatic cell sizing
+        const dictionary& coeffsDict_;
 
-        //- Cell size at reference point
-        scalar referenceCellSize_;
+        //- Reference to the triSurfaceMesh
+        const triSurfaceMesh& surface_;
 
-        //- Direction of cell size grading, stored as unit vector, may be
-        //  supplied with any magnitude
-        vector direction_;
+        //- Name of the surface. Used to write the cell size field
+        const word surfaceName_;
 
-        //- Gradient of cell size change in direction of direction_
-        scalar cellSizeGradient_;
+        const Switch readCurvature_;
+        const word curvatureFile_;
 
+        const Switch readFeatureProximity_;
+        const word featureProximityFile_;
 
-    // Private Member Functions
+        const Switch readInternalCloseness_;
+        const word internalClosenessFile_;
 
-        //- Calculate the cell size as a function of the given position
-        scalar sizeFunction(const point& pt) const;
+        //- The curvature values are multiplied by the inverse of this value to
+        //  get the cell size
+        const scalar curvatureCellSizeFactor_;
+
+        //- The maximum allowable sell size
+        const scalar maximumCellSize_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearSpatial");
+    TypeName("automatic");
+
 
     // Constructors
 
         //- Construct from components
-        linearSpatial
+        automatic
         (
-            const dictionary& initialPointsDict,
-            const searchableSurface& surface
+            const dictionary& cellSizeCalcTypeDict,
+            const triSurfaceMesh& surface
         );
 
 
     //- Destructor
-    virtual ~linearSpatial()
+    virtual ~automatic()
     {}
 
 
     // Member Functions
 
-        //- Modify scalar argument to the cell size specified by function.
-        //  Return a boolean specifying if the function was used, i.e. false if
-        //  the point was not in range of the surface for a spatially varying
-        //  size.
-        virtual bool cellSize
-        (
-            const point& pt,
-            scalar& size
-        ) const;
+        //- Load the cell size field
+        virtual triSurfaceScalarField load();
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,6 +133,11 @@ public:
 
             //- Return the cell size at the given locations
             scalarField cellSize(const pointField& pts) const;
+
+        // Edit
+
+            //- Set the cell sizes for each point
+            void setCellSizes(const pointField& pts);
 };
 
 

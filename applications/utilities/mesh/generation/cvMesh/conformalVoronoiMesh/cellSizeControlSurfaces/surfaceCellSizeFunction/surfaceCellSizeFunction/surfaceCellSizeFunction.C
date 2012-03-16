@@ -23,123 +23,76 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cellSizeFunction.H"
+#include "surfaceCellSizeFunction.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(cellSizeFunction, 0);
-    defineRunTimeSelectionTable(cellSizeFunction, dictionary);
-
-    scalar cellSizeFunction::snapToSurfaceTol_ = 1e-10;
+    defineTypeNameAndDebug(surfaceCellSizeFunction, 0);
+    defineRunTimeSelectionTable(surfaceCellSizeFunction, dictionary);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cellSizeFunction::cellSizeFunction
+Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
 (
     const word& type,
-    const dictionary& cellSizeFunctionDict,
+    const dictionary& surfaceCellSizeFunctionDict,
     const searchableSurface& surface
 )
 :
-    dictionary(cellSizeFunctionDict),
+    dictionary(surfaceCellSizeFunctionDict),
     surface_(surface),
-    surfaceCellSizeFunction_
-    (
-        surfaceCellSizeFunction::New
-        (
-            cellSizeFunctionDict,
-            surface
-        )
-    ),
     coeffsDict_(subDict(type + "Coeffs")),
-    sideMode_(),
-    priority_(readLabel(cellSizeFunctionDict.lookup("priority")))
-{
-    word mode = cellSizeFunctionDict.lookup("mode");
-
-    if (surface_.hasVolumeType())
-    {
-        if (mode == "inside")
-        {
-            sideMode_ = smInside;
-        }
-        else if (mode == "outside")
-        {
-            sideMode_ = smOutside;
-        }
-        else if (mode == "bothSides")
-        {
-            sideMode_ = rmBothsides;
-        }
-        else
-        {
-            FatalErrorIn("cellSizeFunction::cellSizeFunction")
-                << "Unknown mode, expected: inside, outside or bothSides" << nl
-                << exit(FatalError);
-        }
-    }
-    else
-    {
-        if (mode != "bothSides")
-        {
-            WarningIn("cellSizeFunction::cellSizeFunction")
-                << "surface does not support volumeType, defaulting mode to "
-                << "bothSides."
-                << endl;
-        }
-
-        sideMode_ = rmBothsides;
-    }
-}
+    refinementFactor_(readScalar(lookup("refinementFactor")))
+{}
 
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
+Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 (
-    const dictionary& cellSizeFunctionDict,
+    const dictionary& surfaceCellSizeFunctionDict,
     const searchableSurface& surface
 )
 {
-    word cellSizeFunctionTypeName
+    word surfaceCellSizeFunctionTypeName
     (
-        cellSizeFunctionDict.lookup("cellSizeFunction")
+        surfaceCellSizeFunctionDict.lookup("surfaceCellSizeFunction")
     );
 
-    Info<< "    Selecting cellSizeFunction " << cellSizeFunctionTypeName
-        << endl;
+    Info<< "    Selecting surfaceCellSizeFunction "
+        << surfaceCellSizeFunctionTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(cellSizeFunctionTypeName);
+        dictionaryConstructorTablePtr_->find(surfaceCellSizeFunctionTypeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "cellSizeFunction::New(dictionary&, "
+            "surfaceCellSizeFunction::New(dictionary&, "
             "const conformalVoronoiMesh&, const searchableSurface&)"
-        )   << "Unknown cellSizeFunction type "
-            << cellSizeFunctionTypeName
+        )   << "Unknown surfaceCellSizeFunction type "
+            << surfaceCellSizeFunctionTypeName
             << endl << endl
-            << "Valid cellSizeFunction types are :" << endl
+            << "Valid surfaceCellSizeFunction types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<cellSizeFunction>
+    return autoPtr<surfaceCellSizeFunction>
     (
-        cstrIter()(cellSizeFunctionDict, surface)
+        cstrIter()(surfaceCellSizeFunctionDict, surface)
     );
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::cellSizeFunction::~cellSizeFunction()
+Foam::surfaceCellSizeFunction::~surfaceCellSizeFunction()
 {}
 
 

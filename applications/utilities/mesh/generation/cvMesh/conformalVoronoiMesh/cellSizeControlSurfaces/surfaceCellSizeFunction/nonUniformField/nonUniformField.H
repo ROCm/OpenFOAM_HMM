@@ -22,89 +22,93 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::linearSpatial
+    Foam::nonUniformField
 
 Description
 
 SourceFiles
-    linearSpatial.C
+    nonUniformField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearSpatial_H
-#define linearSpatial_H
+#ifndef nonUniformField_H
+#define nonUniformField_H
 
-#include "cellSizeFunction.H"
+#include "triSurfaceFields.H"
+#include "PrimitivePatchInterpolation.H"
+#include "surfaceCellSizeFunction.H"
+#include "cellSizeCalculationType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class triSurfaceMesh;
+class searchableSurface;
+
 /*---------------------------------------------------------------------------*\
-                         Class linearSpatial Declaration
+                           Class nonUniformField Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearSpatial
+class nonUniformField
 :
-    public cellSizeFunction
+    public surfaceCellSizeFunction
 {
 
-private:
+protected:
+
+    // Private typedef
+
+        typedef PrimitivePatchInterpolation
+        <
+            PrimitivePatch<labelledTri, List, pointField, point>
+        >   primitivePatchInterpolation;
+
 
     // Private data
 
-        //- Reference point for spatial size grading
-        point referencePoint_;
+        const triSurfaceMesh& surfaceTriMesh_;
 
-        //- Cell size at reference point
-        scalar referenceCellSize_;
+        triSurfaceScalarField surfaceCellSize_;
 
-        //- Direction of cell size grading, stored as unit vector, may be
-        //  supplied with any magnitude
-        vector direction_;
+        autoPtr<cellSizeCalculationType> cellSizeCalculationType_;
 
-        //- Gradient of cell size change in direction of direction_
-        scalar cellSizeGradient_;
+        mutable autoPtr<triSurfacePointScalarField> pointCellSize_;
 
-
-    // Private Member Functions
-
-        //- Calculate the cell size as a function of the given position
-        scalar sizeFunction(const point& pt) const;
+        mutable autoPtr<primitivePatchInterpolation> patch_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearSpatial");
+    TypeName("nonUniformField");
+
 
     // Constructors
 
         //- Construct from components
-        linearSpatial
+        nonUniformField
         (
-            const dictionary& initialPointsDict,
+            const dictionary& cellSizeFunctionDict,
             const searchableSurface& surface
         );
 
 
     //- Destructor
-    virtual ~linearSpatial()
+    virtual ~nonUniformField()
     {}
 
 
     // Member Functions
 
-        //- Modify scalar argument to the cell size specified by function.
-        //  Return a boolean specifying if the function was used, i.e. false if
-        //  the point was not in range of the surface for a spatially varying
-        //  size.
-        virtual bool cellSize
-        (
-            const point& pt,
-            scalar& size
-        ) const;
+        virtual const scalar& surfaceSize(const label index) const;
+
+        virtual const scalar& refineSurfaceSize(const label index);
+
+        virtual scalar interpolate(const point& pt, const label index) const;
+
+        virtual void recalculateInterpolation() const;
 };
 
 

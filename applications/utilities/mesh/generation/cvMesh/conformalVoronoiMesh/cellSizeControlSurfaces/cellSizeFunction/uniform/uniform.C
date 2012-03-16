@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,8 +44,7 @@ uniform::uniform
     const searchableSurface& surface
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface),
-    cellSize_(readScalar(coeffsDict().lookup("cellSize")))
+    cellSizeFunction(typeName, initialPointsDict, surface)
 {}
 
 
@@ -57,64 +56,115 @@ bool uniform::cellSize
     scalar& size
 ) const
 {
-    if (sideMode_ == rmBothsides)
-    {
-        size = cellSize_;
-
-        return true;
-    }
-
-    size = 0;
-
     List<pointIndexHit> hits;
 
     surface_.findNearest
     (
         pointField(1, pt),
-        scalarField(1, sqr(snapToSurfaceTol_)),
+        scalarField(1, sqr(GREAT)),
         hits
     );
 
     const pointIndexHit& hitInfo = hits[0];
 
-    // If the nearest point is essentially on the surface, do not do a
-    // getVolumeType calculation, as it will be prone to error.
     if (hitInfo.hit())
     {
-        size = cellSize_;
+        const point& hitPt = hitInfo.hitPoint();
+        const label index = hitInfo.index();
 
-        return true;
+        if (sideMode_ == rmBothsides)
+        {
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
+
+            return true;
+        }
+
+        size = 0;
+
+        List<pointIndexHit> closeToSurfaceHits;
+
+        surface_.findNearest
+        (
+            pointField(1, pt),
+            scalarField(1, sqr(snapToSurfaceTol_)),
+            closeToSurfaceHits
+        );
+
+        const pointIndexHit& closeToSurface = closeToSurfaceHits[0];
+
+        // If the nearest point is essentially on the surface, do not do a
+        // getVolumeType calculation, as it will be prone to error.
+        if (closeToSurface.hit())
+        {
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
+
+            return true;
+        }
+
+        pointField ptF(1, pt);
+        List<searchableSurface::volumeType> vTL(1);
+
+        surface_.getVolumeType(ptF, vTL);
+
+        bool functionApplied = false;
+
+        if
+        (
+            sideMode_ == smInside
+         && vTL[0] == searchableSurface::INSIDE
+        )
+        {
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
+
+            functionApplied = true;
+        }
+        else if
+        (
+            sideMode_ == smOutside
+         && vTL[0] == searchableSurface::OUTSIDE
+        )
+        {
+            size = surfaceCellSizeFunction_().interpolate(hitPt, index);
+
+            functionApplied = true;
+        }
+
+        return functionApplied;
     }
 
-    pointField ptF(1, pt);
-    List<searchableSurface::volumeType> vTL(1);
+    return false;
+}
 
-    surface_.getVolumeType(ptF, vTL);
 
-    bool functionApplied = false;
+bool uniform::setCellSize
+(
+    const pointField& pts
+)
+{
+//    labelHashSet surfaceAlreadyHit(cellSize_.size());
+//
+//    forAll(pts, ptI)
+//    {
+//        const Foam::point& pt = pts[ptI];
+//
+//        List<pointIndexHit> hits;
+//
+//        surface_.findNearest
+//        (
+//            pointField(1, pt),
+//            scalarField(1, sqr(GREAT)),
+//            hits
+//        );
+//
+//        if (hits[0].hit() && !surfaceAlreadyHit.found(hits[0].index()))
+//        {
+//            surfaceCellSizeFunction_().refineCellSize(hits[0].index());
+//
+//            surfaceAlreadyHit.insert(hits[0].index());
+//        }
+//    }
 
-    if
-    (
-        sideMode_ == smInside
-     && vTL[0] == searchableSurface::INSIDE
-    )
-    {
-        size = cellSize_;
-
-        functionApplied = true;
-    }
-    else if
-    (
-        sideMode_ == smOutside
-     && vTL[0] == searchableSurface::OUTSIDE
-    )
-    {
-        size = cellSize_;
-
-        functionApplied = true;
-    }
-
-    return functionApplied;
+    return true;
 }
 
 

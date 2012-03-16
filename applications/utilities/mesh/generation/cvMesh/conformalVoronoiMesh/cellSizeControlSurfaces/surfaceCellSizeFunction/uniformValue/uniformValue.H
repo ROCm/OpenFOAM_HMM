@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation 
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::linearSpatial
+    Foam::uniformValue
 
 Description
 
 SourceFiles
-    linearSpatial.C
+    uniformValue.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearSpatial_H
-#define linearSpatial_H
+#ifndef uniformValue_H
+#define uniformValue_H
 
-#include "cellSizeFunction.H"
+#include "surfaceCellSizeFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,69 +42,55 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class linearSpatial Declaration
+                           Class uniformValue Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearSpatial
+class uniformValue
 :
-    public cellSizeFunction
+    public surfaceCellSizeFunction
 {
 
 private:
 
     // Private data
 
-        //- Reference point for spatial size grading
-        point referencePoint_;
-
-        //- Cell size at reference point
-        scalar referenceCellSize_;
-
-        //- Direction of cell size grading, stored as unit vector, may be
-        //  supplied with any magnitude
-        vector direction_;
-
-        //- Gradient of cell size change in direction of direction_
-        scalar cellSizeGradient_;
-
-
-    // Private Member Functions
-
-        //- Calculate the cell size as a function of the given position
-        scalar sizeFunction(const point& pt) const;
+        scalar surfaceCellSize_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("linearSpatial");
+    TypeName("uniformValue");
+
 
     // Constructors
 
         //- Construct from components
-        linearSpatial
+        uniformValue
         (
-            const dictionary& initialPointsDict,
+            const dictionary& cellSizeFunctionDict,
             const searchableSurface& surface
         );
 
 
     //- Destructor
-    virtual ~linearSpatial()
+    virtual ~uniformValue()
     {}
 
 
     // Member Functions
 
-        //- Modify scalar argument to the cell size specified by function.
-        //  Return a boolean specifying if the function was used, i.e. false if
-        //  the point was not in range of the surface for a spatially varying
-        //  size.
-        virtual bool cellSize
+        virtual const scalar& surfaceSize(const label index) const;
+
+        virtual const scalar& refineSurfaceSize(const label index);
+
+        virtual scalar interpolate
         (
             const point& pt,
-            scalar& size
+            const label index
         ) const;
+
+        virtual void recalculateInterpolation() const;
 };
 
 
