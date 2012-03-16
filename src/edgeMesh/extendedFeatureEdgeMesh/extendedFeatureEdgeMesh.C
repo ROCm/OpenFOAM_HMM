@@ -819,6 +819,39 @@ void Foam::extendedFeatureEdgeMesh::nearestFeatureEdgeByType
 }
 
 
+void Foam::extendedFeatureEdgeMesh::allNearestFeaturePoints
+(
+    const point& sample,
+    scalar searchRadiusSqr,
+    List<pointIndexHit>& info
+) const
+{
+    DynamicList<pointIndexHit> dynPointHit;
+
+    // Pick up all the feature points that intersect the search sphere
+    labelList elems = pointTree().findSphere
+    (
+        sample,
+        searchRadiusSqr
+    );
+
+    forAll(elems, elemI)
+    {
+        label index = elems[elemI];
+        label ptI = pointTree().shapes().pointLabels()[index];
+        const point& pt = points()[ptI];
+
+        pointIndexHit nearHit;
+
+        nearHit = pointIndexHit(true, pt, index);
+
+        dynPointHit.append(nearHit);
+    }
+
+    info.transfer(dynPointHit);
+}
+
+
 void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
 (
     const point& sample,
