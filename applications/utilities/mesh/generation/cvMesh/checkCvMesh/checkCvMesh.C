@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
+
 #   include "addOverwriteOption.H"
 
 #   include "setRootCase.H"
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createMesh.H"
+#   include "createNamedPolyMesh.H"
 
     runTime.functionObjects().off();
 
@@ -57,13 +59,10 @@ int main(int argc, char *argv[])
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
-        Info<< "Create mesh for time = " << runTime.timeName()
+        Info<< "Time = " << runTime.timeName()
             << nl << endl;
 
         mesh.readUpdate();
-
-        Info<< "Read mesh in = "
-            << runTime.cpuTimeIncrement() << " s" << endl;
 
         // Check patches and faceZones are synchronised
         mesh.boundaryMesh().checkParallelSync(true);
@@ -87,8 +86,10 @@ int main(int argc, char *argv[])
             = cvMeshDict.subDict("meshQualityControls");
 
 
-        Info<< "Checking initial mesh ..." << endl;
+        Info<< "Checking mesh ..." << endl;
+
         faceSet wrongFaces(mesh, "wrongFaces", mesh.nFaces()/100);
+
         motionSmoother::checkMesh(false, mesh, meshQualityDict, wrongFaces);
 
         const label nInitErrors = returnReduce
@@ -117,6 +118,5 @@ int main(int argc, char *argv[])
     Info<< "End\n" << endl;
 
     return 0;
-
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,6 @@ private:
 
     // Private data
 
-        //- Cell size
-        scalar cellSize_;
-
 
 public:
 
@@ -89,6 +86,12 @@ public:
             const point& pt,
             scalar& size
         ) const;
+
+        //- Adapt local cell size. Return true if anything changed.
+        virtual bool setCellSize
+        (
+            const pointField& pts
+        );
 };
 
 
