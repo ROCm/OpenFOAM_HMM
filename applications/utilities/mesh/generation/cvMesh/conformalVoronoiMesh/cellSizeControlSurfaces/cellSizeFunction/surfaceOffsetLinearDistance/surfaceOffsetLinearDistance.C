@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,13 +50,10 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 )
 :
     cellSizeFunction(typeName, initialPointsDict, surface),
-    surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
     distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
     surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),
     totalDistance_(),
-    totalDistanceSqr_(),
-    gradient_(),
-    intercept_()
+    totalDistanceSqr_()
 {
     if
     (
@@ -111,25 +108,33 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
     }
 
     totalDistanceSqr_ = sqr(totalDistance_);
-
-    gradient_ =
-        (distanceCellSize_ - surfaceCellSize_)
-       /(totalDistance_ - surfaceOffset_);
-
-    intercept_ = surfaceCellSize_ - gradient_*surfaceOffset_;
 }
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar surfaceOffsetLinearDistance::sizeFunction(scalar d) const
+scalar surfaceOffsetLinearDistance::sizeFunction
+(
+    const point& pt,
+    scalar d,
+    label index
+) const
 {
+    const scalar interpolatedSize
+        = surfaceCellSizeFunction_().interpolate(pt, index);
+
     if (d <= surfaceOffset_)
     {
-        return surfaceCellSize_;
+        return interpolatedSize;
     }
 
-    return gradient_*d + intercept_;
+    scalar gradient =
+        (distanceCellSize_ - interpolatedSize)
+       /(totalDistance_ - surfaceOffset_);
+
+    scalar intercept = interpolatedSize - gradient*surfaceOffset_;
+
+    return gradient*d + intercept;
 }
 
 
@@ -156,9 +161,14 @@ bool surfaceOffsetLinearDistance::cellSize
 
     if (hitInfo.hit())
     {
+        const point& hitPt = hitInfo.hitPoint();
+        const label hitIndex = hitInfo.index();
+
+        const scalar dist = mag(pt - hitPt);
+
         if (sideMode_ == rmBothsides)
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             return true;
         }
@@ -167,7 +177,7 @@ bool surfaceOffsetLinearDistance::cellSize
         // getVolumeType calculation, as it will be prone to error.
         if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
         {
-            size = sizeFunction(0);
+            size = sizeFunction(hitPt, 0, hitIndex);
 
             return true;
         }
@@ -185,7 +195,7 @@ bool surfaceOffsetLinearDistance::cellSize
          && vTL[0] == searchableSurface::INSIDE
         )
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             functionApplied = true;
         }
@@ -195,7 +205,7 @@ bool surfaceOffsetLinearDistance::cellSize
          && vTL[0] == searchableSurface::OUTSIDE
         )
         {
-            size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+            size = sizeFunction(hitPt, dist, hitIndex);
 
             functionApplied = true;
         }

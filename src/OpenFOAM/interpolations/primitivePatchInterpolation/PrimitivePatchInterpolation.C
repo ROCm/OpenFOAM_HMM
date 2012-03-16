@@ -60,7 +60,7 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
     }
 
     const pointField& points = patch_.localPoints();
-    const faceList& faces = patch_.localFaces();
+    const List<typename Patch::FaceType>& faces = patch_.localFaces();
 
     faceToPointWeightsPtr_ = new scalarListList(points.size());
     scalarListList& weights = *faceToPointWeightsPtr_;
@@ -118,7 +118,7 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
     }
 
     const pointField& points = patch_.localPoints();
-    const faceList& faces = patch_.localFaces();
+    const List<typename Patch::FaceType>& faces = patch_.localFaces();
     const edgeList& edges = patch_.edges();
     const labelListList& edgeFaces = patch_.edgeFaces();
 
@@ -261,7 +261,7 @@ tmp<Field<Type> > PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
 
     Field<Type>& result = tresult();
 
-    const faceList& localFaces = patch_.localFaces();
+    const List<typename Patch::FaceType>& localFaces = patch_.localFaces();
 
     forAll(result, facei)
     {

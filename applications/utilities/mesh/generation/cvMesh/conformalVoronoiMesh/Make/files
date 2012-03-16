@@ -15,13 +15,23 @@ backgroundMeshDecomposition/backgroundMeshDecomposition.C
 
 cellSizeControlSurfaces/cellSizeControlSurfaces.C
 
-cellSiseFunctions = cellSizeControlSurfaces/cellSizeFunction
-$(cellSiseFunctions)/cellSizeFunction/cellSizeFunction.C
-$(cellSiseFunctions)/uniform/uniform.C
-$(cellSiseFunctions)/uniformDistance/uniformDistance.C
-$(cellSiseFunctions)/linearDistance/linearDistance.C
-$(cellSiseFunctions)/surfaceOffsetLinearDistance/surfaceOffsetLinearDistance.C
-$(cellSiseFunctions)/linearSpatial/linearSpatial.C
+cellSizeFunctions = cellSizeControlSurfaces/cellSizeFunction
+$(cellSizeFunctions)/cellSizeFunction/cellSizeFunction.C
+$(cellSizeFunctions)/uniform/uniform.C
+$(cellSizeFunctions)/uniformDistance/uniformDistance.C
+$(cellSizeFunctions)/linearDistance/linearDistance.C
+$(cellSizeFunctions)/surfaceOffsetLinearDistance/surfaceOffsetLinearDistance.C
+$(cellSizeFunctions)/linearSpatial/linearSpatial.C
+
+surfaceCellSizeFunctions = cellSizeControlSurfaces/surfaceCellSizeFunction
+$(surfaceCellSizeFunctions)/surfaceCellSizeFunction/surfaceCellSizeFunction.C
+$(surfaceCellSizeFunctions)/uniformValue/uniformValue.C
+$(surfaceCellSizeFunctions)/nonUniformField/nonUniformField.C
+
+cellSizeCalculationType = $(surfaceCellSizeFunctions)/cellSizeCalculationType
+$(cellSizeCalculationType)/cellSizeCalculationType/cellSizeCalculationType.C
+$(cellSizeCalculationType)/fieldFromFile/fieldFromFile.C
+$(cellSizeCalculationType)/automatic/automatic.C
 
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
