@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "conformalVoronoiMesh.H"
 #include "motionSmoother.H"
 #include "backgroundMeshDecomposition.H"
+#include "polyMeshGeometry.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -1552,7 +1553,8 @@ void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
 }
 
 
-Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
+Foam::autoPtr<Foam::polyMesh>
+Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 (
     const pointField& pts
 ) const
@@ -1592,21 +1594,26 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     labelList cellToDelaunayVertex(removeUnusedCells(owner, neighbour));
     cellCentres = pointField(cellCentres, cellToDelaunayVertex);
 
-    polyMesh pMesh
+    autoPtr<polyMesh> meshPtr
     (
-        IOobject
+        new polyMesh
         (
-            "cvMesh_temporary",
-            runTime_.timeName(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        xferCopy(pts),
-        xferMove(faces),
-        xferMove(owner),
-        xferMove(neighbour)
+            IOobject
+            (
+                "cvMesh_temporary",
+                runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            xferCopy(pts),
+            xferMove(faces),
+            xferMove(owner),
+            xferMove(neighbour)
+        )
     );
+
+    polyMesh& pMesh = meshPtr();
 
     List<polyPatch*> patches(patchStarts.size());
 
@@ -1614,40 +1621,40 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     forAll(patches, p)
     {
-        if (patchTypes[p] == processorPolyPatch::typeName)
-        {
-            // Do not create empty processor patches
+       if (patchTypes[p] == processorPolyPatch::typeName)
+       {
+           // Do not create empty processor patches
 
-            if (patchSizes[p] > 0)
-            {
-                patches[nValidPatches] = new processorPolyPatch
-                (
-                    patchNames[p],
-                    patchSizes[p],
-                    patchStarts[p],
-                    nValidPatches,
-                    pMesh.boundaryMesh(),
-                    Pstream::myProcNo(),
-                    procNeighbours[p]
-                );
+           if (patchSizes[p] > 0)
+           {
+               patches[nValidPatches] = new processorPolyPatch
+               (
+                   patchNames[p],
+                   patchSizes[p],
+                   patchStarts[p],
+                   nValidPatches,
+                   pMesh.boundaryMesh(),
+                   Pstream::myProcNo(),
+                   procNeighbours[p]
+               );
 
-                nValidPatches++;
-            }
-        }
-        else
-        {
-            patches[nValidPatches] = polyPatch::New
-            (
-                patchTypes[p],
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                nValidPatches,
-                pMesh.boundaryMesh()
-            ).ptr();
+               nValidPatches++;
+           }
+       }
+       else
+       {
+           patches[nValidPatches] = polyPatch::New
+           (
+               patchTypes[p],
+               patchNames[p],
+               patchSizes[p],
+               patchStarts[p],
+               nValidPatches,
+               pMesh.boundaryMesh()
+           ).ptr();
 
-            nValidPatches++;
-        }
+           nValidPatches++;
+       }
     }
 
     patches.setSize(nValidPatches);
@@ -1671,6 +1678,199 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     // pMesh.addPatches(patches, false);
 
     // pMesh.overrideCellCentres(cellCentres);
+
+    return meshPtr;
+}
+
+
+void Foam::conformalVoronoiMesh::checkCellSizing()
+{
+    Info<< "Checking cell sizes..."<< endl;
+
+    timeCheck("Start of Cell Sizing");
+
+    PackedBoolList boundaryPts(number_of_cells(), false);
+    pointField ptsField;
+
+    indexDualVertices(ptsField, boundaryPts);
+
+    // Merge close dual vertices.
+    mergeCloseDualVertices(ptsField, boundaryPts);
+
+    autoPtr<polyMesh> meshPtr = createPolyMeshFromPoints(ptsField);
+    const polyMesh& pMesh = meshPtr();
+
+    //pMesh.write();
+
+    // Find cells with poor quality
+    DynamicList<label> checkFaces(identity(pMesh.nFaces()));
+    labelHashSet wrongFaces(pMesh.nFaces()/100);
+
+    Info<< "Running checkMesh on mesh with " << pMesh.nCells()
+        << " cells "<< endl;
+
+    const dictionary& dict
+        = cvMeshControls().cvMeshDict().subDict("meshQualityControls");
+
+    const scalar maxNonOrtho = readScalar(dict.lookup("maxNonOrtho", true));
+
+    label nWrongFaces = 0;
+
+    if (maxNonOrtho < 180.0 - SMALL)
+    {
+        polyMeshGeometry::checkFaceDotProduct
+        (
+            false,
+            maxNonOrtho,
+            pMesh,
+            pMesh.cellCentres(),
+            pMesh.faceAreas(),
+            checkFaces,
+            List<labelPair>(),
+            &wrongFaces
+        );
+
+        label nNonOrthogonal = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    non-orthogonality > " << maxNonOrtho
+            << " degrees : " << nNonOrthogonal << endl;
+
+        nWrongFaces += nNonOrthogonal;
+    }
+
+    labelHashSet protrudingCells = findOffsetPatchFaces(pMesh, 0.25);
+
+    label nProtrudingCells = protrudingCells.size();
+
+    Info<< "    protruding/intruding cells : " << nProtrudingCells << endl;
+
+    nWrongFaces += nProtrudingCells;
+
+//    motionSmoother::checkMesh
+//    (
+//        false,
+//        pMesh,
+//        cvMeshControls().cvMeshDict().subDict("meshQualityControls"),
+//        checkFaces,
+//        wrongFaces
+//    );
+
+    Info<< "    Found total of " << nWrongFaces << " bad faces" << endl;
+
+    {
+        labelHashSet cellsToResizeMap(pMesh.nFaces()/100);
+
+        // Find cells that are attached to the faces in wrongFaces.
+        forAllConstIter(labelHashSet, wrongFaces, iter)
+        {
+            const label faceOwner = pMesh.faceOwner()[iter.key()];
+            const label faceNeighbour = pMesh.faceNeighbour()[iter.key()];
+
+            if (!cellsToResizeMap.found(faceOwner))
+            {
+                cellsToResizeMap.insert(faceOwner);
+            }
+
+            if (!cellsToResizeMap.found(faceNeighbour))
+            {
+                cellsToResizeMap.insert(faceNeighbour);
+            }
+        }
+
+        cellsToResizeMap += protrudingCells;
+
+        pointField cellsToResize(cellsToResizeMap.size());
+
+        label count = 0;
+        for (label cellI = 0; cellI < pMesh.nCells(); ++cellI)
+        {
+            if (cellsToResizeMap.found(cellI))
+            {
+                cellsToResize[count++] = pMesh.cellCentres()[cellI];
+            }
+        }
+
+        Info<< "    Automatically re-sizing " << cellsToResize.size()
+            << " cells that are attached to the bad faces: DISABLED" << endl;
+
+        //cellSizeControl_.setCellSizes(cellsToResize);
+    }
+
+    timeCheck("End of Cell Sizing");
+
+    Info<< "Finished checking cell sizes"<< endl;
+}
+
+
+Foam::labelHashSet Foam::conformalVoronoiMesh::findOffsetPatchFaces
+(
+    const polyMesh& mesh,
+    const scalar allowedOffset
+) const
+{
+    timeCheck("Start findRemainingProtrusionSet");
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    cellSet offsetBoundaryCells
+    (
+        mesh,
+        "cvMesh_protrudingCells",
+        mesh.nCells()/1000
+    );
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& patch = patches[patchI];
+
+        const faceList& localFaces = patch.localFaces();
+        const pointField& localPoints = patch.localPoints();
+
+        const labelList& fCell = patch.faceCells();
+
+        forAll(localFaces, pLFI)
+        {
+            const face& f = localFaces[pLFI];
+
+            const Foam::point& faceCentre = f.centre(localPoints);
+
+            const scalar targetSize = targetCellSize(faceCentre);
+
+            pointIndexHit pHit;
+            label surfHit = -1;
+
+            geometryToConformTo_.findSurfaceNearest
+            (
+                faceCentre,
+                sqr(targetSize),
+                pHit,
+                surfHit
+            );
+
+            if
+            (
+                pHit.hit()
+             && (mag(pHit.hitPoint() - faceCentre) > allowedOffset*targetSize)
+            )
+            {
+                offsetBoundaryCells.insert(fCell[pLFI]);
+            }
+        }
+    }
+
+    offsetBoundaryCells.write();
+
+    return offsetBoundaryCells;
+}
+
+
+Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
+(
+    const pointField& pts
+) const
+{
+    autoPtr<polyMesh> meshPtr = createPolyMeshFromPoints(pts);
+    polyMesh& pMesh = meshPtr();
 
     timeCheck("polyMesh created, checking quality");
 
@@ -2264,10 +2464,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 }
             }
         }
-
-        Pout<< "Patch Names:     " << patchNames << endl;
-        Pout<< "Patch Sizes:     " << patchSizes << endl;
-        Pout<< "Proc Neighbours: " << procNeighbours << endl;
     }
 }
 

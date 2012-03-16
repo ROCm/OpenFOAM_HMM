@@ -1,0 +1,33 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+set -x
+
+if [ ! -e "Make/files" ] || [ ! -e "Make/options" ]
+then
+    mkdir -p Make
+
+    if [ -n "$CGAL_ARCH_PATH" ]
+    then
+        cp -r MakeWithCGAL/* Make
+
+        echo
+        echo Compiling surfaceFeatureExtract with CGAL support for curvature
+        echo
+
+        wmake
+    else
+        cp -r MakeWithoutCGAL/* Make
+
+        echo
+        echo Compiling surfaceFeatureExtract without CGAL support for curvature
+        echo
+
+        wmake
+    fi
+else
+    echo surfaceFeatureExtract already has a Make folder
+fi
+
+
+# ----------------------------------------------------------------- end-of-file

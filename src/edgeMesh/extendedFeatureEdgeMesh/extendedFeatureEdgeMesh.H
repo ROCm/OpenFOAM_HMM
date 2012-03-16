@@ -283,6 +283,14 @@ public:
                 List<pointIndexHit>& info
             ) const;
 
+            //- Find all the feature points within searchDistSqr of sample
+            void allNearestFeaturePoints
+            (
+                const point& sample,
+                scalar searchRadiusSqr,
+                List<pointIndexHit>& info
+            ) const;
+
             //- Find all the feature edges within searchDistSqr of sample
             void allNearestFeatureEdges
             (
@@ -290,6 +298,7 @@ public:
                 const scalar searchRadiusSqr,
                 List<pointIndexHit>& info
             ) const;
+
 
         // Access
 

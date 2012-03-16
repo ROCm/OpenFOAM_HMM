@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -336,6 +336,22 @@ Foam::scalarField Foam::cellSizeControlSurfaces::cellSize
     return cellSizes;
 }
 
+
+void Foam::cellSizeControlSurfaces::setCellSizes
+(
+    const pointField& pts
+)
+{
+    if (cellSizeFunctions_.size())
+    {
+        forAll(cellSizeFunctions_, i)
+        {
+            cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+            cSF.setCellSize(pts);
+        }
+    }
+}
 
 
 // ************************************************************************* //

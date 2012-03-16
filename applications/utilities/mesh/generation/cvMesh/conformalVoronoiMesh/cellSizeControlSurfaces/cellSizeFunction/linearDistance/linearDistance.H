@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,6 @@ private:
 
     // Private data
 
-        //- cell size at the surface
-        scalar surfaceCellSize_;
-
         //- cell size at distance_ from the surface
         scalar distanceCellSize_;
 
@@ -66,14 +63,11 @@ private:
         //- distance squared
         scalar distanceSqr_;
 
-        //- storing gradient for linear function
-        scalar gradient_;
-
 
     // Private Member Functions
 
         //- Calculate the cell size as a function of the given distance
-        scalar sizeFunction(scalar d) const;
+        scalar sizeFunction(const point& pt, scalar d, label index) const;
 
 
 public:
@@ -107,6 +101,12 @@ public:
             const point& pt,
             scalar& size
         ) const;
+
+        //- Adapt local cell size. Return true if anything changed.
+        virtual bool setCellSize
+        (
+            const pointField& pts
+        );
 };
 
 
