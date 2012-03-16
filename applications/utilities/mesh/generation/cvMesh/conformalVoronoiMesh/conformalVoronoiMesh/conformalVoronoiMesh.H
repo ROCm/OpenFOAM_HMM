@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -911,6 +911,17 @@ private:
             const HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
         ) const;
 
+        //- Check whether the cell sizes are fine enough. Creates a polyMesh.
+        void checkCellSizing();
+
+        //- Find all cells with a patch face that is not near the surface. The
+        //  allowed offset is the fraction of the target cell size.
+        labelHashSet findOffsetPatchFaces
+        (
+            const polyMesh& mesh,
+            const scalar allowedOffset
+        ) const;
+
         //- Create a polyMesh and check its quality, reports which
         //  elements damage the mesh quality, allowing backtracking.
         labelHashSet checkPolyMeshQuality(const pointField& pts) const;
@@ -1004,6 +1015,9 @@ private:
             const labelList& patchStarts,
             const labelList& procNeighbours
         ) const;
+
+        //- Create a polyMesh from points.
+        autoPtr<polyMesh> createPolyMeshFromPoints(const pointField& pts) const;
 
         //- Rotate the faces on processor patches if necessary
         void reorderProcessorPatches
@@ -1193,7 +1207,7 @@ public:
 
             //- Find the cellSet of the boundary cells which have points that
             //  protrude out of the surface beyond a tolerance.
-            void findRemainingProtrusionSet(const fvMesh& mesh) const;
+            labelHashSet findRemainingProtrusionSet(const polyMesh& mesh) const;
 
             void writeProcessorInterface
             (

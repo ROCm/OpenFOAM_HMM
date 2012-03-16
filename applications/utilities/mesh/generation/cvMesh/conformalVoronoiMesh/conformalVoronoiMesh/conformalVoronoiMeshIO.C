@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1072,9 +1072,9 @@ void Foam::conformalVoronoiMesh::writeCellCentres
 }
 
 
-void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
+Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
 (
-    const fvMesh& mesh
+    const polyMesh& mesh
 ) const
 {
     timeCheck("Start findRemainingProtrusionSet");
@@ -1129,7 +1129,7 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
 
     reduce(protrudingCellsSize, sumOp<label>());
 
-    if (protrudingCellsSize > 0)
+    if (cvMeshControls().objOutput() && protrudingCellsSize > 0)
     {
         Info<< nl << "Found " << protrudingCellsSize
             << " cells protruding from the surface, writing cellSet "
@@ -1138,6 +1138,8 @@ void Foam::conformalVoronoiMesh::findRemainingProtrusionSet
 
         protrudingCells.write();
     }
+
+    return protrudingCells;
 }
 
 
