@@ -1791,9 +1791,9 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
         }
 
         Info<< "    Automatically re-sizing " << cellsToResize.size()
-            << " cells that are attached to the bad faces: DISABLED" << endl;
+            << " cells that are attached to the bad faces: " << endl;
 
-        //cellSizeControl_.setCellSizes(cellsToResize);
+        cellSizeControl_.setCellSizes(cellsToResize);
     }
 
     timeCheck("End of Cell Sizing");
