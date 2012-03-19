@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ SourceFiles
 #include "dictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "surfaceCellSizeFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,6 +85,11 @@ protected:
         //- Reference to the searchableSurface that cellSizeFunction
         //  relates to
         const searchableSurface& surface_;
+
+        //- Cell size at the surface
+        scalarField surfaceCellSize_;
+
+        autoPtr<surfaceCellSizeFunction> surfaceCellSizeFunction_;
 
         //- Method details dictionary
         dictionary coeffsDict_;
@@ -170,6 +176,18 @@ public:
             const point& pt,
             scalar& size
         ) const = 0;
+
+
+        virtual bool setCellSize
+        (
+            const pointField& pts
+        )
+        {
+            WarningIn("cellSizeFunction::setCellSize(const pointField&)")
+                << "Not overloaded."
+                << endl;
+            return false;
+        }
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -816,6 +816,8 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
     storedAlignments_.setSize(sizeAndAlignmentLocations_.size());
 
     label i = 0;
+
+    checkCellSizing();
 
     for
     (
