@@ -578,6 +578,12 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
         Info<< "dataType : " << dataType_ << endl;
     }
 
+    if (dataType_ == "BINARY")
+    {
+        FatalIOErrorIn("vtkUnstructuredReader::read(ISstream&)", inFile)
+            << "Binary reading not supported " << exit(FatalIOError);
+    }
+
     parseMode readMode = NOMODE;
     label wantedSize = -1;
 

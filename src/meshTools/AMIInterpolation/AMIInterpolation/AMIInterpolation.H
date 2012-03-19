@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,32 +84,6 @@ class AMIInterpolation
     //- local typedef to octree tree-type
     typedef treeDataPrimitivePatch<face, SubList, const pointField&> treeType;
 
-    //- Helper class for list
-    template<class T>
-    class ListPlusEqOp
-    {
-        public:
-        void operator()(List<T>& x, const List<T> y) const
-        {
-            if (y.size())
-            {
-                if (x.size())
-                {
-                    label sz = x.size();
-                    x.setSize(sz + y.size());
-                    forAll(y, i)
-                    {
-                        x[sz++] = y[i];
-                    }
-                }
-                else
-                {
-                    x = y;
-                }
-            }
-        }
-    };
-
 
     // Private data
 
@@ -132,6 +106,10 @@ class AMIInterpolation
             //- Weights of target faces per source face
             scalarListList srcWeights_;
 
+            //- Labels of faces that are not overlapped by any target faces
+            //  (should be empty for correct functioning)
+            labelList srcNonOverlap_;
+
 
         // Target patch
 
@@ -141,7 +119,7 @@ class AMIInterpolation
             //- Addresses of source faces per target face
             labelListList tgtAddress_;
 
-            //- Weights of wource faces per target face
+            //- Weights of source faces per target face
             scalarListList tgtWeights_;
 
 
@@ -386,6 +364,11 @@ public:
 
                 //- Return const access to source patch weights
                 inline const scalarListList& srcWeights() const;
+
+                //- Labels of faces that are not overlapped by any target faces
+                //  (should be empty for correct functioning)
+                inline const labelList& srcNonOverlap() const;
+
 
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //  This gets source data into a form to be consumed by
