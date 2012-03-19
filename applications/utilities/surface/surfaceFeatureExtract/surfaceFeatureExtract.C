@@ -157,12 +157,12 @@ scalarField calcCurvature(const triSurface& surf)
 //                 << monge_fit.condition_number() << nl << std::endl;
 
         // Use the maximum curvature to give smaller cell sizes later.
-        k[vertI++]
-            = max
-              (
-                   mag(monge_form.principal_curvatures(0)),
-                   mag(monge_form.principal_curvatures(1))
-              );
+        k[vertI++] =
+            max
+            (
+                mag(monge_form.principal_curvatures(0)),
+                mag(monge_form.principal_curvatures(1))
+            );
     }
 
     return k;
@@ -174,8 +174,10 @@ bool edgesConnected(const edge& e1, const edge& e2)
 {
     if
     (
-        e1.start() == e2.start() || e1.start() == e2.end()
-     || e1.end() == e2.start() || e1.end() == e2.end()
+        e1.start() == e2.start()
+     || e1.start() == e2.end()
+     || e1.end() == e2.start()
+     || e1.end() == e2.end()
     )
     {
         return true;
@@ -265,8 +267,8 @@ scalar calcProximityOfFeatureEdges
                     // Don't refine if the edges are connected to each other
                     if (!edgesConnected(e1, e2))
                     {
-                        scalar curDist
-                            = mag(pHit1.hitPoint() - pHit2.hitPoint());
+                        scalar curDist =
+                            mag(pHit1.hitPoint() - pHit2.hitPoint());
 
                         minDist = min(curDist, minDist);
                     }
@@ -896,8 +898,6 @@ int main(int argc, char *argv[])
             const vectorField& normals = searchSurf.faceNormals();
 
             scalar span = searchSurf.bounds().mag();
-
-            //args.optionReadIfPresent("closeness", span);
 
             scalar externalAngleTolerance = 10;
             scalar externalToleranceCosAngle =
