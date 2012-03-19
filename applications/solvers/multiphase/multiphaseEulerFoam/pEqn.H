@@ -132,6 +132,17 @@
         phasei++;
     }
 
+    phasei = 0;
+    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    {
+        phaseModel& phase = iter();
+
+        mrfZones.relativeFlux(phase.phi().oldTime());
+        mrfZones.relativeFlux(phase.phi());
+
+        phasei++;
+    }
+
     surfaceScalarField Dp
     (
         IOobject
@@ -185,7 +196,6 @@
                 phase.phi() =
                     phiHbyAs[phasei]
                   + rAlphaAUfs[phasei]*mSfGradp/phase.rho();
-                mrfZones.relativeFlux(phase.phi().oldTime());
                 phi += alphafs[phasei]*phase.phi();
 
                 phasei++;
