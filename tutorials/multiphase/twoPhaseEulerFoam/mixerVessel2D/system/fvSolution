@@ -76,6 +76,7 @@ PIMPLE
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      1;
+    nAlphaSubCycles 3;
     correctAlpha    yes;
     pRefCell        0;
     pRefValue       0;

@@ -11,26 +11,10 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      transportProperties;
+    object      MRFZones;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
-{
-    rho             2500;
-    nu              1e-06;
-    d               0.0003;
-}
-
-phase2
-{
-    rho             1.2;
-    nu              1.5e-05;
-    d               1;
-}
-
-Cvm             0;
-Cl              0;
-Ct              0;
+0()
 
 // ************************************************************************* //
