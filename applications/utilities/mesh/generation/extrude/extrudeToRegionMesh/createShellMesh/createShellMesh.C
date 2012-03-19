@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,7 @@ void Foam::createShellMesh::syncEdges
     const labelList& patchEdges,
     const labelList& coupledEdges,
     const PackedBoolList& sameEdgeOrientation,
+    const bool syncNonCollocated,
 
     PackedBoolList& isChangedEdge,
     DynamicList<label>& changedEdges,
@@ -111,7 +112,11 @@ void Foam::createShellMesh::syncEdges
     (
         cppEdgeData,
         globalData.globalEdgeSlaves(),
-        globalData.globalEdgeTransformedSlaves(),
+        (
+            syncNonCollocated
+          ? globalData.globalEdgeTransformedSlaves()    // transformed elems
+          : labelListList(globalData.globalEdgeSlaves().size()) //no transformed
+        ),
         map,
         minEqOp<labelPair>()
     );
@@ -150,6 +155,7 @@ void Foam::createShellMesh::calcPointRegions
     const globalMeshData& globalData,
     const primitiveFacePatch& patch,
     const PackedBoolList& nonManifoldEdge,
+    const bool syncNonCollocated,
 
     faceList& pointGlobalRegions,
     faceList& pointLocalRegions,
@@ -243,6 +249,7 @@ void Foam::createShellMesh::calcPointRegions
         patchEdges,
         coupledEdges,
         sameEdgeOrientation,
+        syncNonCollocated,
 
         isChangedEdge,
         changedEdges,
@@ -356,6 +363,7 @@ void Foam::createShellMesh::calcPointRegions
             patchEdges,
             coupledEdges,
             sameEdgeOrientation,
+            syncNonCollocated,
 
             isChangedEdge,
             changedEdges,
@@ -509,6 +517,7 @@ void Foam::createShellMesh::setRefinement
         }
     }
 
+
     // Introduce original points
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -525,11 +534,12 @@ void Foam::createShellMesh::setRefinement
         );
         pointToPointMap.append(pointI);
 
-//        Pout<< "Added bottom point " << pointToPointMap[pointI]
-//            << " at " << patch_.localPoints()[pointI]
-//            << "  from point " << pointI
-//            << endl;
+        //Pout<< "Added bottom point " << addedPointI
+        //    << " at " << patch_.localPoints()[pointI]
+        //    << "  from point " << pointI
+        //    << endl;
     }
+
 
     // Introduce new points (one for every region)
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -541,7 +551,6 @@ void Foam::createShellMesh::setRefinement
 
         point pt = patch_.localPoints()[pointI];
         point disp = firstLayerDisp[regionI];
-
         for (label layerI = 0; layerI < nLayers; layerI++)
         {
             pt += disp;
@@ -675,7 +684,7 @@ void Foam::createShellMesh::setRefinement
             {
                 FatalErrorIn("createShellMesh::setRefinement(..)")
                     << "external/feature edge:" << edgeI
-                    << " has " << eFaces.size() << " connected extruded faces"
+                    << " has " << eFaces.size() << " connected extruded faces "
                     << " but only " << ePatches.size()
                     << " boundary faces defined." << exit(FatalError);
             }
