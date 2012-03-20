@@ -1,0 +1,86 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surface1.stl
+{
+    // extractFromFile || extractFromSurface
+    extractionMethod    extractFromFile;
+
+    extractFromFile
+    {
+        // Load from an existing feature edge file
+        featureEdgeFile "constant/triSurface/featureEdges.nas";
+    }
+    
+    trimFeatures
+    {
+        // Remove features with fewer than the specified number of edges
+        minElem         0;
+        
+        // Remove features shorter than the specified cumulative length
+        minLen          0.0;
+    }  
+    
+    subsetFeatures
+    {        
+        // Use a plane to select feature edges
+        // (normal)(basePoint)
+        plane               (1 0 0)(0 0 0);
+        
+        // Select feature edges using a box
+        // (minPt)(maxPt)
+        insideBox           (0 0 0)(1 1 1);
+        outsideBox          (0 0 0)(1 1 1);
+        
+        // Remove any non-manifold (open or > 2 connected faces) edges
+        manifoldEdges       no;
+    }
+    
+    // Output the curvature of the surface
+    curvature               no;
+    
+    // Output the proximity of feature points and edges to each other
+    featureProximity        no;
+    // The maximum search distance to use when looking for other feature
+    // points and edges
+    maxFeatureProximity     1;
+    
+    // Out put the closeness of surface elements to other surface elements.
+    closeness               no;
+
+    // Write options
+    writeVTK                no;
+    writeObj                yes;
+    writeFeatureEdgeMesh    no;
+}
+
+
+surface2.nas
+{
+    extractionMethod    extractFromSurface;
+
+    extractFromSurface
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle   120;
+    }
+}
+
+
+// ************************************************************************* //
