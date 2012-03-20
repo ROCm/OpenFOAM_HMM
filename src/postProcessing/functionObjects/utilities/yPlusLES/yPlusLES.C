@@ -23,25 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "yPlusRAS.H"
+#include "yPlusLES.H"
 #include "volFields.H"
 
-#include "incompressible/RAS/RASModel/RASModel.H"
-#include "nutkWallFunction/nutkWallFunctionFvPatchScalarField.H"
-
-#include "compressible/RAS/RASModel/RASModel.H"
-#include "mutkWallFunction/mutkWallFunctionFvPatchScalarField.H"
-
-#include "wallDist.H"
+#include "incompressible/LES/LESModel/LESModel.H"
+#include "compressible/LES/LESModel/LESModel.H"
+#include "wallFvPatch.H"
+#include "nearWallDist.H"
+//#include "wallDist.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::yPlusRAS, 0);
+defineTypeNameAndDebug(Foam::yPlusLES, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::yPlusRAS::makeFile()
+void Foam::yPlusLES::makeFile()
 {
     // Create the output file if not already created
     if (outputFilePtr_.empty())
@@ -77,7 +75,7 @@ void Foam::yPlusRAS::makeFile()
             outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
 
             // Add headers to output data
-            outputFilePtr_() << "# y+ (RAS)" << nl
+            outputFilePtr_() << "# y+ (LES)" << nl
                 << "# time " << token::TAB << "patch" << token::TAB
                 << "min" << token::TAB << "max" << token::TAB << "average"
                 << endl;
@@ -86,33 +84,40 @@ void Foam::yPlusRAS::makeFile()
 }
 
 
-void Foam::yPlusRAS::calcIncompressibleYPlus
+void Foam::yPlusLES::calcIncompressibleYPlus
 (
     const fvMesh& mesh,
+    const volVectorField& U,
     volScalarField& yPlus
 )
 {
-    typedef incompressible::RASModels::nutkWallFunctionFvPatchScalarField
-        wallFunctionPatchField;
+    const incompressible::LESModel& model =
+        mesh.lookupObject<incompressible::LESModel>("LESProperties");
 
-    const incompressible::RASModel& model =
-        mesh.lookupObject<incompressible::RASModel>("RASProperties");
+    volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
+    volScalarField nuEff(model.nuEff());
 
-    const volScalarField nut(model.nut());
-    const volScalarField::GeometricBoundaryField& nutPatches =
-        nut.boundaryField();
+    const fvPatchList& patches = mesh.boundary();
+
+    const volScalarField nuLam(model.nu());
 
     bool foundPatch = false;
-    forAll(nutPatches, patchI)
+    forAll(patches, patchI)
     {
-        if (isA<wallFunctionPatchField>(nutPatches[patchI]))
+        const fvPatch& currPatch = patches[patchI];
+
+        if (isA<wallFvPatch>(currPatch))
         {
             foundPatch = true;
+            yPlus.boundaryField()[patchI] =
+                d[patchI]
+               *sqrt
+                (
+                    nuEff.boundaryField()[patchI]
+                   *mag(U.boundaryField()[patchI].snGrad())
+                )
+               /nuLam.boundaryField()[patchI];
 
-            const wallFunctionPatchField& nutPw =
-                dynamic_cast<const wallFunctionPatchField&>(nutPatches[patchI]);
-
-            yPlus.boundaryField()[patchI] = nutPw.yPlus();
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
             scalar minYp = min(Yp);
@@ -121,15 +126,15 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
 
             if (log_)
             {
-                Info<< "    patch " << nutPw.patch().name()
-                    << " y+ : min = " << minYp << ", max = " << maxYp
-                    << ", average = " << avgYp << nl;
+                Info<< "    patch " << currPatch.name()
+                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
+                    << ", average = " << average(Yp) << nl;
             }
 
             if (Pstream::master())
             {
                 outputFilePtr_() << obr_.time().value() << token::TAB
-                    << nutPw.patch().name() << token::TAB
+                    << currPatch.name() << token::TAB
                     << minYp << token::TAB << maxYp << token::TAB
                     << avgYp << endl;
             }
@@ -138,39 +143,47 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
 
     if (log_ && !foundPatch)
     {
-        Info<< "    no " << wallFunctionPatchField::typeName << " patches"
-            << endl;
+        Info<< "    no " << wallFvPatch::typeName << " patches" << endl;
     }
 }
 
 
-void Foam::yPlusRAS::calcCompressibleYPlus
+void Foam::yPlusLES::calcCompressibleYPlus
 (
     const fvMesh& mesh,
+    const volVectorField& U,
     volScalarField& yPlus
 )
 {
-    typedef compressible::RASModels::mutkWallFunctionFvPatchScalarField
-        wallFunctionPatchField;
+    const compressible::LESModel& model =
+        mesh.lookupObject<compressible::LESModel>("LESProperties");
 
-    const compressible::RASModel& model =
-        mesh.lookupObject<compressible::RASModel>("RASProperties");
+    volScalarField::GeometricBoundaryField d = nearWallDist(mesh).y();
+    volScalarField muEff(model.muEff());
 
-    const volScalarField mut(model.mut());
-    const volScalarField::GeometricBoundaryField& mutPatches =
-        mut.boundaryField();
+    const fvPatchList& patches = mesh.boundary();
+
+    const volScalarField muLam(model.mu());
+
+    Info<< type() << " output:" << nl;
 
     bool foundPatch = false;
-    forAll(mutPatches, patchI)
+    forAll(patches, patchI)
     {
-        if (isA<wallFunctionPatchField>(mutPatches[patchI]))
+        const fvPatch& currPatch = patches[patchI];
+
+        if (isA<wallFvPatch>(currPatch))
         {
             foundPatch = true;
+            yPlus.boundaryField()[patchI] =
+                d[patchI]
+               *sqrt
+                (
+                    muEff.boundaryField()[patchI]
+                   *mag(U.boundaryField()[patchI].snGrad())
+                )
+               /muLam.boundaryField()[patchI];
 
-            const wallFunctionPatchField& mutPw =
-                dynamic_cast<const wallFunctionPatchField&>(mutPatches[patchI]);
-
-            yPlus.boundaryField()[patchI] = mutPw.yPlus();
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
             scalar minYp = min(Yp);
@@ -179,32 +192,31 @@ void Foam::yPlusRAS::calcCompressibleYPlus
 
             if (log_)
             {
-                Info<< "    patch " << mutPw.patch().name()
-                    << " y+ : min = " << minYp << ", max = " << maxYp
-                    << ", average = " << avgYp << nl;
+                Info<< "    patch " << currPatch.name()
+                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
+                    << ", average = " << average(Yp) << nl;
             }
 
             if (Pstream::master())
             {
                 outputFilePtr_() << obr_.time().value() << token::TAB
-                    << mutPw.patch().name() << token::TAB
+                    << currPatch.name() << token::TAB
                     << minYp << token::TAB << maxYp << token::TAB
                     << avgYp << endl;
             }
-        }
+         }
     }
 
     if (log_ && !foundPatch)
     {
-        Info<< "    no " << wallFunctionPatchField::typeName << " patches"
-            << endl;
+        Info<< "    no " << wallFvPatch::typeName << " patches" << endl;
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::yPlusRAS::yPlusRAS
+Foam::yPlusLES::yPlusLES
 (
     const word& name,
     const objectRegistry& obr,
@@ -217,6 +229,7 @@ Foam::yPlusRAS::yPlusRAS
     active_(true),
     log_(false),
     phiName_("phi"),
+    UName_("U"),
     outputFilePtr_(NULL)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -225,7 +238,7 @@ Foam::yPlusRAS::yPlusRAS
         active_ = false;
         WarningIn
         (
-            "yPlusRAS::yPlusRAS"
+            "yPlusLES::yPlusLES"
             "("
                 "const word&, "
                 "const objectRegistry&, "
@@ -242,13 +255,13 @@ Foam::yPlusRAS::yPlusRAS
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::yPlusRAS::~yPlusRAS()
+Foam::yPlusLES::~yPlusLES()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::yPlusRAS::read(const dictionary& dict)
+void Foam::yPlusLES::read(const dictionary& dict)
 {
     if (active_)
     {
@@ -258,32 +271,34 @@ void Foam::yPlusRAS::read(const dictionary& dict)
 }
 
 
-void Foam::yPlusRAS::execute()
+void Foam::yPlusLES::execute()
 {
     // Do nothing - only valid on write
 }
 
 
-void Foam::yPlusRAS::end()
+void Foam::yPlusLES::end()
 {
     // Do nothing - only valid on write
 }
 
 
-void Foam::yPlusRAS::write()
+void Foam::yPlusLES::write()
 {
     if (active_)
     {
         const surfaceScalarField& phi =
             obr_.lookupObject<surfaceScalarField>(phiName_);
 
+        const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
+
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
-        volScalarField yPlusRAS
+        volScalarField yPlusLES
         (
             IOobject
             (
-                "yPlusRAS",
+                "yPlusLES",
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ
@@ -299,11 +314,11 @@ void Foam::yPlusRAS::write()
 
         if (phi.dimensions() == dimMass/dimTime)
         {
-            calcCompressibleYPlus(mesh, yPlusRAS);
+            calcCompressibleYPlus(mesh, U, yPlusLES);
         }
         else
         {
-            calcIncompressibleYPlus(mesh, yPlusRAS);
+            calcIncompressibleYPlus(mesh, U, yPlusLES);
         }
 
         if (log_)
@@ -311,7 +326,7 @@ void Foam::yPlusRAS::write()
             Info<< endl;
         }
 
-        yPlusRAS.write();
+        yPlusLES.write();
     }
 }
 
