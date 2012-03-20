@@ -53,7 +53,7 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::fieldValues::faceSource::operationType,
-        9
+        11
     >::names[] =
     {
         "none",
@@ -64,7 +64,9 @@ namespace Foam
         "areaIntegrate",
         "min",
         "max",
-        "CoV"
+        "CoV",
+        "areaNormalAverage",
+        "areaNormalIntegrate"
     };
 
 }
@@ -73,7 +75,7 @@ namespace Foam
 const Foam::NamedEnum<Foam::fieldValues::faceSource::sourceType, 3>
     Foam::fieldValues::faceSource::sourceTypeNames_;
 
-const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 9>
+const Foam::NamedEnum<Foam::fieldValues::faceSource::operationType, 11>
     Foam::fieldValues::faceSource::operationTypeNames_;
 
 
@@ -309,6 +311,35 @@ void Foam::fieldValues::faceSource::writeFileHeader()
         }
 
         outputFilePtr_() << endl;
+    }
+}
+
+
+template<>
+Foam::vector Foam::fieldValues::faceSource::processValues
+(
+    const Field<vector>& values,
+    const vectorField& Sf,
+    const scalarField& weightField
+) const
+{
+    switch (operation_)
+    {
+        case opAreaNormalAverage:
+        {
+            scalar result = sum(values&Sf)/sum(mag(Sf));
+            return vector(result, 0.0, 0.0);
+        }
+        case opAreaNormalIntegrate:
+        {
+            scalar result = sum(values&Sf);
+            return vector(result, 0.0, 0.0);
+        }
+        default:
+        {
+            // Fall through to other operations
+            return processSameTypeValues(values, Sf, weightField);
+        }
     }
 }
 
