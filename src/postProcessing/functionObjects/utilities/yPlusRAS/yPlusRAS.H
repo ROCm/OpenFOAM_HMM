@@ -39,7 +39,8 @@ SourceFiles
 
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
-#include "fvMesh.H"
+#include "Switch.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,6 +51,7 @@ namespace Foam
 class objectRegistry;
 class dictionary;
 class mapPolyMesh;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                           Class yPlusRAS Declaration
@@ -67,25 +69,26 @@ class yPlusRAS
         //- on/off switch
         bool active_;
 
+        //- Switch to send output to Info as well as to file
+        Switch log_;
+
         //- Name of mass/volume flux field (optional, default = phi)
         word phiName_;
+
+        //- Output file pointer
+        autoPtr<OFstream> outputFilePtr_;
 
 
     // Private Member Functions
 
+        //- Make the output file
+        virtual void makeFile();
+
         //- Calculate incompressible form of y+
-        void calcIncompressibleYPlus
-        (
-            const fvMesh& mesh,
-            volScalarField& yPlus
-        ) const;
+        void calcIncompressibleYPlus(const fvMesh& mesh, volScalarField& yPlus);
 
         //- Calculate compressible form of y+
-        void calcCompressibleYPlus
-        (
-            const fvMesh& mesh,
-            volScalarField& yPlus
-        ) const;
+        void calcCompressibleYPlus(const fvMesh& mesh, volScalarField& yPlus);
 
         //- Disallow default bitwise copy construct
         yPlusRAS(const yPlusRAS&);

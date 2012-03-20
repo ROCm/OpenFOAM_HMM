@@ -39,12 +39,57 @@ defineTypeNameAndDebug(Foam::yPlusLES, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::yPlusLES::makeFile()
+{
+    // Create the output file if not already created
+    if (outputFilePtr_.empty())
+    {
+        if (debug)
+        {
+            Info<< "Creating output file." << endl;
+        }
+
+        // File update
+        if (Pstream::master())
+        {
+            fileName outputDir;
+            word startTimeName =
+                obr_.time().timeName(obr_.time().startTime().value());
+
+            if (Pstream::parRun())
+            {
+                // Put in undecomposed case (Note: gives problems for
+                // distributed data running)
+                outputDir =
+                    obr_.time().path()/".."/name_/startTimeName;
+            }
+            else
+            {
+                outputDir = obr_.time().path()/name_/startTimeName;
+            }
+
+            // Create directory if does not exist
+            mkDir(outputDir);
+
+            // Open new file at start up
+            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
+
+            // Add headers to output data
+            outputFilePtr_() << "# y+ (LES)" << nl
+                << "# time " << token::TAB << "patch" << token::TAB
+                << "min" << token::TAB << "max" << token::TAB << "average"
+                << endl;
+        }
+    }
+}
+
+
 void Foam::yPlusLES::calcIncompressibleYPlus
 (
     const fvMesh& mesh,
     const volVectorField& U,
     volScalarField& yPlus
-) const
+)
 {
     const incompressible::LESModel& model =
         mesh.lookupObject<incompressible::LESModel>("LESProperties");
@@ -55,8 +100,6 @@ void Foam::yPlusLES::calcIncompressibleYPlus
     const fvPatchList& patches = mesh.boundary();
 
     const volScalarField nuLam(model.nu());
-
-    Info<< type() << " output:" << nl;
 
     bool foundPatch = false;
     forAll(patches, patchI)
@@ -77,13 +120,28 @@ void Foam::yPlusLES::calcIncompressibleYPlus
 
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            Info<< "    patch " << currPatch.name()
-                << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
-                << ", average = " << average(Yp) << nl;
+            scalar minYp = min(Yp);
+            scalar maxYp = max(Yp);
+            scalar avgYp = average(Yp);
+
+            if (log_)
+            {
+                Info<< "    patch " << currPatch.name()
+                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
+                    << ", average = " << average(Yp) << nl;
+            }
+
+            if (Pstream::master())
+            {
+                outputFilePtr_() << obr_.time().value() << token::TAB
+                    << currPatch.name() << token::TAB
+                    << minYp << token::TAB << maxYp << token::TAB
+                    << avgYp << endl;
+            }
         }
     }
 
-    if (!foundPatch)
+    if (log_ && !foundPatch)
     {
         Info<< "    no " << wallFvPatch::typeName << " patches" << endl;
     }
@@ -95,7 +153,7 @@ void Foam::yPlusLES::calcCompressibleYPlus
     const fvMesh& mesh,
     const volVectorField& U,
     volScalarField& yPlus
-) const
+)
 {
     const compressible::LESModel& model =
         mesh.lookupObject<compressible::LESModel>("LESProperties");
@@ -128,13 +186,28 @@ void Foam::yPlusLES::calcCompressibleYPlus
 
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            Info<< "    patch " << currPatch.name()
-                << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
-                << ", average = " << average(Yp) << nl;
-        }
+            scalar minYp = min(Yp);
+            scalar maxYp = max(Yp);
+            scalar avgYp = average(Yp);
+
+            if (log_)
+            {
+                Info<< "    patch " << currPatch.name()
+                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
+                    << ", average = " << average(Yp) << nl;
+            }
+
+            if (Pstream::master())
+            {
+                outputFilePtr_() << obr_.time().value() << token::TAB
+                    << currPatch.name() << token::TAB
+                    << minYp << token::TAB << maxYp << token::TAB
+                    << avgYp << endl;
+            }
+         }
     }
 
-    if (!foundPatch)
+    if (log_ && !foundPatch)
     {
         Info<< "    no " << wallFvPatch::typeName << " patches" << endl;
     }
@@ -154,8 +227,10 @@ Foam::yPlusLES::yPlusLES
     name_(name),
     obr_(obr),
     active_(true),
+    log_(false),
     phiName_("phi"),
-    UName_("U")
+    UName_("U"),
+    outputFilePtr_(NULL)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -173,6 +248,8 @@ Foam::yPlusLES::yPlusLES
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
+
+    makeFile();
 }
 
 
@@ -188,6 +265,7 @@ void Foam::yPlusLES::read(const dictionary& dict)
 {
     if (active_)
     {
+        log_ = dict.lookupOrDefault<Switch>("log", false);
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
     }
 }
@@ -229,6 +307,11 @@ void Foam::yPlusLES::write()
             dimensionedScalar("0", dimless, 0.0)
         );
 
+        if (log_)
+        {
+            Info<< type() << " output:" << nl;
+        }
+
         if (phi.dimensions() == dimMass/dimTime)
         {
             calcCompressibleYPlus(mesh, U, yPlusLES);
@@ -238,7 +321,10 @@ void Foam::yPlusLES::write()
             calcIncompressibleYPlus(mesh, U, yPlusLES);
         }
 
-        Info<< endl;
+        if (log_)
+        {
+            Info<< endl;
+        }
 
         yPlusLES.write();
     }
