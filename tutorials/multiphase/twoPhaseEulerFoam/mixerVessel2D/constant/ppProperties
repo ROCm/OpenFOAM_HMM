@@ -11,26 +11,19 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      transportProperties;
+    object      ppProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
-{
-    rho             2500;
-    nu              1e-06;
-    d               0.0003;
-}
+preAlphaExp     300;
 
-phase2
-{
-    rho             1.2;
-    nu              1.5e-05;
-    d               1;
-}
+expMax          10;
 
-Cvm             0;
-Cl              0;
-Ct              0;
+alphaMax        0.6;
+
+g0              g0 [ 1 -1 -2 0 0 0 0 ] 0;
+
+packingLimiter  off;
+
 
 // ************************************************************************* //

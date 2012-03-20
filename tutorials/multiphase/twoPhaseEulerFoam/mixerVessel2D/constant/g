@@ -9,28 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
+    class       uniformDimensionedVectorField;
     location    "constant";
-    object      transportProperties;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
-{
-    rho             2500;
-    nu              1e-06;
-    d               0.0003;
-}
+dimensions      [0 1 -2 0 0 0 0];
+value           (0 0 0);
 
-phase2
-{
-    rho             1.2;
-    nu              1.5e-05;
-    d               1;
-}
-
-Cvm             0;
-Cl              0;
-Ct              0;
 
 // ************************************************************************* //

@@ -9,28 +9,40 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      transportProperties;
+    class       volScalarField;
+    location    "0";
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
+dimensions      [ 0 2 -3 0 0 0 0 ];
+
+internalField   uniform 20;
+
+boundaryField
 {
-    rho             2500;
-    nu              1e-06;
-    d               0.0003;
+    rotor
+    {
+        type            zeroGradient;
+        value           uniform 20;
+    }
+
+    stator
+    {
+        type            zeroGradient;
+        value           uniform 20;
+    }
+
+    front
+    {
+        type            empty;
+    }
+
+    back
+    {
+        type            empty;
+    }
 }
 
-phase2
-{
-    rho             1.2;
-    nu              1.5e-05;
-    d               1;
-}
-
-Cvm             0;
-Cl              0;
-Ct              0;
 
 // ************************************************************************* //

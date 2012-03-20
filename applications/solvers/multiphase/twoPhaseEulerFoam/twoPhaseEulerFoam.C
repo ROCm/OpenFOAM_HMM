@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "MULES.H"
+#include "subCycle.H"
 #include "nearWallDist.H"
 #include "wallFvPatch.H"
 #include "Switch.H"
@@ -43,6 +45,7 @@ Description
 #include "kineticTheoryModel.H"
 
 #include "pimpleControl.H"
+#include "MRFZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,6 +59,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "readPPProperties.H"
     #include "initContinuityErrs.H"
+    #include "createMRFZones.H"
     #include "readTimeControls.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"

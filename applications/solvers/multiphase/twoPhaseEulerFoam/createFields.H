@@ -93,16 +93,22 @@
 
     dimensionedScalar Cvm
     (
+        "Cvm",
+        dimless,
         transportProperties.lookup("Cvm")
     );
 
     dimensionedScalar Cl
     (
+        "Cl",
+        dimless,
         transportProperties.lookup("Cl")
     );
 
     dimensionedScalar Ct
     (
+        "Ct",
+        dimless,
         transportProperties.lookup("Ct")
     );
 

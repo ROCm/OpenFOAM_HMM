@@ -21,13 +21,10 @@ solvers
     {
         solver          GAMG;
         tolerance       1e-08;
-        relTol          0.1;
-        smoother        DIC;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        nFinestSweeps   2;
+        relTol          0.05;
+        smoother        GaussSeidel;
         cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
+        nCellsInCoarsestLevel 20;
         agglomerator    faceAreaPair;
         mergeLevels     1;
     }
@@ -39,48 +36,67 @@ solvers
         relTol          0;
     }
 
-    "(k|epsilon)"
+    U
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-07;
         relTol          0.1;
     }
 
-    "(k|epsilon)Final"
+    UFinal
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-05;
+        tolerance       1e-07;
         relTol          0;
     }
 
-    alpha
+    "alpha.*"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-10;
-        relTol          0.1;
+        relTol          0;
     }
 
-    alpha1Final
+    "(k|epsilon|Theta|T).*"
     {
         solver          PBiCG;
         preconditioner  DILU;
-        tolerance       1e-10;
+        tolerance       1e-06;
         relTol          0;
     }
 }
 
 PIMPLE
 {
-    nCorrectors     2;
+    nOuterCorrectors 1;
+    nCorrectors     3;
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      1;
     nAlphaSubCycles 3;
     correctAlpha    yes;
     pRefCell        0;
     pRefValue       0;
+}
+
+relaxationFactors
+{
+    fields
+    {
+        p                1;
+    }
+    equations
+    {
+        "U.*"            1;
+        "alpha.*"        1;
+        "Theta.*"        1;
+        "k.*"            1;
+        "epsilon.*"      1;
+        "T.*"            1;
+    }
 }
 
 

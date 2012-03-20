@@ -11,26 +11,20 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      transportProperties;
+    object      interfacialProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
-{
-    rho             2500;
-    nu              1e-06;
-    d               0.0003;
-}
+dragModel1          SchillerNaumann;
+dragModel2          SchillerNaumann;
 
-phase2
-{
-    rho             1.2;
-    nu              1.5e-05;
-    d               1;
-}
+heatTransferModel1  RanzMarshall;
+heatTransferModel2  RanzMarshall;
 
-Cvm             0;
-Cl              0;
-Ct              0;
+dispersedPhase      both;
+dragPhase           blended;
+
+residualSlip        1e-2;
+minInterfaceAlpha   1e-3;
 
 // ************************************************************************* //

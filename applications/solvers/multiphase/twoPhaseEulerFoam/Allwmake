@@ -6,6 +6,5 @@ wmake libso phaseModel
 wmake libso interfacialModels
 wmake libso kineticTheoryModels
 wmake
-wmake MRFtwoPhaseEulerFoam
 
 # ----------------------------------------------------------------- end-of-file
