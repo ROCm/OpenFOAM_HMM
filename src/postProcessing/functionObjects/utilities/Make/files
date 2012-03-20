@@ -1,15 +1,18 @@
 codedFunctionObject/codedFunctionObject.C
 
+dsmcFields/dsmcFields.C
+dsmcFields/dsmcFieldsFunctionObject.C
+
 pressureCoefficient/pressureCoefficient.C
 pressureCoefficient/pressureCoefficientFunctionObject.C
 
 staticPressure/staticPressure.C
 staticPressure/staticPressureFunctionObject.C
 
-dsmcFields/dsmcFields.C
-dsmcFields/dsmcFieldsFunctionObject.C
-
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
+
+yPlusRAS/yPlusRAS.C
+yPlusRAS/yPlusRASFunctionObject.C
 
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects
