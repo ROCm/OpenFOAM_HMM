@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::yPlusRAS
+    Foam::yPlusLES
 
 Description
-    Evaluates and outputs turbulence y+ for RAS models.  Values written to
-    time folders as field 'yPlusRAS'
+    Evaluates and outputs turbulence y+ for LES models.  Values written to
+    time folders as field 'yPlusLES'
 
 SourceFiles
-    yPlusRAS.C
-    IOyPlusRAS.H
+    yPlusLES.C
+    IOyPlusLES.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef yPlusRAS_H
-#define yPlusRAS_H
+#ifndef yPlusLES_H
+#define yPlusLES_H
 
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
@@ -52,14 +52,14 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                          Class yPlusRAS Declaration
+                          Class yPlusLES Declaration
 \*---------------------------------------------------------------------------*/
 
-class yPlusRAS
+class yPlusLES
 {
     // Private data
 
-        //- Name of this set of yPlusRAS objects
+        //- Name of this set of yPlusLES objects
         word name_;
 
         const objectRegistry& obr_;
@@ -70,6 +70,9 @@ class yPlusRAS
         //- Name of mass/volume flux field (optional, default = phi)
         word phiName_;
 
+        //- Name of velocity field
+        word UName_;
+
 
     // Private Member Functions
 
@@ -77,6 +80,7 @@ class yPlusRAS
         void calcIncompressibleYPlus
         (
             const fvMesh& mesh,
+            const volVectorField& U,
             volScalarField& yPlus
         ) const;
 
@@ -84,27 +88,28 @@ class yPlusRAS
         void calcCompressibleYPlus
         (
             const fvMesh& mesh,
+            const volVectorField& U,
             volScalarField& yPlus
         ) const;
 
         //- Disallow default bitwise copy construct
-        yPlusRAS(const yPlusRAS&);
+        yPlusLES(const yPlusLES&);
 
         //- Disallow default bitwise assignment
-        void operator=(const yPlusRAS&);
+        void operator=(const yPlusLES&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("yPlusRAS");
+    TypeName("yPlusLES");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        yPlusRAS
+        yPlusLES
         (
             const word& name,
             const objectRegistry&,
@@ -114,18 +119,18 @@ public:
 
 
     //- Destructor
-    virtual ~yPlusRAS();
+    virtual ~yPlusLES();
 
 
     // Member Functions
 
-        //- Return name of the set of yPlusRAS
+        //- Return name of the set of yPlusLES
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the yPlusRAS data
+        //- Read the yPlusLES data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -134,7 +139,7 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Calculate the yPlusRAS and write
+        //- Calculate the yPlusLES and write
         virtual void write();
 
         //- Update for changes of mesh

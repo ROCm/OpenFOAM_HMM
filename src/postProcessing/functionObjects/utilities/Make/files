@@ -12,6 +12,9 @@ staticPressure/staticPressureFunctionObject.C
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
 
+yPlusLES/yPlusLES.C
+yPlusLES/yPlusLESFunctionObject.C
+
 yPlusRAS/yPlusRAS.C
 yPlusRAS/yPlusRASFunctionObject.C
 
