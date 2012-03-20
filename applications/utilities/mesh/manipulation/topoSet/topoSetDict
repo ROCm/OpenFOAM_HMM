@@ -85,7 +85,6 @@ FoamFile
 //    {
 //        set p0;
 //        option any;         // cell with any point in pointSet
-//        //option all;       // cell with all points in pointSet
 //        //option edge;      // cell with an edge with both points in pointSet
 //    }
 //
