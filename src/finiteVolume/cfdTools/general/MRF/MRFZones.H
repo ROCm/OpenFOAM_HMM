@@ -72,6 +72,9 @@ public:
 
     // Member Functions
 
+        //- Add the Coriolis force contribution to the acceleration field
+        void addCoriolis(const volVectorField& U, volVectorField& ddtU) const;
+
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;
 

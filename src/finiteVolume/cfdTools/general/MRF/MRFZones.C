@@ -55,6 +55,19 @@ Foam::MRFZones::MRFZones(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::MRFZones::addCoriolis
+(
+    const volVectorField& U,
+    volVectorField& ddtU
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addCoriolis(U, ddtU);
+    }
+}
+
+
 void Foam::MRFZones::addCoriolis(fvVectorMatrix& UEqn) const
 {
     forAll(*this, i)

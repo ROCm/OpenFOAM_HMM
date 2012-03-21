@@ -292,6 +292,31 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::MRFZone::addCoriolis
+(
+    const volVectorField& U,
+    volVectorField& ddtU
+) const
+{
+    if (cellZoneID_ == -1)
+    {
+        return;
+    }
+
+    const labelList& cells = mesh_.cellZones()[cellZoneID_];
+    const scalarField& V = mesh_.V();
+    vectorField& ddtUc = ddtU.internalField();
+    const vectorField& Uc = U.internalField();
+    const vector& Omega = Omega_.value();
+
+    forAll(cells, i)
+    {
+        label celli = cells[i];
+        ddtUc[celli] += V[celli]*(Omega ^ Uc[celli]);
+    }
+}
+
+
 void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 {
     if (cellZoneID_ == -1)
