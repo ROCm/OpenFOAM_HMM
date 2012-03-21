@@ -227,7 +227,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
             << nbrMesh.name() << ':'
             << nbrPatch.name() << ':'
             << this->dimensionedInternalField().name() << " :"
-            << " heat[W]:" << Q
+            << " heat transfer rate:" << Q
             << " walltemperature "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)
