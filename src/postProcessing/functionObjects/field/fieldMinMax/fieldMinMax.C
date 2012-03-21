@@ -156,7 +156,9 @@ void Foam::fieldMinMax::writeFileHeader()
     if (fieldMinMaxFilePtr_.valid())
     {
         fieldMinMaxFilePtr_()
-            << "# Time" << tab << "field" << tab << "min" << tab << "max"
+            << "# Time" << token::TAB << "field" << token::TAB
+            << "min" << token::TAB << "position(min)" << token::TAB
+            << "max" << token::TAB << "position(max)" << token::TAB
             << endl;
     }
 }
@@ -184,50 +186,27 @@ void Foam::fieldMinMax::write()
             makeFile();
         }
 
+        if (log_)
+        {
+            Info<< type() << " output:" << nl;
+        }
+
         forAll(fieldSet_, fieldI)
         {
-            calcMinMaxFields<scalar>(fieldSet_[fieldI]);
-            calcMinMaxFields<vector>(fieldSet_[fieldI]);
-            calcMinMaxFields<sphericalTensor>(fieldSet_[fieldI]);
-            calcMinMaxFields<symmTensor>(fieldSet_[fieldI]);
-            calcMinMaxFields<tensor>(fieldSet_[fieldI]);
+            calcMinMaxFields<scalar>(fieldSet_[fieldI], mdCmpt);
+            calcMinMaxFields<vector>(fieldSet_[fieldI], mode_);
+            calcMinMaxFields<sphericalTensor>(fieldSet_[fieldI], mode_);
+            calcMinMaxFields<symmTensor>(fieldSet_[fieldI], mode_);
+            calcMinMaxFields<tensor>(fieldSet_[fieldI], mode_);
         }
-    }
-}
 
-
-template<>
-void Foam::fieldMinMax::calcMinMaxFields<Foam::scalar>
-(
-    const word& fieldName
-)
-{
-    if (obr_.foundObject<volScalarField>(fieldName))
-    {
-        const volScalarField& field =
-            obr_.lookupObject<volScalarField>(fieldName);
-        const scalar minValue = min(field).value();
-        const scalar maxValue = max(field).value();
-
-        if (Pstream::master())
+        if (log_)
         {
-            if (write_)
-            {
-                fieldMinMaxFilePtr_()
-                    << obr_.time().value() << tab
-                    << fieldName << tab << minValue << tab << maxValue << endl;
-            }
-
-            if (log_)
-            {
-                Info<< "fieldMinMax output:" << nl
-                    << "    min(" << fieldName << ") = " << minValue << nl
-                    << "    max(" << fieldName << ") = " << maxValue << nl
-                    << endl;
-            }
+            Info<< endl;
         }
     }
 }
+
 
 
 // ************************************************************************* //
