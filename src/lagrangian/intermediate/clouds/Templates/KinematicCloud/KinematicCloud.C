@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -671,6 +671,17 @@ void  Foam::KinematicCloud<CloudType>::motion(TrackData& td)
     CloudType::move(td,  solution_.trackTime());
 
     updateCellOccupancy();
+}
+
+
+template<class CloudType>
+void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
+{
+    typedef typename particle::TrackingData<KinematicCloud<CloudType> > tdType;
+
+    tdType td(*this);
+
+    Cloud<parcelType>::template autoMap<tdType>(td, mapper);
 }
 
 

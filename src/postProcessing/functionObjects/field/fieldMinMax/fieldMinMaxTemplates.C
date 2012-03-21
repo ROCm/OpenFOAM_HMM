@@ -27,81 +27,140 @@ License
 #include "volFields.H"
 #include "dictionary.H"
 #include "Time.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fieldMinMax::calcMinMaxFields(const word& fieldName)
+void Foam::fieldMinMax::calcMinMaxFields
+(
+    const word& fieldName,
+    const modeType& mode
+)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
     if (obr_.foundObject<fieldType>(fieldName))
     {
+        const label procI = Pstream::myProcNo();
+
         const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
-        switch (mode_)
+        switch (mode)
         {
             case mdMag:
             {
-                const scalar minValue = min(mag(field)).value();
-                const scalar maxValue = max(mag(field)).value();
+                const scalarField magField(mag(field));
+
+                labelList minIs(Pstream::nProcs());
+                scalarList minVs(Pstream::nProcs());
+                List<vector> minCs(Pstream::nProcs());
+                minIs[procI] = findMin(magField);
+                minVs[procI] = magField[minIs[procI]];
+                minCs[procI] = field.mesh().C()[minIs[procI]];
+
+                Pstream::gatherList(minIs);
+                Pstream::gatherList(minVs);
+                Pstream::gatherList(minCs);
+
+                labelList maxIs(Pstream::nProcs());
+                scalarList maxVs(Pstream::nProcs());
+                List<vector> maxCs(Pstream::nProcs());
+                maxIs[procI] = findMax(magField);
+                maxVs[procI] = magField[maxIs[procI]];
+                maxCs[procI] = field.mesh().C()[maxIs[procI]];
+
+                Pstream::gatherList(maxIs);
+                Pstream::gatherList(maxVs);
+                Pstream::gatherList(maxCs);
+
+                label minI = findMin(minVs);
+                scalar minValue = minVs[minI];
+                const vector& minC = minCs[minI];
+
+                label maxI = findMax(maxVs);
+                scalar maxValue = maxVs[maxI];
+                const vector& maxC = maxCs[maxI];
 
                 if (Pstream::master())
                 {
                     if (write_)
                     {
                         fieldMinMaxFilePtr_()
-                            << obr_.time().value() << tab
-                            << fieldName << tab << minValue << tab << maxValue
-                            << endl;
+                            << obr_.time().value() << token::TAB
+                            << fieldName << token::TAB
+                            << minValue << token::TAB << minC << token::TAB
+                            << maxValue << token::TAB << maxC << endl;
                     }
 
                     if (log_)
                     {
-                        Info<< "fieldMinMax output:" << nl
-                            << "    min(mag(" << fieldName << ")) = "
-                            << minValue << nl
+                        Info<< "    min(mag(" << fieldName << ")) = "
+                            << minValue << " at position " << minC << nl
                             << "    max(mag(" << fieldName << ")) = "
-                            << maxValue << nl
-                            << endl;
+                            << maxValue << " at position " << maxC << nl;
                     }
                 }
                 break;
             }
             case mdCmpt:
             {
-                const Type minValue = min(field).value();
-                const Type maxValue = max(field).value();
+                List<Type> minVs(Pstream::nProcs());
+                labelList minIs(Pstream::nProcs());
+                List<vector> minCs(Pstream::nProcs());
+                minIs[procI] = findMin(field);
+                minVs[procI] = field[minIs[procI]];
+                minCs[procI] = field.mesh().C()[minIs[procI]];
+
+                Pstream::gatherList(minIs);
+                Pstream::gatherList(minVs);
+                Pstream::gatherList(minCs);
+
+                List<Type> maxVs(Pstream::nProcs());
+                labelList maxIs(Pstream::nProcs());
+                List<vector> maxCs(Pstream::nProcs());
+                maxIs[procI] = findMax(field);
+                maxVs[procI] = field[maxIs[procI]];
+                maxCs[procI] = field.mesh().C()[maxIs[procI]];
+
+                Pstream::gatherList(maxIs);
+                Pstream::gatherList(maxVs);
+                Pstream::gatherList(maxCs);
+
+                label minI = findMin(minVs);
+                Type minValue = minVs[minI];
+                const vector& minC = minCs[minI];
+
+                label maxI = findMax(maxVs);
+                Type maxValue = maxVs[maxI];
+                const vector& maxC = maxCs[maxI];
+
 
                 if (Pstream::master())
                 {
                     if (write_)
                     {
                         fieldMinMaxFilePtr_()
-                            << obr_.time().value() << tab
-                            << fieldName << tab << minValue << tab << maxValue
-                            << endl;
+                            << obr_.time().value() << token::TAB
+                            << fieldName << token::TAB
+                            << minValue << token::TAB << minC << token::TAB
+                            << maxValue << token::TAB << maxC << endl;
                     }
 
                     if (log_)
                     {
-                        Info<< "fieldMinMax output:" << nl
-                            << "    cmptMin(" << fieldName << ") = "
-                            << minValue << nl
-                            << "    cmptMax(" << fieldName << ") = "
-                            << maxValue << nl
-                            << endl;
+                        Info<< "    min(" << fieldName << ") = "
+                            << minValue << " at position " << minC << nl
+                            << "    max(" << fieldName << ") = "
+                            << maxValue << " at position " << maxC << nl;
                     }
                 }
                 break;
             }
             default:
             {
-                FatalErrorIn
-                (
-                    "Foam::fieldMinMax::calcMinMaxFields"
-                    "(const word& fieldName)"
-                )<< "Unknown min/max mode: " << modeTypeNames_[mode_]
-                 << exit(FatalError);
+                FatalErrorIn("Foam::fieldMinMax::calcMinMaxFields(const word&)")
+                    << "Unknown min/max mode: " << modeTypeNames_[mode_]
+                    << exit(FatalError);
             }
         }
     }

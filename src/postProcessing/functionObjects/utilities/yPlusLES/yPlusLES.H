@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,33 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fieldMinMax
+    Foam::yPlusLES
 
 Description
-    Calculates scalar minimim and maximum field values.
-
-    For variables with rank > 0, computes the magnitude of the min/max
-    values.
-
-    Data written to the file \<timeDir\>/fieldMinMax.dat
-
+    Evaluates and outputs turbulence y+ for LES models.  Values written to
+    time folders as field 'yPlusLES'
 
 SourceFiles
-    fieldMinMax.C
-    IOfieldMinMax.H
+    yPlusLES.C
+    IOyPlusLES.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldMinMax_H
-#define fieldMinMax_H
+#ifndef yPlusLES_H
+#define yPlusLES_H
 
-#include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
-#include "HashSet.H"
-#include "OFstream.H"
-#include "Switch.H"
 #include "pointFieldFwd.H"
-#include "NamedEnum.H"
+#include "Switch.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,30 +51,17 @@ namespace Foam
 class objectRegistry;
 class dictionary;
 class mapPolyMesh;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class fieldMinMax Declaration
+                          Class yPlusLES Declaration
 \*---------------------------------------------------------------------------*/
 
-class fieldMinMax
+class yPlusLES
 {
-public:
+    // Private data
 
-    enum modeType
-    {
-        mdMag,
-        mdCmpt
-    };
-
-protected:
-
-    // Protected data
-
-        //- Mode type names
-        static const NamedEnum<modeType, 2> modeTypeNames_;
-
-        //- Name of this set of field min/max.
-        //  Also used as the name of the output directory.
+        //- Name of this set of yPlusLES objects
         word name_;
 
         const objectRegistry& obr_;
@@ -90,48 +69,58 @@ protected:
         //- on/off switch
         bool active_;
 
-        //- Switch to enable/disable writing to file
-        Switch write_;
-
-        //- Switch to send output to Info as well
+        //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Mode for min/max - only applicable for ranks > 0
-        modeType mode_;
+        //- Name of mass/volume flux field (optional, default = phi)
+        word phiName_;
 
-        //- Fields to assess min/max
-        wordList fieldSet_;
+        //- Name of velocity field
+        word UName_;
 
-        //- Min/max file ptr
-        autoPtr<OFstream> fieldMinMaxFilePtr_;
+        //- Output file pointer
+        autoPtr<OFstream> outputFilePtr_;
 
 
     // Private Member Functions
 
-        //- If the output file has not been created create it
-        void makeFile();
+        //- Make the output file
+        virtual void makeFile();
+
+        //- Calculate incompressible form of y+
+        void calcIncompressibleYPlus
+        (
+            const fvMesh& mesh,
+            const volVectorField& U,
+            volScalarField& yPlus
+        );
+
+        //- Calculate compressible form of y+
+        void calcCompressibleYPlus
+        (
+            const fvMesh& mesh,
+            const volVectorField& U,
+            volScalarField& yPlus
+        );
 
         //- Disallow default bitwise copy construct
-        fieldMinMax(const fieldMinMax&);
+        yPlusLES(const yPlusLES&);
 
         //- Disallow default bitwise assignment
-        void operator=(const fieldMinMax&);
-
-        //- Output file header information
-        virtual void writeFileHeader();
+        void operator=(const yPlusLES&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("fieldMinMax");
+    TypeName("yPlusLES");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        fieldMinMax
+        yPlusLES
         (
             const word& name,
             const objectRegistry&,
@@ -141,18 +130,18 @@ public:
 
 
     //- Destructor
-    virtual ~fieldMinMax();
+    virtual ~yPlusLES();
 
 
     // Member Functions
 
-        //- Return name of the set of field min/max
+        //- Return name of the set of yPlusLES
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the field min/max data
+        //- Read the yPlusLES data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -161,15 +150,7 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Calculate the field min/max
-        template<class Type>
-        void calcMinMaxFields
-        (
-            const word& fieldName,
-            const modeType& mode
-        );
-
-        //- Write the fieldMinMax
+        //- Calculate the yPlusLES and write
         virtual void write();
 
         //- Update for changes of mesh
@@ -185,12 +166,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "fieldMinMaxTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

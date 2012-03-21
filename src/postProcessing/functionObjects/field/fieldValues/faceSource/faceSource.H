@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,9 @@ Description
       - min
       - max
       - CoV (Coefficient of variation: standard deviation/mean)
-
+      - areaNormalAverage   (vector with first component (average of) inproduct
+                             of value and face area vector)
+      - areaNormalIntegrate (   ,,          ,,           (sum of)       ,,
 
     Notes:
     - faces on empty patches get ignored
@@ -75,7 +77,11 @@ Description
       negative pressure)
     - using sampledSurfaces:
             - they do not do surface fields
-            - they use cell values - they do not do any interpolation.
+            - if interpolate=true they use interpolationCellPoint
+              otherwise they use cell values
+            - each triangle in sampledSurface is logically only in one cell
+              so interpolation will be wrong when triangles are larger than
+              cells. This can only happen for sampling on triSurfaceMesh.
             - take care when using isoSurfaces - these might have duplicate
               triangles so integration might be wrong
 
@@ -138,11 +144,13 @@ public:
             opAreaIntegrate,
             opMin,
             opMax,
-            opCoV
+            opCoV,
+            opAreaNormalAverage,
+            opAreaNormalIntegrate
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 9> operationTypeNames_;
+        static const NamedEnum<operationType, 11> operationTypeNames_;
 
 
 private:
@@ -194,7 +202,6 @@ protected:
             autoPtr<sampledSurface> surfacePtr_;
 
 
-
     // Protected Member Functions
 
         //- Initialise, e.g. face addressing
@@ -212,12 +219,23 @@ protected:
             const bool mustGet = false
         ) const;
 
-        //- Apply the 'operation' to the values
+        //- Apply the 'operation' to the values. Operation has to
+        //  preserve Type.
+        template<class Type>
+        Type processSameTypeValues
+        (
+            const Field<Type>& values,
+            const vectorField& Sf,
+            const scalarField& weightField
+        ) const;
+
+        //- Apply the 'operation' to the values. Wrapper around
+        //  processSameTypeValues. See also template specialisation below.
         template<class Type>
         Type processValues
         (
             const Field<Type>& values,
-            const scalarField& magSf,
+            const vectorField& Sf,
             const scalarField& weightField
         ) const;
 
@@ -290,6 +308,17 @@ public:
                 const bool applyOrientation
             ) const;
 };
+
+
+//- Specialisation of processing vectors for opAreaNormalAverage,
+//  opAreaNormalIntegrate (use inproduct - dimension reducing operation)
+template<>
+vector faceSource::processValues
+(
+    const Field<vector>& values,
+    const vectorField& Sf,
+    const scalarField& weightField
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
