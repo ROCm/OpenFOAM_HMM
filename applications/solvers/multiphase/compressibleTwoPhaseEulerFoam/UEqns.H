@@ -45,7 +45,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
           - fvm::Sp(dragCoeff/rho1, U1)
           - alpha1*alpha2/rho1*(liftForce - Cvm*rho2*DDtU2)
         );
-        mrfZones.addCoriolis(alpha1, U1Eqn);
+        mrfZones.addCoriolis(alpha1*(1 + Cvm*rho2*alpha2/rho1), U1Eqn);
         U1Eqn.relax();
     }
 
@@ -76,7 +76,7 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
           - fvm::Sp(dragCoeff/rho2, U2)
           + alpha1*alpha2/rho2*(liftForce + Cvm*rho2*DDtU1)
         );
-        mrfZones.addCoriolis(alpha2, U2Eqn);
+        mrfZones.addCoriolis(alpha2*(1 + Cvm*rho2*alpha1/rho2), U2Eqn);
         U2Eqn.relax();
     }
 }
