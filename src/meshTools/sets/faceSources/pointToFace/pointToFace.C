@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,11 +41,12 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::pointToFace::pointAction,
-        2
+        3
     >::names[] =
     {
         "any",
-        "all"
+        "all",
+        "edge"
     };
 }
 
@@ -53,13 +54,14 @@ namespace Foam
 Foam::topoSetSource::addToUsageTable Foam::pointToFace::usage_
 (
     pointToFace::typeName,
-    "\n    Usage: pointToFace <pointSet> any|all\n\n"
+    "\n    Usage: pointToFace <pointSet> any|all|edge\n\n"
     "    Select faces with\n"
     "    -any point in the pointSet\n"
     "    -all points in the pointSet\n\n"
+    "    -two consecutive points (an edge) in the pointSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::pointToFace::pointAction, 2>
+const Foam::NamedEnum<Foam::pointToFace::pointAction, 3>
     Foam::pointToFace::pointActionNames_;
 
 
@@ -123,6 +125,23 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
             if (iter() == mesh_.faces()[faceI].size())
             {
                 addOrDelete(set, faceI, add);
+            }
+        }
+    }
+    else if (option_ == EDGE)
+    {
+        const faceList& faces = mesh_.faces();
+        forAll(faces, faceI)
+        {
+            const face& f = faces[faceI];
+
+            forAll(f, fp)
+            {
+                if (loadedSet.found(f[fp]) && loadedSet.found(f.nextLabel(fp)))
+                {
+                    addOrDelete(set, faceI, add);
+                    break;
+                }
             }
         }
     }

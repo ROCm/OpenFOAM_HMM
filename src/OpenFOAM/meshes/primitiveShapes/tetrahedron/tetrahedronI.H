@@ -704,8 +704,6 @@ tetSliceWithPlane
         // Tet cut into two prisms. Determine the positive one.
         label pos0 = -1;
         label pos1 = -1;
-        label neg0 = -1;
-        label neg1 = -1;
         forAll(d, i)
         {
             if (d[i] > 0)
@@ -717,17 +715,6 @@ tetSliceWithPlane
                 else
                 {
                     pos1 = i;
-                }
-            }
-            else
-            {
-                if (neg0 == -1)
-                {
-                    neg0 = i;
-                }
-                else
-                {
-                    neg1 = i;
                 }
             }
         }

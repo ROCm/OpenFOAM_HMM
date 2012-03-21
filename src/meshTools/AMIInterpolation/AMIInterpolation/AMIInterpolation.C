@@ -32,6 +32,32 @@ License
 
 namespace Foam
 {
+    //- Helper class for list
+    template<class T>
+    class ListPlusEqOp
+    {
+        public:
+        void operator()(List<T>& x, const List<T> y) const
+        {
+            if (y.size())
+            {
+                if (x.size())
+                {
+                    label sz = x.size();
+                    x.setSize(sz + y.size());
+                    forAll(y, i)
+                    {
+                        x[sz++] = y[i];
+                    }
+                }
+                else
+                {
+                    x = y;
+                }
+            }
+        }
+    };
+
     //- Combine operator for interpolateToSource/Target
     template<class Type, class BinaryOp>
     class combineBinaryOp
@@ -1044,7 +1070,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     // reset starting seed
     label startSeedI = 0;
 
-    label nNonOverlap = 0;
+    DynamicList<label> nonOverlapFaces;
     do
     {
         nbrFaces.clear();
@@ -1085,7 +1111,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
         if (!faceProcessed)
         {
-            nNonOverlap++;
+            nonOverlapFaces.append(srcFaceI);
         }
 
         // choose new src face from current src face neighbour
@@ -1105,10 +1131,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
         }
     } while (nFacesRemaining > 0);
 
-    if (nNonOverlap != 0)
+    if (nonOverlapFaces.size() != 0)
     {
-        Pout<< "AMI: " << nNonOverlap << " non-overlap faces identified"
+        Pout<< "AMI: " << nonOverlapFaces.size()
+            << " non-overlap faces identified"
             << endl;
+
+        srcNonOverlap_.transfer(nonOverlapFaces);
     }
 
     // transfer data to persistent storage
@@ -1461,6 +1490,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
+    srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),
@@ -1493,6 +1523,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
+    srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),
@@ -1580,6 +1611,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(fineAMI.singlePatchProc_),
     srcAddress_(),
     srcWeights_(),
+    srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
     treePtr_(NULL),

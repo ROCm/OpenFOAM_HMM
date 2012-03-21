@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,8 @@ public:
         //- Enumeration defining the valid options
         enum pointAction
         {
-            ANY     // Cells using any point in set
+            ANY,    // Cells using any point in set
+            EDGE    // Cells using an edge with both points in set
             //ALL   // Possible extension: cells whose all points are in set
         };
 
@@ -64,7 +65,7 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        static const NamedEnum<pointAction, 1> pointActionNames_;
+        static const NamedEnum<pointAction, 2> pointActionNames_;
 
         //- Name of set to use
         word setName_;

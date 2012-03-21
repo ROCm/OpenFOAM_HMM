@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,10 +44,57 @@ Foam::fileFormats::OBJedgeFormat::OBJedgeFormat
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::fileFormats::OBJedgeFormat::read
+void Foam::fileFormats::OBJedgeFormat::readVertices
 (
-    const fileName& filename
+    const string& line,
+    string::size_type& endNum,
+    DynamicList<label>& dynVertices
 )
+{
+    dynVertices.clear();
+    while (true)
+    {
+        string::size_type startNum =
+            line.find_first_not_of(' ', endNum);
+
+        if (startNum == string::npos)
+        {
+            break;
+        }
+
+        endNum = line.find(' ', startNum);
+
+        string vertexSpec;
+        if (endNum != string::npos)
+        {
+            vertexSpec = line.substr(startNum, endNum-startNum);
+        }
+        else
+        {
+            vertexSpec = line.substr(startNum, line.size() - startNum);
+        }
+
+        string::size_type slashPos = vertexSpec.find('/');
+
+        label vertI = 0;
+        if (slashPos != string::npos)
+        {
+            IStringStream intStream(vertexSpec.substr(0, slashPos));
+
+            intStream >> vertI;
+        }
+        else
+        {
+            IStringStream intStream(vertexSpec);
+
+            intStream >> vertI;
+        }
+        dynVertices.append(vertI - 1);
+    }
+}
+
+
+bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
 {
     clear();
 
@@ -65,6 +112,8 @@ bool Foam::fileFormats::OBJedgeFormat::read
     DynamicList<point> dynPoints;
     DynamicList<edge> dynEdges;
     DynamicList<label> dynUsedPoints;
+
+    DynamicList<label> dynVertices;
 
     while (is.good())
     {
@@ -97,50 +146,18 @@ bool Foam::fileFormats::OBJedgeFormat::read
             // Assume 'l' is followed by space.
             string::size_type endNum = 1;
 
-            int nVerts = 0;
-            for (int count = 0; count < 2; ++count)
+            readVertices
+            (
+                line,
+                endNum,
+                dynVertices
+            );
+
+
+            for (label i = 1; i < dynVertices.size(); i++)
             {
-                string::size_type startNum =
-                    line.find_first_not_of(' ', endNum);
+                edge edgeRead(dynVertices[i-1], dynVertices[i]);
 
-                if (startNum == string::npos)
-                {
-                    break;
-                }
-
-                endNum = line.find(' ', startNum);
-
-                string vertexSpec;
-                if (endNum != string::npos)
-                {
-                    vertexSpec = line.substr(startNum, endNum-startNum);
-                }
-                else
-                {
-                    vertexSpec = line.substr(startNum, line.size() - startNum);
-                }
-
-                string::size_type slashPos = vertexSpec.find('/');
-
-                label vertI = 0;
-                if (slashPos != string::npos)
-                {
-                    IStringStream intStream(vertexSpec.substr(0, slashPos));
-
-                    intStream >> vertI;
-                }
-                else
-                {
-                    IStringStream intStream(vertexSpec);
-
-                    intStream >> vertI;
-                }
-
-                edgeRead[nVerts++] = (vertI - 1); // change to zero-offset
-            }
-
-            if (nVerts >= 2)
-            {
                 dynUsedPoints[edgeRead[0]] = edgeRead[0];
                 dynUsedPoints[edgeRead[1]] = edgeRead[1];
 
