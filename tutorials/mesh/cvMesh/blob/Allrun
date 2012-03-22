@@ -5,7 +5,9 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 runApplication blockMesh
-runApplication cvMesh $nProc
-runApplication checkMesh $nProc -constant -allGeometry -allTopology
+runApplication cvMesh
+runApplication collapseEdges 1e-3 45
+runApplication snappyHexMesh
+runApplication checkMesh -constant -allGeometry -allTopology
 
 # ----------------------------------------------------------------- end-of-file
