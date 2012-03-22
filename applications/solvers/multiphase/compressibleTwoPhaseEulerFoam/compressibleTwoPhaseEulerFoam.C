@@ -33,6 +33,7 @@ Description
 #include "fvCFD.H"
 #include "nearWallDist.H"
 #include "wallFvPatch.H"
+#include "fixedValueFvsPatchFields.H"
 #include "Switch.H"
 
 #include "IFstream.H"
