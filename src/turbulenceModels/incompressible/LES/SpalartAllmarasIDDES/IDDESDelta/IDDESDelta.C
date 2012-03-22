@@ -74,16 +74,20 @@ void Foam::IDDESDelta::calcDelta()
     {
         scalar deltaMaxTmp = 0.0;
         const labelList& cFaces = cells[cellI];
-        const point& faceCentre = faceCentres[cFaces[0]];
         const vector nCell = n[cellI];
         forAll(cFaces, cFaceI)
         {
             label faceI = cFaces[cFaceI];
-            const point& faceCentreTwo = faceCentres[faceI];
-            scalar tmp = (faceCentre - faceCentreTwo) & nCell;
-            if (tmp > deltaMaxTmp)
+            const point& faceCentreI = faceCentres[faceI];
+            forAll(cFaces, cFaceJ)
             {
-                deltaMaxTmp = tmp;
+                label faceJ = cFaces[cFaceJ];
+                const point& faceCentreJ = faceCentres[faceJ];
+                scalar tmp = (faceCentreJ - faceCentreI) & nCell;
+                if (tmp > deltaMaxTmp)
+                {
+                    deltaMaxTmp = tmp;
+                }
             }
         }
         faceToFacenMax[cellI] = deltaMaxTmp;
