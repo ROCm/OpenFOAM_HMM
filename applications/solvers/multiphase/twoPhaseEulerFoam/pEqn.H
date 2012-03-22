@@ -5,8 +5,8 @@
     volScalarField rAU1(1.0/U1Eqn.A());
     volScalarField rAU2(1.0/U2Eqn.A());
 
-    rAU1f = fvc::interpolate(rAU1);
-    surfaceScalarField rAU2f(fvc::interpolate(rAU2));
+    rAU1f = 1.0/fvc::interpolate(U1Eqn.A());
+    surfaceScalarField rAU2f(1.0/fvc::interpolate(U2Eqn.A()));
 
     volVectorField HbyA1("HbyA1", U1);
     HbyA1 = rAU1*U1Eqn.H();
@@ -16,39 +16,19 @@
 
     mrfZones.absoluteFlux(phi1.oldTime());
     mrfZones.absoluteFlux(phi1);
-
     mrfZones.absoluteFlux(phi2.oldTime());
     mrfZones.absoluteFlux(phi2);
 
-    surfaceScalarField phiDrag1
-    (
-        fvc::interpolate(alpha2/rho1*K*rAU1)*phi2 + rAU1f*(g & mesh.Sf())
-    );
+    surfaceScalarField ppDrag("ppDrag", 0.0*phi1);
 
     if (g0.value() > 0.0)
     {
-        phiDrag1 -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
+        ppDrag -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
     }
 
     if (kineticTheory.on())
     {
-        phiDrag1 -= rAU1f*fvc::snGrad(kineticTheory.pa()/rho1)*mesh.magSf();
-    }
-
-
-    surfaceScalarField phiDrag2
-    (
-        fvc::interpolate(alpha1/rho2*K*rAU2)*phi1 + rAU2f*(g & mesh.Sf())
-    );
-
-    // Fix for gravity on outlet boundary.
-    forAll(p.boundaryField(), patchi)
-    {
-        if (isA<zeroGradientFvPatchScalarField>(p.boundaryField()[patchi]))
-        {
-            phiDrag1.boundaryField()[patchi] = 0.0;
-            phiDrag2.boundaryField()[patchi] = 0.0;
-        }
+        ppDrag -= rAU1f*fvc::snGrad(kineticTheory.pa()/rho1)*mesh.magSf();
     }
 
     surfaceScalarField phiHbyA1
@@ -56,7 +36,9 @@
         "phiHbyA1",
         (fvc::interpolate(HbyA1) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU1, U1, phi1)
-      + phiDrag1
+      + fvc::interpolate(alpha2/rho1*K*rAU1)*phi2
+      + ppDrag
+      + rAU1f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA1);
 
@@ -65,7 +47,8 @@
         "phiHbyA2",
         (fvc::interpolate(HbyA2) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU2, U2, phi2)
-      + phiDrag2
+      + fvc::interpolate(alpha1/rho2*K*rAU2)*phi1
+      + rAU2f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA2);
 
@@ -75,6 +58,9 @@
     mrfZones.relativeFlux(phi2);
 
     surfaceScalarField phiHbyA("phiHbyA", alpha1f*phiHbyA1 + alpha2f*phiHbyA2);
+
+    HbyA1 += alpha2*(1.0/rho1)*rAU1*K*U2;
+    HbyA2 += alpha1*(1.0/rho2)*rAU2*K*U1;
 
     surfaceScalarField Dp
     (
@@ -104,10 +90,19 @@
             p.relax();
             SfGradp = pEqn.flux()/Dp;
 
-            U1 = HbyA1 + fvc::reconstruct(phiDrag1 - rAU1f*SfGradp/rho1);
+            U1 = HbyA1
+               + fvc::reconstruct
+                 (
+                     ppDrag
+                   + rAU1f*((g & mesh.Sf()) - SfGradp/rho1)
+                 );
             U1.correctBoundaryConditions();
 
-            U2 = HbyA2 + fvc::reconstruct(phiDrag2 - rAU2f*SfGradp/rho2);
+            U2 = HbyA2
+               + fvc::reconstruct
+                 (
+                     rAU2f*((g & mesh.Sf()) - SfGradp/rho2)
+                 );
             U2.correctBoundaryConditions();
 
             U = alpha1*U1 + alpha2*U2;

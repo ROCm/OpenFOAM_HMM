@@ -77,4 +77,15 @@ volScalarField heatTransferCoeff
     heatTransferCoeff *= alpha1Coeff;
 
     liftForce = Cl*(alpha1*rho1 + alpha2*rho2)*(Ur ^ fvc::curl(U));
+
+    // Remove lift, drag and phase heat-transfer at fixed-flux boundaries
+    forAll(phi1.boundaryField(), patchi)
+    {
+        if (isA<fixedValueFvsPatchScalarField>(phi1.boundaryField()[patchi]))
+        {
+            dragCoeff.boundaryField()[patchi] = 0.0;
+            heatTransferCoeff.boundaryField()[patchi] = 0.0;
+            liftForce.boundaryField()[patchi] = vector::zero;
+        }
+    }
 }
