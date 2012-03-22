@@ -413,7 +413,7 @@ OPENMPI)
 
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddMan     $MPI_ARCH_PATH/man
+    _foamAddMan     $MPI_ARCH_PATH/share/man
     ;;
 
 SYSTEMOPENMPI)
