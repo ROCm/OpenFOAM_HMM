@@ -10,16 +10,23 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      RASProperties;
+    location    "system";
+    object      topoSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
-
-turbulence      off;
-
-printCoeffs     on;
-
+actions
+(
+    {
+        name    rotor;
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        sourceInfo
+        {
+            name rotor;
+        }
+    }
+);
 
 // ************************************************************************* //

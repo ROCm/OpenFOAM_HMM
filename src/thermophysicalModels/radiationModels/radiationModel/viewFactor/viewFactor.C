@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -590,9 +590,9 @@ void Foam::radiation::viewFactor::calculate()
             const scalarField& Qrp = Qr_.boundaryField()[patchID];
             const scalarField& magSf = mesh_.magSf().boundaryField()[patchID];
             scalar heatFlux = gSum(Qrp*magSf);
-            Info<< "Total heat flux at patch: "
+            Info<< "Total heat transfer rate at patch: "
                 << patchID << " "
-                << heatFlux << " [W]" << endl;
+                << heatFlux << endl;
         }
     }
 

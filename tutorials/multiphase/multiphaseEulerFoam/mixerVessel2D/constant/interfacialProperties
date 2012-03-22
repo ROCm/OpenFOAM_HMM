@@ -11,15 +11,20 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      RASProperties;
+    object      interfacialProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
+dragModel1          SchillerNaumann;
+dragModel2          SchillerNaumann;
 
-turbulence      off;
+heatTransferModel1  RanzMarshall;
+heatTransferModel2  RanzMarshall;
 
-printCoeffs     on;
+dispersedPhase      both;
+dragPhase           blended;
 
+residualSlip        1e-2;
+minInterfaceAlpha   1e-3;
 
 // ************************************************************************* //

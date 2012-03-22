@@ -9,17 +9,40 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      RASProperties;
+    class       volScalarField;
+    location    "0";
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
+dimensions      [ 0 2 -3 0 0 0 0 ];
 
-turbulence      off;
+internalField   uniform 20;
 
-printCoeffs     on;
+boundaryField
+{
+    rotor
+    {
+        type            zeroGradient;
+        value           uniform 20;
+    }
+
+    stator
+    {
+        type            zeroGradient;
+        value           uniform 20;
+    }
+
+    front
+    {
+        type            empty;
+    }
+
+    back
+    {
+        type            empty;
+    }
+}
 
 
 // ************************************************************************* //

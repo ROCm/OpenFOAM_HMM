@@ -163,7 +163,11 @@ public:
 
         //- Calculate the field min/max
         template<class Type>
-        void calcMinMaxFields(const word& fieldName);
+        void calcMinMaxFields
+        (
+            const word& fieldName,
+            const modeType& mode
+        );
 
         //- Write the fieldMinMax
         virtual void write();
@@ -176,11 +180,6 @@ public:
         virtual void movePoints(const pointField&)
         {}
 };
-
-
-// Template specialisation for scalar fields
-template<>
-void fieldMinMax::calcMinMaxFields<scalar>(const word& fieldName);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

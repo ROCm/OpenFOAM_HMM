@@ -10,16 +10,52 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      RASProperties;
+    location    "system";
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
+ddtSchemes
+{
+    default         Euler;
+}
 
-turbulence      off;
+gradSchemes
+{
+    default         Gauss linear;
+}
 
-printCoeffs     on;
+divSchemes
+{
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*,alpha.*\)"   Gauss vanLeer;
+
+    "div\(phiAlpha.*,U.*\)" Gauss limitedLinearV 1;
+    div(Rc)                 Gauss linear;
+    "div\(phi.*,U.*\)"      Gauss limitedLinearV 1;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+fluxRequired
+{
+    default         no;
+    p;
+    pcorr;
+}
 
 
 // ************************************************************************* //

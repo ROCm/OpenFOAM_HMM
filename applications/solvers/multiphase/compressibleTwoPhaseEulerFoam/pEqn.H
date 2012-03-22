@@ -122,16 +122,22 @@
             U1 = HbyA1
                + fvc::reconstruct
                  (
-                     rAlphaAU1f*(g & mesh.Sf())
-                   + rAlphaAU1f*mSfGradp/fvc::interpolate(rho1)
+                     rAlphaAU1f
+                    *(
+                         (g & mesh.Sf())
+                       + mSfGradp/fvc::interpolate(rho1)
+                     )
                  );
             U1.correctBoundaryConditions();
 
             U2 = HbyA2
                + fvc::reconstruct
                  (
-                     rAlphaAU2f*(g & mesh.Sf())
-                   + rAlphaAU2f*mSfGradp/fvc::interpolate(rho2)
+                     rAlphaAU2f
+                    *(
+                        (g & mesh.Sf())
+                      + mSfGradp/fvc::interpolate(rho2)
+                    )
                  );
             U2.correctBoundaryConditions();
 

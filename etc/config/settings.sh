@@ -366,7 +366,7 @@ fi
 # ~~~~~~~~~~~~~~
 
 boost_version=boost_1_45_0
-cgal_version=CGAL-3.9
+cgal_version=CGAL-4.0
 
 export BOOST_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$boost_version
 export CGAL_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$cgal_version

@@ -9,17 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
+    class       uniformDimensionedVectorField;
     location    "constant";
-    object      RASProperties;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
-
-turbulence      off;
-
-printCoeffs     on;
+dimensions      [0 1 -2 0 0 0 0];
+value           (0 0 0);
 
 
 // ************************************************************************* //

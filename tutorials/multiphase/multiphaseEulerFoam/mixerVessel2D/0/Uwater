@@ -9,17 +9,38 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      RASProperties;
+    class       volVectorField;
+    object      Uwater;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
+dimensions      [0 1 -1 0 0 0 0];
 
-turbulence      off;
+internalField   uniform (0 0 0);
 
-printCoeffs     on;
+boundaryField
+{
+    rotor
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
 
+    stator
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+
+    front
+    {
+        type            empty;
+    }
+
+    back
+    {
+        type            empty;
+    }
+}
 
 // ************************************************************************* //

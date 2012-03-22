@@ -11,15 +11,19 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      RASProperties;
+    object      LESProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-RASModel        kEpsilon;
-
-turbulence      off;
+LESModel        laminar;
 
 printCoeffs     on;
 
+delta           cubeRootVol;
+
+cubeRootVolCoeffs
+{
+    deltaCoeff      1;
+}
 
 // ************************************************************************* //
