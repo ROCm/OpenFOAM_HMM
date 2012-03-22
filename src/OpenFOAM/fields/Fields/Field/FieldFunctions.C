@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -514,11 +514,12 @@ template<class Type>
 Type gAverage(const UList<Type>& f)
 {
     label n = f.size();
-    reduce(n, sumOp<label>());
+    Type s = sum(f);
+    sumReduce(s, n);
 
     if (n > 0)
     {
-        Type avrg = gSum(f)/n;
+        Type avrg = s/n;
 
         return avrg;
     }
