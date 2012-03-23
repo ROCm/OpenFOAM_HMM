@@ -63,6 +63,15 @@ void Foam::reduce(vector2D&, const sumOp<vector2D>&, const int)
 {}
 
 
+void Foam::sumReduce
+(
+    scalar& Value,
+    label& Count,
+    const int tag
+)
+{}
+
+
 void Foam::reduce(scalar&, const sumOp<scalar>&, const int, label&)
 {}
 
