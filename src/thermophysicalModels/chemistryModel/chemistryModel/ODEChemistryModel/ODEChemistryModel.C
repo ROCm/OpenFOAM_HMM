@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -743,6 +743,8 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     const scalar deltaT
 )
 {
+    CompType::correct();
+
     scalar deltaTMin = GREAT;
 
     const volScalarField rho

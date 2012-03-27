@@ -76,6 +76,9 @@ protected:
         //- Chemistry activation switch
         Switch chemistry_;
 
+        //- Initial chemical time step
+        const scalar deltaTChemIni_;
+
         //- Latest estimation of integration step
         scalarField deltaTChem_;
 
@@ -85,6 +88,9 @@ protected:
         //- Return non-const access to the latest estimation of integration
         //  step, e.g. for multi-chemistry model
         scalarField& deltaTChem();
+
+        //- Correct function - updates due to mesh changes
+        void correct();
 
 
 public:

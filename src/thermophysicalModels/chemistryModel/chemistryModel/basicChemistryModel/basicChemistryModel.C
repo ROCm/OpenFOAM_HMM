@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,18 @@ namespace Foam
     defineTypeNameAndDebug(basicChemistryModel, 0);
 }
 
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+void Foam::basicChemistryModel::correct()
+{
+    if (mesh_.changing())
+    {
+        deltaTChem_.setSize(mesh_.nCells());
+        deltaTChem_ = deltaTChemIni_;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicChemistryModel::basicChemistryModel(const fvMesh& mesh)
@@ -51,11 +63,8 @@ Foam::basicChemistryModel::basicChemistryModel(const fvMesh& mesh)
     ),
     mesh_(mesh),
     chemistry_(lookup("chemistry")),
-    deltaTChem_
-    (
-        mesh.nCells(),
-        readScalar(lookup("initialChemicalTimeStep"))
-    )
+    deltaTChemIni_(readScalar(lookup("initialChemicalTimeStep"))),
+    deltaTChem_(mesh.nCells(), deltaTChemIni_)
 {}
 
 
