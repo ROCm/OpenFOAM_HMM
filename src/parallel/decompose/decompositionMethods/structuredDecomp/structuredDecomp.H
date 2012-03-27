@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::structuredDecomp
 
 Description
-    Decomposition given using consecutive application of decomposers.
+    Decomposition by walking out decomposition of patch cells mesh.
 
 SourceFiles
     structuredDecomp.C
@@ -52,9 +52,9 @@ class structuredDecomp
 
         dictionary methodDict_;
 
-        autoPtr<decompositionMethod> method_;
+        wordReList patches_;
 
-        wordList patches_;
+        autoPtr<decompositionMethod> method_;
 
 
     // Private Member Functions

@@ -128,6 +128,18 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             zones[i] = label(region[i]);
         }
     }
+    else if (reader.cellData().foundObject<scalarIOField>("STLSolidLabeling"))
+    {
+        const scalarIOField& region =
+            reader.cellData().lookupObject<scalarIOField>
+            (
+                "STLSolidLabeling"
+            );
+        forAll(region, i)
+        {
+            zones[i] = label(region[i]);
+        }
+    }
 
     // Create zone names
     const label nZones = max(zones)+1;

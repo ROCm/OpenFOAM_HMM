@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,23 +61,22 @@ int main(int argc, char *argv[])
         // Check for new mesh
         mesh.readUpdate();
 
-        volVectorField cc
-        (
-            IOobject
-            (
-                "cellCentres",
-                runTime.timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh.C()
-        );
-
-        // Info<< "Writing cellCentre positions to " << cc.name() << " in "
-        //     << runTime.timeName() << endl;
+        //volVectorField cc
+        //(
+        //    IOobject
+        //    (
+        //        "cellCentres",
+        //        runTime.timeName(),
+        //        mesh,
+        //        IOobject::NO_READ,
+        //        IOobject::AUTO_WRITE
+        //    ),
+        //    1.0*mesh.C()
+        //);
         //
-        // cc.write();
+        //Info<< "Writing cellCentre positions to " << cc.name() << " in "
+        //     << runTime.timeName() << endl;
+        //cc.write();
 
         Info<< "Writing components of cellCentre positions to volScalarFields"
             << " ccx, ccy, ccz in " <<  runTime.timeName() << endl;

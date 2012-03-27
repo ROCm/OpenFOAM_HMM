@@ -85,7 +85,7 @@ surfaceConformation
 
     featureEdgeExclusionDistanceCoeff   0.2;
 
-    surfaceSearchDistanceCoeff  2.5;
+    surfaceSearchDistanceCoeff  5;
 
     maxSurfaceProtrusionCoeff   0.1;
 
@@ -97,7 +97,7 @@ surfaceConformation
     {
         initial
         {
-            edgeSearchDistCoeff             2;
+            edgeSearchDistCoeff             5;
             surfacePtReplaceDistCoeff       0.5;
             surfacePtExclusionDistanceCoeff 0.5;
         }
@@ -150,10 +150,16 @@ motionControl
         {
             priority            1;
             mode                bothSides;
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize 0.04;
+            }
+            refinementFactor    1;
+
             cellSizeFunction    uniformDistance;
             uniformDistanceCoeffs
             {
-                cellSize        0.04;
                 distance        0.1;
             }
             linearDistanceCoeffs

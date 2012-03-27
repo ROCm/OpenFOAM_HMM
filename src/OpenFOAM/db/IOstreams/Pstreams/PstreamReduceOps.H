@@ -96,6 +96,20 @@ T returnReduce
 }
 
 
+// Reduce with sum of both value and count (for averaging)
+template <class T>
+void sumReduce
+(
+    T& Value,
+    label& Count,
+    const int tag = Pstream::msgType()
+)
+{
+    reduce(Value, sumOp<T>(), tag);
+    reduce(Count, sumOp<label>(), tag);
+}
+
+
 // Non-blocking version of reduce. Sets request.
 template <class T, class BinaryOp>
 void reduce
@@ -122,6 +136,13 @@ void reduce
 (
     vector2D& Value,
     const sumOp<vector2D>& bop,
+    const int tag = Pstream::msgType()
+);
+
+void sumReduce
+(
+    scalar& Value,
+    label& Count,
     const int tag = Pstream::msgType()
 );
 

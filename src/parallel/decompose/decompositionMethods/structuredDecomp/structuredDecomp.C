@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,11 @@ namespace Foam
 Foam::structuredDecomp::structuredDecomp(const dictionary& decompositionDict)
 :
     decompositionMethod(decompositionDict),
-    methodDict_(decompositionDict_.subDict(typeName + "Coeffs"))
+    methodDict_(decompositionDict_.subDict(typeName + "Coeffs")),
+    patches_(methodDict_.lookup("patches"))
 {
     methodDict_.set("numberOfSubdomains", nDomains());
     method_ = decompositionMethod::New(methodDict_);
-    patches_ = wordList(methodDict_.lookup("patches"));
 }
 
 
@@ -72,29 +72,20 @@ Foam::labelList Foam::structuredDecomp::decompose
     const scalarField& cWeights
 )
 {
-    labelList patchIDs(patches_.size());
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+    const labelHashSet patchIDs(pbm.patchSet(patches_));
 
     label nFaces = 0;
-    forAll(patches_, i)
+    forAllConstIter(labelHashSet, patchIDs, iter)
     {
-        patchIDs[i] = pbm.findPatchID(patches_[i]);
-
-        if (patchIDs[i] == -1)
-        {
-            FatalErrorIn("structuredDecomp::decompose(..)")
-                << "Cannot find patch " << patches_[i] << endl
-                << "Valid patches are " << pbm.names()
-                << exit(FatalError);
-        }
-        nFaces += pbm[patchIDs[i]].size();
+        nFaces += pbm[iter.key()].size();
     }
 
     // Extract a submesh.
     labelHashSet patchCells(2*nFaces);
-    forAll(patchIDs, i)
+    forAllConstIter(labelHashSet, patchIDs, iter)
     {
-        const labelUList& fc = pbm[patchIDs[i]].faceCells();
+        const labelUList& fc = pbm[iter.key()].faceCells();
         forAll(fc, i)
         {
             patchCells.insert(fc[i]);
@@ -127,9 +118,9 @@ Foam::labelList Foam::structuredDecomp::decompose
     labelList patchFaces(nFaces);
     List<topoDistanceData> patchData(nFaces);
     nFaces = 0;
-    forAll(patchIDs, i)
+    forAllConstIter(labelHashSet, patchIDs, iter)
     {
-        const polyPatch& pp = pbm[patchIDs[i]];
+        const polyPatch& pp = pbm[iter.key()];
         const labelUList& fc = pp.faceCells();
         forAll(fc, i)
         {

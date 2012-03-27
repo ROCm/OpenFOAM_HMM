@@ -159,11 +159,10 @@
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {
         phaseModel& phase = iter();
-        Dp += alphafs[phasei]*rAlphaAUfs[phasei]/phase.rho();
+        Dp += mag(alphafs[phasei]*rAlphaAUfs[phasei])/phase.rho();
 
         phasei++;
     }
-    Dp = mag(Dp);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -172,6 +171,8 @@
             fvc::div(phiHbyA)
           - fvm::laplacian(Dp, p)
         );
+
+        pEqnIncomp.setReference(pRefCell, pRefValue);
 
         solve
         (
@@ -196,7 +197,10 @@
                 phase.phi() =
                     phiHbyAs[phasei]
                   + rAlphaAUfs[phasei]*mSfGradp/phase.rho();
-                phi += alphafs[phasei]*phase.phi();
+                phi +=
+                    alphafs[phasei]*phiHbyAs[phasei]
+                  + mag(alphafs[phasei]*rAlphaAUfs[phasei])
+                   *mSfGradp/phase.rho();
 
                 phasei++;
             }

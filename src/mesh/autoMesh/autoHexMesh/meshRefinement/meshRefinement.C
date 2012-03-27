@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1819,6 +1819,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const point& keepPoint
 )
 {
+    // Force calculation of face decomposition (used in findCell)
+    (void)mesh_.tetBasePtIs();
+
     // Determine connected regions. regionSplit is the labelList with the
     // region per cell.
     regionSplit cellRegion(mesh_);
