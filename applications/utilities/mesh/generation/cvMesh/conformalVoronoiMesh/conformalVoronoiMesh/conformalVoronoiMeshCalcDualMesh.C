@@ -1590,7 +1590,11 @@ Foam::conformalVoronoiMesh::collapseFace
 //                    collapseToPtI = faceBoundaryPts[0];
 //
 //                    collapseToPt =
-//                        0.5*(pts[faceBoundaryPts[0]] + pts[faceBoundaryPts[1]]);
+//                        0.5
+//                       *(
+//                            pts[faceBoundaryPts[0]]
+//                          + pts[faceBoundaryPts[1]]
+//                        );
 //                }
 //                else if (faceBoundaryPts.size() < f.size())
 //                {
@@ -1646,7 +1650,11 @@ Foam::conformalVoronoiMesh::collapseFace
 //                    collapseToPtI = faceBoundaryPts[0];
 //
 //                    collapseToPt =
-//                        0.5*(pts[faceBoundaryPts[0]] + pts[faceBoundaryPts[1]]);
+//                        0.5
+//                       *(
+//                            pts[faceBoundaryPts[0]]
+//                          + pts[faceBoundaryPts[1]]
+//                        );
 //                }
 //                else if (faceBoundaryPts.size() < f.size())
 //                {
