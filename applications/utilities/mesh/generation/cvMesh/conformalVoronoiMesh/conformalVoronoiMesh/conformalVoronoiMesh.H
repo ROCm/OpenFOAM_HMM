@@ -536,6 +536,11 @@ private:
             const Delaunay::Finite_edges_iterator& eit
         ) const;
 
+        boolList dualFaceBoundaryPoints
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
         //- Finds the maximum filterCount of the dual vertices
         //  (Delaunay cells) that form the dual face produced by the
         //  supplied edge
@@ -841,6 +846,13 @@ private:
         (
             const Delaunay::Finite_facets_iterator& fit
         ) const;
+
+        //- Merge adjacent edges that are not attached to other faces
+        label mergeNearlyParallelEdges
+        (
+            const pointField& pts,
+            const scalar maxCosAngle
+        );
 
         //- Merge vertices that are very close together
         void mergeCloseDualVertices

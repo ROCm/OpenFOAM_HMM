@@ -366,6 +366,49 @@ inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
 }
 
 
+inline Foam::List<bool> Foam::conformalVoronoiMesh::dualFaceBoundaryPoints
+(
+    const Delaunay::Finite_edges_iterator& eit
+) const
+{
+    Cell_circulator ccStart = incident_cells(*eit);
+    Cell_circulator cc1 = ccStart;
+    Cell_circulator cc2 = cc1;
+
+    // Advance the second circulator so that it always stays on the next
+    // cell around the edge;
+    cc2++;
+
+    DynamicList<bool> tmpFaceBoundaryPoints;
+
+    do
+    {
+        label cc1I = cc1->cellIndex();
+
+        label cc2I = cc2->cellIndex();
+
+        if (cc1I != cc2I)
+        {
+            if (cc1->boundaryDualVertex())
+            {
+                tmpFaceBoundaryPoints.append(true);
+            }
+            else
+            {
+                tmpFaceBoundaryPoints.append(false);
+            }
+        }
+
+        cc1++;
+
+        cc2++;
+
+    } while (cc1 != ccStart);
+
+    return tmpFaceBoundaryPoints;
+}
+
+
 inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
 (
     const Delaunay::Finite_facets_iterator& fit
