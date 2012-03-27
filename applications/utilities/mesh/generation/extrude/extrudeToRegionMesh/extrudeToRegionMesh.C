@@ -38,6 +38,7 @@ Description
       if flipMap is false)
     - not parallel
 
+\verbatim
 
 Internal face extrusion
 -----------------------
@@ -108,6 +109,8 @@ Notes:
       detect this as a cyclic since the face is the same face. It will
       only work if the coupled edge extrudes a different face so if there
       are more than 1 cell inbetween.
+
+\endverbatim
 
 \*---------------------------------------------------------------------------*/
 
