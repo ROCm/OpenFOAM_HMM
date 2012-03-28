@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 #include "removeFaces.H"
 #include "refinementHistory.H"
 #include "PackedBoolList.H"
+#include "uniformDimensionedFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,7 +75,7 @@ class hexRef8
         labelIOList pointLevel_;
 
         //- Typical edge length between unrefined points
-        const scalar level0Edge_;
+        uniformDimensionedScalarField level0Edge_;
 
         //- Refinement history
         refinementHistory history_;
@@ -319,24 +320,29 @@ public:
     // Constructors
 
         //- Construct from mesh, read_if_present refinement data
-        //  (from write below)
-        hexRef8(const polyMesh& mesh);
+        //  (from write below). If readHistory is true does read_if_present
+        //  of refinement history. If false clears all history
+        hexRef8(const polyMesh& mesh, const bool readHistory = true);
 
-        //- Construct from mesh and un/refinement data.
+        //- Construct from mesh and un/refinement data and optional size of
+        //  starting cells
         hexRef8
         (
             const polyMesh& mesh,
             const labelList& cellLevel,
             const labelList& pointLevel,
-            const refinementHistory& history
+            const refinementHistory& history,
+            const scalar level0Edge = -GREAT
         );
 
-        //- Construct from mesh and refinement data.
+        //- Construct from mesh and refinement data and optional size of
+        //  starting cells
         hexRef8
         (
             const polyMesh& mesh,
             const labelList& cellLevel,
-            const labelList& pointLevel
+            const labelList& pointLevel,
+            const scalar level0Edge = -GREAT
         );
 
 
@@ -367,7 +373,7 @@ public:
             //- Typical edge length between unrefined points
             scalar level0EdgeLength() const
             {
-                return level0Edge_;
+                return level0Edge_.value();
             }
 
         // Refinement
