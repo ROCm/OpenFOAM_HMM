@@ -704,6 +704,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             labelList faceVerts;
             readBlock(inFile, nNumbers, faceVerts);
             faces_.setSize(nFaces);
+            faceMap_.setSize(nFaces);
             label elemI = 0;
             forAll(faces_, faceI)
             {
