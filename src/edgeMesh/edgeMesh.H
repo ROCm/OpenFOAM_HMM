@@ -246,6 +246,9 @@ public:
         //- Merge common points (points within mergeDist)
         void mergePoints(const scalar mergeDist);
 
+        //- Merge similar edges
+        void mergeEdges();
+
 
     // Write
 

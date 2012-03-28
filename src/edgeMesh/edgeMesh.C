@@ -28,6 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 #include "ListOps.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -327,10 +328,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
         }
 
         // Compact using a hashtable and commutative hash of edge.
-        HashTable<label, edge, Hash<edge> > edgeToLabel
-        (
-            2*edges_.size()
-        );
+        EdgeMap<label> edgeToLabel(2*edges_.size());
 
         label newEdgeI = 0;
 
@@ -349,16 +347,41 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
         edges_.setSize(newEdgeI);
 
-        for
-        (
-            HashTable<label, edge, Hash<edge> >::const_iterator iter =
-                edgeToLabel.begin();
-            iter != edgeToLabel.end();
-            ++iter
-        )
+        forAllConstIter(EdgeMap<label>, edgeToLabel, iter)
         {
             edges_[iter()] = iter.key();
         }
+    }
+}
+
+
+void Foam::edgeMesh::mergeEdges()
+{
+    EdgeMap<label> existingEdges(2*edges_.size());
+
+    label curEdgeI = 0;
+    forAll(edges_, edgeI)
+    {
+        const edge& e = edges_[edgeI];
+
+        if (existingEdges.insert(e, curEdgeI))
+        {
+            curEdgeI++;
+        }
+    }
+
+    if (debug)
+    {
+        Info<< "Merging duplicate edges: "
+            << edges_.size() - existingEdges.size()
+            << " edges will be deleted." << endl;
+    }
+
+    edges_.setSize(existingEdges.size());
+
+    forAllConstIter(EdgeMap<label>, existingEdges, iter)
+    {
+        edges_[iter()] = iter.key();
     }
 }
 

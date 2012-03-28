@@ -166,6 +166,12 @@ inline Foam::scalar Foam::cvControls::mergeClosenessCoeff() const
 }
 
 
+inline Foam::scalar Foam::cvControls::edgeMergeAngle() const
+{
+    return edgeMergeAngle_;
+}
+
+
 inline Foam::Switch
 Foam::cvControls::continueFilteringOnBadInitialPolyMesh() const
 {

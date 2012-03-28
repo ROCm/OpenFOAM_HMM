@@ -19,7 +19,6 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lmeshTools \
-    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
     -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh

@@ -82,9 +82,9 @@ Foam::nonUniformField::nonUniformField
     Info<< decrIndent;
 
     Info<< indent << "Cell size field statistics:" << nl
-        << indent << "   Minimum: " << min(surfaceCellSize_).value() << nl
-        << indent << "   Average: " << average(surfaceCellSize_).value() << nl
-        << indent << "   Maximum: " << max(surfaceCellSize_).value() << endl;
+        << indent << "    Minimum: " << min(surfaceCellSize_).value() << nl
+        << indent << "    Average: " << average(surfaceCellSize_).value() << nl
+        << indent << "    Maximum: " << max(surfaceCellSize_).value() << endl;
 
     Info<< decrIndent;
 }

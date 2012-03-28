@@ -3,30 +3,25 @@ cd ${0%/*} || exit 1    # run from this directory
 
 set -x
 
-if [ ! -e "Make/files" ] || [ ! -e "Make/options" ]
+if [ -n "$CGAL_ARCH_PATH" ]
 then
-    mkdir -p Make
+    echo
+    echo "Compiling surfaceFeatureExtract with CGAL curvature support"
+    echo
 
-    if [ -n "$CGAL_ARCH_PATH" ]
-    then
-        cp -r MakeWithCGAL/* Make
-
-        echo
-        echo Compiling surfaceFeatureExtract with CGAL support for curvature
-        echo
-
-        wmake
-    else
-        cp -r MakeWithoutCGAL/* Make
-
-        echo
-        echo Compiling surfaceFeatureExtract without CGAL support for curvature
-        echo
-
-        wmake
-    fi
+    wmake "ENABLE_CURVATURE=-DENABLE_CURVATURE \
+           EXE_FROUNDING_MATH=-frounding-math \
+           USE_F2C=-DCGAL_USE_F2C \
+           CGAL_LIBDIR=-L$CGAL_ARCH_PATH/lib \
+           LAPACK_LIB=-llapack \
+           BLAS_LIB=-lblas \
+           CGAL_LIB=-lCGAL"
 else
-    echo surfaceFeatureExtract already has a Make folder
+    echo
+    echo "Compiling surfaceFeatureExtract without CGAL curvature support"
+    echo
+
+    wmake
 fi
 
 

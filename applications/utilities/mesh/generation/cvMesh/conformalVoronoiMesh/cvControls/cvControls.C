@@ -291,6 +291,11 @@ Foam::cvControls::cvControls
         filteringDict.lookup("mergeClosenessCoeff")
     );
 
+    edgeMergeAngle_ = readScalar
+    (
+        filteringDict.lookup("edgeMergeAngle")
+    );
+
     continueFilteringOnBadInitialPolyMesh_ = Switch
     (
         filteringDict.lookupOrDefault<Switch>

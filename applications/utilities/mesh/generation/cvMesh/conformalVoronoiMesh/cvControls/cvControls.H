@@ -234,6 +234,11 @@ class cvControls
         //  being merged, fraction of the local target cell size
         scalar mergeClosenessCoeff_;
 
+        //- If the angle between two dual edges that are connected by a single
+        //  point is less than this angle, then the edges will be merged into a
+        //  single edge.
+        scalar edgeMergeAngle_;
+
         //- If the mesh quality criteria cannot be satisfied, continue
         //  with filtering anyway?
         Switch continueFilteringOnBadInitialPolyMesh_;
@@ -404,6 +409,9 @@ public:
 
             //- Return the mergeClosenessCoeff
             inline scalar mergeClosenessCoeff() const;
+
+            //- Return the edgeMergeAngle
+            inline scalar edgeMergeAngle() const;
 
             //- Return the continueFilteringOnBadInitialPolyMesh Switch
             inline Switch continueFilteringOnBadInitialPolyMesh() const;

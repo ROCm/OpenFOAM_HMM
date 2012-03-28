@@ -113,6 +113,17 @@ bool Foam::fileFormats::NASedgeFormat::read
             // discard groupID
             dynEdges.append(e);
         }
+        else if (cmd == "PLOTEL")
+        {
+            edge e;
+
+            // label groupId = readLabel(IStringStream(line.substr(16,8))());
+            e[0] = readLabel(IStringStream(line.substr(16,8))());
+            e[1] = readLabel(IStringStream(line.substr(24,8))());
+
+            // discard groupID
+            dynEdges.append(e);
+        }
         else if (cmd == "GRID")
         {
             label index = readLabel(IStringStream(line.substr(8,8))());

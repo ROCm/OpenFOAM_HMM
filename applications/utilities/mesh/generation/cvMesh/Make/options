@@ -20,7 +20,8 @@ EXE_LIBS = \
     $(CGAL_LIBS) \
     -lconformalVoronoiMesh \
     -lmeshTools \
-    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
+    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
     -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh

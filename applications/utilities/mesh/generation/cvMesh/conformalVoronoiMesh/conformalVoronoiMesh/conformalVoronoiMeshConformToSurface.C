@@ -719,12 +719,15 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
                         const Foam::point& p = infoList[hitI].hitPoint();
 
-                        const scalar separationDistance
-                            = mag(p - info.hitPoint());
+                        const scalar separationDistance =
+                            mag(p - info.hitPoint());
 
-                        const scalar minSepDist
-                            = sqr(cvMeshControls().removalDistCoeff()
-                             *targetCellSize(p));
+                        const scalar minSepDist =
+                            sqr
+                            (
+                                cvMeshControls().removalDistCoeff()
+                               *targetCellSize(p)
+                            );
 
                         // Reject the point if it is too close to another
                         // surface point.
