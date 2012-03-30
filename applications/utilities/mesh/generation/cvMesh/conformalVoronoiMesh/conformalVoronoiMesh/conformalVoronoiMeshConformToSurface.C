@@ -440,6 +440,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+//                else
+//                {
+//                    vit->setInternal();
+//                }
             }
             else if (vit->ppSlave() || vit->referredExternal())
             {
@@ -477,6 +481,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+//                else
+//                {
+//                    vit->setInternal();
+//                }
             }
         }
 
@@ -2697,7 +2705,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                             // NEED TO REMOVE FROM THE SURFACE TREE...
                             surfacePtLocationTreePtr_().remove
                             (
-                                existingSurfacePtLocations.size()
+                                existingSurfacePtLocations.size() - 1
                             );
                         }
 

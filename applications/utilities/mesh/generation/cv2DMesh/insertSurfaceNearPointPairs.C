@@ -93,7 +93,7 @@ void Foam::CV2D::insertSurfaceNearPointPairs()
 
                         nNearPoints++;
 
-                        // Correct the edge iterator for the change in the 
+                        // Correct the edge iterator for the change in the
                         // number of edges following the point-pair insertion
                         eit = Finite_edges_iterator
                         (

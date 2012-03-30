@@ -99,7 +99,7 @@
     scalar u0 = hs0 - p0/rho0;
     scalar R0 = p0/(rho0*T0);
     Rspecific[0] = R0;
- 
+
     scalar integratedHeat = 0.0;
 
     Info << constProp << " will be held constant." << nl

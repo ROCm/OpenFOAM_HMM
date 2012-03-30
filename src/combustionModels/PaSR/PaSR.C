@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,10 +53,15 @@ Foam::combustionModels::PaSR<CombThermoType>::PaSR
         dimensionedScalar("kappa", dimless, 0.0)
     ),
     useReactionRate_(this->coeffs().lookupOrDefault("useReactionRate", false))
-{}
+{
+    if (useReactionRate_)
+    {
+        Info<< "    using reaction rate" << endl;
+    }
+}
 
 
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CombThermoType>
 Foam::combustionModels::PaSR<CombThermoType>::~PaSR()
@@ -79,13 +84,12 @@ void Foam::combustionModels::PaSR<CombThermoType>::correct()
 {
     if (this->active())
     {
+        const scalar t = this->mesh().time().value();
+        const scalar dt = this->mesh().time().deltaTValue();
+
         if (!useReactionRate_)
         {
-            this->pChemistry_->solve
-            (
-                this->mesh().time().value()-this->mesh().time().deltaTValue(),
-                this->mesh().time().deltaTValue()
-            );
+            this->pChemistry_->solve(t - dt, dt);
         }
         else
         {
@@ -94,35 +98,35 @@ void Foam::combustionModels::PaSR<CombThermoType>::correct()
 
         if (turbulentReaction_)
         {
+            tmp<volScalarField> trho(this->rho());
+            const volScalarField& rho = trho();
             tmp<volScalarField> tepsilon(this->turbulence().epsilon());
             const volScalarField& epsilon = tepsilon();
             tmp<volScalarField> tmuEff(this->turbulence().muEff());
             const volScalarField& muEff = tmuEff();
+
             tmp<volScalarField> ttc(tc());
             const volScalarField& tc = ttc();
+
+            const dimensionedScalar e0
+            (
+                "e0",
+                sqr(dimLength)/pow3(dimTime),
+                SMALL
+            );
+
             forAll(epsilon, i)
             {
                 if (epsilon[i] > 0)
                 {
-                    const dimensionedScalar e0
-                    (
-                        "e0",
-                        sqr(dimLength)/pow3(dimTime), SMALL
-                    );
-
                     scalar tk =
                         Cmix_.value()
-                       *Foam::sqrt
-                       (
-                            muEff[i]/this->rho()()[i]/(epsilon[i] + e0.value())
-                       );
+                       *Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + e0.value()));
 
                     // Chalmers PaSR model
                     if (!useReactionRate_)
                     {
-                        kappa_[i] =
-                            ( this->mesh().time().deltaTValue() + tc[i])
-                        /( this->mesh().time().deltaTValue() + tc[i] + tk);
+                        kappa_[i] = (dt + tc[i])/(dt + tc[i] + tk);
                     }
                     else
                     {
@@ -148,11 +152,7 @@ template<class CombThermoType>
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::combustionModels::PaSR<CombThermoType>::R(const volScalarField& Y) const
 {
-
-    tmp<fvScalarMatrix> tSu
-    (
-        new fvScalarMatrix(Y, dimMass/dimTime)
-    );
+    tmp<fvScalarMatrix> tSu(new fvScalarMatrix(Y, dimMass/dimTime));
 
     fvScalarMatrix& Su = tSu();
 

@@ -285,7 +285,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
                             );
 
                             flatSiteData.append(wSD);
- 
+
                             particleHit = true;
                         }
                     }
