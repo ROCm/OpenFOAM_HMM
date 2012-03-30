@@ -173,6 +173,8 @@ int main(int argc, char *argv[])
         surfaces,
         points,
         scalarField(points.size(), sqr(GREAT)),
+        searchableSurface::OUTSIDE,     // for non-closed surfaces treat as
+                                        // outside
         nearestSurfaces,
         signedDist
     );

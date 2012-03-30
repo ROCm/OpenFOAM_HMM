@@ -693,6 +693,7 @@ void Foam::searchableSurfacesQueries::signedDistance
     const labelList& surfacesToTest,
     const pointField& samples,
     const scalarField& nearestDistSqr,
+    const searchableSurface::volumeType illegalHandling,
     labelList& nearestSurfaces,
     scalarField& distance
 )
@@ -753,9 +754,32 @@ void Foam::searchableSurfacesQueries::signedDistance
             }
             else
             {
-                FatalErrorIn("signedDistance()")
-                    << "getVolumeType failure, neither INSIDE or OUTSIDE"
-                    << exit(FatalError);
+                switch (illegalHandling)
+                {
+                    case searchableSurface::OUTSIDE:
+                    {
+                        distance[pointI] = dist;
+                        break;
+                    }
+                    case searchableSurface::INSIDE:
+                    {
+                        distance[pointI] = -dist;
+                        break;
+                    }
+                    default:
+                    {
+                        FatalErrorIn("signedDistance()")
+                            << "getVolumeType failure,"
+                            << " neither INSIDE or OUTSIDE."
+                            << " point:" << surfPoints[i]
+                            << " surface:"
+                            << allSurfaces[surfacesToTest[testI]].name()
+                            << " volType:"
+                            << searchableSurface::volumeTypeNames[vT]
+                            << exit(FatalError);
+                        break;
+                    }
+                }
             }
         }
     }

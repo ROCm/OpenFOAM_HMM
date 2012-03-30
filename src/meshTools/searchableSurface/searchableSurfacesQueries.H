@@ -184,13 +184,18 @@ public:
                 List<pointIndexHit>&
             );
 
-            //- Find signed distance to nearest surface
+            //- Find signed distance to nearest surface. Outside is positive.
+            //  illegalHandling: how to handle non-inside or outside
+            //      OUTSIDE : treat as outside
+            //      INSIDE  : treat as inside
+            //      UNKNOWN : throw fatal error
             static void signedDistance
             (
                 const PtrList<searchableSurface>& allSurfaces,
                 const labelList& surfacesToTest,
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
+                const searchableSurface::volumeType illegalHandling,
                 labelList& nearestSurfaces,
                 scalarField& distance
             );
