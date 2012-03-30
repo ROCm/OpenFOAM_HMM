@@ -82,7 +82,7 @@ Foam::label Foam::checkTopology
                 if (cFaces[i] < 0 || cFaces[i] >= mesh.nFaces())
                 {
                     cells.insert(cellI);
-                    break;  
+                    break;
                 }
             }
         }
