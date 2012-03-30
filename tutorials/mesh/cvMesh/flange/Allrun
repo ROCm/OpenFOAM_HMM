@@ -28,6 +28,7 @@ do
 done
 
 runParallel cvMesh $nProc
+#runParallel snappyHexMesh $nProc
 
 runApplication reconstructParMesh -constant -mergeTol 1e-6
 
