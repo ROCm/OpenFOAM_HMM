@@ -59,7 +59,6 @@ initialPoints
 
     autoDensityCoeffs
     {
-        minCellSizeLimit 0.04;
         minLevels 0;
         maxSizeRatio 5.0;
         sampleResolution 5;
@@ -150,21 +149,20 @@ motionControl
         {
             priority            1;
             mode                bothSides;
+            
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
                 surfaceCellSize 0.04;
             }
-            refinementFactor    1;
 
-            cellSizeFunction    uniformDistance;
+            cellSizeFunction        uniformDistance;
             uniformDistanceCoeffs
             {
                 distance        0.1;
             }
             linearDistanceCoeffs
             {
-                surfaceCellSize         0.02;
                 distanceCellSize        $defaultCellSize;
                 distance                0.1;
             }
@@ -217,14 +215,15 @@ polyMeshFiltering
 {
     writeTetDualMesh                        false;
     filterSizeCoeff                         0.2;
-    mergeClosenessCoeff                     1e-9;
+    mergeClosenessCoeff                     1e-3;
+    edgeMergeAngle                          45;
     continueFilteringOnBadInitialPolyMesh   true;
     filterErrorReductionCoeff               0.5;
     filterCountSkipThreshold                4;
     surfaceStepFaceAngle                    80;
     maxCollapseIterations                   25;
     maxConsecutiveEqualFaceSets             5;
-    edgeCollapseGuardFraction               0.3;
+    edgeCollapseGuardFraction               0.1;
     maxCollapseFaceToPointSideLengthCoeff   0.35;
 }
 

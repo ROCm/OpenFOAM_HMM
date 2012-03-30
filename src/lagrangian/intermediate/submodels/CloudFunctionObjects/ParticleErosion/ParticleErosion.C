@@ -181,7 +181,7 @@ void Foam::ParticleErosion<CloudType>::postPatch
 
         // particle direction of travel
         const vector& U = p.U();
-        
+
         // quick reject if particle travelling away from the patch
         if ((-nw & U) < 0)
         {

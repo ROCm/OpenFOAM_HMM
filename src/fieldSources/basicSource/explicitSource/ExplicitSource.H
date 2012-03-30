@@ -39,7 +39,7 @@ Description
             }
         }
 
-    If volumeMode = 
+    If volumeMode =
         - absolute: values are given as <quantity>
         - specific: values are given as <quantity>/m3
 

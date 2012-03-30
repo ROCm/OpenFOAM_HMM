@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
         "word",
         "specify alternative dictionary for the feature extraction information"
     );
-    
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 

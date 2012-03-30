@@ -112,7 +112,7 @@ public:
 
             //- Post-move hook
             virtual void postMove
-            (   
+            (
                 const parcelType& p,
                 const label cellI,
                 const scalar dt
