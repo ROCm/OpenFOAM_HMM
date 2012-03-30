@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,22 @@ Foam::UniformDimensionedField<Type>::UniformDimensionedField
 :
     regIOobject(io),
     dimensioned<Type>(dt)
-{}
+{
+    // Read value
+    if
+    (
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        dictionary dict(readStream(typeName));
+        this->dimensions().reset(dict.lookup("dimensions"));
+        dict.lookup("value") >> this->value();
+    }
+}
 
 
 template<class Type>

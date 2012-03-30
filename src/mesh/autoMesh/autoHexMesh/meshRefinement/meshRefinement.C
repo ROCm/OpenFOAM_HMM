@@ -877,49 +877,7 @@ Foam::meshRefinement::meshRefinement
     meshCutter_
     (
         mesh,
-        labelIOList
-        (
-            IOobject
-            (
-                "cellLevel",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            ),
-            labelList(mesh_.nCells(), 0)
-        ),
-        labelIOList
-        (
-            IOobject
-            (
-                "pointLevel",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            ),
-            labelList(mesh_.nPoints(), 0)
-        ),
-        refinementHistory
-        (
-            IOobject
-            (
-                "refinementHistory",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            List<refinementHistory::splitCell8>(0),
-            labelList(0)
-        )   // no unrefinement
+        false   // do not try to read history.
     ),
     surfaceIndex_
     (

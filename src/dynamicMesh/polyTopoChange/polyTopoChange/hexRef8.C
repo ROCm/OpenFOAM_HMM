@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1745,6 +1745,7 @@ void Foam::hexRef8::setInstance(const fileName& inst)
 
     cellLevel_.instance() = inst;
     pointLevel_.instance() = inst;
+    level0Edge_.instance() = inst;
     history_.instance() = inst;
 }
 
@@ -1752,7 +1753,7 @@ void Foam::hexRef8::setInstance(const fileName& inst)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from mesh, read refinement data
-Foam::hexRef8::hexRef8(const polyMesh& mesh)
+Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 :
     mesh_(mesh),
     cellLevel_
@@ -1781,7 +1782,19 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh)
         ),
         labelList(mesh_.nPoints(), 0)
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar("level0Edge", dimLength, getLevel0EdgeLength())
+    ),
     history_
     (
         IOobject
@@ -1790,15 +1803,24 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh)
             mesh_.facesInstance(),
             polyMesh::meshSubDir,
             mesh_,
-            IOobject::READ_IF_PRESENT,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_.nCells()    // All cells visible if could not be read
+        (readHistory ? mesh_.nCells() : 0)  // All cells visible if not be read
     ),
     faceRemover_(mesh_, GREAT),     // merge boundary faces wherever possible
     savedPointLevel_(0),
     savedCellLevel_(0)
 {
+    if (readHistory)
+    {
+        history_.readOpt() = IOobject::READ_IF_PRESENT;
+        if (history_.headerOk())
+        {
+            history_.read();
+        }
+    }
+
     if (history_.active() && history_.visibleCells().size() != mesh_.nCells())
     {
         FatalErrorIn
@@ -1849,7 +1871,8 @@ Foam::hexRef8::hexRef8
     const polyMesh& mesh,
     const labelList& cellLevel,
     const labelList& pointLevel,
-    const refinementHistory& history
+    const refinementHistory& history,
+    const scalar level0Edge
 )
 :
     mesh_(mesh),
@@ -1879,7 +1902,24 @@ Foam::hexRef8::hexRef8
         ),
         pointLevel
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar
+        (
+            "level0Edge",
+            dimLength,
+            (level0Edge >= 0 ? level0Edge : getLevel0EdgeLength())
+        )
+    ),
     history_
     (
         IOobject
@@ -1945,7 +1985,8 @@ Foam::hexRef8::hexRef8
 (
     const polyMesh& mesh,
     const labelList& cellLevel,
-    const labelList& pointLevel
+    const labelList& pointLevel,
+    const scalar level0Edge
 )
 :
     mesh_(mesh),
@@ -1975,7 +2016,24 @@ Foam::hexRef8::hexRef8
         ),
         pointLevel
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar
+        (
+            "level0Edge",
+            dimLength,
+            (level0Edge >= 0 ? level0Edge : getLevel0EdgeLength())
+        )
+    ),
     history_
     (
         IOobject
@@ -2621,7 +2679,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
             << "Value should be >= 1" << exit(FatalError);
     }
 
-    const scalar level0Size = 2*maxFaceDiff*level0Edge_;
+    const scalar level0Size = 2*maxFaceDiff*level0EdgeLength();
 
 
     // Bit tricky. Say we want a distance of three cells between two
@@ -5514,7 +5572,10 @@ void Foam::hexRef8::setUnrefinement
 // Write refinement to polyMesh directory.
 bool Foam::hexRef8::write() const
 {
-    bool writeOk = cellLevel_.write() && pointLevel_.write();
+    bool writeOk =
+        cellLevel_.write()
+     && pointLevel_.write()
+     && level0Edge_.write();
 
     if (history_.active())
     {
