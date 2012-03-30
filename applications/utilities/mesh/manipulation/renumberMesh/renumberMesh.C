@@ -641,9 +641,12 @@ int main(int argc, char *argv[])
     Info<< "Mesh size: " << mesh.globalData().nTotalCells() << nl
         << "Before renumbering :" << nl
         << "    band           : " << band << nl
-        << "    profile        : " << profile << nl
-        << "    rms frontwidth : " << rmsFrontwidth << nl
-        << endl;
+        << "    profile        : " << profile << nl;
+    if (doFrontWidth)
+    {
+        Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
+    }
+    Info<< endl;
 
     bool sortCoupledFaceCells = false;
     bool writeMaps = false;
