@@ -202,7 +202,7 @@ protected:
         //- Maximum radius
         scalar rMax_;
 
-        
+
     // Protected Member Functions
 
         //- Check data
@@ -247,7 +247,7 @@ public:
 
     // Constructors
 
-        
+
         //- Construct from components
         rotorDiskSource
         (

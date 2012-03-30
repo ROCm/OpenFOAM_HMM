@@ -6,7 +6,6 @@ cd ${0%/*} || exit 1    # run from this directory
 
 runApplication blockMesh
 runApplication cvMesh
-runApplication collapseEdges 1e-3 45
 runApplication snappyHexMesh
 runApplication checkMesh -constant -allGeometry -allTopology
 

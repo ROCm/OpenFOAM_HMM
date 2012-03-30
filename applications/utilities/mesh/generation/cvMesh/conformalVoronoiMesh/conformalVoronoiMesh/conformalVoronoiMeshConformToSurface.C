@@ -440,6 +440,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+//                else
+//                {
+//                    vit->setInternal();
+//                }
             }
             else if (vit->ppSlave() || vit->referredExternal())
             {
@@ -477,6 +481,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
                         existingSurfacePtLocations
                     );
                 }
+//                else
+//                {
+//                    vit->setInternal();
+//                }
             }
         }
 
@@ -719,12 +727,15 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceAllIntersections
 
                         const Foam::point& p = infoList[hitI].hitPoint();
 
-                        const scalar separationDistance
-                            = mag(p - info.hitPoint());
+                        const scalar separationDistance =
+                            mag(p - info.hitPoint());
 
-                        const scalar minSepDist
-                            = sqr(cvMeshControls().removalDistCoeff()
-                             *targetCellSize(p));
+                        const scalar minSepDist =
+                            sqr
+                            (
+                                cvMeshControls().removalDistCoeff()
+                               *targetCellSize(p)
+                            );
 
                         // Reject the point if it is too close to another
                         // surface point.
@@ -2694,7 +2705,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
                             // NEED TO REMOVE FROM THE SURFACE TREE...
                             surfacePtLocationTreePtr_().remove
                             (
-                                existingSurfacePtLocations.size()
+                                existingSurfacePtLocations.size() - 1
                             );
                         }
 

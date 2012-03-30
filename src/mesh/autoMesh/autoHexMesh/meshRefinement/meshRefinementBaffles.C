@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1234,6 +1234,9 @@ void Foam::meshRefinement::findCellZoneInsideWalk
     regionSplit cellRegion(mesh_, blockedFace);
     blockedFace.clear();
 
+
+    // Force calculation of face decomposition (used in findCell)
+    (void)mesh_.tetBasePtIs();
 
     // For all locationSurface find the cell
     forAll(locationSurfaces, i)

@@ -268,6 +268,9 @@ private:
         //- Return the local maximum surface protrusion distance
         inline scalar maxSurfaceProtrusion(const Foam::point& pt) const;
 
+        //- Return the required cell size at the given location
+        scalar requiredSize(const Foam::point& pt) const;
+
         //- Return the required alignment directions at the given location
         tensor requiredAlignment(const Foam::point& pt) const;
 
@@ -529,6 +532,11 @@ private:
 
         //- Builds a dual face by circulating around the supplied edge.
         face buildDualFace
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        boolList dualFaceBoundaryPoints
         (
             const Delaunay::Finite_edges_iterator& eit
         ) const;
@@ -838,6 +846,13 @@ private:
         (
             const Delaunay::Finite_facets_iterator& fit
         ) const;
+
+        //- Merge adjacent edges that are not attached to other faces
+        label mergeNearlyParallelEdges
+        (
+            const pointField& pts,
+            const scalar maxCosAngle
+        );
 
         //- Merge vertices that are very close together
         void mergeCloseDualVertices

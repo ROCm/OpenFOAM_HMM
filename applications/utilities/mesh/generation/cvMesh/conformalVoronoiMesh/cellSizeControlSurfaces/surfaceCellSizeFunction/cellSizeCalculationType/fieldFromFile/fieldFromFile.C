@@ -63,7 +63,7 @@ Foam::fieldFromFile::fieldFromFile
 
 Foam::triSurfaceScalarField Foam::fieldFromFile::load()
 {
-    Info<< "Loading: " << fileName_ << endl;
+    Info<< indent << "Loading: " << fileName_ << endl;
 
     triSurfaceScalarField surfaceCellSize
     (

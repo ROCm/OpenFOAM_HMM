@@ -46,7 +46,10 @@ Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
     dictionary(surfaceCellSizeFunctionDict),
     surface_(surface),
     coeffsDict_(subDict(type + "Coeffs")),
-    refinementFactor_(readScalar(lookup("refinementFactor")))
+    refinementFactor_
+    (
+        lookupOrDefault<scalar>("refinementFactor", 1.0)
+    )
 {}
 
 

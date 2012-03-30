@@ -28,7 +28,7 @@ Description
     Calculates pressure coefficient, c_p
 
         c_p = p/p_dyn,inf
-    
+
     where:
 
         p_dyn,inf = 0.5*rho*mag(U_inf)^2

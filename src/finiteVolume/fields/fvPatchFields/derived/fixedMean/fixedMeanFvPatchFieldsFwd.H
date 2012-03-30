@@ -21,78 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::uniformValue
-
-Description
-
-SourceFiles
-    uniformValue.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformValue_H
-#define uniformValue_H
+#ifndef fixedMeanFvPatchFieldsFwd_H
+#define fixedMeanFvPatchFieldsFwd_H
 
-#include "surfaceCellSizeFunction.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                           Class uniformValue Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-class uniformValue
-:
-    public surfaceCellSizeFunction
-{
+template<class Type> class fixedMeanFvPatchField;
 
-private:
-
-    // Private data
-
-        scalar surfaceCellSize_;
-
-
-public:
-
-    //- Runtime type information
-    TypeName("uniformValue");
-
-
-    // Constructors
-
-        //- Construct from components
-        uniformValue
-        (
-            const dictionary& cellSizeFunctionDict,
-            const searchableSurface& surface
-        );
-
-
-    //- Destructor
-    virtual ~uniformValue()
-    {}
-
-
-    // Member Functions
-
-        virtual const scalar& surfaceSize(const label index) const;
-
-        virtual const scalar& refineSurfaceSize(const label index);
-
-        virtual scalar interpolate
-        (
-            const point& pt,
-            const label index
-        ) const;
-
-        virtual void recalculateInterpolation() const;
-};
-
+makePatchTypeFieldTypedefs(fixedMean);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

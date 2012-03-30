@@ -36,7 +36,6 @@ Description
       (nonuniformTransform)cyclic \<zoneA\>_\<zoneB\>
     - extrudes into master direction (i.e. away from the owner cell
       if flipMap is false)
-    - not parallel
 
 \verbatim
 

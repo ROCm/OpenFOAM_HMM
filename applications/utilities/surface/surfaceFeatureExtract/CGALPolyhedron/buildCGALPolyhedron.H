@@ -53,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class buildCGALPolyhedron Declaration
+                    Class buildCGALPolyhedron Declaration
 \*---------------------------------------------------------------------------*/
 
 class buildCGALPolyhedron
@@ -80,18 +80,56 @@ public:
     // Constructors
 
         //- Construct with reference to triSurface
-        buildCGALPolyhedron(const triSurface& surf);
+        explicit buildCGALPolyhedron(const triSurface& surf)
+        :
+            CGAL::Modifier_base<HalfedgeDS>(),
+            surf_(surf)
+        {}
 
 
     //- Destructor
-    ~buildCGALPolyhedron();
+    ~buildCGALPolyhedron(){}
 
 
     // Member Operators
 
         //- operator() of this `modifier' called by delegate function of
         //  Polyhedron
-        void operator()(HalfedgeDS& hds);
+        void operator()(HalfedgeDS& hds)
+        {
+            typedef HalfedgeDS::Traits     Traits;
+            typedef Traits::Point_3        Point;
+
+            // Postcondition: `hds' is a valid polyhedral surface.
+            CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> B(hds, false);
+
+            B.begin_surface
+            (
+                surf_.points().size(),      // n points
+                surf_.size(),               // n facets
+                2*surf_.edges().size()      // n halfedges
+            );
+
+            forAll(surf_.points(), pI)
+            {
+                const Foam::point& p = surf_.points()[pI];
+
+                B.add_vertex(Point(p.x(), p.y(), p.z()));
+            }
+
+            forAll(surf_, fI)
+            {
+                B.begin_facet();
+
+                B.add_vertex_to_facet(surf_[fI][0]);
+                B.add_vertex_to_facet(surf_[fI][1]);
+                B.add_vertex_to_facet(surf_[fI][2]);
+
+                B.end_facet();
+            }
+
+            B.end_surface();
+        }
 };
 
 

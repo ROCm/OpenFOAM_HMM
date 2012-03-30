@@ -38,7 +38,7 @@ Description
             gradPini    gradPini [0 2 -2 0 0] 0; // initial pressure gradient
             flowDir     (1 0 0);    // flow direction
         }
-        
+
 
 SourceFiles
     pressureGradientExplicitSource.C
