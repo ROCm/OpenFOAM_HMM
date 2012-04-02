@@ -10,20 +10,26 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+defaultFieldValues
+(
+    volScalarFieldValue alpha1 0
+);
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+regions
+(
+    boxToCell
+    {
+        box (-100 0 -100) (0 20 100);
 
-dispersedPhase      both;
-
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+        fieldValues
+        (
+            volScalarFieldValue alpha1 1
+        );
+    }
+);
 
 // ************************************************************************* //

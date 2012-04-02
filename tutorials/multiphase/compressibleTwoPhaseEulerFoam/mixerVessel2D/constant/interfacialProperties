@@ -24,7 +24,7 @@ heatTransferModel2  RanzMarshall;
 dispersedPhase      both;
 dragPhase           blended;
 
-residualSlip        1e-2;
-minInterfaceAlpha   1e-3;
+residualPhaseFraction   1e-3;
+residualSlip            1e-2;
 
 // ************************************************************************* //

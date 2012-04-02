@@ -9,21 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
+    class       uniformDimensionedVectorField;
     location    "constant";
-    object      interfacialProperties;
+    object      g;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+dimensions      [0 1 -2 0 0 0 0];
+value           ( 0 -9.81 0 );
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
-
-dispersedPhase      both;
-
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
 
 // ************************************************************************* //

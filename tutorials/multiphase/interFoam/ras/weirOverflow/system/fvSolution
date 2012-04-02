@@ -10,20 +10,58 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+solvers
+{
+    pcorr
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-10;
+        relTol          0;
+    }
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+    p_rgh
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-07;
+        relTol          0.05;
+    }
 
-dispersedPhase      both;
+    p_rghFinal
+    {
+        $p_rgh;
+        relTol          0;
+    }
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+    "(U|k|epsilon)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8;
+        relTol          0.1;
+    }
+
+    "(U|k|epsilon)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    momentumPredictor no;
+    nCorrectors     3;
+    nNonOrthogonalCorrectors 0;
+    nAlphaCorr      1;
+    nAlphaSubCycles 2;
+    cAlpha          1;
+}
+
 
 // ************************************************************************* //
