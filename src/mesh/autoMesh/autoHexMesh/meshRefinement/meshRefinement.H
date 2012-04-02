@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,7 @@ class searchableSurface;
 class regionSplit;
 class globalIndex;
 class removePoints;
+class localPointRegion;
 
 /*---------------------------------------------------------------------------*\
                            Class meshRefinement Declaration
@@ -140,15 +141,6 @@ private:
 
 
     // Private Member Functions
-
-        //- Reorder list according to map.
-        template<class T>
-        static void updateList
-        (
-            const labelList& newToOld,
-            const T& nullValue,
-            List<T>& elems
-        );
 
         //- Add patchfield of given type to all fields on mesh
         template<class GeoField>
@@ -709,6 +701,10 @@ public:
 
             //- Find boundary points that connect to more than one cell
             //  region and split them.
+            autoPtr<mapPolyMesh> dupNonManifoldPoints(const localPointRegion&);
+
+            //- Find boundary points that connect to more than one cell
+            //  region and split them.
             autoPtr<mapPolyMesh> dupNonManifoldPoints();
 
             //- Create baffle for every internal face where ownPatch != -1.
@@ -778,6 +774,15 @@ public:
             (
                 const mapPolyMesh&,
                 const labelList& changedFaces
+            );
+
+            //- Helper: reorder list according to map.
+            template<class T>
+            static void updateList
+            (
+                const labelList& newToOld,
+                const T& nullValue,
+                List<T>& elems
             );
 
 
