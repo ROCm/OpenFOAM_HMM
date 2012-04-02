@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #define labelledTri_H
 
 #include "triFace.H"
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,6 +114,30 @@ public:
 
 template<>
 inline bool contiguous<labelledTri>()  {return true;}
+
+
+//- Hash specialization to offset faces in ListListOps::combineOffset
+template<>
+class offsetOp<labelledTri>
+{
+
+public:
+
+    inline labelledTri operator()
+    (
+        const labelledTri& x,
+        const label offset
+    ) const
+    {
+        labelledTri result(x);
+
+        forAll(x, xI)
+        {
+            result[xI] = x[xI] + offset;
+        }
+        return result;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

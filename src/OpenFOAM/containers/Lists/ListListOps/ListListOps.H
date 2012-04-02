@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,10 +92,8 @@ SourceFiles
 
 namespace Foam
 {
-//
-//template <class T> class accessOp;
-//template <class T> class offsetOp;
-// Dummy access operator for combine()
+
+// Dummy access operator for ListListOps::combine()
 template <class T>
 class accessOp
 {
@@ -108,7 +106,7 @@ public:
 };
 
 
-// Offset operator for combineOffset()
+// Offset operator for ListListOps::combineOffset()
 template <class T>
 class offsetOp
 {

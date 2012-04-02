@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ Description
 #include "mapDistributePolyMesh.H"
 #include "IOobjectList.H"
 #include "globalIndex.H"
+#include "loadOrCreateMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,292 +63,292 @@ Description
 static const scalar defaultMergeTol = 1E-6;
 
 
-// Read mesh if available. Otherwise create empty mesh with same non-proc
-// patches as proc0 mesh. Requires all processors to have all patches
-// (and in same order).
-autoPtr<fvMesh> createMesh
-(
-    const Time& runTime,
-    const word& regionName,
-    const fileName& instDir,
-    const bool haveMesh
-)
-{
-    //Pout<< "Create mesh for time = "
-    //    << runTime.timeName() << nl << endl;
-
-    IOobject io
-    (
-        regionName,
-        instDir,
-        runTime,
-        IOobject::MUST_READ
-    );
-
-    if (!haveMesh)
-    {
-        // Create dummy mesh. Only used on procs that don't have mesh.
-        IOobject noReadIO(io);
-        noReadIO.readOpt() = IOobject::NO_READ;
-        fvMesh dummyMesh
-        (
-            noReadIO,
-            xferCopy(pointField()),
-            xferCopy(faceList()),
-            xferCopy(labelList()),
-            xferCopy(labelList()),
-            false
-        );
-        // Add some dummy zones so upon reading it does not read them
-        // from the undecomposed case. Should be done as extra argument to
-        // regIOobject::readStream?
-        List<pointZone*> pz
-        (
-            1,
-            new pointZone
-            (
-                "dummyPointZone",
-                labelList(0),
-                0,
-                dummyMesh.pointZones()
-            )
-        );
-        List<faceZone*> fz
-        (
-            1,
-            new faceZone
-            (
-                "dummyFaceZone",
-                labelList(0),
-                boolList(0),
-                0,
-                dummyMesh.faceZones()
-            )
-        );
-        List<cellZone*> cz
-        (
-            1,
-            new cellZone
-            (
-                "dummyCellZone",
-                labelList(0),
-                0,
-                dummyMesh.cellZones()
-            )
-        );
-        dummyMesh.addZones(pz, fz, cz);
-        //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
-        //    << endl;
-        dummyMesh.write();
-    }
-
-    //Pout<< "Reading mesh from " << io.objectPath() << endl;
-    autoPtr<fvMesh> meshPtr(new fvMesh(io));
-    fvMesh& mesh = meshPtr();
-
-
-    // Sync patches
-    // ~~~~~~~~~~~~
-
-    if (Pstream::master())
-    {
-        // Send patches
-        for
-        (
-            int slave=Pstream::firstSlave();
-            slave<=Pstream::lastSlave();
-            slave++
-        )
-        {
-            OPstream toSlave(Pstream::scheduled, slave);
-            toSlave << mesh.boundaryMesh();
-        }
-    }
-    else
-    {
-        // Receive patches
-        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
-        PtrList<entry> patchEntries(fromMaster);
-
-        if (haveMesh)
-        {
-            // Check master names against mine
-
-            const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-            forAll(patchEntries, patchI)
-            {
-                const entry& e = patchEntries[patchI];
-                const word type(e.dict().lookup("type"));
-                const word& name = e.keyword();
-
-                if (type == processorPolyPatch::typeName)
-                {
-                    break;
-                }
-
-                if (patchI >= patches.size())
-                {
-                    FatalErrorIn
-                    (
-                        "createMesh(const Time&, const fileName&, const bool)"
-                    )   << "Non-processor patches not synchronised."
-                        << endl
-                        << "Processor " << Pstream::myProcNo()
-                        << " has only " << patches.size()
-                        << " patches, master has "
-                        << patchI
-                        << exit(FatalError);
-                }
-
-                if
-                (
-                    type != patches[patchI].type()
-                 || name != patches[patchI].name()
-                )
-                {
-                    FatalErrorIn
-                    (
-                        "createMesh(const Time&, const fileName&, const bool)"
-                    )   << "Non-processor patches not synchronised."
-                        << endl
-                        << "Master patch " << patchI
-                        << " name:" << type
-                        << " type:" << type << endl
-                        << "Processor " << Pstream::myProcNo()
-                        << " patch " << patchI
-                        << " has name:" << patches[patchI].name()
-                        << " type:" << patches[patchI].type()
-                        << exit(FatalError);
-                }
-            }
-        }
-        else
-        {
-            // Add patch
-            List<polyPatch*> patches(patchEntries.size());
-            label nPatches = 0;
-
-            forAll(patchEntries, patchI)
-            {
-                const entry& e = patchEntries[patchI];
-                const word type(e.dict().lookup("type"));
-                const word& name = e.keyword();
-
-                if (type == processorPolyPatch::typeName)
-                {
-                    break;
-                }
-
-                //Pout<< "Adding patch:" << nPatches
-                //    << " name:" << name << " type:" << type << endl;
-
-                dictionary patchDict(e.dict());
-                patchDict.remove("nFaces");
-                patchDict.add("nFaces", 0);
-                patchDict.remove("startFace");
-                patchDict.add("startFace", 0);
-
-                patches[patchI] = polyPatch::New
-                (
-                    name,
-                    patchDict,
-                    nPatches++,
-                    mesh.boundaryMesh()
-                ).ptr();
-            }
-            patches.setSize(nPatches);
-            mesh.addFvPatches(patches, false);  // no parallel comms
-
-            //// Write empty mesh now we have correct patches
-            //meshPtr().write();
-        }
-    }
-
-
-    // Determine zones
-    // ~~~~~~~~~~~~~~~
-
-    wordList pointZoneNames(mesh.pointZones().names());
-    Pstream::scatter(pointZoneNames);
-    wordList faceZoneNames(mesh.faceZones().names());
-    Pstream::scatter(faceZoneNames);
-    wordList cellZoneNames(mesh.cellZones().names());
-    Pstream::scatter(cellZoneNames);
-
-    if (!haveMesh)
-    {
-        // Add the zones. Make sure to remove the old dummy ones first
-        mesh.pointZones().clear();
-        mesh.faceZones().clear();
-        mesh.cellZones().clear();
-
-        List<pointZone*> pz(pointZoneNames.size());
-        forAll(pointZoneNames, i)
-        {
-            pz[i] = new pointZone
-            (
-                pointZoneNames[i],
-                labelList(0),
-                i,
-                mesh.pointZones()
-            );
-        }
-        List<faceZone*> fz(faceZoneNames.size());
-        forAll(faceZoneNames, i)
-        {
-            fz[i] = new faceZone
-            (
-                faceZoneNames[i],
-                labelList(0),
-                boolList(0),
-                i,
-                mesh.faceZones()
-            );
-        }
-        List<cellZone*> cz(cellZoneNames.size());
-        forAll(cellZoneNames, i)
-        {
-            cz[i] = new cellZone
-            (
-                cellZoneNames[i],
-                labelList(0),
-                i,
-                mesh.cellZones()
-            );
-        }
-        mesh.addZones(pz, fz, cz);
-    }
-
-
-    if (!haveMesh)
-    {
-        // We created a dummy mesh file above. Delete it.
-        //Pout<< "Removing dummy mesh " << io.objectPath() << endl;
-        rmDir(io.objectPath());
-    }
-
-    // Force recreation of globalMeshData.
-    mesh.clearOut();
-    mesh.globalData();
-
-
-    // Do some checks.
-
-    // Check if the boundary definition is unique
-    mesh.boundaryMesh().checkDefinition(true);
-    // Check if the boundary processor patches are correct
-    mesh.boundaryMesh().checkParallelSync(true);
-    // Check names of zones are equal
-    mesh.cellZones().checkDefinition(true);
-    mesh.cellZones().checkParallelSync(true);
-    mesh.faceZones().checkDefinition(true);
-    mesh.faceZones().checkParallelSync(true);
-    mesh.pointZones().checkDefinition(true);
-    mesh.pointZones().checkParallelSync(true);
-
-    return meshPtr;
-}
+//// Read mesh if available. Otherwise create empty mesh with same non-proc
+//// patches as proc0 mesh. Requires all processors to have all patches
+//// (and in same order).
+//autoPtr<fvMesh> createMesh
+//(
+//    const Time& runTime,
+//    const word& regionName,
+//    const fileName& instDir,
+//    const bool haveMesh
+//)
+//{
+//    //Pout<< "Create mesh for time = "
+//    //    << runTime.timeName() << nl << endl;
+//
+//    IOobject io
+//    (
+//        regionName,
+//        instDir,
+//        runTime,
+//        IOobject::MUST_READ
+//    );
+//
+//    if (!haveMesh)
+//    {
+//        // Create dummy mesh. Only used on procs that don't have mesh.
+//        IOobject noReadIO(io);
+//        noReadIO.readOpt() = IOobject::NO_READ;
+//        fvMesh dummyMesh
+//        (
+//            noReadIO,
+//            xferCopy(pointField()),
+//            xferCopy(faceList()),
+//            xferCopy(labelList()),
+//            xferCopy(labelList()),
+//            false
+//        );
+//        // Add some dummy zones so upon reading it does not read them
+//        // from the undecomposed case. Should be done as extra argument to
+//        // regIOobject::readStream?
+//        List<pointZone*> pz
+//        (
+//            1,
+//            new pointZone
+//            (
+//                "dummyPointZone",
+//                labelList(0),
+//                0,
+//                dummyMesh.pointZones()
+//            )
+//        );
+//        List<faceZone*> fz
+//        (
+//            1,
+//            new faceZone
+//            (
+//                "dummyFaceZone",
+//                labelList(0),
+//                boolList(0),
+//                0,
+//                dummyMesh.faceZones()
+//            )
+//        );
+//        List<cellZone*> cz
+//        (
+//            1,
+//            new cellZone
+//            (
+//                "dummyCellZone",
+//                labelList(0),
+//                0,
+//                dummyMesh.cellZones()
+//            )
+//        );
+//        dummyMesh.addZones(pz, fz, cz);
+//        //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
+//        //    << endl;
+//        dummyMesh.write();
+//    }
+//
+//    //Pout<< "Reading mesh from " << io.objectPath() << endl;
+//    autoPtr<fvMesh> meshPtr(new fvMesh(io));
+//    fvMesh& mesh = meshPtr();
+//
+//
+//    // Sync patches
+//    // ~~~~~~~~~~~~
+//
+//    if (Pstream::master())
+//    {
+//        // Send patches
+//        for
+//        (
+//            int slave=Pstream::firstSlave();
+//            slave<=Pstream::lastSlave();
+//            slave++
+//        )
+//        {
+//            OPstream toSlave(Pstream::scheduled, slave);
+//            toSlave << mesh.boundaryMesh();
+//        }
+//    }
+//    else
+//    {
+//        // Receive patches
+//        IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
+//        PtrList<entry> patchEntries(fromMaster);
+//
+//        if (haveMesh)
+//        {
+//            // Check master names against mine
+//
+//            const polyBoundaryMesh& patches = mesh.boundaryMesh();
+//
+//            forAll(patchEntries, patchI)
+//            {
+//                const entry& e = patchEntries[patchI];
+//                const word type(e.dict().lookup("type"));
+//                const word& name = e.keyword();
+//
+//                if (type == processorPolyPatch::typeName)
+//                {
+//                    break;
+//                }
+//
+//                if (patchI >= patches.size())
+//                {
+//                    FatalErrorIn
+//                    (
+//                        "createMesh(const Time&, const fileName&, const bool)"
+//                    )   << "Non-processor patches not synchronised."
+//                        << endl
+//                        << "Processor " << Pstream::myProcNo()
+//                        << " has only " << patches.size()
+//                        << " patches, master has "
+//                        << patchI
+//                        << exit(FatalError);
+//                }
+//
+//                if
+//                (
+//                    type != patches[patchI].type()
+//                 || name != patches[patchI].name()
+//                )
+//                {
+//                    FatalErrorIn
+//                    (
+//                        "createMesh(const Time&, const fileName&, const bool)"
+//                    )   << "Non-processor patches not synchronised."
+//                        << endl
+//                        << "Master patch " << patchI
+//                        << " name:" << type
+//                        << " type:" << type << endl
+//                        << "Processor " << Pstream::myProcNo()
+//                        << " patch " << patchI
+//                        << " has name:" << patches[patchI].name()
+//                        << " type:" << patches[patchI].type()
+//                        << exit(FatalError);
+//                }
+//            }
+//        }
+//        else
+//        {
+//            // Add patch
+//            List<polyPatch*> patches(patchEntries.size());
+//            label nPatches = 0;
+//
+//            forAll(patchEntries, patchI)
+//            {
+//                const entry& e = patchEntries[patchI];
+//                const word type(e.dict().lookup("type"));
+//                const word& name = e.keyword();
+//
+//                if (type == processorPolyPatch::typeName)
+//                {
+//                    break;
+//                }
+//
+//                //Pout<< "Adding patch:" << nPatches
+//                //    << " name:" << name << " type:" << type << endl;
+//
+//                dictionary patchDict(e.dict());
+//                patchDict.remove("nFaces");
+//                patchDict.add("nFaces", 0);
+//                patchDict.remove("startFace");
+//                patchDict.add("startFace", 0);
+//
+//                patches[patchI] = polyPatch::New
+//                (
+//                    name,
+//                    patchDict,
+//                    nPatches++,
+//                    mesh.boundaryMesh()
+//                ).ptr();
+//            }
+//            patches.setSize(nPatches);
+//            mesh.addFvPatches(patches, false);  // no parallel comms
+//
+//            //// Write empty mesh now we have correct patches
+//            //meshPtr().write();
+//        }
+//    }
+//
+//
+//    // Determine zones
+//    // ~~~~~~~~~~~~~~~
+//
+//    wordList pointZoneNames(mesh.pointZones().names());
+//    Pstream::scatter(pointZoneNames);
+//    wordList faceZoneNames(mesh.faceZones().names());
+//    Pstream::scatter(faceZoneNames);
+//    wordList cellZoneNames(mesh.cellZones().names());
+//    Pstream::scatter(cellZoneNames);
+//
+//    if (!haveMesh)
+//    {
+//        // Add the zones. Make sure to remove the old dummy ones first
+//        mesh.pointZones().clear();
+//        mesh.faceZones().clear();
+//        mesh.cellZones().clear();
+//
+//        List<pointZone*> pz(pointZoneNames.size());
+//        forAll(pointZoneNames, i)
+//        {
+//            pz[i] = new pointZone
+//            (
+//                pointZoneNames[i],
+//                labelList(0),
+//                i,
+//                mesh.pointZones()
+//            );
+//        }
+//        List<faceZone*> fz(faceZoneNames.size());
+//        forAll(faceZoneNames, i)
+//        {
+//            fz[i] = new faceZone
+//            (
+//                faceZoneNames[i],
+//                labelList(0),
+//                boolList(0),
+//                i,
+//                mesh.faceZones()
+//            );
+//        }
+//        List<cellZone*> cz(cellZoneNames.size());
+//        forAll(cellZoneNames, i)
+//        {
+//            cz[i] = new cellZone
+//            (
+//                cellZoneNames[i],
+//                labelList(0),
+//                i,
+//                mesh.cellZones()
+//            );
+//        }
+//        mesh.addZones(pz, fz, cz);
+//    }
+//
+//
+//    if (!haveMesh)
+//    {
+//        // We created a dummy mesh file above. Delete it.
+//        //Pout<< "Removing dummy mesh " << io.objectPath() << endl;
+//        rmDir(io.objectPath());
+//    }
+//
+//    // Force recreation of globalMeshData.
+//    mesh.clearOut();
+//    mesh.globalData();
+//
+//
+//    // Do some checks.
+//
+//    // Check if the boundary definition is unique
+//    mesh.boundaryMesh().checkDefinition(true);
+//    // Check if the boundary processor patches are correct
+//    mesh.boundaryMesh().checkParallelSync(true);
+//    // Check names of zones are equal
+//    mesh.cellZones().checkDefinition(true);
+//    mesh.cellZones().checkParallelSync(true);
+//    mesh.faceZones().checkDefinition(true);
+//    mesh.faceZones().checkParallelSync(true);
+//    mesh.pointZones().checkDefinition(true);
+//    mesh.pointZones().checkParallelSync(true);
+//
+//    return meshPtr;
+//}
 
 
 // Get merging distance when matching face centres
@@ -786,13 +787,24 @@ int main(int argc, char *argv[])
     const bool allHaveMesh = (findIndex(haveMesh, false) == -1);
 
     // Create mesh
-    autoPtr<fvMesh> meshPtr = createMesh
+    //autoPtr<fvMesh> meshPtr = createMesh
+    //(
+    //    runTime,
+    //    regionName,
+    //    masterInstDir,
+    //    haveMesh[Pstream::myProcNo()]
+    //);
+    autoPtr<fvMesh> meshPtr = loadOrCreateMesh
     (
-        runTime,
-        regionName,
-        masterInstDir,
-        haveMesh[Pstream::myProcNo()]
+        IOobject
+        (
+            regionName,
+            masterInstDir,
+            runTime,
+            Foam::IOobject::MUST_READ
+        )
     );
+
     fvMesh& mesh = meshPtr();
 
     // Print some statistics
