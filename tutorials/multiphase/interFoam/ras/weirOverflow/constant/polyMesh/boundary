@@ -9,21 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
-
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
-
-dispersedPhase      both;
-
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+5
+(
+    inlet
+    {
+        type            patch;
+        nFaces          44;
+        startFace       9981;
+    }
+    outlet
+    {
+        type            patch;
+        nFaces          64;
+        startFace       10025;
+    }
+    lowerWall
+    {
+        type            wall;
+        nFaces          155;
+        startFace       10089;
+    }
+    atmosphere
+    {
+        type            patch;
+        nFaces          95;
+        startFace       10244;
+    }
+    defaultFaces
+    {
+        type            empty;
+        nFaces          10160;
+        startFace       10339;
+    }
+)
 
 // ************************************************************************* //

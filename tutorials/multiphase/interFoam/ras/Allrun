@@ -49,4 +49,7 @@ cloneCase damBreak damBreakFine
 # Do damBreakPorousBaffle
 (cd damBreakPorousBaffle && foamRunTutorials)
 
+# Do weirOverflow
+(cd weirOverflow && foamRunTutorials)
+
 # ----------------------------------------------------------------- end-of-file

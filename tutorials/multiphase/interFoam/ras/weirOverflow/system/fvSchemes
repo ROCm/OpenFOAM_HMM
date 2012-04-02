@@ -10,20 +10,56 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    location    "system";
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+ddtSchemes
+{
+    default         Euler;
+}
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+gradSchemes
+{
+    default         Gauss linear;
+}
 
-dispersedPhase      both;
+divSchemes
+{
+    div(rho*phi,U)  Gauss linear;
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss interfaceCompression;
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon) Gauss upwind;
+    div(phi,R)      Gauss upwind;
+    div(R)          Gauss linear;
+    div(phi,nuTilda) Gauss upwind;
+    div((nuEff*dev(T(grad(U))))) Gauss linear;
+}
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+fluxRequired
+{
+    default         no;
+    p_rgh;
+    pcorr;
+    alpha;
+}
+
 
 // ************************************************************************* //

@@ -9,21 +9,51 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    class       volScalarField;
+    location    "0";
+    object      epsilon;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+#include        "include/initialConditions"
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+dimensions      [0 2 -3 0 0 0 0];
 
-dispersedPhase      both;
+internalField   uniform $turbulentEpsilon;
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+boundaryField
+{
+    inlet
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+
+    outlet
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    lowerWall
+    {
+        type            epsilonWallFunction;
+        value           $internalField;
+    }
+
+    atmosphere
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
+
+    defaultFaces
+    {
+        type            empty;
+    }
+}
+
 
 // ************************************************************************* //

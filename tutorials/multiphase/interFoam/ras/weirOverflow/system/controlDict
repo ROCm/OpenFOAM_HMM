@@ -10,20 +10,46 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      interfacialProperties;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+application     interFoam;
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+startFrom       latestTime;
 
-dispersedPhase      both;
+startTime       0;
 
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
+stopAt          endTime;
+
+endTime         60;
+
+deltaT          0.001;
+
+writeControl    adjustableRunTime;
+
+writeInterval   2;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
+
+adjustTimeStep  on;
+
+maxCo           0.2;
+maxAlphaCo      0.2;
+
+maxDeltaT       1;
 
 // ************************************************************************* //

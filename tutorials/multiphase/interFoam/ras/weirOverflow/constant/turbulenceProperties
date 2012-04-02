@@ -11,19 +11,11 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      interfacialProperties;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+simulationType  RASModel;
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
-
-dispersedPhase      both;
-
-residualPhaseFraction   1e-3;
-residualSlip            1e-2;
 
 // ************************************************************************* //
