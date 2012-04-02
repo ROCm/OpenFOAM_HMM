@@ -1,8 +1,6 @@
-/*
 EXE_DEBUG = -DFULLDEBUG -g -O0
 EXE_FROUNDING_MATH = -frounding-math
 EXE_NDEBUG = -DNDEBUG
-*/
 
 include $(GENERAL_RULES)/CGAL
 
@@ -24,8 +22,8 @@ EXE_LIBS = \
     -lconformalVoronoiMesh \
     -ldecompositionMethods /* -L$(FOAM_LIBBIN)/dummy -lscotchDecomp */ \
     -ledgeMesh \
+    -lsampling \
     -ltriSurface \
     -lmeshTools \
     -ldynamicMesh \
-    -lsampling \
     -lfiniteVolume
