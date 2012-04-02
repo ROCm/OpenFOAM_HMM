@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,7 @@ SourceFiles
 #include "intersection.H"
 #include "pointField.H"
 #include "triPointRef.H"
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -247,6 +248,30 @@ inline unsigned Hash<triFace>::operator()(const triFace& t) const
 
 template<>
 inline bool contiguous<triFace>()  {return true;}
+
+
+//- Hash specialization to offset faces in ListListOps::combineOffset
+template<>
+class offsetOp<triFace>
+{
+
+public:
+
+    inline triFace operator()
+    (
+        const triFace& x,
+        const label offset
+    ) const
+    {
+        triFace result(x);
+
+        forAll(x, xI)
+        {
+            result[xI] = x[xI] + offset;
+        }
+        return result;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

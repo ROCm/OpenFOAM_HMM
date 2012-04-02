@@ -36,6 +36,7 @@ SourceFiles
 #define labelledTri_H
 
 #include "triFace.H"
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,14 +115,15 @@ public:
 template<>
 inline bool contiguous<labelledTri>()  {return true;}
 
-//- Used to offset faces in ListListOps::combineOffset
+
+//- Hash specialization to offset faces in ListListOps::combineOffset
 template<>
 class offsetOp<labelledTri>
 {
 
 public:
 
-    labelledTri operator()
+    inline labelledTri operator()
     (
         const labelledTri& x,
         const label offset

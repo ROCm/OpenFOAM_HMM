@@ -28,58 +28,7 @@ License
 #include "mergePoints.H"
 #include "face.H"
 #include "triFace.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //- Used to offset faces in Pstream::combineOffset
-    template<>
-    class offsetOp<face>
-    {
-
-    public:
-
-        face operator()
-        (
-            const face& x,
-            const label offset
-        ) const
-        {
-            face result(x.size());
-
-            forAll(x, xI)
-            {
-                result[xI] = x[xI] + offset;
-            }
-            return result;
-        }
-    };
-
-    //- Used to offset faces in Pstream::combineOffset
-    template<>
-    class offsetOp<triFace>
-    {
-
-    public:
-
-        triFace operator()
-        (
-            const triFace& x,
-            const label offset
-        ) const
-        {
-            triFace result(x);
-
-            forAll(x, xI)
-            {
-                result[xI] = x[xI] + offset;
-            }
-            return result;
-        }
-    };
-}
-
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
