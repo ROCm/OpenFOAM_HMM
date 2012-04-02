@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,9 +43,30 @@ Foam::backgroundMeshDecomposition::octreeNearestDistances() const
 }
 
 
-const Foam::treeBoundBox& Foam::backgroundMeshDecomposition::procBounds() const
+const Foam::treeBoundBox&
+Foam::backgroundMeshDecomposition::procBounds() const
 {
     return allBackgroundMeshBounds_[Pstream::myProcNo()];
 }
+
+
+const Foam::labelList& Foam::backgroundMeshDecomposition::cellLevel() const
+{
+    return meshCutter_.cellLevel();
+}
+
+
+const Foam::labelList& Foam::backgroundMeshDecomposition::pointLevel() const
+{
+    return meshCutter_.pointLevel();
+}
+
+
+const Foam::decompositionMethod&
+Foam::backgroundMeshDecomposition::decomposer() const
+{
+    return decomposerPtr_();
+}
+
 
 // ************************************************************************* //

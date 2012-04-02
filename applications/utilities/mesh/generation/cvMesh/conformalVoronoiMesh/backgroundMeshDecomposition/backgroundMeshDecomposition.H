@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,10 +92,22 @@ class backgroundMeshDecomposition
     // Private data
 
         //- Method details dictionary
-        dictionary coeffsDict_;
+        //dictionary coeffsDict_;
 
-        //- Reference to the conformalVoronoiMesh holding this object
-        const conformalVoronoiMesh& cvMesh_;
+        //- Reference to runtime
+        const Time& runTime_;
+
+        //- Reference to surface
+        const conformationSurfaces& geometryToConformTo_;
+
+        //- The cell size control object
+        const cellSizeControlSurfaces& cellSizeControl_;
+
+        //- Random number generator
+        Random& rndGen_;
+
+        //- Controls
+        const cvControls& cvMeshControls_;
 
         //- Mesh stored on for this processor, specifiying the domain that it
         //  is responsible for.
@@ -191,11 +203,27 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components in cvMesh operation
         backgroundMeshDecomposition
         (
             const dictionary& coeffsDict,
             const conformalVoronoiMesh& cvMesh
+        );
+
+        //- Construct from components for standalone operation
+        backgroundMeshDecomposition
+        (
+            const scalar spanScale,
+            const scalar minCellSizeLimit,
+            const label minLevels,
+            const label volRes,
+            const scalar maxCellWeightCoeff,
+
+            const Time& runTime,
+            const conformationSurfaces& geometryToConformTo,
+            const cellSizeControlSurfaces& cellSizeControl,
+            Random& rndGen,
+            const cvControls& cvMeshControls
         );
 
 
@@ -299,6 +327,15 @@ public:
 
             //- Return the boundBox of this processor
             inline const treeBoundBox& procBounds() const;
+
+            //- Return the cell level of the underlying mesh
+            inline const labelList& cellLevel() const;
+
+            //- Return the point level of the underlying mesh
+            inline const labelList& pointLevel() const;
+
+            //- Return the current decomposition method
+            inline const decompositionMethod& decomposer() const;
 };
 
 
