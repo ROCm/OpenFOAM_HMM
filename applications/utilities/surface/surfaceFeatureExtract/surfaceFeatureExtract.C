@@ -592,7 +592,7 @@ int main(int argc, char *argv[])
         if (extractionMethod == "extractFromFile")
         {
             const fileName featureEdgeFile =
-                surfaceDict.subDict("extractFromFile").lookup
+                surfaceDict.subDict("extractFromFileCoeffs").lookup
                 (
                     "featureEdgeFile"
                 );
@@ -612,7 +612,7 @@ int main(int argc, char *argv[])
             const scalar includedAngle =
                 readScalar
                 (
-                    surfaceDict.subDict("extractFromSurface").lookup
+                    surfaceDict.subDict("extractFromSurfaceCoeffs").lookup
                     (
                         "includedAngle"
                     )
@@ -747,10 +747,10 @@ int main(int argc, char *argv[])
         surfaceFeatures newSet(surf);
         newSet.setFromStatus(edgeStat);
 
-        if (writeObj)
-        {
-            newSet.writeObj("final");
-        }
+        //if (writeObj)
+        //{
+        //    newSet.writeObj("final");
+        //}
 
         Info<< nl
             << "Final feature set after trimming and subsetting:" << nl
@@ -775,7 +775,7 @@ int main(int argc, char *argv[])
 
         if (writeObj)
         {
-            feMesh.writeObj(surfFileName.lessExt().name());
+            feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
         }
 
         feMesh.write();
