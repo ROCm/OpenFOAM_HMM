@@ -87,9 +87,6 @@ surface2.nas
 
     // Write options
 
-        // Write .eMesh file (for snappyHexMesh)
-        writeFeatureEdgeMesh    no;
-
         // Write features to obj format for postprocessing
         writeObj                yes;
 
@@ -97,7 +94,6 @@ surface2.nas
         // for postprocessing
         writeVTK                no;
 }
-
 
 
 // ************************************************************************* //
