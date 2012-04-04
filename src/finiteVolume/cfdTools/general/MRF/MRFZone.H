@@ -48,6 +48,7 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
 #include "fvMatrices.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,7 +88,7 @@ class MRFZone
 
         const dimensionedVector origin_;
         dimensionedVector axis_;
-        const dimensionedScalar omega_;
+        dimensionedScalar omega_;
         dimensionedVector Omega_;
 
 
@@ -205,13 +206,11 @@ public:
         void correctBoundaryVelocity(volVectorField& U) const;
 
 
-    // Ostream Operator
+    // IOstream operator
 
-        friend Ostream& operator<<(Ostream& os, const MRFZone&)
-        {
-            notImplemented("Ostream& operator<<(Ostream& os, const MRFZone&)");
-            return os;
-        }
+        friend Ostream& operator<<(Ostream& os, const MRFZone& MRF);
+
+
 };
 
 
