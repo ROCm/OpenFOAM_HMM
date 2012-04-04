@@ -18,7 +18,7 @@ flange.obj
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurface
+    extractFromSurfaceCoeffs
     {
         // Mark edges whose adjacent surface normals are at an angle less
         // than includedAngle as features
@@ -27,10 +27,14 @@ flange.obj
         includedAngle   155;
     }
 
+
     // Write options
-    writeVTK                no;
-    writeObj                yes;
-    writeFeatureEdgeMesh    no;
+
+        // Write .eMesh file (for snappyHexMesh)
+        writeFeatureEdgeMesh    no;
+
+        // Write features to obj format for postprocessing
+        writeObj                yes;
 }
 
 

@@ -16,10 +16,34 @@ FoamFile
 
 surface1.stl
 {
-    // extractFromFile || extractFromSurface
+    // How to obtain raw features (extractFromFile || extractFromSurface)
+    extractionMethod    extractFromSurface;
+
+    extractFromSurfaceCoeffs
+    {
+        // Mark edges whose adjacent surface normals are at an angle less
+        // than includedAngle as features
+        // - 0  : selects no edges
+        // - 180: selects all edges
+        includedAngle   120;
+    }
+
+    // Write options
+
+        // Write .eMesh file (for snappyHexMesh)
+        writeFeatureEdgeMesh    yes;
+
+        // Write features to obj format for postprocessing
+        writeObj                yes;
+}
+
+
+surface2.nas
+{
+    // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod    extractFromFile;
 
-    extractFromFile
+    extractFromFileCoeffs
     {
         // Load from an existing feature edge file
         featureEdgeFile "constant/triSurface/featureEdges.nas";
@@ -62,25 +86,18 @@ surface1.stl
     closeness               no;
 
     // Write options
-    writeVTK                no;
-    writeObj                yes;
-    writeFeatureEdgeMesh    no;
+
+        // Write .eMesh file (for snappyHexMesh)
+        writeFeatureEdgeMesh    no;
+
+        // Write features to obj format for postprocessing
+        writeObj                yes;
+
+        // Write surface proximity and curvature fields to vtk format
+        // for postprocessing
+        writeVTK                no;
 }
 
-
-surface2.nas
-{
-    extractionMethod    extractFromSurface;
-
-    extractFromSurface
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   120;
-    }
-}
 
 
 // ************************************************************************* //
