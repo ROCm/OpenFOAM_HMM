@@ -1,7 +1,12 @@
+MarchingCubes = fastdualoctree_sgp
+
 include $(GENERAL_RULES)/CGAL
 
 EXE_INC = \
-    -IMarchingCubes \
+    -DUNIX \
+    -Wno-old-style-cast \
+    /* -IMarchingCubes */ \
+    -I$(MarchingCubes) \
     -I../conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
@@ -9,6 +14,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     $(CGAL_LIBS) \
+    -lGL \
     -lconformalVoronoiMesh \
     -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
     -ledgeMesh \
