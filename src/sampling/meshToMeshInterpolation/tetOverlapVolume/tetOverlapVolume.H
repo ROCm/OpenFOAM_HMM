@@ -60,9 +60,9 @@ class tetOverlapVolume
         (
             const tetPoints& tetA,
             const tetPoints& tetB,
-            FixedList<tetPoints, 200>& insideTets,
+            tetIntersectionList& insideTets,
             label& nInside,
-            FixedList<tetPoints, 200>& outsideTets,
+            tetIntersectionList& outsideTets,
             label& nOutside
         ) const;
 
@@ -115,7 +115,7 @@ public:
             const primitiveMesh& meshB,
             const label cellBI,
             const treeBoundBox& cellBbB
-        );
+        ) const;
 };
 
 
