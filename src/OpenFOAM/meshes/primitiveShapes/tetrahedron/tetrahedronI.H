@@ -556,7 +556,7 @@ inline void Foam::tetrahedron<Point, PointRef>::sumVolOp::operator()
 template<class Point, class PointRef>
 inline Foam::tetrahedron<Point, PointRef>::storeOp::storeOp
 (
-    FixedList<tetPoints, 200>& tets,
+    tetIntersectionList& tets,
     label& nTets
 )
 :

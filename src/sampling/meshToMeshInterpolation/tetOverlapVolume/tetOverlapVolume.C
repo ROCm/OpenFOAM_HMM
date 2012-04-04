@@ -49,14 +49,14 @@ void Foam::tetOverlapVolume::tetTetOverlap
 (
     const tetPoints& tetA,
     const tetPoints& tetB,
-    FixedList<tetPoints, 200>& insideTets,
+    tetIntersectionList& insideTets,
     label& nInside,
-    FixedList<tetPoints, 200>& outsideTets,
+    tetIntersectionList& outsideTets,
     label& nOutside
 ) const
 {
     // Work storage
-    FixedList<tetPoints, 200> cutInsideTets;
+    tetIntersectionList cutInsideTets;
     label nCutInside = 0;
 
     tetPointRef::storeOp inside(insideTets, nInside);
@@ -138,9 +138,9 @@ Foam::scalar Foam::tetOverlapVolume::tetTetOverlapVol
     const tetPoints& tetB
 ) const
 {
-    FixedList<tetPoints, 200> insideTets;
+    tetIntersectionList insideTets;
     label nInside = 0;
-    FixedList<tetPoints, 200> cutInsideTets;
+    tetIntersectionList cutInsideTets;
     label nCutInside = 0;
 
     tetPointRef::storeOp inside(insideTets, nInside);
@@ -222,7 +222,7 @@ Foam::scalar Foam::tetOverlapVolume::cellCellOverlapVolumeMinDecomp
     const primitiveMesh& meshB,
     const label cellBI,
     const treeBoundBox& cellBbB
-)
+) const
 {
     const cell& cFacesA = meshA.cells()[cellAI];
     const point& ccA = meshA.cellCentres()[cellAI];
