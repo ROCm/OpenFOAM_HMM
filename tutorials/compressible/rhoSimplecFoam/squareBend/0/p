@@ -26,8 +26,8 @@ boundaryField
     }
     inlet
     {
-        //type            zeroGradient;
-        type            mixed;
+        type            zeroGradient;
+        //type            mixed;
         refValue        uniform 110000;
         refGradient     uniform 0;
         valueFraction   uniform 0.3;
