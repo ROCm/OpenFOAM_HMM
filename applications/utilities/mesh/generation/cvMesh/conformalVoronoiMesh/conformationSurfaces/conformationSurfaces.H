@@ -303,6 +303,9 @@ public:
             //- Find which patch is closest to the point
             label findPatch(const point& pt) const;
 
+            //- Is the surface a baffle
+            inline bool isBaffle(const label index) const;
+
 
         // Write
 
