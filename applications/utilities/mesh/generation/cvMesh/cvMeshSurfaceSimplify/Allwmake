@@ -2,8 +2,9 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake
-wmake rhoPorousMRFSimpleFoam
-wmake rhoSimplecFoam
+if [ -d "${FASTDUALOCTREE_SRC_PATH}" ]
+then
+    wmake
+fi
 
 # ----------------------------------------------------------------- end-of-file

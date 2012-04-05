@@ -29,21 +29,17 @@ if (simple.transonic())
         (
             "phic",
             fvc::interpolate(rho/AtU - rho/AU)*fvc::snGrad(p)*mesh.magSf()
-          + phid*(fvc::interpolate(p) - fvc::interpolate(p, "UD"))
         );
-
-        //refCast<mixedFvPatchScalarField>(p.boundaryField()[1]).refValue()
-        //    = p.boundaryField()[1];
 
         fvScalarMatrix pEqn
         (
             fvm::div(phid, p)
           + fvc::div(phic)
-          - fvm::Sp(fvc::div(phid), p)
-          + fvc::div(phid)*p
           - fvm::laplacian(rho/AtU, p)
         );
-        //pEqn.relax();
+
+        // Relax the pressure equation to ensure diagonal-dominance
+        pEqn.relax();
 
         pEqn.setReference(pRefCell, pRefValue);
 
@@ -71,7 +67,6 @@ else
         fvScalarMatrix pEqn
         (
             fvc::div(phiHbyA)
-        //- fvm::laplacian(rho/AU, p)
           - fvm::laplacian(rho/AtU, p)
         );
 

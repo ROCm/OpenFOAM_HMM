@@ -87,6 +87,13 @@ class tetrahedron
 {
 public:
 
+    // Public typedefs
+
+        //- Storage type for tets originating from intersecting tets.
+        //  (can possibly be smaller than 200)
+        typedef FixedList<tetPoints, 200> tetIntersectionList;
+
+
         // Classes for use in sliceWithPlane. What to do with decomposition
         // of tet.
 
@@ -111,11 +118,11 @@ public:
             //- Store resulting tets
             class storeOp
             {
-                FixedList<tetPoints, 200>& tets_;
+                tetIntersectionList& tets_;
                 label& nTets_;
 
             public:
-                inline storeOp(FixedList<tetPoints, 200>&, label&);
+                inline storeOp(tetIntersectionList&, label&);
 
                 inline void operator()(const tetPoints&);
             };
@@ -259,6 +266,16 @@ public:
                 const plane& pl,
                 AboveTetOp& aboveOp,
                 BelowTetOp& belowOp
+            ) const;
+
+            //- Decompose tet into tets inside and outside other tet
+            inline void tetOverlap
+            (
+                const tetrahedron<Point, PointRef>& tetB,
+                tetIntersectionList& insideTets,
+                label& nInside,
+                tetIntersectionList& outsideTets,
+                label& nOutside
             ) const;
 
 

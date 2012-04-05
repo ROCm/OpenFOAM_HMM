@@ -2,8 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-wmake
-wmake rhoPorousMRFSimpleFoam
-wmake rhoSimplecFoam
+wclean
+wclean rhoPorousMRFSimpleFoam
+wclean rhoSimplecFoam
 
 # ----------------------------------------------------------------- end-of-file
