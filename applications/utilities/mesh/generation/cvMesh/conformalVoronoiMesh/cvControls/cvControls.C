@@ -61,7 +61,7 @@ Foam::cvControls::cvControls
 
     specialiseFeaturePoints_ = Switch
     (
-        surfDict.lookupOrDefault<Switch>("specialiseFeaturePoints", false)
+        surfDict.lookup("specialiseFeaturePoints")
     );
 
     surfaceSearchDistanceCoeff_ = readScalar
