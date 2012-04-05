@@ -51,9 +51,9 @@ Foam::scalar Foam::tetOverlapVolume::tetTetOverlapVol
     const tetPoints& tetB
 ) const
 {
-    tetIntersectionList insideTets;
+    tetPointRef::tetIntersectionList insideTets;
     label nInside = 0;
-    tetIntersectionList cutInsideTets;
+    tetPointRef::tetIntersectionList cutInsideTets;
     label nCutInside = 0;
 
     tetPointRef::storeOp inside(insideTets, nInside);
