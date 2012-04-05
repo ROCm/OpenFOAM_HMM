@@ -767,6 +767,8 @@ int main(int argc, char *argv[])
         Info<< nl << "Writing extendedFeatureEdgeMesh to "
             << feMesh.objectPath() << endl;
 
+        mkDir(feMesh.path());
+
         if (writeObj)
         {
             feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
