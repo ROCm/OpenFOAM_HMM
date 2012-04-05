@@ -252,7 +252,7 @@ void Foam::rotorDiskSource::createCoordinateSystem()
     {
         case gmAuto:
         {
-            // determine rotation origin
+            // determine rotation origin (cell volume weighted)
             scalar sumV = 0.0;
             const scalarField& V = mesh_.V();
             const vectorField& C = mesh_.C();
@@ -262,6 +262,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                 sumV += V[cellI];
                 origin += V[cellI]*C[cellI];
             }
+            reduce(origin, sumOp<vector>());
+            reduce(sumV, sumOp<scalar>());
             origin /= sumV;
 
             // determine first radial vector
@@ -277,6 +279,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                     magR = mag(test);
                 }
             }
+            reduce(dx1, maxMagSqrOp<vector>());
+            magR = mag(dx1);
 
             // determine second radial vector and cross to determine axis
             forAll(cells_, i)
@@ -292,6 +296,7 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                     }
                 }
             }
+            reduce(axis, maxMagSqrOp<vector>());
             axis /= mag(axis);
 
             // axis direction is somewhat arbitrary - check if user needs
