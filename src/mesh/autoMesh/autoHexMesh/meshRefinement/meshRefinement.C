@@ -2216,28 +2216,6 @@ void Foam::meshRefinement::dumpRefinementLevel() const
 
         pointRefLevel.write();
     }
-
-    // Dump cell centres
-    {
-        for (direction i=0; i<vector::nComponents; i++)
-        {
-            volScalarField cci
-            (
-                IOobject
-                (
-                    "cc" + word(vector::componentNames[i]),
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh_.C().component(i)
-            );
-
-            cci.write();
-        }
-    }
 }
 
 
