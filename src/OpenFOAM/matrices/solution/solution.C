@@ -65,6 +65,8 @@ void Foam::solution::read(const dictionary& dict)
         else
         {
             // backwards compatibility
+            fieldRelaxDict_.clear();
+
             const wordList entryNames(relaxDict.toc());
             forAll(entryNames, i)
             {
