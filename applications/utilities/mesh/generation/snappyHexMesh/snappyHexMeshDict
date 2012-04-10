@@ -158,7 +158,8 @@ castellatedMeshControls
             //      internal : keep them as internal faces (default)
             //      baffle   : create baffles from them. This gives more
             //                 freedom in mesh motion
-            //      boundary : create loose-standing boundary faces.
+            //      boundary : create free-standing boundary faces (baffles
+            //                 but without the shared points)
             //faceType internal;
         }
     }
