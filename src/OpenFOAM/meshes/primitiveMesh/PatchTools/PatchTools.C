@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 
 #include "PatchToolsCheck.C"
 #include "PatchToolsEdgeOwner.C"
+#include "PatchToolsGatherAndMerge.C"
 #include "PatchToolsSearch.C"
 #include "PatchToolsSortEdges.C"
 #include "PatchToolsNormals.C"

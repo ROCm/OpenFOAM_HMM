@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,10 +49,26 @@ namespace Foam
         "none"
     };
 }
-
-
 const Foam::NamedEnum<Foam::refinementSurfaces::areaSelectionAlgo, 4>
     Foam::refinementSurfaces::areaSelectionAlgoNames;
+
+
+namespace Foam
+{
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::refinementSurfaces::faceZoneType,
+        3
+    >::names[] =
+    {
+        "internal",
+        "baffle",
+        "boundary"
+    };
+}
+const Foam::NamedEnum<Foam::refinementSurfaces::faceZoneType, 3>
+    Foam::refinementSurfaces::faceZoneTypeNames;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -70,6 +86,7 @@ Foam::refinementSurfaces::refinementSurfaces
     cellZoneNames_(surfacesDict.size()),
     zoneInside_(surfacesDict.size(), NONE),
     zoneInsidePoints_(surfacesDict.size()),
+    faceType_(surfacesDict.size(), INTERNAL),
     regionOffset_(surfacesDict.size())
 {
     // Wilcard specification : loop over all surface, all regions
@@ -93,6 +110,7 @@ Foam::refinementSurfaces::refinementSurfaces
     faceZoneNames_.setSize(surfI);
     cellZoneNames_.setSize(surfI);
     zoneInside_.setSize(surfI, NONE);
+    faceType_.setSize(surfI, INTERNAL),
     regionOffset_.setSize(surfI);
 
     labelList globalMinLevel(surfI, 0);
@@ -183,7 +201,16 @@ Foam::refinementSurfaces::refinementSurfaces
                         << " since no cellZone specified."
                         << endl;
                 }
+
+                // How to handle faces on faceZone
+                word faceTypeMethod;
+                if (dict.readIfPresent("faceType", faceTypeMethod))
+                {
+                    faceType_[surfI] = faceZoneTypeNames[faceTypeMethod];
+                }
             }
+
+
 
             // Global perpendicular angle
             if (dict.found("patchInfo"))

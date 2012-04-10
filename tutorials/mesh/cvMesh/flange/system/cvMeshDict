@@ -113,7 +113,7 @@ initialPoints
     minimumSurfaceDistanceCoeff 0.55;
 
     initialPointsMethod         autoDensity;
-    // initialPointsMethod         pointFile;
+    //initialPointsMethod         pointFile;
 
     autoDensityCoeffs
     {
@@ -143,10 +143,15 @@ motionControl
         {
             priority            1;
             mode                inside;
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize     0.0005;
+            }
+
             cellSizeFunction    linearDistance;
             linearDistanceCoeffs
             {
-                surfaceCellSize     0.0005;
                 distanceCellSize    $defaultCellSize;
                 distance            0.004;
             }
@@ -205,27 +210,14 @@ polyMeshFiltering
     filterCountSkipThreshold                4;
     maxCollapseIterations                   25;
     maxConsecutiveEqualFaceSets             5;
-    surfaceStepFaceAngle                    80;
-    edgeCollapseGuardFraction               0.3;
+    surfaceStepFaceAngle                    90;
+    edgeCollapseGuardFraction               0.0;    //0.3;
     maxCollapseFaceToPointSideLengthCoeff   0.35;
+    edgeMergeAngle                          30;
 }
 
 
-meshQualityControls
-{
-    maxNonOrtho         65;
-    maxBoundarySkewness 50;
-    maxInternalSkewness 10;
-    maxConcave          80;
-    minTetQuality       1e-30;
-    minVol              0;
-    minArea             -1;
-    minTwist            0.001;
-    minDeterminant      0.001;
-    minFaceWeight       0.02;
-    minVolRatio         0.01;
-    minTriangleTwist    -1;
-}
+#include "meshQualityControls"
 
 
 // ************************************************************************* //

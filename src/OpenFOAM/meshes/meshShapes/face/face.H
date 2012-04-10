@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ SourceFiles
 #include "faceListFwd.H"
 #include "intersection.H"
 #include "pointHit.H"
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -383,6 +384,30 @@ public:
     // Istream Operator
 
         friend Istream& operator>>(Istream&, face&);
+};
+
+
+//- Hash specialization to offset faces in ListListOps::combineOffset
+template<>
+class offsetOp<face>
+{
+
+public:
+
+    inline face operator()
+    (
+        const face& x,
+        const label offset
+    ) const
+    {
+        face result(x.size());
+
+        forAll(x, xI)
+        {
+            result[xI] = x[xI] + offset;
+        }
+        return result;
+    }
 };
 
 

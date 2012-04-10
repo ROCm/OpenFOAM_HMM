@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,23 +21,63 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    rhoSimplecFoam
+
 Description
-    Simple central-difference snGrad scheme with quadratic fit correction from
-    a larger stencil.
+    Steady-state SIMPLEC solver for laminar or turbulent RANS flow of
+    compressible fluids.
 
 \*---------------------------------------------------------------------------*/
 
-#include "quadraticFitSnGrad.H"
-#include "fvMesh.H"
+#include "fvCFD.H"
+#include "basicPsiThermo.H"
+#include "RASModel.H"
+#include "mixedFvPatchFields.H"
+#include "bound.H"
+#include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+int main(int argc, char *argv[])
 {
-namespace fv
-{
-    makeSnGradScheme(quadraticFitSnGrad)
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+
+    simpleControl simple(mesh);
+
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (simple.loop())
+    {
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        // Velocity-pressure-enthalpy SIMPLEC corrector
+        {
+            #include "UEqn.H"
+            #include "pEqn.H"
+            #include "hEqn.H"
+        }
+
+        turbulence->correct();
+
+        runTime.write();
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
+    }
+
+    Info<< "End\n" << endl;
+
+    return 0;
 }
-}
+
 
 // ************************************************************************* //

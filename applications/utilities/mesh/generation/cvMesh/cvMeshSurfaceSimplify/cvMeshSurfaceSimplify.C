@@ -28,6 +28,7 @@ Description
     Simplifies surfaces by resampling.
 
     Uses Thomas Lewiner's topology preserving MarchingCubes.
+    (http://zeus.mat.puc-rio.br/tomlew/tomlew_uk.php)
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,12 +38,327 @@ Description
 #include "conformationSurfaces.H"
 #include "triSurfaceMesh.H"
 
-#include "MarchingCubes.h"
-
+#include "opt_octree.h"
+#include "cube.h"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+class pointConversion
+{
+    const vector scale_;
+
+    const vector offset_;
+
+public:
+
+    //- Construct from components
+    pointConversion
+    (
+        const vector scale,
+        const vector offset
+    )
+    :
+        scale_(scale),
+        offset_(offset)
+    {}
+
+    inline Point toLocal(const Foam::point& pt) const
+    {
+        Foam::point p = cmptMultiply(scale_, (pt + offset_));
+        return Point(p.x(), p.y(), p.z());
+    }
+
+    inline Foam::point toGlobal(const Point& pt) const
+    {
+        point p(pt.x(), pt.y(), pt.z());
+        return cmptDivide(p, scale_) - offset_;
+    }
+};
+
+
+
+
+// For use in Fast-Dual Octree from Thomas Lewiner
+class distanceCalc
+:
+    public ::data_access
+{
+
+    const Level min_level_;
+
+    const conformationSurfaces& geometryToConformTo_;
+
+    const pointConversion& converter_;
+
+
+    // Private Member Functions
+
+    scalar signedDistance(const Foam::point& pt) const
+    {
+        const searchableSurfaces& geometry = geometryToConformTo_.geometry();
+        const labelList& surfaces = geometryToConformTo_.surfaces();
+
+        static labelList nearestSurfaces;
+        static scalarField distance;
+
+        static pointField samples(1);
+        samples[0] = pt;
+
+        searchableSurfacesQueries::signedDistance
+        (
+            geometry,
+            surfaces,
+            samples,
+            scalarField(1, GREAT),
+            searchableSurface::OUTSIDE,
+            nearestSurfaces,
+            distance
+        );
+
+        return distance[0];
+    }
+
+
+public:
+
+    // Constructors
+
+        //- Construct from components
+        distanceCalc
+        (
+            Level max_level_,
+            real iso_val_,
+            Level min_level,
+            const conformationSurfaces& geometryToConformTo,
+            const pointConversion& converter
+        )
+        :
+            data_access(max_level_,iso_val_),
+            min_level_(min_level),
+            geometryToConformTo_(geometryToConformTo),
+            converter_(converter)
+        {}
+
+
+    //- Destructor
+    virtual ~distanceCalc()
+    {}
+
+
+    // Member Functions
+
+        //- test function
+        virtual bool need_refine( const Cube &c )
+        {
+            int l = c.lv() ;
+
+            if( l >= _max_level ) return false;
+            if( l < min_level_ ) return true;
+
+            treeBoundBox bb
+            (
+                converter_.toGlobal
+                (
+                    Point
+                    (
+                        c.xmin(),
+                        c.ymin(),
+                        c.zmin()
+                    )
+                ),
+                converter_.toGlobal
+                (
+                    Point
+                    (
+                        c.xmax(),
+                        c.ymax(),
+                        c.zmax()
+                    )
+                )
+            );
+
+            const searchableSurfaces& geometry =
+                geometryToConformTo_.geometry();
+            const labelList& surfaces =
+                geometryToConformTo_.surfaces();
+
+
+            //- Uniform refinement around surface
+            {
+                forAll(surfaces, i)
+                {
+                    if (geometry[surfaces[i]].overlaps(bb))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+            ////- Surface intersects bb (but not using intersection test)
+            //scalar ccDist = signedDistance(bb.midpoint());
+            //scalar ccVal = ccDist - _iso_val;
+            //if (mag(ccVal) < SMALL)
+            //{
+            //    return true;
+            //}
+            //const pointField points(bb.points());
+            //forAll(points, pointI)
+            //{
+            //    scalar pointVal = signedDistance(points[pointI]) - _iso_val;
+            //    if (ccVal*pointVal < 0)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
+
+
+            ////- Refinement based on intersection with multiple planes.
+            ////  Does not work well - too high a ratio between
+            ////  neighbouring cubes.
+            //const pointField points(bb.points());
+            //const edgeList& edges = treeBoundBox::edges;
+            //pointField start(edges.size());
+            //pointField end(edges.size());
+            //forAll(edges, i)
+            //{
+            //    start[i] = points[edges[i][0]];
+            //    end[i] = points[edges[i][1]];
+            //}
+            //Foam::List<Foam::List<pointIndexHit> > hitInfo;
+            //labelListList hitSurfaces;
+            //searchableSurfacesQueries::findAllIntersections
+            //(
+            //    geometry,
+            //    surfaces,
+            //    start,
+            //    end,
+            //    hitSurfaces,
+            //    hitInfo
+            //);
+            //
+            //// Count number of intersections
+            //label nInt = 0;
+            //forAll(hitSurfaces, edgeI)
+            //{
+            //    nInt += hitSurfaces[edgeI].size();
+            //}
+            //
+            //if (nInt == 0)
+            //{
+            //    // No surface intersected. See if there is one inside
+            //    forAll(surfaces, i)
+            //    {
+            //        if (geometry[surfaces[i]].overlaps(bb))
+            //        {
+            //            return true;
+            //        }
+            //    }
+            //    return false;
+            //}
+            //
+            //// Check multiple surfaces
+            //label baseSurfI = -1;
+            //forAll(hitSurfaces, edgeI)
+            //{
+            //    const labelList& hSurfs = hitSurfaces[edgeI];
+            //    forAll(hSurfs, i)
+            //    {
+            //        if (baseSurfI == -1)
+            //        {
+            //            baseSurfI = hSurfs[i];
+            //        }
+            //        else if (baseSurfI != hSurfs[i])
+            //        {
+            //            // Multiple surfaces
+            //            return true;
+            //        }
+            //    }
+            //}
+            //
+            //// Get normals
+            //DynamicList<pointIndexHit> baseInfo(nInt);
+            //forAll(hitInfo, edgeI)
+            //{
+            //    const Foam::List<pointIndexHit>& hits = hitInfo[edgeI];
+            //    forAll(hits, i)
+            //    {
+            //        (void)hits[i].hitPoint();
+            //        baseInfo.append(hits[i]);
+            //    }
+            //}
+            //vectorField normals;
+            //geometry[surfaces[baseSurfI]].getNormal(baseInfo, normals);
+            //for (label i = 1; i < normals.size(); ++i)
+            //{
+            //    if ((normals[0] & normals[i]) < 0.9)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //labelList regions;
+            //geometry[surfaces[baseSurfI]].getRegion(baseInfo, regions);
+            //for (label i = 1; i < regions.size(); ++i)
+            //{
+            //    if (regions[0] != regions[i])
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
+
+
+
+            //samples[0] = point(c.xmin(), c.ymin(), c.zmin());
+            //samples[1] = point(c.xmax(), c.ymin(), c.zmin());
+            //samples[2] = point(c.xmax(), c.ymax(), c.zmin());
+            //samples[3] = point(c.xmin(), c.ymax(), c.zmin());
+            //
+            //samples[4] = point(c.xmin(), c.ymin(), c.zmax());
+            //samples[5] = point(c.xmax(), c.ymin(), c.zmax());
+            //samples[6] = point(c.xmax(), c.ymax(), c.zmax());
+            //samples[7] = point(c.xmin(), c.ymax(), c.zmax());
+
+            //scalarField nearestDistSqr(8, GREAT);
+            //
+            //Foam::List<pointIndexHit> nearestInfo;
+            //surf_.findNearest(samples, nearestDistSqr, nearestInfo);
+            //vectorField normals;
+            //surf_.getNormal(nearestInfo, normals);
+            //
+            //for (label i = 1; i < normals.size(); ++i)
+            //{
+            //    if ((normals[0] & normals[i]) < 0.5)
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
+
+            //// Check if surface octree same level
+            //const labelList elems(surf_.tree().findBox(bb));
+            //
+            //if (elems.size() > 1)
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //  return false;
+            //}
+        }
+
+        //- data function
+        virtual real value_at( const Cube &c )
+        {
+            return signedDistance(converter_.toGlobal(c)) - _iso_val;
+        }
+};
+
 
 // Main program:
 
@@ -52,19 +368,16 @@ int main(int argc, char *argv[])
     (
         "Re-sample surfaces used in cvMesh operation"
     );
-    //argList::validArgs.append("inputFile");
-    argList::validArgs.append("(nx ny nz)");
     argList::validArgs.append("outputName");
 
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const Vector<label> n(IStringStream(args.args()[1])());
-    const fileName exportName = args.args()[2];
+    const fileName exportName = args.args()[1];
 
     Info<< "Reading surfaces as specified in the cvMeshDict and"
-        << " writing re-sampled " << n << " to " << exportName
+        << " writing a re-sampled surface to " << exportName
         << nl << endl;
 
     cpuTime timer;
@@ -114,124 +427,100 @@ int main(int argc, char *argv[])
         << timer.cpuTimeIncrement() << " s." << nl << endl;
 
 
-
-    // Extend
-    treeBoundBox bb = geometryToConformTo.globalBounds();
-    {
-        const vector smallVec = 0.1*bb.span();
-        bb.min() -= smallVec;
-        bb.max() += smallVec;
-    }
-
-    Info<< "Meshing to bounding box " << bb << nl << endl;
-
-    const vector span(bb.span());
-    const vector d
-    (
-        span.x()/(n.x()-1),
-        span.y()/(n.y()-1),
-        span.z()/(n.z()-1)
-    );
-
-    MarchingCubes mc(span.x(), span.y(), span.z() ) ;
-    mc.set_resolution(n.x(), n.y(), n.z());
-    mc.init_all() ;
-
-
-    // Generate points
-    pointField points(mc.size_x()*mc.size_y()*mc.size_z());
-    label pointI = 0;
-
-    point pt;
-    for( int k = 0 ; k < mc.size_z() ; k++ )
-    {
-        pt.z() = bb.min().z() + k*d.z();
-        for( int j = 0 ; j < mc.size_y() ; j++ )
-        {
-            pt.y() = bb.min().y() + j*d.y();
-            for( int i = 0 ; i < mc.size_x() ; i++ )
-            {
-                pt.x() = bb.min().x() + i*d.x();
-                points[pointI++] = pt;
-            }
-        }
-    }
-
-    Info<< "Generated " << points.size() << " sampling points in = "
-        << timer.cpuTimeIncrement() << " s." << nl << endl;
-
-
-    // Compute data
     const searchableSurfaces& geometry = geometryToConformTo.geometry();
     const labelList& surfaces = geometryToConformTo.surfaces();
 
-    scalarField signedDist;
-    labelList nearestSurfaces;
-    searchableSurfacesQueries::signedDistance
+
+    const label minLevel = 2;
+
+    // The max cube size follows from the minLevel and the default cube size
+    // (1)
+    const scalar maxSize = 1.0 / (1 << minLevel);
+    const scalar halfMaxSize = 0.5*maxSize;
+
+
+    // Scale the geometry to fit within
+    // halfMaxSize .. 1-halfMaxSize
+
+    scalar wantedRange = 1.0-maxSize;
+
+    const treeBoundBox bb = geometryToConformTo.globalBounds();
+
+    const vector scale = cmptDivide
     (
-        geometry,
-        surfaces,
-        points,
-        scalarField(points.size(), sqr(GREAT)),
-        nearestSurfaces,
-        signedDist
+        point(wantedRange, wantedRange, wantedRange),
+        bb.span()
+    );
+    const vector offset =
+        cmptDivide
+        (
+            point(halfMaxSize, halfMaxSize, halfMaxSize),
+            scale
+        )
+       -bb.min();
+
+
+    const pointConversion converter(scale, offset);
+
+
+    // Marching cubes
+
+    OptOctree octree;
+
+    distanceCalc ref
+    (
+        8,          //maxLevel
+        0.0,        //distance
+        minLevel,   //minLevel
+        geometryToConformTo,
+        converter
     );
 
-    // Fill elements
-    pointI = 0;
-    for( int k = 0 ; k < mc.size_z() ; k++ )
-    {
-        for( int j = 0 ; j < mc.size_y() ; j++ )
-        {
-            for( int i = 0 ; i < mc.size_x() ; i++ )
-            {
-                mc.set_data(float(signedDist[pointI++]), i, j, k);
-            }
-        }
-    }
+    octree.refine(&ref);
+    octree.set_impl(&ref);
 
-    Info<< "Determined signed distance in = "
+    Info<< "Calculated octree in = "
         << timer.cpuTimeIncrement() << " s." << nl << endl;
 
+    MarchingCubes& mc = octree.mc();
 
-    mc.run() ;
+    mc.clean_all() ;
+    octree.build_isosurface(&ref) ;
 
-    Info<< "Constructed iso surface in = "
+    Info<< "Constructed iso surface of distance in = "
         << timer.cpuTimeIncrement() << " s." << nl << endl;
-
-
-    mc.clean_temps() ;
-
-
 
     // Write output file
     if (mc.ntrigs() > 0)
     {
         Triangle* triangles = mc.triangles();
-        List<labelledTri> tris(mc.ntrigs());
-        forAll(tris, triI)
+        label nTris = mc.ntrigs();
+        Foam::DynamicList<labelledTri> tris(mc.ntrigs());
+        for (label triI = 0; triI < nTris; ++triI)
         {
-            tris[triI] = labelledTri
-            (
-                triangles[triI].v1,
-                triangles[triI].v2,
-                triangles[triI].v3,
-                0                       // region
-            );
+            const Triangle& t = triangles[triI];
+            if (t.v1 != t.v2 && t.v1 != t.v3 && t.v2 != t.v3)
+            {
+                tris.append
+                (
+                    labelledTri
+                    (
+                        triangles[triI].v1,
+                        triangles[triI].v2,
+                        triangles[triI].v3,
+                        0                       // region
+                    )
+                );
+            }
         }
 
 
-        Vertex* vertices = mc.vertices();
+        Point* vertices = mc.vertices();
         pointField points(mc.nverts());
         forAll(points, pointI)
         {
-            Vertex& v = vertices[pointI];
-            points[pointI] = point
-            (
-                bb.min().x() + v.x*span.x()/mc.size_x(),
-                bb.min().y() + v.y*span.y()/mc.size_y(),
-                bb.min().z() + v.z*span.z()/mc.size_z()
-            );
+            const Point& v = vertices[pointI];
+            points[pointI] = converter.toGlobal(v);
         }
 
 
@@ -265,6 +554,7 @@ int main(int argc, char *argv[])
         }
 
         triSurface s(tris, patches, points, true);
+        tris.clearStorage();
 
         Info<< "Extracted triSurface in = "
             << timer.cpuTimeIncrement() << " s." << nl << endl;
@@ -272,7 +562,7 @@ int main(int argc, char *argv[])
 
         // Find out region on local surface of nearest point
         {
-            List<pointIndexHit> hitInfo;
+            Foam::List<pointIndexHit> hitInfo;
             labelList hitSurfaces;
             geometryToConformTo.findSurfaceNearest
             (
@@ -339,7 +629,6 @@ int main(int argc, char *argv[])
     }
 
     mc.clean_all() ;
-
 
     Info<< "End\n" << endl;
 

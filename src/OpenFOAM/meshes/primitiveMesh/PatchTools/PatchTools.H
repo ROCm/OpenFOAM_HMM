@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ SourceFiles
     PatchTools.C
     PatchToolsCheck.C
     PatchToolsEdgeOwner.C
+    PatchToolsGatherAndMerge.C
     PatchToolsSearch.C
     PatchToolsSortEdges.C
     PatchToolsNormals.C
@@ -234,6 +235,25 @@ public:
         const polyMesh&,
         const PrimitivePatch<Face, FaceList, PointField, PointType>&,
         const labelList& meshFaces
+    );
+
+
+    //- Gather points and faces onto master and merge (geometrically) into
+    //  single patch.
+    template
+    <
+        class Face,
+        template<class> class FaceList,
+        class PointField,
+        class PointType
+    >
+    static void gatherAndMerge
+    (
+        const scalar mergeDist,
+        const PrimitivePatch<Face, FaceList, PointField, PointType>& p,
+        Field<PointType>& mergedPoints,
+        List<Face>& mergedFaces,
+        labelList& pointMergeMap
     );
 
 };

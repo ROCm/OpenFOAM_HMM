@@ -36,7 +36,7 @@ volScalarField heatTransferCoeff
 
 {
     volVectorField Ur(U1 - U2);
-    volScalarField magUr(mag(Ur));
+    volScalarField magUr(mag(Ur) + residualSlip);
 
     if (dispersedPhase == "1")
     {
@@ -69,12 +69,9 @@ volScalarField heatTransferCoeff
             << exit(FatalError);
     }
 
-    volScalarField alpha1Coeff
-    (
-        (alpha1 + minInterfaceAlpha)*(alpha2 + minInterfaceAlpha)
-    );
-    dragCoeff *= alpha1Coeff;
-    heatTransferCoeff *= alpha1Coeff;
+    volScalarField alphaCoeff(max(alpha1*alpha2, residualPhaseFraction));
+    dragCoeff *= alphaCoeff;
+    heatTransferCoeff *= alphaCoeff;
 
     liftForce = Cl*(alpha1*rho1 + alpha2*rho2)*(Ur ^ fvc::curl(U));
 

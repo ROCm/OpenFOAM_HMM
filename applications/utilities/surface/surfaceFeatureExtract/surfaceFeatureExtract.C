@@ -525,12 +525,6 @@ int main(int argc, char *argv[])
             surfaceDict.lookupOrAddDefault<Switch>("writeVTK", "off");
         const Switch writeObj =
             surfaceDict.lookupOrAddDefault<Switch>("writeObj", "off");
-        const Switch writeFeatureEdgeMesh =
-            surfaceDict.lookupOrAddDefault<Switch>
-            (
-                "writeFeatureEdgeMesh",
-                "off"
-            );
 
         const Switch curvature =
             surfaceDict.lookupOrAddDefault<Switch>("curvature", "off");
@@ -592,7 +586,7 @@ int main(int argc, char *argv[])
         if (extractionMethod == "extractFromFile")
         {
             const fileName featureEdgeFile =
-                surfaceDict.subDict("extractFromFile").lookup
+                surfaceDict.subDict("extractFromFileCoeffs").lookup
                 (
                     "featureEdgeFile"
                 );
@@ -612,7 +606,7 @@ int main(int argc, char *argv[])
             const scalar includedAngle =
                 readScalar
                 (
-                    surfaceDict.subDict("extractFromSurface").lookup
+                    surfaceDict.subDict("extractFromSurfaceCoeffs").lookup
                     (
                         "includedAngle"
                     )
@@ -747,10 +741,10 @@ int main(int argc, char *argv[])
         surfaceFeatures newSet(surf);
         newSet.setFromStatus(edgeStat);
 
-        if (writeObj)
-        {
-            newSet.writeObj("final");
-        }
+        //if (writeObj)
+        //{
+        //    newSet.writeObj("final");
+        //}
 
         Info<< nl
             << "Final feature set after trimming and subsetting:" << nl
@@ -773,37 +767,36 @@ int main(int argc, char *argv[])
         Info<< nl << "Writing extendedFeatureEdgeMesh to "
             << feMesh.objectPath() << endl;
 
+        mkDir(feMesh.path());
+
         if (writeObj)
         {
-            feMesh.writeObj(surfFileName.lessExt().name());
+            feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
         }
 
         feMesh.write();
 
         // Write a featureEdgeMesh for backwards compatibility
-        if (writeFeatureEdgeMesh)
-        {
-            featureEdgeMesh bfeMesh
+        featureEdgeMesh bfeMesh
+        (
+            IOobject
             (
-                IOobject
-                (
-                    surfFileName.lessExt().name() + ".eMesh",   // name
-                    runTime.constant(),                         // instance
-                    "triSurface",
-                    runTime,                                    // registry
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
-                ),
-                feMesh.points(),
-                feMesh.edges()
-            );
+                surfFileName.lessExt().name() + ".eMesh",   // name
+                runTime.constant(),                         // instance
+                "triSurface",
+                runTime,                                    // registry
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            feMesh.points(),
+            feMesh.edges()
+        );
 
-            Info<< nl << "Writing featureEdgeMesh to "
-                << bfeMesh.objectPath() << endl;
+        Info<< nl << "Writing featureEdgeMesh to "
+            << bfeMesh.objectPath() << endl;
 
-            bfeMesh.regIOobject::write();
-        }
+        bfeMesh.regIOobject::write();
 
         triSurfaceMesh searchSurf
         (

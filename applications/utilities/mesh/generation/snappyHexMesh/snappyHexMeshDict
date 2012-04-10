@@ -154,6 +154,13 @@ castellatedMeshControls
             //faceZone sphere;
             //cellZone sphere;
             //cellZoneInside inside;  //outside/insidePoint
+            //- Optional specification of what to do with faceZone faces:
+            //      internal : keep them as internal faces (default)
+            //      baffle   : create baffles from them. This gives more
+            //                 freedom in mesh motion
+            //      boundary : create free-standing boundary faces (baffles
+            //                 but without the shared points)
+            //faceType internal;
         }
     }
 

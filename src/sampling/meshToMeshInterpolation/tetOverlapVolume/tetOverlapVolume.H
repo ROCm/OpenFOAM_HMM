@@ -55,17 +55,6 @@ class tetOverlapVolume
 {
     // Private member functions
 
-        //- Tet overlap
-        void tetTetOverlap
-        (
-            const tetPoints& tetA,
-            const tetPoints& tetB,
-            FixedList<tetPoints, 200>& insideTets,
-            label& nInside,
-            FixedList<tetPoints, 200>& outsideTets,
-            label& nOutside
-        ) const;
-
         //- Tet Overlap Vol
         scalar tetTetOverlapVol
         (
@@ -115,7 +104,7 @@ public:
             const primitiveMesh& meshB,
             const label cellBI,
             const treeBoundBox& cellBbB
-        );
+        ) const;
 };
 
 

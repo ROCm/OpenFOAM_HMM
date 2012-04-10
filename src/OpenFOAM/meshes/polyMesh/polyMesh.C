@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1092,7 +1092,8 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
 
 Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 (
-    const pointField& newPoints
+    const pointField& newPoints,
+    const bool deleteDemandDrivenData
 )
 {
     if (debug)
@@ -1145,6 +1146,14 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     }
 
     // Force recalculation of all geometric data with new points
+
+    if (deleteDemandDrivenData)
+    {
+        // Remove the stored tet base points
+        tetBasePtIsPtr_.clear();
+        // Remove the cell tree
+        cellTreePtr_.clear();
+    }
 
     bounds_ = boundBox(points_);
     boundary_.movePoints(points_);

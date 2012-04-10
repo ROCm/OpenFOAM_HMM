@@ -36,14 +36,18 @@ defineTypeNameAndDebug(Foam::vtkUnstructuredReader, 0);
 
 template<>
 const char*
-Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 4>::names[] =
+Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 8>::names[] =
 {
     "int",
+    "unsigned_int",
+    "long",
+    "unsigned_long",
     "float",
+    "double",
     "string",
     "vtkIdType"
 };
-const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 4>
+const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 8>
 Foam::vtkUnstructuredReader::vtkDataTypeNames;
 
 
@@ -385,6 +389,9 @@ void Foam::vtkUnstructuredReader::readField
     switch (vtkDataTypeNames[dataType])
     {
         case VTK_INT:
+        case VTK_UINT:
+        case VTK_LONG:
+        case VTK_ULONG:
         case VTK_ID:
         {
             autoPtr<labelIOField> fieldVals
@@ -406,6 +413,7 @@ void Foam::vtkUnstructuredReader::readField
         break;
 
         case VTK_FLOAT:
+        case VTK_DOUBLE:
         {
             autoPtr<scalarIOField> fieldVals
             (
@@ -627,7 +635,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
             }
 
             word primitiveTag(inFile);
-            if (primitiveTag != "float")
+            if (primitiveTag != "float" && primitiveTag != "double")
             {
                 FatalIOErrorIn("vtkUnstructuredReader::read(..)", inFile)
                     << "Expected 'float' entry but found "
@@ -809,7 +817,11 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 3*wantedSize
             );
 
-            if (vtkDataTypeNames[dataType] == VTK_FLOAT)
+            if
+            (
+                vtkDataTypeNames[dataType] == VTK_FLOAT
+             || vtkDataTypeNames[dataType] == VTK_DOUBLE
+            )
             {
                 objectRegistry::iterator iter = reg.find(dataName);
                 scalarField s(*dynamic_cast<const scalarField*>(iter()));

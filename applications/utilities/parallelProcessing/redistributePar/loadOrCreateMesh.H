@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,63 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    rhoSimplecFoam
+InNamespace
+    Foam
 
 Description
-    Steady-state SIMPLEC solver for laminar or turbulent RANS flow of
-    compressible fluids.
+    Load or create (0 size) a mesh. Used in distributing meshes to a
+    larger number of processors
+
+SourceFiles
+    loadOrCreateMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "basicPsiThermo.H"
-#include "RASModel.H"
-#include "mixedFvPatchFields.H"
-#include "bound.H"
-#include "simpleControl.H"
+#ifndef loadOrCreateMesh_H
+#define loadOrCreateMesh_H
+
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
 
-    simpleControl simple(mesh);
+//- Load (if it exists) or create zero cell mesh given an IOobject:
+//      name     : regionName
+//      instance : exact directory where to find mesh (i.e. does not
+//                 do a findInstance
+autoPtr<fvMesh> loadOrCreateMesh(const IOobject& io);
 
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (simple.loop())
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        // Velocity-pressure-enthalpy SIMPLEC corrector
-        {
-            #include "UEqn.H"
-            #include "pEqn.H"
-            #include "hEqn.H"
-        }
-
-        turbulence->correct();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return 0;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

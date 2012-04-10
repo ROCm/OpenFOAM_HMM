@@ -62,4 +62,10 @@ const Foam::treeBoundBox& Foam::conformationSurfaces::globalBounds() const
 }
 
 
+bool Foam::conformationSurfaces::isBaffle(const label index) const
+{
+    return baffleSurfaces_[index];
+}
+
+
 // ************************************************************************* //

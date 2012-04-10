@@ -173,6 +173,8 @@ $(derivedFvPatchFields)/cylindricalInletVelocity/cylindricalInletVelocityFvPatch
 $(derivedFvPatchFields)/outletMappedUniformInlet/outletMappedUniformInletFvPatchFields.C
 $(derivedFvPatchFields)/waveSurfacePressure/waveSurfacePressureFvPatchScalarField.C
 $(derivedFvPatchFields)/phaseHydrostaticPressure/phaseHydrostaticPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/variableHeightFlowRate/variableHeightFlowRateFvPatchField.C
+$(derivedFvPatchFields)/variableHeightFlowRateInletVelocity/variableHeightFlowRateInletVelocityFvPatchVectorField.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -338,10 +340,6 @@ $(snGradSchemes)/correctedSnGrad/correctedSnGrads.C
 $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
 $(snGradSchemes)/orthogonalSnGrad/orthogonalSnGrads.C
-/*
-$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGradData.C
-$(snGradSchemes)/quadraticFitSnGrad/quadraticFitSnGrads.C
-*/
 
 convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C

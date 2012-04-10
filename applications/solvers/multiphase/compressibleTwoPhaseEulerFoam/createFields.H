@@ -310,12 +310,19 @@
 
     Info << "dispersedPhase is " << dispersedPhase << endl;
 
-    scalar minInterfaceAlpha
+    scalar residualPhaseFraction
     (
         readScalar
         (
-            interfacialProperties.lookup("minInterfaceAlpha")
+            interfacialProperties.lookup("residualPhaseFraction")
         )
+    );
+
+    dimensionedScalar residualSlip
+    (
+        "residualSlip",
+        dimVelocity,
+        interfacialProperties.lookup("residualSlip")
     );
 
     kineticTheoryModel kineticTheory

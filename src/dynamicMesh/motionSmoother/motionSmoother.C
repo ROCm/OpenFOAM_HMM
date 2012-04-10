@@ -903,7 +903,9 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
         testSyncPositions(newPoints, 1E-6*mesh_.bounds().mag());
     }
 
-    tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
+    // Move actual mesh points. Make sure to delete tetBasePtIs so it
+    // gets rebuilt.
+    tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints, true);
 
     pp_.movePoints(mesh_.points());
 
