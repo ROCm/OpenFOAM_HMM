@@ -41,40 +41,6 @@ License
 #   define MPI_SCALAR MPI_DOUBLE
 #endif
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    typedef struct
-    {
-        scalar value;
-        label count;
-    } CountAndValue;
-
-    void reduceSum
-    (
-        void *in,
-        void *inOut,
-        int *len,
-        MPI_Datatype *dptr
-    )
-    {
-        CountAndValue* inPtr =
-            reinterpret_cast<CountAndValue*>(in);
-        CountAndValue* inOutPtr =
-            reinterpret_cast<CountAndValue*>(inOut);
-
-        for (int i=0; i< *len; ++i)
-        {
-            inOutPtr->value += inPtr->value;
-            inOutPtr->count += inPtr->count;
-            inPtr++;
-            inOutPtr++;
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // NOTE:
@@ -493,101 +459,11 @@ void Foam::sumReduce
     const int tag
 )
 {
-    static bool hasDataType_ = false;
-    static MPI_Datatype mesg_mpi_strct_;
-    static MPI_Op myOp_;
+    vector2D twoScalars(Value, scalar(Count));
+    reduce(twoScalars, sumOp<vector2D>());
 
-    if (Pstream::debug)
-    {
-        Pout<< "Foam::sumReduce : value:" << Value
-            << " count:" << Count << endl;
-    }
-
-    if (!UPstream::parRun())
-    {
-        return;
-    }
-
-    if (UPstream::nProcs() <= UPstream::nProcsSimpleSum)
-    {
-        reduce(Value, sumOp<scalar>(), tag);
-        reduce(Count, sumOp<label>(), tag);
-    }
-    else
-    {
-        CountAndValue in,out;
-
-        if (!hasDataType_)
-        {
-            int lengths[2];
-            lengths[0] = 1;
-            lengths[1] = 1;
-            MPI_Datatype types[2];
-            types[0] = MPI_DOUBLE;
-            types[1] = MPI_INT;
-            MPI_Aint addresses[2];
-            MPI_Address(&in.value, &addresses[0]);
-            MPI_Address(&in.count, &addresses[1]);
-            MPI_Aint offsets[2];
-            offsets[0] = 0;
-            offsets[1] = addresses[1]-addresses[0];
-
-            if
-            (
-                MPI_Type_create_struct
-                (
-                    2,
-                    lengths,
-                    offsets,
-                    types,
-                    &mesg_mpi_strct_
-                )
-            )
-            {
-                FatalErrorIn("Foam::sumReduce()")
-                    << "MPI_Type_create_struct" << abort(FatalError);
-            }
-            if (MPI_Type_commit(&mesg_mpi_strct_))
-            {
-                FatalErrorIn("Foam::sumReduce()")
-                    << "MPI_Type_commit" << abort(FatalError);
-            }
-            if (MPI_Op_create(reduceSum, true, &myOp_))
-            {
-                FatalErrorIn("Foam::sumReduce()")
-                    << "MPI_Op_create" << abort(FatalError);
-            }
-
-            hasDataType_ = true;
-        }
-
-        in.value = Value;
-        in.count = Count;
-        if
-        (
-            MPI_Allreduce
-            (
-                &in,
-                &out,
-                1,
-                mesg_mpi_strct_,
-                myOp_,
-                MPI_COMM_WORLD
-            )
-        )
-        {
-            FatalErrorIn("Foam::sumReduce(..)")
-                << "Problem." << abort(FatalError);
-        }
-        Value = out.value;
-        Count = out.count;
-    }
-
-    if (Pstream::debug)
-    {
-        Pout<< "Foam::reduce : reduced value:" << Value
-            << " reduced count:" << Count << endl;
-    }
+    Value = twoScalars.x();
+    Count = twoScalars.y();
 }
 
 
