@@ -28,6 +28,8 @@ Description
     Reader for vtk unstructured_grid legacy files. Supports single CELLS, POINTS
     etc. entry only.
 
+    - all integer types (int, unsigned_int, long etc.) become Foam::label
+    - all real types (float, double) become Foam::scalar
     - POINTS becomes OpenFOAM points
     - CELLS gets split into OpenFOAM
         - cells
@@ -69,12 +71,16 @@ public:
         enum vtkDataType
         {
             VTK_INT,
+            VTK_UINT,
+            VTK_LONG,
+            VTK_ULONG,
             VTK_FLOAT,
+            VTK_DOUBLE,
             VTK_STRING,
             VTK_ID
         };
 
-        static const NamedEnum<vtkDataType, 4> vtkDataTypeNames;
+        static const NamedEnum<vtkDataType, 8> vtkDataTypeNames;
 
 
         //- Enumeration defining the vtk dataset types
