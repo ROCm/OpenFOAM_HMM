@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -442,7 +442,11 @@ public:
             }
 
             //- Move points, returns volumes swept by faces in motion
-            virtual tmp<scalarField> movePoints(const pointField&);
+            virtual tmp<scalarField> movePoints
+            (
+                const pointField&,
+                const bool deleteDemandDrivenData = false
+            );
 
             //- Reset motion
             void resetMotion() const;

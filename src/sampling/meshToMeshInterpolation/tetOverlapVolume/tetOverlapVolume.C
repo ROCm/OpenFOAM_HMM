@@ -45,102 +45,15 @@ Foam::tetOverlapVolume::tetOverlapVolume()
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
-void Foam::tetOverlapVolume::tetTetOverlap
-(
-    const tetPoints& tetA,
-    const tetPoints& tetB,
-    FixedList<tetPoints, 200>& insideTets,
-    label& nInside,
-    FixedList<tetPoints, 200>& outsideTets,
-    label& nOutside
-) const
-{
-    // Work storage
-    FixedList<tetPoints, 200> cutInsideTets;
-    label nCutInside = 0;
-
-    tetPointRef::storeOp inside(insideTets, nInside);
-    tetPointRef::storeOp cutInside(cutInsideTets, nCutInside);
-    tetPointRef::dummyOp outside;
-
-
-    // Cut tetA with all inwards pointing faces of tetB. Any tets remaining
-    // in aboveTets are inside tetB.
-
-    {
-        // face0
-        plane pl0(tetB[1], tetB[3], tetB[2]);
-
-        // Cut and insert subtets into cutInsideTets (either by getting
-        // an index from freeSlots or by appending to insideTets) or
-        // insert into outsideTets
-        tetA.tet().sliceWithPlane(pl0, cutInside, outside);
-    }
-
-    if (nCutInside == 0)
-    {
-        nInside = nCutInside;
-        return;
-    }
-
-    {
-        // face1
-        plane pl1(tetB[0], tetB[2], tetB[3]);
-
-        nInside = 0;
-
-        for (label i = 0; i < nCutInside; i++)
-        {
-            cutInsideTets[i].tet().sliceWithPlane(pl1, inside, outside);
-        }
-
-        if (nInside == 0)
-        {
-            return;
-        }
-    }
-
-    {
-        // face2
-        plane pl2(tetB[0], tetB[3], tetB[1]);
-
-        nCutInside = 0;
-
-        for (label i = 0; i < nInside; i++)
-        {
-            insideTets[i].tet().sliceWithPlane(pl2, cutInside, outside);
-        }
-
-        if (nCutInside == 0)
-        {
-            nInside = nCutInside;
-            return;
-        }
-    }
-
-    {
-        // face3
-        plane pl3(tetB[0], tetB[1], tetB[2]);
-
-        nInside = 0;
-
-        for (label i = 0; i < nCutInside; i++)
-        {
-            cutInsideTets[i].tet().sliceWithPlane(pl3, inside, outside);
-        }
-    }
-}
-
-
 Foam::scalar Foam::tetOverlapVolume::tetTetOverlapVol
 (
     const tetPoints& tetA,
     const tetPoints& tetB
 ) const
 {
-    FixedList<tetPoints, 200> insideTets;
+    tetPointRef::tetIntersectionList insideTets;
     label nInside = 0;
-    FixedList<tetPoints, 200> cutInsideTets;
+    tetPointRef::tetIntersectionList cutInsideTets;
     label nCutInside = 0;
 
     tetPointRef::storeOp inside(insideTets, nInside);
@@ -222,7 +135,7 @@ Foam::scalar Foam::tetOverlapVolume::cellCellOverlapVolumeMinDecomp
     const primitiveMesh& meshB,
     const label cellBI,
     const treeBoundBox& cellBbB
-)
+) const
 {
     const cell& cFacesA = meshA.cells()[cellAI];
     const point& ccA = meshA.cellCentres()[cellAI];

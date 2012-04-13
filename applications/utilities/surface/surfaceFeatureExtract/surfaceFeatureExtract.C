@@ -525,12 +525,6 @@ int main(int argc, char *argv[])
             surfaceDict.lookupOrAddDefault<Switch>("writeVTK", "off");
         const Switch writeObj =
             surfaceDict.lookupOrAddDefault<Switch>("writeObj", "off");
-        const Switch writeFeatureEdgeMesh =
-            surfaceDict.lookupOrAddDefault<Switch>
-            (
-                "writeFeatureEdgeMesh",
-                "off"
-            );
 
         const Switch curvature =
             surfaceDict.lookupOrAddDefault<Switch>("curvature", "off");
@@ -773,6 +767,8 @@ int main(int argc, char *argv[])
         Info<< nl << "Writing extendedFeatureEdgeMesh to "
             << feMesh.objectPath() << endl;
 
+        mkDir(feMesh.path());
+
         if (writeObj)
         {
             feMesh.writeObj(feMesh.path()/surfFileName.lessExt().name());
@@ -781,29 +777,26 @@ int main(int argc, char *argv[])
         feMesh.write();
 
         // Write a featureEdgeMesh for backwards compatibility
-        if (writeFeatureEdgeMesh)
-        {
-            featureEdgeMesh bfeMesh
+        featureEdgeMesh bfeMesh
+        (
+            IOobject
             (
-                IOobject
-                (
-                    surfFileName.lessExt().name() + ".eMesh",   // name
-                    runTime.constant(),                         // instance
-                    "triSurface",
-                    runTime,                                    // registry
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
-                ),
-                feMesh.points(),
-                feMesh.edges()
-            );
+                surfFileName.lessExt().name() + ".eMesh",   // name
+                runTime.constant(),                         // instance
+                "triSurface",
+                runTime,                                    // registry
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            feMesh.points(),
+            feMesh.edges()
+        );
 
-            Info<< nl << "Writing featureEdgeMesh to "
-                << bfeMesh.objectPath() << endl;
+        Info<< nl << "Writing featureEdgeMesh to "
+            << bfeMesh.objectPath() << endl;
 
-            bfeMesh.regIOobject::write();
-        }
+        bfeMesh.regIOobject::write();
 
         triSurfaceMesh searchSurf
         (

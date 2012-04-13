@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -544,7 +544,7 @@ public:
                 const labelListList& globalEdgeSlaves() const;
                 const labelListList& globalEdgeTransformedSlaves() const;
                 const mapDistribute& globalEdgeSlavesMap() const;
-                //- Is my edge same orientation master edge
+                //- Is my edge same orientation as master edge
                 const PackedBoolList& globalEdgeOrientation() const;
 
             // Coupled point to boundary faces. These are uncoupled boundary

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,8 @@ void Foam::solution::read(const dictionary& dict)
         else
         {
             // backwards compatibility
+            fieldRelaxDict_.clear();
+
             const wordList entryNames(relaxDict.toc());
             forAll(entryNames, i)
             {
