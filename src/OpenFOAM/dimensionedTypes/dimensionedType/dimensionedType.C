@@ -154,6 +154,16 @@ dimensioned<Type>::dimensioned
 }
 
 
+template <class Type>
+dimensioned<Type>::dimensioned
+()
+:
+    name_("undefined"),
+    dimensions_(dimless),
+    value_(pTraits<Type>::zero)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class Type>

@@ -49,6 +49,7 @@ SourceFiles
 #include "fvMatricesFwd.H"
 #include "fvMatrices.H"
 #include "DataEntry.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,10 +87,14 @@ class MRFZone
         //- Excluded faces (per patch) that do not move with the MRF
         labelListList excludedFaces_;
 
-        const dimensionedVector origin_;
-        dimensionedVector axis_;
-        dimensionedScalar omega_;
-        dimensionedVector Omega_;
+        //- Origin of the axis
+        const vector origin_;
+
+        //- Axis vector
+        vector axis_;
+
+        //- Angular velocty (rad/sec)
+        autoPtr<DataEntry<scalar> > omega_;
 
 
     // Private Member Functions

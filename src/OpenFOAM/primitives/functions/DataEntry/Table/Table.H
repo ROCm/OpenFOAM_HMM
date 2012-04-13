@@ -30,7 +30,7 @@ Description
     in the form, e.g. for an entry \<entryName\> that is (scalar, vector):
 
     \verbatim
-        <entryName>   table
+        <entryName>   table [0 1 0 0 0] //dimension set optional
         (
             0.0 (1 2 3)
             1.0 (4 5 6)
@@ -127,6 +127,22 @@ public:
             virtual Type integrate(const scalar x1, const scalar x2) const
             {
                 return TableBase<Type>::integrate(x1, x2);
+            }
+
+             //- Return dimensioned constant value
+            virtual dimensioned<Type> dimValue(const scalar x) const
+            {
+                return TableBase<Type>::dimValue(x);
+            }
+
+            //- Integrate between two values and return dimensioned type
+            virtual dimensioned<Type> dimIntegrate
+            (
+                const scalar x1,
+                const scalar x2
+            )
+            {
+                return TableBase<Type>::dimIntegrate(x1, x2);
             }
 
 
