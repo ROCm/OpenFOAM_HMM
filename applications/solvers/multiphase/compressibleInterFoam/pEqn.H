@@ -1,6 +1,6 @@
 {
-    rho1 = rho10 + psi1*p;
-    rho2 = rho20 + psi2*p;
+    rho1 = eos1->rho(p, T);
+    rho2 = eos2->rho(p, T);
 
     volScalarField rAU = 1.0/UEqn.A();
     surfaceScalarField rAUf = fvc::interpolate(rAU);
@@ -81,15 +81,10 @@
     U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
     U.correctBoundaryConditions();
 
-    p = max
-    (
-        (p_rgh + gh*(alpha1*rho10 + alpha2*rho20))
-       /(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
-        pMin
-    );
+    p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
 
-    rho1 = rho10 + psi1*p;
-    rho2 = rho20 + psi2*p;
+    rho1 = eos1->rho(p, T);
+    rho2 = eos2->rho(p, T);
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
     Info<< "min(p_rgh) " << min(p_rgh).value() << endl;

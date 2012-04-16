@@ -15,6 +15,6 @@
     );
 
     // Update compressibilities
-    psi1 = 1.0/(R1*T);
-    psi2 = 1.0/(R2*T);
+    psi1 = eos1->psi(p, T);
+    psi2 = eos2->psi(p, T);
 }

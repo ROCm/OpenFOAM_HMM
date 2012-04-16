@@ -28,83 +28,6 @@
 
     #include "createPhi.H"
 
-    Info<< "Reading transportProperties\n" << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi);
-
-    volScalarField& alpha1(twoPhaseProperties.alpha1());
-
-    Info<< "Calculating phase-fraction alpha" << twoPhaseProperties.phase2Name()
-        << nl << endl;
-    volScalarField alpha2
-    (
-        "alpha" + twoPhaseProperties.phase2Name(),
-        scalar(1) - alpha1
-    );
-
-    dimensionedScalar rho10
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("rho0")
-    );
-
-    dimensionedScalar rho20
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("rho0")
-    );
-
-    dimensionedScalar k1
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("k")
-    );
-
-    dimensionedScalar k2
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("k")
-    );
-
-    dimensionedScalar Cv1
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("Cv")
-    );
-
-    dimensionedScalar Cv2
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("Cv")
-    );
-
-    dimensionedScalar R1
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("R")
-    );
-
-    dimensionedScalar R2
-    (
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("R")
-    );
-
     Info<< "Reading field T\n" << endl;
     volScalarField T
     (
@@ -119,6 +42,95 @@
         mesh
     );
 
+    volScalarField p
+    (
+        IOobject
+        (
+            "p",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        p_rgh
+    );
+
+
+    Info<< "Reading transportProperties\n" << endl;
+    twoPhaseMixture twoPhaseProperties(U, phi);
+
+    volScalarField& alpha1(twoPhaseProperties.alpha1());
+
+    Info<< "Calculating phase-fraction alpha" << twoPhaseProperties.phase2Name()
+        << nl << endl;
+    volScalarField alpha2
+    (
+        "alpha" + twoPhaseProperties.phase2Name(),
+        scalar(1) - alpha1
+    );
+
+    dimensionedScalar k1
+    (
+        "k",
+        dimensionSet(1, 1, -3, -1, 0),
+        twoPhaseProperties.subDict
+        (
+            twoPhaseProperties.phase1Name()
+        ).lookup("k")
+    );
+
+    dimensionedScalar k2
+    (
+        "k",
+        dimensionSet(1, 1, -3, -1, 0),
+        twoPhaseProperties.subDict
+        (
+            twoPhaseProperties.phase2Name()
+        ).lookup("k")
+    );
+
+    dimensionedScalar Cv1
+    (
+        "Cv",
+        dimensionSet(0, 2, -2, -1, 0),
+        twoPhaseProperties.subDict
+        (
+            twoPhaseProperties.phase1Name()
+        ).lookup("Cv")
+    );
+
+    dimensionedScalar Cv2
+    (
+        "Cv",
+        dimensionSet(0, 2, -2, -1, 0),
+        twoPhaseProperties.subDict
+        (
+            twoPhaseProperties.phase2Name()
+        ).lookup("Cv")
+    );
+
+    autoPtr<phaseEquationOfState> eos1
+    (
+        phaseEquationOfState::New
+        (
+            twoPhaseProperties.subDict
+            (
+                twoPhaseProperties.phase1Name()
+            )
+        )
+    );
+
+    autoPtr<phaseEquationOfState> eos2
+    (
+        phaseEquationOfState::New
+        (
+            twoPhaseProperties.subDict
+            (
+                twoPhaseProperties.phase2Name()
+            )
+        )
+    );
+
     volScalarField psi1
     (
         IOobject
@@ -127,8 +139,9 @@
             runTime.timeName(),
             mesh
         ),
-        1.0/(R1*T)
+        eos1->psi(p, T)
     );
+    psi1.oldTime();
 
     volScalarField psi2
     (
@@ -138,7 +151,7 @@
             runTime.timeName(),
             mesh
         ),
-        1.0/(R2*T)
+        eos2->psi(p, T)
     );
     psi2.oldTime();
 
@@ -148,26 +161,8 @@
     volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("ghf", g & mesh.Cf());
 
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        max
-        (
-            (p_rgh + gh*(alpha1*rho10 + alpha2*rho20))
-           /(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
-            pMin
-        )
-    );
-
-    volScalarField rho1(rho10 + psi1*p);
-    volScalarField rho2(rho20 + psi2*p);
+    volScalarField rho1(eos1->rho(p, T));
+    volScalarField rho2(eos2->rho(p, T));
 
     volScalarField rho
     (
