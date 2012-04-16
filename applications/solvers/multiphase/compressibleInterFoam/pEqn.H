@@ -1,28 +1,31 @@
 {
-    volScalarField rAU(1.0/UEqn.A());
-    surfaceScalarField rAUf(fvc::interpolate(rAU));
+    rho1 = rho10 + psi1*p;
+    rho2 = rho20 + psi2*p;
 
-    tmp<fvScalarMatrix> p_rghEqnComp;
+    volScalarField rAU = 1.0/UEqn.A();
+    surfaceScalarField rAUf = fvc::interpolate(rAU);
 
-    if (pimple.transonic())
+    tmp<fvScalarMatrix> p_rghEqnComp1;
+    tmp<fvScalarMatrix> p_rghEqnComp2;
+
+    //if (transonic)
+    //{
+    //}
+    //else
     {
-        p_rghEqnComp =
-        (
-            fvm::ddt(p_rgh)
-          + fvm::div(phi, p_rgh)
-          - fvm::Sp(fvc::div(phi), p_rgh)
-        );
-    }
-    else
-    {
-        p_rghEqnComp =
-        (
-            fvm::ddt(p_rgh)
-          + fvc::div(phi, p_rgh)
-          - fvc::Sp(fvc::div(phi), p_rgh)
-        );
-    }
+        surfaceScalarField phid1("phid1", fvc::interpolate(psi1)*phi);
+        surfaceScalarField phid2("phid2", fvc::interpolate(psi2)*phi);
 
+        p_rghEqnComp1 =
+            fvc::ddt(rho1) + psi1*correction(fvm::ddt(p_rgh))
+          + fvc::div(phid1, p_rgh)
+          - fvc::Sp(fvc::div(phid1), p_rgh);
+
+        p_rghEqnComp2 =
+            fvc::ddt(rho2) + psi2*correction(fvm::ddt(p_rgh))
+          + fvc::div(phid2, p_rgh)
+          - fvc::Sp(fvc::div(phid2), p_rgh);
+    }
 
     U = rAU*UEqn.H();
 
@@ -39,6 +42,10 @@
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf();
 
+    // Thermodynamic density needs to be updated by psi*d(p) after the
+    // pressure solution - done in 2 parts. Part 1:
+    //thermo.rho() -= psi*p_rgh;
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix p_rghEqnIncomp
@@ -50,19 +57,23 @@
         solve
         (
             (
-                max(alpha1, scalar(0))*(psi1/rho1)
-              + max(alpha2, scalar(0))*(psi2/rho2)
+                (max(alpha1, scalar(0))/rho1)*p_rghEqnComp1()
+              + (max(alpha2, scalar(0))/rho2)*p_rghEqnComp2()
             )
-           *p_rghEqnComp()
           + p_rghEqnIncomp,
             mesh.solver(p_rgh.select(pimple.finalInnerIter()))
         );
 
         if (pimple.finalNonOrthogonalIter())
         {
+            // Second part of thermodynamic density update
+            //thermo.rho() += psi*p_rgh;
+
             dgdt =
-                (pos(alpha2)*(psi2/rho2) - pos(alpha1)*(psi1/rho1))
-               *(p_rghEqnComp & p_rgh);
+            (
+                pos(alpha2)*(p_rghEqnComp2 & p_rgh)/rho2
+              - pos(alpha1)*(p_rghEqnComp1 & p_rgh)/rho1
+            );
             phi += p_rghEqnIncomp.flux();
         }
     }

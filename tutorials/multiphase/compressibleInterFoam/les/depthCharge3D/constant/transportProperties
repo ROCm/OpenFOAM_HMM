@@ -15,22 +15,28 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
+phases (water air);
+
+water
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 1e-06;
+    k               k         [1 1 -3 -1 0 0 0] 0; //0.613;
     rho             rho [ 1 -3 0 0 0 0 0 ] 1000;
     rho0            rho0 [ 1 -3 0 0 0 0 0 ] 1000;
-    psi             psi [ 0 -2 2 0 0 ] 1e-05;
+    R               R         [0 2 -2 -1 0] 3000;
+    Cv              Cv        [0 2 -2 -1 0] 4179;
 }
 
-phase2
+air
 {
     transportModel  Newtonian;
     nu              nu [ 0 2 -1 0 0 0 0 ] 1.589e-05;
+    k               k         [1 1 -3 -1 0 0 0] 0; //2.63e-2;
     rho             rho [ 1 -3 0 0 0 0 0 ] 1;
     rho0            rho0 [ 1 -3 0 0 0 0 0 ] 0;
-    psi             psi [ 0 -2 2 0 0 ] 1e-05;
+    R               R         [0 2 -2 -1 0] 287;
+    Cv              Cv        [0 2 -2 -1 0] 721;
 }
 
 pMin            pMin [ 1 -1 -2 0 0 0 0 ] 10000;
