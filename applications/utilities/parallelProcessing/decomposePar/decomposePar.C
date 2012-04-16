@@ -322,6 +322,23 @@ int main(int argc, char *argv[])
     }
 
 
+
+    // Caches
+    // ~~~~~~
+    // Cached processor meshes and maps. These are only preserved if running
+    // with multiple times.
+    PtrList<Time> processorDbList(mesh.nProcs());
+    PtrList<fvMesh> procMeshList(mesh.nProcs());
+    PtrList<labelIOList> faceProcAddressingList(mesh.nProcs());
+    PtrList<labelIOList> cellProcAddressingList(mesh.nProcs());
+    PtrList<labelIOList> boundaryProcAddressingList(mesh.nProcs());
+    PtrList<fvFieldDecomposer> fieldDecomposerList(mesh.nProcs());
+    PtrList<dimFieldDecomposer> dimFieldDecomposerList(mesh.nProcs());
+    PtrList<labelIOList> pointProcAddressingList(mesh.nProcs());
+    PtrList<pointFieldDecomposer> pointFieldDecomposerList(mesh.nProcs());
+
+
+
     // Loop over all times
     forAll(times, timeI)
     {
@@ -674,13 +691,24 @@ int main(int argc, char *argv[])
         {
             Info<< "Processor " << procI << ": field transfer" << endl;
 
+
             // open the database
-            Time processorDb
-            (
-                Time::controlDictName,
-                args.rootPath(),
-                args.caseName()/fileName(word("processor") + name(procI))
-            );
+            if (!processorDbList.set(procI))
+            {
+                processorDbList.set
+                (
+                    procI,
+                    new Time
+                    (
+                        Time::controlDictName,
+                        args.rootPath(),
+                        args.caseName()
+                       /fileName(word("processor") + name(procI))
+                    )
+                );
+            }
+            Time& processorDb = processorDbList[procI];
+
 
             processorDb.setTime(runTime);
 
@@ -695,65 +723,113 @@ int main(int argc, char *argv[])
             }
 
             // read the mesh
-            fvMesh procMesh
-            (
-                IOobject
+            if (!procMeshList.set(procI))
+            {
+                procMeshList.set
                 (
-                    regionName,
-                    processorDb.timeName(),
-                    processorDb
-                )
-            );
+                    procI,
+                    new fvMesh
+                    (
+                        IOobject
+                        (
+                            regionName,
+                            processorDb.timeName(),
+                            processorDb
+                        )
+                    )
+                );
+            }
+            const fvMesh& procMesh = procMeshList[procI];
 
-            labelIOList faceProcAddressing
-            (
-                IOobject
-                (
-                    "faceProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
 
-            labelIOList cellProcAddressing
-            (
-                IOobject
+            if (!faceProcAddressingList.set(procI))
+            {
+                faceProcAddressingList.set
                 (
-                    "cellProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
+                    procI,
+                    new labelIOList
+                    (
+                        IOobject
+                        (
+                            "faceProcAddressing",
+                            procMesh.facesInstance(),
+                            procMesh.meshSubDir,
+                            procMesh,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        )
+                    )
+                );
+            }
+            const labelIOList& faceProcAddressing =
+                faceProcAddressingList[procI];
 
-            labelIOList boundaryProcAddressing
-            (
-                IOobject
+
+            if (!cellProcAddressingList.set(procI))
+            {
+                cellProcAddressingList.set
                 (
-                    "boundaryProcAddressing",
-                    procMesh.facesInstance(),
-                    procMesh.meshSubDir,
-                    procMesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
-            );
+                    procI,
+                    new labelIOList
+                    (
+                        IOobject
+                        (
+                            "cellProcAddressing",
+                            procMesh.facesInstance(),
+                            procMesh.meshSubDir,
+                            procMesh,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        )
+                    )
+                );
+            }
+            const labelIOList& cellProcAddressing =
+                cellProcAddressingList[procI];
+
+
+            if (!boundaryProcAddressingList.set(procI))
+            {
+                boundaryProcAddressingList.set
+                (
+                    procI,
+                    new labelIOList
+                    (
+                        IOobject
+                        (
+                            "boundaryProcAddressing",
+                            procMesh.facesInstance(),
+                            procMesh.meshSubDir,
+                            procMesh,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        )
+                    )
+                );
+            }
+            const labelIOList& boundaryProcAddressing =
+                boundaryProcAddressingList[procI];
+
 
             // FV fields
             {
-                fvFieldDecomposer fieldDecomposer
-                (
-                    mesh,
-                    procMesh,
-                    faceProcAddressing,
-                    cellProcAddressing,
-                    boundaryProcAddressing
-                );
+                if (!fieldDecomposerList.set(procI))
+                {
+                    fieldDecomposerList.set
+                    (
+                        procI,
+                        new fvFieldDecomposer
+                        (
+                            mesh,
+                            procMesh,
+                            faceProcAddressing,
+                            cellProcAddressing,
+                            boundaryProcAddressing
+                        )
+                    );
+                }
+                const fvFieldDecomposer& fieldDecomposer =
+                    fieldDecomposerList[procI];
 
                 fieldDecomposer.decomposeFields(volScalarFields);
                 fieldDecomposer.decomposeFields(volVectorFields);
@@ -766,23 +842,43 @@ int main(int argc, char *argv[])
                 fieldDecomposer.decomposeFields(surfaceSphericalTensorFields);
                 fieldDecomposer.decomposeFields(surfaceSymmTensorFields);
                 fieldDecomposer.decomposeFields(surfaceTensorFields);
+
+                if (times.size() == 1)
+                {
+                    // Clear cached decomposer
+                    fieldDecomposerList.set(procI, NULL);
+                }
             }
 
             // Dimensioned fields
             {
-                dimFieldDecomposer fieldDecomposer
-                (
-                    mesh,
-                    procMesh,
-                    faceProcAddressing,
-                    cellProcAddressing
-                );
+                if (!dimFieldDecomposerList.set(procI))
+                {
+                    dimFieldDecomposerList.set
+                    (
+                        procI,
+                        new dimFieldDecomposer
+                        (
+                            mesh,
+                            procMesh,
+                            faceProcAddressing,
+                            cellProcAddressing
+                        )
+                    );
+                }
+                const dimFieldDecomposer& dimDecomposer =
+                    dimFieldDecomposerList[procI];
 
-                fieldDecomposer.decomposeFields(dimScalarFields);
-                fieldDecomposer.decomposeFields(dimVectorFields);
-                fieldDecomposer.decomposeFields(dimSphericalTensorFields);
-                fieldDecomposer.decomposeFields(dimSymmTensorFields);
-                fieldDecomposer.decomposeFields(dimTensorFields);
+                dimDecomposer.decomposeFields(dimScalarFields);
+                dimDecomposer.decomposeFields(dimVectorFields);
+                dimDecomposer.decomposeFields(dimSphericalTensorFields);
+                dimDecomposer.decomposeFields(dimSymmTensorFields);
+                dimDecomposer.decomposeFields(dimTensorFields);
+
+                if (times.size() == 1)
+                {
+                    dimFieldDecomposerList.set(procI, NULL);
+                }
             }
 
 
@@ -796,34 +892,59 @@ int main(int argc, char *argv[])
              || pointTensorFields.size()
             )
             {
-                labelIOList pointProcAddressing
-                (
-                    IOobject
+                if (!pointProcAddressingList.set(procI))
+                {
+                    pointProcAddressingList.set
                     (
-                        "pointProcAddressing",
-                        procMesh.facesInstance(),
-                        procMesh.meshSubDir,
-                        procMesh,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                );
+                        procI,
+                        new labelIOList
+                        (
+                            IOobject
+                            (
+                                "pointProcAddressing",
+                                procMesh.facesInstance(),
+                                procMesh.meshSubDir,
+                                procMesh,
+                                IOobject::MUST_READ,
+                                IOobject::NO_WRITE
+                            )
+                        )
+                    );
+                }
+                const labelIOList& pointProcAddressing =
+                    pointProcAddressingList[procI];
 
-                pointMesh procPMesh(procMesh);
+                const pointMesh& procPMesh = pointMesh::New(procMesh);
 
-                pointFieldDecomposer fieldDecomposer
-                (
-                    pMesh,
-                    procPMesh,
-                    pointProcAddressing,
-                    boundaryProcAddressing
-                );
+                if (!pointFieldDecomposerList.set(procI))
+                {
+                    pointFieldDecomposerList.set
+                    (
+                        procI,
+                        new pointFieldDecomposer
+                        (
+                            pMesh,
+                            procPMesh,
+                            pointProcAddressing,
+                            boundaryProcAddressing
+                        )
+                    );
+                }
+                const pointFieldDecomposer& pointDecomposer =
+                    pointFieldDecomposerList[procI];
 
-                fieldDecomposer.decomposeFields(pointScalarFields);
-                fieldDecomposer.decomposeFields(pointVectorFields);
-                fieldDecomposer.decomposeFields(pointSphericalTensorFields);
-                fieldDecomposer.decomposeFields(pointSymmTensorFields);
-                fieldDecomposer.decomposeFields(pointTensorFields);
+                pointDecomposer.decomposeFields(pointScalarFields);
+                pointDecomposer.decomposeFields(pointVectorFields);
+                pointDecomposer.decomposeFields(pointSphericalTensorFields);
+                pointDecomposer.decomposeFields(pointSymmTensorFields);
+                pointDecomposer.decomposeFields(pointTensorFields);
+
+
+                if (times.size() == 1)
+                {
+                    pointProcAddressingList.set(procI, NULL);
+                    pointFieldDecomposerList.set(procI, NULL);
+                }
             }
 
 
@@ -937,6 +1058,20 @@ int main(int argc, char *argv[])
                     );
                     chDir(currentDir);
                 }
+            }
+
+
+
+            // We have cached all the constant mesh data for the current
+            // processor. This is only important if running with multiple
+            // times, otherwise it is just extra storage.
+            if (times.size() == 1)
+            {
+                boundaryProcAddressingList.set(procI, NULL);
+                cellProcAddressingList.set(procI, NULL);
+                faceProcAddressingList.set(procI, NULL);
+                procMeshList.set(procI, NULL);
+                processorDbList.set(procI, NULL);
             }
         }
     }
