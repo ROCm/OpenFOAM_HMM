@@ -431,7 +431,7 @@ void Foam::mappedPatchBase::calcMapping() const
     tmp<pointField> patchPoints(facePoints(patch_));
 
     // Get offsetted points
-    const pointField offsettedPoints = samplePoints(patchPoints());
+    const pointField offsettedPoints(samplePoints(patchPoints()));
 
 
     // Do a sanity check

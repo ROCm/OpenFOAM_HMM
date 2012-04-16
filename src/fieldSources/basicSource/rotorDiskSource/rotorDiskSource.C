@@ -628,7 +628,7 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 
     const volVectorField& U = eqn.psi();
 
-    const vectorField Uin = inflowVelocity(U);
+    const vectorField Uin(inflowVelocity(U));
 
     trim_->correct(Uin, force);
 
