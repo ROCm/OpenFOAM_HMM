@@ -180,7 +180,7 @@ bool Foam::mergePoints
     const bool verbose,
     labelList& pointMap,
     List<Type>& newPoints,
-    const Type& origin = Type::zero
+    const Type& origin
 )
 {
     label nUnique = mergePoints
