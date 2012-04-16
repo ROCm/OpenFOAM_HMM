@@ -36,6 +36,12 @@ Foam::Table<Type>::Table(const word& entryName, const dictionary& dict)
     Istream& is(dict.lookup(entryName));
     word entryType(is);
 
+    token firstToken(is);
+    is.putBack(firstToken);
+    if (firstToken == token::BEGIN_SQR)
+    {
+        is >> this->dimensions_;
+    }
     is  >> this->table_;
 
     TableBase<Type>::check();

@@ -23,53 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TableFile.H"
+#include "trimModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
-:
-    DataEntry<Type>(entryName),
-    TableBase<Type>(entryName, dict.subDict(type() + "Coeffs")),
-    fName_("none")
+Foam::autoPtr<Foam::trimModel> Foam::trimModel::New
+(
+    const rotorDiskSource& rotor,
+    const dictionary& dict
+)
 {
-    const dictionary coeffs(dict.subDict(type() + "Coeffs"));
-    coeffs.lookup("fileName") >> fName_;
+    const word modelType(dict.lookup(typeName));
 
-    if (coeffs.found("dimensions"))
+    Info<< "    Selecting " << typeName << " " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        coeffs.lookup("dimensions") >> this->dimensions_;
+        FatalErrorIn
+        (
+            "trimModel::New(const rotorDiskSource&, const dictionary&)"
+        )   << "Unknown " << typeName << " type "
+            << modelType << nl << nl
+            << "Valid " << typeName << " types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
-    fileName expandedFile(fName_);
-    IFstream is(expandedFile.expand());
-
-    is  >> this->table_;
-
-    TableBase<Type>::check();
+    return autoPtr<trimModel>(cstrIter()(rotor, dict));
 }
-
-
-template<class Type>
-Foam::TableFile<Type>::TableFile(const TableFile<Type>& tbl)
-:
-    DataEntry<Type>(tbl),
-    TableBase<Type>(tbl),
-    fName_(tbl.fName_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::TableFile<Type>::~TableFile()
-{}
-
-
-// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
-
-#include "TableFileIO.C"
 
 
 // ************************************************************************* //

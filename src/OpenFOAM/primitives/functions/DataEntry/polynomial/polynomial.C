@@ -42,10 +42,18 @@ Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
 :
     DataEntry<scalar>(entryName),
     coeffs_(),
-    canIntegrate_(true)
+    canIntegrate_(true),
+    dimensions_(dimless)
 {
     Istream& is(dict.lookup(entryName));
     word entryType(is);
+
+    token firstToken(is);
+    is.putBack(firstToken);
+    if (firstToken == token::BEGIN_SQR)
+    {
+        is >> this->dimensions_;
+    }
 
     is  >> coeffs_;
 
@@ -85,7 +93,8 @@ Foam::polynomial::polynomial
 :
     DataEntry<scalar>(entryName),
     coeffs_(coeffs),
-    canIntegrate_(true)
+    canIntegrate_(true),
+    dimensions_(dimless)
 {
     if (!coeffs_.size())
     {
@@ -125,7 +134,8 @@ Foam::polynomial::polynomial(const polynomial& poly)
 :
     DataEntry<scalar>(poly),
     coeffs_(poly.coeffs_),
-    canIntegrate_(poly.canIntegrate_)
+    canIntegrate_(poly.canIntegrate_),
+    dimensions_(poly.dimensions_)
 {}
 
 
@@ -179,5 +189,27 @@ Foam::scalar Foam::polynomial::integrate(const scalar x1, const scalar x2) const
     return intx;
 }
 
+
+Foam::dimensioned<Foam::scalar> Foam::polynomial::dimValue
+(
+    const scalar x
+) const
+{
+    return dimensioned<scalar>("dimensionedValue", dimensions_, value(x));
+}
+
+
+Foam::dimensioned<Foam::scalar> Foam::polynomial::dimIntegrate
+(
+    const scalar x1, const scalar x2
+) const
+{
+    return dimensioned<scalar>
+    (
+        "dimensionedValue",
+        dimensions_,
+        integrate(x1, x2)
+    );
+}
 
 // ************************************************************************* //

@@ -39,7 +39,8 @@ Foam::TableBase<Type>::TableBase(const word& name, const dictionary& dict)
             dict.lookupOrDefault<word>("outOfBounds", "clamp")
         )
     ),
-    table_()
+    table_(),
+    dimensions_(dimless)
 {}
 
 
@@ -48,7 +49,8 @@ Foam::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 :
     name_(tbl.name_),
     boundsHandling_(tbl.boundsHandling_),
-    table_(tbl.table_)
+    table_(tbl.table_),
+    dimensions_(tbl.dimensions_)
 {}
 
 
@@ -330,6 +332,11 @@ Type Foam::TableBase<Type>::value(const scalar x) const
         i++;
     }
 
+Info <<
+     (xDash - table_[i].first())/(table_[i+1].first() - table_[i].first())
+      * (table_[i+1].second() - table_[i].second())
+      + table_[i].second() << endl;
+
     // Linear interpolation to find value
     return Type
     (
@@ -402,6 +409,28 @@ Type Foam::TableBase<Type>::integrate(const scalar x1, const scalar x2) const
     return sum;
 }
 
+
+template<class Type>
+Foam::dimensioned<Type> Foam::TableBase<Type>::
+dimValue(const scalar x) const
+{
+    return dimensioned<Type>("dimensionedValue", dimensions_, this->value(x));
+}
+
+
+template<class Type>
+Foam::dimensioned<Type> Foam::TableBase<Type>::dimIntegrate
+(
+    const scalar x1, const scalar x2
+) const
+{
+    return dimensioned<Type>
+    (
+        "dimensionedValue",
+        dimensions_,
+        this->integrate(x2, x1)
+    );
+}
 
 // * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
 

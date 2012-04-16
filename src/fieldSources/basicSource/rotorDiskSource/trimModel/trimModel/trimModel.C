@@ -23,53 +23,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TableFile.H"
+#include "trimModel.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
-:
-    DataEntry<Type>(entryName),
-    TableBase<Type>(entryName, dict.subDict(type() + "Coeffs")),
-    fName_("none")
+namespace Foam
 {
-    const dictionary coeffs(dict.subDict(type() + "Coeffs"));
-    coeffs.lookup("fileName") >> fName_;
-
-    if (coeffs.found("dimensions"))
-    {
-        coeffs.lookup("dimensions") >> this->dimensions_;
-    }
-
-    fileName expandedFile(fName_);
-    IFstream is(expandedFile.expand());
-
-    is  >> this->table_;
-
-    TableBase<Type>::check();
+    defineTypeNameAndDebug(trimModel, 0);
+    defineRunTimeSelectionTable(trimModel, dictionary);
 }
 
 
-template<class Type>
-Foam::TableFile<Type>::TableFile(const TableFile<Type>& tbl)
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::trimModel::trimModel
+(
+    const rotorDiskSource& rotor,
+    const dictionary& dict,
+    const word& name
+)
 :
-    DataEntry<Type>(tbl),
-    TableBase<Type>(tbl),
-    fName_(tbl.fName_)
+    rotor_(rotor),
+    name_(name),
+    coeffs_(dictionary::null)
+{
+    read(dict);
+}
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+Foam::trimModel::~trimModel()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::TableFile<Type>::~TableFile()
-{}
-
-
-// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
-
-#include "TableFileIO.C"
+void Foam::trimModel::read(const dictionary& dict)
+{
+    coeffs_ = dict.subDict(name_ + "Coeffs");
+}
 
 
 // ************************************************************************* //

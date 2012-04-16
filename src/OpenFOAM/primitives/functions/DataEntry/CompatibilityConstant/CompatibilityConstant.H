@@ -42,6 +42,7 @@ SourceFiles
 #define CompatibilityConstant_H
 
 #include "DataEntry.H"
+#include "dimensionSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,6 +68,9 @@ class CompatibilityConstant
 
         //- Constant value
         Type value_;
+
+        //- The dimension set
+        dimensionSet dimensions_;
 
 
     // Private Member Functions
@@ -110,6 +114,16 @@ public:
 
         //- Integrate between two values
         Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Return dimensioned constant value
+        dimensioned<Type> dimValue(const scalar) const;
+
+        //- Integrate between two values and return dimensioned type
+        dimensioned<Type> dimIntegrate
+        (
+            const scalar x1,
+            const scalar x2
+        ) const;
 
 
     // I/O

@@ -23,53 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TableFile.H"
+#include "rotorDiskSource.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
-:
-    DataEntry<Type>(entryName),
-    TableBase<Type>(entryName, dict.subDict(type() + "Coeffs")),
-    fName_("none")
+const Foam::List<Foam::point>& Foam::rotorDiskSource::x() const
 {
-    const dictionary coeffs(dict.subDict(type() + "Coeffs"));
-    coeffs.lookup("fileName") >> fName_;
-
-    if (coeffs.found("dimensions"))
-    {
-        coeffs.lookup("dimensions") >> this->dimensions_;
-    }
-
-    fileName expandedFile(fName_);
-    IFstream is(expandedFile.expand());
-
-    is  >> this->table_;
-
-    TableBase<Type>::check();
+    return x_;
 }
 
 
-template<class Type>
-Foam::TableFile<Type>::TableFile(const TableFile<Type>& tbl)
-:
-    DataEntry<Type>(tbl),
-    TableBase<Type>(tbl),
-    fName_(tbl.fName_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::TableFile<Type>::~TableFile()
-{}
-
-
-// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
-
-#include "TableFileIO.C"
+const Foam::cylindricalCS& Foam::rotorDiskSource::coordSys() const
+{
+    return coordSys_;
+}
 
 
 // ************************************************************************* //
+
