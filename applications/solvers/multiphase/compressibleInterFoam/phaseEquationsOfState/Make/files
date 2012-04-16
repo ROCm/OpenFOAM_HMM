@@ -1,0 +1,7 @@
+phaseEquationOfState/phaseEquationOfState.C
+phaseEquationOfState/newPhaseEquationOfState.C
+constant/constant.C
+linear/linear.C
+perfectFluid/perfectFluid.C
+
+LIB = $(FOAM_LIBBIN)/libphaseEquationsOfState

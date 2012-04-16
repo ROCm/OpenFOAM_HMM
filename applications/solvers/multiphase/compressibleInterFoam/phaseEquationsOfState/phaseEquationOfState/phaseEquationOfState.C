@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,64 +23,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Newtonian.H"
-#include "addToRunTimeSelectionTable.H"
-#include "surfaceFields.H"
+#include "phaseEquationOfState.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace viscosityModels
-{
-    defineTypeNameAndDebug(Newtonian, 0);
-    addToRunTimeSelectionTable(viscosityModel, Newtonian, dictionary);
-}
+    defineTypeNameAndDebug(phaseEquationOfState, 0);
+    defineRunTimeSelectionTable(phaseEquationOfState, dictionary);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModels::Newtonian::Newtonian
+Foam::phaseEquationOfState::phaseEquationOfState
 (
-    const word& name,
-    const dictionary& viscosityProperties,
-    const volVectorField& U,
-    const surfaceScalarField& phi
+    const dictionary& dict
 )
 :
-    viscosityModel(name, viscosityProperties, U, phi),
-    nu0_("nu", dimensionSet(0, 2, -1, 0, 0), viscosityProperties_.lookup("nu")),
-    nu_
-    (
-        IOobject
-        (
-            name,
-            U_.time().timeName(),
-            U_.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        U_.mesh(),
-        nu0_
-    )
+    dict_(dict)
 {}
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-bool Foam::viscosityModels::Newtonian::read
-(
-    const dictionary& viscosityProperties
-)
-{
-    viscosityModel::read(viscosityProperties);
-
-    viscosityProperties_.lookup("nu") >> nu0_;
-    nu_ = nu0_;
-
-    return true;
-}
+Foam::phaseEquationOfState::~phaseEquationOfState()
+{}
 
 
 // ************************************************************************* //
