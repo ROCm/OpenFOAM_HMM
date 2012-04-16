@@ -153,14 +153,14 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
         }
         case opAreaAverage:
         {
-            const scalarField magSf = mag(Sf);
+            const scalarField magSf(mag(Sf));
 
             result = sum(values*magSf)/sum(magSf);
             break;
         }
         case opAreaIntegrate:
         {
-            const scalarField magSf = mag(Sf);
+            const scalarField magSf(mag(Sf));
 
             result = sum(values*magSf);
             break;
@@ -177,7 +177,7 @@ Type Foam::fieldValues::faceSource::processSameTypeValues
         }
         case opCoV:
         {
-            const scalarField magSf = mag(Sf);
+            const scalarField magSf(mag(Sf));
 
             Type meanValue = sum(values*magSf)/sum(magSf);
 
