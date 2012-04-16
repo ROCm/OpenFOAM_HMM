@@ -83,8 +83,8 @@ Foam::twoPhaseMixture::twoPhaseMixture
         )
     ),
 
-    rho1_(nuModel1_->viscosityProperties().lookup("rho")),
-    rho2_(nuModel2_->viscosityProperties().lookup("rho")),
+    rho1_("rho", dimDensity, nuModel1_->viscosityProperties().lookup("rho")),
+    rho2_("rho", dimDensity, nuModel2_->viscosityProperties().lookup("rho")),
 
     U_(U),
     phi_(phi),
