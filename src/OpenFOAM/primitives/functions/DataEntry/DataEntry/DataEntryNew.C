@@ -41,7 +41,15 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
     word DataEntryType;
     if (firstToken.isWord())
     {
-        DataEntryType = firstToken.wordToken();
+        // Dimensioned type default compatibility
+        if (firstToken.wordToken() == entryName)
+        {
+            DataEntryType = "CompatibilityConstant";
+        }
+        else
+        {
+            DataEntryType = firstToken.wordToken();
+        }
     }
     else
     {

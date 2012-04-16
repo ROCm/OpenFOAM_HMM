@@ -41,6 +41,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "Field.H"
+#include "dimensionedType.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,23 +142,49 @@ public:
             virtual void convertTimeBase(const Time& t);
 
 
-        // Evaluation
+public:
 
-            //- Return value as a function of (scalar) independent variable
-            virtual Type value(const scalar x) const;
 
-            //- Return value as a function of (scalar) independent variable
-            virtual tmp<Field<Type> > value(const scalarField& x) const;
+    // Evaluation
 
-            //- Integrate between two (scalar) values
-            virtual Type integrate(const scalar x1, const scalar x2) const;
+        //- Return value as a function of (scalar) independent variable
+        virtual Type value(const scalar x) const;
 
-            //- Integrate between two (scalar) values
-            virtual tmp<Field<Type> > integrate
-            (
-                const scalarField& x1,
-                const scalarField& x2
-            ) const;
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<Type> > value(const scalarField& x) const;
+
+        //- Integrate between two (scalar) values
+        virtual Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Integrate between two (scalar) values
+        virtual tmp<Field<Type> > integrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
+
+        //- Return dimensioned type
+        virtual dimensioned<Type> dimValue(const scalar x) const;
+
+        //- Return dimensioned type as a function of (scalar)
+        virtual tmp<Field<dimensioned<Type> > > dimValue
+        (
+            const scalarField& x
+        ) const;
+
+        //- Integrate between two scalars and returns a dimensioned type
+        virtual dimensioned<Type> dimIntegrate
+        (
+            const scalar x1,
+            const scalar x2
+        ) const;
+
+        //- Integrate between two scalars and returns list of dimensioned type
+        virtual tmp<Field<dimensioned<Type> > > dimIntegrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
 
 
     // I/O
