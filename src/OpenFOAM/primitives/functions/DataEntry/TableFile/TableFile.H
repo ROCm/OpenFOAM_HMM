@@ -31,9 +31,10 @@ Description
         <entryName>   tableFile;
         tableFileCoeffs
         {
-            dimensions      [0 0 1 0 0]; // optional dimensions
-            fileName        dataFile;    // name of data file
-            outOfBounds     clamp;       // optional out-of-bounds handling
+            dimensions          [0 0 1 0 0]; // optional dimensions
+            fileName            dataFile;    // name of data file
+            outOfBounds         clamp;       // optional out-of-bounds handling
+            interpolationScheme linear;      // optional interpolation method
         }
     \endverbatim
 
