@@ -50,6 +50,11 @@ Description
 #include "PackedBoolList.H"
 #include "SortableList.H"
 #include "unitConversion.H"
+#include "globalMeshData.H"
+#include "globalIndex.H"
+
+#include "OFstream.H"
+#include "meshTools.H"
 
 using namespace Foam;
 
@@ -174,37 +179,74 @@ label mergeEdges
 
 
 // Return master point edge needs to be collapsed to (or -1)
-label edgeMaster(const PackedBoolList& boundaryPoint, const edge& e)
+label edgeMaster
+(
+    const labelList& boundaryPoint,
+    const bool flipEdge,
+    const edge& e
+)
 {
     label masterPoint = -1;
 
-    // Collapse edge to boundary point.
-    if (boundaryPoint.get(e[0]))
+    label e0 = e[0];
+    label e1 = e[1];
+
+    if (flipEdge)
     {
-        if (boundaryPoint.get(e[1]))
+        e0 = e[1];
+        e1 = e[0];
+    }
+
+    // Check if one of the points is on a processor
+    if
+    (
+        boundaryPoint[e0] > 0
+     && boundaryPoint[e1] > 0
+    )
+    {
+        if (boundaryPoint[e0] != boundaryPoint[e1])
+        {
+            return -1;
+        }
+    }
+
+    if (boundaryPoint[e0] > 0)
+    {
+        return e0;
+    }
+    else if (boundaryPoint[e1] > 0)
+    {
+        return e1;
+    }
+
+    // Collapse edge to boundary point.
+    if (boundaryPoint[e0] == 0)
+    {
+        if (boundaryPoint[e1] == 0)
         {
             // Both points on boundary. Choose one to collapse to.
             // Note: should look at feature edges/points!
-            masterPoint = e[0];
+            masterPoint = e0;
         }
         else
         {
-            masterPoint = e[0];
+            masterPoint = e0;
         }
     }
     else
     {
-        if (boundaryPoint.get(e[1]))
+        if (boundaryPoint[e1] == 0)
         {
-            masterPoint = e[1];
+            masterPoint = e1;
         }
         else
         {
             // None on boundary. Choose arbitrary.
             // Note: should look at geometry?
-            masterPoint = e[0];
+            masterPoint = e0;
         }
     }
+
     return masterPoint;
 }
 
@@ -212,7 +254,7 @@ label edgeMaster(const PackedBoolList& boundaryPoint, const edge& e)
 label collapseSmallEdges
 (
     const polyMesh& mesh,
-    const PackedBoolList& boundaryPoint,
+    const labelList& boundaryPoint,
     const scalar minLen,
     edgeCollapser& collapser
 )
@@ -223,7 +265,17 @@ label collapseSmallEdges
     // Collapse all edges that are too small. Choose intelligently which
     // point to collapse edge to.
 
-    label nCollapsed = 0;
+    const globalMeshData& globalData = mesh.globalData();
+    const mapDistribute& map = globalData.globalEdgeSlavesMap();
+    const labelList& coupledMeshEdges = globalData.coupledPatchMeshEdges();
+    const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
+    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
+
+    // Store collapse direction in collapseEdge
+    //   -1 -> Do not collapse
+    //    0 -> Collapse to start point
+    //    1 -> Collapse to end point
+    labelList collapseEdge(edges.size(), -1);
 
     forAll(edges, edgeI)
     {
@@ -231,15 +283,121 @@ label collapseSmallEdges
 
         if (e.mag(points) < minLen)
         {
-            label master = edgeMaster(boundaryPoint, e);
+            collapseEdge[edgeI] = 0;
+        }
+    }
 
-            if (master != -1) // && collapser.unaffectedEdge(edgeI))
+    // Check whether edge point order is reversed from mesh to coupledPatch
+    PackedBoolList meshToPatchSameOrientation(coupledMeshEdges.size(), true);
+
+    forAll(coupledMeshEdges, eI)
+    {
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        if (collapseEdge[meshEdgeIndex] != -1)
+        {
+            const edge& meshEdge = edges[meshEdgeIndex];
+            const edge& coupledPatchEdge = coupledPatch.edges()[eI];
+
+            if
+            (
+                meshEdge[0] == coupledPatch.meshPoints()[coupledPatchEdge[1]]
+             && meshEdge[1] == coupledPatch.meshPoints()[coupledPatchEdge[0]]
+            )
+            {
+                meshToPatchSameOrientation[eI] = false;
+            }
+        }
+    }
+
+
+    labelList cppEdgeData(coupledMeshEdges.size(), -1);
+
+    forAll(coupledMeshEdges, eI)
+    {
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        if (collapseEdge[meshEdgeIndex] != -1)
+        {
+            if (meshToPatchSameOrientation[eI] == cppOrientation[eI])
+            {
+                cppEdgeData[eI] = 0;
+            }
+            else
+            {
+                cppEdgeData[eI] = 1;
+            }
+        }
+    }
+
+
+    // Synchronise cppEdgeData
+    // Use minEqOp reduction, so that edge will only be collapsed on processor
+    // boundary if both processors agree to collapse it
+    globalData.syncData
+    (
+        cppEdgeData,
+        globalData.globalEdgeSlaves(),
+        globalData.globalEdgeTransformedSlaves(),
+        map,
+        minEqOp<label>()
+    );
+
+
+    forAll(coupledMeshEdges, eI)
+    {
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        if (collapseEdge[meshEdgeIndex] != -1)
+        {
+            if (meshToPatchSameOrientation[eI] == cppOrientation[eI])
+            {
+                collapseEdge[meshEdgeIndex] = 0;
+            }
+            else
+            {
+                collapseEdge[meshEdgeIndex] = 1;
+            }
+        }
+    }
+
+
+    OFstream str1("collapsedPoints_" + name(Pstream::myProcNo()) + ".obj");
+
+    label nCollapsed = 0;
+
+    forAll(edges, edgeI)
+    {
+        if (collapseEdge[edgeI] != -1)
+        {
+            const edge& e = edges[edgeI];
+
+            const label master =
+                edgeMaster
+                (
+                    boundaryPoint,
+                    collapseEdge[edgeI],
+                    e
+                );
+
+            if (e[0] == master)
+            {
+                meshTools::writeOBJ(str1, points[e[1]], points[e[0]]);
+            }
+            else if (e[1] == master)
+            {
+                meshTools::writeOBJ(str1, points[e[0]], points[e[1]]);
+            }
+
+            if (master != -1)
             {
                 collapser.collapseEdge(edgeI, master);
+
                 nCollapsed++;
             }
         }
     }
+
     return nCollapsed;
 }
 
@@ -248,86 +406,88 @@ label collapseSmallEdges
 // are very small. This one tries to collapse them if it can be done with
 // edge collapse. For faces where a face gets replace by two edges use
 // collapseFaces
-label collapseHighAspectFaces
-(
-    const polyMesh& mesh,
-    const PackedBoolList& boundaryPoint,
-    const scalar areaFac,
-    const scalar edgeRatio,
-    edgeCollapser& collapser
-)
-{
-    const pointField& points = mesh.points();
-    const edgeList& edges = mesh.edges();
-    const faceList& faces = mesh.faces();
-    const labelListList& faceEdges = mesh.faceEdges();
-
-    scalarField magArea(mag(mesh.faceAreas()));
-
-    label maxIndex = findMax(magArea);
-
-    scalar minArea = areaFac * magArea[maxIndex];
-
-    Info<< "Max face area:" << magArea[maxIndex] << endl
-        << "Collapse area factor:" << areaFac << endl
-        << "Collapse area:" << minArea << endl;
-
-    label nCollapsed = 0;
-
-    forAll(faces, faceI)
-    {
-        if (magArea[faceI] < minArea)
-        {
-            const face& f = faces[faceI];
-
-            // Get the edges in face point order
-            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
-
-            SortableList<scalar> lengths(fEdges.size());
-            forAll(fEdges, i)
-            {
-                lengths[i] = edges[fEdges[i]].mag(points);
-            }
-            lengths.sort();
-
-
-            label edgeI = -1;
-
-            if (f.size() == 4)
-            {
-                // Compare second largest to smallest
-                if (lengths[2] > edgeRatio*lengths[0])
-                {
-                    // Collapse smallest only. Triangle should be cleared
-                    // next time around.
-                    edgeI = fEdges[lengths.indices()[0]];
-                }
-            }
-            else if (f.size() == 3)
-            {
-                // Compare second largest to smallest
-                if (lengths[1] > edgeRatio*lengths[0])
-                {
-                    edgeI = fEdges[lengths.indices()[0]];
-                }
-            }
-
-
-            if (edgeI != -1)
-            {
-                label master = edgeMaster(boundaryPoint, edges[edgeI]);
-
-                if (master != -1)// && collapser.unaffectedEdge(edgeI))
-                {
-                    collapser.collapseEdge(edgeI, master);
-                    nCollapsed++;
-                }
-            }
-        }
-    }
-
-    return nCollapsed;
-}
+//label collapseHighAspectFaces
+//(
+//    const polyMesh& mesh,
+//    const PackedBoolList& boundaryPoint,
+//    const Map<label>& processorPoints,
+//    const scalar areaFac,
+//    const scalar edgeRatio,
+//    edgeCollapser& collapser
+//)
+//{
+//    const pointField& points = mesh.points();
+//    const edgeList& edges = mesh.edges();
+//    const faceList& faces = mesh.faces();
+//    const labelListList& faceEdges = mesh.faceEdges();
+//
+//    scalarField magArea(mag(mesh.faceAreas()));
+//
+//    label maxIndex = findMax(magArea);
+//
+//    scalar minArea = areaFac * magArea[maxIndex];
+//
+//    Info<< "Max face area:" << magArea[maxIndex] << endl
+//        << "Collapse area factor:" << areaFac << endl
+//        << "Collapse area:" << minArea << endl;
+//
+//    label nCollapsed = 0;
+//
+//    forAll(faces, faceI)
+//    {
+//        if (magArea[faceI] < minArea)
+//        {
+//            const face& f = faces[faceI];
+//
+//            // Get the edges in face point order
+//            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
+//
+//            SortableList<scalar> lengths(fEdges.size());
+//            forAll(fEdges, i)
+//            {
+//                lengths[i] = edges[fEdges[i]].mag(points);
+//            }
+//            lengths.sort();
+//
+//
+//            label edgeI = -1;
+//
+//            if (f.size() == 4)
+//            {
+//                // Compare second largest to smallest
+//                if (lengths[2] > edgeRatio*lengths[0])
+//                {
+//                    // Collapse smallest only. Triangle should be cleared
+//                    // next time around.
+//                    edgeI = fEdges[lengths.indices()[0]];
+//                }
+//            }
+//            else if (f.size() == 3)
+//            {
+//                // Compare second largest to smallest
+//                if (lengths[1] > edgeRatio*lengths[0])
+//                {
+//                    edgeI = fEdges[lengths.indices()[0]];
+//                }
+//            }
+//
+//
+//            if (edgeI != -1)
+//            {
+//                label master =
+//                    edgeMaster(boundaryPoint, processorPoints, false, edges[edgeI]);
+//
+//                if (master != -1)// && collapser.unaffectedEdge(edgeI))
+//                {
+//                    collapser.collapseEdge(edgeI, master);
+//                    nCollapsed++;
+//                }
+//            }
+//        }
+//    }
+//
+//    return nCollapsed;
+//}
 
 
 void set(const labelList& elems, const bool val, boolList& status)
@@ -340,112 +500,113 @@ void set(const labelList& elems, const bool val, boolList& status)
 
 
 // Tries to simplify polygons to face of minSize (4=quad, 3=triangle)
-label simplifyFaces
-(
-    const polyMesh& mesh,
-    const PackedBoolList& boundaryPoint,
-    const label minSize,
-    const scalar lenGap,
-    edgeCollapser& collapser
-)
-{
-    const pointField& points = mesh.points();
-    const edgeList& edges = mesh.edges();
-    const faceList& faces = mesh.faces();
-    const cellList& cells = mesh.cells();
-    const labelListList& faceEdges = mesh.faceEdges();
-    const labelList& faceOwner = mesh.faceOwner();
-    const labelList& faceNeighbour = mesh.faceNeighbour();
-    const labelListList& pointCells = mesh.pointCells();
-    const labelListList& cellEdges = mesh.cellEdges();
-
-    label nCollapsed = 0;
-
-    boolList protectedEdge(mesh.nEdges(), false);
-
-    forAll(faces, faceI)
-    {
-        const face& f = faces[faceI];
-
-        if
-        (
-            f.size() > minSize
-         && cells[faceOwner[faceI]].size() >= 6
-         && (
-                mesh.isInternalFace(faceI)
-             && cells[faceNeighbour[faceI]].size() >= 6
-            )
-        )
-        {
-            // Get the edges in face point order
-            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
-
-            SortableList<scalar> lengths(fEdges.size());
-            forAll(fEdges, i)
-            {
-                lengths[i] = edges[fEdges[i]].mag(points);
-            }
-            lengths.sort();
-
-
-            // Now find a gap in length between consecutive elements greater
-            // than lenGap.
-
-            label gapPos = -1;
-
-            for (label i = f.size()-1-minSize; i >= 0; --i)
-            {
-                if (lengths[i+1] > lenGap*lengths[i])
-                {
-                    gapPos = i;
-
-                    break;
-                }
-            }
-
-            if (gapPos != -1)
-            {
-                //for (label i = gapPos; i >= 0; --i)
-                label i = 0;  // Hack: collapse smallest edge only.
-                {
-                    label edgeI = fEdges[lengths.indices()[i]];
-
-                    if (!protectedEdge[edgeI])
-                    {
-                        const edge& e = edges[edgeI];
-
-                        label master = edgeMaster(boundaryPoint, e);
-
-                        if (master != -1)
-                        {
-                            collapser.collapseEdge(edgeI, master);
-
-                            // Protect all other edges on all cells using edge
-                            // points.
-
-                            const labelList& pCells0 = pointCells[e[0]];
-
-                            forAll(pCells0, i)
-                            {
-                                set(cellEdges[pCells0[i]], true, protectedEdge);
-                            }
-                            const labelList& pCells1 = pointCells[e[1]];
-
-                            forAll(pCells1, i)
-                            {
-                                set(cellEdges[pCells1[i]], true, protectedEdge);
-                            }
-
-                            nCollapsed++;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return nCollapsed;
-}
+//label simplifyFaces
+//(
+//    const polyMesh& mesh,
+//    const PackedBoolList& boundaryPoint,
+//    const Map<label>& processorPoints,
+//    const label minSize,
+//    const scalar lenGap,
+//    edgeCollapser& collapser
+//)
+//{
+//    const pointField& points = mesh.points();
+//    const edgeList& edges = mesh.edges();
+//    const faceList& faces = mesh.faces();
+//    const cellList& cells = mesh.cells();
+//    const labelListList& faceEdges = mesh.faceEdges();
+//    const labelList& faceOwner = mesh.faceOwner();
+//    const labelList& faceNeighbour = mesh.faceNeighbour();
+//    const labelListList& pointCells = mesh.pointCells();
+//    const labelListList& cellEdges = mesh.cellEdges();
+//
+//    label nCollapsed = 0;
+//
+//    boolList protectedEdge(mesh.nEdges(), false);
+//
+//    forAll(faces, faceI)
+//    {
+//        const face& f = faces[faceI];
+//
+//        if
+//        (
+//            f.size() > minSize
+//         && cells[faceOwner[faceI]].size() >= 6
+//         && (
+//                mesh.isInternalFace(faceI)
+//             && cells[faceNeighbour[faceI]].size() >= 6
+//            )
+//        )
+//        {
+//            // Get the edges in face point order
+//            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
+//
+//            SortableList<scalar> lengths(fEdges.size());
+//            forAll(fEdges, i)
+//            {
+//                lengths[i] = edges[fEdges[i]].mag(points);
+//            }
+//            lengths.sort();
+//
+//
+//            // Now find a gap in length between consecutive elements greater
+//            // than lenGap.
+//
+//            label gapPos = -1;
+//
+//            for (label i = f.size()-1-minSize; i >= 0; --i)
+//            {
+//                if (lengths[i+1] > lenGap*lengths[i])
+//                {
+//                    gapPos = i;
+//
+//                    break;
+//                }
+//            }
+//
+//            if (gapPos != -1)
+//            {
+//                //for (label i = gapPos; i >= 0; --i)
+//                label i = 0;  // Hack: collapse smallest edge only.
+//                {
+//                    label edgeI = fEdges[lengths.indices()[i]];
+//
+//                    if (!protectedEdge[edgeI])
+//                    {
+//                        const edge& e = edges[edgeI];
+//
+//                        label master = edgeMaster(boundaryPoint, processorPoints, false, e);
+//
+//                        if (master != -1)
+//                        {
+//                            collapser.collapseEdge(edgeI, master);
+//
+//                            // Protect all other edges on all cells using edge
+//                            // points.
+//
+//                            const labelList& pCells0 = pointCells[e[0]];
+//
+//                            forAll(pCells0, i)
+//                            {
+//                                set(cellEdges[pCells0[i]], true, protectedEdge);
+//                            }
+//                            const labelList& pCells1 = pointCells[e[1]];
+//
+//                            forAll(pCells1, i)
+//                            {
+//                                set(cellEdges[pCells1[i]], true, protectedEdge);
+//                            }
+//
+//                            nCollapsed++;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    return nCollapsed;
+//}
 
 
 // Main program:
@@ -453,7 +614,7 @@ label simplifyFaces
 int main(int argc, char *argv[])
 {
 #   include "addOverwriteOption.H"
-    argList::noParallel();
+
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
 
@@ -475,16 +636,26 @@ int main(int argc, char *argv[])
         << " degrees" << nl
         << endl;
 
-
     bool meshChanged = false;
+
+    // Edge collapsing engine
+    edgeCollapser collapser(mesh);
+
+    label nIterations = 0;
 
     while (true)
     {
+        Info<< "Iteration " << nIterations << incrIndent << endl;
+
         const faceList& faces = mesh.faces();
 
-        // Get all points on the boundary
-        PackedBoolList boundaryPoint(mesh.nPoints());
+        // boundaryPoint:
+        // + -1 : point not on boundary
+        // +  0 : point on a real boundary
+        // + >0 : point on a processor patch with that ID
+        labelList boundaryPoint(mesh.nPoints(), -1);
 
+        // Get all points on a boundary
         label nIntFaces = mesh.nInternalFaces();
         for (label faceI = nIntFaces; faceI < mesh.nFaces(); faceI++)
         {
@@ -492,16 +663,37 @@ int main(int argc, char *argv[])
 
             forAll(f, fp)
             {
-                boundaryPoint.set(f[fp], 1);
+                boundaryPoint[f[fp]] = 0;
             }
         }
 
-        // Edge collapsing engine
-        edgeCollapser collapser(mesh);
+        // Get all processor boundary points and the processor patch label that
+        // they are on.
+        const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
+        forAll(bMesh, patchI)
+        {
+            const polyPatch& patch = bMesh[patchI];
+
+            if (isA<processorPolyPatch>(patch))
+            {
+                const processorPolyPatch& pPatch =
+                    refCast<const processorPolyPatch>(patch);
+
+                forAll(pPatch, fI)
+                {
+                    const face& f = pPatch[fI];
+
+                    forAll(f, fp)
+                    {
+                        boundaryPoint[f[fp]] = patchI;
+                    }
+                }
+            }
+        }
 
         // Collapse all edges that are too small.
-        label nCollapsed =
+        label nSmallCollapsed =
             collapseSmallEdges
             (
                 mesh,
@@ -509,33 +701,56 @@ int main(int argc, char *argv[])
                 minLen,
                 collapser
             );
-        Info<< "Collapsing " << nCollapsed << " small edges" << endl;
 
+        reduce(nSmallCollapsed, sumOp<label>());
+
+        Info<< indent << "Collapsing " << nSmallCollapsed
+            << " small edges" << endl;
+
+
+
+
+
+        label nMerged = 0;
 
         // Remove midpoints on straight edges.
-        if (nCollapsed == 0)
+        if (nSmallCollapsed == 0)
         {
-            nCollapsed = mergeEdges(mesh, maxCos, collapser);
-            Info<< "Collapsing " << nCollapsed << " in line edges" << endl;
+            //nMerged = mergeEdges(mesh, maxCos, collapser);
         }
 
+        reduce(nMerged, sumOp<label>());
+
+        Info<< indent << "Collapsing " << nMerged << " in line edges" << endl;
+
+
+
+
+
+
+        label nSliversCollapsed = 0;
 
         // Remove small sliver faces that can be collapsed to single edge
-        if (nCollapsed == 0)
+        if (nSmallCollapsed == 0 && nMerged == 0)
         {
-            nCollapsed =
-                collapseHighAspectFaces
-                (
-                    mesh,
-                    boundaryPoint,
-                    1e-9,       // factor of largest face area
-                    5,          // factor between smallest and largest edge on
-                                // face
-                    collapser
-                );
-            Info<< "Collapsing " << nCollapsed
-                << " small high aspect ratio faces" << endl;
+//            nSliversCollapsed =
+//                collapseHighAspectFaces
+//                (
+//                    mesh,
+//                    boundaryPoint,
+//                    processorPoints,
+//                    1E-9,       // factor of largest face area
+//                    5,          // factor between smallest and largest edge on
+//                                // face
+//                    collapser
+//                );
         }
+
+        reduce(nSliversCollapsed, sumOp<label>());
+
+        Info<< indent << "Collapsing " << nSliversCollapsed
+            << " small high aspect ratio faces" << endl;
+
 
         // Simplify faces to quads wherever possible
         //if (nCollapsed == 0)
@@ -553,7 +768,12 @@ int main(int argc, char *argv[])
         //}
 
 
-        if (nCollapsed == 0)
+        label totalCollapsed =
+            nSmallCollapsed
+          + nMerged
+          + nSliversCollapsed;
+
+        if (totalCollapsed == 0)
         {
             break;
         }
@@ -564,7 +784,7 @@ int main(int argc, char *argv[])
         collapser.setRefinement(meshMod);
 
         // Do all changes
-        Info<< "Morphing ..." << endl;
+        Info<< indent << "Applying changes to the mesh" << nl << endl;
 
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
 
@@ -576,6 +796,10 @@ int main(int argc, char *argv[])
         }
 
         meshChanged = true;
+
+        Info<< decrIndent;
+
+        nIterations++;
     }
 
     if (meshChanged)
@@ -590,7 +814,8 @@ int main(int argc, char *argv[])
             mesh.setInstance(oldInstance);
         }
 
-        Info<< "Writing collapsed mesh to time " << runTime.timeName() << endl;
+        Info<< nl << "Writing collapsed mesh to time "
+            << runTime.timeName() << nl << endl;
 
         mesh.write();
     }
