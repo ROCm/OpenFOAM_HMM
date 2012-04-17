@@ -79,7 +79,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::constant::rho
             (
                 "rho",
                 p.time().timeName(),
-                p.mesh()
+                p.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
             ),
             p.mesh(),
             rho_
@@ -102,7 +105,10 @@ Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::constant::psi
             (
                 "psi",
                 p.time().timeName(),
-                p.mesh()
+                p.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
             ),
             p.mesh(),
             dimensionedScalar("psi", dimDensity/dimPressure, 0)

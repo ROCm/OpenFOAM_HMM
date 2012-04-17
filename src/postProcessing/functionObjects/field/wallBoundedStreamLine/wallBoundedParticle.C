@@ -62,7 +62,7 @@ namespace Foam
 //
 //    pointHit ph(ln.nearestDist(position()));
 //
-//    if (ph.distance() > 1E-6)
+//    if (ph.distance() > 1e-6)
 //    {
 //        FatalErrorIn
 //        (

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linear.H"
+#include "adiabaticPerfectFluid.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -33,12 +33,12 @@ namespace Foam
 {
 namespace phaseEquationsOfState
 {
-    defineTypeNameAndDebug(linear, 0);
+    defineTypeNameAndDebug(adiabaticPerfectFluid, 0);
 
     addToRunTimeSelectionTable
     (
         phaseEquationOfState,
-        linear,
+        adiabaticPerfectFluid,
         dictionary
     );
 }
@@ -47,26 +47,29 @@ namespace phaseEquationsOfState
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::phaseEquationsOfState::linear::linear
+Foam::phaseEquationsOfState::adiabaticPerfectFluid::adiabaticPerfectFluid
 (
     const dictionary& dict
 )
 :
     phaseEquationOfState(dict),
+    p0_("p0", dimPressure, dict.lookup("p0")),
     rho0_("rho0", dimDensity, dict.lookup("rho0")),
-    psi_("psi", dimDensity/dimPressure, dict.lookup("psi"))
+    gamma_("gamma", dimless, dict.lookup("gamma")),
+    B_("B", dimPressure, dict.lookup("B"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::phaseEquationsOfState::linear::~linear()
+Foam::phaseEquationsOfState::adiabaticPerfectFluid::~adiabaticPerfectFluid()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::linear::rho
+Foam::tmp<Foam::volScalarField>
+Foam::phaseEquationsOfState::adiabaticPerfectFluid::rho
 (
     const volScalarField& p,
     const volScalarField& T
@@ -85,13 +88,14 @@ Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::linear::rho
                 IOobject::NO_WRITE,
                 false
             ),
-            rho0_ + psi_*p
+            rho0_*pow((p + B_)/(p0_ + B_), 1.0/gamma_)
         )
     );
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::linear::psi
+Foam::tmp<Foam::volScalarField>
+Foam::phaseEquationsOfState::adiabaticPerfectFluid::psi
 (
     const volScalarField& p,
     const volScalarField& T
@@ -110,8 +114,8 @@ Foam::tmp<Foam::volScalarField> Foam::phaseEquationsOfState::linear::psi
                 IOobject::NO_WRITE,
                 false
             ),
-            p.mesh(),
-            psi_
+            (rho0_/(gamma_*(p0_ + B_)))
+           *pow((p + B_)/(p0_ + B_), 1.0/gamma_ - 1.0)
         )
     );
 }

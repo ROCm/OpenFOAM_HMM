@@ -161,8 +161,8 @@
     volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("ghf", g & mesh.Cf());
 
-    volScalarField rho1(eos1->rho(p, T));
-    volScalarField rho2(eos2->rho(p, T));
+    volScalarField rho1("rho1", eos1->rho(p, T));
+    volScalarField rho2("rho2", eos2->rho(p, T));
 
     volScalarField rho
     (

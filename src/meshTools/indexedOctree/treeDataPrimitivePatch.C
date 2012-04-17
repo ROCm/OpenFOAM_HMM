@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ template
 >
 Foam::scalar
 Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-tolSqr = sqr(1E-6);
+tolSqr = sqr(1e-6);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

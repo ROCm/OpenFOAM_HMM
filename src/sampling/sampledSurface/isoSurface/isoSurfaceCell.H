@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -336,7 +336,7 @@ public:
             const scalarField& pointValues,
             const scalar iso,
             const bool regularise,
-            const scalar mergeTol = 1E-6    // fraction of bounding box
+            const scalar mergeTol = 1e-6    // fraction of bounding box
         );
 
 
