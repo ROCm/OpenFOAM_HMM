@@ -870,7 +870,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     {
         d[i] /= norm;
 
-        if (mag(d[i]) < 1E-6)
+        if (mag(d[i]) < 1e-6)
         {
             d[i] = 0.0;
         }

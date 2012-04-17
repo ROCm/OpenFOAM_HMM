@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
         const pointField& points = mesh().points();
 
         const boundBox& bb = mesh().bounds();
-        const scalar mergeDim = 1E-4 * bb.minDim();
+        const scalar mergeDim = 1e-4 * bb.minDim();
 
         forAll(edges, edgeI)
         {

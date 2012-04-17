@@ -43,7 +43,7 @@ defineTypeNameAndDebug(Foam::boundaryMesh, 0);
 const Foam::vector Foam::boundaryMesh::splitNormal_(3, 2, 1);
 
 // Distance to face tolerance for getNearest
-const Foam::scalar Foam::boundaryMesh::distanceTol_ = 1E-2;
+const Foam::scalar Foam::boundaryMesh::distanceTol_ = 1e-2;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -871,11 +871,11 @@ Foam::labelList Foam::boundaryMesh::getNearest
     {
         scalar sign = mesh().faceNormals()[bFaceI] & splitNormal_;
 
-        if (sign > -1E-5)
+        if (sign > -1e-5)
         {
             rightFaces.append(bFaceI);
         }
-        if (sign < 1E-5)
+        if (sign < 1e-5)
         {
             leftFaces.append(bFaceI);
         }
@@ -909,7 +909,7 @@ Foam::labelList Foam::boundaryMesh::getNearest
 
     // Extend domain slightly (also makes it 3D if was 2D)
     // Note asymmetry to avoid having faces align with octree cubes.
-    scalar tol = 1E-6 * overallBb.avgDim();
+    scalar tol = 1e-6 * overallBb.avgDim();
 
     point& bbMin = overallBb.min();
     bbMin.x() -= tol;

@@ -923,7 +923,7 @@ Foam::extendedFeatureEdgeMesh::pointTree() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1E-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -963,7 +963,7 @@ Foam::extendedFeatureEdgeMesh::edgeTree() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1E-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -1007,7 +1007,7 @@ Foam::extendedFeatureEdgeMesh::edgeTreesByType() const
         // geometry there are less face/edge aligned items.
         treeBoundBox bb
         (
-            treeBoundBox(points()).extend(rndGen, 1E-4)
+            treeBoundBox(points()).extend(rndGen, 1e-4)
         );
 
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
             treeBoundBox
             (
                 boundBox(mesh.points(), false)
-            ).extend(rndGen, 1E-3)
+            ).extend(rndGen, 1e-3)
         );
         Pstream::gatherList(meshBb);
         Pstream::scatterList(meshBb);

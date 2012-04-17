@@ -31,7 +31,7 @@ License
 
 defineTypeNameAndDebug(Foam::treeDataFace, 0);
 
-Foam::scalar Foam::treeDataFace::tolSqr = sqr(1E-6);
+Foam::scalar Foam::treeDataFace::tolSqr = sqr(1e-6);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
             const pointField& points = pMesh.points();
 
             const boundBox& bb = pMesh.bounds();
-            const scalar mergeDim = 1E-4 * bb.minDim();
+            const scalar mergeDim = 1e-4 * bb.minDim();
 
             forAll(edges, edgeI)
             {

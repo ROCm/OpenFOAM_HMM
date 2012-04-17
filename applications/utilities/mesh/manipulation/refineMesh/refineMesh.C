@@ -52,7 +52,7 @@ using namespace Foam;
 
 
 // Max cos angle for edges to be considered aligned with axis.
-static const scalar edgeTol = 1E-3;
+static const scalar edgeTol = 1e-3;
 
 
 // Calculate some edge statistics on mesh.
@@ -206,7 +206,7 @@ label twoDNess(const polyMesh& mesh)
             minLen = min(minLen, mesh.edges()[cEdges[i]].mag(mesh.points()));
         }
 
-        if (cellPlane.distance(ctrs[cellI]) > 1E-6*minLen)
+        if (cellPlane.distance(ctrs[cellI]) > 1e-6*minLen)
         {
             // Centres not in plane
             return  -1;
@@ -274,7 +274,7 @@ label twoDNess(const polyMesh& mesh)
 
             const scalarField cosAngle(mag(n/mag(n) & cellPlane.normal()));
 
-            if (mag(min(cosAngle) - max(cosAngle)) > 1E-6)
+            if (mag(min(cosAngle) - max(cosAngle)) > 1e-6)
             {
                 // cosAngle should be either ~1 over all faces (2D front and
                 // back) or ~0 (all other patches perp to 2D)

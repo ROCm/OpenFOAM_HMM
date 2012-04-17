@@ -36,7 +36,7 @@ void Foam::clockTime::getTime(timeType& t)
 
 double Foam::clockTime::timeDifference(const timeType& beg, const timeType& end)
 {
-    return end.tv_sec - beg.tv_sec + 1E-6*(end.tv_usec - beg.tv_usec);
+    return end.tv_sec - beg.tv_sec + 1e-6*(end.tv_usec - beg.tv_usec);
 }
 
 

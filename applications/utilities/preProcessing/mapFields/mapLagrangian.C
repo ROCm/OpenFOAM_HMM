@@ -32,7 +32,7 @@ License
 namespace Foam
 {
 
-static const scalar perturbFactor = 1E-6;
+static const scalar perturbFactor = 1e-6;
 
 
 // Special version of findCell that generates a cell guaranteed to be

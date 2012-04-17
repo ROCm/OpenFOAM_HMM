@@ -149,7 +149,7 @@ void Foam::patchSeedSet::calcSamples
             const point& cc = mesh().cellCentres()[cellI];
             samplingPts.append
             (
-                info.hitPoint() + 1E-1*(cc-info.hitPoint())
+                info.hitPoint() + 1e-1*(cc-info.hitPoint())
             );
         }
         else

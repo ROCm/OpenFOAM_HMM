@@ -54,7 +54,7 @@ namespace Foam
 
 
 // Tolerance used as fraction of minimum edge length.
-const Foam::scalar Foam::perfectInterface::tol_ = 1E-3;
+const Foam::scalar Foam::perfectInterface::tol_ = 1e-3;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -125,7 +125,7 @@ void Foam::directions::check2D
 {
     if (correct2DPtr)
     {
-        if (mag(correct2DPtr->planeNormal() & vec) > 1E-6)
+        if (mag(correct2DPtr->planeNormal() & vec) > 1e-6)
         {
             FatalErrorIn("check2D") << "Specified vector " << vec
                 << "is not normal to plane defined in dynamicMeshDict."

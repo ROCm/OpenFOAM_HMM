@@ -52,7 +52,7 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
     label nUnique = mergePoints
     (
         points,
-        1E-6,
+        1e-6,
         false,
         oldToNew
     );
@@ -226,7 +226,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         label nUnique = mergePoints
         (
             facePoints,
-            1E-6,
+            1e-6,
             false,
             oldToNew
         );

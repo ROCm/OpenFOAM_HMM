@@ -146,7 +146,7 @@ Foam::boolList Foam::cellClassification::markFaces
     treeBoundBox allBb(mesh_.points());
 
     // Extend domain slightly (also makes it 3D if was 2D)
-    scalar tol = 1E-6 * allBb.avgDim();
+    scalar tol = 1e-6 * allBb.avgDim();
 
     point& bbMin = allBb.min();
     bbMin.x() -= tol;
@@ -187,7 +187,7 @@ Foam::boolList Foam::cellClassification::markFaces
 
         vector edgeNormal(end - start);
         const scalar edgeMag = mag(edgeNormal);
-        const vector smallVec = 1E-9*edgeNormal;
+        const vector smallVec = 1e-9*edgeNormal;
 
         edgeNormal /= edgeMag+VSMALL;
 

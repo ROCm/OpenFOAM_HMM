@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::faceTriangulation::edgeRelTol = 1E-6;
+const Foam::scalar Foam::faceTriangulation::edgeRelTol = 1e-6;
 
 
 // Edge to the right of face vertex i

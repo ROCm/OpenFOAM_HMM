@@ -38,7 +38,7 @@ template
 >
 Foam::scalar
 Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-tolSqr = sqr(1E-6);
+tolSqr = sqr(1e-6);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

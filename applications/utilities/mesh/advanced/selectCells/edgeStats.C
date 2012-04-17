@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::scalar Foam::edgeStats::edgeTol_ = 1E-3;
+const Foam::scalar Foam::edgeStats::edgeTol_ = 1e-3;
 
 
 

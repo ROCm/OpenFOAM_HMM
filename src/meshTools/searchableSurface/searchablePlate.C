@@ -185,8 +185,8 @@ Foam::pointIndexHit Foam::searchablePlate::findLine
     if (info.hit())
     {
         treeBoundBox bb(origin_, origin_+span_);
-        bb.min()[normalDir_] -= 1E-6;
-        bb.max()[normalDir_] += 1E-6;
+        bb.min()[normalDir_] -= 1e-6;
+        bb.max()[normalDir_] += 1e-6;
 
         if (!bb.contains(info.hitPoint()))
         {

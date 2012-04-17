@@ -900,7 +900,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
     {
         Pout<< "motionSmoother::movePoints : testing sync of newPoints."
             << endl;
-        testSyncPositions(newPoints, 1E-6*mesh_.bounds().mag());
+        testSyncPositions(newPoints, 1e-6*mesh_.bounds().mag());
     }
 
     // Move actual mesh points. Make sure to delete tetBasePtIs so it
@@ -1051,7 +1051,7 @@ bool Foam::motionSmoother::scaleMesh
                 totalDisplacement,
                 maxMagEqOp(),
                 vector::zero,   // null value
-                1E-6*mesh_.bounds().mag()
+                1e-6*mesh_.bounds().mag()
             );
         }
 

@@ -60,7 +60,7 @@ Description
 
 // Tolerance (as fraction of the bounding box). Needs to be fairly lax since
 // usually meshes get written with limited precision (6 digits)
-static const scalar defaultMergeTol = 1E-6;
+static const scalar defaultMergeTol = 1e-6;
 
 
 //// Read mesh if available. Otherwise create empty mesh with same non-proc
@@ -721,7 +721,7 @@ int main(int argc, char *argv[])
         "mergeTol",
         "scalar",
         "specify the merge distance relative to the bounding box size "
-        "(default 1E-6)"
+        "(default 1e-6)"
     );
 #   include "setRootCase.H"
 

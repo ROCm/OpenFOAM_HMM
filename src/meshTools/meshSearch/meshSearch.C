@@ -35,7 +35,7 @@ License
 
 defineTypeNameAndDebug(Foam::meshSearch, 0);
 
-Foam::scalar Foam::meshSearch::tol_ = 1E-3;
+Foam::scalar Foam::meshSearch::tol_ = 1e-3;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -567,7 +567,7 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
 
             treeBoundBox& overallBb = overallBbPtr_();
             // Extend slightly and make 3D
-            overallBb = overallBb.extend(rndGen, 1E-4);
+            overallBb = overallBb.extend(rndGen, 1e-4);
             overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
             overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         }
@@ -620,7 +620,7 @@ const
 
             treeBoundBox& overallBb = overallBbPtr_();
             // Extend slightly and make 3D
-            overallBb = overallBb.extend(rndGen, 1E-4);
+            overallBb = overallBb.extend(rndGen, 1e-4);
             overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
             overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         }

@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
                 (
                     mesh,
                     boundaryPoint,
-                    1E-9,       // factor of largest face area
+                    1e-9,       // factor of largest face area
                     5,          // factor between smallest and largest edge on
                                 // face
                     collapser

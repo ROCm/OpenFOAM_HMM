@@ -4452,7 +4452,7 @@ void Foam::hexRef8::distribute(const mapDistributePolyMesh& map)
 
 void Foam::hexRef8::checkMesh() const
 {
-    const scalar smallDim = 1E-6 * mesh_.bounds().mag();
+    const scalar smallDim = 1e-6 * mesh_.bounds().mag();
 
     if (debug)
     {

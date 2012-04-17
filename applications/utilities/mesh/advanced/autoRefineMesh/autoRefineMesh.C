@@ -58,7 +58,7 @@ using namespace Foam;
 
 
 // Max cos angle for edges to be considered aligned with axis.
-static const scalar edgeTol = 1E-3;
+static const scalar edgeTol = 1e-3;
 
 
 void writeSet(const cellSet& cells, const string& msg)

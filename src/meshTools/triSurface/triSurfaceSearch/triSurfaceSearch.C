@@ -54,7 +54,7 @@ Foam::triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
         treeBoundBox(surface_.points(), surface_.meshPoints()).extend
         (
             rndGen,
-            1E-4
+            1e-4
         )
     );
     treeBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

@@ -569,7 +569,7 @@ void Foam::surfaceIntersection::doCutEdges
     List<DynamicList<label> >& surfEdgeCuts
 )
 {
-    scalar oldTol = intersection::setPlanarTol(1E-3);
+    scalar oldTol = intersection::setPlanarTol(1e-3);
 
     const pointField& surf1Pts = surf1.localPoints();
 

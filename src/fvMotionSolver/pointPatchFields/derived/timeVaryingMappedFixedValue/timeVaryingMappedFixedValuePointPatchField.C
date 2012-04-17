@@ -92,7 +92,7 @@ timeVaryingMappedFixedValuePointPatchField
     fixedValuePointPatchField<Type>(p, iF),
     fieldTableName_(iF.name()),
     setAverage_(readBool(dict.lookup("setAverage"))),
-    perturb_(dict.lookupOrDefault("perturb", 1E-5)),
+    perturb_(dict.lookupOrDefault("perturb", 1e-5)),
     mapperPtr_(NULL),
     sampleTimes_(0),
     startSampleTime_(-1),

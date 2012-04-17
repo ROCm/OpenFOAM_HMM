@@ -94,7 +94,7 @@ void Foam::patchCloudSet::calcSamples
     // Not very random
     Random rndGen(123456);
     // Make bb asymetric just to avoid problems on symmetric meshes
-    bb = bb.extend(rndGen, 1E-4);
+    bb = bb.extend(rndGen, 1e-4);
 
     // Make sure bb is 3D.
     bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

@@ -45,7 +45,7 @@ Description
             // Maintain average to that of the supplied values
             setAverage      false;
 
-            // Optional: change perturbation (default 1E-5) to avoid any ties
+            // Optional: change perturbation (default 1e-5) to avoid any ties
             // in triangulating regular geometries.
             //perturb       0.0;
 

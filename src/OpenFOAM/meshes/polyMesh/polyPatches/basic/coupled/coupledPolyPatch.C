@@ -34,7 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 
-    const scalar coupledPolyPatch::defaultMatchTol_ = 1E-4;
+    const scalar coupledPolyPatch::defaultMatchTol_ = 1e-4;
 
     template<>
     const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =

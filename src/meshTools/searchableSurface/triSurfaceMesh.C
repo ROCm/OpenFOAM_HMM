@@ -542,7 +542,7 @@ Foam::triSurfaceMesh::tree() const
 
         // Slightly extended bb. Slightly off-centred just so on symmetric
         // geometry there are less face/edge aligned items.
-        bb = bb.extend(rndGen, 1E-4);
+        bb = bb.extend(rndGen, 1e-4);
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -594,7 +594,7 @@ Foam::triSurfaceMesh::edgeTree() const
         // Slightly extended bb. Slightly off-centred just so on symmetric
         // geometry there are less face/edge aligned items.
 
-        bb = bb.extend(rndGen, 1E-4);
+        bb = bb.extend(rndGen, 1e-4);
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
