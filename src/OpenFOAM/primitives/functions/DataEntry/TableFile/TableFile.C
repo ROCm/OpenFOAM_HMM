@@ -45,6 +45,15 @@ Foam::TableFile<Type>::TableFile(const word& entryName, const dictionary& dict)
     fileName expandedFile(fName_);
     IFstream is(expandedFile.expand());
 
+    if (!is.good())
+    {
+        FatalIOErrorIn
+        (
+            "TableFile<Type>::TableFile(const word&, const dictionary&)",
+            is
+        )   << "Cannot open file." << exit(FatalIOError);
+    }
+
     is  >> this->table_;
 
     TableBase<Type>::check();
