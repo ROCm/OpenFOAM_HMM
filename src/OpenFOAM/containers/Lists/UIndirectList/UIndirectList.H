@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -117,6 +117,12 @@ public:
 
             //- Assignment of all entries to the given value
             inline void operator=(const T&);
+
+
+    // STL type definitions
+
+        //- Type of values the UList contains.
+        typedef T value_type;
 
 
     // Ostream operator

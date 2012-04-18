@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,8 @@ Description
 #include "surfaceFields.H"
 #include "pointFields.H"
 #include "ReadFields.H"
+#include "interpolationWeights.H"
+#include "uniformInterpolate.H"
 
 using namespace Foam;
 
@@ -48,6 +50,8 @@ class fieldInterpolator
     const HashSet<word>& selectedFields_;
     instant ti_;
     instant ti1_;
+    const interpolationWeights& interpolator_;
+    const wordList& timeNames_;
     int divisions_;
 
 public:
@@ -60,6 +64,8 @@ public:
         const HashSet<word>& selectedFields,
         const instant& ti,
         const instant& ti1,
+        const interpolationWeights& interpolator,
+        const wordList& timeNames,
         int divisions
     )
     :
@@ -69,6 +75,8 @@ public:
         selectedFields_(selectedFields),
         ti_(ti),
         ti1_(ti1),
+        interpolator_(interpolator),
+        timeNames_(timeNames),
         divisions_(divisions)
     {}
 
@@ -98,34 +106,6 @@ void fieldInterpolator::interpolate()
             {
                 Info<< " " << fieldIter()->name() << '(';
 
-                GeoFieldType fieldi
-                (
-                    IOobject
-                    (
-                        fieldIter()->name(),
-                        ti_.name(),
-                        fieldIter()->db(),
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    mesh_
-                );
-
-                GeoFieldType fieldi1
-                (
-                    IOobject
-                    (
-                        fieldIter()->name(),
-                        ti1_.name(),
-                        fieldIter()->db(),
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    mesh_
-                );
-
                 scalar deltaT = (ti1_.value() - ti_.value())/(divisions_ + 1);
 
                 for (int j=0; j<divisions_; j++)
@@ -141,20 +121,51 @@ void fieldInterpolator::interpolate()
                         Info<< " ";
                     }
 
-                    scalar lambda = scalar(j + 1)/scalar(divisions_ + 1);
+                    // Calculate times to read and weights
+                    labelList indices;
+                    scalarField weights;
+                    interpolator_.valueWeights
+                    (
+                        runTime_.value(),
+                        indices,
+                        weights
+                    );
+
+                    const wordList selectedTimeNames
+                    (
+                        UIndirectList<word>(timeNames_, indices)()
+                    );
+
+                    //Info<< "For time " << runTime_.value()
+                    //    << " need times " << selectedTimeNames
+                    //    << " need weights " << weights << endl;
+
+
+                    // Read on the objectRegistry all the required fields
+                    ReadFields<GeoFieldType>
+                    (
+                        fieldIter()->name(),
+                        mesh_,
+                        selectedTimeNames
+                    );
 
                     GeoFieldType fieldj
                     (
-                        IOobject
+                        uniformInterpolate<GeoFieldType>
                         (
+                            IOobject
+                            (
+                                fieldIter()->name(),
+                                runTime_.timeName(),
+                                fieldIter()->db(),
+                                IOobject::NO_READ,
+                                IOobject::NO_WRITE,
+                                false
+                            ),
                             fieldIter()->name(),
-                            timej.name(),
-                            fieldIter()->db(),
-                            IOobject::NO_READ,
-                            IOobject::NO_WRITE,
-                            false
-                        ),
-                        (1.0 - lambda)*fieldi + lambda*fieldi1
+                            selectedTimeNames,
+                            weights
+                        )
                     );
 
                     fieldj.write();
@@ -188,6 +199,12 @@ int main(int argc, char *argv[])
         "integer",
         "specify number of temporal sub-divisions to create (default = 1)."
     );
+    argList::addOption
+    (
+        "interpolationType",
+        "word",
+        "specify type of interpolation (linear or spline)"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -198,14 +215,50 @@ int main(int argc, char *argv[])
     {
         args.optionLookup("fields")() >> selectedFields;
     }
+    if (selectedFields.size())
+    {
+        Info<< "Interpolating fields " << selectedFields << nl << endl;
+    }
+    else
+    {
+        Info<< "Interpolating all fields" << nl << endl;
+    }
+
 
     int divisions = 1;
     if (args.optionFound("divisions"))
     {
         args.optionLookup("divisions")() >> divisions;
     }
+    Info<< "Using " << divisions << " per time interval" << nl << endl;
+
+
+    const word interpolationType = args.optionLookupOrDefault<word>
+    (
+        "interpolationType",
+        "linear"
+    );
+    Info<< "Using interpolation " << interpolationType << nl << endl;
+
 
     instantList timeDirs = timeSelector::select0(runTime, args);
+
+    scalarField timeVals(timeDirs.size());
+    wordList timeNames(timeDirs.size());
+    forAll(timeDirs, i)
+    {
+        timeVals[i] = timeDirs[i].value();
+        timeNames[i] = timeDirs[i].name();
+    }
+    autoPtr<interpolationWeights> interpolatorPtr
+    (
+        interpolationWeights::New
+        (
+            interpolationType,
+            timeVals
+        )
+    );
+
 
     #include "createMesh.H"
 
@@ -226,6 +279,8 @@ int main(int argc, char *argv[])
             selectedFields,
             timeDirs[timei],
             timeDirs[timei+1],
+            interpolatorPtr(),
+            timeNames,
             divisions
         );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,72 +21,63 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    Foam::ReadFields
-
-Description
-    Helper routine to read fields
-
-SourceFiles
-    ReadFields.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReadFields_H
-#define ReadFields_H
-
-#include "PtrList.H"
-#include "wordList.H"
+#include "GeometricField.H"
+#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class IOobjectList;
+// * * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * //
 
-//- Helper routine to read fields
-template<class GeoField, class Mesh>
-wordList ReadFields
+//- Interpolate selected fields (given by indices and corresponding weights)
+//  (boundary type becomes calculated). Fields stored per index. Field gets name
+//  "uniformInterpolate(" + fld.name() + ')'.
+template<class GeoField>
+tmp<GeoField> uniformInterpolate
 (
-    const Mesh& mesh,
-    const IOobjectList& objects,
-    PtrList<GeoField>& fields,
-    const bool syncPar = true
+    const HashPtrTable<GeoField, label, Hash<label> >& fields,
+    const labelList& indices,
+    const scalarField& weights
 );
 
-//- Helper routine to read GeometricFields. The fieldsCache is per time
-//  an objectRegistry of all stored fields
+//- Interpolate fields. fieldsCache contains per timeName all loaded fields.
+//  Resulting field gets properties according to fieldIO
 template<class GeoField>
-static void ReadFields
+tmp<GeoField> uniformInterpolate
 (
+    const IOobject& fieldIO,
     const word& fieldName,
-    const typename GeoField::Mesh& mesh,
-    const wordList& timeNames,
-    objectRegistry& fieldsCache
+    const wordList& times,
+    const scalarField& weights,
+    const objectRegistry& fieldsCache
 );
 
-//- Helper routine to read GeometricFields. The fieldsCache is per time
-//  an objectRegistry of all stored fields
+//- Interpolate fields. fieldsCache contains per timeName all loaded fields.
+//  Resulting field gets properties according to fieldIO
 template<class GeoField>
-static void ReadFields
+tmp<GeoField> uniformInterpolate
 (
+    const IOobject& fieldIO,
     const word& fieldName,
-    const typename GeoField::Mesh& mesh,
-    const wordList& timeNames,
+    const wordList& times,
+    const scalarField& weights,
     const word& registryName = "fieldsCache"
 );
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ReadFields.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+#   include "uniformInterpolate.C"
 #endif
 
 // ************************************************************************* //

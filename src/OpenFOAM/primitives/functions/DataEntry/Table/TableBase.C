@@ -26,6 +26,29 @@ License
 #include "TableBase.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+const Foam::interpolationWeights& Foam::TableBase<Type>::interpolator() const
+{
+    if (interpolatorPtr_.empty())
+    {
+        // Re-work table into linear list
+        tableSamples_.setSize(table_.size());
+        forAll(table_, i)
+        {
+            tableSamples_[i] = table_[i].first();
+        }
+        interpolatorPtr_ = interpolationWeights::New
+        (
+            interpolationScheme_,
+            tableSamples_
+        );
+    }
+    return interpolatorPtr_();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -39,6 +62,10 @@ Foam::TableBase<Type>::TableBase(const word& name, const dictionary& dict)
             dict.lookupOrDefault<word>("outOfBounds", "clamp")
         )
     ),
+    interpolationScheme_
+    (
+        dict.lookupOrDefault<word>("interpolationScheme", "linear")
+    ),
     table_(),
     dimensions_(dimless)
 {}
@@ -49,8 +76,11 @@ Foam::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 :
     name_(tbl.name_),
     boundsHandling_(tbl.boundsHandling_),
+    interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
-    dimensions_(tbl.dimensions_)
+    dimensions_(tbl.dimensions_),
+    tableSamples_(tbl.tableSamples_),
+    interpolatorPtr_(tbl.interpolatorPtr_)
 {}
 
 
@@ -307,6 +337,9 @@ void Foam::TableBase<Type>::convertTimeBase(const Time& t)
         scalar value = table_[i].first();
         table_[i].first() = t.userTimeToTime(value);
     }
+
+    tableSamples_.clear();
+    interpolatorPtr_.clear();
 }
 
 
@@ -325,88 +358,104 @@ Type Foam::TableBase<Type>::value(const scalar x) const
         return table_.last().second();
     }
 
-    // Find i such that x(i) < xDash < x(i+1)
-    label i = 0;
-    while ((table_[i+1].first() < xDash) && (i+1 < table_.size()))
+    // Use interpolator
+    interpolator().valueWeights(x, currentIndices_, currentWeights_);
+
+    Type t = currentWeights_[0]*table_[currentIndices_[0]].second();
+    for (label i = 1; i < currentIndices_.size(); i++)
     {
-        i++;
+        t += currentWeights_[i]*table_[currentIndices_[i]].second();
     }
+    return t;
 
-Info <<
-     (xDash - table_[i].first())/(table_[i+1].first() - table_[i].first())
-      * (table_[i+1].second() - table_[i].second())
-      + table_[i].second() << endl;
-
-    // Linear interpolation to find value
-    return Type
-    (
-        (xDash - table_[i].first())/(table_[i+1].first() - table_[i].first())
-      * (table_[i+1].second() - table_[i].second())
-      + table_[i].second()
-    );
+    //// Find i such that x(i) < xDash < x(i+1)
+    //label i = 0;
+    //while ((table_[i+1].first() < xDash) && (i+1 < table_.size()))
+    //{
+    //    i++;
+    //}
+    //
+    //// Linear interpolation to find value
+    //return Type
+    //(
+    //    (xDash - table_[i].first())/(table_[i+1].first() - table_[i].first())
+    //  * (table_[i+1].second() - table_[i].second())
+    //  + table_[i].second()
+    //);
 }
 
 
 template<class Type>
 Type Foam::TableBase<Type>::integrate(const scalar x1, const scalar x2) const
 {
-    // Initialise return value
-    Type sum = pTraits<Type>::zero;
+    // Use interpolator
+    interpolator().integrationWeights(x1, x2, currentIndices_, currentWeights_);
 
-    // Return zero if out of bounds
-    if ((x1 > table_.last().first()) || (x2 < table_[0].first()))
+    Type sum = currentWeights_[0]*table_[currentIndices_[0]].second();
+    for (label i = 1; i < currentIndices_.size(); i++)
     {
-        return sum;
+       sum += currentWeights_[i]*table_[currentIndices_[i]].second();
     }
-
-    // Find next index greater than x1
-    label id1 = 0;
-    while ((table_[id1].first() < x1) && (id1 < table_.size()))
-    {
-        id1++;
-    }
-
-    // Find next index less than x2
-    label id2 = table_.size() - 1;
-    while ((table_[id2].first() > x2) && (id2 >= 1))
-    {
-        id2--;
-    }
-
-    if ((id1 - id2) == 1)
-    {
-        // x1 and x2 lie within 1 interval
-        sum = 0.5*(value(x1) + value(x2))*(x2 - x1);
-    }
-    else
-    {
-        // x1 and x2 cross multiple intervals
-
-        // Integrate table body
-        for (label i=id1; i<id2; i++)
-        {
-            sum +=
-                (table_[i].second() + table_[i+1].second())
-              * (table_[i+1].first() - table_[i].first());
-        }
-        sum *= 0.5;
-
-        // Add table ends (partial segments)
-        if (id1 > 0)
-        {
-            sum += 0.5
-              * (value(x1) + table_[id1].second())
-              * (table_[id1].first() - x1);
-        }
-        if (id2 < table_.size() - 1)
-        {
-            sum += 0.5
-              * (table_[id2].second() + value(x2))
-              * (x2 - table_[id2].first());
-        }
-    }
-
     return sum;
+
+
+    //// Initialise return value
+    //Type sum = pTraits<Type>::zero;
+    //
+    //// Return zero if out of bounds
+    //if ((x1 > table_.last().first()) || (x2 < table_[0].first()))
+    //{
+    //    return sum;
+    //}
+    //
+    //// Find next index greater than x1
+    //label id1 = 0;
+    //while ((table_[id1].first() < x1) && (id1 < table_.size()))
+    //{
+    //    id1++;
+    //}
+    //
+    //// Find next index less than x2
+    //label id2 = table_.size() - 1;
+    //while ((table_[id2].first() > x2) && (id2 >= 1))
+    //{
+    //    id2--;
+    //}
+    //
+    //if ((id1 - id2) == 1)
+    //{
+    //    // x1 and x2 lie within 1 interval
+    //    sum = 0.5*(value(x1) + value(x2))*(x2 - x1);
+    //}
+    //else
+    //{
+    //    // x1 and x2 cross multiple intervals
+    //
+    //    // Integrate table body
+    //    for (label i=id1; i<id2; i++)
+    //    {
+    //        sum +=
+    //            (table_[i].second() + table_[i+1].second())
+    //          * (table_[i+1].first() - table_[i].first());
+    //    }
+    //    sum *= 0.5;
+    //
+    //    // Add table ends (partial segments)
+    //    if (id1 > 0)
+    //    {
+    //        sum += 0.5
+    //          * (value(x1) + table_[id1].second())
+    //          * (table_[id1].first() - x1);
+    //    }
+    //    if (id2 < table_.size() - 1)
+    //    {
+    //        sum += 0.5
+    //          * (table_[id2].second() + value(x2))
+    //          * (x2 - table_[id2].first());
+    //    }
+    //}
+    //
+    //return sum;
 }
 
 
