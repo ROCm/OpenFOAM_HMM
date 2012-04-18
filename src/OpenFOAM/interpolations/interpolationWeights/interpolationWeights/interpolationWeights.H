@@ -131,11 +131,26 @@ public:
             scalarField& weights
         ) const = 0;
 
+        //- Helper: weighted sum
+        template<class ListType1, class ListType2>
+        static typename outerProduct
+        <
+            typename ListType1::value_type,
+            typename ListType2::value_type
+        >::type
+        weightedSum(const ListType1& f1, const ListType2& f2);
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "interpolationWeightsTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
