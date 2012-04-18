@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    UName_("U"),
+    phiHbyAName_("phiHbyA"),
     phiName_("phi"),
     rhoName_("rho"),
     adjoint_(false)
@@ -54,7 +54,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
+    phiHbyAName_(ptf.phiHbyAName_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
     adjoint_(ptf.adjoint_)
@@ -69,10 +69,10 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
+    phiHbyAName_(dict.lookupOrDefault<word>("phiHbyA", "phiHbyA")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    adjoint_(dict.lookup("adjoint"))
+    adjoint_(dict.lookupOrDefault<Switch>("adjoint", false))
 {
     if (dict.found("gradient"))
     {
@@ -94,7 +94,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(wbppsf),
-    UName_(wbppsf.UName_),
+    phiHbyAName_(wbppsf.phiHbyAName_),
     phiName_(wbppsf.phiName_),
     rhoName_(wbppsf.rhoName_),
     adjoint_(wbppsf.adjoint_)
@@ -108,7 +108,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(wbppsf, iF),
-    UName_(wbppsf.UName_),
+    phiHbyAName_(wbppsf.phiHbyAName_),
     phiName_(wbppsf.phiName_),
     rhoName_(wbppsf.rhoName_),
     adjoint_(wbppsf.adjoint_)
@@ -124,11 +124,14 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<vector>& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const surfaceScalarField& phiHbyA =
+        db().lookupObject<surfaceScalarField>(phiHbyAName_);
 
     const surfaceScalarField& phi =
         db().lookupObject<surfaceScalarField>(phiName_);
+
+    fvsPatchField<scalar> phiHbyAp =
+        patch().patchField<surfaceScalarField, scalar>(phiHbyA);
 
     fvsPatchField<scalar> phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
@@ -141,16 +144,16 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
         phip /= rhop;
     }
 
-    const fvPatchField<scalar>& rAp =
-        patch().lookupPatchField<volScalarField, scalar>("(1|A("+UName_+"))");
+    const fvPatchField<scalar>& Dpp =
+        patch().lookupPatchField<volScalarField, scalar>("Dp");
 
     if (adjoint_)
     {
-        gradient() = ((patch().Sf() & Up) - phip)/patch().magSf()/rAp;
+        gradient() = (phip - phiHbyAp)/patch().magSf()/Dpp;
     }
     else
     {
-        gradient() = (phip - (patch().Sf() & Up))/patch().magSf()/rAp;
+        gradient() = (phiHbyAp - phip)/patch().magSf()/Dpp;
     }
 
     fixedGradientFvPatchScalarField::updateCoeffs();
@@ -160,7 +163,7 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "phiHbyA", "phiHbyA", phiHbyAName_);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
