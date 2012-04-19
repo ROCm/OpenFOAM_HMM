@@ -119,6 +119,14 @@ public:
             const label size
         );
 
+        //- Construct given polyPatchList
+        polyBoundaryMesh
+        (
+            const IOobject&,
+            const polyMesh&,
+            const polyPatchList&
+        );
+
 
     //- Destructor
     ~polyBoundaryMesh();

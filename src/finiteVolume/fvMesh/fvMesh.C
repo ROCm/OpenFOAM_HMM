@@ -295,7 +295,7 @@ Foam::fvMesh::fvMesh
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
     data(static_cast<const objectRegistry&>(*this)),
-    boundary_(*this),
+    boundary_(*this, boundaryMesh()),
     lduPtr_(NULL),
     curTimeIndex_(time().timeIndex()),
     VPtr_(NULL),
