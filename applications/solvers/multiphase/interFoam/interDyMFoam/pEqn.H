@@ -1,6 +1,6 @@
 {
-    volScalarField rAU("Dp", 1.0/UEqn.A());
-    surfaceScalarField rAUf("Dpf", fvc::interpolate(rAU));
+    volScalarField rAU("rAU", 1.0/UEqn.A());
+    surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();

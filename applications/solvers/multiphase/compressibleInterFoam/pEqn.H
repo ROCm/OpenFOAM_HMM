@@ -2,8 +2,8 @@
     rho1 = eos1->rho(p, T);
     rho2 = eos2->rho(p, T);
 
-    volScalarField rAU = 1.0/UEqn.A();
-    surfaceScalarField rAUf = fvc::interpolate(rAU);
+    volScalarField rAU("rAU", 1.0/UEqn.A());
+    surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
     tmp<fvScalarMatrix> p_rghEqnComp1;
     tmp<fvScalarMatrix> p_rghEqnComp2;
@@ -27,20 +27,25 @@
           - fvc::Sp(fvc::div(phid2), p_rgh);
     }
 
-    U = rAU*UEqn.H();
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*UEqn.H();
 
-    surfaceScalarField phiU
+    surfaceScalarField phiHbyA
     (
-        "phiU",
-        (fvc::interpolate(U) & mesh.Sf())
+        "phiHbyA",
+        (fvc::interpolate(HbyA) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
 
-    phi = phiU +
+    surfaceScalarField phig
+    (
         (
             fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
           - ghf*fvc::snGrad(rho)
-        )*rAUf*mesh.magSf();
+        )*rAUf*mesh.magSf()
+    );
+
+    phiHbyA += phig;
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
     // pressure solution - done in 2 parts. Part 1:
@@ -50,7 +55,7 @@
     {
         fvScalarMatrix p_rghEqnIncomp
         (
-            fvc::div(phi)
+            fvc::div(phiHbyA)
           - fvm::laplacian(rAUf, p_rgh)
         );
 
@@ -74,12 +79,14 @@
                 pos(alpha2)*(p_rghEqnComp2 & p_rgh)/rho2
               - pos(alpha1)*(p_rghEqnComp1 & p_rgh)/rho1
             );
-            phi += p_rghEqnIncomp.flux();
+
+            phi = phiHbyA + p_rghEqnIncomp.flux();
+
+            U = HbyA
+              + rAU*fvc::reconstruct((phig + p_rghEqnIncomp.flux())/rAUf);
+            U.correctBoundaryConditions();
         }
     }
-
-    U += rAU*fvc::reconstruct((phi - phiU)/rAUf);
-    U.correctBoundaryConditions();
 
     p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
 

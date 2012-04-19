@@ -1,6 +1,6 @@
 {
-    volScalarField rAU("Dp", 1.0/UEqn.A());
-    surfaceScalarField rAUf("Dpf", fvc::interpolate(rAU));
+    volScalarField rAU("rAU", 1.0/UEqn.A());
+    surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
@@ -11,7 +11,6 @@
         (fvc::interpolate(HbyA) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU, rho, U, phi)
     );
-
     mrfZones.relativeFlux(phiHbyA);
 
     adjustPhi(phiHbyA, U, p_rgh);

@@ -71,6 +71,9 @@ class fixedFluxPressureFvPatchScalarField
         //  if neccessary
         word rhoName_;
 
+        //- Name of the pressure diffusivity field
+        word DpName_;
+
         //- Is the pressure adjoint, i.e. has the opposite sign
         Switch adjoint_;
 
