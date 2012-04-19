@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ using namespace Foam;
 
 
 // Max cos angle for edges to be considered aligned with axis.
-static const scalar edgeTol = 1E-3;
+static const scalar edgeTol = 1e-3;
 
 
 void writeSet(const cellSet& cells, const string& msg)

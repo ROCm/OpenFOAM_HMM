@@ -240,9 +240,14 @@ Foam::dynamicRefineFvMesh::refine
         }
     }
 
+//    // Remove the stored tet base points
+//    tetBasePtIsPtr_.clear();
+//    // Remove the cell tree
+//    cellTreePtr_.clear();
 
     // Update fields
     updateMesh(map);
+
 
     // Move mesh
     /*

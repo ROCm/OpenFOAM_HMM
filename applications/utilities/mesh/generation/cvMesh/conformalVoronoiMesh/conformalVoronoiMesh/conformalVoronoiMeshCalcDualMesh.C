@@ -561,7 +561,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
     scalar closenessTolerance = cvMeshControls().mergeClosenessCoeff();
 
     // Absolute distance for points to be considered coincident. Bit adhoc
-    // but points were seen with distSqr ~ 1E-30 which is SMALL^2. Add a few
+    // but points were seen with distSqr ~ 1e-30 which is SMALL^2. Add a few
     // digits to account for truncation errors.
     scalar coincidentDistanceSqr = sqr
     (

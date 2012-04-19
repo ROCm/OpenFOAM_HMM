@@ -1073,7 +1073,7 @@ void Foam::meshRefinement::findCellZoneGeometric
                 label nei = faceNeighbour[faceI];
                 const point& neiCc = cellCentres[nei];
                 // Perturbed cc
-                const vector d = 1E-4*(neiCc - ownCc);
+                const vector d = 1e-4*(neiCc - ownCc);
                 candidatePoints[nCandidates++] = ownCc-d;
                 candidatePoints[nCandidates++] = neiCc+d;
             }
@@ -1081,7 +1081,7 @@ void Foam::meshRefinement::findCellZoneGeometric
             {
                 const point& neiFc = mesh_.faceCentres()[faceI];
                 // Perturbed cc
-                const vector d = 1E-4*(neiFc - ownCc);
+                const vector d = 1e-4*(neiFc - ownCc);
                 candidatePoints[nCandidates++] = ownCc-d;
             }
         }

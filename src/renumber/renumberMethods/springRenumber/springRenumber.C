@@ -138,7 +138,7 @@ Foam::labelList Foam::springRenumber::renumber
             << "  average force:" << average(mag(sumForce)) << endl;
 
         // Determine displacement.
-        scalarField displacement = deltaT*sumForce;
+        scalarField displacement(deltaT*sumForce);
 
         //Pout<< "Displacement :" << nl
         //    << "    min    : " << min(displacement) << nl

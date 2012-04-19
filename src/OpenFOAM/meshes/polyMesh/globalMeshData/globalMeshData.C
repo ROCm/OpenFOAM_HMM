@@ -44,7 +44,7 @@ License
 defineTypeNameAndDebug(Foam::globalMeshData, 0);
 
 // Geometric matching tolerance. Factor of mesh bounding box.
-const Foam::scalar Foam::globalMeshData::matchTol_ = 1E-8;
+const Foam::scalar Foam::globalMeshData::matchTol_ = 1e-8;
 
 namespace Foam
 {

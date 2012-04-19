@@ -5,14 +5,14 @@
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
 
-    surfaceScalarField phig(rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf());
+    surfaceScalarField phig(-rAUf*ghf*fvc::snGrad(rhok)*mesh.magSf());
 
     surfaceScalarField phiHbyA
     (
         "phiHbyA",
         (fvc::interpolate(HbyA) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU, U, phi)
-      - phig
+      + phig
     );
 
     while (pimple.correctNonOrthogonal())
@@ -36,7 +36,7 @@
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U = HbyA - rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rAUf);
+            U = HbyA + rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rAUf);
             U.correctBoundaryConditions();
         }
     }

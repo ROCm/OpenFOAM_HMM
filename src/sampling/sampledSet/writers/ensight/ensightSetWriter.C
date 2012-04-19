@@ -157,7 +157,7 @@ void Foam::ensightSetWriter<Type>::write
                 << "coordinates" << nl;
             for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
             {
-                const scalarField fld = valueSets[setI]->component(cmpt);
+                const scalarField fld(valueSets[setI]->component(cmpt));
                 forAll(fld, i)
                 {
                     if (mag(fld[i]) >= scalar(floatScalarVSMALL))
@@ -293,7 +293,7 @@ void Foam::ensightSetWriter<Type>::write
                     cmpt++
                 )
                 {
-                    const scalarField fld = fieldVals[trackI].component(cmpt);
+                    const scalarField fld(fieldVals[trackI].component(cmpt));
                     forAll(fld, i)
                     {
                         if (mag(fld[i]) >= scalar(floatScalarVSMALL))
