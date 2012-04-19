@@ -10,14 +10,14 @@ application=`getApplication`
 runApplication blockMesh
 transformPoints -scale '(1.6666 1 1)'
 
-cp system/changeDictionaryDict.X system/changeDictionaryDict
-runApplication changeDictionary -instance system
+#cp system/changeDictionaryDict.X system/changeDictionaryDict
+runApplication changeDictionary -instance system -dict system/changeDictionaryDict.X
 runApplication mirrorMesh
 rm log.mirrorMesh
 
 rm log.changeDictionary
-cp system/changeDictionaryDict.Y system/changeDictionaryDict
-runApplication changeDictionary -instance system
+#cp system/changeDictionaryDict.Y system/changeDictionaryDict
+runApplication changeDictionary -instance system -dict  system/changeDictionaryDict.Y
 
 runApplication mirrorMesh
 cp -rf 0/polyMesh constant/
