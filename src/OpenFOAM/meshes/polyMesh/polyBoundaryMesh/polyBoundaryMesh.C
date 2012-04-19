@@ -132,6 +132,84 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 {}
 
 
+Foam::polyBoundaryMesh::polyBoundaryMesh
+(
+    const IOobject& io,
+    const polyMesh& pm,
+    const polyPatchList& ppl
+)
+:
+    polyPatchList(),
+    regIOobject(io),
+    mesh_(pm)
+{
+    if
+    (
+        (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
+     || this->readOpt() == IOobject::MUST_READ
+     || this->readOpt() == IOobject::MUST_READ_IF_MODIFIED
+    )
+    {
+
+        if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+        {
+            WarningIn
+            (
+                "polyBoundaryMesh::polyBoundaryMesh\n"
+                "(\n"
+                "    const IOobject&,\n"
+                "    const polyMesh&\n"
+                "    const polyPatchList&\n"
+                ")"
+            )   << "Specified IOobject::MUST_READ_IF_MODIFIED but class"
+                << " does not support automatic rereading."
+                << endl;
+        }
+
+        polyPatchList& patches = *this;
+
+        // Read polyPatchList
+        Istream& is = readStream(typeName);
+
+        PtrList<entry> patchEntries(is);
+        patches.setSize(patchEntries.size());
+
+        forAll(patches, patchI)
+        {
+            patches.set
+            (
+                patchI,
+                polyPatch::New
+                (
+                    patchEntries[patchI].keyword(),
+                    patchEntries[patchI].dict(),
+                    patchI,
+                    *this
+                )
+            );
+        }
+
+        // Check state of IOstream
+        is.check
+        (
+            "polyBoundaryMesh::polyBoundaryMesh"
+            "(const IOobject&, const polyMesh&, const polyPatchList&)"
+        );
+
+        close();
+    }
+    else
+    {
+        polyPatchList& patches = *this;
+        patches.setSize(ppl.size());
+        forAll (patches, patchI)
+        {
+            patches.set(patchI, ppl[patchI].clone(*this).ptr());
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::polyBoundaryMesh::~polyBoundaryMesh()

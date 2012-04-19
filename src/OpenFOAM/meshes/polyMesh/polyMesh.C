@@ -338,7 +338,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         points
@@ -351,7 +351,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         faces
@@ -364,7 +364,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         owner
@@ -377,7 +377,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         neighbour
@@ -391,11 +391,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         *this,
-        0
+        polyPatchList()
     ),
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
@@ -410,11 +410,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<pointZone>()
     ),
     faceZones_
     (
@@ -424,11 +424,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<faceZone>()
     ),
     cellZones_
     (
@@ -438,11 +438,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<cellZone>()
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),

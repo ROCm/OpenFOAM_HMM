@@ -86,4 +86,9 @@ motionSmoother/polyMeshGeometry/polyMeshGeometry.C
 
 motionSolver/motionSolver.C
 
+createShellMesh/createShellMesh.C
+
+extrudePatchMesh/extrudePatchMesh.C
+
+
 LIB = $(FOAM_LIBBIN)/libdynamicMesh

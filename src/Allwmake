@@ -52,6 +52,8 @@ wmake $makeType conversion
 
 wmake $makeType sampling
 
+wmake $makeType mesh/extrudeModel
+
 wmake $makeType dynamicMesh
 wmake $makeType dynamicFvMesh
 wmake $makeType topoChangerFvMesh
