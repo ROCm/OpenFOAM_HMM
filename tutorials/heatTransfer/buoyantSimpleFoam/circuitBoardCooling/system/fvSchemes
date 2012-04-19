@@ -40,7 +40,7 @@ laplacianSchemes
 {
     default         none;
     laplacian(muEff,U) Gauss linear uncorrected;
-    laplacian((rho*(1|A(U))),p_rgh) Gauss linear uncorrected;
+    laplacian(Dp,p_rgh) Gauss linear uncorrected;
     laplacian(alphaEff,h) Gauss linear uncorrected;
     laplacian(DkEff,k) Gauss linear uncorrected;
     laplacian(DepsilonEff,epsilon) Gauss linear uncorrected;

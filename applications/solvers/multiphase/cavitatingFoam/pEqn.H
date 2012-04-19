@@ -12,7 +12,7 @@
     surfaceScalarField rhof("rhof", fvc::interpolate(rho));
 
     volScalarField rAU(1.0/UEqn.A());
-    surfaceScalarField rAUf("rAUf", rhof*fvc::interpolate(rAU));
+    surfaceScalarField rAUf("Dp", rhof*fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
