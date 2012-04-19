@@ -167,8 +167,11 @@ bool linearInterpolationWeights::integrationWeights
             << exit(FatalError);
     }
 
-    // Currently no fancy logic on cached index
-    label i1 = findLower(samples_, t1);
+    // Currently no fancy logic on cached index like in value
+
+    //- Find lower or equal index
+    label i1 = findLower(samples_, t1, 0, lessEqOp<scalar>());
+    //- Find lower index
     label i2 = findLower(samples_, t2);
 
     // For now just fail if any outside table
