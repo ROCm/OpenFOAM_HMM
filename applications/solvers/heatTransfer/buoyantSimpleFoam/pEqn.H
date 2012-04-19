@@ -9,7 +9,7 @@
     HbyA = rAU*UEqn().H();
     UEqn.clear();
 
-    surfaceScalarField phig(rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
+    surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
     surfaceScalarField phiHbyA
     (
@@ -19,7 +19,7 @@
 
     bool closedVolume = adjustPhi(phiHbyA, U, p_rgh);
 
-    phiHbyA -= phig;
+    phiHbyA += phig;
 
     while (simple.correctNonOrthogonal())
     {
@@ -41,7 +41,7 @@
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U = HbyA - rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rhorAUf);
+            U = HbyA + rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
         }
     }
