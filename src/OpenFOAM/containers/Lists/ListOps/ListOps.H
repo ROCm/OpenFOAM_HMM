@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 #define ListOps_H
 
 #include "labelList.H"
+#include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -206,6 +207,18 @@ label findSortedIndex
     const ListType&,
     typename ListType::const_reference,
     const label start=0
+);
+
+
+//- Find last element < given value in sorted list and return index,
+//  return -1 if not found. Binary search.
+template<class ListType, class BinaryOp>
+label findLower
+(
+    const ListType&,
+    typename ListType::const_reference,
+    const label stary,
+    const BinaryOp& bop
 );
 
 
