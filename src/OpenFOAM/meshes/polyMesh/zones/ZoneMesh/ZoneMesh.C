@@ -162,6 +162,32 @@ Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
 {}
 
 
+template<class ZoneType, class MeshType>
+Foam::ZoneMesh<ZoneType, MeshType>::ZoneMesh
+(
+    const IOobject& io ,
+    const MeshType& mesh,
+    const PtrList<ZoneType>& pzm
+)
+:
+    PtrList<ZoneType>(),
+    regIOobject(io),
+    mesh_(mesh),
+    zoneMapPtr_(NULL)
+{
+    ZoneMesh<ZoneType, MeshType>(io, mesh);
+
+    if (this->size() == 0)
+    {
+        PtrList<ZoneType>& zones = *this;
+        zones.setSize(pzm.size());
+        forAll (zones, zoneI)
+        {
+            zones.set(zoneI, pzm[zoneI].clone(*this).ptr());
+        }
+    }
+}
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ZoneType, class MeshType>

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
         for (int corr=1; corr<=1; corr++)
         {
-            volScalarField rAU(1.0/UEqn.A());
+            volScalarField rAU("Dp", 1.0/UEqn.A());
             volVectorField HbyA("HbyA", U);
             HbyA = rAU*UEqn.H();
 

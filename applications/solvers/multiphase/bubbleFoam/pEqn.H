@@ -8,16 +8,21 @@
     surfaceScalarField rAU1f(fvc::interpolate(rAU1));
     surfaceScalarField rAU2f(fvc::interpolate(rAU2));
 
-    U1 = rAU1*U1Eqn.H();
-    U2 = rAU2*U2Eqn.H();
+    volVectorField HbyA1("HbyA1", U1);
+    HbyA1 = rAU1*U1Eqn.H();
+
+    volVectorField HbyA2("HbyA2", U2);
+    HbyA2 = rAU2*U2Eqn.H();
 
     surfaceScalarField phiDrag1
     (
-        fvc::interpolate(alpha2/rho1*dragCoef*rAU1)*phi2 + rAU1f*(g & mesh.Sf())
+        fvc::interpolate(alpha2/rho1*dragCoef*rAU1)*phi2
+      + rAU1f*(g & mesh.Sf())
     );
     surfaceScalarField phiDrag2
     (
-        fvc::interpolate(alpha1/rho2*dragCoef*rAU2)*phi1 + rAU2f*(g & mesh.Sf())
+        fvc::interpolate(alpha1/rho2*dragCoef*rAU2)*phi1
+      + rAU2f*(g & mesh.Sf())
     );
 
     forAll(p.boundaryField(), patchi)
@@ -29,16 +34,25 @@
         }
     }
 
-    phi1 = (fvc::interpolate(U1) & mesh.Sf()) + fvc::ddtPhiCorr(rAU1, U1, phi1)
-        + phiDrag1;
-    phi2 = (fvc::interpolate(U2) & mesh.Sf()) + fvc::ddtPhiCorr(rAU2, U2, phi2)
-        + phiDrag2;
+    surfaceScalarField phiHbyA1
+    (
+        (fvc::interpolate(HbyA1) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU1, U1, phi1)
+      + phiDrag1
+    );
 
-    phi = alpha1f*phi1 + alpha2f*phi2;
+    surfaceScalarField phiHbyA2
+    (
+        (fvc::interpolate(HbyA2) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU2, U2, phi2)
+      + phiDrag2
+    );
+
+    surfaceScalarField phiHbyA("phiHbyA", alpha1f*phiHbyA1 + alpha2f*phiHbyA2);
 
     surfaceScalarField Dp
     (
-        "(rho*(1|A(U)))",
+        "Dp",
         alpha1f*rAU1f/rho1 + alpha2f*rAU2f/rho2
     );
 
@@ -46,7 +60,7 @@
     {
         fvScalarMatrix pEqn
         (
-            fvm::laplacian(Dp, p) == fvc::div(phi)
+            fvm::laplacian(Dp, p) == fvc::div(phiHbyA)
         );
 
         pEqn.setReference(pRefCell, pRefValue);
@@ -57,19 +71,17 @@
         {
             surfaceScalarField SfGradp(pEqn.flux()/Dp);
 
-            phi1 -= rAU1f*SfGradp/rho1;
-            phi2 -= rAU2f*SfGradp/rho2;
+            phi1 = phiHbyA1 - rAU1f*SfGradp/rho1;
+            phi2 = phiHbyA2 - rAU2f*SfGradp/rho2;
             phi = alpha1f*phi1 + alpha2f*phi2;
 
             p.relax();
             SfGradp = pEqn.flux()/Dp;
 
-            U1 += (fvc::reconstruct(phiDrag1 - rAU1f*SfGradp/rho1));
-            //U1 += rAU1*(fvc::reconstruct(phiDrag1/rAU1f - SfGradp/rho1));
+            U1 = HbyA1 + (fvc::reconstruct(phiDrag1 - rAU1f*SfGradp/rho1));
             U1.correctBoundaryConditions();
 
-            U2 += (fvc::reconstruct(phiDrag2 - rAU2f*SfGradp/rho2));
-            //U2 += rAU2*(fvc::reconstruct(phiDrag2/rAU2f - SfGradp/rho2));
+            U2 = HbyA2 + (fvc::reconstruct(phiDrag2 - rAU2f*SfGradp/rho2));
             U2.correctBoundaryConditions();
 
             U = alpha1*U1 + alpha2*U2;

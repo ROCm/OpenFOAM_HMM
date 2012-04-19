@@ -5,7 +5,7 @@
     rho.relax();
 
     volScalarField rAU(1.0/UEqn().A());
-    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
+    surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 
     U = rAU*UEqn().H();
     UEqn.clear();
@@ -15,8 +15,8 @@
     dimensionedScalar compressibility = fvc::domainIntegrate(psi);
     bool compressible = (compressibility.value() > SMALL);
 
-    surfaceScalarField buoyancyPhi(rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
-    phi -= buoyancyPhi;
+    surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
+    phi += phig;
 
     // Solve pressure
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -44,7 +44,7 @@
 
             // Correct the momentum source with the pressure gradient flux
             // calculated from the relaxed pressure
-            U -= rAU*fvc::reconstruct((buoyancyPhi + p_rghEqn.flux())/rhorAUf);
+            U += rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
         }
     }
