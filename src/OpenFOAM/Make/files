@@ -314,6 +314,12 @@ $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
 meshes/lduMesh/lduMesh.C
 
+LduMatrix = matrices/LduMatrix
+$(LduMatrix)/LduMatrix/lduMatrices.C
+$(LduMatrix)/Smoothers/lduSmoothers.C
+$(LduMatrix)/Preconditioners/lduPreconditioners.C
+$(LduMatrix)/Solvers/lduSolvers.C
+
 primitiveShapes = meshes/primitiveShapes
 
 $(primitiveShapes)/line/line.C

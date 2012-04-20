@@ -142,7 +142,8 @@ class fvMatrix
         mutable GeometricField<Type, fvsPatchField, surfaceMesh>
             *faceFluxCorrectionPtr_;
 
-protected:
+// ***HGW for testing LduMatrix protected:
+public:
 
     //- Declare friendship with the fvSolver class
     friend class fvSolver;
