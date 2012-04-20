@@ -22,7 +22,7 @@ boundaryField
 {
     walls
     {
-        type               multiphaseFixedFluxPressure;
+        type               fixedFluxPressure;
         value              $internalField;
     }
     outlet
@@ -32,7 +32,7 @@ boundaryField
     }
     inlet
     {
-        type               multiphaseFixedFluxPressure;
+        type               fixedFluxPressure;
         value              $internalField;
     }
     frontAndBackPlanes

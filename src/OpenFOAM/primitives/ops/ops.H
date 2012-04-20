@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,6 +142,10 @@ Op(minMod, minMod(x, y))
 Op(and, x && y)
 Op(or, x || y)
 Op(eqEq, x == y)
+Op(less, x < y)
+Op(lessEq, x <= y)
+Op(greater, x > y)
+Op(greaterEq, x >= y)
 
 #undef Op
 

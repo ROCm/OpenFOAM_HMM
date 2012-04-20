@@ -8,6 +8,7 @@
 
     surfaceScalarField phiHbyA
     (
+        "phiHbyA",
         fvc::interpolate(rho)
        *(
            (fvc::interpolate(HbyA) & mesh.Sf())

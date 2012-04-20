@@ -107,6 +107,24 @@ namespace meshTools
             const point& pt
         );
 
+        //- Write obj representation of a line connecting two points
+        //  Need to keep track of points that have been added. count starts at 0
+        void writeOBJ
+        (
+            Ostream& os,
+            const point& p1,
+            const point& p2,
+            label& count
+        );
+
+        //- Write obj representation of a point p1 with a vector from p1 to p2
+        void writeOBJ
+        (
+            Ostream& os,
+            const point& p1,
+            const point& p2
+        );
+
         //- Write obj representation of faces subset
         void writeOBJ
         (

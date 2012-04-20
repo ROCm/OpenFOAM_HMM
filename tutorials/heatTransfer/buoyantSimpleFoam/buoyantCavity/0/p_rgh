@@ -23,25 +23,25 @@ boundaryField
 {
     frontAndBack
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 
     topAndBottom
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 
     hot
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 
     cold
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 }
