@@ -386,7 +386,7 @@ bool Foam::triSurface::read
     }
     else if (ext == "stlb")
     {
-        return readSTL(name);
+        return readSTLBINARY(name);
     }
     else if (ext == "gts")
     {
