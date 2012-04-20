@@ -23,19 +23,19 @@ boundaryField
 {
     inlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
     outlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
     sides
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
 }
 

@@ -23,7 +23,7 @@ boundaryField
 {
     outlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
 
@@ -41,13 +41,13 @@ boundaryField
 
     base
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
 
     inlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
 

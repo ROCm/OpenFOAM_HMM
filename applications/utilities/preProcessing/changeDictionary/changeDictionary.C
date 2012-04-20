@@ -253,6 +253,12 @@ int main(int argc, char *argv[])
         "file",
         "specify an alternative to system/changeDictionaryDict"
     );
+    argList::addOption
+    (
+        "instance",
+        "name",
+        "override instance setting (default is the time name)"
+    );
 
     // Add explicit time option
     timeSelector::addOptions();
@@ -280,6 +286,7 @@ int main(int argc, char *argv[])
             << "No times selected." << exit(FatalError);
     }
     runTime.setTime(times[0], 0);
+    word instance = args.optionLookupOrDefault("instance", runTime.timeName());
 
 
     #include "createNamedMesh.H"
@@ -465,7 +472,7 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     fieldName,
-                    runTime.timeName(),
+                    instance,
                     mesh,
                     IOobject::MUST_READ_IF_MODIFIED,
                     IOobject::NO_WRITE,

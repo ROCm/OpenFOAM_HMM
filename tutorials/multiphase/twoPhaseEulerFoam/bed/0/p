@@ -22,7 +22,7 @@ boundaryField
 {
     bottom
     {
-        type               multiphaseFixedFluxPressure;
+        type               fixedFluxPressure;
         value              $internalField;
     }
 
@@ -34,7 +34,7 @@ boundaryField
 
     walls
     {
-        type               multiphaseFixedFluxPressure;
+        type               fixedFluxPressure;
         value              $internalField;
     }
 

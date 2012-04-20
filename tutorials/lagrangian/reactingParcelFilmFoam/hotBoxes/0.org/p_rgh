@@ -23,12 +23,12 @@ boundaryField
 {
     walls
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 100000;
     }
     wallFilm
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 100000;
     }
 }

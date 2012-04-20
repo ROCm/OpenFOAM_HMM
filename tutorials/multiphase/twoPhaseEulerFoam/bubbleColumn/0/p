@@ -1901,7 +1901,7 @@ boundaryField
 {
     inlet
     {
-        type            multiphaseFixedFluxPressure;
+        type            fixedFluxPressure;
         value           uniform 0;
     }
 
@@ -1913,7 +1913,7 @@ boundaryField
 
     walls
     {
-        type            multiphaseFixedFluxPressure;
+        type            fixedFluxPressure;
         value           uniform 0;
     }
 
