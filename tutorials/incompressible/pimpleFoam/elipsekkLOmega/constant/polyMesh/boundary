@@ -15,37 +15,31 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
+4
 (
-    left
-    {
-        type            symmetryPlane;
-        nFaces          320;
-        startFace       99210;
-    }
     outlet
     {
         type            patch;
         nFaces          320;
-        startFace       99530;
+        startFace       99370;
     }
     up
     {
         type            symmetryPlane;
         nFaces          380;
-        startFace       99850;
+        startFace       99690;
     }
     hole
     {
         type            wall;
         nFaces          560;
-        startFace       100230;
+        startFace       100070;
     }
     frontAndBack
     {
         type            empty;
         nFaces          100000;
-        startFace       100790;
+        startFace       100630;
     }
 )
 

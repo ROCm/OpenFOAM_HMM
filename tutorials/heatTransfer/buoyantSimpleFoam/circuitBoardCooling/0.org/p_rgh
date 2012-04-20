@@ -23,22 +23,22 @@ boundaryField
 {
     floor
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
     ceiling
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
     inlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
     outlet
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
     fixedWalls
