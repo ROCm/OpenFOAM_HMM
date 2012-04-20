@@ -227,7 +227,7 @@ void Foam::meshTools::writeOBJ
     os << "v" << ' ' << p2.x() << ' ' << p2.y() << ' ' << p2.z() << endl;
 
     os << "l" << " " << (count + 1) << " " << (count + 2) << endl;
-    
+
     count += 2;
 }
 
