@@ -218,6 +218,39 @@ void Foam::meshTools::writeOBJ
 void Foam::meshTools::writeOBJ
 (
     Ostream& os,
+    const point& p1,
+    const point& p2,
+    label& count
+)
+{
+    os << "v" << ' ' << p1.x() << ' ' << p1.y() << ' ' << p1.z() << endl;
+    os << "v" << ' ' << p2.x() << ' ' << p2.y() << ' ' << p2.z() << endl;
+
+    os << "l" << " " << (count + 1) << " " << (count + 2) << endl;
+    
+    count += 2;
+}
+
+
+void Foam::meshTools::writeOBJ
+(
+    Ostream& os,
+    const point& p1,
+    const point& p2
+)
+{
+    os << "v" << ' ' << p1.x() << ' ' << p1.y() << ' ' << p1.z() << endl;
+
+    os << "vn"
+        << ' ' << p2.x() - p1.x()
+        << ' ' << p2.y() - p1.y()
+        << ' ' << p2.z() - p1.z() << endl;
+}
+
+
+void Foam::meshTools::writeOBJ
+(
+    Ostream& os,
     const faceList& faces,
     const pointField& points,
     const labelList& faceLabels
