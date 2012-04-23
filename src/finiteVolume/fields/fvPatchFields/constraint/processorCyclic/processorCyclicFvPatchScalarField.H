@@ -38,9 +38,8 @@ namespace Foam
 //template<>
 //void processorCyclicFvPatchField<scalar>::initInterfaceMatrixUpdate
 //(
-//    const scalarField&,
 //    scalarField&,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField&,
 //    const direction,
 //    const Pstream::commsTypes commsType
@@ -50,9 +49,8 @@ namespace Foam
 //template<>
 //void processorCyclicFvPatchField<scalar>::updateInterfaceMatrix
 //(
-//    const scalarField&,
 //    scalarField& result,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField& coeffs,
 //    const direction,
 //    const Pstream::commsTypes commsType

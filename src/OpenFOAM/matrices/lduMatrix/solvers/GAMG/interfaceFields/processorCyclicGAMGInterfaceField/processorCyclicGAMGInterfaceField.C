@@ -63,9 +63,8 @@ Foam::processorCyclicGAMGInterfaceField::~processorCyclicGAMGInterfaceField()
 
 //void Foam::processorCyclicGAMGInterfaceField::initInterfaceMatrixUpdate
 //(
-//    const scalarField& psiInternal,
 //    scalarField&,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField&,
 //    const direction,
 //    const Pstream::commsTypes commsType
@@ -81,9 +80,8 @@ Foam::processorCyclicGAMGInterfaceField::~processorCyclicGAMGInterfaceField()
 //
 //void Foam::processorCyclicGAMGInterfaceField::updateInterfaceMatrix
 //(
-//    const scalarField&,
 //    scalarField& result,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField& coeffs,
 //    const direction cmpt,
 //    const Pstream::commsTypes commsType

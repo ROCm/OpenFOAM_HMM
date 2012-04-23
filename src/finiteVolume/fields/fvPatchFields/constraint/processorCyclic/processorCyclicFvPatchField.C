@@ -227,9 +227,8 @@ processorCyclicFvPatchField<Type>::~processorCyclicFvPatchField()
 //template<class Type>
 //void processorCyclicFvPatchField<Type>::initInterfaceMatrixUpdate
 //(
-//    const scalarField& psiInternal,
 //    scalarField&,
-//    const lduMatrix&,
+//    const scalarField& psiInternal,
 //    const scalarField&,
 //    const direction,
 //    const Pstream::commsTypes commsType
@@ -246,9 +245,8 @@ processorCyclicFvPatchField<Type>::~processorCyclicFvPatchField()
 //template<class Type>
 //void processorCyclicFvPatchField<Type>::updateInterfaceMatrix
 //(
-//    const scalarField&,
 //    scalarField& result,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField& coeffs,
 //    const direction cmpt,
 //    const Pstream::commsTypes commsType
