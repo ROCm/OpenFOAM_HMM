@@ -35,9 +35,8 @@ namespace Foam
 template<>
 void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 (
-    const scalarField& psiInternal,
     scalarField&,
-    const lduMatrix&,
+    const scalarField& psiInternal,
     const scalarField&,
     const direction,
     const Pstream::commsTypes commsType
@@ -92,9 +91,8 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 template<>
 void processorFvPatchField<scalar>::updateInterfaceMatrix
 (
-    const scalarField&,
     scalarField& result,
-    const lduMatrix&,
+    const scalarField&,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType

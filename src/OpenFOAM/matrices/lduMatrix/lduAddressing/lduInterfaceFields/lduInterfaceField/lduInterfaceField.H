@@ -115,9 +115,8 @@ public:
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
             (
-                const scalarField&,
                 scalarField&,
-                const lduMatrix&,
+                const scalarField&,
                 const scalarField&,
                 const direction,
                 const Pstream::commsTypes commsType
@@ -145,9 +144,8 @@ public:
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
-                const scalarField&,
                 scalarField&,
-                const lduMatrix&,
+                const scalarField&,
                 const scalarField&,
                 const direction,
                 const Pstream::commsTypes commsType

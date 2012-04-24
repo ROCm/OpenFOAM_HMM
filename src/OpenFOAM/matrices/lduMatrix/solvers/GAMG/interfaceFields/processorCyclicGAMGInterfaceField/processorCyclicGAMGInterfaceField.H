@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,9 +111,8 @@ public:
 //            //- Initialise neighbour matrix update
 //            virtual void initInterfaceMatrixUpdate
 //            (
-//                const scalarField& psiInternal,
 //                scalarField& result,
-//                const lduMatrix& m,
+//                const scalarField& psiInternal,
 //                const scalarField& coeffs,
 //                const direction cmpt,
 //                const Pstream::commsTypes commsType
@@ -122,9 +121,8 @@ public:
 //            //- Update result field based on interface functionality
 //            virtual void updateInterfaceMatrix
 //            (
-//                const scalarField& psiInternal,
 //                scalarField& result,
-//                const lduMatrix&,
+//                const scalarField& psiInternal,
 //                const scalarField& coeffs,
 //                const direction cmpt,
 //                const Pstream::commsTypes commsType
