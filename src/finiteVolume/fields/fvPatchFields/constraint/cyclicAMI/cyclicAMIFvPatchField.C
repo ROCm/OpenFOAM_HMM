@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,9 +202,8 @@ Foam::cyclicAMIFvPatchField<Type>::neighbourPatchField() const
 template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 (
-    const scalarField& psiInternal,
     scalarField& result,
-    const lduMatrix&,
+    const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes

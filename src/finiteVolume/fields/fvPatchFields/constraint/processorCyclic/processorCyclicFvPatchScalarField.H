@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,9 +38,8 @@ namespace Foam
 //template<>
 //void processorCyclicFvPatchField<scalar>::initInterfaceMatrixUpdate
 //(
-//    const scalarField&,
 //    scalarField&,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField&,
 //    const direction,
 //    const Pstream::commsTypes commsType
@@ -50,9 +49,8 @@ namespace Foam
 //template<>
 //void processorCyclicFvPatchField<scalar>::updateInterfaceMatrix
 //(
-//    const scalarField&,
 //    scalarField& result,
-//    const lduMatrix&,
+//    const scalarField&,
 //    const scalarField& coeffs,
 //    const direction,
 //    const Pstream::commsTypes commsType
