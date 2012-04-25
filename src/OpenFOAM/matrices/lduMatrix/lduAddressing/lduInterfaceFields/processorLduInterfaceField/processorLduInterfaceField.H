@@ -87,6 +87,10 @@ public:
             virtual int rank() const = 0;
 
 
+        //- Transform given patch field
+        template<class Type>
+        void transformCoupleField(Field<Type>& f) const;
+
         //- Transform given patch component field
         void transformCoupleField
         (
@@ -99,6 +103,30 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "tensorField.H"
+
+template<class Type>
+void Foam::processorLduInterfaceField::transformCoupleField
+(
+    Field<Type>& f
+) const
+{
+    if (doTransform())
+    {
+        if (forwardT().size() == 1)
+        {
+            transform(f, forwardT()[0], f);
+        }
+        else
+        {
+            transform(f, forwardT(), f);
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

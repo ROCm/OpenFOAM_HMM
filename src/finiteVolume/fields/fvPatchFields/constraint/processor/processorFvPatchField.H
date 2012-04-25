@@ -64,6 +64,9 @@ class processorFvPatchField
             //- Send buffer.
             mutable Field<Type> sendBuf_;
 
+            //- Receive buffer.
+            mutable Field<Type> receiveBuf_;
+
             //- Outstanding request
             mutable label outstandingSendRequest_;
 
@@ -184,6 +187,9 @@ public:
             //- Return patch-normal gradient
             virtual tmp<Field<Type> > snGrad() const;
 
+            //- Is all data available
+            virtual bool ready() const;
+
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
             (
@@ -194,9 +200,6 @@ public:
                 const Pstream::commsTypes commsType
             ) const;
 
-            //- Is all data available
-            virtual bool ready() const;
-
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
@@ -206,6 +209,25 @@ public:
                 const direction cmpt,
                 const Pstream::commsTypes commsType
             ) const;
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                Field<Type>& result,
+                const Field<Type>& psiInternal,
+                const scalarField& coeffs,
+                const Pstream::commsTypes commsType
+            ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>& result,
+                const Field<Type>& psiInternal,
+                const scalarField& coeffs,
+                const Pstream::commsTypes commsType
+            ) const;
+
 
         //- Processor coupled interface functions
 

@@ -150,13 +150,18 @@ Foam::TPBiCG<Type, DType, LUType>::solve(Field<Type>& psi) const
 
             // --- Update preconditioned residuals
             this->matrix_.Amul(wA, pA);
-
             this->matrix_.Tmul(wT, pT);
 
             Type wApT = gSumCmptProd(wA, pT);
 
             // --- Test for singularity
-            if (solverPerf.singular(cmptDivide(cmptMag(wApT), normFactor)))
+            if
+            (
+                solverPerf.checkSingularity
+                (
+                    cmptDivide(cmptMag(wApT), normFactor)
+                )
+            )
             {
                 break;
             }

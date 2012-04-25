@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
                         "{"
                         "    solver           PBiCG;"
                         "    preconditioner   DILU;"
-                        "    tolerance        (1e-13 1e-13 1e-13);"
+                        "    tolerance        (1e-5 1e-5 1);"
                         "    relTol           (0 0 0);"
                         "}"
                     )()

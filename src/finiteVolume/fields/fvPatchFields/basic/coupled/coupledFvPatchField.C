@@ -39,7 +39,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(p)),
+    LduInterfaceField<Type>(refCast<const lduInterface>(p)),
     fvPatchField<Type>(p, iF)
 {}
 
@@ -52,7 +52,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const Field<Type>& f
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(p)),
+    LduInterfaceField<Type>(refCast<const lduInterface>(p)),
     fvPatchField<Type>(p, iF, f)
 {}
 
@@ -66,7 +66,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(p)),
+    LduInterfaceField<Type>(refCast<const lduInterface>(p)),
     fvPatchField<Type>(ptf, p, iF, mapper)
 {}
 
@@ -79,7 +79,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const dictionary& dict
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(p)),
+    LduInterfaceField<Type>(refCast<const lduInterface>(p)),
     fvPatchField<Type>(p, iF, dict)
 {}
 
@@ -90,7 +90,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const coupledFvPatchField<Type>& ptf
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(ptf.patch())),
+    LduInterfaceField<Type>(refCast<const lduInterface>(ptf.patch())),
     fvPatchField<Type>(ptf)
 {}
 
@@ -102,7 +102,7 @@ coupledFvPatchField<Type>::coupledFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(ptf.patch())),
+    LduInterfaceField<Type>(refCast<const lduInterface>(ptf.patch())),
     fvPatchField<Type>(ptf, iF)
 {}
 

@@ -24,7 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TPCG.H"
-#include "TPBiCG.H"
+//#include "TPBiCG.H"
+#include "PBiCGScalarAlpha.H"
 #include "SmoothSolver.H"
 #include "fieldTypes.H"
 
@@ -46,7 +47,7 @@ License
 
 namespace Foam
 {
-    makeLduSolvers(scalar, scalar, scalar);
+    //makeLduSolvers(scalar, scalar, scalar);
     makeLduSolvers(vector, scalar, scalar);
     makeLduSolvers(sphericalTensor, scalar, scalar);
     makeLduSolvers(symmTensor, scalar, scalar);

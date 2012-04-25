@@ -143,7 +143,13 @@ Foam::TPCG<Type, DType, LUType>::solve(Field<Type>& psi) const
 
 
             // --- Test for singularity
-            if (solverPerf.singular(cmptDivide(cmptMag(wApA), normFactor)))
+            if
+            (
+                solverPerf.checkSingularity
+                (
+                    cmptDivide(cmptMag(wApA), normFactor)
+                )
+            )
             {
                 break;
             }

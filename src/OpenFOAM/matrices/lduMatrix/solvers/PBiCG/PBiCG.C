@@ -167,9 +167,11 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 
             scalar wApT = gSumProd(wA, pT);
 
-
             // --- Test for singularity
-            if (solverPerf.checkSingularity(mag(wApT)/normFactor)) break;
+            if (solverPerf.checkSingularity(mag(wApT)/normFactor))
+            {
+                break;
+            }
 
 
             // --- Update solution and residual:

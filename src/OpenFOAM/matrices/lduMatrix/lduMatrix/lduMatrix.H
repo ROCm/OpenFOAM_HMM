@@ -210,7 +210,7 @@ public:
                 return singular_;
             }
 
-            //- Convergence test
+            //- Check, store and return convergence
             bool checkConvergence
             (
                 const scalar tolerance,
@@ -222,6 +222,7 @@ public:
 
             //- Print summary of solver performance
             void print() const;
+
 
         // Member Operators
 

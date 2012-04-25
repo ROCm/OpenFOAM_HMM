@@ -126,7 +126,7 @@ Foam::TPBiCG<Type, DType, LUType>::solve
 
             // --- Update search directions:
             //wArT = gSumProd(wA, rT);
-            wArT = sum(wA & rT);
+            wArT = gSum(wA && rT);
 
             if (solverPerf.nIterations() == 0)
             {
@@ -138,7 +138,7 @@ Foam::TPBiCG<Type, DType, LUType>::solve
             }
             else
             {
-                scalar beta = cmptDivide(wArT, wArTold);
+                scalar beta = wArT/wArTold;
 
                 for (register label cell=0; cell<nCells; cell++)
                 {
@@ -152,19 +152,24 @@ Foam::TPBiCG<Type, DType, LUType>::solve
             this->matrix_.Amul(wA, pA);
             this->matrix_.Tmul(wT, pT);
 
-            scalar wApT = sum(wA & pT);
-
+            scalar wApT = gSum(wA && pT);
 
             // --- Test for singularity
-            //if
-            //(
-            //    solverPerf.checkSingularity(ratio(mag(wApT)normFactor))
-            //) break;
+            if
+            (
+                solverPerf.checkSingularity
+                (
+                    cmptDivide(Type::one*mag(wApT), normFactor)
+                )
+            )
+            {
+                break;
+            }
 
 
             // --- Update solution and residual:
 
-            scalar alpha = cmptDivide(wArT, wApT);
+            scalar alpha = wArT/wApT;
 
             for (register label cell=0; cell<nCells; cell++)
             {

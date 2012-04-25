@@ -111,7 +111,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
         );
 
         lduInterfaceFieldPtrsList interfaces =
-            psi.boundaryField().interfaces();
+            psi.boundaryField().scalarInterfaces();
 
         // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
         // bouCoeffsCmpt for the explicit part of the coupled boundary
@@ -245,7 +245,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fvMatrix<Type>::residual() const
                 psiCmpt,
                 res.component(cmpt) - boundaryDiagCmpt*psiCmpt,
                 bouCoeffsCmpt,
-                psi_.boundaryField().interfaces(),
+                psi_.boundaryField().scalarInterfaces(),
                 cmpt
             )
         );
