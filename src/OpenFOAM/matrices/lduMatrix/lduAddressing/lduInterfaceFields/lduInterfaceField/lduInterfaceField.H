@@ -73,6 +73,7 @@ class lduInterfaceField
         //- Disallow default bitwise assignment
         void operator=(const lduInterfaceField&);
 
+
 public:
 
     //- Runtime type information
@@ -112,17 +113,6 @@ public:
 
         // Coupled interface matrix update
 
-            //- Initialise neighbour matrix update
-            virtual void initInterfaceMatrixUpdate
-            (
-                scalarField&,
-                const scalarField&,
-                const scalarField&,
-                const direction,
-                const Pstream::commsTypes commsType
-            ) const
-            {}
-
             //- Whether matrix has been updated
             bool updatedMatrix() const
             {
@@ -140,6 +130,17 @@ public:
             {
                 return true;
             }
+
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
+            (
+                scalarField&,
+                const scalarField&,
+                const scalarField&,
+                const direction,
+                const Pstream::commsTypes commsType
+            ) const
+            {}
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix

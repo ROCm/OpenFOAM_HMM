@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,12 @@ void scalarField::replace(const direction, const scalar& s);
 void stabilise(scalarField& Res, const UList<scalar>& sf, const scalar s);
 tmp<scalarField> stabilise(const UList<scalar>&, const scalar s);
 tmp<scalarField> stabilise(const tmp<scalarField>&, const scalar s);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

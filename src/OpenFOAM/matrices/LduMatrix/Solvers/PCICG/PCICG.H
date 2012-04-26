@@ -21,46 +21,88 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::PCICG
+
+Description
+    Preconditioned conjugate gradient solver for symmetric lduMatrices
+    using a run-time selectable preconditiioner.
+
+SourceFiles
+    PCICG.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicFvPatchScalarField_H
-#define processorCyclicFvPatchScalarField_H
+#ifndef PCICG_H
+#define PCICG_H
 
-#include "processorCyclicFvPatchField.H"
+#include "LduMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                           Class PCICG Declaration
+\*---------------------------------------------------------------------------*/
 
-//template<>
-//void processorCyclicFvPatchField<scalar>::initInterfaceMatrixUpdate
-//(
-//    scalarField&,
-//    const scalarField&,
-//    const scalarField&,
-//    const direction,
-//    const Pstream::commsTypes commsType
-//) const;
-//
-//
-//template<>
-//void processorCyclicFvPatchField<scalar>::updateInterfaceMatrix
-//(
-//    scalarField& result,
-//    const scalarField&,
-//    const scalarField& coeffs,
-//    const direction,
-//    const Pstream::commsTypes commsType
-//) const;
+template<class Type, class DType, class LUType>
+class PCICG
+:
+    public LduMatrix<Type, DType, LUType>::solver
+{
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        PCICG(const PCICG&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const PCICG&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("PCICG");
+
+
+    // Constructors
+
+        //- Construct from matrix components and solver data dictionary
+        PCICG
+        (
+            const word& fieldName,
+            const LduMatrix<Type, DType, LUType>& matrix,
+            const dictionary& solverDict
+        );
+
+
+    // Destructor
+
+        virtual ~PCICG()
+        {}
+
+
+    // Member Functions
+
+        //- Solve the matrix with this solver
+        virtual typename LduMatrix<Type, DType, LUType>::solverPerformance solve
+        (
+            Field<Type>& psi
+        ) const;
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "PCICG.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

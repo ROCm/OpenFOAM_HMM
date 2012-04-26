@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,13 +36,18 @@ SourceFiles
 #ifndef LduInterfaceField_H
 #define LduInterfaceField_H
 
-#include "lduInterface.H"
-#include "Field.H"
+#include "lduInterfaceField.H"
+#include "primitiveFieldsFwd.H"
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+class lduMatrix;
 
 /*---------------------------------------------------------------------------*\
                      Class LduInterfaceField Declaration
@@ -50,13 +55,9 @@ namespace Foam
 
 template<class Type>
 class LduInterfaceField
+:
+    public lduInterfaceField
 {
-    // Private data
-
-        //- Reference to the coupled patch this field is defined for
-        const lduInterface& interface_;
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -68,61 +69,33 @@ class LduInterfaceField
 
 public:
 
-        class Amultiplier
-        {
-        public:
-
-            Amultiplier()
-            {}
-
-            virtual ~Amultiplier()
-            {}
-
-            virtual void addAmul
-            (
-                Field<Type>& Apsi,
-                const Field<Type>& psi
-            ) const = 0;
-        };
-
-
     //- Runtime type information
     TypeName("LduInterfaceField");
 
 
     // Constructors
 
-        //- Construct given interface
-        LduInterfaceField(const lduInterface& interface)
+        //- Construct given coupled patch
+        LduInterfaceField(const lduInterface& patch)
         :
-            interface_(interface)
+            lduInterfaceField(patch)
         {}
 
 
-    // Destructor
-
-        virtual ~LduInterfaceField();
+    //- Destructor
+    virtual ~LduInterfaceField();
 
 
     // Member Functions
 
-        // Access
-
-            //- Return the interface
-            const lduInterface& interface() const
-            {
-                return interface_;
-            }
-
-
-        // Coupled interface matrix update
+        // Coupled interface functionality
 
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
             (
-                Field<Type>& Apsi,
-                const Field<Type>& psi,
-                const Amultiplier&,
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
                 const Pstream::commsTypes commsType
             ) const
             {}
@@ -130,9 +103,9 @@ public:
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
-                Field<Type>& Apsi,
-                const Field<Type>& psi,
-                const Amultiplier&,
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
                 const Pstream::commsTypes commsType
             ) const = 0;
 };
@@ -141,6 +114,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "LduInterfaceField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

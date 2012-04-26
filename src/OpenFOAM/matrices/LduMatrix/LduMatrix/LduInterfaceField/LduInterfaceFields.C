@@ -23,44 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorLduInterfaceField.H"
-#include "diagTensorField.H"
+#include "LduInterfaceField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    //defineTypeNameAndDebug(processorLduInterfaceField, 0);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorLduInterfaceField<Type>::~processorLduInterfaceField()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::processorLduInterfaceField<Type>::transformCoupleField
+defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::scalar>, 0);
+defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::vector>, 0);
+defineTemplateTypeNameAndDebug
 (
-    Field<Type>& f
-) const
-{
-    if (doTransform())
-    {
-        if (forwardT().size() == 1)
-        {
-            transform(f, forwardT()[0], f);
-        }
-        else
-        {
-            transform(f, forwardT(), f);
-        }
-    }
-}
-
+    Foam::LduInterfaceField<Foam::sphericalTensor>,
+    0
+);
+defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::symmTensor>, 0);
+defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::tensor>, 0);
 
 // ************************************************************************* //

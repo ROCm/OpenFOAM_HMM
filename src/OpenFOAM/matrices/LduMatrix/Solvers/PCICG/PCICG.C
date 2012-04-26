@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TPCG.H"
+#include "PCICG.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-Foam::TPCG<Type, DType, LUType>::TPCG
+Foam::PCICG<Type, DType, LUType>::PCICG
 (
     const word& fieldName,
     const LduMatrix<Type, DType, LUType>& matrix,
@@ -48,7 +48,7 @@ Foam::TPCG<Type, DType, LUType>::TPCG
 
 template<class Type, class DType, class LUType>
 typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
-Foam::TPCG<Type, DType, LUType>::solve(Field<Type>& psi) const
+Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
     word preconditionerName(this->controlDict_.lookup("preconditioner"));
 
@@ -143,7 +143,13 @@ Foam::TPCG<Type, DType, LUType>::solve(Field<Type>& psi) const
 
 
             // --- Test for singularity
-            if (solverPerf.singular(cmptDivide(cmptMag(wApA), normFactor)))
+            if
+            (
+                solverPerf.checkSingularity
+                (
+                    cmptDivide(cmptMag(wApA), normFactor)
+                )
+            )
             {
                 break;
             }

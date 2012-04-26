@@ -151,7 +151,7 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 
     if (&psiInternal == &this->internalField())
     {
-        tmp<Field<scalar> > tjf = jump();
+        tmp<Field<scalar> > tjf = jump()().component(cmpt);
         if (!this->cyclicPatch().owner())
         {
             tjf = -tjf;
@@ -173,6 +173,54 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 
     // Transform according to the transformation tensors
     this->transformCoupleField(pnf, cmpt);
+
+    // Multiply the field by coefficients and add into the result
+    const labelUList& faceCells = this->cyclicPatch().faceCells();
+    forAll(faceCells, elemI)
+    {
+        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+    }
+}
+
+
+template<class Type>
+void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
+(
+    Field<Type>& result,
+    const Field<Type>& psiInternal,
+    const scalarField& coeffs,
+    const Pstream::commsTypes
+) const
+{
+    Field<Type> pnf(this->size());
+
+    const labelUList& nbrFaceCells =
+        this->cyclicPatch().neighbFvPatch().faceCells();
+
+    if (&psiInternal == &this->internalField())
+    {
+        tmp<Field<Type> > tjf = jump();
+        if (!this->cyclicPatch().owner())
+        {
+            tjf = -tjf;
+        }
+        const Field<Type>& jf = tjf();
+
+        forAll(*this, facei)
+        {
+            pnf[facei] = psiInternal[nbrFaceCells[facei]] - jf[facei];
+        }
+    }
+    else
+    {
+        forAll(*this, facei)
+        {
+            pnf[facei] = psiInternal[nbrFaceCells[facei]];
+        }
+    }
+
+    // Transform according to the transformation tensors
+    this->transformCoupleField(pnf);
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = this->cyclicPatch().faceCells();

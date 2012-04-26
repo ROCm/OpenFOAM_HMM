@@ -198,18 +198,40 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    scalarField pnf(this->size());
-
     const labelUList& nbrFaceCells =
         cyclicPatch().cyclicPatch().neighbPatch().faceCells();
 
-    forAll(pnf, facei)
-    {
-        pnf[facei] = psiInternal[nbrFaceCells[facei]];
-    }
+    scalarField pnf(psiInternal, nbrFaceCells);
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
+
+    // Multiply the field by coefficients and add into the result
+    const labelUList& faceCells = cyclicPatch_.faceCells();
+
+    forAll(faceCells, elemI)
+    {
+        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+    }
+}
+
+
+template<class Type>
+void cyclicFvPatchField<Type>::updateInterfaceMatrix
+(
+    Field<Type>& result,
+    const Field<Type>& psiInternal,
+    const scalarField& coeffs,
+    const Pstream::commsTypes
+) const
+{
+    const labelUList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
+
+    Field<Type> pnf(psiInternal, nbrFaceCells);
+
+    // Transform according to the transformation tensors
+    transformCoupleField(pnf);
 
     // Multiply the field by coefficients and add into the result
     const labelUList& faceCells = cyclicPatch_.faceCells();

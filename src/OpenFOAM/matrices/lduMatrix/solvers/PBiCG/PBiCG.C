@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,9 +167,11 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 
             scalar wApT = gSumProd(wA, pT);
 
-
             // --- Test for singularity
-            if (solverPerf.checkSingularity(mag(wApT)/normFactor)) break;
+            if (solverPerf.checkSingularity(mag(wApT)/normFactor))
+            {
+                break;
+            }
 
 
             // --- Update solution and residual:

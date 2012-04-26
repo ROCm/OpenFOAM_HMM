@@ -15,7 +15,9 @@ then
            CGAL_LIBDIR=-L$CGAL_ARCH_PATH/lib \
            LAPACK_LIB=-llapack \
            BLAS_LIB=-lblas \
-           CGAL_LIB=-lCGAL"
+           CGAL_LIB=-lCGAL \
+           CGAL_BOOST_LIB=-lboost_thread \
+           CGAL_MPFR_LIB=-lmpfr"
 else
     echo
     echo "Compiling surfaceFeatureExtract without CGAL curvature support"
