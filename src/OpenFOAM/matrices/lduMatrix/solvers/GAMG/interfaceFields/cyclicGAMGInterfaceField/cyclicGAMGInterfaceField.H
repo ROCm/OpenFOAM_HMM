@@ -105,19 +105,6 @@ public:
             }
 
 
-        // Interface matrix update
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                scalarField& result,
-                const scalarField& psiInternal,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const Pstream::commsTypes commsType
-            ) const;
-
-
         //- Cyclic interface functions
 
             //- Does the interface field perform the transfromation
@@ -143,6 +130,19 @@ public:
             {
                 return rank_;
             }
+
+
+        // Interface matrix update
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                scalarField& result,
+                const scalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction cmpt,
+                const Pstream::commsTypes commsType
+            ) const;
 };
 
 
