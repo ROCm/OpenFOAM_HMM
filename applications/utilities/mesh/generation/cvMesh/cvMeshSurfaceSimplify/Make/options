@@ -14,6 +14,8 @@ EXE_INC = \
 
 EXE_LIBS = \
     $(CGAL_LIBS) \
+    -lboost_thread \
+    -lmpfr \
     -L$(FASTDUALOCTREE_SRC_PATH) -lperf_main \
     -lGL \
     -lconformalVoronoiMesh \
