@@ -88,6 +88,24 @@ tmp<scalarField> stabilise(const tmp<scalarField>& tsf, const scalar s)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<>
+scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2)
+{
+    if (f1.size() && (f1.size() == f2.size()))
+    {
+        scalar SumProd = 0.0;
+        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, scalar, f1, *, scalar, f2)
+        return SumProd;
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 BINARY_TYPE_OPERATOR(scalar, scalar, scalar, +, add)
 BINARY_TYPE_OPERATOR(scalar, scalar, scalar, -, subtract)
 

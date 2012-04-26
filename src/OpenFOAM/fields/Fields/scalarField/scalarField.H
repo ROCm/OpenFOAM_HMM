@@ -74,6 +74,12 @@ tmp<scalarField> stabilise(const tmp<scalarField>&, const scalar s);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<>
+scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 BINARY_TYPE_OPERATOR(scalar, scalar, scalar, +, add)
 BINARY_TYPE_OPERATOR(scalar, scalar, scalar, -, subtract)
 

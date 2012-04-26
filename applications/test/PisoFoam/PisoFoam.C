@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
                         "{"
                         "    /*solver          SmoothSolver;*/"
                         "    smoother        GaussSeidel;"
-                        "    solver           PBiCG;"
+                        "    solver           PBiCCCG;"
                         "    preconditioner   DILU;"
                         "    tolerance        (1e-7 1e-7 1);"
                         "    relTol           (0 0 0);"

@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TPBiCG.H"
+#include "PCICG.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-Foam::TPBiCG<Type, DType, LUType>::TPBiCG
+Foam::PCICG<Type, DType, LUType>::PCICG
 (
     const word& fieldName,
     const LduMatrix<Type, DType, LUType>& matrix,
@@ -48,7 +48,7 @@ Foam::TPBiCG<Type, DType, LUType>::TPBiCG
 
 template<class Type, class DType, class LUType>
 typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
-Foam::TPBiCG<Type, DType, LUType>::solve(Field<Type>& psi) const
+Foam::PCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
     word preconditionerName(this->controlDict_.lookup("preconditioner"));
 
@@ -66,27 +66,18 @@ Foam::TPBiCG<Type, DType, LUType>::solve(Field<Type>& psi) const
     Field<Type> pA(nCells);
     Type* __restrict__ pAPtr = pA.begin();
 
-    Field<Type> pT(nCells, pTraits<Type>::zero);
-    Type* __restrict__ pTPtr = pT.begin();
-
     Field<Type> wA(nCells);
     Type* __restrict__ wAPtr = wA.begin();
 
-    Field<Type> wT(nCells);
-    Type* __restrict__ wTPtr = wT.begin();
+    Type wArA = this->matrix_.great_*pTraits<Type>::one;
+    Type wArAold = wArA;
 
-    Type wArT = this->matrix_.great_*pTraits<Type>::one;
-    Type wArTold = wArT;
-
-    // --- Calculate A.psi and T.psi
+    // --- Calculate A.psi
     this->matrix_.Amul(wA, psi);
-    this->matrix_.Tmul(wT, psi);
 
-    // --- Calculate initial residual and transpose residual fields
+    // --- Calculate initial residual field
     Field<Type> rA(this->matrix_.source() - wA);
-    Field<Type> rT(this->matrix_.source() - wT);
     Type* __restrict__ rAPtr = rA.begin();
-    Type* __restrict__ rTPtr = rT.begin();
 
     // --- Calculate normalisation factor
     Type normFactor = this->normFactor(psi, wA, pA);
@@ -114,52 +105,49 @@ Foam::TPBiCG<Type, DType, LUType>::solve(Field<Type>& psi) const
         // --- Solver iteration
         do
         {
-            // --- Store previous wArT
-            wArTold = wArT;
+            // --- Store previous wArA
+            wArAold = wArA;
 
-            // --- Precondition residuals
+            // --- Precondition residual
             preconPtr->precondition(wA, rA);
-            preconPtr->preconditionT(wT, rT);
 
             // --- Update search directions:
-            wArT = gSumCmptProd(wA, rT);
+            wArA = gSumCmptProd(wA, rA);
 
             if (solverPerf.nIterations() == 0)
             {
                 for (register label cell=0; cell<nCells; cell++)
                 {
                     pAPtr[cell] = wAPtr[cell];
-                    pTPtr[cell] = wTPtr[cell];
                 }
             }
             else
             {
                 Type beta = cmptDivide
                 (
-                    wArT,
-                    stabilise(wArTold, this->matrix_.vsmall_)
+                    wArA,
+                    stabilise(wArAold, this->matrix_.vsmall_)
                 );
 
                 for (register label cell=0; cell<nCells; cell++)
                 {
                     pAPtr[cell] = wAPtr[cell] + cmptMultiply(beta, pAPtr[cell]);
-                    pTPtr[cell] = wTPtr[cell] + cmptMultiply(beta, pTPtr[cell]);
                 }
             }
 
 
-            // --- Update preconditioned residuals
+            // --- Update preconditioned residual
             this->matrix_.Amul(wA, pA);
-            this->matrix_.Tmul(wT, pT);
 
-            Type wApT = gSumCmptProd(wA, pT);
+            Type wApA = gSumCmptProd(wA, pA);
+
 
             // --- Test for singularity
             if
             (
                 solverPerf.checkSingularity
                 (
-                    cmptDivide(cmptMag(wApT), normFactor)
+                    cmptDivide(cmptMag(wApA), normFactor)
                 )
             )
             {
@@ -171,15 +159,14 @@ Foam::TPBiCG<Type, DType, LUType>::solve(Field<Type>& psi) const
 
             Type alpha = cmptDivide
             (
-                wArT,
-                stabilise(wApT, this->matrix_.vsmall_)
+                wArA,
+                stabilise(wApA, this->matrix_.vsmall_)
             );
 
             for (register label cell=0; cell<nCells; cell++)
             {
                 psiPtr[cell] += cmptMultiply(alpha, pAPtr[cell]);
                 rAPtr[cell] -= cmptMultiply(alpha, wAPtr[cell]);
-                rTPtr[cell] -= cmptMultiply(alpha, wTPtr[cell]);
             }
 
             solverPerf.finalResidual() =

@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "scalarField.H"
-
 #define TEMPLATE template<class Type>
 #include "FieldFunctionsM.H"
 
@@ -332,5 +330,6 @@ PRODUCT_OPERATOR(scalarProduct, &&, dotdot)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "undefFieldFunctionsM.H"
+#include "scalarField.H"
 
 // ************************************************************************* //

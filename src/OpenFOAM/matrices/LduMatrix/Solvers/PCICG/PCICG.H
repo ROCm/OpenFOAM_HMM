@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::TPBiCG
+    Foam::PCICG
 
 Description
-    Preconditioned bi-conjugate gradient solver for asymmetric lduMatrices
+    Preconditioned conjugate gradient solver for symmetric lduMatrices
     using a run-time selectable preconditiioner.
 
 SourceFiles
-    TPBiCG.C
+    PCICG.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TPBiCG_H
-#define TPBiCG_H
+#ifndef PCICG_H
+#define PCICG_H
 
 #include "LduMatrix.H"
 
@@ -44,33 +44,33 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class TPBiCG Declaration
+                           Class PCICG Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class DType, class LUType>
-class TPBiCG
+class PCICG
 :
     public LduMatrix<Type, DType, LUType>::solver
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        TPBiCG(const TPBiCG&);
+        PCICG(const PCICG&);
 
         //- Disallow default bitwise assignment
-        void operator=(const TPBiCG&);
+        void operator=(const PCICG&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("PBiCG");
+    TypeName("PCICG");
 
 
     // Constructors
 
         //- Construct from matrix components and solver data dictionary
-        TPBiCG
+        PCICG
         (
             const word& fieldName,
             const LduMatrix<Type, DType, LUType>& matrix,
@@ -80,7 +80,7 @@ public:
 
     // Destructor
 
-        virtual ~TPBiCG()
+        virtual ~PCICG()
         {}
 
 
@@ -101,7 +101,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "TPBiCG.C"
+#   include "PCICG.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

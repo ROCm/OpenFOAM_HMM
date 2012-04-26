@@ -23,9 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TPCG.H"
-//#include "TPBiCG.H"
-#include "PBiCGScalarAlpha.H"
+#include "PCICG.H"
+#include "PBiCCCG.H"
+#include "PBiCICG.H"
 #include "SmoothSolver.H"
 #include "fieldTypes.H"
 
@@ -35,11 +35,14 @@ License
     makeLduSymSolver(DiagonalSolver, Type, DType, LUType);                    \
     makeLduAsymSolver(DiagonalSolver, Type, DType, LUType);                   \
                                                                               \
-    makeLduSolver(TPCG, Type, DType, LUType);                                 \
-    makeLduSymSolver(TPCG, Type, DType, LUType);                              \
+    makeLduSolver(PCICG, Type, DType, LUType);                                \
+    makeLduSymSolver(PCICG, Type, DType, LUType);                             \
                                                                               \
-    makeLduSolver(TPBiCG, Type, DType, LUType);                               \
-    makeLduAsymSolver(TPBiCG, Type, DType, LUType);                           \
+    makeLduSolver(PBiCCCG, Type, DType, LUType);                              \
+    makeLduAsymSolver(PBiCCCG, Type, DType, LUType);                          \
+                                                                              \
+    makeLduSolver(PBiCICG, Type, DType, LUType);                              \
+    makeLduAsymSolver(PBiCICG, Type, DType, LUType);                          \
                                                                               \
     makeLduSolver(SmoothSolver, Type, DType, LUType);                         \
     makeLduSymSolver(SmoothSolver, Type, DType, LUType);                      \
@@ -47,7 +50,7 @@ License
 
 namespace Foam
 {
-    //makeLduSolvers(scalar, scalar, scalar);
+    makeLduSolvers(scalar, scalar, scalar);
     makeLduSolvers(vector, scalar, scalar);
     makeLduSolvers(sphericalTensor, scalar, scalar);
     makeLduSolvers(symmTensor, scalar, scalar);
