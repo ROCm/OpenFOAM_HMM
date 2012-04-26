@@ -185,6 +185,16 @@ public:
                 const Pstream::commsTypes commsType
             ) const = 0;
 
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const = 0;
+
+
         //- Write
         virtual void write(Ostream&) const;
 };

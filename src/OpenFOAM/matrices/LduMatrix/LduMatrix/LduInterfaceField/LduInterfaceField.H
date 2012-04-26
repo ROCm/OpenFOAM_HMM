@@ -88,33 +88,26 @@ public:
 
     // Member Functions
 
-        //- Initialise neighbour matrix update
-        virtual void initInterfaceMatrixUpdate
-        (
-            Field<Type>&,
-            const Field<Type>&,
-            const scalarField&,
-            const Pstream::commsTypes commsType
-        ) const
-        {}
+        // Coupled interface functionality
 
-        //- Update result field based on interface functionality
-        virtual void updateInterfaceMatrix
-        (
-            Field<Type>&,
-            const Field<Type>&,
-            const scalarField&,
-            const Pstream::commsTypes commsType
-        ) const // = 0;
-        {
-            notImplemented
+            //- Initialise neighbour matrix update
+            virtual void initInterfaceMatrixUpdate
             (
-                "updateInterfaceMatrix"
-                "(Field<Type>&, const Field<Type>&,"
-                "const scalarField&,"
-                "const Pstream::commsTypes commsType) const"
-            );
-        }
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const
+            {}
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const = 0;
 };
 
 

@@ -26,7 +26,7 @@ License
 #ifndef processorCyclicFvPatchFields_H
 #define processorCyclicFvPatchFields_H
 
-#include "processorCyclicFvPatchScalarField.H"
+#include "processorCyclicFvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

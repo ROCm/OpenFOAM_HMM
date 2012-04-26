@@ -59,47 +59,4 @@ Foam::processorCyclicGAMGInterfaceField::~processorCyclicGAMGInterfaceField()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//void Foam::processorCyclicGAMGInterfaceField::initInterfaceMatrixUpdate
-//(
-//    scalarField&,
-//    const scalarField&,
-//    const scalarField&,
-//    const direction,
-//    const Pstream::commsTypes commsType
-//) const
-//{
-//    procInterface_.compressedSend
-//    (
-//        commsType,
-//        procInterface_.interfaceInternalField(psiInternal)()
-//    );
-//}
-//
-//
-//void Foam::processorCyclicGAMGInterfaceField::updateInterfaceMatrix
-//(
-//    scalarField& result,
-//    const scalarField&,
-//    const scalarField& coeffs,
-//    const direction cmpt,
-//    const Pstream::commsTypes commsType
-//) const
-//{
-//    scalarField pnf
-//    (
-//        procInterface_.compressedReceive<scalar>(commsType, coeffs.size())
-//    );
-//    transformCoupleField(pnf, cmpt);
-//
-//    const labelUList& faceCells = procInterface_.faceCells();
-//
-//    forAll(faceCells, elemI)
-//    {
-//        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-//    }
-//}
-
-
 // ************************************************************************* //

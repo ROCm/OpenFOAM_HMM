@@ -109,7 +109,7 @@ public:
             }
 
             //- Return the "jump" across the patch as a "half" field
-            virtual tmp<Field<scalar> > jump() const = 0;
+            virtual tmp<Field<Type> > jump() const = 0;
 
 
         // Evaluation functions
@@ -124,6 +124,15 @@ public:
                 const scalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
+                const Pstream::commsTypes commsType
+            ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
                 const Pstream::commsTypes commsType
             ) const;
 };

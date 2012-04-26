@@ -167,6 +167,15 @@ public:
                 const Pstream::commsTypes commsType
             ) const;
 
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const;
+
 
         // Cyclic AMI coupled interface functions
 
