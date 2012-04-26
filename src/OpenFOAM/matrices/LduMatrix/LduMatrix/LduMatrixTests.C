@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::singular
+bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::checkSingularity
 (
     const Type& wApA
 )
@@ -112,6 +112,87 @@ void Foam::LduMatrix<Type, DType, LUType>::solverPerformance::print
                 << endl;
         }
     }
+}
+
+
+template<class Type, class DType, class LUType>
+bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::operator!=
+(
+    const LduMatrix<Type, DType, LUType>::solverPerformance& sp
+) const
+{
+    return
+    (
+        solverName()      != sp.solverName()
+     || fieldName()       != sp.fieldName()
+     || initialResidual() != sp.initialResidual()
+     || finalResidual()   != sp.finalResidual()
+     || nIterations()     != sp.nIterations()
+     || converged()       != sp.converged()
+     || singular()        != sp.singular()
+    );
+}
+
+
+template<class Type, class DType, class LUType>
+typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance Foam::max
+(
+    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp1,
+    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp2
+)
+{
+    return lduMatrix::solverPerformance
+    (
+        sp1.solverName(),
+        sp1.fieldName_,
+        max(sp1.initialResidual(), sp2.initialResidual()),
+        max(sp1.finalResidual(), sp2.finalResidual()),
+        max(sp1.nIterations(), sp2.nIterations()),
+        sp1.converged() && sp2.converged(),
+        sp1.singular() || sp2.singular()
+    );
+}
+
+
+template<class Type, class DType, class LUType>
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp
+)
+{
+    is.readBeginList("LduMatrix<Type, DType, LUType>::solverPerformance");
+    is  >> sp.solverName_
+        >> sp.fieldName_
+        >> sp.initialResidual_
+        >> sp.finalResidual_
+        >> sp.noIterations_
+        >> sp.converged_
+        >> sp.singular_;
+    is.readEndList("LduMatrix<Type, DType, LUType>::solverPerformance");
+
+    return is;
+}
+
+
+template<class Type, class DType, class LUType>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp
+)
+{
+    os  << token::BEGIN_LIST
+        << sp.solverName_ << token::SPACE
+        << sp.fieldName_ << token::SPACE
+        << sp.initialResidual_ << token::SPACE
+        << sp.finalResidual_ << token::SPACE
+        << sp.noIterations_ << token::SPACE
+        << sp.converged_ << token::SPACE
+        << sp.singular_ << token::SPACE
+        << token::END_LIST;
+
+    return os;
 }
 
 

@@ -222,6 +222,38 @@ void cyclicFvPatchField<Type>::updateInterfaceMatrix
 
 
 template<class Type>
+void cyclicFvPatchField<Type>::updateInterfaceMatrix
+(
+    Field<Type>& result,
+    const Field<Type>& psiInternal,
+    const scalarField& coeffs,
+    const Pstream::commsTypes
+) const
+{
+    Field<Type> pnf(this->size());
+
+    const labelUList& nbrFaceCells =
+        cyclicPatch().cyclicPatch().neighbPatch().faceCells();
+
+    forAll(pnf, facei)
+    {
+        pnf[facei] = psiInternal[nbrFaceCells[facei]];
+    }
+
+    // Transform according to the transformation tensors
+    transformCoupleField(pnf);
+
+    // Multiply the field by coefficients and add into the result
+    const labelUList& faceCells = cyclicPatch_.faceCells();
+
+    forAll(faceCells, elemI)
+    {
+        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+    }
+}
+
+
+template<class Type>
 void cyclicFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);

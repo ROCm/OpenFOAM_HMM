@@ -485,9 +485,35 @@ boundaryInternalField() const
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::lduInterfaceFieldPtrsList
+Foam::LduInterfaceFieldPtrsList<Type>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
 interfaces() const
+{
+    LduInterfaceFieldPtrsList<Type> interfaces(this->size());
+
+    forAll(interfaces, patchi)
+    {
+        if (isA<LduInterfaceField<Type> >(this->operator[](patchi)))
+        {
+            interfaces.set
+            (
+                patchi,
+                &refCast<const LduInterfaceField<Type> >
+                (
+                    this->operator[](patchi)
+                )
+            );
+        }
+    }
+
+    return interfaces;
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::lduInterfaceFieldPtrsList
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+scalarInterfaces() const
 {
     lduInterfaceFieldPtrsList interfaces(this->size());
 
@@ -498,7 +524,10 @@ interfaces() const
             interfaces.set
             (
                 patchi,
-                &refCast<const lduInterfaceField>(this->operator[](patchi))
+                &refCast<const lduInterfaceField>
+                (
+                    this->operator[](patchi)
+                )
             );
         }
     }

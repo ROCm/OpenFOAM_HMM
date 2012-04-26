@@ -45,6 +45,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(p, iF),
     procPatch_(refCast<const processorFvPatch>(p)),
     sendBuf_(0),
+    receiveBuf_(0),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(0),
@@ -63,6 +64,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(p, iF, f),
     procPatch_(refCast<const processorFvPatch>(p)),
     sendBuf_(0),
+    receiveBuf_(0),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(0),
@@ -83,6 +85,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     procPatch_(refCast<const processorFvPatch>(p)),
     sendBuf_(0),
+    receiveBuf_(0),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(0),
@@ -126,6 +129,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(p, iF, dict),
     procPatch_(refCast<const processorFvPatch>(p)),
     sendBuf_(0),
+    receiveBuf_(0),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(0),
@@ -162,6 +166,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(ptf),
     procPatch_(refCast<const processorFvPatch>(ptf.patch())),
     sendBuf_(ptf.sendBuf_.xfer()),
+    receiveBuf_(ptf.receiveBuf_.xfer()),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(ptf.scalarSendBuf_.xfer()),
@@ -186,6 +191,7 @@ processorFvPatchField<Type>::processorFvPatchField
     coupledFvPatchField<Type>(ptf, iF),
     procPatch_(refCast<const processorFvPatch>(ptf.patch())),
     sendBuf_(0),
+    receiveBuf_(0),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
     scalarSendBuf_(0),
@@ -416,6 +422,124 @@ void processorFvPatchField<Type>::updateInterfaceMatrix
 
         // Transform according to the transformation tensor
         transformCoupleField(pnf, cmpt);
+
+        // Multiply the field by coefficients and add into the result
+        forAll(faceCells, elemI)
+        {
+            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+        }
+    }
+
+    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+}
+
+
+template<class Type>
+void processorFvPatchField<Type>::initInterfaceMatrixUpdate
+(
+    Field<Type>&,
+    const Field<Type>& psiInternal,
+    const scalarField&,
+    const Pstream::commsTypes commsType
+) const
+{
+    this->patch().patchInternalField(psiInternal, sendBuf_);
+
+    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    {
+        // Fast path.
+        if (debug && !this->ready())
+        {
+            FatalErrorIn
+            (
+                "processorFvPatchField<Type>::initInterfaceMatrixUpdate(..)"
+            )   << "On patch " << procPatch_.name()
+                << " outstanding request."
+                << abort(FatalError);
+        }
+
+
+        receiveBuf_.setSize(sendBuf_.size());
+        outstandingRecvRequest_ = UPstream::nRequests();
+        IPstream::read
+        (
+            Pstream::nonBlocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<char*>(receiveBuf_.begin()),
+            receiveBuf_.byteSize(),
+            procPatch_.tag()
+        );
+
+        outstandingSendRequest_ = UPstream::nRequests();
+        OPstream::write
+        (
+            Pstream::nonBlocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<const char*>(sendBuf_.begin()),
+            sendBuf_.byteSize(),
+            procPatch_.tag()
+        );
+    }
+    else
+    {
+        procPatch_.compressedSend(commsType, sendBuf_);
+    }
+
+    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
+}
+
+
+template<class Type>
+void processorFvPatchField<Type>::updateInterfaceMatrix
+(
+    Field<Type>& result,
+    const Field<Type>&,
+    const scalarField& coeffs,
+    const Pstream::commsTypes commsType
+) const
+{
+    if (this->updatedMatrix())
+    {
+        return;
+    }
+
+    const labelUList& faceCells = this->patch().faceCells();
+
+    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    {
+        // Fast path.
+        if
+        (
+            outstandingRecvRequest_ >= 0
+         && outstandingRecvRequest_ < Pstream::nRequests()
+        )
+        {
+            UPstream::waitRequest(outstandingRecvRequest_);
+        }
+        // Recv finished so assume sending finished as well.
+        outstandingSendRequest_ = -1;
+        outstandingRecvRequest_ = -1;
+
+        // Consume straight from receiveBuf_
+
+        // Transform according to the transformation tensor
+        transformCoupleField(receiveBuf_);
+
+        // Multiply the field by coefficients and add into the result
+        forAll(faceCells, elemI)
+        {
+            result[faceCells[elemI]] -= coeffs[elemI]*receiveBuf_[elemI];
+        }
+    }
+    else
+    {
+        Field<Type> pnf
+        (
+            procPatch_.compressedReceive<Type>(commsType, this->size())()
+        );
+
+        // Transform according to the transformation tensor
+        transformCoupleField(pnf);
 
         // Multiply the field by coefficients and add into the result
         forAll(faceCells, elemI)

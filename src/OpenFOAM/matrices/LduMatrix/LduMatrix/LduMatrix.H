@@ -75,6 +75,27 @@ Ostream& operator<<
     const LduMatrix<Type, DType, LUType>&
 );
 
+template<class Type, class DType, class LUType>
+typename LduMatrix<Type, DType, LUType>::solverPerformance max
+(
+    const typename LduMatrix<Type, DType, LUType>::solverPerformance&,
+    const typename LduMatrix<Type, DType, LUType>::solverPerformance&
+);
+
+template<class Type, class DType, class LUType>
+Istream& operator>>
+(
+    Istream&,
+    typename LduMatrix<Type, DType, LUType>::solverPerformance&
+);
+
+template<class Type, class DType, class LUType>
+Ostream& operator<<
+(
+    Ostream&,
+    const typename LduMatrix<Type, DType, LUType>::solverPerformance&
+);
+
 
 /*---------------------------------------------------------------------------*\
                            Class LduMatrix Declaration
@@ -162,6 +183,20 @@ public:
                 return solverName_;
             }
 
+            //- Return solver name
+            word& solverName()
+            {
+                return solverName_;
+            }
+
+
+            //- Return field name
+            const word& fieldName() const
+            {
+                return fieldName_;
+            }
+
+
             //- Return initial residual
             const Type& initialResidual() const
             {
@@ -200,8 +235,12 @@ public:
                 return noIterations_;
             }
 
-            //- Check, store and return singularity
-            bool singular(const Type& wApA);
+
+            //- Has the solver converged?
+            bool converged() const
+            {
+                return converged_;
+            }
 
             //- Is the matrix singular?
             bool singular() const;
@@ -213,14 +252,41 @@ public:
                 const Type& relTolerance
             );
 
-            //- Has the solver converged?
-            bool converged() const
-            {
-                return converged_;
-            }
+            //- Singularity test
+            bool checkSingularity(const Type& residual);
 
             //- Print summary of solver performance to the given stream
             void print(Ostream& os) const;
+
+
+        // Member Operators
+
+            bool operator!=(const solverPerformance&) const;
+
+
+        // Friend functions
+
+            //- Return the element-wise maximum of two solverPerformances
+            friend solverPerformance max <Type, DType, LUType>
+            (
+                const solverPerformance&,
+                const solverPerformance&
+            );
+
+
+        // Ostream Operator
+
+            friend Istream& operator>> <Type, DType, LUType>
+            (
+                Istream&,
+                solverPerformance&
+            );
+
+            friend Ostream& operator<< <Type, DType, LUType>
+            (
+                Ostream&,
+                const solverPerformance&
+            );
     };
 
 
@@ -631,6 +697,12 @@ public:
 
             //- Return interfaces
             const LduInterfaceFieldPtrsList<Type>& interfaces() const
+            {
+                return interfaces_;
+            }
+
+            //- Return interfaces
+            LduInterfaceFieldPtrsList<Type>& interfaces()
             {
                 return interfaces_;
             }

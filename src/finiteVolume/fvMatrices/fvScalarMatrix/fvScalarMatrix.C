@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,7 +80,7 @@ Foam::fvMatrix<Foam::scalar>::solver
                 *this,
                 boundaryCoeffs_,
                 internalCoeffs_,
-                psi_.boundaryField().interfaces(),
+                psi_.boundaryField().scalarInterfaces(),
                 solverControls
             )
         )
@@ -158,7 +158,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
         *this,
         boundaryCoeffs_,
         internalCoeffs_,
-        psi.boundaryField().interfaces(),
+        psi.boundaryField().scalarInterfaces(),
         solverControls
     )->solve(psi.internalField(), totalSource);
 
@@ -187,7 +187,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
             psi_.internalField(),
             source_ - boundaryDiag*psi_.internalField(),
             boundaryCoeffs_,
-            psi_.boundaryField().interfaces(),
+            psi_.boundaryField().scalarInterfaces(),
             0
         )
     );

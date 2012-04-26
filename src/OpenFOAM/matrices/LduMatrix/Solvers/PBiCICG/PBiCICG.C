@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TPBiCG.H"
+#include "PBiCICG.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-Foam::TPBiCG<Type, DType, LUType>::TPBiCG
+Foam::PBiCICG<Type, DType, LUType>::PBiCICG
 (
     const word& fieldName,
     const LduMatrix<Type, DType, LUType>& matrix,
@@ -48,10 +48,7 @@ Foam::TPBiCG<Type, DType, LUType>::TPBiCG
 
 template<class Type, class DType, class LUType>
 typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
-Foam::TPBiCG<Type, DType, LUType>::solve
-(
-    Field<Type>& psi
-) const
+Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
     word preconditionerName(this->controlDict_.lookup("preconditioner"));
 
@@ -78,8 +75,8 @@ Foam::TPBiCG<Type, DType, LUType>::solve
     Field<Type> wT(nCells);
     Type* __restrict__ wTPtr = wT.begin();
 
-    scalar wArT = 1e15; //this->matrix_.great_;
-    scalar wArTold = wArT;
+    Type wArT = this->matrix_.great_*pTraits<Type>::one;
+    Type wArTold = wArT;
 
     // --- Calculate A.psi and T.psi
     this->matrix_.Amul(wA, psi);
@@ -125,8 +122,7 @@ Foam::TPBiCG<Type, DType, LUType>::solve
             preconPtr->preconditionT(wT, rT);
 
             // --- Update search directions:
-            //wArT = gSumProd(wA, rT);
-            wArT = sum(wA & rT);
+            wArT = gSumCmptProd(wA, rT);
 
             if (solverPerf.nIterations() == 0)
             {
@@ -138,12 +134,16 @@ Foam::TPBiCG<Type, DType, LUType>::solve
             }
             else
             {
-                scalar beta = cmptDivide(wArT, wArTold);
+                Type beta = cmptDivide
+                (
+                    wArT,
+                    stabilise(wArTold, this->matrix_.vsmall_)
+                );
 
                 for (register label cell=0; cell<nCells; cell++)
                 {
-                    pAPtr[cell] = wAPtr[cell] + (beta* pAPtr[cell]);
-                    pTPtr[cell] = wTPtr[cell] + (beta* pTPtr[cell]);
+                    pAPtr[cell] = wAPtr[cell] + cmptMultiply(beta, pAPtr[cell]);
+                    pTPtr[cell] = wTPtr[cell] + cmptMultiply(beta, pTPtr[cell]);
                 }
             }
 
@@ -152,25 +152,34 @@ Foam::TPBiCG<Type, DType, LUType>::solve
             this->matrix_.Amul(wA, pA);
             this->matrix_.Tmul(wT, pT);
 
-            scalar wApT = sum(wA & pT);
-
+            Type wApT = gSumCmptProd(wA, pT);
 
             // --- Test for singularity
-            //if
-            //(
-            //    solverPerf.checkSingularity(ratio(mag(wApT)normFactor))
-            //) break;
+            if
+            (
+                solverPerf.checkSingularity
+                (
+                    cmptDivide(cmptMag(wApT), normFactor)
+                )
+            )
+            {
+                break;
+            }
 
 
             // --- Update solution and residual:
 
-            scalar alpha = cmptDivide(wArT, wApT);
+            Type alpha = cmptDivide
+            (
+                wArT,
+                stabilise(wApT, this->matrix_.vsmall_)
+            );
 
             for (register label cell=0; cell<nCells; cell++)
             {
-                psiPtr[cell] += (alpha* pAPtr[cell]);
-                rAPtr[cell] -= (alpha* wAPtr[cell]);
-                rTPtr[cell] -= (alpha* wTPtr[cell]);
+                psiPtr[cell] += cmptMultiply(alpha, pAPtr[cell]);
+                rAPtr[cell] -= cmptMultiply(alpha, wAPtr[cell]);
+                rTPtr[cell] -= cmptMultiply(alpha, wTPtr[cell]);
             }
 
             solverPerf.finalResidual() =
