@@ -387,9 +387,17 @@ public:
             //  Solver controls read from fvSolution
             autoPtr<fvSolver> solver();
 
-            //- Solve returning the solution statistics.
+            //- Solve segregated or coupled returning the solution statistics.
             //  Use the given solver controls
             lduMatrix::solverPerformance solve(const dictionary&);
+
+            //- Solve segregated returning the solution statistics.
+            //  Use the given solver controls
+            lduMatrix::solverPerformance solveSegregated(const dictionary&);
+
+            //- Solve coupled returning the solution statistics.
+            //  Use the given solver controls
+            lduMatrix::solverPerformance solveCoupled(const dictionary&);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution

@@ -130,14 +130,15 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 
 
 template<>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
+Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 (
     const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<scalar>::solve(const dictionary& solverControls) : "
+        Info<< "fvMatrix<scalar>::solveSegregated"
+               "(const dictionary& solverControls) : "
                "solving fvMatrix<scalar>"
             << endl;
     }

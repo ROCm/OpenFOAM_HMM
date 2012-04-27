@@ -23,6 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "LduMatrix.H"
+#include "diagTensorField.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -62,12 +65,51 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             << endl;
     }
 
+    word type(solverControls.lookupOrDefault<word>("type", "segregated"));
+
+    if (type == "segregated")
+    {
+        return solveSegregated(solverControls);
+    }
+    else if (type == "coupled")
+    {
+        return solveCoupled(solverControls);
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "fvMatrix<Type>::solve(const dictionary& solverControls)",
+            solverControls
+        )   << "Unknown type " << type
+            << "; currently supported solver types are segregated and coupled"
+            << exit(FatalIOError);
+
+        return lduMatrix::solverPerformance();
+    }
+}
+
+
+template<class Type>
+Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
+(
+    const dictionary& solverControls
+)
+{
+    if (debug)
+    {
+        Info<< "fvMatrix<Type>::solveSegregated"
+               "(const dictionary& solverControls) : "
+               "solving fvMatrix<Type>"
+            << endl;
+    }
+
     GeometricField<Type, fvPatchField, volMesh>& psi =
        const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 
     lduMatrix::solverPerformance solverPerfVec
     (
-        "fvMatrix<Type>::solve",
+        "fvMatrix<Type>::solveSegregated",
         psi.name()
     );
 
@@ -161,6 +203,62 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
     psi.mesh().setSolverPerformance(psi.name(), solverPerfVec);
 
     return solverPerfVec;
+}
+
+
+template<class Type>
+Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveCoupled
+(
+    const dictionary& solverControls
+)
+{
+    if (debug)
+    {
+        Info<< "fvMatrix<Type>::solveCoupled"
+               "(const dictionary& solverControls) : "
+               "solving fvMatrix<Type>"
+            << endl;
+    }
+
+    GeometricField<Type, fvPatchField, volMesh>& psi =
+       const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
+
+    LduMatrix<Type, scalar, scalar> coupledMatrix(psi.mesh());
+    coupledMatrix.diag() = diag();
+    coupledMatrix.upper() = upper();
+    coupledMatrix.lower() = lower();
+    coupledMatrix.source() = source();
+
+    addBoundaryDiag(coupledMatrix.diag(), 0);
+    addBoundarySource(coupledMatrix.source(), false);
+
+    coupledMatrix.interfaces() = psi.boundaryField().interfaces();
+    coupledMatrix.interfacesUpper() = boundaryCoeffs().component(0);
+    coupledMatrix.interfacesLower() = internalCoeffs().component(0);
+
+    autoPtr<typename LduMatrix<Type, scalar, scalar>::solver>
+    coupledMatrixSolver
+    (
+        LduMatrix<Type, scalar, scalar>::solver::New
+        (
+            psi.name(),
+            coupledMatrix,
+            solverControls
+        )
+    );
+
+    SolverPerformance<Type> solverPerf
+    (
+        coupledMatrixSolver->solve(psi)
+    );
+
+    solverPerf.print(Info);
+
+    psi.correctBoundaryConditions();
+
+    // psi.mesh().setSolverPerformance(psi.name(), solverPerf);
+
+    return lduMatrix::solverPerformance();
 }
 
 

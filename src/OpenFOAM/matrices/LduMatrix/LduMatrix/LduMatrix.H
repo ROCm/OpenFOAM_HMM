@@ -54,6 +54,7 @@ SourceFiles
 #include "Field.H"
 #include "FieldField.H"
 #include "LduInterfaceFieldPtrsList.H"
+#include "SolverPerformance.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -73,27 +74,6 @@ Ostream& operator<<
 (
     Ostream&,
     const LduMatrix<Type, DType, LUType>&
-);
-
-template<class Type, class DType, class LUType>
-typename LduMatrix<Type, DType, LUType>::solverPerformance max
-(
-    const typename LduMatrix<Type, DType, LUType>::solverPerformance&,
-    const typename LduMatrix<Type, DType, LUType>::solverPerformance&
-);
-
-template<class Type, class DType, class LUType>
-Istream& operator>>
-(
-    Istream&,
-    typename LduMatrix<Type, DType, LUType>::solverPerformance&
-);
-
-template<class Type, class DType, class LUType>
-Ostream& operator<<
-(
-    Ostream&,
-    const typename LduMatrix<Type, DType, LUType>::solverPerformance&
 );
 
 
@@ -127,168 +107,7 @@ class LduMatrix
 
 public:
 
-    //- Class returned by the solver
-    //  containing performance statistics
-    class solverPerformance
-    {
-        word   solverName_;
-        word   fieldName_;
-        Type   initialResidual_;
-        Type   finalResidual_;
-        label  noIterations_;
-        bool   converged_;
-        FixedList<bool, pTraits<Type>::nComponents> singular_;
-
-
-    public:
-
-        // Constructors
-
-            solverPerformance()
-            :
-                initialResidual_(pTraits<Type>::zero),
-                finalResidual_(pTraits<Type>::zero),
-                noIterations_(0),
-                converged_(false),
-                singular_(false)
-            {}
-
-
-            solverPerformance
-            (
-                const word&  solverName,
-                const word&  fieldName,
-                const Type&  iRes = pTraits<Type>::zero,
-                const Type&  fRes = pTraits<Type>::zero,
-                const label  nIter = 0,
-                const bool   converged = false,
-                const bool   singular = false
-            )
-            :
-                solverName_(solverName),
-                fieldName_(fieldName),
-                initialResidual_(iRes),
-                finalResidual_(fRes),
-                noIterations_(nIter),
-                converged_(converged),
-                singular_(singular)
-            {}
-
-
-        // Member functions
-
-            //- Return solver name
-            const word& solverName() const
-            {
-                return solverName_;
-            }
-
-            //- Return solver name
-            word& solverName()
-            {
-                return solverName_;
-            }
-
-
-            //- Return field name
-            const word& fieldName() const
-            {
-                return fieldName_;
-            }
-
-
-            //- Return initial residual
-            const Type& initialResidual() const
-            {
-                return initialResidual_;
-            }
-
-            //- Return initial residual
-            Type& initialResidual()
-            {
-                return initialResidual_;
-            }
-
-
-            //- Return final residual
-            const Type& finalResidual() const
-            {
-                return finalResidual_;
-            }
-
-            //- Return final residual
-            Type& finalResidual()
-            {
-                return finalResidual_;
-            }
-
-
-            //- Return number of iterations
-            label nIterations() const
-            {
-                return noIterations_;
-            }
-
-            //- Return number of iterations
-            label& nIterations()
-            {
-                return noIterations_;
-            }
-
-
-            //- Has the solver converged?
-            bool converged() const
-            {
-                return converged_;
-            }
-
-            //- Is the matrix singular?
-            bool singular() const;
-
-            //- Check, store and return convergence
-            bool converged
-            (
-                const Type& tolerance,
-                const Type& relTolerance
-            );
-
-            //- Singularity test
-            bool checkSingularity(const Type& residual);
-
-            //- Print summary of solver performance to the given stream
-            void print(Ostream& os) const;
-
-
-        // Member Operators
-
-            bool operator!=(const solverPerformance&) const;
-
-
-        // Friend functions
-
-            //- Return the element-wise maximum of two solverPerformances
-            friend solverPerformance max <Type, DType, LUType>
-            (
-                const solverPerformance&,
-                const solverPerformance&
-            );
-
-
-        // Ostream Operator
-
-            friend Istream& operator>> <Type, DType, LUType>
-            (
-                Istream&,
-                solverPerformance&
-            );
-
-            friend Ostream& operator<< <Type, DType, LUType>
-            (
-                Ostream&,
-                const solverPerformance&
-            );
-    };
-
+    friend class SolverPerformance<Type>;
 
     //- Abstract base-class for LduMatrix solvers
     class solver
@@ -417,7 +236,7 @@ public:
             //- Read and reset the solver parameters from the given dictionary
             virtual void read(const dictionary& solverDict);
 
-            virtual solverPerformance solve
+            virtual SolverPerformance<Type> solve
             (
                 Field<Type>& psi
             ) const = 0;

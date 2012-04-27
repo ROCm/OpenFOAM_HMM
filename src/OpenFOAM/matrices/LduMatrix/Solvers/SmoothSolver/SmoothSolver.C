@@ -58,11 +58,11 @@ void Foam::SmoothSolver<Type, DType, LUType>::readControls()
 
 
 template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
+Foam::SolverPerformance<Type>
 Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
     // --- Setup class containing solver performance data
-    typename LduMatrix<Type, DType, LUType>::solverPerformance solverPerf
+    SolverPerformance<Type> solverPerf
     (
         typeName,
         this->fieldName_

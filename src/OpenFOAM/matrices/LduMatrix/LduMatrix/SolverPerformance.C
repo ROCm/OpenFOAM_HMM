@@ -27,23 +27,24 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type, class DType, class LUType>
-bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::checkSingularity
+template<class Type>
+bool Foam::SolverPerformance<Type>::checkSingularity
 (
     const Type& wApA
 )
 {
     for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        singular_[cmpt] = component(wApA, cmpt) < vsmall_;
+        singular_[cmpt] =
+            component(wApA, cmpt) < LduMatrix<scalar, scalar, scalar>::vsmall_;
     }
 
     return singular();
 }
 
 
-template<class Type, class DType, class LUType>
-bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::singular() const
+template<class Type>
+bool Foam::SolverPerformance<Type>::singular() const
 {
     for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
@@ -54,14 +55,14 @@ bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::singular() const
 }
 
 
-template<class Type, class DType, class LUType>
-bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::converged
+template<class Type>
+bool Foam::SolverPerformance<Type>::converged
 (
     const Type& Tolerance,
     const Type& RelTolerance
 )
 {
-    if (debug >= 2)
+    if (LduMatrix<scalar, scalar, scalar>::debug >= 2)
     {
         Info<< solverName_
             << ":  Iteration " << noIterations_
@@ -73,7 +74,8 @@ bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::converged
     (
         finalResidual_ < Tolerance
      || (
-            RelTolerance > small_*pTraits<Type>::one
+            RelTolerance
+          > LduMatrix<scalar, scalar, scalar>::small_*pTraits<Type>::one
          && finalResidual_ < cmptMultiply(RelTolerance, initialResidual_)
         )
     )
@@ -89,8 +91,8 @@ bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::converged
 }
 
 
-template<class Type, class DType, class LUType>
-void Foam::LduMatrix<Type, DType, LUType>::solverPerformance::print
+template<class Type>
+void Foam::SolverPerformance<Type>::print
 (
     Ostream& os
 ) const
@@ -115,10 +117,10 @@ void Foam::LduMatrix<Type, DType, LUType>::solverPerformance::print
 }
 
 
-template<class Type, class DType, class LUType>
-bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::operator!=
+template<class Type>
+bool Foam::SolverPerformance<Type>::operator!=
 (
-    const LduMatrix<Type, DType, LUType>::solverPerformance& sp
+    const SolverPerformance<Type>& sp
 ) const
 {
     return
@@ -134,14 +136,14 @@ bool Foam::LduMatrix<Type, DType, LUType>::solverPerformance::operator!=
 }
 
 
-template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance Foam::max
+template<class Type>
+typename Foam::SolverPerformance<Type> Foam::max
 (
-    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp1,
-    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp2
+    const typename Foam::SolverPerformance<Type>& sp1,
+    const typename Foam::SolverPerformance<Type>& sp2
 )
 {
-    return lduMatrix::solverPerformance
+    return SolverPerformance<Type>
     (
         sp1.solverName(),
         sp1.fieldName_,
@@ -154,14 +156,14 @@ typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance Foam::max
 }
 
 
-template<class Type, class DType, class LUType>
+template<class Type>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp
+    typename Foam::SolverPerformance<Type>& sp
 )
 {
-    is.readBeginList("LduMatrix<Type, DType, LUType>::solverPerformance");
+    is.readBeginList("SolverPerformance<Type>");
     is  >> sp.solverName_
         >> sp.fieldName_
         >> sp.initialResidual_
@@ -169,17 +171,17 @@ Foam::Istream& Foam::operator>>
         >> sp.noIterations_
         >> sp.converged_
         >> sp.singular_;
-    is.readEndList("LduMatrix<Type, DType, LUType>::solverPerformance");
+    is.readEndList("SolverPerformance<Type>");
 
     return is;
 }
 
 
-template<class Type, class DType, class LUType>
+template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance& sp
+    const typename Foam::SolverPerformance<Type>& sp
 )
 {
     os  << token::BEGIN_LIST

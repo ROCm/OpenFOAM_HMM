@@ -68,7 +68,7 @@ lduMatrix::solverPerformance fvMatrix<scalar>::fvSolver::solve
 );
 
 template<>
-lduMatrix::solverPerformance fvMatrix<scalar>::solve
+lduMatrix::solverPerformance fvMatrix<scalar>::solveSegregated
 (
     const dictionary&
 );

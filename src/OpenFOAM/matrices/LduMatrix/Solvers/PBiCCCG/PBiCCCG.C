@@ -47,7 +47,7 @@ Foam::PBiCCCG<Type, DType, LUType>::PBiCCCG
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
+Foam::SolverPerformance<Type>
 Foam::PBiCCCG<Type, DType, LUType>::solve
 (
     Field<Type>& psi
@@ -56,7 +56,7 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
     word preconditionerName(this->controlDict_.lookup("preconditioner"));
 
     // --- Setup class containing solver performance data
-    typename LduMatrix<Type, DType, LUType>::solverPerformance solverPerf
+    SolverPerformance<Type> solverPerf
     (
         preconditionerName + typeName,
         this->fieldName_
