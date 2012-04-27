@@ -283,7 +283,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::calcEdgeWeights
 
     forAll(edges, edgeI)
     {
-        wght[edgeI] = min(GREAT, 1.0/edges[edgeI].mag(points));
+        wght[edgeI] = 1.0/(edges[edgeI].mag(points)+SMALL);
     }
     return twght;
 }

@@ -3394,11 +3394,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
     // Create the mesh
     // ~~~~~~~~~~~~~~~
 
+    IOobject noReadIO(io);
+    noReadIO.readOpt() = IOobject::NO_READ;
     newMeshPtr.reset
     (
         new fvMesh
         (
-            io,
+            noReadIO,
             xferMove(newPoints),
             faces_.xfer(),
             faceOwner_.xfer(),
