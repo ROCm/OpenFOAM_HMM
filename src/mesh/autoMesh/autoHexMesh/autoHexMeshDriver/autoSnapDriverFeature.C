@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1202,10 +1202,23 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     // Reverse lookup : go through all edgeAttractors and find the
     // nearest point on pp
 
+    // Get search domain and extend it a bit
+    treeBoundBox bb(pp.localPoints());
+    {
+        // Random number generator. Bit dodgy since not exactly random ;-)
+        Random rndGen(65431);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        bb = bb.extend(rndGen, 1e-4);
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    }
+
     indexedOctree<treeDataPoint> ppTree
     (
         treeDataPoint(pp.localPoints()),
-        treeBoundBox(pp.localPoints()), // overall search domain
+        bb,                             // overall search domain
         8,                              // maxLevel
         10,                             // leafsize
         3.0                             // duplicity
