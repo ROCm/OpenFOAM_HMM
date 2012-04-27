@@ -37,6 +37,7 @@ polyTopoChange/polyTopoChange/removePoints.C
 polyTopoChange/polyTopoChange/combineFaces.C
 polyTopoChange/polyTopoChange/localPointRegion.C
 polyTopoChange/polyTopoChange/duplicatePoints.C
+polyTopoChange/polyTopoChange/tetDecomposer.C
 
 slidingInterface/slidingInterface.C
 slidingInterface/slidingInterfaceProjectPoints.C
