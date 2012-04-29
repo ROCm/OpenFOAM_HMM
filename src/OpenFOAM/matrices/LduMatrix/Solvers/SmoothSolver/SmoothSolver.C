@@ -53,7 +53,7 @@ template<class Type, class DType, class LUType>
 void Foam::SmoothSolver<Type, DType, LUType>::readControls()
 {
     LduMatrix<Type, DType, LUType>::solver::readControls();
-    readControl(this->controlDict_, nSweeps_, "nSweeps");
+    this->readControl(this->controlDict_, nSweeps_, "nSweeps");
 }
 
 
