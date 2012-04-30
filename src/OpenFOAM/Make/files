@@ -240,7 +240,6 @@ lduMatrix = matrices/lduMatrix
 $(lduMatrix)/lduMatrix/lduMatrix.C
 $(lduMatrix)/lduMatrix/lduMatrixOperations.C
 $(lduMatrix)/lduMatrix/lduMatrixATmul.C
-$(lduMatrix)/lduMatrix/lduMatrixTests.C
 $(lduMatrix)/lduMatrix/lduMatrixUpdateMatrixInterfaces.C
 $(lduMatrix)/lduMatrix/lduMatrixSolver.C
 $(lduMatrix)/lduMatrix/lduMatrixSmoother.C
@@ -316,6 +315,7 @@ meshes/lduMesh/lduMesh.C
 
 LduMatrix = matrices/LduMatrix
 $(LduMatrix)/LduMatrix/lduMatrices.C
+$(LduMatrix)/LduMatrix/solverPerformance.C
 $(LduMatrix)/LduMatrix/LduInterfaceField/LduInterfaceFields.C
 $(LduMatrix)/Smoothers/lduSmoothers.C
 $(LduMatrix)/Preconditioners/lduPreconditioners.C

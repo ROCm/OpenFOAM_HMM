@@ -30,9 +30,6 @@ License
 
 defineTypeNameAndDebug(Foam::lduMatrix, 1);
 
-const Foam::scalar Foam::lduMatrix::great_ = 1.0e+20;
-const Foam::scalar Foam::lduMatrix::small_ = 1.0e-20;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

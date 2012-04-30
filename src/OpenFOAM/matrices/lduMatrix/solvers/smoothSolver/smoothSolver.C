@@ -74,7 +74,7 @@ void Foam::smoothSolver::readControls()
 }
 
 
-Foam::lduMatrix::solverPerformance Foam::smoothSolver::solve
+Foam::solverPerformance Foam::smoothSolver::solve
 (
     scalarField& psi,
     const scalarField& source,
@@ -82,7 +82,7 @@ Foam::lduMatrix::solverPerformance Foam::smoothSolver::solve
 ) const
 {
     // Setup class containing solver performance data
-    lduMatrix::solverPerformance solverPerf(typeName, fieldName_);
+    solverPerformance solverPerf(typeName, fieldName_);
 
     // If the nSweeps_ is negative do a fixed number of sweeps
     if (nSweeps_ < 0)

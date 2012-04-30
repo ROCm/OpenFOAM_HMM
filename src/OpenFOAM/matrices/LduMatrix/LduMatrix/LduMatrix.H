@@ -460,15 +460,6 @@ public:
         // Declare name of the class and its debug switch
         ClassName("LduMatrix");
 
-        //- Large Type for the use in solvers
-        static const scalar great_;
-
-        //- Small Type for the use in solvers
-        static const scalar small_;
-
-        //- Very small Type for the use in solvers
-        static const scalar vsmall_;
-
 
     // Constructors
 
@@ -680,16 +671,6 @@ typedef Foam::LduMatrix<Type, DType, LUType>                                  \
     ldu##Type##DType##LUType##Matrix;                                         \
                                                                               \
 defineNamedTemplateTypeNameAndDebug(ldu##Type##DType##LUType##Matrix, 0);     \
-                                                                              \
-                                                                              \
-template<>                                                                    \
-const scalar ldu##Type##DType##LUType##Matrix::great_(1e15);                  \
-                                                                              \
-template<>                                                                    \
-const scalar ldu##Type##DType##LUType##Matrix::small_(1e-15);                 \
-                                                                              \
-template<>                                                                    \
-const scalar ldu##Type##DType##LUType##Matrix::vsmall_(VSMALL);               \
                                                                               \
                                                                               \
 typedef LduMatrix<Type, DType, LUType>::smoother                              \

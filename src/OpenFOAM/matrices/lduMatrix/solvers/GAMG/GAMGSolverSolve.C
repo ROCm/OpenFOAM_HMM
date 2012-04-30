@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::lduMatrix::solverPerformance Foam::GAMGSolver::solve
+Foam::solverPerformance Foam::GAMGSolver::solve
 (
     scalarField& psi,
     const scalarField& source,
@@ -38,7 +38,7 @@ Foam::lduMatrix::solverPerformance Foam::GAMGSolver::solve
 ) const
 {
     // Setup class containing solver performance data
-    lduMatrix::solverPerformance solverPerf(typeName, fieldName_);
+    solverPerformance solverPerf(typeName, fieldName_);
 
     // Calculate A.psi used to calculate the initial residual
     scalarField Apsi(psi.size());
@@ -103,7 +103,7 @@ Foam::lduMatrix::solverPerformance Foam::GAMGSolver::solve
 
             if (debug >= 2)
             {
-                solverPerf.print();
+                solverPerf.print(Info);
             }
         } while
         (
@@ -429,7 +429,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
     {
         const label coarsestLevel = matrixLevels_.size() - 1;
         coarsestCorrField = 0;
-        lduMatrix::solverPerformance coarseSolverPerf;
+        solverPerformance coarseSolverPerf;
 
         if (matrixLevels_[coarsestLevel].asymmetric())
         {
@@ -468,7 +468,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
 
         if (debug >= 2)
         {
-            coarseSolverPerf.print();
+            coarseSolverPerf.print(Info);
         }
     }
 }

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LduMatrix.H"
+#include "SolverPerformance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,7 +36,7 @@ bool Foam::SolverPerformance<Type>::checkSingularity
     for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
         singular_[cmpt] =
-            component(wApA, cmpt) < LduMatrix<scalar, scalar, scalar>::vsmall_;
+            component(wApA, cmpt) < vsmall_;
     }
 
     return singular();
@@ -56,13 +56,13 @@ bool Foam::SolverPerformance<Type>::singular() const
 
 
 template<class Type>
-bool Foam::SolverPerformance<Type>::converged
+bool Foam::SolverPerformance<Type>::checkConvergence
 (
     const Type& Tolerance,
     const Type& RelTolerance
 )
 {
-    if (LduMatrix<scalar, scalar, scalar>::debug >= 2)
+    if (debug >= 2)
     {
         Info<< solverName_
             << ":  Iteration " << noIterations_
@@ -75,7 +75,7 @@ bool Foam::SolverPerformance<Type>::converged
         finalResidual_ < Tolerance
      || (
             RelTolerance
-          > LduMatrix<scalar, scalar, scalar>::small_*pTraits<Type>::one
+          > small_*pTraits<Type>::one
          && finalResidual_ < cmptMultiply(RelTolerance, initialResidual_)
         )
     )

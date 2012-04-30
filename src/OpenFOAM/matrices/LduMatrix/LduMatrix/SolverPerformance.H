@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,6 +92,21 @@ class SolverPerformance
 
 
 public:
+
+    // Static data
+
+        // Declare name of the class and its debug switch
+        ClassName("SolverPerformance");
+
+        //- Large Type for the use in solvers
+        static const scalar great_;
+
+        //- Small Type for the use in solvers
+        static const scalar small_;
+
+        //- Very small Type for the use in solvers
+        static const scalar vsmall_;
+
 
     // Constructors
 
@@ -197,7 +212,7 @@ public:
         bool singular() const;
 
         //- Check, store and return convergence
-        bool converged
+        bool checkConvergence
         (
             const Type& tolerance,
             const Type& relTolerance
@@ -247,8 +262,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define makeSolverPerformance(Type)                                           \
+                                                                              \
+typedef Foam::SolverPerformance<Type>                                         \
+    solverPerformance##Type;                                                  \
+                                                                              \
+defineNamedTemplateTypeNameAndDebug(solverPerformance##Type, 0);              \
+                                                                              \
+template<>                                                                    \
+const scalar solverPerformance##Type::great_(1e20);                           \
+                                                                              \
+template<>                                                                    \
+const scalar solverPerformance##Type::small_(1e-20);                          \
+                                                                              \
+template<>                                                                    \
+const scalar solverPerformance##Type::vsmall_(VSMALL);                        \
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
-//#   include "SolverPerformance.C"
+#   include "SolverPerformance.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

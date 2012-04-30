@@ -239,11 +239,11 @@ public:
 
             //- Solve returning the solution statistics.
             //  Use the given solver controls
-            lduMatrix::solverPerformance solve(const dictionary&);
+            solverPerformance solve(const dictionary&);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution
-            lduMatrix::solverPerformance solve();
+            solverPerformance solve();
     };
 
 
@@ -389,19 +389,19 @@ public:
 
             //- Solve segregated or coupled returning the solution statistics.
             //  Use the given solver controls
-            lduMatrix::solverPerformance solve(const dictionary&);
+            solverPerformance solve(const dictionary&);
 
             //- Solve segregated returning the solution statistics.
             //  Use the given solver controls
-            lduMatrix::solverPerformance solveSegregated(const dictionary&);
+            solverPerformance solveSegregated(const dictionary&);
 
             //- Solve coupled returning the solution statistics.
             //  Use the given solver controls
-            lduMatrix::solverPerformance solveCoupled(const dictionary&);
+            solverPerformance solveCoupled(const dictionary&);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution
-            lduMatrix::solverPerformance solve();
+            solverPerformance solve();
 
             //- Return the matrix residual
             tmp<Field<Type> > residual() const;
@@ -550,14 +550,14 @@ void checkMethod
 //- Solve returning the solution statistics given convergence tolerance
 //  Use the given solver controls
 template<class Type>
-lduMatrix::solverPerformance solve(fvMatrix<Type>&, const dictionary&);
+solverPerformance solve(fvMatrix<Type>&, const dictionary&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
 //  deleting temporary matrix after solution.
 //  Use the given solver controls
 template<class Type>
-lduMatrix::solverPerformance solve
+solverPerformance solve
 (
     const tmp<fvMatrix<Type> >&,
     const dictionary&
@@ -567,14 +567,14 @@ lduMatrix::solverPerformance solve
 //- Solve returning the solution statistics given convergence tolerance
 //  Solver controls read fvSolution
 template<class Type>
-lduMatrix::solverPerformance solve(fvMatrix<Type>&);
+solverPerformance solve(fvMatrix<Type>&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
 //  deleting temporary matrix after solution.
 //  Solver controls read fvSolution
 template<class Type>
-lduMatrix::solverPerformance solve(const tmp<fvMatrix<Type> >&);
+solverPerformance solve(const tmp<fvMatrix<Type> >&);
 
 
 //- Return the correction form of the given matrix

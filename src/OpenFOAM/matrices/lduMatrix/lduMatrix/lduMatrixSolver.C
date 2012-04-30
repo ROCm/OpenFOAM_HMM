@@ -188,10 +188,12 @@ Foam::scalar Foam::lduMatrix::solver::normFactor
     matrix_.sumA(tmpField, interfaceBouCoeffs_, interfaces_);
     tmpField *= gAverage(psi);
 
-    return gSum(mag(Apsi - tmpField) + mag(source - tmpField)) + matrix_.small_;
+    return
+        gSum(mag(Apsi - tmpField) + mag(source - tmpField))
+      + solverPerformance::small_;
 
     // At convergence this simpler method is equivalent to the above
-    // return 2*gSumMag(source) + matrix_.small_;
+    // return 2*gSumMag(source) + solverPerformance::small_;
 }
 
 

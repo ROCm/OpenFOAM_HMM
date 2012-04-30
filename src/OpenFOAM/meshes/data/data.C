@@ -25,7 +25,7 @@ License
 
 #include "data.H"
 #include "Time.H"
-#include "lduMatrix.H"
+#include "solverPerformance.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -63,12 +63,12 @@ const Foam::dictionary& Foam::data::solverPerformanceDict() const
 void Foam::data::setSolverPerformance
 (
     const word& name,
-    const lduMatrix::solverPerformance& sp
+    const solverPerformance& sp
 ) const
 {
     dictionary& dict = const_cast<dictionary&>(solverPerformanceDict());
 
-    List<lduMatrix::solverPerformance> perfs;
+    List<solverPerformance> perfs;
 
     if (prevTimeIndex_ != this->time().timeIndex())
     {
@@ -90,7 +90,7 @@ void Foam::data::setSolverPerformance
 
 void Foam::data::setSolverPerformance
 (
-    const lduMatrix::solverPerformance& sp
+    const solverPerformance& sp
 ) const
 {
     setSolverPerformance(sp.fieldName(), sp);

@@ -86,7 +86,7 @@ public:
         {}
 
         //- Solve the matrix with this solver
-        lduMatrix::solverPerformance solve
+        solverPerformance solve
         (
             scalarField& psi,
             const scalarField& source,

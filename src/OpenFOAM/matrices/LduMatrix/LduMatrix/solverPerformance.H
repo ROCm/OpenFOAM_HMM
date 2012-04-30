@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,61 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::solverPerformance
+
+Description
+    SolverPerformance instantiated for a scalar
+
+SourceFiles
+    solverPerformance.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "diagonalSolver.H"
+#ifndef solverPerformance_H
+#define solverPerformance_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Foam::diagonalSolver, 0);
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::diagonalSolver::diagonalSolver
-(
-    const word& fieldName,
-    const lduMatrix& matrix,
-    const FieldField<Field, scalar>& interfaceBouCoeffs,
-    const FieldField<Field, scalar>& interfaceIntCoeffs,
-    const lduInterfaceFieldPtrsList& interfaces,
-    const dictionary& solverControls
-)
-:
-    lduMatrix::solver
-    (
-        fieldName,
-        matrix,
-        interfaceBouCoeffs,
-        interfaceIntCoeffs,
-        interfaces,
-        solverControls
-    )
-{}
-
+#include "SolverPerformance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::solverPerformance Foam::diagonalSolver::solve
-(
-    scalarField& psi,
-    const scalarField& source,
-    const direction cmpt
-) const
+namespace Foam
 {
-    psi = source/matrix_.diag();
-
-    return solverPerformance
-    (
-        typeName,
-        fieldName_,
-        0,
-        0,
-        0,
-        true,
-        false
-    );
+    typedef SolverPerformance<scalar> solverPerformance;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

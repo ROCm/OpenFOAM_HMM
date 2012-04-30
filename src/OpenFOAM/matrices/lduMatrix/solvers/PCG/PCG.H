@@ -88,7 +88,7 @@ public:
     // Member Functions
 
         //- Solve the matrix with this solver
-        virtual lduMatrix::solverPerformance solve
+        virtual solverPerformance solve
         (
             scalarField& psi,
             const scalarField& source,

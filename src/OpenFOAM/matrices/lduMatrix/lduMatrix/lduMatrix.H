@@ -57,6 +57,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "solverPerformance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,166 +86,6 @@ class lduMatrix
 
 
 public:
-
-    //- Class returned by the solver, containing performance statistics
-    class solverPerformance
-    {
-        word   solverName_;
-        word   fieldName_;
-        scalar initialResidual_;
-        scalar finalResidual_;
-        label  noIterations_;
-        bool   converged_;
-        bool   singular_;
-
-
-    public:
-
-        // Constructors
-
-            //- Construct null
-            solverPerformance()
-            :
-                initialResidual_(0),
-                finalResidual_(0),
-                noIterations_(0),
-                converged_(false),
-                singular_(false)
-            {}
-
-            //- Construct from components
-            solverPerformance
-            (
-                const word&  solverName,
-                const word&  fieldName,
-                const scalar iRes = 0,
-                const scalar fRes = 0,
-                const label  nIter = 0,
-                const bool   converged = false,
-                const bool   singular = false
-            )
-            :
-                solverName_(solverName),
-                fieldName_(fieldName),
-                initialResidual_(iRes),
-                finalResidual_(fRes),
-                noIterations_(nIter),
-                converged_(converged),
-                singular_(singular)
-            {}
-
-            //- Construct from Istream
-            solverPerformance(Istream&);
-
-
-        // Member functions
-
-            //- Return solver name
-            const word& solverName() const
-            {
-                return solverName_;
-            }
-
-            //- Return solver name
-            word& solverName()
-            {
-                return solverName_;
-            }
-
-
-            //- Return field name
-            const word& fieldName() const
-            {
-                return fieldName_;
-            }
-
-
-            //- Return initial residual
-            scalar initialResidual() const
-            {
-                return initialResidual_;
-            }
-
-            //- Return initial residual
-            scalar& initialResidual()
-            {
-                return initialResidual_;
-            }
-
-
-            //- Return final residual
-            scalar finalResidual() const
-            {
-                return finalResidual_;
-            }
-
-            //- Return final residual
-            scalar& finalResidual()
-            {
-                return finalResidual_;
-            }
-
-
-            //- Return number of iterations
-            label nIterations() const
-            {
-                return noIterations_;
-            }
-
-            //- Return number of iterations
-            label& nIterations()
-            {
-                return noIterations_;
-            }
-
-
-            //- Has the solver converged?
-            bool converged() const
-            {
-                return converged_;
-            }
-
-            //- Is the matrix singular?
-            bool singular() const
-            {
-                return singular_;
-            }
-
-            //- Check, store and return convergence
-            bool checkConvergence
-            (
-                const scalar tolerance,
-                const scalar relTolerance
-            );
-
-            //- Singularity test
-            bool checkSingularity(const scalar residual);
-
-            //- Print summary of solver performance
-            void print() const;
-
-
-        // Member Operators
-
-            bool operator!=(const solverPerformance&) const;
-
-
-        // Friend functions
-
-            //- Return the element-wise maximum of two solverPerformances
-            friend solverPerformance max
-            (
-                const solverPerformance&,
-                const solverPerformance&
-            );
-
-
-        // Ostream Operator
-
-            friend Istream& operator>>(Istream&, solverPerformance&);
-            friend Ostream& operator<<(Ostream&, const solverPerformance&);
-    };
-
 
     //- Abstract base-class for lduMatrix solvers
     class solver
@@ -669,12 +510,6 @@ public:
 
         // Declare name of the class and its debug switch
         ClassName("lduMatrix");
-
-        //- Large scalar for the use in solvers
-        static const scalar great_;
-
-        //- Small scalar for the use in solvers
-        static const scalar small_;
 
 
     // Constructors

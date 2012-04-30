@@ -75,7 +75,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     Field<Type> wT(nCells);
     Type* __restrict__ wTPtr = wT.begin();
 
-    Type wArT = this->matrix_.great_*pTraits<Type>::one;
+    Type wArT = solverPerf.great_*pTraits<Type>::one;
     Type wArTold = wArT;
 
     // --- Calculate A.psi and T.psi
@@ -101,7 +101,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.converged(this->tolerance_, this->relTol_))
+    if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
     {
         // --- Select and construct the preconditioner
         autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
@@ -137,7 +137,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
                 Type beta = cmptDivide
                 (
                     wArT,
-                    stabilise(wArTold, this->matrix_.vsmall_)
+                    stabilise(wArTold, solverPerf.vsmall_)
                 );
 
                 for (register label cell=0; cell<nCells; cell++)
@@ -172,7 +172,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
             Type alpha = cmptDivide
             (
                 wArT,
-                stabilise(wApT, this->matrix_.vsmall_)
+                stabilise(wApT, solverPerf.vsmall_)
             );
 
             for (register label cell=0; cell<nCells; cell++)
@@ -188,7 +188,7 @@ Foam::PBiCICG<Type, DType, LUType>::solve(Field<Type>& psi) const
         } while
         (
             solverPerf.nIterations()++ < this->maxIter_
-        && !(solverPerf.converged(this->tolerance_, this->relTol_))
+        && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
         );
     }
 

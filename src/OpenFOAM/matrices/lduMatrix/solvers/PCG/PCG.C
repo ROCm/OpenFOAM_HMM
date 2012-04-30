@@ -62,7 +62,7 @@ Foam::PCG::PCG
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::lduMatrix::solverPerformance Foam::PCG::solve
+Foam::solverPerformance Foam::PCG::solve
 (
     scalarField& psi,
     const scalarField& source,
@@ -70,7 +70,7 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
 ) const
 {
     // --- Setup class containing solver performance data
-    lduMatrix::solverPerformance solverPerf
+    solverPerformance solverPerf
     (
         lduMatrix::preconditioner::getName(controlDict_) + typeName,
         fieldName_
@@ -86,7 +86,7 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
     scalarField wA(nCells);
     scalar* __restrict__ wAPtr = wA.begin();
 
-    scalar wArA = matrix_.great_;
+    scalar wArA = solverPerf.great_;
     scalar wArAold = wArA;
 
     // --- Calculate A.psi

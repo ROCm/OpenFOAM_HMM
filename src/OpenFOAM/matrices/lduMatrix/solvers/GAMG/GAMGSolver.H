@@ -229,7 +229,7 @@ public:
     // Member Functions
 
         //- Solve
-        virtual lduMatrix::solverPerformance solve
+        virtual solverPerformance solve
         (
             scalarField& psi,
             const scalarField& source,

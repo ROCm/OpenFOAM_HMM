@@ -53,7 +53,7 @@ void Foam::fvMatrix<Type>::setComponentReference
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
+Foam::solverPerformance Foam::fvMatrix<Type>::solve
 (
     const dictionary& solverControls
 )
@@ -85,13 +85,13 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
             << "; currently supported solver types are segregated and coupled"
             << exit(FatalIOError);
 
-        return lduMatrix::solverPerformance();
+        return solverPerformance();
     }
 }
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
+Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 (
     const dictionary& solverControls
 )
@@ -107,7 +107,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
     GeometricField<Type, fvPatchField, volMesh>& psi =
        const_cast<GeometricField<Type, fvPatchField, volMesh>&>(psi_);
 
-    lduMatrix::solverPerformance solverPerfVec
+    solverPerformance solverPerfVec
     (
         "fvMatrix<Type>::solveSegregated",
         psi.name()
@@ -176,7 +176,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
             cmpt
         );
 
-        lduMatrix::solverPerformance solverPerf;
+        solverPerformance solverPerf;
 
         // Solver call
         solverPerf = lduMatrix::solver::New
@@ -189,7 +189,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        solverPerf.print();
+        solverPerf.print(Info);
 
         solverPerfVec = max(solverPerfVec, solverPerf);
         solverPerfVec.solverName() = solverPerf.solverName();
@@ -207,7 +207,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveCoupled
+Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 (
     const dictionary& solverControls
 )
@@ -258,7 +258,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 
     // psi.mesh().setSolverPerformance(psi.name(), solverPerf);
 
-    return lduMatrix::solverPerformance();
+    return solverPerformance();
 }
 
 
@@ -281,7 +281,7 @@ Foam::fvMatrix<Type>::solver()
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
+Foam::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 {
     return solve
     (
@@ -298,7 +298,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::fvSolver::solve()
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve()
+Foam::solverPerformance Foam::fvMatrix<Type>::solve()
 {
     return solve
     (

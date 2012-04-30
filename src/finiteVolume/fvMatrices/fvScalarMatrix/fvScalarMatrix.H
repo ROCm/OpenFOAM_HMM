@@ -62,13 +62,13 @@ autoPtr<fvMatrix<scalar>::fvSolver> fvMatrix<scalar>::solver
 );
 
 template<>
-lduMatrix::solverPerformance fvMatrix<scalar>::fvSolver::solve
+solverPerformance fvMatrix<scalar>::fvSolver::solve
 (
     const dictionary&
 );
 
 template<>
-lduMatrix::solverPerformance fvMatrix<scalar>::solveSegregated
+solverPerformance fvMatrix<scalar>::solveSegregated
 (
     const dictionary&
 );
