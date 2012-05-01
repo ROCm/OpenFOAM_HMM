@@ -70,8 +70,7 @@ void Foam::KinematicCloud<CloudType>::setModels()
         SurfaceFilmModel<KinematicCloud<CloudType> >::New
         (
             subModelProperties_,
-            *this,
-            g_
+            *this
         ).ptr()
     );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -487,11 +487,10 @@ template<class CloudType>
 Foam::ThermoSurfaceFilm<CloudType>::ThermoSurfaceFilm
 (
     const dictionary& dict,
-    CloudType& owner,
-    const dimensionedVector& g
+    CloudType& owner
 )
 :
-    SurfaceFilmModel<CloudType>(dict, owner, g, typeName),
+    SurfaceFilmModel<CloudType>(dict, owner, typeName),
     rndGen_(owner.rndGen()),
     thermo_
     (
