@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,7 @@ template<class CloudType>
 Foam::NoSurfaceFilm<CloudType>::NoSurfaceFilm
 (
     const dictionary&,
-    CloudType& owner,
-    const dimensionedVector&
+    CloudType& owner
 )
 :
     SurfaceFilmModel<CloudType>(owner)

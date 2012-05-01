@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Foam::scalar Foam::seriesProfile::evaluate
 
     forAll(values, i)
     {
-        result += values[i]*cos((i+1)*xIn);
+        result += values[i]*sin((i + 1)*xIn);
     }
 
     return result;

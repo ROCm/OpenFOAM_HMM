@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,8 @@ Description
     Series-up based profile data - drag and lift coefficients computed as
     sum of cosine series
 
-        Cd = sum_i(CdCoeff)*cos(i*AOA)
-        Cl = sum_i(ClCoeff)*cos(i*AOA)
+        Cd = sum_i(CdCoeff)*sin(i*AOA)
+        Cl = sum_i(ClCoeff)*sin(i*AOA)
 
     where:
         AOA = angle of attack [deg] converted to [rad] internally
