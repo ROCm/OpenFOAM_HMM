@@ -913,8 +913,8 @@ int main(int argc, char *argv[])
 
             // Info<< "span " << span << endl;
 
-            pointField start = searchSurf.faceCentres() - span*normals;
-            pointField end = searchSurf.faceCentres() + span*normals;
+            pointField start(searchSurf.faceCentres() - span*normals);
+            pointField end(searchSurf.faceCentres() + span*normals);
             const pointField& faceCentres = searchSurf.faceCentres();
 
             List<List<pointIndexHit> > allHitInfo;
