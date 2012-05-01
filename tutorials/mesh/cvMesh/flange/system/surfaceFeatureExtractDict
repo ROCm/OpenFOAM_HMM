@@ -30,9 +30,6 @@ flange.obj
 
     // Write options
 
-        // Write .eMesh file (for snappyHexMesh)
-        writeFeatureEdgeMesh    no;
-
         // Write features to obj format for postprocessing
         writeObj                yes;
 }

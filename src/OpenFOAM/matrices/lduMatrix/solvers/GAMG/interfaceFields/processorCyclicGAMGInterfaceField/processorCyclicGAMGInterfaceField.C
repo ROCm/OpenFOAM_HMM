@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,51 +57,6 @@ Foam::processorCyclicGAMGInterfaceField::processorCyclicGAMGInterfaceField
 
 Foam::processorCyclicGAMGInterfaceField::~processorCyclicGAMGInterfaceField()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//void Foam::processorCyclicGAMGInterfaceField::initInterfaceMatrixUpdate
-//(
-//    const scalarField& psiInternal,
-//    scalarField&,
-//    const lduMatrix&,
-//    const scalarField&,
-//    const direction,
-//    const Pstream::commsTypes commsType
-//) const
-//{
-//    procInterface_.compressedSend
-//    (
-//        commsType,
-//        procInterface_.interfaceInternalField(psiInternal)()
-//    );
-//}
-//
-//
-//void Foam::processorCyclicGAMGInterfaceField::updateInterfaceMatrix
-//(
-//    const scalarField&,
-//    scalarField& result,
-//    const lduMatrix&,
-//    const scalarField& coeffs,
-//    const direction cmpt,
-//    const Pstream::commsTypes commsType
-//) const
-//{
-//    scalarField pnf
-//    (
-//        procInterface_.compressedReceive<scalar>(commsType, coeffs.size())
-//    );
-//    transformCoupleField(pnf, cmpt);
-//
-//    const labelUList& faceCells = procInterface_.faceCells();
-//
-//    forAll(faceCells, elemI)
-//    {
-//        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-//    }
-//}
 
 
 // ************************************************************************* //

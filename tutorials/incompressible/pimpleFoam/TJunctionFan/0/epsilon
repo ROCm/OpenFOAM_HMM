@@ -27,19 +27,19 @@ boundaryField
         mixingLength    0.01;
         phi             phi;
         k               k;
-        value           $internalField;
+        value           uniform 200;
     }
     outlet1
     {
         type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        inletValue      uniform 200;
+        value           uniform 200;
     }
     outlet2
     {
         type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        inletValue      uniform 200;
+        value           uniform 200;
     }
     baffles
     {
@@ -47,7 +47,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           $internalField;
+        value           uniform 0;
     }
     fan_half0
     {
@@ -63,7 +63,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           $internalField;
+        value           uniform 200;
     }
 }
 

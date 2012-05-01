@@ -130,6 +130,7 @@ Foam::solution::solution
             obr,
             (
                 obr.readOpt() == IOobject::MUST_READ
+             || obr.readOpt() == IOobject::READ_IF_PRESENT
               ? IOobject::MUST_READ_IF_MODIFIED
               : obr.readOpt()
             ),
@@ -148,6 +149,7 @@ Foam::solution::solution
     (
         readOpt() == IOobject::MUST_READ
      || readOpt() == IOobject::MUST_READ_IF_MODIFIED
+     || (readOpt() == IOobject::READ_IF_PRESENT && headerOk())
     )
     {
         read(solutionDict());

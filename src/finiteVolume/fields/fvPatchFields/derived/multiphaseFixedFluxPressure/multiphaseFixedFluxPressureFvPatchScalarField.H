@@ -25,7 +25,14 @@ Class
     Foam::multiphaseFixedFluxPressureFvPatchScalarField
 
 Description
-    Foam::multiphaseFixedFluxPressureFvPatchScalarField
+    Adjusts the pressure gradient such that the flux on the boundary is that
+    specified by the velocity boundary condition.
+
+    The predicted flux to be compensated by the pressure gradient is evaluated
+    as (phi - phiHbyA), both of which are looked-up from the database as is
+    the pressure diffusivity Dp used to calculate the gradient.
+
+    The names of the phi, phiHbyA and Dp fields may be optionally specified.
 
 SourceFiles
     multiphaseFixedFluxPressureFvPatchScalarField.C

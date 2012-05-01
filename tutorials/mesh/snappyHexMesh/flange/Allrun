@@ -6,5 +6,5 @@
 cp $FOAM_TUTORIALS/resources/geometry/flange.stl.gz constant/triSurface/
 
 runApplication blockMesh
-runApplication surfaceFeatureExtract -includedAngle 150 -writeObj constant/triSurface/flange.stl flange
+runApplication surfaceFeatureExtract
 runApplication snappyHexMesh -overwrite

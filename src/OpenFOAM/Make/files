@@ -240,7 +240,6 @@ lduMatrix = matrices/lduMatrix
 $(lduMatrix)/lduMatrix/lduMatrix.C
 $(lduMatrix)/lduMatrix/lduMatrixOperations.C
 $(lduMatrix)/lduMatrix/lduMatrixATmul.C
-$(lduMatrix)/lduMatrix/lduMatrixTests.C
 $(lduMatrix)/lduMatrix/lduMatrixUpdateMatrixInterfaces.C
 $(lduMatrix)/lduMatrix/lduMatrixSolver.C
 $(lduMatrix)/lduMatrix/lduMatrixSmoother.C
@@ -313,6 +312,14 @@ algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomer
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
 meshes/lduMesh/lduMesh.C
+
+LduMatrix = matrices/LduMatrix
+$(LduMatrix)/LduMatrix/lduMatrices.C
+$(LduMatrix)/LduMatrix/solverPerformance.C
+$(LduMatrix)/LduMatrix/LduInterfaceField/LduInterfaceFields.C
+$(LduMatrix)/Smoothers/lduSmoothers.C
+$(LduMatrix)/Preconditioners/lduPreconditioners.C
+$(LduMatrix)/Solvers/lduSolvers.C
 
 primitiveShapes = meshes/primitiveShapes
 
@@ -575,6 +582,13 @@ $(interpolations)/patchToPatchInterpolation/PatchToPatchInterpolationName.C
 $(interpolations)/interpolationTable/tableReaders/tableReaders.C
 $(interpolations)/interpolationTable/tableReaders/openFoam/openFoamTableReaders.C
 $(interpolations)/interpolationTable/tableReaders/csv/csvTableReaders.C
+
+interpolationWeights = $(interpolations)/interpolationWeights
+$(interpolationWeights)/interpolationWeights/interpolationWeights.C
+$(interpolationWeights)/linearInterpolationWeights/linearInterpolationWeights.C
+$(interpolationWeights)/splineInterpolationWeights/splineInterpolationWeights.C
+
+
 
 algorithms/indexedOctree/indexedOctreeName.C
 algorithms/indexedOctree/treeDataCell.C

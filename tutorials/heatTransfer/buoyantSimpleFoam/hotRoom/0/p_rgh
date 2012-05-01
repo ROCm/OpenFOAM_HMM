@@ -22,19 +22,19 @@ boundaryField
 {
     floor
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 
     ceiling
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 
     fixedWalls
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 1e5;
     }
 }

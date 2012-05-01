@@ -45,8 +45,6 @@ SourceFiles
 #ifndef conformalVoronoiMesh_H
 #define conformalVoronoiMesh_H
 
-#define CGAL_INEXACT
-
 #include "CGALTriangulation3Ddefs.H"
 #include "uint.H"
 #include "ulong.H"

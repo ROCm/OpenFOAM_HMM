@@ -72,9 +72,8 @@ Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
 
 void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
-    const scalarField& psiInternal,
     scalarField&,
-    const lduMatrix&,
+    const scalarField& psiInternal,
     const scalarField&,
     const direction,
     const Pstream::commsTypes commsType
@@ -117,9 +116,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 
 void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 (
-    const scalarField&,
     scalarField& result,
-    const lduMatrix&,
+    const scalarField&,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType

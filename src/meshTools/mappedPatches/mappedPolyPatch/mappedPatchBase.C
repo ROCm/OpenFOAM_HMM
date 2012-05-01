@@ -265,7 +265,7 @@ void Foam::mappedPatchBase::findSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1E-4
+                        1e-4
                     )
                 );
                 patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

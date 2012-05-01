@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,7 +80,7 @@ Foam::fvMatrix<Foam::scalar>::solver
                 *this,
                 boundaryCoeffs_,
                 internalCoeffs_,
-                psi_.boundaryField().interfaces(),
+                psi_.boundaryField().scalarInterfaces(),
                 solverControls
             )
         )
@@ -93,7 +93,7 @@ Foam::fvMatrix<Foam::scalar>::solver
 
 
 template<>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
+Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 (
     const dictionary& solverControls
 )
@@ -111,13 +111,13 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     // assign new solver controls
     solver_->read(solverControls);
 
-    lduMatrix::solverPerformance solverPerf = solver_->solve
+    solverPerformance solverPerf = solver_->solve
     (
         psi.internalField(),
         totalSource
     );
 
-    solverPerf.print();
+    solverPerf.print(Info);
 
     fvMat_.diag() = saveDiag;
 
@@ -130,14 +130,15 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 
 
 template<>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
+Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 (
     const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<scalar>::solve(const dictionary& solverControls) : "
+        Info<< "fvMatrix<scalar>::solveSegregated"
+               "(const dictionary& solverControls) : "
                "solving fvMatrix<scalar>"
             << endl;
     }
@@ -152,17 +153,17 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
     addBoundarySource(totalSource, false);
 
     // Solver call
-    lduMatrix::solverPerformance solverPerf = lduMatrix::solver::New
+    solverPerformance solverPerf = lduMatrix::solver::New
     (
         psi.name(),
         *this,
         boundaryCoeffs_,
         internalCoeffs_,
-        psi.boundaryField().interfaces(),
+        psi.boundaryField().scalarInterfaces(),
         solverControls
     )->solve(psi.internalField(), totalSource);
 
-    solverPerf.print();
+    solverPerf.print(Info);
 
     diag() = saveDiag;
 
@@ -187,7 +188,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
             psi_.internalField(),
             source_ - boundaryDiag*psi_.internalField(),
             boundaryCoeffs_,
-            psi_.boundaryField().interfaces(),
+            psi_.boundaryField().scalarInterfaces(),
             0
         )
     );

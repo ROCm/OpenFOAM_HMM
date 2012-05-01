@@ -22,6 +22,8 @@ EXE_INC = \
 
 EXE_LIBS = \
     $(CGAL_LIBS) \
+    -lboost_thread \
+    -lmpfr \
     -lconformalVoronoiMesh \
     -lmeshTools \
     -ldecompositionMethods \

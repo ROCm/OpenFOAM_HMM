@@ -40,7 +40,7 @@ laplacianSchemes
 {
     default         none;
     laplacian(muEff,U) Gauss linear orthogonal;
-    laplacian((rho*(1|A(U))),p_rgh) Gauss linear orthogonal;
+    laplacian(Dp,p_rgh) Gauss linear orthogonal;
     laplacian(alphaEff,h) Gauss linear orthogonal;
     laplacian(DkEff,k) Gauss linear orthogonal;
     laplacian(DepsilonEff,epsilon) Gauss linear orthogonal;

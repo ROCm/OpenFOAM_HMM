@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,28 @@ wordList ReadFields
     const IOobjectList& objects,
     PtrList<GeoField>& fields,
     const bool syncPar = true
+);
+
+//- Helper routine to read GeometricFields. The fieldsCache is per time
+//  an objectRegistry of all stored fields
+template<class GeoField>
+static void ReadFields
+(
+    const word& fieldName,
+    const typename GeoField::Mesh& mesh,
+    const wordList& timeNames,
+    objectRegistry& fieldsCache
+);
+
+//- Helper routine to read GeometricFields. The fieldsCache is per time
+//  an objectRegistry of all stored fields
+template<class GeoField>
+static void ReadFields
+(
+    const word& fieldName,
+    const typename GeoField::Mesh& mesh,
+    const wordList& timeNames,
+    const word& registryName = "fieldsCache"
 );
 
 } // End namespace Foam

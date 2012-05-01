@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 
-    const scalar coupledPolyPatch::defaultMatchTol_ = 1E-4;
+    const scalar coupledPolyPatch::defaultMatchTol_ = 1e-4;
 
     template<>
     const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =

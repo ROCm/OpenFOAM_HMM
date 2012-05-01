@@ -48,9 +48,8 @@ void Foam::lduMatrix::initMatrixInterfaces
             {
                 interfaces[interfaceI].initInterfaceMatrixUpdate
                 (
-                    psiif,
                     result,
-                    *this,
+                    psiif,
                     coupleCoeffs[interfaceI],
                     cmpt,
                     Pstream::defaultCommsType
@@ -75,9 +74,8 @@ void Foam::lduMatrix::initMatrixInterfaces
             {
                 interfaces[interfaceI].initInterfaceMatrixUpdate
                 (
-                    psiif,
                     result,
-                    *this,
+                    psiif,
                     coupleCoeffs[interfaceI],
                     cmpt,
                     Pstream::blocking
@@ -112,9 +110,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
             {
                 interfaces[interfaceI].updateInterfaceMatrix
                 (
-                    psiif,
                     result,
-                    *this,
+                    psiif,
                     coupleCoeffs[interfaceI],
                     cmpt,
                     Pstream::defaultCommsType
@@ -141,9 +138,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
                         {
                             interfaces[interfaceI].updateInterfaceMatrix
                             (
-                                psiif,
                                 result,
-                                *this,
+                                psiif,
                                 coupleCoeffs[interfaceI],
                                 cmpt,
                                 Pstream::defaultCommsType
@@ -193,9 +189,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
             {
                 interfaces[interfaceI].updateInterfaceMatrix
                 (
-                    psiif,
                     result,
-                    *this,
+                    psiif,
                     coupleCoeffs[interfaceI],
                     cmpt,
                     Pstream::defaultCommsType
@@ -218,9 +213,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 {
                     interfaces[interfaceI].initInterfaceMatrixUpdate
                     (
-                        psiif,
                         result,
-                        *this,
+                        psiif,
                         coupleCoeffs[interfaceI],
                         cmpt,
                         Pstream::scheduled
@@ -230,9 +224,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 {
                     interfaces[interfaceI].updateInterfaceMatrix
                     (
-                        psiif,
                         result,
-                        *this,
+                        psiif,
                         coupleCoeffs[interfaceI],
                         cmpt,
                         Pstream::scheduled
@@ -254,9 +247,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
             {
                 interfaces[interfaceI].updateInterfaceMatrix
                 (
-                    psiif,
                     result,
-                    *this,
+                    psiif,
                     coupleCoeffs[interfaceI],
                     cmpt,
                     Pstream::blocking

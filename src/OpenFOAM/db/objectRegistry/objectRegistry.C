@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,9 +151,25 @@ Foam::wordList Foam::objectRegistry::sortedNames(const word& ClassName) const
 
 const Foam::objectRegistry& Foam::objectRegistry::subRegistry
 (
-    const word& name
+    const word& name,
+    const bool forceCreate
 ) const
 {
+    if (forceCreate && !foundObject<objectRegistry>(name))
+    {
+        objectRegistry* fieldsCachePtr = new objectRegistry
+        (
+            IOobject
+            (
+                name,
+                time().constant(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            )
+        );
+        fieldsCachePtr->store();
+    }
     return lookupObject<objectRegistry>(name);
 }
 

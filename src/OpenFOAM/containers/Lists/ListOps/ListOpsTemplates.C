@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -592,12 +592,13 @@ Foam::label Foam::findSortedIndex
 }
 
 
-template<class ListType>
+template<class ListType, class BinaryOp>
 Foam::label Foam::findLower
 (
     const ListType& l,
     typename ListType::const_reference t,
-    const label start
+    const label start,
+    const BinaryOp& bop
 )
 {
     if (start >= l.size())
@@ -612,7 +613,7 @@ Foam::label Foam::findLower
     {
         label mid = (low + high)/2;
 
-        if (l[mid] < t)
+        if (bop(l[mid], t))
         {
             low = mid;
         }
@@ -622,13 +623,13 @@ Foam::label Foam::findLower
         }
     }
 
-    if (l[high] < t)
+    if (bop(l[high], t))
     {
         return high;
     }
     else
     {
-        if (l[low] < t)
+        if (bop(l[low], t))
         {
             return low;
         }
@@ -637,6 +638,18 @@ Foam::label Foam::findLower
             return -1;
         }
     }
+}
+
+
+template<class ListType>
+Foam::label Foam::findLower
+(
+    const ListType& l,
+    typename ListType::const_reference t,
+    const label start
+)
+{
+    return findLower(l, t, start, lessOp<typename ListType::value_type>());
 }
 
 

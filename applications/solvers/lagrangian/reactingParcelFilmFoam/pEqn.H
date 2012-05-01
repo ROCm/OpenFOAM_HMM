@@ -1,11 +1,11 @@
 rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
-surfaceScalarField rhorAUf(rAU.name() + 'f', fvc::interpolate(rho*rAU));
+surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn.H();
 
-surfaceScalarField phig(rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
+surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
 surfaceScalarField phiHbyA
 (
@@ -15,7 +15,7 @@ surfaceScalarField phiHbyA
         (fvc::interpolate(HbyA) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU, rho, U, phi)
     )
-  - phig
+  + phig
 );
 
 
@@ -37,7 +37,7 @@ while (pimple.correctNonOrthogonal())
     if (pimple.finalNonOrthogonalIter())
     {
         phi = phiHbyA + p_rghEqn.flux();
-        U = HbyA + rAU*fvc::reconstruct((p_rghEqn.flux() - phig)/rhorAUf);
+        U = HbyA + rAU*fvc::reconstruct((p_rghEqn.flux() + phig)/rhorAUf);
         U.correctBoundaryConditions();
     }
 }

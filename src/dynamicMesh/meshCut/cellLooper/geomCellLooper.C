@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ License
 
 // Extension factor of edges to make sure we catch intersections through
 // edge endpoints
-const Foam::scalar Foam::geomCellLooper::pointEqualTol_ = 1E-3;
+const Foam::scalar Foam::geomCellLooper::pointEqualTol_ = 1e-3;
 
 
 // Snap cuts through edges onto edge endpoints. Fraction of edge length.

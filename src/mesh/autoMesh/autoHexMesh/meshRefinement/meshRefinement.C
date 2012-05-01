@@ -1881,7 +1881,7 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
         List<treeBoundBox> meshBb(1);
         treeBoundBox& bb = meshBb[0];
         bb = treeBoundBox(mesh_.points());
-        bb = bb.extend(rndGen, 1E-4);
+        bb = bb.extend(rndGen, 1e-4);
 
         // Distribute all geometry (so refinementSurfaces and shellSurfaces)
         searchableSurfaces& geometry =

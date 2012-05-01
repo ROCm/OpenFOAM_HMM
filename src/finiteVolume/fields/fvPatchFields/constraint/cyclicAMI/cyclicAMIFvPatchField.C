@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -202,9 +202,8 @@ Foam::cyclicAMIFvPatchField<Type>::neighbourPatchField() const
 template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 (
-    const scalarField& psiInternal,
     scalarField& result,
-    const lduMatrix&,
+    const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
@@ -217,6 +216,35 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
+
+    pnf = cyclicAMIPatch_.interpolate(pnf);
+
+    // Multiply the field by coefficients and add into the result
+    const labelUList& faceCells = cyclicAMIPatch_.faceCells();
+
+    forAll(faceCells, elemI)
+    {
+        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
+    }
+}
+
+
+template<class Type>
+void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
+(
+    Field<Type>& result,
+    const Field<Type>& psiInternal,
+    const scalarField& coeffs,
+    const Pstream::commsTypes
+) const
+{
+    const labelUList& nbrFaceCells =
+        cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().faceCells();
+
+    Field<Type> pnf(psiInternal, nbrFaceCells);
+
+    // Transform according to the transformation tensors
+    transformCoupleField(pnf);
 
     pnf = cyclicAMIPatch_.interpolate(pnf);
 

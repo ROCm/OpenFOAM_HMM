@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ Foam::triSurfaceSearch::triSurfaceSearch(const triSurface& surface)
         treeBoundBox(surface_.points(), surface_.meshPoints()).extend
         (
             rndGen,
-            1E-4
+            1e-4
         )
     );
     treeBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);

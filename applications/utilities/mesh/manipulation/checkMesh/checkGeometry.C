@@ -41,8 +41,8 @@ Foam::label Foam::findOppositeWedge
             if
             (
                 pp.size() == wpp.size()
-             && mag(pp.axis() & wpp.axis()) >= (1-1E-3)
-             && mag(ppCosAngle - wppCosAngle) >= 1E-3
+             && mag(pp.axis() & wpp.axis()) >= (1-1e-3)
+             && mag(ppCosAngle - wppCosAngle) >= 1e-3
             )
             {
                 return patchI;
@@ -106,7 +106,7 @@ bool Foam::checkWedges
             );
 
 
-            if (mag(opp.axis() & pp.axis()) < (1-1E-3))
+            if (mag(opp.axis() & pp.axis()) < (1-1e-3))
             {
                 if (report)
                 {

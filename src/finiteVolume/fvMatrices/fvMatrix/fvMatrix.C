@@ -1377,7 +1377,7 @@ void Foam::checkMethod
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve
+Foam::solverPerformance Foam::solve
 (
     fvMatrix<Type>& fvm,
     const dictionary& solverControls
@@ -1387,13 +1387,13 @@ Foam::lduMatrix::solverPerformance Foam::solve
 }
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve
+Foam::solverPerformance Foam::solve
 (
     const tmp<fvMatrix<Type> >& tfvm,
     const dictionary& solverControls
 )
 {
-    lduMatrix::solverPerformance solverPerf =
+    solverPerformance solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve(solverControls);
 
     tfvm.clear();
@@ -1403,15 +1403,15 @@ Foam::lduMatrix::solverPerformance Foam::solve
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve(fvMatrix<Type>& fvm)
+Foam::solverPerformance Foam::solve(fvMatrix<Type>& fvm)
 {
     return fvm.solve();
 }
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
+Foam::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 {
-    lduMatrix::solverPerformance solverPerf =
+    solverPerformance solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve();
 
     tfvm.clear();

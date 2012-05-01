@@ -29,10 +29,13 @@ boundaryField
         gamma           1;
         p0              40;
         pressure        table
-        (
-            (0 10)
-            (1 40)
-        );
+
+2
+(
+(0 10)
+(1 40)
+)
+;
         value           uniform 40;
     }
     outlet1
@@ -54,7 +57,14 @@ boundaryField
         type            fan;
         patchType       cyclic;
         jump            uniform 0;
-        f               2(100 -0.1);
+        jumpTable       polynomial
+
+2
+(
+(100 0)
+(-0.1 1)
+)
+;
         value           uniform 0;
     }
     fan_half1
@@ -62,7 +72,6 @@ boundaryField
         type            fan;
         patchType       cyclic;
         jump            uniform 0;
-        f               2(100 -0.1);
         value           uniform 0;
     }
     defaultFaces

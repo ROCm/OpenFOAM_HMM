@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,24 @@ tmp<scalarField> stabilise(const tmp<scalarField>& tsf, const scalar s)
     stabilise(tRes(), tsf(), s);
     reuseTmp<scalar, scalar>::clear(tsf);
     return tRes;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<>
+scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2)
+{
+    if (f1.size() && (f1.size() == f2.size()))
+    {
+        scalar SumProd = 0.0;
+        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, scalar, f1, *, scalar, f2)
+        return SumProd;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
