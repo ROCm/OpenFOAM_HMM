@@ -28,7 +28,7 @@ Description
     Series-up based profile data - drag and lift coefficients computed as
     sum of cosine series
 
-        Cd = sum_i(CdCoeff)*sin(i*AOA)
+        Cd = sum_i(CdCoeff)*cos(i*AOA)
         Cl = sum_i(ClCoeff)*sin(i*AOA)
 
     where:
@@ -79,12 +79,21 @@ protected:
 
     // Protected Member Functions
 
-        //- Evaluate
-        scalar evaluate
-        (
-            const scalar& xIn,
-            const List<scalar>& values
-        ) const;
+        // Evaluate
+
+            //- Drag
+            scalar evaluateDrag
+            (
+                const scalar& xIn,
+                const List<scalar>& values
+            ) const;
+
+            //- Lift
+            scalar evaluateLift
+            (
+                const scalar& xIn,
+                const List<scalar>& values
+            ) const;
 
 
 public:

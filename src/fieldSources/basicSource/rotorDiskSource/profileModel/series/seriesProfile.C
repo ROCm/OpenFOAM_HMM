@@ -38,7 +38,24 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::scalar Foam::seriesProfile::evaluate
+Foam::scalar Foam::seriesProfile::evaluateDrag
+(
+    const scalar& xIn,
+    const List<scalar>& values
+) const
+{
+    scalar result = 0.0;
+
+    forAll(values, i)
+    {
+        result += values[i]*cos((i + 1)*xIn);
+    }
+
+    return result;
+}
+
+
+Foam::scalar Foam::seriesProfile::evaluateLift
 (
     const scalar& xIn,
     const List<scalar>& values
@@ -108,8 +125,8 @@ Foam::seriesProfile::seriesProfile
 
 void Foam::seriesProfile::Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const
 {
-    Cd = evaluate(alpha, CdCoeffs_);
-    Cl = evaluate(alpha, ClCoeffs_);
+    Cd = evaluateDrag(alpha, CdCoeffs_);
+    Cl = evaluateLift(alpha, ClCoeffs_);
 }
 
 
