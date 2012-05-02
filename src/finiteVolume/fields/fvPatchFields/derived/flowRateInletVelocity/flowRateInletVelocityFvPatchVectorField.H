@@ -30,8 +30,10 @@ Description
 
     The basis of the patch (volumetric or mass) is determined by the
     dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the
-    mass basis.
+
+    If the flux is mass-based
+    - the current density is used to correct the velocity
+    - volumetric flow rate can be applied by setting the 'rho' entry to 'none'
 
     Example of the boundary condition specification:
     \verbatim
@@ -39,6 +41,7 @@ Description
     {
         type        flowRateInletVelocity;
         flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        rho         rho;        // none | rho [m3/s or kg/s]
         value       uniform (0 0 0); // placeholder
     }
     \endverbatim
