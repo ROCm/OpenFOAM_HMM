@@ -67,7 +67,7 @@ void Foam::fixedTrim::read(const dictionary& dict)
     scalar theta1c = degToRad(readScalar(coeffs_.lookup("theta1c")));
     scalar theta1s = degToRad(readScalar(coeffs_.lookup("theta1s")));
 
-    const List<vector>& x = rotor_.x();
+    const List<point>& x = rotor_.x();
     forAll(thetag_, i)
     {
         scalar psi = x[i].y();
