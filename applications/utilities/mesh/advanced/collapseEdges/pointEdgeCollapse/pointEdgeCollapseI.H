@@ -91,8 +91,8 @@ inline bool Foam::pointEdgeCollapse::update
 //            // Same coordinate. Same string?
 //            if (w2.collapseIndex_ < collapseIndex_)
 //            {
-//                // Take over string index from w2 (and also coordinate but this
-//                // was same)
+//                // Take over string index from w2 (and also coordinate but
+//                // this was same)
 //                operator=(w2);
 //                return true;
 //            }
