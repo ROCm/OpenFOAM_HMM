@@ -54,7 +54,8 @@ else
     {
         fvScalarMatrix pEqn
         (
-            fvm::laplacian(rho*rAU, p) == fvc::div(phiHbyA)
+            fvc::div(phiHbyA)
+          - fvm::laplacian(rho*rAU, p)
         );
 
         pEqn.setReference(pRefCell, pRefValue);
@@ -63,7 +64,7 @@ else
 
         if (simple.finalNonOrthogonalIter())
         {
-            phi = phiHbyA - pEqn.flux();
+            phi = phiHbyA + pEqn.flux();
         }
     }
 }
@@ -88,5 +89,10 @@ if (closedVolume)
 rho = thermo.rho();
 rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
-rho.relax();
+
+if (!simple.transonic())
+{
+    rho.relax();
+}
+
 Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;

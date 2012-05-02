@@ -99,8 +99,16 @@ void Foam::SolverPerformance<Type>::print
 {
     for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        os  << solverName_ << ":  Solving for "
-            << word(fieldName_ + pTraits<Type>::componentNames[cmpt]);
+        if (pTraits<Type>::nComponents == 1)
+        {
+            os  << solverName_ << ":  Solving for " << fieldName_;
+
+        }
+        else
+        {
+            os  << solverName_ << ":  Solving for "
+                << word(fieldName_ + pTraits<Type>::componentNames[cmpt]);
+        }
 
         if (singular_[cmpt])
         {

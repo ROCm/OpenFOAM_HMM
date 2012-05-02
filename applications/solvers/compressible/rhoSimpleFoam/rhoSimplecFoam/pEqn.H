@@ -3,8 +3,6 @@ rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
 rho.relax();
 
-volScalarField p0(p);
-
 volScalarField AU(UEqn().A());
 volScalarField AtU(AU - UEqn().H1());
 
@@ -22,7 +20,7 @@ if (simple.transonic())
         surfaceScalarField phid
         (
             "phid",
-            fvc::interpolate(psi*HbyA) & mesh.Sf()
+            fvc::interpolate(psi)*(fvc::interpolate(HbyA) & mesh.Sf())
         );
 
         surfaceScalarField phic
@@ -30,6 +28,8 @@ if (simple.transonic())
             "phic",
             fvc::interpolate(rho/AtU - rho/AU)*fvc::snGrad(p)*mesh.magSf()
         );
+
+        HbyA -= fvc::grad(p)*(1.0/AU - 1.0/AtU);
 
         fvScalarMatrix pEqn
         (
@@ -58,11 +58,15 @@ else
         surfaceScalarField phiHbyA
         (
             "phiHbyA",
-            fvc::interpolate(rho*HbyA) & mesh.Sf()
+            fvc::interpolate(rho)*fvc::interpolate(HbyA) & mesh.Sf()
         );
 
-        closedVolume = adjustPhi(phi, U, p);
-        phi += fvc::interpolate(rho/AtU - rho/AU)*fvc::snGrad(p)*mesh.magSf();
+        closedVolume = adjustPhi(phiHbyA, U, p);
+
+        phiHbyA +=
+            fvc::interpolate(rho/AtU - rho/AU)*fvc::snGrad(p)*mesh.magSf();
+
+        HbyA -= fvc::grad(p)*(1.0/AU - 1.0/AtU);
 
         fvScalarMatrix pEqn
         (
@@ -88,9 +92,7 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-U = HbyA - (fvc::grad(p0)*(1.0/AU - 1.0/AtU) + fvc::grad(p)/AtU);
-//U = HbyA - fvc::grad(p)/AU;
-
+U = HbyA - fvc::grad(p)/AtU;
 U.correctBoundaryConditions();
 
 // For closed-volume cases adjust the pressure and density levels
