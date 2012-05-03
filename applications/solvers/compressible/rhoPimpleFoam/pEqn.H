@@ -3,6 +3,7 @@ rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
 rho.relax();
 
+volScalarField rAU(1.0/UEqn().A());
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn().H();
 
@@ -23,13 +24,15 @@ if (pimple.transonic())
         )
     );
 
+    volScalarField Dp("Dp", rho*rAU);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(Dp, p)
         );
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
@@ -52,6 +55,8 @@ else
         )
     );
 
+    volScalarField Dp("Dp", rho*rAU);
+
     while (pimple.correctNonOrthogonal())
     {
         // Pressure corrector
@@ -59,7 +64,7 @@ else
         (
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(Dp, p)
         );
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));

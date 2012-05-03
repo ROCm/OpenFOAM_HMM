@@ -74,7 +74,10 @@ int main(int argc, char *argv[])
 
         #include "setrDeltaT.H"
 
-        #include "rhoEqn.H"
+        if (pimple.nCorrPIMPLE() <= 1)
+        {
+            #include "rhoEqn.H"
+        }
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())

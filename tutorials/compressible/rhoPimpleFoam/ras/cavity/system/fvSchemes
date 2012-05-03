@@ -52,7 +52,7 @@ laplacianSchemes
     laplacian(DepsilonEff,epsilon) Gauss linear orthogonal;
     laplacian(DREff,R) Gauss linear orthogonal;
     laplacian(DomegaEff,omega) Gauss linear orthogonal;
-    laplacian((rho*(1|A(U))),p) Gauss linear orthogonal;
+    laplacian(Dp,p) Gauss linear orthogonal;
     laplacian(alphaEff,h) Gauss linear orthogonal;
 }
 

@@ -40,7 +40,7 @@ divSchemes
 laplacianSchemes
 {
     default         none;
-    laplacian((rho*(1|A(U))),p) Gauss linear orthogonal;
+    laplacian(Dp,p) Gauss linear orthogonal;
     laplacian(muEff,U) Gauss linear orthogonal;
     laplacian(alphaEff,e) Gauss linear orthogonal;
 }
