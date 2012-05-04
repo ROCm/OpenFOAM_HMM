@@ -29,4 +29,6 @@ $(interRegion)/constantHeatTransfer/constantHeatTransfer.C
 $(interRegion)/tabulatedHeatTransfer/tabulatedHeatTransfer.C
 $(interRegion)/variableHeatTransfer/variableHeatTransfer.C
 
+basicSource/codedSource/codedSource.C
+
 LIB = $(FOAM_LIBBIN)/libfieldSources
