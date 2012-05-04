@@ -53,16 +53,16 @@ template<class Type, class DType, class LUType>
 void Foam::SmoothSolver<Type, DType, LUType>::readControls()
 {
     LduMatrix<Type, DType, LUType>::solver::readControls();
-    readControl(this->controlDict_, nSweeps_, "nSweeps");
+    this->readControl(this->controlDict_, nSweeps_, "nSweeps");
 }
 
 
 template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
+Foam::SolverPerformance<Type>
 Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
 {
     // --- Setup class containing solver performance data
-    typename LduMatrix<Type, DType, LUType>::solverPerformance solverPerf
+    SolverPerformance<Type> solverPerf
     (
         typeName,
         this->fieldName_
@@ -113,7 +113,7 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
 
 
         // Check convergence, solve if not converged
-        if (!solverPerf.converged(this->tolerance_, this->relTol_))
+        if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
         {
             autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>
             smootherPtr = LduMatrix<Type, DType, LUType>::smoother::New
@@ -141,7 +141,7 @@ Foam::SmoothSolver<Type, DType, LUType>::solve(Field<Type>& psi) const
             } while
             (
                 (solverPerf.nIterations() += nSweeps_) < this->maxIter_
-             && !(solverPerf.converged(this->tolerance_, this->relTol_))
+             && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
             );
         }
     }

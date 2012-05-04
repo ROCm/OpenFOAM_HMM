@@ -160,7 +160,7 @@ castellatedMeshControls
             //                 freedom in mesh motion
             //      boundary : create free-standing boundary faces (baffles
             //                 but without the shared points)
-            //faceType internal;
+            //faceType baffle;
         }
     }
 

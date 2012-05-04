@@ -87,10 +87,7 @@ public:
     // Member Functions
 
         //- Solve the matrix with this solver
-        virtual typename LduMatrix<Type, DType, LUType>::solverPerformance solve
-        (
-            Field<Type>& psi
-        ) const;
+        virtual SolverPerformance<Type> solve(Field<Type>& psi) const;
 };
 
 

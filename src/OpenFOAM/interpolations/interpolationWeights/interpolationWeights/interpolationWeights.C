@@ -57,8 +57,12 @@ autoPtr<interpolationWeights> interpolationWeights::New
     const scalarField& samples
 )
 {
-    Info<< nl << "Selecting interpolationWeights "
-        << type << endl;
+    if (debug)
+    {
+        InfoIn("interpolationWeights::New")
+            << "Selecting interpolationWeights "
+            << type << endl;
+    }
 
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(type);
@@ -85,33 +89,6 @@ autoPtr<interpolationWeights> interpolationWeights::New
 
 interpolationWeights::~interpolationWeights()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//objectRegistry& interpolationWeights::registry
-//(
-//    const objectRegistry& obr,
-//    const word& name
-//)
-//{
-//    if (!obr.foundObject<objectRegistry>(name))
-//    {
-//        objectRegistry* fieldsCachePtr = new objectRegistry
-//        (
-//            IOobject
-//            (
-//                name,
-//                obr.time().constant(),
-//                obr,
-//                IOobject::NO_READ,
-//                IOobject::NO_WRITE
-//            )
-//        );
-//        fieldsCachePtr->store();
-//    }
-//    return const_cast<objectRegistry&>(obr.subRegistry(name));
-//}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

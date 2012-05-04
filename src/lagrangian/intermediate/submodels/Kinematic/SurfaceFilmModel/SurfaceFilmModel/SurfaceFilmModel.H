@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,10 +140,9 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            CloudType& owner,
-            const dimensionedVector& g
+            CloudType& owner
         ),
-        (dict, owner, g)
+        (dict, owner)
     );
 
 
@@ -157,7 +156,6 @@ public:
         (
             const dictionary& dict,
             CloudType& owner,
-            const dimensionedVector& g,
             const word& type
         );
 
@@ -182,8 +180,7 @@ public:
     static autoPtr<SurfaceFilmModel<CloudType> > New
     (
         const dictionary& dict,
-        CloudType& owner,
-        const dimensionedVector& g
+        CloudType& owner
     );
 
 

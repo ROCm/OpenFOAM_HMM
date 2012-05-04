@@ -320,7 +320,6 @@ void LaunderSharmaKE::correct()
         C1_*G*epsilon_/k_
       - fvm::SuSp(((2.0/3.0)*C1_ + C3_)*rho_*divU, epsilon_)
       - fvm::Sp(C2_*f2()*rho_*epsilon_/k_, epsilon_)
-    //+ 0.75*1.5*flameKproduction*epsilon_/k_
       + E
     );
 
@@ -340,7 +339,6 @@ void LaunderSharmaKE::correct()
      ==
         G - fvm::SuSp(2.0/3.0*rho_*divU, k_)
       - fvm::Sp(rho_*(epsilon_ + D)/k_, k_)
-    //+ flameKproduction
     );
 
     kEqn().relax();

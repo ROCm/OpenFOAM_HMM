@@ -55,7 +55,7 @@ void Foam::DiagonalSolver<Type, DType, LUType>::read
 
 
 template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
+Foam::SolverPerformance<Type>
 Foam::DiagonalSolver<Type, DType, LUType>::solve
 (
     Field<Type>& psi
@@ -63,7 +63,7 @@ Foam::DiagonalSolver<Type, DType, LUType>::solve
 {
     psi = this->matrix_.source()/this->matrix_.diag();
 
-    return typename LduMatrix<Type, DType, LUType>::solverPerformance
+    return SolverPerformance<Type>
     (
         typeName,
         this->fieldName_,

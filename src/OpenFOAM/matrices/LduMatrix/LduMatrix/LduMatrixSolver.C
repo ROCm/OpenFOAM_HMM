@@ -179,7 +179,7 @@ Type Foam::LduMatrix<Type, DType, LUType>::solver::normFactor
     return stabilise
     (
         gSum(cmptMag(Apsi - tmpField) + cmptMag(matrix_.source() - tmpField)),
-        matrix_.small_
+        SolverPerformance<Type>::small_
     );
 
     // At convergence this simpler method is equivalent to the above

@@ -696,16 +696,16 @@ void Foam::tetDecomposer::setRefinement
 
 void Foam::tetDecomposer::updateMesh(const mapPolyMesh& map)
 {
-    inplaceRenumber(map.pointMap(), cellToPoint_);
-    inplaceRenumber(map.pointMap(), faceToPoint_);
+    inplaceRenumber(map.reversePointMap(), cellToPoint_);
+    inplaceRenumber(map.reversePointMap(), faceToPoint_);
 
     forAll(faceOwnerCells_, faceI)
     {
-        inplaceRenumber(map.cellMap(), faceOwnerCells_[faceI]);
+        inplaceRenumber(map.reverseCellMap(), faceOwnerCells_[faceI]);
     }
     forAll(faceNeighbourCells_, faceI)
     {
-        inplaceRenumber(map.cellMap(), faceNeighbourCells_[faceI]);
+        inplaceRenumber(map.reverseCellMap(), faceNeighbourCells_[faceI]);
     }
 }
 

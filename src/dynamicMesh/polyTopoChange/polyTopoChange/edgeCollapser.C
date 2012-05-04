@@ -27,6 +27,10 @@ License
 #include "polyMesh.H"
 #include "polyTopoChange.H"
 #include "ListOps.H"
+#include "globalMeshData.H"
+#include "OFstream.H"
+#include "meshTools.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -121,6 +125,7 @@ void Foam::edgeCollapser::filterFace(const label faceI, face& f) const
         }
     }
 
+
     // Check for pinched face. Tries to correct
     // - consecutive duplicate vertex. Removes duplicate vertex.
     // - duplicate vertex with one other vertex in between (spike).
@@ -190,15 +195,15 @@ void Foam::edgeCollapser::printRegions() const
 
         if (master != -1)
         {
-            Info<< "Region:" << regionI << nl
+            Pout<< "Region:" << regionI << nl
                 << "    master:" << master
-                << ' ' << mesh_.points()[master] << nl;
+                << ' ' << pointRegionMasterLocation_[regionI] << nl;
 
             forAll(pointRegion_, pointI)
             {
                 if (pointRegion_[pointI] == regionI && pointI != master)
                 {
-                    Info<< "    slave:" << pointI
+                    Pout<< "    slave:" << pointI
                         << ' ' <<  mesh_.points()[pointI] << nl;
                 }
             }
@@ -272,6 +277,7 @@ Foam::edgeCollapser::edgeCollapser(const polyMesh& mesh)
 :
     mesh_(mesh),
     pointRegion_(mesh.nPoints(), -1),
+    pointRegionMasterLocation_(mesh.nPoints() / 100),
     pointRegionMaster_(mesh.nPoints() / 100),
     freeRegions_()
 {}
@@ -289,6 +295,8 @@ bool Foam::edgeCollapser::unaffectedEdge(const label edgeI) const
 
 bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
 {
+    const pointField& points = mesh_.points();
+
     const edge& e = mesh_.edges()[edgeI];
 
     label pointRegion0 = pointRegion_[e[0]];
@@ -310,7 +318,7 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
                 {
                     FatalErrorIn
                     ("edgeCollapser::collapseEdge(const label, const label)")
-                        << "Problem : freeed region :" << freeRegion
+                        << "Problem : freed region :" << freeRegion
                         << " has already master "
                         << pointRegionMaster_[freeRegion]
                         << abort(FatalError);
@@ -327,13 +335,22 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
             pointRegion_[e[1]] = freeRegion;
 
             pointRegionMaster_(freeRegion) = master;
+            pointRegionMasterLocation_(freeRegion) = points[master];
         }
         else
         {
             // e[1] is part of collapse network, e[0] not. Add e0 to e1 region.
             pointRegion_[e[0]] = pointRegion1;
 
-            pointRegionMaster_[pointRegion1] = master;
+            if
+            (
+                pointRegionMaster_[pointRegion1] == e[0]
+             || pointRegionMaster_[pointRegion1] == e[1]
+            )
+            {
+                pointRegionMaster_[pointRegion1] = master;
+                pointRegionMasterLocation_[pointRegion1] = points[master];
+            }
         }
     }
     else
@@ -343,7 +360,15 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
             // e[0] is part of collapse network. Add e1 to e0 region
             pointRegion_[e[1]] = pointRegion0;
 
-            pointRegionMaster_[pointRegion0] = master;
+            if
+            (
+                pointRegionMaster_[pointRegion0] == e[0]
+             || pointRegionMaster_[pointRegion0] == e[1]
+            )
+            {
+                pointRegionMaster_[pointRegion0] = master;
+                pointRegionMasterLocation_[pointRegion0] = points[master];
+            }
         }
         else if (pointRegion0 != pointRegion1)
         {
@@ -356,6 +381,9 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
             // Use minRegion as region for combined net, free maxRegion.
             pointRegionMaster_[minRegion] = master;
             pointRegionMaster_[maxRegion] = -1;
+            pointRegionMasterLocation_[minRegion] = points[master];
+            pointRegionMasterLocation_[maxRegion] = point(0, 0, 0);
+
             freeRegions_.insert(maxRegion);
 
             if (minRegion != pointRegion0)
@@ -380,19 +408,67 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
     const labelList& faceNeighbour = mesh_.faceNeighbour();
     const labelListList& pointFaces = mesh_.pointFaces();
     const labelListList& cellEdges = mesh_.cellEdges();
+    const pointZoneMesh& pointZones = mesh_.pointZones();
 
-    // Print regions:
-    //printRegions()
+
 
     bool meshChanged = false;
 
+    // Synchronise pointRegionMasterLocation_
+    const globalMeshData& globalData = mesh_.globalData();
+    const mapDistribute& map = globalData.globalPointSlavesMap();
+    const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
+    const labelList& meshPoints = coupledPatch.meshPoints();
+    const Map<label>& meshPointMap = coupledPatch.meshPointMap();
+
+
+    List<point> newPoints = coupledPatch.localPoints();
+
+    for (label pI = 0; pI < coupledPatch.nPoints(); ++pI)
+    {
+        const label pointRegionMaster = pointRegion_[meshPoints[pI]];
+
+        if (pointRegionMaster != -1)
+        {
+            newPoints[pI]
+                = pointRegionMasterLocation_[pointRegionMaster];
+        }
+    }
+
+    globalData.syncData
+    (
+        newPoints,
+        globalData.globalPointSlaves(),
+        globalData.globalPointTransformedSlaves(),
+        map,
+        minMagSqrEqOp<point>()
+    );
+
+        OFstream str1("newPoints_" + name(Pstream::myProcNo()) + ".obj");
+        forAll(pointRegion_, pI)
+        {
+            if (meshPointMap.found(pI))
+            {
+                meshTools::writeOBJ(str1, newPoints[meshPointMap[pI]]);
+            }
+        }
+
+    for (label pI = 0; pI < coupledPatch.nPoints(); ++pI)
+    {
+        const label pointRegionMaster = pointRegion_[meshPoints[pI]];
+
+        if (pointRegionMaster != -1)
+        {
+            pointRegionMasterLocation_[pointRegionMaster]
+                = newPoints[pI];
+        }
+    }
 
     // Current faces (is also collapseStatus: f.size() < 3)
     faceList newFaces(mesh_.faces());
 
     // Current cellCollapse status
     boolList cellRemoved(mesh_.nCells(), false);
-
 
     do
     {
@@ -521,11 +597,48 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         }
     }
 
+    // Modify the point location of the remaining points
+    forAll(pointRegion_, pointI)
+    {
+        const label pointRegion = pointRegion_[pointI];
+
+        if
+        (
+            !pointRemoved(pointI)
+         && meshPointMap.found(pointI)
+        )
+        {
+            meshMod.modifyPoint
+            (
+                pointI,
+                newPoints[meshPointMap[pointI]],
+                pointZones.whichZone(pointI),
+                false
+            );
+        }
+        else if
+        (
+            pointRegion != -1
+         && !pointRemoved(pointI)
+         && !meshPointMap.found(pointI)
+        )
+        {
+            const point& collapsePoint
+                = pointRegionMasterLocation_[pointRegion];
+
+            meshMod.modifyPoint
+            (
+                pointI,
+                collapsePoint,
+                pointZones.whichZone(pointI),
+                false
+            );
+        }
+    }
 
 
     const polyBoundaryMesh& boundaryMesh = mesh_.boundaryMesh();
     const faceZoneMesh& faceZones = mesh_.faceZones();
-
 
     // Renumber faces that use points
     forAll(pointRegion_, pointI)
@@ -585,6 +698,9 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         }
     }
 
+    // Print regions:
+//    printRegions();
+
     return meshChanged;
 }
 
@@ -593,8 +709,10 @@ void Foam::edgeCollapser::updateMesh(const mapPolyMesh& map)
 {
     pointRegion_.setSize(mesh_.nPoints());
     pointRegion_ = -1;
+
     // Reset count, do not remove underlying storage
     pointRegionMaster_.clear();
+    pointRegionMasterLocation_.clear();
     freeRegions_.clear();
 }
 

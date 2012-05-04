@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,25 +21,45 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Convergence and singularity tests for solvers.
-
 \*---------------------------------------------------------------------------*/
 
-#include "lduMatrix.H"
+#include "SolverPerformance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::lduMatrix::solverPerformance::solverPerformance(Istream& is)
+template<class Type>
+bool Foam::SolverPerformance<Type>::checkSingularity
+(
+    const Type& wApA
+)
 {
-    is  >> *this;
+    for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    {
+        singular_[cmpt] =
+            component(wApA, cmpt) < vsmall_;
+    }
+
+    return singular();
 }
 
 
-bool Foam::lduMatrix::solverPerformance::checkConvergence
+template<class Type>
+bool Foam::SolverPerformance<Type>::singular() const
+{
+    for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+    {
+        if (!singular_[cmpt]) return false;
+    }
+
+    return true;
+}
+
+
+template<class Type>
+bool Foam::SolverPerformance<Type>::checkConvergence
 (
-    const scalar Tolerance,
-    const scalar RelTolerance
+    const Type& Tolerance,
+    const Type& RelTolerance
 )
 {
     if (debug >= 2)
@@ -54,10 +74,10 @@ bool Foam::lduMatrix::solverPerformance::checkConvergence
     (
         finalResidual_ < Tolerance
      || (
-            RelTolerance > SMALL
-         && finalResidual_ <= RelTolerance*initialResidual_
+            RelTolerance
+          > small_*pTraits<Type>::one
+         && finalResidual_ < cmptMultiply(RelTolerance, initialResidual_)
         )
-  // || (solverName == "symSolve" && iter == 0)
     )
     {
         converged_ = true;
@@ -71,38 +91,33 @@ bool Foam::lduMatrix::solverPerformance::checkConvergence
 }
 
 
-bool Foam::lduMatrix::solverPerformance::checkSingularity
+template<class Type>
+void Foam::SolverPerformance<Type>::print
 (
-    const scalar residual
-)
+    Ostream& os
+) const
 {
-    if (residual > VSMALL)
+    for(direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        singular_ = false;
-    }
-    else
-    {
-        singular_ = true;
-    }
-
-    return singular_;
-}
-
-
-void Foam::lduMatrix::solverPerformance::print() const
-{
-    if (debug)
-    {
-        Info<< solverName_ << ":  Solving for " << fieldName_;
-
-        if (singular())
+        if (pTraits<Type>::nComponents == 1)
         {
-            Info<< ":  solution singularity" << endl;
+            os  << solverName_ << ":  Solving for " << fieldName_;
+
         }
         else
         {
-            Info<< ", Initial residual = " << initialResidual_
-                << ", Final residual = " << finalResidual_
+            os  << solverName_ << ":  Solving for "
+                << word(fieldName_ + pTraits<Type>::componentNames[cmpt]);
+        }
+
+        if (singular_[cmpt])
+        {
+            os  << ":  solution singularity" << endl;
+        }
+        else
+        {
+            os  << ", Initial residual = " << component(initialResidual_, cmpt)
+                << ", Final residual = " << component(finalResidual_, cmpt)
                 << ", No Iterations " << noIterations_
                 << endl;
         }
@@ -110,9 +125,10 @@ void Foam::lduMatrix::solverPerformance::print() const
 }
 
 
-bool Foam::lduMatrix::solverPerformance::operator!=
+template<class Type>
+bool Foam::SolverPerformance<Type>::operator!=
 (
-    const lduMatrix::solverPerformance& sp
+    const SolverPerformance<Type>& sp
 ) const
 {
     return
@@ -128,13 +144,14 @@ bool Foam::lduMatrix::solverPerformance::operator!=
 }
 
 
-Foam::lduMatrix::solverPerformance Foam::max
+template<class Type>
+typename Foam::SolverPerformance<Type> Foam::max
 (
-    const lduMatrix::solverPerformance& sp1,
-    const lduMatrix::solverPerformance& sp2
+    const typename Foam::SolverPerformance<Type>& sp1,
+    const typename Foam::SolverPerformance<Type>& sp2
 )
 {
-    return lduMatrix::solverPerformance
+    return SolverPerformance<Type>
     (
         sp1.solverName(),
         sp1.fieldName_,
@@ -147,13 +164,14 @@ Foam::lduMatrix::solverPerformance Foam::max
 }
 
 
+template<class Type>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    Foam::lduMatrix::solverPerformance& sp
+    typename Foam::SolverPerformance<Type>& sp
 )
 {
-    is.readBeginList("lduMatrix::solverPerformance");
+    is.readBeginList("SolverPerformance<Type>");
     is  >> sp.solverName_
         >> sp.fieldName_
         >> sp.initialResidual_
@@ -161,16 +179,17 @@ Foam::Istream& Foam::operator>>
         >> sp.noIterations_
         >> sp.converged_
         >> sp.singular_;
-    is.readEndList("lduMatrix::solverPerformance");
+    is.readEndList("SolverPerformance<Type>");
 
     return is;
 }
 
 
+template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Foam::lduMatrix::solverPerformance& sp
+    const typename Foam::SolverPerformance<Type>& sp
 )
 {
     os  << token::BEGIN_LIST

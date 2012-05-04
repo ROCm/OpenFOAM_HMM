@@ -382,7 +382,6 @@ Foam::Ostream& Foam::operator<<
 #include "LduMatrixOperations.C"
 #include "LduMatrixATmul.C"
 #include "LduMatrixUpdateMatrixInterfaces.C"
-#include "LduMatrixTests.C"
 #include "LduMatrixPreconditioner.C"
 #include "LduMatrixSmoother.C"
 #include "LduMatrixSolver.C"

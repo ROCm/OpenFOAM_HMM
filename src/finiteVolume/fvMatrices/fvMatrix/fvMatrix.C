@@ -841,24 +841,22 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
     );
     volScalarField& H1_ = tH1();
 
-    // Loop over field components
-    /*
-    for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
-    {
-        scalarField psiCmpt(psi_.internalField().component(cmpt));
-
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
-        addBoundaryDiag(boundaryDiagCmpt, cmpt);
-        boundaryDiagCmpt.negate();
-        addCmptAvBoundaryDiag(boundaryDiagCmpt);
-
-        H1_.internalField().replace(cmpt, boundaryDiagCmpt);
-    }
-
-    H1_.internalField() += lduMatrix::H1();
-    */
-
     H1_.internalField() = lduMatrix::H1();
+
+    forAll(psi_.boundaryField(), patchI)
+    {
+        const fvPatchField<Type>& ptf = psi_.boundaryField()[patchI];
+
+        if (ptf.coupled() && ptf.size())
+        {
+            addToInternalField
+            (
+                lduAddr().patchAddr(patchI),
+                boundaryCoeffs_[patchI].component(0),
+                H1_
+            );
+        }
+    }
 
     H1_.internalField() /= psi_.mesh().V();
     H1_.correctBoundaryConditions();
@@ -1377,7 +1375,7 @@ void Foam::checkMethod
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve
+Foam::solverPerformance Foam::solve
 (
     fvMatrix<Type>& fvm,
     const dictionary& solverControls
@@ -1387,13 +1385,13 @@ Foam::lduMatrix::solverPerformance Foam::solve
 }
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve
+Foam::solverPerformance Foam::solve
 (
     const tmp<fvMatrix<Type> >& tfvm,
     const dictionary& solverControls
 )
 {
-    lduMatrix::solverPerformance solverPerf =
+    solverPerformance solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve(solverControls);
 
     tfvm.clear();
@@ -1403,15 +1401,15 @@ Foam::lduMatrix::solverPerformance Foam::solve
 
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve(fvMatrix<Type>& fvm)
+Foam::solverPerformance Foam::solve(fvMatrix<Type>& fvm)
 {
     return fvm.solve();
 }
 
 template<class Type>
-Foam::lduMatrix::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
+Foam::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 {
-    lduMatrix::solverPerformance solverPerf =
+    solverPerformance solverPerf =
         const_cast<fvMatrix<Type>&>(tfvm()).solve();
 
     tfvm.clear();

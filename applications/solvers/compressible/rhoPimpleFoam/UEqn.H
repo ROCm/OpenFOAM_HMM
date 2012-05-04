@@ -4,12 +4,11 @@ tmp<fvVectorMatrix> UEqn
 (
     fvm::ddt(rho, U)
   + fvm::div(phi, U)
+  - fvm::Sp(fvc::ddt(rho) + fvc::div(phi), U)
   + turbulence->divDevRhoReff(U)
 );
 
 UEqn().relax();
-
-volScalarField rAU(1.0/UEqn().A());
 
 if (pimple.momentumPredictor())
 {

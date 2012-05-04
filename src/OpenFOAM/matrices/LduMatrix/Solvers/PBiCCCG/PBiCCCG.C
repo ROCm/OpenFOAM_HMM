@@ -47,7 +47,7 @@ Foam::PBiCCCG<Type, DType, LUType>::PBiCCCG
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class DType, class LUType>
-typename Foam::LduMatrix<Type, DType, LUType>::solverPerformance
+Foam::SolverPerformance<Type>
 Foam::PBiCCCG<Type, DType, LUType>::solve
 (
     Field<Type>& psi
@@ -56,7 +56,7 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
     word preconditionerName(this->controlDict_.lookup("preconditioner"));
 
     // --- Setup class containing solver performance data
-    typename LduMatrix<Type, DType, LUType>::solverPerformance solverPerf
+    SolverPerformance<Type> solverPerf
     (
         preconditionerName + typeName,
         this->fieldName_
@@ -104,7 +104,7 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
-    if (!solverPerf.converged(this->tolerance_, this->relTol_))
+    if (!solverPerf.checkConvergence(this->tolerance_, this->relTol_))
     {
         // --- Select and construct the preconditioner
         autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
@@ -183,7 +183,7 @@ Foam::PBiCCCG<Type, DType, LUType>::solve
         } while
         (
             solverPerf.nIterations()++ < this->maxIter_
-        && !(solverPerf.converged(this->tolerance_, this->relTol_))
+        && !(solverPerf.checkConvergence(this->tolerance_, this->relTol_))
         );
     }
 

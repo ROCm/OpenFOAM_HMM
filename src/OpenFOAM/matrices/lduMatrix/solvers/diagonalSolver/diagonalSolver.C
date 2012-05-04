@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::diagonalSolver::diagonalSolver
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::lduMatrix::solverPerformance Foam::diagonalSolver::solve
+Foam::solverPerformance Foam::diagonalSolver::solve
 (
     scalarField& psi,
     const scalarField& source,
@@ -65,7 +65,7 @@ Foam::lduMatrix::solverPerformance Foam::diagonalSolver::solve
 {
     psi = source/matrix_.diag();
 
-    return lduMatrix::solverPerformance
+    return solverPerformance
     (
         typeName,
         fieldName_,

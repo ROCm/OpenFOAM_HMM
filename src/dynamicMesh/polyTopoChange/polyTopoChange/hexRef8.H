@@ -44,6 +44,7 @@ SourceFiles
 #include "refinementHistory.H"
 #include "PackedBoolList.H"
 #include "uniformDimensionedFields.H"
+#include "cellShapeList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,6 +89,9 @@ class hexRef8
 
         //- Level of saved cells
         Map<label> savedCellLevel_;
+
+        //- cell shapes when seen as split hexes
+        mutable autoPtr<cellShapeList> cellShapesPtr_;
 
 
     // Private Member Functions
@@ -303,6 +307,34 @@ class hexRef8
         void checkWantedRefinementLevels(const labelList&) const;
 
 
+        // Cellshape recognition
+
+            //- Collect all points on face of certain level
+            void collectLevelPoints
+            (
+                const labelList& f,
+                const label level,
+                DynamicList<label>& points
+            ) const;
+
+            //- Collect all points on face (in local numbering) of certain level
+            void collectLevelPoints
+            (
+                const labelList& meshPoints,
+                const labelList& f,
+                const label level,
+                DynamicList<label>& points
+            ) const;
+
+            //- Collect all faces with four corner points and return true if
+            //  hex was matched (6 faces of each four corner points)
+            bool matchHexShape
+            (
+                const label cellI,
+                const label cellLevel,
+                DynamicList<face>& quads
+            ) const;
+
 
         //- Disallow default bitwise copy construct
         hexRef8(const hexRef8&);
@@ -496,6 +528,10 @@ public:
                 const label maxPointDiff,
                 const labelList& pointsToCheck
             ) const;
+
+            //- Utility: get hexes as cell shapes
+            const cellShapeList& cellShapes() const;
+
 
         // Unrefinement (undoing refinement, not arbitrary coarsening)
 

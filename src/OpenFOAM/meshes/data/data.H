@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ SourceFiles
 #define data_H
 
 #include "IOdictionary.H"
-#include "lduMatrix.H"
+#include "solverPerformance.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,13 +94,13 @@ public:
             void setSolverPerformance
             (
                 const word& name,
-                const lduMatrix::solverPerformance&
+                const solverPerformance&
             ) const;
 
             //- Add/set the solverPerformance entry, using its fieldName
             void setSolverPerformance
             (
-                const lduMatrix::solverPerformance&
+                const solverPerformance&
             ) const;
 };
 

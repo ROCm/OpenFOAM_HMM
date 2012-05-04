@@ -25,13 +25,15 @@ if (pimple.transonic())
     );
     mrfZones.relativeFlux(fvc::interpolate(psi), phid);
 
+    volScalarField Dp("Dp", rho*rAU);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(Dp, p)
         );
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
@@ -56,6 +58,8 @@ else
 
     mrfZones.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
+    volScalarField Dp("Dp", rho*rAU);
+
     while (pimple.correctNonOrthogonal())
     {
         // Pressure corrector
@@ -63,7 +67,7 @@ else
         (
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
-          - fvm::laplacian(rho*rAU, p)
+          - fvm::laplacian(Dp, p)
         );
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));

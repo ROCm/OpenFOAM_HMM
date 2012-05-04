@@ -93,7 +93,7 @@ Foam::fvMatrix<Foam::scalar>::solver
 
 
 template<>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
+Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 (
     const dictionary& solverControls
 )
@@ -111,13 +111,13 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     // assign new solver controls
     solver_->read(solverControls);
 
-    lduMatrix::solverPerformance solverPerf = solver_->solve
+    solverPerformance solverPerf = solver_->solve
     (
         psi.internalField(),
         totalSource
     );
 
-    solverPerf.print();
+    solverPerf.print(Info);
 
     fvMat_.diag() = saveDiag;
 
@@ -130,14 +130,15 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 
 
 template<>
-Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
+Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 (
     const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<scalar>::solve(const dictionary& solverControls) : "
+        Info<< "fvMatrix<scalar>::solveSegregated"
+               "(const dictionary& solverControls) : "
                "solving fvMatrix<scalar>"
             << endl;
     }
@@ -152,7 +153,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
     addBoundarySource(totalSource, false);
 
     // Solver call
-    lduMatrix::solverPerformance solverPerf = lduMatrix::solver::New
+    solverPerformance solverPerf = lduMatrix::solver::New
     (
         psi.name(),
         *this,
@@ -162,7 +163,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
         solverControls
     )->solve(psi.internalField(), totalSource);
 
-    solverPerf.print();
+    solverPerf.print(Info);
 
     diag() = saveDiag;
 

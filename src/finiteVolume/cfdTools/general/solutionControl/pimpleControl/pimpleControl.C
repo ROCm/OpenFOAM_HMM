@@ -70,7 +70,7 @@ bool Foam::pimpleControl::criteriaSatisfied()
         const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
-            const List<lduMatrix::solverPerformance> sp(iter().stream());
+            const List<solverPerformance> sp(iter().stream());
             const scalar residual = sp.last().initialResidual();
 
             checked = true;
