@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,22 +21,20 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::interRegionHeatTransferModel
-
 Description
-    Base class for inter region heat exchange. The derived classes must
-    provide the heat transfer coefficient (htc)
-    NOTE: mapToMap does to work in paralell
+    Template for use with dynamic code generation of a basicSource
+
+    - without state
+
+SourceFiles
+    codedBasicSourceTemplate.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interRegionHeatTransferModel_H
-#define interRegionHeatTransferModel_H
+#ifndef codedBasicSourceTemplate_H
+#define codedBasicSourceTemplate_H
 
 #include "basicSource.H"
-#include "volFields.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,50 +42,26 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class interRegionHeatTransferModel Declaration
+                         A templated CodedBasicSource
 \*---------------------------------------------------------------------------*/
 
-class interRegionHeatTransferModel
+class ${typeName}CodedBasic${SourceType}
 :
     public basicSource
 {
-
-private:
-
-    // Private data
-
-        //- Pointer to secondary interRegionHeatTransferModel
-        interRegionHeatTransferModel* secIrht_;
-
-        //- First iteration
-        bool firstIter_;
-
-
-    // Private members
-
-        //- Check coupled interRegionHeatTransferModel
-        void check();
-
-
-protected:
-
-    // Protected data
-
-        //- Heat transfer coefficient [W/m2/k] by area/volume [1/m]
-        // registered on the master mesh
-        volScalarField htc_;
-
-
 public:
 
+    //- Information about the SHA1 of the code itself
+    static const char* const SHA1sum;
+
     //- Runtime type information
-    TypeName("interRegionHeatTransferModel");
+    TypeName("${typeName}");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        interRegionHeatTransferModel
+        //- Construct from patch and internal field
+        ${typeName}CodedBasic${SourceType}
         (
             const word& name,
             const word& modelType,
@@ -95,36 +69,31 @@ public:
             const fvMesh& mesh
         );
 
-
     //- Destructor
-    virtual ~interRegionHeatTransferModel();
+    virtual ~${typeName}CodedBasic${SourceType}();
 
 
-    // Member Functions
+    // Member functions
 
+            //- Correct field
+            virtual void correct
+            (
+                GeometricField<${TemplateType}, fvPatchField, volMesh>&
+            );
 
-        // Access
+            //- Explicit and implicit matrix contributions
+            virtual void addSup
+            (
+                fvMatrix<${TemplateType}>& eqn,
+                const label fieldI
+            );
 
-            //- Return the heat transfer coefficient
-            const volScalarField& htc() const
-            {
-                return  htc_;
-            }
-
-            //-Source term to fvMatrix<scalar>
-            virtual void addSup(fvMatrix<scalar>& eEqn, const label fieldI);
-
-            //- Calculate heat transfer coefficient
-            virtual const tmp<volScalarField> calculateHtc() = 0;
-
-
-        // I-O
-
-            //- Write data
-            virtual void writeData(Ostream&) const;
-
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+            //- Set value
+            virtual void setValue
+            (
+                fvMatrix<${TemplateType}>& eqn,
+                const label fieldI
+            );
 };
 
 
@@ -132,8 +101,8 @@ public:
 
 } // End namespace Foam
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //
