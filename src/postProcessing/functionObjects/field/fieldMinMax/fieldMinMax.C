@@ -157,9 +157,22 @@ void Foam::fieldMinMax::writeFileHeader()
     {
         fieldMinMaxFilePtr_()
             << "# Time" << token::TAB << "field" << token::TAB
-            << "min" << token::TAB << "position(min)" << token::TAB
-            << "max" << token::TAB << "position(max)" << token::TAB
-            << endl;
+            << "min" << token::TAB << "position(min)";
+
+        if (Pstream::parRun())
+        {
+            fieldMinMaxFilePtr_() << token::TAB << "proc";
+        }
+
+        fieldMinMaxFilePtr_()
+            << token::TAB << "max" << token::TAB << "position(max)";
+
+        if (Pstream::parRun())
+        {
+            fieldMinMaxFilePtr_() << token::TAB << "proc";
+        }
+
+        fieldMinMaxFilePtr_() << endl;
     }
 }
 
