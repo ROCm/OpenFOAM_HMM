@@ -11,55 +11,45 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      fvSchemes;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default         Euler;
-}
+application     rhoPimplecFoam;
 
-gradSchemes
-{
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-    grad(U)         Gauss linear;
-}
+startFrom       startTime;
 
-divSchemes
-{
-    default         none;
-    div(phi,U)      Gauss upwind;
-    div(phid,p)     Gauss limitedLinear 1;
-    div(phi,e)      Gauss limitedLinear 1;
-    div(phi,K)      Gauss limitedLinear 1;
-    div((muEff*dev2(T(grad(U))))) Gauss linear 1;
-}
+startTime       0;
 
-laplacianSchemes
-{
-    default         none;
-    laplacian(Dp,p) Gauss linear corrected;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(alphaEff,e) Gauss linear corrected;
-}
+stopAt          endTime;
 
-interpolationSchemes
-{
-    default         linear;
-}
+endTime         10;
 
-snGradSchemes
-{
-    default         corrected;
-}
+deltaT          1;
 
-fluxRequired
-{
-    default         no;
-    p               ;
-}
+writeControl    adjustableRunTime;
+
+writeInterval   10;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  no;
+
+maxCo           10;
+
+maxDeltaT       1;
 
 
 // ************************************************************************* //

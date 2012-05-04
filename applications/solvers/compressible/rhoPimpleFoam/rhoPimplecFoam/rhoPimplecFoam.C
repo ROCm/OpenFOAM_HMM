@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    sonicLiquidFoam
+    rhoPimplecFoam
 
 Description
-    Transient solver for trans-sonic/supersonic, laminar flow of a
-    compressible liquid.
+    Transient solver for laminar or turbulent flow of compressible fluids
+    for HVAC and similar applications.
+
+    Uses the flexible PIMPLEC (PISOC-SIMPLEC) solution for time-resolved and
+    pseudo-transient simulations.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "basicPsiThermo.H"
+#include "turbulenceModel.H"
+#include "bound.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,8 +46,9 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readThermodynamicProperties.H"
-    #include "readTransportProperties.H"
+
+    pimpleControl pimple(mesh);
+
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
@@ -48,64 +56,38 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
+        #include "readTimeControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readPISOControls.H"
-        #include "compressibleCourantNo.H"
-
-        #include "rhoEqn.H"
-
-        fvVectorMatrix UEqn
-        (
-            fvm::ddt(rho, U)
-          + fvm::div(phi, U)
-          - fvm::laplacian(mu, U)
-        );
-
-        solve(UEqn == -fvc::grad(p));
-
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        if (pimple.nCorrPIMPLE() <= 1)
         {
-            volScalarField rAU(1.0/UEqn.A());
-            U = rAU*UEqn.H();
-
-            surfaceScalarField phid
-            (
-                "phid",
-                psi
-               *(
-                    (fvc::interpolate(U) & mesh.Sf())
-                  + fvc::ddtPhiCorr(rAU, rho, U, phi)
-                )
-            );
-
-            phi = (rhoO/psi)*phid;
-            volScalarField Dp("Dp", rho*rAU);
-
-            fvScalarMatrix pEqn
-            (
-                fvm::ddt(psi, p)
-              + fvc::div(phi)
-              + fvm::div(phid, p)
-              - fvm::laplacian(Dp, p)
-            );
-
-            pEqn.solve();
-
-            phi += pEqn.flux();
-
-            #include "compressibleContinuityErrs.H"
-
-            U -= rAU*fvc::grad(p);
-            U.correctBoundaryConditions();
+            #include "rhoEqn.H"
         }
 
-        rho = rhoO + psi*p;
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
+        {
+            #include "UEqn.H"
+            #include "hEqn.H"
+
+            // --- Pressure corrector loop
+            while (pimple.correct())
+            {
+                #include "pEqn.H"
+            }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         runTime.write();
 

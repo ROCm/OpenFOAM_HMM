@@ -10,51 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      fvSchemes;
+    location    "constant";
+    object      RASProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default         Euler;
-}
+RASModel        kEpsilon;
 
-gradSchemes
-{
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-}
+turbulence      on;
 
-divSchemes
-{
-    default         none;
-    div(phi,U)      Gauss limitedLinearV 1;
-    div(phid,p)     Gauss limitedLinear 1;
-}
-
-laplacianSchemes
-{
-    default         none;
-    laplacian(mu,U) Gauss linear corrected;
-    laplacian(Dp,p) Gauss linear corrected;
-}
-
-interpolationSchemes
-{
-    default         linear;
-}
-
-snGradSchemes
-{
-    default         corrected;
-}
-
-fluxRequired
-{
-    default         no;
-    p               ;
-}
+printCoeffs     on;
 
 
 // ************************************************************************* //

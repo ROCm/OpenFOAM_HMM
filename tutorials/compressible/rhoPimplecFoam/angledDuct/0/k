@@ -9,49 +9,51 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      U;
+    class       volScalarField;
+    location    "0";
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform (0 0 0);
+internalField   uniform 1;
 
 boundaryField
 {
     front
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            compressible::kqRWallFunction;
+        value           uniform 1;
     }
     back
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            compressible::kqRWallFunction;
+        value           uniform 1;
     }
     wall
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            compressible::kqRWallFunction;
+        value           uniform 1;
     }
     porosityWall
     {
-        type            slip;
-        value           uniform (0 0 0);
+        type            compressible::kqRWallFunction;
+        value           uniform 1;
     }
     inlet
     {
-        type            flowRateInletVelocity;
-        flowRate        constant 0.1;
-        value           uniform (0 0 0);
+        type            turbulentIntensityKineticEnergyInlet;
+        intensity       0.05;
+        value           uniform 1;
     }
     outlet
     {
-        type            pressureInletOutletVelocity;
-        value           uniform (0 0 0);
-        inletValue      uniform (0 0 0);
+        type            inletOutlet;
+        inletValue      uniform 1;
+        value           uniform 1;
     }
 }
+
 
 // ************************************************************************* //

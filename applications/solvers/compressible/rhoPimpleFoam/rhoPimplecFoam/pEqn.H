@@ -4,10 +4,12 @@ rho = min(rho, rhoMax);
 rho.relax();
 
 volScalarField rAU(1.0/UEqn().A());
+volScalarField rAtU(1.0/(1.0/rAU - UEqn().H1()));
+
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*UEqn().H();
 
-if (pimple.nCorrPISO() <= 1)
+if (pimple.nCorrPIMPLE() <= 1)
 {
     UEqn.clear();
 }
@@ -23,9 +25,16 @@ if (pimple.transonic())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
-    mrfZones.relativeFlux(fvc::interpolate(psi), phid);
 
-    volScalarField Dp("Dp", rho*rAU);
+    surfaceScalarField phic
+    (
+        "phic",
+        fvc::interpolate(rho*(rAtU - rAU))*fvc::snGrad(p)*mesh.magSf()
+    );
+
+    HbyA -= (rAU - rAtU)*fvc::grad(p);
+
+    volScalarField Dp("Dp", rho*rAtU);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -33,14 +42,18 @@ if (pimple.transonic())
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
+          + fvc::div(phic)
           - fvm::laplacian(Dp, p)
         );
 
-        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
+        // Relax the pressure equation to maintain diagonal dominance
+        pEqn.relax();
+
+        pEqn.solve();
 
         if (pimple.finalNonOrthogonalIter())
         {
-            phi == pEqn.flux();
+            phi == phic + pEqn.flux();
         }
     }
 }
@@ -56,13 +69,13 @@ else
         )
     );
 
-    mrfZones.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    phiHbyA += fvc::interpolate(rho*(rAtU - rAU))*fvc::snGrad(p)*mesh.magSf();
+    HbyA -= (rAU - rAtU)*fvc::grad(p);
 
-    volScalarField Dp("Dp", rho*rAU);
+    volScalarField Dp("Dp", rho*rAtU);
 
     while (pimple.correctNonOrthogonal())
     {
-        // Pressure corrector
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
@@ -70,7 +83,7 @@ else
           - fvm::laplacian(Dp, p)
         );
 
-        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
+        pEqn.solve();
 
         if (pimple.finalNonOrthogonalIter())
         {
@@ -85,15 +98,20 @@ else
 // Explicitly relax pressure for momentum corrector
 p.relax();
 
-rho = thermo.rho();
-rho = max(rho, rhoMin);
-rho = min(rho, rhoMax);
-rho.relax();
-Info<< "rho max/min : " << max(rho).value()
-    << " " << min(rho).value() << endl;
-
-U = HbyA - rAU*fvc::grad(p);
+U = HbyA - rAtU*fvc::grad(p);
 U.correctBoundaryConditions();
 K = 0.5*magSqr(U);
 
 dpdt = fvc::ddt(p);
+
+// Recalculate density from the relaxed pressure
+rho = thermo.rho();
+rho = max(rho, rhoMin);
+rho = min(rho, rhoMax);
+
+if (!pimple.transonic())
+{
+    rho.relax();
+}
+
+Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value() << endl;

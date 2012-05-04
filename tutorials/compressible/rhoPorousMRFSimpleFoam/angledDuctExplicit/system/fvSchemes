@@ -39,7 +39,6 @@ laplacianSchemes
 {
     laplacian(muEff,U) Gauss linear corrected;
     laplacian(alphaEff,h) Gauss linear corrected;
-    laplacian((rho|A(U)),p) Gauss linear corrected;
     laplacian((rho*rAU),p) Gauss linear corrected;
     laplacian(DepsilonEff,epsilon) Gauss linear corrected;
     laplacian(DkEff,k) Gauss linear corrected;
