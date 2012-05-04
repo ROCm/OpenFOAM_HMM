@@ -177,8 +177,11 @@ public:
             //- Thermal conductivity [W/m/K]
             virtual scalar kappa(const label specieI, const scalar T) const;
 
-            //- Thermal diffusivity [kg/m/s]
-            virtual scalar alpha(const label specieI, const scalar T) const;
+            //- Thermal diffusivity enthalpy [kg/m/s]
+            virtual scalar alphah(const label specieI, const scalar T) const;
+
+            //- Thermal diffusivity internal energy [kg/m/s]
+            virtual scalar alphae(const label specieI, const scalar T) const;
 };
 
 

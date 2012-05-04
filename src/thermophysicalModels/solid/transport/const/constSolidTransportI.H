@@ -58,18 +58,4 @@ inline Foam::scalar Foam::constSolidTransport<thermo>::K(const scalar T) const
 }
 
 
-template<class thermo>
-inline Foam::scalar Foam::constSolidTransport<thermo>::alpha
-(
-    const scalar T
-) const
-{
-    scalar Cp = this->Cp(T);
-
-    scalar rho = this->rho(T);
-
-    return K_/(rho*Cp);
-}
-
-
 // ************************************************************************* //

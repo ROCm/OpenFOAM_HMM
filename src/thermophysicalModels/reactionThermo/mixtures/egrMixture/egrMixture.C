@@ -282,13 +282,24 @@ Foam::scalar Foam::egrMixture<ThermoType>::kappa
 
 
 template<class ThermoType>
-Foam::scalar Foam::egrMixture<ThermoType>::alpha
+Foam::scalar Foam::egrMixture<ThermoType>::alphah
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return getLocalThermo(specieI).alpha(T);
+    return getLocalThermo(specieI).alphah(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::egrMixture<ThermoType>::alphae
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).alphae(T);
 }
 
 

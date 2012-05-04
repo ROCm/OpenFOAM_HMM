@@ -95,9 +95,6 @@ public:
         //- Thermal conductivity [W/mK]
         inline scalar K(const scalar T) const;
 
-        //- Thermal diffusivity [kg/ms]
-        inline scalar alpha(const scalar T) const;
-
 
     // Ostream Operator
 

@@ -69,15 +69,16 @@ inline Foam::scalar Foam::constTransport<Thermo>::kappa(const scalar T) const
 
 
 template<class Thermo>
-inline Foam::scalar Foam::constTransport<Thermo>::alpha(const scalar T) const
+inline Foam::scalar Foam::constTransport<Thermo>::alphae(const scalar T) const
 {
-    scalar Cp_ = this->Cp(T);
+    return this->kappa(T)/this->Cv(T);
+}
 
-    scalar deltaT = T - specie::Tstd;
-    scalar CpBar =
-        (deltaT*(this->H(T) - this->H(specie::Tstd)) + Cp_)/(sqr(deltaT) + 1);
 
-    return Cp_*mu(T)*rPr_/CpBar;
+template<class Thermo>
+inline Foam::scalar Foam::constTransport<Thermo>::alphah(const scalar T) const
+{
+    return mu(T)*rPr_;
 }
 
 

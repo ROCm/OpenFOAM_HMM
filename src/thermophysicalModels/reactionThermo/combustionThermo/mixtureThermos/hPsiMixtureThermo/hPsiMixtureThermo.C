@@ -49,7 +49,7 @@ void Foam::hPsiMixtureThermo<MixtureType>::calculate()
         psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
 
         muCells[celli] = mixture.mu(TCells[celli]);
-        alphaCells[celli] = mixture.alpha(TCells[celli]);
+        alphaCells[celli] = mixture.alphah(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -74,7 +74,7 @@ void Foam::hPsiMixtureThermo<MixtureType>::calculate()
 
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 pmu_[facei] = mixture.mu(pT[facei]);
-                palpha_[facei] = mixture.alpha(pT[facei]);
+                palpha_[facei] = mixture.alphah(pT[facei]);
             }
         }
         else
@@ -88,7 +88,7 @@ void Foam::hPsiMixtureThermo<MixtureType>::calculate()
 
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 pmu_[facei] = mixture.mu(pT[facei]);
-                palpha_[facei] = mixture.alpha(pT[facei]);
+                palpha_[facei] = mixture.alphah(pT[facei]);
             }
         }
     }

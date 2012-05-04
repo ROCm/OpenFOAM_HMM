@@ -162,8 +162,11 @@ public:
         //- Thermal conductivity [W/mK]
         inline scalar kappa(const scalar T) const;
 
+        //- Thermal diffusivity for internal energy [kg/ms]
+        inline scalar alphae(const scalar T) const;
+
         //- Thermal diffusivity for enthalpy [kg/ms]
-        inline scalar alpha(const scalar T) const;
+        inline scalar alphah(const scalar T) const;
 
         // Species diffusivity
         //inline scalar D(const scalar T) const;
