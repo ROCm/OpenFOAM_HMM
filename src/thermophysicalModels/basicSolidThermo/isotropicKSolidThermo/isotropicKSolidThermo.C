@@ -75,6 +75,7 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo
         Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"))
     )
 {
+    Info<< "    kappa      : " << kappaValues_ << nl << endl;
     correct();
 }
 
@@ -100,6 +101,7 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo(const fvMesh& mesh)
         Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"))
     )
 {
+    Info<< "    kappa      : " << kappaValues_ << nl <<endl;
     correct();
 }
 

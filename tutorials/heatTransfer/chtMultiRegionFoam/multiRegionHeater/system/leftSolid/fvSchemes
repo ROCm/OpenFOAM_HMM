@@ -31,8 +31,8 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(K,T)   Gauss linear limited 0.333;
+    default                 none;
+    laplacian(kappa,T)      Gauss linear limited 0.333;
 }
 
 interpolationSchemes

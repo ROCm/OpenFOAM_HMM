@@ -78,7 +78,7 @@ FoamFile
         sampleRegion    baffleRegion;
         samplePatch     region0_to_baffleRegion_baffleFaces2_top;
         offsetMode      nonuniform;
-        offsets         
+        offsets         nonuniform List<vector> 
 14
 (
 (0.02 8.67362e-19 -0)
@@ -107,7 +107,7 @@ FoamFile
         sampleRegion    baffleRegion;
         samplePatch     region0_to_baffleRegion_baffleFaces2_bottom;
         offsetMode      nonuniform;
-        offsets         
+        offsets         nonuniform List<vector> 
 14
 (
 (1.11022e-16 8.67362e-19 -0)

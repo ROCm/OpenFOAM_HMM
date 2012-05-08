@@ -33,15 +33,14 @@ Foam::interpolateSolid::interpolateSolid(const dictionary& dict)
 {
     read(dict);
 
-    Info<< "Constructed directionalKSolidThermo with samples" << nl
+    Info<< "Constructed solid thermo with samples" << nl
         << "    T          : " << TValues_ << nl
         << "    rho        : " << rhoValues_ << nl
         << "    cp         : " << cpValues_ << nl
         << "    Hf         : " << HfValues_ << nl
         << "    emissivity : " << emissivityValues_ << nl
         << "    kappaRad   : " << kappaRadValues_ << nl
-        << "    sigmaS     : " << sigmaSValues_ << nl
-        << endl;
+        << "    sigmaS     : " << sigmaSValues_ << nl;
 
 
     if

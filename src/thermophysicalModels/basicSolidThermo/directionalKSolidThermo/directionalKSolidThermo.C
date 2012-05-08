@@ -137,6 +137,8 @@ void Foam::directionalKSolidThermo::init()
     kappaValues_ =
         Field<vector>(subDict(typeName + "Coeffs").lookup("kappaValues"));
 
+    Info<< "    kappa      : " << kappaValues_ << nl << endl;
+
     // Determine transforms for cell centres
     forAll(mesh_.C(), cellI)
     {

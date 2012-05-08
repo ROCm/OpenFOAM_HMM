@@ -96,7 +96,7 @@ dictionaryReplacement
                 // Coupled BC.
                 neighbourFieldName  T;
                 kappa               basicThermo;
-                KName               none;
+                kappaName           none;
 
 
                 // Thermo baffle model
