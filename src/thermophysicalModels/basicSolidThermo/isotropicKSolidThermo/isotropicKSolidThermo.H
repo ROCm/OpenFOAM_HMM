@@ -109,7 +109,8 @@ public:
             {
                 notImplemented
                 (
-                    "directionalKSolidThermo::directionalKappa(const label) const"
+                    "directionalKSolidThermo::directionalKappa(const label)
+                    "const"
                 );
                 return tmp<symmTensorField>(NULL);
             }
