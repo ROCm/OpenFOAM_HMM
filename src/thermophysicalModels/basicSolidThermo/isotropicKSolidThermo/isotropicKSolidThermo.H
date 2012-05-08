@@ -99,17 +99,18 @@ public:
                 return tmp<volSymmTensorField>(NULL);
             }
 
+
         // Per patch calculation
 
-            //- Thermal conductivity [W//m/K]
+            //- Thermal conductivity [W/m/K]
             virtual tmp<scalarField> kappa(const label patchI) const;
 
-            //- Thermal conductivity [W//m/K]
+            //- Thermal conductivity [W/m/K]
             virtual tmp<symmTensorField> directionalKappa(const label) const
             {
                 notImplemented
                 (
-                    "directionalKSolidThermo::directionalKappa(const label)
+                    "directionalKSolidThermo::directionalKappa(const label)"
                     "const"
                 );
                 return tmp<symmTensorField>(NULL);
