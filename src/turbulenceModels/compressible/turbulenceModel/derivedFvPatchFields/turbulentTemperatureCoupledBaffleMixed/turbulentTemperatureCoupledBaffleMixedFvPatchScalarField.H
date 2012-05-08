@@ -48,8 +48,8 @@ Description
 
     Needs to be on underlying mapped(Wall)FvPatch.
 
-    Note: kappa : heat conduction at patch. Gets supplied how to lookup/calculate
-        kappa:
+    Note: kappa : heat conduction at patch. Gets supplied how to lookup
+        calculate kappa:
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
     - 'basicThermo' : use basicThermo and compressible::RASmodel to calculate
         kappa

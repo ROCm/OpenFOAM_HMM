@@ -138,7 +138,8 @@ Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::kappa() const
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::constSolidThermo::directionalKappa() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::constSolidThermo::directionalKappa() const
 {
     dimensionedSymmTensor t
     (

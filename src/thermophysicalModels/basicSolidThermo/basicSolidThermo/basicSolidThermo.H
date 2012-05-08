@@ -190,7 +190,10 @@ public:
             virtual tmp<scalarField> kappa(const label patchI) const = 0;
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<symmTensorField> directionalKappa(const label) const = 0;
+            virtual tmp<symmTensorField> directionalKappa
+            (
+                const label
+            ) const = 0;
 
             //- Specific heat capacity [J/kg/K)]
             virtual tmp<scalarField> Cp(const label patchI) const = 0;

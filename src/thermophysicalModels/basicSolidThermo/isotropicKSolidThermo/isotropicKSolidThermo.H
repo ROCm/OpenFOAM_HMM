@@ -92,7 +92,10 @@ public:
             //- Thermal conductivity [W/m/K]
             virtual tmp<volSymmTensorField> directionalKappa() const
             {
-                notImplemented("directionalKSolidThermo::directionalKappa() const");
+                notImplemented
+                (
+                    "directionalKSolidThermo::directionalKappa() const"
+                );
                 return tmp<volSymmTensorField>(NULL);
             }
 

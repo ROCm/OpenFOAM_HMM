@@ -147,14 +147,16 @@ Foam::tmp<Foam::scalarField> Foam::isotropicKSolidThermo::kappa
 
 bool Foam::isotropicKSolidThermo::read()
 {
-    kappaValues_  = Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"));
+    kappaValues_  =
+        Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"));
     return true;
 }
 
 
 bool Foam::isotropicKSolidThermo::writeData(Ostream& os) const
 {
-    os.writeKeyword("kappaValues") << kappaValues_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaValues") << kappaValues_
+        << token::END_STATEMENT << nl;
     bool ok = interpolatedSolidThermo::writeData(os);
 
     return ok && os.good();

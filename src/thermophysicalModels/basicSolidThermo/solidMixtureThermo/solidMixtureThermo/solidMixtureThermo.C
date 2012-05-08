@@ -225,7 +225,8 @@ void Foam::solidMixtureThermo<MixtureType>::correct()
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::solidMixtureThermo<MixtureType>::kappa() const
+Foam::tmp<Foam::volScalarField> Foam::solidMixtureThermo<MixtureType>::
+kappa() const
 {
     return kappa_;
 }

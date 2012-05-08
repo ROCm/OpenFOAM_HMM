@@ -131,7 +131,10 @@ public:
             //- Thermal conductivity [W//m/K]
             virtual tmp<scalarField> kappa(const label patchI) const
             {
-                notImplemented("directionalKSolidThermo::kappa(const label) const");
+                notImplemented
+                (
+                    "directionalKSolidThermo::kappa(const label) const"
+                );
                 return tmp<scalarField>(NULL);
             }
 

@@ -52,7 +52,8 @@ inline Foam::constSolidTransport<thermo>::constSolidTransport
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline Foam::scalar Foam::constSolidTransport<thermo>::kappa(const scalar T) const
+inline Foam::scalar Foam::constSolidTransport<thermo>::
+kappa(const scalar T) const
 {
     return kappa_;
 }

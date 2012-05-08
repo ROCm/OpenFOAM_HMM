@@ -132,15 +132,24 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             if (mesh.objectRegistry::foundObject<volScalarField>(kappaName_))
             {
-                return patch_.lookupPatchField<volScalarField, scalar>(kappaName_);
+                return patch_.lookupPatchField
+                <
+                    volScalarField, scalar
+                >(kappaName_);
             }
             else if
             (
-                mesh.objectRegistry::foundObject<volSymmTensorField>(kappaName_)
+                mesh.objectRegistry::foundObject
+                <
+                    volSymmTensorField
+                >(kappaName_)
             )
             {
                 const symmTensorField& KWall =
-                    patch_.lookupPatchField<volSymmTensorField, scalar>(kappaName_);
+                    patch_.lookupPatchField
+                    <
+                        volSymmTensorField, scalar
+                    >(kappaName_);
 
                 const vectorField n(patch_.nf());
 
@@ -152,7 +161,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << "Did not find field " << kappaName_
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
                     << endl
-                    << "Please set 'kappa' to one of " << KMethodTypeNames_.toc()
+                    << "Please set 'kappa' to one of "
+                    << KMethodTypeNames_.toc()
                     << " and 'kappaName' to the name of the volScalar"
                     << " or volSymmTensor field (if kappa=lookup)"
                     << exit(FatalError);
