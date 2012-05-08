@@ -38,7 +38,7 @@ solvers
         relTol          0.1;
     }
 
-    h
+    e
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -82,7 +82,7 @@ relaxationFactors
     {
         U               0.7;
         "(k|epsilon)"   0.7;
-        h               0.5;
+        e               0.5;
     }
 }
 
