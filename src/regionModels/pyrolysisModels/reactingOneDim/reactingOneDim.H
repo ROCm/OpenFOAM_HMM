@@ -84,10 +84,10 @@ protected:
         // Reference to solid thermo properties
 
             //- Absorption coefficient [1/m]
-            const volScalarField& kappa_;
+            const volScalarField& kappaRad_;
 
             //- Thermal conductivity [W/m/K]
-            const volScalarField& K_;
+            const volScalarField& kappa_;
 
             //- Density [kg/m3]
             volScalarField& rho_;
@@ -230,10 +230,10 @@ public:
                 virtual const tmp<volScalarField> Cp() const;
 
                 //- Return the region absorptivity [1/m]
-                virtual const volScalarField& kappa() const;
+                virtual const volScalarField& kappaRad() const;
 
                 //- Return the region thermal conductivity [W/m/k]
-                virtual const volScalarField& K() const;
+                virtual const volScalarField& kappa() const;
 
                 //- Return the total gas mass flux to primary region [kg/m2/s]
                 virtual const surfaceScalarField& phiGas() const;

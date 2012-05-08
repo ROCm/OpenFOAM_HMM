@@ -58,12 +58,12 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 (
     const fvPatch& patch,
     const word& calculationType,
-    const word& KName
+    const word& kappaName
 )
 :
     patch_(patch),
     method_(KMethodTypeNames_[calculationType]),
-    KName_(KName)
+    kappaName_(kappaName)
 {}
 
 
@@ -74,14 +74,14 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 )
 :
     patch_(patch),
-    method_(KMethodTypeNames_.read(dict.lookup("K"))),
-    KName_(dict.lookup("KName"))
+    method_(KMethodTypeNames_.read(dict.lookup("kappa"))),
+    kappaName_(dict.lookup("kappaName"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
+Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 (
     const scalarField& Tp
 ) const
@@ -111,7 +111,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
                 (
                     "solidThermophysicalProperties"
                 );
-            return thermo.K(patch_.index());
+            return thermo.kappa(patch_.index());
         }
         break;
 
@@ -124,23 +124,23 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
                 (
                     "solidThermophysicalProperties"
                 );
-            return n & thermo.directionalK(patch_.index()) & n;
+            return n & thermo.directionalKappa(patch_.index()) & n;
         }
         break;
 
         case LOOKUP:
         {
-            if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
+            if (mesh.objectRegistry::foundObject<volScalarField>(kappaName_))
             {
-                return patch_.lookupPatchField<volScalarField, scalar>(KName_);
+                return patch_.lookupPatchField<volScalarField, scalar>(kappaName_);
             }
             else if
             (
-                mesh.objectRegistry::foundObject<volSymmTensorField>(KName_)
+                mesh.objectRegistry::foundObject<volSymmTensorField>(kappaName_)
             )
             {
                 const symmTensorField& KWall =
-                    patch_.lookupPatchField<volSymmTensorField, scalar>(KName_);
+                    patch_.lookupPatchField<volSymmTensorField, scalar>(kappaName_);
 
                 const vectorField n(patch_.nf());
 
@@ -149,12 +149,12 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
             else
             {
                 FatalErrorIn("temperatureCoupledBase::K() const")
-                    << "Did not find field " << KName_
+                    << "Did not find field " << kappaName_
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
                     << endl
-                    << "Please set 'K' to one of " << KMethodTypeNames_.toc()
-                    << " and 'KName' to the name of the volScalar"
-                    << " or volSymmTensor field (if K=lookup)"
+                    << "Please set 'kappa' to one of " << KMethodTypeNames_.toc()
+                    << " and 'kappaName' to the name of the volScalar"
+                    << " or volSymmTensor field (if kappa=lookup)"
                     << exit(FatalError);
 
                 return scalarField(0);
@@ -163,11 +163,11 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
 
         default:
         {
-            FatalErrorIn("temperatureCoupledBase::K() const")
+            FatalErrorIn("temperatureCoupledBase::kappa() const")
                 << "Unimplemented method " << method_ << endl
-                << "Please set 'K' to one of " << KMethodTypeNames_.toc()
-                << " and 'KName' to the name of the volScalar"
-                << " or volSymmTensor field (if K=lookup)"
+                << "Please set 'kappa' to one of " << KMethodTypeNames_.toc()
+                << " and 'kappaName' to the name of the volScalar"
+                << " or volSymmTensor field (if kappa=lookup)"
                 << exit(FatalError);
         }
         break;
@@ -178,9 +178,9 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::K
 
 void Foam::temperatureCoupledBase::write(Ostream& os) const
 {
-    os.writeKeyword("K") << KMethodTypeNames_[method_]
+    os.writeKeyword("kappa") << KMethodTypeNames_[method_]
         << token::END_STATEMENT << nl;
-    os.writeKeyword("KName") << KName_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaName") << kappaName_ << token::END_STATEMENT << nl;
 }
 
 

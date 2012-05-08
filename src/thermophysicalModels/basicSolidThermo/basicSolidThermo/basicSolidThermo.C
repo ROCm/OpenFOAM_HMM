@@ -78,11 +78,11 @@ Foam::basicSolidThermo::basicSolidThermo(const fvMesh& mesh)
         mesh,
         dimMass/dimVolume
     ),
-    kappa_
+    kappaRad_
     (
         IOobject
         (
-            "kappa",
+            "kappaRad",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -165,11 +165,11 @@ Foam::basicSolidThermo::basicSolidThermo
         mesh,
         dimMass/dimVolume
     ),
-    kappa_
+    kappaRad_
     (
         IOobject
         (
-            "kappa",
+            "kappaRad",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -239,9 +239,9 @@ Foam::volScalarField& Foam::basicSolidThermo::rho()
 }
 
 
-const Foam::volScalarField& Foam::basicSolidThermo::kappa() const
+const Foam::volScalarField& Foam::basicSolidThermo::kappaRad() const
 {
-    return kappa_;
+    return kappaRad_;
 }
 
 

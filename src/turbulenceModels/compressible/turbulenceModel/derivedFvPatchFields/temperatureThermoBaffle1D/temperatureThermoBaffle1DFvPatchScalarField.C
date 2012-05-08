@@ -292,7 +292,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         // Create fields for solid properties
         forAll(KDeltaw, i)
         {
-            KDeltaw[i] = solid_().K((Tp[i] + nbrTp[i])/2.0)/thickness_[i];
+            KDeltaw[i] = solid_().kappa((Tp[i] + nbrTp[i])/2.0)/thickness_[i];
         }
 
         const scalarField q

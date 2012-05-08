@@ -29,11 +29,11 @@ template<class thermo>
 inline Foam::constSolidTransport<thermo>::constSolidTransport
 (
     const thermo& t,
-    const scalar k
+    const scalar kappa
 )
 :
     thermo(t),
-    K_(k)
+    kappa_(kappa)
 {}
 
 
@@ -45,16 +45,16 @@ inline Foam::constSolidTransport<thermo>::constSolidTransport
 )
 :
     thermo(name, ct),
-    K_(ct.K_)
+    kappa_(ct.kappa_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline Foam::scalar Foam::constSolidTransport<thermo>::K(const scalar T) const
+inline Foam::scalar Foam::constSolidTransport<thermo>::kappa(const scalar T) const
 {
-    return K_;
+    return kappa_;
 }
 
 

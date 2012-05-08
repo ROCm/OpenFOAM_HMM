@@ -41,8 +41,8 @@ boundaryField
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
         Tnbr            T;
-        K               solidThermo;
-        KName           none;
+        kappa           solidThermo;
+        kappaName       none;
         QrNbr           Qr;
         Qr              none;
         value           uniform 298.15;

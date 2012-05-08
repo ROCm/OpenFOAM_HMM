@@ -151,15 +151,15 @@ const tmp<volScalarField> noPyrolysis::Cp() const
 }
 
 
-const volScalarField& noPyrolysis::kappa() const
+const volScalarField& noPyrolysis::kappaRad() const
 {
-    return (solidThermo_->kappa());
+    return (solidThermo_->kappaRad());
 }
 
 
-const volScalarField& noPyrolysis::K() const
+const volScalarField& noPyrolysis::kappa() const
 {
-     return (solidThermo_->K());
+     return (solidThermo_->kappa());
 }
 
 

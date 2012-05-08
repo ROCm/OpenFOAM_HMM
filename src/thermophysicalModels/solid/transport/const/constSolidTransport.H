@@ -65,7 +65,7 @@ class constSolidTransport
     // Private data
 
         //- Constant thermal conductivity.
-        scalar K_;
+        scalar kappa_;
 
 
     // Private Member Functions
@@ -74,7 +74,7 @@ class constSolidTransport
         inline constSolidTransport
         (
             const thermo& t,
-            const scalar k
+            const scalar kappa
         );
 
 
@@ -93,7 +93,7 @@ public:
     // Member functions
 
         //- Thermal conductivity [W/mK]
-        inline scalar K(const scalar T) const;
+        inline scalar kappa(const scalar T) const;
 
 
     // Ostream Operator

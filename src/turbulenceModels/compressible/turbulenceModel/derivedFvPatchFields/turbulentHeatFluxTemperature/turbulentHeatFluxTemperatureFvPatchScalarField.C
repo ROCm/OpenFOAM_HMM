@@ -93,7 +93,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
-    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.KName()),
+    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.kappaName()),
     heatSource_(ptf.heatSource_),
     q_(ptf.q_, mapper)
 {}
@@ -124,7 +124,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(thftpsf),
-    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.KName()),
+    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.kappaName()),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_)
 {}
@@ -138,7 +138,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(thftpsf, iF),
-    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.KName()),
+    temperatureCoupledBase(patch(), thftpsf.KMethod(), thftpsf.kappaName()),
     heatSource_(thftpsf.heatSource_),
     q_(thftpsf.q_)
 {}
@@ -188,12 +188,12 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         case hsPower:
         {
             const scalar Ap = gSum(patch().magSf());
-            gradient() = q_/(Ap*K(Tp));
+            gradient() = q_/(Ap*kappa(Tp));
             break;
         }
         case hsFlux:
         {
-            gradient() = q_/K(Tp);
+            gradient() = q_/kappa(Tp);
             break;
         }
         default:

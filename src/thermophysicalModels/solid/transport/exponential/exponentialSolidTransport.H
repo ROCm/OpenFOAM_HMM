@@ -64,7 +64,7 @@ class exponentialSolidTransport
     // Private data
 
         //- Constant thermal coefficient.
-        scalar K0_;
+        scalar kappa0_;
 
         //- Exponent coefficient
         scalar n0_;
@@ -79,7 +79,7 @@ class exponentialSolidTransport
         inline exponentialSolidTransport
         (
             const thermo& t,
-            const scalar K0,
+            const scalar kappa0,
             const scalar n0,
             const scalar Tref
         );
@@ -104,7 +104,7 @@ public:
     // Member functions
 
         //- Thermal conductivity [W/mK]
-        inline scalar K(const scalar T) const;
+        inline scalar kappa(const scalar T) const;
 
 
     // Ostream Operator

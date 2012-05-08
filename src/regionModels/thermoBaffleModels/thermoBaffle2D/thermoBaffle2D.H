@@ -155,7 +155,7 @@ public:
                 virtual const tmp<volScalarField> Cp() const;
 
                 //- Return solid absortivity [1/m]
-                virtual const volScalarField& kappa() const;
+                virtual const volScalarField& kappaRad() const;
 
                 //- Return the film mean temperature [K]
                 virtual const volScalarField& T() const;
@@ -164,7 +164,7 @@ public:
                 virtual const volScalarField& rho() const;
 
                 //- Return thermal conductivity [W/m/K]
-                virtual const volScalarField& K() const;
+                virtual const volScalarField& kappa() const;
 
 
             // Helper functions

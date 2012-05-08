@@ -35,7 +35,7 @@ Description
 
     // Coupled BC.
     neighbourFieldName  T;
-    K                   basicThermo;
+    kappa               basicThermo;
     KName               none;
 
 
@@ -57,10 +57,10 @@ Description
         //- thermo properties
         rho rho [1 -3  0  0 0 0 0]              80;
         Cp  Cp  [0  2 -2 -1 0 0 0]              15;
-        K   K   [1  1 -3 -1 0 0 0]              0.01;
+        kappa   kappa   [1  1 -3 -1 0 0 0]      0.01;
 
         //- radiative properties
-        kappa kappa [0 -1 0 0 0 0 0]            0;
+        kappaRad  kappaRad [0 -1 0 0 0 0 0]     0;
         sigmaS sigmaS [0 -1 0 0 0 0 0]          0;
         emissivity  emissivity  [0 0 0 0 0 0 0] 1;
 

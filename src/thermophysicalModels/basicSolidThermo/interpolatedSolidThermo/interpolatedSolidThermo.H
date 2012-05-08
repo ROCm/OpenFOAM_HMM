@@ -69,7 +69,7 @@ private:
             tmp<scalarField> sigmaS(const label) const;
 
             //- Absorption coefficient [1/m]
-            tmp<scalarField> kappa(const label) const;
+            tmp<scalarField> kappaRad(const label) const;
 
              //- Emissivity []
             tmp<scalarField> emissivity(const label) const;

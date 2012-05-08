@@ -99,13 +99,13 @@ public:
             virtual scalar rho(scalar T, label celli) const;
 
             //- Absorption coefficient
-            virtual scalar kappa(scalar T, label celli) const;
+            virtual scalar kappaRad(scalar T, label celli) const;
 
             //- Scatter coefficient
             virtual scalar sigmaS(scalar T, label celli) const;
 
             //- Thermal conductivity
-            virtual scalar K(scalar T, label celli) const;
+            virtual scalar kappa(scalar T, label celli) const;
 
             //- Emissivity coefficient
             virtual scalar emissivity(scalar T, label celli) const;
