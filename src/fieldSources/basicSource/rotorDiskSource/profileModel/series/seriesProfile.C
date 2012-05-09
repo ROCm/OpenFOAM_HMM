@@ -48,7 +48,7 @@ Foam::scalar Foam::seriesProfile::evaluateDrag
 
     forAll(values, i)
     {
-        result += values[i]*cos((i + 1)*xIn);
+        result += values[i]*cos(i*xIn);
     }
 
     return result;
@@ -65,7 +65,9 @@ Foam::scalar Foam::seriesProfile::evaluateLift
 
     forAll(values, i)
     {
-        result += values[i]*sin((i + 1)*xIn);
+        // note: first contribution always zero since sin(0) = 0, but
+        // keep zero base to be consitent with drag coeffs
+        result += values[i]*sin(i*xIn);
     }
 
     return result;
