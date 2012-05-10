@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,7 +132,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::
 updateCoeffs()
 {
-    //Do nothing
+    // Do nothing
 
     if (debug)
     {
@@ -141,7 +141,7 @@ updateCoeffs()
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
             << this->dimensionedInternalField().name() << " <- "
-            << " heat[W]:" << Q
+            << " heat transfer rate:" << Q
             << " wall radiative heat flux "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)

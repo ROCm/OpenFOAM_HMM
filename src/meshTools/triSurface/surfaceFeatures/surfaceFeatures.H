@@ -95,6 +95,11 @@ private:
         {}
     };
 
+    // Static data
+
+        //- Tolerance for determining whether two vectors are parallel
+        static const scalar parallelTolerance;
+
 
     // Private data
 
@@ -129,6 +134,14 @@ private:
 
         //- Construct feature points where more than 2 feature edges meet
         void calcFeatPoints(const List<edgeStatus>&);
+
+        //- Classify the angles of the feature edges
+        void classifyFeatureAngles
+        (
+            const labelListList& edgeFaces,
+            List<edgeStatus>& edgeStat,
+            const scalar minCos
+        ) const;
 
         //- Choose next unset feature edge.
         label nextFeatEdge
@@ -185,6 +198,15 @@ public:
 
         //- Construct from file
         surfaceFeatures(const triSurface&, const fileName& fName);
+
+        //- Construct from pointField and edgeList (edgeMesh)
+        surfaceFeatures
+        (
+            const triSurface&,
+            const pointField& points,
+            const edgeList& edges,
+            const scalar mergeTol = 1e-6
+        );
 
         //- Construct as copy
         surfaceFeatures(const surfaceFeatures&);
@@ -327,9 +349,8 @@ public:
                 pointField& edgePoint
             ) const;
 
-
             //- Find nearest surface edge (out of selectedEdges) for each
-            // sample edge.
+            //  sample edge.
             //  Sets:
             //  - edgeLabel         : label of surface edge.
             //  - pointOnEdge       : exact position of nearest point on edge.
@@ -345,6 +366,16 @@ public:
                 labelList& edgeLabel,       // label of surface edge or -1
                 pointField& pointOnEdge,    // point on above edge
                 pointField& pointOnFeature  // point on sample edge
+            ) const;
+
+            //- Find nearest feature edge to each surface edge. Uses the
+            //  mid-point of the surface edges.
+            void nearestFeatEdge
+            (
+                const edgeList& edges,
+                const pointField& points,
+                scalar searchSpanSqr,
+                labelList& edgeLabel
             ) const;
 
 

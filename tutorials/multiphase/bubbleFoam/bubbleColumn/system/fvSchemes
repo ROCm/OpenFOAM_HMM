@@ -42,7 +42,7 @@ laplacianSchemes
     default         none;
     laplacian(nuEff1,U1) Gauss linear corrected;
     laplacian(nuEff2,U2) Gauss linear corrected;
-    laplacian((rho*(1|A(U))),p) Gauss linear corrected;
+    laplacian(Dp,p) Gauss linear corrected;
 }
 
 interpolationSchemes

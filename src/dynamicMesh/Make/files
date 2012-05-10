@@ -37,6 +37,7 @@ polyTopoChange/polyTopoChange/removePoints.C
 polyTopoChange/polyTopoChange/combineFaces.C
 polyTopoChange/polyTopoChange/localPointRegion.C
 polyTopoChange/polyTopoChange/duplicatePoints.C
+polyTopoChange/polyTopoChange/tetDecomposer.C
 
 slidingInterface/slidingInterface.C
 slidingInterface/slidingInterfaceProjectPoints.C
@@ -85,5 +86,10 @@ motionSmoother/motionSmootherCheck.C
 motionSmoother/polyMeshGeometry/polyMeshGeometry.C
 
 motionSolver/motionSolver.C
+
+createShellMesh/createShellMesh.C
+
+extrudePatchMesh/extrudePatchMesh.C
+
 
 LIB = $(FOAM_LIBBIN)/libdynamicMesh

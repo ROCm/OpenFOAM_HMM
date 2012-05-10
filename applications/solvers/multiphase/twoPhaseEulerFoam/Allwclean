@@ -6,6 +6,5 @@ wclean libso phaseModel
 wclean libso interfacialModels
 wclean libso kineticTheoryModels
 wclean
-wclean MRFtwoPhaseEulerFoam
 
 # ----------------------------------------------------------------- end-of-file

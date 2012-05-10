@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -228,13 +228,20 @@ Foam::KinematicCloud<CloudType>::UIntegrator() const
 
 
 template<class CloudType>
+inline Foam::label Foam::KinematicCloud<CloudType>::nParcels() const
+{
+    return this->size();
+}
+
+
+template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::massInSystem() const
 {
     scalar sysMass = 0.0;
     forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
     {
          const parcelType& p = iter();
-         sysMass += p.mass()*p.nParticle();
+         sysMass += p.nParticle()*p.mass();
     }
 
     return sysMass;
@@ -251,7 +258,7 @@ Foam::KinematicCloud<CloudType>::linearMomentumOfSystem() const
     {
         const parcelType& p = iter();
 
-        linearMomentum += p.mass()*p.U();
+        linearMomentum += p.nParticle()*p.mass()*p.U();
     }
 
     return linearMomentum;
@@ -268,7 +275,7 @@ Foam::KinematicCloud<CloudType>::linearKineticEnergyOfSystem() const
     {
         const parcelType& p = iter();
 
-        linearKineticEnergy += 0.5*p.mass()*(p.U() & p.U());
+        linearKineticEnergy += p.nParticle()*0.5*p.mass()*(p.U() & p.U());
     }
 
     return linearKineticEnergy;
@@ -286,7 +293,7 @@ Foam::KinematicCloud<CloudType>::rotationalKineticEnergyOfSystem() const
         const parcelType& p = iter();
 
         rotationalKineticEnergy +=
-            0.5*p.momentOfInertia()*(p.omega() & p.omega());
+            p.nParticle()*0.5*p.momentOfInertia()*(p.omega() & p.omega());
     }
 
     return rotationalKineticEnergy;

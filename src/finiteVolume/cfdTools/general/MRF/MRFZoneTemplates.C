@@ -41,8 +41,10 @@ void Foam::MRFZone::relativeRhoFlux
     const surfaceVectorField& Cf = mesh_.Cf();
     const surfaceVectorField& Sf = mesh_.Sf();
 
-    const vector& origin = origin_.value();
-    const vector& Omega = Omega_.value();
+    const vector& origin = origin_;
+
+    const scalar t = mesh_.time().timeOutputValue();
+    const vector& Omega = omega_->value(t)*axis_;
 
     const vectorField& Cfi = Cf.internalField();
     const vectorField& Sfi = Sf.internalField();
@@ -92,8 +94,10 @@ void Foam::MRFZone::absoluteRhoFlux
     const surfaceVectorField& Cf = mesh_.Cf();
     const surfaceVectorField& Sf = mesh_.Sf();
 
-    const vector& origin = origin_.value();
-    const vector& Omega = Omega_.value();
+    const vector& origin = origin_;
+
+    const scalar t = mesh_.time().timeOutputValue();
+    const vector& Omega = omega_->value(t)*axis_;
 
     const vectorField& Cfi = Cf.internalField();
     const vectorField& Sfi = Sf.internalField();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "refinementData.H"
 #include "refinementDistanceData.H"
+#include "degenerateMatcher.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1745,14 +1746,193 @@ void Foam::hexRef8::setInstance(const fileName& inst)
 
     cellLevel_.instance() = inst;
     pointLevel_.instance() = inst;
+    level0Edge_.instance() = inst;
     history_.instance() = inst;
+}
+
+
+void Foam::hexRef8::collectLevelPoints
+(
+    const labelList& f,
+    const label level,
+    DynamicList<label>& points
+) const
+{
+    forAll(f, fp)
+    {
+        if (pointLevel_[f[fp]] <= level)
+        {
+            points.append(f[fp]);
+        }
+    }
+}
+
+
+void Foam::hexRef8::collectLevelPoints
+(
+    const labelList& meshPoints,
+    const labelList& f,
+    const label level,
+    DynamicList<label>& points
+) const
+{
+    forAll(f, fp)
+    {
+        label pointI = meshPoints[f[fp]];
+        if (pointLevel_[pointI] <= level)
+        {
+            points.append(pointI);
+        }
+    }
+}
+
+
+// Return true if we've found 6 quads. faces guaranteed to be outwards pointing.
+bool Foam::hexRef8::matchHexShape
+(
+    const label cellI,
+    const label cellLevel,
+    DynamicList<face>& quads
+) const
+{
+    const cell& cFaces = mesh_.cells()[cellI];
+
+    // Work arrays
+    DynamicList<label> verts(4);
+    quads.clear();
+
+
+    // 1. pick up any faces with four cellLevel points
+
+    forAll(cFaces, i)
+    {
+        label faceI = cFaces[i];
+        const face& f = mesh_.faces()[faceI];
+
+        verts.clear();
+        collectLevelPoints(f, cellLevel, verts);
+        if (verts.size() == 4)
+        {
+            if (mesh_.faceOwner()[faceI] != cellI)
+            {
+                reverse(verts);
+            }
+            quads.append(face(0));
+            labelList& quadVerts = quads.last();
+            quadVerts.transfer(verts);
+        }
+    }
+
+
+    if (quads.size() < 6)
+    {
+        Map<labelList> pointFaces(2*cFaces.size());
+
+        forAll(cFaces, i)
+        {
+            label faceI = cFaces[i];
+            const face& f = mesh_.faces()[faceI];
+
+            // Pick up any faces with only one level point.
+            // See if there are four of these where the commont point
+            // is a level+1 point. This common point is then the mid of
+            // a split face.
+
+            verts.clear();
+            collectLevelPoints(f, cellLevel, verts);
+            if (verts.size() == 1)
+            {
+                // Add to pointFaces for any level+1 point (this might be
+                // a midpoint of a split face)
+                forAll(f, fp)
+                {
+                    label pointI = f[fp];
+                    if (pointLevel_[pointI] == cellLevel+1)
+                    {
+                        Map<labelList>::iterator iter =
+                            pointFaces.find(pointI);
+                        if (iter != pointFaces.end())
+                        {
+                            labelList& pFaces = iter();
+                            if (findIndex(pFaces, faceI) == -1)
+                            {
+                                pFaces.append(faceI);
+                            }
+                        }
+                        else
+                        {
+                            pointFaces.insert
+                            (
+                                pointI,
+                                labelList(1, faceI)
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Check if we've collected any midPoints.
+        forAllConstIter(Map<labelList>, pointFaces, iter)
+        {
+            const labelList& pFaces = iter();
+
+            if (pFaces.size() == 4)
+            {
+                // Collect and orient.
+                faceList fourFaces(pFaces.size());
+                forAll(pFaces, pFaceI)
+                {
+                    label faceI = pFaces[pFaceI];
+                    const face& f = mesh_.faces()[faceI];
+                    if (mesh_.faceOwner()[faceI] == cellI)
+                    {
+                        fourFaces[pFaceI] = f;
+                    }
+                    else
+                    {
+                        fourFaces[pFaceI] = f.reverseFace();
+                    }
+                }
+
+                primitivePatch bigFace
+                (
+                    SubList<face>(fourFaces, fourFaces.size()),
+                    mesh_.points()
+                );
+                const labelListList& edgeLoops = bigFace.edgeLoops();
+
+                if (edgeLoops.size() == 1)
+                {
+                    // Collect the 4 cellLevel points
+                    verts.clear();
+                    collectLevelPoints
+                    (
+                        bigFace.meshPoints(),
+                        bigFace.edgeLoops()[0],
+                        cellLevel,
+                        verts
+                    );
+
+                    if (verts.size() == 4)
+                    {
+                        quads.append(face(0));
+                        labelList& quadVerts = quads.last();
+                        quadVerts.transfer(verts);
+                    }
+                }
+            }
+        }
+    }
+
+    return (quads.size() == 6);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from mesh, read refinement data
-Foam::hexRef8::hexRef8(const polyMesh& mesh)
+Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 :
     mesh_(mesh),
     cellLevel_
@@ -1781,7 +1961,19 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh)
         ),
         labelList(mesh_.nPoints(), 0)
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar("level0Edge", dimLength, getLevel0EdgeLength())
+    ),
     history_
     (
         IOobject
@@ -1790,15 +1982,24 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh)
             mesh_.facesInstance(),
             polyMesh::meshSubDir,
             mesh_,
-            IOobject::READ_IF_PRESENT,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_.nCells()    // All cells visible if could not be read
+        (readHistory ? mesh_.nCells() : 0)  // All cells visible if not be read
     ),
     faceRemover_(mesh_, GREAT),     // merge boundary faces wherever possible
     savedPointLevel_(0),
     savedCellLevel_(0)
 {
+    if (readHistory)
+    {
+        history_.readOpt() = IOobject::READ_IF_PRESENT;
+        if (history_.headerOk())
+        {
+            history_.read();
+        }
+    }
+
     if (history_.active() && history_.visibleCells().size() != mesh_.nCells())
     {
         FatalErrorIn
@@ -1849,7 +2050,8 @@ Foam::hexRef8::hexRef8
     const polyMesh& mesh,
     const labelList& cellLevel,
     const labelList& pointLevel,
-    const refinementHistory& history
+    const refinementHistory& history,
+    const scalar level0Edge
 )
 :
     mesh_(mesh),
@@ -1879,7 +2081,24 @@ Foam::hexRef8::hexRef8
         ),
         pointLevel
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar
+        (
+            "level0Edge",
+            dimLength,
+            (level0Edge >= 0 ? level0Edge : getLevel0EdgeLength())
+        )
+    ),
     history_
     (
         IOobject
@@ -1945,7 +2164,8 @@ Foam::hexRef8::hexRef8
 (
     const polyMesh& mesh,
     const labelList& cellLevel,
-    const labelList& pointLevel
+    const labelList& pointLevel,
+    const scalar level0Edge
 )
 :
     mesh_(mesh),
@@ -1975,7 +2195,24 @@ Foam::hexRef8::hexRef8
         ),
         pointLevel
     ),
-    level0Edge_(getLevel0EdgeLength()),
+    level0Edge_
+    (
+        IOobject
+        (
+            "level0Edge",
+            mesh_.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        dimensionedScalar
+        (
+            "level0Edge",
+            dimLength,
+            (level0Edge >= 0 ? level0Edge : getLevel0EdgeLength())
+        )
+    ),
     history_
     (
         IOobject
@@ -2621,7 +2858,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
             << "Value should be >= 1" << exit(FatalError);
     }
 
-    const scalar level0Size = 2*maxFaceDiff*level0Edge_;
+    const scalar level0Size = 2*maxFaceDiff*level0EdgeLength();
 
 
     // Bit tricky. Say we want a distance of three cells between two
@@ -4279,6 +4516,9 @@ void Foam::hexRef8::updateMesh
 
     // Update face removal engine
     faceRemover_.updateMesh(map);
+
+    // Clear cell shapes
+    cellShapesPtr_.clear();
 }
 
 
@@ -4363,6 +4603,9 @@ void Foam::hexRef8::subset
 
     // Nothing needs doing to faceRemover.
     //faceRemover_.subset(pointMap, faceMap, cellMap);
+
+    // Clear cell shapes
+    cellShapesPtr_.clear();
 }
 
 
@@ -4389,12 +4632,15 @@ void Foam::hexRef8::distribute(const mapDistributePolyMesh& map)
 
     // Update face removal engine
     faceRemover_.distribute(map);
+
+    // Clear cell shapes
+    cellShapesPtr_.clear();
 }
 
 
 void Foam::hexRef8::checkMesh() const
 {
-    const scalar smallDim = 1E-6 * mesh_.bounds().mag();
+    const scalar smallDim = 1e-6 * mesh_.bounds().mag();
 
     if (debug)
     {
@@ -4861,6 +5107,66 @@ void Foam::hexRef8::checkRefinementLevels
     //            << abort(FatalError);
     //    }
     //}
+}
+
+
+const Foam::cellShapeList& Foam::hexRef8::cellShapes() const
+{
+    if (cellShapesPtr_.empty())
+    {
+        if (debug)
+        {
+            Pout<< "hexRef8::cellShapes() : calculating splitHex cellShapes."
+                << " cellLevel:" << cellLevel_.size()
+                << " pointLevel:" << pointLevel_.size()
+                << endl;
+        }
+
+        const cellShapeList& meshShapes = mesh_.cellShapes();
+        cellShapesPtr_.reset(new cellShapeList(meshShapes));
+
+        label nSplitHex = 0;
+        label nUnrecognised = 0;
+
+        forAll(cellLevel_, cellI)
+        {
+            if (meshShapes[cellI].model().index() == 0)
+            {
+                label level = cellLevel_[cellI];
+
+                // Return true if we've found 6 quads
+                DynamicList<face> quads;
+                bool haveQuads = matchHexShape
+                (
+                    cellI,
+                    level,
+                    quads
+                );
+
+                if (haveQuads)
+                {
+                    faceList faces(quads.xfer());
+                    cellShapesPtr_()[cellI] = degenerateMatcher::match(faces);
+                    nSplitHex++;
+                }
+                else
+                {
+                    nUnrecognised++;
+                }
+            }
+        }
+        if (debug)
+        {
+            Pout<< "hexRef8::cellShapes() :"
+                << " nCells:" << mesh_.nCells() << " of which" << nl
+                << "    primitive:" << (mesh_.nCells()-nSplitHex-nUnrecognised)
+                << nl
+                << "    split-hex:" << nSplitHex << nl
+                << "    poly     :" << nUnrecognised << nl
+                << endl;
+        }
+    }
+    return cellShapesPtr_();
 }
 
 
@@ -5514,7 +5820,10 @@ void Foam::hexRef8::setUnrefinement
 // Write refinement to polyMesh directory.
 bool Foam::hexRef8::write() const
 {
-    bool writeOk = cellLevel_.write() && pointLevel_.write();
+    bool writeOk =
+        cellLevel_.write()
+     && pointLevel_.write()
+     && level0Edge_.write();
 
     if (history_.active())
     {

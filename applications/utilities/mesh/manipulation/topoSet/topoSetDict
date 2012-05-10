@@ -85,7 +85,7 @@ FoamFile
 //    {
 //        set p0;
 //        option any;         // cell with any point in pointSet
-//        //option all;       // cell with all points in pointSet
+//        //option edge;      // cell with an edge with both points in pointSet
 //    }
 //
 //    // Select based on cellShape
@@ -198,6 +198,7 @@ FoamFile
 //        set p0;
 //        option any;         // Faces using any point in pointSet
 //        //option all        // Faces with all points in pointSet
+//        //option edge       // Faces with two consecutive points in pointSet
 //    }
 //
 //    //  Select by explicitly providing face labels

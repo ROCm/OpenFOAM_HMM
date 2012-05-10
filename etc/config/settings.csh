@@ -41,6 +41,9 @@ alias _foamAddMan 'setenv MANPATH \!*\:${MANPATH}'
 # Set environment variables according to system type
 setenv WM_ARCH `uname -s`
 
+# Default WM_COMPILER_LIB_ARCH for 32bit
+setenv WM_COMPILER_LIB_ARCH
+
 switch ($WM_ARCH)
 case Linux:
     setenv WM_ARCH linux
@@ -210,6 +213,13 @@ case ThirdParty:
         set mpfr_version=mpfr-3.1.0
         set mpc_version=mpc-0.9
         breaksw
+    case Gcc47:
+    case Gcc47++0x:
+        set gcc_version=gcc-4.7.0
+        set gmp_version=gmp-5.0.4
+        set mpfr_version=mpfr-3.1.0
+        set mpc_version=mpc-0.9
+        breaksw
     case Gcc45:
     case Gcc45++0x:
         set gcc_version=gcc-4.5.2
@@ -269,12 +279,7 @@ case ThirdParty:
         _foamAddPath    $gccDir/bin
 
         # add compiler libraries to run-time environment
-        # 64-bit needs lib64, but 32-bit needs lib (not lib32)
-        if ($WM_ARCH_OPTION == 64 && $?WM_COMPILER_LIB_ARCH) then
-            _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
-        else
-            _foamAddLib     $gccDir/lib
-        endif
+        _foamAddLib     $gccDir/lib$WM_COMPILER_LIB_ARCH
 
         # add gmp/mpfr libraries to run-time environment
         _foamAddLib     $gmpDir/lib
@@ -371,21 +376,6 @@ unset boost_version cgal_version
 unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
 
 switch ("$WM_MPLIB")
-case OPENMPI:
-    setenv FOAM_MPI openmpi-1.5.4
-    # optional configuration tweaks:
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
-
-    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
-
-    # Tell OpenMPI where to find its install directory
-    setenv OPAL_PREFIX $MPI_ARCH_PATH
-
-    _foamAddPath    $MPI_ARCH_PATH/bin
-    _foamAddLib     $MPI_ARCH_PATH/lib
-    _foamAddMan     $MPI_ARCH_PATH/man
-    breaksw
-
 case SYSTEMOPENMPI:
     # Use the system installed openmpi, get library directory via mpicc
     setenv FOAM_MPI openmpi-system
@@ -410,13 +400,36 @@ case SYSTEMOPENMPI:
     unset libDir
     breaksw
 
+case OPENMPI:
+    setenv FOAM_MPI openmpi-1.5.4
+    # optional configuration tweaks:
+    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.csh`
+
+    setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
+
+    # Tell OpenMPI where to find its install directory
+    setenv OPAL_PREFIX $MPI_ARCH_PATH
+
+    _foamAddPath    $MPI_ARCH_PATH/bin
+
+    # 64-bit on OpenSuSE 12.1 uses lib64 others use lib
+    _foamAddLib     $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
+    _foamAddLib     $MPI_ARCH_PATH/lib
+
+    _foamAddMan     $MPI_ARCH_PATH/share/man
+    breaksw
+
 case MPICH:
     setenv FOAM_MPI mpich2-1.1.1p1
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$FOAM_MPI
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
     _foamAddPath    $MPI_ARCH_PATH/bin
+
+    # 64-bit on OpenSuSE 12.1 uses lib64 others use lib
+    _foamAddLib     $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     _foamAddLib     $MPI_ARCH_PATH/lib
+
     _foamAddMan     $MPI_ARCH_PATH/share/man
     breaksw
 
@@ -427,7 +440,11 @@ case MPICH-GM:
     setenv GM_LIB_PATH /opt/gm/lib64
 
     _foamAddPath    $MPI_ARCH_PATH/bin
+
+    # 64-bit on OpenSuSE 12.1 uses lib64 others use lib
+    _foamAddLib     $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
     _foamAddLib     $MPI_ARCH_PATH/lib
+
     _foamAddLib     $GM_LIB_PATH
     breaksw
 

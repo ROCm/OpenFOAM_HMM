@@ -641,9 +641,12 @@ int main(int argc, char *argv[])
     Info<< "Mesh size: " << mesh.globalData().nTotalCells() << nl
         << "Before renumbering :" << nl
         << "    band           : " << band << nl
-        << "    profile        : " << profile << nl
-        << "    rms frontwidth : " << rmsFrontwidth << nl
-        << endl;
+        << "    profile        : " << profile << nl;
+    if (doFrontWidth)
+    {
+        Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
+    }
+    Info<< endl;
 
     bool sortCoupledFaceCells = false;
     bool writeMaps = false;
@@ -1033,6 +1036,22 @@ int main(int argc, char *argv[])
         (
             UIndirectList<label>(faceProcAddressing, map().faceMap())
         );
+
+        // Detect any flips.
+        const labelHashSet& fff = map().flipFaceFlux();
+        forAllConstIter(labelHashSet, fff, iter)
+        {
+            label faceI = iter.key();
+            label masterFaceI = faceProcAddressing[faceI];
+
+            faceProcAddressing[faceI] = -masterFaceI;
+
+            if (masterFaceI == 0)
+            {
+                FatalErrorIn(args.executable()) << "problem faceI:" << faceI
+                    << " masterFaceI:" << masterFaceI << exit(FatalError);
+            }
+        }
     }
     if (pointProcAddressing.headerOk())
     {
@@ -1080,9 +1099,13 @@ int main(int argc, char *argv[])
         );
         Info<< "After renumbering :" << nl
             << "    band           : " << band << nl
-            << "    profile        : " << profile << nl
-            << "    rms frontwidth : " << rmsFrontwidth << nl
-            << endl;
+            << "    profile        : " << profile << nl;
+        if (doFrontWidth)
+        {
+
+            Info<< "    rms frontwidth : " << rmsFrontwidth << nl;
+        }
+        Info<< endl;
     }
 
     if (orderPoints)

@@ -1,5 +1,5 @@
 volScalarField rAU(1.0/UEqn().A());
-surfaceScalarField rAUf(rAU.name() + 'f', fvc::interpolate(rAU));
+surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
 volVectorField HbyA("HbyA", U);
 HbyA = rAU*(UEqn() == sources(U))().H();

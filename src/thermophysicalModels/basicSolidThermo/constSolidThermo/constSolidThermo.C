@@ -46,36 +46,36 @@ Foam::constSolidThermo::constSolidThermo
 :
     basicSolidThermo(mesh, dict),
     dict_(dict.subDict(typeName + "Coeffs")),
-    constK_(dimensionedScalar(dict_.lookup("K"))),
-    K_
+    constKappa_(dimensionedScalar(dict_.lookup("kappa"))),
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        constK_
+        constKappa_
     ),
     constRho_(dimensionedScalar(dict_.lookup("rho"))),
     constCp_(dimensionedScalar(dict_.lookup("Cp"))),
     constHf_(dimensionedScalar(dict_.lookup("Hf"))),
     constEmissivity_(dimensionedScalar(dict_.lookup("emissivity"))),
-    constKappa_(dimensionedScalar(dict_.lookup("kappa"))),
+    constKappaRad_(dimensionedScalar(dict_.lookup("kappaRad"))),
     constSigmaS_(dimensionedScalar(dict_.lookup("sigmaS")))
 {
     read();
 
-    K_ = constK_;
+    kappa_ = constKappa_;
 
     rho_ = constRho_;
 
     emissivity_ = constEmissivity_;
 
-    kappa_ = constKappa_;
+    kappaRad_ = constKappaRad_;
 
     sigmaS_ = constSigmaS_;
 }
@@ -85,36 +85,36 @@ Foam::constSolidThermo::constSolidThermo(const fvMesh& mesh)
 :
     basicSolidThermo(mesh),
     dict_(subDict(typeName + "Coeffs")),
-    constK_(dimensionedScalar(dict_.lookup("K"))),
-    K_
+    constKappa_(dimensionedScalar(dict_.lookup("kappa"))),
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         mesh,
-        constK_
+        constKappa_
     ),
     constRho_(dimensionedScalar(dict_.lookup("rho"))),
     constCp_(dimensionedScalar(dict_.lookup("Cp"))),
     constHf_(dimensionedScalar(dict_.lookup("Hf"))),
     constEmissivity_(dimensionedScalar(dict_.lookup("emissivity"))),
-    constKappa_(dimensionedScalar(dict_.lookup("kappa"))),
+    constKappaRad_(dimensionedScalar(dict_.lookup("kappaRad"))),
     constSigmaS_(dimensionedScalar(dict_.lookup("sigmaS")))
 {
     read();
 
-    K_ = constK_;
+    kappa_ = constKappa_;
 
     rho_ = constRho_;
 
     emissivity_ = constEmissivity_;
 
-    kappa_ = constKappa_;
+    kappaRad_ = constKappaRad_;
 
     sigmaS_ = constSigmaS_;
 }
@@ -132,26 +132,27 @@ void Foam::constSolidThermo::correct()
 {}
 
 
-Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::K() const
+Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::kappa() const
 {
-    return K_;
+    return kappa_;
 }
 
 
-Foam::tmp<Foam::volSymmTensorField> Foam::constSolidThermo::directionalK() const
+Foam::tmp<Foam::volSymmTensorField>
+Foam::constSolidThermo::directionalKappa() const
 {
     dimensionedSymmTensor t
     (
-        constK_.name(),
-        constK_.dimensions(),
+        constKappa_.name(),
+        constKappa_.dimensions(),
         symmTensor
         (
-            constK_.value(),
+            constKappa_.value(),
             0.0,
             0.0,
-            constK_.value(),
+            constKappa_.value(),
             0.0,
-            constK_.value()
+            constKappa_.value()
         )
     );
     return tmp<volSymmTensorField>
@@ -160,7 +161,7 @@ Foam::tmp<Foam::volSymmTensorField> Foam::constSolidThermo::directionalK() const
         (
             IOobject
             (
-                "K",
+                "kappa",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -215,28 +216,28 @@ Foam::tmp<Foam::volScalarField> Foam::constSolidThermo::Hf() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::constSolidThermo::K
+Foam::tmp<Foam::scalarField> Foam::constSolidThermo::kappa
 (
     const label patchI
 ) const
 {
-    return (K_.boundaryField()[patchI]);
+    return (kappa_.boundaryField()[patchI]);
 }
 
 
-Foam::tmp<Foam::symmTensorField> Foam::constSolidThermo::directionalK
+Foam::tmp<Foam::symmTensorField> Foam::constSolidThermo::directionalKappa
 (
     const label patchI
 ) const
 {
     symmTensor t
     (
-        constK_.value(),
+        constKappa_.value(),
         0.0,
         0.0,
-        constK_.value(),
+        constKappa_.value(),
         0.0,
-        constK_.value()
+        constKappa_.value()
     );
     return tmp<symmTensorField>
     (
@@ -291,19 +292,19 @@ bool Foam::constSolidThermo::read(const dictionary& dict)
 {
     constRho_ = dimensionedScalar(dict.lookup("rho"));
     constCp_ = dimensionedScalar(dict.lookup("Cp"));
-    constK_ = dimensionedScalar(dict.lookup("K"));
+    constKappa_ = dimensionedScalar(dict.lookup("kappa"));
     constHf_ = dimensionedScalar(dict.lookup("Hf"));
     constEmissivity_ = dimensionedScalar(dict.lookup("emissivity"));
-    constKappa_ = dimensionedScalar(dict_.lookup("kappa"));
+    constKappaRad_ = dimensionedScalar(dict_.lookup("kappaRad"));
     constSigmaS_ = dimensionedScalar(dict_.lookup("sigmaS"));
 
     Info<< "Constructed constSolidThermo with" << nl
         << "    rho        : " << constRho_ << nl
         << "    Cp         : " << constCp_ << nl
-        << "    K          : " << constK_ << nl
+        << "    kappa      : " << constKappa_ << nl
         << "    Hf         : " << constHf_ << nl
         << "    emissivity : " << constEmissivity_ << nl
-        << "    kappa      : " << constKappa_ << nl
+        << "    kappaRad   : " << constKappaRad_ << nl
         << "    sigmaS     : " << constSigmaS_ << nl
         << endl;
 
@@ -316,9 +317,9 @@ bool Foam::constSolidThermo::writeData(Ostream& os) const
     bool ok = basicSolidThermo::writeData(os);
     os.writeKeyword("rho") << constRho_ << token::END_STATEMENT << nl;
     os.writeKeyword("Cp") << constCp_ << token::END_STATEMENT << nl;
-    os.writeKeyword("K") << constK_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Hf") << constHf_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << constKappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Hf") << constHf_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaRad") << constKappaRad_ << token::END_STATEMENT << nl;
     os.writeKeyword("sigmaS") << constSigmaS_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivity") << constEmissivity_ << token::END_STATEMENT
         << nl;

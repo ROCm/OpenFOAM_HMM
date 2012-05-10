@@ -4,5 +4,6 @@ set -x
 
 wmake
 wmake rhoPorousMRFSimpleFoam
+wmake rhoSimplecFoam
 
 # ----------------------------------------------------------------- end-of-file

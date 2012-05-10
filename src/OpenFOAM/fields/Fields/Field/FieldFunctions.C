@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -365,7 +365,7 @@ scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
     if (f1.size() && (f1.size() == f2.size()))
     {
         scalar SumProd = 0.0;
-        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, *, Type, f2)
+        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, &&, Type, f2)
         return SumProd;
     }
     else
@@ -498,7 +498,7 @@ template<class Type>
 scalar gSumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
     scalar SumProd = sumProd(f1, f2);
-    reduce(SumProd, sumOp<Type>());
+    reduce(SumProd, sumOp<scalar>());
     return SumProd;
 }
 
@@ -514,11 +514,12 @@ template<class Type>
 Type gAverage(const UList<Type>& f)
 {
     label n = f.size();
-    reduce(n, sumOp<label>());
+    Type s = sum(f);
+    sumReduce(s, n);
 
     if (n > 0)
     {
-        Type avrg = gSum(f)/n;
+        Type avrg = s/n;
 
         return avrg;
     }

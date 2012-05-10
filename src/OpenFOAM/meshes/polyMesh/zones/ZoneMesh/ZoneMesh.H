@@ -106,6 +106,15 @@ public:
             const label size
         );
 
+         //- Construct given a PtrList
+        ZoneMesh
+        (
+            const IOobject&,
+            const MeshType&,
+            const PtrList<ZoneType>&
+        );
+
+
     //- Destructor
     ~ZoneMesh();
 

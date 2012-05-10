@@ -27,6 +27,8 @@ License
 #include "mergePoints.H"
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include "ListOps.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -112,35 +114,7 @@ void Foam::edgeMesh::calcPointEdges() const
     pointEdgesPtr_.reset(new labelListList(points_.size()));
     labelListList& pointEdges = pointEdgesPtr_();
 
-    // Count
-    labelList nEdgesPerPoint(points_.size(), 0);
-
-    forAll(edges_, edgeI)
-    {
-        const edge& e = edges_[edgeI];
-
-        nEdgesPerPoint[e[0]]++;
-        nEdgesPerPoint[e[1]]++;
-    }
-
-    // Size
-    forAll(pointEdges, pointI)
-    {
-        pointEdges[pointI].setSize(nEdgesPerPoint[pointI]);
-    }
-
-    // Fill
-    nEdgesPerPoint = 0;
-
-    forAll(edges_, edgeI)
-    {
-        const edge& e = edges_[edgeI];
-        const label p0 = e[0];
-        const label p1 = e[1];
-
-        pointEdges[p0][nEdgesPerPoint[p0]++] = edgeI;
-        pointEdges[p1][nEdgesPerPoint[p1]++] = edgeI;
-    }
+    invertManyToMany(pointEdges.size(), edges_, pointEdges);
 }
 
 
@@ -354,10 +328,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
         }
 
         // Compact using a hashtable and commutative hash of edge.
-        HashTable<label, edge, Hash<edge> > edgeToLabel
-        (
-            2*edges_.size()
-        );
+        EdgeMap<label> edgeToLabel(2*edges_.size());
 
         label newEdgeI = 0;
 
@@ -376,16 +347,41 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
         edges_.setSize(newEdgeI);
 
-        for
-        (
-            HashTable<label, edge, Hash<edge> >::const_iterator iter =
-                edgeToLabel.begin();
-            iter != edgeToLabel.end();
-            ++iter
-        )
+        forAllConstIter(EdgeMap<label>, edgeToLabel, iter)
         {
             edges_[iter()] = iter.key();
         }
+    }
+}
+
+
+void Foam::edgeMesh::mergeEdges()
+{
+    EdgeMap<label> existingEdges(2*edges_.size());
+
+    label curEdgeI = 0;
+    forAll(edges_, edgeI)
+    {
+        const edge& e = edges_[edgeI];
+
+        if (existingEdges.insert(e, curEdgeI))
+        {
+            curEdgeI++;
+        }
+    }
+
+    if (debug)
+    {
+        Info<< "Merging duplicate edges: "
+            << edges_.size() - existingEdges.size()
+            << " edges will be deleted." << endl;
+    }
+
+    edges_.setSize(existingEdges.size());
+
+    forAllConstIter(EdgeMap<label>, existingEdges, iter)
+    {
+        edges_[iter()] = iter.key();
     }
 }
 

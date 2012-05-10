@@ -36,13 +36,13 @@ template<class thermo>
 inline constSolidRad<thermo>::constSolidRad
 (
     const thermo& t,
-    const scalar kappa,
+    const scalar kappaRad,
     const scalar sigmaS,
     const scalar emissivity
 )
 :
     thermo(t),
-    kappa_(kappa),
+    kappaRad_(kappaRad),
     sigmaS_(sigmaS),
     emissivity_(emissivity)
 {}
@@ -59,7 +59,7 @@ inline constSolidRad<thermo>::constSolidRad
 )
 :
     thermo(name, pg),
-    kappa_(pg.kappa_),
+    kappaRad_(pg.kappaRad_),
     sigmaS_(pg.sigmaS_),
     emissivity_(pg.emissivity_)
 {}
@@ -82,9 +82,9 @@ inline autoPtr<constSolidRad<thermo> > constSolidRad<thermo>::New(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline scalar constSolidRad<thermo>::kappa(scalar) const
+inline scalar constSolidRad<thermo>::kappaRad(scalar) const
 {
-    return kappa_;
+    return kappaRad_;
 }
 
 

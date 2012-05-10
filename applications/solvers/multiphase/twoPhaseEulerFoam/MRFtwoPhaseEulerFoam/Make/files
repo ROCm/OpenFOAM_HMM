@@ -1,3 +1,0 @@
-MRFTwoPhaseEulerFoam.C
-
-EXE = $(FOAM_APPBIN)/MRFTwoPhaseEulerFoam

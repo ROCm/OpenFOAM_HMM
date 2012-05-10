@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,13 +37,16 @@ Description
             fieldNames      (U);    // names of fields on which to apply source
             rhoName         rho;    // density field if compressible case
             nBlades         3;      // number of blades
-            tip effect      0.96;   // normalised radius above which lift = 0
+            tipEffect       0.96;   // normalised radius above which lift = 0
 
             inletFlowType   local;  // inlet flow type specification
 
             geometryMode    auto;   // geometry specification
 
             refDirection    (-1 0 0); // reference direction
+                                      // - used as reference for psi angle
+
+            trimModel       fixed;  // fixed || targetForce
 
             flapCoeffs
             {
@@ -51,16 +54,12 @@ Description
                 beta1           0;  // lateral flapping coeff
                 beta2           0;  // longitudinal flapping coeff
             }
-            trimCoeffs
-            {
-                alphac          15; // collective pitch angle [deg]
-                A               0;  // lateral cyclic coeff
-                B               0;  // longitudinal cyclic coeff
-            }
+
             blade
             {
                 ...
             }
+
             profiles
             {
                 ...
@@ -102,6 +101,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+class trimModel;
+
 /*---------------------------------------------------------------------------*\
                       Class rotorDiskSource Declaration
 \*---------------------------------------------------------------------------*/
@@ -140,13 +142,6 @@ protected:
             scalar beta2;   // longitudinal flapping coeff
         };
 
-        struct trimData
-        {
-            scalar alphaC;  // collective pitch angle
-            scalar A;       // lateral cyclic coeff
-            scalar B;       // longitudinal cyclic coeff
-        };
-
 
     // Protected data
 
@@ -172,8 +167,8 @@ protected:
         //- Blade flap coefficients [rad/s]
         flapData flap_;
 
-        //- Blad trim coefficients
-        trimData trim_;
+        //- Trim model
+        autoPtr<trimModel> trim_;
 
         //- Blade data
         bladeModel blade_;
@@ -181,7 +176,8 @@ protected:
         //- Profile data
         profileModelList profiles_;
 
-        //- Cell centre positions in local rotor frame (Cartesian x, y, z)
+        //- Cell centre positions in local rotor frame
+        //  (Cylindrical r, theta, z)
         List<point> x_;
 
         //- Rotation tensor for flap angle
@@ -189,9 +185,6 @@ protected:
 
         //- Inverse rotation tensor for flap angle
         List<tensor> invR_;
-
-        //- Geometric angle of attack [deg]
-        List<scalar> alphag_;
 
         //- Area [m2]
         List<scalar> area_;
@@ -202,7 +195,7 @@ protected:
         //- Maximum radius
         scalar rMax_;
 
-        
+
     // Protected Member Functions
 
         //- Check data
@@ -219,15 +212,6 @@ protected:
 
         //- Return the inlet flow field
         tmp<vectorField> inflowVelocity(const volVectorField& U) const;
-
-        //- Calculate forces
-        template<class RhoType>
-        tmp<volVectorField> calculateForces
-        (
-            const RhoType& rho,
-            const vectorField& U,
-            const dimensionSet& dims
-        );
 
         //- Helper function to write rotor values
         template<class Type>
@@ -247,7 +231,7 @@ public:
 
     // Constructors
 
-        
+
         //- Construct from components
         rotorDiskSource
         (
@@ -263,6 +247,29 @@ public:
 
 
     // Member Functions
+
+        // Access
+            
+            //- Return the cell centre positions in local rotor frame
+            // (Cylindrical r, theta, z)
+            inline const List<point>& x() const;
+
+            //- Return the rotor co-ordinate system (r, theta, z)
+            inline const cylindricalCS& coordSys() const;
+
+
+        // Evaluation
+
+            //- Calculate forces
+            void calculate
+            (
+                const vectorField& U,
+                const scalarField& alphag,
+                vectorField& force,
+                const bool divideVolume = true,
+                const bool output = true
+            ) const;
+
 
         // Source term addition
 
@@ -283,6 +290,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "rotorDiskSourceI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

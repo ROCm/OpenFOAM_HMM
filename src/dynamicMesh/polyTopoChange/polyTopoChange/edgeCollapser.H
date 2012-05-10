@@ -39,6 +39,7 @@ SourceFiles
 
 #include "labelList.H"
 #include "DynamicList.H"
+#include "point.H"
 #include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,6 +66,10 @@ class edgeCollapser
 
         //- For every point -1 or region number
         labelList pointRegion_;
+
+        //- Actual location of the point to collapse to for every region master
+        //  point. This will be forced to be consistent across processors
+        DynamicList<point> pointRegionMasterLocation_;
 
         //- -1 or master vertex for region number
         DynamicList<label> pointRegionMaster_;

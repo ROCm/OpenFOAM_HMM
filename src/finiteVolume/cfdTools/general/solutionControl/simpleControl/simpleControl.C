@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ bool Foam::simpleControl::criteriaSatisfied()
         const label fieldI = applyToField(variableName);
         if (fieldI != -1)
         {
-            const List<lduMatrix::solverPerformance> sp(iter().stream());
+            const List<solverPerformance> sp(iter().stream());
             const scalar residual = sp.first().initialResidual();
 
             checked = true;

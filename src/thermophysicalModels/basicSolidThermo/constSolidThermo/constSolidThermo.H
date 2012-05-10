@@ -58,10 +58,10 @@ private:
         dictionary dict_;
 
         //- Constant thermal conductivity [W/(m.K)]
-        dimensionedScalar constK_;
+        dimensionedScalar constKappa_;
 
         //- Thermal conductivity field[W/(m.K)]
-        volScalarField K_;
+        volScalarField kappa_;
 
         //- Density [kg/m3]
         dimensionedScalar constRho_;
@@ -76,7 +76,7 @@ private:
         dimensionedScalar constEmissivity_;
 
         //- Absorptivity [1/m]
-        dimensionedScalar constKappa_;
+        dimensionedScalar constKappaRad_;
 
         //- Scatter [1/m]
         dimensionedScalar constSigmaS_;
@@ -110,10 +110,10 @@ public:
         // Derived thermal properties
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volScalarField> K() const;
+            virtual tmp<volScalarField> kappa() const;
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volSymmTensorField> directionalK() const;
+            virtual tmp<volSymmTensorField> directionalKappa() const;
 
             //- Specific heat capacity [J/(kg.K)]
             virtual tmp<volScalarField> Cp() const;
@@ -125,10 +125,10 @@ public:
         // Per patch calculation
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<scalarField> K(const label patchI) const;
+            virtual tmp<scalarField> kappa(const label patchI) const;
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<symmTensorField>directionalK(const label) const;
+            virtual tmp<symmTensorField>directionalKappa(const label) const;
 
             //- Specific heat capacity [J/kg/K)]
             virtual tmp<scalarField> Cp(const label patchI) const;

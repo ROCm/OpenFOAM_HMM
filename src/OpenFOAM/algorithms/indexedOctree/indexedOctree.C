@@ -2832,7 +2832,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
 ) const
 {
     label nearestShapeI = -1;
-    point nearestPoint;
+    point nearestPoint = vector::zero;
 
     if (nodes_.size())
     {
@@ -2846,10 +2846,6 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
             linePoint,
             nearestPoint
         );
-    }
-    else
-    {
-        nearestPoint = vector::zero;
     }
 
     return pointIndexHit(nearestShapeI != -1, nearestPoint, nearestShapeI);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,142 @@ const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::scalar Foam::conformalVoronoiMesh::requiredSize
+(
+    const Foam::point& pt
+) const
+{
+    pointIndexHit surfHit;
+    label hitSurface;
+
+    DynamicList<scalar> cellSizeHits;
+
+    geometryToConformTo_.findSurfaceNearest
+    (
+        pt,
+        sqr(GREAT),
+        surfHit,
+        hitSurface
+    );
+
+    if (!surfHit.hit())
+    {
+        FatalErrorIn
+        (
+            "Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment"
+        )
+            << "findSurfaceNearest did not find a hit across the surfaces."
+            << exit(FatalError) << endl;
+    }
+
+    cellSizeHits.append(cellSizeControl().cellSize(pt));
+
+    // Primary alignment
+
+    vectorField norm(1);
+
+    allGeometry_[hitSurface].getNormal
+    (
+        List<pointIndexHit>(1, surfHit),
+        norm
+    );
+
+    const vector np = norm[0];
+
+    // Generate equally spaced 'spokes' in a circle normal to the
+    // direction from the vertex to the closest point on the surface
+    // and look for a secondary intersection.
+
+    const vector d = surfHit.hitPoint() - pt;
+
+    const tensor Rp = rotationTensor(vector(0,0,1), np);
+
+    const label s = cvMeshControls().alignmentSearchSpokes();
+
+    const scalar spanMag = geometryToConformTo_.globalBounds().mag();
+
+    scalar totalDist = 0;
+
+    for (label i = 0; i < s; i++)
+    {
+        vector spoke
+        (
+            Foam::cos(i*constant::mathematical::twoPi/s),
+            Foam::sin(i*constant::mathematical::twoPi/s),
+            0
+        );
+
+        spoke *= spanMag;
+
+        spoke = Rp & spoke;
+
+        pointIndexHit spokeHit;
+
+        label spokeSurface = -1;
+
+        // internal spoke
+
+        geometryToConformTo_.findSurfaceNearestIntersection
+        (
+            pt,
+            pt + spoke,
+            spokeHit,
+            spokeSurface
+        );
+
+        if (spokeHit.hit())
+        {
+            const Foam::point& hitPt = spokeHit.hitPoint();
+
+            scalar spokeHitDistance = mag(hitPt - pt);
+
+            cellSizeHits.append
+            (
+                cellSizeControl().cellSize(hitPt)
+            );
+
+            totalDist += spokeHitDistance;
+        }
+
+        //external spoke
+
+        Foam::point mirrorPt = pt + 2*d;
+
+        geometryToConformTo_.findSurfaceNearestIntersection
+        (
+            mirrorPt,
+            mirrorPt + spoke,
+            spokeHit,
+            spokeSurface
+        );
+
+        if (spokeHit.hit())
+        {
+            const Foam::point& hitPt = spokeHit.hitPoint();
+
+            scalar spokeHitDistance = mag(hitPt - mirrorPt);
+
+            cellSizeHits.append
+            (
+                cellSizeControl().cellSize(hitPt)
+            );
+
+            totalDist += spokeHitDistance;
+        }
+    }
+
+    scalar cellSize = 0;
+
+    forAll(cellSizeHits, hitI)
+    {
+        cellSize += cellSizeHits[hitI];
+    }
+
+    return cellSize/cellSizeHits.size();
+    //return cellSizeControl().cellSize(pt);
+}
+
 
 Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
 (
@@ -817,6 +953,8 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     label i = 0;
 
+    checkCellSizing();
+
     for
     (
         List<Point>::const_iterator pit = storePts.begin();
@@ -826,10 +964,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
     {
         sizeAndAlignmentLocations_[i] = topoint(*pit);
 
-        storedSizes_[i] = cellSizeControl().cellSize
-        (
-            sizeAndAlignmentLocations_[i]
-        );
+        storedSizes_[i] = requiredSize(sizeAndAlignmentLocations_[i]);
 
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
 

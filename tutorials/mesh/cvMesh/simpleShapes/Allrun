@@ -30,15 +30,11 @@ surfaceOrient \
     constant/triSurface/domain_clean_orient.stl
     > log.surfaceOrient.domain 2>&1
 
-runApplication surfaceFeatureExtract \
-    constant/triSurface/coneAndSphere_clean_orient.obj \
-    coneAndSphere -includedAngle 125
+runApplication surfaceFeatureExtract
 mv log.surfaceFeatureExtract log.surfaceFeatureExtract.coneAndSphere_clean
 
 unset FOAM_SIGFPE
-runApplication surfaceFeatureExtract \
-    constant/triSurface/domain_clean_orient.stl \
-    domain -includedAngle 125
+runApplication surfaceFeatureExtract
 mv log.surfaceFeatureExtract log.surfaceFeatureExtract.domain
 
 # Generate aligned points (in constant/internalDelaunayVertices) and a

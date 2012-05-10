@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,7 @@ Description
 #include "triSurface.H"
 #include "argList.H"
 #include "Time.H"
+#include "featureEdgeMesh.H"
 #include "extendedFeatureEdgeMesh.H"
 #include "triSurfaceSearch.H"
 #include "OFstream.H"
@@ -216,7 +217,6 @@ bool intersectSurfaces
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::noParallel();
     argList::validArgs.append("action");
     argList::validArgs.append("surface file");
@@ -452,6 +452,30 @@ int main(int argc, char *argv[])
     feMesh.write();
 
     feMesh.writeObj(sFeatFileName);
+
+    {
+        // Write a featureEdgeMesh for backwards compatibility
+        featureEdgeMesh bfeMesh
+        (
+            IOobject
+            (
+                sFeatFileName + ".eMesh",   // name
+                runTime.constant(),                         // instance
+                "triSurface",
+                runTime,                                    // registry
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            feMesh.points(),
+            feMesh.edges()
+        );
+
+        Info<< nl << "Writing featureEdgeMesh to "
+            << bfeMesh.objectPath() << endl;
+
+        bfeMesh.regIOobject::write();
+    }
 
     Info << "End\n" << endl;
 

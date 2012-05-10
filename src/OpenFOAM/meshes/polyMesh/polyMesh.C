@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -338,7 +338,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         points
@@ -351,7 +351,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         faces
@@ -364,7 +364,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         owner
@@ -377,7 +377,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         neighbour
@@ -391,11 +391,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::AUTO_WRITE
         ),
         *this,
-        0
+        polyPatchList()
     ),
     bounds_(points_, syncPar),
     geometricD_(Vector<label>::zero),
@@ -410,11 +410,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<pointZone>()
     ),
     faceZones_
     (
@@ -424,11 +424,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<faceZone>()
     ),
     cellZones_
     (
@@ -438,11 +438,11 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
-        0
+        PtrList<cellZone>()
     ),
     globalMeshDataPtr_(NULL),
     moving_(false),
@@ -893,7 +893,7 @@ Foam::polyMesh::cellTree() const
 
         Random rndGen(261782);
 
-        overallBb = overallBb.extend(rndGen, 1E-4);
+        overallBb = overallBb.extend(rndGen, 1e-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
@@ -1092,7 +1092,8 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
 
 Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
 (
-    const pointField& newPoints
+    const pointField& newPoints,
+    const bool deleteDemandDrivenData
 )
 {
     if (debug)
@@ -1145,6 +1146,14 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     }
 
     // Force recalculation of all geometric data with new points
+
+    if (deleteDemandDrivenData)
+    {
+        // Remove the stored tet base points
+        tetBasePtIsPtr_.clear();
+        // Remove the cell tree
+        cellTreePtr_.clear();
+    }
 
     bounds_ = boundBox(points_);
     boundary_.movePoints(points_);

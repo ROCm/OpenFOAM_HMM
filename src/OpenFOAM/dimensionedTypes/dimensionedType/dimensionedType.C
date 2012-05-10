@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,7 +126,49 @@ dimensioned<Type>::dimensioned
 :
     name_(name),
     dimensions_(dimSet),
-    value_(pTraits<Type>(is))
+    value_(pTraits<Type>::zero)
+{
+    token nextToken(is);
+    is.putBack(nextToken);
+
+    // Check if the original format is used in which the name is provided
+    // and reset the name to that read
+    if (nextToken.isWord())
+    {
+        is >> name_;
+        is >> nextToken;
+        is.putBack(nextToken);
+    }
+
+    // If the dimensions are provided compare with the argument
+    if (nextToken == token::BEGIN_SQR)
+    {
+        dimensionSet dims(is);
+
+        if (dims != dimensions_)
+        {
+            FatalErrorIn
+            (
+                "dimensioned<Type>::dimensioned"
+                "(const word&, const dimensionSet&, Istream&)"
+            ) << "The dimensions " << dims
+              << " provided do not match the required dimensions "
+              << dimensions_
+              << abort(FatalError);
+        }
+    }
+
+    is >> value_;
+}
+
+
+template <class Type>
+dimensioned<Type>::dimensioned
+()
+:
+    name_("undefined"),
+    dimensions_(dimless),
+    value_(pTraits<Type>::zero)
 {}
 
 
@@ -359,8 +401,26 @@ dimensioned<Type> min
 template <class Type>
 Istream& operator>>(Istream& is, dimensioned<Type>& dt)
 {
-    // do a stream read op for a Type and a dimensions()et
-    is >> dt.name_ >> dt.dimensions_ >> dt.value_;
+    token nextToken(is);
+    is.putBack(nextToken);
+
+    // Check if the original format is used in which the name is provided
+    // and reset the name to that read
+    if (nextToken.isWord())
+    {
+        is >> dt.name_;
+        is >> nextToken;
+        is.putBack(nextToken);
+    }
+
+    // If the dimensions are provided reset the dimensions to those read
+    if (nextToken == token::BEGIN_SQR)
+    {
+        is >> dt.dimensions_;
+    }
+
+    // Read the value
+    is >> dt.value_;
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, dimensioned<Type>&)");

@@ -63,7 +63,7 @@ protected:
 
         Field<scalar> emissivityValues_;
 
-        Field<scalar> kappaValues_;
+        Field<scalar> kappaRadValues_;
 
         Field<scalar> sigmaSValues_;
 

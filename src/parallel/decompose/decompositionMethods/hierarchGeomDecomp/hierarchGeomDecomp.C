@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -701,7 +701,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     label allSize = points.size();
     reduce(allSize, sumOp<label>());
 
-    const label sizeTol = max(1, label(1E-3*allSize/nProcessors_));
+    const label sizeTol = max(1, label(1e-3*allSize/nProcessors_));
 
     // Sort recursive
     sortComponent
@@ -742,7 +742,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     label allSize = points.size();
     reduce(allSize, sumOp<label>());
 
-    const label sizeTol = max(1, label(1E-3*allSize/nProcessors_));
+    const label sizeTol = max(1, label(1e-3*allSize/nProcessors_));
 
     // Sort recursive
     sortComponent

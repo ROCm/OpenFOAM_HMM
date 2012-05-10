@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -214,7 +214,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
         forAll(localPoints, i)
         {
-            const point pt = localPoints[i] + 1E-4*rndGen.vector01();
+            const point pt = localPoints[i] + 1e-4*rndGen.vector01();
 
             label meshPointI = allBoundary.meshPoints()[i];
 
@@ -299,7 +299,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const edge& e = edges[i];
 
-            const point pt = e.centre(localPoints) + 1E-4*rndGen.vector01();
+            const point pt = e.centre(localPoints) + 1e-4*rndGen.vector01();
 
             label meshEdgeI = meshEdges[i];
 

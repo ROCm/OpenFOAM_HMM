@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -268,7 +268,7 @@ kOmegaSST::kOmegaSST
       / max
         (
             a1_*omega_,
-            F2()*sqrt(2.0*magSqr(symm(fvc::grad(U_))))
+            F2()*sqrt(2.0)*mag(symm(fvc::grad(U_)))
         )
     );
     mut_.correctBoundaryConditions();
@@ -365,7 +365,7 @@ void kOmegaSST::correct()
         // Re-calculate viscosity
         mut_ =
             a1_*rho_*k_
-           /max(a1_*omega_, F2()*sqrt(2.0*magSqr(symm(fvc::grad(U_)))));
+           /max(a1_*omega_, F2()*sqrt(2.0)*mag(symm(fvc::grad(U_))));
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -411,6 +411,7 @@ void kOmegaSST::correct()
     (
         fvm::ddt(rho_, omega_)
       + fvm::div(phi_, omega_)
+      - fvm::Sp(fvc::ddt(rho_) + fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(F1), omega_)
      ==
         rhoGammaF1*GbyMu
@@ -435,6 +436,7 @@ void kOmegaSST::correct()
     (
         fvm::ddt(rho_, k_)
       + fvm::div(phi_, k_)
+      - fvm::Sp(fvc::ddt(rho_) + fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(F1), k_)
      ==
         min(G, (c1_*betaStar_)*rho_*k_*omega_)

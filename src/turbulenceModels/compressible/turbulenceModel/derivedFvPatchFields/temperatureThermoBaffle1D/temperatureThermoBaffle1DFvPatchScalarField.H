@@ -114,9 +114,9 @@ class temperatureThermoBaffle1DFvPatchScalarField
             }
 
 
-            scalar K(const scalar T) const
+            scalar kappa(const scalar T) const
             {
-                return solidPtr_().K(T);
+                return solidPtr_().kappa(T);
             }
     };
 

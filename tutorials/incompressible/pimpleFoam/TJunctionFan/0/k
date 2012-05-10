@@ -27,24 +27,24 @@ boundaryField
         intensity       0.05;
         U               U;
         phi             phi;
-        value           $internalField;
+        value           uniform 0.375;
     }
     outlet1
     {
         type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        inletValue      uniform 0.375;
+        value           uniform 0.375;
     }
     outlet2
     {
         type            inletOutlet;
-        inletValue      $internalField;
-        value           $internalField;
+        inletValue      uniform 0.375;
+        value           uniform 0.375;
     }
     baffles
     {
         type            kqRWallFunction;
-        value           $internalField;
+        value           uniform 0;
     }
     fan_half0
     {
@@ -57,7 +57,7 @@ boundaryField
     defaultFaces
     {
         type            kqRWallFunction;
-        value           $internalField;
+        value           uniform 0.375;
     }
 }
 

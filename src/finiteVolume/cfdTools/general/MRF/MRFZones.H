@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,11 @@ class MRFZones
 :
     public IOPtrList<MRFZone>
 {
+    // Private data
+
+        //- Reference to mesh
+        const fvMesh& mesh_;
+
 
     // Private Member Functions
 
@@ -71,6 +76,9 @@ public:
 
 
     // Member Functions
+
+        //- Add the Coriolis force contribution to the acceleration field
+        void addCoriolis(const volVectorField& U, volVectorField& ddtU) const;
 
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;
@@ -106,6 +114,13 @@ public:
 
         //- Correct the boundary velocity for the roation of the MRF region
         void correctBoundaryVelocity(volVectorField& U) const;
+
+
+    // I-O
+
+        //- Read from Istream
+        virtual bool readData(Istream&);
+
 };
 
 

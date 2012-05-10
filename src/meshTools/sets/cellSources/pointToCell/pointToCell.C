@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,10 +41,11 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::pointToCell::pointAction,
-        1
+        2
     >::names[] =
     {
-        "any"
+        "any",
+        "edge"
     };
 }
 
@@ -52,11 +53,12 @@ namespace Foam
 Foam::topoSetSource::addToUsageTable Foam::pointToCell::usage_
 (
     pointToCell::typeName,
-    "\n    Usage: pointToCell <pointSet> any\n\n"
-    "    Select all cells with any point in the pointSet\n\n"
+    "\n    Usage: pointToCell <pointSet> any|edge\n\n"
+    "    Select all cells with any point ('any') or any edge ('edge')"
+    " in the pointSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::pointToCell::pointAction, 1>
+const Foam::NamedEnum<Foam::pointToCell::pointAction, 2>
     Foam::pointToCell::pointActionNames_;
 
 
@@ -79,6 +81,26 @@ void Foam::pointToCell::combine(topoSet& set, const bool add) const
             forAll(pCells, pCellI)
             {
                 addOrDelete(set, pCells[pCellI], add);
+            }
+        }
+    }
+    else if (option_ == EDGE)
+    {
+        const faceList& faces = mesh_.faces();
+        forAll(faces, faceI)
+        {
+            const face& f = faces[faceI];
+
+            forAll(f, fp)
+            {
+                if (loadedSet.found(f[fp]) && loadedSet.found(f.nextLabel(fp)))
+                {
+                    addOrDelete(set, mesh_.faceOwner()[faceI], add);
+                    if (mesh_.isInternalFace(faceI))
+                    {
+                        addOrDelete(set, mesh_.faceNeighbour()[faceI], add);
+                    }
+                }
             }
         }
     }

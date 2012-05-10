@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,7 +118,7 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
     inverseVolumeWeightsPtr_ = new scalarListList(toMesh_.nCells());
     scalarListList& invVolCoeffs = *inverseVolumeWeightsPtr_;
 
-    labelListList& cellToCell = *cellToCellAddressingPtr_;
+    const labelListList& cellToCell = cellToCellAddressing();
 
     tetOverlapVolume overlapEngine;
 
@@ -129,8 +129,8 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
         if (overlapCells.size() > 0)
         {
             invVolCoeffs[celli].setSize(overlapCells.size());
-            scalar v(0);
-            forAll (overlapCells, j)
+
+            forAll(overlapCells, j)
             {
                 label cellFrom = overlapCells[j];
                 treeBoundBox bbFromMesh
@@ -142,7 +142,7 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
                     )
                 );
 
-                v = overlapEngine.cellCellOverlapVolumeMinDecomp
+                scalar v = overlapEngine.cellCellOverlapVolumeMinDecomp
                 (
                     toMesh_,
                     celli,
@@ -151,19 +151,14 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
                     cellFrom,
                     bbFromMesh
                 );
-                invVolCoeffs[celli][j] =  v/toMesh_.V()[celli];
-            }
-            if (celli == 2)
-            {
-                Info << "cellToCell :" << cellToCell[celli] << endl;
-                Info << "invVolCoeffs :" << invVolCoeffs[celli] << endl;
+                invVolCoeffs[celli][j] = v/toMesh_.V()[celli];
             }
         }
     }
 }
 
 
-void  Foam::meshToMesh::calculateCellToCellAddressing() const
+void Foam::meshToMesh::calculateCellToCellAddressing() const
 {
     if (debug)
     {

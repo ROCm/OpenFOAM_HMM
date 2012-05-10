@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -142,7 +142,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
         zeroGradientFvPatchScalarField::typeName
     );
 
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    const conformationSurfaces& geometry = geometryToConformTo_;
 
     decompositionMethod& decomposer = decomposerPtr_();
 
@@ -512,7 +512,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
     // Sample the box to find an estimate of the min size, and a volume
     // estimate when overlapping == true.
 
-    const conformationSurfaces& geometry = cvMesh_.geometryToConformTo();
+    const conformationSurfaces& geometry = geometryToConformTo_;
 
     treeBoundBox cellBb
     (
@@ -578,7 +578,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
         forAll(samplePoints, i)
         {
-            scalar s = cvMesh_.cellSizeControl().cellSize
+            scalar s = cellSizeControl_.cellSize
             (
                 hitInfo[i].hitPoint()
             );
@@ -693,7 +693,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
     // Overall bb
     treeBoundBox overallBb(boundaryFacesPtr_().localPoints());
 
-    Random& rnd = cvMesh_.rndGen();
+    Random& rnd = rndGen_;
 
     bFTreePtr_.reset
     (
@@ -726,11 +726,11 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 
     octreeNearestDistances_ = bFTreePtr_().calcNearestDistance();
 
-    if (cvMesh_.cvMeshControls().objOutput())
+    if (cvMeshControls_.objOutput())
     {
         OFstream fStr
         (
-            cvMesh_.time().path()
+            mesh_.time().path()
            /"backgroundMeshDecomposition_proc_"
           + name(Pstream::myProcNo())
           + "_boundaryFaces.obj"
@@ -777,15 +777,18 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     const conformalVoronoiMesh& cvMesh
 )
 :
-    coeffsDict_(coeffsDict),
-    cvMesh_(cvMesh),
+    runTime_(cvMesh.time()),
+    geometryToConformTo_(cvMesh.geometryToConformTo()),
+    cellSizeControl_(cvMesh.cellSizeControl()),
+    rndGen_(cvMesh.rndGen()),
+    cvMeshControls_(cvMesh.cvMeshControls()),
     mesh_
     (
         IOobject
         (
             fvMesh::defaultRegion,
-            cvMesh_.time().timeName(),
-            cvMesh_.time(),
+            runTime_.timeName(),
+            runTime_,
             IOobject::MUST_READ
         )
     ),
@@ -805,22 +808,22 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
         IOobject
         (
             "decomposeParDict",
-            cvMesh_.time().system(),
-            cvMesh_.time(),
+            runTime_.system(),
+            runTime_,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
     ),
     decomposerPtr_(decompositionMethod::New(decomposeDict_)),
     mergeDist_(1e-6*mesh_.bounds().mag()),
-    spanScale_(readScalar(coeffsDict_.lookup("spanScale"))),
+    spanScale_(readScalar(coeffsDict.lookup("spanScale"))),
     minCellSizeLimit_
     (
-        coeffsDict_.lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
+        coeffsDict.lookupOrDefault<scalar>("minCellSizeLimit", 0.0)
     ),
-    minLevels_(readLabel(coeffsDict_.lookup("minLevels"))),
-    volRes_(readLabel(coeffsDict_.lookup("sampleResolution"))),
-    maxCellWeightCoeff_(readScalar(coeffsDict_.lookup("maxCellWeightCoeff")))
+    minLevels_(readLabel(coeffsDict.lookup("minLevels"))),
+    volRes_(readLabel(coeffsDict.lookup("sampleResolution"))),
+    maxCellWeightCoeff_(readScalar(coeffsDict.lookup("maxCellWeightCoeff")))
 {
     if (!Pstream::parRun())
     {
@@ -847,6 +850,74 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             << " which is not parallel aware." << endl
             << exit(FatalError);
     }
+
+    Info<< nl << "Building initial background mesh decomposition" << endl;
+
+    initialRefinement();
+}
+
+
+Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
+(
+    const scalar spanScale,
+    const scalar minCellSizeLimit,
+    const label minLevels,
+    const label volRes,
+    const scalar maxCellWeightCoeff,
+
+    const Time& runTime,
+    const conformationSurfaces& geometryToConformTo,
+    const cellSizeControlSurfaces& cellSizeControl,
+    Random& rndGen,
+    const cvControls& cvMeshControls
+)
+:
+    runTime_(runTime),
+    geometryToConformTo_(geometryToConformTo),
+    cellSizeControl_(cellSizeControl),
+    rndGen_(rndGen),
+    cvMeshControls_(cvMeshControls),
+    mesh_
+    (
+        IOobject
+        (
+            fvMesh::defaultRegion,
+            runTime_.timeName(),
+            runTime_,
+            IOobject::MUST_READ
+        )
+    ),
+    meshCutter_
+    (
+        mesh_,
+        labelList(mesh_.nCells(), 0),
+        labelList(mesh_.nPoints(), 0)
+    ),
+    boundaryFacesPtr_(),
+    bFTreePtr_(),
+    octreeNearestDistances_(),
+    allBackgroundMeshBounds_(Pstream::nProcs()),
+    globalBackgroundBounds_(),
+    decomposeDict_
+    (
+        IOobject
+        (
+            "decomposeParDict",
+            runTime_.system(),
+            runTime_,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+    decomposerPtr_(decompositionMethod::New(decomposeDict_)),
+    mergeDist_(1e-6*mesh_.bounds().mag()),
+    spanScale_(spanScale),
+    minCellSizeLimit_(minCellSizeLimit),
+    minLevels_(minLevels),
+    volRes_(volRes),
+    maxCellWeightCoeff_(maxCellWeightCoeff)
+{
+    // Stand-alone operation
 
     Info<< nl << "Building initial background mesh decomposition" << endl;
 

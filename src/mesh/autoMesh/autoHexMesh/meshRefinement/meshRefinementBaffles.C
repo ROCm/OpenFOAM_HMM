@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1073,7 +1073,7 @@ void Foam::meshRefinement::findCellZoneGeometric
                 label nei = faceNeighbour[faceI];
                 const point& neiCc = cellCentres[nei];
                 // Perturbed cc
-                const vector d = 1E-4*(neiCc - ownCc);
+                const vector d = 1e-4*(neiCc - ownCc);
                 candidatePoints[nCandidates++] = ownCc-d;
                 candidatePoints[nCandidates++] = neiCc+d;
             }
@@ -1081,7 +1081,7 @@ void Foam::meshRefinement::findCellZoneGeometric
             {
                 const point& neiFc = mesh_.faceCentres()[faceI];
                 // Perturbed cc
-                const vector d = 1E-4*(neiFc - ownCc);
+                const vector d = 1e-4*(neiFc - ownCc);
                 candidatePoints[nCandidates++] = ownCc-d;
             }
         }
@@ -1234,6 +1234,9 @@ void Foam::meshRefinement::findCellZoneInsideWalk
     regionSplit cellRegion(mesh_, blockedFace);
     blockedFace.clear();
 
+
+    // Force calculation of face decomposition (used in findCell)
+    (void)mesh_.tetBasePtIs();
 
     // For all locationSurface find the cell
     forAll(locationSurfaces, i)
@@ -2203,14 +2206,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
 // Find boundary points that connect to more than one cell region and
 // split them.
-Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints
+(
+    const localPointRegion& regionSide
+)
 {
     // Topochange container
     polyTopoChange meshMod(mesh_);
-
-
-    // Analyse which points need to be duplicated
-    localPointRegion regionSide(mesh_);
 
     label nNonManifPoints = returnReduce
     (
@@ -2254,6 +2256,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
     updateMesh(map, labelList(0));
 
     return map;
+}
+
+
+// Find boundary points that connect to more than one cell region and
+// split them.
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
+{
+    // Analyse which points need to be duplicated
+    localPointRegion regionSide(mesh_);
+
+    return dupNonManifoldPoints(regionSide);
 }
 
 

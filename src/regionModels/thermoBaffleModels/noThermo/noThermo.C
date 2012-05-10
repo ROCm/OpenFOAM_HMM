@@ -95,9 +95,9 @@ const tmp<volScalarField> noThermo::Cp() const
     );
 }
 
-const volScalarField& noThermo::kappa() const
+const volScalarField& noThermo::kappaRad() const
 {
-    FatalErrorIn("const volScalarField& noThermo::kappa() const")
+    FatalErrorIn("const volScalarField& noThermo::kappaRad() const")
         << "kappa field not available for " << type() << abort(FatalError);
     return volScalarField::null();
 }
@@ -111,9 +111,9 @@ const volScalarField& noThermo::rho() const
 }
 
 
-const volScalarField& noThermo::K() const
+const volScalarField& noThermo::kappa() const
 {
-   FatalErrorIn("const volScalarField& noThermo::K() const")
+   FatalErrorIn("const volScalarField& noThermo::kappa() const")
         << "K field not available for " << type() << abort(FatalError);
     return volScalarField::null();
 }

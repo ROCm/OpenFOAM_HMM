@@ -37,6 +37,8 @@ SourceFiles
 
 #include "DataEntry.H"
 #include "Tuple2.H"
+#include "dimensionSet.H"
+#include "interpolationWeights.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,16 +81,37 @@ protected:
     // Protected data
 
         //- Table name
-        word name_;
+        const word name_;
 
         //- Enumeration for handling out-of-bound values
-        boundsHandling boundsHandling_;
+        const boundsHandling boundsHandling_;
+
+        //- Interpolation type
+        const word interpolationScheme_;
 
         //- Table data
         List<Tuple2<scalar, Type> > table_;
 
+        //- The dimension set
+        dimensionSet dimensions_;
+
+        //- Extracted values
+        mutable scalarField tableSamples_;
+
+        //- Interpolator method
+        mutable autoPtr<interpolationWeights> interpolatorPtr_;
+
+        //- Cached indices and weights
+        mutable labelList currentIndices_;
+
+        mutable scalarField currentWeights_;
+
 
     // Protected Member Functions
+
+
+        //- Return (demand driven) interpolator
+        const interpolationWeights& interpolator() const;
 
         //- Disallow default bitwise assignment
         void operator=(const TableBase<Type>&);
@@ -137,6 +160,16 @@ public:
 
         //- Integrate between two (scalar) values
         virtual Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Return dimensioned constant value
+        virtual dimensioned<Type> dimValue(const scalar x) const;
+
+        //- Integrate between two values and return dimensioned type
+        virtual dimensioned<Type> dimIntegrate
+        (
+            const scalar x1,
+            const scalar x2
+        ) const;
 
 
     // I/O

@@ -23,11 +23,11 @@ boundaryField
 {
     "(sides|frontAndBack)"
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
     region0_to_wallFilmRegion_wallFilmFaces
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
     }
 }
 

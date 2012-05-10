@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,8 +147,13 @@ public:
             template<class Type>
             wordList names() const;
 
-            //- Lookup and return a const sub-objectRegistry
-            const objectRegistry& subRegistry(const word& name) const;
+            //- Lookup and return a const sub-objectRegistry. Optionally create
+            //  it if it does not exist.
+            const objectRegistry& subRegistry
+            (
+                const word& name,
+                const bool forceCreate = false
+            ) const;
 
             //- Lookup and return all objects of the given Type
             template<class Type>

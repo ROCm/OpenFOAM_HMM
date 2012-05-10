@@ -57,7 +57,7 @@ protected:
     // Protected data
 
         //- Thermal conductivity [W/m/K]
-        volScalarField K_;
+        volScalarField kappa_;
 
 
 private:
@@ -74,7 +74,7 @@ private:
 
             tmp<scalarField> sigmaS(const label patchI) const;
 
-            tmp<scalarField> kappa(const label patchI) const;
+            tmp<scalarField> kappaRad(const label patchI) const;
 
             tmp<scalarField> emissivity(const label patchI) const;
 
@@ -118,12 +118,12 @@ public:
         // Derived thermal properties
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volScalarField> K() const;
+            virtual tmp<volScalarField> kappa() const;
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volSymmTensorField> directionalK() const
+            virtual tmp<volSymmTensorField> directionalKappa() const
             {
-                notImplemented("solidMixtureThermo::directionalK() const");
+                notImplemented("solidMixtureThermo::directionalKappa() const");
                 return tmp<volSymmTensorField>(NULL);
             }
 
@@ -140,14 +140,14 @@ public:
         // Per patch calculation
 
             //- Thermal conductivity [W/(m.K)]
-            virtual tmp<scalarField> K(const label patchI) const;
+            virtual tmp<scalarField> kappa(const label patchI) const;
 
             //- Thermal conductivity [W/(m.K)]
-            virtual tmp<symmTensorField> directionalK(const label) const
+            virtual tmp<symmTensorField> directionalKappa(const label) const
             {
                 notImplemented
                 (
-                    "solidMixtureThermo::directionalK(const label) const"
+                    "solidMixtureThermo::directionalKappa(const label) const"
                 );
                 return tmp<symmTensorField>(NULL);
             }

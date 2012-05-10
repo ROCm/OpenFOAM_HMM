@@ -107,6 +107,9 @@ public:
         //- Construct from an Istream with a given name and dimensions
         dimensioned(const word&, const dimensionSet&, Istream&);
 
+        //- Null constructor
+        dimensioned();
+
         //- Construct from dictionary, with default value.
         static dimensioned<Type> lookupOrDefault
         (

@@ -6,7 +6,7 @@
     thermo.rho() -= psi*p_rgh;
 
     volScalarField rAU(1.0/UEqn.A());
-    surfaceScalarField rhorAUf("(rho*(1|A(U)))", fvc::interpolate(rho*rAU));
+    surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();

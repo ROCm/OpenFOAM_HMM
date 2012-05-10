@@ -136,6 +136,7 @@ void Foam::multiphaseFixedFluxPressureFvPatchScalarField::updateCoeffs()
     fvsPatchField<scalar> phip =
         patch().patchField<surfaceScalarField, scalar>(phi);
 
+    /*
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchField<scalar>& rhop =
@@ -143,6 +144,15 @@ void Foam::multiphaseFixedFluxPressureFvPatchScalarField::updateCoeffs()
 
         phip /= rhop;
     }
+
+    if (phiHbyA.dimensions() == dimDensity*dimVelocity*dimArea)
+    {
+        const fvPatchField<scalar>& rhop =
+            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+
+        phiHbyAp /= rhop;
+    }
+    */
 
     const fvsPatchField<scalar>& Dpp =
         patch().lookupPatchField<surfaceScalarField, scalar>("Dp");

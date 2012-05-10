@@ -14,13 +14,16 @@ surfaceScalarField phid
     )
 );
 
+
+volScalarField Dp("Dp", rho*rAU);
+
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
     fvScalarMatrix pEqn
     (
         fvm::ddt(psi, p)
       + fvm::div(phid, p)
-      - fvm::laplacian(rho*rAU, p)
+      - fvm::laplacian(Dp, p)
     );
 
     pEqn.solve();

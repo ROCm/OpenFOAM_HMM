@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -249,6 +249,7 @@ Foam::conformationSurfaces::conformationSurfaces
 
     Info<< endl
         << "Testing for locationInMesh " << locationInMesh_ << endl;
+
     forAll(surfaces_, s)
     {
         const searchableSurface& surface(allGeometry_[surfaces_[s]]);
@@ -266,7 +267,6 @@ Foam::conformationSurfaces::conformationSurfaces
             surface.getVolumeType(pts, vTypes);
 
             referenceVolumeTypes_[s] = vTypes[0];
-
 
             Info<< "    is "
                 << searchableSurface::volumeTypeNames[referenceVolumeTypes_[s]]

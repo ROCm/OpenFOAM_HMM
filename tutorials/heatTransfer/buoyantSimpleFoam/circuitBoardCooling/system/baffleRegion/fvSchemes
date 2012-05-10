@@ -32,8 +32,8 @@ gradSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(K,T) Gauss linear uncorrected;
+    default             none;
+    laplacian(kappa,T)  Gauss linear uncorrected;
 }
 
 

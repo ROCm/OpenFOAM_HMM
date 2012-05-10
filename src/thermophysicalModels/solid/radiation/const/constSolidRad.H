@@ -62,7 +62,7 @@ class constSolidRad
     // Private data
 
         //- Absorption coefficient
-        scalar kappa_;
+        scalar kappaRad_;
 
         //- Scattering coefficient
         scalar sigmaS_;
@@ -75,7 +75,7 @@ class constSolidRad
         inline constSolidRad
         (
             const thermo& t,
-            const scalar kappa,
+            const scalar kappaRad,
             const scalar sigmaS,
             const scalar emissivity
         );
@@ -101,7 +101,7 @@ public:
     // Member functions
 
         //- Return absorption coefficient [1/m]
-        inline scalar kappa(scalar T) const;
+        inline scalar kappaRad(scalar T) const;
 
         //- Return scattering [1/m]
         inline scalar sigmaS(scalar T) const;

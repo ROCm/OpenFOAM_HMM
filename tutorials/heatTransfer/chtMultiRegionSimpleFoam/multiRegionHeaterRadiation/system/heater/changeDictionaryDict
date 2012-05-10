@@ -48,10 +48,10 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
                 Tnbr            T;
-                K               solidThermo;
+                kappa           solidThermo;
                 QrNbr           Qr;
                 Qr              none;
-                KName           none;
+                kappaName       none;
                 value           uniform 300;
             }
 
@@ -59,10 +59,10 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureRadCoupledMixed;
                 Tnbr            T;
-                K               solidThermo;
+                kappa           solidThermo;
                 QrNbr           Qr;
                 Qr              none;
-                KName           none;
+                kappaName       none;
                 value           uniform 300;
             }
 
@@ -70,8 +70,8 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                K               solidThermo;
-                KName           none;
+                kappa           solidThermo;
+                kappaName       none;
                 value           uniform 300;
             }
             minY

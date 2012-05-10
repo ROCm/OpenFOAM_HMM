@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,8 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
 #include "fvMatrices.H"
+#include "DataEntry.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,10 +87,14 @@ class MRFZone
         //- Excluded faces (per patch) that do not move with the MRF
         labelListList excludedFaces_;
 
-        const dimensionedVector origin_;
-        dimensionedVector axis_;
-        const dimensionedScalar omega_;
-        dimensionedVector Omega_;
+        //- Origin of the axis
+        const vector origin_;
+
+        //- Axis vector
+        vector axis_;
+
+        //- Angular velocty (rad/sec)
+        autoPtr<DataEntry<scalar> > omega_;
 
 
     // Private Member Functions
@@ -166,6 +172,9 @@ public:
             setMRFFaces();
         }
 
+        //- Add the Coriolis force contribution to the acceleration field
+        void addCoriolis(const volVectorField& U, volVectorField& ddtU) const;
+
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;
 
@@ -202,13 +211,11 @@ public:
         void correctBoundaryVelocity(volVectorField& U) const;
 
 
-    // Ostream Operator
+    // IOstream operator
 
-        friend Ostream& operator<<(Ostream& os, const MRFZone&)
-        {
-            notImplemented("Ostream& operator<<(Ostream& os, const MRFZone&)");
-            return os;
-        }
+        friend Ostream& operator<<(Ostream& os, const MRFZone& MRF);
+
+
 };
 
 

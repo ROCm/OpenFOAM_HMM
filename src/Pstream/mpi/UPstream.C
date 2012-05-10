@@ -43,9 +43,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // NOTE:
 // valid parallel options vary between implementations, but flag common ones.
 // if they are not removed by MPI_Init(), the subsequent argument processing
@@ -452,6 +449,21 @@ void Foam::reduce(vector2D& Value, const sumOp<vector2D>& bop, const int tag)
     {
         Pout<< "Foam::reduce : reduced value:" << Value << endl;
     }
+}
+
+
+void Foam::sumReduce
+(
+    scalar& Value,
+    label& Count,
+    const int tag
+)
+{
+    vector2D twoScalars(Value, scalar(Count));
+    reduce(twoScalars, sumOp<vector2D>());
+
+    Value = twoScalars.x();
+    Count = twoScalars.y();
 }
 
 

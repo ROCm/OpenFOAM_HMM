@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,18 +50,6 @@ class processorCyclicGAMGInterfaceField
 :
     public processorGAMGInterfaceField
 {
-    // Private data
-
-//        //- Local reference cast into the processor interface
-//        const processorCyclicGAMGInterface& procInterface_;
-//
-//        //- Is the transform required
-//        bool doTransform_;
-//
-//        //- Rank of component for transformation
-//        int rank_;
-//
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -93,75 +81,6 @@ public:
     // Destructor
 
         virtual ~processorCyclicGAMGInterfaceField();
-
-
-    // Member Functions
-
-//        // Access
-//
-//            //- Return size
-//            label size() const
-//            {
-//                return procInterface_.size();
-//            }
-//
-//
-//        // Interface matrix update
-//
-//            //- Initialise neighbour matrix update
-//            virtual void initInterfaceMatrixUpdate
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix& m,
-//                const scalarField& coeffs,
-//                const direction cmpt,
-//                const Pstream::commsTypes commsType
-//            ) const;
-//
-//            //- Update result field based on interface functionality
-//            virtual void updateInterfaceMatrix
-//            (
-//                const scalarField& psiInternal,
-//                scalarField& result,
-//                const lduMatrix&,
-//                const scalarField& coeffs,
-//                const direction cmpt,
-//                const Pstream::commsTypes commsType
-//            ) const;
-//
-//
-//        //- Processor interface functions
-//
-//            //- Return processor number
-//            virtual int myProcNo() const
-//            {
-//                return procInterface_.myProcNo();
-//            }
-//
-//            //- Return neigbour processor number
-//            virtual int neighbProcNo() const
-//            {
-//                return procInterface_.neighbProcNo();
-//            }
-//
-//            //- Does the interface field perform the transfromation
-//            virtual bool doTransform() const
-//            {
-//                return doTransform_;
-//            }
-//
-//            //- Return face transformation tensor
-//            virtual const tensorField& forwardT() const
-//            {
-//                return procInterface_.forwardT();
-//            }
-//
-//            //- Return rank of component for transform
-//            virtual int rank() const
-//            {
-//                return rank_;
-//            }
 };
 
 

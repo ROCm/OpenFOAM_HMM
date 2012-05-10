@@ -25,10 +25,10 @@ constSolidThermoCoeffs
     //- thermo properties
     rho rho [1 -3  0  0 0 0 0] 8000;
     Cp  Cp  [0  2 -2 -1 0 0 0] 450;
-    K   K   [1  1 -3 -1 0 0 0] 80;
+    kappa   kapp   [1  1 -3 -1 0 0 0] 80;
 
     //- radiation properties
-    kappa kappa [0 -1 0 0 0 0 0]            0;
+    kappaRad kappaRad [0 -1 0 0 0 0 0]      0;
     sigmaS sigmaS [0 -1 0 0 0 0 0]          0;
     emissivity  emissivity  [0 0 0 0 0 0 0] 1;
 
@@ -43,11 +43,11 @@ isotropicKSolidThermoCoeffs
     TValues             (100 1000);
     rhoValues           (1000 1700);
     cpValues            (1700 1700);
-    KValues             (80 40);
+    kappaValues         (80 40);
 
     //- radiation properties
     emissivityValues    (1 1);
-    kappaValues         (0 0);
+    kappaRadValues      (0 0);
     sigmaSValues        (0 0);
 
     //- chemical properties
@@ -65,7 +65,7 @@ directionalKSolidThermoCoeffs
     TValues             (100 1000);
     rhoValues           (1700 1700);
     cpValues            (1700 1700);
-    KValues             ((10 10 10) (40 40 40));
+    kappaValues         ((10 10 10) (40 40 40));
 
     coordinateSystem
     {
@@ -83,8 +83,8 @@ directionalKSolidThermoCoeffs
 
     //- radiation properties
     emissivityValues    (1 1);
-    kappaValues         (1 1);
-    sigmaSValues         (1 1);
+    kappaRadValues      (1 1);
+    sigmaSValues        (1 1);
 }
 
 solidComponents
@@ -96,7 +96,7 @@ pmmaCoeffs
 {
     transport
     {
-        K0      0.152;
+        kappa0  0.152;
         n0      1.3;
         Tref    300; //K0*pow(T/Tref_, n0))
     }
@@ -104,7 +104,7 @@ pmmaCoeffs
     radiation
     {
         sigmaS      0.0;
-        kappa       0.0;
+        kappaRad    0.0;
         emissivity  0.1;
     }
 
@@ -126,7 +126,7 @@ charCoeffs
 {
     transport
     {
-        K0      0.4;
+        kappa0  0.4;
         n0      1.3;
         Tref    300; //K0*pow(T/Tref_, n0))
     }
@@ -134,7 +134,7 @@ charCoeffs
     radiation
     {
         sigmaS      0.0;
-        kappa       0.0;
+        kappaRad    0.0;
         emissivity  0.0;
     }
 

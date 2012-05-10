@@ -283,7 +283,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::calcEdgeWeights
 
     forAll(edges, edgeI)
     {
-        wght[edgeI] = min(GREAT, 1.0/edges[edgeI].mag(points));
+        wght[edgeI] = 1.0/(edges[edgeI].mag(points)+SMALL);
     }
     return twght;
 }
@@ -900,10 +900,12 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
     {
         Pout<< "motionSmoother::movePoints : testing sync of newPoints."
             << endl;
-        testSyncPositions(newPoints, 1E-6*mesh_.bounds().mag());
+        testSyncPositions(newPoints, 1e-6*mesh_.bounds().mag());
     }
 
-    tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
+    // Move actual mesh points. Make sure to delete tetBasePtIs so it
+    // gets rebuilt.
+    tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints, true);
 
     pp_.movePoints(mesh_.points());
 
@@ -1049,7 +1051,7 @@ bool Foam::motionSmoother::scaleMesh
                 totalDisplacement,
                 maxMagEqOp(),
                 vector::zero,   // null value
-                1E-6*mesh_.bounds().mag()
+                1e-6*mesh_.bounds().mag()
             );
         }
 

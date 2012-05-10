@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ void Foam::hsPsiMixtureThermo<MixtureType>::calculate()
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
         muCells[celli] = mixture_.mu(TCells[celli]);
-        alphaCells[celli] = mixture_.alpha(TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -109,7 +109,7 @@ void Foam::hsPsiMixtureThermo<MixtureType>::calculate()
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alpha(pT[facei]);
+                palpha_[facei] = mixture_.alphah(pT[facei]);
             }
         }
         else
@@ -123,7 +123,7 @@ void Foam::hsPsiMixtureThermo<MixtureType>::calculate()
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alpha(pT[facei]);
+                palpha_[facei] = mixture_.alphah(pT[facei]);
             }
         }
     }

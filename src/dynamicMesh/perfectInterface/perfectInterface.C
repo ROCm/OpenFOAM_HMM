@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ namespace Foam
 
 
 // Tolerance used as fraction of minimum edge length.
-const Foam::scalar Foam::perfectInterface::tol_ = 1E-3;
+const Foam::scalar Foam::perfectInterface::tol_ = 1e-3;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

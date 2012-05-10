@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -407,9 +407,12 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
 
         clearGeom();
 
-        points_.instance() = pointsInst;
 
-        points_ = pointIOField
+        label nOldPoints = points_.size();
+
+        points_.clear();
+
+        pointIOField newPoints
         (
             IOobject
             (
@@ -422,6 +425,19 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 false
             )
         );
+
+        if (nOldPoints != 0 && nOldPoints != newPoints.size())
+        {
+            FatalErrorIn("polyMesh::readUpdate()")
+                << "Point motion detected but number of points "
+                << newPoints.size() << " in "
+                << newPoints.objectPath() << " does not correspond to "
+                << " current " << nOldPoints
+                << exit(FatalError);
+        }
+
+        points_.transfer(newPoints);
+        points_.instance() = pointsInst;
 
         // Derived info
         bounds_ = boundBox(points_);

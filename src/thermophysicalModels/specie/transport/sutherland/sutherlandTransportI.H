@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,20 +147,23 @@ inline Foam::scalar Foam::sutherlandTransport<Thermo>::kappa
 
 
 template<class Thermo>
-inline Foam::scalar Foam::sutherlandTransport<Thermo>::alpha
+inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphae
 (
     const scalar T
 ) const
 {
-    scalar Cv_ = this->Cv(T);
-    scalar R_ = this->R();
-    scalar Cp_ = Cv_ + R_;
+    return mu(T)*(1.32 + 1.77*this->R()/this->Cv(T));
+}
 
-    scalar deltaT = T - specie::Tstd;
-    scalar CpBar =
-        (deltaT*(this->H(T) - this->H(specie::Tstd)) + Cp_)/(sqr(deltaT) + 1);
 
-    return mu(T)*Cv_*(1.32 + 1.77*this->R()/Cv_)/CpBar;
+template<class Thermo>
+inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphah
+(
+    const scalar T
+) const
+{
+
+    return kappa(T)/this->Cp(T);
 }
 
 

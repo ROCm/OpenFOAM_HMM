@@ -211,10 +211,10 @@ public:
                 virtual const tmp<volScalarField> Cp() const = 0;
 
                 //- Return the region absorptivity [1/m]
-                virtual const volScalarField& kappa() const = 0;
+                virtual const volScalarField& kappaRad() const = 0;
 
                 //- Return the region thermal conductivity [W/m/k]
-                virtual const volScalarField& K() const = 0;
+                virtual const volScalarField& kappa() const = 0;
 
 
         // Evolution

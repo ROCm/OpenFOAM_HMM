@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ Description
             // Maintain average to that of the supplied values
             setAverage      false;
 
-            // Optional: change perturbation (default 1E-5) to avoid any ties
+            // Optional: change perturbation (default 1e-5) to avoid any ties
             // in triangulating regular geometries.
             //perturb       0.0;
 
@@ -66,9 +66,9 @@ SourceFiles
 #define timeVaryingMappedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "coordinateSystem.H"
 #include "FixedList.H"
 #include "instantList.H"
+#include "pointToPointPlanarInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,16 +95,8 @@ class timeVaryingMappedFixedValueFvPatchField
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;
 
-        //- Coordinate system
-        autoPtr<coordinateSystem> referenceCS_;
-
-        //- Current interpolation addressing to face centres of underlying
-        //  patch
-        List<FixedList<label, 3> > nearestVertex_;
-
-        //- Current interpolation factors to face centres of underlying
-        //  patch
-        List<FixedList<scalar, 3> > nearestVertexWeight_;
+        //- 2D interpolation
+        autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
 
         //- List of boundaryData time directories
         instantList sampleTimes_;
@@ -126,31 +118,6 @@ class timeVaryingMappedFixedValueFvPatchField
 
         //- If setAverage: end average value
         Type endAverage_;
-
-
-    // Private Member Functions
-
-        //- Get names of times
-        static wordList timeNames(const instantList&);
-
-        //- Find times around current time
-        void findTime
-        (
-            const fileName& instance,
-            const fileName& local,
-            const scalar timeVal,
-            label& lo,
-            label& hi
-        ) const;
-
-
-        //- Read boundary points and determine interpolation weights to patch
-        //  faceCentres
-        void readSamplePoints();
-
-        //- Do actual interpolation using current weights
-        tmp<Field<Type> > interpolate(const Field<Type>&) const;
-
 
 public:
 
@@ -223,12 +190,6 @@ public:
     // Member functions
 
         // Access
-
-            //- Return the coordinateSystem
-            const coordinateSystem& referenceCS() const
-            {
-                return referenceCS_;
-            }
 
             //- Return startSampledValues
             const Field<Type> startSampledValues()

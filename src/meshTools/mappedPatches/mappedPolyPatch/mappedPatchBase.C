@@ -265,7 +265,7 @@ void Foam::mappedPatchBase::findSamples
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
                         rndGen,
-                        1E-4
+                        1e-4
                     )
                 );
                 patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -431,7 +431,7 @@ void Foam::mappedPatchBase::calcMapping() const
     tmp<pointField> patchPoints(facePoints(patch_));
 
     // Get offsetted points
-    const pointField offsettedPoints = samplePoints(patchPoints());
+    const pointField offsettedPoints(samplePoints(patchPoints()));
 
 
     // Do a sanity check

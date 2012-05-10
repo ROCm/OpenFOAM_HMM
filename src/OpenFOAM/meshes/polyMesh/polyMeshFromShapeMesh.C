@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -614,10 +614,17 @@ Foam::polyMesh::polyMesh
 
     label nAllPatches = boundaryFaces.size();
 
-    if (nFaces > defaultPatchStart)
+
+    label nDefaultFaces = nFaces - defaultPatchStart;
+    if (syncPar)
+    {
+        reduce(nDefaultFaces, sumOp<label>());
+    }
+
+    if (nDefaultFaces > 0)
     {
         WarningIn("polyMesh::polyMesh(... construct from shapes...)")
-            << "Found " << nFaces - defaultPatchStart
+            << "Found " << nDefaultFaces
             << " undefined faces in mesh; adding to default patch." << endl;
 
         // Check if there already exists a defaultFaces patch as last patch
@@ -883,10 +890,16 @@ Foam::polyMesh::polyMesh
 
     label nAllPatches = boundaryFaces.size();
 
-    if (nFaces > defaultPatchStart)
+    label nDefaultFaces = nFaces - defaultPatchStart;
+    if (syncPar)
+    {
+        reduce(nDefaultFaces, sumOp<label>());
+    }
+
+    if (nDefaultFaces > 0)
     {
         WarningIn("polyMesh::polyMesh(... construct from shapes...)")
-            << "Found " << nFaces - defaultPatchStart
+            << "Found " << nDefaultFaces
             << " undefined faces in mesh; adding to default patch." << endl;
 
         // Check if there already exists a defaultFaces patch as last patch

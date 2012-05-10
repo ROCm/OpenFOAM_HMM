@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::PBiCG::PBiCG
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
+Foam::solverPerformance Foam::PBiCG::solve
 (
     scalarField& psi,
     const scalarField& source,
@@ -70,7 +70,7 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 ) const
 {
     // --- Setup class containing solver performance data
-    lduMatrix::solverPerformance solverPerf
+    solverPerformance solverPerf
     (
         lduMatrix::preconditioner::getName(controlDict_) + typeName,
         fieldName_
@@ -92,7 +92,7 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
     scalarField wT(nCells);
     scalar* __restrict__ wTPtr = wT.begin();
 
-    scalar wArT = matrix_.great_;
+    scalar wArT = solverPerf.great_;
     scalar wArTold = wArT;
 
     // --- Calculate A.psi and T.psi
@@ -167,9 +167,11 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 
             scalar wApT = gSumProd(wA, pT);
 
-
             // --- Test for singularity
-            if (solverPerf.checkSingularity(mag(wApT)/normFactor)) break;
+            if (solverPerf.checkSingularity(mag(wApT)/normFactor))
+            {
+                break;
+            }
 
 
             // --- Update solution and residual:

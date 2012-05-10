@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,13 @@ template<class thermo>
 inline Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
 (
     const thermo& t,
-    const scalar K0,
+    const scalar kappa0,
     const scalar n0,
     const scalar Tref
 )
 :
     thermo(t),
-    K0_(K0),
+    kappa0_(kappa0),
     n0_(n0),
     Tref_(Tref)
 {}
@@ -49,7 +49,7 @@ inline Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
 )
 :
     thermo(name, ct),
-    K0_(ct.K0_),
+    kappa0_(ct.kappa0_),
     n0_(ct.n0_),
     Tref_(ct.Tref_)
 {}
@@ -58,27 +58,14 @@ inline Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline Foam::scalar Foam::exponentialSolidTransport<thermo>::K
+inline Foam::scalar Foam::exponentialSolidTransport<thermo>::kappa
 (
     const scalar T
 ) const
 {
-    return (K0_*pow(T/Tref_, n0_));
+    return (kappa0_*pow(T/Tref_, n0_));
 }
 
-
-template<class thermo>
-inline Foam::scalar Foam::exponentialSolidTransport<thermo>::alpha
-(
-    const scalar T
-) const
-{
-    scalar Cp = this->Cp(T);
-
-    scalar rho = this->rho(T);
-
-    return (K(T)/(rho*Cp));
-}
 
 
 // ************************************************************************* //

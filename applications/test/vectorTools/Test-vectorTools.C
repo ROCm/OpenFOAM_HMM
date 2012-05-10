@@ -8,7 +8,7 @@ using namespace Foam;
 
 void test(const vector& a, const vector& b, const scalar tolerance)
 {
-    Info<< "Vectors " << a << " and " << b 
+    Info<< "Vectors " << a << " and " << b
         << " are (to tolerance of " << tolerance << "): ";
 
     if (vectorTools::areParallel(a, b, tolerance))

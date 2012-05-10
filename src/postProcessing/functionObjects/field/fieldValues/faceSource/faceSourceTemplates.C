@@ -27,6 +27,7 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "sampledSurface.H"
+#include "interpolationCellPoint.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -65,13 +66,44 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::getFieldValues
     }
     else if (obr_.foundObject<vf>(fieldName))
     {
+        const vf& fld = obr_.lookupObject<vf>(fieldName);
+
         if (surfacePtr_.valid())
         {
-            return surfacePtr_().sample(obr_.lookupObject<vf>(fieldName));
+            if (surfacePtr_().interpolate())
+            {
+                const interpolationCellPoint<Type> interp(fld);
+                tmp<Field<Type> > tintFld(surfacePtr_().interpolate(interp));
+                const Field<Type>& intFld = tintFld();
+
+                // Average
+                const faceList& faces = surfacePtr_().faces();
+                tmp<Field<Type> > tavg
+                (
+                    new Field<Type>(faces.size(), pTraits<Type>::zero)
+                );
+                Field<Type>& avg = tavg();
+
+                forAll(faces, faceI)
+                {
+                    const face& f = faces[faceI];
+                    forAll(f, fp)
+                    {
+                        avg[faceI] += intFld[f[fp]];
+                    }
+                    avg[faceI] /= f.size();
+                }
+
+                return tavg;
+            }
+            else
+            {
+                return surfacePtr_().sample(fld);
+            }
         }
         else
         {
-            return filterField(obr_.lookupObject<vf>(fieldName), true);
+            return filterField(fld, true);
         }
     }
 
@@ -94,12 +126,11 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::faceSource::getFieldValues
 
 
 template<class Type>
-Type Foam::fieldValues::faceSource::processValues
+Type Foam::fieldValues::faceSource::processSameTypeValues
 (
     const Field<Type>& values,
-    const scalarField& magSf,
+    const vectorField& Sf,
     const scalarField& weightField
-
 ) const
 {
     Type result = pTraits<Type>::zero;
@@ -122,11 +153,15 @@ Type Foam::fieldValues::faceSource::processValues
         }
         case opAreaAverage:
         {
+            const scalarField magSf(mag(Sf));
+
             result = sum(values*magSf)/sum(magSf);
             break;
         }
         case opAreaIntegrate:
         {
+            const scalarField magSf(mag(Sf));
+
             result = sum(values*magSf);
             break;
         }
@@ -142,6 +177,8 @@ Type Foam::fieldValues::faceSource::processValues
         }
         case opCoV:
         {
+            const scalarField magSf(mag(Sf));
+
             Type meanValue = sum(values*magSf)/sum(magSf);
 
             const label nComp = pTraits<Type>::nComponents;
@@ -169,6 +206,19 @@ Type Foam::fieldValues::faceSource::processValues
 }
 
 
+template<class Type>
+Type Foam::fieldValues::faceSource::processValues
+(
+    const Field<Type>& values,
+    const vectorField& Sf,
+    const scalarField& weightField
+) const
+{
+    return processSameTypeValues(values, Sf, weightField);
+}
+
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -186,22 +236,22 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
             weightField = getFieldValues<scalar>(weightFieldName_, true);
         }
 
-        scalarField magSf;
+        vectorField Sf;
 
         if (surfacePtr_.valid())
         {
-            // Get unoriented magSf
-            magSf = surfacePtr_().magSf();
+            // Get oriented Sf
+            Sf = surfacePtr_().Sf();
         }
         else
         {
-            // Get unoriented magSf
-            magSf = filterField(mesh().magSf(), false);
+            // Get oriented Sf
+            Sf = filterField(mesh().Sf(), false);
         }
 
         // Combine onto master
         combineFields(values);
-        combineFields(magSf);
+        combineFields(Sf);
         combineFields(weightField);
 
         // apply weight field
@@ -210,7 +260,7 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
 
         if (Pstream::master())
         {
-            Type result = processValues(values, magSf, weightField);
+            Type result = processValues(values, Sf, weightField);
 
             if (valueOutput_)
             {

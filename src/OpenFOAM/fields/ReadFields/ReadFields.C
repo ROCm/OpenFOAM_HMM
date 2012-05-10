@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,6 +124,136 @@ Foam::wordList Foam::ReadFields
         );
     }
     return masterNames;
+}
+
+
+template<class GeoField>
+void Foam::ReadFields
+(
+    const word& fieldName,
+    const typename GeoField::Mesh& mesh,
+    const wordList& timeNames,
+    objectRegistry& fieldsCache
+)
+{
+    // Collect all times that are no longer used
+    {
+        HashSet<word> usedTimes(timeNames);
+
+        DynamicList<word> unusedTimes(fieldsCache.size());
+
+        forAllIter(objectRegistry, fieldsCache, timeIter)
+        {
+            const word& tm = timeIter.key();
+            if (!usedTimes.found(tm))
+            {
+                unusedTimes.append(tm);
+            }
+        }
+
+        //Info<< "Unloading times " << unusedTimes << endl;
+
+        forAll(unusedTimes, i)
+        {
+            objectRegistry& timeCache = const_cast<objectRegistry&>
+            (
+                fieldsCache.lookupObject<objectRegistry>(unusedTimes[i])
+            );
+            fieldsCache.checkOut(timeCache);
+        }
+    }
+
+
+    // Load any new fields
+    forAll(timeNames, i)
+    {
+        const word& tm = timeNames[i];
+
+        // Create if not found
+        if (!fieldsCache.found(tm))
+        {
+            //Info<< "Creating registry for time " << tm << endl;
+
+            // Create objectRegistry if not found
+            objectRegistry* timeCachePtr = new objectRegistry
+            (
+                IOobject
+                (
+                    tm,
+                    tm,
+                    fieldsCache,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            timeCachePtr->store();
+        }
+
+        // Obtain cache for current time
+        const objectRegistry& timeCache =
+            fieldsCache.lookupObject<objectRegistry>
+            (
+                tm
+            );
+
+        // Store field if not found
+        if (!timeCache.found(fieldName))
+        {
+            //Info<< "Loading field " << fieldName
+            //    << " for time " << tm << endl;
+
+            GeoField loadedFld
+            (
+                IOobject
+                (
+                    fieldName,
+                    tm,
+                    mesh.thisDb(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh
+            );
+
+            // Transfer to timeCache (new objectRegistry and store flag)
+            GeoField* fldPtr = new GeoField
+            (
+                IOobject
+                (
+                    fieldName,
+                    tm,
+                    timeCache,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                loadedFld
+            );
+            fldPtr->store();
+        }
+    }
+}
+
+
+template<class GeoField>
+void Foam::ReadFields
+(
+    const word& fieldName,
+    const typename GeoField::Mesh& mesh,
+    const wordList& timeNames,
+    const word& registryName
+)
+{
+    ReadFields<GeoField>
+    (
+        fieldName,
+        mesh,
+        timeNames,
+        const_cast<objectRegistry&>
+        (
+            mesh.thisDb().subRegistry(registryName, true)
+        )
+    );
 }
 
 

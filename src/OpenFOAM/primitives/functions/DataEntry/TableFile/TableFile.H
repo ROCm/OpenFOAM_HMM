@@ -31,8 +31,10 @@ Description
         <entryName>   tableFile;
         tableFileCoeffs
         {
-            fileName        dataFile;   // name of data file
-            outOfBounds     clamp;      // optional out-of-bounds handling
+            dimensions          [0 0 1 0 0]; // optional dimensions
+            fileName            dataFile;    // name of data file
+            outOfBounds         clamp;       // optional out-of-bounds handling
+            interpolationScheme linear;      // optional interpolation method
         }
     \endverbatim
 
@@ -143,6 +145,22 @@ public:
             virtual Type integrate(const scalar x1, const scalar x2) const
             {
                 return TableBase<Type>::integrate(x1, x2);
+            }
+
+            //- Return dimensioned constant value
+            virtual dimensioned<Type> dimValue(const scalar x) const
+            {
+                return TableBase<Type>::dimValue(x);
+            }
+
+            //- Integrate between two values and return dimensioned type
+            virtual dimensioned<Type> dimIntegrate
+            (
+                const scalar x1,
+                const scalar x2
+            )
+            {
+                return TableBase<Type>::dimIntegrate(x1, x2);
             }
 
 

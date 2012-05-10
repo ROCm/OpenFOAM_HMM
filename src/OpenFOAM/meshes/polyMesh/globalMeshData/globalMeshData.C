@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ License
 defineTypeNameAndDebug(Foam::globalMeshData, 0);
 
 // Geometric matching tolerance. Factor of mesh bounding box.
-const Foam::scalar Foam::globalMeshData::matchTol_ = 1E-8;
+const Foam::scalar Foam::globalMeshData::matchTol_ = 1e-8;
 
 namespace Foam
 {
@@ -2403,7 +2403,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     (
         masterGlobalPoint,
         pointSlaves,
-        labelListList(cpp.nPoints()),   // no transforms
+        labelListList(0),   // no transforms
         pointSlavesMap,
         maxEqOp<label>()
     );
@@ -2684,7 +2684,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     (
         globalMaster,
         pointSlaves,
-        labelListList(cpp.nPoints()),   // no transforms
+        labelListList(0),   // no transforms
         pointSlavesMap,
         maxEqOp<label>()
     );

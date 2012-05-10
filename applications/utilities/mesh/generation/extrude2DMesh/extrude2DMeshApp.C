@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
         const pointField& points = mesh().points();
 
         const boundBox& bb = mesh().bounds();
-        const scalar mergeDim = 1E-4 * bb.minDim();
+        const scalar mergeDim = 1e-4 * bb.minDim();
 
         forAll(edges, edgeI)
         {

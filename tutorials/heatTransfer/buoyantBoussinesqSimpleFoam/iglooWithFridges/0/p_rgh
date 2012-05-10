@@ -22,28 +22,28 @@ boundaryField
 {
     ground
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         rho             rhok;
         value           uniform 0;
     }
 
     igloo_region0
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         rho             rhok;
         value           uniform 0;
     }
 
     twoFridgeFreezers_seal_0
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         rho             rhok;
         value           uniform 0;
     }
 
     twoFridgeFreezers_herring_1
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         rho             rhok;
         value           uniform 0;
     }

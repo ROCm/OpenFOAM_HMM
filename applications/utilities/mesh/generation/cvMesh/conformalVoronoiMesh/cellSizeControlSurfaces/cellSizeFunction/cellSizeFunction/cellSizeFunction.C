@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,18 +30,15 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(cellSizeFunction, 0);
+    defineRunTimeSelectionTable(cellSizeFunction, dictionary);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cellSizeFunction, 0);
-defineRunTimeSelectionTable(cellSizeFunction, dictionary);
-
-scalar cellSizeFunction::snapToSurfaceTol_ = 1e-10;
-
+    scalar cellSizeFunction::snapToSurfaceTol_ = 1e-10;
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-cellSizeFunction::cellSizeFunction
+Foam::cellSizeFunction::cellSizeFunction
 (
     const word& type,
     const dictionary& cellSizeFunctionDict,
@@ -50,6 +47,14 @@ cellSizeFunction::cellSizeFunction
 :
     dictionary(cellSizeFunctionDict),
     surface_(surface),
+    surfaceCellSizeFunction_
+    (
+        surfaceCellSizeFunction::New
+        (
+            cellSizeFunctionDict,
+            surface
+        )
+    ),
     coeffsDict_(subDict(type + "Coeffs")),
     sideMode_(),
     priority_(readLabel(cellSizeFunctionDict.lookup("priority")))
@@ -94,7 +99,7 @@ cellSizeFunction::cellSizeFunction
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-autoPtr<cellSizeFunction> cellSizeFunction::New
+Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 (
     const dictionary& cellSizeFunctionDict,
     const searchableSurface& surface
@@ -134,12 +139,8 @@ autoPtr<cellSizeFunction> cellSizeFunction::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-cellSizeFunction::~cellSizeFunction()
+Foam::cellSizeFunction::~cellSizeFunction()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

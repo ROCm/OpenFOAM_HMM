@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -763,13 +763,6 @@ bool Foam::slidingInterface::projectPoints() const
     {
         const edge& curEdge = slaveEdges[edgeI];
 
-        //HJ: check for all edges even if both ends have missed
-        //    Experimental.
-//         if
-//         (
-//             slavePointFaceHits[curEdge.start()].hit()
-//          || slavePointFaceHits[curEdge.end()].hit()
-//         )
         {
             // Clear the maps
             curFaceMap.clear();

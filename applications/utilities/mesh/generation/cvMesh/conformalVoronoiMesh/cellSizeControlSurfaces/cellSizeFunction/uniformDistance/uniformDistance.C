@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "uniformDistance.H"
 #include "addToRunTimeSelectionTable.H"
+#include "dimensionSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +46,6 @@ uniformDistance::uniformDistance
 )
 :
     cellSizeFunction(typeName, initialPointsDict, surface),
-    cellSize_(readScalar(coeffsDict().lookup("cellSize"))),
     distance_(readScalar(coeffsDict().lookup("distance"))),
     distanceSqr_(sqr(distance_))
 {}
@@ -76,7 +76,7 @@ bool uniformDistance::cellSize
     {
         if (sideMode_ == rmBothsides)
         {
-            size = cellSize_;
+            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
 
             return true;
         }
@@ -85,7 +85,7 @@ bool uniformDistance::cellSize
         // getVolumeType calculation, as it will be prone to error.
         if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
         {
-            size = cellSize_;
+            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
 
             return true;
         }
@@ -103,7 +103,7 @@ bool uniformDistance::cellSize
          && vTL[0] == searchableSurface::INSIDE
         )
         {
-            size = cellSize_;
+            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
 
             functionApplied = true;
         }
@@ -113,7 +113,7 @@ bool uniformDistance::cellSize
          && vTL[0] == searchableSurface::OUTSIDE
         )
         {
-            size = cellSize_;
+            size = surfaceCellSizeFunction_().surfaceSize(hitInfo.index());
 
             functionApplied = true;
         }
@@ -122,6 +122,38 @@ bool uniformDistance::cellSize
     }
 
     return false;
+}
+
+
+bool uniformDistance::setCellSize
+(
+    const pointField& pts
+)
+{
+    labelHashSet surfaceAlreadyHit(surface_.size());
+
+    forAll(pts, ptI)
+    {
+        const Foam::point& pt = pts[ptI];
+
+        List<pointIndexHit> hits;
+
+        surface_.findNearest
+        (
+            pointField(1, pt),
+            scalarField(1, distanceSqr_),
+            hits
+        );
+
+        if (hits[0].hit() && !surfaceAlreadyHit.found(hits[0].index()))
+        {
+            surfaceCellSizeFunction_().refineSurfaceSize(hits[0].index());
+
+            surfaceAlreadyHit.insert(hits[0].index());
+        }
+    }
+
+    return true;
 }
 
 

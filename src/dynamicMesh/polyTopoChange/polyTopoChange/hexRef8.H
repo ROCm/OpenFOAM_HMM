@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,8 @@ SourceFiles
 #include "removeFaces.H"
 #include "refinementHistory.H"
 #include "PackedBoolList.H"
+#include "uniformDimensionedFields.H"
+#include "cellShapeList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,7 +76,7 @@ class hexRef8
         labelIOList pointLevel_;
 
         //- Typical edge length between unrefined points
-        const scalar level0Edge_;
+        uniformDimensionedScalarField level0Edge_;
 
         //- Refinement history
         refinementHistory history_;
@@ -87,6 +89,9 @@ class hexRef8
 
         //- Level of saved cells
         Map<label> savedCellLevel_;
+
+        //- cell shapes when seen as split hexes
+        mutable autoPtr<cellShapeList> cellShapesPtr_;
 
 
     // Private Member Functions
@@ -302,6 +307,34 @@ class hexRef8
         void checkWantedRefinementLevels(const labelList&) const;
 
 
+        // Cellshape recognition
+
+            //- Collect all points on face of certain level
+            void collectLevelPoints
+            (
+                const labelList& f,
+                const label level,
+                DynamicList<label>& points
+            ) const;
+
+            //- Collect all points on face (in local numbering) of certain level
+            void collectLevelPoints
+            (
+                const labelList& meshPoints,
+                const labelList& f,
+                const label level,
+                DynamicList<label>& points
+            ) const;
+
+            //- Collect all faces with four corner points and return true if
+            //  hex was matched (6 faces of each four corner points)
+            bool matchHexShape
+            (
+                const label cellI,
+                const label cellLevel,
+                DynamicList<face>& quads
+            ) const;
+
 
         //- Disallow default bitwise copy construct
         hexRef8(const hexRef8&);
@@ -319,24 +352,29 @@ public:
     // Constructors
 
         //- Construct from mesh, read_if_present refinement data
-        //  (from write below)
-        hexRef8(const polyMesh& mesh);
+        //  (from write below). If readHistory is true does read_if_present
+        //  of refinement history. If false clears all history
+        hexRef8(const polyMesh& mesh, const bool readHistory = true);
 
-        //- Construct from mesh and un/refinement data.
+        //- Construct from mesh and un/refinement data and optional size of
+        //  starting cells
         hexRef8
         (
             const polyMesh& mesh,
             const labelList& cellLevel,
             const labelList& pointLevel,
-            const refinementHistory& history
+            const refinementHistory& history,
+            const scalar level0Edge = -GREAT
         );
 
-        //- Construct from mesh and refinement data.
+        //- Construct from mesh and refinement data and optional size of
+        //  starting cells
         hexRef8
         (
             const polyMesh& mesh,
             const labelList& cellLevel,
-            const labelList& pointLevel
+            const labelList& pointLevel,
+            const scalar level0Edge = -GREAT
         );
 
 
@@ -367,7 +405,7 @@ public:
             //- Typical edge length between unrefined points
             scalar level0EdgeLength() const
             {
-                return level0Edge_;
+                return level0Edge_.value();
             }
 
         // Refinement
@@ -490,6 +528,10 @@ public:
                 const label maxPointDiff,
                 const labelList& pointsToCheck
             ) const;
+
+            //- Utility: get hexes as cell shapes
+            const cellShapeList& cellShapes() const;
+
 
         // Unrefinement (undoing refinement, not arbitrary coarsening)
 

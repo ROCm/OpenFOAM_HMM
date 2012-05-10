@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -456,8 +456,8 @@ public:
 
         // Check
 
-            //- Total mass injected
-            inline scalar massInjected() const;
+            //- Total number of parcels
+            inline label nParcels() const;
 
             //- Total mass in system
             inline scalar massInSystem() const;
@@ -554,6 +554,13 @@ public:
             //- Particle motion
             template<class TrackData>
             void motion(TrackData& td);
+
+
+        // Mapping
+
+            //- Remap the cells of particles corresponding to the
+            //  mesh topology change with a default tracking data object
+            virtual void autoMap(const mapPolyMesh&);
 
 
         // I-O

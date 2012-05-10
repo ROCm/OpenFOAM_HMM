@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,12 @@ const Foam::List<Foam::word>& Foam::conformationSurfaces::patchNames() const
 const Foam::treeBoundBox& Foam::conformationSurfaces::globalBounds() const
 {
     return globalBounds_;
+}
+
+
+bool Foam::conformationSurfaces::isBaffle(const label index) const
+{
+    return baffleSurfaces_[index];
 }
 
 

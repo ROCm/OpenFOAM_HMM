@@ -748,7 +748,7 @@ inline void Foam::particle::initCellFacePt()
                 // number, but hasn't been able to find a cell to
                 // occupy.
 
-                if(!mesh_.pointInCellBB(position_, oldCellI, 0.1))
+                if (!mesh_.pointInCellBB(position_, oldCellI, 0.1))
                 {
                     // If the position is not inside the (slightly
                     // extended) bound-box of the cell that it thought

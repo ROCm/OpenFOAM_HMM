@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ License
 #include "rotorDiskSource.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mathematicalConstants.H"
+#include "trimModel.H"
 #include "unitConversion.H"
-#include "geometricOneField.H"
 #include "fvMatrices.H"
 #include "syncTools.H"
 
@@ -123,6 +123,8 @@ void Foam::rotorDiskSource::checkData()
 
 void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 {
+    area_ = 0.0;
+
     static const scalar tol = 0.8;
 
     const label nInternalFaces = mesh_.nInternalFaces();
@@ -252,7 +254,7 @@ void Foam::rotorDiskSource::createCoordinateSystem()
     {
         case gmAuto:
         {
-            // determine rotation origin
+            // determine rotation origin (cell volume weighted)
             scalar sumV = 0.0;
             const scalarField& V = mesh_.V();
             const vectorField& C = mesh_.C();
@@ -262,6 +264,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                 sumV += V[cellI];
                 origin += V[cellI]*C[cellI];
             }
+            reduce(origin, sumOp<vector>());
+            reduce(sumV, sumOp<scalar>());
             origin /= sumV;
 
             // determine first radial vector
@@ -277,6 +281,8 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                     magR = mag(test);
                 }
             }
+            reduce(dx1, maxMagSqrOp<vector>());
+            magR = mag(dx1);
 
             // determine second radial vector and cross to determine axis
             forAll(cells_, i)
@@ -292,14 +298,18 @@ void Foam::rotorDiskSource::createCoordinateSystem()
                     }
                 }
             }
+            reduce(axis, maxMagSqrOp<vector>());
             axis /= mag(axis);
 
-            // axis direction is somewhat arbitrary - check if user needs
-            // needs to reverse
-            bool reverse(readBool(coeffs_.lookup("reverseAxis")));
-            if (reverse)
+            // correct the axis direction using a point above the rotor
             {
-                axis *= -1.0;
+                vector pointAbove(coeffs_.lookup("pointAbove"));
+                vector dir = pointAbove - origin;
+                dir /= mag(dir);
+                if ((dir & axis) < 0)
+                {
+                    axis *= -1.0;
+                }
             }
 
             coeffs_.lookup("refDirection") >> refDir;
@@ -347,9 +357,6 @@ void Foam::rotorDiskSource::constructGeometry()
 {
     const vectorField& C = mesh_.C();
 
-    const vector rDir = coordSys_.e1();
-    const vector zDir = coordSys_.e3();
-
     forAll(cells_, i)
     {
         const label cellI = cells_[i];
@@ -378,9 +385,6 @@ void Foam::rotorDiskSource::constructGeometry()
         scalar cPos = cos(beta);
         scalar sPos = sin(beta);
         invR_[i] = tensor(cPos, 0.0, -sPos, 0.0, 1.0, 0.0, sPos, 0.0, cPos);
-
-        // geometric angle of attack - not including twist [radians]
-        alphag_[i] = trim_.alphaC + trim_.A*cos(psi) + trim_.B*sin(psi);
     }
 }
 
@@ -442,13 +446,12 @@ Foam::rotorDiskSource::rotorDiskSource
     inletVelocity_(vector::zero),
     tipEffect_(1.0),
     flap_(),
-    trim_(),
+    trim_(trimModel::New(*this, coeffs_)),
     blade_(coeffs_.subDict("blade")),
     profiles_(coeffs_.subDict("profiles")),
     x_(cells_.size(), vector::zero),
     R_(cells_.size(), I),
     invR_(cells_.size(), I),
-    alphag_(cells_.size(), 0.0),
     area_(cells_.size(), 0.0),
     coordSys_(false),
     rMax_(0.0)
@@ -465,34 +468,179 @@ Foam::rotorDiskSource::~rotorDiskSource()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::rotorDiskSource::calculate
+(
+    const vectorField& U,
+    const scalarField& alphag,
+    vectorField& force,
+    const bool divideVolume,
+    const bool output
+) const
+{
+    tmp<volScalarField> trho;
+    if (rhoName_ != "none")
+    {
+        trho = mesh_.lookupObject<volScalarField>(rhoName_);
+    }
+
+    const scalarField& V = mesh_.V();
+
+
+    // logging info
+    scalar dragEff = 0.0;
+    scalar liftEff = 0.0;
+    scalar AOAmin = GREAT;
+    scalar AOAmax = -GREAT;
+
+    forAll(cells_, i)
+    {
+        if (area_[i] > ROOTVSMALL)
+        {
+            const label cellI = cells_[i];
+
+            const scalar radius = x_[i].x();
+
+            // velocity in local cylindrical reference frame
+            vector Uc = coordSys_.localVector(U[cellI]);
+
+            // apply correction in local system due to coning
+            Uc = R_[i] & Uc;
+
+            // set radial component of velocity to zero
+            Uc.x() = 0.0;
+
+            // remove blade linear velocity from blade normal component
+            Uc.y() -= radius*omega_;
+
+            // determine blade data for this radius
+            // i1 = index of upper bound data point in blade list
+            scalar twist = 0.0;
+            scalar chord = 0.0;
+            label i1 = -1;
+            label i2 = -1;
+            scalar invDr = 0.0;
+            blade_.interpolate(radius, twist, chord, i1, i2, invDr);
+
+            // effective angle of attack
+            scalar alphaEff =
+                mathematical::pi + atan2(Uc.z(), Uc.y()) - (alphag[i] + twist);
+
+            if (alphaEff > mathematical::pi)
+            {
+                alphaEff -= mathematical::twoPi;
+            }
+            if (alphaEff < -mathematical::pi)
+            {
+                alphaEff += mathematical::twoPi;
+            }
+
+            AOAmin = min(AOAmin, alphaEff);
+            AOAmax = max(AOAmax, alphaEff);
+
+            // determine profile data for this radius and angle of attack
+            const label profile1 = blade_.profileID()[i1];
+            const label profile2 = blade_.profileID()[i2];
+
+            scalar Cd1 = 0.0;
+            scalar Cl1 = 0.0;
+            profiles_[profile1].Cdl(alphaEff, Cd1, Cl1);
+
+            scalar Cd2 = 0.0;
+            scalar Cl2 = 0.0;
+            profiles_[profile2].Cdl(alphaEff, Cd2, Cl2);
+
+            scalar Cd = invDr*(Cd2 - Cd1) + Cd1;
+            scalar Cl = invDr*(Cl2 - Cl1) + Cl1;
+
+            // apply tip effect for blade lift
+            scalar tipFactor = neg(radius/rMax_ - tipEffect_);
+
+            // calculate forces perpendicular to blade
+            scalar pDyn = 0.5*magSqr(Uc);
+            if (trho.valid())
+            {
+                pDyn *= trho()[cellI];
+            }
+
+            scalar f = pDyn*chord*nBlades_*area_[i]/mathematical::twoPi;
+            vector localForce = vector(0.0, f*Cd, tipFactor*f*Cl);
+
+            // convert force from local coning system into rotor cylindrical
+            localForce = invR_[i] & localForce;
+
+            // accumulate forces
+            dragEff += localForce.y();
+            liftEff += localForce.z();
+
+            // convert force to global cartesian co-ordinate system
+            force[cellI] = coordSys_.globalVector(localForce);
+
+            if (divideVolume)
+            {
+                force[cellI] /= V[cellI];
+            }
+        }
+    }
+
+
+    if (output)
+    {
+        reduce(AOAmin, minOp<scalar>());
+        reduce(AOAmax, maxOp<scalar>());
+        reduce(dragEff, sumOp<scalar>());
+        reduce(liftEff, sumOp<scalar>());
+
+        Info<< type() << " output:" << nl
+            << "    min/max(AOA)   = " << radToDeg(AOAmin) << ", "
+            << radToDeg(AOAmax) << nl
+            << "    Effective drag = " << dragEff << nl
+            << "    Effective lift = " << liftEff << endl;
+    }
+}
+
+
 void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
-    // add source to rhs of eqn
-
-    const volVectorField& U = eqn.psi();
-
+    dimensionSet dims = dimless;
     if (eqn.dimensions() == dimForce)
     {
         coeffs_.lookup("rhoName") >> rhoName_;
-
-        const volScalarField& rho =
-            mesh_.lookupObject<volScalarField>(rhoName_);
-
-        eqn -= calculateForces
-            (
-                rho.internalField(),
-                inflowVelocity(U),
-                dimForce/dimVolume
-            );
+        dims.reset(dimForce/dimVolume);
     }
     else
     {
-        eqn -= calculateForces
-            (
-                oneField(),
-                inflowVelocity(U),
-                dimForce/dimVolume/dimDensity
-            );
+        dims.reset(dimForce/dimVolume/dimDensity);
+    }
+
+    volVectorField force
+    (
+        IOobject
+        (
+            "rotorForce",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector("zero", dims, vector::zero)
+    );
+
+    const volVectorField& U = eqn.psi();
+
+    const vectorField Uin(inflowVelocity(U));
+
+    trim_->correct(Uin, force);
+
+    calculate(Uin, trim_->thetag(), force);
+
+
+    // add source to rhs of eqn
+    eqn -= force;
+
+    if (mesh_.time().outputTime())
+    {
+        force.write();
     }
 }
 
@@ -525,12 +673,10 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
         flapCoeffs.lookup("beta1") >> flap_.beta1;
         flapCoeffs.lookup("beta2") >> flap_.beta2;
         flap_.beta0 = degToRad(flap_.beta0);
+        flap_.beta1 = degToRad(flap_.beta1);
+        flap_.beta2 = degToRad(flap_.beta2);
 
-        const dictionary& trimCoeffs(coeffs_.subDict("trimCoeffs"));
-        trimCoeffs.lookup("alphaC") >> trim_.alphaC;
-        trimCoeffs.lookup("A") >> trim_.A;
-        trimCoeffs.lookup("B") >> trim_.B;
-        trim_.alphaC = degToRad(trim_.alphaC);
+        trim_->read(coeffs_);        
 
         checkData();
 
@@ -540,7 +686,7 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
 
         if (debug)
         {
-            writeField("alphag", alphag_, true);
+            writeField("alphag", trim_->thetag()(), true);
             writeField("faceArea", area_, true);
         }
 

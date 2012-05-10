@@ -1,6 +1,9 @@
 {
-    word scheme("div(phi,alpha1)");
-    word schemer("div(phir,alpha1)");
+    label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
+    label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
+
+    word alphaScheme("div(phi,alpha1)");
+    word alpharScheme("div(phir,alpha1)");
 
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);
@@ -15,14 +18,39 @@
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
     {
-        fvScalarMatrix alpha1Eqn
+        for
         (
-             fvm::ddt(alpha1)
-           + fvm::div(phic, alpha1, scheme)
-           + fvm::div(-fvc::flux(-phir, alpha2, schemer), alpha1, schemer)
-        );
+            subCycle<volScalarField> alphaSubCycle(alpha1, nAlphaSubCycles);
+            !(++alphaSubCycle).end();
+        )
+        {
+            surfaceScalarField phiAlpha
+            (
+                fvc::flux
+                (
+                    phic,
+                    alpha1,
+                    alphaScheme
+                )
+              + fvc::flux
+                (
+                    -fvc::flux(-phir, alpha2, alpharScheme),
+                    alpha1,
+                    alpharScheme
+                )
+            );
 
-        if (g0.value() > 0.0)
+            MULES::explicitSolve
+            (
+                alpha1,
+                phi,
+                phiAlpha,
+                (g0.value() > 0 ? alphaMax : 1),
+                0
+            );
+        }
+
+        if (g0.value() > 0)
         {
             ppMagf = rAU1f*fvc::interpolate
             (
@@ -30,18 +58,22 @@
                *g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
             );
 
-            alpha1Eqn -= fvm::laplacian
+            fvScalarMatrix alpha1Eqn
             (
-                (fvc::interpolate(alpha1) + scalar(0.0001))*ppMagf,
-                alpha1,
-                "laplacian(alpha1PpMag,alpha1)"
+                fvm::ddt(alpha1) - fvc::ddt(alpha1)
+              - fvm::laplacian
+                (
+                    (fvc::interpolate(alpha1) + scalar(0.0001))*ppMagf,
+                    alpha1,
+                    "laplacian(alpha1PpMag,alpha1)"
+                )
             );
+
+            alpha1Eqn.relax();
+            alpha1Eqn.solve();
+
+            #include "packingLimiter.H"
         }
-
-        alpha1Eqn.relax();
-        alpha1Eqn.solve();
-
-        #include "packingLimiter.H"
 
         alpha2 = scalar(1) - alpha1;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Description
     release.
 
     If the turbulent fluctuation of the mixture fraction at the sub-grid level
-    is large (>1E-04) then a beta pdf is used for filtering.
+    is large (>1e-04) then a beta pdf is used for filtering.
 
     At the moment the flame area combustion model is only fit to work in a LES
     frame work. In RAS the subgrid fluctiuation has to be solved by an extra

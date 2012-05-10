@@ -8,7 +8,7 @@ cd ${0%/*} || exit 1    # run from this directory
 nProc=`grep numberOfSubdomains system/decomposeParDict \
      | sed s/"numberOfSubdomains *\(.*\);"/"\1"/`
 
-runApplication surfaceFeatureExtract constant/triSurface/flange.obj flange -includedAngle 155
+runApplication surfaceFeatureExtract
 
 # Create tight-fitting background mesh
 runApplication blockMesh
@@ -28,6 +28,7 @@ do
 done
 
 runParallel cvMesh $nProc
+#runParallel snappyHexMesh $nProc
 
 runApplication reconstructParMesh -constant -mergeTol 1e-6
 

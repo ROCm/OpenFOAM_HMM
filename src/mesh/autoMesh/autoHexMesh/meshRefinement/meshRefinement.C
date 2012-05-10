@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -877,49 +877,7 @@ Foam::meshRefinement::meshRefinement
     meshCutter_
     (
         mesh,
-        labelIOList
-        (
-            IOobject
-            (
-                "cellLevel",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            ),
-            labelList(mesh_.nCells(), 0)
-        ),
-        labelIOList
-        (
-            IOobject
-            (
-                "pointLevel",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE,
-                false
-            ),
-            labelList(mesh_.nPoints(), 0)
-        ),
-        refinementHistory
-        (
-            IOobject
-            (
-                "refinementHistory",
-                mesh_.facesInstance(),
-                fvMesh::meshSubDir,
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            List<refinementHistory::splitCell8>(0),
-            labelList(0)
-        )   // no unrefinement
+        false   // do not try to read history.
     ),
     surfaceIndex_
     (
@@ -1819,6 +1777,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const point& keepPoint
 )
 {
+    // Force calculation of face decomposition (used in findCell)
+    (void)mesh_.tetBasePtIs();
+
     // Determine connected regions. regionSplit is the labelList with the
     // region per cell.
     regionSplit cellRegion(mesh_);
@@ -1920,7 +1881,7 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
         List<treeBoundBox> meshBb(1);
         treeBoundBox& bb = meshBb[0];
         bb = treeBoundBox(mesh_.points());
-        bb = bb.extend(rndGen, 1E-4);
+        bb = bb.extend(rndGen, 1e-4);
 
         // Distribute all geometry (so refinementSurfaces and shellSurfaces)
         searchableSurfaces& geometry =
@@ -2254,28 +2215,6 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         }
 
         pointRefLevel.write();
-    }
-
-    // Dump cell centres
-    {
-        for (direction i=0; i<vector::nComponents; i++)
-        {
-            volScalarField cci
-            (
-                IOobject
-                (
-                    "cc" + word(vector::componentNames[i]),
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                mesh_.C().component(i)
-            );
-
-            cci.write();
-        }
     }
 }
 

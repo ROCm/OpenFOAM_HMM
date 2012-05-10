@@ -32,7 +32,7 @@ template<class thermo>
 Foam::constSolidTransport<thermo>::constSolidTransport(const dictionary& dict)
 :
     thermo(dict),
-    K_(readScalar(dict.subDict("transport").lookup("K")))
+    kappa_(readScalar(dict.subDict("transport").lookup("kappa")))
 {}
 
 
@@ -46,7 +46,7 @@ Foam::Ostream& Foam::operator<<
 )
 {
     operator<<(os, static_cast<const thermo&>(ct));
-    os << tab << ct.K_;
+    os << tab << ct.kappa_;
 
     os.check("Ostream& operator<<(Ostream& os,const constSolidTransport& ct)");
 

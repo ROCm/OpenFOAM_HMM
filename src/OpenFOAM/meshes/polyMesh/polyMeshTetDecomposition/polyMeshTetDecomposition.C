@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,7 +197,7 @@ Foam::label Foam::polyMeshTetDecomposition::findBasePoint
     }
 
     // If a base point hasn't triggered a return by now, then there is
-    // non that can produce a good decomposition
+    // none that can produce a good decomposition
     return -1;
 }
 

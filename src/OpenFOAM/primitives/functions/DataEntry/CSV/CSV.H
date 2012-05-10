@@ -32,12 +32,13 @@ Description
         <entryName>   csvFile;
         csvFileCoeffs
         {
-            hasHeaderLine   true;
-            refColumn       0;          // reference column index
-            componentColumns (1 2 3);   // component column indices
-            separator       ",";        // optional (defaults to ",")
-            fileName        "fileXYZ";  // name of csv data file
-            outOfBounds     clamp;      // optional out-of-bounds handling
+            hasHeaderLine       true;
+            refColumn           0;          // reference column index
+            componentColumns    (1 2 3);    // component column indices
+            separator           ",";        // optional (defaults to ",")
+            fileName            "fileXYZ";  // name of csv data file
+            outOfBounds         clamp;      // optional out-of-bounds handling
+            interpolationScheme linear;     // optional interpolation scheme
         }
     \endverbatim
 
@@ -161,6 +162,22 @@ public:
             virtual Type integrate(const scalar x1, const scalar x2) const
             {
                 return TableBase<Type>::integrate(x1, x2);
+            }
+
+            //- Return dimensioned constant value
+            virtual dimensioned<Type> dimValue(const scalar x) const
+            {
+                return TableBase<Type>::dimValue(x);
+            }
+
+            //- Integrate between two values and return dimensioned type
+            virtual dimensioned<Type> dimIntegrate
+            (
+                const scalar x1,
+                const scalar x2
+            ) const
+            {
+                return TableBase<Type>::dimIntegrate(x1, x2);
             }
 
 

@@ -86,7 +86,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
-    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.KName()),
+    temperatureCoupledBase(patch(), ptf.KMethod(), ptf.kappaName()),
     oldMode_(unknown),
     q_(ptf.q_, mapper),
     h_(ptf.h_, mapper),
@@ -181,7 +181,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(tppsf, iF),
-    temperatureCoupledBase(patch(), tppsf.KMethod(), tppsf.KName()),
+    temperatureCoupledBase(patch(), tppsf.KMethod(), tppsf.kappaName()),
     oldMode_(tppsf.oldMode_),
     q_(tppsf.q_),
     h_(tppsf.h_),
@@ -199,7 +199,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     }
 
     scalarField q(size(), 0.0);
-    scalarField KDelta(K(*this)*patch().deltaCoeffs());
+    scalarField KDelta(kappa(*this)*patch().deltaCoeffs());
 
     if (oldMode_ == fixedHeatFlux)
     {
@@ -223,7 +223,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     {
         if (q[i] > 0) //in
         {
-            this->refGrad()[i] = q[i]/K(*this)()[i];
+            this->refGrad()[i] = q[i]/kappa(*this)()[i];
             this->refValue()[i] = 0.0;
             this->valueFraction()[i] = 0.0;
         }
@@ -239,12 +239,12 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     if (debug)
     {
-        scalar Q = gSum(K(*this)*patch().magSf()*snGrad());
+        scalar Q = gSum(kappa(*this)*patch().magSf()*snGrad());
 
         Info<< patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
             << this->dimensionedInternalField().name() << " :"
-            << " heatFlux:" << Q
+            << " heat transfer rate:" << Q
             << " walltemperature "
             << " min:" << gMin(*this)
             << " max:" << gMax(*this)

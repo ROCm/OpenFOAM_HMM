@@ -53,10 +53,10 @@ class isotropicKSolidThermo
     // Private data
 
         //- Thermal conductivity [W/(m.K)]
-        volScalarField K_;
+        volScalarField kappa_;
 
         //- Thermal conductivity vector
-        Field<scalar> KValues_;
+        Field<scalar> kappaValues_;
 
 
 public:
@@ -87,26 +87,31 @@ public:
         // Access functions
 
             //- Constant access to K
-            virtual tmp<volScalarField> K() const;
+            virtual tmp<volScalarField> kappa() const;
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volSymmTensorField> directionalK() const
-            {
-                notImplemented("directionalKSolidThermo::directionalK() const");
-                return tmp<volSymmTensorField>(NULL);
-            }
-
-        // Per patch calculation
-
-            //- Thermal conductivity [W//m/K]
-            virtual tmp<scalarField> K(const label patchI) const;
-
-            //- Thermal conductivity [W//m/K]
-            virtual tmp<symmTensorField> directionalK(const label) const
+            virtual tmp<volSymmTensorField> directionalKappa() const
             {
                 notImplemented
                 (
-                    "directionalKSolidThermo::directionalK(const label) const"
+                    "directionalKSolidThermo::directionalKappa() const"
+                );
+                return tmp<volSymmTensorField>(NULL);
+            }
+
+
+        // Per patch calculation
+
+            //- Thermal conductivity [W/m/K]
+            virtual tmp<scalarField> kappa(const label patchI) const;
+
+            //- Thermal conductivity [W/m/K]
+            virtual tmp<symmTensorField> directionalKappa(const label) const
+            {
+                notImplemented
+                (
+                    "directionalKSolidThermo::directionalKappa(const label)"
+                    "const"
                 );
                 return tmp<symmTensorField>(NULL);
             }

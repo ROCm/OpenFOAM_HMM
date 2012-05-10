@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,44 @@ Foam::MRFZones::MRFZones(const fvMesh& mesh)
             IOobject::NO_WRITE
         ),
         MRFZone::iNew(mesh)
+    ),
+    mesh_(mesh)
+{
+    if
+    (
+        Pstream::parRun()
+     &&
+     (
+        regIOobject::fileModificationChecking == timeStampMaster
+     || regIOobject::fileModificationChecking == inotifyMaster
+     )
     )
-{}
+    {
+        WarningIn("MRFZones(const fvMesh&)")
+            << "The MRFZones are not run time modifiable\n"
+            << "    using 'timeStampMaster' or 'inotifyMaster'\n"
+            << "    for the entry fileModificationChecking\n"
+            << "    in the etc/controlDict.\n"
+            << "    Use 'timeStamp' instead."
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::MRFZones::addCoriolis
+(
+    const volVectorField& U,
+    volVectorField& ddtU
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addCoriolis(U, ddtU);
+    }
+}
+
 
 void Foam::MRFZones::addCoriolis(fvVectorMatrix& UEqn) const
 {
@@ -145,6 +178,13 @@ void Foam::MRFZones::correctBoundaryVelocity(volVectorField& U) const
     {
         operator[](i).correctBoundaryVelocity(U);
     }
+}
+
+
+bool Foam::MRFZones::readData(Istream& is)
+{
+    PtrList<MRFZone>::read(is, MRFZone::iNew(mesh_));
+    return is.good();
 }
 
 

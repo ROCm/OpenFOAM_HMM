@@ -8,16 +8,7 @@ cd ${0%/*} || exit 1    # run from this directory
 rm -rf constant/polyMesh/sets
 
 runApplication blockMesh
-runApplication surfaceFeatureExtract -includedAngle 150 constant/triSurface/bottomAir.stl bottomAir
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.bottom
-runApplication surfaceFeatureExtract -includedAngle 150 constant/triSurface/heater.stl heater
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.heater
-runApplication surfaceFeatureExtract -includedAngle 150 constant/triSurface/leftSolid.stl leftSolid
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.leftSolid
-runApplication surfaceFeatureExtract -includedAngle 150 constant/triSurface/rightSolid.stl rightSolid
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.rightSolid
-runApplication surfaceFeatureExtract -includedAngle 150 constant/triSurface/topAir.stl topAir
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.topAir
+runApplication surfaceFeatureExtract
 
 runApplication snappyHexMesh -overwrite
 runApplication splitMeshRegions -cellZones -overwrite
