@@ -1900,7 +1900,7 @@ template<class Type, class CombineOp>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const UList<Type>& fld,
-    const CombineOp& bop,
+    const CombineOp& cop,
     List<Type>& result
 ) const
 {
@@ -1937,7 +1937,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, work[faces[i]], weights[i]);
+                cop(result[faceI], faceI, work[faces[i]], weights[i]);
             }
         }
     }
@@ -1950,7 +1950,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
+                cop(result[faceI], faceI, fld[faces[i]], weights[i]);
             }
         }
     }
@@ -1962,7 +1962,7 @@ template<class Type, class CombineOp>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const UList<Type>& fld,
-    const CombineOp& bop,
+    const CombineOp& cop,
     List<Type>& result
 ) const
 {
@@ -1999,7 +1999,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, work[faces[i]], weights[i]);
+                cop(result[faceI], faceI, work[faces[i]], weights[i]);
             }
         }
     }
@@ -2012,7 +2012,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
+                cop(result[faceI], faceI, fld[faces[i]], weights[i]);
             }
         }
     }
@@ -2101,7 +2101,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const Field<Type>& fld
 ) const
 {
-    return interpolateToSource(fld, sumOp<Type>());
+    return interpolateToSource(fld, plusEqOp<Type>());
 }
 
 
@@ -2113,7 +2113,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToSource(tFld(), sumOp<Type>());
+    return interpolateToSource(tFld(), plusEqOp<Type>());
 }
 
 
@@ -2125,7 +2125,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const Field<Type>& fld
 ) const
 {
-    return interpolateToTarget(fld, sumOp<Type>());
+    return interpolateToTarget(fld, plusEqOp<Type>());
 }
 
 
@@ -2137,7 +2137,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToTarget(tFld(), sumOp<Type>());
+    return interpolateToTarget(tFld(), plusEqOp<Type>());
 }
 
 
