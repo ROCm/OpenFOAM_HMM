@@ -917,21 +917,22 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     const primitivePatch& tgtPatch
 ) const
 {
-    // quick reject if either face has zero area
-    if (srcMagSf_[srcFaceI] < ROOTVSMALL || tgtMagSf_[tgtFaceI] < ROOTVSMALL)
-    {
-        return 0.0;
-    }
-
     const pointField& srcPoints = srcPatch.points();
     const pointField& tgtPoints = tgtPatch.points();
-
-    // create intersection object
-    faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
     // references to candidate faces
     const face& src = srcPatch[srcFaceI];
     const face& tgt = tgtPatch[tgtFaceI];
+
+    // quick reject if either face has zero area
+    // Note: do not used stored face areas for target patch
+    if ((srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgt.mag(tgtPoints) < ROOTVSMALL))
+    {
+        return 0.0;
+    }
+
+    // create intersection object
+    faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
     // crude resultant norm
     vector n(-src.normal(srcPoints));
