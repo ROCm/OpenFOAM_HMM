@@ -59,16 +59,16 @@ namespace Foam
     };
 
     //- Combine operator for interpolateToSource/Target
-    template<class Type, class BinaryOp>
+    template<class Type, class CombineOp>
     class combineBinaryOp
     {
-        const BinaryOp& bop_;
+        const CombineOp& cop_;
 
         public:
 
-            combineBinaryOp(const BinaryOp& bop)
+            combineBinaryOp(const CombineOp& cop)
             :
-                bop_(bop)
+                cop_(cop)
             {}
 
             void operator()
@@ -79,7 +79,7 @@ namespace Foam
                 const scalar weight
             ) const
             {
-                x = bop_(x, weight*y);
+                cop_(x, weight*y);
             }
     };
 }
@@ -2020,12 +2020,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const Field<Type>& fld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
     tmp<Field<Type> > tresult
@@ -2037,32 +2037,32 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
         )
     );
 
-    interpolateToSource(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
+    interpolateToSource(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
 
     return tresult;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const tmp<Field<Type> >& tFld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
-    return interpolateToSource(tFld(), bop);
+    return interpolateToSource(tFld(), cop);
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const Field<Type>& fld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
     tmp<Field<Type> > tresult
@@ -2074,22 +2074,22 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
         )
     );
 
-    interpolateToTarget(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
+    interpolateToTarget(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
 
     return tresult;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const tmp<Field<Type> >& tFld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
-    return interpolateToTarget(tFld(), bop);
+    return interpolateToTarget(tFld(), cop);
 }
 
 
