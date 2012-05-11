@@ -69,7 +69,7 @@ Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::emissivity
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::kappa
+Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::kappaRad
 (
     const label patchI
 ) const
@@ -82,7 +82,7 @@ Foam::tmp<Foam::scalarField> Foam::interpolatedSolidThermo::kappa
             (
                 T_.boundaryField()[patchI],
                 TValues_,
-                kappaValues_
+                kappaRadValues_
             )
         )
     );
@@ -178,16 +178,16 @@ void Foam::interpolatedSolidThermo::calculate()
 
 
     // Correct absorptivity
-    kappa_.internalField() = interpolateXY
+    kappaRad_.internalField() = interpolateXY
     (
         T_.internalField(),
         TValues_,
-        kappaValues_
+        kappaRadValues_
     );
 
-    forAll(kappa_.boundaryField(), patchI)
+    forAll(kappaRad_.boundaryField(), patchI)
     {
-        kappa_.boundaryField()[patchI] == this->kappa(patchI)();
+        kappaRad_.boundaryField()[patchI] == this->kappaRad(patchI)();
     }
 
 

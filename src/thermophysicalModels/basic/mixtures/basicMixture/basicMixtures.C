@@ -32,6 +32,7 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
+#include "pressurePerfectGas.H"
 #include "incompressible.H"
 
 #include "eConstThermo.H"
@@ -117,6 +118,30 @@ makeBasicPolyMixture
 (
     pureMixture,
     8
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    pressurePerfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
+    pressurePerfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    janafThermo,
+    pressurePerfectGas
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

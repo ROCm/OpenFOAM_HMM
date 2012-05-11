@@ -57,11 +57,11 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo
 )
 :
     interpolatedSolidThermo(mesh, typeName + "Coeffs", dict),
-    K_
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -70,8 +70,12 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo
         mesh,
         dimEnergy/dimTime/(dimLength*dimTemperature)
     ),
-    KValues_ (Field<scalar>(subDict(typeName + "Coeffs").lookup("KValues")))
+    kappaValues_
+    (
+        Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"))
+    )
 {
+    Info<< "    kappa      : " << kappaValues_ << nl << endl;
     correct();
 }
 
@@ -79,11 +83,11 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo
 Foam::isotropicKSolidThermo::isotropicKSolidThermo(const fvMesh& mesh)
 :
     interpolatedSolidThermo(mesh, typeName + "Coeffs"),
-    K_
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -92,8 +96,12 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo(const fvMesh& mesh)
         mesh,
         dimEnergy/dimTime/(dimLength*dimTemperature)
     ),
-    KValues_ (Field<scalar>(subDict(typeName + "Coeffs").lookup("KValues")))
+    kappaValues_
+    (
+        Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"))
+    )
 {
+    Info<< "    kappa      : " << kappaValues_ << nl <<endl;
     correct();
 }
 
@@ -101,20 +109,20 @@ Foam::isotropicKSolidThermo::isotropicKSolidThermo(const fvMesh& mesh)
 void Foam::isotropicKSolidThermo::correct()
 {
     // Correct K
-    K_.internalField() = interpolateXY
+    kappa_.internalField() = interpolateXY
     (
         T_.internalField(),
         TValues_,
-        KValues_
+        kappaValues_
     );
 
-    forAll(K_.boundaryField(), patchI)
+    forAll(kappa_.boundaryField(), patchI)
     {
-        K_.boundaryField()[patchI] == interpolateXY
+        kappa_.boundaryField()[patchI] == interpolateXY
         (
             T_.boundaryField()[patchI],
             TValues_,
-            KValues_
+            kappaValues_
         );
     }
 
@@ -122,31 +130,33 @@ void Foam::isotropicKSolidThermo::correct()
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::isotropicKSolidThermo::K() const
+Foam::tmp<Foam::volScalarField> Foam::isotropicKSolidThermo::kappa() const
 {
-    return K_;
+    return kappa_;
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::isotropicKSolidThermo::K
+Foam::tmp<Foam::scalarField> Foam::isotropicKSolidThermo::kappa
 (
     const label patchI
 ) const
 {
-    return K_.boundaryField()[patchI];
+    return kappa_.boundaryField()[patchI];
 }
 
 
 bool Foam::isotropicKSolidThermo::read()
 {
-    KValues_  = Field<scalar>(subDict(typeName + "Coeffs").lookup("KValues"));
+    kappaValues_  =
+        Field<scalar>(subDict(typeName + "Coeffs").lookup("kappaValues"));
     return true;
 }
 
 
 bool Foam::isotropicKSolidThermo::writeData(Ostream& os) const
 {
-    os.writeKeyword("KValues") << KValues_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaValues") << kappaValues_
+        << token::END_STATEMENT << nl;
     bool ok = interpolatedSolidThermo::writeData(os);
 
     return ok && os.good();

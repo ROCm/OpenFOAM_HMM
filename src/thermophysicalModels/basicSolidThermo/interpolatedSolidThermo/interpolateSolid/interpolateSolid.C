@@ -33,15 +33,14 @@ Foam::interpolateSolid::interpolateSolid(const dictionary& dict)
 {
     read(dict);
 
-    Info<< "Constructed directionalKSolidThermo with samples" << nl
+    Info<< "Constructed solid thermo with samples" << nl
         << "    T          : " << TValues_ << nl
         << "    rho        : " << rhoValues_ << nl
         << "    cp         : " << cpValues_ << nl
         << "    Hf         : " << HfValues_ << nl
         << "    emissivity : " << emissivityValues_ << nl
-        << "    kappa : " << kappaValues_ << nl
-        << "    sigmaS : " << sigmaSValues_ << nl
-        << endl;
+        << "    kappaRad   : " << kappaRadValues_ << nl
+        << "    sigmaS     : " << sigmaSValues_ << nl;
 
 
     if
@@ -88,7 +87,7 @@ bool Foam::interpolateSolid::writeData(Ostream& os) const
     os.writeKeyword("HfValues") << HfValues_ << token::END_STATEMENT << nl;
     os.writeKeyword("emissivityValues") << emissivityValues_ <<
          token::END_STATEMENT << nl;
-    os.writeKeyword("kappaValues") << kappaValues_
+    os.writeKeyword("kappaRadValues") << kappaRadValues_
         << token::END_STATEMENT << nl;
     os.writeKeyword("sigmaSValues") << sigmaSValues_
         << token::END_STATEMENT << nl;
@@ -103,7 +102,7 @@ bool Foam::interpolateSolid::read(const dictionary& dict)
     TValues_ = Field<scalar>(dict.lookup("TValues"));
     rhoValues_ = Field<scalar>(dict.lookup("rhoValues"));
     cpValues_ = Field<scalar>(dict.lookup("cpValues"));
-    kappaValues_ = Field<scalar>(dict.lookup("kappaValues"));
+    kappaRadValues_ = Field<scalar>(dict.lookup("kappaRadValues"));
     sigmaSValues_ = Field<scalar>(dict.lookup("sigmaSValues"));
     HfValues_ = Field<scalar>(dict.lookup("HfValues"));
     emissivityValues_ = Field<scalar>(dict.lookup("emissivityValues"));

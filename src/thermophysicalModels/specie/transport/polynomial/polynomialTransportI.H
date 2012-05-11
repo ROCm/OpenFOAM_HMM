@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,17 +122,22 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
 
 
 template<class Thermo, int PolySize>
-inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alpha
+inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alphae
 (
     const scalar T
 ) const
 {
-    scalar deltaT = T - specie::Tstd;
-    scalar CpBar =
-        (deltaT*(this->H(T) - this->H(specie::Tstd)) + this->Cp(T))
-       /(sqr(deltaT) + 1);
+    return kappa(T)/this->Cv(T);
+}
 
-    return kappa(T)/CpBar;
+
+template<class Thermo, int PolySize>
+inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alphah
+(
+    const scalar T
+) const
+{
+    return kappa(T)/this->Cp(T);
 }
 
 

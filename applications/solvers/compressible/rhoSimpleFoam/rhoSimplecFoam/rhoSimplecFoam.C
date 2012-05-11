@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
         // Velocity-pressure-enthalpy SIMPLEC corrector
         {
             #include "UEqn.H"
+            #include "eEqn.H"
             #include "pEqn.H"
-            #include "hEqn.H"
         }
 
         turbulence->correct();

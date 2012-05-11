@@ -45,6 +45,7 @@ const Foam::interpolationWeights& Foam::TableBase<Type>::interpolator() const
             tableSamples_
         );
     }
+
     return interpolatorPtr_();
 }
 
@@ -172,6 +173,7 @@ Foam::TableBase<Type>::outOfBounds
 {
     boundsHandling prev = boundsHandling_;
     boundsHandling_ = bound;
+
     return prev;
 }
 
@@ -366,22 +368,8 @@ Type Foam::TableBase<Type>::value(const scalar x) const
     {
         t += currentWeights_[i]*table_[currentIndices_[i]].second();
     }
-    return t;
 
-    //// Find i such that x(i) < xDash < x(i+1)
-    //label i = 0;
-    //while ((table_[i+1].first() < xDash) && (i+1 < table_.size()))
-    //{
-    //    i++;
-    //}
-    //
-    //// Linear interpolation to find value
-    //return Type
-    //(
-    //    (xDash - table_[i].first())/(table_[i+1].first() - table_[i].first())
-    //  * (table_[i+1].second() - table_[i].second())
-    //  + table_[i].second()
-    //);
+    return t;
 }
 
 
@@ -396,66 +384,8 @@ Type Foam::TableBase<Type>::integrate(const scalar x1, const scalar x2) const
     {
        sum += currentWeights_[i]*table_[currentIndices_[i]].second();
     }
+
     return sum;
-
-
-    //// Initialise return value
-    //Type sum = pTraits<Type>::zero;
-    //
-    //// Return zero if out of bounds
-    //if ((x1 > table_.last().first()) || (x2 < table_[0].first()))
-    //{
-    //    return sum;
-    //}
-    //
-    //// Find next index greater than x1
-    //label id1 = 0;
-    //while ((table_[id1].first() < x1) && (id1 < table_.size()))
-    //{
-    //    id1++;
-    //}
-    //
-    //// Find next index less than x2
-    //label id2 = table_.size() - 1;
-    //while ((table_[id2].first() > x2) && (id2 >= 1))
-    //{
-    //    id2--;
-    //}
-    //
-    //if ((id1 - id2) == 1)
-    //{
-    //    // x1 and x2 lie within 1 interval
-    //    sum = 0.5*(value(x1) + value(x2))*(x2 - x1);
-    //}
-    //else
-    //{
-    //    // x1 and x2 cross multiple intervals
-    //
-    //    // Integrate table body
-    //    for (label i=id1; i<id2; i++)
-    //    {
-    //        sum +=
-    //            (table_[i].second() + table_[i+1].second())
-    //          * (table_[i+1].first() - table_[i].first());
-    //    }
-    //    sum *= 0.5;
-    //
-    //    // Add table ends (partial segments)
-    //    if (id1 > 0)
-    //    {
-    //        sum += 0.5
-    //          * (value(x1) + table_[id1].second())
-    //          * (table_[id1].first() - x1);
-    //    }
-    //    if (id2 < table_.size() - 1)
-    //    {
-    //        sum += 0.5
-    //          * (table_[id2].second() + value(x2))
-    //          * (x2 - table_[id2].first());
-    //    }
-    //}
-    //
-    //return sum;
 }
 
 
@@ -481,9 +411,9 @@ Foam::dimensioned<Type> Foam::TableBase<Type>::dimIntegrate
     );
 }
 
+
 // * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
 
 #include "TableBaseIO.C"
-
 
 // ************************************************************************* //

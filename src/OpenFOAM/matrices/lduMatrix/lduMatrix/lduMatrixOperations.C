@@ -351,36 +351,4 @@ void Foam::lduMatrix::operator*=(scalar s)
 }
 
 
-Foam::tmp<Foam::scalarField > Foam::lduMatrix::H1() const
-{
-    tmp<scalarField > tH1
-    (
-        new scalarField(lduAddr().size(), 0.0)
-    );
-
-    if (lowerPtr_ || upperPtr_)
-    {
-        scalarField& H1_ = tH1();
-
-        scalar* __restrict__ H1Ptr = H1_.begin();
-
-        const label* __restrict__ uPtr = lduAddr().upperAddr().begin();
-        const label* __restrict__ lPtr = lduAddr().lowerAddr().begin();
-
-        const scalar* __restrict__ lowerPtr = lower().begin();
-        const scalar* __restrict__ upperPtr = upper().begin();
-
-        register const label nFaces = upper().size();
-
-        for (register label face=0; face<nFaces; face++)
-        {
-            H1Ptr[uPtr[face]] -= lowerPtr[face];
-            H1Ptr[lPtr[face]] -= upperPtr[face];
-        }
-    }
-
-    return tH1;
-}
-
-
 // ************************************************************************* //

@@ -34,12 +34,12 @@ Description
         myWallPatch
         {
             type            externalWallHeatFluxTemperature;
-            K               solidThermo;       // solidThermo or lookup
+            kappa           solidThermo;       // solidThermo or lookup
             q               uniform 1000;      // Heat flux / [W/m2]
             Ta              uniform 300.0;     // Tambient temperature /[K]
             h               uniform 10.0;      // Heat transfer coeff /[W/Km2]
             value           uniform 300.0;     // Initial temperature / [K]
-            KName           none;
+            kappaName       none;
         }
 
 Note:

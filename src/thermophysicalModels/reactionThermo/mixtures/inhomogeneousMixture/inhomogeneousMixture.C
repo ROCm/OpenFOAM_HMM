@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -277,13 +277,24 @@ Foam::scalar Foam::inhomogeneousMixture<ThermoType>::kappa
 
 
 template<class ThermoType>
-Foam::scalar Foam::inhomogeneousMixture<ThermoType>::alpha
+Foam::scalar Foam::inhomogeneousMixture<ThermoType>::alphah
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return getLocalThermo(specieI).alpha(T);
+    return getLocalThermo(specieI).alphah(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::inhomogeneousMixture<ThermoType>::alphae
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return getLocalThermo(specieI).alphae(T);
 }
 
 

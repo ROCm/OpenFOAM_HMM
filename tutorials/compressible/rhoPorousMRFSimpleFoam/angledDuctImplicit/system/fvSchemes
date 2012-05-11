@@ -29,16 +29,16 @@ divSchemes
 {
     div(phi,U)      Gauss upwind;
     div((muEff*dev2(T(grad(U))))) Gauss linear;
-    div(phi,h)      Gauss upwind;
+    div(phi,e)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div(phi,k)      Gauss upwind;
-    div(phi,K)      Gauss upwind;
+    div(phi,Ekp)    Gauss upwind;
 }
 
 laplacianSchemes
 {
     laplacian(muEff,U) Gauss linear corrected;
-    laplacian(alphaEff,h) Gauss linear corrected;
+    laplacian(alphaEff,e) Gauss linear corrected;
     laplacian((rho*rAU),p) Gauss linear corrected;
     laplacian(DepsilonEff,epsilon) Gauss linear corrected;
     laplacian(DkEff,k) Gauss linear corrected;

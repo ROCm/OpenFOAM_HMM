@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -167,8 +167,11 @@ public:
             //- Thermal conductivity [W/m/K]
             virtual scalar kappa(const label specieI, const scalar T) const;
 
-            //- Thermal diffusivity [kg/m/s]
-            virtual scalar alpha(const label specieI, const scalar T) const;
+            //- Thermal diffusivity of enthalpy [kg/m/s]
+            virtual scalar alphah(const label specieI, const scalar T) const;
+
+            //- Thermal diffusivity of internal energy[kg/m/s]
+            virtual scalar alphae(const label specieI, const scalar T) const;
 };
 
 

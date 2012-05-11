@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -302,13 +302,24 @@ Foam::scalar Foam::multiComponentMixture<ThermoType>::kappa
 
 
 template<class ThermoType>
-Foam::scalar Foam::multiComponentMixture<ThermoType>::alpha
+Foam::scalar Foam::multiComponentMixture<ThermoType>::alphah
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return speciesData_[specieI].alpha(T);
+    return speciesData_[specieI].alphah(T);
+}
+
+
+template<class ThermoType>
+Foam::scalar Foam::multiComponentMixture<ThermoType>::alphae
+(
+    const label specieI,
+    const scalar T
+) const
+{
+    return speciesData_[specieI].alphae(T);
 }
 
 

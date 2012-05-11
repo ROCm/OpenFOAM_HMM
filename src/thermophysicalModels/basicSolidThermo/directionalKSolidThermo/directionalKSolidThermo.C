@@ -59,11 +59,11 @@ Foam::directionalKSolidThermo::directionalKSolidThermo
 )
 :
     interpolatedSolidThermo(mesh, typeName + "Coeffs", dict),
-    directionalK_
+    directionalKappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -93,11 +93,11 @@ Foam::directionalKSolidThermo::directionalKSolidThermo
 Foam::directionalKSolidThermo::directionalKSolidThermo(const fvMesh& mesh)
 :
     interpolatedSolidThermo(mesh, typeName + "Coeffs"),
-    directionalK_
+    directionalKappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -134,7 +134,10 @@ Foam::directionalKSolidThermo::~directionalKSolidThermo()
 
 void Foam::directionalKSolidThermo::init()
 {
-    KValues_ = Field<vector>(subDict(typeName + "Coeffs").lookup("KValues"));
+    kappaValues_ =
+        Field<vector>(subDict(typeName + "Coeffs").lookup("kappaValues"));
+
+    Info<< "    kappa      : " << kappaValues_ << nl << endl;
 
     // Determine transforms for cell centres
     forAll(mesh_.C(), cellI)
@@ -362,51 +365,55 @@ void Foam::directionalKSolidThermo::correct()
 
 
 Foam::tmp<Foam::volSymmTensorField>
-Foam::directionalKSolidThermo::directionalK() const
+Foam::directionalKSolidThermo::directionalKappa() const
 {
-    return directionalK_;
+    return directionalKappa_;
 }
 
 
 void Foam::directionalKSolidThermo::calculate()
 {
     // Correct directionalK
-    Field<vector> localK
+    Field<vector> localKappa
     (
         interpolateXY
         (
             T_.internalField(),
             TValues_,
-            KValues_
+            kappaValues_
         )
     );
 
     // Transform into global coordinate system
     transformField
     (
-        directionalK_.internalField(),
+        directionalKappa_.internalField(),
         ccTransforms_.internalField(),
-        localK
+        localKappa
     );
 
-    forAll(directionalK_.boundaryField(), patchI)
+    forAll(directionalKappa_.boundaryField(), patchI)
     {
-        directionalK_.boundaryField()[patchI] == this->directionalK(patchI)();
+        directionalKappa_.boundaryField()[patchI] ==
+            this->directionalKappa(patchI)();
     }
 }
 
 
-Foam::tmp<Foam::symmTensorField> Foam::directionalKSolidThermo::directionalK
+Foam::tmp<Foam::symmTensorField> Foam::directionalKSolidThermo::directionalKappa
 (
     const label patchI
 ) const
 {
     const fvPatchScalarField& patchT = T_.boundaryField()[patchI];
 
-    Field<vector> localK(interpolateXY(patchT, TValues_, KValues_));
+    Field<vector> localKappa(interpolateXY(patchT, TValues_, kappaValues_));
 
-    tmp<symmTensorField> tglobalK(new symmTensorField(localK.size()));
-    transformField(tglobalK(), ccTransforms_.boundaryField()[patchI], localK);
+    tmp<symmTensorField> tglobalK(new symmTensorField(localKappa.size()));
+    transformField
+    (
+        tglobalK(), ccTransforms_.boundaryField()[patchI], localKappa
+    );
 
     return tglobalK;
 }
@@ -421,7 +428,8 @@ bool Foam::directionalKSolidThermo::read()
 bool Foam::directionalKSolidThermo::read(const dictionary& dict)
 {
     coordSys_ = coordinateSystem(dict, mesh_);
-    KValues_  = Field<vector>(subDict(typeName + "Coeffs").lookup("KValues"));
+    kappaValues_  =
+        Field<vector>(subDict(typeName + "Coeffs").lookup("kappaValues"));
     return true;
 }
 
@@ -429,7 +437,8 @@ bool Foam::directionalKSolidThermo::read(const dictionary& dict)
 bool Foam::directionalKSolidThermo::writeData(Ostream& os) const
 {
     bool ok = interpolatedSolidThermo::writeData(os);
-    os.writeKeyword("KValues") << KValues_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappaValues")
+        << kappaValues_ << token::END_STATEMENT << nl;
     return ok && os.good();
 }
 

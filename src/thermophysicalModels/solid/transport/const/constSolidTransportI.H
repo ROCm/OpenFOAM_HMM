@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,11 @@ template<class thermo>
 inline Foam::constSolidTransport<thermo>::constSolidTransport
 (
     const thermo& t,
-    const scalar k
+    const scalar kappa
 )
 :
     thermo(t),
-    K_(k)
+    kappa_(kappa)
 {}
 
 
@@ -45,30 +45,17 @@ inline Foam::constSolidTransport<thermo>::constSolidTransport
 )
 :
     thermo(name, ct),
-    K_(ct.K_)
+    kappa_(ct.kappa_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline Foam::scalar Foam::constSolidTransport<thermo>::K(const scalar T) const
+inline Foam::scalar Foam::constSolidTransport<thermo>::
+kappa(const scalar T) const
 {
-    return K_;
-}
-
-
-template<class thermo>
-inline Foam::scalar Foam::constSolidTransport<thermo>::alpha
-(
-    const scalar T
-) const
-{
-    scalar Cp = this->Cp(T);
-
-    scalar rho = this->rho(T);
-
-    return K_/(rho*Cp);
+    return kappa_;
 }
 
 

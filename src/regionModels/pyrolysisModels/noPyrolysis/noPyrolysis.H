@@ -124,10 +124,10 @@ public:
             virtual const tmp<volScalarField> Cp() const;
 
             //- Return the region absorptivity [1/m]
-            virtual const volScalarField& kappa() const;
+            virtual const volScalarField& kappaRad() const;
 
             //- Return the region thermal conductivity [W/m/k]
-            virtual const volScalarField& K() const;
+            virtual const volScalarField& kappa() const;
 
             //- Return the total gas mass flux to primary region [kg/m2/s]
             virtual const surfaceScalarField& phiGas() const;

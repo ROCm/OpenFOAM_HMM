@@ -73,7 +73,7 @@ protected:
             volScalarField rho_;
 
             //- Absorption coefficient [1/m]
-            volScalarField kappa_;
+            volScalarField kappaRad_;
 
             //- Scatter coeffcient [1/m]
             volScalarField sigmaS_;
@@ -157,7 +157,7 @@ public:
             virtual volScalarField& rho();
 
             //- Absorption coefficient [1/m]
-            virtual const volScalarField& kappa() const;
+            virtual const volScalarField& kappaRad() const;
 
             //- Emissivity coefficient
             virtual const volScalarField& sigmaS() const;
@@ -169,10 +169,10 @@ public:
         // Derived thermal properties
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volScalarField> K() const = 0;
+            virtual tmp<volScalarField> kappa() const = 0;
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volSymmTensorField> directionalK() const = 0;
+            virtual tmp<volSymmTensorField> directionalKappa() const = 0;
 
             //- Specific heat capacity [J/kg/K]
             virtual tmp<volScalarField> Cp() const = 0;
@@ -187,10 +187,13 @@ public:
         // Per patch calculation
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<scalarField> K(const label patchI) const = 0;
+            virtual tmp<scalarField> kappa(const label patchI) const = 0;
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<symmTensorField> directionalK(const label) const = 0;
+            virtual tmp<symmTensorField> directionalKappa
+            (
+                const label
+            ) const = 0;
 
             //- Specific heat capacity [J/kg/K)]
             virtual tmp<scalarField> Cp(const label patchI) const = 0;

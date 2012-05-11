@@ -96,7 +96,7 @@ void thermoBaffle2D::solveEnergy()
     volScalarField& Q = tQ();
 
     volScalarField rhoCp("rhoCp", thermo_->rho()*thermo_->Cp()());
-    volScalarField K("K", thermo_->K());
+    volScalarField kappa("kappa", thermo_->kappa());
 
 
     //If region is one-dimension variable thickness
@@ -119,7 +119,7 @@ void thermoBaffle2D::solveEnergy()
 
                 rhoCp[cellId] *= delta_.value()/thickness_[localFaceI];
 
-                K[cellId] *= delta_.value()/thickness_[localFaceI];
+                kappa[cellId] *= delta_.value()/thickness_[localFaceI];
             }
         }
     }
@@ -131,7 +131,7 @@ void thermoBaffle2D::solveEnergy()
     fvScalarMatrix TEqn
     (
         fvm::ddt(rhoCp, T_)
-      - fvm::laplacian(K, T_)
+      - fvm::laplacian(kappa, T_)
      ==
         Q
     );
@@ -316,9 +316,9 @@ const tmp<volScalarField> thermoBaffle2D::Cp() const
 }
 
 
-const volScalarField& thermoBaffle2D::kappa() const
+const volScalarField& thermoBaffle2D::kappaRad() const
 {
-    return thermo_->kappa();
+    return thermo_->kappaRad();
 }
 
 
@@ -328,9 +328,9 @@ const volScalarField& thermoBaffle2D::rho() const
 }
 
 
-const volScalarField& thermoBaffle2D::K() const
+const volScalarField& thermoBaffle2D::kappa() const
 {
-    return thermo_->K();
+    return thermo_->kappa();
 }
 
 
@@ -362,7 +362,7 @@ void thermoBaffle2D::info() const
             (
                 mag(regionMesh().Sf().boundaryField()[patchI])
               * pT.snGrad()
-              * thermo_->K(patchI)
+              * thermo_->kappa(patchI)
             ) << endl;
     }
 }

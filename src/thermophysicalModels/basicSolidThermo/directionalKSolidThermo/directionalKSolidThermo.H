@@ -54,10 +54,10 @@ class directionalKSolidThermo
     // Private data
 
         //- Thermal conductivity [W/(m.K)]
-        volSymmTensorField directionalK_;
+        volSymmTensorField directionalKappa_;
 
         //- Thermal conductivity vector
-        Field<vector> KValues_;
+        Field<vector> kappaValues_;
 
         //- Coordinate system used for the directional properties
         coordinateSystem coordSys_;
@@ -117,26 +117,29 @@ public:
         //- Access functions
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volScalarField> K() const
+            virtual tmp<volScalarField> kappa() const
             {
-                notImplemented("directionalKSolidThermo::K() const");
+                notImplemented("directionalKSolidThermo::kappa() const");
                 return tmp<volScalarField>(NULL);
             }
 
             //- Thermal conductivity [W/m/K]
-            virtual tmp<volSymmTensorField> directionalK() const;
+            virtual tmp<volSymmTensorField> directionalKappa() const;
 
          // Per patch calculation
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<scalarField> K(const label patchI) const
+            virtual tmp<scalarField> kappa(const label patchI) const
             {
-                notImplemented("directionalKSolidThermo::K(const label) const");
+                notImplemented
+                (
+                    "directionalKSolidThermo::kappa(const label) const"
+                );
                 return tmp<scalarField>(NULL);
             }
 
             //- Thermal conductivity [W//m/K]
-            virtual tmp<symmTensorField> directionalK(const label) const;
+            virtual tmp<symmTensorField> directionalKappa(const label) const;
 
 
         // I-O

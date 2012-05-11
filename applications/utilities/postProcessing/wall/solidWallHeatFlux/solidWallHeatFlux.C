@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         forAll(wallHeatFlux.boundaryField(), patchi)
         {
             wallHeatFlux.boundaryField()[patchi] =
-                thermo().K(patchi)
+                thermo().kappa(patchi)
                *T.boundaryField()[patchi].snGrad();
 
             if (isA<wallFvPatch>(mesh.boundary()[patchi]))

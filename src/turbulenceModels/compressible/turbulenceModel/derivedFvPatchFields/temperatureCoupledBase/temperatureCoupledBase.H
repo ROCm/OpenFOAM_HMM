@@ -27,13 +27,14 @@ Class
 Description
     Common functions for use in temperature coupled boundaries. For now only
 
-    K() : heat conduction at patch. Gets supplied how to lookup/calculate K:
+    kappa() : heat conduction at patch. Gets supplied how to lookup/calculate
+        kappa:
 
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
     - 'basicThermo' : use basicThermo and default compressible::turbulenceModel
-       to calculate K
-    - 'solidThermo' : use basicSolidThermo K()
-    - 'directionalSolidThermo' directionalK()
+       to calculate kappa
+    - 'solidThermo' : use basicSolidThermo kappa()
+    - 'directionalSolidThermo' directionalKappa()
 
 SourceFiles
     temperatureCoupledBase.C
@@ -59,7 +60,7 @@ namespace Foam
 class temperatureCoupledBase
 {
 public:
-        //- Type of supplied K
+        //- Type of supplied Kappa
         enum KMethodType
         {
             BASICTHERMO,
@@ -81,7 +82,7 @@ private:
         const KMethodType method_;
 
         //- Name of thermal conductivity field (if looked up from database)
-        const word KName_;
+        const word kappaName_;
 
 
 public:
@@ -113,13 +114,13 @@ public:
         }
 
         //- Name of thermal conductivity field
-        const word& KName() const
+        const word& kappaName() const
         {
-            return KName_;
+            return kappaName_;
         }
 
         //- Given patch temperature calculate corresponding K field
-        tmp<scalarField> K(const scalarField& Tp) const;
+        tmp<scalarField> kappa(const scalarField& Tp) const;
 
         //- Write
         void write(Ostream&) const;

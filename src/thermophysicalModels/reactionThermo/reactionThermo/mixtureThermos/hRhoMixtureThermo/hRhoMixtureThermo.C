@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ void Foam::hRhoMixtureThermo<MixtureType>::calculate()
         rhoCells[celli] = mixture.rho(pCells[celli], TCells[celli]);
 
         muCells[celli] = mixture.mu(TCells[celli]);
-        alphaCells[celli] = mixture.alpha(TCells[celli]);
+        alphaCells[celli] = mixture.alphah(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -78,7 +78,7 @@ void Foam::hRhoMixtureThermo<MixtureType>::calculate()
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
                 pmu_[facei] = mixture.mu(pT[facei]);
-                palpha_[facei] = mixture.alpha(pT[facei]);
+                palpha_[facei] = mixture.alphah(pT[facei]);
             }
         }
         else
@@ -93,7 +93,7 @@ void Foam::hRhoMixtureThermo<MixtureType>::calculate()
                 ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture.rho(pp[facei], pT[facei]);
                 pmu_[facei] = mixture.mu(pT[facei]);
-                palpha_[facei] = mixture.alpha(pT[facei]);
+                palpha_[facei] = mixture.alphah(pT[facei]);
             }
         }
     }

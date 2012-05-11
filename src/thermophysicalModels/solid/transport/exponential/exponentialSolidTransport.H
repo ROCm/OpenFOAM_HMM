@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ class exponentialSolidTransport
     // Private data
 
         //- Constant thermal coefficient.
-        scalar K0_;
+        scalar kappa0_;
 
         //- Exponent coefficient
         scalar n0_;
@@ -79,7 +79,7 @@ class exponentialSolidTransport
         inline exponentialSolidTransport
         (
             const thermo& t,
-            const scalar K0,
+            const scalar kappa0,
             const scalar n0,
             const scalar Tref
         );
@@ -104,10 +104,7 @@ public:
     // Member functions
 
         //- Thermal conductivity [W/mK]
-        inline scalar K(const scalar T) const;
-
-        //- Thermal diffusivity [kg/ms]
-        inline scalar alpha(const scalar T) const;
+        inline scalar kappa(const scalar T) const;
 
 
     // Ostream Operator

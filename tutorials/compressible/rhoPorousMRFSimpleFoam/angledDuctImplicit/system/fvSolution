@@ -29,7 +29,7 @@ solvers
         mergeLevels     1;
     }
 
-    h
+    e
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -76,7 +76,7 @@ relaxationFactors
     {
         U               0.7;
         "(k|epsilon)"   0.9;
-        h               0.9;
+        e               0.9;
     }
 }
 

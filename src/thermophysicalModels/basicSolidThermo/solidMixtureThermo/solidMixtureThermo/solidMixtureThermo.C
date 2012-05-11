@@ -34,8 +34,8 @@ void Foam::solidMixtureThermo<MixtureType>::calculate()
 {
 
     scalarField& rhoCells = rho_.internalField();
-    scalarField& KCells = K_.internalField();
     scalarField& kappaCells = kappa_.internalField();
+    scalarField& kappaRadCells = kappaRad_.internalField();
     scalarField& sigmaSCells = sigmaS_.internalField();
     scalarField& emissivityCells = emissivity_.internalField();
 
@@ -44,9 +44,9 @@ void Foam::solidMixtureThermo<MixtureType>::calculate()
     forAll(iT, celli)
     {
         rhoCells[celli] = MixtureType::rho(iT[celli], celli);
-        kappaCells[celli] = MixtureType::kappa(iT[celli], celli);
+        kappaRadCells[celli] = MixtureType::kappaRad(iT[celli], celli);
         sigmaSCells[celli] = MixtureType::sigmaS(iT[celli], celli);
-        KCells[celli] = MixtureType::K(iT[celli], celli);
+        kappaCells[celli] = MixtureType::kappa(iT[celli], celli);
         emissivityCells[celli] = MixtureType::emissivity(iT[celli], celli);
     }
 
@@ -55,8 +55,8 @@ void Foam::solidMixtureThermo<MixtureType>::calculate()
     forAll(bT, patchI)
     {
         rho_.boundaryField()[patchI] == this->rho(patchI)();
-        K_.boundaryField()[patchI] == this->K(patchI)();
         kappa_.boundaryField()[patchI] == this->kappa(patchI)();
+        kappaRad_.boundaryField()[patchI] == this->kappaRad(patchI)();
         sigmaS_.boundaryField()[patchI] == this->sigmaS(patchI)();
         emissivity_.boundaryField()[patchI] == this->emissivity(patchI)();
     }
@@ -109,25 +109,25 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::sigmaS
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::kappa
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::kappaRad
 (
     const label patchI
 ) const
 {
     const scalarField& patchT = T_.boundaryField()[patchI];
-   const polyPatch& pp = mesh_.boundaryMesh()[patchI];
+    const polyPatch& pp = mesh_.boundaryMesh()[patchI];
     const labelUList& cells = pp.faceCells();
 
-    tmp<scalarField> tKappa(new scalarField(patchT.size()));
-    scalarField& kappa = tKappa();
+    tmp<scalarField> tKappaRad(new scalarField(patchT.size()));
+    scalarField& kappaRad = tKappaRad();
 
     forAll(patchT, celli)
     {
-        kappa[celli] =
-            MixtureType::kappa(patchT[celli], cells[celli]);
+        kappaRad[celli] =
+            MixtureType::kappaRad(patchT[celli], cells[celli]);
     }
 
-    return tKappa;
+    return tKappaRad;
 }
 
 
@@ -163,11 +163,11 @@ Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
 :
     basicSolidThermo(mesh),
     MixtureType(*this, mesh),
-    K_
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -190,11 +190,11 @@ Foam::solidMixtureThermo<MixtureType>::solidMixtureThermo
 :
     basicSolidThermo(mesh, dict),
     MixtureType(*this, mesh),
-    K_
+    kappa_
     (
         IOobject
         (
-            "K",
+            "kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -225,9 +225,10 @@ void Foam::solidMixtureThermo<MixtureType>::correct()
 
 
 template<class MixtureType>
-Foam::tmp<Foam::volScalarField> Foam::solidMixtureThermo<MixtureType>::K() const
+Foam::tmp<Foam::volScalarField> Foam::solidMixtureThermo<MixtureType>::
+kappa() const
 {
-    return K_;
+    return kappa_;
 }
 
 
@@ -352,7 +353,7 @@ Foam::solidMixtureThermo<MixtureType>::Hf() const
 
 
 template<class MixtureType>
-Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::K
+Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::kappa
 (
     const label patchI
 ) const
@@ -361,15 +362,15 @@ Foam::tmp<Foam::scalarField> Foam::solidMixtureThermo<MixtureType>::K
     const polyPatch& pp = mesh_.boundaryMesh()[patchI];
     const labelUList& cells = pp.faceCells();
 
-    tmp<scalarField> tK(new scalarField(patchT.size()));
-    scalarField& K = tK();
+    tmp<scalarField> tkappa(new scalarField(patchT.size()));
+    scalarField& kappa = tkappa();
 
     forAll(patchT, celli)
     {
-        K[celli] = MixtureType::K(patchT[celli], cells[celli]);
+        kappa[celli] = MixtureType::kappa(patchT[celli], cells[celli]);
     }
 
-    return tK;
+    return tkappa;
 }
 
 

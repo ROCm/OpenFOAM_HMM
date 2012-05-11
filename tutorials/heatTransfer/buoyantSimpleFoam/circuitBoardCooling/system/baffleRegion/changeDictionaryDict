@@ -24,9 +24,8 @@ dictionaryReplacement
             {
                 type                compressible::temperatureThermoBaffle;
                 neighbourFieldName  T;
-                K                   solidThermo;
-                KName               none;
-
+                kappa               solidThermo;
+                kappaName           none;
                 value               uniform 300;
             }
             baffleFaces2_side

@@ -35,12 +35,12 @@ Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
 )
 :
     thermo(dict),
-    K0_(0.0),
+    kappa0_(0.0),
     n0_(0.0),
     Tref_(0.0)
 {
     const dictionary& subDict = dict.subDict("transport");
-    K0_ = readScalar(subDict.lookup("K0"));
+    kappa0_ = readScalar(subDict.lookup("kappa0"));
     n0_ = readScalar(subDict.lookup("n0"));
     Tref_ = readScalar(subDict.lookup("Tref"));
 }
@@ -55,7 +55,7 @@ Foam::Ostream& Foam::operator<<
 )
 {
     operator<<(os, static_cast<const thermo&>(et));
-    os << tab << et.K0_  << tab << et.n0_ << tab << et.Tref_;
+    os << tab << et.kappa0_  << tab << et.n0_ << tab << et.Tref_;
 
     os.check
     (

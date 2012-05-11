@@ -139,7 +139,7 @@ void Foam::cylindricalInletVelocityFvPatchVectorField::updateCoeffs()
         (rpm*constant::mathematical::pi/30.0)*(hatAxis) ^ d
     );
 
-    operator==(tangVel + axis_*axialVelocity + radialVelocity*d);
+    operator==(tangVel + hatAxis*axialVelocity + radialVelocity*d/mag(d));
 
     fixedValueFvPatchField<vector>::updateCoeffs();
 }

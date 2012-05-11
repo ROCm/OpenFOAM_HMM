@@ -126,7 +126,7 @@ void reactingOneDim::updateQr()
                 const label cellI = cells[k];
                 const point& Cf1 = regionMesh().cellCentres()[cellI];
                 const scalar delta = mag(Cf1 - Cf0);
-                kappaInt += kappa_[cellI]*delta;
+                kappaInt += kappaRad_[cellI]*delta;
                 Qr_[cellI] = Qr0*exp(-kappaInt);
                 Cf0 = Cf1;
             }
@@ -294,7 +294,7 @@ void reactingOneDim::solveEnergy()
     fvScalarMatrix TEqn
     (
         fvm::ddt(rhoCp, T_)
-      - fvm::laplacian(K_, T_)
+      - fvm::laplacian(kappa_, T_)
      ==
         chemistrySh_
       + fvc::div(phiQr)
@@ -347,8 +347,8 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
     pyrolysisModel(modelType, mesh),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
     solidThermo_(solidChemistry_->solidThermo()),
+    kappaRad_(solidThermo_.kappaRad()),
     kappa_(solidThermo_.kappa()),
-    K_(solidThermo_.K()),
     rho_(solidThermo_.rho()),
     Ys_(solidThermo_.composition().Y()),
     T_(solidThermo_.T()),
@@ -449,8 +449,8 @@ reactingOneDim::reactingOneDim
     pyrolysisModel(modelType, mesh, dict),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
     solidThermo_(solidChemistry_->solidThermo()),
+    kappaRad_(solidThermo_.kappaRad()),
     kappa_(solidThermo_.kappa()),
-    K_(solidThermo_.K()),
     rho_(solidThermo_.rho()),
     Ys_(solidThermo_.composition().Y()),
     T_(solidThermo_.T()),
@@ -584,7 +584,7 @@ scalar reactingOneDim::solidRegionDiffNo() const
         surfaceScalarField KrhoCpbyDelta
         (
             regionMesh().surfaceInterpolation::deltaCoeffs()
-          * fvc::interpolate(K_)
+          * fvc::interpolate(kappa_)
           / fvc::interpolate(Cp()*rho_)
         );
 
@@ -619,15 +619,15 @@ const tmp<volScalarField> reactingOneDim::Cp() const
 }
 
 
-const volScalarField& reactingOneDim::kappa() const
+const volScalarField& reactingOneDim::kappaRad() const
 {
-    return kappa_;
+    return kappaRad_;
 }
 
 
-const volScalarField& reactingOneDim::K() const
+const volScalarField& reactingOneDim::kappa() const
 {
-    return K_;
+    return kappa_;
 }
 
 

@@ -159,7 +159,7 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::h
 
 
 template<class ThermoSolidType>
-Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::kappa
+Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::kappaRad
 (
     scalar T, label celli
 ) const
@@ -167,7 +167,7 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::kappa
     scalar tmp = 0.0;
     forAll(solidData_, i)
     {
-        tmp += solidData_[i].kappa(T)*X(i, celli, T);
+        tmp += solidData_[i].kappaRad(T)*X(i, celli, T);
     }
     return tmp;
 }
@@ -189,7 +189,7 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::sigmaS
 
 
 template<class ThermoSolidType>
-Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::K
+Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::kappa
 (
     scalar T, label celli
 ) const
@@ -197,7 +197,7 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoSolidType>::K
     scalar tmp = 0.0;
     forAll(solidData_, i)
     {
-        tmp += solidData_[i].K(T)*X(i, celli, T);
+        tmp += solidData_[i].kappa(T)*X(i, celli, T);
     }
     return tmp;
 }

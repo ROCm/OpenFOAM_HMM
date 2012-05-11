@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,13 +85,14 @@ int main(int argc, char *argv[])
             );
 
             phi = (rhoO/psi)*phid;
+            volScalarField Dp("Dp", rho*rAU);
 
             fvScalarMatrix pEqn
             (
                 fvm::ddt(psi, p)
               + fvc::div(phi)
               + fvm::div(phid, p)
-              - fvm::laplacian(rho*rAU, p)
+              - fvm::laplacian(Dp, p)
             );
 
             pEqn.solve();
