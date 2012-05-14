@@ -126,11 +126,11 @@ void Foam::enthalpyJumpFvPatchScalarField::updateCoeffs()
 
         if (db().foundObject<volScalarField>("h"))
         {
-            jump_ = thermo.h(jumpTb, faceCells)();
+            jump_ = thermo.h(jumpTb, faceCells);
         }
         else if (db().foundObject<volScalarField>("hs"))
         {
-            jump_ = thermo.hs(jumpTb, faceCells)();
+            jump_ = thermo.hs(jumpTb, faceCells);
         }
         else
         {
