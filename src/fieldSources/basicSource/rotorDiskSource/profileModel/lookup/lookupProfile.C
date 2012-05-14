@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,9 +65,9 @@ void Foam::lookupProfile::interpolateWeights
         ddx = 0.0;
         return;
     }
-    else if (i2 == values.size())
+    else if (i2 == nElem)
     {
-        i2 = values.size() - 1;
+        i2 = nElem - 1;
         i1 = i2;
         ddx = 0.0;
         return;

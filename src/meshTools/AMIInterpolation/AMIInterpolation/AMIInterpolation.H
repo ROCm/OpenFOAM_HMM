@@ -429,36 +429,36 @@ public:
 
 
             //- Interpolate from target to source with supplied binary op
-            template<class Type, class BinaryOp>
+            template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
                 const Field<Type>& fld,
-                const BinaryOp& bop
+                const CombineOp& cop
             ) const;
 
             //- Interpolate from target tmp field to source with supplied
             //  binary op
-            template<class Type, class BinaryOp>
+            template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToSource
             (
                 const tmp<Field<Type> >& tFld,
-                const BinaryOp& bop
+                const CombineOp& cop
             ) const;
 
             //- Interpolate from source to target with supplied op
-            template<class Type, class BinaryOp>
+            template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToTarget
             (
                 const Field<Type>& fld,
-                const BinaryOp& bop
+                const CombineOp& cop
             ) const;
 
             //- Interpolate from source tmp field to target with supplied op
-            template<class Type, class BinaryOp>
+            template<class Type, class CombineOp>
             tmp<Field<Type> > interpolateToTarget
             (
                 const tmp<Field<Type> >& tFld,
-                const BinaryOp& bop
+                const CombineOp& cop
             ) const;
 
             //- Interpolate from target to source

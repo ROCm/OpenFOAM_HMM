@@ -152,13 +152,17 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     {
         Pstream::mapCombineGather(polyhedralFaces, plusEqOp<label>());
 
-        Info<< "    Breakdown of polyhedra by number of faces:" << endl;
-        Info<< "        faces" << "   number of cells" << endl;
+        Info<< "    Breakdown of polyhedra by number of faces:" << nl
+            << "        faces" << "   number of cells" << endl;
 
-        forAllConstIter(Map<label>, polyhedralFaces, iter)
+        labelList sortedKeys = polyhedralFaces.sortedToc();
+
+        forAll(sortedKeys, keyI)
         {
+            label nFaces = sortedKeys[keyI];
+
             Info<< setf(std::ios::right) << setw(13)
-                << iter.key() << "   " << iter() << nl;
+                << nFaces << "   " << polyhedralFaces[nFaces] << nl;
         }
     }
 
