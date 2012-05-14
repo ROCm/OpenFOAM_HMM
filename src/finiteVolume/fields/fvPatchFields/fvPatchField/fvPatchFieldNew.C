@@ -65,10 +65,8 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
      || actualPatchType != p.type()
     )
     {
-        Info << actualPatchType << endl;
-        Info << p.type() << endl;
         typename patchConstructorTable::iterator patchTypeCstrIter =
-            patchConstructorTablePtr_->find(actualPatchType);//p.type());
+            patchConstructorTablePtr_->find(p.type());
 
         if (patchTypeCstrIter != patchConstructorTablePtr_->end())
         {

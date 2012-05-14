@@ -33,6 +33,7 @@ License
 #include "fixedInternalEnergyFvPatchScalarField.H"
 #include "gradientInternalEnergyFvPatchScalarField.H"
 #include "mixedInternalEnergyFvPatchScalarField.H"
+#include "temperatureJumpFvPatchScalarField.H"
 #include "enthalpyJumpFvPatchScalarField.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
@@ -69,7 +70,7 @@ Foam::wordList Foam::basicThermo::hBoundaryTypes()
         {
             hbt[patchi] = mixedEnthalpyFvPatchScalarField::typeName;
         }
-        else if (isA<enthalpyJumpFvPatchScalarField>(tbf[patchi]))
+        else if (isA<temperatureJumpFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = enthalpyJumpFvPatchScalarField::typeName;
         }
