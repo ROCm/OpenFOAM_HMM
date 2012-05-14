@@ -118,9 +118,11 @@ Foam::hRhoThermo<MixtureType>::hRhoThermo(const fvMesh& mesh)
         ),
         mesh,
         dimEnergy/dimMass,
-        this->hBoundaryTypes()
+        this->hBoundaryTypes(),
+        mesh.boundaryMesh().types()
     )
 {
+
     scalarField& hCells = h_.internalField();
     const scalarField& TCells = this->T_.internalField();
 
@@ -138,6 +140,7 @@ Foam::hRhoThermo<MixtureType>::hRhoThermo(const fvMesh& mesh)
     hBoundaryCorrection(h_);
 
     calculate();
+
 }
 
 

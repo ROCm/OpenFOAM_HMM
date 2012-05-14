@@ -33,6 +33,8 @@ License
 #include "fixedInternalEnergyFvPatchScalarField.H"
 #include "gradientInternalEnergyFvPatchScalarField.H"
 #include "mixedInternalEnergyFvPatchScalarField.H"
+#include "temperatureJumpFvPatchScalarField.H"
+#include "enthalpyJumpFvPatchScalarField.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -64,9 +66,13 @@ Foam::wordList Foam::basicThermo::hBoundaryTypes()
         {
             hbt[patchi] = gradientEnthalpyFvPatchScalarField::typeName;
         }
-        else if (isA<mixedFvPatchScalarField>(tbf[patchi]))
+        else if(isA<mixedFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = mixedEnthalpyFvPatchScalarField::typeName;
+        }
+        else if (isA<temperatureJumpFvPatchScalarField>(tbf[patchi]))
+        {
+            hbt[patchi] = enthalpyJumpFvPatchScalarField::typeName;
         }
     }
 
@@ -85,7 +91,7 @@ void Foam::basicThermo::hBoundaryCorrection(volScalarField& h)
             refCast<gradientEnthalpyFvPatchScalarField>(hbf[patchi]).gradient()
                 = hbf[patchi].fvPatchField::snGrad();
         }
-        else if (isA<mixedEnthalpyFvPatchScalarField>(hbf[patchi]))
+        else if(isA<mixedEnthalpyFvPatchScalarField>(hbf[patchi]))
         {
             refCast<mixedEnthalpyFvPatchScalarField>(hbf[patchi]).refGrad()
                 = hbf[patchi].fvPatchField::snGrad();

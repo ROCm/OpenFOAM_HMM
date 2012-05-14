@@ -10,4 +10,6 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -L$(FOAM_USER_LIBBIN) \
+        -lFvPatchScalarFieldEnthalpyJump
