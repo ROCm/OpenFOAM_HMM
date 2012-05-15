@@ -33,7 +33,7 @@ Description
 
         pressureGradientExplicitSourceCoeffs
         {
-            UName       U;          // name of velocity field
+            fieldNames  (U);        // name of velocity field
             Ubar        (10.0 0 0); // desired average velocity
             gradPini    gradPini [0 2 -2 0 0] 0; // initial pressure gradient
             flowDir     (1 0 0);    // flow direction
@@ -82,6 +82,9 @@ class pressureGradientExplicitSource
         //- Flow direction
         vector flowDir_;
 
+        //- Matrix 1/A coefficients field pointer
+        autoPtr<volScalarField> invAPtr_;
+
 
     // Private Member Functions
 
@@ -125,6 +128,13 @@ public:
 
             //- Add explicit contribution to equation
             virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
+
+            //- Set 1/A coefficient
+            virtual void setValue
+            (
+                fvMatrix<vector>& eqn,
+                const label fieldI
+            );
 
 
         // I-O
