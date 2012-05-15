@@ -25,7 +25,6 @@ License
 
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
-#include "tetrahedron.H"
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
