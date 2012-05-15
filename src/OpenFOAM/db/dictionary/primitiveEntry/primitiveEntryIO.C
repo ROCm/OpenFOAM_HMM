@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -225,9 +225,9 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         const token& t = operator[](i);
         if (t.type() == token::VERBATIMSTRING)
         {
-            os  << token::HASH << token::BEGIN_BLOCK;
-            os.writeQuoted(t.stringToken(), false);
-            os  << token::HASH << token::END_BLOCK;
+            // Bypass token output operator to avoid losing verbatimness.
+            // Handle in Ostreams themselves
+            os.write(t);
         }
         else
         {
