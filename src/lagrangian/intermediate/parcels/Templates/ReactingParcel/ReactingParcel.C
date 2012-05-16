@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,12 +80,15 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
 )
 {
     scalar addedMass = 0.0;
+    scalar maxMassI = 0.0;
     forAll(td.cloud().rhoTrans(), i)
     {
-        addedMass += td.cloud().rhoTrans(i)[cellI];
+        scalar dm = td.cloud().rhoTrans(i)[cellI];
+        maxMassI = max(maxMassI, mag(dm));
+        addedMass += dm;
     }
 
-    if (addedMass < ROOTVSMALL)
+    if (maxMassI < ROOTVSMALL)
     {
         return;
     }
@@ -95,16 +98,13 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
 
     const scalar massCellNew = massCell + addedMass;
-    this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
+    this->Uc_ = (this->Uc_*massCell + td.cloud().UTrans()[cellI])/massCellNew;
 
     scalar CpEff = 0.0;
-    if (addedMass > ROOTVSMALL)
+    forAll(td.cloud().rhoTrans(), i)
     {
-        forAll(td.cloud().rhoTrans(), i)
-        {
-            scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
-        }
+        scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
+        CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
     }
 
     const scalar Cpc = td.CpInterp().psi()[cellI];
@@ -152,7 +152,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 )
 {
     // No correction if total concentration of emitted species is small
-    if (sum(Cs) < SMALL)
+    if (!td.cloud().heatTransfer().BirdCorrection() || (sum(Cs) < SMALL))
     {
         return;
     }

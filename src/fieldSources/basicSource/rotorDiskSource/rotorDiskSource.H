@@ -149,6 +149,7 @@ protected:
         word rhoName_;
 
         //- Rotational speed [rad/s]
+        //  Positive anti-clockwise when looking along -ve lift direction
         scalar omega_;
 
         //- Number of blades
@@ -166,15 +167,6 @@ protected:
 
         //- Blade flap coefficients [rad/s]
         flapData flap_;
-
-        //- Trim model
-        autoPtr<trimModel> trim_;
-
-        //- Blade data
-        bladeModel blade_;
-
-        //- Profile data
-        profileModelList profiles_;
 
         //- Cell centre positions in local rotor frame
         //  (Cylindrical r, theta, z)
@@ -194,6 +186,15 @@ protected:
 
         //- Maximum radius
         scalar rMax_;
+
+        //- Trim model
+        autoPtr<trimModel> trim_;
+
+        //- Blade data
+        bladeModel blade_;
+
+        //- Profile data
+        profileModelList profiles_;
 
 
     // Protected Member Functions

@@ -446,15 +446,15 @@ Foam::rotorDiskSource::rotorDiskSource
     inletVelocity_(vector::zero),
     tipEffect_(1.0),
     flap_(),
-    trim_(trimModel::New(*this, coeffs_)),
-    blade_(coeffs_.subDict("blade")),
-    profiles_(coeffs_.subDict("profiles")),
     x_(cells_.size(), vector::zero),
     R_(cells_.size(), I),
     invR_(cells_.size(), I),
     area_(cells_.size(), 0.0),
     coordSys_(false),
-    rMax_(0.0)
+    rMax_(0.0),
+    trim_(trimModel::New(*this, coeffs_)),
+    blade_(coeffs_.subDict("blade")),
+    profiles_(coeffs_.subDict("profiles"))
 {
     read(dict);
 }
@@ -521,9 +521,16 @@ void Foam::rotorDiskSource::calculate
             scalar invDr = 0.0;
             blade_.interpolate(radius, twist, chord, i1, i2, invDr);
 
+            // flip geometric angle if blade is spinning in reverse (clockwise)
+            scalar alphaGeom = alphag[i] + twist;
+            if (omega_ < 0)
+            {
+                alphaGeom = mathematical::pi - alphaGeom;
+            }
+
             // effective angle of attack
             scalar alphaEff =
-                mathematical::pi + atan2(Uc.z(), Uc.y()) - (alphag[i] + twist);
+                mathematical::pi + atan2(Uc.z(), Uc.y()) - alphaGeom;
 
             if (alphaEff > mathematical::pi)
             {

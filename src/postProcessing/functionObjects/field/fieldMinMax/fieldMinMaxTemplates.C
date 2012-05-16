@@ -88,16 +88,43 @@ void Foam::fieldMinMax::calcMinMaxFields
                         fieldMinMaxFilePtr_()
                             << obr_.time().value() << token::TAB
                             << fieldName << token::TAB
-                            << minValue << token::TAB << minC << token::TAB
-                            << maxValue << token::TAB << maxC << endl;
+                            << minValue << token::TAB << minC;
+
+                        if (Pstream::parRun())
+                        {
+                            fieldMinMaxFilePtr_() << token::TAB << minI;
+                        }
+
+                        fieldMinMaxFilePtr_()
+                             << token::TAB << maxValue << token::TAB << maxC;
+
+                        if (Pstream::parRun())
+                        {
+                            fieldMinMaxFilePtr_() << token::TAB << maxI;
+                        }
+
+                        fieldMinMaxFilePtr_() << endl;
                     }
 
                     if (log_)
                     {
                         Info<< "    min(mag(" << fieldName << ")) = "
-                            << minValue << " at position " << minC << nl
-                            << "    max(mag(" << fieldName << ")) = "
-                            << maxValue << " at position " << maxC << nl;
+                            << minValue << " at position " << minC;
+
+                        if (Pstream::parRun())
+                        {
+                            Info<< " on processor " << minI;
+                        }
+
+                        Info<< nl << "    max(mag(" << fieldName << ")) = "
+                            << maxValue << " at position " << maxC;
+
+                        if (Pstream::parRun())
+                        {
+                            Info<< " on processor " << maxI;
+                        }
+
+                        Info<< endl;
                     }
                 }
                 break;
@@ -142,16 +169,43 @@ void Foam::fieldMinMax::calcMinMaxFields
                         fieldMinMaxFilePtr_()
                             << obr_.time().value() << token::TAB
                             << fieldName << token::TAB
-                            << minValue << token::TAB << minC << token::TAB
-                            << maxValue << token::TAB << maxC << endl;
+                            << minValue << token::TAB << minC;
+
+                        if (Pstream::parRun())
+                        {
+                            fieldMinMaxFilePtr_() << token::TAB << minI;
+                        }
+
+                        fieldMinMaxFilePtr_()
+                             << token::TAB << maxValue << token::TAB << maxC;
+
+                        if (Pstream::parRun())
+                        {
+                            fieldMinMaxFilePtr_() << token::TAB << maxI;
+                        }
+
+                        fieldMinMaxFilePtr_() << endl;
                     }
 
                     if (log_)
                     {
                         Info<< "    min(" << fieldName << ") = "
-                            << minValue << " at position " << minC << nl
-                            << "    max(" << fieldName << ") = "
-                            << maxValue << " at position " << maxC << nl;
+                            << minValue << " at position " << minC;
+
+                        if (Pstream::parRun())
+                        {
+                            Info<< " on processor " << minI;
+                        }
+
+                        Info<< nl << "    max(" << fieldName << ") = "
+                            << maxValue << " at position " << maxC;
+
+                        if (Pstream::parRun())
+                        {
+                            Info<< " on processor " << maxI;
+                        }
+
+                        Info<< endl;
                     }
                 }
                 break;

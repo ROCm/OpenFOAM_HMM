@@ -43,7 +43,7 @@ inline bool Foam::pointEdgeCollapse::update
             << "problem." << abort(FatalError);
     }
 
-    if (w2.collapseIndex_ == -1)
+    if (w2.collapseIndex_ == -1 || collapseIndex_ == -1)
     {
         // Not marked for collapse; only happens on edges.
         return false;
@@ -56,11 +56,11 @@ inline bool Foam::pointEdgeCollapse::update
     }
     else
     {
-        // Same coordinate. Same string?
+        // Take over w2 if it is 'better'
+
         if (w2.collapseIndex_ < collapseIndex_)
         {
-            // Take over string index from w2 (and also coordinate but this
-            // was same)
+            // Take over string index and coordinate from w2
             operator=(w2);
             return true;
         }
@@ -85,35 +85,6 @@ inline bool Foam::pointEdgeCollapse::update
         {
             return false;
         }
-
-//        if (samePoint(w2.collapsePoint_))
-//        {
-//            // Same coordinate. Same string?
-//            if (w2.collapseIndex_ < collapseIndex_)
-//            {
-//                // Take over string index from w2 (and also coordinate but
-//                // this was same)
-//                operator=(w2);
-//                return true;
-//            }
-//            else
-//            {
-//                return false;
-//            }
-//        }
-//        else
-//        {
-//            // Find nearest coordinate
-//            if (magSqr(w2.collapsePoint_) < magSqr(collapsePoint_))
-//            {
-//                operator=(w2);
-//                return true;
-//            }
-//            else
-//            {
-//                return false;
-//            }
-//        }
     }
 }
 

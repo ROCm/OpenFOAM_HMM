@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -165,8 +165,14 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // String
-        case token::STRING :
         case token::VERBATIMSTRING :
+        {
+            // Recurse to read actual string
+            read(t);
+            t.type() = token::VERBATIMSTRING;
+            return *this;
+        }
+        case token::STRING :
         {
             string* pval = new string;
             if (read(*pval))

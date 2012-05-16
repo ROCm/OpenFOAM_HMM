@@ -118,7 +118,8 @@ Foam::hsRhoThermo<MixtureType>::hsRhoThermo(const fvMesh& mesh)
         ),
         mesh,
         dimEnergy/dimMass,
-        this->hBoundaryTypes()
+        this->hBoundaryTypes(),
+        mesh.boundaryMesh().types()
     )
 {
     scalarField& hsCells = hs_.internalField();

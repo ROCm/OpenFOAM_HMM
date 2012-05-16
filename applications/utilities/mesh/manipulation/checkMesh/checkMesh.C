@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,21 @@ Application
 Description
     Checks validity of a mesh
 
+Usage
+    - checkMesh [OPTION]
+
+    \param -allGeometry \n
+    Checks all (including non finite-volume specific) geometry
+
+    \param -allTopology \n
+    Checks all (including non finite-volume specific) addressing
+
+    \param -meshQualityDict \n
+    Checks against user defined (in \a system/meshQualityDict) quality settings
+
+    \param -region \<name\> \n
+    Specify an alternative mesh region.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -39,6 +54,7 @@ Description
 #include "printMeshStats.H"
 #include "checkTopology.H"
 #include "checkGeometry.H"
+#include "checkMeshQuality.H"
 
 using namespace Foam;
 
@@ -63,6 +79,11 @@ int main(int argc, char *argv[])
         "allTopology",
         "include extra topology checks"
     );
+    argList::addBoolOption
+    (
+        "meshQualityDict",
+        "read user-defined mesh quality criterions from system/meshQualityDict"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -72,6 +93,46 @@ int main(int argc, char *argv[])
     const bool noTopology  = args.optionFound("noTopology");
     const bool allGeometry = args.optionFound("allGeometry");
     const bool allTopology = args.optionFound("allTopology");
+    const bool meshQualityDict = args.optionFound("meshQualityDict");
+
+    if (noTopology)
+    {
+        Info<< "Disabling all topology checks." << nl << endl;
+    }
+    if (allTopology)
+    {
+        Info<< "Enabling all (cell, face, edge, point) topology checks."
+            << nl << endl;
+    }
+    if (allGeometry)
+    {
+        Info<< "Enabling all geometry checks." << nl << endl;
+    }
+    if (meshQualityDict)
+    {
+        Info<< "Enabling user-defined geometry checks." << nl << endl;
+    }
+
+
+    autoPtr<IOdictionary> qualDict;
+    if (meshQualityDict)
+    {
+        qualDict.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    "meshQualityDict",
+                    mesh.time().system(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+           )
+        );
+    }
+
 
     forAll(timeDirs, timeI)
     {
@@ -96,25 +157,31 @@ int main(int argc, char *argv[])
 
             printMeshStats(mesh, allTopology);
 
-            label noFailedChecks = 0;
+            label nFailedChecks = 0;
 
             if (!noTopology)
             {
-                noFailedChecks += checkTopology(mesh, allTopology, allGeometry);
+                nFailedChecks += checkTopology(mesh, allTopology, allGeometry);
             }
 
-            noFailedChecks += checkGeometry(mesh, allGeometry);
+            nFailedChecks += checkGeometry(mesh, allGeometry);
 
-            // Note: no reduction in noFailedChecks necessary since is
+            if (meshQualityDict)
+            {
+                nFailedChecks += checkMeshQuality(mesh, qualDict());
+            }
+
+
+            // Note: no reduction in nFailedChecks necessary since is
             //       counter of checks, not counter of failed cells,faces etc.
 
-            if (noFailedChecks == 0)
+            if (nFailedChecks == 0)
             {
                 Info<< "\nMesh OK.\n" << endl;
             }
             else
             {
-                Info<< "\nFailed " << noFailedChecks << " mesh checks.\n"
+                Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
                     << endl;
             }
         }
@@ -123,6 +190,12 @@ int main(int argc, char *argv[])
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
             label nFailedChecks = checkGeometry(mesh, allGeometry);
+
+            if (meshQualityDict)
+            {
+                nFailedChecks += checkMeshQuality(mesh, qualDict());
+            }
+
 
             if (nFailedChecks)
             {
