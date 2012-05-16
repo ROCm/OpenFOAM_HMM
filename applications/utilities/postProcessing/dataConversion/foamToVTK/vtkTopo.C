@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,7 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
     const cellModel& tet = *(cellModeller::lookup("tet"));
     const cellModel& pyr = *(cellModeller::lookup("pyr"));
     const cellModel& prism = *(cellModeller::lookup("prism"));
+    const cellModel& wedge = *(cellModeller::lookup("wedge"));
     const cellModel& tetWedge = *(cellModeller::lookup("tetWedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
@@ -77,7 +78,7 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
             if
             (
                 model != hex
-                // && model != wedge    // See above.
+             && model != wedge    // See above.
              && model != prism
              && model != pyr
              && model != tet
@@ -164,21 +165,21 @@ Foam::vtkTopo::vtkTopo(const polyMesh& mesh)
 
             cellTypes_[cellI] = VTK_WEDGE;
         }
-//        else if (cellModel == wedge)
-//        {
-//            // Treat as squeezed hex
-//            vtkVerts.setSize(8);
-//            vtkVerts[0] = cellShape[0];
-//            vtkVerts[1] = cellShape[1];
-//            vtkVerts[2] = cellShape[2];
-//            vtkVerts[3] = cellShape[0];
-//            vtkVerts[4] = cellShape[3];
-//            vtkVerts[5] = cellShape[4];
-//            vtkVerts[6] = cellShape[5];
-//            vtkVerts[7] = cellShape[6];
-//
-//            cellTypes_[cellI] = VTK_HEXAHEDRON;
-//        }
+        else if (cellModel == wedge)
+        {
+            // Treat as squeezed hex
+            vtkVerts.setSize(8);
+            vtkVerts[0] = cellShape[0];
+            vtkVerts[1] = cellShape[1];
+            vtkVerts[2] = cellShape[2];
+            vtkVerts[3] = cellShape[2];
+            vtkVerts[4] = cellShape[3];
+            vtkVerts[5] = cellShape[4];
+            vtkVerts[6] = cellShape[5];
+            vtkVerts[7] = cellShape[6];
+
+            cellTypes_[cellI] = VTK_HEXAHEDRON;
+        }
         else if (cellModel == hex)
         {
             vtkVerts = cellShape;
