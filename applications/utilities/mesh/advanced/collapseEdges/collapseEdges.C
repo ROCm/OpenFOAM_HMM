@@ -993,7 +993,7 @@ PackedBoolList checkMeshQuality(const polyMesh& mesh)
     (
         IOobject
         (
-            "meshQualityControls",
+            "meshQualityDict",
             mesh.time().system(),
             mesh.time(),
             IOobject::MUST_READ,
