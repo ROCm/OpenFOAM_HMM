@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,6 +50,7 @@ Description
 #include "PointEdgeWave.H"
 #include "pointEdgeCollapse.H"
 #include "motionSmoother.H"
+#include "removePoints.H"
 
 using namespace Foam;
 
@@ -788,51 +789,61 @@ label mergeEdges
     labelList& collapseEdge
 )
 {
-    const pointField& points = mesh.points();
     const edgeList& edges = mesh.edges();
     const labelListList& pointEdges = mesh.pointEdges();
 
+    // Point removal engine
+    removePoints pointRemover(mesh, false);
+
+    // Find out points that can be deleted
+    boolList pointCanBeDeleted;
+    label nTotRemove = pointRemover.countPointUsage(maxCos, pointCanBeDeleted);
+
+
+    // Rework point-to-remove into edge-to-collapse.
+
     label nCollapsed = 0;
 
-    forAll(pointEdges, pointI)
+    if (nTotRemove > 0)
     {
-        const labelList& pEdges = pointEdges[pointI];
-
-        if (pEdges.size() == 2 && boundaryPoint[pointI] <= 0)
+        forAll(pointEdges, pointI)
         {
-            // Collapse only if none of the points part of merge network and
-            // none protected (minEdgeLen < 0)
-            label e0 = pEdges[0];
-            label e1 = pEdges[1];
-
-            if
-            (
-                collapseEdge[e0] == -1
-             && minEdgeLen[e0] >= 0
-             && collapseEdge[e1] == -1
-             && minEdgeLen[e1] >= 0
-            )
+            if (pointCanBeDeleted[pointI])
             {
-                const edge& leftE = edges[e0];
-                const edge& rightE = edges[e1];
+                const labelList& pEdges = pointEdges[pointI];
 
-                // Get the two vertices on both sides of the point
-                label leftV = leftE.otherVertex(pointI);
-                label rightV = rightE.otherVertex(pointI);
-
-                // Check if the two edge are in line
-                vector leftVec = points[pointI] - points[leftV];
-                leftVec /= mag(leftVec) + VSMALL;
-
-                vector rightVec = points[rightV] - points[pointI];
-                rightVec /= mag(rightVec) + VSMALL;
-
-                if ((leftVec & rightVec) > maxCos)
+                if (pEdges.size() == 2)
                 {
-                    // Collapse one (left) side of the edge. Make pointI
-                    // the master.
-                    collapseEdge[e0] = findIndex(leftE, pointI);
-                    nCollapsed++;
+                    // Always the case?
+
+                    label e0 = pEdges[0];
+                    label e1 = pEdges[1];
+
+                    if
+                    (
+                        collapseEdge[e0] == -1
+                     && minEdgeLen[e0] >= 0
+                     && collapseEdge[e1] == -1
+                     && minEdgeLen[e1] >= 0
+                    )
+                    {
+                        // Get the two vertices on both sides of the point
+                        label leftV = edges[e0].otherVertex(pointI);
+                        label rightV = edges[e1].otherVertex(pointI);
+
+                        // Can collapse pointI onto either leftV or rightV.
+                        // Preferentially choose an internal point to hopefully
+                        // give less distortion
+
+                        if (boundaryPoint[leftV] == -1)
+                        {
+                            collapseEdge[e0] = findIndex(edges[e0], leftV);
+                        }
+                        else
+                        {
+                            collapseEdge[e1] = findIndex(edges[e1], rightV);
+                        }
+                    }
                 }
             }
         }
