@@ -10,12 +10,14 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      extrudeProperties;
+    object      extrudeMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // What to extrude:
 //      patch   : from patch of another case ('sourceCase')
+//      mesh    : as above but with original case included
+//      surface : from externally read surface
 
 constructFrom patch;
 sourceCase "../wingMotion_snappyHexMesh";
@@ -24,7 +26,8 @@ sourcePatches (front);
 // If construct from patch: patch to use for back (can be same as sourcePatch)
 exposedPatchName back;
 
-// Flip surface normals before usage.
+// Flip surface normals before usage. Valid only for extrude from surface or
+// patch.
 flipNormals false;
 
 //- Linear extrusion in point-normal direction
@@ -41,7 +44,10 @@ linearNormalCoeffs
 
 // Do front and back need to be merged? Usually only makes sense for 360
 // degree wedges.
-mergeFaces false;
+mergeFaces false;   //true;
+
+// Merge small edges. Fraction of bounding box.
+mergeTol 0;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
