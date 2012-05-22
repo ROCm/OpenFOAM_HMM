@@ -15,6 +15,9 @@
     const volScalarField& kappa = tkappa();
     //const volSymmTensorField& K = tK();
 
+    tmp<volScalarField> trhoCp = cp*rho;
+    const volScalarField& rhoCp = trhoCp();
+
     volScalarField& T = thermo.T();
 
     IObasicSourceList& sources = solidHeatSources[i];

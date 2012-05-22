@@ -10,7 +10,7 @@ if (finalIter)
         (
             fvm::ddt(betav*rho*cp, T)
           - fvm::laplacian(betav*kappa, T, "laplacian(K,T)")
-          + sources(rho, T)
+          + sources(rhoCp, T)
         );
 
         TEqn().relax();
