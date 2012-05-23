@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,33 +47,34 @@ void Foam::bladeModel::interpolateWeights
     scalar& ddx
 ) const
 {
-    scalar x = -GREAT;
+    i2 = 0;
     label nElem = values.size();
 
-    i2 = 0;
-    while ((x < xIn) && (i2 < nElem))
+    if (nElem == 1)
     {
-        x = values[i2];
-        i2++;
-    }
-
-    if (i2 == 0)
-    {
-        i1 = i2;
-        ddx = 0.0;
-        return;
-    }
-    else if (i2 == values.size())
-    {
-        i2 = values.size() - 1;
         i1 = i2;
         ddx = 0.0;
         return;
     }
     else
     {
-        i1 = i2 - 1;
-        ddx = (xIn - values[i1])/(values[i2] - values[i1]);
+        while ((values[i2] < xIn) && (i2 < nElem))
+        {
+            i2++;
+        }
+
+        if (i2 == nElem)
+        {
+            i2 = nElem - 1;
+            i1 = i2;
+            ddx = 0.0;
+            return;
+        }
+        else
+        {
+            i1 = i2 - 1;
+            ddx = (xIn - values[i1])/(values[i2] - values[i1]);
+        }
     }
 }
 
@@ -120,14 +121,8 @@ Foam::bladeModel::bladeModel(const dictionary& dict)
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::bladeModel::bladeModel"
-            "("
-                "const dictionary&, "
-                "const word&"
-            ")"
-        )   << "No blade data specified" << exit(FatalError);
+        FatalErrorIn("Foam::bladeModel::bladeModel(const dictionary&)")
+            << "No blade data specified" << exit(FatalError);
     }
 }
 
