@@ -123,14 +123,6 @@ void writeMesh
 int main(int argc, char *argv[])
 {
 #   include "addOverwriteOption.H"
-
-    Foam::argList::addBoolOption
-    (
-        "checkOnly",
-        "check existing mesh against snappyHexMeshDict settings"
-    );
-
-
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -140,8 +132,6 @@ int main(int argc, char *argv[])
         << runTime.cpuTimeIncrement() << " s" << endl;
 
     const bool overwrite = args.optionFound("overwrite");
-
-    const bool checkOnly = args.optionFound("checkOnly");
 
     // Check patches and faceZones are synchronised
     mesh.boundaryMesh().checkParallelSync(true);
@@ -183,36 +173,6 @@ int main(int argc, char *argv[])
         readScalar(meshDict.lookup("mergeTolerance"))
     );
 
-
-    if (checkOnly)
-    {
-        Info<< "Checking initial mesh ..." << endl;
-        faceSet wrongFaces(mesh, "wrongFaces", mesh.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
-
-        const label nInitErrors = returnReduce
-        (
-            wrongFaces.size(),
-            sumOp<label>()
-        );
-
-        Info<< "Detected " << nInitErrors << " illegal faces"
-            << " (concave, zero area or negative cell pyramid volume)"
-            << endl;
-
-        if (nInitErrors > 0)
-        {
-            Info<< "Writing " << nInitErrors
-                << " faces in error to set "
-                << wrongFaces.name() << endl;
-            wrongFaces.instance() = mesh.pointsInstance();
-            wrongFaces.write();
-        }
-
-        Info<< "End\n" << endl;
-
-        return 0;
-    }
 
 
     // Read decomposePar dictionary

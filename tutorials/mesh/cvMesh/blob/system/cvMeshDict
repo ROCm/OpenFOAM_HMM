@@ -92,6 +92,8 @@ surfaceConformation
 
     surfaceConformationRebuildFrequency 10;
 
+    specialiseFeaturePoints off;
+
     conformationControls
     {
         initial
@@ -230,18 +232,8 @@ polyMeshFiltering
 
 meshQualityControls
 {
-    maxNonOrtho         65;
-    maxBoundarySkewness 50;
-    maxInternalSkewness 10;
-    maxConcave          80;
-    minVol              1e-20;
-    minTetQuality       1e-30;
-    minArea             -1;
-    minTwist            0.0;
-    minDeterminant      0.001;
-    minFaceWeight       0.02;
-    minVolRatio         0.01;
-    minTriangleTwist    -1;
+    #include "meshQualityDict"
 }
+
 
 // ************************************************************************* //

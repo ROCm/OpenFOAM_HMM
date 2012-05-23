@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -884,6 +884,25 @@ void Foam::mapDistribute::applyInverseTransforms
             field[elems[i]] = transformFld[i];
         }
     }
+}
+
+
+//- Distribute data using default commsType.
+template<class T>
+void Foam::mapDistribute::distribute
+(
+    DynamicList<T>& fld,
+    const bool dummyTransform,
+    const int tag
+) const
+{
+    fld.shrink();
+
+    List<T>& fldList = static_cast<List<T>& >(fld);
+
+    distribute(fldList, dummyTransform, tag);
+
+    fld.setCapacity(fldList.size());
 }
 
 

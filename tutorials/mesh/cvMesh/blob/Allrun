@@ -6,7 +6,8 @@ cd ${0%/*} || exit 1    # run from this directory
 
 runApplication blockMesh
 runApplication cvMesh
-runApplication snappyHexMesh
+#runApplication collapseEdges 1e-10 180 -overwrite
+runApplication snappyHexMesh -overwrite
 runApplication checkMesh -constant -allGeometry -allTopology
 
 # ----------------------------------------------------------------- end-of-file

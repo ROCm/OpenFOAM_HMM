@@ -31,7 +31,8 @@ exposedPatchName movingWall;
 // If construct from surface:
 surface "movingWall.stl";
 
-// Flip surface normals before usage.
+// Flip surface normals before usage. Valid only for extrude from surface or
+// patch.
 flipNormals false;
 
 //- Linear extrusion in point-normal direction

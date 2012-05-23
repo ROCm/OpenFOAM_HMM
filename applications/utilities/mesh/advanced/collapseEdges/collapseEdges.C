@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,59 +28,33 @@ Description
     - merge two edges if they are in line. Maximum angle provided as argument.
     - remove unused points.
 
-    Cannot remove cells. Can remove faces and points but does not check
+    Optionally removes cells. Can remove faces and points but does not check
     for nonsense resulting topology.
 
     When collapsing an edge with one point on the boundary it will leave
     the boundary point intact. When both points inside it chooses random. When
-    both points on boundary random again. Note: it should in fact use features
-    where if one point is on a feature it collapses to that one. Alas we don't
-    have features on a polyMesh.
+    both points on boundary random again.
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "Time.H"
 #include "polyTopoChange.H"
-#include "polyTopoChanger.H"
-#include "polyMesh.H"
 #include "fvMesh.H"
 #include "mapPolyMesh.H"
 #include "mathematicalConstants.H"
 #include "PackedBoolList.H"
-#include "SortableList.H"
 #include "unitConversion.H"
 #include "globalMeshData.H"
 #include "globalIndex.H"
 #include "PointEdgeWave.H"
 #include "pointEdgeCollapse.H"
 #include "motionSmoother.H"
-
-#include "OFstream.H"
-#include "meshTools.H"
+#include "removePoints.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-label findIndex
-(
-    const labelList& elems,
-    const label start,
-    const label size,
-    const label val
-)
-{
-    for (label i = start; i < size; i++)
-    {
-        if (elems[i] == val)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
 
 void filterFace
 (
@@ -121,7 +95,7 @@ void filterFace
         }
         else
         {
-            if (findIndex(f, 0, newFp, collapsePoint) == -1)
+            if (findIndex(SubList<label>(f, newFp), collapsePoint) == -1)
             {
                 f[newFp++] = collapsePoint;
             }
@@ -147,7 +121,7 @@ void filterFace
         label pointI = f[fp];
 
         // Search for previous occurrence.
-        label index = findIndex(f, 0, fp, pointI);
+        label index = findIndex(SubList<label>(f, fp), pointI);
 
         if (index == fp1)
         {
@@ -206,18 +180,49 @@ bool setRefinement
 
     boolList removedPoints(mesh.nPoints(), false);
 
-    // Create strings of edges
+    // Create strings of edges.
+    // Map from collapseIndex(=global master point) to set of points
     Map<DynamicList<label> > collapseStrings;
-
-    forAll(allPointInfo, pointI)
     {
-        const label collapseIndex = allPointInfo[pointI].collapseIndex();
-
-        if (collapseIndex != -1 && collapseIndex != -2)
+        // 1. Count elements per collapseIndex
+        Map<label> nPerIndex(mesh.nPoints()/10);
+        forAll(allPointInfo, pointI)
         {
-            collapseStrings(collapseIndex).append(pointI);
+            const label collapseIndex = allPointInfo[pointI].collapseIndex();
+
+            if (collapseIndex != -1 && collapseIndex != -2)
+            {
+                Map<label>::iterator fnd = nPerIndex.find(collapseIndex);
+                if (fnd != nPerIndex.end())
+                {
+                    fnd()++;
+                }
+                else
+                {
+                    nPerIndex.insert(collapseIndex, 1);
+                }
+            }
+        }
+
+        // 2. Size
+        collapseStrings.resize(2*nPerIndex.size());
+        forAllConstIter(Map<label>, nPerIndex, iter)
+        {
+            collapseStrings.insert(iter.key(), DynamicList<label>(iter()));
+        }
+
+        // 3. Fill
+        forAll(allPointInfo, pointI)
+        {
+            const label collapseIndex = allPointInfo[pointI].collapseIndex();
+
+            if (collapseIndex != -1 && collapseIndex != -2)
+            {
+                collapseStrings[collapseIndex].append(pointI);
+            }
         }
     }
+
 
     bool meshChanged = false;
 
@@ -293,7 +298,7 @@ bool setRefinement
 
                         if (nFaces < 4)
                         {
-                            Info<< "Cell:" << cellI
+                            Pout<< "Cell:" << cellI
                                 << " uses faces:" << cFaces
                                 << " of which too many are marked for removal:"
                                 << endl
@@ -302,10 +307,10 @@ bool setRefinement
                             {
                                 if (newFaces[cFaces[j]].size() < 3)
                                 {
-                                    Info<< ' '<< cFaces[j];
+                                    Pout<< ' '<< cFaces[j];
                                 }
                             }
-                            Info<< endl;
+                            Pout<< endl;
 
                             cellRemoved[cellI] = true;
 
@@ -463,9 +468,6 @@ bool setRefinement
         }
     }
 
-    // Print regions:
-//    printRegions();
-
     return meshChanged;
 }
 
@@ -505,99 +507,6 @@ labelList getSortedEdges
 
     return faceEdges;
 }
-
-
-// Merges edges which are in straight line. I.e. edge split by point.
-//label mergeEdges
-//(
-//    const polyMesh& mesh,
-//    const scalar maxCos,
-//    List<pointEdgeCollapse>& allPointInfo
-//)
-//{
-//    const pointField& points = mesh.points();
-//    const edgeList& edges = mesh.edges();
-//    const labelListList& pointEdges = mesh.pointEdges();
-//    const labelList& region = collapser.pointRegion();
-//    const labelList& master = collapser.pointRegionMaster();
-//
-//    label nCollapsed = 0;
-//
-//    forAll(pointEdges, pointI)
-//    {
-//        const labelList& pEdges = pointEdges[pointI];
-//
-//        if (pEdges.size() == 2)
-//        {
-//            const edge& leftE = edges[pEdges[0]];
-//            const edge& rightE = edges[pEdges[1]];
-//
-//            // Get the two vertices on both sides of the point
-//            label leftV = leftE.otherVertex(pointI);
-//            label rightV = rightE.otherVertex(pointI);
-//
-//            // Collapse only if none of the points part of merge network
-//            // or all of networks with different masters.
-//            label midMaster = -1;
-//            if (region[pointI] != -1)
-//            {
-//                midMaster = master[region[pointI]];
-//            }
-//
-//            label leftMaster = -2;
-//            if (region[leftV] != -1)
-//            {
-//                leftMaster = master[region[leftV]];
-//            }
-//
-//            label rightMaster = -3;
-//            if (region[rightV] != -1)
-//            {
-//                rightMaster = master[region[rightV]];
-//            }
-//
-//            if
-//            (
-//                midMaster != leftMaster
-//             && midMaster != rightMaster
-//             && leftMaster != rightMaster
-//            )
-//            {
-//                // Check if the two edge are in line
-//                vector leftVec = points[pointI] - points[leftV];
-//                leftVec /= mag(leftVec) + VSMALL;
-//
-//                vector rightVec = points[rightV] - points[pointI];
-//                rightVec /= mag(rightVec) + VSMALL;
-//
-//                if ((leftVec & rightVec) > maxCos)
-//                {
-//                    // Collapse one (left) side of the edge. Make left vertex
-//                    // the master.
-//                    //if (collapser.unaffectedEdge(pEdges[0]))
-//                    const edge& e = mesh.edges()[pEdges[0]];
-//
-//                    if
-//                    (
-//                        allPointInfo[e[0]].collapseIndex() < 0
-//                     && allPointInfo[e[1]].collapseIndex() < 0
-//                    )
-//                    {
-//                        //pointEdgeCollapse pec(mesh.points()[leftV], leftV);
-//
-//                        allPointInfo[e[0]] = pec;
-//                        allPointInfo[e[1]] = pec;
-//
-//                        //collapser.collapseEdge(pEdges[0], leftV);
-//                        nCollapsed++;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    return nCollapsed;
-//}
 
 
 // Return master point edge needs to be collapsed to (or -1)
@@ -673,112 +582,22 @@ label edgeMaster
 }
 
 
-label collapseSmallEdges
+// Create consistent set of collapses.
+//  collapseEdge : per edge:
+//      -1 : do not collapse
+//       0 : collapse to start
+//       1 : collapse to end
+//  Note: collapseEdge has to be parallel consistent (in orientation)
+label syncCollapse
 (
     const polyMesh& mesh,
-    const scalarList& freezeEdges,
-    const labelList& boundaryPoint,
-    const scalar minLen,
+    const globalIndex& globalStrings,
+    const labelList& collapseEdge,
     List<pointEdgeCollapse>& allPointInfo
 )
 {
-    const pointField& points = mesh.points();
     const edgeList& edges = mesh.edges();
-
-    // Store collapse direction in collapseEdge
-    //   -1 -> Do not collapse
-    //    0 -> Collapse to start point
-    //    1 -> Collapse to end point
-    labelList collapseEdge(edges.size(), -1);
-
-    forAll(edges, edgeI)
-    {
-        const edge& e = edges[edgeI];
-
-        if (e.mag(points) < minLen*freezeEdges[edgeI])
-        {
-            collapseEdge[edgeI] = 0;
-        }
-    }
-
-    // Check whether edge point order is reversed from mesh to coupledPatch
-//    const globalMeshData& globalData = mesh.globalData();
-//    const mapDistribute& map = globalData.globalEdgeSlavesMap();
-//    const labelList& coupledMeshEdges = globalData.coupledPatchMeshEdges();
-//    const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
-//    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
-//    PackedBoolList meshToPatchSameOrientation(coupledMeshEdges.size(), true);
-//
-//    forAll(coupledMeshEdges, eI)
-//    {
-//        const label meshEdgeIndex = coupledMeshEdges[eI];
-//
-//        if (collapseEdge[meshEdgeIndex] != -1)
-//        {
-//            const edge& meshEdge = edges[meshEdgeIndex];
-//            const edge& coupledPatchEdge = coupledPatch.edges()[eI];
-//
-//            if
-//            (
-//                meshEdge[0] == coupledPatch.meshPoints()[coupledPatchEdge[1]]
-//             && meshEdge[1] == coupledPatch.meshPoints()[coupledPatchEdge[0]]
-//            )
-//            {
-//                meshToPatchSameOrientation[eI] = false;
-//            }
-//        }
-//    }
-//
-//
-//    labelList cppEdgeData(coupledMeshEdges.size(), -1);
-//
-//    forAll(coupledMeshEdges, eI)
-//    {
-//        const label meshEdgeIndex = coupledMeshEdges[eI];
-//
-//        if (collapseEdge[meshEdgeIndex] != -1)
-//        {
-//            if (meshToPatchSameOrientation[eI] == cppOrientation[eI])
-//            {
-//                cppEdgeData[eI] = 0;
-//            }
-//            else
-//            {
-//                cppEdgeData[eI] = 1;
-//            }
-//        }
-//    }
-//
-//
-//    // Synchronise cppEdgeData
-//    // Use minEqOp reduction, so that edge will only be collapsed on processor
-//    // boundary if both processors agree to collapse it
-//    globalData.syncData
-//    (
-//        cppEdgeData,
-//        globalData.globalEdgeSlaves(),
-//        globalData.globalEdgeTransformedSlaves(),
-//        map,
-//        minEqOp<label>()
-//    );
-//
-//
-//    forAll(coupledMeshEdges, eI)
-//    {
-//        const label meshEdgeIndex = coupledMeshEdges[eI];
-//
-//        if (collapseEdge[meshEdgeIndex] != -1)
-//        {
-//            if (meshToPatchSameOrientation[eI] == cppOrientation[eI])
-//            {
-//                collapseEdge[meshEdgeIndex] = 0;
-//            }
-//            else
-//            {
-//                collapseEdge[meshEdgeIndex] = 1;
-//            }
-//        }
-//    }
+    const pointField& points = mesh.points();
 
     label nCollapsed = 0;
 
@@ -786,46 +605,43 @@ label collapseSmallEdges
     DynamicList<pointEdgeCollapse> initPointInfo(mesh.nPoints());
     allPointInfo.resize(mesh.nPoints());
 
-    globalIndex globalStrings(mesh.nPoints());
+    // Initialise edges to no collapse
+    List<pointEdgeCollapse> allEdgeInfo
+    (
+        mesh.nEdges(),
+        pointEdgeCollapse(vector::zero, -1)
+    );
 
-    List<pointEdgeCollapse> allEdgeInfo(mesh.nEdges());
-    forAll(allEdgeInfo, edgeI)
-    {
-        allEdgeInfo[edgeI] = pointEdgeCollapse(vector::zero, -1);
-    }
-
+    // Mark selected edges for collapse
     forAll(edges, edgeI)
     {
         const edge& e = edges[edgeI];
 
         if (collapseEdge[edgeI] != -1)
         {
-            const label master =
-                edgeMaster
-                (
-                    boundaryPoint,
-                    collapseEdge[edgeI],
-                    e
-                );
+            label masterPointI = e[collapseEdge[edgeI]];
 
-//            if (master != -1)
-            {
-                pointEdgeCollapse pec
-                (
-                    points[master],
-                    globalStrings.toGlobal(master)
-                );
+            const pointEdgeCollapse pec
+            (
+                points[masterPointI],
+                globalStrings.toGlobal(masterPointI)
+            );
 
-                allEdgeInfo[edgeI] = pec;
+            // Mark as collapsable but with nonsense master so it gets
+            // overwritten and starts an update wave
+            allEdgeInfo[edgeI] = pointEdgeCollapse
+            (
+                points[masterPointI],
+                labelMax
+            );
 
-                initPointInfo.append(pec);
-                initPoints.append(e.start());
+            initPointInfo.append(pec);
+            initPoints.append(e.start());
 
-                initPointInfo.append(pec);
-                initPoints.append(e.end());
+            initPointInfo.append(pec);
+            initPoints.append(e.end());
 
-                nCollapsed++;
-            }
+            nCollapsed++;
         }
     }
 
@@ -843,229 +659,352 @@ label collapseSmallEdges
 }
 
 
-// Faces which have edges just larger than collapse length but faces which
-// are very small. This one tries to collapse them if it can be done with
-// edge collapse. For faces where a face gets replace by two edges use
-// collapseFaces
-//label collapseHighAspectFaces
-//(
-//    const polyMesh& mesh,
-//    const PackedBoolList& boundaryPoint,
-//    const Map<label>& processorPoints,
-//    const scalar areaFac,
-//    const scalar edgeRatio,
-//    edgeCollapser& collapser
-//)
-//{
-//    const pointField& points = mesh.points();
-//    const edgeList& edges = mesh.edges();
-//    const faceList& faces = mesh.faces();
-//    const labelListList& faceEdges = mesh.faceEdges();
-//
-//    scalarField magArea(mag(mesh.faceAreas()));
-//
-//    label maxIndex = findMax(magArea);
-//
-//    scalar minArea = areaFac * magArea[maxIndex];
-//
-//    Info<< "Max face area:" << magArea[maxIndex] << endl
-//        << "Collapse area factor:" << areaFac << endl
-//        << "Collapse area:" << minArea << endl;
-//
-//    label nCollapsed = 0;
-//
-//    forAll(faces, faceI)
-//    {
-//        if (magArea[faceI] < minArea)
-//        {
-//            const face& f = faces[faceI];
-//
-//            // Get the edges in face point order
-//            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
-//
-//            SortableList<scalar> lengths(fEdges.size());
-//            forAll(fEdges, i)
-//            {
-//                lengths[i] = edges[fEdges[i]].mag(points);
-//            }
-//            lengths.sort();
-//
-//
-//            label edgeI = -1;
-//
-//            if (f.size() == 4)
-//            {
-//                // Compare second largest to smallest
-//                if (lengths[2] > edgeRatio*lengths[0])
-//                {
-//                    // Collapse smallest only. Triangle should be cleared
-//                    // next time around.
-//                    edgeI = fEdges[lengths.indices()[0]];
-//                }
-//            }
-//            else if (f.size() == 3)
-//            {
-//                // Compare second largest to smallest
-//                if (lengths[1] > edgeRatio*lengths[0])
-//                {
-//                    edgeI = fEdges[lengths.indices()[0]];
-//                }
-//            }
-//
-//
-//            if (edgeI != -1)
-//            {
-//                label master = edgeMaster
-//                    (
-//                        boundaryPoint,
-//                        processorPoints,
-//                        false,
-//                        edges[edgeI]
-//                    );
-//
-//                if (master != -1)// && collapser.unaffectedEdge(edgeI))
-//                {
-//                    collapser.collapseEdge(edgeI, master);
-//                    nCollapsed++;
-//                }
-//            }
-//        }
-//    }
-//
-//    return nCollapsed;
-//}
-
-
-void set(const labelList& elems, const bool val, boolList& status)
+void syncCollapseEdge(const polyMesh& mesh, labelList& collapseEdge)
 {
-    forAll(elems, i)
+    // Check whether edge point order is reversed from mesh to coupledPatch
+    const globalMeshData& globalData = mesh.globalData();
+    const mapDistribute& map = globalData.globalEdgeSlavesMap();
+    const labelList& coupledMeshEdges = globalData.coupledPatchMeshEdges();
+    const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
+    const PackedBoolList& cppOrientation = globalData.globalEdgeOrientation();
+    PackedBoolList meshToPatchSameOrientation(coupledMeshEdges.size(), true);
+
+    forAll(coupledMeshEdges, eI)
     {
-        status[elems[i]] = val;
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        if (collapseEdge[meshEdgeIndex] != -1)
+        {
+            const edge& meshEdge = mesh.edges()[meshEdgeIndex];
+            const edge& coupledPatchEdge = coupledPatch.edges()[eI];
+
+            if
+            (
+                meshEdge[0] == coupledPatch.meshPoints()[coupledPatchEdge[1]]
+             && meshEdge[1] == coupledPatch.meshPoints()[coupledPatchEdge[0]]
+            )
+            {
+                meshToPatchSameOrientation[eI] = false;
+            }
+        }
+    }
+
+
+    labelList cppEdgeData(map.constructSize());
+
+    forAll(coupledMeshEdges, eI)
+    {
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        cppEdgeData[eI] = collapseEdge[meshEdgeIndex];
+
+        if
+        (
+            (collapseEdge[meshEdgeIndex] != -1)
+         && (meshToPatchSameOrientation[eI] != cppOrientation[eI])
+        )
+        {
+            cppEdgeData[eI] = 1-cppEdgeData[eI];
+        }
+    }
+
+
+    // Synchronise cppEdgeData
+    // Use minEqOp reduction, so that edge will only be collapsed on processor
+    // boundary if both processors agree to collapse it
+    globalData.syncData
+    (
+        cppEdgeData,
+        globalData.globalEdgeSlaves(),
+        globalData.globalEdgeTransformedSlaves(),
+        map,
+        minEqOp<label>()
+    );
+
+
+    forAll(coupledMeshEdges, eI)
+    {
+        const label meshEdgeIndex = coupledMeshEdges[eI];
+
+        collapseEdge[meshEdgeIndex] = cppEdgeData[eI];
+
+        if
+        (
+            (cppEdgeData[eI] != -1)
+         && (meshToPatchSameOrientation[eI] != cppOrientation[eI])
+        )
+        {
+            collapseEdge[meshEdgeIndex] = 1-collapseEdge[meshEdgeIndex];
+        }
     }
 }
 
 
-// Tries to simplify polygons to face of minSize (4=quad, 3=triangle)
-//label simplifyFaces
-//(
-//    const polyMesh& mesh,
-//    const PackedBoolList& boundaryPoint,
-//    const Map<label>& processorPoints,
-//    const label minSize,
-//    const scalar lenGap,
-//    edgeCollapser& collapser
-//)
-//{
-//    const pointField& points = mesh.points();
-//    const edgeList& edges = mesh.edges();
-//    const faceList& faces = mesh.faces();
-//    const cellList& cells = mesh.cells();
-//    const labelListList& faceEdges = mesh.faceEdges();
-//    const labelList& faceOwner = mesh.faceOwner();
-//    const labelList& faceNeighbour = mesh.faceNeighbour();
-//    const labelListList& pointCells = mesh.pointCells();
-//    const labelListList& cellEdges = mesh.cellEdges();
-//
-//    label nCollapsed = 0;
-//
-//    boolList protectedEdge(mesh.nEdges(), false);
-//
-//    forAll(faces, faceI)
-//    {
-//        const face& f = faces[faceI];
-//
-//        if
-//        (
-//            f.size() > minSize
-//         && cells[faceOwner[faceI]].size() >= 6
-//         && (
-//                mesh.isInternalFace(faceI)
-//             && cells[faceNeighbour[faceI]].size() >= 6
-//            )
-//        )
-//        {
-//            // Get the edges in face point order
-//            labelList fEdges(getSortedEdges(edges, f, faceEdges[faceI]));
-//
-//            SortableList<scalar> lengths(fEdges.size());
-//            forAll(fEdges, i)
-//            {
-//                lengths[i] = edges[fEdges[i]].mag(points);
-//            }
-//            lengths.sort();
-//
-//
-//            // Now find a gap in length between consecutive elements greater
-//            // than lenGap.
-//
-//            label gapPos = -1;
-//
-//            for (label i = f.size()-1-minSize; i >= 0; --i)
-//            {
-//                if (lengths[i+1] > lenGap*lengths[i])
-//                {
-//                    gapPos = i;
-//
-//                    break;
-//                }
-//            }
-//
-//            if (gapPos != -1)
-//            {
-//                //for (label i = gapPos; i >= 0; --i)
-//                label i = 0;  // Hack: collapse smallest edge only.
-//                {
-//                    label edgeI = fEdges[lengths.indices()[i]];
-//
-//                    if (!protectedEdge[edgeI])
-//                    {
-//                        const edge& e = edges[edgeI];
-//
-//                        label master
-//                       = edgeMaster(boundaryPoint, processorPoints, false, e);
-//
-//                        if (master != -1)
-//                        {
-//                            collapser.collapseEdge(edgeI, master);
-//
-//                            // Protect all other edges on all cells using edge
-//                            // points.
-//
-//                            const labelList& pCells0 = pointCells[e[0]];
-//
-//                            forAll(pCells0, i)
-//                            {
-//                              set(cellEdges[pCells0[i]], true, protectedEdge);
-//                            }
-//                            const labelList& pCells1 = pointCells[e[1]];
-//
-//                            forAll(pCells1, i)
-//                            {
-//                              set(cellEdges[pCells1[i]], true, protectedEdge);
-//                            }
-//
-//                            nCollapsed++;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    return nCollapsed;
-//}
+// Mark (in collapseEdge) any edges to collapse
+label collapseSmallEdges
+(
+    const polyMesh& mesh,
+    const labelList& boundaryPoint,
+    const scalarField& minEdgeLen,
+    labelList& collapseEdge
+)
+{
+    // Work out which edges to collapse
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    label nCollapsed = 0;
+
+    forAll(mesh.edges(), edgeI)
+    {
+        if (collapseEdge[edgeI] == -1)
+        {
+            const edge& e = mesh.edges()[edgeI];
+
+            if (e.mag(mesh.points()) < minEdgeLen[edgeI])
+            {
+                label masterPointI = edgeMaster(boundaryPoint, false, e);
+                if (masterPointI == e[0])
+                {
+                    collapseEdge[edgeI] = 0;
+                }
+                else
+                {
+                    collapseEdge[edgeI] = 1;
+                }
+                nCollapsed++;
+            }
+        }
+    }
+    return nCollapsed;
+}
 
 
-labelHashSet checkMeshQuality(const polyMesh& mesh)
+// Mark (in collapseEdge) any edges to merge
+label mergeEdges
+(
+    const polyMesh& mesh,
+    const scalar maxCos,
+    const labelList& boundaryPoint,
+    const scalarField& minEdgeLen,
+    labelList& collapseEdge
+)
+{
+    const edgeList& edges = mesh.edges();
+    const labelListList& pointEdges = mesh.pointEdges();
+
+    // Point removal engine
+    removePoints pointRemover(mesh, false);
+
+    // Find out points that can be deleted
+    boolList pointCanBeDeleted;
+    label nTotRemove = pointRemover.countPointUsage(maxCos, pointCanBeDeleted);
+
+
+    // Rework point-to-remove into edge-to-collapse.
+
+    label nCollapsed = 0;
+
+    if (nTotRemove > 0)
+    {
+        forAll(pointEdges, pointI)
+        {
+            if (pointCanBeDeleted[pointI])
+            {
+                const labelList& pEdges = pointEdges[pointI];
+
+                if (pEdges.size() == 2)
+                {
+                    // Always the case?
+
+                    label e0 = pEdges[0];
+                    label e1 = pEdges[1];
+
+                    if
+                    (
+                        collapseEdge[e0] == -1
+                     && minEdgeLen[e0] >= 0
+                     && collapseEdge[e1] == -1
+                     && minEdgeLen[e1] >= 0
+                    )
+                    {
+                        // Get the two vertices on both sides of the point
+                        label leftV = edges[e0].otherVertex(pointI);
+                        label rightV = edges[e1].otherVertex(pointI);
+
+                        // Can collapse pointI onto either leftV or rightV.
+                        // Preferentially choose an internal point to hopefully
+                        // give less distortion
+
+                        if (boundaryPoint[leftV] == -1)
+                        {
+                            collapseEdge[e0] = findIndex(edges[e0], leftV);
+                        }
+                        else
+                        {
+                            collapseEdge[e1] = findIndex(edges[e1], rightV);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return nCollapsed;
+}
+
+
+// Make consistent set of collapses that does not collapse any cells
+label consistentCollapse
+(
+    const bool allowCellCollapse,
+    const polyMesh& mesh,
+    const globalIndex& globalStrings,
+    labelList& collapseEdge,
+    List<pointEdgeCollapse>& allPointInfo
+)
+{
+    // Make sure we don't collapse cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    while (true)
+    {
+        // Sync collapseEdge
+        syncCollapseEdge(mesh, collapseEdge);
+
+
+        // Get collapsed faces
+
+        label nAdditionalCollapsed = 0;
+
+        PackedBoolList isCollapsedFace(mesh.nFaces());
+        forAll(mesh.faceEdges(), faceI)
+        {
+            const labelList& fEdges = mesh.faceEdges()[faceI];
+
+            // Count number of remaining edges
+            label nEdges = fEdges.size();
+            forAll(fEdges, fEdgeI)
+            {
+                label edgeI = fEdges[fEdgeI];
+                if (collapseEdge[edgeI] != -1)
+                {
+                    nEdges--;
+                }
+            }
+
+            if (nEdges < 3)
+            {
+                // Face is collapsed.
+                isCollapsedFace[faceI] = 1;
+
+                if (nEdges == 1)
+                {
+                    // Cannot collapse face down to single edge.
+
+                    //- Option 1: collapse remaining edge as well. However
+                    //  if this edge is on the coupled processor patch this
+                    //  logic clashes with that of syncCollapseEdge
+                    //  (do not collapse if any not collapse)
+                    //forAll(fEdges, fEdgeI)
+                    //{
+                    //    label edgeI = fEdges[fEdgeI];
+                    //    if (collapseEdge[edgeI] == -1)
+                    //    {
+                    //        collapseEdge[edgeI] = 0;
+                    //        nAdditionalCollapsed++;
+                    //    }
+                    //}
+
+                    //- Option 2: uncollapse this face.
+                    forAll(fEdges, fEdgeI)
+                    {
+                        label edgeI = fEdges[fEdgeI];
+                        if (collapseEdge[edgeI] != -1)
+                        {
+                            collapseEdge[edgeI] = -1;
+                            nAdditionalCollapsed++;
+                        }
+                    }
+                }
+            }
+        }
+
+        //Pout<< "nAdditionalCollapsed : " << nAdditionalCollapsed << endl;
+
+
+        label nUncollapsed = 0;
+
+        if (!allowCellCollapse)
+        {
+            // Check collapsed cells
+
+            forAll(mesh.cells(), cellI)
+            {
+                const cell& cFaces = mesh.cells()[cellI];
+                label nFaces = cFaces.size();
+                forAll(cFaces, i)
+                {
+                    label faceI = cFaces[i];
+                    if (isCollapsedFace[faceI])
+                    {
+                        nFaces--;
+                        if (nFaces < 4)
+                        {
+                            // Unmark this face for collapse
+                            const labelList& fEdges = mesh.faceEdges()[faceI];
+
+                            forAll(fEdges, fEdgeI)
+                            {
+                                label edgeI = fEdges[fEdgeI];
+                                if (collapseEdge[edgeI] != -1)
+                                {
+                                    collapseEdge[edgeI] = -1;
+                                    nUncollapsed++;
+                                }
+                            }
+
+                            // Uncollapsed this face.
+                            isCollapsedFace[faceI] = 0;
+                            nFaces++;
+                        }
+                    }
+                }
+            }
+            //Pout<< "** disallowing cells : nUncollapsed : "
+            //    << nUncollapsed << endl;
+        }
+
+
+        if
+        (
+            returnReduce(nUncollapsed+nAdditionalCollapsed, sumOp<label>())
+            == 0
+        )
+        {
+            break;
+        }
+    }
+
+
+    // Create consistent set of collapses
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Note: requires collapseEdge to be synchronised. (above loop makes sure
+    //       of that)
+
+    return syncCollapse(mesh, globalStrings, collapseEdge, allPointInfo);
+}
+
+
+// Check mesh and mark points on faces in error
+// Returns boolList with points in error set
+PackedBoolList checkMeshQuality(const polyMesh& mesh)
 {
     //mesh.checkMesh(true);
-    labelHashSet freezePoints;
 
     IOdictionary meshQualityDict
     (
         IOobject
         (
-            "meshQualityControls",
+            "meshQualityDict",
             mesh.time().system(),
             mesh.time(),
             IOobject::MUST_READ,
@@ -1102,35 +1041,61 @@ labelHashSet checkMeshQuality(const polyMesh& mesh)
 
     Info<< nl << "Number of bad faces          : " << nBadFaces << endl;
 
+    PackedBoolList isErrorPoint(mesh.nPoints());
     forAllConstIter(labelHashSet, badFaces, iter)
     {
         const face& f = mesh.faces()[iter.key()];
 
         forAll(f, pI)
         {
-            freezePoints.insert(f[pI]);
+            isErrorPoint[f[pI]] = 1;
         }
     }
 
-//    const edgeList& edges = mesh.edges();
-//
-//    label nFrozenEdges = 0;
-//
-//    OFstream str("frozenEdges.obj");
-//
-//    label count = 0;
-//    forAll(edges, eI)
-//    {
-//        const edge& e = edges[eI];
-//
-//        if (freezePoints.found(e[0]) && freezePoints.found(e[1]))
-//        {
-//            freezeEdges[eI] = true;
-//            nFrozenEdges++;
-//        }
-//    }
+    syncTools::syncPointList
+    (
+        mesh,
+        isErrorPoint,
+        orEqOp<unsigned int>(),
+        0
+    );
 
-    return freezePoints;
+    return isErrorPoint;
+}
+
+
+// Check mesh with collapses (newMesh), updates minEdgeLen, nFrozenEdges
+void checkMeshAndFreezeEdges
+(
+    const polyMesh& newMesh,
+    const labelList& oldToNewMesh,
+    const polyMesh& oldMesh,
+    scalarField& minEdgeLen,
+    label& nFrozenEdges
+)
+{
+    PackedBoolList isErrorPoint = checkMeshQuality(newMesh);
+
+    forAll(oldMesh.edges(), edgeI)
+    {
+        const edge& e = oldMesh.edges()[edgeI];
+        label newStart = oldToNewMesh[e[0]];
+        label newEnd = oldToNewMesh[e[1]];
+
+        if
+        (
+            (newStart >= 0 && isErrorPoint[newStart])
+         || (newEnd >= 0 && isErrorPoint[newEnd])
+        )
+        {
+            // Gradual decrease? For now just hard disable
+            if (minEdgeLen[edgeI] > -GREAT/2)
+            {
+                minEdgeLen[edgeI] = -GREAT;
+                nFrozenEdges++;
+            }
+        }
+    }
 }
 
 
@@ -1165,14 +1130,21 @@ labelList findBoundaryPoints(const polyMesh& mesh)
     {
         const polyPatch& patch = bMesh[patchI];
 
-        if (isA<processorPolyPatch>(patch))
+        if (isA<coupledPolyPatch>(patch))
         {
-            const processorPolyPatch& pPatch =
-                refCast<const processorPolyPatch>(patch);
-
-            forAll(pPatch, fI)
+            if (patchI == 0)
             {
-                const face& f = pPatch[fI];
+                // We mark 'normal' boundary points with 0 so make sure this
+                // coupled patch is not 0.
+                FatalErrorIn("findBoundaryPoints(const polyMesh&)")
+                    << "Your patches should have non-coupled ones before any"
+                    << " coupled ones. Current patches " << bMesh.names()
+                    << exit(FatalError);
+            }
+
+            forAll(patch, fI)
+            {
+                const face& f = patch[fI];
 
                 forAll(f, fp)
                 {
@@ -1189,11 +1161,28 @@ labelList findBoundaryPoints(const polyMesh& mesh)
 // Main program:
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Merges small and in-line edges.\n"
+        "Collapses faces and optionally cells to a point."
+    );
+
 #   include "addOverwriteOption.H"
 
     argList::validArgs.append("edge length [m]");
     argList::validArgs.append("merge angle (degrees)");
-    argList::addOption("minLenFactor", "scalar", "edge length factor");
+    argList::addBoolOption
+    (
+        "allowCellCollapse",
+        "Allow collapsing of cells to a single point"
+    );
+    argList::addBoolOption
+    (
+        "checkMeshQuality",
+        "Only collapse if not exceeding given meshQualityDict limits"
+    );
+
+
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -1201,12 +1190,12 @@ int main(int argc, char *argv[])
 #   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    scalar minLen  = args.argRead<scalar>(1);
-    const scalar angle   = args.argRead<scalar>(2);
-    const scalar minLenFactor
-        = args.optionLookupOrDefault<scalar>("minLenFactor", 0.5);
+    scalar minLen = args.argRead<scalar>(1);
+    const scalar angle = args.argRead<scalar>(2);
 
+    const bool allowCellCollapse = args.optionFound("allowCellCollapse");
     const bool overwrite = args.optionFound("overwrite");
+    const bool checkQuality = args.optionFound("checkMeshQuality");
 
     scalar maxCos = Foam::cos(degToRad(angle));
 
@@ -1216,190 +1205,216 @@ int main(int argc, char *argv[])
         << " degrees" << nl
         << endl;
 
-    Info<< "If an invalid mesh is generated then the edge length will be " << nl
-        << "multiplied by a factor of " << minLenFactor << " and collapsing "
-        << "will be reattempted" << nl << endl;
+    if (allowCellCollapse)
+    {
+        Info<< "Allowing collapse of cells down to a point." << nl
+            << endl;
+    }
+    else
+    {
+        Info<< "Disallowing collapse of cells down to a point." << nl
+            << endl;
+    }
 
+
+    if (checkQuality)
+    {
+        Info<< "Selectively disabling wanted collapses until resulting quality"
+            << " satisfies constraints in system/meshQualityDict" << nl
+            << endl;
+    }
+
+
+
+    // To mark master of collapes
+    globalIndex globalStrings(mesh.nPoints());
+
+
+    // Local collapse length. Any edge below this length gets (attempted)
+    // collapsed. Use either aa gradually decreasing value
+    // (so from minLen to e.g. 0.5*minLen) or a hard limit (GREAT)
+    scalarField minEdgeLen(mesh.nEdges(), minLen);
+    label nFrozenEdges = 0;
+
+
+
+    // Initial mesh check
+    // ~~~~~~~~~~~~~~~~~~
+    // Do not allow collapses in regions of error.
+    // Updates minEdgeLen, nFrozenEdges
+    if (checkQuality)
+    {
+        checkMeshAndFreezeEdges
+        (
+            mesh,
+            identity(mesh.nPoints()),
+            mesh,
+            minEdgeLen,
+            nFrozenEdges
+        );
+        Info<< "Initial frozen edges "
+            << returnReduce(nFrozenEdges, sumOp<label>())
+            << " out of " << returnReduce(mesh.nEdges(), sumOp<label>())
+            << endl;
+    }
+
+
+    // Mark points on boundary
+    const labelList boundaryPoint = findBoundaryPoints(mesh);
+
+    // Copy of current set of topology changes. Used to generate final mesh.
+    polyTopoChange savedMeshMod(mesh.boundaryMesh().size());
+
+    // Keep track of whether mesh has changed at all
     bool meshChanged = false;
 
-    checkMeshQuality(mesh);
 
-    autoPtr<fvMesh> fvMeshPtr;
 
-    scalarList freezeEdges(mesh.nEdges(), 1.0);
+    // Main loop
+    // ~~~~~~~~~
+    // It tries and do some collapses, checks the resulting mesh and
+    // 'freezes' some edges (by marking in minEdgeLen) and tries again.
+    // This will iterate ultimately to the situation where every edge is
+    // frozen and nothing gets collapsed.
 
     do
     {
-        label nIterations = 0;
-        label nFrozenEdges = 0;
-
-        fvMeshPtr.reset(new fvMesh(mesh));
-        fvMesh& fvMeshRef = fvMeshPtr();
-
-        // Contains new point label for original points
-        labelList pointMap(identity(mesh.nPoints()));
-
-        scalarList tmpFreezeEdges = freezeEdges;
-
-        autoPtr<mapPolyMesh> morphMap;
-
-        while (true)
-        {
-            Info<< "Iteration " << nIterations << incrIndent << endl;
-
-            labelList boundaryPoint = findBoundaryPoints(fvMeshRef);
-
-            List<pointEdgeCollapse> allPointInfo;
-
-            // Collapse all edges that are too small.
-            label nSmallCollapsed =
-                collapseSmallEdges
-                (
-                    fvMeshRef,
-                    tmpFreezeEdges,
-                    boundaryPoint,
-                    minLen,
-                    allPointInfo
-                );
-
-            reduce(nSmallCollapsed, sumOp<label>());
-
-            Info<< indent << "Collapsing " << nSmallCollapsed
-                << " small edges" << endl;
+        // Per edge collapse status:
+        // -1 : not collapsed
+        //  0 : collapse to start
+        //  1 : collapse to end
+        labelList collapseEdge(mesh.nEdges(), -1);
 
 
+        // Work out which edges to collapse
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // This is by looking at minEdgeLen (to avoid frozen edges)
+        // and marking in collapseEdge.
+
+        // Small edges
+        label nSmallCollapsed = collapseSmallEdges
+        (
+            mesh,
+            boundaryPoint,
+            minEdgeLen,
+            collapseEdge
+        );
+        reduce(nSmallCollapsed, sumOp<label>());
+
+        Info<< indent << "Collapsing " << nSmallCollapsed
+            << " small edges" << endl;
 
 
+        // Inline edges
+        label nMerged = mergeEdges
+        (
+            mesh,
+            maxCos,
+            boundaryPoint,
+            minEdgeLen,
+            collapseEdge
+        );
 
-            label nMerged = 0;
-
-            // Remove midpoints on straight edges.
-            if (nSmallCollapsed == 0)
-            {
-                //nMerged = mergeEdges(fvMeshRef, maxCos, allPointInfo);
-            }
-
-            reduce(nMerged, sumOp<label>());
-
-            Info<< indent << "Collapsing " << nMerged << " in line edges"
-                << endl;
-
-
-
-
-
-
-            label nSliversCollapsed = 0;
-
-            // Remove small sliver faces that can be collapsed to single edge
-//            if (nSmallCollapsed == 0 && nMerged == 0)
-//            {
-//                nSliversCollapsed =
-//                    collapseHighAspectFaces
-//                    (
-//                        mesh,
-//                        boundaryPoint,
-//                        processorPoints,
-//                        1E-9,
-//                        5,
-//                        collapser
-//                    );
-//            }
-
-            reduce(nSliversCollapsed, sumOp<label>());
-
-            Info<< indent << "Collapsing " << nSliversCollapsed
-                << " small high aspect ratio faces" << endl;
-
-
-            // Simplify faces to quads wherever possible
-            //if (nCollapsed == 0)
-            //{
-            //    nCollapsed =
-            //        simplifyFaces
-            //        (
-            //            mesh,
-            //            boundaryPoint,
-            //            4,              // minimum size of face
-            //            0.2,            // gap in edge lengths on face
-            //            collapser
-            //        );
-            //    Info<< "Collapsing " << nCollapsed << " polygonal faces"
-            //        << endl;
-            //}
-
-
-            label totalCollapsed =
-                nSmallCollapsed
-              + nMerged
-              + nSliversCollapsed;
-
-            polyTopoChange meshMod(fvMeshRef);
-
-            // Insert mesh refinement into polyTopoChange.
-            setRefinement(fvMeshRef, meshMod, allPointInfo);
-
-            // Do all changes
-            Info<< indent << "Applying changes to the mesh" << nl
-                << decrIndent << endl;
-
-            morphMap = meshMod.changeMesh(fvMeshRef, false);
-
-//            // Contains new point label for old points
-//            const labelList& reversePointMap = morphMap().reversePointMap();
-//
-//            forAll(pointMap, pI)
-//            {
-//                const label originalPoint = pI;
-//                const label currentPoint = pointMap[pI];
-//
-//                if (currentPoint < reversePointMap.size())
-//                {
-//                    const label newPoint = reversePointMap[currentPoint];
-//
-//                    if (newPoint != -1)
-//                    {
-//                        pointMap[originalPoint] = newPoint;
-//                    }
-//                }
-//            }
-
-            if (totalCollapsed == 0)
-            {
-                labelHashSet freezePoints = checkMeshQuality(fvMeshRef);
-
-                label nFreezePoints = freezePoints.size();
-                reduce(nFreezePoints, sumOp<label>());
-
-                nFrozenEdges = nFreezePoints;
-
-                Info<< "Number of frozen points      : " << nFreezePoints
-                    << endl;
-
-                break;
-            }
-
-            if (morphMap().hasMotionPoints())
-            {
-                fvMeshRef.movePoints(morphMap().preMotionPoints());
-            }
-
-            meshChanged = true;
-
-            nIterations++;
-        }
-
-        if (nFrozenEdges > 0)
-        {
-            minLen *= minLenFactor;
-        }
-
-        reduce(nFrozenEdges, sumOp<label>());
-
-        Info<< "Number of frozen edges       : " << nFrozenEdges << nl
+        reduce(nMerged, sumOp<label>());
+        Info<< indent << "Collapsing " << nMerged << " in line edges"
             << endl;
 
-        if (nFrozenEdges == 0)
+
+        // Merge edge collapses into consistent collapse-network. Make sure
+        // no cells get collapsed.
+        List<pointEdgeCollapse> allPointInfo;
+        label nLocalCollapse = consistentCollapse
+        (
+            allowCellCollapse,
+            mesh,
+            globalStrings,
+            collapseEdge,
+            allPointInfo
+        );
+
+        reduce(nLocalCollapse, sumOp<label>());
+        Info<< "nLocalCollapse = " << nLocalCollapse << endl;
+
+        if (nLocalCollapse == 0)
+        {
+            break;
+        }
+
+
+        // There are collapses so mesh will get changed
+        meshChanged = true;
+
+
+        // Apply collapses to current mesh
+        polyTopoChange meshMod(mesh);
+
+        // Insert mesh refinement into polyTopoChange.
+        setRefinement(mesh, meshMod, allPointInfo);
+
+        // Do all changes
+        Info<< indent << "Applying changes to the mesh" << nl
+            //<< decrIndent
+            << endl;
+
+        savedMeshMod = meshMod;
+
+        autoPtr<fvMesh> newMeshPtr;
+        autoPtr<mapPolyMesh> mapPtr = meshMod.makeMesh
+        (
+            newMeshPtr,
+            IOobject
+            (
+                mesh.name(),
+                mesh.instance(),
+                mesh.time(),  // register with runTime
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh,
+            true        // parallel sync
+        );
+
+        fvMesh& newMesh = newMeshPtr();
+        const mapPolyMesh& map = mapPtr();
+
+        // Update fields
+        newMesh.updateMesh(map);
+        if (map.hasMotionPoints())
+        {
+            newMesh.movePoints(map.preMotionPoints());
+        }
+
+
+
+
+        // If no checks needed exit.
+        if (!checkQuality)
+        {
+            break;
+        }
+
+        // Mesh check
+        // ~~~~~~~~~~~~~~~~~~
+        // Do not allow collapses in regions of error.
+        // Updates minEdgeLen, nFrozenEdges
+        label nOldFrozenEdges = returnReduce(nFrozenEdges, sumOp<label>());
+        checkMeshAndFreezeEdges
+        (
+            newMesh,
+            map.reversePointMap(),
+            mesh,
+            minEdgeLen,
+            nFrozenEdges
+        );
+        label nNewFrozenEdges = returnReduce(nFrozenEdges, sumOp<label>());
+
+        Info<< "Frozen edges "
+            << returnReduce(nFrozenEdges, sumOp<label>())
+            << " out of " << returnReduce(mesh.nEdges(), sumOp<label>())
+            << endl;
+
+        if (nNewFrozenEdges == nOldFrozenEdges)
         {
             break;
         }
@@ -1409,6 +1424,18 @@ int main(int argc, char *argv[])
 
     if (meshChanged)
     {
+        // Apply changes to current mesh
+        autoPtr<mapPolyMesh> mapPtr = savedMeshMod.changeMesh(mesh, false);
+        const mapPolyMesh& map = mapPtr();
+
+        // Update fields
+        mesh.updateMesh(map);
+        if (map.hasMotionPoints())
+        {
+            mesh.movePoints(map.preMotionPoints());
+        }
+
+
         // Write resulting mesh
         if (!overwrite)
         {
@@ -1416,16 +1443,15 @@ int main(int argc, char *argv[])
         }
         else
         {
-            fvMeshPtr().setInstance(oldInstance);
+            mesh.setInstance(oldInstance);
         }
 
         Info<< nl << "Writing collapsed mesh to time "
             << runTime.timeName() << nl << endl;
 
-        fvMeshPtr().write();
+        mesh.write();
     }
 
-    Info<< "Final minimum length : " << minLen << " m" << nl << endl;
 
     Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
         << "  ClockTime = " << runTime.elapsedClockTime() << " s"

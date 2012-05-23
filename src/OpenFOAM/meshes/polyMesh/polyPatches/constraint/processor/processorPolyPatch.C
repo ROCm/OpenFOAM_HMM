@@ -634,7 +634,7 @@ bool Foam::processorPolyPatch::order
             fileName str
             (
                 boundaryMesh().mesh().time().path()
-               /name()/name()+"_faces.obj"
+               /name() + "_faces.obj"
             );
             Pout<< "processorPolyPatch::order :"
                 << " Writing faces to OBJ file " << str.name() << endl;
