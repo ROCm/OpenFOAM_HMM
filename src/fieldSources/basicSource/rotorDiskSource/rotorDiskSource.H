@@ -148,6 +148,9 @@ protected:
         //- Name of density field
         word rhoName_;
 
+        //- Reference density if rhoName = 'none'
+        scalar rhoRef_;
+
         //- Rotational speed [rad/s]
         //  Positive anti-clockwise when looking along -ve lift direction
         scalar omega_;

@@ -142,11 +142,6 @@ Foam::tmp<Foam::scalarField> Foam::targetForceTrim::thetag() const
     forAll(t, i)
     {
         scalar psi = x[i].y();
-        if (psi < 0)
-        {
-            psi += mathematical::twoPi;
-        }
-
         t[i] = theta_[0] + theta_[1]*cos(psi) + theta_[2]*sin(psi);
     }
 
