@@ -51,9 +51,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     // Check who has a mesh
     const bool haveMesh = isDir(io.time().path()/io.instance()/meshSubDir);
 
-Pout<< "meshpath:" << io.time().path()/io.instance()/meshSubDir << endl;
-Pout<< "haveMesh:" << haveMesh << endl;
-
     if (!haveMesh)
     {
         // Create dummy mesh. Only used on procs that don't have mesh.
@@ -293,8 +290,10 @@ Pout<< "haveMesh:" << haveMesh << endl;
     if (!haveMesh)
     {
         // We created a dummy mesh file above. Delete it.
-        //Pout<< "Removing dummy mesh " << io.objectPath() << endl;
-        rmDir(io.objectPath());
+        const fileName meshFiles = io.time().path()/io.instance()/meshSubDir;
+        //Pout<< "Removing dummy mesh " << meshFiles << endl;
+        mesh.removeFiles();
+        rmDir(meshFiles);
     }
 
     // Force recreation of globalMeshData.
