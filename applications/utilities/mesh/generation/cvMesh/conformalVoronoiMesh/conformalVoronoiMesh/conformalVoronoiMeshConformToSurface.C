@@ -196,7 +196,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     {
         if (vit->internalPoint() && !vit->nearBoundary())
         {
-            const Foam::point& pt = topoint(vit->point());
+            pointFromPoint pt = topoint(vit->point());
             const scalar range = sqr(2.0*targetCellSize(pt));
 
             pointIndexHit pHit;
