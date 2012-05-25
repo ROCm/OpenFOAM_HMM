@@ -88,4 +88,8 @@ sigmaRadialCoeffs
 // degree wedges.
 mergeFaces false;   //true;
 
+// Merge small edges. Fraction of bounding box.
+mergeTol 0;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
