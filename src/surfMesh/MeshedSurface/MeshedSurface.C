@@ -229,7 +229,7 @@ Foam::MeshedSurface<Face>::MeshedSurface
     ParentType(List<Face>(), surf.points())
 {
     labelList faceMap;
-    this->storedZones().transfer(surf.sortedZones(faceMap));
+    this->storedZones() = surf.sortedZones(faceMap);
 
     const List<Face>& origFaces = surf.faces();
     List<Face> newFaces(origFaces.size());
