@@ -1189,8 +1189,24 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
     }
 
     edgeList newEdges(newEdgeI);
-    UIndirectList<edge>(newEdges, reverseEdgeMap) = edges();
-    UIndirectList<edge>(newEdges, reverseFemEdgeMap) = fem.edges();
+    forAll(edges(), i)
+    {
+        const edge& e = edges()[i];
+        newEdges[reverseEdgeMap[i]] = edge
+        (
+            reversePointMap[e[0]],
+            reversePointMap[e[1]]
+        );
+    }
+    forAll(fem.edges(), i)
+    {
+        const edge& e = fem.edges()[i];
+        newEdges[reverseFemEdgeMap[i]] = edge
+        (
+            reverseFemPointMap[e[0]],
+            reverseFemPointMap[e[1]]
+        );
+    }
 
     pointField newEdgeDirections(newEdgeI);
     newEdgeDirections.rmap(edgeDirections(), reverseEdgeMap);
