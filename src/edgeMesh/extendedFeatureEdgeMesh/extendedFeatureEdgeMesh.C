@@ -1112,15 +1112,6 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
         reverseFemPointMap[i] = newPointI++;
     }
 
-
-//Pout<< "points:" << points().size() << endl;
-//Pout<< "reversePointMap:" << reversePointMap << endl;
-//
-//Pout<< "fem.points:" << fem.points().size() << endl;
-//Pout<< "reverseFemPointMap:" << reverseFemPointMap << endl;
-
-
-
     pointField newPoints(newPointI);
     newPoints.rmap(points(), reversePointMap);
     newPoints.rmap(fem.points(), reverseFemPointMap);
@@ -1240,11 +1231,6 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
         }
     }
 
-//Pout<< "fem.featurePointNormals().size():" << fem.featurePointNormals().size()
-//    << endl;
-//Pout<< "fem.nonFeatureStart():" << fem.nonFeatureStart() << endl;
-//Pout<< "reverseFemPointMap:" << reverseFemPointMap.size() << endl;
-
 
     // Combine and re-index into newFeaturePointNormals
     labelListList newFeaturePointNormals
@@ -1253,22 +1239,16 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
      + fem.featurePointNormals().size()
     );
 
-//Pout<< "newFeaturePointNormals:" << newFeaturePointNormals.size() << endl;
-//Pout<< "Doing featurePointNormals." << endl;
-
     // Note: featurePointNormals only go up to nonFeatureStart
     UIndirectList<labelList>
     (
         newFeaturePointNormals,
-        SubList<label>(reversePointMap, nonFeatureStart())
+        SubList<label>(reversePointMap, featurePointNormals().size())
     ) = featurePointNormals();
-
-
-//Pout<< "Doing fem.featurePointNormals()." << endl;
     UIndirectList<labelList>
     (
         newFeaturePointNormals,
-        SubList<label>(reverseFemPointMap, fem.nonFeatureStart())
+        SubList<label>(reverseFemPointMap, fem.featurePointNormals().size())
     ) = fem.featurePointNormals();
     forAll(fem.featurePointNormals(), i)
     {
@@ -1327,6 +1307,114 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
     edgeTreesByType_.clear();
 }
 
+
+void Foam::extendedFeatureEdgeMesh::flipNormals()
+{
+    // Points
+    // ~~~~~~
+
+    // From current points into new points
+    labelList reversePointMap(identity(points().size()));
+
+    // Flip convex and concave points
+
+    label newPointI = 0;
+    // Concave points become convex
+    for (label i = concaveStart(); i < mixedStart(); i++)
+    {
+        reversePointMap[i] = newPointI++;
+    }
+    // Convex points become concave
+    label newConcaveStart = newPointI;
+    for (label i = 0; i < concaveStart(); i++)
+    {
+        reversePointMap[i] = newPointI++;
+    }
+
+
+    // Edges
+    // ~~~~~~
+
+    // From current edges into new edges
+    labelList reverseEdgeMap(identity(edges().size()));
+
+    // Flip external and internal edges
+
+    label newEdgeI = 0;
+    // Internal become external
+    for (label i = internalStart(); i < flatStart(); i++)
+    {
+        reverseEdgeMap[i] = newEdgeI++;
+    }
+    // External become internal
+    label newInternalStart = newEdgeI;
+    for (label i = 0; i < internalStart(); i++)
+    {
+        reverseEdgeMap[i] = newEdgeI++;
+    }
+
+
+    pointField newPoints(points().size());
+    newPoints.rmap(points(), reversePointMap);
+
+    edgeList newEdges(edges().size());
+    forAll(edges(), i)
+    {
+        const edge& e = edges()[i];
+        newEdges[reverseEdgeMap[i]] = edge
+        (
+            reversePointMap[e[0]],
+            reversePointMap[e[1]]
+        );
+    }
+
+
+    // Normals are flipped
+    // ~~~~~~~~~~~~~~~~~~~
+
+    pointField newEdgeDirections(edges().size());
+    newEdgeDirections.rmap(-1.0*edgeDirections(), reverseEdgeMap);
+
+    pointField newNormals(-1.0*normals());
+
+    labelListList newEdgeNormals(edgeNormals().size());
+    UIndirectList<labelList>(newEdgeNormals, reverseEdgeMap) = edgeNormals();
+
+    labelListList newFeaturePointNormals(featurePointNormals().size());
+
+    // Note: featurePointNormals only go up to nonFeatureStart
+    UIndirectList<labelList>
+    (
+        newFeaturePointNormals,
+        SubList<label>(reversePointMap, featurePointNormals().size())
+    ) = featurePointNormals();
+
+    labelList newRegionEdges(regionEdges().size());
+    forAll(regionEdges(), i)
+    {
+        newRegionEdges[i] = reverseEdgeMap[regionEdges()[i]];
+    }
+
+    // Transfer
+    concaveStart_ = newConcaveStart;
+
+    // Reset points and edges
+    reset(xferMove(newPoints), newEdges.xfer());
+
+    // Transfer
+    internalStart_ = newInternalStart;
+
+    edgeDirections_.transfer(newEdgeDirections);
+    normals_.transfer(newNormals);
+    edgeNormals_.transfer(newEdgeNormals);
+    featurePointNormals_.transfer(newFeaturePointNormals);
+    regionEdges_.transfer(newRegionEdges);
+
+    pointTree_.clear();
+    edgeTree_.clear();
+    edgeTreesByType_.clear();
+}
+//XXXXX
 
 void Foam::extendedFeatureEdgeMesh::writeObj
 (

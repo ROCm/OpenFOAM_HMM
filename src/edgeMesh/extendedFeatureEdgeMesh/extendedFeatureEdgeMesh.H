@@ -388,6 +388,10 @@ public:
             //- Add extendedFeatureEdgeMesh. No filtering of duplicates.
             void add(const extendedFeatureEdgeMesh&);
 
+            //- Flip normals. All concave become convex, all internal external
+            //  etc.
+            void flipNormals();
+
 
         // Write
 
