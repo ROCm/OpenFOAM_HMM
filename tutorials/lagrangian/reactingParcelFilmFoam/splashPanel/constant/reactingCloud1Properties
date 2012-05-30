@@ -129,8 +129,6 @@ subModels
     {
         interactionType splashBai;
         deltaWet        0.0005;
-        dMinSplash      1e-5;
-        dMaxSplash      1e-3;
         Adry            2630;
         Awet            1320;
         Cf              0.6;
