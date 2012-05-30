@@ -36,7 +36,7 @@ Usage
     \param -allTopology \n
     Checks all (including non finite-volume specific) addressing
 
-    \param -meshQualityDict \n
+    \param -meshQuality \n
     Checks against user defined (in \a system/meshQualityDict) quality settings
 
     \param -region \<name\> \n
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "meshQualityDict",
+        "meshQuality",
         "read user-defined mesh quality criterions from system/meshQualityDict"
     );
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     const bool noTopology  = args.optionFound("noTopology");
     const bool allGeometry = args.optionFound("allGeometry");
     const bool allTopology = args.optionFound("allTopology");
-    const bool meshQualityDict = args.optionFound("meshQualityDict");
+    const bool meshQuality = args.optionFound("meshQuality");
 
     if (noTopology)
     {
@@ -108,14 +108,14 @@ int main(int argc, char *argv[])
     {
         Info<< "Enabling all geometry checks." << nl << endl;
     }
-    if (meshQualityDict)
+    if (meshQuality)
     {
         Info<< "Enabling user-defined geometry checks." << nl << endl;
     }
 
 
     autoPtr<IOdictionary> qualDict;
-    if (meshQualityDict)
+    if (meshQuality)
     {
         qualDict.reset
         (
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
             nFailedChecks += checkGeometry(mesh, allGeometry);
 
-            if (meshQualityDict)
+            if (meshQuality)
             {
                 nFailedChecks += checkMeshQuality(mesh, qualDict());
             }
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 
             label nFailedChecks = checkGeometry(mesh, allGeometry);
 
-            if (meshQualityDict)
+            if (meshQuality)
             {
                 nFailedChecks += checkMeshQuality(mesh, qualDict());
             }
