@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ Description
 
     The flow/wave speed at the outlet is provided by the virtual function
     advectionSpeed() the default implementation of which requires the name of
-    flux field a the outlet (phi) and optionally the density (rho) if the
-    mass-flux rather than the volumetric-flux is given.
+    the flux field (phi) and optionally the density (rho) if the mass-flux
+    rather than the volumetric-flux is given.
     \verbatim
         outlet
         {
@@ -50,7 +50,7 @@ Description
     \endverbatim
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
-    BC fron this class and overriding advectionSpeed() e.g. in
+    BC from this class and overriding advectionSpeed() e.g. in
     waveTransmissiveFvPatchField the advectionSpeed() calculates and returns
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
