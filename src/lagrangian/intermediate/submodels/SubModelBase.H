@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ protected:
         //- Reference to the cloud dictionary
         const dictionary& dict_;
 
-        //- Name of the sub-model bas class
+        //- Name of the sub-model base class
         const word baseName_;
 
         //- Name of the sub-model
