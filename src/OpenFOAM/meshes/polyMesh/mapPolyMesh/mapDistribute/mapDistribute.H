@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -553,6 +553,15 @@ public:
                 const T& nullValue,
                 const int tag = UPstream::msgType()
             );
+
+            //- Distribute data using default commsType.
+            template<class T>
+            void distribute
+            (
+                DynamicList<T>& fld,
+                const bool dummyTransform = true,
+                const int tag = UPstream::msgType()
+            ) const;
 
             //- Distribute data using default commsType.
             template<class T>

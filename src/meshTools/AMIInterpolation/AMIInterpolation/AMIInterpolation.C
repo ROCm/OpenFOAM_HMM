@@ -59,16 +59,16 @@ namespace Foam
     };
 
     //- Combine operator for interpolateToSource/Target
-    template<class Type, class BinaryOp>
+    template<class Type, class CombineOp>
     class combineBinaryOp
     {
-        const BinaryOp& bop_;
+        const CombineOp& cop_;
 
         public:
 
-            combineBinaryOp(const BinaryOp& bop)
+            combineBinaryOp(const CombineOp& cop)
             :
-                bop_(bop)
+                cop_(cop)
             {}
 
             void operator()
@@ -79,7 +79,7 @@ namespace Foam
                 const scalar weight
             ) const
             {
-                x = bop_(x, weight*y);
+                cop_(x, weight*y);
             }
     };
 }
@@ -142,8 +142,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeIntersectionOBJ
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch
 ) const
 {
     const scalar maxBoundsError = 0.05;
@@ -166,8 +166,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
         (
             "AMIInterpolation<SourcePatch, TargetPatch>::checkPatches"
             "("
-                "const primitivePatch&, "
-                "const primitivePatch&"
+                "const SourcePatch&, "
+                "const TargetPatch&"
             ")"
         )   << "Source and target patch bounding boxes are not similar" << nl
             << "    source box span     : " << bbSrc.span() << nl
@@ -182,7 +182,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::resetTree
 (
-    const primitivePatch& tgtPatch
+    const TargetPatch& tgtPatch
 )
 {
     // Clear the old octree
@@ -212,8 +212,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::resetTree
 template<class SourcePatch, class TargetPatch>
 Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch
 ) const
 {
     label procI = 0;
@@ -297,7 +297,7 @@ template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
 (
     const mapDistribute& map,
-    const primitivePatch& pp,
+    const TargetPatch& pp,
     const globalIndex& gi,
     List<faceList>& faces,
     List<pointField>& points,
@@ -394,7 +394,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
 distributeAndMergePatches
 (
     const mapDistribute& map,
-    const primitivePatch& tgtPatch,
+    const TargetPatch& tgtPatch,
     const globalIndex& gi,
     faceList& tgtFaces,
     pointField& tgtPoints,
@@ -509,8 +509,8 @@ template<class SourcePatch, class TargetPatch>
 Foam::autoPtr<Foam::mapDistribute>
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch
 ) const
 {
     // Get decomposition of patch
@@ -711,7 +711,7 @@ template<class SourcePatch, class TargetPatch>
 Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 (
     const label srcFaceI,
-    const primitivePatch& srcPatch
+    const SourcePatch& srcPatch
 ) const
 {
     label targetFaceI = -1;
@@ -745,7 +745,7 @@ template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::appendNbrFaces
 (
     const label faceI,
-    const primitivePatch& patch,
+    const TargetPatch& patch,
     const DynamicList<label>& visitedFaces,
     DynamicList<label>& faceIDs
 ) const
@@ -793,8 +793,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
     label& startSeedI,
     label& srcFaceI,
     label& tgtFaceI,
-    const primitivePatch& srcPatch0,
-    const primitivePatch& tgtPatch0,
+    const SourcePatch& srcPatch0,
+    const TargetPatch& tgtPatch0,
     const boolList& mapFlag,
     labelList& seedFaces,
     const DynamicList<label>& visitedFaces
@@ -897,8 +897,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
                 "label&, "
                 "label&, "
                 "label&, "
-                "const primitivePatch&, "
-                "const primitivePatch&, "
+                "const SourcePatch&, "
+                "const TargetPatch&, "
                 "const boolList&, "
                 "labelList&, "
                 "const DynamicList<label>&"
@@ -913,25 +913,26 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
 (
     const label srcFaceI,
     const label tgtFaceI,
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch
 ) const
 {
-    // quick reject if either face has zero area
-    if (srcMagSf_[srcFaceI] < ROOTVSMALL || tgtMagSf_[tgtFaceI] < ROOTVSMALL)
-    {
-        return 0.0;
-    }
-
     const pointField& srcPoints = srcPatch.points();
     const pointField& tgtPoints = tgtPatch.points();
-
-    // create intersection object
-    faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
     // references to candidate faces
     const face& src = srcPatch[srcFaceI];
     const face& tgt = tgtPatch[tgtFaceI];
+
+    // quick reject if either face has zero area
+    // Note: do not used stored face areas for target patch
+    if ((srcMagSf_[srcFaceI] < ROOTVSMALL) || (tgt.mag(tgtPoints) < ROOTVSMALL))
+    {
+        return 0.0;
+    }
+
+    // create intersection object
+    faceAreaIntersect inter(srcPoints, tgtPoints, reverseTarget_);
 
     // crude resultant norm
     vector n(-src.normal(srcPoints));
@@ -963,20 +964,17 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch,
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
     label srcFaceI,
     label tgtFaceI
 )
 {
-    if (!srcPatch.size() || !tgtPatch.size())
+    if (debug && (!srcPatch.size() || !tgtPatch.size()))
     {
-        if (debug)
-        {
-            Pout<< "AMI: Patches not on processor: Source faces = "
-                << srcPatch.size() << ", target faces = " << tgtPatch.size()
-                << endl;
-        }
+        Pout<< "AMI: Patches not on processor: Source faces = "
+            << srcPatch.size() << ", target faces = " << tgtPatch.size()
+            << endl;
     }
 
     if (!srcPatch.size())
@@ -990,8 +988,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
             "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
             "calcAddressing"
             "("
-                "const primitivePatch&, "
-                "const primitivePatch&, "
+                "const SourcePatch&, "
+                "const TargetPatch&, "
                 "label, "
                 "label"
             ")"
@@ -1035,8 +1033,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
                 "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
                 "calcAddressing"
                 "("
-                    "const primitivePatch&, "
-                    "const primitivePatch&, "
+                    "const SourcePatch&, "
+                    "const TargetPatch&, "
                     "label, "
                     "label"
                 ")"
@@ -1542,7 +1540,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     {
         // create new patches for source and target
         pointField srcPoints = srcPatch.points();
-        primitivePatch srcPatch0
+        SourcePatch srcPatch0
         (
             SubList<face>
             (
@@ -1563,7 +1561,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
         }
 
         pointField tgtPoints = tgtPatch.points();
-        primitivePatch tgtPatch0
+        TargetPatch tgtPatch0
         (
             SubList<face>
             (
@@ -1734,8 +1732,8 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::~AMIInterpolation()
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch
 )
 {
     // Calculate face areas
@@ -1784,7 +1782,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtFaceIDs
         );
 
-        primitivePatch
+        TargetPatch
             newTgtPatch
             (
                 SubList<face>
@@ -1900,7 +1898,7 @@ template<class Type, class CombineOp>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const UList<Type>& fld,
-    const CombineOp& bop,
+    const CombineOp& cop,
     List<Type>& result
 ) const
 {
@@ -1937,7 +1935,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, work[faces[i]], weights[i]);
+                cop(result[faceI], faceI, work[faces[i]], weights[i]);
             }
         }
     }
@@ -1950,7 +1948,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
+                cop(result[faceI], faceI, fld[faces[i]], weights[i]);
             }
         }
     }
@@ -1962,7 +1960,7 @@ template<class Type, class CombineOp>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const UList<Type>& fld,
-    const CombineOp& bop,
+    const CombineOp& cop,
     List<Type>& result
 ) const
 {
@@ -1999,7 +1997,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, work[faces[i]], weights[i]);
+                cop(result[faceI], faceI, work[faces[i]], weights[i]);
             }
         }
     }
@@ -2012,7 +2010,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
             forAll(faces, i)
             {
-                bop(result[faceI], faceI, fld[faces[i]], weights[i]);
+                cop(result[faceI], faceI, fld[faces[i]], weights[i]);
             }
         }
     }
@@ -2020,12 +2018,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const Field<Type>& fld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
     tmp<Field<Type> > tresult
@@ -2037,32 +2035,32 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
         )
     );
 
-    interpolateToSource(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
+    interpolateToSource(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
 
     return tresult;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
 (
     const tmp<Field<Type> >& tFld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
-    return interpolateToSource(tFld(), bop);
+    return interpolateToSource(tFld(), cop);
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const Field<Type>& fld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
     tmp<Field<Type> > tresult
@@ -2074,22 +2072,22 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
         )
     );
 
-    interpolateToTarget(fld, combineBinaryOp<Type, BinaryOp>(bop), tresult());
+    interpolateToTarget(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
 
     return tresult;
 }
 
 
 template<class SourcePatch, class TargetPatch>
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 Foam::tmp<Foam::Field<Type> >
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
 (
     const tmp<Field<Type> >& tFld,
-    const BinaryOp& bop
+    const CombineOp& cop
 ) const
 {
-    return interpolateToTarget(tFld(), bop);
+    return interpolateToTarget(tFld(), cop);
 }
 
 
@@ -2101,7 +2099,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const Field<Type>& fld
 ) const
 {
-    return interpolateToSource(fld, sumOp<Type>());
+    return interpolateToSource(fld, plusEqOp<Type>());
 }
 
 
@@ -2113,7 +2111,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToSource(tFld(), sumOp<Type>());
+    return interpolateToSource(tFld(), plusEqOp<Type>());
 }
 
 
@@ -2125,7 +2123,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const Field<Type>& fld
 ) const
 {
-    return interpolateToTarget(fld, sumOp<Type>());
+    return interpolateToTarget(fld, plusEqOp<Type>());
 }
 
 
@@ -2137,15 +2135,15 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
     const tmp<Field<Type> >& tFld
 ) const
 {
-    return interpolateToTarget(tFld(), sumOp<Type>());
+    return interpolateToTarget(tFld(), plusEqOp<Type>());
 }
 
 
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::writeFaceConnectivity
 (
-    const primitivePatch& srcPatch,
-    const primitivePatch& tgtPatch,
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
     const labelListList& srcAddress
 )
 const

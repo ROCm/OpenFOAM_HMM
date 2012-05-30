@@ -472,6 +472,33 @@ void unmarkBaffles
 }
 
 
+void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
+{
+    os  << "    points : " << fem.points().size() << nl
+        << "    of which" << nl
+        << "        convex             : "
+        << fem.concaveStart() << nl
+        << "        concave            : "
+        << (fem.mixedStart()-fem.concaveStart()) << nl
+        << "        mixed              : "
+        << (fem.nonFeatureStart()-fem.mixedStart()) << nl
+        << "        non-feature        : "
+        << (fem.points().size()-fem.nonFeatureStart()) << nl
+        << "    edges  : " << fem.edges().size() << nl
+        << "    of which" << nl
+        << "        external edges     : "
+        << fem.internalStart() << nl
+        << "        internal edges     : "
+        << (fem.flatStart()- fem.internalStart()) << nl
+        << "        flat edges         : "
+        << (fem.openStart()- fem.flatStart()) << nl
+        << "        open edges         : "
+        << (fem.multipleStart()- fem.openStart()) << nl
+        << "        multiply connected : "
+        << (fem.edges().size()- fem.multipleStart()) << nl;
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
@@ -514,7 +541,7 @@ int main(int argc, char *argv[])
 
     forAllConstIter(dictionary, dict, iter)
     {
-        dictionary surfaceDict = dict.subDict(iter().keyword());
+        const dictionary& surfaceDict = iter().dict();
 
         const fileName surfFileName = iter().keyword();
         const fileName sFeatFileName = surfFileName.lessExt().name();
@@ -522,16 +549,16 @@ int main(int argc, char *argv[])
         Info<< "Surface            : " << surfFileName << nl << endl;
 
         const Switch writeVTK =
-            surfaceDict.lookupOrAddDefault<Switch>("writeVTK", "off");
+            surfaceDict.lookupOrDefault<Switch>("writeVTK", "off");
         const Switch writeObj =
-            surfaceDict.lookupOrAddDefault<Switch>("writeObj", "off");
+            surfaceDict.lookupOrDefault<Switch>("writeObj", "off");
 
         const Switch curvature =
-            surfaceDict.lookupOrAddDefault<Switch>("curvature", "off");
+            surfaceDict.lookupOrDefault<Switch>("curvature", "off");
         const Switch featureProximity =
-            surfaceDict.lookupOrAddDefault<Switch>("featureProximity", "off");
+            surfaceDict.lookupOrDefault<Switch>("featureProximity", "off");
         const Switch closeness =
-            surfaceDict.lookupOrAddDefault<Switch>("closeness", "off");
+            surfaceDict.lookupOrDefault<Switch>("closeness", "off");
 
         const word extractionMethod = surfaceDict.lookup("extractionMethod");
 
@@ -579,7 +606,7 @@ int main(int argc, char *argv[])
 
 
         // Either construct features from surface & featureAngle or read set.
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         surfaceFeatures set(surf);
 
@@ -670,7 +697,10 @@ int main(int argc, char *argv[])
 
         if (surfaceDict.isDict("subsetFeatures"))
         {
-            dictionary subsetDict = surfaceDict.subDict("subsetFeatures");
+            const dictionary& subsetDict = surfaceDict.subDict
+            (
+                "subsetFeatures"
+            );
 
             if (subsetDict.found("insideBox"))
             {
@@ -704,7 +734,7 @@ int main(int argc, char *argv[])
             }
 
             const Switch manifoldEdges =
-                subsetDict.lookupOrAddDefault<Switch>("manifoldEdges", "no");
+                subsetDict.lookupOrDefault<Switch>("manifoldEdges", "no");
 
             if (manifoldEdges)
             {
@@ -746,16 +776,6 @@ int main(int argc, char *argv[])
         //    newSet.writeObj("final");
         //}
 
-        Info<< nl
-            << "Final feature set after trimming and subsetting:" << nl
-            << "    feature points : " << newSet.featurePoints().size() << nl
-            << "    feature edges  : " << newSet.featureEdges().size() << nl
-            << "    of which" << nl
-            << "        region edges   : " << newSet.nRegionEdges() << nl
-            << "        external edges : " << newSet.nExternalEdges() << nl
-            << "        internal edges : " << newSet.nInternalEdges() << nl
-            << endl;
-
         // Extracting and writing a extendedFeatureEdgeMesh
         extendedFeatureEdgeMesh feMesh
         (
@@ -763,6 +783,51 @@ int main(int argc, char *argv[])
             runTime,
             sFeatFileName + ".extendedFeatureEdgeMesh"
         );
+
+
+        if (surfaceDict.isDict("addFeatures"))
+        {
+            const dictionary& subsetDict = surfaceDict.subDict
+            (
+                "addFeatures"
+            );
+
+            const word addFeName = subsetDict["name"];
+            Info<< "Adding (without merging) features from " << addFeName
+                << nl << endl;
+
+            const Switch flip = subsetDict["flip"];
+
+            extendedFeatureEdgeMesh addFeMesh
+            (
+                IOobject
+                (
+                    addFeName,
+                    runTime.time().constant(),
+                    "extendedFeatureEdgeMesh",
+                    runTime.time(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+            Info<< "Read " << addFeMesh.name() << nl;
+            writeStats(addFeMesh, Info);
+
+            if (flip)
+            {
+                Info<< "Flipping " << addFeMesh.name() << endl;
+                addFeMesh.flipNormals();
+                Info<< "After flipping " << addFeMesh.name() << nl;
+                writeStats(addFeMesh, Info);
+            }
+
+            feMesh.add(addFeMesh);
+        }
+
+
+        Info<< nl
+            << "Final feature set:" << nl;
+        writeStats(feMesh, Info);
 
         Info<< nl << "Writing extendedFeatureEdgeMesh to "
             << feMesh.objectPath() << endl;

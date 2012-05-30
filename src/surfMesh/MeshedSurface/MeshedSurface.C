@@ -229,15 +229,14 @@ Foam::MeshedSurface<Face>::MeshedSurface
     ParentType(List<Face>(), surf.points())
 {
     labelList faceMap;
-    this->storedZones().transfer(surf.sortedZones(faceMap));
+    this->storedZones() = surf.sortedZones(faceMap);
 
     const List<Face>& origFaces = surf.faces();
     List<Face> newFaces(origFaces.size());
 
-    // this is somewhat like ListOps reorder and/or IndirectList
     forAll(newFaces, faceI)
     {
-        newFaces[faceI] = origFaces[faceMap[faceI]];
+        newFaces[faceMap[faceI]] = origFaces[faceI];
     }
 
     this->storedFaces().transfer(newFaces);
@@ -1084,7 +1083,7 @@ void Foam::MeshedSurface<Face>::transfer
 
         forAll(faceMap, faceI)
         {
-            newFaces[faceI].transfer(oldFaces[faceMap[faceI]]);
+            newFaces[faceMap[faceI]].transfer(oldFaces[faceI]);
         }
 
         reset

@@ -21,8 +21,6 @@ dictionaryReplacement
         AMI1
         {
             type            cyclicAMI;
-            nFaces          0;
-            startFace       1756182;
             neighbourPatch  AMI2;
             transform       noOrdering;
             surface         
@@ -32,8 +30,6 @@ dictionaryReplacement
         AMI2
         {
             type            cyclicAMI;
-            nFaces          0;
-            startFace       1756182;
             neighbourPatch  AMI1;
             transform       noOrdering;
             surface         

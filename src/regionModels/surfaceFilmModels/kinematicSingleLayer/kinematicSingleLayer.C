@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -879,22 +879,19 @@ scalar kinematicSingleLayer::CourantNumber() const
 
     if (regionMesh().nInternalFaces() > 0)
     {
-        const scalar deltaT = time_.deltaTValue();
+        const scalarField sumPhi(fvc::surfaceSum(mag(phi_)));
 
-        const surfaceScalarField SfUfbyDelta
-        (
-            regionMesh().surfaceInterpolation::deltaCoeffs()*mag(phi_)
-        );
-        const surfaceScalarField rhoDelta(fvc::interpolate(rho_*delta_));
-        const surfaceScalarField& magSf = regionMesh().magSf();
+        const scalarField& V = regionMesh().V();
 
-        forAll(rhoDelta, i)
+        forAll(deltaRho_, i)
         {
-            if (rhoDelta[i] > ROOTVSMALL)
+            if (deltaRho_[i] > SMALL)
             {
-                CoNum = max(CoNum, SfUfbyDelta[i]/rhoDelta[i]/magSf[i]*deltaT);
+                CoNum = max(CoNum, sumPhi[i]/deltaRho_[i]/V[i]);
             }
         }
+
+        CoNum *= 0.5*time_.deltaTValue();
     }
 
     reduce(CoNum, maxOp<scalar>());

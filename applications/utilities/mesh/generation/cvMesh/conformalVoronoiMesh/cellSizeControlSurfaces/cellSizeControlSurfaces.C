@@ -96,8 +96,9 @@ bool Foam::cellSizeControlSurfaces::evalCellSizeFunctions
 
     if (cellSizeFunctions_.size())
     {
-        // Initialise to the last (lowest) priority
-        label previousPriority = cellSizeFunctions_.last().priority();
+        // Maintain priority of current hit. Initialise so it always goes
+        // through at least once.
+        label previousPriority = -1;
 
         forAll(cellSizeFunctions_, i)
         {

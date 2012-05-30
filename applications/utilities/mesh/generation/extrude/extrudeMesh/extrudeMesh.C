@@ -238,6 +238,25 @@ int main(int argc, char *argv[])
         dict.lookup("constructFrom")
     );
 
+    // Any merging of small edges
+    const scalar mergeTol(dict.lookupOrDefault<scalar>("mergeTol", 1e-4));
+
+    Info<< "Extruding from " << ExtrudeModeNames[mode]
+        << " using model " << model().type() << endl;
+    if (flipNormals)
+    {
+        Info<< "Flipping normals before extruding" << endl;
+    }
+    if (mergeTol > 0)
+    {
+        Info<< "Collapsing edges < " << mergeTol << " of bounding box" << endl;
+    }
+    else
+    {
+        Info<< "Not collapsing any edges after extrusion" << endl;
+    }
+    Info<< endl;
+
 
     // Generated mesh (one of either)
     autoPtr<fvMesh> meshFromMesh;
@@ -251,10 +270,10 @@ int main(int argc, char *argv[])
 
     if (mode == PATCH || mode == MESH)
     {
-        if (flipNormals)
+        if (flipNormals && mode == MESH)
         {
             FatalErrorIn(args.executable())
-                << "Flipping normals not supported for extrusions from patch."
+                << "Flipping normals not supported for extrusions from mesh."
                 << exit(FatalError);
         }
 
@@ -297,6 +316,60 @@ int main(int argc, char *argv[])
         addPatchCellLayer layerExtrude(mesh, (mode == MESH));
 
         const labelList meshFaces(patchFaces(patches, sourcePatches));
+
+        if (mode == PATCH && flipNormals)
+        {
+            // Cheat. Flip patch faces in mesh. This invalidates the
+            // mesh (open cells) but does produce the correct extrusion.
+            polyTopoChange meshMod(mesh);
+            forAll(meshFaces, i)
+            {
+                label meshFaceI = meshFaces[i];
+
+                label patchI = patches.whichPatch(meshFaceI);
+                label own = mesh.faceOwner()[meshFaceI];
+                label nei = -1;
+                if (patchI == -1)
+                {
+                    nei = mesh.faceNeighbour()[meshFaceI];
+                }
+
+                label zoneI = mesh.faceZones().whichZone(meshFaceI);
+                bool zoneFlip = false;
+                if (zoneI != -1)
+                {
+                    label index = mesh.faceZones()[zoneI].whichFace(meshFaceI);
+                    zoneFlip = mesh.faceZones()[zoneI].flipMap()[index];
+                }
+
+                meshMod.modifyFace
+                (
+                    mesh.faces()[meshFaceI].reverseFace(),  // modified face
+                    meshFaceI,                      // label of face
+                    own,                            // owner
+                    nei,                            // neighbour
+                    true,                           // face flip
+                    patchI,                         // patch for face
+                    zoneI,                          // zone for face
+                    zoneFlip                        // face flip in zone
+                );
+            }
+
+            // Change the mesh. No inflation.
+            autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
+
+            // Update fields
+            mesh.updateMesh(map);
+
+            // Move mesh (since morphing does not do this)
+            if (map().hasMotionPoints())
+            {
+                mesh.movePoints(map().preMotionPoints());
+            }
+        }
+
+
+
         indirectPrimitivePatch extrudePatch
         (
             IndirectList<face>
@@ -471,11 +544,6 @@ int main(int argc, char *argv[])
             displacement[pointI] = extrudePt - layer0Points[pointI];
         }
 
-        if (flipNormals)
-        {
-            Info<< "Flipping faces." << nl << endl;
-            displacement = -displacement;
-        }
 
         // Check if wedge (has layer0 different from original patch points)
         // If so move the mesh to starting position.
@@ -666,7 +734,7 @@ int main(int argc, char *argv[])
 
     const boundBox& bb = mesh.bounds();
     const vector span = bb.span();
-    const scalar mergeDim = 1e-4 * bb.minDim();
+    const scalar mergeDim = mergeTol * bb.minDim();
 
     Info<< "Mesh bounding box : " << bb << nl
         << "        with span : " << span << nl
@@ -677,6 +745,7 @@ int main(int argc, char *argv[])
     // Collapse edges
     // ~~~~~~~~~~~~~~
 
+    if (mergeDim > 0)
     {
         Info<< "Collapsing edges < " << mergeDim << " ..." << nl << endl;
 

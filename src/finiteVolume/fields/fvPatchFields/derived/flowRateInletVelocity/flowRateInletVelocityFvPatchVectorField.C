@@ -129,11 +129,19 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
     }
     else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        if (rhoName_ == "none")
+        {
+            // volumetric flow-rate if density not given
+            operator==(n*avgU);
+        }
+        else
+        {
+            // mass flow-rate
+            const fvPatchField<scalar>& rhop =
+                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        // mass flow-rate
-        operator==(n*avgU/rhop);
+            operator==(n*avgU/rhop);
+        }
     }
     else
     {

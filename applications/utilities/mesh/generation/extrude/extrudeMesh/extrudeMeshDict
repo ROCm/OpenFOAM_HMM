@@ -31,7 +31,8 @@ exposedPatchName movingWall;
 // If construct from surface:
 surface "movingWall.stl";
 
-// Flip surface normals before usage.
+// Flip surface normals before usage. Valid only for extrude from surface or
+// patch.
 flipNormals false;
 
 //- Linear extrusion in point-normal direction
@@ -86,5 +87,9 @@ sigmaRadialCoeffs
 // Do front and back need to be merged? Usually only makes sense for 360
 // degree wedges.
 mergeFaces false;   //true;
+
+// Merge small edges. Fraction of bounding box.
+mergeTol 0;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

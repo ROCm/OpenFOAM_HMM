@@ -83,7 +83,8 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
     Ubar_(coeffs_.lookup("Ubar")),
     gradPini_(coeffs_.lookup("gradPini")),
     gradP_(gradPini_),
-    flowDir_(Ubar_/mag(Ubar_))
+    flowDir_(Ubar_/mag(Ubar_)),
+    invAPtr_(NULL)
 {
     coeffs_.lookup("fieldNames") >> fieldNames_;
 
@@ -124,36 +125,9 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSource::addSup
-(
-    fvMatrix<vector>& eqn,
-    const label fieldI
-)
-{
-    DimensionedField<vector, volMesh> Su
-    (
-        IOobject
-        (
-            name_ + fieldNames_[fieldI] + "Sup",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedVector("zero", gradP_.dimensions(), vector::zero)
-    );
-
-    UIndirectList<vector>(Su, cells_) = flowDir_*gradP_.value();
-
-    eqn += Su;
-}
-
-
 void Foam::pressureGradientExplicitSource::correct(volVectorField& U)
 {
-    const volScalarField& rAU =
-        mesh_.lookupObject<volScalarField>("(1|A(" + U.name() + "))");
+    const scalarField& rAU = invAPtr_().internalField();
 
     // Integrate flow variables over cell set
     scalar magUbarAve = 0.0;
@@ -193,6 +167,63 @@ void Foam::pressureGradientExplicitSource::correct(volVectorField& U)
         << ", pressure gradient = " << gradP_.value() << endl;
 
     writeGradP();
+}
+
+
+void Foam::pressureGradientExplicitSource::addSup
+(
+    fvMatrix<vector>& eqn,
+    const label fieldI
+)
+{
+    DimensionedField<vector, volMesh> Su
+    (
+        IOobject
+        (
+            name_ + fieldNames_[fieldI] + "Sup",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector("zero", gradP_.dimensions(), vector::zero)
+    );
+
+    UIndirectList<vector>(Su, cells_) = flowDir_*gradP_.value();
+
+    eqn += Su;
+}
+
+
+void Foam::pressureGradientExplicitSource::setValue
+(
+    fvMatrix<vector>& eqn,
+    const label
+)
+{
+    if (invAPtr_.empty())
+    {
+        invAPtr_.reset
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    name_ + "::invA",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                1.0/eqn.A()
+            )
+        );
+    }
+    else
+    {
+        invAPtr_() = 1.0/eqn.A();
+    }
 }
 
 

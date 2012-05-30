@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Move points:
+// Move boundary points:
 // Every entry is two coordinates. First one is location of the point to move,
 // the second is the position to move to.
 pointsToMove
@@ -22,15 +22,15 @@ pointsToMove
     (( -0.17861 -0.45073 0.75276)( -0.18 -0.45073 0.75276))
 );
 
-// Split edge in two:
-// First coord is a point on the edge to cut, second is the position of the
-// newly introduced point
+// Split boundary edge in two:
+// First coord is a point on the (boundary) edge to cut, second is the
+// position of the newly introduced point
 edgesToSplit
 (
     (( -0.17692 -0.45312 0.74516)( -0.18 -0.45 0.742))
 );
 
-// Triangulate a face:
+// Triangulate a boundary face:
 // First coord is a point on the face to triangulate. It will introduce a
 // point on the face, triangulate and move the point to the second coordinate.
 facesToTriangulate
@@ -38,8 +38,8 @@ facesToTriangulate
     (( -0.039123 -0.45045 0.74083) (-0.03844 -0.45049 0.73572))
 );
 
-// Edges to collapse. First coord is point on the edge, second is coordinate
-// to collapse to.
+// Boundary edges to collapse. First coord is point on the edge, second
+// is coordinate to collapse to.
 edgesToCollapse
 (
     ((0.054975 0.099987 0.0044074)(0.054975 0.099987 0.0044074))
@@ -55,7 +55,8 @@ cellsToSplit
 );
 
 // Change patch:
-// Changes patchID of faces. Coord selects the face, label is the patch index.
+// Changes patchID of boundary faces. Coord selects the face, label is the
+// patch index.
 facesToRepatch
 (
     (( -0.039123 -0.45045 0.74083) 1)

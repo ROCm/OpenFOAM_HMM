@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -127,9 +127,7 @@ public:
             //  A point can be deleted if
             //  - it is not used by any edge.
             //  or
-            //  - is not used by an internal edge
-            //  - is used by only two boundary edges. (note that these two
-            //    edges will always be boundary ones!)
+            //  - is used by only two edges
             //  - these two edges are sufficiently in line (cos > minCos)
             //  - all processors agree that point can be deleted.
             label countPointUsage

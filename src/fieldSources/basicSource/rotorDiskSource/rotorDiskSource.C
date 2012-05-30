@@ -67,6 +67,7 @@ namespace Foam
 
 void Foam::rotorDiskSource::checkData()
 {
+    // set inflow type
     switch (selectionMode())
     {
         case smCellSet:
@@ -129,11 +130,10 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 
     const label nInternalFaces = mesh_.nInternalFaces();
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-    const vectorField& Sf = mesh_.Sf().internalField();
-    const scalarField& magSf = mesh_.magSf().internalField();
+    const vectorField& Sf = mesh_.Sf();
+    const scalarField& magSf = mesh_.magSf();
 
     vector n = vector::zero;
-    label nFace = 0;
 
     // calculate cell addressing for selected cells
     labelList cellAddr(mesh_.nCells(), -1);
@@ -158,7 +158,6 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
     // correct for parallel running
     syncTools::swapBoundaryFaceList(mesh_, nbrFaceCellAddr);
 
-
     // add internal field contributions
     for (label faceI = 0; faceI < nInternalFaces; faceI++)
     {
@@ -173,7 +172,6 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
             {
                 area_[own] += magSf[faceI];
                 n += Sf[faceI];
-                nFace++;
             }
         }
         else if ((own == -1) && (nbr != -1))
@@ -184,7 +182,6 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
             {
                 area_[nbr] += magSf[faceI];
                 n -= Sf[faceI];
-                nFace++;
             }
         }
     }
@@ -210,7 +207,6 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
                 {
                     area_[own] += magSfp[j];
                     n += Sfp[j];
-                    nFace++;
                 }
             }
         }
@@ -222,11 +218,10 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
                 const label own = cellAddr[mesh_.faceOwner()[faceI]];
                 const vector nf = Sfp[j]/magSfp[j];
 
-                if ((own != -1) && ((nf & axis) > 0.8))
+                if ((own != -1) && ((nf & axis) > tol))
                 {
                     area_[own] += magSfp[j];
                     n += Sfp[j];
-                    nFace++;
                 }
             }
         }
@@ -359,32 +354,30 @@ void Foam::rotorDiskSource::constructGeometry()
 
     forAll(cells_, i)
     {
-        const label cellI = cells_[i];
-
-        // position in (planar) rotor co-ordinate system
-        x_[i] = coordSys_.localPosition(C[cellI]);
-
-        // cache max radius
-        rMax_ = max(rMax_, x_[i].x());
-
-        // swept angle relative to rDir axis [radians] in range 0 -> 2*pi
-        scalar psi = x_[i].y();
-        if (psi < 0)
+        if (area_[i] > ROOTVSMALL)
         {
-            psi += mathematical::twoPi;
+            const label cellI = cells_[i];
+
+            // position in (planar) rotor co-ordinate system
+            x_[i] = coordSys_.localPosition(C[cellI]);
+
+            // cache max radius
+            rMax_ = max(rMax_, x_[i].x());
+
+            // swept angle relative to rDir axis [radians] in range 0 -> 2*pi
+            scalar psi = x_[i].y();
+
+            // blade flap angle [radians]
+            scalar beta =
+                flap_.beta0 - flap_.beta1*cos(psi) - flap_.beta2*sin(psi);
+
+            // determine rotation tensor to convert from planar system into the
+            // rotor cone system
+            scalar c = cos(beta);
+            scalar s = sin(beta);
+            R_[i] = tensor(c, 0, -s, 0, 1, 0, s, 0, c);
+            invR_[i] = R_[i].T();
         }
-
-        // blade flap angle [radians]
-        scalar beta = flap_.beta0 - flap_.beta1*cos(psi) - flap_.beta2*sin(psi);
-
-        // determine rotation tensor to convert from planar system into the
-        // rotor cone system
-        scalar cNeg = cos(-beta);
-        scalar sNeg = sin(-beta);
-        R_[i] = tensor(cNeg, 0.0, -sNeg, 0.0, 1.0, 0.0, sNeg, 0.0, cNeg);
-        scalar cPos = cos(beta);
-        scalar sPos = sin(beta);
-        invR_[i] = tensor(cPos, 0.0, -sPos, 0.0, 1.0, 0.0, sPos, 0.0, cPos);
     }
 }
 
@@ -440,21 +433,22 @@ Foam::rotorDiskSource::rotorDiskSource
 :
     basicSource(name, modelType, dict, mesh),
     rhoName_("none"),
+    rhoRef_(1.0),
     omega_(0.0),
     nBlades_(0),
     inletFlow_(ifLocal),
     inletVelocity_(vector::zero),
     tipEffect_(1.0),
     flap_(),
-    trim_(trimModel::New(*this, coeffs_)),
-    blade_(coeffs_.subDict("blade")),
-    profiles_(coeffs_.subDict("profiles")),
     x_(cells_.size(), vector::zero),
     R_(cells_.size(), I),
     invR_(cells_.size(), I),
     area_(cells_.size(), 0.0),
     coordSys_(false),
-    rMax_(0.0)
+    rMax_(0.0),
+    trim_(trimModel::New(*this, coeffs_)),
+    blade_(coeffs_.subDict("blade")),
+    profiles_(coeffs_.subDict("profiles"))
 {
     read(dict);
 }
@@ -477,13 +471,15 @@ void Foam::rotorDiskSource::calculate
     const bool output
 ) const
 {
-    tmp<volScalarField> trho;
-    if (rhoName_ != "none")
-    {
-        trho = mesh_.lookupObject<volScalarField>(rhoName_);
-    }
-
     const scalarField& V = mesh_.V();
+    const bool compressible = rhoName_ != "none";
+
+    tmp<volScalarField> trho
+    (
+        compressible
+      ? mesh_.lookupObject<volScalarField>(rhoName_)
+      : volScalarField::null()
+    );
 
 
     // logging info
@@ -503,17 +499,17 @@ void Foam::rotorDiskSource::calculate
             // velocity in local cylindrical reference frame
             vector Uc = coordSys_.localVector(U[cellI]);
 
-            // apply correction in local system due to coning
+            // transform from rotor cylindrical into local coning system
             Uc = R_[i] & Uc;
 
             // set radial component of velocity to zero
             Uc.x() = 0.0;
 
-            // remove blade linear velocity from blade normal component
-            Uc.y() -= radius*omega_;
+            // set blade normal component of velocity
+            Uc.y() = radius*omega_ - Uc.y();
 
             // determine blade data for this radius
-            // i1 = index of upper bound data point in blade list
+            // i2 = index of upper radius bound data point in blade list
             scalar twist = 0.0;
             scalar chord = 0.0;
             label i1 = -1;
@@ -521,18 +517,15 @@ void Foam::rotorDiskSource::calculate
             scalar invDr = 0.0;
             blade_.interpolate(radius, twist, chord, i1, i2, invDr);
 
-            // effective angle of attack
-            scalar alphaEff =
-                mathematical::pi + atan2(Uc.z(), Uc.y()) - (alphag[i] + twist);
+            // flip geometric angle if blade is spinning in reverse (clockwise)
+            scalar alphaGeom = alphag[i] + twist;
+            if (omega_ < 0)
+            {
+                alphaGeom = mathematical::pi - alphaGeom;
+            }
 
-            if (alphaEff > mathematical::pi)
-            {
-                alphaEff -= mathematical::twoPi;
-            }
-            if (alphaEff < -mathematical::pi)
-            {
-                alphaEff += mathematical::twoPi;
-            }
+            // effective angle of attack
+            scalar alphaEff = alphaGeom - atan2(-Uc.z(), Uc.y());
 
             AOAmin = min(AOAmin, alphaEff);
             AOAmax = max(AOAmax, alphaEff);
@@ -557,20 +550,20 @@ void Foam::rotorDiskSource::calculate
 
             // calculate forces perpendicular to blade
             scalar pDyn = 0.5*magSqr(Uc);
-            if (trho.valid())
+            if (compressible)
             {
                 pDyn *= trho()[cellI];
             }
 
-            scalar f = pDyn*chord*nBlades_*area_[i]/mathematical::twoPi;
-            vector localForce = vector(0.0, f*Cd, tipFactor*f*Cl);
+            scalar f = pDyn*chord*nBlades_*area_[i]/radius/mathematical::twoPi;
+            vector localForce = vector(0.0, -f*Cd, tipFactor*f*Cl);
+
+            // accumulate forces
+            dragEff += rhoRef_*localForce.y();
+            liftEff += rhoRef_*localForce.z();
 
             // convert force from local coning system into rotor cylindrical
             localForce = invR_[i] & localForce;
-
-            // accumulate forces
-            dragEff += localForce.y();
-            liftEff += localForce.z();
 
             // convert force to global cartesian co-ordinate system
             force[cellI] = coordSys_.globalVector(localForce);
@@ -609,6 +602,7 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
     }
     else
     {
+        coeffs_.lookup("rhoRef") >> rhoRef_;
         dims.reset(dimForce/dimVolume/dimDensity);
     }
 
@@ -659,6 +653,8 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
         coeffs_.lookup("fieldNames") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
 
+
+        // read co-ordinate system/geometry invariant properties
         scalar rpm(readScalar(coeffs_.lookup("rpm")));
         omega_ = rpm/60.0*mathematical::twoPi;
 
@@ -676,13 +672,16 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
         flap_.beta1 = degToRad(flap_.beta1);
         flap_.beta2 = degToRad(flap_.beta2);
 
-        trim_->read(coeffs_);        
 
-        checkData();
-
+        // create co-ordinate system
         createCoordinateSystem();
 
+        // read co-odinate system dependent properties
+        checkData();
+
         constructGeometry();
+
+        trim_->read(coeffs_);
 
         if (debug)
         {
