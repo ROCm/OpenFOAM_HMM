@@ -57,7 +57,7 @@ Description
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "RASModel.H"
 #include "laminarFlameSpeed.H"
 #include "XiModel.H"

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "reactionTypes.H"
-#include "makeReactionThermo.H"
+#include "makeReaction.H"
 
 #include "ArrheniusReactionRate.H"
 #include "infiniteReactionRate.H"

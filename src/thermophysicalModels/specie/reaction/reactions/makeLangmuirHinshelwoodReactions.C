@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReactionThermo.H"
+#include "makeReaction.H"
 #include "reactionTypes.H"
 #include "LangmuirHinshelwoodReactionRate.H"
 

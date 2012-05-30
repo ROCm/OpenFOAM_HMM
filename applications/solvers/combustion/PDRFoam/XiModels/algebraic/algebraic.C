@@ -43,7 +43,7 @@ namespace XiModels
 Foam::XiModels::algebraic::algebraic
 (
     const dictionary& XiProperties,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su,
     const volScalarField& rho,

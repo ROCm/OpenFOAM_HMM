@@ -35,6 +35,7 @@ Description
 #include "perfectGas.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
+#include "sensibleEnthalpy.H"
 #include "specieThermo.H"
 #include "sutherlandTransport.H"
 #include "constTransport.H"
@@ -47,13 +48,36 @@ Description
 
 namespace Foam
 {
-    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
+    typedef
+        sutherlandTransport
+        <
+            specieThermo
+            <
+                janafThermo
+                <
+                    perfectGas
+                >,
+                sensibleEnthalpy
+            >
+        >
         gasThermoPhysics;
 
-    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
+    typedef
+        constTransport
+        <
+            specieThermo
+            <
+                hConstThermo
+                <
+                    perfectGas
+                >,
+                sensibleEnthalpy
+            >
+        >
         constGasThermoPhysics;
 
-    typedef polynomialTransport
+    typedef
+        polynomialTransport
         <
             specieThermo
             <
@@ -61,7 +85,8 @@ namespace Foam
                 <
                     icoPolynomial<8>,
                     8
-                >
+                >,
+                sensibleEnthalpy
             >,
             8
         >
@@ -73,4 +98,3 @@ namespace Foam
 #endif
 
 // ************************************************************************* //
-

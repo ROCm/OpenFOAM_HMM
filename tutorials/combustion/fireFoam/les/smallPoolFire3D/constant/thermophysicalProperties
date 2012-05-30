@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType hsPsiMixtureThermo<singleStepReactingMixture<gasThermoPhysics>>;
+thermoType hePsiReactionThermo<singleStepReactingMixture<gasThermoPhysics>>;
 
 inertSpecie N2;
 

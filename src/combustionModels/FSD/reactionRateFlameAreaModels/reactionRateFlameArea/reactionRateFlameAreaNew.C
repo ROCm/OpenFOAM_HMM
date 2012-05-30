@@ -48,7 +48,7 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
     {
         FatalIOErrorIn
         (
-            "reactionRateFlameArea::New(const hsCombustionThermo&)",
+            "reactionRateFlameArea::New(const psiReactionThermo&)",
             dict
         )   << "Unknown reactionRateFlameArea type "
             << reactionRateFlameAreaType << endl << endl

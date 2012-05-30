@@ -81,7 +81,7 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hsCombustionThermo
+        //- Construct from dictionary and psiReactionThermo
         relaxation
         (
             const word modelType,

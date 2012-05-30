@@ -103,6 +103,27 @@ public:
         //- Return the turbulence thermal diffusivity, i.e. 0 for laminar flow
         virtual tmp<volScalarField> alphat() const;
 
+        //- Return the effective turbulent temperature diffusivity,
+        //  i.e. the laminar thermal diffusivity
+        virtual tmp<volScalarField> kappaEff() const
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField
+                (
+                    "kappaEff",
+                    thermo().kappa()
+                )
+            );
+        }
+
+        //- Return the effective turbulent temperature diffusivity for a patch,
+        //  i.e. the laminar thermal diffusivity
+        virtual tmp<scalarField> kappaEff(const label patchI) const
+        {
+            return thermo().kappa(patchI);
+        }
+
         //- Return the effective turbulent thermal diffusivity,
         //  i.e. the laminar thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const

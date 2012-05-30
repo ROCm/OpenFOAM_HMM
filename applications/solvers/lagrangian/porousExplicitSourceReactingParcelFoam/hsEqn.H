@@ -7,7 +7,7 @@
      ==
       - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + parcels.Sh(hs)
-      + radiation->Shs(thermo)
+      + radiation->Sh(thermo)
       + combustion->Sh()
       + sources(rho, hs)
     );

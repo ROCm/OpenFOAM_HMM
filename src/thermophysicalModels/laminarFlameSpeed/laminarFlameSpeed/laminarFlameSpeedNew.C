@@ -29,7 +29,7 @@ License
 
 Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 (
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 {
     // do not register the dictionary
@@ -57,7 +57,7 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
     {
         FatalIOErrorIn
         (
-            "laminarFlameSpeed::New(const hhuCombustionThermo&)",
+            "laminarFlameSpeed::New(const psiuReactionThermo&)",
             propDict
         )   << "Unknown laminarFlameSpeed type "
             << corrType << nl << nl

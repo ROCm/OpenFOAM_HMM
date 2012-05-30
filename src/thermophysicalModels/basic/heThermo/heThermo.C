@@ -1,0 +1,618 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "heThermo.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class BasicThermo, class MixtureType>
+Foam::heThermo<BasicThermo, MixtureType>::heThermo(const fvMesh& mesh)
+:
+    BasicThermo(mesh),
+    MixtureType(*this, mesh),
+
+    he_
+    (
+        IOobject
+        (
+            MixtureType::thermoType::heName(),
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimEnergy/dimMass,
+        this->heBoundaryTypes()
+    )
+{
+    scalarField& heCells = he_.internalField();
+    const scalarField& TCells = this->T_.internalField();
+
+    forAll(heCells, celli)
+    {
+        heCells[celli] = this->cellMixture(celli).HE(TCells[celli]);
+    }
+
+    forAll(he_.boundaryField(), patchi)
+    {
+        he_.boundaryField()[patchi] ==
+            he(this->T_.boundaryField()[patchi], patchi);
+    }
+
+    this->heBoundaryCorrection(he_);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class BasicThermo, class MixtureType>
+Foam::heThermo<BasicThermo, MixtureType>::~heThermo()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::he
+(
+    const scalarField& T,
+    const labelList& cells
+) const
+{
+    tmp<scalarField> the(new scalarField(T.size()));
+    scalarField& he = the();
+
+    forAll(T, celli)
+    {
+        he[celli] = this->cellMixture(cells[celli]).HE(T[celli]);
+    }
+
+    return the;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::he
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> the(new scalarField(T.size()));
+    scalarField& he = the();
+
+    forAll(T, facei)
+    {
+        he[facei] = this->patchFaceMixture(patchi, facei).HE(T[facei]);
+    }
+
+    return the;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::hc() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> thc
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "hc",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            he_.dimensions()
+        )
+    );
+
+    volScalarField& hcf = thc();
+    scalarField& hcCells = hcf.internalField();
+
+    forAll(hcCells, celli)
+    {
+        hcCells[celli] = this->cellMixture(celli).Hc();
+    }
+
+    forAll(hcf.boundaryField(), patchi)
+    {
+        scalarField& hcp = hcf.boundaryField()[patchi];
+
+        forAll(hcp, facei)
+        {
+            hcp[facei] = this->patchFaceMixture(patchi, facei).Hc();
+        }
+    }
+
+    return thc;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::Cp
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCp(new scalarField(T.size()));
+    scalarField& cp = tCp();
+
+    forAll(T, facei)
+    {
+        cp[facei] = this->patchFaceMixture(patchi, facei).Cp(T[facei]);
+    }
+
+    return tCp;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::Cp() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> tCp
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Cp",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimEnergy/dimMass/dimTemperature
+        )
+    );
+
+    volScalarField& cp = tCp();
+
+    forAll(this->T_, celli)
+    {
+        cp[celli] = this->cellMixture(celli).Cp(this->T_[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        const fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
+        fvPatchScalarField& pCp = cp.boundaryField()[patchi];
+
+        forAll(pT, facei)
+        {
+            pCp[facei] = this->patchFaceMixture(patchi, facei).Cp(pT[facei]);
+        }
+    }
+
+    return tCp;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::Cv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCv(new scalarField(T.size()));
+    scalarField& cv = tCv();
+
+    forAll(T, facei)
+    {
+        cv[facei] = this->patchFaceMixture(patchi, facei).Cv(T[facei]);
+    }
+
+    return tCv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::Cv() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> tCv
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Cv",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimEnergy/dimMass/dimTemperature
+        )
+    );
+
+    volScalarField& cv = tCv();
+
+    forAll(this->T_, celli)
+    {
+        cv[celli] = this->cellMixture(celli).Cv(this->T_[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        cv.boundaryField()[patchi] =
+            Cv(this->T_.boundaryField()[patchi], patchi);
+    }
+
+    return tCv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::gamma
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tgamma(new scalarField(T.size()));
+    scalarField& cpv = tgamma();
+
+    forAll(T, facei)
+    {
+        cpv[facei] = this->patchFaceMixture(patchi, facei).gamma(T[facei]);
+    }
+
+    return tgamma;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::gamma() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> tgamma
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "gamma",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimless
+        )
+    );
+
+    volScalarField& cpv = tgamma();
+
+    forAll(this->T_, celli)
+    {
+        cpv[celli] = this->cellMixture(celli).gamma(this->T_[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        const fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
+        fvPatchScalarField& pgamma = cpv.boundaryField()[patchi];
+
+        forAll(pT, facei)
+        {
+            pgamma[facei] =
+                this->patchFaceMixture(patchi, facei).gamma(pT[facei]);
+        }
+    }
+
+    return tgamma;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::Cpv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCpv(new scalarField(T.size()));
+    scalarField& cpv = tCpv();
+
+    forAll(T, facei)
+    {
+        cpv[facei] = this->patchFaceMixture(patchi, facei).Cpv(T[facei]);
+    }
+
+    return tCpv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::Cpv() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> tCpv
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "Cpv",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimEnergy/dimMass/dimTemperature
+        )
+    );
+
+    volScalarField& cpv = tCpv();
+
+    forAll(this->T_, celli)
+    {
+        cpv[celli] = this->cellMixture(celli).Cpv(this->T_[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        const fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
+        fvPatchScalarField& pCpv = cpv.boundaryField()[patchi];
+
+        forAll(pT, facei)
+        {
+            pCpv[facei] = this->patchFaceMixture(patchi, facei).Cpv(pT[facei]);
+        }
+    }
+
+    return tCpv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::CpByCpv
+(
+    const scalarField& T,
+    const label patchi
+) const
+{
+    tmp<scalarField> tCpByCpv(new scalarField(T.size()));
+    scalarField& cpByCpv = tCpByCpv();
+
+    forAll(T, facei)
+    {
+        cpByCpv[facei] =
+            this->patchFaceMixture(patchi, facei).cpBycpv(T[facei]);
+    }
+
+    return tCpByCpv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::CpByCpv() const
+{
+    const fvMesh& mesh = this->T_.mesh();
+
+    tmp<volScalarField> tCpByCpv
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "CpByCpv",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimless
+        )
+    );
+
+    volScalarField& cpByCpv = tCpByCpv();
+
+    forAll(this->T_, celli)
+    {
+        cpByCpv[celli] = this->cellMixture(celli).cpBycpv(this->T_[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        const fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
+        fvPatchScalarField& pCpByCpv = cpByCpv.boundaryField()[patchi];
+
+        forAll(pT, facei)
+        {
+            pCpByCpv[facei] =
+                this->patchFaceMixture(patchi, facei).cpBycpv(pT[facei]);
+        }
+    }
+
+    return tCpByCpv;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::THE
+(
+    const scalarField& h,
+    const scalarField& T0,
+    const labelList& cells
+) const
+{
+    tmp<scalarField> tT(new scalarField(h.size()));
+    scalarField& T = tT();
+
+    forAll(h, celli)
+    {
+        T[celli] = this->cellMixture(cells[celli]).THE(h[celli], T0[celli]);
+    }
+
+    return tT;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::THE
+(
+    const scalarField& h,
+    const scalarField& T0,
+    const label patchi
+) const
+{
+    tmp<scalarField> tT(new scalarField(h.size()));
+    scalarField& T = tT();
+
+    forAll(h, facei)
+    {
+        T[facei] = this->patchFaceMixture
+        (
+            patchi,
+            facei
+        ).THE(h[facei], T0[facei]);
+    }
+
+    return tT;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::kappa() const
+{
+    tmp<Foam::volScalarField> kappa(Cp()*this->alpha_);
+    kappa().rename("kappa");
+    return kappa;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField> Foam::heThermo<BasicThermo, MixtureType>::kappa
+(
+    const label patchi
+) const
+{
+    return
+        Cp(this->T_.boundaryField()[patchi], patchi)
+       *this->alpha_.boundaryField()[patchi];
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::kappaEff
+(
+    const volScalarField& alphat
+) const
+{
+    tmp<Foam::volScalarField> kappaEff(Cp()*alphaEff(alphat));
+    kappaEff().rename("kappaEff");
+    return kappaEff;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::kappaEff
+(
+    const scalarField& alphat,
+    const label patchi
+) const
+{
+    return
+        Cp(this->T_.boundaryField()[patchi], patchi)
+       *alphaEff(alphat, patchi);
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::volScalarField>
+Foam::heThermo<BasicThermo, MixtureType>::alphaEff
+(
+    const volScalarField& alphat
+) const
+{
+    tmp<Foam::volScalarField> alphaEff(this->CpByCpv()*(this->alpha_ + alphat));
+    alphaEff().rename("alphaEff");
+    return alphaEff;
+}
+
+
+template<class BasicThermo, class MixtureType>
+Foam::tmp<Foam::scalarField>
+Foam::heThermo<BasicThermo, MixtureType>::alphaEff
+(
+    const scalarField& alphat,
+    const label patchi
+) const
+{
+    return
+    this->CpByCpv(this->T_.boundaryField()[patchi], patchi)
+   *(
+        this->alpha_.boundaryField()[patchi]
+      + alphat
+    );
+}
+
+
+template<class BasicThermo, class MixtureType>
+bool Foam::heThermo<BasicThermo, MixtureType>::read()
+{
+    if (BasicThermo::read())
+    {
+        MixtureType::read(*this);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+// ************************************************************************* //

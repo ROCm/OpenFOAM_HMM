@@ -89,13 +89,13 @@ void Foam::porousMedia::fixedTemperature::addEnthalpySource
     forAll(zones, zoneI)
     {
         const labelList& cells = mesh.cellZones()[zones[zoneI]];
-        tmp<scalarField> h = thermo.h(T, cells);
+        tmp<scalarField> he = thermo.he(T, cells);
 
         forAll(cells, i)
         {
             hDiag[cells[i]] += rate*V[cells[i]]*rho[cells[i]];
             hSource[cells[i]] +=
-                rate*V[cells[i]]*rho[cells[i]]*h()[cells[i]];
+                rate*V[cells[i]]*rho[cells[i]]*he()[cells[i]];
         }
     }
 }

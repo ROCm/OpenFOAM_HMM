@@ -5,7 +5,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         mesh,
         fields,
         phi,
-        mesh.divScheme("div(phi,ft_b_h_hu)")
+        mesh.divScheme("div(phi,ft_b_ha_hau)")
     )
 );
 
@@ -54,13 +54,13 @@ if (ign.ignited())
     surfaceScalarField nf("nf", mesh.Sf() & nfVec);
     n /= mgb;
 
-#   include "StCorr.H"
+    #include "StCorr.H"
 
     // Calculate turbulent flame speed flux
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     surfaceScalarField phiSt("phiSt", fvc::interpolate(rhou*StCorr*St)*nf);
 
-#   include "StCourantNo.H"
+    #include "StCourantNo.H"
 
     Db = flameWrinkling->Db();
 
@@ -78,7 +78,7 @@ if (ign.ignited())
 
     // Add ignition cell contribution to b-equation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#   include "ignite.H"
+    #include "ignite.H"
 
     // Solve for b
     // ~~~~~~~~~~~

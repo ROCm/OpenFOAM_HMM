@@ -69,7 +69,4 @@
 
     Info<< "Min/max rho:" << min(rho).value() << ' '
         << max(rho).value() << endl;
-
-    // Update thermal conductivity
-    kappa = thermo.Cp()*turb.alphaEff();
 }

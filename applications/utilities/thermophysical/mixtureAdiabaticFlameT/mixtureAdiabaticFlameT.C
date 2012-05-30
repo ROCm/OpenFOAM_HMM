@@ -36,13 +36,14 @@ Description
 #include "OSspecific.H"
 
 #include "specieThermo.H"
+#include "absoluteEnthalpy.H"
 #include "janafThermo.H"
 #include "perfectGas.H"
 #include "mixture.H"
 
 using namespace Foam;
 
-typedef specieThermo<janafThermo<perfectGas> > thermo;
+typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -115,7 +116,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< "Adiabatic flame temperature of mixture " << rMix.name() << " = "
-         << products.TH(reactants.H(T0), 1000.0) << " K" << endl;
+         << products.THa(reactants.Ha(T0), 1000.0) << " K" << endl;
 
     return 0;
 }

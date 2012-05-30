@@ -43,7 +43,7 @@ namespace XiEqModels
 Foam::XiEqModels::instability::instability
 (
     const dictionary& XiEqProperties,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )

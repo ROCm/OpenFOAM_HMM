@@ -112,7 +112,7 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hsCombustionThermo
+        //- Construct from dictionary and psiReactionThermo
         reactionRateFlameArea
         (
             const dictionary& dict,

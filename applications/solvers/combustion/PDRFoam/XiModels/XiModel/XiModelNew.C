@@ -30,7 +30,7 @@ License
 Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 (
     const dictionary& propDict,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su,
     const volScalarField& rho,

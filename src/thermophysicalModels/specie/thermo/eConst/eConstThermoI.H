@@ -110,7 +110,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::cp
 
 
 template<class EquationOfState>
-inline Foam::scalar Foam::eConstThermo<EquationOfState>::h
+inline Foam::scalar Foam::eConstThermo<EquationOfState>::ha
 (
     const scalar T
 ) const

@@ -36,13 +36,14 @@ Description
 #include "IOmanip.H"
 
 #include "specieThermo.H"
+#include "absoluteEnthalpy.H"
 #include "janafThermo.H"
 #include "perfectGas.H"
 #include "SLPtrList.H"
 
 using namespace Foam;
 
-typedef specieThermo<janafThermo<perfectGas> > thermo;
+typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:

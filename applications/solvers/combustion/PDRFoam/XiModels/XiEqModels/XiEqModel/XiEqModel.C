@@ -39,7 +39,7 @@ namespace Foam
 Foam::XiEqModel::XiEqModel
 (
     const dictionary& XiEqProperties,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )

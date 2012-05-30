@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hsRhoMixtureThermo<reactingMixture<icoPoly8ThermoPhysics>>;
+thermoType      heRhoReactionThermo<reactingMixture<icoPoly8ThermoPhysics>>;
 
 chemistryReader foamChemistryReader;
 

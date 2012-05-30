@@ -32,7 +32,7 @@ Description
 #include "fvCFD.H"
 #include "engineTime.H"
 #include "engineMesh.H"
-#include "basicPsiThermo.H"
+#include "psiThermo.H"
 #include "turbulenceModel.H"
 #include "OFstream.H"
 #include "pimpleControl.H"

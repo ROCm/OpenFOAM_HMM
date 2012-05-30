@@ -79,7 +79,7 @@ energySource1
         volumeMode      absolute;
         injectionRate
         {
-            hs          10;
+            h           10;
         }
     }
 }

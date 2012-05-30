@@ -54,6 +54,10 @@ class basicMixture
 
 public:
 
+    //- The base class of the mixture
+    typedef basicMixture basicMixtureType;
+
+
     // Runtime type information
     TypeName("basicMixture");
 

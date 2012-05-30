@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactionThermo_H
-#define makeReactionThermo_H
+#ifndef makeSolidReactionThermo_H
+#define makeSolidReactionThermo_H
 
 #include "solidReaction.H"
 #include "IrreversibleSolidReaction.H"

@@ -1,8 +1,7 @@
     fvMesh& mesh = fluidRegions[i];
 
-    basicRhoThermo& thermo = thermoFluid[i];
+    rhoThermo& thermo = thermoFluid[i];
     volScalarField& rho = rhoFluid[i];
-    volScalarField& kappa = kappaFluid[i];
     volVectorField& U = UFluid[i];
     surfaceScalarField& phi = phiFluid[i];
 
@@ -12,7 +11,7 @@
 
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
-    volScalarField& h = thermo.h();
+    volScalarField& h = thermo.he();
 
     volScalarField& p_rgh = p_rghFluid[i];
     const volScalarField& gh = ghFluid[i];

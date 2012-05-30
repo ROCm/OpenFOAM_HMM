@@ -27,7 +27,7 @@ solution
         schemes
         {
             U               explicit 1;
-            hs              explicit 1;
+            h               explicit 1;
         }
     }
 

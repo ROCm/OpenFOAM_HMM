@@ -53,7 +53,7 @@ solvers
     };
 
 
-    "(U|Yi|k|hs|omega)"
+    "(U|Yi|k|h|omega)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -62,7 +62,7 @@ solvers
         nSweeps         1;
     };
 
-    "(U|Yi|k|hs|omega)Final"
+    "(U|Yi|k|h|omega)Final"
     {
         $U;
         tolerance       1e-7;
@@ -108,7 +108,7 @@ relaxationFactors
     equations
     {
         "(U|k).*"                   1;
-        "(C3H8|O2|H2O|CO2|hs).*"    0.9;
+        "(C3H8|O2|H2O|CO2|h).*"    0.9;
     }
 }
 

@@ -9,7 +9,7 @@
       - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + parcels.Sh(hs)
       + surfaceFilm.Sh()
-      + radiation->Shs(thermo)
+      + radiation->Sh(thermo)
       + combustion->Sh()
     );
 

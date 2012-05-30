@@ -99,8 +99,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                 );
 
             return
-                model.alphaEff()().boundaryField()[patch_.index()]
-               *model.thermo().Cp(Tp, patch_.index());
+                model.kappaEff(patch_.index());
         }
         break;
 

@@ -238,21 +238,30 @@ public:
             );
         }
 
+        //- Return the effective turbulent temperature diffusivity
+        virtual tmp<volScalarField> kappaEff() const
+        {
+            return thermo().kappaEff(alphat());
+        }
+
+        //- Return the effective turbulent temperature diffusivity for a patch
+        virtual tmp<scalarField> kappaEff(const label patchI) const
+        {
+            return
+                thermo().kappaEff(alphat()().boundaryField()[patchI], patchI);
+        }
+
         //- Return the effective turbulent thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const
         {
-            return tmp<volScalarField>
-            (
-                new volScalarField("alphaEff", alphat() + alpha())
-            );
+            return thermo().alphaEff(alphat());
         }
 
         //- Return the effective turbulent thermal diffusivity for a patch
         virtual tmp<scalarField> alphaEff(const label patchI) const
         {
             return
-                alphat()().boundaryField()[patchI]
-              + alpha().boundaryField()[patchI];
+                thermo().alphaEff(alphat()().boundaryField()[patchI], patchI);
         }
 
         //- Return yPlus for the given patch

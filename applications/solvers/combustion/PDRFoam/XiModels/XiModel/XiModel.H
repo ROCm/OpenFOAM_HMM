@@ -91,7 +91,7 @@ SourceFiles
 #define XiModel_H
 
 #include "IOdictionary.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "RASModel.H"
 #include "multivariateSurfaceInterpolationScheme.H"
 #include "runTimeSelectionTables.H"
@@ -114,7 +114,7 @@ protected:
 
         dictionary XiModelCoeffs_;
 
-        const hhuCombustionThermo& thermo_;
+        const psiuReactionThermo& thermo_;
         const compressible::RASModel& turbulence_;
         const volScalarField& Su_;
         const volScalarField& rho_;
@@ -151,7 +151,7 @@ public:
             dictionary,
             (
                 const dictionary& XiProperties,
-                const hhuCombustionThermo& thermo,
+                const psiuReactionThermo& thermo,
                 const compressible::RASModel& turbulence,
                 const volScalarField& Su,
                 const volScalarField& rho,
@@ -176,7 +176,7 @@ public:
         static autoPtr<XiModel> New
         (
             const dictionary& XiProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su,
             const volScalarField& rho,
@@ -191,7 +191,7 @@ public:
         XiModel
         (
             const dictionary& XiProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su,
             const volScalarField& rho,

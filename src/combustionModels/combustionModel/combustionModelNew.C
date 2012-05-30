@@ -29,7 +29,7 @@ License
 Foam::autoPtr<Foam::combustionModel> Foam::combustionModel::New
 (
     const dictionary& combustionProperties,
-    hsCombustionThermo& thermo,
+    psiReactionThermo& thermo,
     const compressible::turbulenceModel& turbulence,
     const surfaceScalarField& phi,
     const volScalarField& rho

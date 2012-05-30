@@ -32,7 +32,7 @@ solvers
         relTol          0;
     }
 
-    "(U|hs|k|omega)"
+    "(U|h|k|omega)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -40,7 +40,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|hs|k|omega)Final"
+    "(U|h|k|omega)Final"
     {
         $U;
         tolerance       1e-06;
@@ -71,7 +71,7 @@ solvers
 
     "(Yi|O2|N2|H2O)"
     {
-        $hsFinal;
+        $hFinal;
     }
 }
 

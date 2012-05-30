@@ -67,7 +67,7 @@ class alphaSgsJayatillekeWallFunctionFvPatchScalarField
         scalar E_;
 
         //- Name of (sensible/total) enthalpy field
-        word hsName_;
+        word heName_;
 
 
         // Solution parameters

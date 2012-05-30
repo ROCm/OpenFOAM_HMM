@@ -30,7 +30,7 @@ License
 Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 (
     const dictionary& propDict,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
@@ -48,7 +48,7 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
         (
             "XiEqModel::New"
             "("
-            "    const hhuCombustionThermo& thermo,"
+            "    const psiuReactionThermo& thermo,"
             "    const compressible::RASModel& turbulence,"
             "    const volScalarField& Su"
             ")"

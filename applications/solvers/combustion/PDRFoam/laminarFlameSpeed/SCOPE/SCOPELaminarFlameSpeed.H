@@ -186,11 +186,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hhuCombustionThermo
+        //- Construct from dictionary and psiuReactionThermo
         SCOPE
         (
             const dictionary&,
-            const hhuCombustionThermo&
+            const psiuReactionThermo&
         );
 
 

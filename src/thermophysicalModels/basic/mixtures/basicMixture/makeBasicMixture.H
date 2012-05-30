@@ -32,20 +32,22 @@ Description
 #define makeBasicMixture_H
 
 #include "basicMixture.H"
+#include "sensibleEnthalpy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicMixture(Mixture,Transport,Thermo,EqnOfState)                 \
+#define makeBasicMixture(Mixture,Transport,Type,Thermo,EqnOfState)            \
                                                                               \
-typedef Mixture<Transport<specieThermo<Thermo<EqnOfState> > > >               \
-    Mixture##Transport##Thermo##EqnOfState;                                   \
+typedef                                                                       \
+    Mixture<Transport<specieThermo<Thermo<EqnOfState>, Type> > >              \
+    Mixture##Transport##Type##Thermo##EqnOfState;                             \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (Mixture##Transport##Thermo##EqnOfState,                                  \
-    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>", 0)
+    (Mixture##Transport##Type##Thermo##EqnOfState,                            \
+    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">,"#Type">>>", 0)
 
 
-#define makeBasicPolyMixture(Mixture,Order)                                   \
+#define makeBasicPolyMixture(Mixture,Order,Type)                              \
                                                                               \
 typedef polynomialTransport                                                   \
 <                                                                             \
@@ -55,17 +57,18 @@ typedef polynomialTransport                                                   \
         <                                                                     \
             icoPolynomial<Order>,                                             \
             Order                                                             \
-            >                                                                 \
+        >,                                                                    \
+        Type                                                                  \
     >,                                                                        \
     Order                                                                     \
-> icoPoly##Order##ThermoPhysics;                                              \
+> icoPoly##Order##Type##ThermoPhysics;                                        \
                                                                               \
-typedef Mixture<icoPoly##Order##ThermoPhysics>                                \
-    Mixture##icoPoly##Order##ThermoPhysics;                                   \
+typedef Mixture<icoPoly##Order##Type##ThermoPhysics>                          \
+    Mixture##icoPoly##Order##Type##ThermoPhysics;                             \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (Mixture##icoPoly##Order##ThermoPhysics,                                  \
-    #Mixture"<icoPoly"#Order"ThermoPhysics>", 0)
+    (Mixture##icoPoly##Order##Type##ThermoPhysics,                            \
+    #Mixture"<icoPoly"#Order#Type"ThermoPhysics>", 0)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

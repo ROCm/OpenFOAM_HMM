@@ -49,7 +49,7 @@ namespace laminarFlameSpeedModels
 Foam::laminarFlameSpeedModels::Gulders::Gulders
 (
     const dictionary& dict,
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 :
     laminarFlameSpeed(dict, ct),
@@ -206,17 +206,17 @@ Foam::tmp<Foam::volScalarField> Foam::laminarFlameSpeedModels::Gulders::Su0pTphi
 Foam::tmp<Foam::volScalarField>
 Foam::laminarFlameSpeedModels::Gulders::operator()() const
 {
-    if (hhuCombustionThermo_.composition().contains("ft"))
+    if (psiuReactionThermo_.composition().contains("ft"))
     {
-        const volScalarField& ft = hhuCombustionThermo_.composition().Y("ft");
+        const volScalarField& ft = psiuReactionThermo_.composition().Y("ft");
 
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
             )*ft/((1 + SMALL) - ft)
         );
     }
@@ -224,8 +224,8 @@ Foam::laminarFlameSpeedModels::Gulders::operator()() const
     {
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             equivalenceRatio_
         );
     }

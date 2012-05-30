@@ -37,7 +37,7 @@ SourceFiles
 #define PDRDragModel_H
 
 #include "IOdictionary.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "RASModel.H"
 #include "multivariateSurfaceInterpolationScheme.H"
 #include "runTimeSelectionTables.H"

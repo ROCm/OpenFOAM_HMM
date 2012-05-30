@@ -46,7 +46,7 @@ Foam::combustionModels::psiCombustionModel::psiCombustionModel
 )
 :
     combustionModel(modelType, mesh),
-    thermo_(hsCombustionThermo::New(mesh))
+    thermo_(psiReactionThermo::New(mesh))
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

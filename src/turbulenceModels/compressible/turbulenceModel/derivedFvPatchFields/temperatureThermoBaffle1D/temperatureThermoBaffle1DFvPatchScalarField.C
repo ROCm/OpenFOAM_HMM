@@ -222,10 +222,10 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         // local properties
         const scalarField alphaw = model.alphaEff()().boundaryField()[patchI];
 
-        const fvPatchScalarField& hw =
-            model.thermo().h().boundaryField()[patchI];
+        const fvPatchScalarField& hew =
+            model.thermo().he().boundaryField()[patchI];
 
-        const scalarField qDot(alphaw*hw.snGrad());
+        const scalarField qDot(alphaw*hew.snGrad());
 
         const scalarField& Tp =
             patch().template lookupPatchField<volScalarField, scalar>(TName_);
@@ -245,7 +245,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         mpp.map().distribute(nbrAlphaw);
 
         const fvPatchScalarField& nbrHw =
-            model.thermo().h().boundaryField()[nbrPatchI];
+            model.thermo().he().boundaryField()[nbrPatchI];
 
         scalarField nbrQDot
         (

@@ -37,7 +37,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicRhoThermo.H"
+#include "rhoThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"

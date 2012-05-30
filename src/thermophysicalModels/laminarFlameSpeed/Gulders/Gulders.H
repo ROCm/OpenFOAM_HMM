@@ -106,11 +106,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hhuCombustionThermo
+        //- Construct from dictionary and psiuReactionThermo
         Gulders
         (
             const dictionary&,
-            const hhuCombustionThermo&
+            const psiuReactionThermo&
         );
 
 

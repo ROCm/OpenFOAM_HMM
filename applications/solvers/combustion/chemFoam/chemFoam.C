@@ -34,7 +34,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
+#include "psiReactionThermo.H"
 #include "turbulenceModel.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"

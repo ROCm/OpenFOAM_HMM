@@ -43,7 +43,7 @@ SourceFiles
 #ifndef laminarFlameSpeed_H
 #define laminarFlameSpeed_H
 
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -63,7 +63,7 @@ protected:
 
     // Protected data
 
-        const hhuCombustionThermo& hhuCombustionThermo_;
+        const psiuReactionThermo& psiuReactionThermo_;
 
         //- Fuel
         word fuel_;
@@ -96,7 +96,7 @@ public:
             dictionary,
             (
                 const dictionary& dict,
-                const hhuCombustionThermo& ct
+                const psiuReactionThermo& ct
             ),
             (dict, ct)
         );
@@ -104,11 +104,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hhuCombustionThermo
+        //- Construct from dictionary and psiuReactionThermo
         laminarFlameSpeed
         (
             const dictionary&,
-            const hhuCombustionThermo&
+            const psiuReactionThermo&
         );
 
 
@@ -116,7 +116,7 @@ public:
 
         static autoPtr<laminarFlameSpeed> New
         (
-            const hhuCombustionThermo&
+            const psiuReactionThermo&
         );
 
 

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReactionThermo.H"
+#include "makeReaction.H"
 #include "thermoPhysicsTypes.H"
 
 #include "chemistryReader.H"

@@ -122,16 +122,6 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
 
 
 template<class Thermo, int PolySize>
-inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alphae
-(
-    const scalar T
-) const
-{
-    return kappa(T)/this->Cv(T);
-}
-
-
-template<class Thermo, int PolySize>
 inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alphah
 (
     const scalar T

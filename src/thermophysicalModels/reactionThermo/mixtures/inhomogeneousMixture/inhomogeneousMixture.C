@@ -179,13 +179,13 @@ Foam::scalar Foam::inhomogeneousMixture<ThermoType>::Cv
 
 
 template<class ThermoType>
-Foam::scalar Foam::inhomogeneousMixture<ThermoType>::H
+Foam::scalar Foam::inhomogeneousMixture<ThermoType>::Ha
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return getLocalThermo(specieI).H(T);
+    return getLocalThermo(specieI).Ha(T);
 }
 
 
@@ -222,13 +222,13 @@ Foam::scalar Foam::inhomogeneousMixture<ThermoType>::S
 
 
 template<class ThermoType>
-Foam::scalar Foam::inhomogeneousMixture<ThermoType>::E
+Foam::scalar Foam::inhomogeneousMixture<ThermoType>::Es
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return getLocalThermo(specieI).E(T);
+    return getLocalThermo(specieI).Es(T);
 }
 
 
@@ -284,17 +284,6 @@ Foam::scalar Foam::inhomogeneousMixture<ThermoType>::alphah
 ) const
 {
     return getLocalThermo(specieI).alphah(T);
-}
-
-
-template<class ThermoType>
-Foam::scalar Foam::inhomogeneousMixture<ThermoType>::alphae
-(
-    const label specieI,
-    const scalar T
-) const
-{
-    return getLocalThermo(specieI).alphae(T);
 }
 
 

@@ -44,7 +44,7 @@ Foam::rhoChemistryModel::rhoChemistryModel
 )
 :
     basicChemistryModel(mesh),
-    thermo_(hsReactionThermo::NewType(mesh, thermoTypeName))
+    thermo_(rhoReactionThermo::NewType(mesh, thermoTypeName))
 {}
 
 

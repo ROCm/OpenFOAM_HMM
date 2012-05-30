@@ -176,11 +176,8 @@ public:
             //- Source term component (constant)
             virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
 
-            //- Enthalpy source term
+            //- Energy source term
             virtual tmp<fvScalarMatrix> Sh(basicThermo& thermo) const;
-
-            //- Sensible enthalpy source term
-            virtual tmp<fvScalarMatrix> Shs(basicThermo& thermo) const;
 };
 
 

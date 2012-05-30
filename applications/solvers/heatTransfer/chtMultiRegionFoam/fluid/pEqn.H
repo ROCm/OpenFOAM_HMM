@@ -92,7 +92,4 @@
         rho = thermo.rho();
         p_rgh = p - rho*gh;
     }
-
-    // Update thermal conductivity
-    kappa = thermoFluid[i].Cp()*turb.alphaEff();
 }

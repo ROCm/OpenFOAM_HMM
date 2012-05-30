@@ -44,13 +44,13 @@ Foam::combustionModels::rhoChemistryCombustionModel::rho() const
     return pChemistry_->thermo().rho();
 }
 
-inline const Foam::hsReactionThermo&
+inline const Foam::rhoReactionThermo&
 Foam::combustionModels::rhoChemistryCombustionModel::thermo() const
 {
     return pChemistry_->thermo();
 }
 
-inline Foam::hsReactionThermo&
+inline Foam::rhoReactionThermo&
 Foam::combustionModels::rhoChemistryCombustionModel::thermo()
 {
     return pChemistry_->thermo();

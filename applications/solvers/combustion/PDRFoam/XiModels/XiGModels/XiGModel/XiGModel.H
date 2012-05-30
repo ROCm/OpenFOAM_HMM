@@ -39,7 +39,7 @@ SourceFiles
 #define XiGModel_H
 
 #include "IOdictionary.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "RASModel.H"
 #include "runTimeSelectionTables.H"
 
@@ -61,7 +61,7 @@ protected:
 
         dictionary XiGModelCoeffs_;
 
-        const hhuCombustionThermo& thermo_;
+        const psiuReactionThermo& thermo_;
         const compressible::RASModel& turbulence_;
         const volScalarField& Su_;
 
@@ -92,7 +92,7 @@ public:
             dictionary,
             (
                 const dictionary& XiGProperties,
-                const hhuCombustionThermo& thermo,
+                const psiuReactionThermo& thermo,
                 const compressible::RASModel& turbulence,
                 const volScalarField& Su
             ),
@@ -111,7 +111,7 @@ public:
         static autoPtr<XiGModel> New
         (
             const dictionary& XiGProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su
         );
@@ -123,7 +123,7 @@ public:
         XiGModel
         (
             const dictionary& XiGProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su
         );

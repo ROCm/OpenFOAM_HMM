@@ -25,13 +25,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::hsReactionThermo& Foam::rhoChemistryModel::thermo()
+inline Foam::rhoReactionThermo& Foam::rhoChemistryModel::thermo()
 {
     return thermo_();
 }
 
 
-inline const Foam::hsReactionThermo& Foam::rhoChemistryModel::thermo() const
+inline const Foam::rhoReactionThermo& Foam::rhoChemistryModel::thermo() const
 {
     return thermo_();
 }

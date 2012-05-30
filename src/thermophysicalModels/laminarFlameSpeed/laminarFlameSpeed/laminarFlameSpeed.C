@@ -40,14 +40,14 @@ namespace Foam
 Foam::laminarFlameSpeed::laminarFlameSpeed
 (
     const dictionary& dict,
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 :
-    hhuCombustionThermo_(ct),
+    psiuReactionThermo_(ct),
     fuel_(dict.lookup("fuel")),
     equivalenceRatio_(0)
 {
-    if (!hhuCombustionThermo_.composition().contains("ft"))
+    if (!psiuReactionThermo_.composition().contains("ft"))
     {
         equivalenceRatio_ =
             dimensionedScalar(dict.lookup("equivalenceRatio")).value();

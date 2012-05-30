@@ -131,10 +131,10 @@ public:
         inline tmp<volScalarField> rho() const;
 
         //- Return const access to rho
-        inline const hsReactionThermo& thermo() const;
+        inline const rhoReactionThermo& thermo() const;
 
         //- Return non const access to rho
-        inline hsReactionThermo& thermo();
+        inline rhoReactionThermo& thermo();
 
 
     // I-O

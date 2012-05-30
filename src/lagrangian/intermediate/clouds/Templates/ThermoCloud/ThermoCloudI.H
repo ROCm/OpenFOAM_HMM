@@ -135,7 +135,7 @@ Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
 
     if (this->solution().coupled())
     {
-        if (this->solution().semiImplicit("hs"))
+        if (this->solution().semiImplicit("h"))
         {
             const volScalarField Cp(thermo_.thermo().Cp());
             const DimensionedField<scalar, volMesh>

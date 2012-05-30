@@ -124,14 +124,12 @@ calculateHtc()
 
     const volScalarField Nu(a_*pow(Re, b_)*pow(Pr_, c_));
 
-    const volScalarField K(turb.alphaEff()*secondaryThermo.Cp());
-
     scalarField htcMapped(htc_.internalField().size(), 0.0);
 
     secondaryToPrimaryInterpPtr_->interpolateInternalField
     (
         htcMapped,
-        Nu*K/ds_,
+        Nu*turb.kappaEff()/ds_,
         meshToMesh::MAP,
         eqOp<scalar>()
     );

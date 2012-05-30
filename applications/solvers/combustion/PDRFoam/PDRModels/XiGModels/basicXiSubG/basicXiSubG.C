@@ -43,7 +43,7 @@ namespace XiGModels
 Foam::XiGModels::basicSubGrid::basicSubGrid
 (
     const dictionary& XiGProperties,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )

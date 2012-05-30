@@ -101,7 +101,7 @@ public:
         basicSubGrid
         (
             const dictionary& XiGProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su
         );

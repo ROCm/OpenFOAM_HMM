@@ -32,7 +32,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
 #include "RASModel.H"
 #include "wallFvPatch.H"
 
@@ -41,7 +40,7 @@ Description
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);

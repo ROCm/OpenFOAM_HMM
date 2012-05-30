@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -98,7 +98,7 @@ void Foam::fixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const hhuCombustionThermo& thermo = db().lookupObject<hhuCombustionThermo>
+    const psiuReactionThermo& thermo = db().lookupObject<psiuReactionThermo>
     (
         "thermophysicalProperties"
     );
@@ -108,7 +108,7 @@ void Foam::fixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
     fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.Tu().boundaryField()[patchi]);
     Tw.evaluate();
-    operator==(thermo.hu(Tw, patchi));
+    operator==(thermo.heu(Tw, patchi));
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }

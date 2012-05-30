@@ -64,7 +64,7 @@ Foam::laminarFlameSpeedModels::SCOPE::polynomial::polynomial
 Foam::laminarFlameSpeedModels::SCOPE::SCOPE
 (
     const dictionary& dict,
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 :
     laminarFlameSpeed(dict, ct),
@@ -383,21 +383,21 @@ Foam::tmp<Foam::volScalarField> Foam::laminarFlameSpeedModels::SCOPE::Ma
 Foam::tmp<Foam::volScalarField>
 Foam::laminarFlameSpeedModels::SCOPE::Ma() const
 {
-    if (hhuCombustionThermo_.composition().contains("ft"))
+    if (psiuReactionThermo_.composition().contains("ft"))
     {
-        const volScalarField& ft = hhuCombustionThermo_.composition().Y("ft");
+        const volScalarField& ft = psiuReactionThermo_.composition().Y("ft");
 
         return Ma
         (
             dimensionedScalar
             (
-                hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
             )*ft/(scalar(1) - ft)
         );
     }
     else
     {
-        const fvMesh& mesh = hhuCombustionThermo_.p().mesh();
+        const fvMesh& mesh = psiuReactionThermo_.p().mesh();
 
         return tmp<volScalarField>
         (
@@ -422,17 +422,17 @@ Foam::laminarFlameSpeedModels::SCOPE::Ma() const
 Foam::tmp<Foam::volScalarField>
 Foam::laminarFlameSpeedModels::SCOPE::operator()() const
 {
-    if (hhuCombustionThermo_.composition().contains("ft"))
+    if (psiuReactionThermo_.composition().contains("ft"))
     {
-        const volScalarField& ft = hhuCombustionThermo_.composition().Y("ft");
+        const volScalarField& ft = psiuReactionThermo_.composition().Y("ft");
 
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
             )*ft/(scalar(1) - ft)
         );
     }
@@ -440,8 +440,8 @@ Foam::laminarFlameSpeedModels::SCOPE::operator()() const
     {
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             equivalenceRatio_
         );
     }

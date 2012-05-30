@@ -45,41 +45,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class Thermo> class specieThermo;
+template<class Thermo, template<class> class Type> class specieThermo;
 
-template<class Thermo>
-inline specieThermo<Thermo> operator+
+template<class Thermo, template<class> class Type>
+inline specieThermo<Thermo, Type> operator+
 (
-    const specieThermo<Thermo>&,
-    const specieThermo<Thermo>&
+    const specieThermo<Thermo, Type>&,
+    const specieThermo<Thermo, Type>&
 );
 
-template<class Thermo>
-inline specieThermo<Thermo> operator-
+template<class Thermo, template<class> class Type>
+inline specieThermo<Thermo, Type> operator-
 (
-    const specieThermo<Thermo>&,
-    const specieThermo<Thermo>&
+    const specieThermo<Thermo, Type>&,
+    const specieThermo<Thermo, Type>&
 );
 
-template<class Thermo>
-inline specieThermo<Thermo> operator*
+template<class Thermo, template<class> class Type>
+inline specieThermo<Thermo, Type> operator*
 (
     const scalar,
-    const specieThermo<Thermo>&
+    const specieThermo<Thermo, Type>&
 );
 
-template<class Thermo>
-inline specieThermo<Thermo> operator==
+template<class Thermo, template<class> class Type>
+inline specieThermo<Thermo, Type> operator==
 (
-    const specieThermo<Thermo>&,
-    const specieThermo<Thermo>&
+    const specieThermo<Thermo, Type>&,
+    const specieThermo<Thermo, Type>&
 );
 
-template<class Thermo>
+template<class Thermo, template<class> class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const specieThermo<Thermo>&
+    const specieThermo<Thermo, Type>&
 );
 
 
@@ -87,10 +87,11 @@ Ostream& operator<<
                            Class specieThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Thermo>
+template<class Thermo, template<class> class Type>
 class specieThermo
 :
-    public Thermo
+    public Thermo,
+    public Type<specieThermo<Thermo, Type> >
 {
     // Private data
 
@@ -140,8 +141,8 @@ public:
             // Heat capacity at constant pressure [J/(kmol K)]
             // scalar cp(const scalar) const;
 
-            // Enthalpy [J/kmol]
-            // scalar h(const scalar) const;
+            // Absolute Enthalpy [J/kmol]
+            // scalar ha(const scalar) const;
 
             // Sensible enthalpy [J/kmol]
             // scalar hs(const scalar) const;
@@ -158,17 +159,30 @@ public:
 
             // Mole specific properties
 
+                //- Name of Enthalpy/Internal energy
+                static inline word heName();
+
+                //- Enthalpy/Internal energy [J/kmol]
+                inline scalar he(const scalar T) const;
+
                 //- Heat capacity at constant volume [J/(kmol K)]
                 inline scalar cv(const scalar T) const;
+
+                //- Heat capacity at constant pressure/volume [J/(kmol K)]
+                inline scalar cpv(const scalar T) const;
 
                 //- gamma = cp/cv []
                 inline scalar gamma(const scalar T) const;
 
-                //- Internal energy [J/kmol]
-                inline scalar e(const scalar T) const;
+                //- Ratio of heat capacity at constant pressure to that at
+                //  constant pressure/volume []
+                inline scalar cpBycpv(const scalar T) const;
 
                 //- Sensible internal energy [J/kmol]
                 inline scalar es(const scalar T) const;
+
+                //- Absolute internal energy [J/kmol]
+                inline scalar ea(const scalar T) const;
 
                 //- Gibbs free energy [J/kmol]
                 inline scalar g(const scalar T) const;
@@ -185,6 +199,12 @@ public:
                 //- Heat capacity at constant volume [J/(kg K)]
                 inline scalar Cv(const scalar T) const;
 
+                //- Heat capacity at constant pressure/volume [J/(kg K)]
+                inline scalar Cpv(const scalar T) const;
+
+                //- Enthalpy/Internal energy [J/kg]
+                inline scalar HE(const scalar T) const;
+
                 //- Enthalpy [J/kg]
                 inline scalar H(const scalar T) const;
 
@@ -194,11 +214,20 @@ public:
                 //- Chemical enthalpy [J/kg]
                 inline scalar Hc() const;
 
+                //- Absolute Enthalpy [J/kg]
+                inline scalar Ha(const scalar T) const;
+
                 //- Entropy [J/(kg K)]
                 inline scalar S(const scalar T) const;
 
                 //- Internal energy [J/kg]
                 inline scalar E(const scalar T) const;
+
+                //- Sensible internal energy [J/kg]
+                inline scalar Es(const scalar T) const;
+
+                //- Absolute internal energy [J/kg]
+                inline scalar Ea(const scalar T) const;
 
                 //- Gibbs free energy [J/kg]
                 inline scalar G(const scalar T) const;
@@ -242,14 +271,24 @@ public:
 
         // Energy->temperature  inversion functions
 
-            //- Temperature from Enthalpy given an initial temperature T0
-            inline scalar TH(const scalar H, const scalar T0) const;
+            //- Temperature from enthalpy or internal energy
+            //  given an initial temperature T0
+            inline scalar THE(const scalar H, const scalar T0) const;
 
-            //- Temperature from sensible Enthalpy given an initial T0
+            //- Temperature from sensible enthalpy given an initial T0
             inline scalar THs(const scalar Hs, const scalar T0) const;
 
-            //- Temperature from internal energy given an initial temperature T0
-            inline scalar TE(const scalar E, const scalar T0) const;
+            //- Temperature from absolute enthalpy
+            //  given an initial temperature T0
+            inline scalar THa(const scalar H, const scalar T0) const;
+
+            //- Temperature from sensible internal energy
+            //  given an initial temperature T0
+            inline scalar TEs(const scalar E, const scalar T0) const;
+
+            //- Temperature from absolute internal energy
+            //  given an initial temperature T0
+            inline scalar TEa(const scalar E, const scalar T0) const;
 
 
         // I-O
@@ -268,25 +307,25 @@ public:
 
     // Friend operators
 
-        friend specieThermo operator+ <Thermo>
+        friend specieThermo operator+ <Thermo, Type>
         (
             const specieThermo&,
             const specieThermo&
         );
 
-        friend specieThermo operator- <Thermo>
+        friend specieThermo operator- <Thermo, Type>
         (
             const specieThermo&,
             const specieThermo&
         );
 
-        friend specieThermo operator* <Thermo>
+        friend specieThermo operator* <Thermo, Type>
         (
             const scalar s,
             const specieThermo&
         );
 
-        friend specieThermo operator== <Thermo>
+        friend specieThermo operator== <Thermo, Type>
         (
             const specieThermo&,
             const specieThermo&
@@ -295,7 +334,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <Thermo>
+        friend Ostream& operator<< <Thermo, Type>
         (
             Ostream&,
             const specieThermo&
