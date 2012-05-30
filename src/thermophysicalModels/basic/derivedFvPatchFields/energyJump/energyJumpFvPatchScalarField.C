@@ -24,13 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "addToRunTimeSelectionTable.H"
-#include "enthalpyJumpFvPatchScalarField.H"
+#include "energyJumpFvPatchScalarField.H"
 #include "temperatureJumpFvPatchScalarField.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -40,9 +40,9 @@ Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
 {}
 
 
-Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const enthalpyJumpFvPatchScalarField& ptf,
+    const energyJumpFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -52,7 +52,7 @@ Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
 {}
 
 
-Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -72,9 +72,9 @@ Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
 }
 
 
-Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const enthalpyJumpFvPatchScalarField& ptf
+    const energyJumpFvPatchScalarField& ptf
 )
 :
     cyclicLduInterfaceField(),
@@ -82,9 +82,9 @@ Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
 {}
 
 
-Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const enthalpyJumpFvPatchScalarField& ptf,
+    const energyJumpFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -94,7 +94,7 @@ Foam::enthalpyJumpFvPatchScalarField::enthalpyJumpFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::enthalpyJumpFvPatchScalarField::updateCoeffs()
+void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -124,27 +124,14 @@ void Foam::enthalpyJumpFvPatchScalarField::updateCoeffs()
 
         const labelUList& faceCells = this->patch().faceCells();
 
-        if (db().foundObject<volScalarField>("h"))
-        {
-            jump_ = thermo.h(jumpTb, faceCells);
-        }
-        else if (db().foundObject<volScalarField>("hs"))
-        {
-            jump_ = thermo.hs(jumpTb, faceCells);
-        }
-        else
-        {
-             FatalErrorIn("enthalpyJumpFvPatchScalarField::updateCoeffs()")
-            << " hs or h are not found in db()"
-            << exit(FatalError);
-        }
+        jump_ = thermo.he(jumpTb, faceCells);
     }
 
     fixedJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 
-void Foam::enthalpyJumpFvPatchScalarField::write(Ostream& os) const
+void Foam::energyJumpFvPatchScalarField::write(Ostream& os) const
 {
     fixedJumpFvPatchField<scalar>::write(os);
     this->writeEntry("value", os);
@@ -158,7 +145,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchScalarField,
-       enthalpyJumpFvPatchScalarField
+       energyJumpFvPatchScalarField
    );
 }
 

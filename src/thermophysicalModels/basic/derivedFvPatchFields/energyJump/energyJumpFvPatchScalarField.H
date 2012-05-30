@@ -22,17 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::enthalpyJumpFvPatchScalarField
+    Foam::energyJumpFvPatchScalarField
 
 Description
 
 SourceFiles
-    enthalpyJumpFvPatchScalarField.C
+    energyJumpFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef enthalpyJumpFvPatchScalarField_H
-#define enthalpyJumpFvPatchScalarField_H
+#ifndef energyJumpFvPatchScalarField_H
+#define energyJumpFvPatchScalarField_H
 
 #include "fixedJumpFvPatchField.H"
 #include "DataEntry.H"
@@ -43,10 +43,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class enthalpyJumpFvPatchScalarField Declaration
+                    Class energyJumpFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class enthalpyJumpFvPatchScalarField
+class energyJumpFvPatchScalarField
 :
     public fixedJumpFvPatchField<scalar>
 {
@@ -54,39 +54,39 @@ class enthalpyJumpFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("enthalpyJump");
+    TypeName("energyJump");
 
     // Constructors
 
         //- Construct from patch and internal field
-        enthalpyJumpFvPatchScalarField
+        energyJumpFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        enthalpyJumpFvPatchScalarField
+        energyJumpFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given enthalpyJumpFvPatchScalarField onto a
+        //- Construct by mapping given energyJumpFvPatchScalarField onto a
         //  new patch
-        enthalpyJumpFvPatchScalarField
+        energyJumpFvPatchScalarField
         (
-            const enthalpyJumpFvPatchScalarField&,
+            const energyJumpFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        enthalpyJumpFvPatchScalarField
+        energyJumpFvPatchScalarField
         (
-            const enthalpyJumpFvPatchScalarField&
+            const energyJumpFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -94,14 +94,14 @@ public:
         {
             return tmp<fvPatchField<scalar> >
             (
-                new enthalpyJumpFvPatchScalarField(*this)
+                new energyJumpFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        enthalpyJumpFvPatchScalarField
+        energyJumpFvPatchScalarField
         (
-            const enthalpyJumpFvPatchScalarField&,
+            const energyJumpFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -113,7 +113,7 @@ public:
         {
             return tmp<fvPatchField<scalar> >
             (
-                new enthalpyJumpFvPatchScalarField(*this, iF)
+                new energyJumpFvPatchScalarField(*this, iF)
             );
         }
 
