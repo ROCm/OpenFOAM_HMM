@@ -22,23 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Extracts triSurface from a polyMesh. Triangulates all boundary faces.
-    Region numbers on triangles are the patch numbers of the polyMesh.
+    Extracts surface from a polyMesh. Depending on output surface format
+    triangulates faces.
+
+    Region numbers on faces cannot be guaranteed to be the same as the patch
+    indices.
+
     Optionally only triangulates named patches.
 
     If run in parallel the processor patches get filtered out by default and
-    the mesh gets merged. (based on vertex position, not topology, so might go
-    wrong!).
+    the mesh gets merged (based on topology).
 
 \*---------------------------------------------------------------------------*/
 
+#include "MeshedSurface.H"
+#include "UnsortedMeshedSurface.H"
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "triSurface.H"
-#include "triSurfaceTools.H"
 #include "processorPolyPatch.H"
 #include "ListListOps.H"
+#include "uindirectPrimitivePatch.H"
+#include "globalMeshData.H"
+#include "globalIndex.H"
 
 using namespace Foam;
 
@@ -50,7 +56,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "extract surface from a polyMesh and triangulate boundary faces"
+        "extract surface from a polyMesh"
     );
     argList::validArgs.append("output file");
     #include "addRegionOption.H"
@@ -63,26 +69,36 @@ int main(int argc, char *argv[])
     (
         "patches",
         "(patch0 .. patchN)",
-        "only triangulate named patches"
+        "only triangulate selected patches (wildcards supported)"
     );
 
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName outFileName(runTime.path()/args[1]);
+    const word outFileName(args[1]);
 
-    Info<< "Extracting triSurface from boundaryMesh ..."
+    Info<< "Extracting surface from boundaryMesh ..."
         << endl << endl;
-
-    Pout<< "Reading mesh from time " << runTime.value() << endl;
-
-    #include "createNamedPolyMesh.H"
 
     const bool includeProcPatches =
        !(
             args.optionFound("excludeProcPatches")
          || Pstream::parRun()
         );
+
+    if (includeProcPatches)
+    {
+        Info<< "Including all processor patches." << nl << endl;
+    }
+    else if (Pstream::parRun())
+    {
+        Info<< "Excluding all processor patches." << nl << endl;
+    }
+
+    Info<< "Reading mesh from time " << runTime.value() << endl;
+
+    #include "createNamedPolyMesh.H"
+
 
     // Create local surface from:
     // - explicitly named patches only (-patches (at your option)
@@ -98,24 +114,10 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("patches"))
     {
-        const wordList patchNames
+        includePatches = bMesh.patchSet
         (
-            args.optionLookup("patches")()
+            wordReList(args.optionLookup("patches")())
         );
-
-        forAll(patchNames, patchNameI)
-        {
-            const word& patchName = patchNames[patchNameI];
-            const label patchI = bMesh.findPatchID(patchName);
-
-            if (patchI == -1)
-            {
-                FatalErrorIn(args.executable()) << "No such patch "
-                    << patchName << endl << "Patches are " << bMesh.names()
-                    << exit(FatalError);
-            }
-            includePatches.insert(patchI);
-        }
     }
     else
     {
@@ -127,212 +129,155 @@ int main(int argc, char *argv[])
             {
                 includePatches.insert(patchI);
             }
-            else
-            {
-                Pout<< patch.name() << " : skipped since processorPatch"
-                    << endl;
-            }
         }
     }
 
-    triSurface localSurface
+
+
+    // Collect sizes. Hash on names to handle local-only patches (e.g.
+    //  processor patches)
+    HashTable<label> patchSize(1000);
+    label nFaces = 0;
+    forAllConstIter(labelHashSet, includePatches, iter)
+    {
+        const polyPatch& pp = bMesh[iter.key()];
+        patchSize.insert(pp.name(), pp.size());
+        nFaces += pp.size();
+    }
+    Pstream::mapCombineGather(patchSize, plusEqOp<label>());
+
+
+    // Allocate zone/patch for all patches
+    HashTable<label> compactZoneID(1000);
+    forAllConstIter(HashTable<label>, patchSize, iter)
+    {
+        label sz = compactZoneID.size();
+        compactZoneID.insert(iter.key(), sz);
+    }
+    Pstream::mapCombineScatter(compactZoneID);
+
+
+    // Rework HashTable into labelList just for speed of conversion
+    labelList patchToCompactZone(bMesh.size(), -1);
+    forAllConstIter(HashTable<label>, compactZoneID, iter)
+    {
+        label patchI = bMesh.findPatchID(iter.key());
+        if (patchI != -1)
+        {
+            patchToCompactZone[patchI] = iter();
+        }
+    }
+
+    // Collect faces on zones
+    DynamicList<label> faceLabels(nFaces);
+    DynamicList<label> compactZones(nFaces);
+    forAllConstIter(labelHashSet, includePatches, iter)
+    {
+        const polyPatch& pp = bMesh[iter.key()];
+        forAll(pp, i)
+        {
+            faceLabels.append(pp.start()+i);
+            compactZones.append(patchToCompactZone[pp.index()]);
+        }
+    }
+
+    // Addressing engine for all faces
+    uindirectPrimitivePatch allBoundary
     (
-        triSurfaceTools::triangulate
-        (
-            mesh.boundaryMesh(),
-            includePatches
-        )
+        UIndirectList<face>(mesh.faces(), faceLabels),
+        mesh.points()
     );
 
 
+    // Find correspondence to master points
+    labelList pointToGlobal;
+    labelList uniqueMeshPoints;
+    autoPtr<globalIndex> globalNumbers = mesh.globalData().mergePoints
+    (
+        allBoundary.meshPoints(),
+        allBoundary.meshPointMap(),
+        pointToGlobal,
+        uniqueMeshPoints
+    );
 
-    if (!Pstream::parRun())
+    // Gather all unique points on master
+    List<pointField> gatheredPoints(Pstream::nProcs());
+    gatheredPoints[Pstream::myProcNo()] = pointField
+    (
+        mesh.points(),
+        uniqueMeshPoints
+    );
+    Pstream::gatherList(gatheredPoints);
+
+    // Gather all faces
+    List<faceList> gatheredFaces(Pstream::nProcs());
+    gatheredFaces[Pstream::myProcNo()] = allBoundary.localFaces();
+    forAll(gatheredFaces[Pstream::myProcNo()], i)
     {
-        Info<< "Writing surface to " << outFileName << endl;
-
-        localSurface.write(outFileName);
+        inplaceRenumber(pointToGlobal, gatheredFaces[Pstream::myProcNo()][i]);
     }
-    else
+    Pstream::gatherList(gatheredFaces);
+
+    // Gather all ZoneIDs
+    List<labelList> gatheredZones(Pstream::nProcs());
+    gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
+    Pstream::gatherList(gatheredZones);
+
+    // On master combine all points, faces, zones
+    if (Pstream::master())
     {
-        // Write local surface
-        fileName localPath = runTime.path()/runTime.caseName() + ".obj";
+        pointField allPoints = ListListOps::combine<pointField>
+        (
+            gatheredPoints,
+            accessOp<pointField>()
+        );
+        gatheredPoints.clear();
 
-        Pout<< "Writing local surface to " << localPath << endl;
+        faceList allFaces = ListListOps::combine<faceList>
+        (
+            gatheredFaces,
+            accessOp<faceList>()
+        );
+        gatheredFaces.clear();
 
-        localSurface.write(localPath);
-
-        Info<< endl;
-
-
-        // Gather all points on master
-        List<pointField> gatheredPoints(Pstream::nProcs());
-
-        gatheredPoints[Pstream::myProcNo()] = localSurface.points();
-
-        Pstream::gatherList(gatheredPoints);
-
-
-        // Gather all localSurface patches
-        List<geometricSurfacePatchList> gatheredPatches(Pstream::nProcs());
-
-        gatheredPatches[Pstream::myProcNo()] = localSurface.patches();
-
-        Pstream::gatherList(gatheredPatches);
+        labelList allZones = ListListOps::combine<labelList>
+        (
+            gatheredZones,
+            accessOp<labelList>()
+        );
+        gatheredZones.clear();
 
 
-        // Gather all faces
-        List<List<labelledTri> > gatheredFaces(Pstream::nProcs());
-
-        gatheredFaces[Pstream::myProcNo()] = localSurface;
-
-        Pstream::gatherList(gatheredFaces);
-
-
-        if (Pstream::master())
+        // Zones
+        surfZoneIdentifierList surfZones(compactZoneID.size());
+        forAllConstIter(HashTable<label>, compactZoneID, iter)
         {
-            // On master combine all points
-            pointField allPoints =
-                ListListOps::combine<pointField>
-                (
-                    gatheredPoints,
-                    accessOp<pointField>()
-                );
-
-            // Count number of patches.
-            label nPatches = 0;
-
-            forAll(gatheredPatches, procI)
-            {
-                nPatches += gatheredPatches[procI].size();
-            }
-
-            // Count number of faces.
-            label nFaces = 0;
-
-            forAll(gatheredFaces, procI)
-            {
-                nFaces += gatheredFaces[procI].size();
-            }
-
-
-
-            // Loop over all processors and
-            // - construct mapping from local to global patches
-            // - relabel faces (both points and regions)
-
-            label newPatchI = 0;
-
-            // Name to new patchI
-            HashTable<label> nameToIndex(2*nPatches);
-
-            // Storage (oversized) for all patches
-            geometricSurfacePatchList allPatches(nPatches);
-
-            label newFaceI = 0;
-
-            // Storage for all faces
-            List<labelledTri> allFaces(nFaces);
-
-            // Offset into allPoints for current processor
-            label pointOffset = 0;
-
-            for (label procI = 0; procI < Pstream::nProcs(); procI++)
-            {
-                Info<< "Processor " << procI << endl
-                    << "-----------" << endl;
-
-                const geometricSurfacePatchList& patches =
-                    gatheredPatches[procI];
-
-                // From local patch numbering to global
-                labelList localToGlobal(patches.size());
-
-                forAll(patches, patchI)
-                {
-                    const geometricSurfacePatch& sp = patches[patchI];
-
-                    if (!nameToIndex.found(sp.name()))
-                    {
-                        nameToIndex.insert(sp.name(), newPatchI);
-
-                        localToGlobal[patchI] = newPatchI;
-
-                        allPatches[newPatchI] = sp;
-
-                        newPatchI++;
-                    }
-                    else
-                    {
-                        localToGlobal[patchI] = nameToIndex[sp.name()];
-                    }
-                }
-
-                Info<< "Local patch to global patch mapping:"
-                    << endl;
-
-                forAll(patches, patchI)
-                {
-                    Info<< "    name   : " << patches[patchI].name() << endl
-                        << "    local  : " << patchI << endl
-                        << "    global : " << localToGlobal[patchI]
-                        << endl;
-                }
-
-                Info<< "Local points added in global points starting at "
-                    << pointOffset
-                    << endl;
-
-
-                // Collect and relabel faces
-                const List<labelledTri>& localFaces = gatheredFaces[procI];
-
-
-                forAll(localFaces, faceI)
-                {
-                    const labelledTri& f = localFaces[faceI];
-
-                    allFaces[newFaceI++] =
-                        labelledTri
-                        (
-                            f[0] + pointOffset,
-                            f[1] + pointOffset,
-                            f[2] + pointOffset,
-                            localToGlobal[f.region()]
-                        );
-                }
-
-                pointOffset += gatheredPoints[procI].size();
-
-                Info<< endl;
-            }
-            allPatches.setSize(newPatchI);
-
-            // We now have allPoints, allFaces and allPatches.
-            // Construct overall (yet unmerged) surface from these.
-
-            triSurface allSurf(allFaces, allPatches, allPoints);
-
-            // Cleanup (which does point merge as well)
-            allSurf.cleanup(false);
-
-            // Write surface mesh
-
-            label slashIndex = runTime.caseName().find_last_of('/');
-
-            fileName globalCasePath(runTime.caseName().substr(0, slashIndex));
-
-            Info<< "Writing merged surface to " << globalCasePath << endl;
-
-            // create database for the sequential run
-            fileName globalPath
-            (
-                runTime.rootPath()
-              / globalCasePath
-              / args[1]
-            );
-
-            allSurf.write(globalPath);
+            surfZones[iter()] = surfZoneIdentifier(iter.key(), iter());
+            Info<< "surfZone " << iter()  <<  " : " << surfZones[iter()].name()
+                << endl;
         }
+
+        UnsortedMeshedSurface<face> unsortedFace
+        (
+            xferMove(allPoints),
+            xferMove(allFaces),
+            xferMove(allZones),
+            xferMove(surfZones)
+        );
+
+
+        MeshedSurface<face> sortedFace(unsortedFace);
+
+        fileName globalCasePath
+        (
+            runTime.processorCase()
+          ? runTime.path()/".."/outFileName
+          : runTime.path()/outFileName
+        );
+
+        Info<< "Writing merged surface to " << globalCasePath << endl;
+
+        sortedFace.write(globalCasePath);
     }
 
     Info<< "End\n" << endl;
