@@ -156,6 +156,22 @@ Foam::KinematicCloud<CloudType>::functions()
 
 
 template<class CloudType>
+inline const Foam::InjectionModelList<Foam::KinematicCloud<CloudType> >&
+Foam::KinematicCloud<CloudType>::injectors() const
+{
+    return injectors_;
+}
+
+
+template<class CloudType>
+inline Foam::InjectionModelList<Foam::KinematicCloud<CloudType> >&
+Foam::KinematicCloud<CloudType>::injectors()
+{
+    return injectors_;
+}
+
+
+template<class CloudType>
 inline const Foam::DispersionModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::dispersion() const
 {
@@ -172,14 +188,6 @@ Foam::KinematicCloud<CloudType>::dispersion()
 
 
 template<class CloudType>
-inline const Foam::InjectionModel<Foam::KinematicCloud<CloudType> >&
-Foam::KinematicCloud<CloudType>::injection() const
-{
-    return injectionModel_;
-}
-
-
-template<class CloudType>
 inline const Foam::PatchInteractionModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::patchInteraction() const
 {
@@ -192,14 +200,6 @@ inline Foam::PatchInteractionModel<Foam::KinematicCloud<CloudType> >&
 Foam::KinematicCloud<CloudType>::patchInteraction()
 {
     return patchInteractionModel_();
-}
-
-
-template<class CloudType>
-inline Foam::InjectionModel<Foam::KinematicCloud<CloudType> >&
-Foam::KinematicCloud<CloudType>::injection()
-{
-    return injectionModel_();
 }
 
 
