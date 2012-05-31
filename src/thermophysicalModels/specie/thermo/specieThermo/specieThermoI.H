@@ -66,6 +66,8 @@ inline Foam::scalar Foam::specieThermo<Thermo, Type>::T
                 "scalar (specieThermo<Thermo, Type>::*F)"
                 "(const scalar) const, "
                 "scalar (specieThermo<Thermo, Type>::*dFdT)"
+                "(const scalar) const, "
+                "scalar (specieThermo<Thermo, Type>::*limit)"
                 "(const scalar) const"
                 ") const"
             )   << "Maximum number of iterations exceeded"
