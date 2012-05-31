@@ -439,6 +439,86 @@ void Foam::autoLayerDriver::handleFeatureAngle
 }
 
 
+//Foam::tmp<Foam::scalarField> Foam::autoLayerDriver::undistortedEdgeLength
+//(
+//    const indirectPrimitivePatch& pp,
+//    const bool relativeSizes,
+//    const bool faceSize
+//)
+//{
+//    const fvMesh& mesh = meshRefiner_.mesh();
+//
+//    tmp<scalarField> tfld(new scalarField());
+//    scalarField& fld = tfld();
+//
+//    if (faceSize)
+//    {
+//        fld.setSize(pp.size());
+//    }
+//    else
+//    {
+//        fld.setSize(pp.nPoints());
+//    }
+//
+//
+//    if (relativeSizes)
+//    {
+//        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+//        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+//
+//        if (faceSize)
+//        {
+//            forAll(pp, i)
+//            {
+//                label faceI = pp.addressing()[i];
+//                label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
+//                fld[i] = edge0Len/(1<<ownLevel);
+//            }
+//        }
+//        else
+//        {
+//            // Determine per point the max cell level of connected cells
+//            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//            labelList maxPointLevel(pp.nPoints(), labelMin);
+//
+//            forAll(pp, i)
+//            {
+//                label faceI = pp.addressing()[i];
+//                label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
+//
+//                const face& f = pp.localFaces()[i];
+//                forAll(f, fp)
+//                {
+//                    maxPointLevel[f[fp]] =
+//                        max(maxPointLevel[f[fp]], ownLevel);
+//                }
+//            }
+//
+//            syncTools::syncPointList
+//            (
+//                mesh,
+//                pp.meshPoints(),
+//                maxPointLevel,
+//                maxEqOp<label>(),
+//                labelMin            // null value
+//            );
+//
+//
+//            forAll(maxPointLevel, pointI)
+//            {
+//                // Find undistorted edge size for this level.
+//                fld[i] = edge0Len/(1<<maxPointLevel[pointI]);
+//            }
+//        }
+//    }
+//    else
+//    {
+//        // Use actual cell size
+//    }
+//}
+
+
 // No extrusion on cells with warped faces. Calculates the thickness of the
 // layer and compares it to the space the warped face takes up. Disables
 // extrusion if layer thickness is more than faceRatio of the thickness of
@@ -2383,22 +2463,27 @@ void Foam::autoLayerDriver::addLayers
 
         // Disable extrusion on warped faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // It is hard to calculate some length scale if not in relative
+        // mode so disable this check.
+        if (layerParams.relativeSizes())
+        {
+            // Undistorted edge length
+            const scalar edge0Len =
+                meshRefiner_.meshCutter().level0EdgeLength();
+            const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
-        // Undistorted edge length
-        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
-        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+            handleWarpedFaces
+            (
+                pp,
+                layerParams.maxFaceThicknessRatio(),
+                edge0Len,
+                cellLevel,
 
-        handleWarpedFaces
-        (
-            pp,
-            layerParams.maxFaceThicknessRatio(),
-            edge0Len,
-            cellLevel,
-
-            patchDisp,
-            patchNLayers,
-            extrudeStatus
-        );
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+        }
 
         //// Disable extrusion on cells with multiple patch faces
         //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2585,6 +2670,21 @@ void Foam::autoLayerDriver::addLayers
         dimensionedScalar("medialRatio", dimless, 0.0)
     );
 
+    pointVectorField medialVec
+    (
+        IOobject
+        (
+            "medialVec",
+            meshRefiner_.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        meshMover().pMesh(),
+        dimensionedVector("medialVec", dimLength, vector::zero)
+    );
+
     // Setup information for medial axis smoothing. Calculates medial axis
     // and a smoothed displacement direction.
     // - pointMedialDist : distance to medial axis
@@ -2600,7 +2700,8 @@ void Foam::autoLayerDriver::addLayers
 
         dispVec,
         medialRatio,
-        pointMedialDist
+        pointMedialDist,
+        medialVec
     );
 
 
@@ -2692,6 +2793,7 @@ void Foam::autoLayerDriver::addLayers
                 dispVec,
                 medialRatio,
                 pointMedialDist,
+                medialVec,
 
                 extrudeStatus,
                 patchDisp,
@@ -2830,7 +2932,7 @@ void Foam::autoLayerDriver::addLayers
                 mesh.name(),
                 static_cast<polyMesh&>(mesh).instance(),
                 mesh.time(),  // register with runTime
-                static_cast<polyMesh&>(mesh).readOpt(),
+                IOobject::NO_READ,
                 static_cast<polyMesh&>(mesh).writeOpt()
             ),              // io params from original mesh but new name
             mesh,           // original mesh

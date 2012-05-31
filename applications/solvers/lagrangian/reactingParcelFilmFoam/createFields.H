@@ -10,7 +10,7 @@
 
     psiChemistryModel& chemistry = combustion->pChemistry();
 
-    hsCombustionThermo& thermo = chemistry.thermo();
+    psiReactionThermo& thermo = chemistry.thermo();
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -34,7 +34,7 @@
     );
 
     volScalarField& p = thermo.p();
-    volScalarField& hs = thermo.hs();
+    volScalarField& hs = thermo.he();
     const volScalarField& T = thermo.T();
     const volScalarField& psi = thermo.psi();
 

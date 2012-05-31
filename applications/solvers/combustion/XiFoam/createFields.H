@@ -1,10 +1,10 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<hhuCombustionThermo> pThermo
+    autoPtr<psiuReactionThermo> pThermo
     (
-        hhuCombustionThermo::New(mesh)
+        psiuReactionThermo::New(mesh)
     );
-    hhuCombustionThermo& thermo = pThermo();
+    psiuReactionThermo& thermo = pThermo();
     basicMultiComponentMixture& composition = thermo.composition();
 
     volScalarField rho
@@ -22,8 +22,8 @@
 
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
-    volScalarField& h = thermo.h();
-    volScalarField& hu = thermo.hu();
+    volScalarField& ha = thermo.he();
+    volScalarField& hau = thermo.heu();
 
     volScalarField& b = composition.Y("b");
     Info<< "min(b) = " << min(b).value() << endl;
@@ -45,7 +45,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     Info<< "Creating turbulence model\n" << endl;
@@ -128,5 +128,5 @@
     }
 
     fields.add(b);
-    fields.add(h);
-    fields.add(hu);
+    fields.add(ha);
+    fields.add(hau);

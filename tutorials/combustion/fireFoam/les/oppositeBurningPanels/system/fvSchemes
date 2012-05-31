@@ -30,14 +30,14 @@ divSchemes
     default         none;
     div(phi,U)      Gauss limitedLinear 1;
     div(phi,k)      Gauss limitedLinear 1;
-    div(phi,Yi_hs)  Gauss multivariateSelection
+    div(phi,Yi_h)  Gauss multivariateSelection
     {
         O2              linearUpwind grad(O2);
         N2              linearUpwind grad(N2);
         C3H8            linearUpwind grad(C3H8);
         H2O             linearUpwind grad(H2O);
         CO2             linearUpwind grad(CO2);
-        hs              linearUpwind grad(hs);
+        h               linearUpwind grad(h);
     };
     div((muEff*dev2(T(grad(U))))) Gauss linear;
     div(phi,K)          Gauss limitedLinear 1;
@@ -50,7 +50,7 @@ laplacianSchemes
     default         Gauss linear corrected;
     laplacian(muEff,U) Gauss linear corrected;
     laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(alphaEff,hs) Gauss linear corrected;
+    laplacian(alphaEff,h) Gauss linear corrected;
     laplacian((((rho*(1|A(U)))*rho)*gh)) Gauss linear corrected;
     laplacian(interpolate((rho*(1|A(U)))),p) Gauss linear corrected;
     laplacian(gammaRad,G) Gauss linear corrected;

@@ -34,12 +34,12 @@ divSchemes
     div(phiXi,Xi)   Gauss limitedLinear01 0.1;
     div(phiXi,Su)   Gauss limitedLinear01 0.1;
     div(phiSt,b)    Gauss limitedLinear01 0.1;
-    div(phi,ft_b_h_hu) Gauss multivariateSelection
+    div(phi,ft_b_ha_hau) Gauss multivariateSelection
     {
-        ft limitedLinear01 0.1;
-        b limitedLinear01 0.1;
-        h limitedLinear 0.1;
-        hu limitedLinear 0.1;
+        ft  limitedLinear01 0.1;
+        b   limitedLinear01 0.1;
+        ha  limitedLinear 0.1;
+        hau limitedLinear 0.1;
     };
     div(U)          Gauss linear;
     div((Su*grad(b))) Gauss linear;
@@ -56,8 +56,8 @@ laplacianSchemes
     laplacian((rho*(1|A(U))),p) Gauss linear corrected;
     laplacian(alphaEff,b) Gauss linear corrected;
     laplacian(alphaEff,ft) Gauss linear corrected;
-    laplacian(alphaEff,h) Gauss linear corrected;
-    laplacian(alphaEff,hu) Gauss linear corrected;
+    laplacian(alphaEff,ha) Gauss linear corrected;
+    laplacian(alphaEff,hau) Gauss linear corrected;
 }
 
 interpolationSchemes

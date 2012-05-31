@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -220,11 +220,14 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField magGradUw(mag(Uw.snGrad()));
 
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const fvPatchScalarField& hw =
-        rasModel.thermo().h().boundaryField()[patchI];
+    const fvPatchScalarField& hew =
+        rasModel.thermo().he().boundaryField()[patchI];
 
     // Heat flux [W/m2] - lagging alphatw
-    const scalarField qDot((alphaw + alphatw)*hw.snGrad());
+    const scalarField qDot
+    (
+        rasModel.thermo().alphaEff(alphatw, patchI)*hew.snGrad()
+    );
 
     // Populate boundary values
     forAll(alphatw, faceI)

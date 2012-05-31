@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -280,6 +280,7 @@ public:
 
             //- Sort faces according to zoneIds
             //  Returns a surfZoneList and sets faceMap to index within faces()
+            //  (i.e. map from original,unsorted to sorted)
             surfZoneList sortedZones(labelList& faceMap) const;
 
             //- Set zones to 0 and set a single zone

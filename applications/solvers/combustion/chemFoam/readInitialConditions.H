@@ -90,7 +90,7 @@
         hs0 += Y0[i]*specieData[i].Hs(T0);
     }
 
-    hs = dimensionedScalar("hs", dimEnergy/dimMass, hs0);
+    hs = dimensionedScalar("h", dimEnergy/dimMass, hs0);
 
     thermo.correct();
 
@@ -107,5 +107,3 @@
         << " T   = " << thermo.T()[0] << " [K] " << nl
         << " rho = " << rho[0] << " [kg/m3]" << nl
         << endl;
-
-

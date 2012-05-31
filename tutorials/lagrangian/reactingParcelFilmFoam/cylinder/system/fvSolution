@@ -32,7 +32,7 @@ solvers
         relTol          0;
     }
 
-    "(U|hs)"
+    "(U|h)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -40,7 +40,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|hs)Final"
+    "(U|h)Final"
     {
         $U;
         relTol          0;
@@ -69,7 +69,7 @@ solvers
 
     "(Yi|O2|N2|H2O)"
     {
-        $hsFinal;
+        $hFinal;
     }
 }
 

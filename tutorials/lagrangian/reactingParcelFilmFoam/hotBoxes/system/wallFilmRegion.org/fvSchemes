@@ -21,7 +21,7 @@ ddtSchemes
     ddt(deltaf*rhof) Euler;
     ddt(rhof,deltaf) Euler;
     ddt(deltaf*rhof,Uf) Euler;
-    ddt(deltaf*rhof,hsf) Euler;
+    ddt(deltaf*rhof,hf) Euler;
 }
 
 divSchemes
@@ -29,7 +29,7 @@ divSchemes
     default         none;
     div(phi,Uf)     Gauss upwind;
     div(phid,deltaf) Gauss upwind;
-    div(phi,hsf)    Gauss upwind;
+    div(phi,hf)    Gauss upwind;
     div(nHat)       Gauss linear;
 }
 

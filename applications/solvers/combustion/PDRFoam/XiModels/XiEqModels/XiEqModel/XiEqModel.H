@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ SourceFiles
 #define XiEqModel_H
 
 #include "IOdictionary.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "RASModel.H"
 #include "runTimeSelectionTables.H"
 
@@ -66,7 +66,7 @@ protected:
         dictionary XiEqModelCoeffs_;
 
         //- Thermo
-        const hhuCombustionThermo& thermo_;
+        const psiuReactionThermo& thermo_;
 
         //- Turbulence
         const compressible::RASModel& turbulence_;
@@ -107,7 +107,7 @@ public:
             dictionary,
             (
                 const dictionary& XiEqProperties,
-                const hhuCombustionThermo& thermo,
+                const psiuReactionThermo& thermo,
                 const compressible::RASModel& turbulence,
                 const volScalarField& Su
             ),
@@ -126,7 +126,7 @@ public:
         static autoPtr<XiEqModel> New
         (
             const dictionary& XiEqProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su
         );
@@ -138,7 +138,7 @@ public:
         XiEqModel
         (
             const dictionary& XiEqProperties,
-            const hhuCombustionThermo& thermo,
+            const psiuReactionThermo& thermo,
             const compressible::RASModel& turbulence,
             const volScalarField& Su
         );

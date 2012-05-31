@@ -137,8 +137,8 @@ public:
             //- Heat capacity at constant volume [J/(kg K)]
             virtual scalar Cv(const label specieI, const scalar T) const;
 
-            //- Enthalpy [J/kg]
-            virtual scalar H(const label specieI, const scalar T) const;
+            //- Absolute enthalpy [J/kg]
+            virtual scalar Ha(const label specieI, const scalar T) const;
 
             //- Sensible enthalpy [J/kg]
             virtual scalar Hs(const label specieI, const scalar T) const;
@@ -149,8 +149,8 @@ public:
             //- Entropy [J/(kg K)]
             virtual scalar S(const label specieI, const scalar T) const;
 
-            //- Internal energy [J/kg]
-            virtual scalar E(const label specieI, const scalar T) const;
+            //- Sensible internal energy [J/kg]
+            virtual scalar Es(const label specieI, const scalar T) const;
 
             //- Gibbs free energy [J/kg]
             virtual scalar G(const label specieI, const scalar T) const;
@@ -169,9 +169,6 @@ public:
 
             //- Thermal diffusivity of enthalpy [kg/m/s]
             virtual scalar alphah(const label specieI, const scalar T) const;
-
-            //- Thermal diffusivity of internal energy[kg/m/s]
-            virtual scalar alphae(const label specieI, const scalar T) const;
 };
 
 

@@ -35,6 +35,16 @@ Description
     the boundary point intact. When both points inside it chooses random. When
     both points on boundary random again.
 
+Usage
+    - collapseEdges <edge length> <merge angle> [OPTION]
+
+    \param -allowCellCollapse \n
+    Allow collapsing of cells to a single point
+
+    \param -meshQuality \n
+    Only collapse if not exceeding user defined (in \a system/meshQualityDict)
+    quality settings
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -1178,7 +1188,7 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
-        "checkMeshQuality",
+        "meshQuality",
         "Only collapse if not exceeding given meshQualityDict limits"
     );
 
@@ -1195,7 +1205,7 @@ int main(int argc, char *argv[])
 
     const bool allowCellCollapse = args.optionFound("allowCellCollapse");
     const bool overwrite = args.optionFound("overwrite");
-    const bool checkQuality = args.optionFound("checkMeshQuality");
+    const bool checkQuality = args.optionFound("meshQuality");
 
     scalar maxCos = Foam::cos(degToRad(angle));
 

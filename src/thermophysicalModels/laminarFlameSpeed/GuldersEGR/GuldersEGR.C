@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace laminarFlameSpeedModels
 Foam::laminarFlameSpeedModels::GuldersEGR::GuldersEGR
 (
     const dictionary& dict,
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 :
     laminarFlameSpeed(dict, ct),
@@ -210,31 +210,31 @@ Foam::laminarFlameSpeedModels::GuldersEGR::operator()() const
 {
     if
     (
-        hhuCombustionThermo_.composition().contains("ft")
-     && hhuCombustionThermo_.composition().contains("egr")
+        psiuReactionThermo_.composition().contains("ft")
+     && psiuReactionThermo_.composition().contains("egr")
     )
     {
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             dimensionedScalar
             (
-                hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
+                psiuReactionThermo_.lookup("stoichiometricAirFuelMassRatio")
             )/
             (
-                scalar(1)/hhuCombustionThermo_.composition().Y("ft")
+                scalar(1)/psiuReactionThermo_.composition().Y("ft")
               - scalar(1)
             ),
-            hhuCombustionThermo_.composition().Y("egr")
+            psiuReactionThermo_.composition().Y("egr")
         );
     }
     else
     {
         return Su0pTphi
         (
-            hhuCombustionThermo_.p(),
-            hhuCombustionThermo_.Tu(),
+            psiuReactionThermo_.p(),
+            psiuReactionThermo_.Tu(),
             equivalenceRatio_
         );
     }

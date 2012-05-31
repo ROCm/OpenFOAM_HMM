@@ -689,7 +689,8 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
     pointVectorField& dispVec,
     pointScalarField& medialRatio,
-    pointScalarField& medialDist
+    pointScalarField& medialDist,
+    pointVectorField& medialVec
 ) const
 {
 
@@ -929,7 +930,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         forAll(pointMedialDist, pointI)
         {
             medialDist[pointI] = Foam::sqrt(pointMedialDist[pointI].distSqr());
-            //medialVec[pointI] = pointMedialDist[pointI].origin();
+            medialVec[pointI] = pointMedialDist[pointI].origin();
         }
     }
 
@@ -966,14 +967,14 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             << " : normalised direction of nearest displacement" << nl
             << "    " << medialDist.name()
             << " : distance to medial axis" << nl
-            //<< "    " << medialVec.name()
-            //<< " : nearest point on medial axis" << nl
+            << "    " << medialVec.name()
+            << " : nearest point on medial axis" << nl
             << "    " << medialRatio.name()
             << " : ratio of medial distance to wall distance" << nl
             << endl;
         dispVec.write();
         medialDist.write();
-        //medialVec.write();
+        medialVec.write();
         medialRatio.write();
     }
 }
@@ -996,7 +997,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     const pointVectorField& dispVec,
     const pointScalarField& medialRatio,
     const pointScalarField& medialDist,
-    //const pointVectorField& medialVec,
+    const pointVectorField& medialVec,
 
     List<extrudeMode>& extrudeStatus,
     pointField& patchDisp,
@@ -1066,6 +1067,24 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             << str().name() << endl;
     }
 
+    autoPtr<OFstream> medialVecStr;
+    label medialVertI = 0;
+    if (debug)
+    {
+        medialVecStr.reset
+        (
+            new OFstream
+            (
+                mesh.time().path()
+              / "thicknessRatioExcludeMedialVec_"
+              + meshRefiner_.timeName()
+              + ".obj"
+            )
+        );
+        Info<< "Writing points with too large a extrusion distance to "
+            << medialVecStr().name() << endl;
+    }
+
     forAll(meshPoints, patchPointI)
     {
         if (extrudeStatus[patchPointI] != NOEXTRUDE)
@@ -1082,12 +1101,9 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             vector n =
                 patchDisp[patchPointI]
               / (mag(patchDisp[patchPointI]) + VSMALL);
-            //vector mVec = mesh.points()[pointI]-medialVec[pointI];
-            //scalar mDist = mag(mVec);
-            //scalar thicknessRatio =
-            //    (n&mVec)
-            //   *thickness[patchPointI]
-            //   /(mDist+VSMALL);
+            vector mVec = mesh.points()[pointI]-medialVec[pointI];
+            mVec /= mag(mVec)+VSMALL;
+            thicknessRatio *= (n&mVec);
 
             if (thicknessRatio > maxThicknessToMedialRatio)
             {
@@ -1103,8 +1119,9 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                                 minThickness[patchPointI]
                                +thickness[patchPointI]
                             )
-                        //<< " since near medial at:" << medialVec[pointI]
-                        //<< " with thicknessRatio:" << thicknessRatio
+                        << " medial direction:" << mVec
+                        << " extrusion direction:" << n
+                        << " with thicknessRatio:" << thicknessRatio
                         << endl;
                 }
 
@@ -1123,6 +1140,16 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                     meshTools::writeOBJ(str(), pt+patchDisp[patchPointI]);
                     vertI++;
                     str()<< "l " << vertI-1 << ' ' << vertI << nl;
+                }
+                if (medialVecStr.valid())
+                {
+                    const point& pt = mesh.points()[pointI];
+                    meshTools::writeOBJ(medialVecStr(), pt);
+                    medialVertI++;
+                    meshTools::writeOBJ(medialVecStr(), medialVec[pointI]);
+                    medialVertI++;
+                    medialVecStr()<< "l " << medialVertI-1
+                        << ' ' << medialVertI << nl;
                 }
             }
         }
@@ -1228,6 +1255,15 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                 )
             )()
         );
+
+        // Above move will have changed the instance only on the points (which
+        // is correct).
+        // However the previous mesh written will be the mesh with layers
+        // (see autoLayerDriver.C) so we now have to force writing all files
+        // so we can easily step through time steps. Note that if you
+        // don't write the mesh with layers this is not necessary.
+        meshRefiner_.mesh().setInstance(meshRefiner_.timeName());
+
         meshRefiner_.write
         (
             debug,

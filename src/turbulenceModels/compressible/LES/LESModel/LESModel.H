@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -206,21 +206,30 @@ public:
         //- Return the SGS turbulent thermal diffusivity
         virtual tmp<volScalarField> alphaSgs() const = 0;
 
+        //- Return the effective turbulent temperature diffusivity
+        virtual tmp<volScalarField> kappaEff() const
+        {
+            return thermo().kappaEff(alphaSgs());
+        }
+
+        //- Return the effective turbulent temperature diffusivity for a patch
+        virtual tmp<scalarField> kappaEff(const label patchI) const
+        {
+            return
+                thermo().kappaEff(alphaSgs()().boundaryField()[patchI], patchI);
+        }
+
         //- Return the effective thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const
         {
-            return tmp<volScalarField>
-            (
-                new volScalarField("alphaEff", alphaSgs() + alpha())
-            );
+            return thermo().alphaEff(alphaSgs());
         }
 
         //- Return the effective turbulence thermal diffusivity for a patch
         virtual tmp<scalarField> alphaEff(const label patchI) const
         {
             return
-                alphaSgs()().boundaryField()[patchI]
-              + alpha().boundaryField()[patchI];
+                thermo().alphaEff(alphaSgs()().boundaryField()[patchI], patchI);
         }
 
         //- Return the sub-grid stress tensor.

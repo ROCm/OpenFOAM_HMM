@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -460,7 +460,8 @@ class autoLayerDriver
 
                     pointVectorField& dispVec,
                     pointScalarField& medialRatio,
-                    pointScalarField& medialDist
+                    pointScalarField& medialDist,
+                    pointVectorField& medialVec
                 ) const;
 
                 //- Main routine to shrink mesh
@@ -481,6 +482,7 @@ class autoLayerDriver
                     const pointVectorField& dispVec,
                     const pointScalarField& medialRatio,
                     const pointScalarField& medialDist,
+                    const pointVectorField& medialVec,
 
                     List<extrudeMode>& extrudeStatus,
                     pointField& patchDisp,

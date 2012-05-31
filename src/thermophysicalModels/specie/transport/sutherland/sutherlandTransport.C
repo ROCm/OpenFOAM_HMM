@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ Foam::sutherlandTransport<Thermo>::sutherlandTransport(const dictionary& dict)
 template<class Thermo>
 void Foam::sutherlandTransport<Thermo>::write(Ostream& os) const
 {
-    os  << this->name() << endl;
+    os  << this->specie::name() << endl;
     os  << token::BEGIN_BLOCK  << incrIndent << nl;
 
     Thermo::write(os);

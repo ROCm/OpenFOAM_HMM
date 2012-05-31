@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,8 +171,8 @@ void Foam::LiquidEvaporationBoil<CloudType>::calculate
     forAll(this->owner().thermo().carrier().Y(), i)
     {
         scalar Yc = this->owner().thermo().carrier().Y()[i][cellI];
-        Hc += Yc*this->owner().thermo().carrier().H(i, Tc);
-        Hsc += Yc*this->owner().thermo().carrier().H(i, Ts);
+        Hc += Yc*this->owner().thermo().carrier().Hs(i, Tc);
+        Hsc += Yc*this->owner().thermo().carrier().Hs(i, Ts);
         Cpc += Yc*this->owner().thermo().carrier().Cp(i, Ts);
         kappac += Yc*this->owner().thermo().carrier().kappa(i, Ts);
     }
@@ -315,7 +315,7 @@ Foam::scalar Foam::LiquidEvaporationBoil<CloudType>::dh
         }
         case (parent::etEnthalpyDifference):
         {
-            scalar hc = this->owner().composition().carrier().H(idc, TDash);
+            scalar hc = this->owner().composition().carrier().Hs(idc, TDash);
             scalar hp = liquids_.properties()[idl].h(p, TDash);
 
             dh = hc - hp;

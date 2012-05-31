@@ -59,7 +59,7 @@ solvers
         relTol           0;
     };
 
-    "(U|Yi|hs|k|epsilon)"
+    "(U|Yi|h|k|epsilon)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
@@ -67,7 +67,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|Yi|hs|k|epsilon)Final"
+    "(U|Yi|h|k|epsilon)Final"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;

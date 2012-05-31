@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ Description
 #include "fvCFD.H"
 #include "engineTime.H"
 #include "engineMesh.H"
-#include "hhuCombustionThermo.H"
+#include "psiuReactionThermo.H"
 #include "turbulenceModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
 
             #include "ftEqn.H"
             #include "bEqn.H"
-            #include "huEqn.H"
-            #include "hEqn.H"
+            #include "hauEqn.H"
+            #include "haEqn.H"
 
             if (!ign.ignited())
             {
-                hu == h;
+                hau == ha;
             }
 
             // --- Pressure corrector loop

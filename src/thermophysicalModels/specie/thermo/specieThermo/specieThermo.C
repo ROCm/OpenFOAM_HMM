@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,26 +28,26 @@ License
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-template<class Thermo>
-const Foam::scalar Foam::specieThermo<Thermo>::tol_ = 1.0e-4;
+template<class Thermo, template<class> class Type>
+const Foam::scalar Foam::specieThermo<Thermo, Type>::tol_ = 1.0e-4;
 
-template<class Thermo>
-const int Foam::specieThermo<Thermo>::maxIter_ = 100;
+template<class Thermo, template<class> class Type>
+const int Foam::specieThermo<Thermo, Type>::maxIter_ = 100;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Thermo>
-Foam::specieThermo<Thermo>::specieThermo(Istream& is)
+template<class Thermo, template<class> class Type>
+Foam::specieThermo<Thermo, Type>::specieThermo(Istream& is)
 :
     Thermo(is)
 {
-    is.check("specieThermo<Thermo>::specieThermo(Istream&)");
+    is.check("specieThermo<Thermo, Type>::specieThermo(Istream&)");
 }
 
 
-template<class Thermo>
-Foam::specieThermo<Thermo>::specieThermo(const dictionary& dict)
+template<class Thermo, template<class> class Type>
+Foam::specieThermo<Thermo, Type>::specieThermo(const dictionary& dict)
 :
     Thermo(dict)
 {}
@@ -55,8 +55,8 @@ Foam::specieThermo<Thermo>::specieThermo(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Thermo>
-void Foam::specieThermo<Thermo>::write(Ostream& os) const
+template<class Thermo, template<class> class Type>
+void Foam::specieThermo<Thermo, Type>::write(Ostream& os) const
 {
     Thermo::write(os);
 }
@@ -64,8 +64,11 @@ void Foam::specieThermo<Thermo>::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<class Thermo>
-Foam::Ostream& Foam::operator<<(Ostream& os, const specieThermo<Thermo>& st)
+template<class Thermo, template<class> class Type>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os, const specieThermo<Thermo, Type>& st
+)
 {
     os  << static_cast<const Thermo&>(st);
 

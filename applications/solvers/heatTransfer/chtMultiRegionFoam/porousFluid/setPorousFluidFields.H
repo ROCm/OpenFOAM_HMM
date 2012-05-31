@@ -1,7 +1,6 @@
-
     fvMesh& porousMesh = porousFluidRegions[i];
 
-    basicRhoThermo& porousThermo = thermoPorous[i];
+    rhoThermo& porousThermo = thermoPorous[i];
     volScalarField& porousRho = rhoPorous[i];
 
     volVectorField& porousU = UPorous[i];
@@ -13,6 +12,6 @@
 
     volScalarField& porousP = porousThermo.p();
     const volScalarField& porousPsi = porousThermo.psi();
-    volScalarField& porousH = porousThermo.h();
+    volScalarField& porousH = porousThermo.he();
 
     IObasicSourceList& porousSources = heatPorousSources[i];

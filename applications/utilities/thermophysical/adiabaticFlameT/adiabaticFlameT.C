@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,12 +37,13 @@ Description
 #include "OSspecific.H"
 
 #include "specieThermo.H"
+#include "absoluteEnthalpy.H"
 #include "janafThermo.H"
 #include "perfectGas.H"
 
 using namespace Foam;
 
-typedef specieThermo<janafThermo<perfectGas> > thermo;
+typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -178,7 +179,7 @@ int main(int argc, char *argv[])
 
         Info<< "products " << (1/products.nMoles())*products << ';' << endl;
 
-        scalar Tad = products.TH(reactants.H(T0), 1000.0);
+        scalar Tad = products.THa(reactants.Ha(T0), 1000.0);
         Info<< "Tad = " << Tad << nl << endl;
     }
 

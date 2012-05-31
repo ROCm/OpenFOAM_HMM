@@ -160,12 +160,12 @@ class AMIInterpolation
             //- Check that patches are valid
             void checkPatches
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch
             ) const;
 
             //- Reset the octree for the traget patch face search
-            void resetTree(const primitivePatch& tgtPatch);
+            void resetTree(const TargetPatch& tgtPatch);
 
 
 
@@ -174,8 +174,8 @@ class AMIInterpolation
             //- Calculate if patches are on multiple processors
             label calcDistribution
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch
             ) const;
 
             label calcOverlappingProcs
@@ -188,7 +188,7 @@ class AMIInterpolation
             void distributePatches
             (
                 const mapDistribute& map,
-                const primitivePatch& pp,
+                const TargetPatch& pp,
                 const globalIndex& gi,
                 List<faceList>& faces,
                 List<pointField>& points,
@@ -198,7 +198,7 @@ class AMIInterpolation
             void distributeAndMergePatches
             (
                 const mapDistribute& map,
-                const primitivePatch& tgtPatch,
+                const TargetPatch& tgtPatch,
                 const globalIndex& gi,
                 faceList& tgtFaces,
                 pointField& tgtPoints,
@@ -207,8 +207,8 @@ class AMIInterpolation
 
             autoPtr<mapDistribute> calcProcMap
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch
             ) const;
 
 
@@ -228,14 +228,14 @@ class AMIInterpolation
             label findTargetFace
             (
                 const label srcFaceI,
-                const primitivePatch& srcPatch
+                const SourcePatch& srcPatch
             ) const;
 
             //- Add faces neighbouring faceI to the ID list
             void appendNbrFaces
             (
                 const label faceI,
-                const primitivePatch& patch,
+                const TargetPatch& patch,
                 const DynamicList<label>& visitedFaces,
                 DynamicList<label>& faceIDs
             ) const;
@@ -246,8 +246,8 @@ class AMIInterpolation
                 label& startSeedI,
                 label& srcFaceI,
                 label& tgtFaceI,
-                const primitivePatch& srcPatch0,
-                const primitivePatch& tgtPatch0,
+                const SourcePatch& srcPatch0,
+                const TargetPatch& tgtPatch0,
                 const boolList& mapFlag,
                 labelList& seedFaces,
                 const DynamicList<label>& visitedFaces
@@ -261,15 +261,15 @@ class AMIInterpolation
             (
                 const label srcFaceI,
                 const label tgtFaceI,
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch
             ) const;
 
             //- Calculate addressing
             void calcAddressing
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch,
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch,
                 label srcFaceI = -1,
                 label tgtFaceI = -1
             );
@@ -398,8 +398,8 @@ public:
             //- Update addressing and weights
             void update
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch
             );
 
 
@@ -495,8 +495,8 @@ public:
             //- Write face connectivity as OBJ file
             void writeFaceConnectivity
             (
-                const primitivePatch& srcPatch,
-                const primitivePatch& tgtPatch,
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch,
                 const labelListList& srcAddress
             ) const;
 };

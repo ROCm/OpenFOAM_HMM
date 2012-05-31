@@ -3,7 +3,7 @@ autoPtr<basicThermo> thermo
     basicThermo::New(mesh)
 );
 
-const volScalarField& h = thermo->h();
+const volScalarField& h = thermo->he();
 
 volScalarField rho
 (

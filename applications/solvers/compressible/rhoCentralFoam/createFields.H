@@ -1,13 +1,13 @@
 Info<< "Reading thermophysical properties\n" << endl;
 
-autoPtr<basicPsiThermo> pThermo
+autoPtr<psiThermo> pThermo
 (
-    basicPsiThermo::New(mesh)
+    psiThermo::New(mesh)
 );
-basicPsiThermo& thermo = pThermo();
+psiThermo& thermo = pThermo();
 
 volScalarField& p = thermo.p();
-volScalarField& e = thermo.e();
+volScalarField& e = thermo.he();
 const volScalarField& T = thermo.T();
 const volScalarField& psi = thermo.psi();
 const volScalarField& mu = thermo.mu();

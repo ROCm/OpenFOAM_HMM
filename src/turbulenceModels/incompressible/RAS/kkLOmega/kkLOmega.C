@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -156,15 +156,24 @@ tmp<volScalarField> kkLOmega::gammaBP(const volScalarField& omega) const
 {
     return
     (
-        max
+        min
         (
-            kt_/nu()
-          / (
-                omega
-              + dimensionedScalar("ROTVSMALL", omega.dimensions(), ROOTVSMALL)
-            )
-          - CbpCrit_,
-            scalar(0)
+            max
+            (
+                kt_/nu()
+             / (
+                    omega
+                  + dimensionedScalar
+                    (
+                        "ROTVSMALL",
+                        omega.dimensions(),
+                        ROOTVSMALL
+                    )
+                )
+              - CbpCrit_,
+                scalar(0)
+            ),
+            scalar(50.0)
         )
     );
 }

@@ -47,7 +47,7 @@ solvers
         relTol          0;
     };
 
-    "(b|Xi|ft|h|hu|k|epsilon)"
+    "(b|Xi|ft|ha|hau|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -55,7 +55,7 @@ solvers
         relTol          0.1;
     }
 
-    "(b|Xi|ft|h|hu|k|epsilon)Final"
+    "(b|Xi|ft|ha|hau|k|epsilon)Final"
     {
         solver          PBiCG;
         preconditioner  DILU;

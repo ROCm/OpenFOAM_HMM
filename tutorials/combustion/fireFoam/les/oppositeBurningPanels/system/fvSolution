@@ -71,7 +71,7 @@ solvers
     };
 
 
-    "(hs|hsFinal|Yi)"
+    "(h|hFinal|Yi)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -117,7 +117,7 @@ relaxationFactors
     equations
     {
         "(U|k).*"                   1;
-        "(C3H8|O2|H2O|CO2|hs).*"    1;
+        "(C3H8|O2|H2O|CO2|h).*"    1;
     }
 }
 

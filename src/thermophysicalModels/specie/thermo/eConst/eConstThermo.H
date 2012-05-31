@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,8 +143,8 @@ public:
             //- Heat capacity at constant pressure [J/(kmol K)]
             inline scalar cp(const scalar T) const;
 
-            //- Enthalpy [J/kmol]
-            inline scalar h(const scalar T) const;
+            //- Absolute Enthalpy [J/kmol]
+            inline scalar ha(const scalar T) const;
 
             //- Sensible Enthalpy [J/kmol]
             inline scalar hs(const scalar T) const;

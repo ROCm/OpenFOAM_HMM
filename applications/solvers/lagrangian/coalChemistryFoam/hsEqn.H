@@ -10,7 +10,7 @@
       + combustion->Sh()
       + coalParcels.Sh(hs)
       + limestoneParcels.Sh(hs)
-      + radiation->Shs(thermo)
+      + radiation->Sh(thermo)
       + sources(rho, hs)
     );
 

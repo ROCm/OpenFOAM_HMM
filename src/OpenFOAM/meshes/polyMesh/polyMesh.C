@@ -1217,7 +1217,7 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
 // Remove all files and some subdirs (eg, sets)
 void Foam::polyMesh::removeFiles(const fileName& instanceDir) const
 {
-    fileName meshFilesPath = thisDb().path()/instanceDir/meshDir();
+    fileName meshFilesPath = thisDb().time().path()/instanceDir/meshDir();
 
     rm(meshFilesPath/"points");
     rm(meshFilesPath/"faces");

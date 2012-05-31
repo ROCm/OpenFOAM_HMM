@@ -14,8 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType
-hRhoThermo<pureMixture<constTransport<specieThermo<hConstThermo<incompressible>>>>>;
+thermoType heRhoThermo<pureMixture<constTransport<specieThermo<hConstThermo<incompressible>,sensibleEnthalpy>>>>;
 
 mixture
 {

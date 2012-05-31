@@ -7,7 +7,7 @@
      ==
       - fvc::div(phi, 0.5*magSqr(U), "div(phi,K)")
       + parcels.Sh(hs)
-      + radiation->Shs(thermo)
+      + radiation->Sh(thermo)
       + combustion->Sh()
       + sources(rho, hs)
     );

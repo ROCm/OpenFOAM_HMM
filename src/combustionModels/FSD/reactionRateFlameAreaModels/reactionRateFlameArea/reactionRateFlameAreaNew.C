@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
     {
         FatalIOErrorIn
         (
-            "reactionRateFlameArea::New(const hsCombustionThermo&)",
+            "reactionRateFlameArea::New(const psiReactionThermo&)",
             dict
         )   << "Unknown reactionRateFlameArea type "
             << reactionRateFlameAreaType << endl << endl

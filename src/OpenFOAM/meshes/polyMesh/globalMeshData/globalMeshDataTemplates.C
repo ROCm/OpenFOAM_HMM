@@ -59,8 +59,6 @@ void Foam::globalMeshData::syncData
 
         if (slavePoints.size()+nTransformSlavePoints > 0)
         {
-            const labelList& transformSlavePoints = transformedSlaves[i];
-
             // Combine master with untransformed slave data
             forAll(slavePoints, j)
             {
@@ -68,20 +66,27 @@ void Foam::globalMeshData::syncData
             }
 
             // Combine master with transformed slave data
-            forAll(transformSlavePoints, j)
+            if (nTransformSlavePoints)
             {
-                cop(elem, elems[transformSlavePoints[j]]);
+                const labelList& transformSlavePoints = transformedSlaves[i];
+                forAll(transformSlavePoints, j)
+                {
+                    cop(elem, elems[transformSlavePoints[j]]);
+                }
             }
-
 
             // Copy result back to slave slots
             forAll(slavePoints, j)
             {
                 elems[slavePoints[j]] = elem;
             }
-            forAll(transformSlavePoints, j)
+            if (nTransformSlavePoints)
             {
-                elems[transformSlavePoints[j]] = elem;
+                const labelList& transformSlavePoints = transformedSlaves[i];
+                forAll(transformSlavePoints, j)
+                {
+                    elems[transformSlavePoints[j]] = elem;
+                }
             }
         }
     }
@@ -125,8 +130,6 @@ void Foam::globalMeshData::syncData
 
         if (slavePoints.size()+nTransformSlavePoints > 0)
         {
-            const labelList& transformSlavePoints = transformedSlaves[i];
-
             // Combine master with untransformed slave data
             forAll(slavePoints, j)
             {
@@ -134,20 +137,27 @@ void Foam::globalMeshData::syncData
             }
 
             // Combine master with transformed slave data
-            forAll(transformSlavePoints, j)
+            if (nTransformSlavePoints)
             {
-                cop(elem, elems[transformSlavePoints[j]]);
+                const labelList& transformSlavePoints = transformedSlaves[i];
+                forAll(transformSlavePoints, j)
+                {
+                    cop(elem, elems[transformSlavePoints[j]]);
+                }
             }
-
 
             // Copy result back to slave slots
             forAll(slavePoints, j)
             {
                 elems[slavePoints[j]] = elem;
             }
-            forAll(transformSlavePoints, j)
+            if (nTransformSlavePoints)
             {
-                elems[transformSlavePoints[j]] = elem;
+                const labelList& transformSlavePoints = transformedSlaves[i];
+                forAll(transformSlavePoints, j)
+                {
+                    elems[transformSlavePoints[j]] = elem;
+                }
             }
         }
     }

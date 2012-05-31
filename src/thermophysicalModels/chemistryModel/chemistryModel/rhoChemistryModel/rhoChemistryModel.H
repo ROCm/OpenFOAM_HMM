@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ SourceFiles
 #include "basicChemistryModel.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "hsReactionThermo.H"
+#include "rhoReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,7 +72,7 @@ protected:
     // Protected data
 
         //- Thermo package
-        autoPtr<hsReactionThermo> thermo_;
+        autoPtr<rhoReactionThermo> thermo_;
 
 
 public:
@@ -113,10 +113,10 @@ public:
     // Member Functions
 
         //- Return access to the thermo package
-        inline hsReactionThermo& thermo();
+        inline rhoReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        inline const hsReactionThermo& thermo() const;
+        inline const rhoReactionThermo& thermo() const;
 };
 
 

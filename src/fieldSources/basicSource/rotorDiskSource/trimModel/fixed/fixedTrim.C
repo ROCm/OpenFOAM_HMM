@@ -71,11 +71,6 @@ void Foam::fixedTrim::read(const dictionary& dict)
     forAll(thetag_, i)
     {
         scalar psi = x[i].y();
-        if (psi < 0)
-        {
-            psi += mathematical::twoPi;
-        }
-
         thetag_[i] = theta0 + theta1c*cos(psi) + theta1s*sin(psi);
     }
 }
