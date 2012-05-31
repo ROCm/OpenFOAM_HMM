@@ -83,7 +83,19 @@ subModels
         gravity;
     }
 
-    injectionModel  reactingLookupTableInjection;
+    injectionModels
+    {
+        model1
+        {
+            type            reactingLookupTableInjection;
+            massTotal       0.1;
+            parcelBasisType mass;
+            SOI             0.01;
+            inputFile       "parcelInjectionProperties";
+            duration        10.0;
+            parcelsPerSecond 200;
+        }
+    ]
 
     dispersionModel none;
 
@@ -98,16 +110,6 @@ subModels
     surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;
-
-    reactingLookupTableInjectionCoeffs
-    {
-        massTotal       0.1;
-        parcelBasisType mass;
-        SOI             0.01;
-        inputFile       "parcelInjectionProperties";
-        duration        10.0;
-        parcelsPerSecond 200;
-    }
 
     standardWallInteractionCoeffs
     {

@@ -57,7 +57,27 @@ subModels
         gravity;
     }
 
-    injectionModel manualInjection;
+    injectionModels
+    {
+        model1
+        {
+            type            manualInjection;
+            massTotal       0;
+            parcelBasisType fixed;
+            nParticle       1;
+            SOI             0;
+            positionsFile   "kinematicCloudPositions";
+            U0              ( 0 0 0 );
+            sizeDistribution
+            {
+                type        fixedValue;
+                fixedValueDistribution
+                {
+                    value   0.006;
+                }
+            }
+        }
+    }
 
     dispersionModel none;
 
@@ -70,24 +90,6 @@ subModels
     collisionModel pairCollision;
 
     radiation off;
-
-    manualInjectionCoeffs
-    {
-        massTotal       0;
-        parcelBasisType fixed;
-        nParticle       1;
-        SOI             0;
-        positionsFile   "kinematicCloudPositions";
-        U0              ( 0 0 0 );
-        sizeDistribution
-        {
-            type        fixedValue;
-            fixedValueDistribution
-            {
-                value   0.006;
-            }
-        }
-    }
 
     pairCollisionCoeffs
     {

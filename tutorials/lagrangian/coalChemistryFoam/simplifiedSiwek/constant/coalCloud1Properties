@@ -87,7 +87,29 @@ subModels
         gravity;
     }
 
-    injectionModel  manualInjection;
+    injectionModels
+    {
+        model1
+        {
+            type            manualInjection;
+            massTotal       0.0001;
+            parcelBasisType mass;
+            SOI             0;
+            positionsFile   "coalCloud1Positions";
+            U0              ( 0 -10 0 );
+            sizeDistribution
+            {
+                type        RosinRammler;
+                RosinRammlerDistribution
+                {
+                    minValue        5e-06;
+                    maxValue        0.0005;
+                    d               5e-05;
+                    n               0.5;
+                }
+            }
+        }
+    }
 
     dispersionModel stochasticDispersionRAS;
 
@@ -106,26 +128,6 @@ subModels
     surfaceFilmModel none;
 
     radiation       on;
-
-    manualInjectionCoeffs
-    {
-        massTotal       0.0001;
-        parcelBasisType mass;
-        SOI             0;
-        positionsFile   "coalCloud1Positions";
-        U0              ( 0 -10 0 );
-        sizeDistribution
-        {
-            type        RosinRammler;
-            RosinRammlerDistribution
-            {
-                minValue        5e-06;
-                maxValue        0.0005;
-                d               5e-05;
-                n               0.5;
-            }
-        }
-    }
 
     standardWallInteractionCoeffs
     {
