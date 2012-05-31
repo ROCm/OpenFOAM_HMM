@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,10 +131,10 @@ public:
         inline tmp<volScalarField> rho() const;
 
         //- Return const access to rho
-        inline const hsCombustionThermo& thermo() const;
+        inline const psiReactionThermo& thermo() const;
 
         //- Return non const access to rho
-        inline hsCombustionThermo& thermo();
+        inline psiReactionThermo& thermo();
 
 
     // I-O

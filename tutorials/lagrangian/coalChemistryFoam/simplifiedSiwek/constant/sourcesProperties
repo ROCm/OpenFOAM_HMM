@@ -29,7 +29,7 @@ source1
         volumeMode      absolute;
         injectionRate
         {
-            hs              12000;
+            h               12000;
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ void htcConvFvPatchScalarField::updateCoeffs()
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField alphaEffw = rasModel.alphaEff()().boundaryField()[patchI];
+    const scalarField alphaEffw = rasModel.alphaEff(patchI);
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const vectorField& Uc = rasModel.U();

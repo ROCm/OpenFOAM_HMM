@@ -204,13 +204,13 @@ Foam::scalar Foam::multiComponentMixture<ThermoType>::Cv
 
 
 template<class ThermoType>
-Foam::scalar Foam::multiComponentMixture<ThermoType>::H
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Ha
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return speciesData_[specieI].H(T);
+    return speciesData_[specieI].Ha(T);
 }
 
 
@@ -247,13 +247,13 @@ Foam::scalar Foam::multiComponentMixture<ThermoType>::S
 
 
 template<class ThermoType>
-Foam::scalar Foam::multiComponentMixture<ThermoType>::E
+Foam::scalar Foam::multiComponentMixture<ThermoType>::Es
 (
     const label specieI,
     const scalar T
 ) const
 {
-    return speciesData_[specieI].E(T);
+    return speciesData_[specieI].Es(T);
 }
 
 
@@ -309,17 +309,6 @@ Foam::scalar Foam::multiComponentMixture<ThermoType>::alphah
 ) const
 {
     return speciesData_[specieI].alphah(T);
-}
-
-
-template<class ThermoType>
-Foam::scalar Foam::multiComponentMixture<ThermoType>::alphae
-(
-    const label specieI,
-    const scalar T
-) const
-{
-    return speciesData_[specieI].alphae(T);
 }
 
 

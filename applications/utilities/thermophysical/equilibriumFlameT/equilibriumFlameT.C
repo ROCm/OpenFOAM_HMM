@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,12 +39,13 @@ Description
 #include "IOmanip.H"
 
 #include "specieThermo.H"
+#include "absoluteEnthalpy.H"
 #include "janafThermo.H"
 #include "perfectGas.H"
 
 using namespace Foam;
 
-typedef specieThermo<janafThermo<perfectGas> > thermo;
+typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -241,7 +242,7 @@ int main(int argc, char *argv[])
 
 
             scalar equilibriumFlameTemperatureNew =
-                products.TH(reactants.H(T0), adiabaticFlameTemperature);
+                products.THa(reactants.Ha(T0), adiabaticFlameTemperature);
 
             if (j==0)
             {

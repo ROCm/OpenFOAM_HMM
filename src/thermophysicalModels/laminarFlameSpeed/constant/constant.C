@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ namespace laminarFlameSpeedModels
 Foam::laminarFlameSpeedModels::constant::constant
 (
     const dictionary& dict,
-    const hhuCombustionThermo& ct
+    const psiuReactionThermo& ct
 )
 :
     laminarFlameSpeed(dict, ct),
@@ -76,12 +76,12 @@ Foam::laminarFlameSpeedModels::constant::operator()() const
             IOobject
             (
                 "Su0",
-                hhuCombustionThermo_.T().time().timeName(),
-                hhuCombustionThermo_.T().db(),
+                psiuReactionThermo_.T().time().timeName(),
+                psiuReactionThermo_.T().db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            hhuCombustionThermo_.T().mesh(),
+            psiuReactionThermo_.T().mesh(),
             Su_
         )
     );

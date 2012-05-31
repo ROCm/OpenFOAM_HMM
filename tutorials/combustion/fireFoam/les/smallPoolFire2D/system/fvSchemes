@@ -30,14 +30,14 @@ divSchemes
     default         none;
     div(phi,U)      Gauss limitedLinear 1;
     div(phi,k)      Gauss limitedLinear 1;
-    div(phi,Yi_hs)  Gauss multivariateSelection
+    div(phi,Yi_h)  Gauss multivariateSelection
     {
         O2              limitedLinear01 1;
         CH4             limitedLinear01 1;
         N2              limitedLinear01 1;
         H2O             limitedLinear01 1;
         CO2             limitedLinear01 1;
-        hs              limitedLinear 1;
+        h               limitedLinear 1;
     };
     div((muEff*dev2(T(grad(U))))) Gauss linear;
     div(phi,omega)  Gauss limitedLinear 1;

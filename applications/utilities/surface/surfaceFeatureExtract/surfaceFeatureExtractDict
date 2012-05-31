@@ -70,6 +70,12 @@ surface2.nas
         manifoldEdges       no;
     }
 
+    addFeatures
+    {
+        // Add (without merging) another extendedFeatureEdgeMesh
+        name                axZ.extendedFeatureEdgeMesh;
+    }
+
     // Output the curvature of the surface
     curvature               no;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,13 +25,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::hsReactionThermo&
+inline Foam::rhoReactionThermo&
 Foam::combustionModels::rhoCombustionModel::thermo()
 {
     return thermo_();
 }
 
-inline const Foam::hsReactionThermo&
+inline const Foam::rhoReactionThermo&
 Foam::combustionModels::rhoCombustionModel::thermo() const
 {
     return thermo_();

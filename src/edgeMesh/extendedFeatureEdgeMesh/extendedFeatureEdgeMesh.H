@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,8 @@ Description
 
     Feature points are a sorted subset at the start of the overall points list:
         0 .. concaveStart_-1                : convex points (w.r.t normals)
-        concaveStart_-1 .. mixedStart_-1    : concave points
-        mixedStart_ .. nonFeatureStart_     : mixed internal/external points
+        concaveStart_ .. mixedStart_-1      : concave points
+        mixedStart_ .. nonFeatureStart_-1   : mixed internal/external points
         nonFeatureStart_ .. size-1          : non-feature points
 
     Feature edges are the edgeList of the edgeMesh and are sorted:
@@ -151,6 +151,7 @@ private:
         labelListList edgeNormals_;
 
         //- Indices of the normals that are adjacent to the feature points
+        //  (only valid for 0..nonFeatureStart_-1)
         labelListList featurePointNormals_;
 
         //- Feature edges which are on the boundary between regions
@@ -212,9 +213,10 @@ public:
             const Xfer<edgeList>&
         );
 
-        //- Construct (read) given surfaceFeatures, an objectRegistry and a
-        //  fileName to write to.  Extracts, classifies and reorders the data
-        //  from surfaceFeatures.
+        //- Construct given a surface with selected edges,point
+        //  (surfaceFeatures), an objectRegistry and a
+        //  fileName to write to.
+        //  Extracts, classifies and reorders the data from surfaceFeatures.
         extendedFeatureEdgeMesh
         (
             const surfaceFeatures& sFeat,
@@ -379,6 +381,16 @@ public:
             //- Demand driven construction of octree for boundary edges by type
             const PtrList<indexedOctree<treeDataEdge> >&
             edgeTreesByType() const;
+
+
+        // Edit
+
+            //- Add extendedFeatureEdgeMesh. No filtering of duplicates.
+            void add(const extendedFeatureEdgeMesh&);
+
+            //- Flip normals. All concave become convex, all internal external
+            //  etc.
+            void flipNormals();
 
 
         // Write

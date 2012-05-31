@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -217,6 +217,9 @@ void Foam::surfaceFeatures::classifyFeatureAngles
     const vectorField& faceNormals = surf_.faceNormals();
     const pointField& points = surf_.points();
 
+    // Special case: minCos=1
+    bool selectAll = (mag(minCos-1.0) < SMALL);
+
     forAll(edgeFaces, edgeI)
     {
         const labelList& eFaces = edgeFaces[edgeI];
@@ -235,25 +238,25 @@ void Foam::surfaceFeatures::classifyFeatureAngles
             {
                 edgeStat[edgeI] = REGION;
             }
-            else
+            else if
+            (
+                selectAll
+             || ((faceNormals[face0] & faceNormals[face1]) < minCos)
+            )
             {
-                if ((faceNormals[face0] & faceNormals[face1]) < minCos)
+                // Check if convex or concave by looking at angle
+                // between face centres and normal
+                vector f0Tof1 =
+                    surf_[face1].centre(points)
+                  - surf_[face0].centre(points);
+
+                if ((f0Tof1 & faceNormals[face0]) >= 0.0)
                 {
-
-                    // Check if convex or concave by looking at angle
-                    // between face centres and normal
-                    vector f0Tof1 =
-                        surf_[face1].centre(points)
-                      - surf_[face0].centre(points);
-
-                    if ((f0Tof1 & faceNormals[face0]) > 0.0)
-                    {
-                        edgeStat[edgeI] = INTERNAL;
-                    }
-                    else
-                    {
-                        edgeStat[edgeI] = EXTERNAL;
-                    }
+                    edgeStat[edgeI] = INTERNAL;
+                }
+                else
+                {
+                    edgeStat[edgeI] = EXTERNAL;
                 }
             }
         }

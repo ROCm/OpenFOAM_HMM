@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -676,26 +676,29 @@ Foam::scalar Foam::face::sweptVol
     const pointField& newPoints
 ) const
 {
-    if (size() == 3)
-    {
-        return
-        (
-            triPointRef
-            (
-                oldPoints[operator[](0)],
-                oldPoints[operator[](1)],
-                oldPoints[operator[](2)]
-            ).sweptVol
-            (
-                triPointRef
-                (
-                    newPoints[operator[](0)],
-                    newPoints[operator[](1)],
-                    newPoints[operator[](2)]
-                )
-            )
-        );
-    }
+    // This Optimization causes a small discrepancy between the swept-volume of
+    // opposite faces of complex cells with triangular faces opposing polygons.
+    // It could be used without problem for tetrahedral cells
+    // if (size() == 3)
+    // {
+    //     return
+    //     (
+    //         triPointRef
+    //         (
+    //             oldPoints[operator[](0)],
+    //             oldPoints[operator[](1)],
+    //             oldPoints[operator[](2)]
+    //         ).sweptVol
+    //         (
+    //             triPointRef
+    //             (
+    //                 newPoints[operator[](0)],
+    //                 newPoints[operator[](1)],
+    //                 newPoints[operator[](2)]
+    //             )
+    //         )
+    //     );
+    // }
 
     scalar sv = 0;
 
@@ -708,38 +711,39 @@ Foam::scalar Foam::face::sweptVol
 
     label nPoints = size();
 
-    point nextOldPoint = centreOldPoint;
-    point nextNewPoint = centreNewPoint;
-
-    for (register label pI = 0; pI < nPoints; ++pI)
+    for (register label pi=0; pi<nPoints-1; ++pi)
     {
-        if (pI < nPoints - 1)
-        {
-            nextOldPoint = oldPoints[operator[](pI + 1)];
-            nextNewPoint = newPoints[operator[](pI + 1)];
-        }
-        else
-        {
-            nextOldPoint = oldPoints[operator[](0)];
-            nextNewPoint = newPoints[operator[](0)];
-        }
-
         // Note: for best accuracy, centre point always comes last
         sv += triPointRef
-              (
-                  centreOldPoint,
-                  oldPoints[operator[](pI)],
-                  nextOldPoint
-              ).sweptVol
-              (
-                  triPointRef
-                  (
-                      centreNewPoint,
-                      newPoints[operator[](pI)],
-                      nextNewPoint
-                  )
-              );
+        (
+            centreOldPoint,
+            oldPoints[operator[](pi)],
+            oldPoints[operator[](pi + 1)]
+        ).sweptVol
+        (
+            triPointRef
+            (
+                centreNewPoint,
+                newPoints[operator[](pi)],
+                newPoints[operator[](pi + 1)]
+            )
+        );
     }
+
+    sv += triPointRef
+    (
+        centreOldPoint,
+        oldPoints[operator[](nPoints-1)],
+        oldPoints[operator[](0)]
+    ).sweptVol
+    (
+        triPointRef
+        (
+            centreNewPoint,
+            newPoints[operator[](nPoints-1)],
+            newPoints[operator[](0)]
+        )
+    );
 
     return sv;
 }

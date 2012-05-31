@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -186,11 +186,11 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary and hhuCombustionThermo
+        //- Construct from dictionary and psiuReactionThermo
         SCOPE
         (
             const dictionary&,
-            const hhuCombustionThermo&
+            const psiuReactionThermo&
         );
 
 

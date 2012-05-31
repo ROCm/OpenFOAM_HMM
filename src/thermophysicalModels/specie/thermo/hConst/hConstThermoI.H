@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,7 @@ inline Foam::scalar Foam::hConstThermo<equationOfState>::cp
 
 
 template<class equationOfState>
-inline Foam::scalar Foam::hConstThermo<equationOfState>::h
+inline Foam::scalar Foam::hConstThermo<equationOfState>::ha
 (
     const scalar T
 ) const

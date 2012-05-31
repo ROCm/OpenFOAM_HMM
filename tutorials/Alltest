@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -88,13 +88,13 @@ gradSchemes { default Gauss linear; }
 divSchemes
 {
     default Gauss linear;
-    div(phi,fu_ft_h) Gauss multivariateSelection
+    div(phi,fu_ft_ha) Gauss multivariateSelection
     {
         fu upwind;
         ft upwind;
         h  upwind;
     };
-    div(phi,ft_b_h_hu) Gauss multivariateSelection
+    div(phi,ft_b_ha_hau) Gauss multivariateSelection
     {
         fu upwind;
         ft upwind;

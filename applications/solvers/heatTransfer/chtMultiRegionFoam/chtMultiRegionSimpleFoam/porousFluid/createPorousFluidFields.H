@@ -1,5 +1,5 @@
     // Initialise porous field pointer lists
-    PtrList<basicRhoThermo> thermoPorous(porousFluidRegions.size());
+    PtrList<rhoThermo> thermoPorous(porousFluidRegions.size());
     PtrList<volScalarField> rhoPorous(porousFluidRegions.size());
     PtrList<volScalarField> kappaPorous(porousFluidRegions.size());
     PtrList<volVectorField> UPorous(porousFluidRegions.size());
@@ -32,7 +32,7 @@
         thermoPorous.set
         (
             i,
-            basicRhoThermo::New(porousFluidRegions[i]).ptr()
+            rhoThermo::New(porousFluidRegions[i]).ptr()
         );
 
         Info<< "    Adding to rhoPorous\n" << endl;

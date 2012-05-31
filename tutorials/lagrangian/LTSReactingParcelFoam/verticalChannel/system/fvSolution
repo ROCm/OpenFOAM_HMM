@@ -52,7 +52,7 @@ solvers
         tolerance        1e-4;
     }
 
-    "(U|Yi|hs|k|omega|.*Final)"
+    "(U|Yi|h|k|omega|.*Final)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;

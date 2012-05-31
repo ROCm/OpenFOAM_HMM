@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -176,11 +176,8 @@ public:
             //- Source term component (constant)
             virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
 
-            //- Enthalpy source term
+            //- Energy source term
             virtual tmp<fvScalarMatrix> Sh(basicThermo& thermo) const;
-
-            //- Sensible enthalpy source term
-            virtual tmp<fvScalarMatrix> Shs(basicThermo& thermo) const;
 };
 
 

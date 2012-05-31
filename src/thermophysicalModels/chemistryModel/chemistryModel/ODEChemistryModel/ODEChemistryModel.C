@@ -361,7 +361,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::derivatives
     scalar dT = 0.0;
     for (label i = 0; i < nSpecie_; i++)
     {
-        const scalar hi = specieThermo_[i].h(T);
+        const scalar hi = specieThermo_[i].ha(T);
         dT += hi*dcdt[i];
     }
     dT /= rho*cp;
@@ -782,7 +782,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     forAll(rho, celli)
     {
         const scalar rhoi = rho[celli];
-        const scalar hi = this->thermo().hs()[celli] + hc[celli];
+        const scalar hi = this->thermo().he()[celli] + hc[celli];
         const scalar pi = this->thermo().p()[celli];
         scalar Ti = this->thermo().T()[celli];
 
@@ -815,7 +815,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
             {
                 mixture += (c[i]/cTot)*specieThermo_[i];
             }
-            Ti = mixture.TH(hi, Ti);
+            Ti = mixture.THa(hi, Ti);
 
             timeLeft -= dt;
             this->deltaTChem_[celli] = tauC;

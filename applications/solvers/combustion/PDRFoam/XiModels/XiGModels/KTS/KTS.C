@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ namespace XiGModels
 Foam::XiGModels::KTS::KTS
 (
     const dictionary& XiGProperties,
-    const hhuCombustionThermo& thermo,
+    const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )

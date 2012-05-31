@@ -5,7 +5,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         mesh,
         fields,
         phi,
-        mesh.divScheme("div(phi,Yi_hs)")
+        mesh.divScheme("div(phi,Yi_h)")
     )
 );
 {
@@ -56,7 +56,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         dpdt
       - (fvc::ddt(rho, K) + fvc::div(phi, K))
       + combustion->Sh()
-      + radiation->Shs(thermo)
+      + radiation->Sh(thermo)
       + parcels.Sh(hs)
       + surfaceFilm.Sh()
     );

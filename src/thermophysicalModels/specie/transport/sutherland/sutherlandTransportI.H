@@ -147,16 +147,6 @@ inline Foam::scalar Foam::sutherlandTransport<Thermo>::kappa
 
 
 template<class Thermo>
-inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphae
-(
-    const scalar T
-) const
-{
-    return mu(T)*(1.32 + 1.77*this->R()/this->Cv(T));
-}
-
-
-template<class Thermo>
 inline Foam::scalar Foam::sutherlandTransport<Thermo>::alphah
 (
     const scalar T

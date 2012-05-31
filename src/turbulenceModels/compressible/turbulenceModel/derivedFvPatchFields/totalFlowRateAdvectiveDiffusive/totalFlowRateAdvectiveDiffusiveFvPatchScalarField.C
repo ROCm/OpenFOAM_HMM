@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,9 +139,9 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::rmap
     mixedFvPatchField<scalar>::rmap(ptf, addr);
 }
 
+
 void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 {
-
     if (this->updated())
     {
         return;
@@ -158,7 +158,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
-    const scalarField alphap = turbulence.alphaEff()().boundaryField()[patchI];
+    const scalarField alphap = turbulence.alphaEff(patchI);
 
     refValue() = 1.0;
     refGrad() = 0.0;

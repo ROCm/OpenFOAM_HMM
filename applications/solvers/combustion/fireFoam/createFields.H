@@ -10,7 +10,7 @@
 
     Info<< "Reading thermophysical properties\n" << endl;
 
-    hsCombustionThermo& thermo = combustion->thermo();
+    psiReactionThermo& thermo = combustion->thermo();
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -34,7 +34,7 @@
     );
 
     volScalarField& p = thermo.p();
-    volScalarField& hs = thermo.hs();
+    volScalarField& hs = thermo.he();
     const volScalarField& T = thermo.T();
     const volScalarField& psi = thermo.psi();
 

@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicPsiThermo.H"
+#include "psiThermo.H"
 #include "RASModel.H"
 #include "MRFZones.H"
 #include "thermalPorousZones.H"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,7 +103,7 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::cp
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::h
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::ha
 (
     const scalar T
 ) const
@@ -118,7 +118,7 @@ inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::hs
     const scalar T
 ) const
 {
-    return h(T) - hc();
+    return ha(T) - hc();
 }
 
 

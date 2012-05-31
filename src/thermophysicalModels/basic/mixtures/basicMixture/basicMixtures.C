@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,15 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
-#include "pressurePerfectGas.H"
 #include "incompressible.H"
+#include "isobaricPerfectGas.H"
 
 #include "eConstThermo.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
+#include "sensibleInternalEnergy.H"
+#include "sensibleEnthalpy.H"
 #include "specieThermo.H"
 
 #include "constTransport.H"
@@ -63,6 +65,7 @@ makeBasicMixture
 (
     pureMixture,
     constTransport,
+    sensibleInternalEnergy,
     eConstThermo,
     perfectGas
 );
@@ -71,15 +74,16 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
+    sensibleInternalEnergy,
     eConstThermo,
     perfectGas
 );
-
 
 makeBasicMixture
 (
     pureMixture,
     constTransport,
+    sensibleInternalEnergy,
     hConstThermo,
     perfectGas
 );
@@ -88,6 +92,7 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
+    sensibleInternalEnergy,
     hConstThermo,
     perfectGas
 );
@@ -96,6 +101,7 @@ makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
+    sensibleInternalEnergy,
     janafThermo,
     perfectGas
 );
@@ -104,6 +110,34 @@ makeBasicMixture
 (
     pureMixture,
     constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
     hConstThermo,
     incompressible
 );
@@ -111,38 +145,45 @@ makeBasicMixture
 makeBasicPolyMixture
 (
     pureMixture,
-    3
+    3,
+    sensibleEnthalpy
 );
 
 makeBasicPolyMixture
 (
     pureMixture,
-    8
+    8,
+    sensibleEnthalpy
 );
+
 
 makeBasicMixture
 (
     pureMixture,
     constTransport,
+    sensibleEnthalpy,
     hConstThermo,
-    pressurePerfectGas
+    isobaricPerfectGas
 );
 
 makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
+    sensibleEnthalpy,
     hConstThermo,
-    pressurePerfectGas
+    isobaricPerfectGas
 );
 
 makeBasicMixture
 (
     pureMixture,
     sutherlandTransport,
+    sensibleEnthalpy,
     janafThermo,
-    pressurePerfectGas
+    isobaricPerfectGas
 );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -35,7 +35,7 @@ solution
             rho             semiImplicit 1;
             U               semiImplicit 1;
             Yi              semiImplicit 1;
-            hs              semiImplicit 1;
+            h               semiImplicit 1;
         }
     }
 
