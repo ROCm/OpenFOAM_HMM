@@ -56,18 +56,19 @@ SourceFiles
 #define extendedFeatureEdgeMesh_H
 
 #include "edgeMesh.H"
-#include "surfaceFeatures.H"
-#include "objectRegistry.H"
-#include "IOdictionary.H"
+#include "regIOobject.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
-#include "pointIndexHit.H"
+#include "PrimitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class surfaceFeatures;
+class objectRegistry;
 
 /*---------------------------------------------------------------------------*\
                        Class extendedFeatureEdgeMesh Declaration
@@ -182,6 +183,14 @@ private:
             const vector& fC0tofC1
         ) const;
 
+        template<class Patch>
+        void sortPointsAndEdges
+        (
+            const Patch&,
+            const labelList& featureEdges,
+            const labelList& regionFeatureEdges,
+            const labelList& feaurePoints
+        );
 
 public:
 
@@ -222,6 +231,16 @@ public:
             const surfaceFeatures& sFeat,
             const objectRegistry& obr,
             const fileName& sFeatFileName
+        );
+
+        //- Construct from PrimitivePatch
+        extendedFeatureEdgeMesh
+        (
+            const IOobject&,
+            const PrimitivePatch<face, List, pointField, point>& surf,
+            const labelList& featureEdges,
+            const labelList& regionFeatureEdges,
+            const labelList& featurePoints
         );
 
         //- Construct from all components
@@ -413,6 +432,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "extendedFeatureEdgeMeshI.H"
+
+#ifdef NoRepository
+#   include "extendedFeatureEdgeMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
