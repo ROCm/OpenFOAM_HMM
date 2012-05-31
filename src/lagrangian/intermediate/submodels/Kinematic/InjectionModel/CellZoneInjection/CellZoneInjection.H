@@ -104,7 +104,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        CellZoneInjection(const dictionary& dict, CloudType& owner);
+        CellZoneInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         CellZoneInjection(const CellZoneInjection<CloudType>& im);

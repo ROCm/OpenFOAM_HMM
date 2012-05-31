@@ -36,10 +36,11 @@ template<class CloudType>
 Foam::ConeInjection<CloudType>::ConeInjection
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName, typeName),
     positionAxis_(this->coeffDict().lookup("positionAxis")),
     injectorCells_(positionAxis_.size()),
     injectorTetFaces_(positionAxis_.size()),

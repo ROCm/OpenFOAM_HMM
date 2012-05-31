@@ -98,10 +98,11 @@ template<class CloudType>
 Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName, typeName),
     injectionMethod_(imPoint),
     flowType_(ftConstantVelocity),
     outerDiameter_(readScalar(this->coeffDict().lookup("outerDiameter"))),

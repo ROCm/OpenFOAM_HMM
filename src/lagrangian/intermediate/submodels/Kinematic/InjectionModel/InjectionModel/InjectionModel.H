@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class InjectionModel Declaration
+                       Class InjectionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -186,9 +186,10 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& modelType
         ),
-        (dict, owner)
+        (dict, owner, modelType)
     );
 
 
@@ -202,7 +203,8 @@ public:
         (
             const dictionary& dict,
             CloudType& owner,
-            const word& type
+            const word& modelName,
+            const word& modelType
         );
 
         //- Construct copy
@@ -222,12 +224,23 @@ public:
     virtual ~InjectionModel();
 
 
-    //- Selector
-    static autoPtr<InjectionModel<CloudType> > New
-    (
-        const dictionary& dict,
-        CloudType& owner
-    );
+    // Selectors
+
+        //- Selector with lookup from dictionary
+        static autoPtr<InjectionModel<CloudType> > New
+        (
+            const dictionary& dict,
+            CloudType& owner
+        );
+
+        //- Selector with name and type
+        static autoPtr<InjectionModel<CloudType> > New
+        (
+            const dictionary& dict,
+            const word& modelName,
+            const word& modelType,
+            CloudType& owner
+        );
 
 
     // Member Functions

@@ -109,7 +109,8 @@ public:
         ReactingMultiphaseLookupTableInjection
         (
             const dictionary& dict,
-            CloudType& owner
+            CloudType& owner,
+            const word& modelName
         );
 
         //- Construct copy
