@@ -66,11 +66,20 @@ protected:
         //- Name of the sub-model base class
         const word baseName_;
 
+        //- Type of the sub-model
+        const word modelType_;
+
         //- Name of the sub-model
-        const word name_;
+        const word modelName_;
 
         //- Coefficients dictionary
         const dictionary& coeffDict_;
+
+
+    // Protected Member Functions
+
+        //- Flag to indicate whether data is/was read in-line
+        bool inLine() const;
 
 
 public:
@@ -86,8 +95,18 @@ public:
             CloudType& owner,
             const dictionary& dict,
             const word& baseName,
-            const word& name,
+            const word& modelType,
             const word& dictExt = "Coeffs"
+        );
+
+        //- Construct from owner cloud, dictionary, and model type name
+        SubModelBase
+        (
+            const word& modelName,
+            CloudType& owner,
+            const dictionary& dict,
+            const word& baseName,
+            const word& modelType
         );
 
         //- Construct as copy
@@ -111,11 +130,14 @@ public:
             //- Return const access to the cloud dictionary
             const dictionary& dict() const;
 
+            //- Return const access to the sub-model type
+            const word& modelType() const;
+
             //- Return const access to the base name of the sub-model
             const word& baseName() const;
 
             //- Return const access to the name of the sub-model
-            const word& name() const;
+            const word& modelName() const;
 
             //- Return const access to the coefficients dictionary
             const dictionary& coeffDict() const;
@@ -131,6 +153,9 @@ public:
 
             //- Cache dependant sub-model fields
             virtual void cacheFields(const bool store);
+
+            //- Flag to indicate when to write a property
+            bool outputTime() const;
 
 
         // Edit
