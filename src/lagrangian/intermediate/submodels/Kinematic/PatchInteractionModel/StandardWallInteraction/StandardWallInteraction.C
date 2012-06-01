@@ -41,10 +41,6 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     ),
     e_(0.0),
     mu_(0.0),
-    nEscape0_(this->template getModelProperty<label>("nEscape")),
-    massEscape0_(this->template getModelProperty<scalar>("massEscape")),
-    nStick0_(this->template getModelProperty<label>("nStick")),
-    massStick0_(this->template getModelProperty<scalar>("massStick")),
     nEscape_(0),
     massEscape_(0.0),
     nStick_(0),
@@ -94,10 +90,6 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     interactionType_(pim.interactionType_),
     e_(pim.e_),
     mu_(pim.mu_),
-    nEscape0_(pim.nEscape0_),
-    massEscape0_(pim.massEscape0_),
-    nStick0_(pim.nStick0_),
-    massStick0_(pim.massStick0_),
     nEscape_(pim.nEscape_),
     massEscape_(pim.massEscape_),
     nStick_(pim.nStick_),
@@ -204,11 +196,17 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 template<class CloudType>
 void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
 {
-    label npe = returnReduce(nEscape_, sumOp<label>()) + nEscape0_;
-    scalar mpe = returnReduce(massEscape_, sumOp<scalar>()) + massEscape0_;
+    label npe0 = this->template getBaseProperty<scalar>("nEscape");
+    label npe = npe0 + returnReduce(nEscape_, sumOp<label>());
 
-    label nps = returnReduce(nStick_, sumOp<label>()) + nStick0_;
-    scalar mps = returnReduce(massStick_, sumOp<scalar>()) + massStick0_;
+    scalar mpe0 = this->template getBaseProperty<scalar>("massEscape");
+    scalar mpe = mpe0 + returnReduce(massEscape_, sumOp<scalar>());
+
+    label nps0 = this->template getBaseProperty<scalar>("nStick");
+    label nps = nps0 + returnReduce(nStick_, sumOp<label>());
+
+    scalar mps0 = this->template getBaseProperty<scalar>("massStick");
+    scalar mps = mps0 + returnReduce(massStick_, sumOp<scalar>());
 
     os  << "    Parcel fate (number, mass)" << nl
         << "      - escape                      = " << npe << ", " << mpe << nl
@@ -217,9 +215,16 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
     if (this->outputTime())
     {
         this->setModelProperty("nEscape", npe);
+        nEscape_ = 0;
+
         this->setModelProperty("massEscape", mpe);
+        massEscape_ = 0.0;
+
         this->setModelProperty("nStick", nps);
+        nStick_ = 0;
+
         this->setModelProperty("massStick", mps);
+        massStick_ = 0.0;
     }
 }
 
