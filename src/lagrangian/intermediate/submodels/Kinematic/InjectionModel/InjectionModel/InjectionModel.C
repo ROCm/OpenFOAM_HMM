@@ -243,7 +243,8 @@ void Foam::InjectionModel<CloudType>::postInjectCheck
     if (allParcelsAdded > 0)
     {
         Info<< nl
-            << "--> Cloud: " << this->owner().name() << nl
+            << "--> Cloud: " << this->owner().name()
+            << " injector: " << this->modelName() << nl
             << "    Added " << allParcelsAdded << " new parcels" << nl << endl;
     }
 
@@ -270,16 +271,16 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
-    massInjected_(this->template getBaseProperty<scalar>("massInjected")),
-    nInjections_(this->template getBaseProperty<scalar>("nInjections")),
+    massInjected_(this->template getModelProperty<scalar>("massInjected")),
+    nInjections_(this->template getModelProperty<label>("nInjections")),
     parcelsAddedTotal_
     (
-        this->template getBaseProperty<scalar>("parcelsAddedTotal")
+        this->template getModelProperty<scalar>("parcelsAddedTotal")
     ),
     parcelBasis_(pbNumber),
     nParticleFixed_(0.0),
     time0_(0.0),
-    timeStep0_(this->template getBaseProperty<scalar>("timeStep0"))
+    timeStep0_(this->template getModelProperty<scalar>("timeStep0"))
 {}
 
 
@@ -288,23 +289,24 @@ Foam::InjectionModel<CloudType>::InjectionModel
 (
     const dictionary& dict,
     CloudType& owner,
-    const word& type
+    const word& modelName,
+    const word& modelType
 )
 :
-    SubModelBase<CloudType>(owner, dict, typeName, type),
+    SubModelBase<CloudType>(modelName, owner, dict, typeName, modelType),
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
-    massInjected_(this->template getBaseProperty<scalar>("massInjected")),
-    nInjections_(this->template getBaseProperty<scalar>("nInjections")),
+    massInjected_(this->template getModelProperty<scalar>("massInjected")),
+    nInjections_(this->template getModelProperty<scalar>("nInjections")),
     parcelsAddedTotal_
     (
-        this->template getBaseProperty<scalar>("parcelsAddedTotal")
+        this->template getModelProperty<scalar>("parcelsAddedTotal")
     ),
     parcelBasis_(pbNumber),
     nParticleFixed_(0.0),
     time0_(owner.db().time().value()),
-    timeStep0_(this->template getBaseProperty<scalar>("timeStep0"))
+    timeStep0_(this->template getModelProperty<scalar>("timeStep0"))
 {
     // Provide some info
     // - also serves to initialise mesh dimensions - needed for parallel runs
@@ -735,19 +737,16 @@ bool Foam::InjectionModel<CloudType>::fullyDescribed() const
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::info(Ostream& os)
 {
-    os  << "    Total number of parcels added   = " << parcelsAddedTotal_ << nl
-        << "    Total mass introduced           = " << massInjected_ << nl;
+    os  << "    " << this->modelName() << ":" << nl
+        << "        number of parcels added     = " << parcelsAddedTotal_ << nl
+        << "        mass introduced             = " << massInjected_ << nl;
 
-    if
-    (
-        this->owner().solution().transient()
-     && this->owner().db().time().outputTime()
-    )
+    if (this->outputTime())
     {
-        this->setBaseProperty("massInjected", massInjected_);
-        this->setBaseProperty("nInjections", nInjections_);
-        this->setBaseProperty("parcelsAddedTotal", parcelsAddedTotal_);
-        this->setBaseProperty("timeStep0", timeStep0_);
+        this->setModelProperty("massInjected", massInjected_);
+        this->setModelProperty("nInjections", nInjections_);
+        this->setModelProperty("parcelsAddedTotal", parcelsAddedTotal_);
+        this->setModelProperty("timeStep0", timeStep0_);
     }
 }
 

@@ -101,7 +101,7 @@ Foam::SprayCloud<CloudType>::SprayCloud
     {
         setModels();
 
-        averageParcelMass_ = this->injection().averageParcelMass();
+        averageParcelMass_ = this->injectors().averageParcelMass();
 
         if (readFields)
         {

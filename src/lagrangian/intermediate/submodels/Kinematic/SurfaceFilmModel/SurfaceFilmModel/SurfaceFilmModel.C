@@ -275,9 +275,30 @@ void Foam::SurfaceFilmModel<CloudType>::setParcelProperties
 
 
 template<class CloudType>
-void Foam::SurfaceFilmModel<CloudType>::info(Ostream& os) const
+void Foam::SurfaceFilmModel<CloudType>::info(Ostream& os)
 {
-    // do nothing
+    label nTrans0 =
+        this->template getModelProperty<label>("nParcelsTransferred");
+
+    label nInject0 =
+        this->template getModelProperty<label>("nParcelsInjected");
+
+    label nTransTotal =
+        nTrans0 + returnReduce(nParcelsTransferred_, sumOp<label>());
+
+    label nInjectTotal =
+        nInject0 + returnReduce(nParcelsInjected_, sumOp<label>());
+
+    os  << "    Parcels absorbed into film      = " << nTransTotal << nl
+        << "    New film detached parcels       = " << nInjectTotal << endl;
+
+    if (this->outputTime())
+    {
+        this->setModelProperty("nParcelsTransferred", nTransTotal);
+        this->setModelProperty("nParcelsInjected", nInjectTotal);
+        nParcelsTransferred_ = 0;
+        nParcelsInjected_ = 0;
+    }
 }
 
 

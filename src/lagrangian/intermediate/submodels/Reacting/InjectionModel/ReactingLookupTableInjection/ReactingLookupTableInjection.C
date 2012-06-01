@@ -31,10 +31,11 @@ template<class CloudType>
 Foam::ReactingLookupTableInjection<CloudType>::ReactingLookupTableInjection
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName, typeName),
     inputFileName_(this->coeffDict().lookup("inputFile")),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     parcelsPerSecond_

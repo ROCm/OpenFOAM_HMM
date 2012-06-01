@@ -37,10 +37,11 @@ template<class CloudType>
 Foam::InflationInjection<CloudType>::InflationInjection
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName, typeName),
     generationSetName_(this->coeffDict().lookup("generationCellSet")),
     inflationSetName_(this->coeffDict().lookup("inflationCellSet")),
     generationCells_(),

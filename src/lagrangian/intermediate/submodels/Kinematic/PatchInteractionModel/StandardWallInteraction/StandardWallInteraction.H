@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,21 +72,6 @@ protected:
 
         //- Restitution coefficient
         scalar mu_;
-
-
-        // Counters for initial particle fates
-
-            //- Number of parcels escaped
-            label nEscape0_;
-
-            //- Mass of parcels escaped
-            scalar massEscape0_;
-
-            //- Number of parcels stuck to patches
-            label nStick0_;
-
-            //- Mass of parcels stuck to patches
-            scalar massStick0_;
 
 
         // Counters for particle fates

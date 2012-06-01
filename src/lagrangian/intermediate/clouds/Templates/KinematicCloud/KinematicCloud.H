@@ -73,10 +73,10 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
-class DispersionModel;
+class InjectionModelList;
 
 template<class CloudType>
-class InjectionModel;
+class DispersionModel;
 
 template<class CloudType>
 class PatchInteractionModel;
@@ -192,13 +192,12 @@ protected:
 
         // References to the cloud sub-models
 
+            //- Injector models
+            InjectionModelList<KinematicCloud<CloudType> > injectors_;
+
             //- Dispersion model
             autoPtr<DispersionModel<KinematicCloud<CloudType> > >
                 dispersionModel_;
-
-            //- Injector model
-            autoPtr<InjectionModel<KinematicCloud<CloudType> > >
-                injectionModel_;
 
             //- Patch interaction model
             autoPtr<PatchInteractionModel<KinematicCloud<CloudType> > >
@@ -393,6 +392,14 @@ public:
 
             // Sub-models
 
+                //- Return const access to the injection model
+                inline const InjectionModelList<KinematicCloud<CloudType> >&
+                    injectors() const;
+
+                //- Return reference to the injection model
+                inline InjectionModelList<KinematicCloud<CloudType> >&
+                    injectors();
+
                 //- Return const-access to the dispersion model
                 inline const DispersionModel<KinematicCloud<CloudType> >&
                     dispersion() const;
@@ -400,14 +407,6 @@ public:
                 //- Return reference to the dispersion model
                 inline DispersionModel<KinematicCloud<CloudType> >&
                     dispersion();
-
-                //- Return const access to the injection model
-                inline const InjectionModel<KinematicCloud<CloudType> >&
-                    injection() const;
-
-                //- Return reference to the injection model
-                inline InjectionModel<KinematicCloud<CloudType> >&
-                    injection();
 
                 //- Return const-access to the patch interaction model
                 inline const PatchInteractionModel<KinematicCloud<CloudType> >&

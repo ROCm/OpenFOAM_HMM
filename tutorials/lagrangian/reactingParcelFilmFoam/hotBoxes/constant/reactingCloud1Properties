@@ -83,7 +83,41 @@ subModels
         gravity;
     }
 
-    injectionModel  coneInjection;
+    injectionModels
+    {
+        model1
+        {
+            type            coneInjection;
+            SOI             0.000;
+            duration        20.000;
+            positionAxis
+            (
+                ((0.3 0.35 1.45) (0 0 -1))
+                ((0.6 0.35 1.45) (0 0 -1))
+            );
+
+            massTotal       10;
+            parcelsPerInjector 20000;
+            parcelsPerSecond 500;
+            parcelBasisType mass;
+            flowRateProfile constant 0.1;
+            Umag            constant 3.0;
+            thetaInner      constant 0;
+            thetaOuter      constant 45;
+
+            sizeDistribution
+            {
+                type         RosinRammler;
+                RosinRammlerDistribution
+                {
+                    minValue        5e-04;
+                    maxValue        0.0012;
+                    d               7.5e-05;
+                    n               0.5;
+                }
+            }
+        }
+    }
 
     dispersionModel none;
 
@@ -98,38 +132,6 @@ subModels
     surfaceFilmModel thermoSurfaceFilm;
 
     radiation       off;
-
-    coneInjectionCoeffs
-    {
-        SOI             0.000;
-        duration        20.000;
-        positionAxis
-        (
-            ((0.3 0.35 1.45) (0 0 -1))
-            ((0.6 0.35 1.45) (0 0 -1))
-        );
-
-        massTotal       10;
-        parcelsPerInjector 20000;
-        parcelsPerSecond 500;
-        parcelBasisType mass;
-        flowRateProfile constant 0.1;
-        Umag            constant 3.0;
-        thetaInner      constant 0;
-        thetaOuter      constant 45;
-
-        sizeDistribution
-        {
-            type         RosinRammler;
-            RosinRammlerDistribution
-            {
-                minValue        5e-04;
-                maxValue        0.0012;
-                d               7.5e-05;
-                n               0.5;
-            }
-        }
-    }
 
     standardWallInteractionCoeffs
     {

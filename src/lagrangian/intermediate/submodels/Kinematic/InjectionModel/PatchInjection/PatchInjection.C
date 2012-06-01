@@ -33,10 +33,11 @@ template<class CloudType>
 Foam::PatchInjection<CloudType>::PatchInjection
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName, typeName),
     patchName_(this->coeffDict().lookup("patchName")),
     patchId_(owner.mesh().boundaryMesh().findPatchID(patchName_)),
     duration_(readScalar(this->coeffDict().lookup("duration"))),

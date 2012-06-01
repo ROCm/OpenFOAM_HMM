@@ -88,7 +88,19 @@ subModels
         gravity;
     }
 
-    injectionModel  reactingMultiphaseLookupTableInjection;
+    injectionModels
+    {
+        model1
+        {
+            type            reactingMultiphaseLookupTableInjection;
+            massTotal       1e-2;
+            parcelBasisType mass;
+            SOI             0.5;
+            inputFile       "parcelInjectionProperties";
+            duration        1.0;
+            parcelsPerSecond 250;
+        }
+    }
 
     dispersionModel none;
 
@@ -107,16 +119,6 @@ subModels
     surfaceFilmModel none;
 
     radiation       off;
-
-    reactingMultiphaseLookupTableInjectionCoeffs
-    {
-        massTotal       1e-2;
-        parcelBasisType mass;
-        SOI             0.5;
-        inputFile       "parcelInjectionProperties";
-        duration        1.0;
-        parcelsPerSecond 250;
-    }
 
     localInteractionCoeffs
     {

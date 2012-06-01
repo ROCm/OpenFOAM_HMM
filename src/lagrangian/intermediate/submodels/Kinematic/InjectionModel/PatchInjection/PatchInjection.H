@@ -103,7 +103,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        PatchInjection(const dictionary& dict, CloudType& owner);
+        PatchInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         PatchInjection(const PatchInjection<CloudType>& im);

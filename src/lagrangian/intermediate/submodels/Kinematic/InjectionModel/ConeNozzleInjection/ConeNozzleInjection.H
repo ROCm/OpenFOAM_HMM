@@ -186,7 +186,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ConeNozzleInjection(const dictionary& dict, CloudType& owner);
+        ConeNozzleInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         ConeNozzleInjection(const ConeNozzleInjection<CloudType>& im);

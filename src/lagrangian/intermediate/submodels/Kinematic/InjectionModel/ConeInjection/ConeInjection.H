@@ -118,7 +118,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ConeInjection(const dictionary& dict, CloudType& owner);
+        ConeInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         ConeInjection(const ConeInjection<CloudType>& im);
