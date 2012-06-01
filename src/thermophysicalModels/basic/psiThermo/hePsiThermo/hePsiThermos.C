@@ -23,7 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makePsiThermo.H"
+#include "psiThermo.H"
+#include "makeThermo.H"
 
 #include "perfectGas.H"
 
@@ -47,8 +48,9 @@ namespace Foam
 
 /* * * * * * * * * * * * * * * * * Enthalpy-based * * * * * * * * * * * * * */
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     constTransport,
@@ -57,8 +59,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     sutherlandTransport,
@@ -67,8 +70,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     sutherlandTransport,
@@ -80,8 +84,9 @@ makePsiThermo
 
 /* * * * * * * * * * * * * * Internal-energy-based * * * * * * * * * * * * * */
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     constTransport,
@@ -90,8 +95,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     sutherlandTransport,
@@ -100,8 +106,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     constTransport,
@@ -110,8 +117,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     sutherlandTransport,
@@ -120,8 +128,9 @@ makePsiThermo
     perfectGas
 );
 
-makePsiThermo
+makeThermo
 (
+    psiThermo,
     hePsiThermo,
     pureMixture,
     sutherlandTransport,
