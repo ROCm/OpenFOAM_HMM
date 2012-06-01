@@ -22,22 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::rhoThermo
+    Foam::basicThermo
 
 Description
     Macros for creating 'basic' density-based thermo packages
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeRhoThermo_H
-#define makeRhoThermo_H
+#ifndef makeThermo_H
+#define makeThermo_H
 
-#include "rhoThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeRhoThermo(Cthermo,Mixture,Transport,Type,Thermo,EqnOfState)       \
+#define makeThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState)\
                                                                               \
 typedef Cthermo                                                               \
 <                                                                             \
@@ -77,7 +76,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    rhoThermo,                                                                \
+    BaseThermo,                                                               \
     Cthermo##Mixture##Transport##Type##Thermo##EqnOfState,                    \
     fvMesh                                                                    \
 );                                                                            \
@@ -90,7 +89,7 @@ addToRunTimeSelectionTable                                                    \
 );
 
 
-#define makeRhoPolyThermo(Cthermo,Mixture,Order,Type)                         \
+#define makePolyThermo(BaseThermo,Cthermo,Mixture,Order,Type)                 \
                                                                               \
 typedef polynomialTransport                                                   \
 <                                                                             \
@@ -118,7 +117,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    rhoThermo,                                                                \
+    BaseThermo,                                                               \
     Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics,                    \
     fvMesh                                                                    \
 );                                                                            \
