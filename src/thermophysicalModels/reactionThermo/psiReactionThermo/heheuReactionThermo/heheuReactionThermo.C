@@ -160,7 +160,7 @@ Foam::heheuReactionThermo<MixtureType>::heheuReactionThermo(const fvMesh& mesh)
         }
     }
 
-    heuBoundaryCorrection(this->heu_);
+    this->heuBoundaryCorrection(this->heu_);
 
     calculate();
     this->psi_.oldTime();   // Switch on saving old time
