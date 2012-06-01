@@ -23,7 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeRhoThermo.H"
+#include "rhoThermo.H"
+#include "makeThermo.H"
 
 #include "perfectGas.H"
 #include "isobaricPerfectGas.H"
@@ -52,8 +53,9 @@ namespace Foam
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     constTransport,
@@ -62,8 +64,9 @@ makeRhoThermo
     perfectGas
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     sutherlandTransport,
@@ -72,8 +75,9 @@ makeRhoThermo
     perfectGas
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     sutherlandTransport,
@@ -82,8 +86,9 @@ makeRhoThermo
     perfectGas
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     constTransport,
@@ -92,24 +97,27 @@ makeRhoThermo
     incompressible
 );
 
-makeRhoPolyThermo
+makePolyThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     3,
     sensibleEnthalpy
 );
 
-makeRhoPolyThermo
+makePolyThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     8,
     sensibleEnthalpy
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     constTransport,
@@ -118,8 +126,9 @@ makeRhoThermo
     isobaricPerfectGas
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     sutherlandTransport,
@@ -128,8 +137,9 @@ makeRhoThermo
     isobaricPerfectGas
 );
 
-makeRhoThermo
+makeThermo
 (
+    rhoThermo,
     heRhoThermo,
     pureMixture,
     sutherlandTransport,
@@ -137,6 +147,7 @@ makeRhoThermo
     janafThermo,
     isobaricPerfectGas
 );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

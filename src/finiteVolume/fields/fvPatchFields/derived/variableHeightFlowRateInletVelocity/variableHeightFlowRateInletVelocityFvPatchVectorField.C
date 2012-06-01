@@ -107,8 +107,8 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
     scalarField alphap =
         patch().lookupPatchField<volScalarField, scalar>("alpha1");
 
-    alphap = max(alphap, 0.0);
-    alphap = min(alphap, 1.0);
+    alphap = max(alphap, scalar(0));
+    alphap = min(alphap, scalar(1));
 
     // a simpler way of doing this would be nice
     scalar avgU = -flowRate_/gSum(patch().magSf()*alphap);
