@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,6 +27,13 @@
 #
 # Description
 #     Build the tags files for all the .C and .H files
+#
+#     This script is designed for use with emacs
+#
+#     For use, download/install 'exuberant ctags'.  The executable for this
+#     package is called ctags, which conflicts with the 'standard' version
+#     of ctags found on most *nix systems.  Rename the exuberant ctags
+#     executable to ectags.
 #
 #------------------------------------------------------------------------------
 

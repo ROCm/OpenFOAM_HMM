@@ -100,7 +100,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        KinematicLookupTableInjection(const dictionary& dict, CloudType& owner);
+        KinematicLookupTableInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         KinematicLookupTableInjection

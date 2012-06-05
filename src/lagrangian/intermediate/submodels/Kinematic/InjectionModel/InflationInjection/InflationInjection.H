@@ -120,7 +120,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        InflationInjection(const dictionary& dict, CloudType& owner);
+        InflationInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy
         InflationInjection(const InflationInjection<CloudType>& im);

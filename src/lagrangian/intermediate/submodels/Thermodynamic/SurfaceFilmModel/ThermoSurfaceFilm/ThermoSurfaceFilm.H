@@ -284,7 +284,7 @@ public:
         // I-O
 
             //- Write surface film info to stream
-            virtual void info(Ostream& os) const;
+            virtual void info(Ostream& os);
 };
 
 

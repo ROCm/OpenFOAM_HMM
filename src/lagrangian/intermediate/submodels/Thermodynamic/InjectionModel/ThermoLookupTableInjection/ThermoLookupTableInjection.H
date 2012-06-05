@@ -102,7 +102,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        ThermoLookupTableInjection(const dictionary& dict, CloudType& owner);
+        ThermoLookupTableInjection
+        (
+            const dictionary& dict,
+            CloudType& owner,
+            const word& modelName
+        );
 
         //- Construct copy from owner cloud and injection model
         ThermoLookupTableInjection
