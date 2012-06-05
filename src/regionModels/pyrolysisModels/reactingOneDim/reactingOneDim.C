@@ -146,7 +146,8 @@ void reactingOneDim::updatePhiGas()
 
     forAll(gasTable, gasI)
     {
-        tmp<volScalarField> tHsiGas = solidChemistry_->gasHs(T_, gasI);
+        tmp<volScalarField> tHsiGas =
+            solidChemistry_->gasHs(p, T_, gasI);
         tmp<volScalarField> tRRiGas = solidChemistry_->RRg(gasI);
 
         const volScalarField& HsiGas = tHsiGas();

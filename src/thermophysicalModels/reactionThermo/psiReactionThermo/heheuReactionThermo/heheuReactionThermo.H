@@ -114,6 +114,7 @@ public:
             //- Unburnt gas enthalpy for cell-set [J/kg]
             virtual tmp<scalarField> heu
             (
+                const scalarField& p,
                 const scalarField& T,
                 const labelList& cells
             ) const;
@@ -121,6 +122,7 @@ public:
             //- Unburnt gas enthalpy for patch [J/kg]
             virtual tmp<scalarField> heu
             (
+                const scalarField& p,
                 const scalarField& T,
                 const label patchi
             ) const;

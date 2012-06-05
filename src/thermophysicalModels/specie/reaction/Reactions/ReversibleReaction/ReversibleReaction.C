@@ -100,7 +100,7 @@ Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
     const scalarField& c
 ) const
 {
-    return kfwd/this->Kc(T);
+    return kfwd/this->Kc(p, T);
 }
 
 

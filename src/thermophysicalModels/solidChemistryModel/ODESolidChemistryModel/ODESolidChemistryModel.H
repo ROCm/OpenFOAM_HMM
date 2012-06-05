@@ -220,6 +220,7 @@ public:
             //- Return sensible enthalpy for gas i [J/Kg]
             virtual tmp<volScalarField> gasHs
             (
+                const volScalarField& p,
                 const volScalarField& T,
                 const label i
             ) const;

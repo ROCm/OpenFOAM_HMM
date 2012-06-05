@@ -27,14 +27,32 @@ License
 #define makeReactionThermo_H
 
 #include "addToRunTimeSelectionTable.H"
+#include "SpecieMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeReactionThermo(BaseThermo,CThermo,MixtureThermo,Mixture,Transport,Type,Thermo,EqnOfState) \
                                                                               \
 typedef MixtureThermo                                                         \
-    <Mixture<Transport<specieThermo<Thermo<EqnOfState>,Type> > > >            \
-    MixtureThermo##Mixture##Transport##Type##Thermo##EqnOfState;              \
+<                                                                             \
+    SpecieMixture                                                             \
+    <                                                                         \
+        Mixture                                                               \
+        <                                                                     \
+            Transport                                                         \
+            <                                                                 \
+                specieThermo                                                  \
+                <                                                             \
+                    Thermo                                                    \
+                    <                                                         \
+                        EqnOfState                                            \
+                    >,                                                        \
+                    Type                                                      \
+                >                                                             \
+            >                                                                 \
+        >                                                                     \
+    >                                                                         \
+> MixtureThermo##Mixture##Transport##Type##Thermo##EqnOfState;                \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
@@ -71,8 +89,16 @@ addToRunTimeSelectionTable                                                    \
 
 #define makeReactionMixtureThermo(BaseThermo,CThermo,MixtureThermo,Mixture,ThermoPhys)   \
                                                                               \
-typedef MixtureThermo<Mixture<ThermoPhys> >                                   \
-    MixtureThermo##Mixture##ThermoPhys;                                       \
+typedef MixtureThermo                                                         \
+<                                                                             \
+    SpecieMixture                                                             \
+    <                                                                         \
+        Mixture                                                               \
+        <                                                                     \
+            ThermoPhys                                                        \
+        >                                                                     \
+    >                                                                         \
+> MixtureThermo##Mixture##ThermoPhys;                                         \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \

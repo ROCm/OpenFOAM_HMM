@@ -105,10 +105,11 @@ void Foam::fixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
+    const scalarField& pw = thermo.p().boundaryField()[patchi];
     fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.Tu().boundaryField()[patchi]);
     Tw.evaluate();
-    operator==(thermo.heu(Tw, patchi));
+    operator==(thermo.heu(pw, Tw, patchi));
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }

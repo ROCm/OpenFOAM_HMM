@@ -129,16 +129,16 @@ public:
     // Member functions
 
         //- Dynamic viscosity [kg/ms]
-        inline scalar mu(const scalar T) const;
+        inline scalar mu(const scalar p, const scalar T) const;
 
         //- Thermal conductivity [W/mK]
-        inline scalar kappa(const scalar T) const;
+        inline scalar kappa(const scalar p, const scalar T) const;
 
         //- Thermal diffusivity of enthalpy [kg/ms]
-        inline scalar alphah(const scalar T) const;
+        inline scalar alphah(const scalar p, const scalar T) const;
 
         // Species diffusivity
-        //inline scalar D(const scalar T) const;
+        //inline scalar D(const scalar p, const scalar T) const;
 
         //- Write to Ostream
         void write(Ostream& os) const;

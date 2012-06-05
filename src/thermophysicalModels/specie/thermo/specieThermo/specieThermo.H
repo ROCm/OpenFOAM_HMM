@@ -105,13 +105,15 @@ class specieThermo
     // Private Member Functions
 
         //- Return the temperature corresponding to the value of the
-        //  thermodynamic property f, given the function f = F(T) and dF(T)/dT
+        //  thermodynamic property f, given the function f = F(p, T)
+        //  and dF(p, T)/dT
         inline scalar T
         (
             scalar f,
+            scalar p,
             scalar T0,
-            scalar (specieThermo::*F)(const scalar) const,
-            scalar (specieThermo::*dFdT)(const scalar) const,
+            scalar (specieThermo::*F)(const scalar, const scalar) const,
+            scalar (specieThermo::*dFdT)(const scalar, const scalar) const,
             scalar (specieThermo::*limit)(const scalar) const
         ) const;
 
@@ -163,108 +165,112 @@ public:
                 static inline word heName();
 
                 //- Enthalpy/Internal energy [J/kmol]
-                inline scalar he(const scalar T) const;
+                inline scalar he(const scalar p, const scalar T) const;
 
                 //- Heat capacity at constant volume [J/(kmol K)]
-                inline scalar cv(const scalar T) const;
+                inline scalar cv(const scalar p, const scalar T) const;
 
                 //- Heat capacity at constant pressure/volume [J/(kmol K)]
-                inline scalar cpv(const scalar T) const;
+                inline scalar cpv(const scalar p, const scalar T) const;
 
                 //- gamma = cp/cv []
-                inline scalar gamma(const scalar T) const;
+                inline scalar gamma(const scalar p, const scalar T) const;
 
                 //- Ratio of heat capacity at constant pressure to that at
                 //  constant pressure/volume []
-                inline scalar cpBycpv(const scalar T) const;
+                inline scalar cpBycpv(const scalar p, const scalar T) const;
 
                 //- Sensible internal energy [J/kmol]
-                inline scalar es(const scalar T) const;
+                inline scalar es(const scalar p, const scalar T) const;
 
                 //- Absolute internal energy [J/kmol]
-                inline scalar ea(const scalar T) const;
+                inline scalar ea(const scalar p, const scalar T) const;
 
                 //- Gibbs free energy [J/kmol]
-                inline scalar g(const scalar T) const;
+                inline scalar g(const scalar p, const scalar T) const;
 
                 //- Helmholtz free energy [J/kmol]
-                inline scalar a(const scalar T) const;
+                inline scalar a(const scalar p, const scalar T) const;
 
 
             // Mass specific properties
 
                 //- Heat capacity at constant pressure [J/(kg K)]
-                inline scalar Cp(const scalar T) const;
+                inline scalar Cp(const scalar p, const scalar T) const;
 
                 //- Heat capacity at constant volume [J/(kg K)]
-                inline scalar Cv(const scalar T) const;
+                inline scalar Cv(const scalar p, const scalar T) const;
 
                 //- Heat capacity at constant pressure/volume [J/(kg K)]
-                inline scalar Cpv(const scalar T) const;
+                inline scalar Cpv(const scalar p, const scalar T) const;
 
                 //- Enthalpy/Internal energy [J/kg]
-                inline scalar HE(const scalar T) const;
+                inline scalar HE(const scalar p, const scalar T) const;
 
                 //- Enthalpy [J/kg]
-                inline scalar H(const scalar T) const;
+                inline scalar H(const scalar p, const scalar T) const;
 
                 //- Sensible enthalpy [J/kg]
-                inline scalar Hs(const scalar T) const;
+                inline scalar Hs(const scalar p, const scalar T) const;
 
                 //- Chemical enthalpy [J/kg]
                 inline scalar Hc() const;
 
                 //- Absolute Enthalpy [J/kg]
-                inline scalar Ha(const scalar T) const;
+                inline scalar Ha(const scalar p, const scalar T) const;
 
                 //- Entropy [J/(kg K)]
-                inline scalar S(const scalar T) const;
+                inline scalar S(const scalar p, const scalar T) const;
 
                 //- Internal energy [J/kg]
-                inline scalar E(const scalar T) const;
+                inline scalar E(const scalar p, const scalar T) const;
 
                 //- Sensible internal energy [J/kg]
-                inline scalar Es(const scalar T) const;
+                inline scalar Es(const scalar p, const scalar T) const;
 
                 //- Absolute internal energy [J/kg]
-                inline scalar Ea(const scalar T) const;
+                inline scalar Ea(const scalar p, const scalar T) const;
 
                 //- Gibbs free energy [J/kg]
-                inline scalar G(const scalar T) const;
+                inline scalar G(const scalar p, const scalar T) const;
 
                 //- Helmholtz free energy [J/kg]
-                inline scalar A(const scalar T) const;
+                inline scalar A(const scalar p, const scalar T) const;
 
 
         // Equilibrium reaction thermodynamics
 
             //- Equilibrium constant [] i.t.o fugacities
             //  = PIi(fi/Pstd)^nui
-            inline scalar K(const scalar T) const;
+            inline scalar K(const scalar p, const scalar T) const;
 
             //- Equilibrium constant [] i.t.o. partial pressures
             //  = PIi(pi/Pstd)^nui
             //  For low pressures (where the gas mixture is near perfect) Kp = K
-            inline scalar Kp(const scalar T) const;
+            inline scalar Kp(const scalar p, const scalar T) const;
 
             //- Equilibrium constant i.t.o. molar concentration
             //  = PIi(ci/cstd)^nui
             //  For low pressures (where the gas mixture is near perfect)
             //  Kc = Kp(pstd/(RR*T))^nu
-            inline scalar Kc(const scalar T) const;
+            inline scalar Kc(const scalar p, const scalar T) const;
 
             //- Equilibrium constant [] i.t.o. mole-fractions
             //  For low pressures (where the gas mixture is near perfect)
             //  Kx = Kp(pstd/p)^nui
-            inline scalar Kx(const scalar T, const scalar p) const;
+            inline scalar Kx
+            (
+                const scalar p,
+                const scalar T
+            ) const;
 
             //- Equilibrium constant [] i.t.o. number of moles
             //  For low pressures (where the gas mixture is near perfect)
             //  Kn = Kp(n*pstd/p)^nui where n = number of moles in mixture
             inline scalar Kn
             (
-                const scalar T,
                 const scalar p,
+                const scalar T,
                 const scalar n
             ) const;
 
@@ -273,22 +279,47 @@ public:
 
             //- Temperature from enthalpy or internal energy
             //  given an initial temperature T0
-            inline scalar THE(const scalar H, const scalar T0) const;
+            inline scalar THE
+            (
+                const scalar H,
+                const scalar p,
+                const scalar T0
+            ) const;
 
             //- Temperature from sensible enthalpy given an initial T0
-            inline scalar THs(const scalar Hs, const scalar T0) const;
+            inline scalar THs
+            (
+                const scalar Hs,
+                const scalar p,
+                const scalar T0
+            ) const;
 
             //- Temperature from absolute enthalpy
             //  given an initial temperature T0
-            inline scalar THa(const scalar H, const scalar T0) const;
+            inline scalar THa
+            (
+                const scalar H,
+                const scalar p,
+                const scalar T0
+            ) const;
 
             //- Temperature from sensible internal energy
             //  given an initial temperature T0
-            inline scalar TEs(const scalar E, const scalar T0) const;
+            inline scalar TEs
+            (
+                const scalar E,
+                const scalar p,
+                const scalar T0
+            ) const;
 
             //- Temperature from absolute internal energy
             //  given an initial temperature T0
-            inline scalar TEa(const scalar E, const scalar T0) const;
+            inline scalar TEa
+            (
+                const scalar E,
+                const scalar p,
+                const scalar T0
+            ) const;
 
 
         // I-O

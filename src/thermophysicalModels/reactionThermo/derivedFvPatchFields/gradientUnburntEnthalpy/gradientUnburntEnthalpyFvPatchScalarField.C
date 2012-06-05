@@ -104,16 +104,17 @@ void Foam::gradientUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
+    const scalarField& pw = thermo.p().boundaryField()[patchi];
     fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.Tu().boundaryField()[patchi]);
 
     Tw.evaluate();
 
-    gradient() = thermo.Cp(Tw, patchi)*Tw.snGrad()
+    gradient() = thermo.Cp(pw, Tw, patchi)*Tw.snGrad()
       + patch().deltaCoeffs()*
         (
-            thermo.heu(Tw, patchi)
-          - thermo.heu(Tw, patch().faceCells())
+            thermo.heu(pw, Tw, patchi)
+          - thermo.heu(pw, Tw, patch().faceCells())
         );
 
     fixedGradientFvPatchScalarField::updateCoeffs();

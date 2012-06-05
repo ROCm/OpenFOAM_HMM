@@ -109,6 +109,7 @@ void Foam::mixedEnergyFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
+    const scalarField& pw = thermo.p().boundaryField()[patchi];
     mixedFvPatchScalarField& Tw = refCast<mixedFvPatchScalarField>
     (
         const_cast<fvPatchScalarField&>(thermo.T().boundaryField()[patchi])
@@ -117,13 +118,13 @@ void Foam::mixedEnergyFvPatchScalarField::updateCoeffs()
     Tw.evaluate();
 
     valueFraction() = Tw.valueFraction();
-    refValue() = thermo.he(Tw.refValue(), patchi);
+    refValue() = thermo.he(pw, Tw.refValue(), patchi);
     refGrad() =
-        thermo.Cpv(Tw, patchi)*Tw.refGrad()
+        thermo.Cpv(pw, Tw, patchi)*Tw.refGrad()
       + patch().deltaCoeffs()*
         (
-            thermo.he(Tw, patchi)
-          - thermo.he(Tw, patch().faceCells())
+            thermo.he(pw, Tw, patchi)
+          - thermo.he(pw, Tw, patch().faceCells())
         );
 
     mixedFvPatchScalarField::updateCoeffs();
