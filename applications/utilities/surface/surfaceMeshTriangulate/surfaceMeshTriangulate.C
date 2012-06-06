@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const word outFileName(args[1]);
+    const fileName outFileName(args[1]);
 
     Info<< "Extracting surface from boundaryMesh ..."
         << endl << endl;

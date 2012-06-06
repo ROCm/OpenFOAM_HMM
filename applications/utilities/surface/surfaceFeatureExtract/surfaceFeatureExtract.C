@@ -709,13 +709,7 @@ int main(int argc, char *argv[])
                 Info<< "Removing all edges outside bb " << bb << endl;
                 dumpBox(bb, "subsetBox.obj");
 
-                deleteBox
-                (
-                    surf,
-                    bb,
-                    false,
-                    edgeStat
-                );
+                deleteBox(surf, bb, false, edgeStat);
             }
             else if (subsetDict.found("outsideBox"))
             {
@@ -724,13 +718,7 @@ int main(int argc, char *argv[])
                 Info<< "Removing all edges inside bb " << bb << endl;
                 dumpBox(bb, "deleteBox.obj");
 
-                deleteBox
-                (
-                    surf,
-                    bb,
-                    true,
-                    edgeStat
-                );
+                deleteBox(surf, bb, true, edgeStat);
             }
 
             const Switch manifoldEdges =
@@ -753,12 +741,7 @@ int main(int argc, char *argv[])
             {
                 plane cutPlane(subsetDict.lookup("plane")());
 
-                deleteEdges
-                (
-                    surf,
-                    cutPlane,
-                    edgeStat
-                );
+                deleteEdges(surf, cutPlane, edgeStat);
 
                 Info<< "Only edges that intersect the plane with normal "
                     << cutPlane.normal()
@@ -863,20 +846,6 @@ int main(int argc, char *argv[])
 
         bfeMesh.regIOobject::write();
 
-        triSurfaceMesh searchSurf
-        (
-            IOobject
-            (
-                sFeatFileName + ".closeness",
-                runTime.constant(),
-                "triSurface",
-                runTime,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            surf
-        );
-
     // Find close features
 
     // // Dummy trim operation to mark features
@@ -948,6 +917,22 @@ int main(int argc, char *argv[])
         {
             Info<< nl << "Extracting internal and external closeness of "
                 << "surface." << endl;
+
+
+            triSurfaceMesh searchSurf
+            (
+                IOobject
+                (
+                    sFeatFileName + ".closeness",
+                    runTime.constant(),
+                    "triSurface",
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                surf
+            );
+
 
             // Internal and external closeness
 

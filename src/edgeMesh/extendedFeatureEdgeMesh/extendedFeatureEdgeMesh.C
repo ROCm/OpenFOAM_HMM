@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extendedFeatureEdgeMesh.H"
+#include "surfaceFeatures.H"
 #include "triSurface.H"
 #include "Random.H"
 #include "Time.H"
 #include "meshTools.H"
-#include "linePointRef.H"
 #include "ListListOps.H"
 #include "OFstream.H"
 #include "IFstream.H"
@@ -232,364 +232,59 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
 {
     // Extract and reorder the data from surfaceFeatures
 
-    // References to the surfaceFeatures data
-    const triSurface& surf(sFeat.surface());
-    const pointField& sFeatLocalPts(surf.localPoints());
-    const edgeList& sFeatEds(surf.edges());
 
-    // Filling the extendedFeatureEdgeMesh with the raw geometrical data.
 
-    label nFeatEds = sFeat.featureEdges().size();
+    const triSurface& surf = sFeat.surface();
+    const labelList& featureEdges = sFeat.featureEdges();
+    const labelList& featurePoints = sFeat.featurePoints();
 
-    DynamicList<point> tmpPts;
-    edgeList eds(nFeatEds);
-    DynamicList<vector> norms;
-    vectorField edgeDirections(nFeatEds);
-    labelListList edgeNormals(nFeatEds);
-    DynamicList<label> regionEdges;
+    // Get a labelList of all the featureEdges that are region edges
+    const labelList regionFeatureEdges(identity(sFeat.nRegionEdges()));
 
-    // Mapping between old and new indices, there is entry in the map for each
-    // of sFeatLocalPts, -1 means that this point hasn't been used (yet), >= 0
-    // corresponds to the index
-    labelList pointMap(sFeatLocalPts.size(), -1);
-
-    // Noting when the normal of a face has been used so not to duplicate
-    labelList faceMap(surf.size(), -1);
-
-    // Collecting the status of edge for subsequent sorting
-    List<edgeStatus> edStatus(nFeatEds, NONE);
-
-    forAll(sFeat.featurePoints(), i)
-    {
-        label sFPI = sFeat.featurePoints()[i];
-
-        tmpPts.append(sFeatLocalPts[sFPI]);
-
-        pointMap[sFPI] = tmpPts.size() - 1;
-    }
-
-    // All feature points have been added
-    nonFeatureStart_ = tmpPts.size();
-
-    forAll(sFeat.featureEdges(), i)
-    {
-        label sFEI = sFeat.featureEdges()[i];
-
-        const edge& fE(sFeatEds[sFEI]);
-
-        // Check to see if the points have been already used
-        if (pointMap[fE.start()] == -1)
-        {
-             tmpPts.append(sFeatLocalPts[fE.start()]);
-
-             pointMap[fE.start()] = tmpPts.size() - 1;
-        }
-
-        eds[i].start() = pointMap[fE.start()];
-
-        if (pointMap[fE.end()] == -1)
-        {
-            tmpPts.append(sFeatLocalPts[fE.end()]);
-
-            pointMap[fE.end()] = tmpPts.size() - 1;
-        }
-
-        eds[i].end() = pointMap[fE.end()];
-
-        // Pick up the faces adjacent to the feature edge
-        const labelList& eFaces = surf.edgeFaces()[sFEI];
-
-        edgeNormals[i].setSize(eFaces.size());
-
-        forAll(eFaces, j)
-        {
-            label eFI = eFaces[j];
-
-            // Check to see if the points have been already used
-            if (faceMap[eFI] == -1)
-            {
-                norms.append(surf.faceNormals()[eFI]);
-
-                faceMap[eFI] = norms.size() - 1;
-            }
-
-            edgeNormals[i][j] = faceMap[eFI];
-        }
-
-        vector fC0tofC1(vector::zero);
-
-        if (eFaces.size() == 2)
-        {
-            fC0tofC1 =
-                surf[eFaces[1]].centre(surf.points())
-              - surf[eFaces[0]].centre(surf.points());
-        }
-
-        edStatus[i] = classifyEdge(norms, edgeNormals[i], fC0tofC1);
-
-        edgeDirections[i] = fE.vec(sFeatLocalPts);
-
-        if (i < sFeat.nRegionEdges())
-        {
-            regionEdges.append(i);
-        }
-    }
-
-    // Reorder the edges by classification
-
-    List<DynamicList<label> > allEds(nEdgeTypes);
-
-    DynamicList<label>& externalEds(allEds[0]);
-    DynamicList<label>& internalEds(allEds[1]);
-    DynamicList<label>& flatEds(allEds[2]);
-    DynamicList<label>& openEds(allEds[3]);
-    DynamicList<label>& multipleEds(allEds[4]);
-
-    forAll(eds, i)
-    {
-        edgeStatus eStat = edStatus[i];
-
-        if (eStat == EXTERNAL)
-        {
-            externalEds.append(i);
-        }
-        else if (eStat == INTERNAL)
-        {
-            internalEds.append(i);
-        }
-        else if (eStat == FLAT)
-        {
-            flatEds.append(i);
-        }
-        else if (eStat == OPEN)
-        {
-            openEds.append(i);
-        }
-        else if (eStat == MULTIPLE)
-        {
-            multipleEds.append(i);
-        }
-        else if (eStat == NONE)
-        {
-            FatalErrorIn
-            (
-                "Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh"
-                "("
-                "    const surfaceFeatures& sFeat,"
-                "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName"
-                ")"
-            )
-                << nl << "classifyEdge returned NONE on edge "
-                << eds[i]
-                << ". There is a problem with definition of this edge."
-                << nl << abort(FatalError);
-        }
-    }
-
-    internalStart_ = externalEds.size();
-    flatStart_ = internalStart_ + internalEds.size();
-    openStart_ = flatStart_ + flatEds.size();
-    multipleStart_ = openStart_ + openEds.size();
-
-    labelList edMap
+    sortPointsAndEdges
     (
-        ListListOps::combine<labelList>
-        (
-            allEds,
-            accessOp<labelList>()
-        )
+        surf,
+        featureEdges,
+        regionFeatureEdges,
+        featurePoints
     );
+}
 
-    edMap = invert(edMap.size(), edMap);
 
-    inplaceReorder(edMap, eds);
-    inplaceReorder(edMap, edStatus);
-    inplaceReorder(edMap, edgeDirections);
-    inplaceReorder(edMap, edgeNormals);
-    inplaceRenumber(edMap, regionEdges);
-
-    pointField pts(tmpPts);
-
-    // Initialise the edgeMesh
-    edgeMesh::operator=(edgeMesh(pts, eds));
-
-    // Initialise sorted edge related data
-    edgeDirections_ = edgeDirections/mag(edgeDirections);
-    edgeNormals_ = edgeNormals;
-    regionEdges_ = regionEdges;
-
-    // Normals are all now found and indirectly addressed, can also be stored
-    normals_ = vectorField(norms);
-
-    // Reorder the feature points by classification
-
-    List<DynamicList<label> > allPts(3);
-
-    DynamicList<label>& convexPts(allPts[0]);
-    DynamicList<label>& concavePts(allPts[1]);
-    DynamicList<label>& mixedPts(allPts[2]);
-
-    for (label i = 0; i < nonFeatureStart_; i++)
-    {
-        pointStatus ptStatus = classifyFeaturePoint(i);
-
-        if (ptStatus == CONVEX)
-        {
-            convexPts.append(i);
-        }
-        else if (ptStatus == CONCAVE)
-        {
-            concavePts.append(i);
-        }
-        else if (ptStatus == MIXED)
-        {
-            mixedPts.append(i);
-        }
-        else if (ptStatus == NONFEATURE)
-        {
-            FatalErrorIn
-            (
-                "Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh"
-                "("
-                "    const surfaceFeatures& sFeat,"
-                "    const objectRegistry& obr,"
-                "    const fileName& sFeatFileName"
-                ")"
-            )
-                << nl << "classifyFeaturePoint returned NONFEATURE on point at "
-                << points()[i]
-                << ". There is a problem with definition of this feature point."
-                << nl << abort(FatalError);
-        }
-    }
-
-    concaveStart_ = convexPts.size();
-    mixedStart_ = concaveStart_ + concavePts.size();
-
-    labelList ftPtMap
+Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
+(
+    const IOobject& io,
+    const PrimitivePatch<face, List, pointField, point>& surf,
+    const labelList& featureEdges,
+    const labelList& regionFeatureEdges,
+    const labelList& featurePoints
+)
+:
+    regIOobject(io),
+    edgeMesh(pointField(0), edgeList(0)),
+    concaveStart_(-1),
+    mixedStart_(-1),
+    nonFeatureStart_(-1),
+    internalStart_(-1),
+    flatStart_(-1),
+    openStart_(-1),
+    multipleStart_(-1),
+    normals_(0),
+    edgeDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    regionEdges_(0),
+    pointTree_(),
+    edgeTree_(),
+    edgeTreesByType_()
+{
+    sortPointsAndEdges
     (
-        ListListOps::combine<labelList>
-        (
-            allPts,
-            accessOp<labelList>()
-        )
+        surf,
+        featureEdges,
+        regionFeatureEdges,
+        featurePoints
     );
-
-    ftPtMap = invert(ftPtMap.size(), ftPtMap);
-
-    // Creating the ptMap from the ftPtMap with identity values up to the size
-    // of pts to create an oldToNew map for inplaceReorder
-
-    labelList ptMap(identity(pts.size()));
-
-    forAll(ftPtMap, i)
-    {
-        ptMap[i] = ftPtMap[i];
-    }
-
-    inplaceReorder(ptMap, pts);
-
-    forAll(eds, i)
-    {
-        inplaceRenumber(ptMap, eds[i]);
-    }
-
-    // Reinitialise the edgeMesh with sorted feature points and
-    // renumbered edges
-    edgeMesh::operator=(edgeMesh(pts, eds));
-
-    // Generate the featurePointNormals
-
-    labelListList featurePointNormals(nonFeatureStart_);
-
-    for (label i = 0; i < nonFeatureStart_; i++)
-    {
-        DynamicList<label> tmpFtPtNorms;
-
-        const labelList& ptEds = pointEdges()[i];
-
-        forAll(ptEds, j)
-        {
-            const labelList& ptEdNorms(edgeNormals[ptEds[j]]);
-
-            forAll(ptEdNorms, k)
-            {
-                if (findIndex(tmpFtPtNorms, ptEdNorms[k]) == -1)
-                {
-                    bool addNormal = true;
-
-                    // Check that the normal direction is unique at this feature
-                    forAll(tmpFtPtNorms, q)
-                    {
-                        if
-                        (
-                            (normals_[ptEdNorms[k]] & normals_[tmpFtPtNorms[q]])
-                          > cosNormalAngleTol_
-                        )
-                        {
-                            // Parallel to an existing normal, do not add
-                            addNormal = false;
-
-                            break;
-                        }
-                    }
-
-                    if (addNormal)
-                    {
-                        tmpFtPtNorms.append(ptEdNorms[k]);
-                    }
-                }
-            }
-        }
-
-        featurePointNormals[i] = tmpFtPtNorms;
-    }
-
-    featurePointNormals_ = featurePointNormals;
-
-
-    // Create featurePointEdges_
-    // For each feature point, stores a list of edges which are arranged in
-    // order according to their connectivity
-
-//    featurePointEdges_.setSize(nonFeatureStart_);
-//
-//    Info<< sFeatEds.size() << " " << surf.pointEdges().size() << " "
-//        << edges().size() << endl;
-//
-//    forAll(sFeatEds, eI)
-//    {
-//        Info<< "Edge " << eI << " " << sFeatEds[eI] << " "
-//            << edges()[eI] << endl;
-//    }
-//
-//    const edgeList& edges = eds;
-//
-//    for (label i = 0; i < nonFeatureStart_; i++)
-//    {
-//        const labelList& ptEds = surf.pointEdges()[i];
-//
-//        DynamicList<label> tmpFtEdges;
-//
-//        forAll(ptEds, eI)
-//        {
-//            const label edgeI = ptEds[eI];
-//            const edge& e = sFeatEds[edgeI];
-//
-//            Info<< "Edges: " << edgeI << " " << e << endl;
-//
-//            forAll(sFeatEds, fEdgeI)
-//            {
-//                if (edges[fEdgeI] == e)
-//                {
-//                    tmpFtEdges.append(fEdgeI);
-//                }
-//            }
-//        }
-//
-//        featurePointEdges_[i] = tmpFtEdges;
-//    }
 }
 
 
@@ -1227,7 +922,7 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
         labelList& en = newEdgeNormals[mapI];
         forAll(en, j)
         {
-            en[j] += edgeNormals().size();
+            en[j] += normals().size();
         }
     }
 
@@ -1256,7 +951,7 @@ void Foam::extendedFeatureEdgeMesh::add(const extendedFeatureEdgeMesh& fem)
         labelList& fn = newFeaturePointNormals[mapI];
         forAll(fn, j)
         {
-            fn[j] += featurePointNormals().size();
+            fn[j] += normals().size();
         }
     }
 
