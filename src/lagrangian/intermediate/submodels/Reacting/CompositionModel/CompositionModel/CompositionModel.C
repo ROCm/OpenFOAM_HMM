@@ -396,7 +396,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HMixture += Y[i]*thermo_.carrier().Hs(gid, T);
+                HMixture += Y[i]*thermo_.carrier().Hs(gid, p, T);
             }
             break;
         }
@@ -460,7 +460,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Hs
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HsMixture += Y[i]*thermo_.carrier().Hs(gid, T);
+                HsMixture += Y[i]*thermo_.carrier().Hs(gid, p, T);
             }
             break;
         }
@@ -584,7 +584,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::Cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                CpMixture += Y[i]*thermo_.carrier().Cp(gid, T);
+                CpMixture += Y[i]*thermo_.carrier().Cp(gid, p, T);
             }
             break;
         }

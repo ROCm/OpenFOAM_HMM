@@ -208,7 +208,6 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
     if (baffleActivated_)
     {
-
         const fvPatch& nbrPatch =
             patch().boundaryMesh()[mpp.samplePolyPatch().index()];
 
@@ -230,9 +229,11 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         const scalarField& Tp =
             patch().template lookupPatchField<volScalarField, scalar>(TName_);
 
+        const scalarField& pp = model.thermo().p().boundaryField()[patchI];
+
         tmp<scalarField> Ti = patchInternalField();
 
-        const scalarField Cpw(model.thermo().Cp(Ti, patchI));
+        const scalarField Cpw(model.thermo().Cp(pp, Ti, patchI));
 
         scalarField myh(patch().deltaCoeffs()*alphaw*Cpw);
 
@@ -246,6 +247,9 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
         const fvPatchScalarField& nbrHw =
             model.thermo().he().boundaryField()[nbrPatchI];
+
+        const scalarField& nbrHwPp =
+            model.thermo().p().boundaryField()[nbrPatchI];
 
         scalarField nbrQDot
         (
@@ -271,7 +275,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
         const scalarField nbrCpw
         (
-            model.thermo().Cp(nbrField.patchInternalField(), nbrPatchI)
+            model.thermo().Cp(nbrHwPp, nbrField.patchInternalField(), nbrPatchI)
         );
 
         scalarField nbrh

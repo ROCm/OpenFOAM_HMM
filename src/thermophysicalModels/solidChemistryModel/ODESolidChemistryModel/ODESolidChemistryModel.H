@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -220,6 +220,7 @@ public:
             //- Return sensible enthalpy for gas i [J/Kg]
             virtual tmp<volScalarField> gasHs
             (
+                const volScalarField& p,
                 const volScalarField& T,
                 const label i
             ) const;

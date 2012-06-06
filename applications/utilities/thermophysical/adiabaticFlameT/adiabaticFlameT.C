@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
+    scalar P(readScalar(control.lookup("P")));
     scalar T0(readScalar(control.lookup("T0")));
     const word fuelName(control.lookup("fuel"));
     scalar n(readScalar(control.lookup("n")));
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
 
         Info<< "products " << (1/products.nMoles())*products << ';' << endl;
 
-        scalar Tad = products.THa(reactants.Ha(T0), 1000.0);
+        scalar Tad = products.THa(reactants.Ha(P, T0), P, 1000.0);
         Info<< "Tad = " << Tad << nl << endl;
     }
 

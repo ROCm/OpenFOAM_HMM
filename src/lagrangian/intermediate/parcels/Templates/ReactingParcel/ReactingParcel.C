@@ -104,7 +104,12 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
     forAll(td.cloud().rhoTrans(), i)
     {
         scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-        CpEff += Y*td.cloud().composition().carrier().Cp(i, this->Tc_);
+        CpEff += Y*td.cloud().composition().carrier().Cp
+        (
+            i,
+            this->pc_,
+            this->Tc_
+        );
     }
 
     const scalar Cpc = td.CpInterp().psi()[cellI];
@@ -206,9 +211,9 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         const scalar cbrtW = cbrt(W);
 
         rhos += Xs[i]*W;
-        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, T);
-        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, T);
-        Cps += Xs[i]*thermo.carrier().Cp(i, T);
+        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, pc_, T);
+        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, pc_, T);
+        Cps += Xs[i]*thermo.carrier().Cp(i, pc_, T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -378,7 +383,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             {
                 scalar dmi = dm*Y_[i];
                 label gid = composition.localToGlobalCarrierId(0, i);
-                scalar hs = composition.carrier().Hs(gid, T0);
+                scalar hs = composition.carrier().Hs(gid, pc_, T0);
 
                 td.cloud().rhoTrans(gid)[cellI] += dmi;
                 td.cloud().hsTrans()[cellI] += dmi*hs;
@@ -439,7 +444,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         {
             scalar dm = np0*dMass[i];
             label gid = composition.localToGlobalCarrierId(0, i);
-            scalar hs = composition.carrier().Hs(gid, T0);
+            scalar hs = composition.carrier().Hs(gid, pc_, T0);
 
             td.cloud().rhoTrans(gid)[cellI] += dm;
             td.cloud().UTrans()[cellI] += dm*U0;
@@ -543,7 +548,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
             const label idc = composition.localToGlobalCarrierId(idPhase, i);
             const label idl = composition.globalIds(idPhase)[i];
 
-            const scalar Cp = composition.carrier().Cp(idc, Ts);
+            const scalar Cp = composition.carrier().Cp(idc, pc_, Ts);
             const scalar W = composition.carrier().W(idc);
             const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
 

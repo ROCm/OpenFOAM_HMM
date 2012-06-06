@@ -65,35 +65,59 @@ public:
             }
 
             //- Sensible Internal energy [J/kmol]
-            scalar he(const Thermo& thermo, const scalar T) const
+            scalar he
+            (
+                const Thermo& thermo,
+                const scalar p,
+                const scalar T) const
             {
-                return thermo.es(T);
+                return thermo.es(p, T);
             }
 
             //- Heat capacity at constant volume [J/(kmol K)]
-            scalar cpv(const Thermo& thermo, const scalar T) const
+            scalar cpv
+            (
+                const Thermo& thermo,
+                const scalar p,
+                const scalar T
+            ) const
             {
-                return thermo.cv(T);
+                return thermo.cv(p, T);
             }
 
             //- cp/cv []
-            scalar cpBycpv(const Thermo& thermo, const scalar T) const
+            scalar cpBycpv
+            (
+                const Thermo& thermo,
+                const scalar p,
+                const scalar T
+            ) const
             {
-                return thermo.gamma(T);
+                return thermo.gamma(p, T);
             }
 
             //- Sensible enthalpy [J/kg]
-            scalar HE(const Thermo& thermo, const scalar T) const
+            scalar HE
+            (
+                const Thermo& thermo,
+                const scalar p,
+                const scalar T
+            ) const
             {
-                return thermo.Es(T);
+                return thermo.Es(p, T);
             }
 
             //- Temperature from sensible internal energy
             //  given an initial temperature T0
-            scalar THE(const Thermo& thermo, const scalar e, const scalar T0)
-            const
+            scalar THE
+            (
+                const Thermo& thermo,
+                const scalar e,
+                const scalar p,
+                const scalar T0
+            ) const
             {
-                return thermo.TEs(e, T0);
+                return thermo.TEs(e, p, T0);
             }
 };
 

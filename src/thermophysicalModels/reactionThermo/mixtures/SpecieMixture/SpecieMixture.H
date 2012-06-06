@@ -22,114 +22,63 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::basicMultiComponentMixture
+    Foam::SpecieMixture
 
 Description
-    Multi-component mixture. Provides a list of mass fraction fields and helper
-    functions to query mixture composition.
+    Foam::SpecieMixture
 
 SourceFiles
-    basicMultiComponentMixture.C
+    SpecieMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicMultiComponentMixture_H
-#define basicMultiComponentMixture_H
+#ifndef SpecieMixture_H
+#define SpecieMixture_H
 
-#include "volFields.H"
-#include "PtrList.H"
-#include "speciesTable.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+class dictionary;
+class fvMesh;
+
+
 /*---------------------------------------------------------------------------*\
-                 Class basicMultiComponentMixture Declaration
+                     Class SpecieMixture Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicMultiComponentMixture
+template<class MixtureType>
+class SpecieMixture
+:
+    public MixtureType
 {
 
-protected:
-
-    // Protected data
-
-        //- Table of specie names
-        speciesTable species_;
-
-        //- Species mass fractions
-        PtrList<volScalarField> Y_;
-
-
 public:
-
-    //- The base class of the mixture
-    typedef basicMultiComponentMixture basicMixtureType;
-
 
     // Constructors
 
         //- Construct from dictionary and mesh
-        basicMultiComponentMixture
-        (
-            const dictionary&,
-            const wordList& specieNames,
-            const fvMesh&
-        );
+        SpecieMixture(const dictionary&, const fvMesh&);
 
 
     //- Destructor
-    virtual ~basicMultiComponentMixture()
+    virtual ~SpecieMixture()
     {}
 
 
     // Member functions
 
-        //- Return the table of species
-        const speciesTable& species() const
-        {
-            return species_;
-        }
-
-        //- Return the mass-fraction fields
-        inline PtrList<volScalarField>& Y();
-
-        //- Return the const mass-fraction fields
-        inline const PtrList<volScalarField>& Y() const;
-
-        //- Return the mass-fraction field for a specie given by index
-        inline volScalarField& Y(const label i);
-
-        //- Return the const mass-fraction field for a specie given by index
-        inline const volScalarField& Y(const label i) const;
-
-        //- Return the mass-fraction field for a specie given by name
-        inline volScalarField& Y(const word& specieName);
-
-        //- Return the const mass-fraction field for a specie given by name
-        inline const volScalarField& Y(const word& specieName) const;
-
-        //- Does the mixture include this specie?
-        inline bool contains(const word& specieName) const;
-
-        inline scalar fres(const scalar ft, const scalar stoicRatio) const;
-
-        inline tmp<volScalarField> fres
-        (
-            const volScalarField& ft,
-            const dimensionedScalar& stoicRatio
-        ) const;
-
-
         // Per specie properties
 
             //- Number of moles []
-            virtual scalar nMoles(const label specieI) const = 0;
+            virtual scalar nMoles(const label speciei) const;
 
             //- Molecular weight [kg/kmol]
-            virtual scalar W(const label specieI) const = 0;
+            virtual scalar W(const label speciei) const;
 
 
         // Per specie thermo properties
@@ -137,69 +86,69 @@ public:
             //- Heat capacity at constant pressure [J/(kg K)]
             virtual scalar Cp
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Heat capacity at constant volume [J/(kg K)]
             virtual scalar Cv
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Absolute enthalpy [J/kg]
             virtual scalar Ha
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Sensible enthalpy [J/kg]
             virtual scalar Hs
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Chemical enthalpy [J/kg]
-            virtual scalar Hc(const label specieI) const = 0;
+            virtual scalar Hc(const label speciei) const;
 
             //- Entropy [J/(kg K)]
             virtual scalar S
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Sensible internal energy [J/kg]
             virtual scalar Es
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Gibbs free energy [J/kg]
             virtual scalar G
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Helmholtz free energy [J/kg]
             virtual scalar A
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
 
         // Per specie transport properties
@@ -207,26 +156,26 @@ public:
             //- Dynamic viscosity [kg/m/s]
             virtual scalar mu
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Thermal conductivity [W/m/K]
             virtual scalar kappa
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 
             //- Thermal diffusivity of enthalpy [kg/m/s]
             virtual scalar alphah
             (
-                const label specieI,
+                const label speciei,
                 const scalar p,
                 const scalar T
-            ) const = 0;
+            ) const;
 };
 
 
@@ -234,9 +183,11 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-#include "basicMultiComponentMixtureI.H"
+#ifdef NoRepository
+#   include "SpecieMixture.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

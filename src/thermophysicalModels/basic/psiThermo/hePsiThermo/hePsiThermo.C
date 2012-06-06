@@ -43,11 +43,17 @@ void Foam::hePsiThermo<MixtureType>::calculate()
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE(hCells[celli], TCells[celli]);
+        TCells[celli] = mixture_.THE
+        (
+            hCells[celli],
+            pCells[celli],
+            TCells[celli]
+        );
+
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        muCells[celli] = mixture_.mu(TCells[celli]);
-        alphaCells[celli] = mixture_.alphah(TCells[celli]);
+        muCells[celli] = mixture_.mu(pCells[celli], TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
     }
 
     forAll(this->T_.boundaryField(), patchi)
@@ -68,11 +74,11 @@ void Foam::hePsiThermo<MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                ph[facei] = mixture_.HE(pT[facei]);
+                ph[facei] = mixture_.HE(pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                pmu[facei] = mixture_.mu(pT[facei]);
-                palpha[facei] = mixture_.alphah(pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
             }
         }
         else
@@ -82,11 +88,11 @@ void Foam::hePsiThermo<MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(ph[facei], pT[facei]);
+                pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                pmu[facei] = mixture_.mu(pT[facei]);
-                palpha[facei] = mixture_.alphah(pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
             }
         }
     }

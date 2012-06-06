@@ -50,9 +50,8 @@ typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     Info<< nl << "Reading Burcat data IOdictionary" << endl;
 
@@ -71,6 +70,7 @@ int main(int argc, char *argv[])
 
 
 
+    scalar P = 1e5;
     scalar T = 3000.0;
 
     SLPtrList<thermo> EQreactions;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
     forAllConstIter(SLPtrList<thermo>, EQreactions, iter)
     {
-        Info<< "Kc(EQreactions) = " << iter().Kc(T) << endl;
+        Info<< "Kc(EQreactions) = " << iter().Kc(P, T) << endl;
     }
 
     Info<< nl << "end" << endl;
@@ -131,4 +131,3 @@ int main(int argc, char *argv[])
 
 
 // ************************************************************************* //
-

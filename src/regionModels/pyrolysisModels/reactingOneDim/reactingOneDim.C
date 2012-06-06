@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -146,7 +146,8 @@ void reactingOneDim::updatePhiGas()
 
     forAll(gasTable, gasI)
     {
-        tmp<volScalarField> tHsiGas = solidChemistry_->gasHs(T_, gasI);
+        tmp<volScalarField> tHsiGas =
+            solidChemistry_->gasHs(p, T_, gasI);
         tmp<volScalarField> tRRiGas = solidChemistry_->RRg(gasI);
 
         const volScalarField& HsiGas = tHsiGas();

@@ -47,14 +47,24 @@ void Foam::heheuReactionThermo<MixtureType>::calculate()
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE(hCells[celli], TCells[celli]);
+        TCells[celli] = mixture_.THE
+        (
+            hCells[celli],
+            pCells[celli],
+            TCells[celli]
+        );
+
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        muCells[celli] = mixture_.mu(TCells[celli]);
-        alphaCells[celli] = mixture_.alphah(TCells[celli]);
+        muCells[celli] = mixture_.mu(pCells[celli], TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
 
-        TuCells[celli] =
-            this->cellReactants(celli).THE(heuCells[celli], TuCells[celli]);
+        TuCells[celli] = this->cellReactants(celli).THE
+        (
+            heuCells[celli],
+            pCells[celli],
+            TuCells[celli]
+        );
     }
 
     forAll(this->T_.boundaryField(), patchi)
@@ -77,11 +87,11 @@ void Foam::heheuReactionThermo<MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                ph[facei] = mixture_.HE(pT[facei]);
+                ph[facei] = mixture_.HE(pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alphah(pT[facei]);
+                pmu_[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha_[facei] = mixture_.alphah(pp[facei], pT[facei]);
             }
         }
         else
@@ -91,15 +101,15 @@ void Foam::heheuReactionThermo<MixtureType>::calculate()
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(ph[facei], pT[facei]);
+                pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alphah(pT[facei]);
+                pmu_[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha_[facei] = mixture_.alphah(pp[facei], pT[facei]);
 
                 pTu[facei] =
                     this->patchFaceReactants(patchi, facei)
-                   .THE(pheu[facei], pTu[facei]);
+                   .THE(pheu[facei], pp[facei], pTu[facei]);
             }
         }
     }
@@ -141,22 +151,31 @@ Foam::heheuReactionThermo<MixtureType>::heheuReactionThermo(const fvMesh& mesh)
     )
 {
     scalarField& heuCells = this->heu_.internalField();
+    const scalarField& pCells = this->p_.internalField();
     const scalarField& TuCells = this->Tu_.internalField();
 
     forAll(heuCells, celli)
     {
-        heuCells[celli] = this->cellReactants(celli).HE(TuCells[celli]);
+        heuCells[celli] = this->cellReactants(celli).HE
+        (
+            pCells[celli],
+            TuCells[celli]
+        );
     }
 
     forAll(this->heu_.boundaryField(), patchi)
     {
         fvPatchScalarField& pheu = this->heu_.boundaryField()[patchi];
+        const fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
         const fvPatchScalarField& pTu = this->Tu_.boundaryField()[patchi];
 
         forAll(pheu, facei)
         {
-            pheu[facei] =
-                this->patchFaceReactants(patchi, facei).HE(pTu[facei]);
+            pheu[facei] = this->patchFaceReactants(patchi, facei).HE
+            (
+                pp[facei],
+                pTu[facei]
+            );
         }
     }
 
@@ -200,6 +219,7 @@ template<class MixtureType>
 Foam::tmp<Foam::scalarField>
 Foam::heheuReactionThermo<MixtureType>::heu
 (
+    const scalarField& p,
     const scalarField& Tu,
     const labelList& cells
 ) const
@@ -209,7 +229,7 @@ Foam::heheuReactionThermo<MixtureType>::heu
 
     forAll(Tu, celli)
     {
-        heu[celli] = this->cellReactants(cells[celli]).HE(Tu[celli]);
+        heu[celli] = this->cellReactants(cells[celli]).HE(p[celli], Tu[celli]);
     }
 
     return theu;
@@ -220,6 +240,7 @@ template<class MixtureType>
 Foam::tmp<Foam::scalarField>
 Foam::heheuReactionThermo<MixtureType>::heu
 (
+    const scalarField& p,
     const scalarField& Tu,
     const label patchi
 ) const
@@ -229,7 +250,8 @@ Foam::heheuReactionThermo<MixtureType>::heu
 
     forAll(Tu, facei)
     {
-        heu[facei] = this->patchFaceReactants(patchi, facei).HE(Tu[facei]);
+        heu[facei] =
+            this->patchFaceReactants(patchi, facei).HE(p[facei], Tu[facei]);
     }
 
     return theu;
@@ -258,13 +280,18 @@ Foam::heheuReactionThermo<MixtureType>::Tb() const
 
     volScalarField& Tb_ = tTb();
     scalarField& TbCells = Tb_.internalField();
+    const scalarField& pCells = this->p_.internalField();
     const scalarField& TCells = this->T_.internalField();
     const scalarField& hCells = this->he_.internalField();
 
     forAll(TbCells, celli)
     {
-        TbCells[celli] =
-            this->cellProducts(celli).THE(hCells[celli], TCells[celli]);
+        TbCells[celli] = this->cellProducts(celli).THE
+        (
+            hCells[celli],
+            pCells[celli],
+            TCells[celli]
+        );
     }
 
     forAll(Tb_.boundaryField(), patchi)
@@ -272,13 +299,14 @@ Foam::heheuReactionThermo<MixtureType>::Tb() const
         fvPatchScalarField& pTb = Tb_.boundaryField()[patchi];
 
         const fvPatchScalarField& ph = this->he_.boundaryField()[patchi];
+        const fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
         const fvPatchScalarField& pT = this->T_.boundaryField()[patchi];
 
         forAll(pTb, facei)
         {
             pTb[facei] =
                 this->patchFaceProducts(patchi, facei)
-               .THE(ph[facei], pT[facei]);
+               .THE(ph[facei], pp[facei], pT[facei]);
         }
     }
 
@@ -412,22 +440,31 @@ Foam::heheuReactionThermo<MixtureType>::muu() const
 
     volScalarField& muu_ = tmuu();
     scalarField& muuCells = muu_.internalField();
+    const scalarField& pCells = this->p_.internalField();
     const scalarField& TuCells = this->Tu_.internalField();
 
     forAll(muuCells, celli)
     {
-        muuCells[celli] = this->cellReactants(celli).mu(TuCells[celli]);
+        muuCells[celli] = this->cellReactants(celli).mu
+        (
+            pCells[celli],
+            TuCells[celli]
+        );
     }
 
     forAll(muu_.boundaryField(), patchi)
     {
         fvPatchScalarField& pMuu = muu_.boundaryField()[patchi];
+        const fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
         const fvPatchScalarField& pTu = this->Tu_.boundaryField()[patchi];
 
         forAll(pMuu, facei)
         {
-            pMuu[facei] =
-                this->patchFaceReactants(patchi, facei).mu(pTu[facei]);
+            pMuu[facei] = this->patchFaceReactants(patchi, facei).mu
+            (
+                pp[facei],
+                pTu[facei]
+            );
         }
     }
 
@@ -459,22 +496,31 @@ Foam::heheuReactionThermo<MixtureType>::mub() const
     volScalarField& mub_ = tmub();
     scalarField& mubCells = mub_.internalField();
     const volScalarField Tb_(Tb());
+    const scalarField& pCells = this->p_.internalField();
     const scalarField& TbCells = Tb_.internalField();
 
     forAll(mubCells, celli)
     {
-        mubCells[celli] = this->cellProducts(celli).mu(TbCells[celli]);
+        mubCells[celli] = this->cellProducts(celli).mu
+        (
+            pCells[celli],
+            TbCells[celli]
+        );
     }
 
     forAll(mub_.boundaryField(), patchi)
     {
         fvPatchScalarField& pMub = mub_.boundaryField()[patchi];
+        const fvPatchScalarField& pp = this->p_.boundaryField()[patchi];
         const fvPatchScalarField& pTb = Tb_.boundaryField()[patchi];
 
         forAll(pMub, facei)
         {
-            pMub[facei] =
-                this->patchFaceProducts(patchi, facei).mu(pTb[facei]);
+            pMub[facei] = this->patchFaceProducts(patchi, facei).mu
+            (
+                pp[facei],
+                pTb[facei]
+            );
         }
     }
 

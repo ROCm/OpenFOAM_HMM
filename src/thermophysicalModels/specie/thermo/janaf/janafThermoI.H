@@ -159,6 +159,7 @@ Foam::janafThermo<EquationOfState>::lowCpCoeffs() const
 template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::cp
 (
+    const scalar p,
     const scalar T
 ) const
 {
@@ -170,6 +171,7 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::cp
 template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::ha
 (
+    const scalar p,
     const scalar T
 ) const
 {
@@ -185,10 +187,11 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::ha
 template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::hs
 (
+    const scalar p,
     const scalar T
 ) const
 {
-    return ha(T) - hc();
+    return ha(p, T) - hc();
 }
 
 
@@ -210,6 +213,7 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::hc() const
 template<class EquationOfState>
 inline Foam::scalar Foam::janafThermo<EquationOfState>::s
 (
+    const scalar p,
     const scalar T
 ) const
 {

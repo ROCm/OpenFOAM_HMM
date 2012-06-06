@@ -87,7 +87,7 @@
     forAll(Y, i)
     {
         Y[i] = Y0[i];
-        hs0 += Y0[i]*specieData[i].Hs(T0);
+        hs0 += Y0[i]*specieData[i].Hs(p[i], T0);
     }
 
     hs = dimensionedScalar("h", dimEnergy/dimMass, hs0);

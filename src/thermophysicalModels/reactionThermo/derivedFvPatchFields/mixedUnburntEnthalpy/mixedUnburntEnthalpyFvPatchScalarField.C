@@ -108,6 +108,7 @@ void Foam::mixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
+    const scalarField& pw = thermo.p().boundaryField()[patchi];
     mixedFvPatchScalarField& Tw = refCast<mixedFvPatchScalarField>
     (
         const_cast<fvPatchScalarField&>(thermo.Tu().boundaryField()[patchi])
@@ -116,12 +117,12 @@ void Foam::mixedUnburntEnthalpyFvPatchScalarField::updateCoeffs()
     Tw.evaluate();
 
     valueFraction() = Tw.valueFraction();
-    refValue() = thermo.heu(Tw.refValue(), patchi);
-    refGrad() = thermo.Cp(Tw, patchi)*Tw.refGrad()
+    refValue() = thermo.heu(pw, Tw.refValue(), patchi);
+    refGrad() = thermo.Cp(pw, Tw, patchi)*Tw.refGrad()
       + patch().deltaCoeffs()*
         (
-            thermo.heu(Tw, patchi)
-          - thermo.heu(Tw, patch().faceCells())
+            thermo.heu(pw, Tw, patchi)
+          - thermo.heu(pw, Tw, patch().faceCells())
         );
 
     mixedFvPatchScalarField::updateCoeffs();

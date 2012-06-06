@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -424,7 +424,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             scalar dm = np0*dMassGas[i];
             label gid = composition.localToGlobalCarrierId(GAS, i);
-            scalar hs = composition.carrier().Hs(gid, T0);
+            scalar hs = composition.carrier().Hs(gid, pc, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
             td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
@@ -433,7 +433,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             scalar dm = np0*dMassLiquid[i];
             label gid = composition.localToGlobalCarrierId(LIQ, i);
-            scalar hs = composition.carrier().Hs(gid, T0);
+            scalar hs = composition.carrier().Hs(gid, pc, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
             td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
@@ -444,7 +444,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         {
             scalar dm = np0*dMassSolid[i];
             label gid = composition.localToGlobalCarrierId(SLD, i);
-            scalar hs = composition.carrier().Hs(gid, T0);
+            scalar hs = composition.carrier().Hs(gid, pc, T0);
             td.cloud().rhoTrans(gid)[cellI] += dm;
             td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
@@ -453,7 +453,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         forAll(dMassSRCarrier, i)
         {
             scalar dm = np0*dMassSRCarrier[i];
-            scalar hs = composition.carrier().Hs(i, T0);
+            scalar hs = composition.carrier().Hs(i, pc, T0);
             td.cloud().rhoTrans(i)[cellI] += dm;
             td.cloud().UTrans()[cellI] += dm*U0;
             td.cloud().hsTrans()[cellI] += dm*hs;
@@ -541,7 +541,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         forAll(dMassDV, i)
         {
             const label id = composition.localToGlobalCarrierId(GAS, i);
-            const scalar Cp = composition.carrier().Cp(id, Ts);
+            const scalar Cp = composition.carrier().Cp(id, this->pc_, Ts);
             const scalar W = composition.carrier().W(id);
             const scalar Ni = dMassDV[i]/(this->areaS(d)*dt*W);
 

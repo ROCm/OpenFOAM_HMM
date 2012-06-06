@@ -83,7 +83,7 @@ void Foam::porousMedia::fixedTemperature::addEnthalpySource
     forAll(zones, zoneI)
     {
         const labelList& cells = mesh.cellZones()[zones[zoneI]];
-        hEqn.setValues(cells, thermo.he(T, cells));
+        hEqn.setValues(cells, thermo.he(thermo.p(), T, cells));
     }
 }
 

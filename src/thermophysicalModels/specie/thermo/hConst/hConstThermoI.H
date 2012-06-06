@@ -102,7 +102,8 @@ inline Foam::scalar Foam::hConstThermo<EquationOfState>::limit
 template<class equationOfState>
 inline Foam::scalar Foam::hConstThermo<equationOfState>::cp
 (
-    const scalar
+    const scalar p,
+    const scalar T
 ) const
 {
     return Cp_*this->W();
@@ -112,7 +113,7 @@ inline Foam::scalar Foam::hConstThermo<equationOfState>::cp
 template<class equationOfState>
 inline Foam::scalar Foam::hConstThermo<equationOfState>::ha
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
     return (Cp_*T + Hf_)*this->W();
@@ -122,7 +123,7 @@ inline Foam::scalar Foam::hConstThermo<equationOfState>::ha
 template<class equationOfState>
 inline Foam::scalar Foam::hConstThermo<equationOfState>::hs
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
     return Cp_*T*this->W();
@@ -139,12 +140,13 @@ inline Foam::scalar Foam::hConstThermo<equationOfState>::hc() const
 template<class equationOfState>
 inline Foam::scalar Foam::hConstThermo<equationOfState>::s
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
     notImplemented
     (
-        "scalar hConstThermo<equationOfState>::s(const scalar T) const"
+        "scalar hConstThermo<equationOfState>::"
+        "s(const scalar p, const scalar T) const"
     );
     return T;
 }

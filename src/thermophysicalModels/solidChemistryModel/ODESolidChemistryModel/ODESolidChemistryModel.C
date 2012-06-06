@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -737,6 +737,7 @@ template<class CompType, class SolidThermo,class GasThermo>
 Foam::tmp<Foam::volScalarField>
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::gasHs
 (
+    const volScalarField& p,
     const volScalarField& T,
     const label index
 ) const
@@ -766,7 +767,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::gasHs
 
     forAll(gasHs, cellI)
     {
-        gasHs[cellI] = mixture.Hs(T[cellI]);
+        gasHs[cellI] = mixture.Hs(p[cellI], T[cellI]);
     }
 
     return tHs;

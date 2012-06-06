@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
                 co = co2*
                     min
                     (
-                        CO2BreakUp.Kn(equilibriumFlameTemperature, P, N)
+                        CO2BreakUp.Kn(P, equilibriumFlameTemperature, N)
                        /::sqrt(max(ores, 0.001)),
                         1.0
                     );
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
                 h2 = h2o*
                     min
                     (
-                        H2OBreakUp.Kn(equilibriumFlameTemperature, P, N)
+                        H2OBreakUp.Kn(P, equilibriumFlameTemperature, N)
                        /::sqrt(max(ores, 0.001)),
                         1.0
                     );
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 
 
             scalar equilibriumFlameTemperatureNew =
-                products.THa(reactants.Ha(T0), adiabaticFlameTemperature);
+                products.THa(reactants.Ha(P, T0), P, adiabaticFlameTemperature);
 
             if (j==0)
             {

@@ -104,6 +104,7 @@ Foam::polynomialTransport<Thermo, PolySize>::New(const dictionary& dict)
 template<class Thermo, int PolySize>
 inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::mu
 (
+    const scalar p,
     const scalar T
 ) const
 {
@@ -114,6 +115,7 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::mu
 template<class Thermo, int PolySize>
 inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
 (
+    const scalar p,
     const scalar T
 ) const
 {
@@ -124,10 +126,10 @@ inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::kappa
 template<class Thermo, int PolySize>
 inline Foam::scalar Foam::polynomialTransport<Thermo, PolySize>::alphah
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
-    return kappa(T)/this->Cp(T);
+    return kappa(p, T)/this->Cp(p, T);
 }
 
 

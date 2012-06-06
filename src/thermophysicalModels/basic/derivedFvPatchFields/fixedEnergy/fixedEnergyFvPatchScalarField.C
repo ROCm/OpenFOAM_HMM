@@ -104,10 +104,11 @@ void Foam::fixedEnergyFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
+    const scalarField& pw = thermo.p().boundaryField()[patchi];
     fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.T().boundaryField()[patchi]);
     Tw.evaluate();
-    operator==(thermo.he(Tw, patchi));
+    operator==(thermo.he(pw, Tw, patchi));
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
