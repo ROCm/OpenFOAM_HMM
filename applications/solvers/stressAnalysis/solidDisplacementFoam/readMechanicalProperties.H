@@ -75,7 +75,7 @@
 
     autoPtr<volScalarField> EPtr;
 
-    IOobject EIO
+    IOobject EHeader
     (
         "E",
         runTime.timeName(0),
@@ -92,7 +92,7 @@
         (
             new volScalarField
             (
-                EIO,
+                EHeader,
                 mesh,
                 dimensionedScalar
                 (
@@ -106,13 +106,13 @@
     }
     else if (EType == "field")
     {
-        EIO.readOpt() = IOobject::MUST_READ;
+        EHeader.readOpt() = IOobject::MUST_READ;
 
         EPtr.reset
         (
             new volScalarField
             (
-                EIO,
+                EHeader,
                 mesh
             )
         );
