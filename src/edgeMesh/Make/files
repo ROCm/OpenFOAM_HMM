@@ -5,8 +5,8 @@ edgeMeshNew.C
 edgeFormats = edgeFormats
 $(edgeFormats)/edgeFormatsCore.C
 
-$(edgeFormats)/emesh/EMESHedgeFormat.C
-$(edgeFormats)/emesh/EMESHedgeFormatRunTime.C
+$(edgeFormats)/edgeMesh/edgeMeshFormat.C
+$(edgeFormats)/edgeMesh/edgeMeshFormatRunTime.C
 
 $(edgeFormats)/nas/NASedgeFormat.C
 $(edgeFormats)/nas/NASedgeFormatRunTime.C

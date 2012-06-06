@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "EMESHedgeFormat.H"
+#include "edgeMeshFormat.H"
 #include "IOobject.H"
 #include "IFstream.H"
 #include "clock.H"
@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileFormats::EMESHedgeFormat::EMESHedgeFormat
+Foam::fileFormats::edgeMeshFormat::edgeMeshFormat
 (
     const fileName& filename
 )
@@ -43,7 +43,7 @@ Foam::fileFormats::EMESHedgeFormat::EMESHedgeFormat
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::fileFormats::EMESHedgeFormat::read
+bool Foam::fileFormats::edgeMeshFormat::read
 (
     const fileName& filename
 )
@@ -77,7 +77,7 @@ bool Foam::fileFormats::EMESHedgeFormat::read
 
     if (!io.headerOk())
     {
-        FatalErrorIn("fileFormats::EMESHedgeFormat::read(const fileName&)")
+        FatalErrorIn("fileFormats::edgeMeshFormat::read(const fileName&)")
             << "Cannot read file " << filename
             << exit(FatalError);
     }
@@ -100,7 +100,7 @@ bool Foam::fileFormats::EMESHedgeFormat::read
 }
 
 
-bool Foam::fileFormats::EMESHedgeFormat::read
+bool Foam::fileFormats::edgeMeshFormat::read
 (
     Istream& is,
     pointField& pointLst,
@@ -111,7 +111,7 @@ bool Foam::fileFormats::EMESHedgeFormat::read
     {
         FatalErrorIn
         (
-            "fileFormats::EMESHedgeFormat::read"
+            "fileFormats::edgeMeshFormat::read"
             "(Istream&, pointField&, edgeList&)"
         )
             << "read error "
@@ -128,7 +128,7 @@ bool Foam::fileFormats::EMESHedgeFormat::read
 }
 
 
-Foam::Ostream& Foam::fileFormats::EMESHedgeFormat::write
+Foam::Ostream& Foam::fileFormats::edgeMeshFormat::write
 (
     Ostream& os,
     const pointField& pointLst,
@@ -139,7 +139,7 @@ Foam::Ostream& Foam::fileFormats::EMESHedgeFormat::write
     {
         FatalErrorIn
         (
-            "fileFormats::EMESHedgeFormat::write"
+            "fileFormats::edgeMeshFormat::write"
             "(Ostream&, const fileName&, const edgeMesh&)"
         )
             << "bad output stream " << os.name()
@@ -154,7 +154,7 @@ Foam::Ostream& Foam::fileFormats::EMESHedgeFormat::write
     // Check state of Ostream
     os.check
     (
-        "EMESHedgeFormat::write"
+        "edgeMeshFormat::write"
         "(Ostream&, const pointField&, const edgeList&)"
     );
 
@@ -162,7 +162,7 @@ Foam::Ostream& Foam::fileFormats::EMESHedgeFormat::write
 }
 
 
-void Foam::fileFormats::EMESHedgeFormat::write
+void Foam::fileFormats::edgeMeshFormat::write
 (
     const fileName& filename,
     const edgeMesh& mesh
@@ -196,7 +196,7 @@ void Foam::fileFormats::EMESHedgeFormat::write
     {
         FatalIOErrorIn
         (
-            "fileFormats::EMESHedgeFormat::write"
+            "fileFormats::edgeMeshFormat::write"
             "(const fileName&, const edgeMesh&)",
             osPtr()
         )   << "Cannot open file for writing " << filename
@@ -210,7 +210,7 @@ void Foam::fileFormats::EMESHedgeFormat::write
     {
         FatalIOErrorIn
         (
-            "fileFormats::EMESHedgeFormat::write"
+            "fileFormats::edgeMeshFormat::write"
             "(const fileName&, const edgeMesh&)",
             os
         )   << "Cannot write header"
@@ -220,7 +220,7 @@ void Foam::fileFormats::EMESHedgeFormat::write
     write(os, mesh.points(), mesh.edges());
 
     // Check state of Ostream
-    os.check("EMESHedgeFormat::write(Ostream&)");
+    os.check("edgeMeshFormat::write(Ostream&)");
 }
 
 

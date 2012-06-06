@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "EMESHedgeFormat.H"
+#include "edgeMeshFormat.H"
 
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
@@ -39,7 +39,7 @@ namespace fileFormats
 addNamedToRunTimeSelectionTable
 (
     edgeMesh,
-    EMESHedgeFormat,
+    edgeMeshFormat,
     fileExtension,
     eMesh
 );
@@ -48,7 +48,7 @@ addNamedToRunTimeSelectionTable
 addNamedToMemberFunctionSelectionTable
 (
     edgeMesh,
-    EMESHedgeFormat,
+    edgeMeshFormat,
     write,
     fileExtension,
     eMesh

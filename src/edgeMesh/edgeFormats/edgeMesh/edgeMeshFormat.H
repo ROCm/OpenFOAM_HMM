@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::EMESHedgeFormat
+    Foam::fileFormats::edgeMeshFormat
 
 Description
     Provide a means of reading/writing the single-file OpenFOAM edge format.
@@ -31,12 +31,12 @@ Note
    This class provides more methods than the regular edge format interface.
 
 SourceFiles
-    EMESHedgeFormat.C
+    edgeMeshFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EMESHedgeFormat_H
-#define EMESHedgeFormat_H
+#ifndef edgeMeshFormat_H
+#define edgeMeshFormat_H
 
 #include "edgeMesh.H"
 #include "Ostream.H"
@@ -50,20 +50,20 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class EMESHedgeFormat Declaration
+                      Class edgeMeshFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class EMESHedgeFormat
+class edgeMeshFormat
 :
     public edgeMesh
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        EMESHedgeFormat(const EMESHedgeFormat&);
+        edgeMeshFormat(const edgeMeshFormat&);
 
         //- Disallow default bitwise assignment
-        void operator=(const EMESHedgeFormat&);
+        void operator=(const edgeMeshFormat&);
 
 
 protected:
@@ -84,7 +84,7 @@ public:
     // Constructors
 
         //- Construct from file name
-        EMESHedgeFormat(const fileName&);
+        edgeMeshFormat(const fileName&);
 
 
     // Selectors
@@ -94,13 +94,13 @@ public:
         {
             return autoPtr<edgeMesh>
             (
-                new EMESHedgeFormat(name)
+                new edgeMeshFormat(name)
             );
         }
 
 
     //- Destructor
-    virtual ~EMESHedgeFormat()
+    virtual ~edgeMeshFormat()
     {}
 
 
