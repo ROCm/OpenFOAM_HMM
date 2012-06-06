@@ -138,7 +138,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd = p.delta();
+        vectorField pd(p.delta());
 
         forAll(pd, patchFaceI)
         {
@@ -252,7 +252,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         const labelUList& faceCells = p.faceCells();
 
         // Build the d-vectors
-        vectorField pd = p.delta();
+        vectorField pd(p.delta());
 
         forAll(p, patchFaceI)
         {

@@ -189,9 +189,9 @@
 
     Info<< "Calculating Lame's coefficients\n" << endl;
 
-    volScalarField mu = E/(2.0*(1.0 + nu));
-    volScalarField lambda = nu*E/((1.0 + nu)*(1.0 - 2.0*nu));
-    volScalarField threeK = E/(1.0 - 2.0*nu);
+    volScalarField mu(E/(2.0*(1.0 + nu)));
+    volScalarField lambda(nu*E/((1.0 + nu)*(1.0 - 2.0*nu)));
+    volScalarField threeK(E/(1.0 - 2.0*nu));
 
     Switch planeStress(mechanicalProperties.lookup("planeStress"));
 

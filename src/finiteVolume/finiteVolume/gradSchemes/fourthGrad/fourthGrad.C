@@ -126,7 +126,7 @@ Foam::fv::fourthGrad<Type>::calcGrad
             const labelUList& faceCells = p.faceCells();
 
             // Build the d-vectors
-            vectorField pd = p.delta();
+            vectorField pd(p.delta());
 
             const Field<GradType> neighbourSecondfGrad
             (

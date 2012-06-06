@@ -136,7 +136,7 @@ void Foam::variableHeightFlowRateFvPatchScalarField::updateCoeffs()
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
-    scalarField alphap = this->patchInternalField();
+    scalarField alphap(this->patchInternalField());
 
 
     forAll(phip, i)

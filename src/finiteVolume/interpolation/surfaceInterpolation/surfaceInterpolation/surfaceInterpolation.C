@@ -294,7 +294,7 @@ void Foam::surfaceInterpolation::makeNonOrthDeltaCoeffs() const
 
     forAll(nonOrthDeltaCoeffs.boundaryField(), patchi)
     {
-        vectorField delta = mesh_.boundary()[patchi].delta();
+        vectorField delta(mesh_.boundary()[patchi].delta());
 
         nonOrthDeltaCoeffs.boundaryField()[patchi] =
             1.0/max(mesh_.boundary()[patchi].nf() & delta, 0.05*mag(delta));

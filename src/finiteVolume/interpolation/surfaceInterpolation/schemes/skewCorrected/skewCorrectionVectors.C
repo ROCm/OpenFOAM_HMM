@@ -111,7 +111,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
             const labelUList& faceCells = p.faceCells();
             const vectorField& patchFaceCentres = Cf.boundaryField()[patchI];
             const vectorField& patchSf = Sf.boundaryField()[patchI];
-            const vectorField patchD = p.delta();
+            const vectorField patchD(p.delta());
 
             forAll(p, patchFaceI)
             {
