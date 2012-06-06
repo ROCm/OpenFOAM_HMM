@@ -135,7 +135,7 @@ void Foam::dynamicCodeContext::addLineDirective
     const fileName& name
 )
 {
-    code = "#line " + Foam::name(lineNum) + " \"" + name + "\"\n" + code;
+    code = "#line " + Foam::name(lineNum + 1) + " \"" + name + "\"\n" + code;
 }
 
 
