@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
+    scalar P(readScalar(control.lookup("P")));
     scalar T0(readScalar(control.lookup("T0")));
     mixture rMix(control.lookup("reactants"));
     mixture pMix(control.lookup("products"));
@@ -116,7 +117,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< "Adiabatic flame temperature of mixture " << rMix.name() << " = "
-         << products.THa(reactants.Ha(T0), 1000.0) << " K" << endl;
+         << products.THa(reactants.Ha(P, T0), P, 1000.0) << " K" << endl;
 
     return 0;
 }
