@@ -27,7 +27,7 @@ License
 
 inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
 :
-    fileFormats::edgeFormatsCore(),
+    fileFormats::edgeMeshFormatsCore(),
     points_(em.points_),
     edges_(em.edges_),
     pointEdgesPtr_(NULL)
