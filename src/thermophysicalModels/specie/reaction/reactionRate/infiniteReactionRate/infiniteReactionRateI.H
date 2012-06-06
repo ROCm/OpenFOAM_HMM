@@ -45,7 +45,7 @@ inline void Foam::infiniteReactionRate::write(Ostream& os) const
 
 inline Foam::scalar Foam::infiniteReactionRate::operator()
 (
-    const scalar,
+    const scalar p,
     const scalar,
     const scalarField&
 ) const

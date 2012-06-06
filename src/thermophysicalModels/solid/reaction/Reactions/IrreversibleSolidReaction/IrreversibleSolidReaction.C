@@ -62,12 +62,12 @@ Foam::IrreversibleSolidReaction<ReactionRate>::IrreversibleSolidReaction
 template<class ReactionRate>
 Foam::scalar Foam::IrreversibleSolidReaction<ReactionRate>::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return k_(T, p, c);
+    return k_(p, T, c);
 }
 
 

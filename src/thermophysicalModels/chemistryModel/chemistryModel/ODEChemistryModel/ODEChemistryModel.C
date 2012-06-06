@@ -228,8 +228,8 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
         c2[i] = max(0.0, c[i]);
     }
 
-    const scalar kf = R.kf(T, p, c2);
-    const scalar kr = R.kr(kf, T, p, c2);
+    const scalar kf = R.kf(p, T, c2);
+    const scalar kr = R.kr(kf, p, T, c2);
 
     pf = 1.0;
     pr = 1.0;
@@ -409,8 +409,8 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::jacobian
     {
         const Reaction<ThermoType>& R = reactions_[ri];
 
-        const scalar kf0 = R.kf(T, p, c2);
-        const scalar kr0 = R.kr(T, p, c2);
+        const scalar kf0 = R.kf(p, T, c2);
+        const scalar kr0 = R.kr(p, T, c2);
 
         forAll(R.lhs(), j)
         {

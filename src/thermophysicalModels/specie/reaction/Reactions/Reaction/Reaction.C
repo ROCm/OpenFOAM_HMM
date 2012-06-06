@@ -376,8 +376,8 @@ void Foam::Reaction<ReactionThermo>::write(Ostream& os) const
 template<class ReactionThermo>
 Foam::scalar Foam::Reaction<ReactionThermo>::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
@@ -389,8 +389,8 @@ template<class ReactionThermo>
 Foam::scalar Foam::Reaction<ReactionThermo>::kr
 (
     const scalar kfwd,
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
@@ -401,8 +401,8 @@ Foam::scalar Foam::Reaction<ReactionThermo>::kr
 template<class ReactionThermo>
 Foam::scalar Foam::Reaction<ReactionThermo>::kr
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {

@@ -80,13 +80,13 @@ template<class ReactionRate, class FallOffFunction>
 inline Foam::scalar
 Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    scalar k0 = k0_(T, p, c);
-    scalar kInf = kInf_(T, p, c);
+    scalar k0 = k0_(p, T, c);
+    scalar kInf = kInf_(p, T, c);
 
     scalar Pr = k0*thirdBodyEfficiencies_.M(c)/kInf;
 

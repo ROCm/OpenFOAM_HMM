@@ -72,8 +72,8 @@ inline Foam::JanevReactionRate::JanevReactionRate
 
 inline Foam::scalar Foam::JanevReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

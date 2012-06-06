@@ -95,8 +95,8 @@ inline Foam::LangmuirHinshelwoodReactionRate::LangmuirHinshelwoodReactionRate
 
 inline Foam::scalar Foam::LangmuirHinshelwoodReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField& c
 ) const
 {

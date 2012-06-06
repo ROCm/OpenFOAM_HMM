@@ -72,8 +72,8 @@ inline Foam::powerSeriesReactionRate::powerSeriesReactionRate
 
 inline Foam::scalar Foam::powerSeriesReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

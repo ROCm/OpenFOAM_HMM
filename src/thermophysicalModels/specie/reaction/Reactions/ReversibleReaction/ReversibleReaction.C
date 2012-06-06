@@ -82,12 +82,12 @@ Foam::ReversibleReaction<ReactionThermo, ReactionRate>::ReversibleReaction
 template<class ReactionThermo, class ReactionRate>
 Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return k_(T, p, c);
+    return k_(p, T, c);
 }
 
 
@@ -95,8 +95,8 @@ template<class ReactionThermo, class ReactionRate>
 Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
     const scalar kfwd,
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
@@ -107,12 +107,12 @@ Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
 template<class ReactionThermo, class ReactionRate>
 Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return kr(kf(T, p, c), T, p, c);
+    return kr(kf(p, T, c), p, T, c);
 }
 
 

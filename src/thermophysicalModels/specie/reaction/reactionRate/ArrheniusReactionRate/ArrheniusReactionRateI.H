@@ -68,8 +68,8 @@ inline Foam::ArrheniusReactionRate::ArrheniusReactionRate
 
 inline Foam::scalar Foam::ArrheniusReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

@@ -76,8 +76,8 @@ inline Foam::LandauTellerReactionRate::LandauTellerReactionRate
 
 inline Foam::scalar Foam::LandauTellerReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

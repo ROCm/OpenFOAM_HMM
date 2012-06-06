@@ -107,8 +107,8 @@ public:
             //- Forward rate constant
             virtual scalar kf
             (
-                const scalar T,
                 const scalar p,
+                const scalar T,
                 const scalarField& c
             ) const;
 

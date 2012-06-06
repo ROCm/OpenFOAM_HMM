@@ -307,8 +307,8 @@ void Foam::solidReaction::write(Ostream& os) const
 
 Foam::scalar Foam::solidReaction::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {

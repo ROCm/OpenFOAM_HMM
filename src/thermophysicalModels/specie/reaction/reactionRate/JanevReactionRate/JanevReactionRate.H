@@ -98,8 +98,8 @@ public:
 
         inline scalar operator()
         (
-            const scalar T,
             const scalar p,
+            const scalar T,
             const scalarField& c
         ) const;
 

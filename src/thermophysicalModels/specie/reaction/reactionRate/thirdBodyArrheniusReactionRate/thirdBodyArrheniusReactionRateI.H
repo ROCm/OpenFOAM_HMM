@@ -74,14 +74,14 @@ inline Foam::thirdBodyArrheniusReactionRate::thirdBodyArrheniusReactionRate
 
 inline Foam::scalar Foam::thirdBodyArrheniusReactionRate::operator()
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
     return
         thirdBodyEfficiencies_.M(c)
-       *ArrheniusReactionRate::operator()(T, p, c);
+       *ArrheniusReactionRate::operator()(p, T, c);
 }
 
 
