@@ -118,11 +118,7 @@ Foam::conformationSurfaces::conformationSurfaces
         }
 
 
-        word featureMethod = surfaceSubDict.lookupOrDefault
-        (
-            "featureMethod",
-            word("none")
-        );
+        word featureMethod = surfaceSubDict.lookup("featureMethod");
 
         if (featureMethod == "extendedFeatureEdgeMesh")
         {
