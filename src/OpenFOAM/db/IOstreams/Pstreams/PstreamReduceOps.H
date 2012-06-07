@@ -124,11 +124,18 @@ void reduce
 }
 
 
-// Insist there is a specialisation for the sum reduction of scalar(s)
+// Insist there are specialisations for the common reductions of scalar(s)
 void reduce
 (
     scalar& Value,
     const sumOp<scalar>& bop,
+    const int tag = Pstream::msgType()
+);
+
+void reduce
+(
+    scalar& Value,
+    const minOp<scalar>& bop,
     const int tag = Pstream::msgType()
 );
 
