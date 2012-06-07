@@ -581,7 +581,6 @@ void Foam::UPstream::waitRequest(const label i)
             << Foam::abort(FatalError);
     }
 
-    int flag;
     if
     (
         MPI_Wait
