@@ -13,8 +13,8 @@
     volScalarField rAU1(1.0/U1Eqn.A());
     volScalarField rAU2(1.0/U2Eqn.A());
 
-    surfaceScalarField rAlphaAU1f = fvc::interpolate(alpha1*rAU1);
-    surfaceScalarField rAlphaAU2f = fvc::interpolate(alpha2*rAU2);
+    surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
+    surfaceScalarField rAlphaAU2f(fvc::interpolate(alpha2*rAU2));
 
     volVectorField HbyA1("HbyA1", U1);
     HbyA1 = rAU1*U1Eqn.H();
@@ -104,7 +104,7 @@
 
         if (pimple.finalNonOrthogonalIter())
         {
-            surfaceScalarField mSfGradp = pEqnIncomp.flux()/Dp;
+            surfaceScalarField mSfGradp(pEqnIncomp.flux()/Dp);
 
             phi1 = phiHbyA1 + rAlphaAU1f*mSfGradp/fvc::interpolate(rho1);
             phi2 = phiHbyA2 + rAlphaAU2f*mSfGradp/fvc::interpolate(rho2);

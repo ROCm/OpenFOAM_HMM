@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,12 +93,12 @@ template<class ReactionThermo, class ReactionRate>
 Foam::scalar
 Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return fk_(T, p, c);
+    return fk_(p, T, c);
 }
 
 
@@ -107,12 +107,12 @@ Foam::scalar
 Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
     const scalar,
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return rk_(T, p, c);
+    return rk_(p, T, c);
 }
 
 
@@ -120,12 +120,12 @@ template<class ReactionThermo, class ReactionRate>
 Foam::scalar
 Foam::NonEquilibriumReversibleReaction<ReactionThermo, ReactionRate>::kr
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return rk_(T, p, c);
+    return rk_(p, T, c);
 }
 
 

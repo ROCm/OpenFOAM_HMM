@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "STARCDedgeFormat.H"
+#include "edgeMeshFormat.H"
 
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
@@ -39,19 +39,19 @@ namespace fileFormats
 addNamedToRunTimeSelectionTable
 (
     edgeMesh,
-    STARCDedgeFormat,
+    edgeMeshFormat,
     fileExtension,
-    inp
+    eMesh
 );
 
 // write edgeMesh
 addNamedToMemberFunctionSelectionTable
 (
     edgeMesh,
-    STARCDedgeFormat,
+    edgeMeshFormat,
     write,
     fileExtension,
-    inp
+    eMesh
 );
 
 }

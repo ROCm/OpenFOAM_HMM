@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ inline void Foam::infiniteReactionRate::write(Ostream& os) const
 
 inline Foam::scalar Foam::infiniteReactionRate::operator()
 (
-    const scalar,
+    const scalar p,
     const scalar,
     const scalarField&
 ) const

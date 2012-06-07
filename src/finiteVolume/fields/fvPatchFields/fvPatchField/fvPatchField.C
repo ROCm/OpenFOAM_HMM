@@ -27,7 +27,7 @@ License
 #include "dictionary.H"
 #include "fvMesh.H"
 #include "fvPatchFieldMapper.H"
-//#include "fvMatrices.H"
+#include "volMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

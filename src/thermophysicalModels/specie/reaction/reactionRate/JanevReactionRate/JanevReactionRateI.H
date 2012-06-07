@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,8 +72,8 @@ inline Foam::JanevReactionRate::JanevReactionRate
 
 inline Foam::scalar Foam::JanevReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

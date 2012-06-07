@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,7 +126,7 @@ Foam::fv::fourthGrad<Type>::calcGrad
             const labelUList& faceCells = p.faceCells();
 
             // Build the d-vectors
-            vectorField pd = p.delta();
+            vectorField pd(p.delta());
 
             const Field<GradType> neighbourSecondfGrad
             (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,7 +111,7 @@ void Foam::skewCorrectionVectors::makeSkewCorrectionVectors() const
             const labelUList& faceCells = p.faceCells();
             const vectorField& patchFaceCentres = Cf.boundaryField()[patchI];
             const vectorField& patchSf = Sf.boundaryField()[patchI];
-            const vectorField patchD = p.delta();
+            const vectorField patchD(p.delta());
 
             forAll(p, patchFaceI)
             {

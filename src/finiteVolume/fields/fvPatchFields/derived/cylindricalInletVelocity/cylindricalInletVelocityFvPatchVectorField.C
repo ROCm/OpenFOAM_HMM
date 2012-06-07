@@ -132,7 +132,7 @@ void Foam::cylindricalInletVelocityFvPatchVectorField::updateCoeffs()
     vector hatAxis = axis_/mag(axis_);
 
     const vectorField r(patch().Cf() - centre_);
-    const vectorField d =  r - (hatAxis & r)*hatAxis;
+    const vectorField d(r - (hatAxis & r)*hatAxis);
 
     tmp<vectorField> tangVel
     (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::edgeFormatsCore
+    Foam::fileFormats::edgeMeshFormatsCore
 
 Description
     A collection of helper functions for reading/writing edge formats.
 
 SourceFiles
-    edgeFormatsCore.C
+    edgeMeshFormatsCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeFormatsCore_H
-#define edgeFormatsCore_H
+#ifndef edgeMeshFormatsCore_H
+#define edgeMeshFormatsCore_H
 
 #include "Map.H"
 #include "HashSet.H"
@@ -53,10 +53,10 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class edgeFormatsCore Declaration
+                       Class edgeMeshFormatsCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class edgeFormatsCore
+class edgeMeshFormatsCore
 {
 protected:
 
@@ -103,11 +103,11 @@ public:
     // Constructors
 
         //- Construct null
-        edgeFormatsCore();
+        edgeMeshFormatsCore();
 
 
     //- Destructor
-    virtual ~edgeFormatsCore();
+    virtual ~edgeMeshFormatsCore();
 
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "edgeMesh.H"
 #include "boundBox.H"
-#include "EMESHedgeFormat.H"
+#include "edgeMeshFormat.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -132,7 +132,7 @@ void Foam::edgeMesh::writeStats(Ostream& os) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 {
-    fileFormats::EMESHedgeFormat::write(os, em.points_, em.edges_);
+    fileFormats::edgeMeshFormat::write(os, em.points_, em.edges_);
 
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const edgeMesh&)");
@@ -143,7 +143,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
 
 Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
 {
-    fileFormats::EMESHedgeFormat::read(is, em.points_, em.edges_);
+    fileFormats::edgeMeshFormat::read(is, em.points_, em.edges_);
 
     em.pointEdgesPtr_.clear();
 

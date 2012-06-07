@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeFormatsCore.H"
+#include "edgeMeshFormatsCore.H"
 
 #include "Time.H"
 #include "IFstream.H"
@@ -32,12 +32,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::word Foam::fileFormats::edgeFormatsCore::nativeExt("eMesh");
+Foam::word Foam::fileFormats::edgeMeshFormatsCore::nativeExt("eMesh");
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::string Foam::fileFormats::edgeFormatsCore::getLineNoComment
+Foam::string Foam::fileFormats::edgeMeshFormatsCore::getLineNoComment
 (
     IFstream& is
 )
@@ -54,7 +54,7 @@ Foam::string Foam::fileFormats::edgeFormatsCore::getLineNoComment
 
 
 #if 0
-Foam::fileName Foam::fileFormats::edgeFormatsCore::localMeshFileName
+Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::localMeshFileName
 (
     const word& meshName
 )
@@ -69,7 +69,7 @@ Foam::fileName Foam::fileFormats::edgeFormatsCore::localMeshFileName
 }
 
 
-Foam::fileName Foam::fileFormats::edgeFormatsCore::findMeshInstance
+Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::findMeshInstance
 (
     const Time& t,
     const word& meshName
@@ -109,7 +109,7 @@ Foam::fileName Foam::fileFormats::edgeFormatsCore::findMeshInstance
 }
 
 
-Foam::fileName Foam::fileFormats::edgeFormatsCore::findMeshFile
+Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::findMeshFile
 (
     const Time& t,
     const word& meshName
@@ -153,7 +153,7 @@ Foam::fileName Foam::fileFormats::edgeFormatsCore::findMeshFile
 #endif
 
 
-bool Foam::fileFormats::edgeFormatsCore::checkSupport
+bool Foam::fileFormats::edgeMeshFormatsCore::checkSupport
 (
     const wordHashSet& available,
     const word& ext,
@@ -186,13 +186,13 @@ bool Foam::fileFormats::edgeFormatsCore::checkSupport
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileFormats::edgeFormatsCore::edgeFormatsCore()
+Foam::fileFormats::edgeMeshFormatsCore::edgeMeshFormatsCore()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fileFormats::edgeFormatsCore::~edgeFormatsCore()
+Foam::fileFormats::edgeMeshFormatsCore::~edgeMeshFormatsCore()
 {}
 
 

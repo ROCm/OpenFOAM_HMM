@@ -113,7 +113,7 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
     // a simpler way of doing this would be nice
     scalar avgU = -flowRate_/gSum(patch().magSf()*alphap);
 
-    vectorField n = patch().nf();
+    vectorField n(patch().nf());
 
     operator==(n*avgU*alphap);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,8 +68,8 @@ inline Foam::ArrheniusReactionRate::ArrheniusReactionRate
 
 inline Foam::scalar Foam::ArrheniusReactionRate::operator()
 (
+    const scalar p,
     const scalar T,
-    const scalar,
     const scalarField&
 ) const
 {

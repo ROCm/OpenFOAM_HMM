@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,12 +82,12 @@ Foam::IrreversibleReaction<ReactionThermo, ReactionRate>::IrreversibleReaction
 template<class ReactionThermo, class ReactionRate>
 Foam::scalar Foam::IrreversibleReaction<ReactionThermo, ReactionRate>::kf
 (
-    const scalar T,
     const scalar p,
+    const scalar T,
     const scalarField& c
 ) const
 {
-    return k_(T, p, c);
+    return k_(p, T, c);
 }
 
 

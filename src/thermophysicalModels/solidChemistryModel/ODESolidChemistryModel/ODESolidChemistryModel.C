@@ -266,7 +266,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
         c1[i] = max(0.0, c[i]);
     }
 
-    scalar kf = R.kf(T, 0.0, c1);
+    scalar kf = R.kf(0.0, T, c1);
 
     scalar exponent = R.nReact();
 
@@ -358,7 +358,7 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
     {
         const solidReaction& R = reactions_[ri];
 
-        scalar kf0 = R.kf(T, 0.0, c2);
+        scalar kf0 = R.kf(0.0, T, c2);
 
         forAll(R.slhs(), j)
         {

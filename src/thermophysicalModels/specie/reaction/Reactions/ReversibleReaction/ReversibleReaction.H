@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,8 +139,8 @@ public:
             //- Forward rate constant
             virtual scalar kf
             (
-                const scalar T,
                 const scalar p,
+                const scalar T,
                 const scalarField& c
             ) const;
 
@@ -148,8 +148,8 @@ public:
             virtual scalar kr
             (
                 const scalar kfwd,
-                const scalar T,
                 const scalar p,
+                const scalar T,
                 const scalarField& c
             ) const;
 
@@ -158,8 +158,8 @@ public:
             //  equilibrium constant
             virtual scalar kr
             (
-                const scalar T,
                 const scalar p,
+                const scalar T,
                 const scalarField& c
             ) const;
 

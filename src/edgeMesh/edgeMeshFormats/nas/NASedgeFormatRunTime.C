@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OBJedgeFormat.H"
+#include "NASedgeFormat.H"
 
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
@@ -35,23 +35,22 @@ namespace Foam
 namespace fileFormats
 {
 
-// read edgeMesh
+// read edgeMesh - .bdf (Bulk Data Format)
 addNamedToRunTimeSelectionTable
 (
     edgeMesh,
-    OBJedgeFormat,
+    NASedgeFormat,
     fileExtension,
-    obj
+    bdf
 );
 
-// write edgeMesh
-addNamedToMemberFunctionSelectionTable
+// read edgeMesh - .nas (Nastran Data Format)
+addNamedToRunTimeSelectionTable
 (
     edgeMesh,
-    OBJedgeFormat,
-    write,
+    NASedgeFormat,
     fileExtension,
-    obj
+    nas
 );
 
 }

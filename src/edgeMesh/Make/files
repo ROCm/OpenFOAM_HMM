@@ -2,23 +2,23 @@ edgeMesh.C
 edgeMeshIO.C
 edgeMeshNew.C
 
-edgeFormats = edgeFormats
-$(edgeFormats)/edgeFormatsCore.C
+edgeMeshFormats = edgeMeshFormats
+$(edgeMeshFormats)/edgeMeshFormatsCore.C
 
-$(edgeFormats)/emesh/EMESHedgeFormat.C
-$(edgeFormats)/emesh/EMESHedgeFormatRunTime.C
+$(edgeMeshFormats)/edgeMesh/edgeMeshFormat.C
+$(edgeMeshFormats)/edgeMesh/edgeMeshFormatRunTime.C
 
-$(edgeFormats)/nas/NASedgeFormat.C
-$(edgeFormats)/nas/NASedgeFormatRunTime.C
+$(edgeMeshFormats)/nas/NASedgeFormat.C
+$(edgeMeshFormats)/nas/NASedgeFormatRunTime.C
 
-$(edgeFormats)/obj/OBJedgeFormat.C
-$(edgeFormats)/obj/OBJedgeFormatRunTime.C
+$(edgeMeshFormats)/obj/OBJedgeFormat.C
+$(edgeMeshFormats)/obj/OBJedgeFormatRunTime.C
 
-$(edgeFormats)/starcd/STARCDedgeFormat.C
-$(edgeFormats)/starcd/STARCDedgeFormatRunTime.C
+$(edgeMeshFormats)/starcd/STARCDedgeFormat.C
+$(edgeMeshFormats)/starcd/STARCDedgeFormatRunTime.C
 
-$(edgeFormats)/vtk/VTKedgeFormat.C
-$(edgeFormats)/vtk/VTKedgeFormatRunTime.C
+$(edgeMeshFormats)/vtk/VTKedgeFormat.C
+$(edgeMeshFormats)/vtk/VTKedgeFormatRunTime.C
 
 extendedFeatureEdgeMesh/extendedFeatureEdgeMesh.C
 

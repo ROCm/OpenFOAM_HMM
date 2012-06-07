@@ -108,7 +108,7 @@ void htcConvFvPatchScalarField::updateCoeffs()
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField alphaEffw = rasModel.alphaEff(patchI);
+    const scalarField alphaEffw(rasModel.alphaEff(patchI));
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const vectorField& Uc = rasModel.U();
