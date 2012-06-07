@@ -28,14 +28,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::scalar>, 0);
-defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::vector>, 0);
-defineTemplateTypeNameAndDebug
-(
-    Foam::LduInterfaceField<Foam::sphericalTensor>,
-    0
-);
-defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::symmTensor>, 0);
-defineTemplateTypeNameAndDebug(Foam::LduInterfaceField<Foam::tensor>, 0);
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(LduInterfaceField<scalar>, 0);
+    defineTemplateTypeNameAndDebug(LduInterfaceField<vector>, 0);
+    defineTemplateTypeNameAndDebug
+    (
+        LduInterfaceField<sphericalTensor>,
+        0
+    );
+    defineTemplateTypeNameAndDebug(LduInterfaceField<symmTensor>, 0);
+    defineTemplateTypeNameAndDebug(LduInterfaceField<tensor>, 0);
+}
 
 // ************************************************************************* //
