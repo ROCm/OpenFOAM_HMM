@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
-Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
-    ParcelType::propHeader
-  + " T"
-  + " Cp";
+Foam::string Foam::ThermoParcel<ParcelType>::propertyList_ =
+    Foam::ThermoParcel<ParcelType>::propertyList();
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

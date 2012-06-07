@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
-Foam::string Foam::ReactingParcel<ParcelType>::propHeader =
-    ParcelType::propHeader
-  + " mass0"
-  + " nPhases(Y1..YN)";
+Foam::string Foam::ReactingParcel<ParcelType>::propertyList_ =
+    Foam::ReactingParcel<ParcelType>::propertyList();
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

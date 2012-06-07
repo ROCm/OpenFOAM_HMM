@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -239,11 +239,17 @@ public:
 
     // Static data members
 
-        //- String representation of properties
-        static string propHeader;
-
         //- Runtime type information
         TypeName("ReactingMultiphaseParcel");
+
+        //- String representation of properties
+        AddToPropertyList
+        (
+            ParcelType,
+            " nGas(Y1..YN)"
+          + " nLiquid(Y1..YN)"
+          + " nSolid(Y1..YN)"
+        );
 
 
     // Constructors
