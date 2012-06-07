@@ -34,47 +34,50 @@ License
 
 defineTypeNameAndDebug(Foam::vtkUnstructuredReader, 0);
 
-template<>
-const char*
-Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 8>::names[] =
+namespace Foam
 {
-    "int",
-    "unsigned_int",
-    "long",
-    "unsigned_long",
-    "float",
-    "double",
-    "string",
-    "vtkIdType"
-};
-const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataType, 8>
-Foam::vtkUnstructuredReader::vtkDataTypeNames;
+    template<>
+    const char*
+    NamedEnum<vtkUnstructuredReader::vtkDataType, 8>::names[] =
+    {
+        "int",
+        "unsigned_int",
+        "long",
+        "unsigned_long",
+        "float",
+        "double",
+        "string",
+        "vtkIdType"
+    };
+    const NamedEnum<vtkUnstructuredReader::vtkDataType, 8>
+    vtkUnstructuredReader::vtkDataTypeNames;
 
 
-template<>
-const char*
-Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataSetType, 3>::names[] =
-{
-    "FIELD",
-    "SCALARS",
-    "VECTORS"
-};
-const Foam::NamedEnum<Foam::vtkUnstructuredReader::vtkDataSetType, 3>
-Foam::vtkUnstructuredReader::vtkDataSetTypeNames;
+    template<>
+    const char*
+    NamedEnum<vtkUnstructuredReader::vtkDataSetType, 3>::names[] =
+    {
+        "FIELD",
+        "SCALARS",
+        "VECTORS"
+    };
+    const NamedEnum<vtkUnstructuredReader::vtkDataSetType, 3>
+    vtkUnstructuredReader::vtkDataSetTypeNames;
 
 
-template<>
-const char*
-Foam::NamedEnum<Foam::vtkUnstructuredReader::parseMode, 5>::names[] =
-{
-    "NOMODE",
-    "UNSTRUCTURED_GRID",
-    "POLYDATA",
-    "CELL_DATA",
-    "POINT_DATA"
-};
-const Foam::NamedEnum<Foam::vtkUnstructuredReader::parseMode, 5>
-Foam::vtkUnstructuredReader::parseModeNames;
+    template<>
+    const char*
+    NamedEnum<vtkUnstructuredReader::parseMode, 5>::names[] =
+    {
+        "NOMODE",
+        "UNSTRUCTURED_GRID",
+        "POLYDATA",
+        "CELL_DATA",
+        "POINT_DATA"
+    };
+    const NamedEnum<vtkUnstructuredReader::parseMode, 5>
+    vtkUnstructuredReader::parseModeNames;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,7 +174,13 @@ bool triSurface::readAC(const fileName& ACfileName)
 
     for (label patchI = 0; patchI < nPatches; patchI++)
     {
-        readUpto("OBJECT", ACfile, args, " while reading patch " + patchI);
+        readUpto
+        (
+            "OBJECT",
+            ACfile,
+            args,
+            " while reading patch " + Foam::name(patchI)
+        );
 
         // Object global values
         string patchName = string("patch") + name(patchI);
