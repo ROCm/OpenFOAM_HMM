@@ -40,8 +40,8 @@ method          CuthillMcKee;
 //method          Sloan;
 //method          manual;
 //method          random;
+//method          structured;
 //method          spring;
-//method          boundaryFirst;
 //method          zoltan;             // only if compiled with zoltan support
 
 //CuthillMcKeeCoeffs
@@ -54,6 +54,23 @@ manualCoeffs
 {
     // In system directory: new-to-original (i.e. order) labelIOList
     dataFile "cellMap";
+}
+
+
+// For extruded (i.e. structured in one direction) meshes
+structuredCoeffs
+{
+    // Patches that mesh was extruded from. These determine the starting
+    // layer of cells
+    patches (movingWall);
+    // Method to renumber the starting layer of cells
+    method  random;
+
+    // Renumber in columns (depthFirst) or in layers
+    depthFirst true;
+
+    // Optional: reverse ordering
+    //reverse false;
 }
 
 
@@ -88,12 +105,6 @@ zoltanCoeffs
 {
     ORDER_METHOD    LOCAL_HSFC;
 }
-
-
-//boundaryFirstCoeffs
-//{
-//    reverse true;
-//}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::boundaryFirstRenumber
+    Foam::structuredRenumber
 
 Description
-    Cuthill-McKee renumbering
+    Renumbering according to mesh layers.
+    depthFirst = true:
+        first column gets ids 0..nLayer-1,
+        second nLayers..2*nLayers-1 etc.
+    depthFirst = false:
+        first layer gets ids 0,1,2 etc.
 
 SourceFiles
-    boundaryFirstRenumber.C
+    structuredRenumber.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boundaryFirstRenumber_H
-#define boundaryFirstRenumber_H
+#ifndef structuredRenumber_H
+#define structuredRenumber_H
 
 #include "renumberMethod.H"
 #include "Switch.H"
@@ -42,43 +47,47 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class boundaryFirstRenumber Declaration
+                   Class structuredRenumber Declaration
 \*---------------------------------------------------------------------------*/
 
-class boundaryFirstRenumber
+class structuredRenumber
 :
     public renumberMethod
 {
     // Private data
+
+        const dictionary methodDict_;
+
+        const wordReList patches_;
+
+        const Switch depthFirst_;
+
+        const autoPtr<renumberMethod> method_;
 
         const Switch reverse_;
 
 
     // Private Member Functions
 
-        //- Count the number of internal faces of a cell
-        label countInternalFaces(const primitiveMesh&, const label) const;
-
-
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const boundaryFirstRenumber&);
-        boundaryFirstRenumber(const boundaryFirstRenumber&);
+        void operator=(const structuredRenumber&);
+        structuredRenumber(const structuredRenumber&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("boundaryFirst");
+    TypeName("structured");
 
 
     // Constructors
 
         //- Construct given the renumber dictionary
-        boundaryFirstRenumber(const dictionary& renumberDict);
+        structuredRenumber(const dictionary& renumberDict);
 
 
     //- Destructor
-    virtual ~boundaryFirstRenumber()
+    virtual ~structuredRenumber()
     {}
 
 
@@ -91,7 +100,7 @@ public:
         {
             notImplemented
             (
-                "boundaryFirstRenumber::renumber(const pointField&)"
+                "structuredRenumber::renumber(const pointField&)"
             );
             return labelList(0);
         }
@@ -117,7 +126,7 @@ public:
         {
             notImplemented
             (
-                "boundaryFirstRenumber::renumber"
+                "structuredRenumber::renumber"
                 "(const labelListList&, const pointField&)"
             );
             return labelList(0);
