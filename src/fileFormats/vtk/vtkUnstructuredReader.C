@@ -82,22 +82,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class T>
-void Foam::vtkUnstructuredReader::readBlock
-(
-    Istream& inFile,
-    const label n,
-    List<T>& lst
-) const
-{
-    lst.setSize(n);
-    forAll(lst, i)
-    {
-        inFile >> lst[i];
-    }
-}
-
-
 void Foam::vtkUnstructuredReader::warnUnhandledType
 (
     Istream& inFile,
@@ -730,6 +714,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
         }
         else if (tag == "POINT_DATA")
         {
+            // 'POINT_DATA 24'
             readMode = POINT_DATA;
             wantedSize = points_.size();
 
@@ -798,6 +783,7 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
         }
         else if (tag == "VECTORS" || tag == "NORMALS")
         {
+            // 'NORMALS Normals float'
             string line;
             inFile.getLine(line);
             IStringStream is(line);
@@ -853,6 +839,26 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 regIOobject::store(fieldVals);
             }
         }
+        else if (tag == "TEXTURE_COORDINATES")
+        {
+            // 'TEXTURE_COORDINATES TCoords 2 float'
+            string line;
+            inFile.getLine(line);
+            IStringStream is(line);
+            word dataName(is);          //"Tcoords"
+            label dim(readLabel(is));
+            word dataType(is);
+
+            if (debug)
+            {
+                Info<< "Reading texture coords " << dataName
+                    << " dimension " << dim
+                    << " of type " << dataType << endl;
+            }
+
+            scalarField coords(dim*points_.size());
+            readBlock(inFile, coords.size(), coords);
+        }
         else
         {
             FatalIOErrorIn("vtkUnstructuredReader::read(..)", inFile)
@@ -888,31 +894,6 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
         printFieldStats<scalarIOField>(otherData_);
         printFieldStats<labelIOField>(otherData_);
         printFieldStats<stringIOList>(otherData_);
-    }
-}
-
-
-template<class Type>
-void Foam::vtkUnstructuredReader::printFieldStats
-(
-    const objectRegistry& obj
-) const
-{
-    wordList fieldNames(obj.names(Type::typeName));
-
-    if (fieldNames.size() > 0)
-    {
-        Info<< "Read " << fieldNames.size() << " " << Type::typeName
-            << " fields:" << endl;
-        Info<< "Size\tName" << nl
-            << "----\t----" << endl;
-        forAll(fieldNames, i)
-        {
-            Info<< obj.lookupObject<Type>(fieldNames[i]).size()
-                << "\t" << fieldNames[i]
-                << endl;
-        }
-        Info<< endl;
     }
 }
 
