@@ -41,6 +41,7 @@ Description
 #include "tetrahedron.H"
 #include "FixedList.H"
 #include "polyMeshTetDecomposition.H"
+#include "particleMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -284,7 +285,7 @@ public:
         TypeName("particle");
 
         //- String representation of properties
-        static string propHeader;
+        DefinePropertyList("(Px Py Pz) cellI tetFaceI tetPtI origProc origId");
 
         //- Cumulative particle counter - used to provode unique ID
         static label particleCount_;
@@ -554,13 +555,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "particleI.H"
-/*
-#define defineParticleTypeNameAndDebug(Type, DebugSwitch)                     \
-    template<>                                                                \
-    const Foam::word Particle<Type>::typeName(#Type);                         \
-    template<>                                                                \
-    int Particle<Type>::debug(Foam::debug::debugSwitch(#Type, DebugSwitch));
-*/
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository

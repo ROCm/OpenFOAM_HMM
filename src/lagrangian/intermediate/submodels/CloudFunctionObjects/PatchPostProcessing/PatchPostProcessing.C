@@ -115,7 +115,7 @@ void Foam::PatchPostProcessing<CloudType>::write()
             labelList indices;
             sortedOrder(globalTimes, indices);
 
-            string header("# Time currentProc " + parcelType::propHeader);
+            string header("# Time currentProc " + parcelType::propertyList_);
             patchOutFile<< header.c_str() << nl;
 
             forAll(globalTimes, i)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,7 @@ Ostream& operator<<
 );
 
 /*---------------------------------------------------------------------------*\
-                         Class CollidingParcel Declaration
+                        Class CollidingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
@@ -86,11 +86,21 @@ public:
 
     // Static data members
 
-        //- String representation of properties
-        static string propHeader;
-
         //- Runtime type information
         TypeName("CollidingParcel");
+
+        //- String representation of properties
+        AddToPropertyList
+        (
+            ParcelType,
+            " collisionRecordsPairAccessed"
+          + " collisionRecordsPairOrigProcOfOther"
+          + " collisionRecordsPairOrigIdOfOther"
+          + " (collisionRecordsPairData)"
+          + " collisionRecordsWallAccessed"
+          + " collisionRecordsWallPRel"
+          + " (collisionRecordsWallData)"
+        );
 
 
     // Constructors

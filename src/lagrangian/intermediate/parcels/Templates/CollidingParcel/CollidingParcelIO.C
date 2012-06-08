@@ -30,15 +30,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
-Foam::string Foam::CollidingParcel<ParcelType>::propHeader =
-    ParcelType::propHeader
-  + " collisionRecordsPairAccessed"
-  + " collisionRecordsPairOrigProcOfOther"
-  + " collisionRecordsPairOrigIdOfOther"
-  + " (collisionRecordsPairData)"
-  + " collisionRecordsWallAccessed"
-  + " collisionRecordsWallPRel"
-  + " (collisionRecordsWallData)";
+Foam::string Foam::CollidingParcel<ParcelType>::propertyList_ =
+    Foam::CollidingParcel<ParcelType>::propertyList();
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
