@@ -465,22 +465,15 @@ Foam::rotorDiskSource::~rotorDiskSource()
 void Foam::rotorDiskSource::calculate
 (
     const vectorField& U,
-    const scalarField& alphag,
+    const scalarField& thetag,
     vectorField& force,
     const bool divideVolume,
     const bool output
 ) const
 {
     const scalarField& V = mesh_.V();
-    const bool compressible = rhoName_ != "none";
-
-    tmp<volScalarField> trho
-    (
-        compressible
-      ? mesh_.lookupObject<volScalarField>(rhoName_)
-      : volScalarField::null()
-    );
-
+    const bool compressible = this->compressible();
+    tmp<volScalarField> trho(rho());
 
     // logging info
     scalar dragEff = 0.0;
@@ -518,7 +511,7 @@ void Foam::rotorDiskSource::calculate
             blade_.interpolate(radius, twist, chord, i1, i2, invDr);
 
             // flip geometric angle if blade is spinning in reverse (clockwise)
-            scalar alphaGeom = alphag[i] + twist;
+            scalar alphaGeom = thetag[i] + twist;
             if (omega_ < 0)
             {
                 alphaGeom = mathematical::pi - alphaGeom;
@@ -685,7 +678,7 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
 
         if (debug)
         {
-            writeField("alphag", trim_->thetag()(), true);
+            writeField("thetag", trim_->thetag()(), true);
             writeField("faceArea", area_, true);
         }
 
