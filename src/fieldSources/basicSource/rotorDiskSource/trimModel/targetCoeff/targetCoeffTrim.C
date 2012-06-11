@@ -189,7 +189,7 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
 
             // set initial values
             old = calcCoeffs(U, thetag(), force);
-if (iter == 0) Info<< "old=" << old << endl;
+
             // construct Jacobian by perturbing the pitch angles
             // by +/-(dTheta_/2)
             for (label pitchI = 0; pitchI < 3; pitchI++)
