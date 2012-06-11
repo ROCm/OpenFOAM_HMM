@@ -32,7 +32,7 @@ using namespace Foam::vectorTools;
 
 void Foam::conformalVoronoiMesh::insertBoundingPoints()
 {
-    pointField farPts = geometryToConformTo_.globalBounds().points();
+    pointField farPts(geometryToConformTo_.globalBounds().points());
 
     // Shift corners of bounds relative to origin
     farPts -= geometryToConformTo_.globalBounds().midpoint();
