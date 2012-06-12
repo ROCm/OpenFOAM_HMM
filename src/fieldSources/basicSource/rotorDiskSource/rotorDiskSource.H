@@ -253,13 +253,23 @@ public:
     // Member Functions
 
         // Access
-            
+
+            //- Return the rotational speed [rad/s]
+            //  Positive anti-clockwise when looking along -ve lift direction
+            inline scalar omega() const;
+
             //- Return the cell centre positions in local rotor frame
             // (Cylindrical r, theta, z)
             inline const List<point>& x() const;
 
             //- Return the rotor co-ordinate system (r, theta, z)
             inline const cylindricalCS& coordSys() const;
+
+            //- Return true if solving a compressible case
+            inline bool compressible() const;
+
+            //- Return the density field [kg/m3]
+            inline tmp<volScalarField> rho() const;
 
 
         // Evaluation
@@ -268,7 +278,7 @@ public:
             void calculate
             (
                 const vectorField& U,
-                const scalarField& alphag,
+                const scalarField& thetag,
                 vectorField& force,
                 const bool divideVolume = true,
                 const bool output = true

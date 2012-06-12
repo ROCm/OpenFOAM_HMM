@@ -18,7 +18,7 @@ basicSource/rotorDiskSource/profileModel/series/seriesProfile.C
 basicSource/rotorDiskSource/trimModel/trimModel/trimModel.C
 basicSource/rotorDiskSource/trimModel/trimModel/trimModelNew.C
 basicSource/rotorDiskSource/trimModel/fixed/fixedTrim.C
-basicSource/rotorDiskSource/trimModel/targetForce/targetForceTrim.C
+basicSource/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
 
 basicSource/actuationDiskSource/actuationDiskSource.C
 basicSource/radialActuationDiskSource/radialActuationDiskSource.C

@@ -22,18 +22,55 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::targetForceTrim
+    Foam::targetCoeffTrim
 
 Description
-    Target force trim coefficients
+    Target trim coefficients
+
+    Solves:
+
+        c^old + J.d(theta) = c^target
+
+    Where:
+
+        n     = time level
+        c     = coefficient vector (thrust force, roll moment, pitch moment)
+        theta = pitch angle vector (collective, roll, pitch)
+        J     = Jacobian [3x3] matrix
+
+
+    The trimmed pitch angles are found via solving the above with a
+    Newton-Raphson iterative method.  The solver tolerance can be user-input,
+    using the 'tol' entry.
+
+
+    The coefficients are determined using:
+
+                         force
+        c = ---------------------------------
+            alpha*pi*rho*(omega^2)*(radius^4)
+
+    and
+
+                         moment
+        c = ---------------------------------
+            alpha*pi*rho*(omega^2)*(radius^5)
+
+    Where:
+
+        alpha = user-input conversion coefficient (default = 1)
+        rho   = desity
+        omega = rotor angulr velocity
+        pi    = mathematical pi
+            
 
 SourceFiles
-    targetForceTrim.C
+    targetCoeffTrim.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef targetForceTrim_H
-#define targetForceTrim_H
+#ifndef targetCoeffTrim_H
+#define targetCoeffTrim_H
 
 #include "trimModel.H"
 #include "tensor.H"
@@ -45,10 +82,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class targetForceTrim Declaration
+                      Class targetCoeffTrim Declaration
 \*---------------------------------------------------------------------------*/
 
-class targetForceTrim
+class targetCoeffTrim
 :
     public trimModel
 {
@@ -60,7 +97,7 @@ protected:
         //- Number of iterations between calls to 'correct'
         label calcFrequency_;
 
-        //- Target force [N]
+        //- Target coefficient vector (thrust force, roll moment, pitch moment)
         vector target_;
 
         //- Pitch angles (collective, roll, pitch) [rad]
@@ -78,11 +115,14 @@ protected:
         //- Perturbation angle used to determine jacobian
         scalar dTheta_;
 
+        //- Coefficient to allow for conversion between US and EU definitions
+        scalar alpha_;
+
 
     // Protected member functions
 
-        //- Calculate the rotor forces
-        vector calcForce
+        //- Calculate the rotor force and moment coefficients vector
+        vector calcCoeffs
         (
             const vectorField& U,
             const scalarField& alphag,
@@ -93,13 +133,13 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("targetForceTrim");
+    TypeName("targetCoeffTrim");
 
     //- Constructor
-    targetForceTrim(const rotorDiskSource& rotor, const dictionary& dict);
+    targetCoeffTrim(const rotorDiskSource& rotor, const dictionary& dict);
 
     //- Destructor
-    virtual ~targetForceTrim();
+    virtual ~targetCoeffTrim();
 
 
     // Member functions

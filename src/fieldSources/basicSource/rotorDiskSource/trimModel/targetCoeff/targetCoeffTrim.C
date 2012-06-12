@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "targetForceTrim.H"
+#include "targetCoeffTrim.H"
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 #include "mathematicalConstants.H"
@@ -34,15 +34,15 @@ using namespace Foam::constant;
 
 namespace Foam
 {
-    defineTypeNameAndDebug(targetForceTrim, 0);
+    defineTypeNameAndDebug(targetCoeffTrim, 0);
 
-    addToRunTimeSelectionTable(trimModel, targetForceTrim, dictionary);
+    addToRunTimeSelectionTable(trimModel, targetCoeffTrim, dictionary);
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::vector Foam::targetForceTrim::calcForce
+Foam::vector Foam::targetCoeffTrim::calcCoeffs
 (
     const vectorField& U,
     const scalarField& thetag,
@@ -51,34 +51,51 @@ Foam::vector Foam::targetForceTrim::calcForce
 {
     rotor_.calculate(U, thetag, force, false, false);
 
+    bool compressible = rotor_.compressible();
+    tmp<volScalarField> trho = rotor_.rho();
+
     const labelList& cells = rotor_.cells();
     const vectorField& C = rotor_.mesh().C();
+    const List<point>& x = rotor_.x();
 
     const vector& origin = rotor_.coordSys().origin();
     const vector& rollAxis = rotor_.coordSys().e1();
     const vector& pitchAxis = rotor_.coordSys().e2();
     const vector& yawAxis = rotor_.coordSys().e3();
 
-    vector f(vector::zero);
+    scalar coeff1 = alpha_*sqr(rotor_.omega())*mathematical::pi;
+
+    vector cf(vector::zero);
     forAll(cells, i)
     {
         label cellI = cells[i];
 
-        vector moment = force[cellI]^(C[cellI] - origin);
-        f[0] += force[cellI] & yawAxis;
-        f[1] += moment & pitchAxis;
-        f[2] += moment & rollAxis;
+        // create normalisation coefficient
+        scalar radius = x[i].x();
+        scalar coeff2 = coeff1*pow4(radius);
+        if (compressible)
+        {
+            coeff2 *= trho()[cellI];
+        }
+
+        vector fc = force[cellI];
+        vector mc = fc^(C[cellI] - origin);
+
+        // add to coefficient vector
+        cf[0] += (fc & yawAxis)/(coeff2 + ROOTVSMALL);
+        cf[1] += (mc & pitchAxis)/(coeff2*radius + ROOTVSMALL);
+        cf[2] += (mc & rollAxis)/(coeff2*radius + ROOTVSMALL);
     }
 
-    reduce(f, sumOp<vector>());
+    reduce(cf, sumOp<vector>());
     
-    return f;
+    return cf;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::targetForceTrim::targetForceTrim
+Foam::targetCoeffTrim::targetCoeffTrim
 (
     const rotorDiskSource& rotor,
     const dictionary& dict
@@ -91,7 +108,8 @@ Foam::targetForceTrim::targetForceTrim
     nIter_(50),
     tol_(1e-8),
     relax_(1.0),
-    dTheta_(degToRad(0.1))
+    dTheta_(degToRad(0.1)),
+    alpha_(1.0)
 {
     read(dict);
 }
@@ -99,20 +117,20 @@ Foam::targetForceTrim::targetForceTrim
 
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
-Foam::targetForceTrim::~targetForceTrim()
+Foam::targetCoeffTrim::~targetCoeffTrim()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::targetForceTrim::read(const dictionary& dict)
+void Foam::targetCoeffTrim::read(const dictionary& dict)
 {
     trimModel::read(dict);
 
     const dictionary& targetDict(coeffs_.subDict("target"));
-    target_[0] = readScalar(targetDict.lookup("fThrust"));
-    target_[1] = readScalar(targetDict.lookup("mPitch"));
-    target_[2] = readScalar(targetDict.lookup("mRoll"));
+    target_[0] = readScalar(targetDict.lookup("thrustCoeff"));
+    target_[1] = readScalar(targetDict.lookup("pitchCoeff"));
+    target_[2] = readScalar(targetDict.lookup("rollCoeff"));
 
     const dictionary& pitchAngleDict(coeffs_.subDict("pitchAngles"));
     theta_[0] = degToRad(readScalar(pitchAngleDict.lookup("theta0Ini")));
@@ -129,10 +147,12 @@ void Foam::targetForceTrim::read(const dictionary& dict)
     {
         dTheta_ = degToRad(dTheta_);
     }
+
+    alpha_ = readScalar(coeffs_.lookup("alpha"));
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::targetForceTrim::thetag() const
+Foam::tmp<Foam::scalarField> Foam::targetCoeffTrim::thetag() const
 {
     const List<vector>& x = rotor_.x();
 
@@ -149,34 +169,38 @@ Foam::tmp<Foam::scalarField> Foam::targetForceTrim::thetag() const
 }
 
 
-void Foam::targetForceTrim::correct(const vectorField& U, vectorField& force)
+void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
 {
     if (rotor_.mesh().time().timeIndex() % calcFrequency_ == 0)
     {
+        Info<< type() << ":" << nl
+            << "    solving for target trim coefficients" << nl;
+
         // iterate to find new pitch angles to achieve target force
         scalar err = GREAT;
         label iter = 0;
         tensor J(tensor::zero);
 
+        vector old = vector::zero;
         while ((err > tol_) && (iter < nIter_))
         {
             // cache initial theta vector
             vector theta0(theta_);
 
             // set initial values
-            vector old = calcForce(U, thetag(), force);
+            old = calcCoeffs(U, thetag(), force);
 
             // construct Jacobian by perturbing the pitch angles
             // by +/-(dTheta_/2)
             for (label pitchI = 0; pitchI < 3; pitchI++)
             {
                 theta_[pitchI] -= dTheta_/2.0;
-                vector f0 = calcForce(U, thetag(), force);
+                vector cf0 = calcCoeffs(U, thetag(), force);
 
                 theta_[pitchI] += dTheta_;
-                vector f1 = calcForce(U, thetag(), force);
+                vector cf1 = calcCoeffs(U, thetag(), force);
 
-                vector ddTheta = (f1 - f0)/dTheta_;
+                vector ddTheta = (cf1 - cf0)/dTheta_;
 
                 J[pitchI + 0] = ddTheta[0];
                 J[pitchI + 3] = ddTheta[1];
@@ -201,23 +225,21 @@ void Foam::targetForceTrim::correct(const vectorField& U, vectorField& force)
 
         if (iter == nIter_)
         {
-            WarningIn
-            (
-                "void Foam::targetForceTrim::correct"
-                "("
-                    "const vectorField&, "
-                    "vectorField&"
-                ")"
-            )   << "Trim routine not converged in " << iter
-                << " iterations, max residual = " << err << endl;
+            Info<< "    solution not converged in " << iter
+                << " iterations, final residual = " << err
+                << "(" << tol_ << ")" << endl;
         }
         else
         {
-            Info<< type() << ": converged in " << iter
-                << " iterations" << endl;
+            Info<< "    final residual = " << err << "(" << tol_
+                << "), iterations = " << iter << endl;
         }
 
-        Info<< "    new pitch angles:" << nl
+        Info<< "    current and target coefficients:" << nl
+            << "        thrust  = " << old[0] << ", " << target_[0] << nl
+            << "        pitch   = " << old[1] << ", " << target_[1] << nl
+            << "        roll    = " << old[2] << ", " << target_[2] << nl
+            << "    new pitch angles [deg]:" << nl
             << "        theta0  = " << radToDeg(theta_[0]) << nl
             << "        theta1c = " << radToDeg(theta_[1]) << nl
             << "        theta1s = " << radToDeg(theta_[2]) << nl
