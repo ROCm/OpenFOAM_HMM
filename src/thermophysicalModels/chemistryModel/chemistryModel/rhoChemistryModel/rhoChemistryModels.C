@@ -43,14 +43,30 @@ namespace Foam
     (
         ODEChemistryModel,
         rhoChemistryModel,
-        gasThermoPhysics
+        constGasThermoPhysics
     );
+
     makeChemistryModel
     (
         ODEChemistryModel,
         rhoChemistryModel,
-        constGasThermoPhysics
+        gasThermoPhysics
     );
+
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        rhoChemistryModel,
+        constIsobaricGasThermoPhysics
+    );
+
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        rhoChemistryModel,
+        isobaricGasThermoPhysics
+    );
+
     makeChemistryModel
     (
         ODEChemistryModel,
