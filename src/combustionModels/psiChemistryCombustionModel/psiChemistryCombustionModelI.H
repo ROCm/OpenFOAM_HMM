@@ -31,6 +31,7 @@ Foam::combustionModels::psiChemistryCombustionModel::pChemistry()
     return pChemistry_();
 }
 
+
 inline const Foam::psiChemistryModel&
 Foam::combustionModels::psiChemistryCombustionModel::
 pChemistry() const
@@ -38,11 +39,13 @@ pChemistry() const
     return pChemistry_();
 }
 
+
 inline Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::psiChemistryCombustionModel::rho() const
 {
     return pChemistry_->thermo().rho();
 }
+
 
 inline const Foam::psiReactionThermo&
 Foam::combustionModels::psiChemistryCombustionModel::thermo() const
@@ -50,10 +53,12 @@ Foam::combustionModels::psiChemistryCombustionModel::thermo() const
     return pChemistry_->thermo();
 }
 
+
 inline Foam::psiReactionThermo&
 Foam::combustionModels::psiChemistryCombustionModel::thermo()
 {
     return pChemistry_->thermo();
 }
+
 
 // ************************************************************************* //
