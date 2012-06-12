@@ -209,7 +209,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
             << exit(FatalError);
     }
 
-    Info<< "min/max mag(zetap) = " << gMin(zetap & nf()) << ", "
+    Info<< "min/max(zetap) = " << gMin(zetap & nf()) << ", "
         << gMax(zetap & nf()) << endl;
 
     fixedValueFvPatchScalarField::updateCoeffs();
