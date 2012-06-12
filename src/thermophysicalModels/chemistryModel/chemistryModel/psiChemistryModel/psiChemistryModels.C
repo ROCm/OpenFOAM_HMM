@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,14 +43,30 @@ namespace Foam
     (
         ODEChemistryModel,
         psiChemistryModel,
-        gasThermoPhysics
+        constGasThermoPhysics
     );
+
     makeChemistryModel
     (
         ODEChemistryModel,
         psiChemistryModel,
-        constGasThermoPhysics
+        gasThermoPhysics
     );
+
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        psiChemistryModel,
+        constIsobaricGasThermoPhysics
+    );
+
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        psiChemistryModel,
+        isobaricGasThermoPhysics
+    );
+
     makeChemistryModel
     (
         ODEChemistryModel,

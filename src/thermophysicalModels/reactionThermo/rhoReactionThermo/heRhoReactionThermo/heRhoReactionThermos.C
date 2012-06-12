@@ -29,6 +29,7 @@ License
 #include "heRhoReactionThermo.H"
 
 #include "perfectGas.H"
+#include "isobaricPerfectGas.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
@@ -41,7 +42,6 @@ License
 #include "homogeneousMixture.H"
 #include "inhomogeneousMixture.H"
 #include "veryInhomogeneousMixture.H"
-#include "dieselMixture.H"
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
 #include "singleStepReactingMixture.H"
@@ -133,11 +133,71 @@ makeReactionThermo
     rhoThermo,
     rhoReactionThermo,
     heRhoReactionThermo,
-    dieselMixture,
+    homogeneousMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeReactionThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    inhomogeneousMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeReactionThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    veryInhomogeneousMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeReactionThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    homogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    isobaricPerfectGas
+);
+
+makeReactionThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    inhomogeneousMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    isobaricPerfectGas
+);
+
+makeReactionThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    veryInhomogeneousMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    isobaricPerfectGas
 );
 
 
@@ -158,7 +218,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     multiComponentMixture,
-    icoPoly8ThermoPhysics
+    gasThermoPhysics
 );
 
 makeReactionMixtureThermo
@@ -167,7 +227,25 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     multiComponentMixture,
-    gasThermoPhysics
+    constIsobaricGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    multiComponentMixture,
+    isobaricGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    multiComponentMixture,
+    icoPoly8ThermoPhysics
 );
 
 
@@ -188,7 +266,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     reactingMixture,
-    icoPoly8ThermoPhysics
+    gasThermoPhysics
 );
 
 makeReactionMixtureThermo
@@ -197,7 +275,25 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     reactingMixture,
-    gasThermoPhysics
+    constIsobaricGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    reactingMixture,
+    isobaricGasThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoReactionThermo,
+    reactingMixture,
+    icoPoly8ThermoPhysics
 );
 
 makeReactionMixtureThermo
