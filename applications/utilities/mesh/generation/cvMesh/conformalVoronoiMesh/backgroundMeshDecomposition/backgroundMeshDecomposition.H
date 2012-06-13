@@ -78,10 +78,8 @@ SourceFiles
 namespace Foam
 {
 
-typedef treeDataPrimitivePatch<face, List, const pointField, point>
-    treeDataBPatch;
-
 typedef PrimitivePatch<face, List, const pointField, point> bPatch;
+typedef treeDataPrimitivePatch<bPatch> treeDataBPatch;
 
 /*---------------------------------------------------------------------------*\
                   Class backgroundMeshDecomposition Declaration

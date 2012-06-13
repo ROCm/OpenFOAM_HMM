@@ -82,7 +82,7 @@ class AMIInterpolation
     public AMIInterpolationName
 {
     //- local typedef to octree tree-type
-    typedef treeDataPrimitivePatch<face, SubList, const pointField&> treeType;
+    typedef treeDataPrimitivePatch<TargetPatch> treeType;
 
 
     // Private data
