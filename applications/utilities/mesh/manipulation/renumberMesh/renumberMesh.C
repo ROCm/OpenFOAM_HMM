@@ -1018,6 +1018,11 @@ int main(int argc, char *argv[])
 
     // Update proc maps
     if (cellProcAddressing.headerOk())
+    if
+    (
+        cellProcAddressing.headerOk()
+     && cellProcAddressing.size() == mesh.nCells()
+    )
     {
         Info<< "Renumbering processor cell decomposition map "
             << cellProcAddressing.name() << endl;
@@ -1028,6 +1033,11 @@ int main(int argc, char *argv[])
         );
     }
     if (faceProcAddressing.headerOk())
+    if
+    (
+        faceProcAddressing.headerOk()
+     && faceProcAddressing.size() == mesh.nFaces()
+    )
     {
         Info<< "Renumbering processor face decomposition map "
             << faceProcAddressing.name() << endl;
@@ -1054,6 +1064,11 @@ int main(int argc, char *argv[])
         }
     }
     if (pointProcAddressing.headerOk())
+    if
+    (
+        pointProcAddressing.headerOk()
+     && pointProcAddressing.size() == mesh.nPoints()
+    )
     {
         Info<< "Renumbering processor point decomposition map "
             << pointProcAddressing.name() << endl;
@@ -1173,21 +1188,41 @@ int main(int argc, char *argv[])
 
     mesh.write();
     if (cellProcAddressing.headerOk())
+    if
+    (
+        cellProcAddressing.headerOk()
+     && cellProcAddressing.size() == mesh.nCells()
+    )
     {
         cellProcAddressing.instance() = mesh.facesInstance();
         cellProcAddressing.write();
     }
     if (faceProcAddressing.headerOk())
+    if
+    (
+        faceProcAddressing.headerOk()
+     && faceProcAddressing.size() == mesh.nFaces()
+    )
     {
         faceProcAddressing.instance() = mesh.facesInstance();
         faceProcAddressing.write();
     }
     if (pointProcAddressing.headerOk())
+    if
+    (
+        pointProcAddressing.headerOk()
+     && pointProcAddressing.size() == mesh.nPoints()
+    )
     {
         pointProcAddressing.instance() = mesh.facesInstance();
         pointProcAddressing.write();
     }
     if (boundaryProcAddressing.headerOk())
+    if
+    (
+        boundaryProcAddressing.headerOk()
+     && boundaryProcAddressing.size() == mesh.boundaryMesh().size()
+    )
     {
         boundaryProcAddressing.instance() = mesh.facesInstance();
         boundaryProcAddressing.write();
