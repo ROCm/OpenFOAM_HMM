@@ -255,6 +255,9 @@ void thermoSingleLayer::updateSubmodels()
     // Update source fields
     hsSp_ += primaryEnergyPCTrans_/magSf()/time().deltaT();
     rhoSp_ += primaryMassPCTrans_/magSf()/time().deltaT();
+
+    // Vapour recoil pressure
+    pSp_ -= sqr(primaryMassPCTrans_/magSf()/time_.deltaT())/2.0/rhoPrimary_;
 }
 
 

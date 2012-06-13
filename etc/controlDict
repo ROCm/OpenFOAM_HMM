@@ -510,7 +510,6 @@ DebugSwitches
     gradientUnburntEnthalpy 0;
     granularPressureModel   0;
     hCombustionThermo   0;
-    hMixtureThermo<dieselMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
     hMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
     hMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
     hMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReaction.H"
+#include "makeReactionThermo.H"
 #include "thermoPhysicsTypes.H"
 
 #include "chemistryReader.H"
@@ -38,9 +38,14 @@ namespace Foam
 
 makeChemistryReader(constGasThermoPhysics);
 makeChemistryReader(gasThermoPhysics);
+makeChemistryReader(constIsobaricGasThermoPhysics);
+makeChemistryReader(isobaricGasThermoPhysics);
 makeChemistryReader(icoPoly8ThermoPhysics);
 
+makeChemistryReaderType(foamChemistryReader, constGasThermoPhysics);
 makeChemistryReaderType(foamChemistryReader, gasThermoPhysics);
+makeChemistryReaderType(foamChemistryReader, constIsobaricGasThermoPhysics);
+makeChemistryReaderType(foamChemistryReader, isobaricGasThermoPhysics);
 makeChemistryReaderType(foamChemistryReader, icoPoly8ThermoPhysics);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

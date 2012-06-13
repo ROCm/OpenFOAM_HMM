@@ -41,7 +41,6 @@ License
 #include "homogeneousMixture.H"
 #include "inhomogeneousMixture.H"
 #include "veryInhomogeneousMixture.H"
-#include "dieselMixture.H"
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
 #include "singleStepReactingMixture.H"
@@ -171,18 +170,6 @@ makeReactionThermo
     perfectGas
 );
 
-
-makeReactionThermo
-(
-    psiThermo,
-    psiReactionThermo,
-    hePsiReactionThermo,
-    dieselMixture,
-    sutherlandTransport,
-    sensibleEnthalpy,
-    janafThermo,
-    perfectGas
-);
 
 // Multi-component thermo
 

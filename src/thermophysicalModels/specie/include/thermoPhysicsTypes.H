@@ -33,6 +33,7 @@ Description
 #define thermoPhysicsTypes_H
 
 #include "perfectGas.H"
+#include "isobaricPerfectGas.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
@@ -49,48 +50,71 @@ Description
 namespace Foam
 {
     typedef
-        sutherlandTransport
+    constTransport
+    <
+        specieThermo
         <
-            specieThermo
+            hConstThermo
             <
-                janafThermo
-                <
-                    perfectGas
-                >,
-                sensibleEnthalpy
-            >
-        >
-        gasThermoPhysics;
-
-    typedef
-        constTransport
-        <
-            specieThermo
-            <
-                hConstThermo
-                <
-                    perfectGas
-                >,
-                sensibleEnthalpy
-            >
-        >
-        constGasThermoPhysics;
-
-    typedef
-        polynomialTransport
-        <
-            specieThermo
-            <
-                hPolynomialThermo
-                <
-                    icoPolynomial<8>,
-                    8
-                >,
-                sensibleEnthalpy
+                perfectGas
             >,
-            8
+            sensibleEnthalpy
         >
-        icoPoly8ThermoPhysics;
+    > constGasThermoPhysics;
+
+    typedef
+    sutherlandTransport
+    <
+        specieThermo
+        <
+            janafThermo
+            <
+                perfectGas
+            >,
+            sensibleEnthalpy
+        >
+    > gasThermoPhysics;
+
+    typedef
+    constTransport
+    <
+        specieThermo
+        <
+            hConstThermo
+            <
+                isobaricPerfectGas
+            >,
+            sensibleEnthalpy
+        >
+    > constIsobaricGasThermoPhysics;
+
+    typedef
+    sutherlandTransport
+    <
+        specieThermo
+        <
+            janafThermo
+            <
+                isobaricPerfectGas
+            >,
+            sensibleEnthalpy
+        >
+    > isobaricGasThermoPhysics;
+
+    typedef
+    polynomialTransport
+    <
+        specieThermo
+        <
+            hPolynomialThermo
+            <
+                icoPolynomial<8>,
+                8
+            >,
+            sensibleEnthalpy
+        >,
+        8
+    > icoPoly8ThermoPhysics;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

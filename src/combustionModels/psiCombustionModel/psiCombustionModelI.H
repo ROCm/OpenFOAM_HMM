@@ -31,6 +31,7 @@ Foam::combustionModels::psiCombustionModel::thermo()
     return thermo_();
 }
 
+
 inline const Foam::psiReactionThermo&
 Foam::combustionModels::psiCombustionModel::thermo() const
 {

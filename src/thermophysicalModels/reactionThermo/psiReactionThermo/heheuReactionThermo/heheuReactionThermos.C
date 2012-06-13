@@ -42,7 +42,6 @@ License
 #include "homogeneousMixture.H"
 #include "inhomogeneousMixture.H"
 #include "veryInhomogeneousMixture.H"
-#include "dieselMixture.H"
 #include "multiComponentMixture.H"
 #include "egrMixture.H"
 
@@ -126,7 +125,6 @@ makeReactionThermo
     perfectGas
 );
 
-
 makeReactionThermo
 (
     psiThermo,
@@ -138,8 +136,6 @@ makeReactionThermo
     hConstThermo,
     perfectGas
 );
-
-
 
 makeReactionThermo
 (

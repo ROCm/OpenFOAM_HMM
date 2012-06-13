@@ -811,7 +811,6 @@ void Foam::vtkPV3Foam::renderPatchNames(vtkRenderer* renderer, const bool show)
 }
 
 
-
 void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const
 {
     os  << indent << "Number of nodes: "
@@ -821,9 +820,10 @@ void Foam::vtkPV3Foam::PrintSelf(ostream& os, vtkIndent indent) const
         << (meshPtr_ ? meshPtr_->nCells() : 0) << "\n";
 
     os  << indent << "Number of available time steps: "
-        << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << endl;
+        << (dbPtr_.valid() ? dbPtr_().times().size() : 0) << "\n";
 
     os  << indent << "mesh region: " << meshRegion_ << "\n";
 }
+
 
 // ************************************************************************* //
