@@ -19,11 +19,6 @@ combustionModel  PaSR<psiChemistryCombustionModel>;
 
 active  true;
 
-infinitelyFastChemistryCoeffs
-{
-    C       10.0;
-}
-
 PaSRCoeffs
 {
     Cmix                Cmix [ 0 0 0 0 0 0 0 ] 0.1;
