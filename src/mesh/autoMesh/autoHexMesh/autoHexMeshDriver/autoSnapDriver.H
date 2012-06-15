@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -249,9 +249,10 @@ class autoSnapDriver
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
 
-                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceSurfNormals,
                     const List<List<point> >& pointFaceDisp,
                     const List<List<point> >& pointFaceCentres,
+                    const labelListList& pointFacePatchID,
 
                     vectorField& patchAttraction,
                     List<pointConstraint>& patchConstraints

@@ -71,14 +71,15 @@ namespace Foam
         }
     };
 
+    template<class T>
     class listPlusEqOp
     {
     public:
 
         void operator()
         (
-            List<point>& x,
-            const List<point>& y
+            List<T>& x,
+            const List<T>& y
         ) const
         {
             label sz = x.size();
@@ -486,7 +487,7 @@ void Foam::autoSnapDriver::binFeatureFaces
 
     const label pointI,
 
-    const List<List<point> >& pointFaceNormals,
+    const List<List<point> >& pointFaceSurfNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
 
@@ -495,7 +496,7 @@ void Foam::autoSnapDriver::binFeatureFaces
     DynamicList<label>& surfaceCount
 ) const
 {
-    const List<point>& pfNormals = pointFaceNormals[pointI];
+    const List<point>& pfNormals = pointFaceSurfNormals[pointI];
     const List<point>& pfDisp = pointFaceDisp[pointI];
     const List<point>& pfCentres = pointFaceCentres[pointI];
 
@@ -531,7 +532,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
 
-    const List<List<point> >& pointFaceNormals,
+    const List<List<point> >& pointFaceSurfNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
 
@@ -590,7 +591,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
             snapDist,
             pointI,
 
-            pointFaceNormals,
+            pointFaceSurfNormals,
             pointFaceDisp,
             pointFaceCentres,
 
@@ -720,7 +721,7 @@ void Foam::autoSnapDriver::determineAllFeatures
     const indirectPrimitivePatch& pp,
     const scalarField& snapDist,
 
-    const List<List<point> >& pointFaceNormals,
+    const List<List<point> >& pointFaceSurfNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
 
@@ -873,7 +874,7 @@ void Foam::autoSnapDriver::determineFeatures
     //const vectorField& faceSurfaceNormal,
     //const vectorField& faceDisp,
     //const vectorField& faceRotation,
-    const List<List<point> >& pointFaceNormals,
+    const List<List<point> >& pointFaceSurfNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
 
@@ -955,7 +956,7 @@ void Foam::autoSnapDriver::determineFeatures
 
                 //faceSurfaceNormal,
                 //faceDisp,
-                pointFaceNormals,
+                pointFaceSurfNormals,
                 pointFaceDisp,
                 pointFaceCentres,
 
@@ -1132,9 +1133,10 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     //const vectorField& faceSurfaceNormal,
     //const vectorField& faceDisp,
     //const vectorField& faceRotation,
-    const List<List<point> >& pointFaceNormals,
+    const List<List<point> >& pointFaceSurfNormals,
     const List<List<point> >& pointFaceDisp,
     const List<List<point> >& pointFaceCentres,
+    const labelListList& pointFacePatchID,
 
     vectorField& patchAttraction,
     List<pointConstraint>& patchConstraints
@@ -1181,7 +1183,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         pp,
         snapDist,
 
-        pointFaceNormals,
+        pointFaceSurfNormals,
         pointFaceDisp,
         pointFaceCentres,
 
@@ -1338,6 +1340,115 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
             }
         }
     }
+
+
+
+    //MEJ: any faces that have multi-patch points only keep the multi-patch
+    //     points.
+    {
+        autoPtr<OFstream> multiPatchStr;
+        if (debug&meshRefinement::OBJINTERSECTIONS)
+        {
+            multiPatchStr.reset
+            (
+                new OFstream
+                (
+                    meshRefiner_.mesh().time().path()
+                  / "multiPatch_" + name(iter) + ".obj"
+                )
+            );
+            Pout<< nl << "Dumping removed constraints due to same-face"
+                << " multi-patch points to "
+                << multiPatchStr().name() << endl;
+        }
+
+
+        // 1. Mark points on multiple patches
+        PackedBoolList isMultiPatchPoint(pp.size());
+
+        forAll(pointFacePatchID, pointI)
+        {
+            const labelList& patches = pointFacePatchID[pointI];
+            label patch0 = patches[0];
+            for (label i = 1; i < patches.size(); i++)
+            {
+                if (patch0 != patches[i])
+                {
+                    isMultiPatchPoint[pointI] = 1u;
+                    break;
+                }
+            }
+        }
+
+        // 2. Make sure multi-patch points are also attracted
+        forAll(isMultiPatchPoint, pointI)
+        {
+            if (isMultiPatchPoint[pointI])
+            {
+                if (patchConstraints[pointI].first() == 0)
+                {
+                    patchAttraction[pointI] = allPatchAttraction[pointI];
+                    patchConstraints[pointI] = allPatchConstraints[pointI];
+                    //Pout<< "Adding constraint on multiPatchPoint:"
+                    //    << pp.localPoints()[pointI] << endl;
+                }
+            }
+        }
+
+        // Up to here it is all parallel ok.
+
+
+        // 3. Knock out any attraction on faces with multi-patch points
+        label nChanged = 0;
+        forAll(pp.localFaces(), faceI)
+        {
+            const face& f = pp.localFaces()[faceI];
+
+            label nMultiPatchPoints = 0;
+            forAll(f, fp)
+            {
+                if (isMultiPatchPoint[f[fp]])
+                {
+                    nMultiPatchPoints++;
+                }
+            }
+
+            if (nMultiPatchPoints > 0)
+            {
+                forAll(f, fp)
+                {
+                    label pointI = f[fp];
+                    if
+                    (
+                       !isMultiPatchPoint[pointI]
+                     && patchConstraints[pointI].first() != 0
+                    )
+                    {
+                        //Pout<< "Knocking out constraint"
+                        //    << " on non-multiPatchPoint:"
+                        //    << pp.localPoints()[pointI] << endl;
+                        patchAttraction[pointI] = vector::zero;
+                        patchConstraints[pointI] = pointConstraint();
+                        nChanged++;
+
+                        if (multiPatchStr.valid())
+                        {
+                            meshTools::writeOBJ
+                            (
+                                multiPatchStr(),
+                                pp.localPoints()[pointI]
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        reduce(nChanged, sumOp<label>());
+        Info<< "Removing constraints near multi-patch points : changed "
+            << nChanged << " points" << endl;
+    }
+
 
 
     // Dump
@@ -1753,8 +1864,12 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     const pointField& localPoints = pp.localPoints();
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    // Displacement and orientation per pp face.
+    // Displacement and orientation per pp face
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // vector from point on surface back to face centre
     vectorField faceDisp(pp.size(), vector::zero);
+    // normal of surface at point on surface
     vectorField faceSurfaceNormal(pp.size(), vector::zero);
     vectorField faceRotation(pp.size(), vector::zero);
 
@@ -1771,34 +1886,42 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     vectorField patchDisp = nearestDisp;
 
 
-    // Collect (possibly remote) face-wise data on coupled points.
+    // Collect (possibly remote) per point data of all surrounding faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // - faceSurfaceNormal
     // - faceDisp
     // - faceRotation
-    // - faceCentres
+    // - faceCentres&faceNormal
 
     // For now just get all surrounding face data. Expensive - should just
     // store and sync data on coupled points only (see e.g PatchToolsNormals.C)
 
-    List<List<point> > pointFaceNormals(pp.nPoints());
+    List<List<point> > pointFaceSurfNormals(pp.nPoints());
     List<List<point> > pointFaceDisp(pp.nPoints());
     List<List<point> > pointFaceCentres(pp.nPoints());
+    List<labelList>    pointFacePatchID(pp.nPoints());
 
     // Fill local data
     forAll(pp.pointFaces(), pointI)
     {
         const labelList& pFaces = pp.pointFaces()[pointI];
-        List<point>& pNormals = pointFaceNormals[pointI];
+        List<point>& pNormals = pointFaceSurfNormals[pointI];
         pNormals.setSize(pFaces.size());
         List<point>& pDisp = pointFaceDisp[pointI];
         pDisp.setSize(pFaces.size());
         List<point>& pFc = pointFaceCentres[pointI];
         pFc.setSize(pFaces.size());
+        labelList& pFid = pointFacePatchID[pointI];
+        pFid.setSize(pFaces.size());
+
         forAll(pFaces, i)
         {
-            pNormals[i] = faceSurfaceNormal[pFaces[i]];
-            pDisp[i] = faceDisp[pFaces[i]];
-            pFc[i] = pp.faceCentres()[pFaces[i]];
+            label faceI = pFaces[i];
+            pNormals[i] = faceSurfaceNormal[faceI];
+            pDisp[i] = faceDisp[faceI];
+            pFc[i] = pp.faceCentres()[faceI];
+            label meshFaceI = pp.addressing()[faceI];
+            pFid[i] = mesh.boundaryMesh().whichPatch(meshFaceI);
         }
     }
 
@@ -1806,8 +1929,8 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
     (
         mesh,
         pp.meshPoints(),
-        pointFaceNormals,
-        listPlusEqOp(),
+        pointFaceSurfNormals,
+        listPlusEqOp<point>(),
         List<point>(),
         listTransform()
     );
@@ -1816,7 +1939,7 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         mesh,
         pp.meshPoints(),
         pointFaceDisp,
-        listPlusEqOp(),
+        listPlusEqOp<point>(),
         List<point>(),
         listTransform()
     );
@@ -1825,12 +1948,26 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         mesh,
         pp.meshPoints(),
         pointFaceCentres,
-        listPlusEqOp(),
+        listPlusEqOp<point>(),
         List<point>(),
         listTransform()
     );
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        pointFacePatchID,
+        listPlusEqOp<label>(),
+        List<label>()
+    );
 
 
+
+    // Main calculation
+    // ~~~~~~~~~~~~~~~~
+    // This is the main intelligence which calculates per point the vector to
+    // attract it to the nearest surface. There are lots of possibilities
+    // here.
 
     // Nearest feature
     vectorField patchAttraction(localPoints.size(), vector::zero);
@@ -1845,9 +1982,10 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         pp,
         snapDist,
 
-        pointFaceNormals,
+        pointFaceSurfNormals,
         pointFaceDisp,
         pointFaceCentres,
+        pointFacePatchID,
 
         patchAttraction,
         patchConstraints
