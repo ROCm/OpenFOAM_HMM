@@ -38,7 +38,6 @@ namespace combustionModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 Foam::combustionModels::psiCombustionModel::psiCombustionModel
 (
     const word& modelType,
@@ -49,13 +48,14 @@ Foam::combustionModels::psiCombustionModel::psiCombustionModel
     thermo_(psiReactionThermo::New(mesh))
 {}
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::combustionModels::psiCombustionModel::~psiCombustionModel()
 {}
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::combustionModels::psiCombustionModel::read()
 {
@@ -69,10 +69,12 @@ bool Foam::combustionModels::psiCombustionModel::read()
     }
 }
 
+
 Foam::tmp<Foam::volScalarField>
 Foam::combustionModels::psiCombustionModel::rho() const
 {
     return thermo_->rho();
 }
+
 
 // ************************************************************************* //
