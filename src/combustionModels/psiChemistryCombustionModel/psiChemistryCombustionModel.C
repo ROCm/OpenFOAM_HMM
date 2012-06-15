@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,6 @@ namespace combustionModels
     defineRunTimeSelectionTable(psiChemistryCombustionModel, dictionary);
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 psiChemistryCombustionModel::psiChemistryCombustionModel
@@ -48,13 +47,14 @@ psiChemistryCombustionModel::psiChemistryCombustionModel
     pChemistry_(psiChemistryModel::New(mesh))
 {}
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 psiChemistryCombustionModel::~psiChemistryCombustionModel()
 {}
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool psiChemistryCombustionModel::read()
 {
@@ -68,9 +68,10 @@ bool psiChemistryCombustionModel::read()
     }
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 } // End namespace combustionModels
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

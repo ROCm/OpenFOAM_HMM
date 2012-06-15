@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,10 @@ namespace combustionModels
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
-singleStepCombustion<CombThermoType, ThermoType>
-::singleStepCombustion
+singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
 (
-    const word& modelType, const fvMesh& mesh
+    const word& modelType,
+    const fvMesh& mesh
 )
 :
     CombThermoType(modelType, mesh),
@@ -63,13 +63,11 @@ singleStepCombustion<CombThermoType, ThermoType>
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
-singleStepCombustion<CombThermoType, ThermoType>
-::~singleStepCombustion()
+singleStepCombustion<CombThermoType, ThermoType>::~singleStepCombustion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 
 template<class CombThermoType, class ThermoType>
 Foam::tmp<Foam::fvScalarMatrix>
