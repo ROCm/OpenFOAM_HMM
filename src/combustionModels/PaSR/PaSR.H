@@ -55,7 +55,7 @@ class PaSR
     // Private data
 
         //- Mixing constant
-        dimensionedScalar Cmix_;
+        scalar Cmix_;
 
         //- Turbulent reaction switch
         Switch turbulentReaction_;

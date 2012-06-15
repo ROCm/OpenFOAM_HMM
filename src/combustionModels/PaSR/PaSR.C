@@ -25,7 +25,6 @@ License
 #include "PaSR.H"
 #include "fvmSup.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CombThermoType>
@@ -36,18 +35,17 @@ Foam::combustionModels::PaSR<CombThermoType>::PaSR
 )
 :
     CombThermoType(modelType, mesh),
-    Cmix_(this->coeffs().lookup("Cmix")),
+    Cmix_(readScalar(this->coeffs().lookup("Cmix"))),
     turbulentReaction_(this->coeffs().lookup("turbulentReaction")),
     kappa_
     (
         IOobject
         (
-            "kappa",
+            "PaSR::kappa",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject::AUTO_WRITE
         ),
         mesh,
         dimensionedScalar("kappa", dimless, 0.0)
@@ -69,7 +67,6 @@ Foam::combustionModels::PaSR<CombThermoType>::~PaSR()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 
 template<class CombThermoType>
 Foam::tmp<Foam::volScalarField>
@@ -108,20 +105,12 @@ void Foam::combustionModels::PaSR<CombThermoType>::correct()
             tmp<volScalarField> ttc(tc());
             const volScalarField& tc = ttc();
 
-            const dimensionedScalar e0
-            (
-                "e0",
-                sqr(dimLength)/pow3(dimTime),
-                SMALL
-            );
-
             forAll(epsilon, i)
             {
                 if (epsilon[i] > 0)
                 {
                     scalar tk =
-                        Cmix_.value()
-                       *Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + e0.value()));
+                        Cmix_*Foam::sqrt(muEff[i]/rho[i]/(epsilon[i] + SMALL));
 
                     // Chalmers PaSR model
                     if (!useReactionRate_)
