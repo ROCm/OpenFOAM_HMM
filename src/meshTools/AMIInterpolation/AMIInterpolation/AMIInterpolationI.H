@@ -64,6 +64,14 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcNonOverlap() const
 
 
 template<class SourcePatch, class TargetPatch>
+inline const Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum() const
+{
+    return srcWeightsSum_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::mapDistribute&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
 {
@@ -92,6 +100,14 @@ inline const Foam::scalarListList&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeights() const
 {
     return tgtWeights_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline const Foam::scalarField&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtWeightsSum() const
+{
+    return tgtWeightsSum_;
 }
 
 

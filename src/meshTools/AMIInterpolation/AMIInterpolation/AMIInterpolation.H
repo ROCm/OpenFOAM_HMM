@@ -106,6 +106,9 @@ class AMIInterpolation
             //- Weights of target faces per source face
             scalarListList srcWeights_;
 
+            //- Sum of weights of target faces per source face
+            scalarField srcWeightsSum_;
+
             //- Labels of faces that are not overlapped by any target faces
             //  (should be empty for correct functioning)
             labelList srcNonOverlap_;
@@ -121,6 +124,9 @@ class AMIInterpolation
 
             //- Weights of source faces per target face
             scalarListList tgtWeights_;
+
+            //- Sum of weights of source faces per target face
+            scalarField tgtWeightsSum_;
 
 
         //- Octree used to find face seeds
@@ -285,6 +291,7 @@ class AMIInterpolation
                 const word& patchName,
                 const labelListList& addr,
                 scalarListList& wght,
+                scalarField& wghtSum,
                 const bool output
             );
 
@@ -304,6 +311,7 @@ class AMIInterpolation
                 scalarField& srcMagSf,
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
+                scalarField& srcWeightsSum,
                 autoPtr<mapDistribute>& tgtMap
             );
 
@@ -365,10 +373,13 @@ public:
                 //- Return const access to source patch weights
                 inline const scalarListList& srcWeights() const;
 
+                //- Return const access to normalisation factor of source
+                //  patch weights (i.e. the sum before normalisation)
+                inline const scalarField& srcWeightsSum() const;
+
                 //- Labels of faces that are not overlapped by any target faces
                 //  (should be empty for correct functioning)
                 inline const labelList& srcNonOverlap() const;
-
 
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //  This gets source data into a form to be consumed by
@@ -387,7 +398,11 @@ public:
                 //- Return const access to target patch weights
                 inline const scalarListList& tgtWeights() const;
 
-                //- Target map pointer - valid only if singlePatchProc = -1
+                //- Return const access to normalisation factor of target
+                //  patch weights (i.e. the sum before normalisation)
+                inline const scalarField& tgtWeightsSum() const;
+
+                //- Target map pointer -  valid only if singlePatchProc=-1.
                 //  This gets target data into a form to be consumed by
                 //  srcAddress, srcWeights
                 inline const mapDistribute& tgtMap() const;
