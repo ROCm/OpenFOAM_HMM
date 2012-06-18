@@ -1385,12 +1385,23 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         {
             if (isMultiPatchPoint[pointI])
             {
-                if (patchConstraints[pointI].first() == 0)
+                if
+                (
+                    patchConstraints[pointI].first() == 0
+                 && allPatchConstraints[pointI].first() > 0
+                )
                 {
                     patchAttraction[pointI] = allPatchAttraction[pointI];
                     patchConstraints[pointI] = allPatchConstraints[pointI];
-                    //Pout<< "Adding constraint on multiPatchPoint:"
-                    //    << pp.localPoints()[pointI] << endl;
+
+                    if (multiPatchStr.valid())
+                    {
+                        Pout<< "Adding constraint on multiPatchPoint:"
+                            << pp.localPoints()[pointI]
+                            << " constraint:" << patchConstraints[pointI]
+                            << " attraction:" << patchAttraction[pointI]
+                            << endl;
+                    }
                 }
             }
         }
@@ -1407,7 +1418,12 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
             label nMultiPatchPoints = 0;
             forAll(f, fp)
             {
-                if (isMultiPatchPoint[f[fp]])
+                label pointI = f[fp];
+                if
+                (
+                    isMultiPatchPoint[pointI]
+                 && patchConstraints[pointI].first() != 0
+                )
                 {
                     nMultiPatchPoints++;
                 }
