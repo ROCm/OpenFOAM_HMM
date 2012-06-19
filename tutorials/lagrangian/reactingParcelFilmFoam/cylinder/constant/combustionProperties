@@ -21,7 +21,7 @@ active  false;
 
 PaSRCoeffs
 {
-    Cmix                Cmix [ 0 0 0 0 0 0 0 ] 1.0;
+    Cmix                1.0;
     turbulentReaction   on;
 }
 
