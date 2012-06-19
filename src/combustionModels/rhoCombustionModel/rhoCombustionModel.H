@@ -67,14 +67,6 @@ class rhoCombustionModel
         void operator=(const rhoCombustionModel&);
 
 
-protected:
-
-    // Protected data
-
-        //- Thermo package
-        autoPtr<rhoReactionThermo> thermo_;
-
-
 public:
 
     //- Runtime type information
@@ -99,19 +91,12 @@ public:
 
 
         //- Construct from components and thermo
-        rhoCombustionModel
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        );
+        rhoCombustionModel(const word& modelType, const fvMesh& mesh);
 
 
 
     //- Selector
-    static autoPtr<rhoCombustionModel> New
-    (
-        const fvMesh& mesh
-    );
+    static autoPtr<rhoCombustionModel> New(const fvMesh& mesh);
 
 
     //- Destructor
@@ -127,13 +112,14 @@ public:
 
 
         //- Return access to the thermo package
-        inline rhoReactionThermo& thermo();
+        virtual rhoReactionThermo& thermo() = 0;
 
         //- Return const access to the thermo package
-        inline const rhoReactionThermo& thermo() const;
+        virtual const rhoReactionThermo& thermo() const = 0;
 
         //- Return tmp of rho
-        virtual tmp<volScalarField> rho() const;
+        virtual tmp<volScalarField> rho() const = 0;
+
 
      // I-O
 
@@ -144,12 +130,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 } // End namespace combustionModels
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "rhoCombustionModelI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

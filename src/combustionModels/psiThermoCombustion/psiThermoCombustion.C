@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "psiThermoCombustion.H"
 
-inline Foam::rhoChemistryModel&
-Foam::combustionModels::rhoChemistryCombustionModel::pChemistry()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiThermoCombustion::psiThermoCombustion
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
+:
+    psiCombustionModel(modelType, mesh),
+    thermoPtr_(psiReactionThermo::New(mesh))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiThermoCombustion::~psiThermoCombustion()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::psiReactionThermo&
+Foam::combustionModels::psiThermoCombustion::thermo()
 {
-    return pChemistry_();
+    return thermoPtr_();
 }
 
 
-inline const Foam::rhoChemistryModel&
-Foam::combustionModels::rhoChemistryCombustionModel::
-pChemistry() const
+const Foam::psiReactionThermo&
+Foam::combustionModels::psiThermoCombustion::thermo() const
 {
-    return pChemistry_();
+    return thermoPtr_();
 }
 
 
-inline Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::rhoChemistryCombustionModel::rho() const
+Foam::tmp<Foam::volScalarField>
+Foam::combustionModels::psiThermoCombustion::rho() const
 {
-    return pChemistry_->thermo().rho();
-}
-
-
-inline const Foam::rhoReactionThermo&
-Foam::combustionModels::rhoChemistryCombustionModel::thermo() const
-{
-    return pChemistry_->thermo();
-}
-
-
-inline Foam::rhoReactionThermo&
-Foam::combustionModels::rhoChemistryCombustionModel::thermo()
-{
-    return pChemistry_->thermo();
+    return thermoPtr_->rho();
 }
 
 

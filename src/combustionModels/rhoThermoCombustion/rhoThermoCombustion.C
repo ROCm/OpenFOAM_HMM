@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "rhoThermoCombustion.H"
 
-inline Foam::rhoReactionThermo&
-Foam::combustionModels::rhoCombustionModel::thermo()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::combustionModels::rhoThermoCombustion::rhoThermoCombustion
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
+:
+    rhoCombustionModel(modelType, mesh),
+    thermoPtr_(rhoReactionThermo::New(mesh))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::combustionModels::rhoThermoCombustion::~rhoThermoCombustion()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::rhoReactionThermo&
+Foam::combustionModels::rhoThermoCombustion::thermo()
 {
-    return thermo_();
+    return thermoPtr_();
 }
 
 
-inline const Foam::rhoReactionThermo&
-Foam::combustionModels::rhoCombustionModel::thermo() const
+const Foam::rhoReactionThermo&
+Foam::combustionModels::rhoThermoCombustion::thermo() const
 {
-    return thermo_();
+    return thermoPtr_();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::combustionModels::rhoThermoCombustion::rho() const
+{
+    return thermoPtr_().rho();
 }
 
 

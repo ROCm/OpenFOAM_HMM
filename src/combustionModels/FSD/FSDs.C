@@ -27,6 +27,9 @@ License
 
 #include "thermoPhysicsTypes.H"
 #include "psiCombustionModel.H"
+#include "psiThermoCombustion.H"
+#include "rhoCombustionModel.H"
+#include "rhoThermoCombustion.H"
 #include "FSD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,10 +41,34 @@ namespace combustionModels
     makeCombustionTypesThermo
     (
         FSD,
-        psiCombustionModel,
-        gasThermoPhysics
+        psiThermoCombustion,
+        gasThermoPhysics,
+        psiCombustionModel
     );
 
+    makeCombustionTypesThermo
+    (
+        FSD,
+        psiThermoCombustion,
+        constGasThermoPhysics,
+        psiCombustionModel
+    );
+
+    makeCombustionTypesThermo
+    (
+        FSD,
+        rhoThermoCombustion,
+        gasThermoPhysics,
+        rhoCombustionModel
+    );
+
+    makeCombustionTypesThermo
+    (
+        FSD,
+        rhoThermoCombustion,
+        constGasThermoPhysics,
+        rhoCombustionModel
+    );
 }
 }
 

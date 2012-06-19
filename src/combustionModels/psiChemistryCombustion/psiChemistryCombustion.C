@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,55 +23,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "psiChemistryCombustionModel.H"
-
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
-
-namespace Foam
-{
-namespace combustionModels
-{
-    defineTypeNameAndDebug(psiChemistryCombustionModel, 0);
-    defineRunTimeSelectionTable(psiChemistryCombustionModel, dictionary);
-
+#include "psiChemistryCombustion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-psiChemistryCombustionModel::psiChemistryCombustionModel
+Foam::combustionModels::psiChemistryCombustion::psiChemistryCombustion
 (
     const word& modelType,
     const fvMesh& mesh
 )
 :
-    combustionModel(modelType, mesh),
-    pChemistry_(psiChemistryModel::New(mesh))
+    psiCombustionModel(modelType, mesh),
+    chemistryPtr_(psiChemistryModel::New(mesh))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-psiChemistryCombustionModel::~psiChemistryCombustionModel()
+Foam::combustionModels::psiChemistryCombustion::~psiChemistryCombustion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool psiChemistryCombustionModel::read()
+Foam::psiReactionThermo&
+Foam::combustionModels::psiChemistryCombustion::thermo()
 {
-    if (combustionModel::read())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return chemistryPtr_->thermo();
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+const Foam::psiReactionThermo&
+Foam::combustionModels::psiChemistryCombustion::thermo() const
+{
+    return chemistryPtr_->thermo();
+}
 
-} // End namespace combustionModels
-} // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::tmp<Foam::volScalarField>
+Foam::combustionModels::psiChemistryCombustion::rho() const
+{
+    return chemistryPtr_->thermo().rho();
+}
+
+
+// ************************************************************************* //

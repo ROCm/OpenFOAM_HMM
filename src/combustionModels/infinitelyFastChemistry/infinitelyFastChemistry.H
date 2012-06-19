@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,7 @@ SourceFiles
 
 #ifndef infinitelyFastChemistry_H
 #define infinitelyFastChemistry_H
+
 #include "singleStepCombustion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -51,7 +52,7 @@ namespace combustionModels
 template<class CombThermoType, class ThermoType>
 class infinitelyFastChemistry
 :
-    public singleStepCombustion <CombThermoType, ThermoType>
+    public singleStepCombustion<CombThermoType, ThermoType>
 {
     // Private data
 
@@ -77,10 +78,7 @@ public:
     // Constructors
 
         //- Construct from components
-        infinitelyFastChemistry
-        (
-            const word& modelType, const fvMesh& mesh
-        );
+        infinitelyFastChemistry(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
@@ -95,7 +93,7 @@ public:
             virtual void correct();
 
 
-    // I-O
+        // I-O
 
             //- Update properties
             virtual bool read();

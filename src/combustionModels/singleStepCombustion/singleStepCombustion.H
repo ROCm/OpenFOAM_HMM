@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class singleStepCombustion Declaration
+                    Class singleStepCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CombThermoType, class ThermoType>
@@ -52,20 +52,6 @@ class singleStepCombustion
 :
     public CombThermoType
 {
-
-protected:
-
-    // Protected data
-
-        //- Reference to singleStepReactingMixture mixture
-        singleStepReactingMixture<ThermoType>& singleMixture_;
-
-        //- Fuel consumption rate
-        volScalarField wFuel_;
-
-
-private:
-
     // Private Member Functions
 
         //- Disallow copy construct
@@ -75,16 +61,23 @@ private:
         void operator=(const singleStepCombustion&);
 
 
-public:
+protected:
 
+    // Protected data
+
+        //- Pointer to singleStepReactingMixture mixture
+        singleStepReactingMixture<ThermoType>* singleMixturePtr_;
+
+        //- Fuel consumption rate
+        volScalarField wFuel_;
+
+
+public:
 
     // Constructors
 
         //- Construct from components
-        singleStepCombustion
-        (
-            const word& modelType, const fvMesh& mesh
-        );
+        singleStepCombustion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
@@ -94,7 +87,6 @@ public:
     // Member Functions
 
         // Evolution
-
 
             //- Fuel consumption rate matrix
             virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const;
@@ -106,7 +98,7 @@ public:
             virtual tmp<volScalarField> Sh() const;
 
 
-    // I-O
+        // I-O
 
             //- Update properties from given dictionary
             virtual bool read();
@@ -119,7 +111,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #ifdef NoRepository
 #   include "singleStepCombustion.C"

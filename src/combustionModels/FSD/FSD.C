@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,8 @@ namespace combustionModels
 template<class CombThermoType, class ThermoType>
 FSD<CombThermoType, ThermoType>::FSD
 (
-    const word& modelType, const fvMesh& mesh
+    const word& modelType,
+    const fvMesh& mesh
 )
 :
     singleStepCombustion<CombThermoType, ThermoType>(modelType, mesh),
@@ -62,14 +63,8 @@ FSD<CombThermoType, ThermoType>::FSD
         this->mesh(),
         dimensionedScalar("zero", dimless, 0.0)
     ),
-    YFuelFuelStream_
-    (
-        dimensionedScalar("YFuelStream", dimless, 1.0)
-    ),
-    YO2OxiStream_
-    (
-        dimensionedScalar("YOxiStream", dimless, 0.23)
-    ),
+    YFuelFuelStream_(dimensionedScalar("YFuelStream", dimless, 1.0)),
+    YO2OxiStream_(dimensionedScalar("YOxiStream", dimless, 0.23)),
     Cv_(readScalar(this->coeffs().lookup("Cv"))),
     C_(5.0),
     ftMin_(0.0),
@@ -91,15 +86,15 @@ FSD<CombThermoType, ThermoType>::~FSD()
 template<class CombThermoType, class ThermoType>
 void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 {
-    this->singleMixture_.fresCorrect();
+    this->singleMixturePtr_->fresCorrect();
 
-    const label fuelI = this->singleMixture_.fuelIndex();
+    const label fuelI = this->singleMixturePtr_->fuelIndex();
 
-    const volScalarField& YFuel = this->thermo_->composition().Y()[fuelI];
+    const volScalarField& YFuel = this->thermoPtr_->composition().Y()[fuelI];
 
-    const volScalarField& YO2 = this->thermo_->composition().Y("O2");
+    const volScalarField& YO2 = this->thermoPtr_->composition().Y("O2");
 
-    const dimensionedScalar s = this->singleMixture_.s();
+    const dimensionedScalar s = this->singleMixturePtr_->s();
 
     ft_ =
         (s*YFuel - (YO2 - YO2OxiStream_))/(s*YFuelFuelStream_ + YO2OxiStream_);
@@ -195,7 +190,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     volScalarField  deltaF
     (
-        lesModel.delta()/dimensionedScalar("flame",dimLength, 1.5e-3)
+        lesModel.delta()/dimensionedScalar("flame", dimLength, 1.5e-3)
     );
 
     // Linear correlation between delta and flame thickness
@@ -205,33 +200,33 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     forAll(ft_, cellI)
     {
-        if(ft_[cellI] > ftMin_ && ft_[cellI] < ftMax_)
+        if (ft_[cellI] > ftMin_ && ft_[cellI] < ftMax_)
         {
             scalar ftCell = ft_[cellI];
 
-            if(ftVar[cellI] > ftVarMin_) //sub-grid beta pdf of ft_
+            if (ftVar[cellI] > ftVarMin_) //sub-grid beta pdf of ft_
             {
                 scalar ftVarc = ftVar[cellI];
                 scalar a =
                     max(ftCell*(ftCell*(1.0 - ftCell)/ftVarc - 1.0), 0.0);
                 scalar b = max(a/ftCell - a, 0.0);
 
-                for(int i=1; i<ftDim_; i++)
+                for (int i=1; i<ftDim_; i++)
                 {
                     scalar ft = i*deltaFt;
                     pc[cellI] += pow(ft, a-1.0)*pow(1.0 - ft, b - 1.0)*deltaFt;
                 }
 
-                for(int i=1; i<ftDim_; i++)
+                for (int i=1; i<ftDim_; i++)
                 {
                     scalar ft = i*deltaFt;
                     omegaFuelBar[cellI] +=
                         omegaFuel[cellI]/omegaF[cellI]
                        *exp
-                       (
-                        -sqr(ft - ftStoich)
-                        /(2.0*sqr(0.01*omegaF[cellI]))
-                       )
+                        (
+                           -sqr(ft - ftStoich)
+                           /(2.0*sqr(0.01*omegaF[cellI]))
+                        )
                        *pow(ft, a - 1.0)
                        *pow(1.0 - ft, b - 1.0)
                        *deltaFt;
@@ -241,31 +236,25 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
             else
             {
                 omegaFuelBar[cellI] =
-                    (omegaFuel[cellI]/omegaF[cellI])
-                   *exp
-                   (
-                    -sqr(ftCell - ftStoich)/(2.0*sqr(0.01*omegaF[cellI]))
-                   );
+                   omegaFuel[cellI]/omegaF[cellI]
+                  *exp(-sqr(ftCell - ftStoich)/(2.0*sqr(0.01*omegaF[cellI])));
             }
-
         }
         else
         {
-                omegaFuelBar[cellI] = 0.0;
+            omegaFuelBar[cellI] = 0.0;
         }
     }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Combustion progress variable (c).
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Combustion progress variable, c
 
     List<label> productsIndex(2, label(-1));
     {
         label i = 0;
-        forAll (this->singleMixture_.specieProd(), specieI)
+        forAll(this->singleMixturePtr_->specieProd(), specieI)
         {
-            if (this->singleMixture_.specieProd()[specieI] < 0)
+            if (this->singleMixturePtr_->specieProd()[specieI] < 0)
             {
                 productsIndex[i] = specieI;
                 i++;
@@ -276,9 +265,9 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     // Flamelet probability of the progress c based on IFC (reuse pc)
     scalar YprodTotal = 0;
-    forAll (productsIndex, j)
+    forAll(productsIndex, j)
     {
-        YprodTotal += this->singleMixture_.Yprod0()[productsIndex[j]];
+        YprodTotal += this->singleMixturePtr_->Yprod0()[productsIndex[j]];
     }
 
     forAll(ft_, cellI)
@@ -312,10 +301,10 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     volScalarField& products = tproducts();
 
-    forAll (productsIndex, j)
+    forAll(productsIndex, j)
     {
         label specieI = productsIndex[j];
-        const volScalarField& Yp = this->thermo_->composition().Y()[specieI];
+        const volScalarField& Yp = this->thermoPtr_->composition().Y()[specieI];
         products += Yp;
     }
 
@@ -326,7 +315,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     pc = min(C_*c, scalar(1));
 
-    const volScalarField fres(this->singleMixture_.fres(fuelI));
+    const volScalarField fres(this->singleMixturePtr_->fres(fuelI));
 
     this->wFuel_ == mgft*pc*omegaFuelBar;
 }

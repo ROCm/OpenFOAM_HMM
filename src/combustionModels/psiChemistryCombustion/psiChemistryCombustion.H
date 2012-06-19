@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,25 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::psiCombustionModel
+    Foam::psiChemistryCombustion
 
 Description
-    Combustion models for compressibility-based thermodynamics
+    Compressibility-based chemistry model wrapper for combustion models
 
 SourceFiles
-    psiCombustionModelI.H
-    psiCombustionModel.C
-    psiCombustionModelNew.C
+    psiChemistryCombustion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef psiCombustionModel_H
-#define psiCombustionModel_H
+#ifndef psiChemistryCombustion_H
+#define psiChemistryCombustion_H
 
-#include "combustionModel.H"
 #include "autoPtr.H"
-#include "runTimeSelectionTables.H"
-#include "psiReactionThermo.H"
+#include "psiCombustionModel.H"
+#include "psiChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,74 +47,52 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     class psiCombustionModel Declaration
+                    class psiChemistryCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-class psiCombustionModel
+class psiChemistryCombustion
 :
-    public combustionModel
+    public psiCombustionModel
 {
-
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        psiCombustionModel(const psiCombustionModel&);
+        psiChemistryCombustion(const psiChemistryCombustion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const psiCombustionModel&);
+        void operator=(const psiChemistryCombustion&);
+
+
+protected:
+
+    // Protected data
+
+        //- Pointer to chemistry model
+        autoPtr<psiChemistryModel> chemistryPtr_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("psiCombustionModel");
-
-
-    //- Declare run-time constructor selection tables
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        psiCombustionModel,
-        dictionary,
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        ),
-        (modelType, mesh)
-    );
-
-
     // Constructors
 
         //- Construct from components and thermo
-        psiCombustionModel(const word& modelType, const fvMesh& mesh);
-
-
-
-    //- Selector
-    static autoPtr<psiCombustionModel> New(const fvMesh& mesh);
+        psiChemistryCombustion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~psiCombustionModel();
+    virtual ~psiChemistryCombustion();
 
 
     // Member Functions
 
         //- Return access to the thermo package
-        virtual psiReactionThermo& thermo() = 0;
+        virtual psiReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        virtual const psiReactionThermo& thermo() const = 0;
+        virtual const psiReactionThermo& thermo() const;
 
-        //- Return tmp of rho
-        virtual tmp<volScalarField> rho() const = 0;
-
-
-    // I-O
-
-        //- Update properties from given dictionary
-        virtual bool read();
+        //- Return const access to the density field
+        virtual tmp<volScalarField> rho() const;
 };
 
 

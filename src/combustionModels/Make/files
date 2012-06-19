@@ -6,13 +6,13 @@ psiCombustionModel/psiCombustionModelNew.C
 rhoCombustionModel/rhoCombustionModel.C
 rhoCombustionModel/rhoCombustionModelNew.C
 
+psiThermoCombustion/psiThermoCombustion.C
+rhoThermoCombustion/rhoThermoCombustion.C
+
+psiChemistryCombustion/psiChemistryCombustion.C
+rhoChemistryCombustion/rhoChemistryCombustion.C
+
 infinitelyFastChemistry/infinitelyFastChemistrys.C
-
-psiChemistryCombustionModel/psiChemistryCombustionModel.C
-psiChemistryCombustionModel/psiChemistryCombustionModelNew.C
-
-rhoChemistryCombustionModel/rhoChemistryCombustionModel.C
-rhoChemistryCombustionModel/rhoChemistryCombustionModelNew.C
 
 PaSR/PaSRs.C
 

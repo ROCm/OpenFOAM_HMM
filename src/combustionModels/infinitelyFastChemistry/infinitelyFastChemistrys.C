@@ -26,10 +26,9 @@ License
 #include "makeCombustionTypes.H"
 
 #include "thermoPhysicsTypes.H"
-#include "psiCombustionModel.H"
-#include "rhoCombustionModel.H"
+#include "psiThermoCombustion.H"
+#include "rhoThermoCombustion.H"
 #include "infinitelyFastChemistry.H"
-#include "singleStepCombustion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,22 +39,33 @@ namespace combustionModels
     makeCombustionTypesThermo
     (
         infinitelyFastChemistry,
-        psiCombustionModel,
-        gasThermoPhysics
+        psiThermoCombustion,
+        gasThermoPhysics,
+        psiCombustionModel
     );
 
     makeCombustionTypesThermo
     (
         infinitelyFastChemistry,
-        psiCombustionModel,
-        constGasThermoPhysics
+        psiThermoCombustion,
+        constGasThermoPhysics,
+        psiCombustionModel
     );
 
     makeCombustionTypesThermo
     (
         infinitelyFastChemistry,
-        rhoCombustionModel,
-        gasThermoPhysics
+        rhoThermoCombustion,
+        gasThermoPhysics,
+        rhoCombustionModel
+    );
+
+    makeCombustionTypesThermo
+    (
+        infinitelyFastChemistry,
+        rhoThermoCombustion,
+        constGasThermoPhysics,
+        rhoCombustionModel
     );
 }
 }

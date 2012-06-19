@@ -44,8 +44,7 @@ Foam::combustionModels::psiCombustionModel::psiCombustionModel
     const fvMesh& mesh
 )
 :
-    combustionModel(modelType, mesh),
-    thermo_(psiReactionThermo::New(mesh))
+    combustionModel(modelType, mesh)
 {}
 
 
@@ -67,13 +66,6 @@ bool Foam::combustionModels::psiCombustionModel::read()
     {
         return false;
     }
-}
-
-
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::psiCombustionModel::rho() const
-{
-    return thermo_->rho();
 }
 
 

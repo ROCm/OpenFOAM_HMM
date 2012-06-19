@@ -45,23 +45,17 @@ Foam::combustionModels::rhoCombustionModel::rhoCombustionModel
     const fvMesh& mesh
 )
 :
-    combustionModel(modelType, mesh),
-    thermo_(rhoReactionThermo::New(mesh))
+    combustionModel(modelType, mesh)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::combustionModels::rhoCombustionModel::~rhoCombustionModel()
 {}
 
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::rhoCombustionModel::rho() const
-{
-    return thermo_->rho();
-}
-
 
 bool Foam::combustionModels::rhoCombustionModel::read()
 {
@@ -74,5 +68,6 @@ bool Foam::combustionModels::rhoCombustionModel::read()
         return false;
     }
 }
+
 
 // ************************************************************************* //

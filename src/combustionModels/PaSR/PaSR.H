@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,10 +47,10 @@ namespace combustionModels
                             Class PaSR Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CombThermoType>
+template<class Type>
 class PaSR
 :
-    public CombThermoType
+    public Type
 {
     // Private data
 
@@ -88,11 +88,7 @@ public:
     // Constructors
 
         //- Construct from components
-        PaSR
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        );
+        PaSR(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
@@ -114,6 +110,7 @@ public:
 
             //-  Return source for enthalpy equation [kg/m/s3]
             virtual tmp<volScalarField> Sh() const;
+
 
     // I-O
 

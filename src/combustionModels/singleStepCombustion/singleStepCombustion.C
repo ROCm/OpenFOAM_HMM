@@ -40,10 +40,7 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
 )
 :
     CombThermoType(modelType, mesh),
-    singleMixture_
-    (
-        dynamic_cast<singleStepReactingMixture<ThermoType>&>(this->thermo())
-    ),
+    singleMixturePtr_(NULL),
     wFuel_
     (
         IOobject
@@ -55,9 +52,34 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
             IOobject::NO_WRITE
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimMass/pow3(dimLength)/dimTime, 0.0)
+        dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
     )
-{}
+{
+    if (isA<singleStepReactingMixture<ThermoType> >(this->thermo()))
+    {
+        singleMixturePtr_ =
+            &dynamic_cast<singleStepReactingMixture<ThermoType>&>
+            (
+                this->thermo()
+            );
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "singleStepCombustion<CombThermoType, ThermoType>::"
+            "singleStepCombustion"
+            "("
+                "const word&, "
+                "const fvMesh&"
+            ")"
+        )
+            << "Inconsistent thermo package for " << this->type() << " model:\n"
+            << "    " << this->thermo().type() << nl << nl
+            << "Please select a thermo package based on "
+            << "singleStepReactingMixture" << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
@@ -76,11 +98,11 @@ singleStepCombustion<CombThermoType, ThermoType>::R
     const volScalarField& Y
 ) const
 {
-    const label specieI = this->thermo_->composition().species()[Y.name()];
+    const label specieI = this->thermoPtr_->composition().species()[Y.name()];
 
     const volScalarField wSpecie
     (
-        wFuel_*singleMixture_.specieStoichCoeffs()[specieI]
+        wFuel_*singleMixturePtr_->specieStoichCoeffs()[specieI]
     );
 
     return wSpecie + fvm::Sp(0.0*wSpecie, Y);
@@ -91,10 +113,10 @@ template<class CombThermoType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
 singleStepCombustion< CombThermoType, ThermoType>::Sh() const
 {
-    const label fuelI = singleMixture_.fuelIndex();
-    const volScalarField& YFuel = this->thermo_->composition().Y(fuelI);
+    const label fuelI = singleMixturePtr_->fuelIndex();
+    const volScalarField& YFuel = this->thermoPtr_->composition().Y(fuelI);
 
-    return -singleMixture_.qFuel()*(R(YFuel) & YFuel);
+    return -singleMixturePtr_->qFuel()*(R(YFuel) & YFuel);
 }
 
 
