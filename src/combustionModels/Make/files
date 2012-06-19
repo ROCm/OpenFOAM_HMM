@@ -1,16 +1,14 @@
 combustionModel/combustionModel.C
 
-psiCombustionModel/psiCombustionModel.C
-psiCombustionModel/psiCombustionModelNew.C
+psiCombustionModel/psiCombustionModel/psiCombustionModel.C
+psiCombustionModel/psiCombustionModel/psiCombustionModelNew.C
+psiCombustionModel/psiThermoCombustion/psiThermoCombustion.C
+psiCombustionModel/psiChemistryCombustion/psiChemistryCombustion.C
 
-rhoCombustionModel/rhoCombustionModel.C
-rhoCombustionModel/rhoCombustionModelNew.C
-
-psiThermoCombustion/psiThermoCombustion.C
-rhoThermoCombustion/rhoThermoCombustion.C
-
-psiChemistryCombustion/psiChemistryCombustion.C
-rhoChemistryCombustion/rhoChemistryCombustion.C
+rhoCombustionModel/rhoCombustionModel/rhoCombustionModel.C
+rhoCombustionModel/rhoCombustionModel/rhoCombustionModelNew.C
+rhoCombustionModel/rhoThermoCombustion/rhoThermoCombustion.C
+rhoCombustionModel/rhoChemistryCombustion/rhoChemistryCombustion.C
 
 infinitelyFastChemistry/infinitelyFastChemistrys.C
 
