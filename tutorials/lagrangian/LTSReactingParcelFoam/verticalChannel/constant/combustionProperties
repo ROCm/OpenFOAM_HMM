@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  PaSR<rhoChemistryCombustionModel>;
+combustionModel  PaSR<rhoChemistryCombustion>;
 
 active  false;
 
