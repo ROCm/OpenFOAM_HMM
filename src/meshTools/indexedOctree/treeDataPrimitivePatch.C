@@ -29,30 +29,14 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-Foam::scalar
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-tolSqr = sqr(1e-6);
+template<class PatchType>
+Foam::scalar Foam::treeDataPrimitivePatch<PatchType>::tolSqr = sqr(1e-6);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-Foam::treeBoundBox
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-calcBb
+template<class PatchType>
+Foam::treeBoundBox Foam::treeDataPrimitivePatch<PatchType>::calcBb
 (
     const pointField& points,
     const face& f
@@ -71,15 +55,8 @@ calcBb
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-void Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-update()
+template<class PatchType>
+void Foam::treeDataPrimitivePatch<PatchType>::update()
 {
     if (cacheBb_)
     {
@@ -96,18 +73,11 @@ update()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-treeDataPrimitivePatch
+template<class PatchType>
+Foam::treeDataPrimitivePatch<PatchType>::treeDataPrimitivePatch
 (
     const bool cacheBb,
-    const PrimitivePatch<Face, FaceList, PointField, PointType>& patch
+    const PatchType& patch
 )
 :
     patch_(patch),
@@ -119,16 +89,8 @@ treeDataPrimitivePatch
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-Foam::pointField
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-shapePoints() const
+template<class PatchType>
+Foam::pointField Foam::treeDataPrimitivePatch<PatchType>::shapePoints() const
 {
     pointField cc(patch_.size());
 
@@ -143,27 +105,10 @@ shapePoints() const
 
 //- Get type (inside,outside,mixed,unknown) of point w.r.t. surface.
 //  Only makes sense for closed surfaces.
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-Foam::label
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-getVolumeType
+template<class PatchType>
+Foam::label Foam::treeDataPrimitivePatch<PatchType>:: getVolumeType
 (
-    const indexedOctree
-    <
-        treeDataPrimitivePatch
-        <
-            Face,
-            FaceList,
-            PointField,
-            PointType
-        >
-    >& oc,
+    const indexedOctree<treeDataPrimitivePatch<PatchType> >& oc,
     const point& sample
 ) const
 {
@@ -396,16 +341,8 @@ getVolumeType
 
 
 // Check if any point on shape is inside cubeBb.
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-bool
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-overlaps
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 (
     const label index,
     const treeBoundBox& cubeBb
@@ -462,16 +399,8 @@ overlaps
 
 
 // Check if any point on shape is inside sphere.
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-bool
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-overlaps
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 (
     const label index,
     const point& centre,
@@ -512,16 +441,8 @@ overlaps
 
 // Calculate nearest point to sample. Updates (if any) nearestDistSqr, minIndex,
 // nearestPoint.
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-void
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-findNearest
+template<class PatchType>
+void Foam::treeDataPrimitivePatch<PatchType>::findNearest
 (
     const labelUList& indices,
     const point& sample,
@@ -552,16 +473,8 @@ findNearest
 }
 
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType
->
-bool
-Foam::treeDataPrimitivePatch<Face, FaceList, PointField, PointType>::
-intersects
+template<class PatchType>
+bool Foam::treeDataPrimitivePatch<PatchType>::intersects
 (
     const label index,
     const point& start,

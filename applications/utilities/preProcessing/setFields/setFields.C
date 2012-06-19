@@ -92,7 +92,15 @@ bool setCellFieldType
                 field.boundaryField()[patchi].patchInternalField();
         }
 
-        field.write();
+        if (!field.write())
+        {
+            FatalErrorIn
+            (
+                "void setCellFieldType"
+                "(const fvMesh& mesh, const labelList& selectedCells,"
+                "Istream& fieldValueStream)"
+            ) << "Failed writing field " << fieldName << endl;
+        }
     }
     else
     {
@@ -260,7 +268,15 @@ bool setFaceFieldType
             }
         }
 
-        field.write();
+        if (!field.write())
+        {
+            FatalErrorIn
+            (
+                "void setFaceFieldType"
+                "(const fvMesh& mesh, const labelList& selectedFaces,"
+                "Istream& fieldValueStream)"
+            )   << "Failed writing field " << field.name() << exit(FatalError);
+        }
     }
     else
     {

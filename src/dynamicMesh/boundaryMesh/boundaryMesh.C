@@ -924,10 +924,10 @@ Foam::labelList Foam::boundaryMesh::getNearest
     // Create the octrees
     indexedOctree
     <
-        treeDataPrimitivePatch<face, UIndirectList, const pointField&>
+        treeDataPrimitivePatch<uindirectPrimitivePatch>
     > leftTree
     (
-        treeDataPrimitivePatch<face, UIndirectList, const pointField&>
+        treeDataPrimitivePatch<uindirectPrimitivePatch>
         (
             false,          // cacheBb
             leftPatch
@@ -939,10 +939,10 @@ Foam::labelList Foam::boundaryMesh::getNearest
     );
     indexedOctree
     <
-        treeDataPrimitivePatch<face, UIndirectList, const pointField&>
+        treeDataPrimitivePatch<uindirectPrimitivePatch>
     > rightTree
     (
-        treeDataPrimitivePatch<face, UIndirectList, const pointField&>
+        treeDataPrimitivePatch<uindirectPrimitivePatch>
         (
             false,          // cacheBb
             rightPatch

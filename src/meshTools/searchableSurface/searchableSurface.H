@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -322,6 +322,17 @@ public:
                 const pointField&,
                 List<volumeType>&
             ) const = 0;
+
+            //- Find nearest, normal and region. Can be overridden with
+            //  optimised implementation
+            virtual void findNearest
+            (
+                const pointField& sample,
+                const scalarField& nearestDistSqr,
+                List<pointIndexHit>&,
+                vectorField& normal,
+                labelList& region
+            ) const;
 
 
         // Other

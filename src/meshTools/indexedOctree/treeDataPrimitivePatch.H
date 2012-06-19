@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,13 +59,7 @@ TemplateName(treeDataPrimitivePatch);
                    Class treeDataPrimitivePatch Declaration
 \*---------------------------------------------------------------------------*/
 
-template
-<
-    class Face,
-    template<class> class FaceList,
-    class PointField,
-    class PointType=point
->
+template<class PatchType>
 class treeDataPrimitivePatch
 :
     public treeDataPrimitivePatchName
@@ -78,7 +72,7 @@ class treeDataPrimitivePatch
     // Private data
 
         //- Underlying geometry
-        const PrimitivePatch<Face, FaceList, PointField, PointType>& patch_;
+        const PatchType& patch_;
 
         //- Whether to precalculate and store face bounding box
         const bool cacheBb_;
@@ -103,7 +97,7 @@ public:
         treeDataPrimitivePatch
         (
             const bool cacheBb,
-            const PrimitivePatch<Face, FaceList, PointField, PointType>&
+            const PatchType&
         );
 
 
@@ -121,8 +115,7 @@ public:
             pointField shapePoints() const;
 
             //- Return access to the underlying patch
-            const PrimitivePatch<Face, FaceList, PointField, PointType>&
-            patch() const
+            const PatchType& patch() const
             {
                 return patch_;
             }
@@ -134,16 +127,7 @@ public:
             //  Only makes sense for closed surfaces.
             label getVolumeType
             (
-                const indexedOctree
-                <
-                    treeDataPrimitivePatch
-                    <
-                        Face,
-                        FaceList,
-                        PointField,
-                        PointType
-                    >
-                >&,
+                const indexedOctree<treeDataPrimitivePatch<PatchType> >&,
                 const point&
             ) const;
 

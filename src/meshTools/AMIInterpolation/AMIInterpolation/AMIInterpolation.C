@@ -1164,50 +1164,36 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
     const word& patchName,
     const labelListList& addr,
     scalarListList& wght,
+    scalarField& wghtSum,
     const bool output
 )
 {
-    scalar minBound = VGREAT;
-    scalar maxBound = -VGREAT;
-
-    scalar tSum = 0.0;
-
     // Normalise the weights
+    wghtSum.setSize(wght.size());
     forAll(wght, faceI)
     {
         scalar s = sum(wght[faceI]);
         scalar t = s/patchAreas[faceI];
 
-        tSum += t;
-
-        if (t < minBound)
-        {
-            minBound = t;
-        }
-
-        if (t > maxBound)
-        {
-            maxBound = t;
-        }
-
         forAll(addr[faceI], i)
         {
             wght[faceI][i] /= s;
         }
+
+        wghtSum[faceI] = t;
     }
 
 
     if (output)
     {
-        const label nFace = returnReduce(wght.size(), sumOp<scalar>());
-        reduce(tSum, sumOp<scalar>());
+        const label nFace = returnReduce(wght.size(), sumOp<label>());
 
         if (nFace)
         {
             Info<< "AMI: Patch " << patchName << " weights min/max/average = "
-                << returnReduce(minBound, minOp<scalar>()) << ", "
-                << returnReduce(maxBound, maxOp<scalar>()) << ", "
-                << tSum/nFace << endl;
+                << gMin(wghtSum) << ", "
+                << gMax(wghtSum) << ", "
+                << gAverage(wghtSum) << endl;
         }
     }
 }
@@ -1227,6 +1213,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
     scalarField& srcMagSf,
     labelListList& srcAddress,
     scalarListList& srcWeights,
+    scalarField& srcWeightsSum,
     autoPtr<mapDistribute>& tgtMap
 )
 {
@@ -1468,6 +1455,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
         "source",
         srcAddress,
         srcWeights,
+        srcWeightsSum,
         false
     );
 }
@@ -1488,9 +1476,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
+    srcWeightsSum_(),
     srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
+    tgtWeightsSum_(),
     treePtr_(NULL),
     triMode_(triMode),
     srcMapPtr_(NULL),
@@ -1521,9 +1511,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(-999),
     srcAddress_(),
     srcWeights_(),
+    srcWeightsSum_(),
     srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
+    tgtWeightsSum_(),
     treePtr_(NULL),
     triMode_(triMode),
     srcMapPtr_(NULL),
@@ -1609,9 +1601,11 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     singlePatchProc_(fineAMI.singlePatchProc_),
     srcAddress_(),
     srcWeights_(),
+    srcWeightsSum_(),
     srcNonOverlap_(),
     tgtAddress_(),
     tgtWeights_(),
+    tgtWeightsSum_(),
     treePtr_(NULL),
     triMode_(fineAMI.triMode_),
     srcMapPtr_(NULL),
@@ -1681,6 +1675,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
         srcMagSf_,
         srcAddress_,
         srcWeights_,
+        srcWeightsSum_,
         tgtMapPtr_
     );
 
@@ -1706,6 +1701,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
         tgtMagSf_,
         tgtAddress_,
         tgtWeights_,
+        tgtWeightsSum_,
         srcMapPtr_
     );
 
@@ -1857,8 +1853,24 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         );
 
         // weights normalisation
-        normaliseWeights(srcMagSf_, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(tgtMagSf_, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights
+        (
+            srcMagSf_,
+            "source",
+            srcAddress_,
+            srcWeights_,
+            srcWeightsSum_,
+            true
+        );
+        normaliseWeights
+        (
+            tgtMagSf_,
+            "target",
+            tgtAddress_,
+            tgtWeights_,
+            tgtWeightsSum_,
+            true
+        );
 
         // cache maps and reset addresses
         List<Map<label> > cMap;
@@ -1877,8 +1889,24 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
         calcAddressing(srcPatch, tgtPatch);
 
-        normaliseWeights(srcMagSf_, "source", srcAddress_, srcWeights_, true);
-        normaliseWeights(tgtMagSf_, "target", tgtAddress_, tgtWeights_, true);
+        normaliseWeights
+        (
+            srcMagSf_,
+            "source",
+            srcAddress_,
+            srcWeights_,
+            srcWeightsSum_,
+            true
+        );
+        normaliseWeights
+        (
+            tgtMagSf_,
+            "target",
+            tgtAddress_,
+            tgtWeights_,
+            tgtWeightsSum_,
+            true
+        );
     }
 
     if (debug)
