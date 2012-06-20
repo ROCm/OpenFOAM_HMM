@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Application
     porousExplicitSourceReactingParcelFoam
 
 Description
-    Transient PISO solver for compressible, laminar or turbulent flow with
+    Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting multiphase Lagrangian parcels for porous media, including explicit
     sources for mass, momentum and energy
 
@@ -42,7 +42,7 @@ Description
 #include "fvCFD.H"
 #include "turbulenceModel.H"
 #include "basicReactingMultiphaseCloud.H"
-#include "rhoChemistryCombustionModel.H"
+#include "rhoCombustionModel.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "IObasicSourceList.H"

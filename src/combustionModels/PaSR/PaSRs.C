@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,8 @@ License
 
 #include "makeCombustionTypes.H"
 
-#include "psiChemistryCombustionModel.H"
-#include "rhoChemistryCombustionModel.H"
+#include "psiChemistryCombustion.H"
+#include "rhoChemistryCombustion.H"
 #include "PaSR.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -35,19 +35,10 @@ namespace Foam
 {
 namespace combustionModels
 {
-    makeCombustionTypes
-    (
-        PaSR,
-        psiChemistryCombustionModel
-    );
-
-    makeCombustionTypes
-    (
-        PaSR,
-        rhoChemistryCombustionModel
-    );
+    makeCombustionTypes(PaSR, psiChemistryCombustion, psiCombustionModel);
+    makeCombustionTypes(PaSR, rhoChemistryCombustion, rhoCombustionModel);
 }
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ************************************************************************* //

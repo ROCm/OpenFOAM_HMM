@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,25 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::psiCombustionModel
+    Foam::rhoChemistryCombustion
 
 Description
-    Combustion models for compressibility-based thermodynamics
+    Density-based chemistry model wrapper for combustion models
 
 SourceFiles
-    psiCombustionModelI.H
-    psiCombustionModel.C
-    psiCombustionModelNew.C
+    rhoChemistryCombustion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef psiCombustionModel_H
-#define psiCombustionModel_H
+#ifndef rhoChemistryCombustion_H
+#define rhoChemistryCombustion_H
 
-#include "combustionModel.H"
 #include "autoPtr.H"
-#include "runTimeSelectionTables.H"
-#include "psiReactionThermo.H"
+#include "rhoCombustionModel.H"
+#include "rhoChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,103 +47,59 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     class psiCombustionModel Declaration
+                    class rhoChemistryCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-class psiCombustionModel
+class rhoChemistryCombustion
 :
-    public combustionModel
+    public rhoCombustionModel
 {
-
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        psiCombustionModel(const psiCombustionModel&);
+        rhoChemistryCombustion(const rhoChemistryCombustion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const psiCombustionModel&);
+        void operator=(const rhoChemistryCombustion&);
 
 
 protected:
 
     // Protected data
 
-
-        //- Thermo package
-        autoPtr<psiReactionThermo> thermo_;
-
-
+        //- Pointer to chemistry model
+        autoPtr<rhoChemistryModel> chemistryPtr_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("psiCombustionModel");
-
-
-    //- Declare run-time constructor selection tables
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        psiCombustionModel,
-        dictionary,
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        ),
-        (modelType, mesh)
-    );
-
-
     // Constructors
 
-
         //- Construct from components and thermo
-        psiCombustionModel
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        );
-
-
-
-    //- Selector
-    static autoPtr<psiCombustionModel> New
-    (
-        const fvMesh& mesh
-    );
+        rhoChemistryCombustion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~psiCombustionModel();
+    virtual ~rhoChemistryCombustion();
 
 
     // Member Functions
 
         //- Return access to the thermo package
-        inline psiReactionThermo& thermo();
+        virtual rhoReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        inline const psiReactionThermo& thermo() const;
+        virtual const rhoReactionThermo& thermo() const;
 
-        //- Return tmp of rho
+        //- Return const access to the density field
         virtual tmp<volScalarField> rho() const;
-
-    // I-O
-
-        //- Update properties from given dictionary
-        virtual bool read();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 } // End namespace combustionModels
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "psiCombustionModelI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

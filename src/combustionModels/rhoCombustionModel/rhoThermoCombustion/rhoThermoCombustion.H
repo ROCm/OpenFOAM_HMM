@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,25 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::psiChemistryCombustionModel
+    Foam::rhoThermoCombustion
 
 Description
-    Combustion models for compressibility-based thermodynamics
+    Density-based thermo model wrapper for combustion models
 
 SourceFiles
-    psiChemistryCombustionModelI.H
-    psiChemistryCombustionModel.C
-    psiChemistryCombustionModelNew.C
+    rhoThermoCombustion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef psiChemistryCombustionModel_H
-#define psiChemistryCombustionModel_H
+#ifndef rhoThermoCombustion_H
+#define rhoThermoCombustion_H
 
-#include "combustionModel.H"
 #include "autoPtr.H"
-#include "runTimeSelectionTables.H"
-#include "psiChemistryModel.H"
+#include "rhoCombustionModel.H"
+#include "rhoChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,108 +47,59 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     class psiChemistryCombustionModel Declaration
+                    class rhoThermoCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-class psiChemistryCombustionModel
+class rhoThermoCombustion
 :
-    public combustionModel
+    public rhoCombustionModel
 {
-
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        psiChemistryCombustionModel(const psiChemistryCombustionModel&);
+        rhoThermoCombustion(const rhoThermoCombustion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const psiChemistryCombustionModel&);
+        void operator=(const rhoThermoCombustion&);
 
 
 protected:
 
     // Protected data
 
-        //- Auto pointer to psiChemistry
-        autoPtr<psiChemistryModel> pChemistry_;
+        //- Pointer to thermo model
+        autoPtr<rhoReactionThermo> thermoPtr_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("psiChemistryCombustionModel");
-
-
-    //- Declare run-time constructor selection tables
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        psiChemistryCombustionModel,
-        dictionary,
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        ),
-        (modelType, mesh)
-    );
-
-
     // Constructors
 
-
         //- Construct from components and thermo
-        psiChemistryCombustionModel
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        );
-
-
-
-    //- Selector
-    static autoPtr<psiChemistryCombustionModel> New
-    (
-        const fvMesh& mesh
-    );
+        rhoThermoCombustion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~psiChemistryCombustionModel();
+    virtual ~rhoThermoCombustion();
 
 
     // Member Functions
 
-
         //- Return access to the thermo package
-        inline psiChemistryModel& pChemistry();
+        virtual rhoReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        inline const psiChemistryModel& pChemistry() const;
+        virtual const rhoReactionThermo& thermo() const;
 
-        //- Return const access to rho
-        inline tmp<volScalarField> rho() const;
-
-        //- Return const access to rho
-        inline const psiReactionThermo& thermo() const;
-
-        //- Return non const access to rho
-        inline psiReactionThermo& thermo();
-
-
-    // I-O
-
-        //- Update properties from given dictionary
-        virtual bool read();
+        //- Return const access to the density field
+        virtual tmp<volScalarField> rho() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 } // End namespace combustionModels
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "psiChemistryCombustionModelI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

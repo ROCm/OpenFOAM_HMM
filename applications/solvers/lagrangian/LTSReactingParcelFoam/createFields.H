@@ -1,16 +1,11 @@
     Info<< "Creating combustion model\n" << endl;
 
-    autoPtr<combustionModels::rhoChemistryCombustionModel> combustion
+    autoPtr<combustionModels::rhoCombustionModel> combustion
     (
-        combustionModels::rhoChemistryCombustionModel::New
-        (
-            mesh
-        )
+        combustionModels::rhoCombustionModel::New(mesh)
     );
 
-    rhoChemistryModel& chemistry = combustion->pChemistry();
-
-    rhoReactionThermo& thermo = chemistry.thermo();
+    rhoReactionThermo& thermo = combustion->thermo();
 
     SLGThermo slgThermo(mesh, thermo);
 

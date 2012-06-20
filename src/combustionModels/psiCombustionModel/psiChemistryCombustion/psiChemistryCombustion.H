@@ -2,10 +2,11 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
+    This file is part of OpenFOAM.
 
     OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
@@ -21,22 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::combustionModels::infinitelyFastChemistry
+    Foam::psiChemistryCombustion
 
 Description
-    Simple infinitely fast chemistry combustion model based on the principle
-    mixed is burnt. Additional parameter C is used to distribute the heat
-    release rate.in time
+    Compressibility-based chemistry model wrapper for combustion models
 
 SourceFiles
-    infinitelyFastChemistry.C
+    psiChemistryCombustion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef infinitelyFastChemistry_H
-#define infinitelyFastChemistry_H
+#ifndef psiChemistryCombustion_H
+#define psiChemistryCombustion_H
 
-#include "singleStepCombustion.H"
+#include "autoPtr.H"
+#include "psiCombustionModel.H"
+#include "psiChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,57 +47,52 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class infinitelyFastChemistry Declaration
+                    class psiChemistryCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CombThermoType, class ThermoType>
-class infinitelyFastChemistry
+class psiChemistryCombustion
 :
-    public singleStepCombustion<CombThermoType, ThermoType>
+    public psiCombustionModel
 {
-    // Private data
-
-        //- Model constant
-        scalar C_;
-
-
     // Private Member Functions
 
-        //- Disallow copy construct
-        infinitelyFastChemistry(const infinitelyFastChemistry&);
+        //- Construct as copy (not implemented)
+        psiChemistryCombustion(const psiChemistryCombustion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const infinitelyFastChemistry&);
+        void operator=(const psiChemistryCombustion&);
+
+
+protected:
+
+    // Protected data
+
+        //- Pointer to chemistry model
+        autoPtr<psiChemistryModel> chemistryPtr_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("infinitelyFastChemistry");
-
-
     // Constructors
 
-        //- Construct from components
-        infinitelyFastChemistry(const word& modelType, const fvMesh& mesh);
+        //- Construct from components and thermo
+        psiChemistryCombustion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~infinitelyFastChemistry();
+    virtual ~psiChemistryCombustion();
 
 
     // Member Functions
 
-        // Evolution
+        //- Return access to the thermo package
+        virtual psiReactionThermo& thermo();
 
-            //- Correct combustion rate
-            virtual void correct();
+        //- Return const access to the thermo package
+        virtual const psiReactionThermo& thermo() const;
 
-
-        // I-O
-
-            //- Update properties
-            virtual bool read();
+        //- Return const access to the density field
+        virtual tmp<volScalarField> rho() const;
 };
 
 
@@ -104,13 +100,6 @@ public:
 
 } // End namespace combustionModels
 } // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "infinitelyFastChemistry.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

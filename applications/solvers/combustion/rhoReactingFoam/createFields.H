@@ -1,16 +1,11 @@
 Info<< "Creating reaction model\n" << endl;
 
-autoPtr<combustionModels::rhoChemistryCombustionModel> reaction
+autoPtr<combustionModels::rhoCombustionModel> reaction
 (
-    combustionModels::rhoChemistryCombustionModel::New
-    (
-        mesh
-    )
+    combustionModels::rhoCombustionModel::New(mesh)
 );
 
-rhoChemistryModel& chemistry = reaction->pChemistry();
-
-rhoReactionThermo& thermo = chemistry.thermo();
+rhoReactionThermo& thermo = reaction->thermo();
 
 basicMultiComponentMixture& composition = thermo.composition();
 PtrList<volScalarField>& Y = composition.Y();

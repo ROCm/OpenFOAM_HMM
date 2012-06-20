@@ -27,6 +27,9 @@ License
 
 #include "psiCombustionModel.H"
 #include "rhoCombustionModel.H"
+#include "psiThermoCombustion.H"
+#include "rhoThermoCombustion.H"
+
 #include "noCombustion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,12 +41,14 @@ namespace combustionModels
     makeCombustionTypes
     (
         noCombustion,
+        psiThermoCombustion,
         psiCombustionModel
     );
 
     makeCombustionTypes
     (
         noCombustion,
+        rhoThermoCombustion,
         rhoCombustionModel
     );
 }
