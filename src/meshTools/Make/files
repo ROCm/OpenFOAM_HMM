@@ -111,6 +111,7 @@ $(faceSources)/boundaryToFace/boundaryToFace.C
 $(faceSources)/zoneToFace/zoneToFace.C
 $(faceSources)/boxToFace/boxToFace.C
 $(faceSources)/regionToFace/regionToFace.C
+$(faceSources)/regionToFace/patchEdgeFaceRegion.C
 
 pointSources = sets/pointSources
 $(pointSources)/labelToPoint/labelToPoint.C

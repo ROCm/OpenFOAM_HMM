@@ -66,18 +66,6 @@ class regionToFace
 
     // Private Member Functions
 
-        //- Sync patch edges
-        void syncEdges
-        (
-            const labelList& patchEdges,
-            const labelList& coupledEdges,
-            const bool syncNonCollocated,
-
-            PackedBoolList& isChangedEdge,
-            DynamicList<label>& changedEdges,
-            labelList& allEdgeData
-        ) const;
-
         //- Walk edge-face-edge
         void markZone
         (

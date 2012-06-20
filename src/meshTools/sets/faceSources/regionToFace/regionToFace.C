@@ -30,6 +30,8 @@ License
 #include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
 #include "addToRunTimeSelectionTable.H"
+#include "PatchEdgeFaceWave.H"
+#include "patchEdgeFaceRegion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,69 +58,6 @@ Foam::topoSetSource::addToUsageTable Foam::regionToFace::usage_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Synchronise edges
-void Foam::regionToFace::syncEdges
-(
-    const labelList& patchEdges,
-    const labelList& coupledEdges,
-    const bool syncNonCollocated,
-
-    PackedBoolList& isChangedEdge,
-    DynamicList<label>& changedEdges,
-    labelList& allEdgeData
-) const
-{
-    const globalMeshData& globalData = mesh_.globalData();
-    const mapDistribute& map = globalData.globalEdgeSlavesMap();
-
-    // Convert patch-edge data into cpp-edge data
-    labelList cppEdgeData(map.constructSize(), labelMax);
-
-    forAll(patchEdges, i)
-    {
-        label patchEdgeI = patchEdges[i];
-        label coupledEdgeI = coupledEdges[i];
-
-        if (isChangedEdge[patchEdgeI])
-        {
-            cppEdgeData[coupledEdgeI] = allEdgeData[patchEdgeI];
-        }
-    }
-
-    // Synchronise
-    globalData.syncData
-    (
-        cppEdgeData,
-        globalData.globalEdgeSlaves(),
-        (
-            syncNonCollocated
-          ? globalData.globalEdgeTransformedSlaves()    // transformed elems
-          : labelListList(globalData.globalEdgeSlaves().size()) //no transformed
-        ),
-        map,
-        minEqOp<label>()
-    );
-
-    // Back from cpp-edge to patch-edge data
-    forAll(patchEdges, i)
-    {
-        label patchEdgeI = patchEdges[i];
-        label coupledEdgeI = coupledEdges[i];
-
-        if (cppEdgeData[coupledEdgeI] != labelMax)
-        {
-            allEdgeData[patchEdgeI] = cppEdgeData[coupledEdgeI];
-
-            if (!isChangedEdge[patchEdgeI])
-            {
-                changedEdges.append(patchEdgeI);
-                isChangedEdge[patchEdgeI] = true;
-            }
-        }
-    }
-}
-
-
 void Foam::regionToFace::markZone
 (
     const indirectPrimitivePatch& patch,
@@ -128,130 +67,44 @@ void Foam::regionToFace::markZone
     labelList& faceZone
 ) const
 {
-    // Calculate correspondence between patch and globalData.coupledPatch.
-    labelList patchEdges;
-    labelList coupledEdges;
-    PackedBoolList sameEdgeOrientation;
-    PatchTools::matchEdges
-    (
-        mesh_.globalData().coupledPatch(),
-        patch,
+    // Data on all edges and faces
+    List<patchEdgeFaceRegion> allEdgeInfo(patch.nEdges());
+    List<patchEdgeFaceRegion> allFaceInfo(patch.size());
 
-        coupledEdges,
-        patchEdges,
-        sameEdgeOrientation
-    );
-
-
-    DynamicList<label> changedEdges(patch.nEdges());
-    labelList allEdgeData(patch.nEdges(), -1);
-    PackedBoolList isChangedEdge(patch.nEdges());
-
-
-    // Fill initial seed
-    // ~~~~~~~~~~~~~~~~~
+    DynamicList<label> changedEdges;
+    DynamicList<patchEdgeFaceRegion> changedInfo;
 
     if (Pstream::myProcNo() == procI)
     {
         const labelList& fEdges = patch.faceEdges()[faceI];
         forAll(fEdges, i)
         {
-            label edgeI = fEdges[i];
-            if (!isChangedEdge[edgeI])
-            {
-                allEdgeData[edgeI] = zoneI;
-                changedEdges.append(edgeI);
-                isChangedEdge[edgeI] = true;
-            }
+            changedEdges.append(fEdges[i]);
+            changedInfo.append(zoneI);
         }
     }
 
-    syncEdges
+    // Walk
+    PatchEdgeFaceWave
+    <
+        indirectPrimitivePatch,
+        patchEdgeFaceRegion
+    > calc
     (
-        patchEdges,
-        coupledEdges,
-        true,               //syncNonCollocated,
-
-        isChangedEdge,
+        mesh_,
+        patch,
         changedEdges,
-        allEdgeData
+        changedInfo,
+        allEdgeInfo,
+        allFaceInfo,
+        returnReduce(patch.nEdges(), sumOp<label>())
     );
 
-
-    // Edge-Face-Edge walk across patch
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    while (true)
+    forAll(allFaceInfo, faceI)
     {
-        // From edge to face
-        // ~~~~~~~~~~~~~~~~~
-
-        DynamicList<label> changedFaces(patch.size());
-
-        forAll(changedEdges, changedI)
+        if (allFaceInfo[faceI].region() == zoneI)
         {
-            label edgeI = changedEdges[changedI];
-            const labelList& eFaces = patch.edgeFaces()[edgeI];
-
-            forAll(eFaces, i)
-            {
-                label faceI = eFaces[i];
-
-                if (faceZone[faceI] == -1)
-                {
-                    faceZone[faceI] = zoneI;
-                    changedFaces.append(faceI);
-                }
-            }
-        }
-
-
-        label nChangedFaces = returnReduce(changedFaces.size(), sumOp<label>());
-        if (nChangedFaces == 0)
-        {
-            break;
-        }
-
-
-        // From face to edge
-        // ~~~~~~~~~~~~~~~~~
-
-        isChangedEdge = false;
-        changedEdges.clear();
-
-        forAll(changedFaces, i)
-        {
-            label faceI = changedFaces[i];
-            const labelList& fEdges = patch.faceEdges()[faceI];
-
-            forAll(fEdges, fp)
-            {
-                label edgeI = fEdges[fp];
-
-                if (!isChangedEdge[edgeI])
-                {
-                    allEdgeData[edgeI] = zoneI;
-                    changedEdges.append(edgeI);
-                    isChangedEdge[edgeI] = true;
-                }
-            }
-        }
-
-        syncEdges
-        (
-            patchEdges,
-            coupledEdges,
-            true,               //syncNonCollocated,
-
-            isChangedEdge,
-            changedEdges,
-            allEdgeData
-        );
-
-        label nChangedEdges = returnReduce(changedEdges.size(), sumOp<label>());
-        if (nChangedEdges == 0)
-        {
-            break;
+            faceZone[faceI] = zoneI;
         }
     }
 }
