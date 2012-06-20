@@ -149,13 +149,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::checkPatches
     const scalar maxBoundsError = 0.05;
 
     // check bounds of source and target
-    boundBox bbSrc(srcPatch.points(), srcPatch.meshPoints());
-    reduce(bbSrc.min(), minOp<point>());
-    reduce(bbSrc.max(), maxOp<point>());
-
-    boundBox bbTgt(tgtPatch.points(), tgtPatch.meshPoints());
-    reduce(bbTgt.min(), minOp<point>());
-    reduce(bbTgt.max(), maxOp<point>());
+    boundBox bbSrc(srcPatch.points(), srcPatch.meshPoints(), true);
+    boundBox bbTgt(tgtPatch.points(), tgtPatch.meshPoints(), true);
 
     boundBox bbTgtInf(bbTgt);
     bbTgtInf.inflate(maxBoundsError);
