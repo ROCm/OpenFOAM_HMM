@@ -110,6 +110,9 @@ bool setCellFieldType
             "(const fvMesh& mesh, const labelList& selectedCells,"
             "Istream& fieldValueStream)"
         ) << "Field " << fieldName << " not found" << endl;
+
+        // Consume value
+        (void)pTraits<Type>(fieldValueStream);
     }
 
     return true;
@@ -286,6 +289,9 @@ bool setFaceFieldType
             "(const fvMesh& mesh, const labelList& selectedFaces,"
             "Istream& fieldValueStream)"
         ) << "Field " << fieldName << " not found" << endl;
+
+        // Consume value
+        (void)pTraits<Type>(fieldValueStream);
     }
 
     return true;
