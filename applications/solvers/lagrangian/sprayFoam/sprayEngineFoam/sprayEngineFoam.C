@@ -39,6 +39,7 @@ Description
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
