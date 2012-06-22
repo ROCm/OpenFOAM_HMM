@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,11 @@ int main(int argc, char *argv[])
         "noLagrangian",
         "skip reconstructing lagrangian positions and fields"
     );
+    argList::addBoolOption
+    (
+        "newTimes",
+        "only reconstruct new times (i.e. that do not exist already)"
+    );
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -94,6 +99,10 @@ int main(int argc, char *argv[])
 
         args.optionLookup("lagrangianFields")() >> selectedLagrangianFields;
     }
+
+
+    const bool newTimes = args.optionFound("newTimes");
+
 
     // determine the processor count directly
     label nProcs = 0;
@@ -134,6 +143,8 @@ int main(int argc, char *argv[])
         args
     );
 
+    instantList masterTimeDirs = runTime.times();
+
     if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
@@ -165,6 +176,14 @@ int main(int argc, char *argv[])
     // Loop over all times
     forAll(timeDirs, timeI)
     {
+        if (newTimes && findIndex(masterTimeDirs, timeDirs[timeI]) != -1)
+        {
+            Info<< "Skipping time " << timeDirs[timeI].name()
+                << endl << endl;
+            continue;
+        }
+
+
         // Set time for global database
         runTime.setTime(timeDirs[timeI], timeI);
 
