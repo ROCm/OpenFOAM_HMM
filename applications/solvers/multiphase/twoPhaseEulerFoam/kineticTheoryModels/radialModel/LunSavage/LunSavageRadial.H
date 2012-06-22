@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,17 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::LunSavageRadial
+    Foam::kineticTheoryModels::radialModels::LunSavage
 
 Description
 
 SourceFiles
-    LunSavageRadial.C
+    LunSavage.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LunSavageRadial_H
-#define LunSavageRadial_H
+#ifndef LunSavage_H
+#define LunSavage_H
 
 #include "radialModel.H"
 
@@ -40,12 +40,16 @@ SourceFiles
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
+namespace radialModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class LunSavageradial Declaration
+                           Class LunSavage Declaration
 \*---------------------------------------------------------------------------*/
 
-class LunSavageRadial
+class LunSavage
 :
     public radialModel
 {
@@ -59,24 +63,24 @@ public:
     // Constructors
 
         //- Construct from components
-        LunSavageRadial(const dictionary& dict);
+        LunSavage(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~LunSavageRadial();
+    virtual ~LunSavage();
 
 
     // Member Functions
 
         tmp<volScalarField> g0
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 
         tmp<volScalarField> g0prime
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 };
@@ -84,6 +88,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace radialModels
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

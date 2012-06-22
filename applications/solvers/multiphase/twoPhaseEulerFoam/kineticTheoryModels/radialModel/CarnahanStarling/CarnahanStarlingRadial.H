@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::CarnahanStarlingRadial
+    Foam::kineticTheoryModels::radialModels::CarnahanStarling
 
 Description
 
@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CarnahanStarlingRadial_H
-#define CarnahanStarlingRadial_H
+#ifndef CarnahanStarling_H
+#define CarnahanStarling_H
 
 #include "radialModel.H"
 
@@ -40,12 +40,16 @@ SourceFiles
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
+namespace radialModels
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class CarnahanStarlingradial Declaration
+                           Class CarnahanStarling Declaration
 \*---------------------------------------------------------------------------*/
 
-class CarnahanStarlingRadial
+class CarnahanStarling
 :
     public radialModel
 {
@@ -59,11 +63,11 @@ public:
     // Constructors
 
         //- Construct from components
-        CarnahanStarlingRadial(const dictionary& dict);
+        CarnahanStarling(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~CarnahanStarlingRadial();
+    virtual ~CarnahanStarling();
 
 
     // Member Functions
@@ -71,13 +75,13 @@ public:
 
         tmp<volScalarField> g0
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 
         tmp<volScalarField> g0prime
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 };
@@ -85,6 +89,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace radialModels
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

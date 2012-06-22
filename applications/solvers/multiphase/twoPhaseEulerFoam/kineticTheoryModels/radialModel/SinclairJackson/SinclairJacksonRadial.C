@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,20 +30,29 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(SinclairJacksonRadial, 0);
+namespace kineticTheoryModels
+{
+namespace radialModels
+{
+    defineTypeNameAndDebug(SinclairJackson, 0);
 
     addToRunTimeSelectionTable
     (
         radialModel,
-        SinclairJacksonRadial,
+        SinclairJackson,
         dictionary
     );
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SinclairJacksonRadial::SinclairJacksonRadial(const dictionary& dict)
+Foam::kineticTheoryModels::radialModels::SinclairJackson::SinclairJackson
+(
+    const dictionary& dict
+)
 :
     radialModel(dict)
 {}
@@ -51,31 +60,33 @@ Foam::SinclairJacksonRadial::SinclairJacksonRadial(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::SinclairJacksonRadial::~SinclairJacksonRadial()
+Foam::kineticTheoryModels::radialModels::SinclairJackson::~SinclairJackson()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::SinclairJacksonRadial::g0
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::SinclairJackson::g0
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
-    return 1.0/(1.0 - pow(alpha1/alphaMax, 1.0/3.0));
+    return 1.0/(1.0 - pow(alpha/alphaMax, 1.0/3.0));
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::SinclairJacksonRadial::g0prime
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::SinclairJackson::g0prime
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
     return
-        (-1.0/3.0)*pow(alpha1/alphaMax, -2.0/3.0)
-       /(alphaMax*sqr(1.0 - pow(alpha1/alphaMax, 1.0/3.0)));
+       (1.0/3.0)*pow(max(alpha, 1.0e-6)/alphaMax, -2.0/3.0)
+      /(alphaMax*sqr(1.0 - pow(alpha/alphaMax, 1.0/3.0)));
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radialModel
+    Foam::kineticTheoryModels::radialModel
 
 SourceFiles
     radialModel.C
@@ -40,6 +40,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace kineticTheoryModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -105,14 +107,14 @@ public:
         //- Radial distribution function
         virtual tmp<volScalarField> g0
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const = 0;
 
         //- Derivative of the radial distribution function
         virtual tmp<volScalarField> g0prime
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const = 0;
 };
@@ -120,6 +122,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace kineticTheoryModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
