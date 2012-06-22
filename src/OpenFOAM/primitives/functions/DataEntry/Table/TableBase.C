@@ -25,6 +25,7 @@ License
 
 #include "TableBase.H"
 #include "Time.H"
+#include "interpolationWeights.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
