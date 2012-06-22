@@ -74,13 +74,13 @@ public:
 
         tmp<volScalarField> g0
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 
         tmp<volScalarField> g0prime
         (
-            const volScalarField& alpha1,
+            const volScalarField& alpha,
             const dimensionedScalar& alphaMax
         ) const;
 };

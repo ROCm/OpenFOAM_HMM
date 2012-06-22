@@ -1,5 +1,5 @@
 {
-    fvScalarMatrix hEqn
+    fvScalarMatrix hsEqn
     (
         fvm::ddt(rho, hs)
       + mvConvection->fvmDiv(phi, hs)
@@ -10,11 +10,14 @@
       + parcels.Sh(hs)
       + radiation->Sh(thermo)
       + combustion->Sh()
+      + sources(rho, hs)
     );
 
-    hEqn.relax();
+    hsEqn.relax();
 
-    hEqn.solve();
+    sources.constrain(hsEqn);
+
+    hsEqn.solve();
 
     thermo.correct();
 

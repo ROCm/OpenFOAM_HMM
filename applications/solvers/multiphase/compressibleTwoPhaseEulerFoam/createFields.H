@@ -333,11 +333,11 @@
         drag1
     );
 
-    surfaceScalarField rAU1f
+    volScalarField rAU1
     (
         IOobject
         (
-            "rAU1f",
+            "rAU1",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,

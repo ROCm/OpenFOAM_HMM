@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,15 +29,18 @@ License
 
 namespace Foam
 {
+namespace kineticTheoryModels
+{
     defineTypeNameAndDebug(radialModel, 0);
 
     defineRunTimeSelectionTable(radialModel, dictionary);
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radialModel::radialModel
+Foam::kineticTheoryModels::radialModel::radialModel
 (
     const dictionary& dict
 )
@@ -48,7 +51,7 @@ Foam::radialModel::radialModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radialModel::~radialModel()
+Foam::kineticTheoryModels::radialModel::~radialModel()
 {}
 
 

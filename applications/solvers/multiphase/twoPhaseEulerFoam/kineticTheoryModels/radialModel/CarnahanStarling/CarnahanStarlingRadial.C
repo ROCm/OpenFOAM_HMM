@@ -30,20 +30,29 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(CarnahanStarlingRadial, 0);
+namespace kineticTheoryModels
+{
+namespace radialModels
+{
+    defineTypeNameAndDebug(CarnahanStarling, 0);
 
     addToRunTimeSelectionTable
     (
         radialModel,
-        CarnahanStarlingRadial,
+        CarnahanStarling,
         dictionary
     );
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::CarnahanStarlingRadial::CarnahanStarlingRadial(const dictionary& dict)
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::CarnahanStarling
+(
+    const dictionary& dict
+)
 :
     radialModel(dict)
 {}
@@ -51,37 +60,38 @@ Foam::CarnahanStarlingRadial::CarnahanStarlingRadial(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::CarnahanStarlingRadial::~CarnahanStarlingRadial()
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::~CarnahanStarling()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::CarnahanStarlingRadial::g0
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
 
     return
-        1.0/(1.0 - alpha1)
-      + 3.0*alpha1/(2.0*sqr(1.0 - alpha1))
-      + sqr(alpha1)/(2.0*pow(1.0 - alpha1, 3));
+        1.0/(1.0 - alpha)
+      + 3.0*alpha/(2.0*sqr(1.0 - alpha))
+      + sqr(alpha)/(2.0*pow(1.0 - alpha, 3));
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::CarnahanStarlingRadial::g0prime
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::CarnahanStarling::g0prime
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
     return
-        - alpha1/sqr(1.0 - alpha1)
-        + (3.0*(1.0 - alpha1) + 6.0*sqr(alpha1))/(2.0*(1.0 - alpha1))
-        + (2.0*alpha1*(1.0 - alpha1) + 3.0*pow(alpha1, 3))
-         /(2.0*pow(1.0 - alpha1, 4));
+        2.5/sqr(1.0 - alpha)
+      + 4.0*alpha/pow(1.0 - alpha, 3.0)
+      + 1.5*sqr(alpha)/pow(1.0 - alpha, 4.0);
 }
 
 
