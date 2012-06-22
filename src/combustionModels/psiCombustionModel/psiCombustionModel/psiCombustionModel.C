@@ -23,37 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "psiCombustionModel.H"
 
-inline Foam::rhoChemistryModel&
-Foam::combustionModels::rhoChemistryCombustionModel::pChemistry()
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+namespace Foam
 {
-    return pChemistry_();
+namespace combustionModels
+{
+    defineTypeNameAndDebug(psiCombustionModel, 0);
+    defineRunTimeSelectionTable(psiCombustionModel, dictionary);
+}
 }
 
-inline const Foam::rhoChemistryModel&
-Foam::combustionModels::rhoChemistryCombustionModel::
-pChemistry() const
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiCombustionModel::psiCombustionModel
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
+:
+    combustionModel(modelType, mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiCombustionModel::~psiCombustionModel()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::combustionModels::psiCombustionModel::read()
 {
-    return pChemistry_();
+    if (combustionModel::read())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-inline Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::rhoChemistryCombustionModel::rho() const
-{
-    return pChemistry_->thermo().rho();
-}
-
-inline const Foam::rhoReactionThermo&
-Foam::combustionModels::rhoChemistryCombustionModel::thermo() const
-{
-    return pChemistry_->thermo();
-}
-
-inline Foam::rhoReactionThermo&
-Foam::combustionModels::rhoChemistryCombustionModel::thermo()
-{
-    return pChemistry_->thermo();
-}
 
 // ************************************************************************* //

@@ -318,7 +318,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     Sph = dt*htc*As;
 
-    dhsTrans += Sph*(0.5*(T_ + Tnew) - Tc_);
+    dhsTrans += Sph*(Tres.average() - Tc_);
 
     return Tnew;
 }

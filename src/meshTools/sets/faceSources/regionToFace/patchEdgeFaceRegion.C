@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,56 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "psiCombustionModel.H"
+#include "patchEdgeFaceRegion.H"
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace combustionModels
-{
-    defineTypeNameAndDebug(psiCombustionModel, 0);
-    defineRunTimeSelectionTable(psiCombustionModel, dictionary);
-}
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
-Foam::combustionModels::psiCombustionModel::psiCombustionModel
+Foam::Ostream& Foam::operator<<
 (
-    const word& modelType,
-    const fvMesh& mesh
+    Foam::Ostream& os,
+    const Foam::patchEdgeFaceRegion& wDist
 )
-:
-    combustionModel(modelType, mesh),
-    thermo_(psiReactionThermo::New(mesh))
-{}
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::combustionModels::psiCombustionModel::~psiCombustionModel()
-{}
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-
-bool Foam::combustionModels::psiCombustionModel::read()
 {
-    if (combustionModel::read())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return os << wDist.region_;
 }
 
-Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::psiCombustionModel::rho() const
+
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::patchEdgeFaceRegion& wDist
+)
 {
-    return thermo_->rho();
+    return is >> wDist.region_;
 }
+
 
 // ************************************************************************* //

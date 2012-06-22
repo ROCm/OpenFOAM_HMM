@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,44 +30,43 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCombustionTypesThermo(CombModel, Comb, Thermo)                    \
+#define makeCombustionTypesThermo(CombModel, CombType, Thermo, Table)         \
                                                                               \
-    typedef CombModel<Comb, Thermo> CombModel##Comb##Thermo;                  \
-                                                                              \
+    typedef CombModel<CombType, Thermo> CombModel##CombType##Thermo;          \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        CombModel##Comb##Thermo,                                              \
-        #CombModel"<"#Comb","#Thermo">",                                      \
+        CombModel##CombType##Thermo,                                          \
+        #CombModel"<"#CombType","#Thermo">",                                  \
         0                                                                     \
     );                                                                        \
                                                                               \
-                                                                              \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
-        Comb,                                                                 \
-        CombModel##Comb##Thermo,                                              \
+        Table,                                                                \
+        CombModel##CombType##Thermo,                                          \
         dictionary                                                            \
     );
 
-#define makeCombustionTypes(CombModel, CombThermoType)                        \
+
+#define makeCombustionTypes(CombModel, CombType, Table)                       \
                                                                               \
-    typedef CombModel<CombThermoType>                                         \
-        CombModel##CombThermoType;                                            \
+    typedef CombModel<CombType> CombModel##CombType;                          \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        CombModel##CombThermoType,                                            \
-        #CombModel"<"#CombThermoType">",                                      \
+        CombModel##CombType,                                                  \
+        #CombModel"<"#CombType">",                                            \
         0                                                                     \
     );                                                                        \
                                                                               \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
-        CombThermoType,                                                       \
-        CombModel##CombThermoType,                                            \
+        Table,                                                                \
+        CombModel##CombType,                                                  \
         dictionary                                                            \
     );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

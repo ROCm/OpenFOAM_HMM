@@ -22,25 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rhoCombustionModel
+    Foam::psiCombustionModel
 
 Description
-    Combustion models for rho-based thermodynamics
+    Combustion models for compressibility-based thermodynamics
 
 SourceFiles
-    rhoCombustionModelI.H
-    rhoCombustionModel.C
-    rhoCombustionModelNew.C
+    psiCombustionModelI.H
+    psiCombustionModel.C
+    psiCombustionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rhoCombustionModel_H
-#define rhoCombustionModel_H
+#ifndef psiCombustionModel_H
+#define psiCombustionModel_H
 
 #include "combustionModel.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "rhoReactionThermo.H"
+#include "psiReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,10 +50,10 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                     class rhoCombustionModel Declaration
+                     class psiCombustionModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class rhoCombustionModel
+class psiCombustionModel
 :
     public combustionModel
 {
@@ -61,31 +61,23 @@ class rhoCombustionModel
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        rhoCombustionModel(const rhoCombustionModel&);
+        psiCombustionModel(const psiCombustionModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const rhoCombustionModel&);
-
-
-protected:
-
-    // Protected data
-
-        //- Thermo package
-        autoPtr<rhoReactionThermo> thermo_;
+        void operator=(const psiCombustionModel&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("rhoCombustionModel");
+    TypeName("psiCombustionModel");
 
 
     //- Declare run-time constructor selection tables
     declareRunTimeSelectionTable
     (
         autoPtr,
-        rhoCombustionModel,
+        psiCombustionModel,
         dictionary,
         (
             const word& modelType,
@@ -97,45 +89,32 @@ public:
 
     // Constructors
 
-
         //- Construct from components and thermo
-        rhoCombustionModel
-        (
-            const word& modelType,
-            const fvMesh& mesh
-        );
+        psiCombustionModel(const word& modelType, const fvMesh& mesh);
 
 
 
     //- Selector
-    static autoPtr<rhoCombustionModel> New
-    (
-        const fvMesh& mesh
-    );
+    static autoPtr<psiCombustionModel> New(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~rhoCombustionModel();
+    virtual ~psiCombustionModel();
 
 
     // Member Functions
 
-        // Access functions
-
-            //- Access combustion dict
-             inline const dictionary& coeff() const;
-
-
         //- Return access to the thermo package
-        inline rhoReactionThermo& thermo();
+        virtual psiReactionThermo& thermo() = 0;
 
         //- Return const access to the thermo package
-        inline const rhoReactionThermo& thermo() const;
+        virtual const psiReactionThermo& thermo() const = 0;
 
         //- Return tmp of rho
-        virtual tmp<volScalarField> rho() const;
+        virtual tmp<volScalarField> rho() const = 0;
 
-     // I-O
+
+    // I-O
 
         //- Update properties from given dictionary
         virtual bool read();
@@ -144,12 +123,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 } // End namespace combustionModels
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "rhoCombustionModelI.H"
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

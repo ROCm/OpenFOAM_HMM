@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,21 +59,22 @@ void infinitelyFastChemistry<CombThermoType, ThermoType>::correct()
 
     if (this->active())
     {
-        this->singleMixture_.fresCorrect();
+        this->singleMixturePtr_->fresCorrect();
 
-        const label fuelI = this->singleMixture_.fuelIndex();
+        const label fuelI = this->singleMixturePtr_->fuelIndex();
 
-        const volScalarField& YFuel = this->thermo_->composition().Y()[fuelI];
+        const volScalarField& YFuel =
+            this->thermoPtr_->composition().Y()[fuelI];
 
-        const dimensionedScalar s = this->singleMixture_.s();
+        const dimensionedScalar s = this->singleMixturePtr_->s();
 
-        if (this->thermo_->composition().contains("O2"))
+        if (this->thermoPtr_->composition().contains("O2"))
         {
-            const volScalarField& YO2 = this->thermo_->composition().Y("O2");
+            const volScalarField& YO2 = this->thermoPtr_->composition().Y("O2");
 
             this->wFuel_ ==
-                 this->rho()/(this->mesh().time().deltaT()*C_)
-                *min(YFuel, YO2/s.value());
+                this->rho()/(this->mesh().time().deltaT()*C_)
+               *min(YFuel, YO2/s.value());
         }
     }
 }

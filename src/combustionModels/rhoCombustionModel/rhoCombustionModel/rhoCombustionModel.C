@@ -23,18 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "rhoCombustionModel.H"
 
-inline Foam::psiReactionThermo&
-Foam::combustionModels::psiCombustionModel::thermo()
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+namespace Foam
 {
-    return thermo_();
+namespace combustionModels
+{
+    defineTypeNameAndDebug(rhoCombustionModel, 0);
+    defineRunTimeSelectionTable(rhoCombustionModel, dictionary);
+}
 }
 
-inline const Foam::psiReactionThermo&
-Foam::combustionModels::psiCombustionModel::thermo() const
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+
+Foam::combustionModels::rhoCombustionModel::rhoCombustionModel
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
+:
+    combustionModel(modelType, mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::combustionModels::rhoCombustionModel::~rhoCombustionModel()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::combustionModels::rhoCombustionModel::read()
 {
-    return thermo_();
+    if (combustionModel::read())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

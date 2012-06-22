@@ -1,18 +1,16 @@
 combustionModel/combustionModel.C
 
-psiCombustionModel/psiCombustionModel.C
-psiCombustionModel/psiCombustionModelNew.C
+psiCombustionModel/psiCombustionModel/psiCombustionModel.C
+psiCombustionModel/psiCombustionModel/psiCombustionModelNew.C
+psiCombustionModel/psiThermoCombustion/psiThermoCombustion.C
+psiCombustionModel/psiChemistryCombustion/psiChemistryCombustion.C
 
-rhoCombustionModel/rhoCombustionModel.C
-rhoCombustionModel/rhoCombustionModelNew.C
+rhoCombustionModel/rhoCombustionModel/rhoCombustionModel.C
+rhoCombustionModel/rhoCombustionModel/rhoCombustionModelNew.C
+rhoCombustionModel/rhoThermoCombustion/rhoThermoCombustion.C
+rhoCombustionModel/rhoChemistryCombustion/rhoChemistryCombustion.C
 
 infinitelyFastChemistry/infinitelyFastChemistrys.C
-
-psiChemistryCombustionModel/psiChemistryCombustionModel.C
-psiChemistryCombustionModel/psiChemistryCombustionModelNew.C
-
-rhoChemistryCombustionModel/rhoChemistryCombustionModel.C
-rhoChemistryCombustionModel/rhoChemistryCombustionModelNew.C
 
 PaSR/PaSRs.C
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,23 @@ Foam::searchableSurface::searchableSurface(const IOobject& io)
 
 Foam::searchableSurface::~searchableSurface()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::searchableSurface::findNearest
+(
+    const pointField& sample,
+    const scalarField& nearestDistSqr,
+    List<pointIndexHit>& info,
+    vectorField& normal,
+    labelList& region
+) const
+{
+    findNearest(sample, nearestDistSqr, info);
+    getNormal(info, normal);
+    getRegion(info, region);
+}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "psiChemistryCombustion.H"
 
-inline Foam::rhoReactionThermo&
-Foam::combustionModels::rhoCombustionModel::thermo()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiChemistryCombustion::psiChemistryCombustion
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
+:
+    psiCombustionModel(modelType, mesh),
+    chemistryPtr_(psiChemistryModel::New(mesh))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::combustionModels::psiChemistryCombustion::~psiChemistryCombustion()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::psiReactionThermo&
+Foam::combustionModels::psiChemistryCombustion::thermo()
 {
-    return thermo_();
+    return chemistryPtr_->thermo();
 }
 
-inline const Foam::rhoReactionThermo&
-Foam::combustionModels::rhoCombustionModel::thermo() const
+
+const Foam::psiReactionThermo&
+Foam::combustionModels::psiChemistryCombustion::thermo() const
 {
-    return thermo_();
+    return chemistryPtr_->thermo();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::combustionModels::psiChemistryCombustion::rho() const
+{
+    return chemistryPtr_->thermo().rho();
 }
 
 

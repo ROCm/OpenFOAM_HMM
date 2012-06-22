@@ -86,8 +86,8 @@ void calcIncompressibleYPlus
 
             Info<< "Patch " << patchi
                 << " named " << nutPw.patch().name()
-                << " y+ : min: " << min(Yp) << " max: " << max(Yp)
-                << " average: " << average(Yp) << nl << endl;
+                << " y+ : min: " << gMin(Yp) << " max: " << gMax(Yp)
+                << " average: " << gAverage(Yp) << nl << endl;
         }
     }
 
@@ -166,8 +166,8 @@ void calcCompressibleYPlus
 
             Info<< "Patch " << patchi
                 << " named " << mutPw.patch().name()
-                << " y+ : min: " << min(Yp) << " max: " << max(Yp)
-                << " average: " << average(Yp) << nl << endl;
+                << " y+ : min: " << gMin(Yp) << " max: " << gMax(Yp)
+                << " average: " << gAverage(Yp) << nl << endl;
         }
     }
 

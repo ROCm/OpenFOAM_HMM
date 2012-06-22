@@ -1,16 +1,11 @@
     Info<< "Creating combustion model\n" << endl;
 
-    autoPtr<combustionModels::psiChemistryCombustionModel> combustion
+    autoPtr<combustionModels::psiCombustionModel> combustion
     (
-        combustionModels::psiChemistryCombustionModel::New
-        (
-            mesh
-        )
+        combustionModels::psiCombustionModel::New(mesh)
     );
 
-    psiChemistryModel& chemistry = combustion->pChemistry();
-
-    psiReactionThermo& thermo = chemistry.thermo();
+    psiReactionThermo& thermo = combustion->thermo();
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -102,3 +97,6 @@
         mesh,
         dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
+
+    Info<< "Creating sources\n" << endl;
+    IObasicSourceList sources(mesh);

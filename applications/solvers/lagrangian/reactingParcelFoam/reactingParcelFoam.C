@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Application
     reactingParcelFoam
 
 Description
-    Transient PISO solver for compressible, laminar or turbulent flow with
+    Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting Lagrangian parcels.
 
 \*---------------------------------------------------------------------------*/
@@ -33,10 +33,11 @@ Description
 #include "fvCFD.H"
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
-#include "psiChemistryCombustionModel.H"
+#include "psiCombustionModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
