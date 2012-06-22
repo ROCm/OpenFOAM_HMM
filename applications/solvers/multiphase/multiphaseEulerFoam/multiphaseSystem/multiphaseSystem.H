@@ -196,12 +196,6 @@ private:
 
         void solveAlphas();
 
-        dimensionedScalar sigma
-        (
-            const phaseModel& phase1,
-            const phaseModel& phase2
-        ) const;
-
         scalar cAlpha
         (
             const phaseModel& phase1,
@@ -299,7 +293,7 @@ public:
             const dragCoeffFields& dragCoeffs
         ) const;
 
-        tmp<surfaceScalarField> surfaceTensionForce() const;
+        tmp<surfaceScalarField> surfaceTension(const phaseModel& phase) const;
 
         //- Indicator of the proximity of the interface
         //  Field values are 1 near and 0 away for the interface.
