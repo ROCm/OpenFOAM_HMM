@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,8 @@ Description
 #include "uLabel.H"
 #include "Hasher.H"
 #include "pTraits.H"
+#include "fileName.H"
+#include "wordRe.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +99,107 @@ public:
         return p;
     }
 };
+
+
+//- Hash specialization for hashing strings
+template<>
+class Hash<Foam::string>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const string& p, unsigned seed) const
+    {
+        return string::hash()(p, seed);
+    }
+    unsigned operator()(const string& p) const
+    {
+        return string::hash()(p);
+    }
+};
+
+
+//- Hash specialization for hashing words
+template<>
+class Hash<Foam::word>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const word& p, unsigned seed) const
+    {
+        return word::hash()(p, seed);
+    }
+    unsigned operator()(const word& p) const
+    {
+        return word::hash()(p);
+    }
+};
+
+
+//- Hash specialization for hashing fileNames
+template<>
+class Hash<Foam::fileName>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const fileName& p, unsigned seed) const
+    {
+        return fileName::hash()(p, seed);
+    }
+    unsigned operator()(const fileName& p) const
+    {
+        return fileName::hash()(p);
+    }
+};
+
+
+//- Hash specialization for hashing wordRes
+template<>
+class Hash<Foam::wordRe>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const wordRe& p, unsigned seed) const
+    {
+        return wordRe::hash()(p, seed);
+    }
+    unsigned operator()(const wordRe& p) const
+    {
+        return wordRe::hash()(p);
+    }
+};
+
+
+//- Hash specialization for hashing keyTypes
+template<>
+class Hash<Foam::keyType>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const keyType& p, unsigned seed) const
+    {
+        return keyType::hash()(p, seed);
+    }
+    unsigned operator()(const keyType& p) const
+    {
+        return keyType::hash()(p);
+    }
+};
+
 
 
 //- Hash specialization for hashing pointer addresses.
