@@ -118,7 +118,7 @@ public:
     <
         interfaceThetaProps,
         multiphaseSystem::interfacePair,
-        multiphaseSystem::interfacePair::hash
+        multiphaseSystem::interfacePair::symmHash
     > thetaPropsTable;
 
 
