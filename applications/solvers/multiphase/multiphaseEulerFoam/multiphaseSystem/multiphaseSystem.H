@@ -72,6 +72,21 @@ public:
     {
     public:
 
+        class symmHash
+        :
+            public Hash<interfacePair>
+        {
+        public:
+
+            symmHash()
+            {}
+
+            label operator()(const interfacePair& key) const
+            {
+                return word::hash()(key.first()) + word::hash()(key.second());
+            }
+        };
+
         class hash
         :
             public Hash<interfacePair>
@@ -83,7 +98,7 @@ public:
 
             label operator()(const interfacePair& key) const
             {
-                return word::hash()(key.first()) + word::hash()(key.second());
+                return word::hash()(key.first(), word::hash()(key.second()));
             }
         };
 
@@ -130,10 +145,10 @@ public:
     };
 
 
-    typedef HashPtrTable<dragModel, interfacePair, interfacePair::hash>
+    typedef HashPtrTable<dragModel, interfacePair, interfacePair::symmHash>
         dragModelTable;
 
-    typedef HashPtrTable<volScalarField, interfacePair, interfacePair::hash>
+    typedef HashPtrTable<volScalarField, interfacePair, interfacePair::symmHash>
         dragCoeffFields;
 
 
@@ -168,17 +183,20 @@ private:
 
         volScalarField alphas_;
 
+        typedef HashTable<scalar, interfacePair, interfacePair::symmHash>
+            scalarCoeffSymmTable;
+
         typedef HashTable<scalar, interfacePair, interfacePair::hash>
             scalarCoeffTable;
 
-        scalarCoeffTable sigmas_;
+        scalarCoeffSymmTable sigmas_;
         dimensionSet dimSigma_;
 
-        scalarCoeffTable cAlphas_;
+        scalarCoeffSymmTable cAlphas_;
 
         scalarCoeffTable Cvms_;
 
-        typedef HashTable<dictionary, interfacePair, interfacePair::hash>
+        typedef HashTable<dictionary, interfacePair, interfacePair::symmHash>
             interfaceDictTable;
 
         dragModelTable dragModels_;
@@ -195,18 +213,6 @@ private:
         void calcAlphas();
 
         void solveAlphas();
-
-        scalar cAlpha
-        (
-            const phaseModel& phase1,
-            const phaseModel& phase2
-        ) const;
-
-        dimensionedScalar Cvm
-        (
-            const phaseModel& phase1,
-            const phaseModel& phase2
-        ) const;
 
         tmp<surfaceVectorField> nHatfv
         (

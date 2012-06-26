@@ -58,7 +58,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     phiHbyAName_(ptf.phiHbyAName_),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    DpName_(ptf.rhoName_),
+    DpName_(ptf.DpName_),
     adjoint_(ptf.adjoint_)
 {}
 
@@ -194,8 +194,11 @@ void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "phiHbyA", "phiHbyA", phiHbyAName_);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "Dp", "Dp", rhoName_);
-    os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "Dp", "Dp", DpName_);
+    if (adjoint_)
+    {
+        os.writeKeyword("adjoint") << adjoint_ << token::END_STATEMENT << nl;
+    }
     gradient().writeEntry("gradient", os);
 }
 
