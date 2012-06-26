@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,10 +42,18 @@ int main(int argc, char *argv[])
     timeSelector::addOptions();
 
 #   include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "collate",
+        "Combine similar patches"
+    );
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
+
+    const bool collate = args.optionFound("collate");
+
 
 #   include "createNamedMesh.H"
 
@@ -89,15 +97,81 @@ int main(int argc, char *argv[])
         Info<< endl;
 
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
+
+        DynamicList<HashTable<word> > fieldToTypes(bm.size());
+        DynamicList<DynamicList<label> > groupToPatches(bm.size());
         forAll(bm, patchI)
         {
-            Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
-            outputFieldList<scalar>(vsf, patchI);
-            outputFieldList<vector>(vvf, patchI);
-            outputFieldList<sphericalTensor>(vsptf, patchI);
-            outputFieldList<symmTensor>(vsytf, patchI);
-            outputFieldList<tensor>(vtf, patchI);
-            Info<< endl;
+            if (collate)
+            {
+                HashTable<word> fieldToType;
+                collectFieldList<scalar>(vsf, patchI, fieldToType);
+                collectFieldList<vector>(vvf, patchI, fieldToType);
+                collectFieldList<sphericalTensor>(vsptf, patchI, fieldToType);
+                collectFieldList<symmTensor>(vsytf, patchI, fieldToType);
+                collectFieldList<tensor>(vtf, patchI, fieldToType);
+
+                label groupI = findIndex(fieldToTypes, fieldToType);
+                if (groupI == -1)
+                {
+                    DynamicList<label> group(1);
+                    group.append(patchI);
+                    groupToPatches.append(group);
+                    fieldToTypes.append(fieldToType);
+                }
+                else
+                {
+                    groupToPatches[groupI].append(patchI);
+                }
+            }
+            else
+            {
+                Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
+                outputFieldList<scalar>(vsf, patchI);
+                outputFieldList<vector>(vvf, patchI);
+                outputFieldList<sphericalTensor>(vsptf, patchI);
+                outputFieldList<symmTensor>(vsytf, patchI);
+                outputFieldList<tensor>(vtf, patchI);
+                Info<< endl;
+            }
+        }
+
+
+        bool hasGroups = false;
+        forAll(groupToPatches, groupI)
+        {
+            const DynamicList<label>& patchIDs = groupToPatches[groupI];
+            if (patchIDs.size() > 1)
+            {
+                hasGroups = true;
+                break;
+            }
+        }
+
+
+        if (hasGroups)
+        {
+            Info<< "Collated:" << endl;
+            forAll(groupToPatches, groupI)
+            {
+                const DynamicList<label>& patchIDs = groupToPatches[groupI];
+
+                if (patchIDs.size() > 1)
+                {
+                    Info<< '(' << bm[patchIDs[0]].name();
+                    for (label i = 1; i < patchIDs.size(); i++)
+                    {
+                        Info<< ' ' << bm[patchIDs[i]].name();
+                    }
+                    Info<< ')' << endl;
+                    outputFieldList<scalar>(vsf, patchIDs[0]);
+                    outputFieldList<vector>(vvf, patchIDs[0]);
+                    outputFieldList<sphericalTensor>(vsptf, patchIDs[0]);
+                    outputFieldList<symmTensor>(vsytf, patchIDs[0]);
+                    outputFieldList<tensor>(vtf, patchIDs[0]);
+                    Info<< endl;
+                }
+            }
         }
     }
 

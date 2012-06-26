@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ void Foam::addToFieldList
 template<class Type>
 void Foam::outputFieldList
 (
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
+    const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
     const label patchI
 )
 {
@@ -66,6 +66,28 @@ void Foam::outputFieldList
             Info<< "    " << pTraits<Type>::typeName << tab << tab
                 << fieldList[fieldI].name() << tab << tab
                 << fieldList[fieldI].boundaryField()[patchI].type() << nl;
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::collectFieldList
+(
+    const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
+    const label patchI,
+    HashTable<word>& fieldToType
+)
+{
+    forAll(fieldList, fieldI)
+    {
+        if (fieldList.set(fieldI))
+        {
+            fieldToType.insert
+            (
+                fieldList[fieldI].name(),
+                fieldList[fieldI].boundaryField()[patchI].type()
+            );
         }
     }
 }

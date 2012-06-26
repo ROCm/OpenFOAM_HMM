@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,16 @@ namespace Foam
     template<class Type>
     void outputFieldList
     (
-        PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
+        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
         const label patchI
+    );
+
+    template<class Type>
+    void collectFieldList
+    (
+        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
+        const label patchI,
+        HashTable<word>& fieldToType
     );
 } // End namespace Foam
 
