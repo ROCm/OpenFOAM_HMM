@@ -42,60 +42,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Return names of groups and patches. If multiple groups the first one wins.
-wordHashSet matchGroupOrPatch
-(
-    const polyBoundaryMesh& bm,
-    const labelList& patchIDs
-)
-{
-    // Current matched groups
-    wordHashSet matchedGroups;
-
-    // Current set of unmatched patches
-    labelHashSet nonGroupPatches(patchIDs);
-
-    const HashTable<labelList, word>& groupPatchIDs =
-        bm.groupPatchIDs();
-    for
-    (
-        HashTable<labelList,word>::const_iterator iter =
-            groupPatchIDs.begin();
-        iter != groupPatchIDs.end();
-        ++iter
-    )
-    {
-        // Store currently unmatched patches
-        labelHashSet oldNonGroupPatches(nonGroupPatches);
-
-        // Match by deleting patches in group from the current set and seeing
-        // if all have been deleted.
-        labelHashSet groupPatchSet(iter());
-
-        label nMatch = nonGroupPatches.erase(groupPatchSet);
-
-        if (nMatch == groupPatchSet.size())
-        {
-            matchedGroups.insert(iter.key());
-        }
-        else
-        {
-            // No full match. Undo.
-            nonGroupPatches.transfer(oldNonGroupPatches);
-        }
-    }
-
-    // Add remaining patches
-    forAllConstIter(labelHashSet, nonGroupPatches, iter)
-    {
-        matchedGroups.insert(bm[iter.key()].name());
-    }
-
-    return matchedGroups;
-}
-
-
-
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
@@ -172,7 +118,7 @@ int main(int argc, char *argv[])
 
             forAll(bm, patchI)
             {
-                Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
+                Info<< bm[patchI].type() << "\t: " << bm[patchI].name() << nl;
                 outputFieldList<scalar>(vsf, patchI);
                 outputFieldList<vector>(vvf, patchI);
                 outputFieldList<sphericalTensor>(vsptf, patchI);
@@ -221,19 +167,23 @@ int main(int argc, char *argv[])
                 if (patchIDs.size() > 1)
                 {
                     // Check if part of a group
-                    wordList patchOrGroup
-                    (
-                        matchGroupOrPatch(bm, patchIDs).sortedToc()
-                    );
+                    wordList groups;
+                    labelHashSet nonGroupPatches;
+                    bm.matchGroups(patchIDs, groups, nonGroupPatches);
 
-                    //Info<< patchOrGroup << endl;
-                    Info<< patchOrGroup[0];
-                    for (label i = 1; i < patchOrGroup.size(); i++)
+                    const labelList sortedPatches(nonGroupPatches.sortedToc());
+                    forAll(sortedPatches, i)
                     {
-                        Info<< ' ' << patchOrGroup[i];
+                        Info<< bm[sortedPatches[i]].type()
+                            << "\t: " << bm[sortedPatches[i]].name() << nl;
                     }
-                    Info<< endl;
-
+                    if (groups.size())
+                    {
+                        forAll(groups, i)
+                        {
+                            Info<< "group\t: " << groups[i] << nl;
+                        }
+                    }
                     outputFieldList<scalar>(vsf, patchIDs[0]);
                     outputFieldList<vector>(vvf, patchIDs[0]);
                     outputFieldList<sphericalTensor>(vsptf, patchIDs[0]);
