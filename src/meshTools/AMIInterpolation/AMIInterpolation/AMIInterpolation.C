@@ -280,6 +280,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
             {
                 overlaps[procI] = true;
                 nOverlaps++;
+                break;
             }
         }
     }
