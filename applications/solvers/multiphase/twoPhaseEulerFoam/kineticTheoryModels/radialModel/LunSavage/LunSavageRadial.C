@@ -30,20 +30,29 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(LunSavageRadial, 0);
+namespace kineticTheoryModels
+{
+namespace radialModels
+{
+    defineTypeNameAndDebug(LunSavage, 0);
 
     addToRunTimeSelectionTable
     (
         radialModel,
-        LunSavageRadial,
+        LunSavage,
         dictionary
     );
+}
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::LunSavageRadial::LunSavageRadial(const dictionary& dict)
+Foam::kineticTheoryModels::radialModels::LunSavage::LunSavage
+(
+    const dictionary& dict
+)
 :
     radialModel(dict)
 {}
@@ -51,30 +60,32 @@ Foam::LunSavageRadial::LunSavageRadial(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::LunSavageRadial::~LunSavageRadial()
+Foam::kineticTheoryModels::radialModels::LunSavage::~LunSavage()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::LunSavageRadial::g0
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::LunSavage::g0
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
 
-    return pow(1.0 - alpha1/alphaMax, -2.5*alphaMax);
+    return pow(1.0 - alpha/alphaMax, -2.5*alphaMax);
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::LunSavageRadial::g0prime
+Foam::tmp<Foam::volScalarField>
+Foam::kineticTheoryModels::radialModels::LunSavage::g0prime
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
-    return 2.5*alphaMax*alpha1*pow(1.0 - alpha1, -1.0 - 2.5*alphaMax);
+    return 2.5*pow(1.0 - alpha/alphaMax, -1.0 - 2.5*alphaMax);
 }
 
 

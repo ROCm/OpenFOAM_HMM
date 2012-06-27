@@ -38,7 +38,6 @@ SourceFiles
 #include "DataEntry.H"
 #include "Tuple2.H"
 #include "dimensionSet.H"
-#include "interpolationWeights.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,6 +53,8 @@ Ostream& operator<<
     Ostream&,
     const TableBase<Type>&
 );
+
+class interpolationWeights;
 
 /*---------------------------------------------------------------------------*\
                         Class TableBase Declaration

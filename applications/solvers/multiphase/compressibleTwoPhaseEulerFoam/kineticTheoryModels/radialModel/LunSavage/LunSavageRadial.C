@@ -69,23 +69,23 @@ Foam::kineticTheoryModels::radialModels::LunSavage::~LunSavage()
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::LunSavage::g0
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
 
-    return pow(1.0 - alpha1/alphaMax, -2.5*alphaMax);
+    return pow(1.0 - alpha/alphaMax, -2.5*alphaMax);
 }
 
 
 Foam::tmp<Foam::volScalarField>
 Foam::kineticTheoryModels::radialModels::LunSavage::g0prime
 (
-    const volScalarField& alpha1,
+    const volScalarField& alpha,
     const dimensionedScalar& alphaMax
 ) const
 {
-    return 2.5*alphaMax*alpha1*pow(1.0 - alpha1, -1.0 - 2.5*alphaMax);
+    return 2.5*pow(1.0 - alpha/alphaMax, -1.0 - 2.5*alphaMax);
 }
 
 

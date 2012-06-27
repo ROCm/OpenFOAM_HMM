@@ -10,7 +10,7 @@
     surfaceScalarField alpha1f(fvc::interpolate(alpha1));
     surfaceScalarField alpha2f(scalar(1) - alpha1f);
 
-    volScalarField rAU1(1.0/U1Eqn.A());
+    rAU1 = 1.0/U1Eqn.A();
     volScalarField rAU2(1.0/U2Eqn.A());
 
     surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
@@ -30,6 +30,19 @@
       + fvc::interpolate((1.0/rho1)*rAU1*dragCoeff)*phi2
       + rAlphaAU1f*(g & mesh.Sf())
     );
+
+    if (g0.value() > 0.0)
+    {
+        phiHbyA1 -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
+    }
+
+    if (kineticTheory.on())
+    {
+        phiHbyA1 -=
+            fvc::interpolate((1.0/rho1)*rAU1)
+           *fvc::snGrad(kineticTheory.pa())*mesh.magSf();
+    }
+
     mrfZones.relativeFlux(phiHbyA1);
 
     surfaceScalarField phiHbyA2
