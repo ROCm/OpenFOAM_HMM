@@ -28,6 +28,11 @@ Description
     Writes fields and boundary condition info for each patch at each requested
     time instance.
 
+    Default action is to write a single entry for patches/patchGroups with the
+    same boundary conditions. Use the -expand option to print every patch
+    separately. In case of multiple groups matching it will print only the
+    first one.
+
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
@@ -37,6 +42,60 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Return names of groups and patches. If multiple groups the first one wins.
+wordHashSet matchGroupOrPatch
+(
+    const polyBoundaryMesh& bm,
+    const labelList& patchIDs
+)
+{
+    // Current matched groups
+    wordHashSet matchedGroups;
+
+    // Current set of unmatched patches
+    labelHashSet nonGroupPatches(patchIDs);
+
+    const HashTable<labelList, word>& groupPatchIDs =
+        bm.groupPatchIDs();
+    for
+    (
+        HashTable<labelList,word>::const_iterator iter =
+            groupPatchIDs.begin();
+        iter != groupPatchIDs.end();
+        ++iter
+    )
+    {
+        // Store currently unmatched patches
+        labelHashSet oldNonGroupPatches(nonGroupPatches);
+
+        // Match by deleting patches in group from the current set and seeing
+        // if all have been deleted.
+        labelHashSet groupPatchSet(iter());
+
+        label nMatch = nonGroupPatches.erase(groupPatchSet);
+
+        if (nMatch == groupPatchSet.size())
+        {
+            matchedGroups.insert(iter.key());
+        }
+        else
+        {
+            // No full match. Undo.
+            nonGroupPatches.transfer(oldNonGroupPatches);
+        }
+    }
+
+    // Add remaining patches
+    forAllConstIter(labelHashSet, nonGroupPatches, iter)
+    {
+        matchedGroups.insert(bm[iter.key()].name());
+    }
+
+    return matchedGroups;
+}
+
+
+
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
@@ -44,24 +103,34 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
     argList::addBoolOption
     (
-        "collate",
-        "Combine similar patches"
+        "expand",
+        "Do not combine patches"
     );
 #   include "setRootCase.H"
 #   include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool collate = args.optionFound("collate");
+    const bool expand = args.optionFound("expand");
 
 
 #   include "createNamedMesh.H"
+    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+
 
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        // Update the mesh if changed
+        if (mesh.readUpdate() == polyMesh::TOPO_PATCH_CHANGE)
+        {
+            Info<< "Detected changed patches. Recreating patch group table."
+                << endl;
+        }
+
 
         const IOobjectList fieldObjs(mesh, runTime.timeName());
         const wordList objNames = fieldObjs.names();
@@ -96,13 +165,32 @@ int main(int argc, char *argv[])
 
         Info<< endl;
 
-        const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-        DynamicList<HashTable<word> > fieldToTypes(bm.size());
-        DynamicList<DynamicList<label> > groupToPatches(bm.size());
-        forAll(bm, patchI)
+        if (expand)
         {
-            if (collate)
+            // Print each patch separately
+
+            forAll(bm, patchI)
+            {
+                Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
+                outputFieldList<scalar>(vsf, patchI);
+                outputFieldList<vector>(vvf, patchI);
+                outputFieldList<sphericalTensor>(vsptf, patchI);
+                outputFieldList<symmTensor>(vsytf, patchI);
+                outputFieldList<tensor>(vtf, patchI);
+                Info<< endl;
+            }
+        }
+        else
+        {
+            // Collect for each patch the bc type per field. Merge similar
+            // patches.
+
+            // Per 'group', the map from fieldname to patchfield type
+            DynamicList<HashTable<word> > fieldToTypes(bm.size());
+            // Per 'group' the patches
+            DynamicList<DynamicList<label> > groupToPatches(bm.size());
+            forAll(bm, patchI)
             {
                 HashTable<word> fieldToType;
                 collectFieldList<scalar>(vsf, patchI, fieldToType);
@@ -124,46 +212,28 @@ int main(int argc, char *argv[])
                     groupToPatches[groupI].append(patchI);
                 }
             }
-            else
-            {
-                Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
-                outputFieldList<scalar>(vsf, patchI);
-                outputFieldList<vector>(vvf, patchI);
-                outputFieldList<sphericalTensor>(vsptf, patchI);
-                outputFieldList<symmTensor>(vsytf, patchI);
-                outputFieldList<tensor>(vtf, patchI);
-                Info<< endl;
-            }
-        }
 
 
-        bool hasGroups = false;
-        forAll(groupToPatches, groupI)
-        {
-            const DynamicList<label>& patchIDs = groupToPatches[groupI];
-            if (patchIDs.size() > 1)
-            {
-                hasGroups = true;
-                break;
-            }
-        }
-
-
-        if (hasGroups)
-        {
-            Info<< "Collated:" << endl;
             forAll(groupToPatches, groupI)
             {
                 const DynamicList<label>& patchIDs = groupToPatches[groupI];
 
                 if (patchIDs.size() > 1)
                 {
-                    Info<< '(' << bm[patchIDs[0]].name();
-                    for (label i = 1; i < patchIDs.size(); i++)
+                    // Check if part of a group
+                    wordList patchOrGroup
+                    (
+                        matchGroupOrPatch(bm, patchIDs).sortedToc()
+                    );
+
+                    //Info<< patchOrGroup << endl;
+                    Info<< patchOrGroup[0];
+                    for (label i = 1; i < patchOrGroup.size(); i++)
                     {
-                        Info<< ' ' << bm[patchIDs[i]].name();
+                        Info<< ' ' << patchOrGroup[i];
                     }
-                    Info<< ')' << endl;
+                    Info<< endl;
+
                     outputFieldList<scalar>(vsf, patchIDs[0]);
                     outputFieldList<vector>(vvf, patchIDs[0]);
                     outputFieldList<sphericalTensor>(vsptf, patchIDs[0]);
