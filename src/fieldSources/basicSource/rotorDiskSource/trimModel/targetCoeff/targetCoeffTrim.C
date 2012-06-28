@@ -88,7 +88,7 @@ Foam::vector Foam::targetCoeffTrim::calcCoeffs
     }
 
     reduce(cf, sumOp<vector>());
-    
+
     return cf;
 }
 
@@ -176,6 +176,8 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
         Info<< type() << ":" << nl
             << "    solving for target trim coefficients" << nl;
 
+        const scalar rhoRef = rotor_.rhoRef();
+
         // iterate to find new pitch angles to achieve target force
         scalar err = GREAT;
         label iter = 0;
@@ -210,7 +212,7 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
             }
 
             // calculate the change in pitch angle vector
-            vector dt = inv(J) & (target_ - old);
+            vector dt = inv(J) & (target_/rhoRef - old);
 
             // update pitch angles
             vector thetaNew = theta_ + relax_*dt;
@@ -236,9 +238,9 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
         }
 
         Info<< "    current and target coefficients:" << nl
-            << "        thrust  = " << old[0] << ", " << target_[0] << nl
-            << "        pitch   = " << old[1] << ", " << target_[1] << nl
-            << "        roll    = " << old[2] << ", " << target_[2] << nl
+            << "        thrust  = " << old[0]*rhoRef << ", " << target_[0] << nl
+            << "        pitch   = " << old[1]*rhoRef << ", " << target_[1] << nl
+            << "        roll    = " << old[2]*rhoRef << ", " << target_[2] << nl
             << "    new pitch angles [deg]:" << nl
             << "        theta0  = " << radToDeg(theta_[0]) << nl
             << "        theta1c = " << radToDeg(theta_[1]) << nl

@@ -662,8 +662,8 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
         flapCoeffs.lookup("beta1c") >> flap_.beta1c;
         flapCoeffs.lookup("beta2s") >> flap_.beta2s;
         flap_.beta0 = degToRad(flap_.beta0);
-        flap_.beta1 = degToRad(flap_.beta1);
-        flap_.beta2 = degToRad(flap_.beta2);
+        flap_.beta1c = degToRad(flap_.beta1c);
+        flap_.beta2s = degToRad(flap_.beta2s);
 
 
         // create co-ordinate system
