@@ -70,21 +70,29 @@ Foam::vector Foam::targetCoeffTrim::calcCoeffs
     {
         label cellI = cells[i];
 
-        // create normalisation coefficient
-        scalar radius = x[i].x();
-        scalar coeff2 = coeff1*pow4(radius);
-        if (compressible)
-        {
-            coeff2 *= trho()[cellI];
-        }
-
         vector fc = force[cellI];
         vector mc = fc^(C[cellI] - origin);
 
-        // add to coefficient vector
-        cf[0] += (fc & yawAxis)/(coeff2 + ROOTVSMALL);
-        cf[1] += (mc & pitchAxis)/(coeff2*radius + ROOTVSMALL);
-        cf[2] += (mc & rollAxis)/(coeff2*radius + ROOTVSMALL);
+        if (useCoeffs_)
+        {
+            scalar radius = x[i].x();
+            scalar coeff2 = coeff1*pow4(radius);
+            if (compressible)
+            {
+                coeff2 *= trho()[cellI];
+            }
+
+            // add to coefficient vector
+            cf[0] += (fc & yawAxis)/(coeff2 + ROOTVSMALL);
+            cf[1] += (mc & pitchAxis)/(coeff2*radius + ROOTVSMALL);
+            cf[2] += (mc & rollAxis)/(coeff2*radius + ROOTVSMALL);
+        }
+        else
+        {
+            cf[0] += fc & yawAxis;
+            cf[1] += mc & pitchAxis;
+            cf[2] += mc & rollAxis;
+        }
     }
 
     reduce(cf, sumOp<vector>());
@@ -103,6 +111,7 @@ Foam::targetCoeffTrim::targetCoeffTrim
 :
     trimModel(rotor, dict, typeName),
     calcFrequency_(-1),
+    useCoeffs_(true),
     target_(vector::zero),
     theta_(vector::zero),
     nIter_(50),
@@ -128,9 +137,16 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
     trimModel::read(dict);
 
     const dictionary& targetDict(coeffs_.subDict("target"));
-    target_[0] = readScalar(targetDict.lookup("thrustCoeff"));
-    target_[1] = readScalar(targetDict.lookup("pitchCoeff"));
-    target_[2] = readScalar(targetDict.lookup("rollCoeff"));
+    useCoeffs_ = targetDict.lookupOrDefault<bool>("useCoeffs", true);
+    word ext = "";
+    if (useCoeffs_)
+    {
+        ext = "Coeff";
+    }
+
+    target_[0] = readScalar(targetDict.lookup("thrust" + ext));
+    target_[1] = readScalar(targetDict.lookup("pitch" + ext));
+    target_[2] = readScalar(targetDict.lookup("roll" + ext));
 
     const dictionary& pitchAngleDict(coeffs_.subDict("pitchAngles"));
     theta_[0] = degToRad(readScalar(pitchAngleDict.lookup("theta0Ini")));
@@ -173,8 +189,14 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
 {
     if (rotor_.mesh().time().timeIndex() % calcFrequency_ == 0)
     {
+        word calcType = "forces";
+        if (useCoeffs_)
+        {
+            calcType = "coefficients";
+        }
+
         Info<< type() << ":" << nl
-            << "    solving for target trim coefficients" << nl;
+            << "    solving for target trim " << calcType << nl;
 
         const scalar rhoRef = rotor_.rhoRef();
 
@@ -237,7 +259,7 @@ void Foam::targetCoeffTrim::correct(const vectorField& U, vectorField& force)
                 << "), iterations = " << iter << endl;
         }
 
-        Info<< "    current and target coefficients:" << nl
+        Info<< "    current and target " << calcType << nl
             << "        thrust  = " << old[0]*rhoRef << ", " << target_[0] << nl
             << "        pitch   = " << old[1]*rhoRef << ", " << target_[1] << nl
             << "        roll    = " << old[2]*rhoRef << ", " << target_[2] << nl

@@ -25,7 +25,7 @@ Class
     Foam::targetCoeffTrim
 
 Description
-    Target trim coefficients
+    Target trim forces/coefficients
 
     Solves:
 
@@ -43,8 +43,8 @@ Description
     Newton-Raphson iterative method.  The solver tolerance can be user-input,
     using the 'tol' entry.
 
-
-    The coefficients are determined using:
+    If coefficients are requested (useCoeffs = true), the force and moments
+    are normalised using:
 
                          force
         c = ---------------------------------
@@ -96,6 +96,9 @@ protected:
 
         //- Number of iterations between calls to 'correct'
         label calcFrequency_;
+
+        //- Flag to indicate whether to solve coeffs (true) or forces (false)
+        bool useCoeffs_;
 
         //- Target coefficient vector (thrust force, roll moment, pitch moment)
         vector target_;
