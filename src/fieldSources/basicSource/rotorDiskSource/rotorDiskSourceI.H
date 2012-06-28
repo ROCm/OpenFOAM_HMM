@@ -27,10 +27,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::scalar Foam::rotorDiskSource::rhoRef() const
+{
+    return rhoRef_;
+}
+
+
 Foam::scalar Foam::rotorDiskSource::omega() const
 {
     return omega_;
 }
+
 
 const Foam::List<Foam::point>& Foam::rotorDiskSource::x() const
 {
