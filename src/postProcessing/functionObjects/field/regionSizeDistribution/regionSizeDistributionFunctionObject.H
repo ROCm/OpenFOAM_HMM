@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,49 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::regionSizeDistributionFunctionObject
+
+Description
+    FunctionObject wrapper around regionSizeDistribution to allow it to be
+    created via the functions list within controlDict.
+
+SourceFiles
+    regionSizeDistributionFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchSummaryTemplates_H
-#define patchSummaryTemplates_H
+#ifndef regionSizeDistributionFunctionObject_H
+#define regionSizeDistributionFunctionObject_H
 
-#include "fvCFD.H"
-#include "volFields.H"
+#include "regionSizeDistribution.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    template<class Type>
-    void addToFieldList
-    (
-        PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const IOobject& obj,
-        const label fieldI,
-        const fvMesh& mesh
-    );
-
-    template<class Type>
-    void outputFieldList
-    (
-        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const label patchI
-    );
-
-    template<class Type>
-    void collectFieldList
-    (
-        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const label patchI,
-        HashTable<word>& fieldToType
-    );
-} // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "patchSummaryTemplates.C"
-#endif
+    typedef OutputFilterFunctionObject<regionSizeDistribution>
+        regionSizeDistributionFunctionObject;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,50 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchSummaryTemplates_H
-#define patchSummaryTemplates_H
+#include "regionSizeDistributionFunctionObject.H"
 
-#include "fvCFD.H"
-#include "volFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    template<class Type>
-    void addToFieldList
+    defineNamedTemplateTypeNameAndDebug
     (
-        PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const IOobject& obj,
-        const label fieldI,
-        const fvMesh& mesh
+        regionSizeDistributionFunctionObject,
+        0
     );
 
-    template<class Type>
-    void outputFieldList
+    addToRunTimeSelectionTable
     (
-        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const label patchI
+        functionObject,
+        regionSizeDistributionFunctionObject,
+        dictionary
     );
-
-    template<class Type>
-    void collectFieldList
-    (
-        const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList,
-        const label patchI,
-        HashTable<word>& fieldToType
-    );
-} // End namespace Foam
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "patchSummaryTemplates.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+}
 
 // ************************************************************************* //

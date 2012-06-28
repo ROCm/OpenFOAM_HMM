@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -193,6 +193,15 @@ public:
             const UList<wordRe>& patchNames,
             const bool warnNotFound = true,
             const bool usePatchGroups = true
+        ) const;
+
+        //- Match the patches to groups. Returns all the (fully matched) groups
+        //  and any remaining unmatched patches.
+        void matchGroups
+        (
+            const labelUList& patchIDs,
+            wordList& groups,
+            labelHashSet& nonGroupPatches
         ) const;
 
         //- Check whether all procs have all patches and in same order. Return

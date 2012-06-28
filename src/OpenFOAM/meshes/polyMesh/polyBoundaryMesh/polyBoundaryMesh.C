@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -789,6 +789,52 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
     }
 
     return ids;
+}
+
+
+void Foam::polyBoundaryMesh::matchGroups
+(
+    const labelUList& patchIDs,
+    wordList& groups,
+    labelHashSet& nonGroupPatches
+) const
+{
+    // Current matched groups
+    DynamicList<word> matchedGroups(1);
+
+    // Current set of unmatched patches
+    nonGroupPatches = labelHashSet(patchIDs);
+
+    const HashTable<labelList, word>& groupPatchIDs = this->groupPatchIDs();
+    for
+    (
+        HashTable<labelList,word>::const_iterator iter =
+            groupPatchIDs.begin();
+        iter != groupPatchIDs.end();
+        ++iter
+    )
+    {
+        // Store currently unmatched patches so we can restore
+        labelHashSet oldNonGroupPatches(nonGroupPatches);
+
+        // Match by deleting patches in group from the current set and seeing
+        // if all have been deleted.
+        labelHashSet groupPatchSet(iter());
+
+        label nMatch = nonGroupPatches.erase(groupPatchSet);
+
+        if (nMatch == groupPatchSet.size())
+        {
+            matchedGroups.append(iter.key());
+        }
+        else if (nMatch != 0)
+        {
+            // No full match. Undo.
+            nonGroupPatches.transfer(oldNonGroupPatches);
+        }
+    }
+
+    groups.transfer(matchedGroups);
 }
 
 

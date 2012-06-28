@@ -41,4 +41,7 @@ wallBoundedStreamLine/wallBoundedParticle.C
 surfaceInterpolateFields/surfaceInterpolateFields.C
 surfaceInterpolateFields/surfaceInterpolateFieldsFunctionObject.C
 
+regionSizeDistribution/regionSizeDistribution.C
+regionSizeDistribution/regionSizeDistributionFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects
