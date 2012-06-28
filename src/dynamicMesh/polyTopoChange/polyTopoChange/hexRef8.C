@@ -1993,11 +1993,17 @@ Foam::hexRef8::hexRef8(const polyMesh& mesh, const bool readHistory)
 {
     if (readHistory)
     {
+        // Make sure we don't use the master-only reading. Bit of a hack for
+        // now.
+        regIOobject::fileCheckTypes oldType =
+            regIOobject::fileModificationChecking;
+        regIOobject::fileModificationChecking = regIOobject::timeStamp;
         history_.readOpt() = IOobject::READ_IF_PRESENT;
         if (history_.headerOk())
         {
             history_.read();
         }
+        regIOobject::fileModificationChecking = oldType;
     }
 
     if (history_.active() && history_.visibleCells().size() != mesh_.nCells())
