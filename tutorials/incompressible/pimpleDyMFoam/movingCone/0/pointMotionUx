@@ -22,8 +22,8 @@ boundaryField
 {
     movingWall
     {
-        type            fixedValue;
-        value           uniform 1;
+        type            uniformFixedValue;
+        uniformValue    constant 1;
     }
     farFieldMoving
     {
@@ -31,8 +31,8 @@ boundaryField
     }
     fixedWall
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            uniformFixedValue;
+        uniformValue    constant 0;
     }
     axis
     {
@@ -40,8 +40,8 @@ boundaryField
     }
     left
     {
-        type            fixedValue;
-        value           uniform 0;
+        type            uniformFixedValue;
+        uniformValue    constant 0;
     }
     farField
     {
