@@ -526,13 +526,10 @@ QSMPI)
     ;;
 
 SGIMPI)
-    lastCharID=$(( ${#MPI_ROOT} - 1 ))
-    if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-    then
-        MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-    fi
+    # no trailing slash
+    [ "${MPI_ROOT%/}" = "${MPI_ROOT}" ] || MPI_ROOT="${MPI_ROOT%/}"
 
-    export FOAM_MPI=${MPI_ROOT##*/}
+    export FOAM_MPI="${MPI_ROOT##*/}"
     export MPI_ARCH_PATH=$MPI_ROOT
 
     if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
@@ -555,13 +552,10 @@ SGIMPI)
     ;;
 
 INTELMPI)
-    lastCharID=$(( ${#MPI_ROOT} - 1 ))
-    if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-    then
-        MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-    fi
+    # no trailing slash
+    [ "${MPI_ROOT%/}" = "${MPI_ROOT}" ] || MPI_ROOT="${MPI_ROOT%/}"
 
-    export FOAM_MPI=${MPI_ROOT##*/}
+    export FOAM_MPI="${MPI_ROOT##*/}"
     export MPI_ARCH_PATH=$MPI_ROOT
 
     if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
