@@ -33,7 +33,6 @@ dictionaryReplacement
             {
                 type            uniformFixedValue;
                 uniformValue    constant $pressure;
-                value           $pressure;
             }
             inlet
             {

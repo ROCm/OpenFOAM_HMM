@@ -30,7 +30,6 @@ boundaryField
     outlet
     {
         type            uniformFixedValue;
-        value           $pressure;
         uniformValue    constant $pressure;
     }
 

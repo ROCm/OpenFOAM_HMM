@@ -33,7 +33,6 @@ boundaryField
     inlet
     {
         type            uniformFixedValue;
-        value           $turbulentKE;
         uniformValue    constant $turbulentKE;
     }
     "terrain_.*"
