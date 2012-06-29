@@ -137,7 +137,7 @@ _foamSource()
 {
     while [ $# -ge 1 ]
     do
-        [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1"
+        [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Sourcing: $1" 1>&2
         . $1
        shift
     done
@@ -155,12 +155,12 @@ _foamEval()
             ;;
         *=)
             # name=       -> unset name
-            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}"
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}" 1>&2
             eval "unset ${1%=}"
             ;;
         *=*)
             # name=value  -> export name=value
-            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "export $1"
+            [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "export $1" 1>&2
             eval "export $1"
             ;;
         *)
