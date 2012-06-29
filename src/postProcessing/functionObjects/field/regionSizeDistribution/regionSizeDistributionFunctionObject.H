@@ -21,53 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::regionSizeDistributionFunctionObject
+
+Description
+    FunctionObject wrapper around regionSizeDistribution to allow it to be
+    created via the functions list within controlDict.
+
+SourceFiles
+    regionSizeDistributionFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "rotorDiskSource.H"
+#ifndef regionSizeDistributionFunctionObject_H
+#define regionSizeDistributionFunctionObject_H
+
+#include "regionSizeDistribution.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rotorDiskSource::rhoRef() const
+namespace Foam
 {
-    return rhoRef_;
+    typedef OutputFilterFunctionObject<regionSizeDistribution>
+        regionSizeDistributionFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rotorDiskSource::omega() const
-{
-    return omega_;
-}
-
-
-const Foam::List<Foam::point>& Foam::rotorDiskSource::x() const
-{
-    return x_;
-}
-
-
-const Foam::cylindricalCS& Foam::rotorDiskSource::coordSys() const
-{
-    return coordSys_;
-}
-
-
-bool Foam::rotorDiskSource::compressible() const
-{
-    return rhoName_ != "none";
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::rotorDiskSource::rho() const
-{
-    if (compressible())
-    {
-        return mesh_.lookupObject<volScalarField>(rhoName_);
-    }
-    else
-    {
-        return volScalarField::null();
-    }
-}
+#endif
 
 // ************************************************************************* //
-

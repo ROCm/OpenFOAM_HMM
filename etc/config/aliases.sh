@@ -53,7 +53,7 @@ unset foamPV
 foamPV()
 {
     . $WM_PROJECT_DIR/etc/config/paraview.sh ParaView_VERSION=$1
-    echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)"
+    echo "paraview-$ParaView_VERSION  (major: $ParaView_MAJOR)" 1>&2
 }
 
 

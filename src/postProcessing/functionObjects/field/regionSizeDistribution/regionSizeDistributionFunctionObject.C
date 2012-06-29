@@ -23,51 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rotorDiskSource.H"
+#include "regionSizeDistributionFunctionObject.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rotorDiskSource::rhoRef() const
+namespace Foam
 {
-    return rhoRef_;
-}
+    defineNamedTemplateTypeNameAndDebug
+    (
+        regionSizeDistributionFunctionObject,
+        0
+    );
 
-
-Foam::scalar Foam::rotorDiskSource::omega() const
-{
-    return omega_;
-}
-
-
-const Foam::List<Foam::point>& Foam::rotorDiskSource::x() const
-{
-    return x_;
-}
-
-
-const Foam::cylindricalCS& Foam::rotorDiskSource::coordSys() const
-{
-    return coordSys_;
-}
-
-
-bool Foam::rotorDiskSource::compressible() const
-{
-    return rhoName_ != "none";
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::rotorDiskSource::rho() const
-{
-    if (compressible())
-    {
-        return mesh_.lookupObject<volScalarField>(rhoName_);
-    }
-    else
-    {
-        return volScalarField::null();
-    }
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        regionSizeDistributionFunctionObject,
+        dictionary
+    );
 }
 
 // ************************************************************************* //
-

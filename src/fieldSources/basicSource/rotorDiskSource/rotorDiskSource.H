@@ -51,8 +51,8 @@ Description
             flapCoeffs
             {
                 beta0           0;  // coning angle [deg]
-                beta1           0;  // lateral flapping coeff
-                beta2           0;  // longitudinal flapping coeff
+                beta1c          0;  // lateral flapping coeff (cos coeff)
+                beta2s          0;  // longitudinal flapping coeff (sin coeff)
             }
 
             blade
@@ -76,7 +76,6 @@ Description
             fixed         : specified velocity
             surfaceNormal : specified normal velocity (positive towards rotor)
             local         : use local flow conditions
-
 
 
 SourceFiles
@@ -138,8 +137,8 @@ protected:
         struct flapData
         {
             scalar beta0;   // coning angle
-            scalar beta1;   // lateral flapping coeff
-            scalar beta2;   // longitudinal flapping coeff
+            scalar beta1c;  // lateral flapping coeff (cos coeff)
+            scalar beta2s;  // longitudinal flapping coeff (sin coeff)
         };
 
 
@@ -148,7 +147,7 @@ protected:
         //- Name of density field
         word rhoName_;
 
-        //- Reference density if rhoName = 'none'
+        //- Reference density for rhoName = 'none'
         scalar rhoRef_;
 
         //- Rotational speed [rad/s]
@@ -253,6 +252,9 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return the reference density for rhoName = 'none'
+            inline scalar rhoRef() const;
 
             //- Return the rotational speed [rad/s]
             //  Positive anti-clockwise when looking along -ve lift direction

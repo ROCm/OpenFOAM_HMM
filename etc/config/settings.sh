@@ -93,7 +93,7 @@ Linux)
             export WM_LDFLAGS='-m64'
             ;;
         *)
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64"
+            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32 or 64" 1>&2
             ;;
         esac
         ;;
@@ -135,7 +135,7 @@ Linux)
         ;;
 
     *)
-        echo Unknown processor type `uname -m` for Linux
+        echo Unknown processor type `uname -m` for Linux 1>&2
         ;;
     esac
     ;;
@@ -152,7 +152,7 @@ SunOS)
     ;;
 
 *)    # an unsupported operating system
-    cat <<USAGE
+    /bin/cat <<USAGE 1>&2
 
     Your "$WM_ARCH" operating system is not supported by this release
     of OpenFOAM. For further assistance, please contact www.OpenFOAM.org
@@ -268,11 +268,11 @@ OpenFOAM | ThirdParty)
         #clang_version=llvm-svn
         ;;
     *)
-        echo
-        echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
-        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
-        echo "    Please check your settings"
-        echo
+        echo 1>&2
+        echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'" 1>&2
+        echo "    Please check your settings" 1>&2
+        echo 1>&2
         ;;
     esac
 
@@ -288,11 +288,11 @@ OpenFOAM | ThirdParty)
 
         # Check that the compiler directory can be found
         [ -d "$gccDir" ] || {
-            echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
-            echo "    Cannot find $gccDir installation."
-            echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system'"
+            echo 1>&2
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+            echo "    Cannot find $gccDir installation." 1>&2
+            echo "    Please install this compiler version or if you wish to use the system compiler," 1>&2
+            echo "    change the 'foamCompiler' setting to 'system'" 1>&2
             echo
         }
 
@@ -325,12 +325,12 @@ OpenFOAM | ThirdParty)
 
         # Check that the compiler directory can be found
         [ -d "$clangDir" ] || {
-            echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:"
-            echo "    Cannot find $clangDir installation."
-            echo "    Please install this compiler version or if you wish to use the system compiler,"
-            echo "    change the 'foamCompiler' setting to 'system'"
-            echo
+            echo 1>&2
+            echo "Warning in $WM_PROJECT_DIR/etc/config/settings.sh:" 1>&2
+            echo "    Cannot find $clangDir installation." 1>&2
+            echo "    Please install this compiler version or if you wish to use the system compiler," 1>&2
+            echo "    change the 'foamCompiler' setting to 'system'" 1>&2
+            echo 1>&2
         }
 
         _foamAddMan     $clangDir/share/man
@@ -415,10 +415,10 @@ SYSTEMOPENMPI)
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using system installed MPI:"
-        echo "    compile flags : $PINC"
-        echo "    link flags    : $PLIBS"
-        echo "    libmpi dir    : $libDir"
+        echo "Using system installed MPI:" 1>&2
+        echo "    compile flags : $PINC" 1>&2
+        echo "    link flags    : $PLIBS" 1>&2
+        echo "    libmpi dir    : $libDir" 1>&2
     fi
 
     _foamAddLib     $libDir
@@ -492,7 +492,7 @@ HPMPI)
         _foamAddLib $MPI_ARCH_PATH/lib/linux_ia64
         ;;
     *)
-        echo Unknown processor type `uname -m` for Linux
+        echo Unknown processor type `uname -m` 1>&2
         ;;
     esac
     ;;
@@ -526,13 +526,10 @@ QSMPI)
     ;;
 
 SGIMPI)
-    lastCharID=$(( ${#MPI_ROOT} - 1 ))
-    if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-    then
-        MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-    fi
+    # no trailing slash
+    [ "${MPI_ROOT%/}" = "${MPI_ROOT}" ] || MPI_ROOT="${MPI_ROOT%/}"
 
-    export FOAM_MPI=${MPI_ROOT##*/}
+    export FOAM_MPI="${MPI_ROOT##*/}"
     export MPI_ARCH_PATH=$MPI_ROOT
 
     if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
@@ -545,9 +542,9 @@ SGIMPI)
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using SGI MPT:"
-        echo "    MPI_ROOT : $MPI_ROOT"
-        echo "    FOAM_MPI : $FOAM_MPI"
+        echo "Using SGI MPT:" 1>&2
+        echo "    MPI_ROOT : $MPI_ROOT" 1>&2
+        echo "    FOAM_MPI : $FOAM_MPI" 1>&2
     fi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
@@ -555,13 +552,10 @@ SGIMPI)
     ;;
 
 INTELMPI)
-    lastCharID=$(( ${#MPI_ROOT} - 1 ))
-    if [ "${MPI_ROOT:$lastCharID:1}" == '/' ]
-    then
-        MPI_ROOT=${MPI_ROOT:0:$lastCharID}
-    fi
+    # no trailing slash
+    [ "${MPI_ROOT%/}" = "${MPI_ROOT}" ] || MPI_ROOT="${MPI_ROOT%/}"
 
-    export FOAM_MPI=${MPI_ROOT##*/}
+    export FOAM_MPI="${MPI_ROOT##*/}"
     export MPI_ARCH_PATH=$MPI_ROOT
 
     if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
@@ -574,9 +568,9 @@ INTELMPI)
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using INTEL MPI:"
-        echo "    MPI_ROOT : $MPI_ROOT"
-        echo "    FOAM_MPI : $FOAM_MPI"
+        echo "Using INTEL MPI:" 1>&2
+        echo "    MPI_ROOT : $MPI_ROOT" 1>&2
+        echo "    FOAM_MPI : $FOAM_MPI" 1>&2
     fi
 
     _foamAddPath    $MPI_ARCH_PATH/bin64

@@ -369,7 +369,7 @@ void Foam::rotorDiskSource::constructGeometry()
 
             // blade flap angle [radians]
             scalar beta =
-                flap_.beta0 - flap_.beta1*cos(psi) - flap_.beta2*sin(psi);
+                flap_.beta0 - flap_.beta1c*cos(psi) - flap_.beta2s*sin(psi);
 
             // determine rotation tensor to convert from planar system into the
             // rotor cone system
@@ -659,11 +659,11 @@ bool Foam::rotorDiskSource::read(const dictionary& dict)
 
         const dictionary& flapCoeffs(coeffs_.subDict("flapCoeffs"));
         flapCoeffs.lookup("beta0") >> flap_.beta0;
-        flapCoeffs.lookup("beta1") >> flap_.beta1;
-        flapCoeffs.lookup("beta2") >> flap_.beta2;
+        flapCoeffs.lookup("beta1c") >> flap_.beta1c;
+        flapCoeffs.lookup("beta2s") >> flap_.beta2s;
         flap_.beta0 = degToRad(flap_.beta0);
-        flap_.beta1 = degToRad(flap_.beta1);
-        flap_.beta2 = degToRad(flap_.beta2);
+        flap_.beta1c = degToRad(flap_.beta1c);
+        flap_.beta2s = degToRad(flap_.beta2s);
 
 
         // create co-ordinate system
