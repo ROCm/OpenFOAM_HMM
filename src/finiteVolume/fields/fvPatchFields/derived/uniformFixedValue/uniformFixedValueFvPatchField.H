@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,6 @@ SourceFiles
 #ifndef uniformFixedValueFvPatchField_H
 #define uniformFixedValueFvPatchField_H
 
-#include "Random.H"
 #include "fixedValueFvPatchFields.H"
 #include "DataEntry.H"
 
@@ -85,6 +84,14 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
+        );
+
+        //- Construct from patch and internal field and patch field
+        uniformFixedValueFvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const Field<Type>& fld
         );
 
         //- Construct from patch, internal field and dictionary
@@ -141,14 +148,6 @@ public:
 
 
     // Member functions
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
 
 
         // Evaluation functions
