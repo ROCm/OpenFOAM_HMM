@@ -171,13 +171,15 @@ void Foam::meshToMesh::calcAddressing()
                     wallBb.max() + vector(typDim, typDim, typDim)
                 );
 
+                // Note: allow more levels than in meshSearch. Assume patch
+                // is not as big as all boundary faces
                 indexedOctree<treeDataFace> oc
                 (
                     treeDataFace(false, fromPatch),
                     shiftedBb,  // overall search domain
-                    8,          // maxLevel
+                    12,         // maxLevel
                     10,         // leafsize
-                    3.0         // duplicity
+                    6.0         // duplicity
                 );
 
                 const vectorField::subField centresToBoundary =
@@ -185,7 +187,7 @@ void Foam::meshToMesh::calcAddressing()
 
                 boundaryAddressing_[patchi].setSize(toPatch.size());
 
-                scalar distSqr = sqr(GREAT);
+                scalar distSqr = sqr(wallBb.mag());
 
                 forAll(toPatch, toi)
                 {
