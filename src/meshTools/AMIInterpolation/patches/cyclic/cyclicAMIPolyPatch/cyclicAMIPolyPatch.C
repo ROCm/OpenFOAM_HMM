@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -208,7 +208,7 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
         {
             if (debug)
             {
-                Pout<< " patch:" << name()
+                Pout<< "patch:" << name()
                     << " Assuming cyclic AMI pairs are colocated" << endl;
             }
 
@@ -282,6 +282,16 @@ void Foam::cyclicAMIPolyPatch::resetAMI() const
                 AMIReverse_
             )
         );
+
+        if (debug)
+        {
+            Pout<< "cyclicAMIPolyPatch : " << name()
+                << " constructed AMI with " << nl
+                << "    " << ":srcAddress:" << AMIPtr_().srcAddress().size()
+                << nl
+                << "    " << " tgAddress :" << AMIPtr_().tgtAddress().size()
+                << nl << endl;
+        }
     }
 }
 
@@ -342,6 +352,13 @@ void Foam::cyclicAMIPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 void Foam::cyclicAMIPolyPatch::updateMesh(PstreamBuffers& pBufs)
 {
     polyPatch::updateMesh(pBufs);
+}
+
+
+void Foam::cyclicAMIPolyPatch::clearGeom()
+{
+    AMIPtr_.clear();
+    polyPatch::clearGeom();
 }
 
 
@@ -643,16 +660,6 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
     if (!AMIPtr_.valid())
     {
         resetAMI();
-    }
-
-
-    if (debug)
-    {
-        Pout<< "cyclicAMIPolyPatch : " << name()
-            << " constructed AMI with " << endl
-            << "    " << ":srcAddress:" << AMIPtr_().srcAddress().size() << endl
-            << "    " << " tgAddress :" << AMIPtr_().tgtAddress().size() << endl
-            << endl;
     }
 
     return AMIPtr_();

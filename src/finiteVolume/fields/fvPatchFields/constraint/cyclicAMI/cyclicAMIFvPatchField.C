@@ -143,21 +143,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 template<class Type>
 bool Foam::cyclicAMIFvPatchField<Type>::coupled() const
 {
-    if
-    (
-        Pstream::parRun()
-     || (
-            this->cyclicAMIPatch_.size()
-         && this->cyclicAMIPatch_.cyclicAMIPatch().neighbPatch().size()
-        )
-    )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return cyclicAMIPatch_.coupled();
 }
 
 

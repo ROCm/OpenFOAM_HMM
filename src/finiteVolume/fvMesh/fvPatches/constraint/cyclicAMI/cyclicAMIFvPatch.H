@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -145,6 +145,11 @@ public:
                     this->boundaryMesh()[cyclicAMIPolyPatch_.neighbPatchID()]
                 );
             }
+
+            //- Return true if this patch is coupled. This is equivalent
+            //  to the coupledPolyPatch::coupled() if parallel running or
+            //  both sides present, false otherwise
+            virtual bool coupled() const;
 
             //- Return delta (P to N) vectors across coupled patch
             virtual tmp<vectorField> delta() const;
