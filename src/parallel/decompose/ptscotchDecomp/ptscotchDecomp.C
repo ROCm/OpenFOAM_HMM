@@ -401,10 +401,10 @@ Foam::label Foam::ptscotchDecomp::decompose
     }
 
     // Dump graph
-    if (decompositionDict_.found("ptscotchCoeffs"))
+    if (decompositionDict_.found("scotchCoeffs"))
     {
         const dictionary& scotchCoeffs =
-            decompositionDict_.subDict("ptscotchCoeffs");
+            decompositionDict_.subDict("scotchCoeffs");
 
         if (scotchCoeffs.lookupOrDefault("writeGraph", false))
         {
