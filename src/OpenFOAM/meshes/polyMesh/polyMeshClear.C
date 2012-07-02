@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,10 +63,7 @@ void Foam::polyMesh::clearGeom()
 
     primitiveMesh::clearGeom();
 
-    forAll(boundary_, patchI)
-    {
-        boundary_[patchI].clearGeom();
-    }
+    boundary_.clearGeom();
 
     // Reset valid directions (could change with rotation)
     geometricD_ = Vector<label>::zero;
