@@ -201,21 +201,22 @@ void kappatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
     // Retrieve turbulence properties from model
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
     const scalar Cmu25 = pow(Cmu_, 0.25);
-    const scalarField& y = rasModel.y()[patchI];
-    const tmp<volScalarField> tnu = rasModel.nu();
+    const scalarField& y = turbModel.y()[patchi];
+    const tmp<volScalarField> tnu = turbModel.nu();
     const volScalarField& nu = tnu();
-    const scalarField& nuw = nu.boundaryField()[patchI];
-    const tmp<volScalarField> tk = rasModel.k();
+    const scalarField& nuw = nu.boundaryField()[patchi];
+    const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
     // Molecular Prandtl number
     const scalar
-        Pr(dimensionedScalar(rasModel.transport().lookup("Pr")).value());
+        Pr(dimensionedScalar(turbModel.transport().lookup("Pr")).value());
 
     // Populate boundary values
     scalarField& kappatw = *this;
