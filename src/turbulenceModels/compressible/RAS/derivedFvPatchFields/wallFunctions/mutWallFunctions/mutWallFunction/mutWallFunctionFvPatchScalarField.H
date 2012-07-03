@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    alphaSgsWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::mutWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for thermal diffusivity when using wall functions
+    Boundary condition for turbulent (kinematic) viscosity when using wall
+    functions, based on turbulence kinetic energy.
     - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
-    alphaSgsWallFunctionFvPatchScalarField.C
+    mutWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphaSgsWallFunctionFvPatchScalarField_H
-#define alphaSgsWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutWallFunctionFvPatchScalarField_H
+#define compressibleMutWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -44,112 +45,119 @@ namespace Foam
 {
 namespace compressible
 {
-namespace LESModels
+namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class alphaSgsWallFunctionFvPatchScalarField Declaration
+             Class mutWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class alphaSgsWallFunctionFvPatchScalarField
+class mutWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Turbulent Prandtl number
-        scalar Prt_;
+    // Protected data
+
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Check the type of the patch
-        void checkType();
+        virtual void checkType();
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcMut() const = 0;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("alphaSgsWallFunction");
+    TypeName("mutWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        alphaSgsWallFunctionFvPatchScalarField
+        mutWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        alphaSgsWallFunctionFvPatchScalarField
+        mutWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given alphaSgsWallFunctionFvPatchScalarField
+        //- Construct by mapping given
+        //  mutWallFunctionFvPatchScalarField
         //  onto a new patch
-        alphaSgsWallFunctionFvPatchScalarField
+        mutWallFunctionFvPatchScalarField
         (
-            const alphaSgsWallFunctionFvPatchScalarField&,
+            const mutWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        alphaSgsWallFunctionFvPatchScalarField
+        mutWallFunctionFvPatchScalarField
         (
-            const alphaSgsWallFunctionFvPatchScalarField&
+            const mutWallFunctionFvPatchScalarField&
         );
-
-        //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new alphaSgsWallFunctionFvPatchScalarField(*this)
-            );
-        }
 
         //- Construct as copy setting internal field reference
-        alphaSgsWallFunctionFvPatchScalarField
+        mutWallFunctionFvPatchScalarField
         (
-            const alphaSgsWallFunctionFvPatchScalarField&,
+            const mutWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
-
-        //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
-        (
-            const DimensionedField<scalar, volMesh>& iF
-        ) const
-        {
-            return tmp<fvPatchScalarField>
-            (
-                new alphaSgsWallFunctionFvPatchScalarField(*this, iF)
-            );
-        }
 
 
     // Member functions
 
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        static scalar yPlusLam(const scalar kappa, const scalar E);
+
+        //- Calculate and return the yPlus at the boundary
+        virtual tmp<scalarField> yPlus() const = 0;
+
+
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::Pstream::blocking
-            );
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace LESModels
+} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

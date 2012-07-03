@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,12 +45,14 @@ tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcYPlus
     const scalarField& magUp
 ) const
 {
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+
+    const scalarField& y = turbModel.y()[patchi];
+    const scalarField& muw = turbModel.mu().boundaryField()[patchi];
+    const fvPatchScalarField& rho = turbModel.rho().boundaryField()[patchi];
 
     tmp<scalarField> tyPlus(new scalarField(patch().size(), 0.0));
     scalarField& yPlus = tyPlus();
@@ -170,13 +172,15 @@ tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcYPlus
 
 tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcMut() const
 {
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+
+    const scalarField& y = turbModel.y()[patchi];
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const scalarField& muw = turbModel.mu().boundaryField()[patchi];
+    const fvPatchScalarField& rho = turbModel.rho().boundaryField()[patchi];
 
     scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
@@ -208,7 +212,7 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutkWallFunctionFvPatchScalarField(p, iF),
+    mutWallFunctionFvPatchScalarField(p, iF),
     roughnessHeight_(pTraits<scalar>::zero),
     roughnessConstant_(pTraits<scalar>::zero),
     roughnessFactor_(pTraits<scalar>::zero)
@@ -223,7 +227,7 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    mutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     roughnessHeight_(ptf.roughnessHeight_),
     roughnessConstant_(ptf.roughnessConstant_),
     roughnessFactor_(ptf.roughnessFactor_)
@@ -237,7 +241,7 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    mutkWallFunctionFvPatchScalarField(p, iF, dict),
+    mutWallFunctionFvPatchScalarField(p, iF, dict),
     roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
     roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
     roughnessFactor_(readScalar(dict.lookup("roughnessFactor")))
@@ -249,7 +253,7 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
     const mutURoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    mutkWallFunctionFvPatchScalarField(rwfpsf),
+    mutWallFunctionFvPatchScalarField(rwfpsf),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
     roughnessFactor_(rwfpsf.roughnessFactor_)
@@ -262,7 +266,7 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutkWallFunctionFvPatchScalarField(rwfpsf, iF),
+    mutWallFunctionFvPatchScalarField(rwfpsf, iF),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
     roughnessFactor_(rwfpsf.roughnessFactor_)
@@ -273,10 +277,11 @@ mutURoughWallFunctionFvPatchScalarField::mutURoughWallFunctionFvPatchScalarField
 
 tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::yPlus() const
 {
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     return calcYPlus(magUp);

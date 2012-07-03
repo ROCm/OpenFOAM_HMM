@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,6 +155,7 @@ autoPtr<LESModel> LESModel::New
 
 void LESModel::correct(const tmp<volTensorField>&)
 {
+    turbulenceModel::correct();
     delta_().correct();
 }
 

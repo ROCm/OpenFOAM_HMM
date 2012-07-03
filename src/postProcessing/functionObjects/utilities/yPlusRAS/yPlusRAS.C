@@ -27,10 +27,10 @@ License
 #include "volFields.H"
 
 #include "incompressible/RAS/RASModel/RASModel.H"
-#include "nutkWallFunction/nutkWallFunctionFvPatchScalarField.H"
+#include "nutWallFunction/nutWallFunctionFvPatchScalarField.H"
 
 #include "compressible/RAS/RASModel/RASModel.H"
-#include "mutkWallFunction/mutkWallFunctionFvPatchScalarField.H"
+#include "mutWallFunction/mutWallFunctionFvPatchScalarField.H"
 
 #include "wallDist.H"
 
@@ -92,7 +92,7 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef incompressible::RASModels::nutkWallFunctionFvPatchScalarField
+    typedef incompressible::RASModels::nutWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     const incompressible::RASModel& model =
@@ -150,7 +150,7 @@ void Foam::yPlusRAS::calcCompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef compressible::RASModels::mutkWallFunctionFvPatchScalarField
+    typedef compressible::RASModels::mutWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     const compressible::RASModel& model =

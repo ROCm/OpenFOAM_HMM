@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,9 @@ turbulenceModel::turbulenceModel
     rho_(rho),
     U_(U),
     phi_(phi),
-    thermophysicalModel_(thermophysicalModel)
+    thermophysicalModel_(thermophysicalModel),
+
+    y_(mesh_)
 {}
 
 
@@ -137,7 +139,12 @@ tmp<volScalarField> turbulenceModel::rhoEpsilonEff() const
 
 
 void turbulenceModel::correct()
-{}
+{
+    if (mesh_.changing())
+    {
+        y_.correct();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

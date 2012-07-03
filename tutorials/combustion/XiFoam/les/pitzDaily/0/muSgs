@@ -32,13 +32,13 @@ boundaryField
 
     upperWall
     {
-        type            muSgsUSpaldingWallFunction;
+        type            mutUSpaldingWallFunction;
         value           uniform 0;
     }
 
     lowerWall
     {
-        type            muSgsUSpaldingWallFunction;
+        type            mutUSpaldingWallFunction;
         value           uniform 0;
     }
 

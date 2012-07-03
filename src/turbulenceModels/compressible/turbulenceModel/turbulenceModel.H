@@ -49,6 +49,7 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
 #include "basicThermo.H"
+#include "nearWallDist.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -84,6 +85,9 @@ protected:
         const surfaceScalarField& phi_;
 
         const basicThermo& thermophysicalModel_;
+
+        //- Near wall distance boundary field
+        nearWallDist y_;
 
 
 private:
@@ -176,6 +180,12 @@ public:
         const basicThermo& thermo() const
         {
              return thermophysicalModel_;
+        }
+
+        //- Return the near wall distances
+        const nearWallDist& y() const
+        {
+            return y_;
         }
 
         //- Return the laminar viscosity

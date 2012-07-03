@@ -43,7 +43,7 @@ boundaryField
 
     "(region0_to.*)"
     {
-        type            muSgsUSpaldingWallFunction;
+        type            mutUSpaldingWallFunction;
         value           uniform 0;
     }
 }

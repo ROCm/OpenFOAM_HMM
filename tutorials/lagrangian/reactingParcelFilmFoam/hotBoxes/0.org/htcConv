@@ -28,7 +28,7 @@ boundaryField
     }
     wallFilm
     {
-        type            htcConvection;
+        type            convectiveHeatTransfer;
         L               1.0;
         value           uniform 0;
     }

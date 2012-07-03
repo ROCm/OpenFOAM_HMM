@@ -41,20 +41,6 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void nutkWallFunctionFvPatchScalarField::checkType()
-{
-    if (!isA<wallFvPatch>(patch()))
-    {
-        FatalErrorIn("nutkWallFunctionFvPatchScalarField::checkType()")
-            << "Invalid wall function specification" << nl
-            << "    Patch type for patch " << patch().name()
-            << " must be wall" << nl
-            << "    Current patch type is " << patch().type() << nl << endl
-            << abort(FatalError);
-    }
-}
-
-
 tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
@@ -89,14 +75,6 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-void nutkWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
-{
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
@@ -105,14 +83,8 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
-    yPlusLam_(yPlusLam(kappa_, E_))
-{
-    checkType();
-}
+    nutWallFunctionFvPatchScalarField(p, iF)
+{}
 
 
 nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
@@ -123,14 +95,8 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_),
-    yPlusLam_(ptf.yPlusLam_)
-{
-    checkType();
-}
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+{}
 
 
 nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
@@ -140,14 +106,8 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
-    yPlusLam_(yPlusLam(kappa_, E_))
-{
-    checkType();
-}
+    nutWallFunctionFvPatchScalarField(p, iF, dict)
+{}
 
 
 nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
@@ -155,14 +115,8 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const nutkWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    fixedValueFvPatchScalarField(wfpsf),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_),
-    yPlusLam_(wfpsf.yPlusLam_)
-{
-    checkType();
-}
+    nutWallFunctionFvPatchScalarField(wfpsf)
+{}
 
 
 nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
@@ -171,47 +125,11 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(wfpsf, iF),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_),
-    yPlusLam_(wfpsf.yPlusLam_)
-{
-    checkType();
-}
+    nutWallFunctionFvPatchScalarField(wfpsf, iF)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-scalar nutkWallFunctionFvPatchScalarField::yPlusLam
-(
-    const scalar kappa,
-    const scalar E
-)
-{
-    scalar ypl = 11.0;
-
-    for (int i=0; i<10; i++)
-    {
-        ypl = log(max(E*ypl, 1))/kappa;
-    }
-
-    return ypl;
-}
-
-
-void nutkWallFunctionFvPatchScalarField::updateCoeffs()
-{
-    if (updated())
-    {
-        return;
-    }
-
-    operator==(calcNut());
-
-    fixedValueFvPatchScalarField::updateCoeffs();
-}
-
 
 tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
 {
@@ -229,14 +147,6 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
     const scalarField& nuw = nu.boundaryField()[patchi];
 
     return pow025(Cmu_)*y*sqrt(kwc)/nuw;
-}
-
-
-void nutkWallFunctionFvPatchScalarField::write(Ostream& os) const
-{
-    fvPatchField<scalar>::write(os);
-    writeLocalEntries(os);
-    writeEntry("value", os);
 }
 
 
