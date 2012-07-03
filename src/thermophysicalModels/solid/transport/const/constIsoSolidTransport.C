@@ -29,7 +29,10 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class thermo>
-Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport(const dictionary& dict)
+Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport
+(
+    const dictionary& dict
+)
 :
     thermo(dict),
     kappa_(readScalar(dict.subDict("transport").lookup("kappa")))
