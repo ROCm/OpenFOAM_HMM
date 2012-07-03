@@ -64,6 +64,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             autoPtr<solidType> solidPtr_;
 
             // Solid dictionaries
+            dictionary  specieDict_;
             dictionary  transportDict_;
             dictionary  radiationDict_;
             dictionary  thermoDict_;
@@ -76,6 +77,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
         solidThermoData(const dictionary& dict)
         :
             solidPtr_(new solidType(dict)),
+            specieDict_(dict.subDict("specie")),
             transportDict_(dict.subDict("transport")),
             radiationDict_(dict.subDict("radiation")),
             thermoDict_(dict.subDict("thermodynamics")),
@@ -87,6 +89,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
         solidThermoData()
         :
             solidPtr_(),
+            specieDict_(),
             transportDict_(),
             radiationDict_(),
             thermoDict_(),
@@ -103,6 +106,8 @@ class temperatureThermoBaffle1DFvPatchScalarField
 
             void write(Ostream& os) const
             {
+                os.writeKeyword("specie");
+                os << specieDict_  << nl;
                 os.writeKeyword("transport");
                 os << transportDict_  << nl;
                 os.writeKeyword("radiation");

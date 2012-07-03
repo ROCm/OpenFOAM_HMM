@@ -77,18 +77,6 @@ protected:
             volScalarField alpha_;
 
 
-    // Protected Member Functions
-
-        // Enthalpy/Internal energy
-
-            //- Return the enthalpy/internal energy field boundary types
-            //  by interrogating the temperature field boundary types
-            wordList heBoundaryTypes();
-
-            //- Correct the enthalpy/internal energy field boundaries
-            void heBoundaryCorrection(volScalarField& he);
-
-
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
 
@@ -113,6 +101,9 @@ public:
 
         //- Construct from mesh
         basicThermo(const fvMesh&);
+
+        //- Construct from mesh
+        basicThermo(const fvMesh&, const dictionary&);
 
 
     //- Selector

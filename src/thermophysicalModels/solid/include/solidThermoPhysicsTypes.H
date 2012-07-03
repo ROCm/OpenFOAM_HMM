@@ -37,25 +37,48 @@ Description
 #include "constSolidThermo.H"
 #include "exponentialSolidThermo.H"
 
-#include "constSolidTransport.H"
+#include "constIsoSolidTransport.H"
+#include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
 
 #include "constSolidRad.H"
+
+#include "sensibleEnthalpy.H"
+#include "specieThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef constSolidTransport<constSolidRad<constSolidThermo<constRho> > >
-        constSolidThermoPhysics;
-
-    typedef constSolidTransport
+    typedef
+        constIsoSolidTransport
         <
             constSolidRad
             <
-                exponentialSolidThermo
+                specieThermo
                 <
-                    constRho
+                    constSolidThermo
+                    <
+                        constRho
+                    >,
+                    sensibleEnthalpy
+                >
+            >
+        >
+        constSolidThermoPhysics;
+
+    typedef
+        exponentialSolidTransport
+        <
+            constSolidRad
+            <
+                specieThermo
+                <
+                    exponentialSolidThermo
+                    <
+                        constRho
+                    >,
+                    sensibleEnthalpy
                 >
             >
         >

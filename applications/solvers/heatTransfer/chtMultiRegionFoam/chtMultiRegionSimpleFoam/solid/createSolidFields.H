@@ -1,5 +1,5 @@
     // Initialise solid field pointer lists
-    PtrList<basicSolidThermo> thermos(solidRegions.size());
+    PtrList<solidThermo> thermos(solidRegions.size());
 
     // Populate solid field pointer lists
     forAll(solidRegions, i)
@@ -11,6 +11,6 @@
         thermos.set
         (
             i,
-            basicSolidThermo::New(solidRegions[i])
+            solidThermo::New(solidRegions[i])
         );
     }

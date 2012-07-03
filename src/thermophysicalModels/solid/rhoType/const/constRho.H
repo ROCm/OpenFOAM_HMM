@@ -37,6 +37,7 @@ SourceFiles
 #define constRho_H
 
 #include "dictionary.H"
+#include "specie.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,11 +45,23 @@ SourceFiles
 namespace Foam
 {
 
+
+class constRho;
+
+inline constRho operator*
+(
+    const scalar,
+    const constRho&
+);
+
+
 /*---------------------------------------------------------------------------*\
                            Class constRho Declaration
 \*---------------------------------------------------------------------------*/
 
 class constRho
+:
+    public specie
 {
     // Private data
 
@@ -60,15 +73,20 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        inline constRho(scalar rho);
 
         //- Construct from dictionary
         //constRho(Istream&);
         constRho(const dictionary& dict);
 
         //- Construct as named copy
-        inline constRho(const constRho&);
+        inline constRho(const word&, const constRho&);
+
+        //- Construct from components
+        inline constRho
+        (
+            const specie& t,
+            const scalar rho
+        );
 
         //- Construct and return a clone
         inline autoPtr<constRho> clone() const;
@@ -80,8 +98,22 @@ public:
     // Member functions
 
         //- Return density [kg/m3]
-        inline scalar rho(scalar T) const;
+        inline scalar rho(scalar p, scalar T) const;
 
+
+    // Member operators
+
+        inline constRho& operator=(const constRho&);
+        inline void operator+=(const constRho&);
+        inline void operator-=(const constRho&);
+
+    // Friend operators
+
+        friend constRho operator*
+        (
+            const scalar,
+            const constRho&
+        );
 
     // Ostream Operator
 

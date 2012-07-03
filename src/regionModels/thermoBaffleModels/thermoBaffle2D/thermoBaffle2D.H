@@ -85,10 +85,10 @@ protected:
         // Thermo properties
 
             //- Solid thermo
-            autoPtr<basicSolidThermo> thermo_;
+            autoPtr<solidThermo> thermo_;
 
-            //- Temperature / [K]
-            volScalarField& T_;
+            //- Enthalpy/internal energy
+            volScalarField& h_;
 
 
         // Source term fields
@@ -145,8 +145,8 @@ public:
 
         // Thermo properties
 
-            //- Return const reference to the basicSolidThermo
-            virtual const basicSolidThermo& thermo() const;
+            //- Return const reference to the solidThermo
+            virtual const solidThermo& thermo() const;
 
 
             // Fields
@@ -157,7 +157,7 @@ public:
                 //- Return solid absortivity [1/m]
                 virtual const volScalarField& kappaRad() const;
 
-                //- Return the film mean temperature [K]
+                //- Return temperature [K]
                 virtual const volScalarField& T() const;
 
                 //- Return density [Kg/m3]
@@ -169,26 +169,18 @@ public:
 
             // Helper functions
 
-                //- Return sensible enthalpy as a function of temperature
+                //- Return sensible enthalpy/internal energy
+                //  as a function of temperature
                 //  for a patch
-                inline tmp<scalarField> hs
+                inline tmp<scalarField> he
                 (
+                    const scalarField& p,
                     const scalarField& T,
                     const label patchI
                 ) const;
 
-                //- Return sensible enthalpy as a function of temperature
-                inline tmp<volScalarField> hs
-                (
-                    const volScalarField& T
-                ) const;
-
-                //- Return temperature as a function of sensible enthalpy
-                inline tmp<volScalarField> T
-                (
-                    const volScalarField& hs
-                ) const;
-
+                //- Return sensible enthalpy/internal energy
+                inline tmp<volScalarField> he() const;
 
         // Evolution
 

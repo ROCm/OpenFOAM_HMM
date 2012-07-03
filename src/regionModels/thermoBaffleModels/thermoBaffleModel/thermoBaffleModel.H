@@ -38,7 +38,7 @@ SourceFiles
 #include "scalarIOField.H"
 #include "autoPtr.H"
 #include "volFieldsFwd.H"
-#include "basicSolidThermo.H"
+#include "solidThermo.H"
 #include "regionModel1D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -172,7 +172,7 @@ public:
         // Access
 
             //- Return solid thermo
-            virtual const basicSolidThermo& thermo() const = 0;
+            virtual const solidThermo& thermo() const = 0;
 
             //- Return thickness
             const scalarField& thickness() const

@@ -54,7 +54,7 @@ void reactingOneDim::readReactingOneDimControls()
 {
     const dictionary& solution = this->solution().subDict("SIMPLE");
     solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
-    time_.controlDict().lookup("maxDi") >> maxDiff_;
+    time().controlDict().lookup("maxDi") >> maxDiff_;
 
     coeffs().lookup("radFluxName") >> primaryRadFluxName_;
     coeffs().lookup("minimumDelta") >> minimumDelta_;
@@ -107,6 +107,8 @@ void reactingOneDim::updateQr()
         Qrp = max(Qrp, scalar(0.0));
     }
 
+    const volScalarField kappaRad_(kappaRad());
+
     // Propagate Qr through 1-D regions
     forAll(intCoupledPatchIDs_, i)
     {
@@ -147,18 +149,17 @@ void reactingOneDim::updatePhiGas()
     forAll(gasTable, gasI)
     {
         tmp<volScalarField> tHsiGas =
-            solidChemistry_->gasHs(p, T_, gasI);
+            solidChemistry_->gasHs(solidThermo_.p(), solidThermo_.T(), gasI);
+
         tmp<volScalarField> tRRiGas = solidChemistry_->RRg(gasI);
 
         const volScalarField& HsiGas = tHsiGas();
         const volScalarField& RRiGas = tRRiGas();
 
-        const surfaceScalarField HsiGasf(fvc::interpolate(HsiGas));
-        const surfaceScalarField RRiGasf(fvc::interpolate(RRiGas));
-
         forAll(intCoupledPatchIDs_, i)
         {
             const label patchI = intCoupledPatchIDs_[i];
+
             const scalarField& phiGasp = phiHsGas_.boundaryField()[patchI];
 
             forAll(phiGasp, faceI)
@@ -286,16 +287,16 @@ void reactingOneDim::solveEnergy()
         Info<< "reactingOneDim::solveEnergy()" << endl;
     }
 
-    const volScalarField rhoCp(rho_*solidThermo_.Cp());
+    tmp<volScalarField> alpha(solidThermo_.alpha());
 
     const surfaceScalarField phiQr(fvc::interpolate(Qr_)*nMagSf());
 
     const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
 
-    fvScalarMatrix TEqn
+    fvScalarMatrix hEqn
     (
-        fvm::ddt(rhoCp, T_)
-      - fvm::laplacian(kappa_, T_)
+        fvm::ddt(rho_, h_)
+      - fvm::laplacian(alpha, h_)
      ==
         chemistrySh_
       + fvc::div(phiQr)
@@ -306,17 +307,17 @@ void reactingOneDim::solveEnergy()
     {
         surfaceScalarField phiMesh
         (
-            fvc::interpolate(rhoCp*T_)*regionMesh().phi()
+            fvc::interpolate(rho_*h_)*regionMesh().phi()
         );
 
-        TEqn -= fvc::div(phiMesh);
+        hEqn -= fvc::div(phiMesh);
     }
 
-    TEqn.relax();
-    TEqn.solve();
+    hEqn.relax();
+    hEqn.solve();
 
-    Info<< "pyrolysis min/max(T) = " << min(T_).value() << ", "
-        << max(T_).value() << endl;
+    Info<< "pyrolysis min/max(T) = " << min(solidThermo_.T()) << ", "
+        << max(solidThermo_.T()) << endl;
 }
 
 
@@ -347,12 +348,10 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
 :
     pyrolysisModel(modelType, mesh),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solidThermo()),
-    kappaRad_(solidThermo_.kappaRad()),
-    kappa_(solidThermo_.kappa()),
-    rho_(solidThermo_.rho()),
+    solidThermo_(solidChemistry_->solid()),
+    rho_(solidThermo_.rhos()),
     Ys_(solidThermo_.composition().Y()),
-    T_(solidThermo_.T()),
+    h_(solidThermo_.he()),
     primaryRadFluxName_(coeffs().lookupOrDefault<word>("radFluxName", "Qr")),
     nNonOrthCorr_(-1),
     maxDiff_(10),
@@ -449,12 +448,10 @@ reactingOneDim::reactingOneDim
 :
     pyrolysisModel(modelType, mesh, dict),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solidThermo()),
-    kappaRad_(solidThermo_.kappaRad()),
-    kappa_(solidThermo_.kappa()),
-    rho_(solidThermo_.rho()),
+    solidThermo_(solidChemistry_->solid()),
+    rho_(solidThermo_.rhos()),
     Ys_(solidThermo_.composition().Y()),
-    T_(solidThermo_.T()),
+    h_(solidThermo_.he()),
     primaryRadFluxName_(dict.lookupOrDefault<word>("radFluxName", "Qr")),
     nNonOrthCorr_(-1),
     maxDiff_(10),
@@ -585,11 +582,11 @@ scalar reactingOneDim::solidRegionDiffNo() const
         surfaceScalarField KrhoCpbyDelta
         (
             regionMesh().surfaceInterpolation::deltaCoeffs()
-          * fvc::interpolate(kappa_)
+          * fvc::interpolate(kappa())
           / fvc::interpolate(Cp()*rho_)
         );
 
-        DiNum = max(KrhoCpbyDelta.internalField())*time_.deltaTValue();
+        DiNum = max(KrhoCpbyDelta.internalField())*time().deltaTValue();
     }
 
     return DiNum;
@@ -610,7 +607,7 @@ const volScalarField& reactingOneDim::rho() const
 
 const volScalarField& reactingOneDim::T() const
 {
-    return T_;
+    return solidThermo_.T();
 }
 
 
@@ -620,15 +617,15 @@ const tmp<volScalarField> reactingOneDim::Cp() const
 }
 
 
-const volScalarField& reactingOneDim::kappaRad() const
+tmp<volScalarField> reactingOneDim::kappaRad() const
 {
-    return kappaRad_;
+    return solidThermo_.kappaRad();
 }
 
 
-const volScalarField& reactingOneDim::kappa() const
+tmp<volScalarField> reactingOneDim::kappa() const
 {
-    return kappa_;
+    return solidThermo_.kappa();
 }
 
 
@@ -643,7 +640,7 @@ void reactingOneDim::preEvolveRegion()
     pyrolysisModel::preEvolveRegion();
 
     // Initialise all cells as able to react
-    forAll(T_, cellI)
+    forAll(h_, cellI)
     {
         solidChemistry_->setCellReacting(cellI, true);
     }

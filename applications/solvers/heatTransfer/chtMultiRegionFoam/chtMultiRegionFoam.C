@@ -43,7 +43,7 @@ Description
 #include "regionProperties.H"
 #include "compressibleCourantNo.H"
 #include "solidRegionDiffNo.H"
-#include "basicSolidThermo.H"
+#include "solidThermo.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "IObasicSourceList.H"

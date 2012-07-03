@@ -25,7 +25,7 @@ License
 
 #include "temperatureCoupledBase.H"
 #include "volFields.H"
-#include "basicSolidThermo.H"
+#include "solidThermo.H"
 #include "turbulenceModel.H"
 #include "basicThermo.H"
 
@@ -105,10 +105,10 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 
         case SOLIDTHERMO:
         {
-            const basicSolidThermo& thermo =
-                mesh.lookupObject<basicSolidThermo>
+            const solidThermo& thermo =
+                mesh.lookupObject<solidThermo>
                 (
-                    "solidThermophysicalProperties"
+                    "thermophysicalProperties"
                 );
             return thermo.kappa(patch_.index());
         }
@@ -118,12 +118,21 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             const vectorField n(patch_.nf());
 
-            const basicSolidThermo& thermo =
-                mesh.lookupObject<basicSolidThermo>
+            const solidThermo& thermo =
+                mesh.lookupObject<solidThermo>
                 (
                     "solidThermophysicalProperties"
                 );
-            return n & thermo.directionalKappa(patch_.index()) & n;
+//          note  SAF : Temporarily!
+            //return n & thermo.Kappa(patch_.index()) & n;
+              /*
+              scalarField isoK =
+                    (thermo.Kappa(patch_.index())[0] +
+                     thermo.Kappa(patch_.index())[1] +
+                     thermo.Kappa(patch_.index())[2]) / 3.0;
+               */
+
+              return scalarField(0);
         }
         break;
 

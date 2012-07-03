@@ -95,8 +95,8 @@ void thermoBaffle2D::solveEnergy()
 
     volScalarField& Q = tQ();
 
-    volScalarField rhoCp("rhoCp", thermo_->rho()*thermo_->Cp()());
-    volScalarField kappa("kappa", thermo_->kappa());
+    volScalarField rho("rho", thermo_->rho());
+    volScalarField alpha("alpha", thermo_->alpha());
 
 
     //If region is one-dimension variable thickness
@@ -117,9 +117,9 @@ void thermoBaffle2D::solveEnergy()
                     Qs_.boundaryField()[patchI][localFaceI]
                     /thickness_[localFaceI];
 
-                rhoCp[cellId] *= delta_.value()/thickness_[localFaceI];
+                rho[cellId] *= delta_.value()/thickness_[localFaceI];
 
-                kappa[cellId] *= delta_.value()/thickness_[localFaceI];
+                alpha[cellId] *= delta_.value()/thickness_[localFaceI];
             }
         }
     }
@@ -128,10 +128,10 @@ void thermoBaffle2D::solveEnergy()
         Q = Q_;
     }
 
-    fvScalarMatrix TEqn
+    fvScalarMatrix hEqn
     (
-        fvm::ddt(rhoCp, T_)
-      - fvm::laplacian(kappa, T_)
+        fvm::ddt(rho, h_)
+      - fvm::laplacian(alpha, h_)
      ==
         Q
     );
@@ -140,19 +140,19 @@ void thermoBaffle2D::solveEnergy()
     {
         surfaceScalarField phiMesh
         (
-            fvc::interpolate(rhoCp*T_)*regionMesh().phi()
+            fvc::interpolate(rho*h_)*regionMesh().phi()
         );
 
-        TEqn -= fvc::div(phiMesh);
+        hEqn -= fvc::div(phiMesh);
     }
 
-    TEqn.relax();
-    TEqn.solve();
-
-    Info<< "T gas min/max   = " << min(T_).value() << ", "
-        << max(T_).value() << endl;
+    hEqn.relax();
+    hEqn.solve();
 
     thermo_->correct();
+
+    Info<< "T min/max   = " << min(thermo_->T()) << ", "
+        << max(thermo_->T()) << endl;
 }
 
 
@@ -168,8 +168,8 @@ thermoBaffle2D::thermoBaffle2D
 :
     thermoBaffleModel(modelType, mesh, dict),
     nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
-    thermo_(basicSolidThermo::New(regionMesh(), dict)),
-    T_(thermo_->T()),
+    thermo_(solidThermo::New(regionMesh(), dict)),
+    h_(thermo_->he()),
     Qs_
     (
         IOobject
@@ -220,8 +220,8 @@ thermoBaffle2D::thermoBaffle2D
 :
     thermoBaffleModel(modelType, mesh),
     nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
-    thermo_(basicSolidThermo::New(regionMesh())),
-    T_(thermo_->T()),
+    thermo_(solidThermo::New(regionMesh())),
+    h_(thermo_->he()),
     Qs_
     (
         IOobject
@@ -336,11 +336,11 @@ const volScalarField& thermoBaffle2D::kappa() const
 
 const volScalarField& thermoBaffle2D::T() const
 {
-    return T_;
+    return thermo_->T();
 }
 
 
-const basicSolidThermo& thermoBaffle2D::thermo() const
+const solidThermo& thermoBaffle2D::thermo() const
 {
     return thermo_;
 }
@@ -348,21 +348,18 @@ const basicSolidThermo& thermoBaffle2D::thermo() const
 
 void thermoBaffle2D::info() const
 {
-    Info<< indent << "min/max(T) = " << min(T_).value() << ", "
-        << max(T_).value() << nl;
-
     const labelList& coupledPatches = intCoupledPatchIDs();
     forAll (coupledPatches, i)
     {
         const label patchI = coupledPatches[i];
-        const fvPatchScalarField& pT = T_.boundaryField()[patchI];
+        const fvPatchScalarField& ph = h_.boundaryField()[patchI];
         const word patchName = regionMesh().boundary()[patchI].name();
         Info << indent << "Q : " << patchName << indent <<
             gSum
             (
                 mag(regionMesh().Sf().boundaryField()[patchI])
-              * pT.snGrad()
-              * thermo_->kappa(patchI)
+              * ph.snGrad()
+              * thermo_->alpha(patchI)
             ) << endl;
     }
 }

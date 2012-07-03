@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    T
+    h
     {
         solver           PCG;
         smoother         GaussSeidel;
@@ -31,7 +31,7 @@ nNonOrthCorr        0;
 
 relaxationFactors
 {
-    T       1;
+    h       1;
 }
 
 // ************************************************************************* //

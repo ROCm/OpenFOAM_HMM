@@ -37,6 +37,7 @@ SourceFiles
 
 #include "pyrolysisModel.H"
 #include "volFieldsFwd.H"
+#include "solidChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,7 +84,7 @@ protected:
         autoPtr<solidChemistryModel> solidChemistry_;
 
         //- Reference to solid thermo
-        autoPtr<basicSolidThermo> solidThermo_;
+        autoPtr<solidReactionThermo> solidThermo_;
 
 
 public:
@@ -124,10 +125,10 @@ public:
             virtual const tmp<volScalarField> Cp() const;
 
             //- Return the region absorptivity [1/m]
-            virtual const volScalarField& kappaRad() const;
+            virtual tmp<volScalarField> kappaRad() const;
 
             //- Return the region thermal conductivity [W/m/k]
-            virtual const volScalarField& kappa() const;
+            virtual tmp<volScalarField> kappa() const;
 
             //- Return the total gas mass flux to primary region [kg/m2/s]
             virtual const surfaceScalarField& phiGas() const;

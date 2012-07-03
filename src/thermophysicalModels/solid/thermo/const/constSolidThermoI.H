@@ -78,42 +78,137 @@ Foam::constSolidThermo<rhoType>::New(dictionary& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class rhoType>
-inline Foam::scalar Foam::constSolidThermo<rhoType>::Cp
-(
-    const scalar
-) const
-{
-    return Cp_;
-}
-
-
-template<class rhoType>
-inline Foam::scalar Foam::constSolidThermo<rhoType>::h
+inline Foam::scalar Foam::constSolidThermo<rhoType>::limit
 (
     const scalar T
 ) const
 {
-    scalar hOffset = Cp_*(specie::Tstd);
+    return T;
+}
 
-    return (Cp_*T + Hf_ - hOffset);
+
+template<class rhoType>
+inline Foam::scalar Foam::constSolidThermo<rhoType>::cp
+(
+    const scalar, const scalar
+) const
+{
+    return Cp_*this->W();
+}
+
+
+template<class rhoType>
+inline Foam::scalar Foam::constSolidThermo<rhoType>::ha
+(
+    const scalar p, const scalar T
+) const
+{
+    scalar hOffset = Cp_*(specie::Tstd);
+    return (Cp_*T + Hf_ - hOffset)*this->W();
 }
 
 
 template<class rhoType>
 inline Foam::scalar Foam::constSolidThermo<rhoType>::hs
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
-    return h(T) - Hf_;
+    scalar hOffset = Cp_*(specie::Tstd);
+    return (Cp_*T - hOffset)*this->W();
 }
 
 
 template<class rhoType>
-inline Foam::scalar Foam::constSolidThermo<rhoType>::hf() const
+inline Foam::scalar Foam::constSolidThermo<rhoType>::hc() const
 {
-    return Hf_;
+    return Hf_*this->W();
 }
 
+
+template<class rhoType>
+inline Foam::scalar Foam::constSolidThermo<rhoType>::s
+(
+    const scalar p, const scalar T
+) const
+{
+    notImplemented
+    (
+        "scalar constSolidThermo<rhoType>::"
+        "s(const scalar p, const scalar T) const"
+    );
+    return T;
+}
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class rhoType>
+inline Foam::constSolidThermo<rhoType>&
+Foam::constSolidThermo<rhoType>::operator=
+(
+    const constSolidThermo<rhoType>& ct
+)
+{
+    rhoType::operator=(ct);
+
+    Hf_ = ct.Hf_;
+    Cp_ = ct.Cp_;
+
+    return *this;
+}
+
+
+template<class rhoType>
+inline void Foam::constSolidThermo<rhoType>::operator+=
+(
+    const constSolidThermo<rhoType>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    rhoType::operator+=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    Cp_ = molr1*Cp_ + molr2*ct.Cp_;
+    Hf_ = molr1*Hf_ + molr2*ct.Hf_;
+}
+
+
+template<class rhoType>
+inline void Foam::constSolidThermo<rhoType>::operator-=
+(
+    const constSolidThermo<rhoType>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    rhoType::operator-=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    Cp_ = molr1*Cp_ - molr2*ct.Cp_;
+    Hf_ = molr1*Hf_ - molr2*ct.Hf_;
+}
+
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+template<class rhoType>
+inline Foam::constSolidThermo<rhoType> Foam::operator*
+(
+    const scalar s,
+    const constSolidThermo<rhoType>& ct
+)
+{
+    return constSolidThermo<rhoType>
+    (
+        s*static_cast<const rhoType&>(ct),
+        ct.Cp_,
+        ct.Hf_
+    );
+}
 
 // ************************************************************************* //
