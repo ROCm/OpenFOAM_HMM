@@ -18,11 +18,14 @@ $(alphatWallFunctions)/alphatWallFunction/alphatWallFunctionFvPatchScalarField.C
 $(alphatWallFunctions)/alphatJayatillekeWallFunction/alphatJayatillekeWallFunctionFvPatchScalarField.C
 
 mutWallFunctions = $(wallFunctions)/mutWallFunctions
-$(mutWallFunctions)/mutkRoughWallFunction/mutkRoughWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutWallFunction/mutWallFunctionFvPatchScalarField.C
+
 $(mutWallFunctions)/mutkWallFunction/mutkWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutkRoughWallFunction/mutkRoughWallFunctionFvPatchScalarField.C
+
+$(mutWallFunctions)/mutUWallFunction/mutUWallFunctionFvPatchScalarField.C
 $(mutWallFunctions)/mutURoughWallFunction/mutURoughWallFunctionFvPatchScalarField.C
 $(mutWallFunctions)/mutUSpaldingWallFunction/mutUSpaldingWallFunctionFvPatchScalarField.C
-$(mutWallFunctions)/mutUWallFunction/mutUWallFunctionFvPatchScalarField.C
 $(mutWallFunctions)/mutLowReWallFunction/mutLowReWallFunctionFvPatchScalarField.C
 
 epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
@@ -35,7 +38,7 @@ kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
 $(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
 /* Patch fields */
-derivedFvPatchFields/htcConv/htcConvFvPatchScalarField.C
+derivedFvPatchFields/convectiveHeatTransfer/convectiveHeatTransferFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
 derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 backwardsCompatibility/wallFunctions/backwardsCompatibilityWallFunctions.C

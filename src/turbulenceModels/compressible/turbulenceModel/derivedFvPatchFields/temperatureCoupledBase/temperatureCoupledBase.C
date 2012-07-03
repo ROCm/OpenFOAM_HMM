@@ -98,8 +98,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     "turbulenceModel"
                 );
 
-            return
-                model.kappaEff(patch_.index());
+            return model.kappaEff(patch_.index());
         }
         break;
 
@@ -116,23 +115,25 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 
         case DIRECTIONALSOLIDTHERMO:
         {
-            const vectorField n(patch_.nf());
-
             const solidThermo& thermo =
                 mesh.lookupObject<solidThermo>
                 (
-                    "solidThermophysicalProperties"
+                    "thermophysicalProperties"
                 );
-//          note  SAF : Temporarily!
-            //return n & thermo.Kappa(patch_.index()) & n;
-              /*
-              scalarField isoK =
-                    (thermo.Kappa(patch_.index())[0] +
-                     thermo.Kappa(patch_.index())[1] +
-                     thermo.Kappa(patch_.index())[2]) / 3.0;
-               */
 
-              return scalarField(0);
+            tmp<scalarField> tmeanKappa(Tp);
+            scalarField& meanKappa = tmeanKappa();
+            forAll(meanKappa, i)
+            {
+                meanKappa[i] =
+                (
+                    thermo.Kappa(patch_.index())()[i].x()
+                  + thermo.Kappa(patch_.index())()[i].y()
+                  + thermo.Kappa(patch_.index())()[i].z()
+                )/3.0;
+            }
+
+            return meanKappa;
         }
         break;
 

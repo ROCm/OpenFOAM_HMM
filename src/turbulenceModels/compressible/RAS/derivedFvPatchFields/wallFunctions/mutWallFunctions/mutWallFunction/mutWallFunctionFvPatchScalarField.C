@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------* \
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -34,23 +34,23 @@ License
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(nutWallFunctionFvPatchScalarField, 0);
+defineTypeNameAndDebug(mutWallFunctionFvPatchScalarField, 0);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void nutWallFunctionFvPatchScalarField::checkType()
+void mutWallFunctionFvPatchScalarField::checkType()
 {
     if (!isA<wallFvPatch>(patch()))
     {
-        FatalErrorIn("nutWallFunctionFvPatchScalarField::checkType()")
+        FatalErrorIn("mutWallFunctionFvPatchScalarField::checkType()")
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << patch().name()
             << " must be wall" << nl
@@ -60,7 +60,7 @@ void nutWallFunctionFvPatchScalarField::checkType()
 }
 
 
-void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
@@ -70,7 +70,7 @@ void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -81,14 +81,12 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     kappa_(0.41),
     E_(9.8),
     yPlusLam_(yPlusLam(kappa_, E_))
-{
-    checkType();
-}
+{}
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& ptf,
+    const mutWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -99,12 +97,10 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     kappa_(ptf.kappa_),
     E_(ptf.E_),
     yPlusLam_(ptf.yPlusLam_)
-{
-    checkType();
-}
+{}
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -116,14 +112,12 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     yPlusLam_(yPlusLam(kappa_, E_))
-{
-    checkType();
-}
+{}
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& wfpsf
+    const mutWallFunctionFvPatchScalarField& wfpsf
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
@@ -131,14 +125,12 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),
     yPlusLam_(wfpsf.yPlusLam_)
-{
-    checkType();
-}
+{}
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& wfpsf,
+    const mutWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -147,14 +139,12 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),
     yPlusLam_(wfpsf.yPlusLam_)
-{
-    checkType();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar nutWallFunctionFvPatchScalarField::yPlusLam
+scalar mutWallFunctionFvPatchScalarField::yPlusLam
 (
     const scalar kappa,
     const scalar E
@@ -171,20 +161,20 @@ scalar nutWallFunctionFvPatchScalarField::yPlusLam
 }
 
 
-void nutWallFunctionFvPatchScalarField::updateCoeffs()
+void mutWallFunctionFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
         return;
     }
 
-    operator==(calcNut());
+    operator==(calcMut());
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
-void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
+void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -195,7 +185,7 @@ void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

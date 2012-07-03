@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ SourceFiles
 #ifndef compressibleMutLowReWallFunctionFvPatchScalarField_H
 #define compressibleMutLowReWallFunctionFvPatchScalarField_H
 
-#include "mutkWallFunctionFvPatchScalarField.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace RASModels
 
 class mutLowReWallFunctionFvPatchScalarField
 :
-    public mutkWallFunctionFvPatchScalarField
+    public mutWallFunctionFvPatchScalarField
 {
 protected:
 
@@ -132,6 +132,14 @@ public:
                 new mutLowReWallFunctionFvPatchScalarField(*this, iF)
             );
         }
+
+
+    // Member functions
+
+        // Evaluation functions
+
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 };
 
 

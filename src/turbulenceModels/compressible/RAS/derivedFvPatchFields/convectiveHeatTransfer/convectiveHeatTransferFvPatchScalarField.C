@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "htcConvFvPatchScalarField.H"
+#include "convectiveHeatTransferFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "addToRunTimeSelectionTable.H"
@@ -39,7 +39,8 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-htcConvFvPatchScalarField::htcConvFvPatchScalarField
+convectiveHeatTransferFvPatchScalarField::
+convectiveHeatTransferFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -50,9 +51,10 @@ htcConvFvPatchScalarField::htcConvFvPatchScalarField
 {}
 
 
-htcConvFvPatchScalarField::htcConvFvPatchScalarField
+convectiveHeatTransferFvPatchScalarField::
+convectiveHeatTransferFvPatchScalarField
 (
-    const htcConvFvPatchScalarField& ptf,
+    const convectiveHeatTransferFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -63,7 +65,8 @@ htcConvFvPatchScalarField::htcConvFvPatchScalarField
 {}
 
 
-htcConvFvPatchScalarField::htcConvFvPatchScalarField
+convectiveHeatTransferFvPatchScalarField::
+convectiveHeatTransferFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -75,9 +78,10 @@ htcConvFvPatchScalarField::htcConvFvPatchScalarField
 {}
 
 
-htcConvFvPatchScalarField::htcConvFvPatchScalarField
+convectiveHeatTransferFvPatchScalarField::
+convectiveHeatTransferFvPatchScalarField
 (
-    const htcConvFvPatchScalarField& htcpsf
+    const convectiveHeatTransferFvPatchScalarField& htcpsf
 )
 :
     fixedValueFvPatchScalarField(htcpsf),
@@ -85,9 +89,10 @@ htcConvFvPatchScalarField::htcConvFvPatchScalarField
 {}
 
 
-htcConvFvPatchScalarField::htcConvFvPatchScalarField
+convectiveHeatTransferFvPatchScalarField::
+convectiveHeatTransferFvPatchScalarField
 (
-    const htcConvFvPatchScalarField& htcpsf,
+    const convectiveHeatTransferFvPatchScalarField& htcpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -98,24 +103,25 @@ htcConvFvPatchScalarField::htcConvFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void htcConvFvPatchScalarField::updateCoeffs()
+void convectiveHeatTransferFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
         return;
     }
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField alphaEffw(rasModel.alphaEff(patchI));
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const vectorField& Uc = rasModel.U();
-    const vectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField& Tw = rasModel.thermo().T().boundaryField()[patchI];
-    const scalarField& pw = rasModel.thermo().p().boundaryField()[patchI];
-    const scalarField Cpw(rasModel.thermo().Cp(pw, Tw, patchI));
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField alphaEffw(turbModel.alphaEff(patchi));
+    const scalarField& muw = turbModel.mu().boundaryField()[patchi];
+    const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
+    const vectorField& Uc = turbModel.U();
+    const vectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const scalarField& Tw = turbModel.thermo().T().boundaryField()[patchi];
+    const scalarField& pw = turbModel.thermo().p().boundaryField()[patchi];
+    const scalarField Cpw(turbModel.thermo().Cp(pw, Tw, patchi));
 
     const scalarField kappaw(Cpw*alphaEffw);
     const scalarField Pr(muw*Cpw/kappaw);
@@ -141,7 +147,7 @@ void htcConvFvPatchScalarField::updateCoeffs()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void htcConvFvPatchScalarField::write(Ostream& os) const
+void convectiveHeatTransferFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     os.writeKeyword("L") << L_ << token::END_STATEMENT << nl;
@@ -154,7 +160,7 @@ void htcConvFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    htcConvFvPatchScalarField
+    convectiveHeatTransferFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

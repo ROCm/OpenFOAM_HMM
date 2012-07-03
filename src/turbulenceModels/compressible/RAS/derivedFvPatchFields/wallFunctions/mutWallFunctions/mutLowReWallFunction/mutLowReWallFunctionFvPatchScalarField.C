@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutkWallFunctionFvPatchScalarField(p, iF)
+    mutWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
@@ -66,7 +66,7 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    mutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -77,7 +77,7 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    mutkWallFunctionFvPatchScalarField(p, iF, dict)
+    mutWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
@@ -86,7 +86,7 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
     const mutLowReWallFunctionFvPatchScalarField& mlrwfpsf
 )
 :
-    mutkWallFunctionFvPatchScalarField(mlrwfpsf)
+    mutWallFunctionFvPatchScalarField(mlrwfpsf)
 {}
 
 
@@ -96,8 +96,27 @@ mutLowReWallFunctionFvPatchScalarField::mutLowReWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutkWallFunctionFvPatchScalarField(mlrwfpsf, iF)
+    mutWallFunctionFvPatchScalarField(mlrwfpsf, iF)
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<scalarField> mutLowReWallFunctionFvPatchScalarField::yPlus() const
+{
+    const label patchi = patch().index();
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField& y = turbModel.y()[patchi];
+    const scalarField nuw
+    (
+        turbModel.mu().boundaryField()[patchi]
+       /turbModel.rho().boundaryField()[patchi]
+    );
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+
+    return y*sqrt(nuw*mag(Uw.snGrad()))/nuw;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

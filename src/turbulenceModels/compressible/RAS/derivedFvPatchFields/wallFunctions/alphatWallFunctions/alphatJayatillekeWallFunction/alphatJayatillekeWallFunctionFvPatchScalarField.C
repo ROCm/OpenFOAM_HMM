@@ -199,34 +199,35 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
 
     const scalar Cmu25 = pow025(Cmu_);
 
-    const scalarField& y = rasModel.y()[patchI];
+    const scalarField& y = turbModel.y()[patchi];
 
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const scalarField& muw = turbModel.mu().boundaryField()[patchi];
 
-    const scalarField& alphaw = rasModel.alpha().boundaryField()[patchI];
+    const scalarField& alphaw = turbModel.alpha().boundaryField()[patchi];
     scalarField& alphatw = *this;
 
-    const tmp<volScalarField> tk = rasModel.k();
+    const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
 
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
     const fvPatchScalarField& hew =
-        rasModel.thermo().he().boundaryField()[patchI];
+        turbModel.thermo().he().boundaryField()[patchi];
 
     // Heat flux [W/m2] - lagging alphatw
     const scalarField qDot
     (
-        rasModel.thermo().alphaEff(alphatw, patchI)*hew.snGrad()
+        turbModel.thermo().alphaEff(alphatw, patchi)*hew.snGrad()
     );
 
     // Populate boundary values

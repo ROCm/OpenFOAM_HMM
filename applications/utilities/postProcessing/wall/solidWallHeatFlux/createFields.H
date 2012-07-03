@@ -1,6 +1,6 @@
-autoPtr<basicSolidThermo> thermo
+autoPtr<solidThermo> thermo
 (
-    basicSolidThermo::New(mesh)
+    solidThermo::New(mesh)
 );
 
 volScalarField& T = thermo->T();

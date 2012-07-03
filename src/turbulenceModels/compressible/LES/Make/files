@@ -11,14 +11,4 @@ SpalartAllmaras/SpalartAllmaras.C
 
 vanDriestDelta/vanDriestDelta.C
 
-/* Wall functions */
-wallFunctions=derivedFvPatchFields/wallFunctions
-
-muSgsWallFunctions=$(wallFunctions)/muSgsWallFunctions
-$(muSgsWallFunctions)/muSgsUSpaldingWallFunction/muSgsUSpaldingWallFunctionFvPatchScalarField.C
-
-alphaSgsWallFunctions=$(wallFunctions)/alphaSgsWallFunctions
-$(alphaSgsWallFunctions)/alphaSgsWallFunction/alphaSgsWallFunctionFvPatchScalarField.C
-$(alphaSgsWallFunctions)/alphaSgsJayatillekeWallFunction/alphaSgsJayatillekeWallFunctionFvPatchScalarField.C
-
 LIB = $(FOAM_LIBBIN)/libcompressibleLESModels
