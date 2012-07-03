@@ -198,8 +198,7 @@ void Foam::interRegionHeatTransferModel::addSup
                 << endl;
         }
 
-        //SAF: temporarily output
-        if (mesh_.time().outputTime())
+        if (debug && mesh_.time().outputTime())
         {
             Tmapped.write();
             htc_.write();
