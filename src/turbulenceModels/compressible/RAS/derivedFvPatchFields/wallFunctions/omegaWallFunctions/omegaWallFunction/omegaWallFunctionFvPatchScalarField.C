@@ -28,6 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,23 +56,6 @@ void omegaWallFunctionFvPatchScalarField::checkType()
 }
 
 
-scalar omegaWallFunctionFvPatchScalarField::calcYPlusLam
-(
-    const scalar kappa,
-    const scalar E
-) const
-{
-    scalar ypl = 11.0;
-
-    for (int i=0; i<10; i++)
-    {
-        ypl = log(E*ypl)/kappa;
-    }
-
-    return ypl;
-}
-
-
 void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
     writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
@@ -96,7 +80,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kappa_(0.41),
     E_(9.8),
     beta1_(0.075),
-    yPlusLam_(calcYPlusLam(kappa_, E_))
+    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
 
 {
     checkType();
@@ -136,7 +120,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     beta1_(dict.lookupOrDefault<scalar>("beta1", 0.075)),
-    yPlusLam_(calcYPlusLam(kappa_, E_))
+    yPlusLam_(mutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
 {
     checkType();
 }

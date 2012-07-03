@@ -35,7 +35,7 @@ SourceFiles
 #ifndef compressibleMutUSpaldingWallFunctionFvPatchScalarField_H
 #define compressibleMutUSpaldingWallFunctionFvPatchScalarField_H
 
-#include "mutkWallFunctionFvPatchScalarField.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ namespace RASModels
 
 class mutUSpaldingWallFunctionFvPatchScalarField
 :
-    public mutkWallFunctionFvPatchScalarField
+    public mutWallFunctionFvPatchScalarField
 {
 protected:
 

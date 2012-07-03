@@ -65,14 +65,16 @@ scalar mutkRoughWallFunctionFvPatchScalarField::fnRough
 
 tmp<scalarField> mutkRoughWallFunctionFvPatchScalarField::calcMut() const
 {
-    const label patchI = patch().index();
+    const label patchi = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const tmp<volScalarField> tk = rasModel.k();
+    const turbulenceModel& turbModel =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+
+    const scalarField& y = turbModel.y()[patchi];
+    const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
+    const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const scalarField& muw = turbModel.mu().boundaryField()[patchi];
 
     const scalar Cmu25 = pow025(Cmu_);
 

@@ -31,13 +31,13 @@ boundaryField
     }
     upperWall
     {
-        type            alphaSgsJayatillekeWallFunction;
+        type            alphatJayatillekeWallFunction;
         he              ha;
         value           uniform 0;
     }
     lowerWall
     {
-        type            alphaSgsJayatillekeWallFunction;
+        type            alphatJayatillekeWallFunction;
         he              ha;
         value           uniform 0;
     }

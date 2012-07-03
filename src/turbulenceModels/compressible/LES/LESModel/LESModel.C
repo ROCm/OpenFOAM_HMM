@@ -155,6 +155,7 @@ autoPtr<LESModel> LESModel::New
 
 void LESModel::correct(const tmp<volTensorField>&)
 {
+    turbulenceModel::correct();
     delta_().correct();
 }
 

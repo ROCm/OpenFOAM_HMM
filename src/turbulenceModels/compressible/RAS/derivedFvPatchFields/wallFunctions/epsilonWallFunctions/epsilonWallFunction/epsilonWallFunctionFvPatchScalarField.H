@@ -81,9 +81,6 @@ protected:
         //- Check the type of the patch
         virtual void checkType();
 
-        //- Calculate the Y+ at the edge of the laminar sublayer
-        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
-
         //- Write local wall function variables
         virtual void writeLocalEntries(Ostream&) const;
 

@@ -23,7 +23,7 @@ boundaryField
 {
     ground
     {
-        type        alphaSgsWallFunction;
+        type        alphatWallFunction;
         value       uniform 0;
     }
 
@@ -44,7 +44,7 @@ boundaryField
 
     "(region0_to.*)"
     {
-        type        alphaSgsWallFunction;
+        type        alphatWallFunction;
         value       uniform 0;
     }
 }
