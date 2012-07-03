@@ -1,17 +1,17 @@
 {
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        tmp<fvScalarMatrix> TEqn
+        tmp<fvScalarMatrix> hEqn
         (
-          - fvm::laplacian(betav*kappa, T, "laplacian(K,T)")
-          + sources(rhoCp, T)
+          - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
+          + sources(rho, h)
         );
 
-        TEqn().relax();
-        TEqn().solve();
+        hEqn().relax();
+        hEqn().solve();
     }
-
-    Info<< "Min/max T:" << min(T).value() << ' ' << max(T).value() << endl;
 }
 
 thermo.correct();
+
+Info<< "Min/max T:" << min(thermo.T()) << ' ' << max(thermo.T()) << endl;

@@ -219,47 +219,31 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
 
         // local properties
-        const scalarField alphaw = model.alphaEff()().boundaryField()[patchI];
+        const scalarField kappaw = model.kappaEff()().boundaryField()[patchI];
 
-        const fvPatchScalarField& hew =
-            model.thermo().he().boundaryField()[patchI];
-
-        const scalarField qDot(alphaw*hew.snGrad());
-
-        const scalarField& Tp =
+        const fvPatchScalarField& Tp =
             patch().template lookupPatchField<volScalarField, scalar>(TName_);
 
-        const scalarField& pp = model.thermo().p().boundaryField()[patchI];
+        const scalarField qDot(kappaw*Tp.snGrad());
 
         tmp<scalarField> Ti = patchInternalField();
 
-        const scalarField Cpw(model.thermo().Cp(pp, Ti, patchI));
-
-        scalarField myh(patch().deltaCoeffs()*alphaw*Cpw);
-
-        scalarField alphawCp(alphaw*Cpw);
-
+        scalarField myh(patch().deltaCoeffs()*kappaw);
 
         // nbr properties
-        scalarField nbrAlphaw =
-            model.alphaEff()().boundaryField()[nbrPatchI];
-        mpp.map().distribute(nbrAlphaw);
 
-        const fvPatchScalarField& nbrHw =
-            model.thermo().he().boundaryField()[nbrPatchI];
+        scalarField nbrKappaw =
+            model.kappaEff()().boundaryField()[nbrPatchI];
+        mpp.map().distribute(nbrKappaw);
 
-        const scalarField& nbrHwPp =
-            model.thermo().p().boundaryField()[nbrPatchI];
+        const fvPatchScalarField& nbrTw =
+            model.thermo().T().boundaryField()[nbrPatchI];
 
         scalarField nbrQDot
         (
-            model.alphaEff()().boundaryField()[nbrPatchI]*nbrHw.snGrad()
+            model.kappaEff()().boundaryField()[nbrPatchI]*nbrTw.snGrad()
         );
         mpp.map().distribute(nbrQDot);
-
-        scalarField nbrTp =
-            nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_);
-        mpp.map().distribute(nbrTp);
 
         const temperatureThermoBaffle1DFvPatchScalarField& nbrField =
         refCast<const temperatureThermoBaffle1DFvPatchScalarField>
@@ -273,17 +257,15 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         scalarField nbrTi(nbrField.patchInternalField());
         mpp.map().distribute(nbrTi);
 
-        const scalarField nbrCpw
-        (
-            model.thermo().Cp(nbrHwPp, nbrField.patchInternalField(), nbrPatchI)
-        );
+        scalarField nbrTp =
+           nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_);
+        mpp.map().distribute(nbrTp);
 
         scalarField nbrh
         (
-            nbrPatch.deltaCoeffs()*nbrCpw
-           *model.alphaEff()().boundaryField()[nbrPatchI]
+            nbrPatch.deltaCoeffs()
+           *model.kappaEff()().boundaryField()[nbrPatchI]
         );
-
         mpp.map().distribute(nbrh);
 
 
@@ -296,14 +278,13 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         // Create fields for solid properties
         forAll(KDeltaw, i)
         {
-            KDeltaw[i] = solid_().kappa((Tp[i] + nbrTp[i])/2.0)/thickness_[i];
+            KDeltaw[i] = solid_().kappa((Tp[i] + nbrTw[i])/2.0)/thickness_[i];
         }
 
         const scalarField q
         (
             (Ti() - nbrTi)/(1.0/KDeltaw + 1.0/nbrh + 1.0/myh)
         );
-
 
         forAll(qDot, i)
         {
@@ -327,21 +308,21 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
                         /
                         (
                             1.0
-                          + patch().deltaCoeffs()[i]*alphawCp[i]/KDeltaw[i]
+                          + patch().deltaCoeffs()[i]*kappaw[i]/KDeltaw[i]
                         );
                 }
                 else if (q[i] < 0)
                 {
                     this->refValue()[i] = 0.0;
                     this->refGrad()[i] =
-                        (-nbrQDot[i] + Q[i]*thickness_[i])/alphawCp[i];
+                          (-nbrQDot[i] + Q[i]*thickness_[i])/kappaw[i];
                     this->valueFraction()[i] = 0.0;
                 }
                 else
                 {
                     scalar Qt = Q[i]*thickness_[i];
                     this->refValue()[i] = 0.0;
-                    this->refGrad()[i] = Qt/2/alphawCp[i];
+                    this->refGrad()[i] = Qt/2/kappaw[i];
                     this->valueFraction()[i] = 0.0;
                 }
             }

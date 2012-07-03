@@ -29,6 +29,7 @@ License
 
 Foam::constRho::constRho(const dictionary& dict)
 :
+    specie(dict),
     rho_(readScalar(dict.subDict("density").lookup("rho")))
 {}
 
@@ -37,6 +38,7 @@ Foam::constRho::constRho(const dictionary& dict)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const constRho& cr)
 {
+    os  << static_cast<const specie&>(cr);
     os << cr.rho_;
 
     os.check("Ostream& operator<<(Ostream& os, const constRho& cr)");

@@ -53,16 +53,16 @@ functions
     {
         functionObjectLibs ( "libfieldFunctionObjects.so" );
         type            readFields;
-        fields          ( p U );
+        fields          (p U);
     }
     streamLines
     {
         type            streamLine;
         outputControl   outputTime;
         setFormat       vtk;
-        U               U;
+        UName           U;
         trackForward    true;
-        fields          ( p U );
+        fields          (p U);
         lifeTime        10000;
         nSubCycle       5;
         cloudName       particleTracks;
@@ -71,8 +71,8 @@ functions
         {
             type            uniform;
             axis            x;
-            start           ( -1.001 1e-07 0.0011 );
-            end             ( -1.001 1e-07 1.0011 );
+            start           (-1.001 1e-07 0.0011);
+            end             (-1.001 1e-07 1.0011);
             nPoints         20;
         }
     }
@@ -84,7 +84,20 @@ functions
         surfaceFormat   vtk;
         fields          ( p U );
         interpolationScheme cellPoint;
-        surfaces        ( yNormal { type cuttingPlane ; planeType pointAndNormal ; pointAndNormalDict { basePoint ( 0 0 0 ) ; normalVector ( 0 1 0 ) ; } interpolate true ; } );
+        surfaces
+        (
+            yNormal
+            {
+                type cuttingPlane;
+                planeType pointAndNormal;
+                pointAndNormalDict
+                {
+                    basePoint (0 0 0);
+                    normalVector (0 1 0);
+                }
+                interpolate true;
+            }
+        );
     }
     forces
     {
@@ -98,10 +111,10 @@ functions
         rhoName         rhoInf;
         log             true;
         rhoInf          1;
-        liftDir         ( 0 0 1 );
-        dragDir         ( 1 0 0 );
-        CofR            ( 0.72 0 0 );
-        pitchAxis       ( 0 1 0 );
+        liftDir         (0 0 1);
+        dragDir         (1 0 0);
+        CofR            (0.72 0 0);
+        pitchAxis       (0 1 0);
         magUInf         20;
         lRef            1.42;
         Aref            0.75;

@@ -48,6 +48,14 @@ namespace Foam
 template<class rhoType> class exponentialSolidThermo;
 
 template<class rhoType>
+inline exponentialSolidThermo<rhoType> operator*
+(
+    const scalar,
+    const exponentialSolidThermo<rhoType>&
+);
+
+
+template<class rhoType>
 Ostream& operator<<
 (
     Ostream&,
@@ -109,17 +117,46 @@ public:
 
     // Member Functions
 
-        //- Heat capacity at constant pressure [J/(kg K)]
-        inline scalar Cp(const scalar T) const;
+        //- Limit the temperature to be in the range Tlow_ to Thigh_
+        inline scalar limit(const scalar T) const;
 
-        //- Enthalpy [J/kmol]
-        inline scalar h(const scalar T) const;
 
-        //- Sensible enthalpy [J/kg]
-        inline scalar hs(const scalar T) const;
+        // Fundamental properties
 
-        //- Formation enthalpy [J/kg]
-        inline scalar hf() const;
+            //- Heat capacity at constant pressure [J/(kg K)]
+            inline scalar cp(const scalar p, const scalar T) const;
+
+            //- Absolute enthalpy [J/kmol]
+            inline scalar ha(const scalar p, const scalar T) const;
+
+            //- Sensible enthalpy [J/kg]
+            inline scalar hs(const scalar p, const scalar T) const;
+
+            //- chemical enthalpy [J/kg]
+            inline scalar hc() const;
+
+            //- Entropy [J/(kmol K)]
+            inline scalar s(const scalar p, const scalar T) const;
+
+
+    // Member operators
+
+        inline exponentialSolidThermo& operator=
+        (
+            const exponentialSolidThermo&
+        );
+        inline void operator+=(const exponentialSolidThermo&);
+        inline void operator-=(const exponentialSolidThermo&);
+
+
+    // Friend operators
+
+
+        friend exponentialSolidThermo operator* <rhoType>
+        (
+            const scalar,
+            const exponentialSolidThermo&
+        );
 
 
     // Ostream Operator

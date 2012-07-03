@@ -357,6 +357,7 @@ void Foam::radiation::viewFactor::calculate()
             >(QrPatch);
 
         const scalarList eb = Qrp.emissivity();
+
         const scalarList& Hoi = Qrp.Qro();
 
         const polyPatch& pp = coarseMesh_.boundaryMesh()[patchID];
@@ -372,10 +373,6 @@ void Foam::radiation::viewFactor::calculate()
             label nAgglom = max(agglom) + 1;
 
             labelListList coarseToFine(invertOneToMany(nAgglom, agglom));
-
-            //scalarList Tave(pp.size(), 0.0);
-            //scalarList Eave(Tave.size(), 0.0);
-            //scalarList Hoiave(Tave.size(), 0.0);
 
             forAll(coarseToFine, coarseI)
             {
@@ -395,10 +392,6 @@ void Foam::radiation::viewFactor::calculate()
                     Eave[coarseI] += (eb[faceI]*sf[faceI])/area;
                     Hoiave[coarseI] += (Hoi[faceI]*sf[faceI])/area;
                 }
-
-                //localCoarseTave.append(Tave[coarseI]);
-                //localCoarseEave.append(Eave[coarseI]);
-                //localCoarseHoave.append(Hoiave[coarseI]);
             }
         }
 

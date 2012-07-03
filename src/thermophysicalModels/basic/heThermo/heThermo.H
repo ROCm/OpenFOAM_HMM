@@ -60,6 +60,18 @@ protected:
         volScalarField he_;
 
 
+    // Protected Member Functions
+
+        // Enthalpy/Internal energy
+
+            //- Return the enthalpy/internal energy field boundary types
+            //  by interrogating the temperature field boundary types
+            wordList heBoundaryTypes();
+
+            //- Correct the enthalpy/internal energy field boundaries
+            void heBoundaryCorrection(volScalarField& he);
+
+
 private:
 
     // Private Member Functions
@@ -68,12 +80,19 @@ private:
         heThermo(const heThermo<BasicThermo, MixtureType>&);
 
 
+        //- Initialize heThermo
+        void init();
+
+
 public:
 
     // Constructors
 
         //- Construct from mesh
         heThermo(const fvMesh&);
+
+        //- Construct from mesh and dictionary
+        heThermo(const fvMesh&, const dictionary&);
 
 
     //- Destructor
@@ -214,6 +233,7 @@ public:
             virtual tmp<volScalarField> kappa() const;
 
             //- Thermal diffusivity of mixture for patch [J/m/s/K]
+
             virtual tmp<scalarField> kappa
             (
                 const label patchi
@@ -229,6 +249,7 @@ public:
                 const label patchi
             ) const;
 
+
             //- Effective thermal diffusivity of mixture [J/m/s/K]
             virtual tmp<volScalarField> alphaEff
             (
@@ -240,6 +261,12 @@ public:
             (
                 const scalarField& alphat,
                 const label patchi
+            ) const;
+
+             //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
+            virtual tmp<scalarField> alpha
+            (
+                const label patchI
             ) const;
 
 

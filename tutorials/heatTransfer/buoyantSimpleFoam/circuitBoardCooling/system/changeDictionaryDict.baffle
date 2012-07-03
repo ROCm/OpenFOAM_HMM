@@ -91,10 +91,15 @@ dictionaryReplacement
                 type   compressible::temperatureThermoBaffle1D<constSolidThermoPhysics>;
                 baffleActivated yes;
                 thickness       uniform 0.005;  // thickness [m]
-                Qs              uniform 300;    // heat flux [W/m2]
+                Qs              uniform 100;    // heat flux [W/m2]
+                specie
+                {
+                    nMoles          1;
+                    molWeight       20;
+                }
                 transport
                 {
-                    kappa           1.0;
+                    kappa           1;
                 }
                 radiation
                 {

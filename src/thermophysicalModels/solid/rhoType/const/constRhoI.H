@@ -25,22 +25,20 @@ License
 
 #include "constRho.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline Foam::constRho::constRho
-(
-    scalar rho
-)
-:
-    rho_(rho)
-{}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::constRho::constRho(const constRho& pg)
+inline Foam::constRho::constRho(const word& name, const constRho& pg)
 :
+    specie(name, pg),
     rho_(pg.rho_)
+{}
+
+
+inline Foam::constRho::constRho(const specie& t, const scalar rho)
+:
+    specie(t),
+    rho_(rho)
 {}
 
 
@@ -58,10 +56,63 @@ inline Foam::autoPtr<Foam::constRho> Foam::constRho::New(const dictionary& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::constRho::rho(scalar) const
+inline Foam::scalar Foam::constRho::rho(scalar, scalar) const
 {
     return rho_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::constRho& Foam::constRho::operator=(const constRho& ct)
+{
+    specie::operator=(ct);
+    rho_ = ct.rho_;
+
+    return *this;
+}
+
+
+inline void Foam::constRho::operator+=(const constRho& ct)
+{
+    scalar molr1 = this->nMoles();
+
+    specie::operator+=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    rho_ = molr1*rho_ + molr2*ct.rho_;
+}
+
+
+inline void Foam::constRho::operator-=(const constRho& ct)
+{
+    scalar molr1 = this->nMoles();
+
+    specie::operator-=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    rho_ = molr1*rho_ - molr2*ct.rho_;
+
+}
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+
+inline Foam::constRho Foam::operator*
+(
+    const scalar s,
+    const constRho& ct
+)
+{
+    return constRho
+    (
+        s*static_cast<const specie&>(ct),
+        ct.rho_
+    );
+}
 
 // ************************************************************************* //

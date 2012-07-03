@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,9 +77,6 @@ protected:
 
         //- Check the type of the patch
         virtual void checkType();
-
-        //- Calculate the Y+ at the edge of the laminar sublayer
-        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
@@ -158,6 +155,10 @@ public:
 
 
     // Member functions
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        static scalar yPlusLam(const scalar kappa, const scalar E);
+
 
         // Evaluation functions
 

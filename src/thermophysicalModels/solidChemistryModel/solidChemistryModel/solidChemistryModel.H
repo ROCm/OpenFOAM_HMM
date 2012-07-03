@@ -40,7 +40,7 @@ SourceFiles
 #include "basicChemistryModel.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "basicSolidThermo.H"
+#include "solidReactionThermo.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +73,7 @@ protected:
     // Protected data
 
         //- Solid thermo package
-        autoPtr<basicSolidThermo> solidThermo_;
+        autoPtr<solidReactionThermo> solidThermo_;
 
 
 public:
@@ -118,10 +118,10 @@ public:
     // Member Functions
 
         //- Return access to the solid thermo package
-        inline basicSolidThermo& solidThermo();
+        inline solidReactionThermo& solid();
 
         //- Return const access to the solid thermo package
-        inline const basicSolidThermo& solidThermo() const;
+        inline const solidReactionThermo& solid() const;
 
         //- Return total gases mass source term [kg/m3/s]
         virtual tmp<volScalarField> RRg() const = 0;

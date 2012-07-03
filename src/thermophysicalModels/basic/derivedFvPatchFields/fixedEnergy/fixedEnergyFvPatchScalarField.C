@@ -23,11 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedEnergyFvPatchScalarField.H"
-#include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "basicThermo.H"
+#include "addToRunTimeSelectionTable.H"
+#include "fixedEnergyFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -101,6 +101,7 @@ void Foam::fixedEnergyFvPatchScalarField::updateCoeffs()
     (
         "thermophysicalProperties"
     );
+
 
     const label patchi = patch().index();
 

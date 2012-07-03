@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class fixedEnergyFvPatchScalarField Declaration
+              Class fixedEnergyFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedEnergyFvPatchScalarField
@@ -133,6 +133,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 #endif
 

@@ -36,6 +36,7 @@ SourceFiles
 #define reactingOneDim_H
 
 #include "pyrolysisModel.H"
+#include "solidChemistryModel.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,16 +79,16 @@ protected:
         autoPtr<solidChemistryModel> solidChemistry_;
 
         //- Reference to solid thermo
-        basicSolidThermo& solidThermo_;
+        solidReactionThermo& solidThermo_;
 
 
         // Reference to solid thermo properties
 
-            //- Absorption coefficient [1/m]
-            const volScalarField& kappaRad_;
-
-            //- Thermal conductivity [W/m/K]
-            const volScalarField& kappa_;
+//             //- Absorption coefficient [1/m]
+//             const volScalarField& kappaRad_;
+//
+//             //- Thermal conductivity [W/m/K]
+//             const volScalarField& kappa_;
 
             //- Density [kg/m3]
             volScalarField& rho_;
@@ -96,7 +97,7 @@ protected:
             PtrList<volScalarField>& Ys_;
 
             // Non-const access to temperature
-            volScalarField& T_;
+            volScalarField& h_;
 
 
         //- Name of the radiative flux in the primary region
@@ -230,10 +231,10 @@ public:
                 virtual const tmp<volScalarField> Cp() const;
 
                 //- Return the region absorptivity [1/m]
-                virtual const volScalarField& kappaRad() const;
+                virtual tmp<volScalarField> kappaRad() const;
 
                 //- Return the region thermal conductivity [W/m/k]
-                virtual const volScalarField& kappa() const;
+                virtual tmp<volScalarField> kappa() const;
 
                 //- Return the total gas mass flux to primary region [kg/m2/s]
                 virtual const surfaceScalarField& phiGas() const;

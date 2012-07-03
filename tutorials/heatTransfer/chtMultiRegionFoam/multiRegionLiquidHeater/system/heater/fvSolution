@@ -16,16 +16,16 @@ FoamFile
 
 solvers
 {
-    T
+    h
     {
         solver           PCG;
         preconditioner   DIC;
         tolerance        1e-06;
         relTol           0.1;
     }
-    TFinal
+    hFinal
     {
-        $T;
+        $h;
         tolerance        1e-06;
         relTol           0;
     }

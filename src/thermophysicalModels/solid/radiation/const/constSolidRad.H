@@ -44,6 +44,13 @@ namespace Foam
 template<class thermo> class constSolidRad;
 
 template<class thermo>
+inline constSolidRad<thermo> operator*
+(
+    const scalar,
+    const constSolidRad<thermo>&
+);
+
+template<class thermo>
 Ostream& operator<<
 (
     Ostream&,
@@ -57,7 +64,7 @@ Ostream& operator<<
 template<class thermo>
 class constSolidRad
 :
-    public  thermo
+    public thermo
 {
     // Private data
 
@@ -108,6 +115,22 @@ public:
 
         //- Return  emissivity[]
         inline scalar emissivity(scalar T) const;
+
+
+    // Member operators
+
+        inline constSolidRad& operator=(const constSolidRad&);
+        inline void operator+=(const constSolidRad&);
+        inline void operator-=(const constSolidRad&);
+
+
+    // Friend operators
+
+        friend constSolidRad operator* <thermo>
+        (
+            const scalar,
+            const constSolidRad&
+        );
 
 
     // Ostream Operator

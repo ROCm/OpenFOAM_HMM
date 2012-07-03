@@ -25,10 +25,13 @@ Class
     Foam::temperatureThermoBaffleFvPatchScalarField
 
 Description
-    Thermal bounday applied to both sides of the thermal baffle region and
+    Thermal boundary applied to both sides:the baffle region and
     in the primary region.
-    The primary region creates and evolves the thermal baffle heat transfer
-    equation. The solid thermo and baffle dictionaries are located on the
+
+    The primary region creates it and evolves the thermal baffle heat transfer
+    equation.
+
+    The solid thermo and baffle dictionaries are located on the
     primary region.
 
     type                compressible::temperatureThermoBaffle;
@@ -50,22 +53,44 @@ Description
 
 
     // Solid thermo
-    thermoType constSolidThermo;
+    thermoType
+    heSolidThermo
+        <pureSolidMixture
+            <constIsoSolidTransport
+                <constSolidRad
+                    <specieThermo
+                        <constSolidThermo<constRho>,sensibleEnthalpy>
+                    >
+                 >
+            >
+         >;
 
-    constSolidThermoCoeffs
+    mixture
     {
-        //- thermo properties
-        rho rho [1 -3  0  0 0 0 0]              80;
-        Cp  Cp  [0  2 -2 -1 0 0 0]              15;
-        kappa   kappa   [1  1 -3 -1 0 0 0]      0.01;
-
-        //- radiative properties
-        kappaRad  kappaRad [0 -1 0 0 0 0 0]     0;
-        sigmaS sigmaS [0 -1 0 0 0 0 0]          0;
-        emissivity  emissivity  [0 0 0 0 0 0 0] 1;
-
-        //- chemical properties
-        Hf  Hf  [0  2 -2  0 0 0 0]              0;
+        specie
+        {
+            nMoles          1;
+            molWeight       20;
+        }
+        transport
+        {
+            kappa           0.01;
+        }
+        radiation
+        {
+            sigmaS          0;
+            kappaRad        0;
+            emissivity      1;
+        }
+        thermodynamics
+        {
+            Hf              0;
+            Cp              15;
+        }
+        density
+        {
+            rho             80;
+        }
     }
 
     value               uniform 300;

@@ -25,10 +25,11 @@ License
 
 #include "radiationCoupledBase.H"
 #include "volFields.H"
-#include "basicSolidThermo.H"
+
 
 #include "mappedPatchBase.H"
 #include "fvPatchFieldMapper.H"
+#include "solidThermo.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -142,6 +143,12 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
 
             const polyMesh& nbrMesh = mpp.sampleMesh();
 
+            const solidThermo& thermo =
+                nbrMesh.lookupObject<solidThermo>
+                (
+                    "thermophysicalProperties"
+                );
+
             // Force recalculation of mapping and schedule
             const mapDistribute& distMap = mpp.map();
 
@@ -150,29 +157,10 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
                 nbrMesh
             ).boundary()[mpp.samplePolyPatch().index()];
 
-            if (nbrMesh.foundObject<volScalarField>("emissivity"))
-            {
-                tmp<scalarField> temissivity
-                (
-                    new scalarField
-                    (
-                        nbrPatch.lookupPatchField<volScalarField, scalar>
-                        (
-                            "emissivity"
-                        )
-                    )
-                );
+            scalarField emissivity(thermo.emissivity(nbrPatch.index()));
+            distMap.distribute(emissivity);
 
-                scalarField emissivity(temissivity);
-                // Use direct map mapping to exchange data
-                distMap.distribute(emissivity);
-                //Pout << emissivity << endl;
-                return emissivity;
-            }
-            else
-            {
-                return scalarField(0);
-            }
+            return emissivity;
 
         }
         break;

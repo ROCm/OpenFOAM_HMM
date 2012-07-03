@@ -30,7 +30,7 @@ License
 #include "compressible/LES/LESModel/LESModel.H"
 #include "wallFvPatch.H"
 #include "nearWallDist.H"
-//#include "wallDist.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

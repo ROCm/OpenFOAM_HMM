@@ -37,8 +37,6 @@ SourceFiles
 
 #include "runTimeSelectionTables.H"
 #include "volFieldsFwd.H"
-#include "solidChemistryModel.H"
-#include "basicSolidThermo.H"
 #include "regionModel1D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -218,10 +216,10 @@ public:
                 virtual const tmp<volScalarField> Cp() const = 0;
 
                 //- Return the region absorptivity [1/m]
-                virtual const volScalarField& kappaRad() const = 0;
+                virtual tmp<volScalarField> kappaRad() const = 0;
 
                 //- Return the region thermal conductivity [W/m/k]
-                virtual const volScalarField& kappa() const = 0;
+                virtual tmp<volScalarField> kappa() const = 0;
 
                 //- Return the total gas mass flux to primary region [kg/m2/s]
                 virtual const surfaceScalarField& phiGas() const = 0;
