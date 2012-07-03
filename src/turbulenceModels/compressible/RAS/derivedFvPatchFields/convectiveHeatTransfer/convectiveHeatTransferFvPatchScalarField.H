@@ -22,13 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::RASModels::htcConvFvPatchScalarField
+    Foam::compressible::RASModels::convectiveHeatTransferFvPatchScalarField
 
 Description
     Convective heat transfer boundary condition
 
 SourceFiles
-    htcConvFvPatchScalarField.C
+    convectiveHeatTransferFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,10 +47,10 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class htcConvFvPatchScalarField Declaration
+           Class convectiveHeatTransferFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class htcConvFvPatchScalarField
+class convectiveHeatTransferFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -65,20 +65,20 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("htcConvection");
+    TypeName("convectiveHeatTransfer");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        htcConvFvPatchScalarField
+        convectiveHeatTransferFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        htcConvFvPatchScalarField
+        convectiveHeatTransferFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -86,20 +86,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  htcConvFvPatchScalarField
+        //  convectiveHeatTransferFvPatchScalarField
         //  onto a new patch
-        htcConvFvPatchScalarField
+        convectiveHeatTransferFvPatchScalarField
         (
-            const htcConvFvPatchScalarField&,
+            const convectiveHeatTransferFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        htcConvFvPatchScalarField
+        convectiveHeatTransferFvPatchScalarField
         (
-            const htcConvFvPatchScalarField&
+            const convectiveHeatTransferFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -107,14 +107,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new htcConvFvPatchScalarField(*this)
+                new convectiveHeatTransferFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        htcConvFvPatchScalarField
+        convectiveHeatTransferFvPatchScalarField
         (
-            const htcConvFvPatchScalarField&,
+            const convectiveHeatTransferFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -126,7 +126,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new htcConvFvPatchScalarField(*this, iF)
+                new convectiveHeatTransferFvPatchScalarField(*this, iF)
             );
         }
 
