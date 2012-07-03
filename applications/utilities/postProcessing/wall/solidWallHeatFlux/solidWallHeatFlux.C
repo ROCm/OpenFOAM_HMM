@@ -33,7 +33,7 @@ Description
 
 #include "fvCFD.H"
 #include "wallFvPatch.H"
-#include "basicSolidThermo.H"
+#include "solidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
