@@ -35,7 +35,7 @@ SourceFiles
 #ifndef nutURoughWallFunctionFvPatchScalarField_H
 #define nutURoughWallFunctionFvPatchScalarField_H
 
-#include "nutkWallFunctionFvPatchScalarField.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ namespace RASModels
 
 class nutURoughWallFunctionFvPatchScalarField
 :
-    public nutkWallFunctionFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField
 {
     // Private data
 

@@ -48,6 +48,7 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
 #include "incompressible/transportModel/transportModel.H"
+#include "nearWallDist.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 
@@ -82,6 +83,9 @@ protected:
         const surfaceScalarField& phi_;
 
         transportModel& transportModel_;
+
+        //- Near wall distance boundary field
+        nearWallDist y_;
 
 
 private:
@@ -165,6 +169,12 @@ public:
         inline transportModel& transport() const
         {
             return transportModel_;
+        }
+
+        //- Return the near wall distances
+        const nearWallDist& y() const
+        {
+            return y_;
         }
 
         //- Return the laminar viscosity

@@ -39,7 +39,7 @@ SourceFiles
 #ifndef nutUTabulatedWallFunctionFvPatchScalarField_H
 #define nutUTabulatedWallFunctionFvPatchScalarField_H
 
-#include "nutkWallFunctionFvPatchScalarField.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 #include "uniformInterpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +57,7 @@ namespace RASModels
 
 class nutUTabulatedWallFunctionFvPatchScalarField
 :
-    public nutkWallFunctionFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField
 {
 protected:
 

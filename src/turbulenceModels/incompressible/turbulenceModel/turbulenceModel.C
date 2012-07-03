@@ -26,6 +26,7 @@ License
 #include "turbulenceModel.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +66,8 @@ turbulenceModel::turbulenceModel
 
     U_(U),
     phi_(phi),
-    transportModel_(transport)
+    transportModel_(transport),
+    y_(mesh_)
 {}
 
 
@@ -127,6 +129,11 @@ autoPtr<turbulenceModel> turbulenceModel::New
 void turbulenceModel::correct()
 {
     transportModel_.correct();
+
+    if (mesh_.changing())
+    {
+        y_.correct();
+    }
 }
 
 

@@ -78,9 +78,6 @@ protected:
         //- Check the type of the patch
         virtual void checkType();
 
-        //- Calculate the Y+ at the edge of the laminar sublayer
-        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
-
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
 
@@ -158,6 +155,10 @@ public:
 
 
     // Member functions
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        static scalar yPlusLam(const scalar kappa, const scalar E);
+
 
         // Evaluation functions
 

@@ -32,7 +32,11 @@ Description
 {
     const fvPatchList& patches = mesh_.boundary();
 
-    const scalar yPlusLam = this->yPlusLam(kappa_.value(), E_.value());
+    const scalar yPlusLam = nutkWallFunctionFvPatchScalarField::yPlusLam
+    (
+        kappa_.value(),
+        E_.value()
+    );
 
     const volScalarField nuLam(this->nu());
 
