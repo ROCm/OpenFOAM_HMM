@@ -25,15 +25,10 @@ License
 
 #include "constSolidRad.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class thermo>
-inline constSolidRad<thermo>::constSolidRad
+inline Foam::constSolidRad<thermo>::constSolidRad
 (
     const thermo& t,
     const scalar kappaRad,
@@ -52,7 +47,7 @@ inline constSolidRad<thermo>::constSolidRad
 
 
 template<class thermo>
-inline constSolidRad<thermo>::constSolidRad
+inline Foam::constSolidRad<thermo>::constSolidRad
 (
     const word& name,
     const constSolidRad& pg
@@ -66,14 +61,16 @@ inline constSolidRad<thermo>::constSolidRad
 
 
 template<class thermo>
-inline autoPtr<constSolidRad<thermo> > constSolidRad<thermo>::clone() const
+inline Foam::autoPtr<Foam::constSolidRad<thermo> >
+Foam::constSolidRad<thermo>::clone() const
 {
     return autoPtr<constSolidRad<thermo> >(new constSolidRad<thermo>(*this));
 }
 
 
 template<class thermo>
-inline autoPtr<constSolidRad<thermo> > constSolidRad<thermo>::New(Istream& is)
+inline Foam::autoPtr<Foam::constSolidRad<thermo> >
+Foam::constSolidRad<thermo>::New(Istream& is)
 {
     return autoPtr<constSolidRad<thermo> >(new constSolidRad<thermo>(is));
 }
@@ -82,28 +79,101 @@ inline autoPtr<constSolidRad<thermo> > constSolidRad<thermo>::New(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
-inline scalar constSolidRad<thermo>::kappaRad(scalar) const
+inline Foam::scalar Foam::constSolidRad<thermo>::kappaRad(scalar) const
 {
     return kappaRad_;
 }
 
 
 template<class thermo>
-inline scalar constSolidRad<thermo>::sigmaS(scalar) const
+inline Foam::scalar Foam::constSolidRad<thermo>::sigmaS(scalar) const
 {
     return sigmaS_;
 }
 
 
 template<class thermo>
-inline scalar constSolidRad<thermo>::emissivity(scalar) const
+inline Foam::scalar Foam::constSolidRad<thermo>::emissivity(scalar) const
 {
     return emissivity_;
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class thermo>
+inline Foam::constSolidRad<thermo>&
+Foam::constSolidRad<thermo>::operator=(const constSolidRad<thermo>& ct)
+{
+    thermo::operator=(ct);
+
+    kappaRad_ = ct.kappaRad_;
+    sigmaS_ = ct.sigmaS_;
+    emissivity_ = ct.emissivity_;
+
+    return *this;
+}
+
+
+template<class thermo>
+inline void Foam::constSolidRad<thermo>::operator+=
+(
+    const constSolidRad<thermo>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    thermo::operator+=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    kappaRad_ = molr1*kappaRad_ + molr2*ct.kappaRad_;
+    sigmaS_ = molr1*sigmaS_ + molr2*ct.sigmaS_;
+    emissivity_ = molr1*emissivity_ + molr2*ct.emissivity_;
+}
+
+
+template<class thermo>
+inline void Foam::constSolidRad<thermo>::operator-=
+(
+    const constSolidRad<thermo>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    thermo::operator-=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    kappaRad_ = molr1*kappaRad_ - molr2*ct.kappaRad_;
+    sigmaS_ = molr1*sigmaS_ - molr2*ct.sigmaS_;
+    emissivity_ = molr1*emissivity_ - molr2*ct.emissivity_;
+}
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+template<class thermo>
+inline Foam::constSolidRad<thermo> Foam::operator*
+(
+    const scalar s,
+    const constSolidRad<thermo>& ct
+)
+{
+    return constSolidRad<thermo>
+    (
+        s*static_cast<const thermo&>(ct),
+        ct.kappaRad_,
+        ct.sigmaS_,
+        ct.emissivity_
+    );
+}
+
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+
 
 // ************************************************************************* //

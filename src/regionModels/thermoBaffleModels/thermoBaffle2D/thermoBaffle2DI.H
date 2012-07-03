@@ -39,64 +39,20 @@ namespace thermoBaffleModels
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-inline tmp<scalarField> thermoBaffle2D::hs
+inline tmp<scalarField> thermoBaffle2D::he
 (
+    const scalarField& p,
     const scalarField& T,
     const label patchI
 ) const
 {
-    const scalarField Cp(thermo_->Cp(patchI));
-    return Cp*(T - 298.15);
+    return thermo_->he(p, T, patchI);
 }
 
 
-inline tmp<volScalarField> thermoBaffle2D::hs
-(
-    const volScalarField& T
-) const
+inline tmp<volScalarField> thermoBaffle2D::he() const
 {
-    const volScalarField Cp = thermo_->Cp()();
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "hs(" + T.name() + ")",
-                time().timeName(),
-                regionMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            Cp*(T - (dimensionedScalar("Tstd", dimTemperature, 298.15))),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-}
-
-
-inline tmp<volScalarField> thermoBaffle2D::T
-(
-    const volScalarField& hs
-) const
-{
-    const volScalarField Cp = thermo_->Cp()();
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "T(" + hs.name() + ")",
-                time().timeName(),
-                regionMesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            hs/Cp + dimensionedScalar("Tstd", dimTemperature, 298.15),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
+    return thermo_->he();
 }
 
 

@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
 template<class rhoType>
 inline void Foam::exponentialSolidThermo<rhoType>::checkT(const scalar T) const
 {
@@ -42,6 +41,20 @@ inline void Foam::exponentialSolidThermo<rhoType>::checkT(const scalar T) const
             << T
             << abort(FatalError);
     }
+}
+
+
+template<class rhoType>
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::integrateCp
+(
+    const scalar T
+) const
+{
+    return
+    (
+        c0_*pow(T, n0_ + 1.0)
+       /(pow(Tref_, n0_)*(n0_ + 1.0))
+    );
 }
 
 
@@ -83,40 +96,36 @@ inline Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::integrateCp
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::limit
 (
     const scalar T
 ) const
 {
-    return
-    (
-        c0_*pow(T, n0_ + 1.0)
-       /(pow(Tref_, n0_)*(n0_ + 1.0))
-    );
+    return T;
 }
 
 
 template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::Cp
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::cp
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
-    return c0_*pow(T/Tref_, n0_);
+    return c0_*pow(T/Tref_, n0_)*this->W();
 }
 
 
 template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::h
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::ha
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
     scalar hOffset = integrateCp(specie::Tstd);
 
     return
     (
-        integrateCp(T) + Hf_ - hOffset
+        (integrateCp(T) + Hf_ - hOffset)*this->W()
     );
 }
 
@@ -124,18 +133,113 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::h
 template<class rhoType>
 inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hs
 (
-    const scalar T
+    const scalar p, const scalar T
 ) const
 {
-    return h(T) - Hf_;
+    scalar hOffset = integrateCp(specie::Tstd);
+    return (integrateCp(T) - hOffset)*this->W();
 }
 
 
 template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hf() const
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hc() const
 {
-    return Hf_;
+    return Hf_*this->W();
 }
 
+
+template<class rhoType>
+inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::s
+(
+    const scalar p, const scalar T
+) const
+{
+    notImplemented
+    (
+        "scalar exponentialSolidThermo<rhoType>::"
+        "s(const scalar p, const scalar T) const"
+    );
+    return T;
+}
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+
+template<class rhoType>
+inline Foam::exponentialSolidThermo<rhoType>&
+Foam::exponentialSolidThermo<rhoType>::operator=
+(
+    const exponentialSolidThermo<rhoType>& ct
+)
+{
+    rhoType::operator=(ct);
+
+    Hf_ = ct.Hf_;
+    c0_ = ct.c0_;
+    n0_ = ct.n0_;
+    Tref_ = ct.Tref_;
+
+    return *this;
+}
+
+
+template<class rhoType>
+inline void Foam::exponentialSolidThermo<rhoType>::operator+=
+(
+    const exponentialSolidThermo<rhoType>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    rhoType::operator+=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    Hf_ = molr1*Hf_ + molr2*ct.Hf_;
+    c0_ = molr1*c0_ + molr2*ct.c0_;
+    n0_ = (molr1*n0_ + molr2*ct.n0_);
+    Tref_ = (molr1*Tref_ + molr2*ct.Tref_);
+}
+
+
+template<class rhoType>
+inline void Foam::exponentialSolidThermo<rhoType>::operator-=
+(
+    const exponentialSolidThermo<rhoType>& ct
+)
+{
+    scalar molr1 = this->nMoles();
+
+    rhoType::operator-=(ct);
+
+    molr1 /= this->nMoles();
+    scalar molr2 = ct.nMoles()/this->nMoles();
+
+    Hf_ = molr1*Hf_ - molr2*ct.Hf_;
+    c0_ = (molr1*c0_ - molr2*ct.c0_);
+    n0_ = (molr1*n0_ - molr2*ct.n0_);
+    Tref_ = (molr1*Tref_ - molr2*ct.Tref_);
+}
+
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+template<class rhoType>
+inline Foam::exponentialSolidThermo<rhoType> Foam::operator*
+(
+    const scalar s,
+    const exponentialSolidThermo<rhoType>& ct
+)
+{
+    return exponentialSolidThermo<rhoType>
+    (
+        s*static_cast<const rhoType&>(ct),
+        ct.Hf_,
+        ct.c0_,
+        ct.n0_,
+        ct.Tref_
+    );
+}
 
 // ************************************************************************* //

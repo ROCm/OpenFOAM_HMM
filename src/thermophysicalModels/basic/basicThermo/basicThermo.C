@@ -40,7 +40,7 @@ namespace Foam
     defineTypeNameAndDebug(basicThermo, 0);
     defineRunTimeSelectionTable(basicThermo, fvMesh);
 }
-
+/*
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::wordList Foam::basicThermo::heBoundaryTypes()
@@ -95,7 +95,7 @@ void Foam::basicThermo::heBoundaryCorrection(volScalarField& h)
         }
     }
 }
-
+*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -111,6 +111,92 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh)
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
+    ),
+
+    p_
+    (
+        IOobject
+        (
+            "p",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, -2, 2, 0, 0)
+    ),
+
+    T_
+    (
+        IOobject
+        (
+            "T",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    mu_
+    (
+        IOobject
+        (
+            "mu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
+    ),
+
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
+    )
+{}
+
+
+
+Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        dict
     ),
 
     p_

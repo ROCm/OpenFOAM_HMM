@@ -1,6 +1,6 @@
     fvMesh& mesh = porousSolidRegions[i];
 
-    basicSolidThermo& thermo = porousSolidThermos[i];
+    solidThermo& thermo = porousSolidThermos[i];
     const volScalarField& betav = betavSolid[i];
 
     tmp<volScalarField> trho = thermo.rho();
@@ -15,9 +15,12 @@
     const volScalarField& kappa = tkappa();
     //const volSymmTensorField& K = tK();
 
-    tmp<volScalarField> trhoCp = cp*rho;
-    const volScalarField& rhoCp = trhoCp();
+    //tmp<volScalarField> trhoCp = cp*rho;
+    //const volScalarField& rhoCp = trhoCp();
 
-    volScalarField& T = thermo.T();
+    tmp<volScalarField> talpha = thermo.alpha();
+    const volScalarField& alpha = talpha();
+
+    volScalarField& h = thermo.he();
 
     IObasicSourceList& sources = solidHeatSources[i];

@@ -1,5 +1,5 @@
     fvMesh& mesh = solidRegions[i];
-    basicSolidThermo& thermo = thermos[i];
+    solidThermo& thermo = thermos[i];
 
     tmp<volScalarField> trho = thermo.rho();
     const volScalarField& rho = trho();
@@ -11,4 +11,7 @@
     //tmp<volSymmTensorField> tkappa = thermo.directionalkappa();
     const volScalarField& kappa = tkappa();
 
-    volScalarField& T = thermo.T();
+    tmp<volScalarField> talpha = thermo.alpha();
+    const volScalarField& alpha = talpha();
+
+    volScalarField& h = thermo.he();

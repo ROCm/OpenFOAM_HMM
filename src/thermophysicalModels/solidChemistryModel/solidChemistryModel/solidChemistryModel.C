@@ -44,7 +44,7 @@ Foam::solidChemistryModel::solidChemistryModel
 )
 :
     basicChemistryModel(mesh),
-    solidThermo_(basicSolidThermo::New(mesh)) //, thermoTypeName))
+    solidThermo_(solidReactionThermo::New(mesh)) //, thermoTypeName))
 {}
 
 

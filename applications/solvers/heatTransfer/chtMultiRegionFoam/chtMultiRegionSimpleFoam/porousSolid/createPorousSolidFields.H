@@ -1,5 +1,5 @@
     // Initialise solid field pointer lists
-    PtrList<basicSolidThermo> porousSolidThermos(porousSolidRegions.size());
+    PtrList<solidThermo> porousSolidThermos(porousSolidRegions.size());
     PtrList<IObasicSourceList> solidHeatSources(porousSolidRegions.size());
     PtrList<volScalarField> betavSolid(porousSolidRegions.size());
 
@@ -14,7 +14,7 @@
         porousSolidThermos.set
         (
             i,
-            basicSolidThermo::New(porousSolidRegions[i])
+            solidThermo::New(porousSolidRegions[i])
         );
         Info<< "    Adding sources\n" << endl;
         solidHeatSources.set

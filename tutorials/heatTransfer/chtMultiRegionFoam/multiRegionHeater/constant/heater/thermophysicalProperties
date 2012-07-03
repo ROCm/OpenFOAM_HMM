@@ -1,0 +1,112 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
+//thermoType heSolidThermo<multiComponentSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
+
+mixture
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   12;
+    }
+    transport
+    {
+        kappa   80;
+        //kappa  (80 80 80);
+    }
+    radiation
+    {
+        sigmaS      0.0;
+        kappaRad    0.0;
+        emissivity  0.0;
+    }
+    thermodynamics
+    {
+        Hf      0;
+        Cp      450;
+    }
+    density
+    {
+        rho     8000;
+    }
+}
+
+solidComponents
+(
+    pmma char
+);
+
+pmmaCoeffs
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   100;
+    }
+    transport
+    {
+        kappa   0.152;
+    }
+    radiation
+    {
+        sigmaS      0.0;
+        kappaRad    0.0;
+        emissivity  0.1;
+    }
+    thermodynamics
+    {
+        Hf      0;
+        Cp      1462;
+    }
+    density
+    {
+        rho     1114.0;
+    }
+}
+
+charCoeffs
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   50;
+    }
+    transport
+    {
+        kappa   0.4;
+    }
+
+    radiation
+    {
+        sigmaS      0.0;
+        kappaRad    0.0;
+        emissivity  0.0;
+    }
+
+    thermodynamics
+    {
+        Hf      0;
+        Cp      611.0;
+    }
+
+    density
+    {
+        rho     11.5;
+    }
+}
+// ************************************************************************* //

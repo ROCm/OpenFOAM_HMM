@@ -39,7 +39,7 @@ ODESolidChemistryModel
 :
     CompType(mesh, solidThermoName),
     ODE(),
-    Ys_(this->solidThermo().composition().Y()),
+    Ys_(this->solid().composition().Y()),
     pyrolisisGases_
     (
         mesh.lookupObject<dictionary>
@@ -47,13 +47,12 @@ ODESolidChemistryModel
     ),
     reactions_
     (
-        static_cast<const reactingSolidMixture<SolidThermo>& >
-            (this->solidThermo().composition())
+        dynamic_cast<const reactingSolidMixture<SolidThermo>& >(this->solid())
     ),
     solidThermo_
     (
-        static_cast<const reactingSolidMixture<SolidThermo>& >
-            (this->solidThermo().composition()).solidData()
+        dynamic_cast<const reactingSolidMixture<SolidThermo>& >
+            (this->solid()).solidData()
     ),
     gasThermo_(pyrolisisGases_.size()),
     nGases_(pyrolisisGases_.size()),
@@ -137,7 +136,7 @@ ODESolidChemistryModel
             );
         // Calculate inital values of Ysi0 = rho*delta*Yi
             Ys0_[fieldI].internalField() =
-                this->solidThermo().rho()
+                this->solid().rho()
                *max(Ys_[fieldI], scalar(0.001))*mesh.V();
         }
    }
@@ -208,20 +207,20 @@ ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
 
         scalar omegai = omega
         (
-            R, c, T, 0.0, pf, cf, lRef, pr, cr, rRef
+            R, c, T, p, pf, cf, lRef, pr, cr, rRef
         );
         scalar rhoL = 0.0;
         forAll(R.slhs(), s)
         {
             label si = R.slhs()[s];
             om[si] -= omegai;
-            rhoL = solidThermo_[si].rho(T);
+            rhoL = solidThermo_[si].rho(p, T);
         }
         scalar sr = 0.0;
         forAll(R.srhs(), s)
         {
             label si = R.srhs()[s];
-            scalar rhoR = solidThermo_[si].rho(T);
+            scalar rhoR = solidThermo_[si].rho(p, T);
             sr = rhoR/rhoL;
             om[si] += sr*omegai;
 
@@ -266,9 +265,9 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
         c1[i] = max(0.0, c[i]);
     }
 
-    scalar kf = R.kf(0.0, T, c1);
+    scalar kf = R.kf(p, T, c1);
 
-    scalar exponent = R.nReact();
+    const scalar exponent = R.nReact();
 
     const label Nl = R.slhs().size();
 
@@ -286,18 +285,20 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::derivatives
+void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::
+derivatives
 (
     const scalar time,
     const scalarField &c,
     scalarField& dcdt
 ) const
 {
-    scalar T = c[nSpecie_];
+    const scalar T = c[nSpecie_];
+    const scalar p = c[nSpecie_ + 1];
 
     dcdt = 0.0;
 
-    dcdt = omega(c, T, 0);
+    dcdt = omega(c, T, p);
 
     //Total mass concentration
     scalar cTot = 0.0;
@@ -312,8 +313,8 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::derivatives
     {
         scalar dYidt = dcdt[i]/cTot;
         scalar Yi = c[i]/cTot;
-        newCp += Yi*solidThermo_[i].Cp(T);
-        newhi -= dYidt*solidThermo_[i].hf();
+        newCp += Yi*solidThermo_[i].Cp(p, T);
+        newhi -= dYidt*solidThermo_[i].Hc();
     }
 
     scalar dTdt = newhi/newCp;
@@ -334,7 +335,8 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
     scalarSquareMatrix& dfdc
 ) const
 {
-    scalar T = c[nSpecie_];
+    const scalar T = c[nSpecie_];
+    const scalar p = c[nSpecie_ + 1];
 
     scalarField c2(nSpecie_, 0.0);
 
@@ -352,13 +354,13 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
     }
 
     // length of the first argument must be nSolids
-    dcdt = omega(c2, T, 0.0);
+    dcdt = omega(c2, T, p);
 
     for (label ri=0; ri<reactions_.size(); ri++)
     {
         const solidReaction& R = reactions_[ri];
 
-        scalar kf0 = R.kf(0.0, T, c2);
+        scalar kf0 = R.kf(p, T, c2);
 
         forAll(R.slhs(), j)
         {
@@ -409,8 +411,8 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
 
     // calculate the dcdT elements numerically
     scalar delta = 1.0e-8;
-    scalarField dcdT0 = omega(c2, T - delta, 0);
-    scalarField dcdT1 = omega(c2, T + delta, 0);
+    scalarField dcdT0 = omega(c2, T - delta, p);
+    scalarField dcdT1 = omega(c2, T + delta, p);
 
     for (label i=0; i<nEqns(); i++)
     {
@@ -464,7 +466,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::Sh() const
         {
             forAll(Sh, cellI)
             {
-                scalar hf = solidThermo_[i].hf();
+                scalar hf = solidThermo_[i].Hc();
                 Sh[cellI] -= hf*RRs_[i][cellI];
             }
         }
@@ -532,7 +534,7 @@ calculate()
             IOobject::NO_WRITE,
             false
         ),
-        this->solidThermo().rho()
+        this->solid().rho()
     );
 
     if (this->mesh().changing())
@@ -567,7 +569,8 @@ calculate()
             if (reactingCells_[celli])
             {
                 scalar rhoi = rho[celli];
-                scalar Ti = this->solidThermo().T()[celli];
+                scalar Ti = this->solid().T()[celli];
+                scalar pi = this->solid().p()[celli];
 
                 scalarField c(nSpecie_, 0.0);
                 for (label i=0; i<nSolids_; i++)
@@ -575,7 +578,7 @@ calculate()
                     c[i] = rhoi*Ys_[i][celli]*delta;
                 }
 
-                const scalarField dcdt = omega(c, Ti, 0.0, true);
+                const scalarField dcdt = omega(c, Ti, pi, true);
 
                 forAll(RRs_, i)
                 {
@@ -611,7 +614,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
             IOobject::NO_WRITE,
             false
         ),
-        this->solidThermo().rho()
+        this->solid().rho()
     );
 
     if (this->mesh().changing())
@@ -649,7 +652,8 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
             cellCounter_ = celli;
 
             scalar rhoi = rho[celli];
-            scalar Ti = this->solidThermo().T()[celli];
+            scalar Ti = this->solid().T()[celli];
+            scalar pi = this->solid().p()[celli];
 
             scalarField c(nSpecie_, 0.0);
             scalarField c0(nSpecie_, 0.0);
@@ -672,7 +676,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
             // calculate the chemical source terms
             while (timeLeft > SMALL)
             {
-                tauC = this->solve(c, Ti, 0.0, t, dt);
+                tauC = this->solve(c, Ti, pi, t, dt);
                 t += dt;
 
                 // update the temperature
@@ -693,9 +697,9 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
                 {
                     scalar dYi = dcdt[i]/cTot;
                     scalar Yi = c[i]/cTot;
-                    newCp += Yi*solidThermo_[i].Cp(Ti);
-                    newhi -= dYi*solidThermo_[i].hf();
-                    invRho += Yi/solidThermo_[i].rho(Ti);
+                    newCp += Yi*solidThermo_[i].Cp(pi, Ti);
+                    newhi -= dYi*solidThermo_[i].Hc();
+                    invRho += Yi/solidThermo_[i].rho(pi, Ti);
                 }
 
                 scalar dTi = (newhi/newCp)*dt;
@@ -722,7 +726,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
             }
 
             // Update Ys0_
-            dc = omega(c0, Ti, 0.0, true);
+            dc = omega(c0, Ti, pi, true);
         }
     }
 

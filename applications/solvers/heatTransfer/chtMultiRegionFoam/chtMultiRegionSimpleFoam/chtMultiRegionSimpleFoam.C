@@ -34,7 +34,7 @@ Description
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
-#include "basicSolidThermo.H"
+#include "solidThermo.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "IObasicSourceList.H"

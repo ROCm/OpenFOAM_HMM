@@ -16,7 +16,7 @@ FoamFile
 
 solvers
 {
-    T
+    h
     {
         solver           PCG;
         preconditioner   DIC;
@@ -37,7 +37,7 @@ relaxationFactors
     }
     equations
     {
-        T               0.7;
+        h               0.7;
     }
 }
 

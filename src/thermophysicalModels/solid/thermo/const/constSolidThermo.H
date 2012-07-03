@@ -47,6 +47,37 @@ namespace Foam
 template<class rhoType> class constSolidThermo;
 
 template<class rhoType>
+inline constSolidThermo<rhoType> operator*
+(
+    const scalar,
+    const constSolidThermo<rhoType>&
+);
+
+/*
+template<class rhoType>
+inline constSolidThermo<rhoType> operator+
+(
+    const constSolidThermo<rhoType>&,
+    const constSolidThermo<rhoType>&
+);
+
+template<class rhoType>
+inline constSolidThermo<rhoType> operator-
+(
+    const constSolidThermo<rhoType>&,
+    const constSolidThermo<rhoType>&
+);
+
+
+
+template<class rhoType>
+inline constSolidThermo<rhoType> operator==
+(
+    const constSolidThermo<rhoType>&,
+    const constSolidThermo<rhoType>&
+);
+*/
+template<class rhoType>
 Ostream& operator<<
 (
     Ostream&,
@@ -99,19 +130,40 @@ public:
 
     // Member Functions
 
+         //- Limit the temperature to be in the range Tlow_ to Thigh_
+        inline scalar limit(const scalar T) const;
+
         // Fundamental properties
 
-            //- Heat capacity at constant pressure [J/(kg K)]
-            inline scalar Cp(const scalar T) const;
+            //- Heat capacity at constant pressure [J/(kmol K)]
+            inline scalar cp(const scalar p, const scalar T) const;
 
-            //- Enthalpy [J/kg]
-            inline scalar h(const scalar T) const;
+            //- Absolute enthalpy [J/kmol]
+            inline scalar ha(const scalar p, const scalar T) const;
 
-            //- Sensible enthalpy [J/kg]
-            inline scalar hs(const scalar T) const;
+            //- Sensible enthalpy [J/kmol]
+            inline scalar hs(const scalar p, const scalar T) const;
 
-            //- Enthalpy of formation [J/kg]
-            inline scalar hf() const;
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
+
+            //- Entropy [J/(kmol K)]
+            inline scalar s(const scalar p, const scalar T) const;
+
+
+    // Member operators
+
+        inline constSolidThermo& operator=(const constSolidThermo&);
+        inline void operator+=(const constSolidThermo&);
+        inline void operator-=(const constSolidThermo&);
+
+    // Friend operators
+
+        friend constSolidThermo operator* <rhoType>
+        (
+            const scalar,
+            const constSolidThermo&
+        );
 
 
     // IOstream Operators

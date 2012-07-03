@@ -39,7 +39,9 @@ namespace thermoBaffleModels
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(noThermo, 0);
+
 addToRunTimeSelectionTable(thermoBaffleModel, noThermo, mesh);
+addToRunTimeSelectionTable(thermoBaffleModel, noThermo, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -55,6 +57,18 @@ noThermo::noThermo(const word& modelType, const fvMesh& mesh)
 :
     thermoBaffleModel(mesh)
 {}
+
+
+noThermo::noThermo
+(
+    const word& modelType,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+:
+    thermoBaffleModel(modelType, mesh, dict)
+{}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -127,11 +141,11 @@ const volScalarField& noThermo::T() const
 }
 
 
-const basicSolidThermo& noThermo::thermo() const
+const solidThermo& noThermo::thermo() const
 {
     FatalErrorIn("const volScalarField& noThermo::T() const")
         << "T field not available for " << type() << abort(FatalError);
-    return reinterpret_cast<const basicSolidThermo&>(null);
+    return reinterpret_cast<const solidThermo&>(null);
 }
 
 

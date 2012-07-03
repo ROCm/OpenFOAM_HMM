@@ -222,9 +222,8 @@ void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
         os.writeKeyword("thermoType") << solidThermoType_
             << token::END_STATEMENT << nl;
 
-        os.writeKeyword(word(solidThermoType_ + "Coeffs"));
-
-        os << dict_.subDict(solidThermoType_ + "Coeffs") << nl;
+        os.writeKeyword("mixture");
+        os << dict_.subDict("mixture") << nl;
     }
 }
 

@@ -45,6 +45,13 @@ namespace Foam
 template<class thermo> class exponentialSolidTransport;
 
 template<class thermo>
+inline exponentialSolidTransport<thermo> operator*
+(
+    const scalar,
+    const exponentialSolidTransport<thermo>&
+);
+
+template<class thermo>
 Ostream& operator<<
 (
     Ostream&,
@@ -106,6 +113,27 @@ public:
         //- Thermal conductivity [W/mK]
         inline scalar kappa(const scalar T) const;
 
+        //- Thermal conductivity [W/mK]
+        inline vector Kappa(const scalar T) const;
+
+
+    // Member operators
+
+        inline exponentialSolidTransport& operator=
+        (
+            const exponentialSolidTransport&
+        );
+        inline void operator+=(const exponentialSolidTransport&);
+        inline void operator-=(const exponentialSolidTransport&);
+
+
+    // Friend operators
+
+        friend exponentialSolidTransport operator* <thermo>
+        (
+            const scalar,
+            const exponentialSolidTransport&
+        );
 
     // Ostream Operator
 
