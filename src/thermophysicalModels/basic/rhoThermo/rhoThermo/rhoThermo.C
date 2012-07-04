@@ -55,6 +55,25 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 {}
 
 
+Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dicy)
+:
+    basicThermo(mesh, dict),
+    rho_
+    (
+        IOobject
+        (
+            "rhoThermo",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimDensity
+    )
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::rhoThermo::~rhoThermo()

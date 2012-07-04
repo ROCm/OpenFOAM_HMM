@@ -40,62 +40,7 @@ namespace Foam
     defineTypeNameAndDebug(basicThermo, 0);
     defineRunTimeSelectionTable(basicThermo, fvMesh);
 }
-/*
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::wordList Foam::basicThermo::heBoundaryTypes()
-{
-    const volScalarField::GeometricBoundaryField& tbf = T_.boundaryField();
-
-    wordList hbt = tbf.types();
-
-    forAll(tbf, patchi)
-    {
-        if (isA<fixedValueFvPatchScalarField>(tbf[patchi]))
-        {
-            hbt[patchi] = fixedEnergyFvPatchScalarField::typeName;
-        }
-        else if
-        (
-            isA<zeroGradientFvPatchScalarField>(tbf[patchi])
-         || isA<fixedGradientFvPatchScalarField>(tbf[patchi])
-        )
-        {
-            hbt[patchi] = gradientEnergyFvPatchScalarField::typeName;
-        }
-        else if(isA<mixedFvPatchScalarField>(tbf[patchi]))
-        {
-            hbt[patchi] = mixedEnergyFvPatchScalarField::typeName;
-        }
-        else if (isA<temperatureJumpFvPatchScalarField>(tbf[patchi]))
-        {
-            hbt[patchi] = energyJumpFvPatchScalarField::typeName;
-        }
-    }
-
-    return hbt;
-}
-
-
-void Foam::basicThermo::heBoundaryCorrection(volScalarField& h)
-{
-    volScalarField::GeometricBoundaryField& hbf = h.boundaryField();
-
-    forAll(hbf, patchi)
-    {
-        if (isA<gradientEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<gradientEnergyFvPatchScalarField>(hbf[patchi]).gradient()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-        else if (isA<mixedEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<mixedEnergyFvPatchScalarField>(hbf[patchi]).refGrad()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-    }
-}
-*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
