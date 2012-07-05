@@ -60,8 +60,10 @@ constantProperties
     pMin            1000;
     minParticleMass 1e-15;
 
-    rho0            1000;
     T0              320;
+
+    // place holders for rho0 and T0 - reset from liquid props using T0
+    rho0            1000;
     Cp0             4187;
 
     youngsModulus   1e9;
