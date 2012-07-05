@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,33 @@ Class
     Foam::SRFVelocityFvPatchVectorField
 
 Description
-    Freestream velocity patch to be used with SRF model
-    to apply the appropriate rotation transformation in time and space.
+    Freestream velocity condition to be used in conjunction with the single
+    rotating frame (SRF) model (see: SRFModel class)
+
+    Given the free stream velocity in the absolute frame, the condition 
+    applies the appropriate rotation transformation in time and space to
+    determine the local velocity using:
+
+        \f[
+            Up = cos(theta)*UInf + sin(theta)*(n^UInf) - Up_srf
+        \f]
+
+    where
+        \var Up     = patch velocity [m/s]
+        \var UInf   = free stream velocity in the absolute frame [m/s]
+        \var theta  = swept angle [rad]
+        \var n      = axis direction of the SRF
+        \var Up_srf = SRF velocity of the patch
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            SRFFreestreamVelocity;
+            UInf            (0 0 0);            // free stream velocity
+            value           uniform (0 0 0);    // optional value entry
+        }
+    \endverbatim
 
 SourceFiles
     SRFVelocityFvPatchVectorField.C
@@ -44,7 +69,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class SRFFreestreamVelocityFvPatchVectorField Declaration
+           Class SRFFreestreamVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class SRFFreestreamVelocityFvPatchVectorField
@@ -53,7 +78,7 @@ class SRFFreestreamVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Velocity of the free stream in the absolute frame
+        //- Velocity of the free stream in the absolute frame [m/s]
         vector UInf_;
 
 

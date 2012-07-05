@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,43 @@ Class
     Foam::activePressureForceBaffleVelocityFvPatchVectorField
 
 Description
-    Bounday which emulates the operation of a release pressure panel.
+    This boundary condition is applied to the flow velocity, to simulate the
+    opening of a baffle due to local flow conditions, by merging the behaviours
+    of wall and cyclic conditions.
 
-    The boundary condition modifies mesh areas based on difference
-    of pressure or force face beween both sides of the panel. Once opened the
-    panel continues to open at a fixed rate.
+    The baffle joins two mesh regions, where the open fraction determines
+    the interpolation weights applied to each cyclic- and neighbour-patch
+    contribution.
+
+    Once opened the baffle continues to open at a fixed rate using
+
+        \f[
+            x = x_old + dt/DT
+        \f]
+
+    where
+        \var x      = baffle open fraction [0-1]
+        \var x_old  = baffle open fraction on previous evaluation
+        \var dt     = simulation time step
+        \var DT     = time taken to open the baffle
+
+    The open fraction is then applied to scale the patch areas.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            activePressureForceBaffleVelocity;
+            p               p;          // name of pressure field (default = p)
+            cyclicPatch     cyclic1;    // name of cyclic patch
+            orientation     1;          // 1 or -1 used to switch flow direction
+            openFraction    0.2;        // current opatch open fraction [0-1]
+            openingTime     5.0;        // time taken to open the baffle
+            maxOpenFractionDelta 0.1;   // max open fraction change/timestep
+            minThresholdValue 0.01;     // minimum open fraction for activation
+            forceBased      false;      // force (true) or pressue (false)
+        }
+    \endverbatim
 
 SourceFiles
     activePressureForceBaffleVelocityFvPatchVectorField.C
@@ -48,7 +80,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-            Class activePressureForceBaffleVelocityFvPatch Declaration
+    Class activePressureForceBaffleVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class activePressureForceBaffleVelocityFvPatchVectorField
@@ -101,6 +133,7 @@ class activePressureForceBaffleVelocityFvPatchVectorField
 
         //- Baffle is activated
         bool baffleActivated_;
+
 
 public:
 

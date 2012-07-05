@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,44 @@ Class
     Foam::activeBaffleVelocityFvPatchVectorField
 
 Description
-    Boundary condition that modifies mesh areas based on velocity.
+    This boundary condition is applied to the flow velocity, to simulate the
+    opening of a baffle due to local flow conditions, by merging the behaviours
+    of wall and cyclic conditions.
+
+    The baffle joins two mesh regions, where the open fraction determines
+    the interpolation weights applied to each cyclic- and neighbour-patch
+    contribution.
+
+    We determine whether the baffle is opening or closing from the sign of
+    the net force across the baffle, from which the baffle open fraction is
+    updated using:
+
+        \f[
+            x = x_old + dt/DT*sign(F_net)
+        \f]
+
+    where
+        \var x      = baffle open fraction [0-1]
+        \var x_old  = baffle open fraction on previous evaluation
+        \var dt     = simulation time step
+        \var DT     = time taken to open the baffle
+        \var F_net  = net force across the baffle
+
+    The open fraction is then applied to scale the patch areas.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            activeBaffleVelocity;
+            p               p;          // name of pressure field (default = p)
+            cyclicPatch     cyclic1;    // name of cyclic patch
+            orientation     1;          // 1 or -1 used to switch flow direction
+            openFraction    0.2;        // current opatch open fraction [0-1]
+            openingTime     5.0;        // time taken to open the baffle
+            maxOpenFractionDelta 0.1;   // max open fraction change/timestep
+        }
+    \endverbatim
 
 SourceFiles
     activeBaffleVelocityFvPatchVectorField.C
@@ -44,7 +81,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class activeBaffleVelocityFvPatch Declaration
+          Class activeBaffleVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class activeBaffleVelocityFvPatchVectorField
@@ -163,17 +200,10 @@ public:
         // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
+            virtual void autoMap(const fvPatchFieldMapper&);
 
             //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchVectorField&,
-                const labelList&
-            );
+            virtual void rmap(const fvPatchVectorField&, const labelList&);
 
 
         //- Update the coefficients associated with the patch field

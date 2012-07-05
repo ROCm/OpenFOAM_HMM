@@ -33,12 +33,12 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
-    {
-        type            MarshakRadiationFixedT;
-        Trad            uniform 1000;       // radiation temperature field
-        value           uniform 0;          // place holder
-    }
+        myPatch
+        {
+            type            MarshakRadiationFixedT;
+            Trad            uniform 1000;       // radiation temperature field
+            value           uniform 0;          // place holder
+        }
     \endverbatim
 
 SourceFiles

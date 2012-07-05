@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,38 @@ Class
     Foam::SRFVelocityFvPatchVectorField
 
 Description
-    Velocity patch to be used with SRF model
+    Velocity condition to be used in conjunction with the single
+    rotating frame (SRF) model (see: SRFModel class)
+
+    Given the free stream velocity in the absolute frame, the condition 
+    applies the appropriate rotation transformation in time and space to
+    determine the local velocity.
+
+    The optional \c relative flag switches the behaviour of the patch
+    such that:
+
+        \li relative = yes: inlet velocity applied 'as is':
+
+        \f[
+            Up = U_in
+        \f]
+
+        \li relative = no : SRF velocity is subtracted from the inlet velocity:
+
+        \f[
+            Up = U_in - U_srf
+        \f]
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            SRFVelocity;
+            relative        yes;                // relative motion to the SRF?
+            inletValue      uniform (0 0 0);    // inlet velocity
+            value           uniform (0 0 0);    // initial value
+        }
+    \endverbatim
 
 SourceFiles
     SRFVelocityFvPatchVectorField.C
@@ -57,7 +88,7 @@ class SRFVelocityFvPatchVectorField
         //- Is the supplied inlet value relative to the SRF
         Switch relative_;
 
-        //- Inlet value
+        //- Inlet value [m/s]
         vectorField inletValue_;
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,20 @@ Class
     alphatJayatillekeWallFunctionFvPatchScalarField
 
 Description
-    Thermal wall function for turbulent thermal diffusivity based on the
-    Jayatilleke thermal wall function
+    Thermal wall function for turbulent thermal diffusivity (usually
+    \c alphaSgs) based on the Jayatilleke model.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            alphaSgsJayatillekeWallFunction;
+            Prt             0.85;   // turbulent Prandtl number (default = 0.85)
+            kappa           0.41;   // Von Karman constant (default = 0.41)
+            E               9.8;    // E coefficient (default = 9.8)
+            value           uniform 0; // optional value entry
+        }
+    \endverbatim
 
 SourceFiles
     alphatJayatillekeWallFunctionFvPatchScalarField.C
@@ -48,7 +60,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class alphatJayatillekeWallFunctionFvPatchScalarField Declaration
+      Class alphatJayatillekeWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphatJayatillekeWallFunctionFvPatchScalarField

@@ -31,15 +31,15 @@ Description
     The standard (Euler, backward, CrankNicholson) time schemes are
     supported.  Additionally an optional mechanism to relax the value at
     the boundary to a specified far-field value is provided which is
-    switched on by specifying the relaxation length-scale lInf and the
-    far-field value fieldInf.
+    switched on by specifying the relaxation length-scale \c lInf and the
+    far-field value \c fieldInf.
 
     The flow/wave speed at the outlet is provided by the virtual function
     advectionSpeed() the default implementation of which requires the name of
-    the flux field (phi) and optionally the density (rho) if the mass-flux
-    rather than the volumetric-flux is given.
+    the flux field \c (phi) and optionally the density \c (rho) if the
+    mass-flux rather than the volumetric-flux is given.
     \verbatim
-        outlet
+        myPatch
         {
             type            advective;
             phi             phi;
@@ -50,7 +50,7 @@ Description
     \endverbatim
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
-    BC from this class and overriding advectionSpeed() e.g. in
+    BC from this class and over-riding advectionSpeed()  e.g. in
     waveTransmissiveFvPatchField the advectionSpeed() calculates and returns
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
@@ -71,7 +71,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class advectiveFvPatch Declaration
+                  Class advectiveFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
