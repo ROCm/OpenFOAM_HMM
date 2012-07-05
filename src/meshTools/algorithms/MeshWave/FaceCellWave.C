@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -814,7 +814,27 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     nEvals_(0),
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces())
-{}
+{
+    if
+    (
+        allFaceInfo.size() != mesh_.nFaces()
+     || allCellInfo.size() != mesh_.nCells()
+    )
+    {
+        FatalErrorIn
+        (
+            "FaceCellWave<Type, TrackingData>::FaceCellWave"
+            "(const polyMesh&, const labelList&, const List<Type>,"
+            " UList<Type>&, UList<Type>&, const label maxIter)"
+        )   << "face and cell storage not the size of mesh faces, cells:"
+            << endl
+            << "    allFaceInfo   :" << allFaceInfo.size() << endl
+            << "    mesh_.nFaces():" << mesh_.nFaces() << endl
+            << "    allCellInfo   :" << allCellInfo.size() << endl
+            << "    mesh_.nCells():" << mesh_.nCells()
+            << exit(FatalError);
+    }
+}
 
 
 // Iterate, propagating changedFacesInfo across mesh, until no change (or
@@ -850,6 +870,26 @@ Foam::FaceCellWave<Type, TrackingData>::FaceCellWave
     nUnvisitedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces())
 {
+    if
+    (
+        allFaceInfo.size() != mesh_.nFaces()
+     || allCellInfo.size() != mesh_.nCells()
+    )
+    {
+        FatalErrorIn
+        (
+            "FaceCellWave<Type, TrackingData>::FaceCellWave"
+            "(const polyMesh&, const labelList&, const List<Type>,"
+            " UList<Type>&, UList<Type>&, const label maxIter)"
+        )   << "face and cell storage not the size of mesh faces, cells:"
+            << endl
+            << "    allFaceInfo   :" << allFaceInfo.size() << endl
+            << "    mesh_.nFaces():" << mesh_.nFaces() << endl
+            << "    allCellInfo   :" << allCellInfo.size() << endl
+            << "    mesh_.nCells():" << mesh_.nCells()
+            << exit(FatalError);
+    }
+
     // Copy initial changed faces data
     setFaceInfo(changedFaces, changedFacesInfo);
 
