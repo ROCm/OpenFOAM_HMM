@@ -26,38 +26,53 @@ Class
     atmBoundaryLayerInletEpsilonFvPatchScalarField
 
 Description
-    Boundary condition specifies a epsilon inlet for the atmospheric boundary
-    layer (ABL). This boundaty is to be used in conjunction with
-    ABLInletVelocity.
+    This boundary condition specifies an inlet value for the turbulence
+    dissipation \c epsilon, appropriate for atmospheric boundary layers (ABL),
+    and designed to be used in conjunction with the \c ABLInletVelocity inlet
+    velocity boundary condition.
 
-    \verbatim
-        epsilon = Ustar^3 / (K(z - zGround + z0))
+        \f[
+            epsilon = Ustar^3 / (K(z - zGround + z0))
+        \f]
 
     where:
 
-        Ustar is the frictional velocity
-        K is karman's constant
-        z is the verical coordinate
-        z0 is the surface roughness lenght
-        zGround minium vlaue in z direction
-
+        \var Ustar   = frictional velocity
+        \var K       = Karman's constant
+        \var z       = vertical co-ordinate [m]
+        \var z0      = surface roughness length [m]
+        \var zGround = minimum vlaue in z direction [m]
 
     and:
 
-        Ustar = K Uref/ln((Zref + z0)/z0)
+        \f[
+            Ustar = K Uref/ln((Zref + z0)/z0)
+        \f]
 
     where:
 
-        Uref is the reference velocity at Zref
-        Zref is the reference height.
+        \var Uref = reference velocity at Zref [m/s]
+        \var Zref = reference height [m]
 
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            atmBoundaryLayerInletEpsilon;
+            z               1.0;    // vertical co-ordinate [m]
+            kappa           0.41;   // kappa coefficient (default = 0.41)
+            Uref            1.0;    // reference velocity [m/s]
+            Href            0.0;    // reference height [m]
+            z0              uniform 0.0; // surface roughness length [m]
+            zGround         uniform 0.0; // minimum z co-ordinate [m]
+        }
     \endverbatim
 
     Reference:
-    D.M. Hargreaves and N.G. Wright
-    "On the use of the k-epsilon model in commercial CFD software to model the
-     neutral atmospheric boundary layer"
-    Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
+        D.M. Hargreaves and N.G. Wright,  "On the use of the k-epsilon model
+        in commercial CFD software to model the neutral atmospheric boundary
+        layer", Journal of Wind Engineering and Industrial Aerodynamics
+        95(2007), pp 355-369.
 
 SourceFiles
     atmBoundaryLayerInletEpsilonFvPatchScalarField.C
@@ -96,13 +111,13 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
         //- Reference velocity
         const scalar Uref_;
 
-        //- Reference hight
+        //- Reference height
         const scalar Href_;
 
         //- Surface roughness length
         scalarField z0_;
 
-        //- Minimum corrdinate value in z direction
+        //- Minimum co-ordinate value in z direction
         scalarField zGround_;
 
         //- Frictional velocity

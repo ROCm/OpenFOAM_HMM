@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,23 @@ Class
     Foam::compressible::RASModels::alphatFilmWallFunctionFvPatchScalarField
 
 Description
-    Turbulent thermal diffusivity boundary conditions for use with surface
-    film models.
+    Turbulent thermal diffusivity boundary condition for use with surface
+    film models.  This condition varies from the standard wall function by
+    taking into account any mass released from the film model.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            alphatFilmWallFunction;
+            B               5.5;    // B coefficient (default = 5.5)
+            yPlusCrit       11.05;  // critical y+ (default = 11.05)
+            Cmu             0.09;   // Cmu coefficient (default = 0.09)
+            kappa           0.41;   // kappa coefficient (default = 0.41)
+            Prt             0.85;   // turbulent Prandtl number (default = 0.85)
+            value           uniform 0; // optional value entry
+        }
+    \endverbatim
 
 SourceFiles
     alphatFilmWallFunctionFvPatchScalarField.C

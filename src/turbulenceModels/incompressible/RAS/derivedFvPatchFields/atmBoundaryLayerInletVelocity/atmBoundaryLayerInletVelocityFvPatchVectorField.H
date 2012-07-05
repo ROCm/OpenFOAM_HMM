@@ -26,42 +26,60 @@ Class
     atmBoundaryLayerInletVelocityFvPatchVectorField
 
 Description
-    Boundary condition specifies a atmospheric boundary layer (ABL)
-    velocity inlet profile given the friction velocity value,
-    flow direction n and direction of the parabolic coordinate z.
+    This boundary condition specifies a velocity inlet profile appropriate
+    for atmospheric boundary layers (ABL).  The profile is derived from the
+    friction velocity, flow direction and the direction of the parabolic
+    co-ordinate \c z.
 
-    \verbatim
-        U = (Ustar/K) ln((z - zGround + z0)/z0)
+        \f[
+            U = (Ustar/K) ln((z - zGround + z0)/z0)
+        \f]
 
     where:
 
-        Ustar is the frictional velocity
-        K is karman's constant
-        z0 is the surface roughness lenght
-        z is the verical coordinate
-        zGround is the minumum coordinate value in z direction.
+        \var Ustar   = frictional velocity
+        \var K       = Karman's constant
+        \var z       = vertical co-ordinate [m]
+        \var z0      = surface roughness length [m]
+        \var zGround = minimum vlaue in z direction [m]
 
     and:
 
-        Ustar = K Uref/ln((Zref + z0)/z0)
+        \f[
+            Ustar = K Uref/ln((Zref + z0)/z0)
+        \f]
 
     where:
 
-        Uref is the reference velocity at Zref
-        Zref is the reference height.
-
-    \endverbatim
+        \var Uref = reference velocity at Zref [m/s]
+        \var Zref = reference height [m]
 
     Reference:
-    D.M. Hargreaves and N.G. Wright
-    "On the use of the k-epsilon model in commercial CFD software to model the
-     neutral atmospheric boundary layer"
-    Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
+        D.M. Hargreaves and N.G. Wright,  "On the use of the k-epsilon model
+        in commercial CFD software to model the neutral atmospheric boundary
+        layer", Journal of Wind Engineering and Industrial Aerodynamics
+        95(2007), pp 355-369.
 
-NOTE: D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the k-epsilon
-      model should be changed from 1.3 to 1.11 for consistency.
-      The roughness height (Er) is given by Er = 20 z0 following the same
-      reference
+    \note
+        D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the
+        k-epsilon model should be changed from 1.3 to 1.11 for consistency.
+        The roughness height (Er) is given by Er = 20 z0 following the same
+        reference.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            atmBoundaryLayerInletVelocity;
+            n               (0 1 0); // flow direction
+            z               1.0;    // vertical co-ordinate [m]
+            kappa           0.41;   // kappa coefficient (default = 0.41)
+            Uref            1.0;    // reference velocity [m/s]
+            Href            0.0;    // reference height [m]
+            z0              uniform 0.0; // surface roughness length [m]
+            zGround         uniform 0.0; // minimum z co-ordinate [m]
+        }
+    \endverbatim
 
 SourceFiles
     atmBoundaryLayerInletVelocityFvPatchVectorField.C

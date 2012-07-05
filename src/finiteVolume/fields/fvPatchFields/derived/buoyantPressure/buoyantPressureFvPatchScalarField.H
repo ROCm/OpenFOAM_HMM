@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,41 @@ Class
     Foam::buoyantPressureFvPatchScalarField
 
 Description
-    Set the pressure gradient boundary condition appropriately for buoyant flow.
+    This boundary condition sets the pressure gradient appropriately for
+    buoyant flow.
 
-    If the variable name is "pd" assume it is p - rho*g.h and set the gradient
-    appropriately.  Otherwise assume the variable is the static pressure.
+    If the variable name is one of:
+        \li pd
+        \li p_rgh
+        \li ph_rgh
+    we assume that the pressure variable is \f$ p - rho*g.h\f$ and the gradient
+    set using:
+        \f[
+            grad(pressure) = -snGrad(rho)*(g.h)
+        \f]
+    where
+        \var snGrad = surface-normal gradient operator
+        \var rho    = density [kg/m3]
+        \var g      = acceleration due to gravity [m/s2]
+        \var h      = patch face centres [m]
+
+    Otherwise we assume that it is the static pressure, and the gradient
+    calculated using:
+        \f[
+            grad(pressure) = rho*(g.n)
+        \f]
+    where
+        \var n      = patch face normal vectors
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            buoyantPressure;
+            rho             rho; // optional density field name (default = rho)
+            value           uniform 0;
+        }
+    \endverbatim
 
 SourceFiles
     buoyantPressureFvPatchScalarField.C
