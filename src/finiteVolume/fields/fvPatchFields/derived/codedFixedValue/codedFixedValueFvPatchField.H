@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
         {
             type            codedFixedValue;
             value           uniform 0;
-            redirectType    rampedFixedValue;   // name of generated bc
+            redirectType    rampedFixedValue;   // name of generated BC
 
             code
             #{
@@ -54,17 +54,17 @@ Description
     \endverbatim
 
     A special form is if the 'code' section is not supplied. In this case
-    the code gets read from a (runTimeModifiable!) dictionary system/codeDict
-    which would have a corresponding entry
+    the code is read from a (runTimeModifiable!) dictionary system/codeDict
+    which would have a corresponding entry:
 
     \verbatim
-    rampedFixedValue
-    {
-        code
-        #{
-            operator==(min(10, 0.1*this->db().time().value()));
-        #};
-    }
+        rampedFixedValue
+        {
+            code
+            #{
+                operator==(min(10, 0.1*this->db().time().value()));
+            #};
+        }
     \endverbatim
 
 SeeAlso
@@ -92,7 +92,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                     Class codedFixedValueFvPatch Declaration
+                    Class codedFixedValueFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -109,6 +109,7 @@ class codedFixedValueFvPatchField
         const word redirectType_;
 
         mutable autoPtr<fvPatchField<Type> > redirectPatchFieldPtr_;
+
 
     // Private Member Functions
 
@@ -131,6 +132,7 @@ class codedFixedValueFvPatchField
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
 
 public:
 
@@ -207,8 +209,6 @@ public:
                 new codedFixedValueFvPatchField<Type>(*this, iF)
             );
         }
-
-
 
 
     // Member functions

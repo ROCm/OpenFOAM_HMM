@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Description
         {
             type            codedMixed;
             value           uniform 0;
-            redirectType    rampedMixed;   // name of generated bc
+            redirectType    rampedMixed;   // name of generated BC
 
             code
             #{
@@ -96,7 +96,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                     Class codedMixedFvPatch Declaration
+                      Class codedMixedFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -113,6 +113,7 @@ class codedMixedFvPatchField
         const word redirectType_;
 
         mutable autoPtr<mixedFvPatchField<Type> > redirectPatchFieldPtr_;
+
 
     // Private Member Functions
 
@@ -135,6 +136,7 @@ class codedMixedFvPatchField
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
 
 public:
 
@@ -211,8 +213,6 @@ public:
                 new codedMixedFvPatchField<Type>(*this, iF)
             );
         }
-
-
 
 
     // Member functions
