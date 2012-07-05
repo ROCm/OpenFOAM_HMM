@@ -55,7 +55,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 {}
 
 
-Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dicy)
+Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 :
     basicThermo(mesh, dict),
     rho_
