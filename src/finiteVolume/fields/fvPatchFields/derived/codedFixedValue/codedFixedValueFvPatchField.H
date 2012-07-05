@@ -92,7 +92,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                    Class codedFixedValueFvPatch Declaration
+                 Class codedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

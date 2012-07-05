@@ -25,17 +25,20 @@ Class
     Foam::fanFvPatchField
 
 Description
-    Jump boundary condition. Operates on cyclic. Jump specified as a DataEntry.
-    (table, fileTable, csv etc.)
+    This boundary condition supplies a jump condition, using the \c cyclic
+    condition as a base.
+
+    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
+    contant, polynomial, table values.
 
     Example of the boundary condition specification:
     \verbatim
-        fan_half0
+        myPatch
         {
             type            fan;
-            patchType       cyclic;
-            jump            uniform 0;
-            jumpTable       csvFile;
+            patchType       cyclic;         // specify \c cyclic
+            jump            uniform 0;      // current jump value
+            jumpTable       csvFile;        // jump specification
             csvFileCoeffs
             {
                 hasHeaderLine   1;
@@ -48,20 +51,13 @@ Description
         }
     \endverbatim
 
+    The above example shows the use of a CSV file to specify the jump.
 
-    Backwards compatibility: if the 'f' keyword is detected it assumes
-    it is a power of the flowrate.
+    \note
+     The underlying \c patchType should be set to \c cyclic
 
-    \verbatim
-        fan_half0
-        {
-            type            fan;
-            patchType       cyclic;
-            jump            uniform 0;
-            f               2(100 -0.1);
-            value           uniform 0;
-        }
-    \endverbatim
+SeeAlso
+    Foam::DataEntry
 
 SourceFiles
     fanFvPatchField.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::directionMixedFvPatchField
 
 Description
-    Foam::directionMixedFvPatchField
+    Base class for direction-mixed boundary conditions.
 
 SourceFiles
     directionMixedFvPatchField.C
@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class directionMixedFvPatch Declaration
+                  Class directionMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

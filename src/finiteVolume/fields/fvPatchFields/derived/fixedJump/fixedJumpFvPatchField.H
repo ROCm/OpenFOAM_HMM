@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,11 @@ Class
     Foam::fixedJumpFvPatchField
 
 Description
-    Base class for "jump" of a field<type>
+    Base class for "jump" of a field<type> - not used directly
+
+SeeAlso
+    Foam::fanFvPatchScalarField
+    Foam::fanPressureFvPatchScalarField
 
 SourceFiles
     fixedJumpFvPatchField.C
@@ -61,7 +65,6 @@ protected:
 
 
 public:
-
 
     // Constructors
 

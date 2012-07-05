@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,18 @@ Class
     Foam::emptyFvPatchField
 
 Description
-    Foam::emptyFvPatchField
+    This boundary condition provides an 'empty' condition for reduced
+    dimensions cases, i.e. 1- and 2-D geometries.  Apply this condition to
+    patches whose normal is aligned to geometric directions that do not
+    constitue solution directions.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            empty;
+        }
+    \endverbatim
 
 SourceFiles
     emptyFvPatchField.C
@@ -44,7 +55,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class emptyFvPatch Declaration
+                      Class emptyFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

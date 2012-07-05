@@ -25,7 +25,21 @@ Class
     Foam::cyclicFvPatchField
 
 Description
-    Foam::cyclicFvPatchField
+    This boundary condition enforces a cyclic condition between a pair of
+    boundaries.
+
+    \note
+    The patches must be topologically similar, i.e. if the owner patch is
+    transformed to the neighbour patch, the patches should be identical (or
+    very similar).
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            cyclic;
+        }
+    \endverbatim
 
 SourceFiles
     cyclicFvPatchField.C
@@ -45,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cyclicFvPatch Declaration
+                        Class cyclicFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

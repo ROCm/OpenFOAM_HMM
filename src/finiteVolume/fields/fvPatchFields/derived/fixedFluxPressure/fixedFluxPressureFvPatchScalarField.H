@@ -25,14 +25,31 @@ Class
     Foam::fixedFluxPressureFvPatchScalarField
 
 Description
-    Adjusts the pressure gradient such that the flux on the boundary is that
-    specified by the velocity boundary condition.
+    This boundary condition adjusts the pressure gradient such that the flux
+    on the boundary is that specified by the velocity boundary condition.
 
     The predicted flux to be compensated by the pressure gradient is evaluated
-    as (phi - phiHbyA), both of which are looked-up from the database as is
-    the pressure diffusivity Dp used to calculate the gradient.
+    as \f$(phi - phiHbyA)\f$, both of which are looked-up from the database, as
+    is the pressure diffusivity \c Dp used to calculate the gradient using:
 
-    The names of the phi, phiHbyA and Dp fields may be optionally specified.
+        \f[
+            grad(pressure) = \frac{phiHbyA - phi}{mag(Sf)*Dp}
+        \f]
+
+    where
+        \var Sf = patch face areas
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            externalWallHeatFluxTemperature;
+            phiHbyA         phiHbyA; // predicted flux field (default = phiHbyA)
+            phi             phi;    // flux field (default = phi)
+            rho             rho;    // density field (default = rho)
+            Dp              Dp;     // pressure diffusivity field (default = Dp)
+        }
+    \endverbatim
 
 SourceFiles
     fixedFluxPressureFvPatchScalarField.C
@@ -52,7 +69,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedFluxPressureFvPatch Declaration
+             Class fixedFluxPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedFluxPressureFvPatchScalarField

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,34 @@ Class
     Foam::filmHeightInletVelocityFvPatchVectorField
 
 Description
-    Velocity inlet boundary condition for patches where the film height is
-    specified. The inflow velocity is obtained from the flux with a direction
-    normal to the patch faces.
+    This boundary condition is designed to be used in conjunction with
+    surface film modelling.  It provides a velocity inlet boundary condition
+    for patches where the film height is specified.  The inflow velocity is
+    obtained from the flux with a direction normal to the patch faces using:
+
+    \f[
+        Up = \frac{n*phi}{rho*mag(Sf)*delta}
+    \f]
+
+    where
+        \var Up    = patch velocity [m/s]
+        \var n     = patch normal vector
+        \var phi   = mass flux [kg/s]
+        \var rho   = density [kg/m3]
+        \var Sf    = patch face area vectors [m2]
+        \var delta = film height [m]
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            filmHeightInletVelocity;
+            phi             phi;      // name of flux field (default = phi)
+            rho             rho;      // name of density field (default = rho)
+            deltaf          deltaf;   // name of height field (default = deltaf)
+            value           uniform (0 0 0); // initial velocity / [m/s]
+        }
+    \endverbatim
 
 SourceFiles
     filmHeightInletVelocityFvPatchVectorField.C

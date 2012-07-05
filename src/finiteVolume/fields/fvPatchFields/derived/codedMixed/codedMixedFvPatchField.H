@@ -96,7 +96,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                      Class codedMixedFvPatch Declaration
+                   Class codedMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

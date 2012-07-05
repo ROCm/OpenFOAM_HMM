@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,9 @@ Class
     Foam::cylindricalInletVelocityFvPatchVectorField
 
 Description
-    Describes an inlet vector boundary condition in cylindrical coordinates
-    given a central axis, central point, rpm, axial and radial velocity.
+    This boundary condition describes an inlet vector boundary condition in
+    cylindrical co-ordinates given a central axis, central point, rpm, axial
+    and radial velocity.
 
     Example of the boundary condition specification:
     \verbatim
@@ -36,15 +37,15 @@ Description
         type            cylindricalInletVelocity;
         axis            (0 0 1);
         centre          (0 0 0);
-        axialVelocity   constant 30;
-        radialVelocity  constant -10;
-        rpm             constant 100;
+        axialVelocity   constant 30;    // axial velocity [m/s]
+        radialVelocity  constant -10;   // radial velocity [m/s]
+        rpm             constant 100;   // revolutions per minute
     }
     \endverbatim
 
-    The axialVelocity, radialVelocity and rpm entries are DataEntry types, able
-    to describe time varying functions.  The example above gives the usage for
-    supplying constant values.
+    The \c axialVelocity, \c radialVelocity and \c rpm entries are DataEntry
+    types, able to describe time varying functions.  The example above gives
+    the usage for supplying constant values.
 
 SourceFiles
     cylindricalInletVelocityFvPatchVectorField.C

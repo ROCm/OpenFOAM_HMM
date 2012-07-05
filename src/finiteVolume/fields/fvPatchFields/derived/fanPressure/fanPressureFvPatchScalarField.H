@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,13 @@ Class
     Foam::fanPressureFvPatchScalarField
 
 Description
-    Assigns pressure inlet or outlet total pressure condition for a fan.
+    This boundary condition can be applied to assign either a pressure inlet
+    or outlet total pressure condition for a fan.
 
     User specifies:
-    - pressure drop vs volumetric flow rate table (fan curve) file name;
-    - direction of normal flow through the fan, in or out;
-    - total pressure of the environment.
+    \li pressure drop vs volumetric flow rate table (fan curve) file name;
+    \li direction of normal flow through the fan, in or out;
+    \li total pressure of the environment.
 
     Example of the boundary condition specification:
     \verbatim
@@ -56,7 +57,8 @@ Description
     \endverbatim
 
 See Also
-    Foam::totalPressureFvPatchScalarField and
+    Foam::fanFvPatchField
+    Foam::totalPressureFvPatchScalarField
     Foam::interpolationTable
 
 SourceFiles
