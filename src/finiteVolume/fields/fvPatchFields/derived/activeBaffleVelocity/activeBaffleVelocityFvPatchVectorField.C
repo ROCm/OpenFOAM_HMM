@@ -292,6 +292,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
 void Foam::activeBaffleVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    writeEntryIfDifferent<word>(os, "p", "p", pName_)
     os.writeKeyword("cyclicPatch")
         << cyclicPatchName_ << token::END_STATEMENT << nl;
     os.writeKeyword("orientation")

@@ -92,7 +92,7 @@ activePressureForceBaffleVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    pName_("p"),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
     cyclicPatchName_(dict.lookup("cyclicPatch")),
     cyclicPatchLabel_(p.patch().boundaryMesh().findPatchID(cyclicPatchName_)),
     orientation_(readLabel(dict.lookup("orientation"))),
@@ -278,6 +278,8 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             {
                 valueDiff -=p[nbrFaceCells[facei]]*mag(initCyclicSf_[facei]);
             }
+
+            Info<< "Force difference = " << valueDiff << endl;
         }
         else //pressure based
         {
@@ -290,6 +292,8 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             {
                 valueDiff -= p[nbrFaceCells[facei]];
             }
+
+            Info<< "Pressure difference = " << valueDiff << endl;
         }
 
         if ((mag(valueDiff) > mag(minThresholdValue_) || baffleActivated_))
@@ -316,7 +320,6 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         }
 
         Info<< "Open fraction = " << openFraction_ << endl;
-        Info<< "Pressure difference = " << valueDiff << endl;
 
         vectorField::subField Sfw = patch().patch().faceAreas();
         vectorField newSfw((1 - openFraction_)*initWallSf_);
@@ -351,6 +354,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    writeEntryIfDifferent<word>(os, "p", "p", pName_)
     os.writeKeyword("cyclicPatch")
         << cyclicPatchName_ << token::END_STATEMENT << nl;
     os.writeKeyword("orientation")
@@ -361,8 +365,6 @@ write(Ostream& os) const
         << maxOpenFractionDelta_ << token::END_STATEMENT << nl;
     os.writeKeyword("openFraction")
         << openFraction_ << token::END_STATEMENT << nl;
-    os.writeKeyword("p")
-        << pName_ << token::END_STATEMENT << nl;
     os.writeKeyword("minThresholdValue")
         << minThresholdValue_ << token::END_STATEMENT << nl;
     os.writeKeyword("forceBased")
