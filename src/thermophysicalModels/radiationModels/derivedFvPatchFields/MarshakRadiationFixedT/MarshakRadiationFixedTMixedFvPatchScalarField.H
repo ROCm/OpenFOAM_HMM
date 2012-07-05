@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,21 @@ Class
     Foam::MarshakRadiationFixedTMixedFvPatchScalarField
 
 Description
-    Marshak boundary for radiation G field
-    - radiation temperature specified
+    A 'mixed' boundary condition that implements a Marshak condition for the
+    incident radiation field (usually written as G)
+
+    The radiation temperature field across the patch is supplied by the user
+    using the \c Trad entry.
+
+    Example of the boundary condition specification:
+    \verbatim
+    inlet
+    {
+        type            MarshakRadiationFixedT;
+        Trad            uniform 1000;       // radiation temperature field
+        value           uniform 0;          // place holder
+    }
+    \endverbatim
 
 SourceFiles
     MarshakRadiationFixedTMixedFvPatchScalarField.C
