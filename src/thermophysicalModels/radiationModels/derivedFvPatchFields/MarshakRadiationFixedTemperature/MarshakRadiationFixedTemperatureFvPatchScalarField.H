@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::MarshakRadiationFixedTMixedFvPatchScalarField
+    Foam::MarshakRadiationFixedTemperatureFvPatchScalarField
 
 Description
     A 'mixed' boundary condition that implements a Marshak condition for the
@@ -42,12 +42,12 @@ Description
     \endverbatim
 
 SourceFiles
-    MarshakRadiationFixedTMixedFvPatchScalarField.C
+    MarshakRadiationFixedTemperatureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MarshakRadiationFixedTMixedFvPatchField_H
-#define MarshakRadiationFixedTMixedFvPatchField_H
+#ifndef MarshakRadiationFixedTemperatureFvPatchScalarField_H
+#define MarshakRadiationFixedTemperatureFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 #include "radiationCoupledBase.H"
@@ -58,10 +58,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class MarshakRadiationFixedTMixedFvPatchScalarField Declaration
+     Class MarshakRadiationFixedTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class MarshakRadiationFixedTMixedFvPatchScalarField
+class MarshakRadiationFixedTemperatureFvPatchScalarField
 :
     public mixedFvPatchScalarField,
     public radiationCoupledBase
@@ -76,20 +76,20 @@ class MarshakRadiationFixedTMixedFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("MarshakRadiationFixedT");
+    TypeName("MarshakRadiationFixedTemperature");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        MarshakRadiationFixedTMixedFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        MarshakRadiationFixedTMixedFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -98,18 +98,18 @@ public:
 
         //- Construct by mapping given MarshakRadiationFvPatchField onto a new
         //  patch
-        MarshakRadiationFixedTMixedFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
         (
-            const MarshakRadiationFixedTMixedFvPatchScalarField&,
+            const MarshakRadiationFixedTemperatureFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        MarshakRadiationFixedTMixedFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
         (
-            const MarshakRadiationFixedTMixedFvPatchScalarField&
+            const MarshakRadiationFixedTemperatureFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -117,14 +117,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new MarshakRadiationFixedTMixedFvPatchScalarField(*this)
+                new MarshakRadiationFixedTemperatureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        MarshakRadiationFixedTMixedFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
         (
-            const MarshakRadiationFixedTMixedFvPatchScalarField&,
+            const MarshakRadiationFixedTemperatureFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -136,7 +136,11 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new MarshakRadiationFixedTMixedFvPatchScalarField(*this, iF)
+                new MarshakRadiationFixedTemperatureFvPatchScalarField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MarshakRadiationMixedFvPatchScalarField.H"
+#include "MarshakRadiationFixedTemperatureFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-
-#include "fvc.H"
 #include "radiationModel.H"
 #include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
+Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::
+MarshakRadiationFixedTemperatureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -42,7 +41,7 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, "undefined", scalarField::null()),
-    TName_("undefined")
+    Trad_(p.size())
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -50,9 +49,10 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 }
 
 
-Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
+Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::
+MarshakRadiationFixedTemperatureFvPatchScalarField
 (
-    const MarshakRadiationFvPatchScalarField& ptf,
+    const MarshakRadiationFixedTemperatureFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -65,11 +65,12 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
         ptf.emissivityMethod(),
         ptf.emissivity_
     ),
-    TName_(ptf.TName_)
+    Trad_(ptf.Trad_, mapper)
 {}
 
 
-Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
+Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::
+MarshakRadiationFixedTemperatureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -78,16 +79,10 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, dict),
-    TName_(dict.lookup("T"))
+    Trad_("Trad", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        refValue() = scalarField("value", dict, p.size());
-    }
-    else
-    {
-        refValue() = 0.0;
-    }
+    // refValue updated on each call to updateCoeffs()
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
 
     // zero gradient
     refGrad() = 0.0;
@@ -98,9 +93,10 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 }
 
 
-Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
+Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::
+MarshakRadiationFixedTemperatureFvPatchScalarField
 (
-    const MarshakRadiationFvPatchScalarField& ptf
+    const MarshakRadiationFixedTemperatureFvPatchScalarField& ptf
 )
 :
     mixedFvPatchScalarField(ptf),
@@ -110,13 +106,14 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
         ptf.emissivityMethod(),
         ptf.emissivity_
     ),
-    TName_(ptf.TName_)
+    Trad_(ptf.Trad_)
 {}
 
 
-Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
+Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::
+MarshakRadiationFixedTemperatureFvPatchScalarField
 (
-    const MarshakRadiationFvPatchScalarField& ptf,
+    const MarshakRadiationFixedTemperatureFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -127,32 +124,38 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
         ptf.emissivityMethod(),
         ptf.emissivity_
     ),
-    TName_(ptf.TName_)
+    Trad_(ptf.Trad_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::MarshakRadiationFvPatchScalarField::autoMap
+void Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
 {
-    scalarField::autoMap(m);
+    mixedFvPatchScalarField::autoMap(m);
+    Trad_.autoMap(m);
 }
 
 
-void Foam::MarshakRadiationFvPatchScalarField::rmap
+void Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
 )
 {
     mixedFvPatchScalarField::rmap(ptf, addr);
+
+    const MarshakRadiationFixedTemperatureFvPatchScalarField& mrptf =
+        refCast<const MarshakRadiationFixedTemperatureFvPatchScalarField>(ptf);
+
+    Trad_.rmap(mrptf.Trad_, addr);
 }
 
 
-void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
+void Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -164,12 +167,8 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    // Temperature field
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
-
     // Re-calc reference value
-    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
     const scalarField& gamma =
@@ -177,7 +176,7 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
 
     const scalarField temissivity = emissivity();
 
-    const scalarField Ep(temissivity/(2.0*(2.0 - temissivity)));
+    const scalarField Ep(temissivity/(2.0*(scalar(2.0) - temissivity)));
 
     // Set value fraction
     valueFraction() = 1.0/(1.0 + gamma*patch().deltaCoeffs()/Ep);
@@ -189,11 +188,14 @@ void Foam::MarshakRadiationFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::MarshakRadiationFvPatchScalarField::write(Ostream& os) const
+void Foam::MarshakRadiationFixedTemperatureFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     mixedFvPatchScalarField::write(os);
     radiationCoupledBase::write(os);
-    os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
+    Trad_.writeEntry("Trad", os);
 }
 
 
@@ -204,7 +206,7 @@ namespace Foam
     makePatchTypeField
     (
         fvPatchScalarField,
-        MarshakRadiationFvPatchScalarField
+        MarshakRadiationFixedTemperatureFvPatchScalarField
     );
 }
 
