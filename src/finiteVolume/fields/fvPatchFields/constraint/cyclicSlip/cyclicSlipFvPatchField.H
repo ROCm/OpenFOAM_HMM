@@ -25,7 +25,19 @@ Class
     Foam::cyclicSlipFvPatchField
 
 Description
-    Foam::cyclicSlipFvPatchField
+    This boundary condition is a light wrapper around the cyclicFvPatchField
+    condition, providing no new functionality.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            cyclicSlip;
+        }
+    \endverbatim
+
+SeeAlso
+    Foam::cyclicFvPatchField
 
 SourceFiles
     cyclicSlipFvPatchField.C
@@ -44,7 +56,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cyclicSlipFvPatch Declaration
+                   Class cyclicSlipFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -52,7 +64,6 @@ class cyclicSlipFvPatchField
 :
     public cyclicFvPatchField<Type>
 {
-    // Private data
 
 public:
 
@@ -119,7 +130,6 @@ public:
                 new cyclicSlipFvPatchField<Type>(*this, iF)
             );
         }
-
 };
 
 

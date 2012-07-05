@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,15 +25,10 @@ License
 
 #include "cyclicSlipFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+Foam::cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -44,7 +39,7 @@ cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 
 
 template<class Type>
-cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+Foam::cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
     const cyclicSlipFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -57,7 +52,7 @@ cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 
 
 template<class Type>
-cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+Foam::cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -69,7 +64,7 @@ cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 
 
 template<class Type>
-cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+Foam::cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
     const cyclicSlipFvPatchField<Type>& ptf
 )
@@ -79,7 +74,7 @@ cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 
 
 template<class Type>
-cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
+Foam::cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
 (
     const cyclicSlipFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -88,9 +83,5 @@ cyclicSlipFvPatchField<Type>::cyclicSlipFvPatchField
     cyclicFvPatchField<Type>(ptf, iF)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
