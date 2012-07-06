@@ -73,16 +73,16 @@ void Foam::fieldMinMax::calcMinMaxFields
                 Pstream::gatherList(maxVs);
                 Pstream::gatherList(maxCs);
 
-                label minI = findMin(minVs);
-                scalar minValue = minVs[minI];
-                const vector& minC = minCs[minI];
-
-                label maxI = findMax(maxVs);
-                scalar maxValue = maxVs[maxI];
-                const vector& maxC = maxCs[maxI];
-
                 if (Pstream::master())
                 {
+                    label minI = findMin(minVs);
+                    scalar minValue = minVs[minI];
+                    const vector& minC = minCs[minI];
+
+                    label maxI = findMax(maxVs);
+                    scalar maxValue = maxVs[maxI];
+                    const vector& maxC = maxCs[maxI];
+
                     if (write_)
                     {
                         fieldMinMaxFilePtr_()
@@ -153,17 +153,16 @@ void Foam::fieldMinMax::calcMinMaxFields
                 Pstream::gatherList(maxVs);
                 Pstream::gatherList(maxCs);
 
-                label minI = findMin(minVs);
-                Type minValue = minVs[minI];
-                const vector& minC = minCs[minI];
-
-                label maxI = findMax(maxVs);
-                Type maxValue = maxVs[maxI];
-                const vector& maxC = maxCs[maxI];
-
-
                 if (Pstream::master())
                 {
+                    label minI = findMin(minVs);
+                    Type minValue = minVs[minI];
+                    const vector& minC = minCs[minI];
+
+                    label maxI = findMax(maxVs);
+                    Type maxValue = maxVs[maxI];
+                    const vector& maxC = maxCs[maxI];
+
                     if (write_)
                     {
                         fieldMinMaxFilePtr_()
