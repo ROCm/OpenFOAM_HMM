@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,8 +43,7 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
-{
+
 /*---------------------------------------------------------------------------*\
             Class fixedShearStressFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
@@ -54,6 +53,12 @@ class fixedShearStressFvPatchVectorField
     public fixedValueFvPatchVectorField
 {
     // Private data
+
+        //- Name of flux field (default = phi)
+        const word phiName_;
+
+        //- Name of density field (default = rho)
+        const word rhoName_;
 
         //- Constant shear stress
         const vector tau0_;
@@ -138,7 +143,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
