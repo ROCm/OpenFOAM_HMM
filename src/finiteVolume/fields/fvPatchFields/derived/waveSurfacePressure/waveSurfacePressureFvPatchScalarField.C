@@ -163,14 +163,14 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     timeSchemeType timeScheme(timeSchemeTypeNames_[ddtSchemeName]);
 
     // retrieve the flux field from the database
-    const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const surfaceScalarField& phi =
+        db().lookupObject<surfaceScalarField>(phiName_);
 
     // cache the patch face-normal vectors
     tmp<vectorField> nf(patch().nf());
 
     // change in zeta due to flux
-    vectorField dZetap(dt*nf()*phip/patch().magSf());
+    vectorField dZetap(dt*nf()*phi.boundaryField()[patchI]/patch().magSf());
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
