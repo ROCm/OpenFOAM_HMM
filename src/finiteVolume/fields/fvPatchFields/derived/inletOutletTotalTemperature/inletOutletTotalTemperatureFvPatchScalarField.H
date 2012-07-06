@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,27 @@ Class
     Foam::inletOutletTotalTemperatureFvPatchScalarField
 
 Description
-    Foam::inletOutletTotalTemperatureFvPatchScalarField
+    This boundary condition provides an outflow condition for total
+    temperature for use with supersonic cases, where a user-specified
+    value is applied in the case of reverse flow.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            inletOutletTotalTemperature;
+            U               U;         // velocity field (default = U)
+            phi             phi;       // flux field (default = phi)
+            psi             psi;       // compressiblility field (default = psi)
+            gamma           gamma;     // heat capacity ratio
+            inletValue      uniform 0; // reverse flow (inlet) value
+            T0              uniform 0; // static temperature [K]
+            value           uniform 0; // initial value
+        }
+    \endverbatim
+   
+SeeAlso
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     inletOutletTotalTemperatureFvPatchScalarField.C
@@ -43,7 +63,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class inletOutletTotalTemperatureFvPatch Declaration
+       Class inletOutletTotalTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class inletOutletTotalTemperatureFvPatchScalarField

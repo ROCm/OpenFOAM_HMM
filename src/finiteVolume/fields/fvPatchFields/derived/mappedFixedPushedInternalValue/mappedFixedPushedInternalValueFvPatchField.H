@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,30 @@ Class
     Foam::mappedFixedPushedInternalValueFvPatchField
 
 Description
-    Recycles the boundary values of a neighbour patch field to the boundary
-    and internal values of *this.
+    This boundary condition maps the boundary values of a neighbour patch
+    field to the boundary and internal cell values of *this.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            mappedFixedInternalValue;
+            fieldName       T;              // optional field name
+            setAverage      no;             // apply an average value
+            average         0;              // average to apply if setAverage
+            value           uniform 0;      // place holder
+        }
+    \endverbatim
+
+    \note
+    This boundary condition can only be applied to patches that are of
+    the \c mappedPolyPatch type.
+
+SeeAlso
+    Foam::mappedPatchBase
+    Foam::mappedPolyPatch
+    Foam::mappedFvPatch
+    Foam::mappedFixedValueFvPatchField
 
 SourceFiles
     mappedFixedPushedInternalValueFvPatchField.C

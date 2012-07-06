@@ -25,7 +25,25 @@ Class
     Foam::greyDiffusiveViewFactorFixedValueFvPatchScalarField
 
 Description
-    Radiation temperature specified
+    This boundary condition provides a grey-diffuse condition for radiative
+    heat flux, \c Qr, for use with the view factor model
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            greyDiffusiveRadiationViewFactor;
+            Qro             uniform 0;      // external radiative heat flux
+            emissivityMode  solidThermo;    // solidThermo | lookup
+            value           uniform 0;      // initial value
+        }
+    \endverbatim
+
+SeeAlso
+    Foam::radiation::radiationModel
+    Foam::radiation::viewFactor
+    Foam::radiationCoupledBase
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     greyDiffusiveViewFactorFixedValueFvPatchScalarField.C

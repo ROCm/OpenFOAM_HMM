@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,26 +25,41 @@ Class
     Foam::mappedFixedValueFvPatchField
 
 Description
-    Recycles the value at a set of cells or patch faces back to *this. Can not
-    sample internal faces (since volField not defined on faces).
+    This boundary condition maps the value at a set of cells or patch faces
+    back to *this.  
 
-    mode = NEARESTCELL : sample nearest cell
-    mode = NEARESTPATCHFACE : sample nearest face on selected patch
-    mode = NEARESTFACE : sample nearest face on any patch. Note: does not
-           warn if nearest actually is on internal face!
-    mode = NEARESTPATCHFACEAMI : sample nearest face on selected patch
-           patches can be non-conformal - method uses AMI interpolation
+    The sample mode is set by the underlying mapping engine, provided by the
+    mappedPatchBase class.
+    
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            mapped;
+            fieldName       T;              // optional (alternative) field name
+            setAverage      no;             // apply an average value
+            average         0;              // average to apply if setAverage
+            interpolationScheme cell;       // optional interpolation scheme
+            value           uniform 0;      // place holder
+        }
+    \endverbatim
 
-    For NEARESTCELL you have to provide an 'interpolationScheme' entry
-    which can be any one of the interpolation schemes (cell, cellPoint, etc.)
-    In case of interpolation (so scheme != cell) the limitation is that
-    there is only one value per cell. So e.g. if you have a cell with two
-    boundary faces and both faces sample into the cell both faces will get
-    the same value.
+    When employing the \c nearestCell sample mode, the user must also specify
+    the interpolation scheme using the \c interpolationScheme entry.
 
-    See mappedPatchBase for options on sampling.
+    In case of interpolation (where scheme != cell) the limitation is that
+    there is only one value per cell.  For example, if you have a cell with two
+    boundary faces and both faces sample into the cell, both faces will get the
+    same value.
 
-    Optional 'fieldName' entry to supply a different filename
+    \note
+    It is not possible to sample internal faces since volume fields are not
+    defined on faces.
+
+SeeAlso
+    Foam::mappedPatchBase
+    Foam::interpolation
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     mappedFixedValueFvPatchField.C
@@ -63,7 +78,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class mappedFixedValueFvPatch Declaration
+                Class mappedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

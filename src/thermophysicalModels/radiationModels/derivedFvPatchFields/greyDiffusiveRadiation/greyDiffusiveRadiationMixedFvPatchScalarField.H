@@ -42,6 +42,7 @@ Description
     \endverbatim
 
 SeeAlso
+    Foam::radiation::radiationModel
     Foam::radiation::fvDOM
     Foam::radiationCoupledBase
     Foam::mixedFvPatchField

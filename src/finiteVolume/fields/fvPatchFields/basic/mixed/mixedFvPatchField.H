@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,30 @@ Class
     Foam::mixedFvPatchField
 
 Description
-    Foam::mixedFvPatchField
+    This boundary condition provides a base class for 'mixed' type boundary
+    conditions, i.e. conditions that mix fixed value and patch-normal gradient
+    conditions.
+
+    The respective contributions from each is determined by a weight field:
+
+        \f[
+            x_p = w*A + (1-w)*(x_c + B/delta)
+        \f]
+
+    where
+        \var x_p   = patch values
+        \var x_c   = patch internal cell values
+        \var w     = weight field, \c valueFraction_
+        \var A     = fixed value, \c refValue_
+        \var B     = patch normal gradient, \c refGrad_
+        \var delta = inverse distance from face centre to internal cell centre
+
+    \note
+    This condition is not usually applied directly; instead, use a derived
+    mixed condition such as \c inletOutlet
+
+SeeAlso
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     mixedFvPatchField.C
@@ -43,7 +66,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class mixedFvPatch Declaration
+                      Class mixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
