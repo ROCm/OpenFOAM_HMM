@@ -35,6 +35,7 @@ namespace Foam
     defineRunTimeSelectionTable(solidReactionThermo, dictionary);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::solidReactionThermo::solidReactionThermo(const fvMesh& mesh)
@@ -51,6 +52,7 @@ Foam::solidReactionThermo::solidReactionThermo
 :
     solidThermo(mesh, dict)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
