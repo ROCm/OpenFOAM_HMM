@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,17 @@ Class
     Foam::fixedValueFvPatchField
 
 Description
-    Foam::fixedValueFvPatchField
+    This boundary condition supplies a fixed value constraint, and is the base
+    class for a number of other boundary conditions.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            fixedValue;
+            value           uniform 0;  // example for scalar field usage
+        }
+    \endverbatim
 
 SourceFiles
     fixedValueFvPatchField.C
@@ -43,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedValueFvPatch Declaration
+                   Class fixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

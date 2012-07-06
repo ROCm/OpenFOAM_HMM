@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,23 @@ Class
     Foam::freestreamFvPatchField
 
 Description
-    Foam::freestreamFvPatchField
+    This boundary condition provides a free-stream condition.  It is a 'mixed'
+    condition derived from the \c inletOutlet condition, whereby the mode of
+    operation switches between fixed (free stream) value and zero gradient
+    based on the sign of the flux.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            freestream;
+            phi             phi;    // name of the flux field (default = phi)
+        }
+    \endverbatim
+
+SeeAlso
+    Foam::mixedFvPatchField
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     freestreamFvPatchField.C
@@ -43,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class freestreamFvPatch Declaration
+                  Class freestreamFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

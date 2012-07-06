@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,25 @@ Class
     Foam::fixedPressureCompressibleDensityFvPatchScalarField
 
 Description
-    Calculate compressible density as a function of pressure and fluid
-    properties.
+    This boundary condition calculates a (liquid) compressible density as a
+    function of pressure and fluid properties:
+
+        \f[
+            rho = rholSat + psil*(p - pSat)
+        \f]
+
+    where
+        \var rho = density [kg/m3]
+        \var rholSat = saturation liquid density
+        \var p = pressure [Pa]
+        \var pSat = saturation pressure [Pa]
+
+    The variables \c rholSat, \c pSat and \c psil are retrieved from the
+    \c thermodynamicProperties dictionary.
 
     Example of the boundary condition specification:
     \verbatim
-        inlet
+        myPatch
         {
             type        fixedPressureCompressibleDensity;
             p           p;               // Name of static pressure field

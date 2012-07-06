@@ -25,31 +25,42 @@ Class
     Foam::flowRateInletVelocityFvPatchVectorField
 
 Description
-    Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area.
+    This boundary condition provides a velocity boundary condition, derived
+    from the flux (volumetric or mass-based), whose direction is assumed
+    to be normal to the patch.
 
     The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
+    dimensions of the flux, \c phi, and the value of the density field name,
+    \c rhoName entry.
 
-    If the flux is mass-based
-    - the current density is used to correct the velocity
-    - volumetric flow rate can be applied by setting the 'rho' entry to 'none'
+    For a mass-based flux:
+    \li if \c rhoName is a valid density field name, the flow rate is in kg/s
+    \li if \c rhoName is "none" the flow rate is in m3/s
+
+    For a volumetric-based flux:
+    \li the flow rate is in m3/s
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
-    {
-        type        flowRateInletVelocity;
-        flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        rho         rho;        // none | rho [m3/s or kg/s]
-        value       uniform (0 0 0); // placeholder
-    }
+        myPatch
+        {
+            type        flowRateInletVelocity;
+            flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+            rho         rho;        // none | rho [m3/s or kg/s]
+            value       uniform (0 0 0); // placeholder
+        }
     \endverbatim
 
-Note
-    - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
+    The \c flowRate entry is a \c DataEntry type, meaning that it can be
+    specified as constant, a polynomial fuction of time, and ...
+
+    \note
+    \li the value is positive into the domain (as an inlet)
+    \li may not work correctly for transonic inlets
+    \li strange behaviour with potentialFoam since the U equation is not solved
+
+SeeAlso
+    Foam::DataEntry
 
 SourceFiles
     flowRateInletVelocityFvPatchVectorField.C
@@ -67,7 +78,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-               Class flowRateInletVelocityFvPatch Declaration
+           Class flowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class flowRateInletVelocityFvPatchVectorField
