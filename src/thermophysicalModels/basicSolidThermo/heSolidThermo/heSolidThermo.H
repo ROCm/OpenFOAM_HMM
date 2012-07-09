@@ -89,9 +89,6 @@ public:
 
         // Derived thermal properties
 
-            //- Isotropic thermal conductivity [W/m/K]
-            //virtual tmp<volScalarField> kappa() const;
-
             //- Anisotropic thermal conductivity [W/m/K]
             virtual tmp<volVectorField> Kappa() const;
 

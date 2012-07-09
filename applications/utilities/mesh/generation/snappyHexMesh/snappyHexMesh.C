@@ -40,6 +40,7 @@ Description
 #include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "decompositionMethod.H"
+#include "noDecomp.H"
 #include "fvMeshDistribute.H"
 #include "wallPolyPatch.H"
 #include "refinementParameters.H"
@@ -176,17 +177,27 @@ int main(int argc, char *argv[])
 
 
     // Read decomposePar dictionary
-    IOdictionary decomposeDict
-    (
-        IOobject
+    dictionary decomposeDict;
+    {
+        IOobject io
         (
             "decomposeParDict",
             runTime.system(),
             mesh,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
-        )
-    );
+        );
+
+        if (io.headerOk())
+        {
+            decomposeDict = IOdictionary(io);
+        }
+        else
+        {
+            decomposeDict.add("method", "none");
+            decomposeDict.add("numberOfSubdomains", 1);
+        }
+    }
 
 
     // Debug

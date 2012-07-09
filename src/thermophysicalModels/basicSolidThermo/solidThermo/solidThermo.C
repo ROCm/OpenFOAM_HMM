@@ -42,20 +42,7 @@ namespace Foam
 
 Foam::solidThermo::solidThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh),
-    rho_
-    (
-        IOobject
-        (
-            "rho",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimMass/dimVolume
-    )
+    rhoThermo(mesh)
 {}
 
 
@@ -65,20 +52,7 @@ Foam::solidThermo::solidThermo
     const dictionary& dict
 )
 :
-    basicThermo(mesh, dict),
-    rho_
-    (
-        IOobject
-        (
-            "rho",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimMass/dimVolume
-    )
+    rhoThermo(mesh, dict)
 {}
 
 
@@ -90,57 +64,10 @@ Foam::solidThermo::~solidThermo()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::volScalarField& Foam::solidThermo::T()
-{
-    return this->T_;
-}
-
-
-const Foam::volScalarField& Foam::solidThermo::T() const
-{
-    return this->T_;
-}
-
-
-const Foam::volScalarField& Foam::solidThermo::rhos() const
-{
-    return rho_;
-}
-
-
-Foam::volScalarField& Foam::solidThermo::rhos()
-{
-    return rho_;
-}
-
-
-const Foam::volScalarField& Foam::solidThermo::p() const
-{
-    return this->p_;
-}
-
-
-Foam::volScalarField& Foam::solidThermo::p()
-{
-    return this->p_;
-}
-
-
-const Foam::volScalarField& Foam::solidThermo::alpha() const
-{
-    return this->alpha_;
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::solidThermo::rho() const
-{
-    return tmp<volScalarField>(rho_);
-}
-
-
 bool Foam::solidThermo::read()
 {
     return regIOobject::read();
 }
+
 
 // ************************************************************************* //

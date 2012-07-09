@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::manualDecomp
+    Foam::noDecomp
 
 Description
-    Decomposition given a cell-to-processor association in a file
+    Dummy decomposition method
 
 SourceFiles
-    manualDecomp.C
+    noDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualDecomp_H
-#define manualDecomp_H
+#ifndef noDecomp_H
+#define noDecomp_H
 
 #include "decompositionMethod.H"
 
@@ -41,38 +41,34 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class manualDecomp Declaration
+                           Class noDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
-class manualDecomp
+class noDecomp
 :
     public decompositionMethod
 {
-    // Private data
-
-        fileName decompDataFile_;
-
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const manualDecomp&);
-        manualDecomp(const manualDecomp&);
+        void operator=(const noDecomp&);
+        noDecomp(const noDecomp&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("manual");
+    TypeName("noDecomp");
 
 
     // Constructors
 
         //- Construct given the decomposition dictionary
-        manualDecomp(const dictionary& decompositionDict);
+        noDecomp(const dictionary& decompositionDict);
 
     //- Destructor
-    virtual ~manualDecomp()
+    virtual ~noDecomp()
     {}
 
 
@@ -82,7 +78,7 @@ public:
         //  up to the user.
         virtual bool parallelAware() const
         {
-            return true;
+            return false;
         }
 
         //- Return for every coordinate the wanted processor number. Use the
@@ -92,7 +88,15 @@ public:
             const polyMesh& mesh,
             const pointField& cc,
             const scalarField& cWeights
-        );
+        )
+        {
+            notImplemented
+            (
+                "decompose(const polyMesh&, const pointField&"
+                ", const scalarField&)"
+            );
+            return labelList(0);
+        }
 
         //- Return for every coordinate the wanted processor number. Explicitly
         //  provided connectivity - does not use mesh_.

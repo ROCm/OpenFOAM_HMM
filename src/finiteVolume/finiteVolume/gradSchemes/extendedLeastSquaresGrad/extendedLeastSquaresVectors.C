@@ -110,6 +110,38 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     const labelUList& owner = mesh_.owner();
     const labelUList& neighbour = mesh_.neighbour();
 
+
+    // Determine number of dimensions and (for 2D) missing dimension
+    label nDims = 0;
+    label twoD = -1;
+    for (direction dir = 0; dir < vector::nComponents; dir++)
+    {
+        if (mesh.geometricD()[dir] == 1)
+        {
+            nDims++;
+        }
+        else
+        {
+            twoD = dir;
+        }
+    }
+
+    if (nDims == 1)
+    {
+        FatalErrorIn
+        (
+            "extendedLeastSquaresVectors::makeLeastSquaresVectors() const"
+        )   << "Found a mesh with only one geometric dimension : "
+            << mesh.geometricD()
+            << exit(FatalError);
+    }
+    else if (nDims == 2)
+    {
+        Info<< "extendedLeastSquares : detected " << nDims
+            << " valid directions. Missing direction " << twoD << nl << endl;
+    }
+
+
     const volVectorField& C = mesh.C();
 
     // Set up temporary storage for the dd tensor (before inversion)
@@ -122,7 +154,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
         vector d = C[nei] - C[own];
 
-        const symmTensor wdd(1.0/magSqr(d[facei])*sqr(d[facei]));
+        const symmTensor wdd(1.0/magSqr(d)*sqr(d));
 
         dd[own] += wdd;
         dd[nei] += wdd;
@@ -147,6 +179,28 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         }
     }
 
+
+    // Check for missing dimensions
+    // Add the missing eigenvector (such that it does not
+    // affect the determinant)
+    if (nDims == 2)
+    {
+        forAll(dd, cellI)
+        {
+            if (twoD == 0)
+            {
+                dd[cellI].xx() = 1;
+            }
+            else if (twoD == 1)
+            {
+                dd[cellI].yy() = 1;
+            }
+            else
+            {
+                dd[cellI].zz() = 1;
+            }
+        }
+    }
     scalarField detdd(det(dd));
 
     Info<< "max(detdd) = " << max(detdd) << nl
@@ -170,7 +224,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
                 (
                     "extendedLeastSquaresVectors::"
                     "makeLeastSquaresVectors() const"
-                )   << "nAddCells exceeds maxNaddCells"
+                )   << "nAddCells exceeds maxNaddCells ("
+                    << maxNaddCells << ")"
                     << exit(FatalError);
             }
 
@@ -188,20 +243,35 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
                     if (cellj != i)
                     {
-                        if (cellj != -1)
+                        vector dCij = (mesh.C()[cellj] - mesh.C()[i]);
+
+                        symmTensor ddij =
+                            dd[i] + (1.0/magSqr(dCij))*sqr(dCij);
+
+                        // Add the missing eigenvector (such that it does not
+                        // affect the determinant)
+                        if (nDims == 2)
                         {
-                            vector dCij = (mesh.C()[cellj] - mesh.C()[i]);
-
-                            symmTensor ddij =
-                                dd[i] + (1.0/magSqr(dCij))*sqr(dCij);
-
-                            scalar detddij = det(ddij);
-
-                            if (detddij > maxDetddij)
+                            if (twoD == 0)
                             {
-                                addCell = cellj;
-                                maxDetddij = detddij;
+                                ddij.xx() = 1;
                             }
+                            else if (twoD == 1)
+                            {
+                                ddij.yy() = 1;
+                            }
+                            else
+                            {
+                                ddij.zz() = 1;
+                            }
+                        }
+
+                        scalar detddij = det(ddij);
+
+                        if (detddij > maxDetddij)
+                        {
+                            addCell = cellj;
+                            maxDetddij = detddij;
                         }
                     }
                 }
@@ -213,6 +283,25 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
                 additionalCells_[nAddCells++][1] = addCell;
                 vector dCij = mesh.C()[addCell] - mesh.C()[i];
                 dd[i] += (1.0/magSqr(dCij))*sqr(dCij);
+
+                // Add the missing eigenvector (such that it does not
+                // affect the determinant)
+                if (nDims == 2)
+                {
+                    if (twoD == 0)
+                    {
+                        dd[i].xx() = 1;
+                    }
+                    else if (twoD == 1)
+                    {
+                        dd[i].yy() = 1;
+                    }
+                    else
+                    {
+                        dd[i].zz() = 1;
+                    }
+                }
+
                 detdd[i] = det(dd[i]);
             }
         }
@@ -220,10 +309,16 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
     additionalCells_.setSize(nAddCells);
 
-    Info<< "max(detdd) = " << max(detdd) << nl
-        << "min(detdd) = " << min(detdd) << nl
-        << "average(detdd) = " << average(detdd) << nl
-        << "nAddCells/nCells = " << scalar(nAddCells)/mesh.nCells() << endl;
+    reduce(nAddCells, sumOp<label>());
+    if (nAddCells)
+    {
+        Info<< "max(detdd) = " << max(detdd) << nl
+            << "min(detdd) = " << min(detdd) << nl
+            << "average(detdd) = " << average(detdd) << nl
+            << "nAddCells/nCells = "
+            << scalar(nAddCells)/mesh.globalData().nTotalCells()
+            << endl;
+    }
 
     // Invert the dd tensor
     const symmTensorField invDd(inv(dd));
@@ -237,11 +332,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
 
         vector d = C[nei] - C[own];
 
-        lsP[facei] =
-            (1.0/magSqr(d[facei]))*(invDd[owner[facei]] & d);
-
-        lsN[facei] =
-            ((-1.0)/magSqr(d[facei]))*(invDd[neighbour[facei]] & d);
+        lsP[facei] = (1.0/magSqr(d))*(invDd[own] & d);
+        lsN[facei] = ((-1.0)/magSqr(d))*(invDd[nei] & d);
     }
 
     forAll(blsP, patchI)

@@ -359,7 +359,7 @@ void thermoBaffle2D::info() const
             (
                 mag(regionMesh().Sf().boundaryField()[patchI])
               * ph.snGrad()
-              * thermo_->alpha(patchI)
+              * thermo_->alpha().boundaryField()[patchI]
             ) << endl;
     }
 }

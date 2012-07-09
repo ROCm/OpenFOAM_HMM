@@ -6,5 +6,6 @@ manualDecomp/manualDecomp.C
 multiLevelDecomp/multiLevelDecomp.C
 structuredDecomp/topoDistanceData.C
 structuredDecomp/structuredDecomp.C
+noDecomp/noDecomp.C
 
 LIB = $(FOAM_LIBBIN)/libdecompositionMethods

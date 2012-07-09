@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,40 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solidReactionThermo.H"
-#include "fvMesh.H"
+#include "noDecomp.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(solidReactionThermo, 0);
-    defineRunTimeSelectionTable(solidReactionThermo, mesh);
-    defineRunTimeSelectionTable(solidReactionThermo, dictionary);
+    defineTypeName(noDecomp);
+
+    addNamedToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        noDecomp,
+        dictionary,
+        none
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidReactionThermo::solidReactionThermo(const fvMesh& mesh)
+Foam::noDecomp::noDecomp(const dictionary& decompositionDict)
 :
-    solidThermo(mesh)
-{}
-
-
-Foam::solidReactionThermo::solidReactionThermo
-(
-    const fvMesh& mesh,
-    const dictionary& dict
-)
-:
-    solidThermo(mesh, dict)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solidReactionThermo::~solidReactionThermo()
+    decompositionMethod(decompositionDict)
 {}
 
 
