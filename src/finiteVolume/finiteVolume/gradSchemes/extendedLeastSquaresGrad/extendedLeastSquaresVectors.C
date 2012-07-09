@@ -138,7 +138,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     else if (nDims == 2)
     {
         Info<< "extendedLeastSquares : detected " << nDims
-            << " valid directions. Missing direction " << twoD << nl << endl;
+            << " valid directions. Missing direction " << twoD << endl;
     }
 
 
@@ -207,6 +207,7 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
         << "min(detdd) = " << min(detdd) << nl
         << "average(detdd) = " << average(detdd) << endl;
 
+    label nAdaptedCells = 0;
     label nAddCells = 0;
     label maxNaddCells = 4*detdd.size();
     additionalCellsPtr_ = new List<labelPair>(maxNaddCells);
@@ -215,6 +216,8 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
     forAll(detdd, i)
     {
         label count = 0;
+
+        label oldNAddCells = nAddCells;
 
         while (++count < 100 && detdd[i] < minDet_)
         {
@@ -305,16 +308,24 @@ void Foam::extendedLeastSquaresVectors::makeLeastSquaresVectors() const
                 detdd[i] = det(dd[i]);
             }
         }
+
+        if (oldNAddCells < nAddCells)
+        {
+            nAdaptedCells++;
+        }
     }
 
     additionalCells_.setSize(nAddCells);
 
     reduce(nAddCells, sumOp<label>());
+    reduce(nAdaptedCells, sumOp<label>());
     if (nAddCells)
     {
         Info<< "max(detdd) = " << max(detdd) << nl
             << "min(detdd) = " << min(detdd) << nl
             << "average(detdd) = " << average(detdd) << nl
+            << "nAdapted/nCells = "
+            << scalar(nAdaptedCells)/mesh.globalData().nTotalCells() << nl
             << "nAddCells/nCells = "
             << scalar(nAddCells)/mesh.globalData().nTotalCells()
             << endl;
