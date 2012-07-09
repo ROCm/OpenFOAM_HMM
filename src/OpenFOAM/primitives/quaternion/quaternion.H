@@ -109,6 +109,9 @@ public:
             const scalar angleZ
         );
 
+        //- Construct a quaternion from a rotation tensor
+        inline explicit quaternion(const tensor& rotationTensor);
+
         //- Construct from Istream
         quaternion(Istream&);
 
