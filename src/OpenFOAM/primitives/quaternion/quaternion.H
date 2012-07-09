@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,6 +75,17 @@ class quaternion
 
 public:
 
+    //- Component type
+    typedef scalar cmptType;
+
+    // Member constants
+
+        enum
+        {
+            rank = 1 // Rank of quaternion is 1
+        };
+
+
     // Static data members
 
         static const char* const typeName;
@@ -108,6 +119,9 @@ public:
             const scalar angleY,
             const scalar angleZ
         );
+
+        //- Construct a quaternion from a rotation tensor
+        inline explicit quaternion(const tensor& rotationTensor);
 
         //- Construct from Istream
         quaternion(Istream&);
