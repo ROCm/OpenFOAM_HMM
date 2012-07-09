@@ -75,6 +75,17 @@ class quaternion
 
 public:
 
+    //- Component type
+    typedef scalar cmptType;
+
+    // Member constants
+
+        enum
+        {
+            rank = 1 // Rank of quaternion is 1
+        };
+
+
     // Static data members
 
         static const char* const typeName;
