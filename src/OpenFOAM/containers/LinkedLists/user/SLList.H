@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,13 +59,13 @@ public:
         {}
 
         //- Construct given initial T
-        SLList(T a)
+        explicit SLList(T a)
         :
             LList<SLListBase, T>(a)
         {}
 
         //- Construct from Istream
-        SLList(Istream& is)
+        explicit SLList(Istream& is)
         :
             LList<SLListBase, T>(is)
         {}
