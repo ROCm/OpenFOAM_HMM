@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,13 @@ void Foam::boxToCell::combine(topoSet& set, const bool add) const
 
     forAll(ctrs, cellI)
     {
-        if (bb_.contains(ctrs[cellI]))
+        forAll(bbs_, i)
         {
-            addOrDelete(set, cellI, add);
+            if (bbs_[i].contains(ctrs[cellI]))
+            {
+                addOrDelete(set, cellI, add);
+                break;
+            }
         }
     }
 }
@@ -72,11 +76,11 @@ void Foam::boxToCell::combine(topoSet& set, const bool add) const
 Foam::boxToCell::boxToCell
 (
     const polyMesh& mesh,
-    const treeBoundBox& bb
+    const treeBoundBoxList& bbs
 )
 :
     topoSetSource(mesh),
-    bb_(bb)
+    bbs_(bbs)
 {}
 
 
@@ -88,7 +92,12 @@ Foam::boxToCell::boxToCell
 )
 :
     topoSetSource(mesh),
-    bb_(dict.lookup("box"))
+    bbs_
+    (
+        dict.found("box")
+      ? treeBoundBoxList(1, treeBoundBox(dict.lookup("box")))
+      : dict.lookup("boxes")
+    )
 {}
 
 
@@ -100,7 +109,7 @@ Foam::boxToCell::boxToCell
 )
 :
     topoSetSource(mesh),
-    bb_(checkIs(is))
+    bbs_(1, treeBoundBox(checkIs(is)))
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -119,13 +128,13 @@ void Foam::boxToCell::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding cells with center within box " << bb_ << endl;
+        Info<< "    Adding cells with center within boxes " << bbs_ << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing cells with center within box " << bb_ << endl;
+        Info<< "    Removing cells with center within boxes " << bbs_ << endl;
 
         combine(set, false);
     }
