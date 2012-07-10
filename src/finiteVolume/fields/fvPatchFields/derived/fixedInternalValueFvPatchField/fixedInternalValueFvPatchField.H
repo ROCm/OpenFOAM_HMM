@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedInternalValueFvPatchField
 
@@ -29,15 +32,18 @@ Description
     directly into a matrix, i.e. to set a constraint condition.  Default
     behaviour is to act as a zero gradient condition.
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            fixedInternalValue;
-            vakue           uniform 0;              // place holder
-        }
+    myPatch
+    {
+        type            fixedInternalValue;
+        value           uniform 0;              // place holder
+    }
     \endverbatim
 
+    \note
     This is used as a base for conditions such as the turbulence \c epsilon
     wall function, which applies a near-wall constraint for high Reynolds
     number flows.
@@ -47,6 +53,8 @@ SeeAlso
 
 SourceFiles
     fixedInternalValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

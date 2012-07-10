@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::cyclicAMIFvPatchField
 
@@ -34,16 +37,23 @@ Description
     patch is transformed to the neighbour patch, the outer perimiter of each
     patch should be identical (or very similar).
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            cyclicAMI;
-        }
+    myPatch
+    {
+        type            cyclicAMI;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::AMIInterpolation
 
 SourceFiles
     cyclicAMIFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

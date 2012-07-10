@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::cyclicFvPatchField
 
@@ -33,16 +36,20 @@ Description
     transformed to the neighbour patch, the patches should be identical (or
     very similar).
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            cyclic;
-        }
+    myPatch
+    {
+        type            cyclic;
+    }
     \endverbatim
 
 SourceFiles
     cyclicFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

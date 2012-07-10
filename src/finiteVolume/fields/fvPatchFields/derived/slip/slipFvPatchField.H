@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::slipFvPatchField
 
 Description
-    Foam::slipFvPatchField
+    This boundary condition provides a slip constraint.
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            slip;
+    }
+    \endverbatim
 
 SourceFiles
     slipFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +58,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class slipFvPatch Declaration
+                      Class slipFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

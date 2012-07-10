@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::mixedFvPatchField
 
@@ -36,12 +39,14 @@ Description
         \f]
 
     where
-        \var x_p   = patch values
-        \var x_c   = patch internal cell values
-        \var w     = weight field, \c valueFraction_
-        \var A     = fixed value, \c refValue_
-        \var B     = patch normal gradient, \c refGrad_
-        \var delta = inverse distance from face centre to internal cell centre
+    /vartable
+        x_p   | patch values
+        x_c   | patch internal cell values
+        w     | weight field, \c valueFraction_
+        A     | fixed value, \c refValue_
+        B     | patch normal gradient, \c refGrad_
+        delta | inverse distance from face centre to internal cell centre
+    /endvartable
 
     \note
     This condition is not usually applied directly; instead, use a derived
@@ -52,6 +57,8 @@ SeeAlso
 
 SourceFiles
     mixedFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,24 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::supersonicFreestreamFvPatchVectorField
 
 Description
-    Supersonic free stream condition.
+    This boundary condition provides a supersonic free-stream condition.
 
-    Supersonic outflow is vented according to ???
+    - supersonic outflow is vented according to ???
+    - supersonic inflow is assumed to occur according to the Prandtl-Meyer
+      expansion process.
+    - subsonic outflow is applied via a zero-gradient condition from inside
+      the domain.
 
-    Supersonic inflow is assumed to occur according to the Prandtl-Meyer
-    expansion process.
+    /heading Patch usage
 
-    Subsonic outflow is zero-gradiented from inside the domain.
+    /table
+        Property     | Description             | Required    | Default value
+        UInf         | free-stream velocity    | yes         |
+        pInf         | free-stream pressure    | yes         |
+        TInf         | free-stream temperature | yes         |
+        gamma        | heat capacity ratio (cp/Cv) | yes     | 
+    /endtable
 
-    N.B. This boundary condition is ill-posed if the free-stream flow is
-         normal to the boundary.
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            supersonicFreestream;
+        UInf            500;
+        pInf            1e4;
+        TInf            265;
+        gamma           1.4;
+    }
+    \endverbatim
+
+    \note
+    This boundary condition is ill-posed if the free-stream flow is normal
+    to the boundary.
 
 SourceFiles
     supersonicFreestreamFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,7 +81,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class supersonicFreestreamFvPatch Declaration
+           Class supersonicFreestreamFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class supersonicFreestreamFvPatchVectorField

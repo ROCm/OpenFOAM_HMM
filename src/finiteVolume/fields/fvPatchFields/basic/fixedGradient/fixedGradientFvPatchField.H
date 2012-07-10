@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedGradientFvPatchField
 
@@ -33,22 +36,33 @@ Description
         \f]
 
     where
-        \var values   = patch values
-        \var int      = internal field values
-        \var gradient = gradient (user-specified)
-        \var delta    = inverse distance from patch face centre to cell centre
+    /vartable
+        values   | patch values
+        int      | internal field values
+        gradient | gradient (user-specified)
+        delta    | inverse distance from patch face centre to cell centre
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        gradient     | gradient                | yes         | 
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            fixedGradient;
-            gradient        uniform 0;
-        }
+    myPatch
+    {
+        type            fixedGradient;
+        gradient        uniform 0;
+    }
     \endverbatim
 
 SourceFiles
     fixedGradientFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

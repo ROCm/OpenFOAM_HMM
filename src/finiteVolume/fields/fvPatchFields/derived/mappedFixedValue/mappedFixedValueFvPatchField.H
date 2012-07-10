@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::mappedFixedValueFvPatchField
 
@@ -31,17 +34,27 @@ Description
     The sample mode is set by the underlying mapping engine, provided by the
     mappedPatchBase class.
     
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        fieldName    | name of field to be mapped | no       | this field name
+        setAverage   | flag to activate setting of average value | yes |
+        average      | average value to apply if \c setAverage = yes | yes |
+        interpolationScheme | type of interpolation scheme | no |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            mapped;
-            fieldName       T;              // optional (alternative) field name
-            setAverage      no;             // apply an average value
-            average         0;              // average to apply if setAverage
-            interpolationScheme cell;       // optional interpolation scheme
-            value           uniform 0;      // place holder
-        }
+    myPatch
+    {
+        type            mapped;
+        fieldName       T;
+        setAverage      no;
+        average         0;
+        interpolationScheme cell;
+        value           uniform 0;
+    }
     \endverbatim
 
     When employing the \c nearestCell sample mode, the user must also specify
@@ -63,6 +76,8 @@ SeeAlso
 
 SourceFiles
     mappedFixedValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

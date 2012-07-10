@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,17 +21,52 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::pressureDirectedInletOutletVelocityFvPatchVectorField
 
 Description
-    Velocity inlet/outlet boundary condition for pressure boundary where the
-    pressure is specified.  zero-gradient is applied for outflow (as defined
-    by the flux) and for inflow the velocity is obtained from the flux with
-    the specified `inletDirection'.
+    This velocity inlet/outlet boundary condition is applied to pressure
+    boundaries where the pressure is specified.  A zero-gradient condtion is
+    applied for outflow (as defined by the flux); for inflow, the velocity
+    is obtained from the flux with the specified inlet direction.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        inletDirection | inlet direction per patch face | yes |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            pressureDirectedInletOutletVelocity;
+        phi             phi;
+        rho             rho;
+        inletDirection  uniform (1 0 0);
+        value           uniform 0;
+    }
+    \endverbatim
+
+    \note
+    Sign conventions:
+    - positive flux (out of domain): apply zero-gradient condition
+    - negative flux (into of domain): derive from the flux with specified
+      direction
+
+SeeAlso
+    Foam::mixedFvPatchVectorField
 
 SourceFiles
     pressureDirectedInletOutletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +82,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class pressureDirectedInletOutletVelocityFvPatch Declaration
+    Class pressureDirectedInletOutletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureDirectedInletOutletVelocityFvPatchVectorField
@@ -56,8 +91,13 @@ class pressureDirectedInletOutletVelocityFvPatchVectorField
 {
     // Private data
 
+        //- Flux field name
         word phiName_;
+
+        //- Density field name
         word rhoName_;
+
+        //- Inlet direction
         vectorField inletDir_;
 
 

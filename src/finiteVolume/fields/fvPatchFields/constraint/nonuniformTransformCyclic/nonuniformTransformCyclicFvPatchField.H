@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::nonuniformTransformCyclicFvPatchField
 
 Description
-    Foam::nonuniformTransformCyclicFvPatchField
+    This boundary condition enforces a cyclic condition between a pair of
+    boundaries, incorporating a non-uniform transformation.
 
 SourceFiles
     nonuniformTransformCyclicFvPatchField.C
+    nonuniformTransformCyclicFvPatchFields.H
+    nonuniformTransformCyclicFvPatchFields.C
+    nonuniformTransformCyclicFvPatchFieldsFwd.H
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

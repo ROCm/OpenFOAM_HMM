@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::calculatedFvPatchField
 
@@ -29,17 +32,21 @@ Description
     that the value is assigned via field assignment, and not via a call to
     e.g. \c updateCoeffs or \c evaluate.
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            calculated;
-            value           uniform (0 0 0);    // optional value entry
-        }
+    myPatch
+    {
+        type            calculated;
+        value           uniform (0 0 0);    // optional value entry
+    }
     \endverbatim
 
 SourceFiles
     calculatedFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

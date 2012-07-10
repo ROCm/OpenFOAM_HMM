@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,17 +21,42 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::pressureInletVelocityFvPatchVectorField
 
 Description
-    Velocity inlet boundary condition for patches where the pressure is
-    specified. The inflow velocity is obtained from the flux with a direction
-    normal to the patch faces.  If reverse flow is possible or expected use
-    the "pressureInletOutletVelocityFvPatchVectorField" BC instead.
+    This velocity inlet boundary condition is applied to patches where the
+    pressure is specified.  The inflow velocity is obtained from the flux with
+    a direction normal to the patch faces.
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            pressureInletVelocity;
+        phi             phi;
+        rho             rho;
+        value           uniform 0;
+    }
+    \endverbatim
+
+    \note
+    If reverse flow is possible or expected use
+    the pressureInletOutletVelocityFvPatchVectorField condition instead.
+
+SeeAlso
+    Foam::fixedValueFvPatchField
+    Foam::pressureInletOutletVelocityFvPatchVectorField
 
 SourceFiles
     pressureInletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +72,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class pressureInletVelocityFvPatch Declaration
+           Class pressureInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureInletVelocityFvPatchVectorField
@@ -56,7 +81,10 @@ class pressureInletVelocityFvPatchVectorField
 {
     // Private data
 
+        //- Flux field name
         word phiName_;
+
+        //- Density field name
         word rhoName_;
 
 

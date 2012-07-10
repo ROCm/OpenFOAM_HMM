@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,17 +21,54 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::rotatingPressureInletOutletVelocityFvPatchVectorField
 
 Description
-    Velocity inlet/outlet boundary condition in a rotating frame
-    for patches where the pressure is specified.  zero-gradient is applied for
-    outflow (as defined by the flux) and for inflow the velocity is obtained
+    This velocity inlet/outlet boundary condition is applied to patches in a
+    rotating frame where the pressure is specified.  A zero-gradient is applied
+    for outflow (as defined by the flux); for inflow, the velocity is obtained
     from the flux with a direction normal to the patch faces.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        tangentialVelocity | tangential velocity field | no  |
+        omega        | angular velocty of the frame [rad/s] | yes    | 
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            rotatingPressureInletOutletVelocity;
+        phi             phi;
+        tangentialVelocity uniform (0 0 0);
+        omega           100;        
+    }
+    \endverbatim
+
+    The \c omega entry is a DataEntry type, able to describe time varying
+    functions.
+
+    \note
+    Sign conventions:
+    - positive flux (out of domain): apply zero-gradient condition
+    - negative flux (into of domain): derive from the flux in the patch-normal
+      direction
+
+SeeAlso
+    Foam::pressureInletOutletVelocityFvPatchVectorField
 
 SourceFiles
     rotatingPressureInletOutletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,7 +85,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-         Class rotatingPressureInletOutletVelocityFvPatch Declaration
+   Class rotatingPressureInletOutletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingPressureInletOutletVelocityFvPatchVectorField

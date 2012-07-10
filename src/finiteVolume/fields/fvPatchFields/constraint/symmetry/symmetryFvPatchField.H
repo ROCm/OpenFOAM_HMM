@@ -21,14 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::symmetryFvPatchField
 
 Description
-    Foam::symmetryFvPatchField
+    This boundary condition enforces a symmetry constraint
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            symmetryPlane;
+    }
+    \endverbatim
 
 SourceFiles
     symmetryFvPatchField.C
+    symmetryFvPatchFields.C
+    symmetryFvPatchFields.H
+    symmetryFvPatchFieldsFwd.H
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +61,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class symmetryFvPatch Declaration
+                         Class symmetryFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

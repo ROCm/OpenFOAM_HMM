@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedValueFvPatchField
 
@@ -28,17 +31,26 @@ Description
     This boundary condition supplies a fixed value constraint, and is the base
     class for a number of other boundary conditions.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        value        | values                  | yes         |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            fixedValue;
-            value           uniform 0;  // example for scalar field usage
-        }
+    myPatch
+    {
+        type            fixedValue;
+        value           uniform 0;  // example for scalar field usage
+    }
     \endverbatim
 
 SourceFiles
     fixedValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

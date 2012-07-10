@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::movingWallVelocityFvPatchVectorField
 
@@ -29,14 +32,22 @@ Description
     moving walls.  In addition, it should also be applied to 'moving' walls
     for moving reference frame (MRF) calculations.
 
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | velociy field name      | no          | U
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            movingWallVelocity;
-            U               U;         // name of velocity field (default = U)
-            value           uniform 0; // initial value
-        }
+    myPatch
+    {
+        type            movingWallVelocity;
+        U               U;
+        value           uniform 0; // initial value
+    }
     \endverbatim
 
 SeeAlso
@@ -45,6 +56,8 @@ SeeAlso
 
 SourceFiles
     movingWallVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

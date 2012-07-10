@@ -22,6 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::cylindricalInletVelocityFvPatchVectorField
 
@@ -30,9 +33,20 @@ Description
     cylindrical co-ordinates given a central axis, central point, rpm, axial
     and radial velocity.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        axis         | axis of rotation        | yes         |
+        centre       | centre of rotation      | yes         |
+        axialVelocity| axial velocity profile  | yes         |
+        radialVelocity| radial velocity profile | yes        |
+        rpm          | rotational speed (revolutions per minute) | yes|
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    myPatch
     {
         type            cylindricalInletVelocity;
         axis            (0 0 1);
@@ -43,12 +57,19 @@ Description
     }
     \endverbatim
 
+    \note
     The \c axialVelocity, \c radialVelocity and \c rpm entries are DataEntry
     types, able to describe time varying functions.  The example above gives
     the usage for supplying constant values.
 
+SeeAlso
+    Foam::fixedValueFvPatchField
+    Foam::DataEntry
+
 SourceFiles
     cylindricalInletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,108 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::totalPressureFvPatchScalarField
 
 Description
-    Foam::totalPressureFvPatchScalarField
+    This boundary condition provides a total pressure condition.  Four
+    variants are possible:
+
+    - incompressible subsonic:
+        \f[
+            p_T = p_0 + 0.5*|U|^2
+        \f]
+        where
+        /vartable
+            p_T     | incompressible total pressure [m2/s2]
+            p_0     | incompressible reference pressure [m2/s2]
+            U       | velocity
+        /endvartable
+
+    - compressible subsonic:
+        \f[
+            p_T = p_0 + 0.5*\rho*|U|^2
+        \f]
+        where
+        /vartable
+            p_T     | total pressure [Pa]
+            p_0     | reference pressure [Pa]
+            \rho    | density [kg/m3]
+            U       | velocity
+        /endvartable
+
+    - compressible supersonic (\gamma > 1):
+        \f[
+            p_T = \frac{p_0}{(1 + 0.5*\psi*G)^{\frac{1}{G}}}
+        \f]
+        where
+        /vartable
+            p_T     | total pressure [Pa]
+            p_0     | reference pressure [Pa]
+            \psi    | compressibility [m2/s2]
+            G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
+        /endvartable
+
+    - compressible transonic (\gamma <= 1):
+        \f[
+            p_T = \frac{p_0}{1 + 0.5*\psi*|U|^2}
+        \f]
+        where
+        /vartable
+            p_T     | total pressure [Pa]
+            p_0     | reference pressure [Pa]
+            G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
+        /endvartable
+
+    The modes of operation are set via the combination of \c phi, \c rho, and
+    \c psi entries:
+    /table
+        Mode                    | phi   | rho   | psi
+        incompressible subsonic | phi   | none  | none
+        compressible subsonic   | phi   | rho   | none
+        compressible transonic  | phi   | none  | psi
+        compressible supersonic | phi   | none  | psi
+    /endtable
+
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | velocity field name     | no          | U
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | none
+        psi          | compressibility field name | no       | none
+        gamma        | ratio of specific heats (Cp/Cv) | yes |
+        p0           | static pressure reference | yes       |
+    /endtable
+
+    \note
+    The default boundary behaviour is for subsonic, incompressible flow.
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            totalPressure;
+        U               U;
+        phi             phi;
+        rho             none;
+        psi             none;
+        gamma           1.4;
+        p0              uniform 1e5;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     totalPressureFvPatchScalarField.C
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +137,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class totalPressureFvPatch Declaration
+              Class totalPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class totalPressureFvPatchScalarField

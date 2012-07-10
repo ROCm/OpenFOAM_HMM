@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::emptyFvPatchField
 
@@ -30,16 +33,20 @@ Description
     patches whose normal is aligned to geometric directions that do not
     constitue solution directions.
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            empty;
-        }
+    myPatch
+    {
+        type            empty;
+    }
     \endverbatim
 
 SourceFiles
     emptyFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

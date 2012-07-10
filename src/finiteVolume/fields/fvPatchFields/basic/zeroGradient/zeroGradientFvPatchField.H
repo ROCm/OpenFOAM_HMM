@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::zeroGradientFvPatchField
 
 Description
-    Foam::zeroGradientFvPatchField
+    This boundary condition appies a zero-gradient condition from the patch
+    internal field onto the patch faces.
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            zeroGradient;
+    }
+    \endverbatim
 
 SourceFiles
     zeroGradientFvPatchField.C
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +58,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class zeroGradientFvPatch Declaration
+                     Class zeroGradientFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

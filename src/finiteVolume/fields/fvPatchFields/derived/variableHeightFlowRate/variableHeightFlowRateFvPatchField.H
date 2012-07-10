@@ -21,31 +21,50 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::variableHeightFlowRateFvPatchScalarField
 
 Description
-    This boundary condition uses zeroGradient within a specified range of
-    values for phase fraction alpha. The range is defined within the
-    boundary condition by the lowerBound and upperBound.
+    This boundary condition provides a phase fraction condition based on the
+    local flow conditions, whereby the values are constrained to lay between
+    user-specified upper and lower bounds.  The behaviour is described by:
 
-    alpha > upperBound: fixedValue with uniform value of upperBound
-    lowerBound <= alpha <= upperBound: zeroGradient
-    alpha < lowerBound: fixedValue with uniform value of lowerBound
+    if alpha > upperBound:
+    - apply a fixed value condition, with a uniform level of the upper bound
 
-    Example:
+    if lower bound <= alpha <= upper bound:
+    - apply a  zero-gradient condition
+
+    if alpha < lowerBound:
+    - apply a fixed value condition, with a uniform level of the lower bound
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        lowerBound   | lower bound for clipping | yes        |
+        upperBound   | upper bound for clipping | yes        |
+    /endtable
+
+    Example of the boundary condition specification:
     \verbatim
-        inlet
-        {
-            type            clippedZeroGradient;
-            lowerBound      0.0;
-            upperBound      0.9;
-            value           uniform 0;
-        }
+    myPatch
+    {
+        type            variableHeightFlowRate;
+        lowerBound      0.0;
+        upperBound      0.9;
+        value           uniform 0;
+    }
     \verbatim
 
 SourceFiles
     variableHeightFlowRateFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,7 +79,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class variableHeightFlowRateFvPatchScalar Declaration
+          Class variableHeightFlowRateFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class variableHeightFlowRateFvPatchScalarField
@@ -80,6 +99,7 @@ protected:
 
         //- Upper bound for alpha1
         scalar upperBound_;
+
 
 public:
 
@@ -156,10 +176,6 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
-
-
-    // Member operators
-
 };
 
 

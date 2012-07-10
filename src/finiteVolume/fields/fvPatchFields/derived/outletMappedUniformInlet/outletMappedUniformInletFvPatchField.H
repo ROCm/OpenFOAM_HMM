@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,16 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::outletMappedUniformInletFvPatchField
 
 Description
-    Averages the field over the "outlet" patch specified by name
-    "outletPatchName" and applies this as the uniform value of the field
-    over this patch.
+    This boundary conditon averages the field over the "outlet" patch specified
+    by name "outletPatchName" and applies this as the uniform value of the
+    field over this patch.
+
+    /heading Patch usage
+
+    /table
+        Property        | Description             | Required    | Default value
+        outletPatchName | name of outlet patch    | yes         |
+        phi             | flux field name         | no          | phi
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            outletMappedUniformInlet;
+        outletPatchName aPatch;
+        phi             phi;
+        value           uniform 0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     outletMappedUniformInletFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +72,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class outletMappedUniformInletFvPatch Declaration
+            Class outletMappedUniformInletFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

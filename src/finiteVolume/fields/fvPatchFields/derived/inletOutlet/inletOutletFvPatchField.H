@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::inletOutletFvPatchField
 
@@ -28,22 +31,32 @@ Description
     This boundary condition provides a generic outflow condition, with
     specified inflow for the case of return flow.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        inletValue   | inlet value             | yes         |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            inletOutlet;
-            phi             phi;        // name of flux field (default = phi)
-            inletValue      uniform 0;  // reverse flow (inlet) value
-            value           uniform 0;  // initial value
-        }
+    myPatch
+    {
+        type            inletOutlet;
+        phi             phi;        // name of flux field (default = phi)
+        inletValue      uniform 0;  // reverse flow (inlet) value
+        value           uniform 0;  // initial value
+    }
     \endverbatim
 
     The mode of operation is determined by the sign of the flux across the
     patch faces.
 
-    \li positive flux (out of domain): apply zero-gradient condition
-    \li negative flux (into of domain): apply the user-specified fixed value
+    \note
+    Sign conventions:
+    - positive flux (out of domain): apply zero-gradient condition
+    - negative flux (into of domain): apply the user-specified fixed value
 
 SeeAlso
     Foam::mixedFvPatchField
@@ -51,6 +64,8 @@ SeeAlso
 
 SourceFiles
     inletOutletFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

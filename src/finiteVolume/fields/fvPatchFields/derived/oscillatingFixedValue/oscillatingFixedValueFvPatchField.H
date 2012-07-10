@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,12 +21,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::oscillatingFixedValueFvPatchField
 
 Description
-    Describes an oscillating boundary condition in terms of amplitude and
-    frequency.
+    This boundary condition provides an oscillating condition in terms of
+    amplitude and frequency.
+
+        /f[
+            x_p = (1 + a.sin(\pi f t))x_{ref} + x_o
+        /f]
+
+    where
+
+    /vartable
+        x_p     | patch values
+        x_{ref} | patch reference values
+        x_o     | patch offset values
+        a       | amplitude
+        f       | frequency [1/s]
+        t       | time [s]
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        refValue     | reference value         | yes         |
+        offset       | offset value            | no          | 0.0;                    // optional
+        amplitude    | oscillation amplitude   | yes         |
+        frequency    | oscillation frequency   | yes         |
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
@@ -34,18 +62,24 @@ Description
     {
         type            oscillatingFixedValue;
         refValue        uniform 5.0;
-        offset          0.0;                    // optional
+        offset          0.0;
         amplitude       constant 0.5;
         frequency       constant 10;
     }
     \endverbatim
 
+    \note
     The amplitude and frequency entries are DataEntry types, able to describe
     time varying functions.  The example above gives the usage for supplying
     constant values.
 
+SeeAlso
+    Foam::DataEntry
+
 SourceFiles
     oscillatingFixedValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -62,7 +96,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class oscillatingFixedValueFvPatch Declaration
+              Class oscillatingFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

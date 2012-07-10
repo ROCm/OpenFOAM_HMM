@@ -21,21 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::temperatureJumpFvPatchScalarField
 
 Description
-    Introduce a jump in temperature on a cycle patch
-    front
+    This boundary condition provides a temperature jump condition across a
+    coupled pair of cyclic patches.
+
+    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
+    contant, polynomial, table values.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jump         | current jump value      | yes         |
+        jumpTable    | jump data, e.g. \c csvFile | yes      |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
     {
         type            temperatureJump;
         patchType       cyclic;
         jumpTable       constant 100;
         value           uniform 300;
     }
+    \endverbatim
+
+    The above example shows the use of a constant jump condition.
+
+    \note
+     The underlying \c patchType should be set to \c cyclic
+
+SeeAlso
+    Foam::fixedJumpFvPatchField
 
 SourceFiles
     temperatureJumpFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

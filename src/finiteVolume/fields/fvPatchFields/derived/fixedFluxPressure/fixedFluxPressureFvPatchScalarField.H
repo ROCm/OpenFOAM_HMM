@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedFluxPressureFvPatchScalarField
 
@@ -37,22 +40,40 @@ Description
         \f]
 
     where
-        \var Sf = patch face areas
+
+    /vartable
+        Sf      | patch face areas [m2]
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phiHbyA      | name of predicted flux field | no | phiHbyA
+        phi          | name of flux field      | no |   phi
+        rho          | name of density field   | no |   rho
+        Dp           | name of pressure diffusivity field | no |   Dp
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            externalWallHeatFluxTemperature;
-            phiHbyA         phiHbyA; // predicted flux field (default = phiHbyA)
-            phi             phi;    // flux field (default = phi)
-            rho             rho;    // density field (default = rho)
-            Dp              Dp;     // pressure diffusivity field (default = Dp)
-        }
+    myPatch
+    {
+        type            externalWallHeatFluxTemperature;
+        phiHbyA         phiHbyA;
+        phi             phi;
+        rho             rho;
+        Dp              Dp;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedGradientFvPatchField
 
 SourceFiles
     fixedFluxPressureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

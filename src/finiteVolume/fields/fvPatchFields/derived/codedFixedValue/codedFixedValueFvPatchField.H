@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::codedFixedValueFvPatchField
 
@@ -28,29 +31,31 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
+    /heading Patch usage
+
     Example:
     \verbatim
-        movingWall
-        {
-            type            codedFixedValue;
-            value           uniform 0;
-            redirectType    rampedFixedValue;   // name of generated BC
+    myPatch
+    {
+        type            codedFixedValue;
+        value           uniform 0;
+        redirectType    rampedFixedValue;   // name of generated BC
 
-            code
-            #{
-                operator==(min(10, 0.1*this->db().time().value()));
-            #};
+        code
+        #{
+            operator==(min(10, 0.1*this->db().time().value()));
+        #};
 
-            //codeInclude
-            //#{
-            //    #include "fvCFD.H"
-            //#};
+        //codeInclude
+        //#{
+        //    #include "fvCFD.H"
+        //#};
 
-            //codeOptions
-            //#{
-            //    -I$(LIB_SRC)/finiteVolume/lnInclude
-            //#};
-        }
+        //codeOptions
+        //#{
+        //    -I$(LIB_SRC)/finiteVolume/lnInclude
+        //#};
+    }
     \endverbatim
 
     A special form is if the 'code' section is not supplied. In this case
@@ -58,20 +63,23 @@ Description
     which would have a corresponding entry:
 
     \verbatim
-        rampedFixedValue
-        {
-            code
-            #{
-                operator==(min(10, 0.1*this->db().time().value()));
-            #};
-        }
+    myPatch
+    {
+        code
+        #{
+            operator==(min(10, 0.1*this->db().time().value()));
+        #};
+    }
     \endverbatim
 
 SeeAlso
-    Foam::dynamicCode and Foam::functionEntries::codeStream
+    Foam::dynamicCode
+    Foam::functionEntries::codeStream
 
 SourceFiles
     codedFixedValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

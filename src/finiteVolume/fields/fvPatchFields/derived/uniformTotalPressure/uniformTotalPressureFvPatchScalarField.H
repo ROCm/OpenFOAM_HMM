@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,19 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::uniformTotalPressureFvPatchScalarField
 
 Description
-    A time-varying form of a uniform total pressure boundary condition. The
-    variation is specified as an DataEntry (see Foam::DataEntry).
+    This boundary condition provides a time-varying form of the uniform total
+    pressure boundary condition.
 
-See Also
-    Foam::uniformFixedValueFvPatchField.H
-    and Foam::totalPressureFvPatchScalarField.H
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | velocity field name     | no          | U
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | none
+        psi          | compressibility field name | no       | none
+        gamma        | ratio of specific heats (Cp/Cv) | yes |
+        p0           | static pressure reference | yes       |
+        pressure     | total pressure as a function of time | yes |
+    /endtable
+
+    \note
+    The default boundary behaviour is for subsonic, incompressible flow.
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            uniformTotalPressure;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             psi;
+        gamma           1.4;
+        p0              uniform 1e5;
+        pressure        uniform 0.0;
+    }
+    \endverbatim
+
+
+    The \c pressure entry is specified as a DataEntry type, able to describe
+    time varying functions.
+
+SeeAlso
+    Foam::DataEntry
+    Foam::uniformFixedValueFvPatchField
+    Foam::totalPressureFvPatchField
 
 SourceFiles
     uniformTotalPressureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -75,7 +116,7 @@ class uniformTotalPressureFvPatchScalarField
         //- Heat capacity ratio
         scalar gamma_;
 
-        //- Total pressure
+        //- Static pressure reference
         scalar p0_;
 
         //- Table of time vs total pressure, including the bounding treatment

@@ -21,51 +21,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::activeBaffleVelocityFvPatchVectorField
 
 Description
-    This boundary condition is applied to the flow velocity, to simulate the
-    opening of a baffle due to local flow conditions, by merging the behaviours
-    of wall and cyclic conditions.
-
-    The baffle joins two mesh regions, where the open fraction determines
-    the interpolation weights applied to each cyclic- and neighbour-patch
-    contribution.
+    This velocity boundary condition simulates the opening of a baffle due
+    to local flow conditions, by merging the behaviours of wall and cyclic
+    conditions.  The baffle joins two mesh regions, where the open fraction
+    determines the interpolation weights applied to each cyclic- and
+    neighbour-patch contribution.
 
     We determine whether the baffle is opening or closing from the sign of
     the net force across the baffle, from which the baffle open fraction is
     updated using:
 
         \f[
-            x = x_old + dt/DT*sign(F_net)
+            x = x_{old} + sign(F_{net})\frac{dt}{DT}
         \f]
 
     where
-        \var x      = baffle open fraction [0-1]
-        \var x_old  = baffle open fraction on previous evaluation
-        \var dt     = simulation time step
-        \var DT     = time taken to open the baffle
-        \var F_net  = net force across the baffle
+
+    /vartable
+        x       | baffle open fraction [0-1]
+        x_{old} | baffle open fraction on previous evaluation
+        dt      | simulation time step
+        DT      | time taken to open the baffle
+        F_{net} | net force across the baffle
+    /endvartable
 
     The open fraction is then applied to scale the patch areas.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        p            | pressure field name     | no          | p
+        cyclicPatch  | cylclic patch name      | yes         |
+        orientation  | 1 or -1 used to switch flow direction | yes|
+        openFraction | current opatch open fraction [0-1]| yes |
+        openingTime  | time taken to open the baffle | yes |
+        maxOpenFractionDelta | max open fraction change per timestep | yes |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            activeBaffleVelocity;
-            p               p;          // name of pressure field (default = p)
-            cyclicPatch     cyclic1;    // name of cyclic patch
-            orientation     1;          // 1 or -1 used to switch flow direction
-            openFraction    0.2;        // current opatch open fraction [0-1]
-            openingTime     5.0;        // time taken to open the baffle
-            maxOpenFractionDelta 0.1;   // max open fraction change/timestep
-        }
+    myPatch
+    {
+        type            activeBaffleVelocity;
+        p               p;
+        cyclicPatch     cyclic1;
+        orientation     1;
+        openFraction    0.2;
+        openingTime     5.0;
+        maxOpenFractionDelta 0.1;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
+    Foam::cyclicFvPatchField
 
 SourceFiles
     activeBaffleVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

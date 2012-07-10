@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,12 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::syringePressureFvPatchScalarField
 
 Description
-    Pressure boundary condition obtained from a 0-D model of the cylinder
-    of a syringe.
+    This boundary condition provides a pressure condition, obtained from a
+    zero-D model of the cylinder of a syringe.
 
     The syringe cylinder is defined by its initial volume, piston area and
     velocity profile specified by regions of constant acceleration, speed
@@ -34,27 +37,48 @@ Description
     pressure and compressibility which is assumed constant, i.e. isothermal
     expansion/compression.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        Ap           | syringe piston area     | yes         |
+        Sp           | syringe piston speed    | yes         |
+        VsI          | initial syringe volume  | yes         |
+        tas          | start of piston acceleration | yes    |
+        tae          | end of piston acceleration | yes      |
+        tds          | start of piston deceleration | yes    |
+        tde          | end of piston deceleration | yes      |
+        psI          | initial syringe pressure | yes        |
+        psi          | gas compressibility     | yes         |
+        ams          | added (or removed) gas mass | yes     |
+    /endtable
+
     Example of the BC specification:
     \verbatim
-        outlet
-        {
-            type            syringePressure;
-            Ap              1.388e-6; // syringe piston area
-            Sp              0.01;     // syringe piston speed
-            VsI             1.388e-8; // Initial syringe volume
-            tas             0.001;    // Start of piston acceleration
-            tae             0.002;    // End of piston acceleration
-            tds             0.005;    // Start of piston deceleration
-            tde             0.006;    // end of piston deceleration
-            psI             1e5;      // Initial syringe pressure
-            psi             1e-5;     // Gas compressibility
-            ams             0;        // Added (or removed) gas mass
-                                      // Initially 0 but used for restarting.
-        }
+    myPatch
+    {
+        type            syringePressure;
+        Ap              1.388e-6; // syringe piston area
+        Sp              0.01;     // syringe piston speed
+        VsI             1.388e-8; // Initial syringe volume
+        tas             0.001;    // Start of piston acceleration
+        tae             0.002;    // End of piston acceleration
+        tds             0.005;    // Start of piston deceleration
+        tde             0.006;    // end of piston deceleration
+        psI             1e5;      // Initial syringe pressure
+        psi             1e-5;     // Gas compressibility
+        ams             0;        // Added (or removed) gas mass
+        value           uniform 0 // Initially 0 but used for restarting
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     syringePressureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -69,7 +93,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class syringePressureFvPatch Declaration
+             Class syringePressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class syringePressureFvPatchScalarField
@@ -115,7 +139,9 @@ class syringePressureFvPatchScalarField
         label curTimeIndex_;
 
 
-        //- return the volume of the syringe at time t
+    // Private Functions
+
+        //- Return the volume of the syringe at time t
         scalar Vs(const scalar t) const;
 
 

@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::freestreamFvPatchField
 
@@ -30,13 +33,20 @@ Description
     operation switches between fixed (free stream) value and zero gradient
     based on the sign of the flux.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            freestream;
-            phi             phi;    // name of the flux field (default = phi)
-        }
+    myPatch
+    {
+        type            freestream;
+        phi             phi;
+    }
     \endverbatim
 
 SeeAlso
@@ -45,6 +55,8 @@ SeeAlso
 
 SourceFiles
     freestreamFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,7 +71,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class freestreamFvPatchField Declaration
+                   Class freestreamFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

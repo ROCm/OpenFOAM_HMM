@@ -22,38 +22,49 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 
 Description
-    Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area.
+    This boundary condition provides a velocity boundary condition for
+    multphase flow based on a user-specified volumetric flow rate.
 
-    The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the
-    mass basis.
+    The flow rate is made proportional to the phase fraction alpha at each
+    face of the patch and alpha is ensured to be bound between 0 and 1.
 
-    The flow rate is made proportional to the phase fraction alpha at each face
-    of the patch and alpha is ensured to be bound between 0 and 1.
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        flowRate     | volumetric flow rate [m3/s] | yes |
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    myPatch
     {
         type            variableHeightFlowRateInletVelocity;
-        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        flowRate        0.2;
         value           uniform (0 0 0); // placeholder
     }
     \endverbatim
 
-Note
-    - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
+    \note
+    - the value is positive into the domain
+    - may not work correctly for transonic inlets
+    - strange behaviour with potentialFoam since the momentum equation is
+      not solved
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     variableHeightFlowRateInletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -67,7 +78,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-          Class variableHeightFlowRateInletVelocityFvPatch Declaration
+    Class variableHeightFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class variableHeightFlowRateInletVelocityFvPatchVectorField
@@ -78,6 +89,7 @@ class variableHeightFlowRateInletVelocityFvPatchVectorField
 
         //- Inlet integral flow rate
         scalar flowRate_;
+
 
 public:
 
@@ -174,7 +186,6 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

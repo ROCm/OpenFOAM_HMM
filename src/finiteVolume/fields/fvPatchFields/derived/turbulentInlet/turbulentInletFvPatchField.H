@@ -21,24 +21,58 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::turbulentInletFvPatchField
 
 Description
-    Generate a fluctuating inlet condition by adding a random component
-    to a reference (mean) field.
-    Input:
-        referenceField
-            Mean field.
-        fluctuationScale
-            RMS fluctuation, provided as the fraction of the mean field.
-        alpha
-            temporal correlation factor;
-            the fraction of the new random component added to the previous
-            time-step (defaults to 0.1).
+    This boundary condition generates a fluctuating inlet condition by adding
+    a random component to a reference (mean) field.
+
+    \f[
+        x_p = (1 - \alpha)*x_p^{n-1} + \alpha*(x_{ref}+C_{RMS}*s*x_{ref})
+    \f]
+
+    where
+
+    /vartable
+        x_p     | patch values
+        x_{ref} | refernce patch values
+        n       | time level
+        \alpha  | fraction of new random component added to previous time value
+        C_{RMS} | RMS coefficient
+        s       | fluctuation scale
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        fluctuationScale | RMS fluctuation scale (fraction of mean) | yes |
+        referenceField | reference (mean) field | yes        |
+        alpha | fraction of new random component added to previous| no| 0.1
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            turbulentInlet;
+        fluctuationScale 0.1;
+        referenceField  uniform 10;
+        alpha           0.1;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     turbulentInletFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -54,7 +88,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class turbulentInletFvPatch Declaration
+                 Class turbulentInletFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -64,10 +98,19 @@ class turbulentInletFvPatchField
 {
     // Private data
 
+        //- Random number generator
         Random ranGen_;
+
+        //- Fluctuation scake
         Type fluctuationScale_;
+
+        //- Reference field
         Field<Type> referenceField_;
+
+        //- Fraction of RMS component to apply to last time step values
         scalar alpha_;
+
+        //- Current time index (used for updating)
         label curTimeIndex_;
 
 

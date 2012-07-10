@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::mappedFieldFvPatchField
 
@@ -29,18 +32,26 @@ Description
     condition.  It does not use information on the patch; instead it holds
     thr data locally.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        fieldName    | name of field to be mapped | no       | this field name
+        setAverage   | flag to activate setting of average value | yes |
+        average      | average value to apply if \c setAverage = yes | yes |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            mappedField;
-            fieldName       T;              // optional field name
-            setAverage      no;             // apply an average value
-            average         0;              // average to apply if setAverage
-            value           uniform 0;      // place holder
-        }
+    myPatch
+    {
+        type            mappedField;
+        fieldName       T;              // optional field name
+        setAverage      no;             // apply an average value
+        average         0;              // average to apply if setAverage
+        value           uniform 0;      // place holder
+    }
     \endverbatim
-
 
     \note
     Since this condition can be applied on a per-field and per-patch basis,
@@ -57,6 +68,8 @@ SeeAlso
 
 SourceFiles
     mappedFieldFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::translatingWallVelocityFvPatchVectorField
 
 Description
-    Foam::translatingWallVelocityFvPatchVectorField
+    This boundary condition provides a velocity condition for translational
+    motion on walls.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | translational velocity  | yes|
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            rotatingWallVelocity;
+        U               (100 0 0);
+    }
+    \endverbatim
+
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     translatingWallVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +69,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class translatingWallVelocityFvPatchField Declaration
+            Class translatingWallVelocityFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 class translatingWallVelocityFvPatchVectorField
@@ -52,7 +78,7 @@ class translatingWallVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Origin of the rotation
+        //- Translational velocity
         vector U_;
 
 
@@ -122,7 +148,6 @@ public:
                 new translatingWallVelocityFvPatchVectorField(*this, iF)
             );
         }
-
 
 
     // Member functions

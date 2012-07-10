@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fluxCorrectedVelocityFvPatchVectorField
 
@@ -30,24 +33,35 @@ Description
     by "zeroGradient" and then corrected from the flux:
 
         \f[
-            Up = Uc - n*(n.Uc) + n*phi/mag(Sf)
+            U_p = U_c - n*(n.U_c) + n*phi/mag(Sf)
         \f]
 
     where
-        \var Up  = velocity at the patch [m/s]
-        \var Uc  = velocity in cells adjacent to the patch [m/s]
-        \var n   = patch normal vectors
-        \var phi = flux at the patch [m3/s or kg/s]
-        \var Sf  = patch face area vectors [m2]
+
+    /vartable
+        U_p | velocity at the patch [m/s]
+        U_c | velocity in cells adjacent to the patch [m/s]
+        n   | patch normal vectors
+        phi | flux at the patch [m3/s or kg/s]
+        Sf  | patch face area vectors [m2]
+    /endvartable
+
+    where
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | name of flux field      | no          | phi
+        rho          | name of density field   | no          | rho
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            fluxCorrectedVelocity;
-            phi             phi;        // name of flux field (default = phi)
-            rho             rho;        // name of density field (default = rho)
-        }
+    myPatch
+    {
+        type            fluxCorrectedVelocity;
+        phi             phi;
+        rho             rho;
+    }
     \endverbatim
 
     \note
@@ -60,6 +74,8 @@ SeeAlso
 
 SourceFiles
     fluxCorrectedVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

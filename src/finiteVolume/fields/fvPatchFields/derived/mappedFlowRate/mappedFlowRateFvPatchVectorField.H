@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::mappedFlowRateFvPatchVectorField
 
@@ -28,14 +31,20 @@ Description
     Describes a volumetric/mass flow normal vector boundary condition by its
     magnitude as an integral over its area.
 
-    The inlet mass flux is taken from the neighbor region.
-
-    phi is used to determine if the flow is compressible or incompressible.
+    The inlet mass flux is taken from the neighbour region.
 
     The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the
-    mass basis.
+    dimensions of the flux, phi.  The current density is used to correct the
+    velocity when applying the mass basis.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        neigPhi      | name of flux field on neighbour mesh | yes |
+    /endtable
 
     Example of the boundary condition specification:
     @verbatim
@@ -44,14 +53,15 @@ Description
         type            mappedFlowRate;
         phi             phi;
         rho             rho;
-        neigPhi         neigPhiName_;    // Volumetric/mass flow rate
-                                         // [m3/s or kg/s]
+        neigPhi         phi;
         value           uniform (0 0 0); // placeholder
     }
     @endverbatim
 
 SourceFiles
     mappedFlowRateFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

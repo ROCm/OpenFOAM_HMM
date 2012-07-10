@@ -21,23 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedNormalSlipFvPatchField
 
 Description
     This boundary condition sets the patch-normal component to a fixed value.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        fixedValue   | fixed value             | yes         |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            fixedNormalSlip;
-            fixedValue      uniform 0;     // example entry for a scalar field
-        }
+    myPatch
+    {
+        type            fixedNormalSlip;
+        fixedValue      uniform 0;     // example entry for a scalar field
+    }
     \endverbatim
+
+SeeAlso
+    Foam::transformFvPatchField
 
 SourceFiles
     fixedNormalSlipFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

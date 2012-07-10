@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::activePressureForceBaffleVelocityFvPatchVectorField
 
@@ -36,35 +39,54 @@ Description
     Once opened the baffle continues to open at a fixed rate using
 
         \f[
-            x = x_old + dt/DT
+            x = x_{old} + \frac{dt}{DT}
         \f]
 
     where
-        \var x      = baffle open fraction [0-1]
-        \var x_old  = baffle open fraction on previous evaluation
-        \var dt     = simulation time step
-        \var DT     = time taken to open the baffle
+
+    /vartable
+        x       | baffle open fraction [0-1]
+        x_{old} | baffle open fraction on previous evaluation
+        dt      | simulation time step
+        DT      | time taken to open the baffle
+    /endvartable
 
     The open fraction is then applied to scale the patch areas.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        p            | pressure field name     | no          | p
+        cyclicPatch  | cylclic patch name      | yes         |
+        orientation  | 1 or -1 used to switch flow direction | yes|
+        openFraction | current opatch open fraction [0-1]| yes |
+        openingTime  | time taken to open the baffle | yes |
+        maxOpenFractionDelta | max open fraction change per timestep | yes |
+        minThresholdValue | minimum open fraction for activation | yes |
+        forceBased   | force (true) or pressure-based (false) activation | yes |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            activePressureForceBaffleVelocity;
-            p               p;          // name of pressure field (default = p)
-            cyclicPatch     cyclic1;    // name of cyclic patch
-            orientation     1;          // 1 or -1 used to switch flow direction
-            openFraction    0.2;        // current opatch open fraction [0-1]
-            openingTime     5.0;        // time taken to open the baffle
-            maxOpenFractionDelta 0.1;   // max open fraction change/timestep
-            minThresholdValue 0.01;     // minimum open fraction for activation
-            forceBased      false;      // force (true) or pressue (false)
-        }
+    myPatch
+    {
+        type            activePressureForceBaffleVelocity;
+        p               p;
+        cyclicPatch     cyclic1;
+        orientation     1;
+        openFraction    0.2;
+        openingTime     5.0;
+        maxOpenFractionDelta 0.1;
+        minThresholdValue 0.01;
+        forceBased      false;
+    }
     \endverbatim
 
 SourceFiles
     activePressureForceBaffleVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

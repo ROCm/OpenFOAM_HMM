@@ -21,11 +21,17 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedJumpFvPatchField
 
 Description
-    Base class for "jump" of a field<type> - not used directly
+    Base class for "jump" of a field<type>
+
+    \note
+    not used directly
 
 SeeAlso
     Foam::fanFvPatchScalarField
@@ -33,6 +39,8 @@ SeeAlso
 
 SourceFiles
     fixedJumpFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

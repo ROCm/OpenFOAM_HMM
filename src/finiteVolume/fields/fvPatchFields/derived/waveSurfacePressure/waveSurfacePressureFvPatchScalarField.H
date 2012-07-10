@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::waveSurfacePressureFvPatchScalarField
 
@@ -29,33 +32,49 @@ Description
     the hydrostatic pressure based on a given displacement:
 
         \f[
-            p = -rho*g*zeta
+            p = -\rho*g*\zeta
         \f]
 
-    where
-        \var g    = acceleration due to gravity [m/s2]
-        \var zeta = wave amplitude [m]
+    /vartable
+        \rho  | density [kg/m3]
+        g     | acceleration due to gravity [m/s2]
+        \zeta | wave amplitude [m]
+    /endvartable
 
     The wave amplitude is updated as part of the calculation, derived from the
     local volumetric flux.
+
+    /heading Patch usage
     
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        zeta         | wave amplitude field name | no        | zeta
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            waveSurfacePressure;
-            phi             phi;        // name of flux field (default = phi)
-            rho             rho;        // name of density field (default = rho)
-            zeta            zeta;       // name amplitude field (default = zeta)
-            value           uniform 0;  // place holder
-        }
+    myPatch
+    {
+        type            waveSurfacePressure;
+        phi             phi;
+        rho             rho;
+        zeta            zeta;
+        value           uniform 0;  // place holder
+    }
     \endverbatim
 
     The density field is only required if the flux is mass-based as opposed to
     volumetric-based.
 
+SeeAlso
+    Foam::fixedValueFvPatchField
+
 SourceFiles
     waveSurfacePressureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

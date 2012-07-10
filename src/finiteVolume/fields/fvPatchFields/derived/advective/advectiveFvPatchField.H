@@ -21,12 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::advectiveFvPatchField
 
 Description
-    Advective outflow boundary condition based on solving DDt(psi, U) = 0
-    at the boundary.
+    This boundary condition provides an advective outflow condition, based on
+    solving DDt(psi, U) = 0 at the boundary.
 
     The standard (Euler, backward, CrankNicholson) time schemes are
     supported.  Additionally an optional mechanism to relax the value at
@@ -38,16 +41,6 @@ Description
     advectionSpeed() the default implementation of which requires the name of
     the flux field \c (phi) and optionally the density \c (rho) if the
     mass-flux rather than the volumetric-flux is given.
-    \verbatim
-        myPatch
-        {
-            type            advective;
-            phi             phi;
-            // rho          rho; // Not needed, phi volumetric
-            // fieldInf     1e5; // Optional
-            // lInf         0.1; // Optional
-        }
-    \endverbatim
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
     BC from this class and over-riding advectionSpeed()  e.g. in
@@ -55,8 +48,36 @@ Description
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        fieldInf     | value of field beyond patch | no      |
+        lInf         | distance beyond patch for \c fieldInf | no |
+    /endtable
+
+    \note
+    If \c lInf is specified, \c fieldInf will be required; \c rho is only
+    required in the case of a mass-based flux.
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            advective;
+        phi             phi;
+        // rho          rho; // Not needed for volumetric-based flux
+        // fieldInf     1e5; // Optional
+        // lInf         0.1; // Optional
+    }
+    \endverbatim
+
 SourceFiles
     advectiveFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

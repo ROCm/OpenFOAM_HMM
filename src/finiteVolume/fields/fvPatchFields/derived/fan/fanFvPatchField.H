@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fanFvPatchField
 
@@ -31,27 +34,37 @@ Description
     The jump is specified as a \c DataEntry type, to enable the use of, e.g.
     contant, polynomial, table values.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jump         | current jump value      | yes         |
+        jumpTable    | jump data, e.g. \c csvFile | yes      |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
+    myPatch
+    {
+        type            fan;
+        patchType       cyclic;
+        jump            uniform 0;
+        jumpTable       csvFile;
+        csvFileCoeffs
         {
-            type            fan;
-            patchType       cyclic;         // specify \c cyclic
-            jump            uniform 0;      // current jump value
-            jumpTable       csvFile;        // jump specification
-            csvFileCoeffs
-            {
-                hasHeaderLine   1;
-                refColumn       0;
-                componentColumns 1(1);
-                separator       ",";
-                fileName        "$FOAM_CASE/constant/pressureVsU";
-            }
-            value           uniform 0;
+            hasHeaderLine   1;
+            refColumn       0;
+            componentColumns 1(1);
+            separator       ",";
+            fileName        "$FOAM_CASE/constant/pressureVsU";
         }
+        value           uniform 0;
+    }
     \endverbatim
 
-    The above example shows the use of a CSV file to specify the jump.
+    The above example shows the use of a comma separated (CSV) file to specify
+    the jump condition.
 
     \note
      The underlying \c patchType should be set to \c cyclic
@@ -61,6 +74,10 @@ SeeAlso
 
 SourceFiles
     fanFvPatchField.C
+    fanFvPatchFields.H
+    fanFvPatchFields.C
+    fanFvPatchFieldsFwd.H
+@}
 
 \*---------------------------------------------------------------------------*/
 

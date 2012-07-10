@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::flowRateInletVelocityFvPatchVectorField
 
@@ -34,36 +37,46 @@ Description
     \c rhoName entry.
 
     For a mass-based flux:
-    \li if \c rhoName is a valid density field name, the flow rate is in kg/s
-    \li if \c rhoName is "none" the flow rate is in m3/s
+    - if \c rhoName is a valid density field name, the flow rate is in kg/s
+    - if \c rhoName is "none" the flow rate is in m3/s
 
     For a volumetric-based flux:
-    \li the flow rate is in m3/s
+    - the flow rate is in m3/s
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        flowRate     | volumetric [m3/s] OR mass flow rate [kg/s] | yes |
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type        flowRateInletVelocity;
-            flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-            rho         rho;        // none | rho [m3/s or kg/s]
-            value       uniform (0 0 0); // placeholder
-        }
+    myPatch
+    {
+        type        flowRateInletVelocity;
+        flowRate    0.2;
+        rho         rho;
+        value       uniform (0 0 0); // placeholder
+    }
     \endverbatim
 
     The \c flowRate entry is a \c DataEntry type, meaning that it can be
     specified as constant, a polynomial fuction of time, and ...
 
     \note
-    \li the value is positive into the domain (as an inlet)
-    \li may not work correctly for transonic inlets
-    \li strange behaviour with potentialFoam since the U equation is not solved
+    - the value is positive into the domain (as an inlet)
+    - may not work correctly for transonic inlets
+    - strange behaviour with potentialFoam since the U equation is not solved
 
 SeeAlso
     Foam::DataEntry
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     flowRateInletVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

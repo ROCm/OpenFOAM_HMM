@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::mappedVelocityFluxFixedValueFvPatchField
 
@@ -28,17 +31,25 @@ Description
     This boundary condition maps the velocity and flux from a neighbour patch
     to this patch
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            mappedFixedInternalValue;
-            phi             phi;        // name of flux field (default = phi)
-            value           uniform 0;  // place holder
-        }
+    myPatch
+    {
+        type            mappedFixedInternalValue;
+        phi             phi;
+        value           uniform 0;  // place holder
+    }
     \endverbatim
 
-    The underlying sample mode should be set to nearestPatchFace or nearestFace
+    The underlying sample mode should be set to \c nearestPatchFace or
+    \c nearestFace
 
     \note
     This boundary condition can only be applied to patches that are of
@@ -52,6 +63,8 @@ SeeAlso
 
 SourceFiles
     mappedVelocityFluxFixedValueFvPatchField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

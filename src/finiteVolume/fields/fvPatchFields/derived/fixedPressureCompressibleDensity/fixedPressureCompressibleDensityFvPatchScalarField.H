@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::fixedPressureCompressibleDensityFvPatchScalarField
 
@@ -29,30 +32,46 @@ Description
     function of pressure and fluid properties:
 
         \f[
-            rho = rholSat + psil*(p - pSat)
+            rho = rho_{l,sat} + psi_l*(p - p_{sat})
         \f]
 
     where
-        \var rho = density [kg/m3]
-        \var rholSat = saturation liquid density
-        \var p = pressure [Pa]
-        \var pSat = saturation pressure [Pa]
+
+    /vartable
+        rho     | density [kg/m3]
+        rho_{l,sat} | saturation liquid density [kg/m3]
+        psi_l   | liquid compressibility
+        p       | pressure [Pa]
+        p_{sat} | saturation pressure [Pa]
+    /endvartable
 
     The variables \c rholSat, \c pSat and \c psil are retrieved from the
     \c thermodynamicProperties dictionary.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        p            | pressure field name     | no          | p
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type        fixedPressureCompressibleDensity;
-            p           p;               // Name of static pressure field
-            value       uniform 1;       // Initial value
-        }
+    myPatch
+    {
+        type        fixedPressureCompressibleDensity;
+        p           p;
+        value       uniform 1;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     fixedPressureCompressibleDensityFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

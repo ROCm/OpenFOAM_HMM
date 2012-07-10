@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::buoyantPressureFvPatchScalarField
 
@@ -29,40 +32,56 @@ Description
     buoyant flow.
 
     If the variable name is one of:
-        \li pd
-        \li p_rgh
-        \li ph_rgh
-    we assume that the pressure variable is \f$ p - rho*g.h\f$ and the gradient
+    - \c pd
+    - \c p_rgh
+    - \c ph_rgh
+    we assume that the pressure variable is \f$p - rho*g.h\f$ and the gradient
     set using:
         \f[
             grad(pressure) = -snGrad(rho)*(g.h)
         \f]
+
     where
-        \var snGrad = surface-normal gradient operator
-        \var rho    = density [kg/m3]
-        \var g      = acceleration due to gravity [m/s2]
-        \var h      = patch face centres [m]
+
+    /vartable
+        snGrad | surface-normal gradient operator
+        rho    | density [kg/m3]
+        g      | acceleration due to gravity [m/s2]
+        h      | patch face centres [m]
+    /endtable
 
     Otherwise we assume that it is the static pressure, and the gradient
     calculated using:
         \f[
             grad(pressure) = rho*(g.n)
         \f]
+
     where
-        \var n      = patch face normal vectors
+    /vartable
+        n      | patch face normal vectors
+    /endtable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        rho          | density field name      | no          | rho
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            buoyantPressure;
-            rho             rho; // optional density field name (default = rho)
-            value           uniform 0;
-        }
+    myPatch
+    {
+        type            buoyantPressure;
+        rho             rho;
+        value           uniform 0;
+    }
     \endverbatim
 
 SourceFiles
     buoyantPressureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

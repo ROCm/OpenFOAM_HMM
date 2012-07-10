@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::inletOutletTotalTemperatureFvPatchScalarField
 
@@ -29,19 +32,31 @@ Description
     temperature for use with supersonic cases, where a user-specified
     value is applied in the case of reverse flow.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | velocity field name     | no          | U
+        phi          | flux field name         | no          | phi
+        psi          | compressibility field name |  no      | psi
+        gamma        | heat capacity ration (Cp/Cv) | yes    |
+        inletValue   | reverse flow (inlet) value | yes      |
+        T0           | static temperature [K]  | yes         |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            inletOutletTotalTemperature;
-            U               U;         // velocity field (default = U)
-            phi             phi;       // flux field (default = phi)
-            psi             psi;       // compressiblility field (default = psi)
-            gamma           gamma;     // heat capacity ratio
-            inletValue      uniform 0; // reverse flow (inlet) value
-            T0              uniform 0; // static temperature [K]
-            value           uniform 0; // initial value
-        }
+    myPatch
+    {
+        type            inletOutletTotalTemperature;
+        U               U;
+        phi             phi;
+        psi             psi;
+        gamma           gamma;
+        inletValue      uniform 0;
+        T0              uniform 0;
+        value           uniform 0;
+    }
     \endverbatim
    
 SeeAlso
@@ -49,6 +64,8 @@ SeeAlso
 
 SourceFiles
     inletOutletTotalTemperatureFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

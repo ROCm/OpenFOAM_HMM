@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,14 +21,46 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup boundaryConditions
+@{
+
 Class
     Foam::rotatingWallVelocityFvPatchVectorField
 
 Description
-    Foam::rotatingWallVelocityFvPatchVectorField
+    This boundary condition provides a rotational velocity condition.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        origin       | origin of rotation in Cartesian co-ordinates | yes|
+        axis         | axis of rotation        | yes         |
+        omega        | angular velocty of the frame [rad/s] | yes    | 
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            rotatingWallVelocity;
+        origin          (0 0 0);
+        axis            (0 0 1);
+        omega           100;
+    }
+    \endverbatim
+
+    The \c omega entry is a DataEntry type, able to describe time varying
+    functions.
+    
+SeeAlso
+    Foam::DataEntry
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     rotatingWallVelocityFvPatchVectorField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +76,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class rotatingWallVelocityFvPatch Declaration
+           Class rotatingWallVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingWallVelocityFvPatchVectorField
