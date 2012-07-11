@@ -21,14 +21,43 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup icoWallFunctions
+@{
+
 Class
     Foam::incompressible::RASModels::nutURoughWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition for rough walls, based on velocity.
+    This boundary condition provides a turbulent kinematic viscosity condition
+    when using wall functions for rough walls, based on velocity.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        roughnessHeight | roughness height     | yes         |
+        roughnessConstant | roughness constanr | yes         |
+        roughnessFactor | scaling factor       | 
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutURoughWallFunction;
+        roughnessHeight 1e-5;
+        roughnessConstant 0.5;
+        roughnessFactor 1;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
     nutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

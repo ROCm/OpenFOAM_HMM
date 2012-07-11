@@ -21,27 +21,55 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup icoWallFunctions
+@{
+
 Class
     Foam::incompressible::RASModels::
     nutkAtmRoughWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulent (kinematic) viscosity for atmospheric
-    velocity profiles.
-    Desinged to be used togheter with atmBoundaryLayerInletVelocity.
-    It follows  U = (Ustar/K) ln((z - zGround + z0)/z0)
+    This boundary condition provides a turbulent kinematic viscosity for
+    atmospheric velocity profiles.  It is desinged to be used in conjunction
+    with the atmBoundaryLayerInletVelocity boundary condition.  The values
+    are calculated using:
 
-    where:
+        \f[
+            U = (U_f/K) ln((z + z_0)/z_0)
+        \f]
 
-        Ustar is the frictional velocity
-        K is karman's constant
-        z0 is the surface roughness lenght
-        z is the verical coordinate
-        zGround is the minumum coordinate value in z direction.
+    where
 
+    /vartable
+        U_f | frictional velocity
+        K   | Von Karman's constant
+        z_0 | surface roughness length
+        z   | vertical co-ordinate
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        z0           | surface roughness length| yes         |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutkAtmRoughWallFunction;
+        z0              uniform 0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutkWallFunctionFvPatchField
 
 SourceFiles
     nutkAtmRoughWallFunctionFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
@@ -60,7 +88,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class nutkAtmRoughWallFunctionFvPatchScalarField Declaration
+          Class nutkAtmRoughWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class nutkAtmRoughWallFunctionFvPatchScalarField
@@ -71,7 +99,7 @@ protected:
 
     // Protected data
 
-        //- Surface roughness lenght
+        //- Surface roughness length
         scalarField z0_;
 
 

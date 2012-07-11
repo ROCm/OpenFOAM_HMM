@@ -21,16 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup icoWallFunctions
+@{
+
 Class
     Foam::incompressible::RASModels::nutkWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulent (kinematic) viscosity when using wall
-    functions, based on turbulence kinetic energy.
+    This boundary condition provides a turbulent kinematic viscosity condition
+    when using wall functions, based on turbulence kinetic energy.
     - replicates OpenFOAM v1.5 (and earlier) behaviour
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutkWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
     nutkWallFunctionFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

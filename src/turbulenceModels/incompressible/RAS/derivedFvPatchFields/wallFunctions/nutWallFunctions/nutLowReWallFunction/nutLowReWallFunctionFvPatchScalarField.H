@@ -21,17 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup icoWallFunctions
+@{
+
 Class
     Foam::incompressible::RASModels::nutLowReWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulent (kinematic) viscosity when for use with
-    low Reynolds number models.
+    This boundary condition provides a turbulent kinematic viscosity condition
+    for use with low Reynolds number models.  It sets \c nut to zero, and
+    provides an access function to calculate y+.
 
-    Sets nut to zero, and provides an access function to calculate y+.
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutLowReWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
     nutLowReWallFunctionFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -21,6 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup icoWallFunctions
+@{
+
 Class
     Foam::incompressible::RASModels::epsilonWallFunctionFvPatchScalarField
 
@@ -29,28 +32,42 @@ Description
     condition for high Reynolds number, turbulent flow cases.
 
     The condition can be applied to wall boundaries, whereby it
-    \li calculates \c epsilon and \c G
-    \li inserts near wall epsilon values directly into the epsilon equation
+    - calculates \c epsilon and \c G
+    - inserts near wall epsilon values directly into the epsilon equation
         to act as a constraint
 
     where
-        \var epsilon = turblence dissipation field
-        \var G       = turblence generation field
+
+    /vartable
+        epsilon | turblence dissipation field
+        G       | turblence generation field
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        G            | turbulence generation field name | no | G
+        Cmu          | model coefficient       | no          | 0.09
+        kappa        | Von Karman constant     | no          | 0.41
+        E            | model coefficient       | no          | 9.8
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            epsilonWallFunction;
-            G               G;      // turblence generation field (default = G)
-            Cmu             0.09;   // Cmu model coefficient (default = 0.09)
-            kappa           0.41;   // Von Karman constant (default = 0.41)
-            E               9.8;    // E coefficient (default = 9.8)
-        }
+    myPatch
+    {
+        type            epsilonWallFunction;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedInternalValueFvPatchField
 
 SourceFiles
     epsilonWallFunctionFvPatchScalarField.C
+
+@}
 
 \*---------------------------------------------------------------------------*/
 
