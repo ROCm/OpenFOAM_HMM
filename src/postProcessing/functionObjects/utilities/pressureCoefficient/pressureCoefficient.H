@@ -21,13 +21,18 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup functionObjects
+@{
+
 Class
     Foam::pressureCoefficient
 
 Description
-    Calculates pressure coefficient, c_p
+    Calculates pressure coefficient, \f$c_p\f$
 
-        c_p = p/p_dyn,inf
+        \f[
+            c_p = p/p_{dyn,inf}
+        \f]
 
     where:
 
@@ -36,6 +41,7 @@ Description
 SourceFiles
     pressureCoefficient.C
     IOpressureCoefficient.H
+@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -21,19 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+\addtogroup functionObjects
+@{
+
 Class
     Foam::cloudInfo
 
 Description
-    Outputs cloud information to file
-
-    Currently outputs:
-        - total current number of parcels
-        - total current mass of parcels
+    This function object outputs lagrangian cloud information to a file.  The
+    current outputs include:
+    - total current number of parcels
+    - total current mass of parcels
 
 SourceFiles
     cloudInfo.C
     IOcloudInfo.H
+@}
 
 \*---------------------------------------------------------------------------*/
 
