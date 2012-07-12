@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::mappedFlowRateFvPatchVectorField
+
+\ingroup grpInletBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     Describes a volumetric/mass flow normal vector boundary condition by its
@@ -47,7 +46,7 @@ Description
     /endtable
 
     Example of the boundary condition specification:
-    @verbatim
+    /verbatim
     inlet
     {
         type            mappedFlowRate;
@@ -56,12 +55,10 @@ Description
         neigPhi         phi;
         value           uniform (0 0 0); // placeholder
     }
-    @endverbatim
+    /endverbatim
 
 SourceFiles
     mappedFlowRateFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

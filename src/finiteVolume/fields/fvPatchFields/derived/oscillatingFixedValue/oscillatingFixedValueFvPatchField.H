@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::oscillatingFixedValueFvPatchField
+
+\ingroup grpGenericBoundaryConditions
 
 Description
     This boundary condition provides an oscillating condition in terms of
@@ -78,8 +77,6 @@ SeeAlso
 
 SourceFiles
     oscillatingFixedValueFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

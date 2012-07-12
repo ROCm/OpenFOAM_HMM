@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::freestreamPressureFvPatchScalarField
+
+\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a free-stream condition for pressure.
@@ -51,8 +50,6 @@ SeeAlso
 
 SourceFiles
     freestreamPressureFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

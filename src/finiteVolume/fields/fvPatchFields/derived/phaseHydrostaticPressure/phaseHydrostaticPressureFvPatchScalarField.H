@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::phaseHydrostaticPressureFvPatchScalarField
+
+\ingroup grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a phase-based hydrostatic pressure
@@ -76,8 +75,6 @@ SeeAlso
 
 SourceFiles
     phaseHydrostaticPressureFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

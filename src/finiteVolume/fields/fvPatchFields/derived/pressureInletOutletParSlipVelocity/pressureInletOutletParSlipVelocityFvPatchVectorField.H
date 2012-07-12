@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::pressureInletOutletParSlipVelocityFvPatchVectorField
+
+\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This velocity inlet/outlet boundary condition for pressure boundary where
@@ -66,8 +65,6 @@ SeeAlso
 
 SourceFiles
     pressureInletOutletParSlipVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

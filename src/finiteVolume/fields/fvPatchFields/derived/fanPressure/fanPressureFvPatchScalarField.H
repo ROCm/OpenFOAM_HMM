@@ -24,6 +24,8 @@ License
 Class
     Foam::fanPressureFvPatchScalarField
 
+\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+
 Description
     This boundary condition can be applied to assign either a pressure inlet
     or outlet total pressure condition for a fan.
@@ -35,25 +37,25 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-        inlet
-        {
-            type            fanPressure;
-            fileName        "fanCurve"; // Fan curve file name
-            outOfBounds     clamp;      // (error|warn|clamp|repeat)
-            direction       in;         // Direction of flow through fan
-            p0              uniform 0;  // Environmental total pressure
-            value           uniform 0;  // Initial pressure
-        }
+    inlet
+    {
+        type            fanPressure;
+        fileName        "fanCurve"; // Fan curve file name
+        outOfBounds     clamp;      // (error|warn|clamp|repeat)
+        direction       in;         // Direction of flow through fan
+        p0              uniform 0;  // Environmental total pressure
+        value           uniform 0;  // Initial pressure
+    }
 
-        outlet
-        {
-            type            fanPressure;
-            fileName        "fanCurve"; // Fan curve file name
-            outOfBounds     clamp;      // (error|warn|clamp|repeat)
-            direction       out;        // Direction of flow through fan
-            p0              uniform 0;  // Environmental total pressure
-            value           uniform 0;  // Initial pressure
-        }
+    outlet
+    {
+        type            fanPressure;
+        fileName        "fanCurve"; // Fan curve file name
+        outOfBounds     clamp;      // (error|warn|clamp|repeat)
+        direction       out;        // Direction of flow through fan
+        p0              uniform 0;  // Environmental total pressure
+        value           uniform 0;  // Initial pressure
+    }
     \endverbatim
 
 See Also
@@ -62,7 +64,7 @@ See Also
     Foam::interpolationTable
 
 SourceFiles
-    fanPressureFvPatchScalarField.C
+   fanPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 

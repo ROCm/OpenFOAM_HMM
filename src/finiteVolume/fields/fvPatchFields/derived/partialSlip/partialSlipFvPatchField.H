@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::partialSlipFvPatchField
+
+\ingroup grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a partial slip condition.  The amount of
@@ -53,8 +52,6 @@ SeeAlso
 
 SourceFiles
     partialSlipFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

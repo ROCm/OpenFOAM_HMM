@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::buoyantPressureFvPatchScalarField
+
+\ingroup grpGenericBoundaryConditions grpWallBoundaryConditions
 
 Description
     This boundary condition sets the pressure gradient appropriately for
@@ -80,8 +79,6 @@ Description
 
 SourceFiles
     buoyantPressureFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

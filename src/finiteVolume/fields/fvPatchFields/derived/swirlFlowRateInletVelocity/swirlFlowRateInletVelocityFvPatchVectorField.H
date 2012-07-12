@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::swirlFlowRateInletVelocityFvPatchVectorField
+
+\ingroup grpInletBoundaryConditions
 
 Description
     This boundary condition provides a volumetric- OR mass-flow normal vector
@@ -68,8 +67,6 @@ SeeAlso
 
 SourceFiles
     swirlFlowRateInletVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

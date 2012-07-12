@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::mappedFixedValueFvPatchField
+
+\ingroup grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition maps the value at a set of cells or patch faces
@@ -76,8 +75,6 @@ SeeAlso
 
 SourceFiles
     mappedFixedValueFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

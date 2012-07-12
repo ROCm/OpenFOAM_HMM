@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::timeVaryingMappedFixedValueFvPatchField
+
+\ingroup grpInletBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary conditions interpolates the values from a set of supplied
@@ -70,7 +69,6 @@ SeeAlso
 
 SourceFiles
     timeVaryingMappedFixedValueFvPatchField.C
-@}
 
 \*---------------------------------------------------------------------------*/
 

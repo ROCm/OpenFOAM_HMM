@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::activePressureForceBaffleVelocityFvPatchVectorField
+
+\ingroup grpCoupledBoundaryConditions
 
 Description
     This boundary condition is applied to the flow velocity, to simulate the
@@ -85,8 +84,6 @@ Description
 
 SourceFiles
     activePressureForceBaffleVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

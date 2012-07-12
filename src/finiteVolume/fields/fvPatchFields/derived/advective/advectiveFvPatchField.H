@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::advectiveFvPatchField
+
+\ingroup grpOutletBoundaryConditions
 
 Description
     This boundary condition provides an advective outflow condition, based on
@@ -76,8 +75,6 @@ Description
 
 SourceFiles
     advectiveFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

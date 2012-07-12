@@ -24,11 +24,36 @@ License
 Class
     Foam::totalTemperatureFvPatchScalarField
 
+\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+
 Description
-    Foam::totalTemperatureFvPatchScalarField
+    This boundary condition provides a total temperature condition.
+
+   /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        U            | Velocity field name     | no          | U
+        phi          | Flux field name         | no          | phi
+        psi          | Compressibility field name | no       | psi
+        gamma        | ratio of specific heats (Cp/Cv) | yes |
+        T0           | reference temperature   | yes         |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            totalTemperature;
+        T0              uniform 300;
+    }
+    \endverbatim
 
 SourceFiles
     totalTemperatureFvPatchScalarField.C
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +68,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class totalTemperatureFvPatch Declaration
+             Class totalTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class totalTemperatureFvPatchScalarField

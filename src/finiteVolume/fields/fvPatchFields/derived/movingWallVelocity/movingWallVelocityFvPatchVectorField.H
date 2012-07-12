@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::movingWallVelocityFvPatchVectorField
+
+\ingroup grpWallBoundaryConditions
 
 Description
     This boundary condition provides a velocity condition for cases with
@@ -56,8 +55,6 @@ SeeAlso
 
 SourceFiles
     movingWallVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

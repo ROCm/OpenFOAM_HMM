@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
+
+\ingroup grpInletBoundaryConditions
 
 Description
     This boundary condition provides a velocity boundary condition for
@@ -62,8 +61,6 @@ SeeAlso
 
 SourceFiles
     variableHeightFlowRateInletVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

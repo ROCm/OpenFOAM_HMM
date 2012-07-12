@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::fixedNormalSlipFvPatchField
+
+\ingroup grpGenericBoundaryConditions grpWallBoundaryConditions
 
 Description
     This boundary condition sets the patch-normal component to a fixed value.
@@ -51,8 +50,6 @@ SeeAlso
 
 SourceFiles
     fixedNormalSlipFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

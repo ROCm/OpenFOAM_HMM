@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::fanFvPatchField
+
+\ingroup grpCoupledBoundaryConditions
 
 Description
     This boundary condition supplies a jump condition, using the \c cyclic
@@ -77,7 +76,6 @@ SourceFiles
     fanFvPatchFields.H
     fanFvPatchFields.C
     fanFvPatchFieldsFwd.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

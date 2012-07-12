@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::fluxCorrectedVelocityFvPatchVectorField
+
+\ingroup grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a velocity outlet boundary condition for
@@ -74,8 +73,6 @@ SeeAlso
 
 SourceFiles
     fluxCorrectedVelocityFvPatchVectorField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

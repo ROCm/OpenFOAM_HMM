@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::variableHeightFlowRateFvPatchScalarField
+
+\ingroup grpInletBoundaryConditions
 
 Description
     This boundary condition provides a phase fraction condition based on the
@@ -63,8 +62,6 @@ Description
 
 SourceFiles
     variableHeightFlowRateFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

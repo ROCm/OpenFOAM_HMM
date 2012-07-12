@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::uniformTotalPressureFvPatchScalarField
+
+\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a time-varying form of the uniform total
@@ -73,8 +72,6 @@ SeeAlso
 
 SourceFiles
     uniformTotalPressureFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::outletInletFvPatchField
+
+\ingroup grpInletBoundaryConditions
 
 Description
     This boundary condition provides a generic inflow condition, with
@@ -60,8 +59,6 @@ Description
 
 SourceFiles
     outletInletFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 
