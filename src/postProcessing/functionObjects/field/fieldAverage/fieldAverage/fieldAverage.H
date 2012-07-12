@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 Class
     Foam::fieldAverage
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Calculates the field averages given list of fieldAverageItems, e.g.
@@ -83,7 +82,6 @@ Description
 SourceFiles
     fieldAverage.C
     fieldAverageTemplates.C
-@}
 
 \*---------------------------------------------------------------------------*/
 

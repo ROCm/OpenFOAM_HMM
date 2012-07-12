@@ -24,7 +24,8 @@ License
 Class
     Foam::fixedNormalSlipFvPatchField
 
-\ingroup grpGenericBoundaryConditions grpWallBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpWallBoundaryConditions
 
 Description
     This boundary condition sets the patch-normal component to a fixed value.

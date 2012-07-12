@@ -24,15 +24,39 @@ License
 Class
     Foam::compressible::RASModels::mutkRoughWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Boundary condition for turbulent (kinematic) viscosity when using wall
-    functions for rough walls, based on turbulence kinetic energy.
+    This boundary condition provides a turbulent viscosity condition when
+    using wall functions for rough walls, based on turbulence kinetic energy.
+    The condition manipulates the E parameter to account for roughness
+    effects.
 
-    Manipulates the E parameter to account for roughness effects, based on
-    KsPlus.
-
+    Parameter ranges
     - roughness height = sand-grain roughness (0 for smooth walls)
-    - roughness constant = 0.5-1.0 (0.5 default)
+    - roughness constant = 0.5-1.0
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        Ks           | sand-grain roughness height | yes     |
+        Cs           | roughness constant      | yes         |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutkAtmRoughWallFunction;
+        Ks              uniform 0;
+        Cs              uniform 0.5;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mutkRoughWallFunctionFvPatchScalarField
 
 SourceFiles
     mutkRoughWallFunctionFvPatchScalarField.C

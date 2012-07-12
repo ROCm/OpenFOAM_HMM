@@ -24,7 +24,8 @@ License
 Class
     Foam::uniformTotalPressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a time-varying form of the uniform total

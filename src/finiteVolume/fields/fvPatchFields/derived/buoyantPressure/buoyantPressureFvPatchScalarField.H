@@ -24,7 +24,8 @@ License
 Class
     Foam::buoyantPressureFvPatchScalarField
 
-\ingroup grpGenericBoundaryConditions grpWallBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpWallBoundaryConditions
 
 Description
     This boundary condition sets the pressure gradient appropriately for
@@ -34,31 +35,30 @@ Description
     - \c pd
     - \c p_rgh
     - \c ph_rgh
-    we assume that the pressure variable is \f$p - rho*g.h\f$ and the gradient
-    set using:
+    we assume that the pressure variable is \f$p - \rho(g \cdot h)\f$ and the
+    gradient set using:
         \f[
-            grad(pressure) = -snGrad(rho)*(g.h)
+            \nabla(p) = -\nabla_\perp(\rho)(g \cdot h)
         \f]
 
     where
 
     /vartable
-        snGrad | surface-normal gradient operator
-        rho    | density [kg/m3]
+        \rho   | density [kg/m3]
         g      | acceleration due to gravity [m/s2]
         h      | patch face centres [m]
-    /endtable
+    /endvartable
 
     Otherwise we assume that it is the static pressure, and the gradient
     calculated using:
         \f[
-            grad(pressure) = rho*(g.n)
+            \nabla(p) = \rho(g \cdot n)
         \f]
 
     where
     /vartable
         n      | patch face normal vectors
-    /endtable
+    /endvartable
 
     /heading Patch usage
 
@@ -94,7 +94,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class buoyantPressureFvPatch Declaration
+             Class buoyantPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class buoyantPressureFvPatchScalarField

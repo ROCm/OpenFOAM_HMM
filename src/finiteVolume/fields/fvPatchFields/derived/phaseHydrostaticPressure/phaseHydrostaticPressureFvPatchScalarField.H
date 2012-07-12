@@ -24,14 +24,15 @@ License
 Class
     Foam::phaseHydrostaticPressureFvPatchScalarField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a phase-based hydrostatic pressure
     condition, calculated as:
 
         \f[
-            p_{hyd} = p_{ref} + \rho*g.(x - x_{ref})
+            p_{hyd} = p_{ref} + \rho g (x - x_{ref})
         \f]
 
     where

@@ -24,22 +24,23 @@ License
 Class
     Foam::fixedPressureCompressibleDensityFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition calculates a (liquid) compressible density as a
     function of pressure and fluid properties:
 
         \f[
-            rho = rho_{l,sat} + psi_l*(p - p_{sat})
+            \rho = \rho_{l,sat} + \psi_l*(p - p_{sat})
         \f]
 
     where
 
     /vartable
-        rho     | density [kg/m3]
-        rho_{l,sat} | saturation liquid density [kg/m3]
-        psi_l   | liquid compressibility
+        \rho    | density [kg/m3]
+        \rho_{l,sat} | saturation liquid density [kg/m3]
+        \psi_l  | liquid compressibility
         p       | pressure [Pa]
         p_{sat} | saturation pressure [Pa]
     /endvartable

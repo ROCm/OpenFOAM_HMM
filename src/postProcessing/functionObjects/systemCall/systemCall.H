@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFunctionObjects
-@{
-
 Class
     Foam::systemCall
+
+\ingroup grpFunctionObjects
 
 Description
     Executes system calls, entered in the form of a string list
@@ -33,7 +32,6 @@ Description
 SourceFiles
     systemCall.C
     IOsystemCall.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

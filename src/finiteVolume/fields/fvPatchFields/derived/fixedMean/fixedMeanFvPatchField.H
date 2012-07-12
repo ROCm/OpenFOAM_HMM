@@ -24,7 +24,8 @@ License
 Class
     Foam::fixedMeanFvPatchField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition extrapolates field to the patch using the near-cell

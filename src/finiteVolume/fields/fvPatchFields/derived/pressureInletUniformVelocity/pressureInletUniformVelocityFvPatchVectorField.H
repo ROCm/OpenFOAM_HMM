@@ -24,7 +24,8 @@ License
 Class
     Foam::pressureInletUniformVelocityFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This velocity inlet boundary condition is applied to patches where the

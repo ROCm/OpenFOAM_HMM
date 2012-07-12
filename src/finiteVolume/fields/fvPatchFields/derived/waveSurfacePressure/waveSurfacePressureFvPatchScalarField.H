@@ -24,7 +24,8 @@ License
 Class
     Foam::waveSurfacePressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This is a pressure boundary condition, whose value is calculated as

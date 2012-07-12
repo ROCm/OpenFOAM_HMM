@@ -24,7 +24,8 @@ License
 Class
     Foam::temperatureJumpFvPatchScalarField
 
-\ingroup grpCoupledBoundaryConditions
+Group
+    grpCoupledBoundaryConditions
 
 Description
     This boundary condition provides a temperature jump condition across a

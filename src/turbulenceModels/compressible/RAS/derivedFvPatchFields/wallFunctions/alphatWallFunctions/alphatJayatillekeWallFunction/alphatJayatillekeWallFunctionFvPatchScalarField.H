@@ -24,21 +24,37 @@ License
 Class
     alphatJayatillekeWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Thermal wall function for turbulent thermal diffusivity (usually
-    \c alphaSgs) based on the Jayatilleke model.
+    This boundary condition provides a thermal wall function for turbulent
+    thermal diffusivity (usually\c alphat) based on the Jayatilleke model.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        Prt          | turbulent Prandtl number | no         | 0.85
+        Cmu          | model coefficient       | no          | 0.09
+        kappa        | Von Karman constant     | no          | 0.41
+        E            | model coefficient       | no          | 9.8
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            alphaSgsJayatillekeWallFunction;
-            Prt             0.85;   // turbulent Prandtl number (default = 0.85)
-            kappa           0.41;   // Von Karman constant (default = 0.41)
-            E               9.8;    // E coefficient (default = 9.8)
-            value           uniform 0; // optional value entry
-        }
+    myPatch
+    {
+        type            alphaSgsJayatillekeWallFunction;
+        Prt             0.85;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0; // optional value entry
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     alphatJayatillekeWallFunctionFvPatchScalarField.C

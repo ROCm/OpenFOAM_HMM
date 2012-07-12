@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 class
     Foam::fieldCoordinateSystemTransform
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Transforms fields from global cartesian co-ordinates to local co-ordinate
@@ -35,7 +34,6 @@ SourceFiles
     fieldCoordinateSystemTransform.C
     fieldCoordinateSystemTransformTemplates.C
     IOfieldCoordinateSystemTransform.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

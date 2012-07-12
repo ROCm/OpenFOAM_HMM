@@ -24,7 +24,8 @@ License
 Class
     Foam::syringePressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a pressure condition, obtained from a
@@ -40,16 +41,16 @@ Description
 
     /table
         Property     | Description             | Required    | Default value
-        Ap           | syringe piston area     | yes         |
-        Sp           | syringe piston speed    | yes         |
-        VsI          | initial syringe volume  | yes         |
-        tas          | start of piston acceleration | yes    |
-        tae          | end of piston acceleration | yes      |
-        tds          | start of piston deceleration | yes    |
-        tde          | end of piston deceleration | yes      |
-        psI          | initial syringe pressure | yes        |
-        psi          | gas compressibility     | yes         |
-        ams          | added (or removed) gas mass | yes     |
+        Ap           | syringe piston area [m2] | yes        |
+        Sp           | syringe piston speed [m/s] | yes      |
+        VsI          | initial syringe volume [m3] | yes     |
+        tas          | start of piston acceleration [s] | yes |
+        tae          | end of piston acceleration [s] | yes  |
+        tds          | start of piston deceleration [s] | yes |
+        tde          | end of piston deceleration [s] | yes  |
+        psI          | initial syringe pressure [Pa] | yes   |
+        psi          | gas compressibility [m2/s2] | yes     |
+        ams          | added (or removed) gas mass [kg] | yes |
     /endtable
 
     Example of the BC specification:
@@ -57,17 +58,17 @@ Description
     myPatch
     {
         type            syringePressure;
-        Ap              1.388e-6; // syringe piston area
-        Sp              0.01;     // syringe piston speed
-        VsI             1.388e-8; // Initial syringe volume
-        tas             0.001;    // Start of piston acceleration
-        tae             0.002;    // End of piston acceleration
-        tds             0.005;    // Start of piston deceleration
-        tde             0.006;    // end of piston deceleration
-        psI             1e5;      // Initial syringe pressure
-        psi             1e-5;     // Gas compressibility
-        ams             0;        // Added (or removed) gas mass
-        value           uniform 0 // Initially 0 but used for restarting
+        Ap              1.388e-6;
+        Sp              0.01;
+        VsI             1.388e-8;
+        tas             0.001;
+        tae             0.002;
+        tds             0.005;
+        tde             0.006;
+        psI             1e5;
+        psi             1e-5;
+        ams             0;
+        value           uniform 0;
     }
     \endverbatim
 

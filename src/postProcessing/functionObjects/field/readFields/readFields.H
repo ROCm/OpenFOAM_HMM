@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 Class
     Foam::readFields
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Reads fields from the time folders and adds them to the mesh database
@@ -34,7 +33,6 @@ Description
 SourceFiles
     readFields.C
     IOreadFields.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

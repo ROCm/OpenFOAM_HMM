@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,19 +24,51 @@ License
 Class
     Foam::compressible::turbulentMixingLengthFrequencyInletFvPatchScalarField
 
+Group
+    grpCmpRASBoundaryConditions grpInletBoundaryConditions
+
 Description
-    Calculate omega via the mixing length
+    This boundary condition provides a turbulence specific dissipation,
+    \f$\omega\f$ (omega) inlet condition based on a specified mixing length.
+    The patch values are calculated using:
+
+        \f[
+            \omega_p = \frac{k^{0.5}}{C_{\mu}^{0.25} L}
+        \f]
+   
+    where
+
+    /vartable
+        \omega_p | patch omega values
+        C_{\mu} | Model coefficient, set to 0.09
+        k       | turbulence kinetic energy
+        L       | length scale
+    /endvartable
+
+    \note
+    In the event of reverse flow, a zero-gradient condition is applied
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        mixingLength | Length scale [m]        | yes         |
+        phi          | flux field name         | no          | phi
+        k            | turbulence kinetic energy field name | no | k
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        inlet
-        {
-            type            compressible::turbulentMixingLengthFrequencyInlet;
-            mixingLength    0.005;         // 5 mm
-            k               k;             // turbulent k field
-            value           uniform 5;     // initial value
-        }
+    myPatch
+    {
+        type            compressible::turbulentMixingLengthFrequencyInlet;
+        mixingLength    0.005;
+        value           uniform 200;   // placeholder
+    }
     \endverbatim
+
+SeeAlso
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     turbulentMixingLengthFrequencyInletFvPatchScalarField.C

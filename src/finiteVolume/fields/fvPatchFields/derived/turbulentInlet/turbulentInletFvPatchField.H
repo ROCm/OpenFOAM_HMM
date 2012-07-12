@@ -24,14 +24,15 @@ License
 Class
     Foam::turbulentInletFvPatchField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition generates a fluctuating inlet condition by adding
     a random component to a reference (mean) field.
 
     \f[
-        x_p = (1 - \alpha)*x_p^{n-1} + \alpha*(x_{ref}+C_{RMS}*s*x_{ref})
+        x_p = (1 - \alpha) x_p^{n-1} + \alpha (x_{ref} + s C_{RMS} x_{ref})
     \f]
 
     where

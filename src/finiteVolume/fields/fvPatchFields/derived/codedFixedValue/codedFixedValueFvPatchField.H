@@ -24,7 +24,8 @@ License
 Class
     Foam::codedFixedValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     Constructs on-the-fly a new boundary condition (derived from

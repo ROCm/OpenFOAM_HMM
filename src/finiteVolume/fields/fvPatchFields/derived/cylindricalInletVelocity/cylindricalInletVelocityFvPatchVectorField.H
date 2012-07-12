@@ -24,7 +24,8 @@ License
 Class
     Foam::cylindricalInletVelocityFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition describes an inlet vector boundary condition in

@@ -24,7 +24,8 @@ License
 Class
     Foam::outletInletFvPatchField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a generic inflow condition, with

@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpForcesFunctionObjects
-@{
-
 Class
     Foam::forces
+
+\ingroup grpForcesFunctionObjects
 
 Description
     Calculates the forces and moments by integrating the pressure and
@@ -54,7 +53,6 @@ Note
 SourceFiles
     forces.C
     IOforces.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

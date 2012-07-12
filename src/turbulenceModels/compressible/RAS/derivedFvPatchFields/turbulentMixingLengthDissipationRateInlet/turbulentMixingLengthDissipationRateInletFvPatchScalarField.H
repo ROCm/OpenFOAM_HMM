@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,18 +25,51 @@ Class
     Foam::compressible::
         turbulentMixingLengthDissipationRateInletFvPatchScalarField
 
+Group
+    grpCmpRASBoundaryConditions grpInletBoundaryConditions
+
 Description
-    Calculate epsilon via the mixing length [m]
+    This boundary condition provides a turbulence dissipation, \f$\epsilon\f$
+    (epsilon) inlet condition based on a specified mixing length.  The patch
+    values are calculated using:
+
+        \f[
+            \epsilon_p = \frac{C_{\mu}^{0.75} k^{1.5}}{L}
+        \f]
+   
+    where
+
+    /vartable
+        \epsilon_p | patch epsilon values
+        C_{\mu} | Model coefficient, set to 0.09
+        k       | turbulence kinetic energy
+        L       | length scale
+    /endvartable
+
+    \note
+    In the event of reverse flow, a zero-gradient condition is applied
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        mixingLength | Length scale [m]        | yes         |
+        phi          | flux field name         | no          | phi
+        k            | turbulence kinetic energy field name | no | k
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        inlet
-        {
-            type        compressible::turbulentMixingLengthDissipationRateInlet;
-            mixingLength    0.005;         // 5 mm
-            value           uniform 200;   // placeholder
-        }
+    myPatch
+    {
+        type            compressible::turbulentMixingLengthDissipationRateInlet;
+        mixingLength    0.005;
+        value           uniform 200;   // placeholder
+    }
     \endverbatim
+
+SeeAlso
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
@@ -56,7 +89,7 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-       Class turbulentMixingLengthDissipationRateInletFvPatch Declaration
+ Class turbulentMixingLengthDissipationRateInletFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class turbulentMixingLengthDissipationRateInletFvPatchScalarField

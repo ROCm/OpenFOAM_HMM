@@ -24,7 +24,8 @@ License
 Class
     Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a turbulent kinetic energy condition,
@@ -32,7 +33,7 @@ Description
     mean velocity:
 
         \f[
-            k_p = 1.5*(I)*|U|^2
+            k_p = 1.5 I |U|^2
         \f]
 
     where

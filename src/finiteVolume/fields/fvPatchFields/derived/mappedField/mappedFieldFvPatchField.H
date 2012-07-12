@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedFieldFvPatchField
 
-\ingroup grpGenericBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition provides a self-contained version of the \c mapped

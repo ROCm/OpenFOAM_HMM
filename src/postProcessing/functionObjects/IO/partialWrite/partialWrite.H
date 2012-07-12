@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpIOFunctionObjects
-@{
-
 Class
     Foam::partialWrite
+
+\ingroup grpIOFunctionObjects
 
 Description
     Allows some fields/registered objects to be written more often than others.
@@ -36,7 +35,6 @@ Description
 SourceFiles
     partialWrite.C
     IOpartialWrite.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpIOFunctionObjects
-@{
-
 Class
     Foam::removeRegisteredObject
+
+\ingroup grpIOFunctionObjects
 
 Description
     Removes registered IO objects if present in the database
@@ -33,7 +32,6 @@ Description
 SourceFiles
     removeRegisteredObject.C
     IOremoveRegisteredObject.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

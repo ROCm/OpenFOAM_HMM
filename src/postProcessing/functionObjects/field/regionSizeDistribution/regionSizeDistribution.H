@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 Class
     Foam::regionSizeDistribution
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Looks up a field, interpolates it to the faces and determines a connected
@@ -36,7 +35,6 @@ Description
 
 SourceFiles
     regionSizeDistribution.C
-@}
 
 \*---------------------------------------------------------------------------*/
 

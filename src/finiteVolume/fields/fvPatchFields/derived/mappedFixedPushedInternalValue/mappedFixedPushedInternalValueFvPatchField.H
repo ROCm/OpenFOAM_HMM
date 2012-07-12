@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedFixedPushedInternalValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition maps the boundary values of a neighbour patch

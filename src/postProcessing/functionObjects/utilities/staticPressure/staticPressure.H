@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpUtilitiesFunctionObjects
-@{
-
 Class
     Foam::staticPressure
+
+\ingroup grpUtilitiesFunctionObjects
 
 Description
     Converts kinematic pressure to static pressure, from the name of the
@@ -36,7 +35,6 @@ Description
 SourceFiles
     staticPressure.C
     IOstaticPressure.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

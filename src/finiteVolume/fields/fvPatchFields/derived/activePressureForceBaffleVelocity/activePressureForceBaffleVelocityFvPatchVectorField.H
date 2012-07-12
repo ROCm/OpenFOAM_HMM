@@ -24,7 +24,8 @@ License
 Class
     Foam::activePressureForceBaffleVelocityFvPatchVectorField
 
-\ingroup grpCoupledBoundaryConditions
+Group
+    grpCoupledBoundaryConditions
 
 Description
     This boundary condition is applied to the flow velocity, to simulate the

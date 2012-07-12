@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedFixedValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition maps the value at a set of cells or patch faces

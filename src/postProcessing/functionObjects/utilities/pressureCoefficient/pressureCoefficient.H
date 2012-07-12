@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpUtilitiesFunctionObjects
-@{
-
 Class
     Foam::pressureCoefficient
+
+\ingroup grpUtilitiesFunctionObjects
 
 Description
     Calculates pressure coefficient, \f$c_p\f$
@@ -41,7 +40,6 @@ Description
 SourceFiles
     pressureCoefficient.C
     IOpressureCoefficient.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -24,7 +24,8 @@ License
 Class
     Foam::partialSlipFvPatchField
 
-\ingroup grpWallBoundaryConditions grpGenericBoundaryConditions
+Group
+    grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a partial slip condition.  The amount of

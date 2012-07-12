@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpUtilitiesFunctionObjects
-@{
-
 Class
     Foam::yPlusLES
+
+\ingroup grpUtilitiesFunctionObjects
 
 Description
     Evaluates and outputs turbulence y+ for LES models.  Values written to
@@ -34,7 +33,6 @@ Description
 SourceFiles
     yPlusLES.C
     IOyPlusLES.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

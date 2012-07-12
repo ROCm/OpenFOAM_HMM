@@ -23,9 +23,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpFunctionObjects Function objects
+\defgroup grpCmpRASBoundaryConditions RAS compressible boundary conditions
 @{
-    This group contains function objects
+    This group contains compressible RAS turbulence model boundary conditions
 @}
+
+\defgroup grpCmpWallFunctions RAS compressible wall functions
+@{
+    \ingroup grpCmpRASBoundaryConditions
+    This group contains compressible RAS turbulence model wall functions
+@}
+
 
 \*---------------------------------------------------------------------------*/

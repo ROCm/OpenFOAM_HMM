@@ -24,28 +24,49 @@ License
 Class
     Foam::compressible::RASModels::alphatWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Boundary condition for turbulent thermal diffusivity when using wall
-    functions
+    This boundary condition provides a turbulent thermal diffusivity conditon
+    when using wall functions
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
-    \li replicates OpenFOAM v1.5 (and earlier) behaviour
-
-    Turbulent thermal diffusivity calculated using:
+    The turbulent thermal diffusivity calculated using:
 
         \f[
-            alphat = mut/Prt
+            \alpha_t = \frac{\mu_t}{Pr_t}
         \f]
+
+    where
+
+    /vartable
+        \alpha_t| turblence thermal diffusivity
+        \mu_t   | turblence viscosity
+        Pr_t    | turblent Prandtl number
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        mut          | turbulence viscosity field name | no  | mut
+        Prt          | turbulent Prandtl number | no          | 0.85
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            alphatWallFunction;
-            mut             mut;    // turbulent viscosity field (default = mut)
-            Prt             0.85;   // turbulent Prandtl number (default = 085)
-            value           uniform 0; // optional value entry
-        }
+    myPatch
+    {
+        type            alphatWallFunction;
+        mut             mut;
+        Prt             0.85;
+        value           uniform 0; // optional value entry
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     alphatWallFunctionFvPatchScalarField.C

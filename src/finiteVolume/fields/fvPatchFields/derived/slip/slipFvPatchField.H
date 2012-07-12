@@ -24,7 +24,8 @@ License
 Class
     Foam::slipFvPatchField
 
-\ingroup grpWallBoundaryConditions grpGenericBoundaryConditions
+Group
+    grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a slip constraint.

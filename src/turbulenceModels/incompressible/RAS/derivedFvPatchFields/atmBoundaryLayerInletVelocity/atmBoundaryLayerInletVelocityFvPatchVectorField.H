@@ -24,7 +24,8 @@ License
 Class
     Foam::incompressible::atmBoundaryLayerInletVelocityFvPatchVectorField
 
-\ingroup grpIcoRASBoundaryConditions grpInletBoundaryConditions
+Group
+    grpIcoRASBoundaryConditions grpInletBoundaryConditions
 
 Description
     This boundary condition specifies a velocity inlet profile appropriate

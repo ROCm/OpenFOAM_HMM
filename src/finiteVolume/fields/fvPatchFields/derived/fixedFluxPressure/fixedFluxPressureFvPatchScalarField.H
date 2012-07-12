@@ -24,23 +24,26 @@ License
 Class
     Foam::fixedFluxPressureFvPatchScalarField
 
-\ingroup grpBoundaryConditions
+Group
+    grpOutletBoundaryConditions
 
 Description
     This boundary condition adjusts the pressure gradient such that the flux
     on the boundary is that specified by the velocity boundary condition.
 
     The predicted flux to be compensated by the pressure gradient is evaluated
-    as \f$(phi - phiHbyA)\f$, both of which are looked-up from the database, as
-    is the pressure diffusivity \c Dp used to calculate the gradient using:
+    as \f$(\phi - \phi_{H/A})\f$, both of which are looked-up from the database, as
+    is the pressure diffusivity used to calculate the gradient using:
 
         \f[
-            grad(pressure) = \frac{phiHbyA - phi}{mag(Sf)*Dp}
+            \nabla(p) = \frac{\phi_{H/A} - \phi}{|Sf| D_p}
         \f]
 
     where
 
     /vartable
+        phi     | flux
+        D_p     | pressure diffusivity
         Sf      | patch face areas [m2]
     /endvartable
 
@@ -58,7 +61,7 @@ Description
     \verbatim
     myPatch
     {
-        type            externalWallHeatFluxTemperature;
+        type            fixedFluxPressure;
         phiHbyA         phiHbyA;
         phi             phi;
         rho             rho;

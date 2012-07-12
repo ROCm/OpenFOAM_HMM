@@ -24,7 +24,8 @@ License
 Class
     Foam::rotatingWallVelocityFvPatchVectorField
 
-\ingroup grpWallBoundaryConditions grpGenericBoundaryConditions
+Group
+    grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a rotational velocity condition.

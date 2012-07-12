@@ -24,7 +24,8 @@ License
 Class
     Foam::pressureInletOutletVelocityFvPatchVectorField
 
-\ingroup grpInletletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This velocity inlet/outlet boundary condition is applied to pressure

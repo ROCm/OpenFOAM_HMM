@@ -24,7 +24,8 @@ License
 Class
     Foam::fanPressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition can be applied to assign either a pressure inlet
@@ -97,7 +98,9 @@ public:
             ffdOut
         };
 
+        //- Fan flow directions names
         static const NamedEnum<fanFlowDirection, 2> fanFlowDirectionNames_;
+
 
 private:
 

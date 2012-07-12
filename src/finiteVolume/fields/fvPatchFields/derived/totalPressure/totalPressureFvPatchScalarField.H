@@ -24,15 +24,16 @@ License
 Class
     Foam::totalPressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a total pressure condition.  Four
     variants are possible:
 
-    - incompressible subsonic:
+    1. incompressible subsonic:
         \f[
-            p_T = p_0 + 0.5*|U|^2
+            p_T = p_0 + 0.5 |U|^2
         \f]
         where
         /vartable
@@ -41,9 +42,9 @@ Description
             U       | velocity
         /endvartable
 
-    - compressible subsonic:
+    2. compressible subsonic:
         \f[
-            p_T = p_0 + 0.5*\rho*|U|^2
+            p_T = p_0 + 0.5 \rho |U|^2
         \f]
         where
         /vartable
@@ -53,26 +54,27 @@ Description
             U       | velocity
         /endvartable
 
-    - compressible supersonic (\gamma > 1):
+    3. compressible transonic (\gamma <= 1):
         \f[
-            p_T = \frac{p_0}{(1 + 0.5*\psi*G)^{\frac{1}{G}}}
+            p_T = \frac{p_0}{1 + 0.5 \psi |U|^2}
         \f]
         where
         /vartable
             p_T     | total pressure [Pa]
             p_0     | reference pressure [Pa]
-            \psi    | compressibility [m2/s2]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
         /endvartable
 
-    - compressible transonic (\gamma <= 1):
+    4. compressible supersonic (\gamma > 1):
         \f[
-            p_T = \frac{p_0}{1 + 0.5*\psi*|U|^2}
+            p_T = \frac{p_0}{(1 + 0.5 \psi G)^{\frac{1}{G}}}
         \f]
         where
         /vartable
+            \gamma  | ratio of specific heats (Cp/Cv)
             p_T     | total pressure [Pa]
             p_0     | reference pressure [Pa]
+            \psi    | compressibility [m2/s2]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
         /endvartable
 

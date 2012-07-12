@@ -1,0 +1,69 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
+
+    You should have received a copy of the GNU General Public License along with
+    OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+\page pagePostProcessing Post-processing
+
+\section secFunctionObjects Function objects
+
+OpenFOAM includes a variety of \ref grpFunctionObjects that can be applied during
+the calculation, or afterwards using the execFlowFunctionObjects utility.  The
+range of uses include:
+- \ref grpCloudFunctionObjects
+- \ref grpFieldFunctionObjects
+- \ref grpForcesFunctionObjects
+- \ref grpIOFunctionObjects
+- \ref grpJobControlFunctionObjects
+- \ref grpUtilitiesFunctionObjects
+
+<br>
+\subsection secFieldFunctionObjectUsage Using function objects
+
+To employ function objects, additional entries are required in the
+$FOAM_CASE/system/controlDict input dictionary.  Each object is listed in a
+\c functions sub-dictionary entry, e.g.
+
+\verbatim
+functions
+{
+    myFunctionObject
+    {
+        type            functionObjectType;
+        libs            ("libMyFunctionObjectlib.so");
+        outputControl   outputTime; // output or timeStep
+        outputInterval  1;          // only necessary for outputControl=timeStep
+        ...
+    }
+}
+\endverbatim
+
+The sub-dictionary name \c myFunctionObject is chosen by the user, and is
+often used as the name of the output folder of any generated data.  The \c type
+entry defines the type of function object properties that follow.  Since the
+function objects are packaged into separate libraries, the user must tell the
+code where to find the function object implementation, identified using the
+\c libs entry.  
+
+
+\*---------------------------------------------------------------------------*/

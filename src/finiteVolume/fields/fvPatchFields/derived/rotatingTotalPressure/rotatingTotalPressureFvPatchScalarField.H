@@ -24,7 +24,8 @@ License
 Class
     Foam::rotatingTotalPressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a total pressure condition for patches
@@ -36,8 +37,8 @@ Description
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | rho
-        psi          | compressibility field name | no       | psi
+        rho          | density field name      | no          | none
+        psi          | compressibility field name | no       | none
         gamma        | ratio of specific heats (Cp/Cv) | yes |
         p0           | static pressure reference | yes       |
         omega        | angular velocty of the frame [rad/s] | yes    | 

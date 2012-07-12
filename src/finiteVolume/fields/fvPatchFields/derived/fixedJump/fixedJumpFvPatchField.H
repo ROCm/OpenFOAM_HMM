@@ -24,7 +24,8 @@ License
 Class
     Foam::fixedJumpFvPatchField
 
-\ingroup grpCoupledBoundaryConditions
+Group
+    grpCoupledBoundaryConditions
 
 Description
     Base class for "jump" of a field<type>

@@ -24,7 +24,8 @@ License
 Class
     Foam::freestreamPressureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a free-stream condition for pressure.

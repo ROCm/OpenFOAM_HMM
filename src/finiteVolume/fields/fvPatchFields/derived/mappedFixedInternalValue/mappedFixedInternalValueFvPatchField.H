@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedFixedInternalValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition maps the boundary and internal values of a

@@ -24,8 +24,26 @@ License
 Class
     Foam::compressible::RASModels::mutUSpaldingWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Wall function boundary condition for walls
+    This boundary condition provides a turbulent viscosity condition when
+    using wall functions for rough walls, based on velocity,  using  Spaldings
+    law to give a continuous nut profile to the wall (y+ = 0)
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            mutUSpaldingWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mutWallFunctionFvPatchScalarField
 
 SourceFiles
     mutUSpaldingWallFunctionFvPatchScalarField.C

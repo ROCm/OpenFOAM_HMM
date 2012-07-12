@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 Class
     Foam::surfaceInterpolateFields
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Linear interpolates volFields to surfaceFields
@@ -52,7 +51,6 @@ Description
 SourceFiles
     surfaceInterpolateFields.C
     IOsurfaceInterpolateFields.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

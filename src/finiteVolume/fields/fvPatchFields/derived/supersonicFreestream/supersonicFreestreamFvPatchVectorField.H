@@ -24,7 +24,8 @@ License
 Class
     Foam::supersonicFreestreamFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a supersonic free-stream condition.

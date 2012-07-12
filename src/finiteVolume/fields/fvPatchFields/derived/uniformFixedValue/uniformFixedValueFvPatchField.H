@@ -24,7 +24,8 @@ License
 Class
     Foam::uniformFixedValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a uniform fixed value condition.

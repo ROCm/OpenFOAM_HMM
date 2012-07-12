@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpUtilitiesFunctionObjects
-@{
-
 Class
     Foam::timeActivatedFileUpdate
+
+\ingroup grpUtilitiesFunctionObjects
 
 Description
     Performs a file copy/replacement once a specified time has been reached.
@@ -33,27 +32,27 @@ Description
     Example usage to update the fvSolution dictionary at various times
     throughout the calculation:
 
-        fileUpdate1
-        {
-            type              timeActivatedFileUpdate;
-            functionObjectLibs ("libutilityFunctionObjects.so");
-            outputControl     timeStep;
-            outputInterval    1;
-            fileToUpdate      "$FOAM_CASE/system/fvSolution";
-            timeVsFile
-            (
-                (-1 "$FOAM_CASE/system/fvSolution.0")
-                (0.10 "$FOAM_CASE/system/fvSolution.10")
-                (0.20 "$FOAM_CASE/system/fvSolution.20")
-                (0.35 "$FOAM_CASE/system/fvSolution.35")
-            );
-        }
-
+    \verbatim
+    fileUpdate1
+    {
+        type              timeActivatedFileUpdate;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        outputControl     timeStep;
+        outputInterval    1;
+        fileToUpdate      "$FOAM_CASE/system/fvSolution";
+        timeVsFile
+        (
+            (-1 "$FOAM_CASE/system/fvSolution.0")
+            (0.10 "$FOAM_CASE/system/fvSolution.10")
+            (0.20 "$FOAM_CASE/system/fvSolution.20")
+            (0.35 "$FOAM_CASE/system/fvSolution.35")
+        );
+    }
+    \endverbatim
 
 SourceFiles
     timeActivatedFileUpdate.C
     IOtimeActivatedFileUpdate.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

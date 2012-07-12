@@ -24,7 +24,8 @@ License
 Class
     Foam::advectiveFvPatchField
 
-\ingroup grpOutletBoundaryConditions
+Group
+    grpOutletBoundaryConditions
 
 Description
     This boundary condition provides an advective outflow condition, based on

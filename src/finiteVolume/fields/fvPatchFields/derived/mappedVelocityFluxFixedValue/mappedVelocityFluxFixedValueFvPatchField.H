@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedVelocityFluxFixedValueFvPatchField
 
-\ingroup grpInletBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpInletBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary condition maps the velocity and flux from a neighbour patch

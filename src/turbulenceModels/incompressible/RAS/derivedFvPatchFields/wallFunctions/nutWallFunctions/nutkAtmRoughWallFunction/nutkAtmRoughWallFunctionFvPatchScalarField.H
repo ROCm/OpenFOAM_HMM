@@ -21,12 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpIcoWallFunctions
-@{
-
 Class
     Foam::incompressible::RASModels::
     nutkAtmRoughWallFunctionFvPatchScalarField
+
+Group
+    grpIcoWallFunctions
 
 Description
     This boundary condition provides a turbulent kinematic viscosity for
@@ -35,7 +35,7 @@ Description
     are calculated using:
 
         \f[
-            U = (U_f/K) ln((z + z_0)/z_0)
+            U = frac{U_f}{K} ln(\frac{z + z_0}{z_0})
         \f]
 
     where
@@ -68,8 +68,6 @@ SeeAlso
 
 SourceFiles
     nutkAtmRoughWallFunctionFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

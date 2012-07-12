@@ -52,7 +52,7 @@ License
     This group contains generic boundary condition types
 @}
 
-\defgroup grpGenericBoundaryConditions Coupled boundary Conditions
+\defgroup grpCoupledBoundaryConditions Coupled boundary Conditions
 @{
     \ingroup grpBoundaryConditions
     This group contains coupled boundary condition types
@@ -64,4 +64,4 @@ License
     This group contains wall boundary condition types
 @}
 
-// ************************************************************************* //
+\*---------------------------------------------------------------------------*/

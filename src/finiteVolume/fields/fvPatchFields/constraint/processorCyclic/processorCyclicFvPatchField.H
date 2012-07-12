@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::processorCyclicFvPatchField
+
+Group
+    grpCoupledBoundaryConditions
 
 Description
     This boundary condition enables processor communication across cyclic
@@ -49,8 +49,6 @@ SourceFiles
     processorCyclicFvPatchFields.H
     processorCyclicFvPatchFields.C
     processorCyclicFvPatchFieldsFwd.H
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

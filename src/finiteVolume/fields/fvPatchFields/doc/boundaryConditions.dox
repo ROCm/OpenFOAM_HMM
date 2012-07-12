@@ -23,9 +23,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpFunctionObjects Function objects
-@{
-    This group contains function objects
-@}
+\page pageBoundaryConditions Boundary Conditions
+
+\ref grpBoundaryConditions
+
+\section secBoundaryConditionsOverview Overview
+
+- \ref grpConstraintBoundaryConditions
+- \ref grpInletBoundaryConditions
+- \ref grpOutletBoundaryConditions
+- \ref grpGenericBoundaryConditions
+- \ref grpCoupledBoundaryConditions
+- \ref grpWallBoundaryConditions
 
 \*---------------------------------------------------------------------------*/

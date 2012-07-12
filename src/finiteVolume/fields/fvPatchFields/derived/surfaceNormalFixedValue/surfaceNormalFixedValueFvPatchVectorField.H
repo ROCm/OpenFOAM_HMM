@@ -24,7 +24,8 @@ License
 Class
     Foam::surfaceNormalFixedValueFvPatchVectorField
 
-\ingroup grpGenericBoundaryConditions grpInletBoundaryConditions
+Group
+    grpGenericBoundaryConditions grpInletBoundaryConditions
 
 Description
     This boundary condition provides a surface-normal vector boundary condition

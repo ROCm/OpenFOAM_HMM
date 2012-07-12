@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpFieldFunctionObjects
-@{
-
 Class
     Foam::processorField
+
+\ingroup grpFieldFunctionObjects
 
 Description
     Writes a scalar field whose value is the local processor ID.  Output
@@ -34,7 +33,6 @@ Description
 SourceFiles
     processorField.C
     IOprocessorField.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -24,7 +24,8 @@ License
 Class
     Foam::variableHeightFlowRateFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a phase fraction condition based on the
@@ -58,7 +59,7 @@ Description
         upperBound      0.9;
         value           uniform 0;
     }
-    \verbatim
+    \endverbatim
 
 SourceFiles
     variableHeightFlowRateFvPatchScalarField.C

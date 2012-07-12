@@ -24,7 +24,8 @@ License
 Class
     Foam::totalTemperatureFvPatchScalarField
 
-\ingroup grpInletBoundaryConditions grpOutletBoundaryConditions
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a total temperature condition.

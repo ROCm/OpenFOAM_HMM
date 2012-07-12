@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,8 @@ License
 Class
     Foam::mappedFlowRateFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpInletBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     Describes a volumetric/mass flow normal vector boundary condition by its
@@ -46,8 +47,8 @@ Description
     /endtable
 
     Example of the boundary condition specification:
-    /verbatim
-    inlet
+    \verbatim
+    myPatch
     {
         type            mappedFlowRate;
         phi             phi;
@@ -55,7 +56,7 @@ Description
         neigPhi         phi;
         value           uniform (0 0 0); // placeholder
     }
-    /endverbatim
+    \endverbatim
 
 SourceFiles
     mappedFlowRateFvPatchVectorField.C

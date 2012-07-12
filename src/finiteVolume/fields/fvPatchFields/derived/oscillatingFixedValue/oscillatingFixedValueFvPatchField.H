@@ -24,7 +24,8 @@ License
 Class
     Foam::oscillatingFixedValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition provides an oscillating condition in terms of

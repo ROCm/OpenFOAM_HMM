@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpUtilitiesFunctionObjects
-@{
-
 Class
     Foam::dsmcFields
+
+\ingroup grpUtilitiesFunctionObjects
 
 Description
     Calculate intensive fields:
@@ -38,7 +37,6 @@ Description
 SourceFiles
     dsmcFields.C
     IOdsmcFields.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

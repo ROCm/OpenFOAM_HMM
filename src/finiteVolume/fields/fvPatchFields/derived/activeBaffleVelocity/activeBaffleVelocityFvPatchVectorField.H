@@ -24,7 +24,8 @@ License
 Class
     Foam::activeBaffleVelocityFvPatchVectorField
 
-\ingroup grpCoupledBoundaryConditions
+Group
+    grpCoupledBoundaryConditions
 
 Description
     This velocity boundary condition simulates the opening of a baffle due

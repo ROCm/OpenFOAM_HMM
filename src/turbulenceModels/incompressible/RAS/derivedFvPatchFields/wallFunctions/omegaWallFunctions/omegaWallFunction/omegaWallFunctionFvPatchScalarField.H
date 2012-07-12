@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpIcoWallFunctions
-@{
-
 Class
     Foam::incompressible::RASModels::omegaWallFunctionFvPatchScalarField
+
+Group
+    grpIcoWallFunctions
 
 Description
     This boundary condition provides a wall function constraint on turbulnce
@@ -71,8 +71,6 @@ Description
 
 SourceFiles
     omegaWallFunctionFvPatchScalarField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

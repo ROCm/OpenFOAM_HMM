@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpCloudFunctionObjects
-@{
-
 Class
     Foam::cloudInfo
+
+\ingroup grpCloudFunctionObjects
 
 Description
     This function object outputs lagrangian cloud information to a file.  The
@@ -36,7 +35,6 @@ Description
 SourceFiles
     cloudInfo.C
     IOcloudInfo.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

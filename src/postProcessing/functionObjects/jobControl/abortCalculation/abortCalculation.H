@@ -21,11 +21,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpJobControlFunctionObjects
-@{
-
 Class
     Foam::abortCalculation
+
+\ingroup grpJobControlFunctionObjects
 
 Description
     Watches for presence of the named file in the $FOAM_CASE directory
@@ -39,7 +38,6 @@ Description
 SourceFiles
     abortCalculation.C
     IOabortCalculation.H
-@}
 
 \*---------------------------------------------------------------------------*/
 

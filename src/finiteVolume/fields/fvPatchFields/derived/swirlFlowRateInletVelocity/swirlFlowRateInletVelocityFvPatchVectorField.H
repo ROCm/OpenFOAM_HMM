@@ -24,7 +24,8 @@ License
 Class
     Foam::swirlFlowRateInletVelocityFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a volumetric- OR mass-flow normal vector

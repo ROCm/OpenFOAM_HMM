@@ -24,7 +24,8 @@ License
 Class
     Foam::fixedInternalValueFvPatchField
 
-\ingroup grpGenericBoundaryConditions
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a mechanism to set boundary (cell) values

@@ -24,12 +24,13 @@ License
 Class
     Foam::timeVaryingMappedFixedValueFvPatchField
 
-\ingroup grpInletBoundaryConditions grpCoupledBoundaryConditions
+Group
+    grpInletBoundaryConditions grpCoupledBoundaryConditions
 
 Description
     This boundary conditions interpolates the values from a set of supplied
     points in space and time.  Supplied data should be specified in
-    constant/boundaryData/<patchname> where:
+    constant/boundaryData/\<patchname\> where:
     - points : pointField with locations
     - ddd    : supplied values at time ddd
     The points should be more or less on a plane since they get triangulated

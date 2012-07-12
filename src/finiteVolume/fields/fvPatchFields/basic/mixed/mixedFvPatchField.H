@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::mixedFvPatchField
+
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition provides a base class for 'mixed' type boundary
@@ -35,7 +35,7 @@ Description
     The respective contributions from each is determined by a weight field:
 
         \f[
-            x_p = w*A + (1-w)*(x_c + B/delta)
+            x_p = w*A + (1-w)*(x_c + B/\Delta)
         \f]
 
     where
@@ -45,7 +45,7 @@ Description
         w     | weight field, \c valueFraction_
         A     | fixed value, \c refValue_
         B     | patch normal gradient, \c refGrad_
-        delta | inverse distance from face centre to internal cell centre
+        \Delta| inverse distance from face centre to internal cell centre
     /endvartable
 
     \note
@@ -57,8 +57,6 @@ SeeAlso
 
 SourceFiles
     mixedFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::cyclicFvPatchField
+
+Group
+    grpCoupledBoundaryConditions
 
 Description
     This boundary condition enforces a cyclic condition between a pair of
@@ -48,8 +48,6 @@ Description
 
 SourceFiles
     cyclicFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

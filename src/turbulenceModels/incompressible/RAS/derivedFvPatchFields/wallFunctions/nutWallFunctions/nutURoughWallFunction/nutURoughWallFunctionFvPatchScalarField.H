@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpIcoWallFunctions
-@{
-
 Class
     Foam::incompressible::RASModels::nutURoughWallFunctionFvPatchScalarField
+
+Group
+    grpIcoWallFunctions
 
 Description
     This boundary condition provides a turbulent kinematic viscosity condition
@@ -55,9 +55,7 @@ SeeAlso
     Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
-
-@}
+    nutURoughWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -24,7 +24,8 @@ License
 Class
     Foam::waveTransmissiveFvPatchField
 
-\ingroup grpOutletBoundaryConditions
+Group
+    grpOutletBoundaryConditions
 
 Description
     This boundary condition provides a wave transmissive outflow condition,

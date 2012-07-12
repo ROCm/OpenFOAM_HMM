@@ -24,16 +24,17 @@ License
 Class
     Foam::incompressible::atmBoundaryLayerInletEpsilonFvPatchScalarField
 
-\ingroup grpIcoRASBoundaryConditions grpInletBoundaryConditions
+Group
+    grpIcoRASBoundaryConditions grpInletBoundaryConditions
 
 Description
     This boundary condition specifies an inlet value for the turbulence
-    dissipation \c epsilon, appropriate for atmospheric boundary layers (ABL),
-    and designed to be used in conjunction with the \c ABLInletVelocity inlet
-    velocity boundary condition.
+    dissipation, \f$\epsilon\f$ (\c epsilon), appropriate for atmospheric
+    boundary layers (ABL), and designed to be used in conjunction with the
+    \c ABLInletVelocity inlet velocity boundary condition.
 
         \f[
-            epsilon = (U^*)^3 / (K(z - z_g + z_0))
+            \epsilon = \frac{(U^*)^3}{(K(z - z_g + z_0))}
         \f]
 
     where
@@ -48,7 +49,7 @@ Description
     and:
 
         \f[
-            U^* = K \frac{U_{ref}}{ln(\frac{Z_{ref} + z_0}{z_0}}
+            U^* = K \frac{U_{ref}}{ln(\frac{Z_{ref} + z_0}{z_0})}
         \f]
 
     where:

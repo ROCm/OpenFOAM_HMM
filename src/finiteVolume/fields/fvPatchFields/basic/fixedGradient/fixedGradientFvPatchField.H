@@ -21,26 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup grpBoundaryConditions
-@{
-
 Class
     Foam::fixedGradientFvPatchField
+
+Group
+    grpGenericBoundaryConditions
 
 Description
     This boundary condition supplies a fixed gradient condition, such that
     the patch values are calculated using:
 
         \f[
-            values = int + gradient/delta
+            x_p = x_c + \frac{\nabla(x)}{\Delta}
         \f]
 
     where
     /vartable
-        values   | patch values
-        int      | internal field values
-        gradient | gradient (user-specified)
-        delta    | inverse distance from patch face centre to cell centre
+        x_p      | patch values
+        x_c      | internal field values
+        \nabla(x)| gradient (user-specified)
+        \Delta   | inverse distance from patch face centre to cell centre
     /endvartable
 
     /heading Patch usage
@@ -61,8 +61,6 @@ Description
 
 SourceFiles
     fixedGradientFvPatchField.C
-
-@}
 
 \*---------------------------------------------------------------------------*/
 

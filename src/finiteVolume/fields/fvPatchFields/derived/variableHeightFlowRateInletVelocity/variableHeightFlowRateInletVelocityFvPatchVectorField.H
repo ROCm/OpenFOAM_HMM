@@ -24,7 +24,8 @@ License
 Class
     Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary condition provides a velocity boundary condition for

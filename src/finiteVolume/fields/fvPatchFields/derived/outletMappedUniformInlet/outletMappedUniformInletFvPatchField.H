@@ -24,7 +24,8 @@ License
 Class
     Foam::outletMappedUniformInletFvPatchField
 
-\ingroup grpInletBoundaryConditions
+Group
+    grpInletBoundaryConditions
 
 Description
     This boundary conditon averages the field over the "outlet" patch specified
