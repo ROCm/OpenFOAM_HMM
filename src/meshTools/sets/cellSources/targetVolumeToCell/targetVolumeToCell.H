@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::boxToFace
+    Foam::targetVolumeToCell
 
 Description
-    A topoSetSource to select faces based on face centres inside box.
+    A topoSetSource to select cells based on the wanted volume of selected
+    cells. Adapts a plane until it has enough.
 
 SourceFiles
-    boxToFace.C
+    targetVolumeToCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef boxToFace_H
-#define boxToFace_H
+#ifndef targetVolumeToCell_H
+#define targetVolumeToCell_H
 
 #include "topoSetSource.H"
-#include "treeBoundBoxList.H"
+//#include "plane.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,10 +46,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class boxToFace Declaration
+                         Class targetVolumeToCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class boxToFace
+class targetVolumeToCell
 :
     public topoSetSource
 {
@@ -57,11 +59,23 @@ class boxToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- bounding box.
-        treeBoundBoxList bbs_;
+        //- Wanted volume
+        const scalar vol_;
+
+        //- Normal of plane to sweep
+        vector n_;
+        //plane pl_;
 
 
     // Private Member Functions
+
+        scalar volumeOfSet(const PackedBoolList&) const;
+
+        label selectCells
+        (
+            const scalar normalComp,
+            PackedBoolList& selected
+        ) const;
 
         void combine(topoSet& set, const bool add) const;
 
@@ -69,26 +83,28 @@ class boxToFace
 public:
 
     //- Runtime type information
-    TypeName("boxToFace");
+    TypeName("targetVolumeToCell");
 
     // Constructors
 
         //- Construct from components
-        boxToFace
+        targetVolumeToCell
         (
             const polyMesh& mesh,
-            const treeBoundBoxList& bbs
+            const scalar vol,
+            //const plane&
+            const vector&
         );
 
         //- Construct from dictionary
-        boxToFace
+        targetVolumeToCell
         (
             const polyMesh& mesh,
             const dictionary& dict
         );
 
         //- Construct from Istream
-        boxToFace
+        targetVolumeToCell
         (
             const polyMesh& mesh,
             Istream&
@@ -96,14 +112,14 @@ public:
 
 
     //- Destructor
-    virtual ~boxToFace();
+    virtual ~targetVolumeToCell();
 
 
     // Member Functions
 
         virtual sourceType setType() const
         {
-            return FACESETSOURCE;
+            return CELLSETSOURCE;
         }
 
         virtual void applyToSet

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::boxToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside box.
+    A topoSetSource to select cells based on cell centres inside box(es).
 
 SourceFiles
     boxToCell.C
@@ -36,7 +36,7 @@ SourceFiles
 #define boxToCell_H
 
 #include "topoSetSource.H"
-#include "treeBoundBox.H"
+#include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ class boxToCell
 
 
         //- bounding box.
-        treeBoundBox bb_;
+        treeBoundBoxList bbs_;
 
 
     // Private Member Functions
@@ -78,7 +78,7 @@ public:
         boxToCell
         (
             const polyMesh& mesh,
-            const treeBoundBox& bb
+            const treeBoundBoxList& bbs
         );
 
         //- Construct from dictionary

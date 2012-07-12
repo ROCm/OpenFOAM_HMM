@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ SourceFiles
 #define boxToPoint_H
 
 #include "topoSetSource.H"
-#include "treeBoundBox.H"
+#include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ class boxToPoint
         static addToUsageTable usage_;
 
         //- bounding box.
-        treeBoundBox bb_;
+        treeBoundBoxList bbs_;
 
 
     // Private Member Functions
@@ -77,7 +77,7 @@ public:
         boxToPoint
         (
             const polyMesh& mesh,
-            const treeBoundBox& bb
+            const treeBoundBoxList& bb
         );
 
         //- Construct from dictionary

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,7 +123,7 @@ void starMesh::createCoupleMatches()
                 cellRemovedFaces.insert
                 (
                     fp.masterCell(),
-                    fp.masterFace()
+                    SLList<label>(fp.masterFace())
                 );
             }
             else
@@ -1362,7 +1362,7 @@ void starMesh::createCoupleMatches()
                 cellRemovedFaces.insert
                 (
                     fp.masterCell(),
-                    fp.masterFace()
+                    SLList<label>(fp.masterFace())
                 );
             }
             else
@@ -1378,7 +1378,7 @@ void starMesh::createCoupleMatches()
                 cellRemovedFaces.insert
                 (
                     fp.slaveCell(),
-                    fp.slaveFace()
+                    SLList<label>(fp.slaveFace())
                 );
             }
             else

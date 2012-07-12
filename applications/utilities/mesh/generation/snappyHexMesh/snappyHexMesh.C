@@ -179,18 +179,19 @@ int main(int argc, char *argv[])
     // Read decomposePar dictionary
     dictionary decomposeDict;
     {
-        IOobject io
-        (
-            "decomposeParDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        );
-
-        if (io.headerOk())
+        if (Pstream::parRun())
         {
-            decomposeDict = IOdictionary(io);
+            decomposeDict = IOdictionary
+            (
+                IOobject
+                (
+                    "decomposeParDict",
+                    runTime.system(),
+                    mesh,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE
+                )
+            );
         }
         else
         {
