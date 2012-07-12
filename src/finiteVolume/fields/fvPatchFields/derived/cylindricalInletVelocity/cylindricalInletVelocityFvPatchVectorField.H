@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,8 +19,7 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \addtogroup grpBoundaryConditions
 @{
@@ -39,8 +38,8 @@ Description
         Property     | Description             | Required    | Default value
         axis         | axis of rotation        | yes         |
         centre       | centre of rotation      | yes         |
-        axialVelocity| axial velocity profile  | yes         |
-        radialVelocity| radial velocity profile | yes        |
+        axialVelocity | axial velocity profile [m/s] | yes    |
+        radialVelocity | radial velocity profile [m/s] | yes  |
         rpm          | rotational speed (revolutions per minute) | yes|
     /endtable
 
@@ -51,9 +50,9 @@ Description
         type            cylindricalInletVelocity;
         axis            (0 0 1);
         centre          (0 0 0);
-        axialVelocity   constant 30;    // axial velocity [m/s]
-        radialVelocity  constant -10;   // radial velocity [m/s]
-        rpm             constant 100;   // revolutions per minute
+        axialVelocity   constant 30;
+        radialVelocity  constant -10;
+        rpm             constant 100;
     }
     \endverbatim
 
