@@ -12,5 +12,6 @@ application=`getApplication`
 #runApplication $application
 runApplication decomposePar
 runParallel $application 4
+runApplication reconstructPar
 
 # ----------------------------------------------------------------- end-of-file

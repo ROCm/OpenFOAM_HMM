@@ -143,14 +143,22 @@ int main(int argc, char *argv[])
         args
     );
 
-    instantList masterTimeDirs = runTime.times();
-
     if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
             << "No times selected"
             << exit(FatalError);
     }
+
+
+    // Get current times if -newTimes
+    instantList masterTimeDirs;
+    if (newTimes)
+    {
+        masterTimeDirs = runTime.times();
+    }
+
+
 
 #   include "createNamedMesh.H"
     word regionDir = word::null;
@@ -176,11 +184,24 @@ int main(int argc, char *argv[])
     // Loop over all times
     forAll(timeDirs, timeI)
     {
-        if (newTimes && findIndex(masterTimeDirs, timeDirs[timeI]) != -1)
+        if (newTimes)
         {
-            Info<< "Skipping time " << timeDirs[timeI].name()
-                << endl << endl;
-            continue;
+            // Compare on timeName, not value
+            bool foundTime = false;
+            forAll(masterTimeDirs, i)
+            {
+                if (masterTimeDirs[i].name() == timeDirs[timeI].name())
+                {
+                    foundTime = true;
+                    break;
+                }
+            }
+            if (foundTime)
+            {
+                Info<< "Skipping time " << timeDirs[timeI].name()
+                    << endl << endl;
+                continue;
+            }
         }
 
 

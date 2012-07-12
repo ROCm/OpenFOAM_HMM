@@ -165,7 +165,7 @@ public:
             }
 
             //- Return true if this patch is coupled
-            bool coupled() const
+            virtual bool coupled() const
             {
                 return polyPatch_.coupled();
             }

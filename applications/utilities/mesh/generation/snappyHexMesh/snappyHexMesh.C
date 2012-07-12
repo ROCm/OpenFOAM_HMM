@@ -40,6 +40,7 @@ Description
 #include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "decompositionMethod.H"
+#include "noDecomp.H"
 #include "fvMeshDistribute.H"
 #include "wallPolyPatch.H"
 #include "refinementParameters.H"
@@ -176,17 +177,28 @@ int main(int argc, char *argv[])
 
 
     // Read decomposePar dictionary
-    IOdictionary decomposeDict
-    (
-        IOobject
-        (
-            "decomposeParDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    );
+    dictionary decomposeDict;
+    {
+        if (Pstream::parRun())
+        {
+            decomposeDict = IOdictionary
+            (
+                IOobject
+                (
+                    "decomposeParDict",
+                    runTime.system(),
+                    mesh,
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE
+                )
+            );
+        }
+        else
+        {
+            decomposeDict.add("method", "none");
+            decomposeDict.add("numberOfSubdomains", 1);
+        }
+    }
 
 
     // Debug

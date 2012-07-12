@@ -41,7 +41,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "basicSolidMixture.H"
-#include "basicThermo.H"
+#include "rhoThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,17 +54,8 @@ namespace Foam
 
 class solidThermo
 :
-    public basicThermo
+    public rhoThermo
 {
-
-protected:
-
-
-        // Fields
-
-            //- Density [kg/m3]
-            volScalarField rho_;
-
 
 public:
 
@@ -116,49 +107,8 @@ public:
 
     // Member functions
 
-        //- Update properties
-        virtual void correct() = 0;
-
-
-        // Access to thermodynamic state variables
-
-            //- Constant access to temperature [K]
-            virtual const volScalarField& T() const;
-
-            //- Non constant access to temperature [K]
-            virtual volScalarField& T();
-
-            //- Solid density [kg/m3]
-            virtual const volScalarField& rhos() const;
-
-            //- Non-const access for solid density [kg/m3]
-            virtual volScalarField& rhos();
-
-
-            //- Constant access to p [Pa]
-            virtual const volScalarField& p() const;
-
-            //- Non-constant access to p [Pa]
-            virtual volScalarField& p();
-
-
-        // Access to transport state variables
-
-            //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
-            virtual const volScalarField& alpha() const;
-
 
         // Derived thermal properties
-
-            //- Enthalpy/Internal energy [J/kg]
-            virtual const volScalarField& he() const = 0;
-
-            //- Enthalpy/Internal energy [J/kg]
-            //  Non-const access allowed for transport equations
-            virtual volScalarField& he() = 0;
-
-            //- Thermal conductivity [W/m/K]
-            virtual tmp<volScalarField> kappa() const = 0;
 
             //- Thermal conductivity [W/m/K]
             virtual tmp<volVectorField> Kappa() const = 0;
@@ -172,50 +122,12 @@ public:
             //- Emissivity coefficient [1/m]
             virtual tmp<volScalarField> emissivity() const = 0;
 
-            //- Specific heat capacity [J/kg/K]
-            virtual tmp<volScalarField> Cp() const = 0;
-
-            //- Heat of formation [J/kg]
-            virtual tmp<volScalarField> hc() const = 0;
-
-             //- Density [kg/m^3]
-            virtual tmp<volScalarField> rho() const;
-
 
         // Per patch calculation
 
-            //- Enthalpy/Internal energy [J/kg]
-            virtual tmp<scalarField> he
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchi
-            ) const = 0;
-
-
-            //- Specific heat capacity [J/kg/K)]
-            virtual tmp<scalarField> Cp
-            (
-                const scalarField& p,
-                const scalarField& T,
-                const label patchI
-            ) const = 0;
-
-
-            //- Isotropic thermal conductivity [W//m/K]
-            virtual tmp<scalarField> kappa
-            (
-                const label patchI
-            ) const = 0;
 
             //- Anisotropic thermal conductivity [W/m/K]
             virtual tmp<vectorField> Kappa
-            (
-                const label patchI
-            ) const = 0;
-
-            //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
-            virtual tmp<scalarField> alpha
             (
                 const label patchI
             ) const = 0;

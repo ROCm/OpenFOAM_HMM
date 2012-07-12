@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,12 @@ void Foam::boxToPoint::combine(topoSet& set, const bool add) const
 
     forAll(pts, pointI)
     {
-        if (bb_.contains(pts[pointI]))
+        forAll(bbs_, i)
         {
-            addOrDelete(set, pointI, add);
+            if (bbs_[i].contains(pts[pointI]))
+            {
+                addOrDelete(set, pointI, add);
+            }
         }
     }
 }
@@ -72,11 +75,11 @@ void Foam::boxToPoint::combine(topoSet& set, const bool add) const
 Foam::boxToPoint::boxToPoint
 (
     const polyMesh& mesh,
-    const treeBoundBox& bb
+    const treeBoundBoxList& bbs
 )
 :
     topoSetSource(mesh),
-    bb_(bb)
+    bbs_(bbs)
 {}
 
 
@@ -88,7 +91,12 @@ Foam::boxToPoint::boxToPoint
 )
 :
     topoSetSource(mesh),
-    bb_(dict.lookup("box"))
+    bbs_
+    (
+        dict.found("box")
+      ? treeBoundBoxList(1, treeBoundBox(dict.lookup("box")))
+      : dict.lookup("boxes")
+    )
 {}
 
 
@@ -100,7 +108,7 @@ Foam::boxToPoint::boxToPoint
 )
 :
     topoSetSource(mesh),
-    bb_(checkIs(is))
+    bbs_(1, treeBoundBox(checkIs(is)))
 {}
 
 
@@ -120,14 +128,14 @@ void Foam::boxToPoint::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding points that are within box " << bb_ << " ..."
+        Info<< "    Adding points that are within boxes " << bbs_ << " ..."
             << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing points that are within box " << bb_ << " ..."
+        Info<< "    Removing points that are within boxes " << bbs_ << " ..."
             << endl;
 
         combine(set, false);

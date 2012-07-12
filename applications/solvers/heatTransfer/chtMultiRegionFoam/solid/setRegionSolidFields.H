@@ -12,7 +12,4 @@
     tmp<volScalarField> tkappa = thermo.kappa();
     const volScalarField& kappa = tkappa();
 
-    //tmp<volSymmTensorField> tkappa = thermo.directionalKappa();
-    //const volSymmTensorField& kappa = tkappa();
-
     volScalarField& h = thermo.he();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -198,8 +198,7 @@ void Foam::interRegionHeatTransferModel::addSup
                 << endl;
         }
 
-        //SAF: temporarily output
-        if (mesh_.time().outputTime())
+        if (debug && mesh_.time().outputTime())
         {
             Tmapped.write();
             htc_.write();

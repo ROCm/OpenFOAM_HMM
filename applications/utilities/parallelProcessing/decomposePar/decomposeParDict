@@ -122,7 +122,8 @@ structuredCoeffs
     patches     (bottomPatch);
 }
 
-//// Is the case distributed
+//// Is the case distributed? Note: command-line argument -roots takes
+//// precedence
 //distributed     yes;
 //// Per slave (so nProcs-1 entries) the directory above the case.
 //roots

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,13 @@ void Foam::boxToFace::combine(topoSet& set, const bool add) const
 
     forAll(ctrs, faceI)
     {
-        if (bb_.contains(ctrs[faceI]))
+        forAll(bbs_, i)
         {
-            addOrDelete(set, faceI, add);
+            if (bbs_[i].contains(ctrs[faceI]))
+            {
+                addOrDelete(set, faceI, add);
+                break;
+            }
         }
     }
 }
@@ -72,11 +76,11 @@ void Foam::boxToFace::combine(topoSet& set, const bool add) const
 Foam::boxToFace::boxToFace
 (
     const polyMesh& mesh,
-    const treeBoundBox& bb
+    const treeBoundBoxList& bbs
 )
 :
     topoSetSource(mesh),
-    bb_(bb)
+    bbs_(bbs)
 {}
 
 
@@ -88,7 +92,12 @@ Foam::boxToFace::boxToFace
 )
 :
     topoSetSource(mesh),
-    bb_(dict.lookup("box"))
+    bbs_
+    (
+        dict.found("box")
+      ? treeBoundBoxList(1, treeBoundBox(dict.lookup("box")))
+      : dict.lookup("boxes")
+    )
 {}
 
 
@@ -100,7 +109,7 @@ Foam::boxToFace::boxToFace
 )
 :
     topoSetSource(mesh),
-    bb_(checkIs(is))
+    bbs_(1, treeBoundBox(checkIs(is)))
 {}
 
 
@@ -120,13 +129,13 @@ void Foam::boxToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding faces with centre within box " << bb_ << endl;
+        Info<< "    Adding faces with centre within boxes " << bbs_ << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing faces with centre within box " << bb_ << endl;
+        Info<< "    Removing faces with centre within boxes " << bbs_ << endl;
 
         combine(set, false);
     }

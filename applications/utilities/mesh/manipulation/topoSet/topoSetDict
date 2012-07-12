@@ -95,11 +95,12 @@ FoamFile
 //        type hex;           // hex/wedge/prism/pyr/tet/tetWedge/splitHex
 //    }
 //
-//    // Cells with cell centre within box
+//    // Cells with cell centre within box ('box') or multiple boxes ('boxes')
 //    source boxToCell;
 //    sourceInfo
 //    {
 //       box   (0 0 0) (1 1 1);
+//       //boxes   ((0 0 0) (1 1 1) (10 10 10)(11 11 11));
 //    }
 //
 //    // Cells with cell centre within box
@@ -223,11 +224,12 @@ FoamFile
 //        name ".*Zone1";     // Name of faceZone, regular expressions allowed
 //    }
 //
-//    // Faces with face centre within box
+//    // Faces with face centre within box ('box') or multiple boxes ('boxes')
 //    source boxToFace;
 //    sourceInfo
 //    {
 //        box  (0 0 0) (1 1 1);
+//       //boxes   ((0 0 0) (1 1 1) (10 10 10)(11 11 11));
 //    }
 //
 //    // Faces with normal to within certain angle aligned with vector.
@@ -295,11 +297,12 @@ FoamFile
 //       points ((0 0 0) (1 1 1));
 //    }
 //
-//    // Points with coordinate within box
+//    // Points with coordinate within box ('box') or multiple boxes ('boxes')
 //    source boxToPoint;
 //    sourceInfo
 //    {
 //       box   (0 0 0) (1 1 1);
+//       //boxes   ((0 0 0) (1 1 1) (10 10 10)(11 11 11));
 //    }
 //
 //    // Select based on surface

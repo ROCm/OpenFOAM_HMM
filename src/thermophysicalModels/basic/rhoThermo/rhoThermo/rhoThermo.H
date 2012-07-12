@@ -90,6 +90,9 @@ public:
         //- Construct from mesh
         rhoThermo(const fvMesh&);
 
+        //- Construct from mesh
+        rhoThermo(const fvMesh&, const dictionary&);
+
 
     //- Selector
     static autoPtr<rhoThermo> New(const fvMesh&);

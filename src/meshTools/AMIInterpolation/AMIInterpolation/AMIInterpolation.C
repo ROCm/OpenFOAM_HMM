@@ -965,6 +965,13 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     label tgtFaceI
 )
 {
+    // Pre-size to handle early exit
+    srcAddress_.setSize(srcPatch.size());
+    srcWeights_.setSize(srcPatch.size());
+    tgtAddress_.setSize(tgtPatch.size());
+    tgtWeights_.setSize(tgtPatch.size());
+
+
     if (debug && (!srcPatch.size() || !tgtPatch.size()))
     {
         Pout<< "AMI: Patches not on processor: Source faces = "
@@ -1134,16 +1141,11 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     }
 
     // transfer data to persistent storage
-    srcAddress_.setSize(srcPatch.size());
-    srcWeights_.setSize(srcPatch.size());
     forAll(srcAddr, i)
     {
         srcAddress_[i].transfer(srcAddr[i]);
         srcWeights_[i].transfer(srcWght[i]);
     }
-
-    tgtAddress_.setSize(tgtPatch.size());
-    tgtWeights_.setSize(tgtPatch.size());
     forAll(tgtAddr, i)
     {
         tgtAddress_[i].transfer(tgtAddr[i]);

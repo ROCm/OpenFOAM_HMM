@@ -66,6 +66,81 @@ inline Foam::quaternion::quaternion
     operator*=(quaternion(vector(0, 0, 1), angleZ));
 }
 
+inline Foam::quaternion::quaternion
+(
+    const tensor& rotationTensor
+)
+{
+    scalar trace = rotationTensor.xx()
+                 + rotationTensor.yy()
+                 + rotationTensor.zz();
+
+    if (trace > 0)
+    {
+        scalar s = 0.5/Foam::sqrt(trace + 1.0);
+
+        w_ = 0.25/s;
+        v_[0] = (rotationTensor.zy() - rotationTensor.yz())*s;
+        v_[1] = (rotationTensor.xz() - rotationTensor.zx())*s;
+        v_[2] = (rotationTensor.yx() - rotationTensor.xy())*s;
+    }
+    else
+    {
+        if
+        (
+            rotationTensor.xx() > rotationTensor.yy()
+         && rotationTensor.xx() > rotationTensor.zz()
+        )
+        {
+            scalar s = 2.0*Foam::sqrt
+            (
+                1.0
+              + rotationTensor.xx()
+              - rotationTensor.yy()
+              - rotationTensor.zz()
+            );
+
+            w_ = (rotationTensor.zy() - rotationTensor.yz())/s;
+            v_[0] = 0.25*s;
+            v_[1] = (rotationTensor.xy() + rotationTensor.yx())/s;
+            v_[2] = (rotationTensor.xz() + rotationTensor.zx())/s;
+        }
+        else if
+        (
+            rotationTensor.yy() > rotationTensor.zz()
+        )
+        {
+            scalar s = 2.0*Foam::sqrt
+            (
+                1.0
+              + rotationTensor.yy()
+              - rotationTensor.xx()
+              - rotationTensor.zz()
+            );
+
+            w_ = (rotationTensor.xz() - rotationTensor.xz())/s;
+            v_[0] = (rotationTensor.xy() + rotationTensor.yx())/s;
+            v_[1] = 0.25*s;
+            v_[2] = (rotationTensor.yz() + rotationTensor.zy())/s;
+        }
+        else
+        {
+            scalar s = 2.0*Foam::sqrt
+            (
+                1.0
+              + rotationTensor.zz()
+              - rotationTensor.xx()
+              - rotationTensor.yy()
+            );
+
+            w_ = (rotationTensor.yx() - rotationTensor.xy())/s;
+            v_[0] = (rotationTensor.xz() + rotationTensor.zx())/s;
+            v_[1] = (rotationTensor.yz() + rotationTensor.zy())/s;
+            v_[2] = 0.25*s;
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

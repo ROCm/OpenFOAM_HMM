@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,6 +140,9 @@ protected:
 
         //- Update of the patch topology
         virtual void updateMesh(PstreamBuffers&);
+
+        //- Clear geometry
+        virtual void clearGeom();
 
 
 public:

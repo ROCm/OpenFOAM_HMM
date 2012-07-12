@@ -191,6 +191,22 @@ int main(int argc, char *argv[])
                     outputFieldList<tensor>(vtf, patchIDs[0]);
                     Info<< endl;
                 }
+                else
+                {
+                    // No group.
+                    forAll(patchIDs, i)
+                    {
+                        label patchI = patchIDs[i];
+                        Info<< bm[patchI].type()
+                            << "\t: " << bm[patchI].name() << nl;
+                        outputFieldList<scalar>(vsf, patchI);
+                        outputFieldList<vector>(vvf, patchI);
+                        outputFieldList<sphericalTensor>(vsptf, patchI);
+                        outputFieldList<symmTensor>(vsytf, patchI);
+                        outputFieldList<tensor>(vtf, patchI);
+                        Info<< endl;
+                    }
+                }
             }
         }
     }

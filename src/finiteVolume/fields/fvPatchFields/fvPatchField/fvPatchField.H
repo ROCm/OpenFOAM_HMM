@@ -503,6 +503,19 @@ public:
 #endif
 
 
+#define makeFvPatchField(fvPatchTypeField)                                    \
+                                                                              \
+defineNamedTemplateTypeNameAndDebug(fvPatchTypeField, 0);                     \
+template<>                                                                    \
+int fvPatchTypeField::disallowGenericFvPatchField                             \
+(                                                                             \
+    debug::debugSwitch("disallowGenericFvPatchField", 0)                      \
+);                                                                            \
+defineTemplateRunTimeSelectionTable(fvPatchTypeField, patch);                 \
+defineTemplateRunTimeSelectionTable(fvPatchTypeField, patchMapper);           \
+defineTemplateRunTimeSelectionTable(fvPatchTypeField, dictionary);
+
+
 #define addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)   \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
