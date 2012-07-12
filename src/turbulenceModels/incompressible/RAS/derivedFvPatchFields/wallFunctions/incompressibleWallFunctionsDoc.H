@@ -21,9 +21,9 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup icoWallFunctions RAS incompressible wall functions
+\defgroup grpIcoWallFunctions RAS incompressible wall functions
 @{
-    \ingroup boundaryConditions
+    \ingroup grpBoundaryConditions
     This group contains incompressible RAS turbulence model wall functions
 @}
 

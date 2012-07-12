@@ -21,10 +21,13 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup forcesFunctionObjects Forces function objects
+\defgroup grpForcesFunctionObjects Forces function objects
 @{
-    \ingroup functionObjects
+    \ingroup grpFunctionObjects
     This group contains force-based function objects
+
+    Function objects in this group are packaged into the
+    libforcesFunctionObjects.so library.
 @}
 
 \*---------------------------------------------------------------------------*/

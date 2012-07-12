@@ -21,10 +21,13 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup fieldFunctionObjects Field function objects
+\defgroup grpFieldFunctionObjects Field function objects
 @{
-    \ingroup functionObjects
+    \ingroup grpFunctionObjects
     This group contains field-based function objects
+
+    Function objects in this group are packaged into the
+    libfieldFunctionObjects.so library.
 @}
 
 \*---------------------------------------------------------------------------*/

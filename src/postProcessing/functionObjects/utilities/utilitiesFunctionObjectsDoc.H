@@ -21,9 +21,9 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup utilitiesFunctionObjects Utility function objects
+\defgroup grpUtilitiesFunctionObjects Utility function objects
 @{
-    \ingroup functionObjects
+    \ingroup grpFunctionObjects
     This group contains utility-based function objects
 @}
 

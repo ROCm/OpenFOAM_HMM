@@ -21,10 +21,13 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup cloudFunctionObjects Cloud function objects
+\defgroup grpCloudFunctionObjects Cloud function objects
 @{
-    \ingroup functionObjects
-    This group contains cloud-based function objects
+    \ingroup grpFunctionObjects
+    This group contains cloud-based function objects.
+
+    Function objects in this group are packaged into the
+    libcloudFunctionObjects.so library.
 @}
 
 \*---------------------------------------------------------------------------*/

@@ -21,9 +21,9 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup jobControlFunctionObjects Job control function objects
+\defgroup grpJobControlFunctionObjects Job control function objects
 @{
-    \ingroup functionObjects
+    \ingroup grpFunctionObjects
     This group contains job control-based function objects
 @}
 

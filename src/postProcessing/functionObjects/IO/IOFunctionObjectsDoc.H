@@ -21,9 +21,9 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup IOFunctionObjects Input/outuput function objects
+\defgroup grpIOFunctionObjects Input/outuput function objects
 @{
-    \ingroup functionObjects
+    \ingroup grpFunctionObjects
     This group contains input/output-based function objects
 @}
 
