@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,11 +19,12 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    atmBoundaryLayerInletEpsilonFvPatchScalarField
+    Foam::incompressible::atmBoundaryLayerInletEpsilonFvPatchScalarField
+
+\ingroup grpIcoRASBoundaryConditions grpInletBoundaryConditions
 
 Description
     This boundary condition specifies an inlet value for the turbulence
@@ -32,40 +33,54 @@ Description
     velocity boundary condition.
 
         \f[
-            epsilon = Ustar^3 / (K(z - zGround + z0))
+            epsilon = (U^*)^3 / (K(z - z_g + z_0))
         \f]
 
-    where:
-
-        \var Ustar   = frictional velocity
-        \var K       = Karman's constant
-        \var z       = vertical co-ordinate [m]
-        \var z0      = surface roughness length [m]
-        \var zGround = minimum vlaue in z direction [m]
-
+    where
+    /vartable
+        U^*     | frictional velocity
+        K       | Karman's constant
+        z       | vertical co-ordinate [m]
+        z_0     | surface roughness length [m]
+        z_g     | minimum vlaue in z direction [m]
+    /endvartable
+ 
     and:
 
         \f[
-            Ustar = K Uref/ln((Zref + z0)/z0)
+            U^* = K \frac{U_{ref}}{ln(\frac{Z_{ref} + z_0}{z_0}}
         \f]
 
     where:
+    /vartable
+        U_{ref} | reference velocity at \f$Z_{ref}\f$ [m/s]
+        Z_{ref} | reference height [m]
+    /endvartable
 
-        \var Uref = reference velocity at Zref [m/s]
-        \var Zref = reference height [m]
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        z            | vertical co-ordinate [m] | yes        |
+        kappa        | Karman's constanat      | no          | 0.41
+        Uref         | reference velocity [m/s] | yes        |
+        Href         | reference height [m]    | yes         |
+        z0           | surface roughness length [m] | yes    |
+        zGround      | minimum z co-ordinate [m] | yes       |
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            atmBoundaryLayerInletEpsilon;
-            z               1.0;    // vertical co-ordinate [m]
-            kappa           0.41;   // kappa coefficient (default = 0.41)
-            Uref            1.0;    // reference velocity [m/s]
-            Href            0.0;    // reference height [m]
-            z0              uniform 0.0; // surface roughness length [m]
-            zGround         uniform 0.0; // minimum z co-ordinate [m]
-        }
+    myPatch
+    {
+        type            atmBoundaryLayerInletVelocity;
+        z               1.0;
+        kappa           0.41;
+        Uref            1.0;
+        Href            0.0;
+        z0              uniform 0.0;
+        zGround         uniform 0.0;
+    }
     \endverbatim
 
     Reference:
