@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\defgroup boundaryConditions Boundary Conditions
+\defgroup grpBoundaryConditions Boundary Conditions
 @{
     This group contains OpenFOAM boundary condition types
 @}
