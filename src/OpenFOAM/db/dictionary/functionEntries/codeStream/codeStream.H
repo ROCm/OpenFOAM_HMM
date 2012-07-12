@@ -29,12 +29,12 @@ Description
     generate the entry itself. So
     - codeStream reads three entries: 'code', 'codeInclude' (optional),
     'codeOptions' (optional)
-    and uses those to generate library sources inside \f codeStream/
+    and uses those to generate library sources inside \c codeStream/
     - these get compiled using 'wmake libso'
     - the resulting library is loaded in executed with as arguments
     \code
         (const dictionary& dict, Ostream& os)
-     \endcode
+    \endcode
     where the dictionary is the current dictionary.
     - the code has to write into Ostream which is then used to construct
     the actual dictionary entry.
@@ -77,12 +77,12 @@ Description
       \c \$ and \c ~ sequences)
 
 Note
-    The code to be compiled is stored under the local \f codeStream directory
+    The code to be compiled is stored under the local \c codeStream directory
     with a subdirectory name corresponding to the SHA1 of the contents.
 
     The corresponding library code is located under the local
-    \f codeStream/platforms/$WM_OPTIONS/lib directory in a library
-    \f libcodeStream_SHA1.so
+    \c codeStream/platforms/$WM_OPTIONS/lib directory in a library
+    \c libcodeStream_SHA1.so
 
 SourceFiles
     codeStream.C
