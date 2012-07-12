@@ -37,10 +37,8 @@ inline Foam::quaternion::quaternion(const scalar w, const vector& v)
 inline Foam::quaternion::quaternion(const vector& d, const scalar theta)
 :
     w_(cos(0.5*theta)),
-    v_((sin(0.5*theta)/magSqr(d))*d)
-{
-    normalize();
-}
+    v_((sin(0.5*theta)/mag(d))*d)
+{}
 
 inline Foam::quaternion::quaternion(const scalar w)
 :
