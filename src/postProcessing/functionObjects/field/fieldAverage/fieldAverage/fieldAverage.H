@@ -64,6 +64,7 @@ Description
                 base            time;
             }
         );
+    }
     \endverbatim
 
     Member function calcAverages() calculates the averages.

@@ -33,6 +33,7 @@ Description
 
 SourceFiles
     fieldCoordinateSystemTransform.C
+    fieldCoordinateSystemTransformTemplates.C
     IOfieldCoordinateSystemTransform.H
 @}
 
