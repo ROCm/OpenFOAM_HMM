@@ -165,7 +165,11 @@ castellatedMeshControls
         }
     }
 
+    // Feature angle:
+    // - used if min and max refinement level of a surface differ
+    // - used if feature snapping (see snapControls below) is used
     resolveFeatureAngle 30;
+
 
     // Region-wise refinement
     // ~~~~~~~~~~~~~~~~~~~~~~
