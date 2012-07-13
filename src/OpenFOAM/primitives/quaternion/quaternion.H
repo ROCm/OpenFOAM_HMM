@@ -140,6 +140,8 @@ public:
                //- The rotation tensor corresponding the quaternion
                inline tensor R() const;
 
+               inline quaternion normalized() const;
+
 
            // Edit
 

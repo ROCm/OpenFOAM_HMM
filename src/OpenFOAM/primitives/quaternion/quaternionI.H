@@ -166,6 +166,12 @@ inline Foam::vector& Foam::quaternion::v()
 }
 
 
+inline Foam::quaternion Foam::quaternion::normalized() const
+{
+    return *this/mag(*this);
+}
+
+
 inline void Foam::quaternion::normalize()
 {
     operator/=(mag(*this));
