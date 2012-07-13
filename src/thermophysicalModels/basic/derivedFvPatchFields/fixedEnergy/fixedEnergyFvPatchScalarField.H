@@ -24,8 +24,25 @@ License
 Class
     Foam::fixedEnergyFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
-    A fixed boundary condition for internal energy
+    This boundary condition provides a fixed condition for internal energy
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedEnergy;
+        value           uniform 100;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     fixedEnergyFvPatchScalarField.C
@@ -43,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class fixedEnergyFvPatchScalarField Declaration
+               Class fixedEnergyFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedEnergyFvPatchScalarField

@@ -46,7 +46,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, "undefined", scalarField::null()),
-    TName_("undefinedT")
+    TName_("T")
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -84,7 +84,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, dict),
-    TName_(dict.lookup("T"))
+    TName_(dict.lookupOrDefault<word>("T", "T"))
 {
     if (dict.found("value"))
     {
@@ -249,8 +249,7 @@ void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::write
 {
     mixedFvPatchScalarField::write(os);
     radiationCoupledBase::write(os);
-    os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
-
+    writeEntryIfDifferent<word>(os, "T", "T", TName_);
 }
 
 

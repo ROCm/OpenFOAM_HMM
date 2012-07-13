@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,30 @@ License
 Class
     Foam::wallHeatTransferFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions grpWallBoundaryConditions
+
 Description
-    Enthalpy boundary conditions for wall heat transfer
+    This boundary condition provides an enthalpy condition for wall heat
+    transfer
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        Tinf         | wall temperature        | yes         |
+        alphaWall    | thermal diffusivity     | yes         |
+    /endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            wallHeatTransfer;
+        Tif             uniform 500;
+        alphaWall       uniform 1;
+    }
+    \endverbatim
 
 SourceFiles
     wallHeatTransferFvPatchScalarField.C
@@ -43,7 +65,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class wallHeatTransferFvPatch Declaration
+            Class wallHeatTransferFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallHeatTransferFvPatchScalarField
@@ -52,10 +74,10 @@ class wallHeatTransferFvPatchScalarField
 {
     // Private data
 
-        //- Tinf
+        //- Temperature at the wall
         scalarField Tinf_;
 
-        //- alphaWall
+        //- Thermal diffusivity at the wall
         scalarField alphaWall_;
 
 

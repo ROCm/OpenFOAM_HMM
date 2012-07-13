@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::greyDiffusiveViewFactorFixedValueFvPatchScalarField
+    Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField
+
+Group
+    grpThermoBoundaryConditions
 
 Description
     This boundary condition provides a grey-diffuse condition for radiative
     heat flux, \c Qr, for use with the view factor model
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        Qro          | external radiative heat flux | yes    |
+        emissivityMode | emissivity mode: solidThermo or lookup | yes |
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            greyDiffusiveRadiationViewFactor;
-            Qro             uniform 0;      // external radiative heat flux
-            emissivityMode  solidThermo;    // solidThermo | lookup
-            value           uniform 0;      // initial value
-        }
+    myPatch
+    {
+        type            greyDiffusiveRadiationViewFactor;
+        Qro             uniform 0;
+        emissivityMode  solidThermo;
+        value           uniform 0;
+    }
     \endverbatim
 
 SeeAlso

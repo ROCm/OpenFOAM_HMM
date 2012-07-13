@@ -24,6 +24,9 @@ License
 Class
     Foam::MarshakRadiationFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
     A 'mixed' boundary condition that implements a Marshak condition for the
     incident radiation field (usually written as G)
@@ -31,15 +34,26 @@ Description
     The radiation temperature is retrieved from the mesh database, using a
     user specified temperature field name.
 
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        T            | temperature field name  | no          | T
+    /endtable
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            MarshakRadiation;
-            T               T;                  // name of temperature field
-            value           uniform 0;          // optional value entry
-        }
+    myPatch
+    {
+        type            MarshakRadiation;
+        T               T;
+        value           uniform 0;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::radiationCoupledBase
+    Foam::mixedFvPatchField
 
 SourceFiles
     MarshakRadiationFvPatchScalarField.C

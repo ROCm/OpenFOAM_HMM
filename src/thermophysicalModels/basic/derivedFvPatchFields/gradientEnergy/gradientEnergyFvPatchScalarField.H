@@ -22,10 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::gradientInternalEnergyFvPatchScalarField
+    Foam::gradientEnergyFvPatchScalarField
+
+Group
+    grpThermoBoundaryConditions
 
 Description
-    Gradient boundary condition for internal energy
+    This boundary condition provides a gradient condition for internal energy
+
+    /heading Patch usage
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            gradientEnergy;
+        gradient        uniform 10;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedGradientFvPatchField
 
 SourceFiles
     gradientEnergyFvPatchScalarField.C
@@ -43,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class gradientEnergyFvPatchScalarField Declaration
+             Class gradientEnergyFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class gradientEnergyFvPatchScalarField

@@ -23,36 +23,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\page pageBoundaryConditions Boundary Conditions
-
-\ref grpBoundaryConditions
-
-
-\section secBoundaryConditionsOverview Overview
-
-\subsection secBC1 Basic boundary conditions
-    - \ref grpConstraintBoundaryConditions
-    - \ref grpInletBoundaryConditions
-    - \ref grpOutletBoundaryConditions
-    - \ref grpGenericBoundaryConditions
-    - \ref grpCoupledBoundaryConditions
-    - \ref grpWallBoundaryConditions
-
-\subsection secBC2 Turbulent flow boundary conditions
-    - \ref grpIcoRASBoundaryConditions
-    - \ref grpCmpRASBoundaryConditions
-
-\subsection secBC3 Thermophysical boundary conditions
-    - \ref grpThermoBoundaryConditions
-
-
-\section secWallFunctions Wall functions
-
-Wall functions for incompressible flow
-    - \ref grpIcoWallFunctions
-
-Wall functions for compressible flow
-    - \ref grpCmpWallFunctions
-
+\defgroup grpThermoBoundaryConditions Thermophysical boundary conditions
+@{
+    This group contains thermophysical model boundary conditions
+@}
 
 \*---------------------------------------------------------------------------*/

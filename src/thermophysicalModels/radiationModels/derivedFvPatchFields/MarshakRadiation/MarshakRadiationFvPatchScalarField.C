@@ -40,7 +40,7 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, "undefined", scalarField::null()),
-    TName_("undefined")
+    TName_("T")
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -76,7 +76,7 @@ Foam::MarshakRadiationFvPatchScalarField::MarshakRadiationFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     radiationCoupledBase(p, dict),
-    TName_(dict.lookup("T"))
+    TName_(dict.lookupOrDefault<word>("T", "T"))
 {
     if (dict.found("value"))
     {
@@ -191,7 +191,7 @@ void Foam::MarshakRadiationFvPatchScalarField::write(Ostream& os) const
 {
     mixedFvPatchScalarField::write(os);
     radiationCoupledBase::write(os);
-    os.writeKeyword("T") << TName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "T", "T", TName_);
 }
 
 
