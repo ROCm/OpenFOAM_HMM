@@ -55,4 +55,34 @@ Wall functions for compressible flow
     - \ref grpCmpWallFunctions
 
 
+\section secBoundaryConditions Typical usage for pressure-velocity systems
+
+subsonic inlet (flow specified):
+/table
+    Variable             | Symbol | Type
+    pressure             | p      | \link Foam::zeroGradientFvPatchField zeroGradient\endlink
+    velocity             | U      | \link Foam::fixedValueFvPatchField fixedValue\endlink
+    transported property | -      | \link Foam::fixedValueFvPatchField fixedValue\endlink
+    derived property     | -      | \link Foam::calculatedFvPatchField calculated\endlink or \link Foam::zeroGradientFvPatchField zeroGradient\endlink
+/endtable
+
+subsonic outlet:
+/table
+    Variable             | Symbol | Type
+    pressure             | p      | \link Foam::fixedValueFvPatchField fixedValue\endlink
+    velocity             | U      | \link Foam::inletOutletFvPatchField inletOutlet\endlink or \link Foam::pressureInletOutletVelocityFvPatchVectorField pressureInletOutletVelocity\endlink
+    transported property | -      | \link Foam::inletOutletFvPatchField inletOutlet\endlink
+    derived property     | -      | \link Foam::calculatedFvPatchField calculated\endlink or \link Foam::zeroGradientFvPatchField zeroGradient\endlink
+/endtable
+
+wall:
+/table
+    Variable             | Symbol | Type
+    pressure             | p      | \link Foam::zeroGradientFvPatchField zeroGradient\endlink
+    velocity             | U      | \link Foam::fixedValueFvPatchField fixedValue\endlink
+    transported property | -      | \link Foam::fixedValueFvPatchField fixedValue\endlink
+    derived property     | -      | \link Foam::calculatedFvPatchField calculated\endlink or \link Foam::zeroGradientFvPatchField zeroGradient\endlink
+/endtable
+
+
 \*---------------------------------------------------------------------------*/

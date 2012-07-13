@@ -51,6 +51,7 @@ functions
     {
         type            functionObjectType;
         libs            ("libMyFunctionObjectlib.so");
+        active          yes;        // active by default
         outputControl   outputTime; // output or timeStep
         outputInterval  1;          // only necessary for outputControl=timeStep
         ...

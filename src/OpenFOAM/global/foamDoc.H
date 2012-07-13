@@ -36,6 +36,7 @@ License
     turbulence and heat transfer, to solid dynamics and electromagnetics.
     <a href="http://www.openfoam.org/features">More ...</a>
 
+
 \section layout Code Layout
 
     The OpenFOAM source code comprises of four main components:
@@ -53,11 +54,11 @@ License
     - doc:
         supporting documentation
 
+
 \section usingTheCode Using the code
 
     - \subpage pagePostProcessing
     - \subpage pageBoundaryConditions
-    - \subpage grpIcoRASBoundaryConditions
 
 
 \*---------------------------------------------------------------------------*/

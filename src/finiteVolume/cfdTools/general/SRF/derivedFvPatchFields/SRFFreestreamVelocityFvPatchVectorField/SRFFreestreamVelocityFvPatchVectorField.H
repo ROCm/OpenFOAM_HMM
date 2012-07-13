@@ -33,24 +33,29 @@ Description
     determine the local velocity using:
 
         \f[
-            Up = cos(theta)*UInf + sin(theta)*(n^UInf) - Up_srf
+            U_p = cos(\theta)*U_{Inf} + sin(theta) (n^UInf) - U_{p,srf}
         \f]
 
     where
-        \var Up     = patch velocity [m/s]
-        \var UInf   = free stream velocity in the absolute frame [m/s]
-        \var theta  = swept angle [rad]
-        \var n      = axis direction of the SRF
-        \var Up_srf = SRF velocity of the patch
+    /vartable
+        U_p     = patch velocity [m/s]
+        U_{Inf} = free stream velocity in the absolute frame [m/s]
+        theta   = swept angle [rad]
+        n       = axis direction of the SRF
+        U_{p,srf} = SRF velocity of the patch
+    /endvartable
+
+
+    /heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            SRFFreestreamVelocity;
-            UInf            (0 0 0);            // free stream velocity
-            value           uniform (0 0 0);    // optional value entry
-        }
+    myPatch
+    {
+        type            SRFFreestreamVelocity;
+        UInf            (0 0 0);            // free stream velocity
+        value           uniform (0 0 0);    // optional value entry
+    }
     \endverbatim
 
 SourceFiles

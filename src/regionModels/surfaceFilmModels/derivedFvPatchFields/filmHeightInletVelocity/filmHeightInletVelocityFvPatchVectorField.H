@@ -24,6 +24,9 @@ License
 Class
     Foam::filmHeightInletVelocityFvPatchVectorField
 
+Group
+    grpSurfaceFilmBoundaryConditions
+
 Description
     This boundary condition is designed to be used in conjunction with
     surface film modelling.  It provides a velocity inlet boundary condition
@@ -31,28 +34,42 @@ Description
     obtained from the flux with a direction normal to the patch faces using:
 
     \f[
-        Up = \frac{n*phi}{rho*mag(Sf)*delta}
+        U_p = \frac{n \phi}{\rho |Sf| \delta}
     \f]
 
     where
-        \var Up    = patch velocity [m/s]
-        \var n     = patch normal vector
-        \var phi   = mass flux [kg/s]
-        \var rho   = density [kg/m3]
-        \var Sf    = patch face area vectors [m2]
-        \var delta = film height [m]
+    /vartable
+        U_p    | patch velocity [m/s]
+        n      | patch normal vector
+        \phi   | mass flux [kg/s]
+        \rho   | density [kg/m3]
+        Sf     | patch face area vectors [m2]
+        \delta | film height [m]
+    /endvartable
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        phi          | Flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        deltaf       | height field name       | no          | deltaf
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            filmHeightInletVelocity;
-            phi             phi;      // name of flux field (default = phi)
-            rho             rho;      // name of density field (default = rho)
-            deltaf          deltaf;   // name of height field (default = deltaf)
-            value           uniform (0 0 0); // initial velocity / [m/s]
-        }
+    myPatch
+    {
+        type            filmHeightInletVelocity;
+        phi             phi;
+        rho             rho;
+        deltaf          deltaf;
+        value           uniform (0 0 0); // initial velocity / [m/s]
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     filmHeightInletVelocityFvPatchVectorField.C

@@ -24,9 +24,12 @@ License
 Class
     Foam::temperatureThermoBaffleFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
-    Thermal boundary applied to both sides:the baffle region and
-    in the primary region.
+    This boundary condition provides a coupled condition between the primary
+    baffle mesh regions.
 
     The primary region creates it and evolves the thermal baffle heat transfer
     equation.
@@ -95,6 +98,8 @@ Description
 
     value               uniform 300;
 
+SeeAlso
+    Foam::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 
 SourceFiles
     temperatureThermoBaffleFvPatchScalarField.C

@@ -36,7 +36,7 @@ Description
     /table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
-        inletValue   | inlet value             | yes         |
+        inletValue   | inlet value for reverse flow | yes    |
     /endtable
 
     Example of the boundary condition specification:
@@ -44,9 +44,9 @@ Description
     myPatch
     {
         type            inletOutlet;
-        phi             phi;        // name of flux field (default = phi)
-        inletValue      uniform 0;  // reverse flow (inlet) value
-        value           uniform 0;  // initial value
+        phi             phi;
+        inletValue      uniform 0;
+        value           uniform 0;
     }
     \endverbatim
 

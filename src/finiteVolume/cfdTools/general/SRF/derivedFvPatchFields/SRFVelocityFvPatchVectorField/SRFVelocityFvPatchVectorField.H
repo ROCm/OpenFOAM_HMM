@@ -24,6 +24,9 @@ License
 Class
     Foam::SRFVelocityFvPatchVectorField
 
+Group
+    grpInletBoundaryConditions grpWallBoundaryConditions
+
 Description
     Velocity condition to be used in conjunction with the single
     rotating frame (SRF) model (see: SRFModel class)
@@ -35,28 +38,33 @@ Description
     The optional \c relative flag switches the behaviour of the patch
     such that:
 
-        \li relative = yes: inlet velocity applied 'as is':
+        - relative = yes: inlet velocity applied 'as is':
 
         \f[
             Up = U_in
         \f]
 
-        \li relative = no : SRF velocity is subtracted from the inlet velocity:
+        - relative = no : SRF velocity is subtracted from the inlet velocity:
 
         \f[
             Up = U_in - U_srf
         \f]
 
+    /heading Patch usage
+
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            SRFVelocity;
-            relative        yes;                // relative motion to the SRF?
-            inletValue      uniform (0 0 0);    // inlet velocity
-            value           uniform (0 0 0);    // initial value
-        }
+    myPatch
+    {
+        type            SRFVelocity;
+        relative        yes;                // relative motion to the SRF?
+        inletValue      uniform (0 0 0);    // inlet velocity
+        value           uniform (0 0 0);    // initial value
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     SRFVelocityFvPatchVectorField.C

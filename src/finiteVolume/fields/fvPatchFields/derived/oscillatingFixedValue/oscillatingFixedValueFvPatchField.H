@@ -32,7 +32,7 @@ Description
     amplitude and frequency.
 
         /f[
-            x_p = (1 + a.sin(\pi f t))x_{ref} + x_o
+            x_p = (1 + a sin(\pi f t))x_{ref} + x_o
         /f]
 
     where
@@ -58,7 +58,7 @@ Description
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    myPatch
     {
         type            oscillatingFixedValue;
         refValue        uniform 5.0;

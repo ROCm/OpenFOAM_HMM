@@ -25,13 +25,24 @@ License
 
 \defgroup grpBoundaryConditions Boundary Conditions
 @{
-    This group contains OpenFOAM boundary condition types
+    This group contains OpenFOAM boundary condition types.  All conditions
+    are derived from the base Foam::fvPatchField class.  Patch values are
+    typically updated using the virtual functions
+    - Foam::fvPatchField::updateCoeffs()
+    - Foam::fvPatchField::evaluate()
+
+    The difference between the methods is based on when the patch values are
+    updated.  When the condition is applied to a solution variable, the
+    call to updateCoeffs() occurs as a preliminary step of the
+    \<matrix\>.solve().  The evaluate() method is invoked after, or idependent
+    of the matrix solve, via a call to \<field\>.correctBoundaryConditions().
 @}
 
 \defgroup grpConstraintBoundaryConditions Constraint boundary Conditions
 @{
     \ingroup grpBoundaryConditions
-    This group contains constraint boundary condition types
+    This group contains constraint boundary condition types.  These conditions
+    are mainly employed to reduced dimensioned cases.
 @}
 
 \defgroup grpInletBoundaryConditions Inlet boundary Conditions

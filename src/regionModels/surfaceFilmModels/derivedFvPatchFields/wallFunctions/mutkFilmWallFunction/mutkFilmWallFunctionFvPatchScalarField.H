@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,11 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::RASModels::
-    mutkFilmWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::mutkFilmWallFunctionFvPatchScalarField
+
+Group
+    grpSurfaceFilmBoundaryConditions grpCmpWallFunctions
 
 Description
-    Wall function boundary condition for use with surface film models.
+    This boundary condition provides a turbulent viscosity condition when
+    using wall functions, based on turbulence kinetic energy, for use with
+    surface film models.
+
+    /heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            mutkFilmWallFunction;
+        value           uniform 0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mutkWallFunctionFvPatchScalarField
 
 SourceFiles
     mutkFilmWallFunctionFvPatchScalarField.C

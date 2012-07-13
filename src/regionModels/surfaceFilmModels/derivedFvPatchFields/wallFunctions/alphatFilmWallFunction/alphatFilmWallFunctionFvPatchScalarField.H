@@ -24,24 +24,42 @@ License
 Class
     Foam::compressible::RASModels::alphatFilmWallFunctionFvPatchScalarField
 
+Group
+    grpSurfaceFilmBoundaryConditions grpCmpWallFunctions
+
 Description
-    Turbulent thermal diffusivity boundary condition for use with surface
-    film models.  This condition varies from the standard wall function by
-    taking into account any mass released from the film model.
+    This boundary condition provides a turbulent thermal diffusivity condition
+    when using wall functions, for use with surface film models.  This
+    condition varies from the standard wall function by taking into account any
+    mass released from the film model.
+
+    /heading Patch usage
+
+    /table
+        Property     | Description             | Required    | Default value
+        B            | model coefficient       | no          | 5.5
+        yPlusCrit    | critical y+ for transition to turbulent flow | no|11.05
+        Cmu          | model coefficient       | no          | 0.09
+        kappa        | Von-Karman constant     | no          | 0.41
+        Prt          | turbulent Prandtl number | no         | 0.85
+    /endtable
 
     Example of the boundary condition specification:
     \verbatim
-        myPatch
-        {
-            type            alphatFilmWallFunction;
-            B               5.5;    // B coefficient (default = 5.5)
-            yPlusCrit       11.05;  // critical y+ (default = 11.05)
-            Cmu             0.09;   // Cmu coefficient (default = 0.09)
-            kappa           0.41;   // kappa coefficient (default = 0.41)
-            Prt             0.85;   // turbulent Prandtl number (default = 0.85)
-            value           uniform 0; // optional value entry
-        }
+    myPatch
+    {
+        type            alphatFilmWallFunction;
+        B               5.5;
+        yPlusCrit       11.05;
+        Cmu             0.09;
+        kappa           0.41;
+        Prt             0.85;
+        value           uniform 0;
+    }
     \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     alphatFilmWallFunctionFvPatchScalarField.C
