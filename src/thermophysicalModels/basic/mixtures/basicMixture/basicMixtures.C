@@ -65,51 +65,6 @@ makeBasicMixture
 (
     pureMixture,
     constTransport,
-    sensibleInternalEnergy,
-    eConstThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    sutherlandTransport,
-    sensibleInternalEnergy,
-    eConstThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    constTransport,
-    sensibleInternalEnergy,
-    hConstThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    sutherlandTransport,
-    sensibleInternalEnergy,
-    hConstThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    sutherlandTransport,
-    sensibleInternalEnergy,
-    janafThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    constTransport,
     sensibleEnthalpy,
     hConstThermo,
     perfectGas
@@ -180,6 +135,87 @@ makeBasicMixture
     pureMixture,
     sutherlandTransport,
     sensibleEnthalpy,
+    janafThermo,
+    isobaricPerfectGas
+);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    incompressible
+);
+
+makeBasicPolyMixture
+(
+    pureMixture,
+    3,
+    sensibleInternalEnergy
+);
+
+makeBasicPolyMixture
+(
+    pureMixture,
+    8,
+    sensibleInternalEnergy
+);
+
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
     janafThermo,
     isobaricPerfectGas
 );
