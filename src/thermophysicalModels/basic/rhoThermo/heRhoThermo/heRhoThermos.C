@@ -151,6 +151,104 @@ makeThermo
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    perfectGas
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    perfectGas
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    perfectGas
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    incompressible
+);
+
+makePolyThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    3,
+    sensibleInternalEnergy
+);
+
+makePolyThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    8,
+    sensibleInternalEnergy
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    isobaricPerfectGas
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    isobaricPerfectGas
+);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // ************************************************************************* //

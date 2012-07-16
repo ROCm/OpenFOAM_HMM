@@ -64,7 +64,7 @@ Foam::porousMedia::fixedTemperature::~fixedTemperature()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::porousMedia::fixedTemperature::addEnthalpySource
+void Foam::porousMedia::fixedTemperature::addEnergySource
 (
     const basicThermo& thermo,
     const volScalarField& rho,

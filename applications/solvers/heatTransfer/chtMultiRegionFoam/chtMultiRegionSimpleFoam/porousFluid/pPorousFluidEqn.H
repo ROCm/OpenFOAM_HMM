@@ -16,7 +16,6 @@ porousPhi =
 
 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
-
     fvScalarMatrix pEqn
     (
         fvm::laplacian(porousRho*rAUPorous, porousP) ==  fvc::div(porousPhi)
