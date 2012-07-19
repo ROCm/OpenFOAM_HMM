@@ -48,12 +48,17 @@ Description
 
     \heading Patch usage
 
+    \table
+        Property     | Description             | Required    | Default value
+        UInf         | free stream velocity    | yes         |
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
         type            SRFFreestreamVelocity;
-        UInf            (0 0 0);            // free stream velocity
+        UInf            (0 0 0);
         value           uniform (0 0 0);    // optional value entry
     }
     \endverbatim
