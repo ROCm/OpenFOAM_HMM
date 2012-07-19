@@ -6,14 +6,14 @@ BEGIN {
 }
 
 
-/\/table/ {
+/\\table/ {
     flag = 1;
     firstRow = 1;
     next;
 }
 
 
-/\/endtable/ {
+/\\endtable/ {
     if (data != "")
     {
         printf "<table class=\"OFTable\">\n";
@@ -27,14 +27,14 @@ BEGIN {
 }
 
 
-/\/vartable/ {
+/\\vartable/ {
     flag = 2;
     firstRow = 1;
     next;
 }
 
 
-/\/endvartable/ {
+/\\endvartable/ {
     if (data != "")
     {
         printf "<table border="0">\n";
@@ -51,7 +51,7 @@ BEGIN {
 {
     if (flag > 0)
     {
-        data = (data "<tr>");
+        data = (data "<tr>\n");
         if (flag == 1)
         {
             for (i = 0; i <= NF; i++)
