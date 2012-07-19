@@ -64,6 +64,17 @@ s/^    /\\class /
 }
 
 
+# Group
+#     groupName
+# =>
+# \ingroup namespaceName
+#
+/^Group *$/,/^[^ ]/{
+s/^Group//
+s/^    /\\ingroup /
+}
+
+
 # Namespace
 #     namespaceName
 # =>
