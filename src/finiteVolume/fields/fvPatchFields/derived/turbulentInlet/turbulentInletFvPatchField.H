@@ -37,23 +37,23 @@ Description
 
     where
 
-    /vartable
+    \vartable
         x_p     | patch values
         x_{ref} | refernce patch values
         n       | time level
         \alpha  | fraction of new random component added to previous time value
         C_{RMS} | RMS coefficient
         s       | fluctuation scale
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         fluctuationScale | RMS fluctuation scale (fraction of mean) | yes |
         referenceField | reference (mean) field | yes        |
         alpha | fraction of new random component added to previous| no| 0.1
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

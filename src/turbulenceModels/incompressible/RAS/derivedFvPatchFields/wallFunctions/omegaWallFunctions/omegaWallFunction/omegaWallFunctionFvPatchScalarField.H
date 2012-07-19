@@ -37,10 +37,10 @@ Description
 
     where
 
-    /vartable
+    \vartable
         \omega_{vis} | omega in viscous region
         \omega_{log} | omega in logarithmic region
-    /endvartable
+    \endvartable
 
     Model described by Eq.(15) of:
     \verbatim
@@ -50,16 +50,16 @@ Description
         Nov. 2001
     \endverbatim
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         G            | turbulence generation field name | no | G
         Cmu          | model coefficient       | no          | 0.09
         kappa        | Von Karman constant     | no          | 0.41
         E            | model coefficient       | no          | 9.8
         beta1        | model coefficient       | no          | 0.075
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

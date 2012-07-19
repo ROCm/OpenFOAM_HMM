@@ -30,7 +30,7 @@ Group
 Description
     This boundary condition enables processor communication across patches.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

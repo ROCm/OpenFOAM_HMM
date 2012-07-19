@@ -30,12 +30,12 @@ Group
 Description
     This boundary condition provides a uniform fixed value condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         uniformValue | uniform value           |         yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

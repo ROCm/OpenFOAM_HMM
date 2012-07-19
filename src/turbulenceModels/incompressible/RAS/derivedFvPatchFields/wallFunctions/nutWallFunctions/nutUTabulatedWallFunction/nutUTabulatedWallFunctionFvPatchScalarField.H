@@ -37,12 +37,12 @@ Description
     the tables are not registered since the same table object may be used for
     more than one patch.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         uPlusTable   | U+ as a function of Re table name | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -37,9 +37,9 @@ Description
     pressure and compressibility which is assumed constant, i.e. isothermal
     expansion/compression.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Ap           | syringe piston area [m2] | yes        |
         Sp           | syringe piston speed [m/s] | yes      |
@@ -51,7 +51,7 @@ Description
         psI          | initial syringe pressure [Pa] | yes   |
         psi          | gas compressibility [m2/s2] | yes     |
         ams          | added (or removed) gas mass [kg] | yes |
-    /endtable
+    \endtable
 
     Example of the BC specification:
     \verbatim

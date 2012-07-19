@@ -34,15 +34,15 @@ Description
     The sample mode is set by the underlying mapping engine, provided by the
     mappedPatchBase class.
     
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
         setAverage   | flag to activate setting of average value | yes |
         average      | average value to apply if \c setAverage = yes | yes |
         interpolationScheme | type of interpolation scheme | no |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

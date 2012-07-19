@@ -32,13 +32,13 @@ Description
     by name "outletPatchName" and applies this as the uniform value of the
     field over this patch.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property        | Description             | Required    | Default value
         outletPatchName | name of outlet patch    | yes         |
         phi             | flux field name         | no          | phi
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

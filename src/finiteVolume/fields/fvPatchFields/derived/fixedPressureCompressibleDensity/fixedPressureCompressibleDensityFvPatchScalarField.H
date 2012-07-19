@@ -37,23 +37,23 @@ Description
 
     where
 
-    /vartable
+    \vartable
         \rho    | density [kg/m3]
         \rho_{l,sat} | saturation liquid density [kg/m3]
         \psi_l  | liquid compressibility
         p       | pressure [Pa]
         p_{sat} | saturation pressure [Pa]
-    /endvartable
+    \endvartable
 
     The variables \c rholSat, \c pSat and \c psil are retrieved from the
     \c thermodynamicProperties dictionary.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         p            | pressure field name     | no          | p
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

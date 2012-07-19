@@ -32,9 +32,9 @@ Description
     temperature for use with supersonic cases, where a user-specified
     value is applied in the case of reverse flow.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
@@ -42,7 +42,7 @@ Description
         gamma        | heat capacity ration (Cp/Cv) | yes    |
         inletValue   | reverse flow (inlet) value | yes      |
         T0           | static temperature [K]  | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

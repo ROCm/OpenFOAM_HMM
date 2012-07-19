@@ -38,20 +38,20 @@ Description
 
     where
 
-    /vartable
+    \vartable
         epsilon | turblence dissipation field
         G       | turblence generation field
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         G            | turbulence generation field name | no | G
         Cmu          | model coefficient       | no          | 0.09
         kappa        | Von Karman constant     | no          | 0.41
         E            | model coefficient       | no          | 9.8
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

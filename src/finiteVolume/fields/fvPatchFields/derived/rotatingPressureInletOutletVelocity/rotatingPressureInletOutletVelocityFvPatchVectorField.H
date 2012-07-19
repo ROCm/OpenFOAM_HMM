@@ -33,14 +33,14 @@ Description
     for outflow (as defined by the flux); for inflow, the velocity is obtained
     from the flux with a direction normal to the patch faces.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         tangentialVelocity | tangential velocity field | no  |
         omega        | angular velocty of the frame [rad/s] | yes    | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

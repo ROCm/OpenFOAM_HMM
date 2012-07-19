@@ -31,12 +31,12 @@ Description
     This boundary condition maps the velocity and flux from a neighbour patch
     to this patch
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

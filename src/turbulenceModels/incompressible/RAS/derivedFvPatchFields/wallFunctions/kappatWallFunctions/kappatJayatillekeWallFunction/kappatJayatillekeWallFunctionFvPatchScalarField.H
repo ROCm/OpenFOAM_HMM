@@ -35,15 +35,15 @@ Description
     \note
     The units of kinematic turbulent thermal conductivity are m2/s
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Prt          | turbulent Prandtl number | no         | 0.85
         Cmu          | model coefficient       | no          | 0.09
         kappa        | Von Karman constant     | no          | 0.41
         E            | model coefficient       | no          | 9.8
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

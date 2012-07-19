@@ -32,16 +32,16 @@ Description
     cylindrical co-ordinates given a central axis, central point, rpm, axial
     and radial velocity.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         axis         | axis of rotation        | yes         |
         centre       | centre of rotation      | yes         |
         axialVelocity | axial velocity profile [m/s] | yes    |
         radialVelocity | radial velocity profile [m/s] | yes  |
         rpm          | rotational speed (revolutions per minute) | yes|
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

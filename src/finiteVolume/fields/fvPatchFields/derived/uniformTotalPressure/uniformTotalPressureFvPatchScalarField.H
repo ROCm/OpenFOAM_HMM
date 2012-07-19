@@ -31,9 +31,9 @@ Description
     This boundary condition provides a time-varying form of the uniform total
     pressure boundary condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
@@ -42,7 +42,7 @@ Description
         gamma        | ratio of specific heats (Cp/Cv) | yes |
         p0           | static pressure reference | yes       |
         pressure     | total pressure as a function of time | yes |
-    /endtable
+    \endtable
 
     \note
     The default boundary behaviour is for subsonic, incompressible flow.

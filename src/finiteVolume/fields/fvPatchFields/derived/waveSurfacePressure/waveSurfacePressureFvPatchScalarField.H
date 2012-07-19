@@ -35,23 +35,23 @@ Description
             p = -\rho*g*\zeta
         \f]
 
-    /vartable
+    \vartable
         \rho  | density [kg/m3]
         g     | acceleration due to gravity [m/s2]
         \zeta | wave amplitude [m]
-    /endvartable
+    \endvartable
 
     The wave amplitude is updated as part of the calculation, derived from the
     local volumetric flux.
 
-    /heading Patch usage
+    \heading Patch usage
     
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
         zeta         | wave amplitude field name | no        | zeta
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

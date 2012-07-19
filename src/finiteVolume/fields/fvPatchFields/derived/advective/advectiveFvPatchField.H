@@ -48,15 +48,15 @@ Description
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
         fieldInf     | value of field beyond patch | no      |
         lInf         | distance beyond patch for \c fieldInf | no |
-    /endtable
+    \endtable
 
     \note
     If \c lInf is specified, \c fieldInf will be required; \c rho is only

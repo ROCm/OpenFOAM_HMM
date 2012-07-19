@@ -31,13 +31,13 @@ Description
     This boundary condition provides a generic inflow condition, with
     specified outflow for the case of return flow.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         inletValue   | inlet value             | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

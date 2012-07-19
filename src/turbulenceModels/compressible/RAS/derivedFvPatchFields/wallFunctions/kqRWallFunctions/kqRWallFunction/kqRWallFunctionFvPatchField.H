@@ -31,7 +31,7 @@ Description
     This boundary condition is applied to turbulence \c k, \c q, and \c R
     when using wall functions, and simply enforces a zero-gradient condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

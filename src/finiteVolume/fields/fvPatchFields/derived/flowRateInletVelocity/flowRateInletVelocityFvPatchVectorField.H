@@ -43,12 +43,12 @@ Description
     For a volumetric-based flux:
     - the flow rate is in m3/s
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         flowRate     | volumetric [m3/s] OR mass flow rate [kg/s] | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

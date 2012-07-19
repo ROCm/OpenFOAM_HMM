@@ -37,7 +37,7 @@ Description
     patch is transformed to the neighbour patch, the outer perimiter of each
     patch should be identical (or very similar).
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

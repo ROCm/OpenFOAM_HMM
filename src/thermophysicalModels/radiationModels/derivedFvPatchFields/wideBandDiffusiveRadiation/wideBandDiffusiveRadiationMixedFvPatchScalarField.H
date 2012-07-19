@@ -31,7 +31,7 @@ Description
     This boundary condition provides a wide-band, diffusive radiation
     condition, where the patch temperature is specified.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

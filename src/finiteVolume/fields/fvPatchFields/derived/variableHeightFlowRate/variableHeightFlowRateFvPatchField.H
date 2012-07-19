@@ -41,14 +41,14 @@ Description
     if alpha < lowerBound:
     - apply a fixed value condition, with a uniform level of the lower bound
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         lowerBound   | lower bound for clipping | yes        |
         upperBound   | upper bound for clipping | yes        |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -32,7 +32,7 @@ Description
     using wall functions, based on turbulence kinetic energy, for use with
     surface film models.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

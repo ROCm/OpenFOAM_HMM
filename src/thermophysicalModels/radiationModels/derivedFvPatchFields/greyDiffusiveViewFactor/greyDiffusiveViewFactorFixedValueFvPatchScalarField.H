@@ -31,13 +31,13 @@ Description
     This boundary condition provides a grey-diffuse condition for radiative
     heat flux, \c Qr, for use with the view factor model
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Qro          | external radiative heat flux | yes    |
         emissivityMode | emissivity mode: solidThermo or lookup | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

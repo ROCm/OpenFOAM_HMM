@@ -34,12 +34,12 @@ Description
     The radiation temperature field across the patch is supplied by the user
     using the \c Trad entry.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

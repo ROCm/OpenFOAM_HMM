@@ -33,14 +33,14 @@ Description
     applied for outflow (as defined by the flux); for inflow, the velocity
     is obtained from the flux with the specified inlet direction.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
         inletDirection | inlet direction per patch face | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

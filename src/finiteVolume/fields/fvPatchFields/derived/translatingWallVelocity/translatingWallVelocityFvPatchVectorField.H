@@ -31,12 +31,12 @@ Description
     This boundary condition provides a velocity condition for translational
     motion on walls.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | translational velocity  | yes|
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

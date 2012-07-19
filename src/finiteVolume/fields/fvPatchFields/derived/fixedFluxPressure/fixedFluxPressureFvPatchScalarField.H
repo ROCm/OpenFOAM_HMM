@@ -41,21 +41,21 @@ Description
 
     where
 
-    /vartable
+    \vartable
         phi     | flux
         D_p     | pressure diffusivity
         Sf      | patch face areas [m2]
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phiHbyA      | name of predicted flux field | no | phiHbyA
         phi          | name of flux field      | no |   phi
         rho          | name of density field   | no |   rho
         Dp           | name of pressure diffusivity field | no |   Dp
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

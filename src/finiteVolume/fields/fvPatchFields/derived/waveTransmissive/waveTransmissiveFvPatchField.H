@@ -39,23 +39,23 @@ Description
 
     where
 
-    /vartable
+    \vartable
         x_p     | patch values
         \phi_p  | patch face flux
         \psi_p  | patch compressibility
         Sf      | patch face area vector
         \gamma  | ratio of specific heats
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
         psi          | compressibility field name | no       | psi
         gamma        | ratio of specific heats (Cp/Cv) | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

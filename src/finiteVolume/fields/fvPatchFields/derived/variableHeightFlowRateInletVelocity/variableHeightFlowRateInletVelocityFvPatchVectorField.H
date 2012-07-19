@@ -34,12 +34,12 @@ Description
     The flow rate is made proportional to the phase fraction alpha at each
     face of the patch and alpha is ensured to be bound between 0 and 1.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         flowRate     | volumetric flow rate [m3/s] | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

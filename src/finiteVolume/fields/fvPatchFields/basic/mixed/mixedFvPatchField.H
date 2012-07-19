@@ -39,14 +39,14 @@ Description
         \f]
 
     where
-    /vartable
+    \vartable
         x_p   | patch values
         x_c   | patch internal cell values
         w     | weight field, \c valueFraction_
         A     | fixed value, \c refValue_
         B     | patch normal gradient, \c refGrad_
         \Delta| inverse distance from face centre to internal cell centre
-    /endvartable
+    \endvartable
 
     \note
     This condition is not usually applied directly; instead, use a derived

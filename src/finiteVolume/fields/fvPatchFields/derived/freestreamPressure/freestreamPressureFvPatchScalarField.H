@@ -32,7 +32,7 @@ Description
     It is a zero-gradient condition that constrains the flux across the patch
     based on the free-stream velocity.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

@@ -32,7 +32,7 @@ Description
     using wall functions, based on turbulence kinetic energy.
     - replicates OpenFOAM v1.5 (and earlier) behaviour
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

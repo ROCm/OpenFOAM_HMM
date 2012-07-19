@@ -31,12 +31,12 @@ Description
     This boundary condition extrapolates field to the patch using the near-cell
     values and adjusts the distribution to match the specified mean value.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         meanValue    | mean value              | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

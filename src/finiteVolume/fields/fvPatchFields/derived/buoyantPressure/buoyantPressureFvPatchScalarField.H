@@ -43,11 +43,11 @@ Description
 
     where
 
-    /vartable
+    \vartable
         \rho   | density [kg/m3]
         g      | acceleration due to gravity [m/s2]
         h      | patch face centres [m]
-    /endvartable
+    \endvartable
 
     Otherwise we assume that it is the static pressure, and the gradient
     calculated using:
@@ -56,16 +56,16 @@ Description
         \f]
 
     where
-    /vartable
+    \vartable
         n      | patch face normal vectors
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         rho          | density field name      | no          | rho
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

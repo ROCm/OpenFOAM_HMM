@@ -37,24 +37,24 @@ Description
 
     where
 
-    /vartable
+    \vartable
         x_p     | patch values
         x_{ref} | patch reference values
         x_o     | patch offset values
         a       | amplitude
         f       | frequency [1/s]
         t       | time [s]
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         refValue     | reference value         | yes         |
         offset       | offset value            | no          | 0.0;                    // optional
         amplitude    | oscillation amplitude   | yes         |
         frequency    | oscillation frequency   | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

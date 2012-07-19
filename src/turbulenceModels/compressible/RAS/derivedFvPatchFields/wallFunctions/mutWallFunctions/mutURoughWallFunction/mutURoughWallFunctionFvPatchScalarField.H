@@ -31,14 +31,14 @@ Description
     This boundary condition provides a turbulent viscosity condition when
     using wall functions for rough walls, based on velocity.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         roughnessHeight | roughness height     | yes         |
         roughnessConstant | roughness constanr | yes         |
         roughnessFactor | scaling factor       | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

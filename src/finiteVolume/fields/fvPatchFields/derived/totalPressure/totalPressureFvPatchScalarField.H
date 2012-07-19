@@ -36,62 +36,62 @@ Description
             p_T = p_0 + 0.5 |U|^2
         \f]
         where
-        /vartable
+        \vartable
             p_T     | incompressible total pressure [m2/s2]
             p_0     | incompressible reference pressure [m2/s2]
             U       | velocity
-        /endvartable
+        \endvartable
 
     2. compressible subsonic:
         \f[
             p_T = p_0 + 0.5 \rho |U|^2
         \f]
         where
-        /vartable
+        \vartable
             p_T     | total pressure [Pa]
             p_0     | reference pressure [Pa]
             \rho    | density [kg/m3]
             U       | velocity
-        /endvartable
+        \endvartable
 
     3. compressible transonic (\gamma <= 1):
         \f[
             p_T = \frac{p_0}{1 + 0.5 \psi |U|^2}
         \f]
         where
-        /vartable
+        \vartable
             p_T     | total pressure [Pa]
             p_0     | reference pressure [Pa]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
-        /endvartable
+        \endvartable
 
     4. compressible supersonic (\gamma > 1):
         \f[
             p_T = \frac{p_0}{(1 + 0.5 \psi G)^{\frac{1}{G}}}
         \f]
         where
-        /vartable
+        \vartable
             \gamma  | ratio of specific heats (Cp/Cv)
             p_T     | total pressure [Pa]
             p_0     | reference pressure [Pa]
             \psi    | compressibility [m2/s2]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
-        /endvartable
+        \endvartable
 
     The modes of operation are set via the combination of \c phi, \c rho, and
     \c psi entries:
-    /table
+    \table
         Mode                    | phi   | rho   | psi
         incompressible subsonic | phi   | none  | none
         compressible subsonic   | phi   | rho   | none
         compressible transonic  | phi   | none  | psi
         compressible supersonic | phi   | none  | psi
-    /endtable
+    \endtable
 
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
@@ -99,7 +99,7 @@ Description
         psi          | compressibility field name | no       | none
         gamma        | ratio of specific heats (Cp/Cv) | yes |
         p0           | static pressure reference | yes       |
-    /endtable
+    \endtable
 
     \note
     The default boundary behaviour is for subsonic, incompressible flow.

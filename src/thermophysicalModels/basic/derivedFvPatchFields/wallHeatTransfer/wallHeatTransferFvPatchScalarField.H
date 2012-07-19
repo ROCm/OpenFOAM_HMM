@@ -31,13 +31,13 @@ Description
     This boundary condition provides an enthalpy condition for wall heat
     transfer
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Tinf         | wall temperature        | yes         |
         alphaWall    | thermal diffusivity     | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

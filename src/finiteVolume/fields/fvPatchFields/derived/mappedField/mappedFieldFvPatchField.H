@@ -32,14 +32,14 @@ Description
     condition.  It does not use information on the patch; instead it holds
     thr data locally.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         fieldName    | name of field to be mapped | no       | this field name
         setAverage   | flag to activate setting of average value | yes |
         average      | average value to apply if \c setAverage = yes | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

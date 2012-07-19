@@ -42,14 +42,14 @@ Description
 
     Values are interpolated linearly between times.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         setAverage   | flag to activate setting of average value | yes |
         perturb      | perturb points for regular geometries | no | 1e-5
         fieldTableName | alternative field name to sample | no| this field name
-    /endtable
+    \endtable
 
     /verbatim
     myPatch

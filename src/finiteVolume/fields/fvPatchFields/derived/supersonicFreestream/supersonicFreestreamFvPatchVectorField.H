@@ -36,15 +36,15 @@ Description
     - subsonic outflow is applied via a zero-gradient condition from inside
       the domain.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         UInf         | free-stream velocity    | yes         |
         pInf         | free-stream pressure    | yes         |
         TInf         | free-stream temperature | yes         |
         gamma        | heat capacity ratio (cp/Cv) | yes     | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -32,14 +32,14 @@ Description
     heat source either specified in terms of an absolute power [W], or as a
     flux [W/m2].
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         heatSource   | heat source type: \c flux [W/m2] or \c power [W]| yes |
         q            | heat source value       | yea          |
         alphaEff     | turbulent thermal diffusivity field name | yes |
-    /endtable
+    \endtable
 
     \note
     - it is assumed that the units of \c alphaEff are [kg/m/s]

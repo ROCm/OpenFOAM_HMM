@@ -38,23 +38,23 @@ Description
     \f]
 
     where
-    /vartable
+    \vartable
         U_p    | patch velocity [m/s]
         n      | patch normal vector
         \phi   | mass flux [kg/s]
         \rho   | density [kg/m3]
         Sf     | patch face area vectors [m2]
         \delta | film height [m]
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
         rho          | density field name      | no          | rho
         deltaf       | height field name       | no          | deltaf
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

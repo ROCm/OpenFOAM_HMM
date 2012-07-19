@@ -30,14 +30,14 @@ Group
 Description
     This boundary condition provides a rotational velocity condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         origin       | origin of rotation in Cartesian co-ordinates | yes|
         axis         | axis of rotation        | yes         |
         omega        | angular velocty of the frame [rad/s] | yes    | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

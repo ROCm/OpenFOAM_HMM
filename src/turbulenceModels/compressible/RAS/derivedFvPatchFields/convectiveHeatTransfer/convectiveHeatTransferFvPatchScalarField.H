@@ -42,20 +42,20 @@ Description
 
     where
 
-    /vartable
+    \vartable
         htc_p   | patch convective heat transfer coefficient
         Re      | Reynolds number
         Pr      | Prandtl number
         \kappa_p | thermal conductivity
         L       | length scale
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         L            | Length scale [m]        | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

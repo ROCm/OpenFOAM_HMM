@@ -36,19 +36,19 @@ Description
         \f]
 
     where
-    /vartable
+    \vartable
         x_p      | patch values
         x_c      | internal field values
         \nabla(x)| gradient (user-specified)
         \Delta   | inverse distance from patch face centre to cell centre
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         gradient     | gradient                | yes         | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

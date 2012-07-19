@@ -31,12 +31,12 @@ Description
     This boundary condition supplies a fixed value constraint, and is the base
     class for a number of other boundary conditions.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         value        | values                  | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

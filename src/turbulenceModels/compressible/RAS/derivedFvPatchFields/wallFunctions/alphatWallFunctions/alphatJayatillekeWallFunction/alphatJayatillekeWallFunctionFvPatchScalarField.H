@@ -31,15 +31,15 @@ Description
     This boundary condition provides a thermal wall function for turbulent
     thermal diffusivity (usually\c alphat) based on the Jayatilleke model.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Prt          | turbulent Prandtl number | no         | 0.85
         Cmu          | model coefficient       | no          | 0.09
         kappa        | Von Karman constant     | no          | 0.41
         E            | model coefficient       | no          | 9.8
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

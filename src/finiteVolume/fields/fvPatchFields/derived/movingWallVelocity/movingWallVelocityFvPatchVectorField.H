@@ -33,12 +33,12 @@ Description
     for moving reference frame (MRF) calculations.
 
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | velociy field name      | no          | U
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

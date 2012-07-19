@@ -40,19 +40,19 @@ Description
 
     where
 
-    /vartable
+    \vartable
         \alpha_t| turblence thermal diffusivity
         \mu_t   | turblence viscosity
         Pr_t    | turblent Prandtl number
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         mut          | turbulence viscosity field name | no  | mut
         Prt          | turbulent Prandtl number | no          | 0.85
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

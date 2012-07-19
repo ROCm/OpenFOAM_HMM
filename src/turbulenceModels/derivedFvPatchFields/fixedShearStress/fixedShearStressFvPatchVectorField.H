@@ -25,6 +25,8 @@ License
 Class
     Foam::fixedShearStressFvPatchVectorField
 
+Group grpWallBoundaryConditions
+
 Description
     Set a constant shear stress as tau0 = -nuEff dU/dn.
 

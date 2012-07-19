@@ -33,7 +33,7 @@ Description
     patches whose normal is aligned to geometric directions that do not
     constitue solution directions.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

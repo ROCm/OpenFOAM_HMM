@@ -32,7 +32,7 @@ Description
     using wall functions for rough walls, based on velocity,  using  Spaldings
     law to give a continuous nut profile to the wall (y+ = 0)
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

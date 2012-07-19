@@ -34,12 +34,12 @@ Description
     The radiation temperature is retrieved from the mesh database, using a
     user specified temperature field name.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

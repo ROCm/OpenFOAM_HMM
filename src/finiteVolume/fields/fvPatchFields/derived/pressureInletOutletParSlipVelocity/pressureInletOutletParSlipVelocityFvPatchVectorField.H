@@ -35,13 +35,13 @@ Description
 
     A slip condition is applied tangential to the patch.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -44,18 +44,18 @@ Description
 
     where
 
-    /vartable
+    \vartable
         x       | baffle open fraction [0-1]
         x_{old} | baffle open fraction on previous evaluation
         dt      | simulation time step
         DT      | time taken to open the baffle
-    /endvartable
+    \endvartable
 
     The open fraction is then applied to scale the patch areas.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         p            | pressure field name     | no          | p
         cyclicPatch  | cylclic patch name      | yes         |
@@ -65,7 +65,7 @@ Description
         maxOpenFractionDelta | max open fraction change per timestep | yes |
         minThresholdValue | minimum open fraction for activation | yes |
         forceBased   | force (true) or pressure-based (false) activation | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

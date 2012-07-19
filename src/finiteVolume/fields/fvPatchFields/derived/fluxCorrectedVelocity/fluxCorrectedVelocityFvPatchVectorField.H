@@ -38,21 +38,21 @@ Description
 
     where
 
-    /vartable
+    \vartable
         U_p | velocity at the patch [m/s]
         U_c | velocity in cells adjacent to the patch [m/s]
         n   | patch normal vectors
         \phi_p | flux at the patch [m3/s or kg/s]
         Sf  | patch face area vectors [m2]
-    /endvartable
+    \endvartable
 
     where
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | name of flux field      | no          | phi
         rho          | name of density field   | no          | rho
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

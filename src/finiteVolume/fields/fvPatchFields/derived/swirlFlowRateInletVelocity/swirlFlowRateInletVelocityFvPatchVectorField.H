@@ -37,15 +37,15 @@ Description
     dimensions of the flux, phi. The current density is used to correct the
     velocity when applying the mass basis.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
         flowRate     | flow rate profile       | yes         |
         rpm          | rotational speed profile | yes        |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

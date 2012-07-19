@@ -31,7 +31,7 @@ Description
     This boundary condition appies a zero-gradient condition from the patch
     internal field onto the patch faces.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

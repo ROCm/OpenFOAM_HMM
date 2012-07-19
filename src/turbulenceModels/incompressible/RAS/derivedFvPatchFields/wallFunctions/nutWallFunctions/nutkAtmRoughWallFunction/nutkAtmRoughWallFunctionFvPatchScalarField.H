@@ -40,19 +40,19 @@ Description
 
     where
 
-    /vartable
+    \vartable
         U_f | frictional velocity
         K   | Von Karman's constant
         z_0 | surface roughness length
         z   | vertical co-ordinate
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         z0           | surface roughness length| yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -31,7 +31,7 @@ Description
     This boundary condition provides a turbulent kinematic viscosity condition
     when using wall functions, based on velocity.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

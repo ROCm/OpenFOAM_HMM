@@ -33,13 +33,13 @@ Description
     (fvDOM), in which the radiation temperature is retrieved from the
     temperature field boundary condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         T            | temperature field name  | no          | T
         emissivityMode | emissivity mode: solidThermo or lookup | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

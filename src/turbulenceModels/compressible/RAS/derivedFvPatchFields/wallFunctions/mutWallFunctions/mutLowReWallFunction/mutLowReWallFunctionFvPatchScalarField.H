@@ -32,7 +32,7 @@ Description
     with low Reynolds number models.  It sets \c nut to zero, and provides an
     access function to calculate y+.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

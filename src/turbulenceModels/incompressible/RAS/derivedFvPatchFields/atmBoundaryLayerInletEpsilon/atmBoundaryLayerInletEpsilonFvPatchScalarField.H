@@ -38,13 +38,13 @@ Description
         \f]
 
     where
-    /vartable
+    \vartable
         U^*     | frictional velocity
         K       | Karman's constant
         z       | vertical co-ordinate [m]
         z_0     | surface roughness length [m]
         z_g     | minimum vlaue in z direction [m]
-    /endvartable
+    \endvartable
  
     and:
 
@@ -53,14 +53,14 @@ Description
         \f]
 
     where:
-    /vartable
+    \vartable
         U_{ref} | reference velocity at \f$Z_{ref}\f$ [m/s]
         Z_{ref} | reference height [m]
-    /endvartable
+    \endvartable
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         z            | vertical co-ordinate [m] | yes        |
         kappa        | Karman's constanat      | no          | 0.41
@@ -68,7 +68,7 @@ Description
         Href         | reference height [m]    | yes         |
         z0           | surface roughness length [m] | yes    |
         zGround      | minimum z co-ordinate [m] | yes       |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

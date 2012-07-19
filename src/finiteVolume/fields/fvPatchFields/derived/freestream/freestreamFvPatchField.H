@@ -33,12 +33,12 @@ Description
     operation switches between fixed (free stream) value and zero gradient
     based on the sign of the flux.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

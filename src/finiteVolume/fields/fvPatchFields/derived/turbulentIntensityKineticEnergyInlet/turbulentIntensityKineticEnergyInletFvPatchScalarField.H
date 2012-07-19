@@ -38,22 +38,22 @@ Description
 
     where
 
-    /vartable
+    \vartable
         k_p     | kinetic energy at the patch
         I       | turbulence intensity
         U       | velocity field
-    /endvartable
+    \endvartable
 
     In the event of reverse flow, a zero-gradient condition is applied.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         intensity    | fraction of mean field [0-1] | yes    |
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

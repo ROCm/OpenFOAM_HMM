@@ -39,24 +39,24 @@ Description
    
     where
 
-    /vartable
+    \vartable
         \epsilon_p | patch epsilon values
         C_{\mu} | Model coefficient, set to 0.09
         k       | turbulence kinetic energy
         L       | length scale
-    /endvartable
+    \endvartable
 
     \note
     In the event of reverse flow, a zero-gradient condition is applied
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         mixingLength | Length scale [m]        | yes         |
         phi          | flux field name         | no          | phi
         k            | turbulence kinetic energy field name | no | k
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -50,7 +50,7 @@ Description
             Up = U_in - U_srf
         \f]
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

@@ -30,7 +30,7 @@ Group
 Description
     This boundary condition provides a gradient condition for internal energy
 
-    /heading Patch usage
+    \heading Patch usage
     Example of the boundary condition specification:
     \verbatim
     myPatch

@@ -37,13 +37,13 @@ Description
     - roughness height = sand-grain roughness (0 for smooth walls)
     - roughness constant = 0.5-1.0
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         Ks           | sand-grain roughness height | yes     |
         Cs           | roughness constant      | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -31,12 +31,12 @@ Description
     This boundary condition provides a surface-normal vector boundary condition
     by its magnitude.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         refValue     | reference value         | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

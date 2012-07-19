@@ -37,16 +37,16 @@ Description
         \f]
 
     where
-    /vartable
+    \vartable
         U_p     = patch velocity [m/s]
         U_{Inf} = free stream velocity in the absolute frame [m/s]
         theta   = swept angle [rad]
         n       = axis direction of the SRF
         U_{p,srf} = SRF velocity of the patch
-    /endvartable
+    \endvartable
 
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

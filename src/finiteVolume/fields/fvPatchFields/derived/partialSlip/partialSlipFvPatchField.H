@@ -31,12 +31,12 @@ Description
     This boundary condition provides a partial slip condition.  The amount of
     slip is controlled by a user-supplied field.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property      | Description             | Required    | Default value
         valueFraction | fraction od value used for boundary [0-1] | yes |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

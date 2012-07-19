@@ -31,9 +31,9 @@ Description
     This boundary condition provides a total pressure condition for patches
     in a rotating frame.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         U            | velocity field name     | no          | U
         phi          | flux field name         | no          | phi
@@ -42,7 +42,7 @@ Description
         gamma        | ratio of specific heats (Cp/Cv) | yes |
         p0           | static pressure reference | yes       |
         omega        | angular velocty of the frame [rad/s] | yes    | 
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

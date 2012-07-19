@@ -35,13 +35,13 @@ Description
 
     The tangential patch velocity can be optionally specified.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         tangentialVelocity | tangential velocity field | no  |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

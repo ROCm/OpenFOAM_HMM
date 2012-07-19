@@ -32,7 +32,7 @@ Description
     directly into a matrix, i.e. to set a constraint condition.  Default
     behaviour is to act as a zero gradient condition.
 
-    /heading Patch usage
+    \heading Patch usage
 
     Example of the boundary condition specification:
     \verbatim

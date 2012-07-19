@@ -31,12 +31,12 @@ Description
     This boundary condition provides an energy jump condition across a pair
     of coupled patches.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         jump         | energy jump values      | yes         |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim

@@ -34,14 +34,14 @@ Description
     The jump is specified as a \c DataEntry type, to enable the use of, e.g.
     contant, polynomial, table values.
 
-    /heading Patch usage
+    \heading Patch usage
 
-    /table
+    \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
         jump         | current jump value      | yes         |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
-    /endtable
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
