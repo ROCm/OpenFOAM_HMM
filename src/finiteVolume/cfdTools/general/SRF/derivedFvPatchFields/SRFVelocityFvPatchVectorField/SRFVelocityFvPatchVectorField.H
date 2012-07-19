@@ -41,24 +41,38 @@ Description
         - relative = yes: inlet velocity applied 'as is':
 
         \f[
-            Up = U_in
+            U_p = U_{in}
         \f]
 
         - relative = no : SRF velocity is subtracted from the inlet velocity:
 
         \f[
-            Up = U_in - U_srf
+            U_p = U_{in} - U_{p,srf}
         \f]
 
+    where
+    \vartable
+        U_p     = patch velocity [m/s]
+        U_{in}  = user-specified inlet velocity
+        U_{p,srf} = SRF velocity
+    \endvartable
+
+
     \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        relative     | relative motion to the SRF? | yes     |
+        inletValue   | inlet velocity          | yes         |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
         type            SRFVelocity;
-        relative        yes;                // relative motion to the SRF?
-        inletValue      uniform (0 0 0);    // inlet velocity
+        relative        yes;
+        inletValue      uniform (0 0 0);
         value           uniform (0 0 0);    // initial value
     }
     \endverbatim

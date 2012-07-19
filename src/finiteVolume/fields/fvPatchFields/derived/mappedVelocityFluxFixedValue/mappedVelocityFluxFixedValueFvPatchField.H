@@ -42,7 +42,7 @@ Description
     \verbatim
     myPatch
     {
-        type            mappedFixedInternalValue;
+        type            mappedVelocityFlux;
         phi             phi;
         value           uniform 0;  // place holder
     }

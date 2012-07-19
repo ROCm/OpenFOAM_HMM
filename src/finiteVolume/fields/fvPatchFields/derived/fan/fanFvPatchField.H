@@ -28,7 +28,7 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-    This boundary condition supplies a jump condition, using the \c cyclic
+    This boundary condition provides a jump condition, using the \c cyclic
     condition as a base.
 
     The jump is specified as a \c DataEntry type, to enable the use of, e.g.

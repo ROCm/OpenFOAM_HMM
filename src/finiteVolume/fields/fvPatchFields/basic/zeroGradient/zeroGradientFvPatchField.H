@@ -28,7 +28,7 @@ Group
     grpGenericBoundaryConditions
 
 Description
-    This boundary condition appies a zero-gradient condition from the patch
+    This boundary condition applies a zero-gradient condition from the patch
     internal field onto the patch faces.
 
     \heading Patch usage
@@ -57,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class zeroGradientFvPatch Declaration
+                 Class zeroGradientFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

@@ -45,7 +45,7 @@ Description
     \verbatim
     myPatch
     {
-        type            alphaSgsJayatillekeWallFunction;
+        type            alphatJayatillekeWallFunction;
         Prt             0.85;
         kappa           0.41;
         E               9.8;

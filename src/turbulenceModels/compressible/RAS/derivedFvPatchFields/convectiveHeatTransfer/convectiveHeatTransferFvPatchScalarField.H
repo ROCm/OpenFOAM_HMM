@@ -61,7 +61,7 @@ Description
     \verbatim
     myPatch
     {
-        type            turbulentInlet;
+        type            convectiveHeatTransfer;
         L               0.1;
     }
     \endverbatim

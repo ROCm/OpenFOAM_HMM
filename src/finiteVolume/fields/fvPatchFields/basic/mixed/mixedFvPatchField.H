@@ -35,18 +35,27 @@ Description
     The respective contributions from each is determined by a weight field:
 
         \f[
-            x_p = w*A + (1-w)*(x_c + B/\Delta)
+            x_p = w x_p + (1-w) \left(x_c + \frac{\nabla_\perp x}{\Delta}\right)
         \f]
 
     where
     \vartable
         x_p   | patch values
         x_c   | patch internal cell values
-        w     | weight field, \c valueFraction_
-        A     | fixed value, \c refValue_
-        B     | patch normal gradient, \c refGrad_
+        w     | weight field
         \Delta| inverse distance from face centre to internal cell centre
+        w     | weighting (0-1)
     \endvartable
+
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        valueFraction | weight field           | yes         |
+        refValue     | fixed value             | yes         |
+        refGrad      | patch normal gradient   | yes         |
+    \endtable
 
     \note
     This condition is not usually applied directly; instead, use a derived
