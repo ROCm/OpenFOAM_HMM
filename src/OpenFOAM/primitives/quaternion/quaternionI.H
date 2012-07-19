@@ -40,6 +40,26 @@ inline Foam::quaternion::quaternion(const vector& d, const scalar theta)
     v_((sin(0.5*theta)/mag(d))*d)
 {}
 
+inline Foam::quaternion::quaternion
+(
+    const vector& d,
+    const scalar cosTheta,
+    const bool normalized
+)
+{
+    scalar cosHalfTheta2 = 0.5*(cosTheta + 1);
+    w_ = sqrt(cosHalfTheta2);
+
+    if (normalized)
+    {
+        v_ = sqrt(1 - cosHalfTheta2)*d;
+    }
+    else
+    {
+        v_ = (sqrt(1 - cosHalfTheta2)/mag(d))*d;
+    }
+}
+
 inline Foam::quaternion::quaternion(const scalar w)
 :
     w_(w),
@@ -69,9 +89,10 @@ inline Foam::quaternion::quaternion
     const tensor& rotationTensor
 )
 {
-    scalar trace = rotationTensor.xx()
-                 + rotationTensor.yy()
-                 + rotationTensor.zz();
+    scalar trace =
+        rotationTensor.xx()
+      + rotationTensor.yy()
+      + rotationTensor.zz();
 
     if (trace > 0)
     {
