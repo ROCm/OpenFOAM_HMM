@@ -23,10 +23,9 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpIcoRASTurbulence Incompressible RAS turbulence
+\defgroup grpCmpTurbulence Compressible turbulence
 @{
-    \ingroup grpIcoTurbulence
-    This group contains incompressible RAS models.
+    This group contains compressible turbulence models.
 @}
     
 \*---------------------------------------------------------------------------*/

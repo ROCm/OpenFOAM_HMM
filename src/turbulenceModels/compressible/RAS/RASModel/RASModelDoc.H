@@ -25,6 +25,7 @@ License
 
 \defgroup grpCmpRASTurbulence Compressible RAS turbulence
 @{
+    \ingroup grpCmpTurbulence
     This group contains compressible RAS models.
 @}
     

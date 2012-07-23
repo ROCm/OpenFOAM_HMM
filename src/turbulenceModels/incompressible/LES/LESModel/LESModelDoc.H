@@ -23,10 +23,10 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-\defgroup grpIcoRASTurbulence Incompressible RAS turbulence
+\defgroup grpIcoLESTurbulence Incompressible LES turbulence
 @{
     \ingroup grpIcoTurbulence
-    This group contains incompressible RAS models.
+    This group contains incompressible LES models.
 @}
     
 \*---------------------------------------------------------------------------*/
