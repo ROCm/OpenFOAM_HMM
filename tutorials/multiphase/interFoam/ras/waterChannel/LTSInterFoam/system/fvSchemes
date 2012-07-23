@@ -11,43 +11,51 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoCentralFoam;
+ddtSchemes
+{
+    default         localEuler rDeltaT;
+}
 
-startFrom       latestTime;
+gradSchemes
+{
+    default         Gauss linear;
+}
 
-startTime       0.005;
+divSchemes
+{
+    div(rho*phi,U)  Gauss linearUpwind grad(U);
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss interfaceCompression;
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+}
 
-stopAt          endTime;
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+}
 
-endTime         1e-07;
+interpolationSchemes
+{
+    default         linear;
+}
 
-deltaT          1e-10;
+snGradSchemes
+{
+    default         corrected;
+}
 
-writeControl    adjustableRunTime;
-
-writeInterval   1e-07;
-
-cycleWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  15;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-adjustTimeStep  yes;
-
-maxCo           0.3;
-
-maxDeltaT       1;
+fluxRequired
+{
+    default         no;
+    p_rgh;
+    pcorr;
+    alpha1;
+}
 
 
 // ************************************************************************* //

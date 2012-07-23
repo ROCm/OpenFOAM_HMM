@@ -11,43 +11,35 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      setFieldsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoCentralFoam;
+defaultFieldValues
+(
+    volScalarFieldValue alpha1 0
+);
 
-startFrom       latestTime;
+regions
+(
+    boxToCell
+    {
+        box (0 0 0) (50 130 27);
+        fieldValues
+        (
+            volScalarFieldValue alpha1 1
+        );
+    }
 
-startTime       0.005;
-
-stopAt          endTime;
-
-endTime         1e-07;
-
-deltaT          1e-10;
-
-writeControl    adjustableRunTime;
-
-writeInterval   1e-07;
-
-cycleWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  15;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-adjustTimeStep  yes;
-
-maxCo           0.3;
-
-maxDeltaT       1;
+    boxToFace
+    {
+        box (0 0 0) (50 10.0001 24);
+        fieldValues
+        (
+            volScalarFieldValue alpha1 1
+        );
+    }
+);
 
 
 // ************************************************************************* //

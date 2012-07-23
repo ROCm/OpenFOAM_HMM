@@ -10,44 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      controlDict;
+    object      extrudeProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoCentralFoam;
+constructFrom mesh;
+sourceCase "$FOAM_CASE";
+sourcePatches (outlet);
 
-startFrom       latestTime;
+flipNormals false;
 
-startTime       0.005;
+extrudeModel        linearDirection;
 
-stopAt          endTime;
+nLayers             40;
+expansionRatio      1.0;
 
-endTime         1e-07;
+linearDirectionCoeffs
+{
+    axisPt          (0 0 0);
+    direction       (1 -0.2 -0.02);
+    thickness       40;
+}
 
-deltaT          1e-10;
+mergeFaces false;
 
-writeControl    adjustableRunTime;
-
-writeInterval   1e-07;
-
-cycleWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  15;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-adjustTimeStep  yes;
-
-maxCo           0.3;
-
-maxDeltaT       1;
-
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

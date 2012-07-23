@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Foam::thermalPorousZones::thermalPorousZones
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::thermalPorousZones::addEnthalpySource
+void Foam::thermalPorousZones::addEnergySource
 (
     const basicThermo& thermo,
     const volScalarField& rho,
@@ -55,7 +55,7 @@ void Foam::thermalPorousZones::addEnthalpySource
 {
     forAll(*this, i)
     {
-        operator[](i).addEnthalpySource(thermo, rho, hEqn);
+        operator[](i).addEnergySource(thermo, rho, hEqn);
     }
 }
 
