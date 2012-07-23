@@ -34,7 +34,7 @@ Description
     co-ordinate \c z.
 
         \f[
-            U = \frac{U^*}{K} ln(\frac{z - z_g + z_0}{z_0})
+            U = \frac{U^*}{K} ln\left(\frac{z - z_g + z_0}{z_0}\right)
         \f]
 
     where
@@ -49,7 +49,7 @@ Description
     and:
 
         \f[
-            U^* = K \frac{U_{ref}}{ln(\frac{Z_{ref} + z_0}{z_0})}
+            U^* = K \frac{U_{ref}}{ln\left(\frac{Z_{ref} + z_0}{z_0}\right)}
         \f]
 
     where:
