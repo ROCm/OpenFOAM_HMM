@@ -31,11 +31,11 @@ Description
     Calculates pressure coefficient, \f$c_p\f$
 
         \f[
-            c_p = \frac{p}{p_{dyn,inf}}
+            c_p = \frac{p}{p_{dyn,\infty}}
         \f]
     where:
         \f[
-            p_{dyn,inf} = 0.5 \rho |U_{inf}|^2
+            p_{dyn,\infty} = 0.5 \rho |U_{\infty}|^2
         \f]
 
     where
