@@ -71,9 +71,9 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
     kappa_(ptf.kappa_),
     Uref_(ptf.Uref_),
     Href_(ptf.Href_),
-    z0_(ptf.z0_),
-    zGround_(ptf.zGround_),
-    Ustar_(ptf.Ustar_)
+    z0_(ptf.z0_, mapper),
+    zGround_(ptf.zGround_, mapper),
+    Ustar_(ptf.Ustar_, mapper)
 {}
 
 
