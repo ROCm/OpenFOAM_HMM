@@ -24,7 +24,8 @@ License
 Class
     Foam::partialWrite
 
-\ingroup grpIOFunctionObjects
+Group
+    grpIOFunctionObjects
 
 Description
     Allows some fields/registered objects to be written more often than others.

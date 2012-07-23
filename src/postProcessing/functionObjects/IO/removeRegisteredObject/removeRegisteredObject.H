@@ -24,7 +24,8 @@ License
 Class
     Foam::removeRegisteredObject
 
-\ingroup grpIOFunctionObjects
+Group
+    grpIOFunctionObjects
 
 Description
     Removes registered IO objects if present in the database

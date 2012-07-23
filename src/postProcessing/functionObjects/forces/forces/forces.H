@@ -24,7 +24,8 @@ License
 Class
     Foam::forces
 
-\ingroup grpForcesFunctionObjects
+Group
+    grpForcesFunctionObjects
 
 Description
     Calculates the forces and moments by integrating the pressure and

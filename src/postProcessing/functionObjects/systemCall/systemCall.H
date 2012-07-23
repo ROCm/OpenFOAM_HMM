@@ -24,7 +24,8 @@ License
 Class
     Foam::systemCall
 
-\ingroup grpFunctionObjects
+Group
+    grpFunctionObjects
 
 Description
     Executes system calls, entered in the form of a string list

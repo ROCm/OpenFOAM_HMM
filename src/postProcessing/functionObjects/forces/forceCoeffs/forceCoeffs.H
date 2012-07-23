@@ -24,7 +24,8 @@ License
 Class
     Foam::forceCoeffs
 
-\ingroup grpForcesFunctionObjects
+Group
+    grpForcesFunctionObjects
 
 Description
     Derived from the forces function object, creates a specialisation to

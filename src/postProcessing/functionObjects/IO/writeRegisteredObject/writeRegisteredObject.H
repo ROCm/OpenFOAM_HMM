@@ -24,7 +24,8 @@ License
 Class
     Foam::writeRegisteredObject
 
-\ingroup grpIOFunctionObjects
+Group
+    grpIOFunctionObjects
 
 Description
     Takes over the writing of registered IO objects

@@ -24,7 +24,8 @@ License
 Class
     Foam::abortCalculation
 
-\ingroup grpJobControlFunctionObjects
+Group
+    grpJobControlFunctionObjects
 
 Description
     Watches for presence of the named file in the $FOAM_CASE directory

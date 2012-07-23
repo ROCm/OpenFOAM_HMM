@@ -24,7 +24,8 @@ License
 class
     Foam::fieldCoordinateSystemTransform
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Transforms fields from global cartesian co-ordinates to local co-ordinate

@@ -24,7 +24,8 @@ License
 Class
     Foam::fieldValue
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Base class for field value -based function objects.

@@ -24,7 +24,8 @@ License
 Class
     Foam::yPlusRAS
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Evaluates and outputs turbulence y+ for RAS models.  Values written to

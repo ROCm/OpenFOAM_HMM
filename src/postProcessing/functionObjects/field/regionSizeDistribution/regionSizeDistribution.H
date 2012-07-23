@@ -24,7 +24,8 @@ License
 Class
     Foam::regionSizeDistribution
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Looks up a field, interpolates it to the faces and determines a connected

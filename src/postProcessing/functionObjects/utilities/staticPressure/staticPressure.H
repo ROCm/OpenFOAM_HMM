@@ -24,7 +24,8 @@ License
 Class
     Foam::staticPressure
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Converts kinematic pressure to static pressure, from the name of the
