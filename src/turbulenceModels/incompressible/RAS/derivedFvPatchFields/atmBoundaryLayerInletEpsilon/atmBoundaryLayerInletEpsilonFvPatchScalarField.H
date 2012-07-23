@@ -102,7 +102,7 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
         //- Surface roughness length
         scalarField z0_;
 
-        //- Minimum corrdinate value in z direction
+        //- Minimum coordinate value in z direction
         scalarField zGround_;
 
         //- Frictional velocity
