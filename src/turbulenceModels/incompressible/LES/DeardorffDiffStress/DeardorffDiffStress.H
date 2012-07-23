@@ -41,12 +41,14 @@ Description
         \f]
 
     where
-        k = 0.5*tr(B),
-        epsilon = ce*k^3/2/delta,
-        epsilon/k = ce*k^1/2/delta
-        P = -(B'L + L'B)
-        nuSgs = ck*sqrt(k)*delta
-        nuEff = nuSgs + nu
+    \f{eqnarray*}{
+        k          &=& 0.5 tr(B)                \\
+        \epsilon   &=& c_e k^{3/2}/\Delta       \\
+        \epsilon/k &=& c_e k^{1/2}/\Delta       \\
+        P          &=& -(B'L + L'B)             \\
+        \nu_{sgs}  &=& c_k k^{1/2} \Delta       \\
+        \nu_{eff}  &=& \nu_{sgs} + \nu
+    \f}
 
 SourceFiles
     DeardorffDiffStress.C
