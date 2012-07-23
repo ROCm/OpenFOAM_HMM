@@ -84,6 +84,17 @@ public:
             const IndexType delta
         );
 
+        //- Construct given min, max, delta and data
+        BinSum
+        (
+            const IndexType min,
+            const IndexType max,
+            const IndexType delta,
+            const UList<IndexType>& indexVals,
+            const List& vals,
+            const CombineOp& cop = plusEqOp<typename List::value_type>()
+        );
+
 
         // Access
 
@@ -109,6 +120,13 @@ public:
             (
                 const IndexType& indexVal,
                 const typename List::const_reference val,
+                const CombineOp& cop = plusEqOp<typename List::value_type>()
+            );
+
+            void add
+            (
+                const UList<IndexType>& indexVals,
+                const List& vals,
                 const CombineOp& cop = plusEqOp<typename List::value_type>()
             );
 };

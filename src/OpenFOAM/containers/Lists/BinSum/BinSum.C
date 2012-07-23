@@ -44,6 +44,31 @@ Foam::BinSum<IndexType, List, CombineOp>::BinSum
 {}
 
 
+template<class IndexType, class List, class CombineOp>
+Foam::BinSum<IndexType, List, CombineOp>::BinSum
+(
+    const IndexType min,
+    const IndexType max,
+    const IndexType delta,
+    const UList<IndexType>& indexVals,
+    const List& vals,
+    const CombineOp& cop
+)
+:
+    List(ceil((max-min)/delta), pTraits<typename List::value_type>::zero),
+    min_(min),
+    max_(max),
+    delta_(delta),
+    lowSum_(pTraits<typename List::value_type>::zero),
+    highSum_(pTraits<typename List::value_type>::zero)
+{
+    forAll(indexVals, i)
+    {
+        add(indexVals[i], vals[i], cop);
+    }
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class IndexType, class List, class CombineOp>
@@ -66,6 +91,21 @@ void Foam::BinSum<IndexType, List, CombineOp>::add
     {
         label index = (indexVal-min_)/delta_;
         cop(this->operator[](index), val);
+    }
+}
+
+
+template<class IndexType, class List, class CombineOp>
+void Foam::BinSum<IndexType, List, CombineOp>::add
+(
+    const UList<IndexType>& indexVals,
+    const List& vals,
+    const CombineOp& cop
+)
+{
+    forAll(indexVals, i)
+    {
+        add(indexVals[i], vals[i], cop);
     }
 }
 
