@@ -24,11 +24,13 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 \page pageBoundaryConditions Boundary Conditions
-
-\ref grpBoundaryConditions
-
+\ref grpBoundaryConditions are required to 'close' the simulation problem.
+Careful attention should be applied to their selection so as to create a
+well-posed system of equations, which can be solved numerically.
 
 \section secBoundaryConditionsOverview Overview
+The set of available \ref grpBoundaryConditions comprise of basic, turbulent and
+thermophysical types.
 
 \subsection secBC1 Basic boundary conditions
     - \ref grpConstraintBoundaryConditions
@@ -47,6 +49,10 @@ License
 
 
 \section secWallFunctions Wall functions
+Wall functions in OpenFOAM are modelled as boundary conditions, applied to
+the viscosity for momentum, and thermal diffusivity for energy.  Two groups of
+wall functions are available, which vary in terms of the underlying
+compressibility assumption.
 
 Wall functions for incompressible flow
     - \ref grpIcoWallFunctions
@@ -56,6 +62,9 @@ Wall functions for compressible flow
 
 
 \section secBoundaryConditions Typical usage for pressure-velocity systems
+The choice as to the most appropriate set of boundary conditions is dictated by
+the type of flow problem.  In many cases, multiple possible selections exist;
+the following tables offer suggestions for subsonic flow.
 
 subsonic inlet (flow specified):
 \table
@@ -75,7 +84,7 @@ subsonic outlet:
     derived property     | -      | \link Foam::calculatedFvPatchField calculated\endlink or \link Foam::zeroGradientFvPatchField zeroGradient\endlink
 \endtable
 
-wall:
+wall (impermeable, non-slip):
 \table
     Variable             | Symbol | Type
     pressure             | p      | \link Foam::zeroGradientFvPatchField zeroGradient\endlink
