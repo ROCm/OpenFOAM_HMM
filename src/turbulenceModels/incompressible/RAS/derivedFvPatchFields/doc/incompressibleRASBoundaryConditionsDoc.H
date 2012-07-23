@@ -25,6 +25,7 @@ License
 
 \defgroup grpIcoRASBoundaryConditions RAS incompressible boundary conditions
 @{
+    \ingroup grpIcoRASTurbulence
     This group contains incompressible RAS turbulence model boundary conditions
 @}
 
