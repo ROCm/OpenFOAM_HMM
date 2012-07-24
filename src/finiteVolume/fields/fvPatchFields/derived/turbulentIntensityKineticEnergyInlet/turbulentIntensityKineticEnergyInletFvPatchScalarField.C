@@ -85,7 +85,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
             "("
                 "const fvPatch&, "
                 "const DimensionedField<scalar, volMesh>&, "
-                "const dictionary&
+                "const dictionary&"
             ")"
         )   << "Turbulence intensity should be specified as a fraction 0-1 "
                "of the mean velocity\n"
