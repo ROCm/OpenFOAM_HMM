@@ -142,6 +142,8 @@ void convectiveHeatTransferFvPatchScalarField::updateCoeffs()
             htc[faceI] = 0.037*pow(Re, 0.8)*cbrt(Pr[faceI])*kappaw[faceI]/L_;
         }
     }
+
+    fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
