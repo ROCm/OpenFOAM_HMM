@@ -180,23 +180,26 @@ public:
 
     // Member functions
 
-        //- Return Ustar
-        scalarField& Ustar()
-        {
-            return Ustar_;
-        }
+        // Access
 
-        //- Return flow direction
-        vector& n()
-        {
-            return n_;
-        }
+            //- Return Ustar
+            const scalarField& Ustar() const
+            {
+                return Ustar_;
+            }
 
-        //- Return z direction
-        vector& z()
-        {
-            return z_;
-        }
+            //- Return flow direction
+            const vector& n() const
+            {
+                return n_;
+            }
+
+            //- Return z direction
+            const vector& z() const
+            {
+                return z_;
+            }
+
 
         // Mapping functions
 
@@ -212,12 +215,6 @@ public:
                 const fvPatchVectorField&,
                 const labelList&
             );
-
-
-        // Evaluation functions
-
-            //- Update coefficients
-            virtual void updateCoeffs();
 
 
         //- Write

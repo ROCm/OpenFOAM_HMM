@@ -176,7 +176,7 @@ public:
         // Access
 
             //- Return max value
-            scalarField Ustar() const
+            const scalarField& Ustar() const
             {
                 return Ustar_;
             }
@@ -202,12 +202,6 @@ public:
                 const fvPatchScalarField&,
                 const labelList&
             );
-
-
-        // Evaluation functions
-
-            //- Update coefficients
-            virtual void updateCoeffs();
 
 
         //- Write

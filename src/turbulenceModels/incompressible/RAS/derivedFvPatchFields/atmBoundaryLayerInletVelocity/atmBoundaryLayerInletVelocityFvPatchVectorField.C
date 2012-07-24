@@ -120,7 +120,25 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
         Ustar_[i] = kappa_*Uref_/(log((Href_  + z0_[i])/max(z0_[i] , 0.001)));
     }
 
-    evaluate();
+    const vectorField& c = patch().Cf();
+    const scalarField coord(c & z_);
+    scalarField Un(coord.size());
+
+    forAll(coord, i)
+    {
+        if ((coord[i] - zGround_[i]) < Href_)
+        {
+            Un[i] =
+                (Ustar_[i]/kappa_)
+              * log((coord[i] - zGround_[i] + z0_[i])/max(z0_[i], 0.001));
+        }
+        else
+        {
+            Un[i] = Uref_;
+        }
+    }
+
+    vectorField::operator=(n_*Un);
 }
 
 
@@ -171,32 +189,6 @@ void atmBoundaryLayerInletVelocityFvPatchVectorField::rmap
     z0_.rmap(blptf.z0_, addr);
     zGround_.rmap(blptf.zGround_, addr);
     Ustar_.rmap(blptf.Ustar_, addr);
-}
-
-
-void atmBoundaryLayerInletVelocityFvPatchVectorField::updateCoeffs()
-{
-    const vectorField& c = patch().Cf();
-    const scalarField coord(c & z_);
-    scalarField Un(coord.size());
-
-    forAll(coord, i)
-    {
-        if ((coord[i] - zGround_[i]) < Href_)
-        {
-            Un[i] =
-                (Ustar_[i]/kappa_)
-              * log((coord[i] - zGround_[i] + z0_[i])/max(z0_[i], 0.001));
-        }
-        else
-        {
-            Un[i] = Uref_;
-        }
-    }
-
-    vectorField::operator=(n_*Un);
-
-    fixedValueFvPatchVectorField::updateCoeffs();
 }
 
 
