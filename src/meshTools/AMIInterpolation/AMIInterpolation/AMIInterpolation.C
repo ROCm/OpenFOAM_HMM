@@ -713,7 +713,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 
     const pointField& srcPts = srcPatch.points();
     const face& srcFace = srcPatch[srcFaceI];
-    const point& srcPt = srcFace.centre(srcPts);
+    const point srcPt = srcFace.centre(srcPts);
     const scalar srcFaceArea = srcMagSf_[srcFaceI];
 
 //    pointIndexHit sample = treePtr_->findNearest(srcPt, sqr(0.1*bb.mag()));
