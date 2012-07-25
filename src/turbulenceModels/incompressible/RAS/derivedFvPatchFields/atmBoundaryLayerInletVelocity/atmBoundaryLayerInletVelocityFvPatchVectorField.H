@@ -215,26 +215,42 @@ public:
 
     // Member functions
 
-        //- Return Ustar
-        scalarField& Ustar()
-        {
-            return Ustar_;
-        }
+        // Access
 
-        //- Return flow direction
-        vector& n()
-        {
-            return n_;
-        }
+            //- Return Ustar
+            const scalarField& Ustar() const
+            {
+                return Ustar_;
+            }
 
-        //- Return z direction
-        vector& z()
-        {
-            return z_;
-        }
+            //- Return flow direction
+            const vector& n() const
+            {
+                return n_;
+            }
 
-        //- Update coefficients
-        virtual void updateCoeffs();
+            //- Return z direction
+            const vector& z() const
+            {
+                return z_;
+            }
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchVectorField&,
+                const labelList&
+            );
+
 
         //- Write
         virtual void write(Ostream&) const;

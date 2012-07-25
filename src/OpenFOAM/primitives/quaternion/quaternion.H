@@ -106,6 +106,15 @@ public:
         //  and angle theta
         inline quaternion(const vector& d, const scalar theta);
 
+        //- Construct a rotation quaternion given the direction d
+        //  and cosine angle cosTheta and a if d is normalized
+        inline quaternion
+        (
+            const vector& d,
+            const scalar cosTheta,
+            const bool normalized
+        );
+
         //- Construct given scalar part, the vector part = vector::zero
         inline explicit quaternion(const scalar w);
 
@@ -139,6 +148,8 @@ public:
 
                //- The rotation tensor corresponding the quaternion
                inline tensor R() const;
+
+               inline quaternion normalized() const;
 
 
            // Edit
@@ -206,6 +217,14 @@ inline quaternion inv(const quaternion& q);
 
 //- Return a string representation of a quaternion
 word name(const quaternion&);
+
+//- Spherical linear interpolation of quaternions
+quaternion slerp
+(
+    const quaternion& qa,
+    const quaternion& qb,
+    const scalar t
+);
 
 //- Data associated with quaternion type are contiguous
 template<>

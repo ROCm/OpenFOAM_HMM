@@ -67,7 +67,6 @@ SourceFiles
 #include "transform.H"
 #include "volFields.H"
 #include "fvMesh.H"
-#include "Histogram.H"
 #include "labelPair.H"
 #include "HashSet.H"
 #include "memInfo.H"

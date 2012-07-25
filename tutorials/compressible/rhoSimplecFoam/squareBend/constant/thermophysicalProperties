@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType hePsiThermo<pureMixture<sutherlandTransport<specieThermo<eConstThermo<perfectGas>,sensibleInternalEnergy>>>>;
+thermoType hePsiThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>,sensibleInternalEnergy>>>>;
 
 mixture
 {
@@ -26,7 +26,7 @@ mixture
     }
     thermodynamics
     {
-        Cv          719.3;
+        Cp          1007;
         Hf          0;
     }
     transport

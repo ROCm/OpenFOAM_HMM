@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,33 +58,25 @@ void Foam::wedgePolyPatch::initTransforms()
             );
         centreNormal_ /= mag(centreNormal_);
 
-        if
-        (
-            mag(centreNormal_.x() + centreNormal_.y() + centreNormal_.z())
-            < (1 - SMALL)
-        )
+        const scalar cnCmptSum =
+            centreNormal_.x() + centreNormal_.y() + centreNormal_.z();
+
+        if (mag(cnCmptSum) < (1 - SMALL))
         {
-            FatalErrorIn
-            (
-                "wedgePolyPatch::wedgePolyPatch(const polyPatch&, "
-                "const fvBoundaryMesh&)"
-            )   << "wedge " << name()
+            FatalErrorIn("wedgePolyPatch::initTransforms()")
+                << "wedge " << name()
                 << " centre plane does not align with a coordinate plane by "
-                << 1
-                 - mag(centreNormal_.x()+centreNormal_.y()+centreNormal_.z())
+                << 1 - mag(cnCmptSum)
                 << exit(FatalError);
         }
 
         axis_ = centreNormal_ ^ patchNormal_;
         scalar magAxis = mag(axis_);
-        axis_ /= magAxis;
 
         if (magAxis < SMALL)
         {
-            FatalErrorIn
-            (
-                "wedgePolyPatch::initTransforms()"
-            )   << "wedge " << name()
+            FatalErrorIn("wedgePolyPatch::initTransforms()")
+                << "wedge " << name()
                 << " plane aligns with a coordinate plane." << nl
                 << "    The wedge plane should make a small angle (~2.5deg)"
                    " with the coordinate plane" << nl
@@ -94,6 +86,8 @@ void Foam::wedgePolyPatch::initTransforms()
                 << " , implied coordinate plane direction is " << centreNormal_
                 << exit(FatalError);
         }
+
+        axis_ /= magAxis;
 
         faceT_ = rotationTensor(centreNormal_, patchNormal_);
         cellT_ = faceT_ & faceT_;
