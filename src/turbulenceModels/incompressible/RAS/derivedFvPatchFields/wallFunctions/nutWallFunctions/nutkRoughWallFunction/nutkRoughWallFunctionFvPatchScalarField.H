@@ -48,7 +48,7 @@ Description
     \verbatim
     myPatch
     {
-        type            nutkAtmRoughWallFunction;
+        type            nutkRoughWallFunction;
         Ks              uniform 0;
         Cs              uniform 0.5;
     }

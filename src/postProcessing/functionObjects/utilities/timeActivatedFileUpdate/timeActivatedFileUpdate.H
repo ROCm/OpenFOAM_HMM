@@ -24,7 +24,8 @@ License
 Class
     Foam::timeActivatedFileUpdate
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Performs a file copy/replacement once a specified time has been reached.

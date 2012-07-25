@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,9 @@ License
 
 Class
     Foam::alphaContactAngleFvPatchScalarField
+
+Group
+    grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
     Abstract base class for alphaContactAngle boundary conditions.
@@ -47,11 +50,12 @@ Description
     on p_rgh must set to guarantee that the flux is corrected to be zero at the
     wall e.g.
 
-        walls
-        {
-            type            fixedFluxPressure;
-            adjoint         no;
-        }
+    \verbatim
+    myPatch
+    {
+        type            alphaContactAngle;
+    }
+    \endverbatim
 
     If "limit zeroGradient;" is used the pressure BCs can be left as before.
 
@@ -72,7 +76,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class alphaContactAngleFvPatch Declaration
+             Class alphaContactAngleFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphaContactAngleFvPatchScalarField

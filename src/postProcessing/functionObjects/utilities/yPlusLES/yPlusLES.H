@@ -24,7 +24,8 @@ License
 Class
     Foam::yPlusLES
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Evaluates and outputs turbulence y+ for LES models.  Values written to

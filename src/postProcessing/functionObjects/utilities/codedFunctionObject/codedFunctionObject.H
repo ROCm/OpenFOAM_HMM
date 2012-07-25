@@ -24,7 +24,8 @@ License
 Class
     Foam::codedFunctionObject
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     functionObject using dynamic code compilation.

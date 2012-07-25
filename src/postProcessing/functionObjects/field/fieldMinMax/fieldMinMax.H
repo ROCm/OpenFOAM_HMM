@@ -24,7 +24,8 @@ License
 Class
     Foam::fieldMinMax
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Calculates scalar minimim and maximum field values.

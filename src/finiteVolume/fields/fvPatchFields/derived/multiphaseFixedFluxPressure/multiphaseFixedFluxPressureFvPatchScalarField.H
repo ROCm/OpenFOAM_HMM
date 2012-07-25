@@ -61,7 +61,7 @@ Description
     \verbatim
     myPatch
     {
-        type            externalWallHeatFluxTemperature;
+        type            multiphaseFixedFluxPressure;
         phiHbyA         phiHbyA;
         phi             phi;
         rho             rho;

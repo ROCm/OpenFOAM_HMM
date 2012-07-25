@@ -37,14 +37,14 @@ Description
         Property     | Description             | Required    | Default value
         roughnessHeight | roughness height     | yes         |
         roughnessConstant | roughness constanr | yes         |
-        roughnessFactor | scaling factor       | 
+        roughnessFactor | scaling factor       | yes         |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
-        type            nutURoughWallFunction;
+        type            mutURoughWallFunction;
         roughnessHeight 1e-5;
         roughnessConstant 0.5;
         roughnessFactor 1;

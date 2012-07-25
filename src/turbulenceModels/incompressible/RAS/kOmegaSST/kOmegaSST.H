@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::kOmegaSST
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Implementation of the k-omega-SST turbulence model for incompressible
     flows.

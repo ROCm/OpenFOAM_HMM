@@ -25,7 +25,7 @@ Class
     Foam::compressible::RASModels::kqRWallFunctionFvPatchField
 
 Group
-    grpIcoWallFunctions
+    grpCmpWallFunctions
 
 Description
     This boundary condition is applied to turbulence \c k, \c q, and \c R

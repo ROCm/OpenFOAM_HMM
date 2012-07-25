@@ -44,7 +44,7 @@ Description
     \verbatim
     myPatch
     {
-        type            mappedFixedInternalValue;
+        type            mappedFixedPushedInternalValue;
         fieldName       T;
         setAverage      no;
         average         0;
@@ -78,7 +78,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-      Class mappedFixedPushedInternalValueFvPatchField Declaration
+        Class mappedFixedPushedInternalValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

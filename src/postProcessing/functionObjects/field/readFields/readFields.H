@@ -24,7 +24,8 @@ License
 Class
     Foam::readFields
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Reads fields from the time folders and adds them to the mesh database

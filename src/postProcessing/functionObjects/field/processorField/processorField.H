@@ -24,7 +24,8 @@ License
 Class
     Foam::processorField
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Writes a scalar field whose value is the local processor ID.  Output

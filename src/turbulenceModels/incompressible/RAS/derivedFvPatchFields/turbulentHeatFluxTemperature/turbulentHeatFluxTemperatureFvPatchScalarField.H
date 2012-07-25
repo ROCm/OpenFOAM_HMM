@@ -37,7 +37,7 @@ Description
     \table
         Property     | Description             | Required    | Default value
         heatSource   | heat source type: \c flux [W/m2] or \c power [W]| yes |
-        q            | heat source value       | yea          |
+        q            | heat source value       | yes          |
         alphaEff     | turbulent thermal diffusivity field name | yes |
     \endtable
 

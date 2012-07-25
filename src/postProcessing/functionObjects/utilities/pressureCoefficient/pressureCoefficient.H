@@ -24,18 +24,28 @@ License
 Class
     Foam::pressureCoefficient
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Calculates pressure coefficient, \f$c_p\f$
 
         \f[
-            c_p = p/p_{dyn,inf}
+            c_p = \frac{p}{p_{dyn,\infty}}
+        \f]
+    where:
+        \f[
+            p_{dyn,\infty} = 0.5 \rho |U_{\infty}|^2
         \f]
 
-    where:
+    where
+    \vartable
+        c_p     | pressure coefficient
+        p       | pressure [bar]
+        \rho    | density [kg/m3]
+        U       | velocity [m/s]
+    \endvartable
 
-        p_dyn,inf = 0.5*rho*mag(U_inf)^2
 
 SourceFiles
     pressureCoefficient.C

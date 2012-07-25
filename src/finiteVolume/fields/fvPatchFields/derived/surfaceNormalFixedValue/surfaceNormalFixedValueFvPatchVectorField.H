@@ -42,7 +42,7 @@ Description
     \verbatim
     myPatch
     {
-        type            inletOutlet;
+        type            surfaceNormalFixedValue;
         refValue        -10;           // 10 INTO the domain
     }
     \endverbatim

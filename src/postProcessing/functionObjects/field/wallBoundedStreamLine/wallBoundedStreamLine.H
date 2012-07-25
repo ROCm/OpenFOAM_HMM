@@ -24,7 +24,8 @@ License
 Class
     Foam::wallBoundedStreamLine
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Generation of streamlines. Samples along track of passive particle.

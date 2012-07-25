@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ Description
     \verbatim
     myPatch
     {
-        type            nutkAtmRoughWallFunction;
+        type            mutkRoughWallFunction;
         Ks              uniform 0;
         Cs              uniform 0.5;
     }

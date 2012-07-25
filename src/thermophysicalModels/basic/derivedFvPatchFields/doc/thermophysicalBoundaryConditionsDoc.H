@@ -25,6 +25,7 @@ License
 
 \defgroup grpThermoBoundaryConditions Thermophysical boundary conditions
 @{
+    \ingroup grpBoundaryConditions
     This group contains thermophysical model boundary conditions
 @}
 

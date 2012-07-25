@@ -42,7 +42,7 @@ Description
     \verbatim
     myPatch
     {
-        type            rotatingWallVelocity;
+        type            translatingWallVelocity;
         U               (100 0 0);
     }
     \endverbatim

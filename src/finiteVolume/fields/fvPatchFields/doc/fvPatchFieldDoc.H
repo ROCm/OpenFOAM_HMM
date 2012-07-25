@@ -34,7 +34,7 @@ License
     The difference between the methods is based on when the patch values are
     updated.  When the condition is applied to a solution variable, the
     call to updateCoeffs() occurs as a preliminary step of the
-    \<matrix\>.solve().  The evaluate() method is invoked after, or idependent
+    \<matrix\>.solve().  The evaluate() method is invoked after, or independent
     of the matrix solve, via a call to \<field\>.correctBoundaryConditions().
 @}
 

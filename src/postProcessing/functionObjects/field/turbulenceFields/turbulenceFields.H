@@ -24,7 +24,8 @@ License
 Class
     Foam::turbulenceFields
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Stores turbulence fields on the mesh database for further manipulation.

@@ -24,6 +24,9 @@ License
 Namespace
     Foam::incompressible::LESModels
 
+Group
+    grpIcoLESTurbulence
+
 Description
     Namespace for incompressible LES models.
 

@@ -25,6 +25,7 @@ License
 
 \defgroup grpCmpRASBoundaryConditions RAS compressible boundary conditions
 @{
+    \ingroup grpCmpRASTurbulence
     This group contains compressible RAS turbulence model boundary conditions
 @}
 

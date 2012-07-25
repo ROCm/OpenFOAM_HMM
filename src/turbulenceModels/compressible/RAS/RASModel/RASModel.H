@@ -27,7 +27,6 @@ Namespace
 Description
     Namespace for compressible RAS turbulence models.
 
-
 Class
     Foam::compressible::RASModel
 

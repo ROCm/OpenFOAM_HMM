@@ -24,7 +24,8 @@ License
 Class
     Foam::dsmcFields
 
-\ingroup grpUtilitiesFunctionObjects
+Group
+    grpUtilitiesFunctionObjects
 
 Description
     Calculate intensive fields:

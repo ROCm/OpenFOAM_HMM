@@ -24,7 +24,8 @@ License
 Class
     Foam::fieldAverage
 
-\ingroup grpFieldFunctionObjects
+Group
+    grpFieldFunctionObjects
 
 Description
     Calculates the field averages given list of fieldAverageItems, e.g.

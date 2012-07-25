@@ -24,7 +24,8 @@ License
 Class
     Foam::cloudInfo
 
-\ingroup grpCloudFunctionObjects
+Group
+    grpCloudFunctionObjects
 
 Description
     This function object outputs lagrangian cloud information to a file.  The

@@ -21,11 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-\addtogroup functionObjects
-@{
-
 Class
     Foam::sampledSet
+
+Group
+    grpFunctionObjects
 
 Description
     Holds list of sampling points which is filled at construction time.
@@ -38,7 +38,6 @@ Description
 
 SourceFiles
     sampledSet.C
-@}
 
 \*---------------------------------------------------------------------------*/
 

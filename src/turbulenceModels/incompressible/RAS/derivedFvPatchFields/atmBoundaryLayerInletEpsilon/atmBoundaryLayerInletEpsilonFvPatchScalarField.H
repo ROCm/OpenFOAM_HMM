@@ -34,7 +34,7 @@ Description
     \c ABLInletVelocity inlet velocity boundary condition.
 
         \f[
-            \epsilon = \frac{(U^*)^3}{(K(z - z_g + z_0))}
+            \epsilon = \frac{(U^*)^3}{K(z - z_g + z_0)}
         \f]
 
     where
@@ -49,7 +49,7 @@ Description
     and:
 
         \f[
-            U^* = K \frac{U_{ref}}{ln(\frac{Z_{ref} + z_0}{z_0})}
+            U^* = K \frac{U_{ref}}{ln\left(\frac{Z_{ref} + z_0}{z_0}\right)}
         \f]
 
     where:
@@ -74,7 +74,7 @@ Description
     \verbatim
     myPatch
     {
-        type            atmBoundaryLayerInletVelocity;
+        type            atmBoundaryLayerInletEpsilon;
         z               1.0;
         kappa           0.41;
         Uref            1.0;

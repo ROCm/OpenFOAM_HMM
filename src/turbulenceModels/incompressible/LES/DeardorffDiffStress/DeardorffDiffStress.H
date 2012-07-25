@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,26 +24,31 @@ License
 Class
     Foam::incompressible::LESModels::DeardorffDiffStress
 
+Group
+    grpIcoLESTurbulence
+
 Description
     Differential SGS Stress Equation Model for incompressible flows
 
     The DSEM uses a model version of the full balance equation for the SGS
     stress tensor to simulate the behaviour of B.
     Thus,
-    \verbatim
-        d/dt(B) + div(U*B) - div(nuSgs*grad(B))
-        =
-        P - c1*epsilon/k*B - 0.667*(1 - c1)*epsilon*I - c2*(P - 0.333*trP*I)
+        \f[
+            \frac{d}{dt}(B) + \nabla\cdot(U B) - \nabla\cdot(\nu_{sgs}\nabla B)
+          =
+            P - c_1 \frac{\epsilon}{k}B - 0.667(1 - c_1)\epsilon I
+            - c_2 (P - 0.333 trP I)
+        \f]
 
     where
-
-        k = 0.5*tr(B),
-        epsilon = ce*k^3/2/delta,
-        epsilon/k = ce*k^1/2/delta
-        P = -(B'L + L'B)
-        nuSgs = ck*sqrt(k)*delta
-        nuEff = nuSgs + nu
-    \endverbatim
+    \f{eqnarray*}{
+        k          &=& 0.5 tr(B)                \\
+        \epsilon   &=& c_e k^{3/2}/\Delta       \\
+        \epsilon/k &=& c_e k^{1/2}/\Delta       \\
+        P          &=& -(B'L + L'B)             \\
+        \nu_{sgs}  &=& c_k k^{1/2} \Delta       \\
+        \nu_{eff}  &=& \nu_{sgs} + \nu
+    \f}
 
 SourceFiles
     DeardorffDiffStress.C
@@ -65,7 +70,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class DeardorffDiffStress Declaration
+                    Class DeardorffDiffStress Declaration
 \*---------------------------------------------------------------------------*/
 
 class DeardorffDiffStress

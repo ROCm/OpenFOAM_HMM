@@ -24,7 +24,7 @@ License
 Class
     Foam::surfaceInterpolateFields
 
-\ingroup grpFieldFunctionObjects
+Group grpFieldFunctionObjects
 
 Description
     Linear interpolates volFields to surfaceFields
