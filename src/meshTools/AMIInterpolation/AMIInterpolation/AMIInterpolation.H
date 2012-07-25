@@ -246,6 +246,31 @@ class AMIInterpolation
                 DynamicList<label>& faceIDs
             ) const;
 
+            bool processSourceFace
+            (
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch,
+                const label srcFaceI,
+                const label tgtStartFaceI,
+
+                DynamicList<label>& nbrFaces,
+                DynamicList<label>& visitedFaces,
+                List<DynamicList<label> >& srcAddr,
+                List<DynamicList<scalar> >& srcWght,
+                List<DynamicList<label> >& tgtAddr,
+                List<DynamicList<scalar> >& tgtWght
+            );
+
+            void restartUncoveredSourceFace
+            (
+                const SourcePatch& srcPatch,
+                const TargetPatch& tgtPatch,
+                List<DynamicList<label> >& srcAddr,
+                List<DynamicList<scalar> >& srcWght,
+                List<DynamicList<label> >& tgtAddr,
+                List<DynamicList<scalar> >& tgtWght
+            );
+
             //- Set the source and target seed faces
             void setNextFaces
             (
