@@ -68,14 +68,14 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    Ustar_(ptf.Ustar_),
+    Ustar_(ptf.Ustar_, mapper),
     n_(ptf.n_),
     z_(ptf.z_),
-    z0_(ptf.z0_),
+    z0_(ptf.z0_, mapper),
     kappa_(ptf.kappa_),
     Uref_(ptf.Uref_),
     Href_(ptf.Href_),
-    zGround_(ptf.zGround_)
+    zGround_(ptf.zGround_, mapper)
 {}
 
 
@@ -120,7 +120,25 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
         Ustar_[i] = kappa_*Uref_/(log((Href_  + z0_[i])/max(z0_[i] , 0.001)));
     }
 
-    evaluate();
+    const vectorField& c = patch().Cf();
+    const scalarField coord(c & z_);
+    scalarField Un(coord.size());
+
+    forAll(coord, i)
+    {
+        if ((coord[i] - zGround_[i]) < Href_)
+        {
+            Un[i] =
+                (Ustar_[i]/kappa_)
+              * log((coord[i] - zGround_[i] + z0_[i])/max(z0_[i], 0.001));
+        }
+        else
+        {
+            Un[i] = Uref_;
+        }
+    }
+
+    vectorField::operator=(n_*Un);
 }
 
 
@@ -145,29 +163,32 @@ atmBoundaryLayerInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void atmBoundaryLayerInletVelocityFvPatchVectorField::updateCoeffs()
+void atmBoundaryLayerInletVelocityFvPatchVectorField::autoMap
+(
+    const fvPatchFieldMapper& m
+)
 {
-    const vectorField& c = patch().Cf();
-    const scalarField coord(c & z_);
-    scalarField Un(coord.size());
+    fixedValueFvPatchVectorField::autoMap(m);
+    z0_.autoMap(m);
+    zGround_.autoMap(m);
+    Ustar_.autoMap(m);
+}
 
-    forAll(coord, i)
-    {
-        if ((coord[i] - zGround_[i]) < Href_)
-        {
-            Un[i] =
-                (Ustar_[i]/kappa_)
-              * log((coord[i] - zGround_[i] + z0_[i])/max(z0_[i], 0.001));
-        }
-        else
-        {
-            Un[i] = Uref_;
-        }
-    }
 
-    vectorField::operator=(n_*Un);
+void atmBoundaryLayerInletVelocityFvPatchVectorField::rmap
+(
+    const fvPatchVectorField& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchVectorField::rmap(ptf, addr);
 
-    fixedValueFvPatchVectorField::updateCoeffs();
+    const atmBoundaryLayerInletVelocityFvPatchVectorField& blptf =
+        refCast<const atmBoundaryLayerInletVelocityFvPatchVectorField>(ptf);
+
+    z0_.rmap(blptf.z0_, addr);
+    zGround_.rmap(blptf.zGround_, addr);
+    Ustar_.rmap(blptf.Ustar_, addr);
 }
 
 

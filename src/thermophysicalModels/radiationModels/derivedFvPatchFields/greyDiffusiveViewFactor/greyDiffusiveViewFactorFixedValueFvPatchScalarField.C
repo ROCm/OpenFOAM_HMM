@@ -128,10 +128,14 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::radiation::greyDiffusiveViewFactorFixedValueFvPatchScalarField::
 updateCoeffs()
 {
+    if (this->updated())
+    {
+        return;
+    }
+
     // Do nothing
 
     if (debug)
@@ -149,6 +153,7 @@ updateCoeffs()
             << endl;
     }
 
+    fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 

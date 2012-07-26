@@ -1,4 +1,5 @@
 {
+    // Kinetic + pressure energy
     volScalarField Ekp("Ekp", 0.5*magSqr(U) + p/rho);
 
     fvScalarMatrix eEqn
@@ -10,7 +11,7 @@
         fvc::div(phi)*Ekp - fvc::div(phi, Ekp)
     );
 
-    //pZones.addEnergySource(thermo, rho, eEqn);
+    pZones.addEnergySource(thermo, rho, eEqn);
 
     eEqn.relax();
     eEqn.solve();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,31 @@ Foam::word Foam::name(const quaternion& q)
     OStringStream buf;
     buf << '(' << q.w() << ',' << q.v() << ')';
     return buf.str();
+}
+
+
+Foam::quaternion Foam::slerp
+(
+    const quaternion& qa,
+    const quaternion& qb,
+    const scalar t
+)
+{
+    // Calculate angle between the quaternions
+    scalar cosHalfTheta = qa & qb;
+
+    if (mag(cosHalfTheta) >= 1)
+    {
+        return qa;
+    }
+
+    scalar halfTheta = acos(cosHalfTheta);
+    scalar sinHalfTheta = sqrt(1.0 - sqr(cosHalfTheta));
+
+    scalar wa = sin((1 - t)*halfTheta)/sinHalfTheta;
+    scalar wb = sin(t*halfTheta)/sinHalfTheta;
+
+    return wa*qa + wb*qb;
 }
 
 

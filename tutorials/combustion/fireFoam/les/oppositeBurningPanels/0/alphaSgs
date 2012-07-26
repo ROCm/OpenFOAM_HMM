@@ -24,6 +24,7 @@ boundaryField
     ground
     {
         type        alphatWallFunction;
+        mut         muSgs;
         value       uniform 0;
     }
 
@@ -45,6 +46,7 @@ boundaryField
     "(region0_to.*)"
     {
         type        alphatWallFunction;
+        mut         muSgs;
         value       uniform 0;
     }
 }

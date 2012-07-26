@@ -35,7 +35,7 @@ Description
     \verbatim
         d/dt(k) + div(U*k) - div(nuEff*grad(k))
         =
-        -B*L - ce*k^3/2/delta
+        -D:B - ce*k^(3/2)/delta
 
     and
 

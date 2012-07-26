@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,9 +37,27 @@ inline Foam::quaternion::quaternion(const scalar w, const vector& v)
 inline Foam::quaternion::quaternion(const vector& d, const scalar theta)
 :
     w_(cos(0.5*theta)),
-    v_((sin(0.5*theta)/magSqr(d))*d)
+    v_((sin(0.5*theta)/mag(d))*d)
+{}
+
+inline Foam::quaternion::quaternion
+(
+    const vector& d,
+    const scalar cosTheta,
+    const bool normalized
+)
 {
-    normalize();
+    scalar cosHalfTheta2 = 0.5*(cosTheta + 1);
+    w_ = sqrt(cosHalfTheta2);
+
+    if (normalized)
+    {
+        v_ = sqrt(1 - cosHalfTheta2)*d;
+    }
+    else
+    {
+        v_ = (sqrt(1 - cosHalfTheta2)/mag(d))*d;
+    }
 }
 
 inline Foam::quaternion::quaternion(const scalar w)
@@ -71,9 +89,10 @@ inline Foam::quaternion::quaternion
     const tensor& rotationTensor
 )
 {
-    scalar trace = rotationTensor.xx()
-                 + rotationTensor.yy()
-                 + rotationTensor.zz();
+    scalar trace =
+        rotationTensor.xx()
+      + rotationTensor.yy()
+      + rotationTensor.zz();
 
     if (trace > 0)
     {
@@ -165,6 +184,12 @@ inline Foam::scalar& Foam::quaternion::w()
 inline Foam::vector& Foam::quaternion::v()
 {
     return v_;
+}
+
+
+inline Foam::quaternion Foam::quaternion::normalized() const
+{
+    return *this/mag(*this);
 }
 
 

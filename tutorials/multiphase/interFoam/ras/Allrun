@@ -52,4 +52,7 @@ cloneCase damBreak damBreakFine
 # Do weirOverflow
 (cd weirOverflow && foamRunTutorials)
 
+# Do waterChannel
+(cd waterChannel && foamRunTutorials)
+
 # ----------------------------------------------------------------- end-of-file

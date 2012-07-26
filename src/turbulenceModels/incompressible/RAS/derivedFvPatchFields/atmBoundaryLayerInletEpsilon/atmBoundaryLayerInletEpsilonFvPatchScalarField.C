@@ -71,9 +71,9 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
     kappa_(ptf.kappa_),
     Uref_(ptf.Uref_),
     Href_(ptf.Href_),
-    z0_(ptf.z0_),
-    zGround_(ptf.zGround_),
-    Ustar_(ptf.Ustar_)
+    z0_(ptf.z0_, mapper),
+    zGround_(ptf.zGround_, mapper),
+    Ustar_(ptf.Ustar_, mapper)
 {}
 
 
@@ -116,7 +116,8 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 
     z_ /= mag(z_);
 
-    evaluate();
+    const vectorField& c = patch().Cf();
+    scalarField::operator=(pow3(Ustar_)/(kappa_*((c & z_) - zGround_ + z0_)));
 }
 
 
@@ -166,14 +167,6 @@ void atmBoundaryLayerInletEpsilonFvPatchScalarField::rmap
     z0_.rmap(blptf.z0_, addr);
     zGround_.rmap(blptf.zGround_, addr);
     Ustar_.rmap(blptf.Ustar_, addr);
-}
-
-
-void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
-{
-    const vectorField& c = patch().Cf();
-    tmp<scalarField> coord = (c & z_);
-    scalarField::operator=(pow3(Ustar_)/(kappa_*(coord - zGround_ + z0_)));
 }
 
 
