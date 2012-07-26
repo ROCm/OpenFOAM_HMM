@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,8 +28,42 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Calculates the field averages given list of fieldAverageItems, e.g.
+    This function object calculates average quantities for a user-specified
+    selection of fields.  Fields are entered as a list of sub-dictionaries,
+    which indicate the type of averages to perform, and can be updated during
+    the calculation.  The current options include:
+    - \c mean: arithmetic mean:
+        \f[
+            \overline{x} = \frac{\Sigma x i}{\Sigma i}
+        \f]
+    - \c prime2Mean: prime-squared mean
+        \f[
+            \overline{x'}^2 = \frac{\Sigma (x - \overline{x}) i}{\Sigma i}
+        \f]
+    - base: average over 'time', or 'iteration' (\f$i\f$ in the above)
+    - window: optional averaging window, specified in 'base' units
 
+    \note
+    To employ the \c prime2Mean option, the \c mean option must be selecetd.
+
+    Average field names are constructed by concatenating the base field with
+    the averaging type, e.g. when averaging field 'U', the resultant fields
+    are:
+    - arithmetic mean field, UMean
+    - prime-squared field, UPrime2Mean
+
+    Information regarding the number of averaging steps, and total averaging
+    time are written on a per-field basis to the
+    \c fieldAveragingProperties dictionary, located in \<time\>/uniform
+
+    When restarting form a previous calculation, the averaging is continuous.
+    However, the averaging process can be restarted using the \c cleanRestart
+    option.
+
+    To restart the averaging process after each calculation output time,
+    the \c resetOnOutput option can be applied.
+
+    Example of function object specification:
     \verbatim
     fieldAverage1
     {
@@ -39,16 +73,13 @@ Description
         // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldFunctionObjects.so");
 
-        // Whether to perform a clean restart, or start from previous
-        // averaging info if available
+        // Perform a clean restart?
         cleanRestart true;
 
-        // Whether to reset the averaged fields after they have been written.
-        // Used to average over only the preceding write interval for transient
-        // cases.
-        resetOnOutput true;
+        // Reset the averaged fields after they have been written?
+        resetOnOutput false;
 
-        // Fields to be averaged. runTime modifiable!
+        // Fields to be averaged
         fields
         (
             U
@@ -67,22 +98,10 @@ Description
     }
     \endverbatim
 
-    Member function calcAverages() calculates the averages.
-
-    Member function fieldAverage::write() calls calcAverages(). Average
-    field names are constructed by concatenating the base field with the
-    averaging type, e.g.
-    - base field, U
-    - arithmetic mean field, UMean
-    - prime-squared field, UPrime2Mean
-
-    Information regarding the number of averaging steps, and total averaging
-    time are written on a (base) per-field basis to the
-    fieldAveragingProperties dictionary, located in \<time\>/uniform
-
 SourceFiles
     fieldAverage.C
     fieldAverageTemplates.C
+    fieldAverageItem.C
 
 \*---------------------------------------------------------------------------*/
 

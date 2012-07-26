@@ -33,6 +33,25 @@ Description
     - total current number of parcels
     - total current mass of parcels
 
+    Example of function object specification:
+    \verbatim
+    cloudInfo1
+    {
+        // Type of functionObject
+        type cloudInfo;
+
+        // Where to load it from (if not already in solver)
+        functionObjectLibs ("libcloudFunctionObjects.so");
+
+        // Clouds to process
+        clouds
+        (
+            kinematicCloud1
+            thermoCloud1
+        );
+    }
+    \endverbatim
+
 SourceFiles
     cloudInfo.C
     IOcloudInfo.H
