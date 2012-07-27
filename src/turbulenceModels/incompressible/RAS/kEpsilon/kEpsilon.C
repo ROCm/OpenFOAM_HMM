@@ -192,6 +192,22 @@ tmp<fvVectorMatrix> kEpsilon::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> kEpsilon::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 bool kEpsilon::read()
 {
     if (RASModel::read())

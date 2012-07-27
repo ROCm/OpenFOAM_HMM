@@ -203,6 +203,22 @@ tmp<fvVectorMatrix> laminar::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> laminar::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 void laminar::correct()
 {
     turbulenceModel::correct();

@@ -262,6 +262,22 @@ tmp<fvVectorMatrix> qZeta::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> qZeta::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 bool qZeta::read()
 {
     if (RASModel::read())

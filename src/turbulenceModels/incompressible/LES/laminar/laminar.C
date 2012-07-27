@@ -136,17 +136,34 @@ tmp<volSymmTensorField> laminar::B() const
 }
 
 
-tmp<volSymmTensorField> laminar::devBeff() const
+tmp<volSymmTensorField> laminar::devReff() const
 {
     return -nu()*dev(twoSymm(fvc::grad(U())));
 }
 
 
-tmp<fvVectorMatrix> laminar::divDevBeff(volVectorField& U) const
+tmp<fvVectorMatrix> laminar::divDevReff(volVectorField& U) const
 {
     return
     (
-      - fvm::laplacian(nu(), U) - fvc::div(nu()*dev(T(fvc::grad(U))))
+      - fvm::laplacian(nu(), U)
+      - fvc::div(nu()*dev(T(fvc::grad(U))))
+    );
+}
+
+
+tmp<fvVectorMatrix> laminar::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
     );
 }
 

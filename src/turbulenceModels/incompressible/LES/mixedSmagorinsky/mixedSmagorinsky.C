@@ -91,25 +91,39 @@ tmp<volSymmTensorField> mixedSmagorinsky::B() const
 }
 
 
-tmp<volSymmTensorField> mixedSmagorinsky::devBeff() const
+tmp<volSymmTensorField> mixedSmagorinsky::devReff() const
 {
     return
     (
-        scaleSimilarity::devBeff()
-      + Smagorinsky::devBeff()
+        scaleSimilarity::devReff()
+      + Smagorinsky::devReff()
     );
 }
 
 
-tmp<fvVectorMatrix> mixedSmagorinsky::divDevBeff
+tmp<fvVectorMatrix> mixedSmagorinsky::divDevReff
 (
     volVectorField& U
 ) const
 {
     return
     (
-        scaleSimilarity::divDevBeff(U)
-      + Smagorinsky::divDevBeff(U)
+        scaleSimilarity::divDevReff(U)
+      + Smagorinsky::divDevReff(U)
+    );
+}
+
+
+tmp<fvVectorMatrix> mixedSmagorinsky::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    return
+    (
+        scaleSimilarity::divDevRhoReff(rho, U)
+      + Smagorinsky::divDevRhoReff(rho, U)
     );
 }
 

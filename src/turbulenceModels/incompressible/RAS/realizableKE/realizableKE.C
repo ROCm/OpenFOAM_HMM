@@ -246,6 +246,22 @@ tmp<fvVectorMatrix> realizableKE::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> realizableKE::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 bool realizableKE::read()
 {
     if (RASModel::read())

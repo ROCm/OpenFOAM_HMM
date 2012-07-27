@@ -201,6 +201,22 @@ tmp<fvVectorMatrix> kOmega::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> kOmega::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 bool kOmega::read()
 {
     if (RASModel::read())

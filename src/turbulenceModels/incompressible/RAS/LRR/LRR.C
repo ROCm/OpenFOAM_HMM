@@ -259,6 +259,44 @@ tmp<fvVectorMatrix> LRR::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> LRR::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    if (couplingFactor_.value() > 0.0)
+    {
+        return
+        (
+            fvc::div
+            (
+                rho*R_ + couplingFactor_*(rho*nut_)*fvc::grad(U),
+                "div((rho*R))"
+            )
+          + fvc::laplacian
+            (
+                (1.0 - couplingFactor_)*rho*nut_,
+                U,
+                "laplacian(muEff,U)"
+            )
+          - fvm::laplacian(muEff, U)
+        );
+    }
+    else
+    {
+        return
+        (
+            fvc::div(rho*R_)
+          + fvc::laplacian(rho*nut_, U, "laplacian(muEff,U)")
+          - fvm::laplacian(muEff, U)
+        );
+    }
+}
+
+
 bool LRR::read()
 {
     if (RASModel::read())

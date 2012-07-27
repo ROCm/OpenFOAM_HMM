@@ -105,6 +105,13 @@ public:
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
 
+        //- Return the source term for the momentum equation
+        virtual tmp<fvVectorMatrix> divDevRhoReff
+        (
+            const volScalarField& rho,
+            volVectorField& U
+        ) const;
+
         //- Correct the laminar viscosity
         virtual void correct();
 

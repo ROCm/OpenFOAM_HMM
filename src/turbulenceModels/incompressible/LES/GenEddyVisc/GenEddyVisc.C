@@ -87,17 +87,34 @@ tmp<volSymmTensorField> GenEddyVisc::B() const
 }
 
 
-tmp<volSymmTensorField> GenEddyVisc::devBeff() const
+tmp<volSymmTensorField> GenEddyVisc::devReff() const
 {
     return -nuEff()*dev(twoSymm(fvc::grad(U())));
 }
 
 
-tmp<fvVectorMatrix> GenEddyVisc::divDevBeff(volVectorField& U) const
+tmp<fvVectorMatrix> GenEddyVisc::divDevReff(volVectorField& U) const
 {
     return
     (
-      - fvm::laplacian(nuEff(), U) - fvc::div(nuEff()*dev(T(fvc::grad(U))))
+      - fvm::laplacian(nuEff(), U)
+      - fvc::div(nuEff()*dev(T(fvc::grad(U))))
+    );
+}
+
+
+tmp<fvVectorMatrix> GenEddyVisc::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
     );
 }
 
