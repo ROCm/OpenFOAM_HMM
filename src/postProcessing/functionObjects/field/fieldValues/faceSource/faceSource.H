@@ -28,6 +28,7 @@ Description
     Face source variant of field value function object. Values of user-
     specified fields reported for collections of faces.
 
+    \verbatim
     faceObj1                        // Name also used to identify output folder
     {
         type            faceSource;
@@ -48,6 +49,7 @@ Description
             U
         );
     }
+    \endverbatim
 
     source:
     - faceZone       : requires a 'sourceName' entry to specify the faceZone
@@ -56,34 +58,37 @@ Description
                        sampleDict.
 
     operation is one of:
-      - none
-      - sum
-      - average
-      - weightedAverage
-      - areaAverage
-      - areaIntegrate
-      - min
-      - max
-      - CoV (Coefficient of variation: standard deviation/mean)
-      - areaNormalAverage   (vector with first component (average of) inproduct
-                             of value and face area vector)
-      - areaNormalIntegrate (   ,,          ,,           (sum of)       ,,
+    - none
+    - sum
+    - average (ensemble)
+    - weightedAverage
+    - areaAverage
+    - areaIntegrate
+    - min
+    - max
+    - CoV (Coefficient of variation: standard deviation/mean)
+    - areaNormalAverage   (vector with first component (average of) inproduct
+                         of value and face area vector)
+    - areaNormalIntegrate (   ,,          ,,           (sum of)       ,,
 
-    Notes:
+    For example, to calculate the volumetric or mass flux across a patch,
+    apply the 'sum' operator to the flux field (typically \c phi)
+
+    \note
     - faces on empty patches get ignored
-    - if the field is a volField the faceZone can only consist of boundary
-      faces.
-    - all fields get oriented according to the faceZone (so you might e.g. see
-      negative pressure)
-    - using sampledSurfaces:
-            - they do not do surface fields
-            - if interpolate=true they use interpolationCellPoint
-              otherwise they use cell values
-            - each triangle in sampledSurface is logically only in one cell
-              so interpolation will be wrong when triangles are larger than
-              cells. This can only happen for sampling on triSurfaceMesh.
-            - take care when using isoSurfaces - these might have duplicate
-              triangles so integration might be wrong
+    - if the field is a volField the \c faceZone can only consist of boundary
+      faces
+    - all fields get oriented according to the \c faceZone (so you might
+      e.g. see negative pressure)
+    - using \c sampledSurfaces:
+        - they do not do surface fields
+        - if interpolate=true they use \c interpolationCellPoint
+          otherwise they use cell values
+        - each triangle in \c sampledSurface is logically only in one cell
+          so interpolation will be wrong when triangles are larger than
+          cells. This can only happen for sampling on \c triSurfaceMesh
+        - take care when using isoSurfaces - these might have duplicate
+          triangles so integration might be wrong
 
 SourceFiles
     faceSource.C

@@ -34,13 +34,14 @@ Description
     the calculation.  The current options include:
     - \c mean: arithmetic mean:
         \f[
-            \overline{x} = \frac{\Sigma x i}{\Sigma i}
+            \overline{x} = \frac{1}{N}\displaystyle\sum\limits_{i=0}^N x_i
         \f]
     - \c prime2Mean: prime-squared mean
         \f[
-            \overline{x'}^2 = \frac{\Sigma (x - \overline{x}) i}{\Sigma i}
+            \overline{x'}^2 = \frac{1}{N}\displaystyle\sum\limits_{i=0}^N
+            (x_i - \overline{x})^2
         \f]
-    - base: average over 'time', or 'iteration' (\f$i\f$ in the above)
+    - base: average over 'time', or 'iteration' (\f$N\f$ in the above)
     - window: optional averaging window, specified in 'base' units
 
     \note
