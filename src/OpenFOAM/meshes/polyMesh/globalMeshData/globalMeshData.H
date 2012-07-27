@@ -323,8 +323,6 @@ class globalMeshData
             // its own master. Maybe store as well?
 
             void calcGlobalCoPointSlaves() const;
-            const labelListList& globalCoPointSlaves() const;
-            const mapDistribute& globalCoPointSlavesMap() const;
 
 
         //- Disallow default bitwise copy construct
@@ -546,6 +544,11 @@ public:
                 const mapDistribute& globalEdgeSlavesMap() const;
                 //- Is my edge same orientation as master edge
                 const PackedBoolList& globalEdgeOrientation() const;
+
+            // Collocated point to collocated point
+
+                const labelListList& globalCoPointSlaves() const;
+                const mapDistribute& globalCoPointSlavesMap() const;
 
             // Coupled point to boundary faces. These are uncoupled boundary
             // faces only but include empty patches.
