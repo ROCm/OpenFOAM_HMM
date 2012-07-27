@@ -28,8 +28,11 @@ Group
     grpIcoWallFunctions
 
 Description
-    This boundary condition is applied to turbulence \c k, \c q, and \c R
-    when using wall functions, and simply enforces a zero-gradient condition.
+    This boundary condition provides a suitable condition for turbulence
+    \c k, \c q, and \c R fields for the case of high Reynolds number flow using
+    wall functions.
+
+    It is a simple wrapper around the zero-gradient condition.
 
     \heading Patch usage
 
