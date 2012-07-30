@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,21 +97,20 @@ calculatedFvsPatchField<Type>::calculatedFvsPatchField
 
 
 template<class Type>
-template<class Type2>
 tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
 (
-    const fvsPatchField<Type2>& pf
+    const fvPatch& p
 )
 {
     typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(pf.patch().type());
+        patchConstructorTablePtr_->find(p.type());
 
     if (patchTypeCstrIter != patchConstructorTablePtr_->end())
     {
         return patchTypeCstrIter()
         (
-            pf.patch(),
-            Field<Type>::null()
+            p,
+            DimensionedField<Type, surfaceMesh>::null()
         );
     }
     else
@@ -120,11 +119,22 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
         (
             new calculatedFvsPatchField<Type>
             (
-                pf.patch(),
-                Field<Type>::null()
+                p,
+                DimensionedField<Type, surfaceMesh>::null()
             )
         );
     }
+}
+
+
+template<class Type>
+template<class Type2>
+tmp<fvsPatchField<Type> > fvsPatchField<Type>::NewCalculatedType
+(
+    const fvsPatchField<Type2>& pf
+)
+{
+    return NewCalculatedType(pf.patch());
 }
 
 
