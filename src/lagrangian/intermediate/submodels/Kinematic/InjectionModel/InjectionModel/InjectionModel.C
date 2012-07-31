@@ -428,7 +428,7 @@ Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
         "("
             "const scalar, "
             "const scalar"
-        ") const"
+        ")"
     );
 
     return 0;
@@ -448,7 +448,7 @@ Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
         "("
             "const scalar, "
             "const scalar"
-        ") const"
+        ")"
     );
 
     return 0.0;
@@ -473,9 +473,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = this->owner().db().time().value();
-    const scalar trackTime = this->owner().solution().trackTime();
-    const polyMesh& mesh = this->owner().mesh();
-    typename TrackData::cloudType& cloud = td.cloud();
 
     // Prepare for next time step
     label parcelsAdded = 0;
@@ -485,6 +482,10 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
     if (prepareForNextTimeStep(time, newParcels, newVolume))
     {
+        const scalar trackTime = this->owner().solution().trackTime();
+        const polyMesh& mesh = this->owner().mesh();
+        typename TrackData::cloudType& cloud = td.cloud();
+
         // Duration of injection period during this timestep
         const scalar deltaT =
             max(0.0, min(trackTime, min(time - SOI_, timeEnd() - time0_)));
@@ -645,12 +646,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             cloud.checkParcelProperties(*pPtr, 0.0, fullyDescribed());
 
             // Apply correction to velocity for 2-D cases
-            meshTools::constrainDirection
-            (
-                mesh,
-                mesh.solutionD(),
-                pPtr->U()
-            );
+            meshTools::constrainDirection(mesh, mesh.solutionD(), pPtr->U());
 
             // Number of particles per parcel
             pPtr->nParticle() =
