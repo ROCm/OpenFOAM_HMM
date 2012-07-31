@@ -528,14 +528,8 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     meshTools::constrainToMeshCentre(mesh, pos);
 
                     // Create a new parcel
-                    parcelType* pPtr = new parcelType
-                    (
-                        td.cloud().pMesh(),
-                        pos,
-                        cellI,
-                        tetFaceI,
-                        tetPtI
-                    );
+                    parcelType* pPtr =
+                        new parcelType(mesh, pos, cellI, tetFaceI, tetPtI);
 
                     // Check/set new parcel thermo properties
                     cloud.setParcelThermoProperties(*pPtr, dt);
@@ -638,14 +632,8 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             meshTools::constrainToMeshCentre(mesh, pos);
 
             // Create a new parcel
-            parcelType* pPtr = new parcelType
-            (
-                td.cloud().pMesh(),
-                pos,
-                cellI,
-                tetFaceI,
-                tetPtI
-            );
+            parcelType* pPtr =
+                new parcelType(mesh, pos, cellI, tetFaceI, tetPtI);
 
             // Check/set new parcel thermo properties
             cloud.setParcelThermoProperties(*pPtr, 0.0);
