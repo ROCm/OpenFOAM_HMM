@@ -45,7 +45,7 @@ bool Foam::InjectionModel<CloudType>::validInjection(const label parcelI)
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
+bool Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 (
     const scalar time,
     label& newParcels,
@@ -55,12 +55,13 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     // Initialise values
     newParcels = 0;
     newVolume = 0.0;
+    bool validInjection = false;
 
     // Return if not started injection event
     if (time < SOI_)
     {
         timeStep0_ = time;
-        return;
+        return validInjection;
     }
 
     // Make times relative to SOI
@@ -73,16 +74,27 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     // Volume of parcels to inject
     newVolume = this->volumeToInject(t0, t1);
 
-    // Hold previous time if no parcels, but non-zero volume fraction
-    if ((newParcels == 0) && (newVolume > 0.0))
+    if (newVolume > 0)
     {
-        // hold value of timeStep0_
+        if (newParcels > 0)
+        {
+            timeStep0_ = time;
+            validInjection = true;
+        }
+        else
+        {
+            // injection should have started, but not sufficient volume to
+            // produce (at least) 1 parcel - hold value of timeStep0_
+            validInjection = false;
+        }
     }
     else
     {
-        // advance value of timeStep0_
         timeStep0_ = time;
+        validInjection = false;
     }
+
+    return validInjection;
 }
 
 
@@ -416,7 +428,7 @@ Foam::label Foam::InjectionModel<CloudType>::parcelsToInject
         "("
             "const scalar, "
             "const scalar"
-        ") const"
+        ")"
     );
 
     return 0;
@@ -436,7 +448,7 @@ Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
         "("
             "const scalar, "
             "const scalar"
-        ") const"
+        ")"
     );
 
     return 0.0;
@@ -461,9 +473,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = this->owner().db().time().value();
-    const scalar trackTime = this->owner().solution().trackTime();
-    const polyMesh& mesh = this->owner().mesh();
-    typename TrackData::cloudType& cloud = td.cloud();
 
     // Prepare for next time step
     label parcelsAdded = 0;
@@ -471,96 +480,95 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     label newParcels = 0;
     scalar newVolume = 0.0;
 
-    prepareForNextTimeStep(time, newParcels, newVolume);
-
-    // Duration of injection period during this timestep
-    const scalar deltaT =
-        max(0.0, min(trackTime, min(time - SOI_, timeEnd() - time0_)));
-
-    // Pad injection time if injection starts during this timestep
-    const scalar padTime = max(0.0, SOI_ - time0_);
-
-    // Introduce new parcels linearly across carrier phase timestep
-    for (label parcelI = 0; parcelI < newParcels; parcelI++)
+    if (prepareForNextTimeStep(time, newParcels, newVolume))
     {
-        if (validInjection(parcelI))
+        const scalar trackTime = this->owner().solution().trackTime();
+        const polyMesh& mesh = this->owner().mesh();
+        typename TrackData::cloudType& cloud = td.cloud();
+
+        // Duration of injection period during this timestep
+        const scalar deltaT =
+            max(0.0, min(trackTime, min(time - SOI_, timeEnd() - time0_)));
+
+        // Pad injection time if injection starts during this timestep
+        const scalar padTime = max(0.0, SOI_ - time0_);
+
+        // Introduce new parcels linearly across carrier phase timestep
+        for (label parcelI = 0; parcelI < newParcels; parcelI++)
         {
-            // Calculate the pseudo time of injection for parcel 'parcelI'
-            scalar timeInj = time0_ + padTime + deltaT*parcelI/newParcels;
-
-            // Determine the injection position and owner cell,
-            // tetFace and tetPt
-            label cellI = -1;
-            label tetFaceI = -1;
-            label tetPtI = -1;
-
-            vector pos = vector::zero;
-
-            setPositionAndCell
-            (
-                parcelI,
-                newParcels,
-                timeInj,
-                pos,
-                cellI,
-                tetFaceI,
-                tetPtI
-            );
-
-            if (cellI > -1)
+            if (validInjection(parcelI))
             {
-                // Lagrangian timestep
-                scalar dt = time - timeInj;
+                // Calculate the pseudo time of injection for parcel 'parcelI'
+                scalar timeInj = time0_ + padTime + deltaT*parcelI/newParcels;
 
-                // Apply corrections to position for 2-D cases
-                meshTools::constrainToMeshCentre(mesh, pos);
+                // Determine the injection position and owner cell,
+                // tetFace and tetPt
+                label cellI = -1;
+                label tetFaceI = -1;
+                label tetPtI = -1;
 
-                // Create a new parcel
-                parcelType* pPtr = new parcelType
+                vector pos = vector::zero;
+
+                setPositionAndCell
                 (
-                    td.cloud().pMesh(),
+                    parcelI,
+                    newParcels,
+                    timeInj,
                     pos,
                     cellI,
                     tetFaceI,
                     tetPtI
                 );
 
-                // Check/set new parcel thermo properties
-                cloud.setParcelThermoProperties(*pPtr, dt);
+                if (cellI > -1)
+                {
+                    // Lagrangian timestep
+                    scalar dt = time - timeInj;
 
-                // Assign new parcel properties in injection model
-                setProperties(parcelI, newParcels, timeInj, *pPtr);
+                    // Apply corrections to position for 2-D cases
+                    meshTools::constrainToMeshCentre(mesh, pos);
 
-                // Check/set new parcel injection properties
-                cloud.checkParcelProperties(*pPtr, dt, fullyDescribed());
+                    // Create a new parcel
+                    parcelType* pPtr =
+                        new parcelType(mesh, pos, cellI, tetFaceI, tetPtI);
 
-                // Apply correction to velocity for 2-D cases
-                meshTools::constrainDirection
-                (
-                    mesh,
-                    mesh.solutionD(),
-                    pPtr->U()
-                );
+                    // Check/set new parcel thermo properties
+                    cloud.setParcelThermoProperties(*pPtr, dt);
 
-                // Number of particles per parcel
-                pPtr->nParticle() =
-                    setNumberOfParticles
+                    // Assign new parcel properties in injection model
+                    setProperties(parcelI, newParcels, timeInj, *pPtr);
+
+                    // Check/set new parcel injection properties
+                    cloud.checkParcelProperties(*pPtr, dt, fullyDescribed());
+
+                    // Apply correction to velocity for 2-D cases
+                    meshTools::constrainDirection
                     (
-                        newParcels,
-                        newVolume,
-                        pPtr->d(),
-                        pPtr->rho()
+                        mesh,
+                        mesh.solutionD(),
+                        pPtr->U()
                     );
 
-                if (pPtr->move(td, dt))
-                {
-                    td.cloud().addParticle(pPtr);
-                    massAdded += pPtr->nParticle()*pPtr->mass();
-                    parcelsAdded++;
-                }
-                else
-                {
-                    delete pPtr;
+                    // Number of particles per parcel
+                    pPtr->nParticle() =
+                        setNumberOfParticles
+                        (
+                            newParcels,
+                            newVolume,
+                            pPtr->d(),
+                            pPtr->rho()
+                        );
+
+                    if (pPtr->move(td, dt))
+                    {
+                        td.cloud().addParticle(pPtr);
+                        massAdded += pPtr->nParticle()*pPtr->mass();
+                        parcelsAdded++;
+                    }
+                    else
+                    {
+                        delete pPtr;
+                    }
                 }
             }
         }
@@ -625,14 +633,8 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             meshTools::constrainToMeshCentre(mesh, pos);
 
             // Create a new parcel
-            parcelType* pPtr = new parcelType
-            (
-                td.cloud().pMesh(),
-                pos,
-                cellI,
-                tetFaceI,
-                tetPtI
-            );
+            parcelType* pPtr =
+                new parcelType(mesh, pos, cellI, tetFaceI, tetPtI);
 
             // Check/set new parcel thermo properties
             cloud.setParcelThermoProperties(*pPtr, 0.0);
@@ -644,12 +646,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             cloud.checkParcelProperties(*pPtr, 0.0, fullyDescribed());
 
             // Apply correction to velocity for 2-D cases
-            meshTools::constrainDirection
-            (
-                mesh,
-                mesh.solutionD(),
-                pPtr->U()
-            );
+            meshTools::constrainDirection(mesh, mesh.solutionD(), pPtr->U());
 
             // Number of particles per parcel
             pPtr->nParticle() =

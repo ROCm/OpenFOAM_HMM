@@ -23,38 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PatchInjection.H"
+#include "PatchFlowRateInjection.H"
 #include "TimeDataEntry.H"
 #include "distributionModel.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PatchInjection<CloudType>::PatchInjection
+Foam::PatchFlowRateInjection<CloudType>::PatchFlowRateInjection
 (
     const dictionary& dict,
     CloudType& owner,
     const word& modelName
 )
 :
-    InjectionModel<CloudType>(dict, owner, modelName, typeName),
+    InjectionModel<CloudType>(dict, owner, modelName,typeName),
     patchName_(this->coeffDict().lookup("patchName")),
     patchId_(owner.mesh().boundaryMesh().findPatchID(patchName_)),
+    patchArea_(0.0),
+    patchNormal_(vector::zero),
+    phiName_(this->coeffDict().template lookupOrDefault<word>("phi", "phi")),
+    rhoName_(this->coeffDict().template lookupOrDefault<word>("rho", "rho")),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
+    concentration_(readScalar(this->coeffDict().lookup("concentration"))),
     parcelsPerSecond_
     (
         readScalar(this->coeffDict().lookup("parcelsPerSecond"))
     ),
-    U0_(this->coeffDict().lookup("U0")),
-    flowRateProfile_
-    (
-        TimeDataEntry<scalar>
-        (
-            owner.db().time(),
-            "flowRateProfile",
-            this->coeffDict()
-        )
-    ),
+    U0_(vector::zero),
     sizeDistribution_
     (
         distributionModels::distributionModel::New
@@ -64,13 +61,14 @@ Foam::PatchInjection<CloudType>::PatchInjection
         )
     ),
     cellOwners_(),
-    fraction_(1.0)
+    fraction_(1.0),
+    pMeanVolume_(0.0)
 {
     if (patchId_ < 0)
     {
         FatalErrorIn
         (
-            "PatchInjection<CloudType>::PatchInjection"
+            "PatchFlowRateInjection<CloudType>::PatchFlowRateInjection"
             "("
                 "const dictionary&, "
                 "CloudType&"
@@ -86,54 +84,70 @@ Foam::PatchInjection<CloudType>::PatchInjection
 
     cellOwners_ = patch.faceCells();
 
+    // TODO: retrieve mean diameter from distrution model
+    scalar pMeanDiameter =
+        readScalar(this->coeffDict().lookup("meanParticleDiameter"));
+    pMeanVolume_ = constant::mathematical::pi*pow3(pMeanDiameter)/6.0;
+
+    // patch geometry
     label patchSize = cellOwners_.size();
     label totalPatchSize = patchSize;
     reduce(totalPatchSize, sumOp<label>());
     fraction_ = scalar(patchSize)/totalPatchSize;
 
-    // Set total volume/mass to inject
-    this->volumeTotal_ = fraction_*flowRateProfile_.integrate(0.0, duration_);
-    this->massTotal_ *= fraction_;
+    patchArea_ = gSum(mag(patch.faceAreas()));
+    patchNormal_ = gSum(patch.faceNormals())/totalPatchSize;
+    patchNormal_ /= mag(patchNormal_);
+
+    // Re-initialise total mass/volume to inject to zero
+    // - will be reset during each injection
+    this->volumeTotal_ = 0.0;
+    this->massTotal_ = 0.0;
 }
 
 
 template<class CloudType>
-Foam::PatchInjection<CloudType>::PatchInjection
+Foam::PatchFlowRateInjection<CloudType>::PatchFlowRateInjection
 (
-    const PatchInjection<CloudType>& im
+    const PatchFlowRateInjection<CloudType>& im
 )
 :
     InjectionModel<CloudType>(im),
     patchName_(im.patchName_),
     patchId_(im.patchId_),
+    patchArea_(im.patchArea_),
+    patchNormal_(im.patchNormal_),
+    phiName_(im.phiName_),
+    rhoName_(im.rhoName_),
     duration_(im.duration_),
+    concentration_(im.concentration_),
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
-    flowRateProfile_(im.flowRateProfile_),
     sizeDistribution_(im.sizeDistribution_().clone().ptr()),
     cellOwners_(im.cellOwners_),
-    fraction_(im.fraction_)
+    fraction_(im.fraction_),
+    pMeanVolume_(im.pMeanVolume_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PatchInjection<CloudType>::~PatchInjection()
+Foam::PatchFlowRateInjection<CloudType>::~PatchFlowRateInjection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::PatchInjection<CloudType>::timeEnd() const
+Foam::scalar Foam::PatchFlowRateInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
 }
 
 
 template<class CloudType>
-Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
+Foam::label Foam::PatchFlowRateInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -171,25 +185,57 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
 
 
 template<class CloudType>
-Foam::scalar Foam::PatchInjection<CloudType>::volumeToInject
+Foam::scalar Foam::PatchFlowRateInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
 )
 {
+    scalar volume = 0.0;
+
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        return fraction_*flowRateProfile_.integrate(time0, time1);
+        const polyMesh& mesh = this->owner().mesh();
+
+        const surfaceScalarField& phi =
+            mesh.lookupObject<surfaceScalarField>(phiName_);
+
+        const scalarField& phip = phi.boundaryField()[patchId_];
+
+        scalar carrierVolume = 0.0;
+        if (phi.dimensions() == dimVelocity*dimArea)
+        {
+            const scalar flowRateIn = max(0.0, -sum(phip));
+            U0_ = -patchNormal_*flowRateIn/patchArea_;
+            carrierVolume = (time1 - time0)*flowRateIn;
+        }
+        else
+        {
+            const volScalarField& rho =
+                mesh.lookupObject<volScalarField>(rhoName_);
+            const scalarField& rhop = rho.boundaryField()[patchId_];
+
+            const scalar flowRateIn = max(0.0, -sum(phip/rhop));
+            U0_ = -patchNormal_*flowRateIn/patchArea_;
+            carrierVolume = (time1 - time0)*flowRateIn;
+        }
+
+        const scalar newParticles = concentration_*carrierVolume;
+
+        volume = pMeanVolume_*newParticles;
     }
-    else
-    {
-        return 0.0;
-    }
+
+    reduce(volume, sumOp<scalar>());
+
+    this->volumeTotal_ = volume;
+    this->massTotal_ = volume*this->owner().constProps().rho0();
+
+    return fraction_*volume;
 }
 
 
 template<class CloudType>
-void Foam::PatchInjection<CloudType>::setPositionAndCell
+void Foam::PatchFlowRateInjection<CloudType>::setPositionAndCell
 (
     const label,
     const label,
@@ -237,7 +283,7 @@ void Foam::PatchInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-void Foam::PatchInjection<CloudType>::setProperties
+void Foam::PatchFlowRateInjection<CloudType>::setProperties
 (
     const label,
     const label,
@@ -254,14 +300,14 @@ void Foam::PatchInjection<CloudType>::setProperties
 
 
 template<class CloudType>
-bool Foam::PatchInjection<CloudType>::fullyDescribed() const
+bool Foam::PatchFlowRateInjection<CloudType>::fullyDescribed() const
 {
     return false;
 }
 
 
 template<class CloudType>
-bool Foam::PatchInjection<CloudType>::validInjection(const label)
+bool Foam::PatchFlowRateInjection<CloudType>::validInjection(const label)
 {
     return true;
 }
