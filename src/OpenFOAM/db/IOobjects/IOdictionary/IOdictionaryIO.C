@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,7 +102,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.above(),
                 0,
                 Pstream::msgType(),
-                IOstream::ASCII
+                IOstream::BINARY
             );
             IOdictionary::readData(fromAbove);
         }
@@ -121,7 +121,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),
-                IOstream::ASCII
+                IOstream::BINARY
             );
             IOdictionary::writeData(toBelow);
         }

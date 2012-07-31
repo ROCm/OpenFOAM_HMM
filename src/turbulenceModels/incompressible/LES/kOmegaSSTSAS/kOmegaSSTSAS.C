@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -388,7 +388,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
           - fvm::Sp(fvc::div(phi()), omega_)
           - fvm::laplacian(DomegaEff(F1), omega_)
         ==
-            gamma(F1)*0.5*S2
+            gamma(F1)*S2
           - fvm::Sp(beta(F1)*omega_, omega_)
           - fvm::SuSp       // cross diffusion term
             (
@@ -425,17 +425,34 @@ tmp<volSymmTensorField> kOmegaSSTSAS::B() const
 }
 
 
-tmp<volSymmTensorField> kOmegaSSTSAS::devBeff() const
+tmp<volSymmTensorField> kOmegaSSTSAS::devReff() const
 {
     return -nuEff()*dev(twoSymm(fvc::grad(U())));
 }
 
 
-tmp<fvVectorMatrix> kOmegaSSTSAS::divDevBeff(volVectorField& U) const
+tmp<fvVectorMatrix> kOmegaSSTSAS::divDevReff(volVectorField& U) const
 {
     return
     (
-      - fvm::laplacian(nuEff(), U) - fvc::div(nuEff()*dev(T(fvc::grad(U))))
+      - fvm::laplacian(nuEff(), U)
+      - fvc::div(nuEff()*dev(T(fvc::grad(U))))
+    );
+}
+
+
+tmp<fvVectorMatrix> kOmegaSSTSAS::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
     );
 }
 

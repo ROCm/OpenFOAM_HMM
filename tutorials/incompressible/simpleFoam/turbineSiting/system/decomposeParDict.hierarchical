@@ -10,33 +10,20 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      changeDictionaryDict;
+    object      decomposeParDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionaryReplacement
+numberOfSubdomains 4;
+
+method          hierarchical;
+
+hierarchicalCoeffs
 {
-    boundary
-    {
-        AMI1
-        {
-            type            cyclicAMI;
-            neighbourPatch  AMI2;
-            transform       noOrdering;
-            surface         
-            {
-            }
-        }
-        AMI2
-        {
-            type            cyclicAMI;
-            neighbourPatch  AMI1;
-            transform       noOrdering;
-            surface         
-            {
-            }
-        }
-    }
+    n           (2 2 1);
+    delta       0.001;
+    order       xyz;
 }
 
 // ************************************************************************* //
