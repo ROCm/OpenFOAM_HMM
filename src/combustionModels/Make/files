@@ -10,6 +10,7 @@ rhoCombustionModel/rhoCombustionModel/rhoCombustionModelNew.C
 rhoCombustionModel/rhoThermoCombustion/rhoThermoCombustion.C
 rhoCombustionModel/rhoChemistryCombustion/rhoChemistryCombustion.C
 
+diffusion/diffusions.C
 infinitelyFastChemistry/infinitelyFastChemistrys.C
 
 PaSR/PaSRs.C
