@@ -95,14 +95,16 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
             }
 
             // Note: use ASCII for now - binary IO of dictionaries is
-            // not currently supported
+            // not currently supported or rather the primitiveEntries of
+            // the dictionary think they are in binary form whereas they are
+            // not. Could reset all the ITstreams to ascii?
             IPstream fromAbove
             (
                 Pstream::scheduled,
                 myComm.above(),
                 0,
                 Pstream::msgType(),
-                IOstream::BINARY
+                IOstream::ASCII
             );
             IOdictionary::readData(fromAbove);
         }
@@ -121,7 +123,7 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
                 myComm.below()[belowI],
                 0,
                 Pstream::msgType(),
-                IOstream::BINARY
+                IOstream::ASCII
             );
             IOdictionary::writeData(toBelow);
         }
