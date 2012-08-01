@@ -462,7 +462,16 @@ Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
 template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::averageParcelMass()
 {
-    label nTotal = parcelsToInject(0.0, timeEnd() - timeStart());
+    label nTotal = 0.0;
+    if (this->owner().solution().transient())
+    {
+        nTotal = parcelsToInject(0.0, timeEnd() - timeStart());
+    }
+    else
+    {
+        nTotal = parcelsToInject(0.0, 1.0);
+    }
+
     return massTotal_/nTotal;
 }
 
