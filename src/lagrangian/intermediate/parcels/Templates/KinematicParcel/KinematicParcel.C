@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -363,7 +363,7 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     // Invoke post-processing model
-    td.cloud().functions().postPatch(p, patchI, pp.whichFace(p.face()));
+    td.cloud().functions().postPatch(p, pp, trackFraction, tetIs);
 
     // Invoke surface film model
     if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
