@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,22 +166,37 @@ public:
                 const wordList& componentNames(const label phaseI) const;
 
                 //- Return global id of component cmptName in carrier thermo
-                label globalCarrierId(const word& cmptName) const;
+                label globalCarrierId
+                (
+                    const word& cmptName,
+                    const bool allowNotFound = false
+                ) const;
 
                 //- Return global id of component cmptName in phase phaseI
-                label globalId(const label phaseI, const word& cmptName) const;
+                label globalId
+                (
+                    const label phaseI,
+                    const word& cmptName,
+                    const bool allowNotFound = false
+                ) const;
 
                 //- Return global ids of for phase phaseI
                 const labelList& globalIds(const label phaseI) const;
 
                 //- Return local id of component cmptName in phase phaseI
-                label localId(const label phaseI, const word& cmptName) const;
+                label localId
+                (
+                    const label phaseI,
+                    const word& cmptName,
+                    const bool allowNotFound = false
+                ) const;
 
                 //- Return global carrier id of component given local id
                 label localToGlobalCarrierId
                 (
                     const label phaseI,
-                    const label id
+                    const label id,
+                    const bool allowNotFound = false
                 ) const;
 
                 //- Return the list of phase phaseI mass fractions
