@@ -554,6 +554,7 @@ public:
 
 #ifdef NoRepository
 #   include "AMIInterpolation.C"
+#   include "AMIInterpolationParallelOps.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
