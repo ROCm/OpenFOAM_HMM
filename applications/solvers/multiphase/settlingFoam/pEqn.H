@@ -5,9 +5,6 @@
 
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
-    phi.boundaryField() =
-        fvc::interpolate(rho.boundaryField()*U.boundaryField())
-      & mesh.Sf().boundaryField();
 
     surfaceScalarField phiHbyA
     (
@@ -18,6 +15,7 @@
          + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
+    phi = phiHbyA;
 
     surfaceScalarField phig
     (
