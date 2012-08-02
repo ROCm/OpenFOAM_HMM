@@ -268,12 +268,15 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     (
         td,
         dt,
+        this->age_,
         Ts,
         d0,
         T0,
         mass0,
         this->mass0_,
         YMix[GAS]*YGas_,
+        YMix[LIQ]*YLiquid_,
+        YMix[SLD]*YSolid_,
         canCombust_,
         dMassDV,
         Sh,
@@ -486,12 +489,15 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
 (
     TrackData& td,
     const scalar dt,
+    const scalar age,
     const scalar Ts,
     const scalar d,
     const scalar T,
     const scalar mass,
     const scalar mass0,
     const scalarField& YGasEff,
+    const scalarField& YLiquidEff,
+    const scalarField& YSolidEff,
     bool& canCombust,
     scalarField& dMassDV,
     scalar& Sh,
@@ -520,10 +526,13 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     td.cloud().devolatilisation().calculate
     (
         dt,
+        age,
         mass0,
         mass,
         T,
         YGasEff,
+        YLiquidEff,
+        YSolidEff,
         canCombust,
         dMassDV
     );
