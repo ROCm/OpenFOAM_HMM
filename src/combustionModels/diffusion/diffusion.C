@@ -65,7 +65,8 @@ void diffusion<CombThermoType, ThermoType>::correct()
 
         const label fuelI = this->singleMixturePtr_->fuelIndex();
 
-        const volScalarField& YFuel = this->thermoPtr_->composition().Y()[fuelI];
+        const volScalarField& YFuel =
+            this->thermoPtr_->composition().Y()[fuelI];
 
         if (this->thermoPtr_->composition().contains(oxidantName_))
         {
