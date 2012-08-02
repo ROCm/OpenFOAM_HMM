@@ -5,6 +5,11 @@
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn.H();
 
+    mrfZones.absoluteFlux(phi);
+    phi.boundaryField() =
+        fvc::interpolate(U.boundaryField()) & mesh.Sf().boundaryField();
+    mrfZones.relativeFlux(phi);
+
     surfaceScalarField phiHbyA
     (
         "phiHbyA",

@@ -14,6 +14,12 @@
     volVectorField HbyA2("HbyA2", U2);
     HbyA2 = rAU2*U2Eqn.H();
 
+    U.boundaryField() =
+        alpha1.boundaryField()*U1.boundaryField()
+      + alpha2.boundaryField()*U2.boundaryField();
+    phi.boundaryField() =
+        fvc::interpolate(U.boundaryField()) & mesh.Sf().boundaryField();
+
     surfaceScalarField phiDrag1
     (
         fvc::interpolate(alpha2/rho1*dragCoef*rAU1)*phi2

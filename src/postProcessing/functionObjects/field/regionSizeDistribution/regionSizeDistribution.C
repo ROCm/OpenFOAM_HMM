@@ -547,7 +547,7 @@ void Foam::regionSizeDistribution::write()
 
 
         // Sum all regions
-        const scalarField alphaVol = alpha.internalField()*mesh.V();
+        const scalarField alphaVol(alpha.internalField()*mesh.V());
         Map<scalar> allRegionVolume(regionSum(regions, mesh.V()));
         Map<scalar> allRegionAlphaVolume(regionSum(regions, alphaVol));
         Map<label> allRegionNumCells
