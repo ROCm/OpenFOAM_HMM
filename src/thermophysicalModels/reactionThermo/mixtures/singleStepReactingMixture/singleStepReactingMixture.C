@@ -108,7 +108,14 @@ void Foam::singleStepReactingMixture<ThermoType>::calculateMaxProducts()
         Yprod0_[specieI] =  this->speciesData()[specieI].W()/Wm*Xi[i];
     }
 
-    Info << "Maximum products mass concentrations :" << Yprod0_<< endl;
+    Info << "Maximum products mass concentrations:" << nl;
+    forAll(Yprod0_, i)
+    {
+        if (Yprod0_[i] > 0)
+        {
+            Info<< "    " << this->species()[i] << ": " << Yprod0_[i] << nl;
+        }
+    }
 
     // Normalize the stoichiometric coeff to mass
     forAll(specieStoichCoeffs_, i)
