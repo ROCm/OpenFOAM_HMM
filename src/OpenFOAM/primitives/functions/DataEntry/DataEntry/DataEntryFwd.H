@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,29 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeCoalParcelSurfaceReactionModels_H
-#define makeCoalParcelSurfaceReactionModels_H
+#ifndef DataEntryFws_H
+#define DataEntryFws_H
+
+#include "DataEntry.H"
+#include "vector.H"
+#include "symmTensor.H"
+#include "sphericalTensor.H"
+#include "tensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NoSurfaceReaction.H"
-#include "COxidationDiffusionLimitedRate.H"
-#include "COxidationKineticDiffusionLimitedRate.H"
-#include "COxidationHurtMitchell.H"
-#include "COxidationMurphyShaddix.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeCoalParcelSurfaceReactionModels(CloudType)                        \
-                                                                              \
-    makeSurfaceReactionModelType(COxidationDiffusionLimitedRate, CloudType);  \
-    makeSurfaceReactionModelType                                              \
-    (                                                                         \
-        COxidationKineticDiffusionLimitedRate,                                \
-        CloudType                                                             \
-    );                                                                        \
-    makeSurfaceReactionModelType(COxidationHurtMitchell, CloudType);          \
-    makeSurfaceReactionModelType(COxidationMurphyShaddix, CloudType);
+namespace Foam
+{
+    typedef DataEntry<label> labelDataEntry;
+    typedef DataEntry<scalar> scalarDataEntry;
+    typedef DataEntry<vector> vectorDataEntry;
+    typedef DataEntry<symmTensor> symmTensorDataEntry;
+    typedef DataEntry<sphericalTensor> sphericalTensorDataEntry;
+    typedef DataEntry<tensor> tensorDataEntry;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,20 +21,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::combustionModels::singleStepCombustion
+    Foam::combustionModels::diffusion
 
 Description
-    Base class for combustion models using singleStepReactingMixture.
+    Simple diffusion-based combustion model based on the principle mixed is
+    burnt. Additional parameter C is used to distribute the heat release rate
+    in time.
 
 SourceFiles
-    singleStepCombustion.C
+    diffusion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef singleStepCombustion_H
-#define singleStepCombustion_H
+#ifndef diffusion_H
+#define diffusion_H
 
-#include "singleStepReactingMixture.H"
+#include "singleStepCombustion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,66 +46,59 @@ namespace combustionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class singleStepCombustion Declaration
+                         Class diffusion Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CombThermoType, class ThermoType>
-class singleStepCombustion
+class diffusion
 :
-    public CombThermoType
+    public singleStepCombustion<CombThermoType, ThermoType>
 {
+    // Private data
+
+        //- Model constant
+        scalar C_;
+
+        //- Name of oxidant - default is "O2"
+        word oxidantName_;
+
+
     // Private Member Functions
 
         //- Disallow copy construct
-        singleStepCombustion(const singleStepCombustion&);
+        diffusion(const diffusion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const singleStepCombustion&);
-
-
-protected:
-
-    // Protected data
-
-        //- Pointer to singleStepReactingMixture mixture
-        singleStepReactingMixture<ThermoType>* singleMixturePtr_;
-
-        //- Fuel consumption rate
-        volScalarField wFuel_;
-
-        //- Semi-implicit (true) or explicit (false) treatment
-        bool semiImplicit_;
+        void operator=(const diffusion&);
 
 
 public:
 
+    //- Runtime type information
+    TypeName("diffusion");
+
+
     // Constructors
 
         //- Construct from components
-        singleStepCombustion(const word& modelType, const fvMesh& mesh);
+        diffusion(const word& modelType, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~singleStepCombustion();
+    virtual ~diffusion();
 
 
     // Member Functions
 
         // Evolution
 
-            //- Fuel consumption rate matrix
-            virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
-
-            //- Heat release rate calculated from fuel consumption rate matrix
-            virtual tmp<volScalarField> dQ() const;
-
-            //- Sensible enthalpy source term
-            virtual tmp<volScalarField> Sh() const;
+            //- Correct combustion rate
+            virtual void correct();
 
 
         // I-O
 
-            //- Update properties from given dictionary
+            //- Update properties
             virtual bool read();
 };
 
@@ -113,10 +108,11 @@ public:
 } // End namespace combustionModels
 } // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "singleStepCombustion.C"
+#   include "diffusion.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

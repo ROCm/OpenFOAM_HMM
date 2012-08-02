@@ -48,6 +48,7 @@ SourceFiles
 #include "DataEntry.H"
 #include "Tuple2.H"
 #include "dimensionSet.H"
+#include "DataEntryFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +71,7 @@ Ostream& operator<<
 
 class polynomial
 :
-    public DataEntry<scalar>
+    public scalarDataEntry
 {
     // Private data
 
@@ -107,9 +108,9 @@ public:
         polynomial(const polynomial& poly);
 
         //- Construct and return a clone
-        virtual tmp<DataEntry<scalar> > clone() const
+        virtual tmp<scalarDataEntry> clone() const
         {
-            return tmp<DataEntry<scalar> >(new polynomial(*this));
+            return tmp<scalarDataEntry>(new polynomial(*this));
         }
 
 

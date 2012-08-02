@@ -51,7 +51,69 @@ void Foam::ThermoCloud<CloudType>::setModels()
         ).ptr()
     );
 
-    this->subModelProperties().lookup("radiation") >> radiation_;
+    if (this->solution().coupled())
+    {
+        this->subModelProperties().lookup("radiation") >> radiation_;
+    }
+
+    if (radiation_)
+    {
+        radAreaP_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radAreaP",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh(),
+                dimensionedScalar("zero", dimArea, 0.0)
+            )
+        );
+
+        radT4_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radT4",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh(),
+                dimensionedScalar("zero", pow4(dimTemperature), 0.0)
+            )
+        );
+
+        radAreaPT4_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radAreaPT4",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::AUTO_WRITE
+                ),
+                this->mesh(),
+                dimensionedScalar
+                (
+                    "zero",
+                    sqr(dimLength)*pow4(dimTemperature),
+                    0.0
+                )
+            )
+        );
+    }
 }
 
 
@@ -98,13 +160,16 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     heatTransferModel_(NULL),
     TIntegrator_(NULL),
     radiation_(false),
+    radAreaP_(NULL),
+    radT4_(NULL),
+    radAreaPT4_(NULL),
     hsTrans_
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                this->name() + "hsTrans",
+                this->name() + "::hsTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::READ_IF_PRESENT,
@@ -120,7 +185,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
         (
             IOobject
             (
-                this->name() + "hsCoeff",
+                this->name() + "::hsCoeff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::READ_IF_PRESENT,
@@ -165,13 +230,16 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     heatTransferModel_(c.heatTransferModel_->clone()),
     TIntegrator_(c.TIntegrator_->clone()),
     radiation_(c.radiation_),
+    radAreaP_(NULL),
+    radT4_(NULL),
+    radAreaPT4_(NULL),
     hsTrans_
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                this->name() + "hsTrans",
+                this->name() + "::hsTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -187,7 +255,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
         (
             IOobject
             (
-                this->name() + "hsCoeff",
+                this->name() + "::hsCoeff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -197,7 +265,61 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
             c.hsCoeff()
         )
     )
-{}
+{
+    if (radiation_)
+    {
+        radAreaP_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radAreaP",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                c.radAreaP()
+            )
+        );
+
+        radT4_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radT4",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                c.radT4()
+            )
+        );
+
+        radAreaPT4_.reset
+        (
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    this->name() + "::radAreaPT4",
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                c.radAreaPT4()
+            )
+        );
+    }
+}
 
 
 template<class CloudType>
@@ -218,6 +340,9 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
     heatTransferModel_(NULL),
     TIntegrator_(NULL),
     radiation_(false),
+    radAreaP_(NULL),
+    radT4_(NULL),
+    radAreaPT4_(NULL),
     hsTrans_(NULL),
     hsCoeff_(NULL)
 {}
@@ -285,6 +410,13 @@ void Foam::ThermoCloud<CloudType>::resetSourceTerms()
     CloudType::resetSourceTerms();
     hsTrans_->field() = 0.0;
     hsCoeff_->field() = 0.0;
+
+    if (radiation_)
+    {
+        radAreaP_->field() = 0.0;
+        radT4_->field() = 0.0;
+        radAreaPT4_->field() = 0.0;
+    }
 }
 
 
@@ -298,6 +430,13 @@ void Foam::ThermoCloud<CloudType>::relaxSources
 
     this->relax(hsTrans_(), cloudOldTime.hsTrans(), "h");
     this->relax(hsCoeff_(), cloudOldTime.hsCoeff(), "h");
+
+    if (radiation_)
+    {
+        this->relax(radAreaP_(), cloudOldTime.radAreaP(), "radiation");
+        this->relax(radT4_(), cloudOldTime.radT4(), "radiation");
+        this->relax(radAreaPT4_(), cloudOldTime.radAreaPT4(), "radiation");
+    }
 }
 
 
@@ -308,6 +447,13 @@ void Foam::ThermoCloud<CloudType>::scaleSources()
 
     this->scale(hsTrans_(), "h");
     this->scale(hsCoeff_(), "h");
+
+    if (radiation_)
+    {
+        this->scale(radAreaP_(), "radiation");
+        this->scale(radT4_(), "radiation");
+        this->scale(radAreaPT4_(), "radiation");
+    }
 }
 
 

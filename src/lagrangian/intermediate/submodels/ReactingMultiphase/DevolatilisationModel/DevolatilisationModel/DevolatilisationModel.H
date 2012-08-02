@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class DevolatilisationModel Declaration
+                    Class DevolatilisationModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -126,10 +126,13 @@ public:
         virtual void calculate
         (
             const scalar dt,
+            const scalar age,
             const scalar mass0,
             const scalar mass,
             const scalar T,
             const scalarField& YGasEff,
+            const scalarField& YLiquidEff,
+            const scalarField& YSolidEff,
             bool& canCombust,
             scalarField& dMassDV
         ) const;

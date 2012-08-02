@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,64 +23,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoDevolatilisation.H"
+#include "coalCloudList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
+Foam::coalCloudList::coalCloudList
 (
-    const dictionary&,
-    CloudType& owner
+    const volScalarField& rho,
+    const volVectorField& U,
+    const dimensionedVector& g,
+    const SLGThermo& slgThermo
 )
 :
-    DevolatilisationModel<CloudType>(owner)
-{}
+    PtrList<coalCloud>(),
+    mesh_(rho.mesh())
+{
+    IOdictionary props
+    (
+        IOobject
+        (
+            "coalCloudList",
+            mesh_.time().constant(),
+            mesh_,
+            IOobject::MUST_READ
+        )
+    );
 
+    const wordHashSet cloudNames(wordList(props.lookup("clouds")));
 
-template<class CloudType>
-Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
-(
-    const NoDevolatilisation<CloudType>& dm
-)
-:
-    DevolatilisationModel<CloudType>(dm.owner_)
-{}
+    setSize(cloudNames.size());
 
+    label i = 0;
+    forAllConstIter(wordHashSet, cloudNames, iter)
+    {
+        const word& name = iter.key();
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+        Info<< "creating cloud: " << name << endl;
 
-template<class CloudType>
-Foam::NoDevolatilisation<CloudType>::~NoDevolatilisation()
-{}
+        set
+        (
+            i++,
+            new coalCloud
+            (
+                name,
+                rho,
+                U,
+                g,
+                slgThermo
+            )
+        );
+
+        Info<< endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CloudType>
-bool Foam::NoDevolatilisation<CloudType>::active() const
+void Foam::coalCloudList::evolve()
 {
-    return false;
-}
-
-
-template<class CloudType>
-void Foam::NoDevolatilisation<CloudType>::calculate
-(
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalarField&,
-    const scalarField&,
-    const scalarField&,
-    bool& canCombust,
-    scalarField&
-) const
-{
-    // Model does not stop combustion taking place
-    canCombust = true;
+    forAll(*this, i)
+    {
+        operator[](i).evolve();
+    }
 }
 
 

@@ -196,12 +196,15 @@ protected:
         (
             TrackData& td,
             const scalar dt,           // timestep
-            const scalar Ts,           // Surface temperature
+            const scalar age,          // age
+            const scalar Ts,           // surface temperature
             const scalar d,            // diameter
             const scalar T,            // temperature
             const scalar mass,         // mass
             const scalar mass0,        // mass (initial on injection)
-            const scalarField& YGasEff,// Gas component mass fractions
+            const scalarField& YGasEff,// gas component mass fractions
+            const scalarField& YLiquidEff,// liquid component mass fractions
+            const scalarField& YSolidEff,// solid component mass fractions
             bool& canCombust,          // 'can combust' flag
             scalarField& dMassDV,      // mass transfer - local to particle
             scalar& Sh,                // explicit particle enthalpy source
