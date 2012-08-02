@@ -648,7 +648,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ParcelType(p),
     YGas_(p.YGas_),
     YLiquid_(p.YLiquid_),
-    YSolid_(p.YSolid_)
+    YSolid_(p.YSolid_),
+    canCombust_(p.canCombust_)
 {}
 
 
@@ -662,7 +663,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ParcelType(p, mesh),
     YGas_(p.YGas_),
     YLiquid_(p.YLiquid_),
-    YSolid_(p.YSolid_)
+    YSolid_(p.YSolid_),
+    canCombust_(p.canCombust_)
 {}
 
 
