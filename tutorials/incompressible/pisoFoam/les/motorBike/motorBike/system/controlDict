@@ -17,7 +17,7 @@ FoamFile
 
 libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
 
-application     pisoFoam;
+application     simpleFoam;
 
 startFrom       latestTime;
 

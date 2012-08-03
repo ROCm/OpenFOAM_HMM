@@ -25,7 +25,6 @@ License
 
 #include "AMIInterpolation.H"
 #include "meshTools.H"
-#include "mergePoints.H"
 #include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -205,455 +204,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::resetTree
 
 
 template<class SourcePatch, class TargetPatch>
-Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
-) const
-{
-    label procI = 0;
-
-    if (Pstream::parRun())
-    {
-        List<label> facesPresentOnProc(Pstream::nProcs(), 0);
-        if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
-        {
-            facesPresentOnProc[Pstream::myProcNo()] = 1;
-        }
-        else
-        {
-            facesPresentOnProc[Pstream::myProcNo()] = 0;
-        }
-
-        Pstream::gatherList(facesPresentOnProc);
-        Pstream::scatterList(facesPresentOnProc);
-
-        label nHaveFaces = sum(facesPresentOnProc);
-
-        if (nHaveFaces > 1)
-        {
-            procI = -1;
-            if (debug)
-            {
-                Info<< "AMIInterpolation::calcDistribution: "
-                    << "AMI split across multiple processors" << endl;
-            }
-        }
-        else if (nHaveFaces == 1)
-        {
-            procI = findIndex(facesPresentOnProc, 1);
-            if (debug)
-            {
-                Info<< "AMIInterpolation::calcDistribution: "
-                    << "AMI local to processor" << procI << endl;
-            }
-        }
-    }
-
-
-    // Either not parallel or no faces on any processor
-    return procI;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::label
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcOverlappingProcs
-(
-    const List<treeBoundBoxList>& procBb,
-    const treeBoundBox& bb,
-    boolList& overlaps
-) const
-{
-    overlaps.setSize(procBb.size());
-    overlaps = false;
-
-    label nOverlaps = 0;
-
-    forAll(procBb, procI)
-    {
-        const List<treeBoundBox>& bbs = procBb[procI];
-
-        forAll(bbs, bbI)
-        {
-            if (bbs[bbI].overlaps(bb))
-            {
-                overlaps[procI] = true;
-                nOverlaps++;
-                break;
-            }
-        }
-    }
-    return nOverlaps;
-}
-
-
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::distributePatches
-(
-    const mapDistribute& map,
-    const TargetPatch& pp,
-    const globalIndex& gi,
-    List<faceList>& faces,
-    List<pointField>& points,
-    List<labelList>& faceIDs
-) const
-{
-    PstreamBuffers pBufs(Pstream::nonBlocking);
-
-    for (label domain = 0; domain < Pstream::nProcs(); domain++)
-    {
-        const labelList& sendElems = map.subMap()[domain];
-
-        if (domain != Pstream::myProcNo() && sendElems.size())
-        {
-            labelList globalElems(sendElems.size());
-            forAll(sendElems, i)
-            {
-                globalElems[i] = gi.toGlobal(sendElems[i]);
-            }
-
-            faceList subFaces(UIndirectList<face>(pp, sendElems));
-            primitivePatch subPatch
-            (
-                SubList<face>(subFaces, subFaces.size()),
-                pp.points()
-            );
-
-            if (debug & 2)
-            {
-                Pout<< "distributePatches: to processor " << domain
-                    << " sending faces " << subPatch.faceCentres() << endl;
-            }
-
-            UOPstream toDomain(domain, pBufs);
-            toDomain
-                << subPatch.localFaces() << subPatch.localPoints()
-                << globalElems;
-        }
-    }
-
-    // Start receiving
-    pBufs.finishedSends();
-
-    faces.setSize(Pstream::nProcs());
-    points.setSize(Pstream::nProcs());
-    faceIDs.setSize(Pstream::nProcs());
-
-    {
-        // Set up 'send' to myself
-        const labelList& sendElems = map.subMap()[Pstream::myProcNo()];
-        faceList subFaces(UIndirectList<face>(pp, sendElems));
-        primitivePatch subPatch
-        (
-            SubList<face>(subFaces, subFaces.size()),
-            pp.points()
-        );
-
-        // Receive
-        if (debug & 2)
-        {
-            Pout<< "distributePatches: to processor " << Pstream::myProcNo()
-                << " sending faces " << subPatch.faceCentres() << endl;
-        }
-
-        faces[Pstream::myProcNo()] = subPatch.localFaces();
-        points[Pstream::myProcNo()] = subPatch.localPoints();
-
-        faceIDs[Pstream::myProcNo()].setSize(sendElems.size());
-        forAll(sendElems, i)
-        {
-            faceIDs[Pstream::myProcNo()][i] = gi.toGlobal(sendElems[i]);
-        }
-    }
-
-    // Consume
-    for (label domain = 0; domain < Pstream::nProcs(); domain++)
-    {
-        const labelList& recvElems = map.constructMap()[domain];
-
-        if (domain != Pstream::myProcNo() && recvElems.size())
-        {
-            UIPstream str(domain, pBufs);
-
-            str >> faces[domain]
-                >> points[domain]
-                >> faceIDs[domain];
-        }
-    }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
-distributeAndMergePatches
-(
-    const mapDistribute& map,
-    const TargetPatch& tgtPatch,
-    const globalIndex& gi,
-    faceList& tgtFaces,
-    pointField& tgtPoints,
-    labelList& tgtFaceIDs
-) const
-{
-    // Exchange per-processor data
-    List<faceList> allFaces;
-    List<pointField> allPoints;
-    List<labelList> allTgtFaceIDs;
-    distributePatches(map, tgtPatch, gi, allFaces, allPoints, allTgtFaceIDs);
-
-    // Renumber and flatten
-    label nFaces = 0;
-    label nPoints = 0;
-    forAll(allFaces, procI)
-    {
-        nFaces += allFaces[procI].size();
-        nPoints += allPoints[procI].size();
-    }
-
-    tgtFaces.setSize(nFaces);
-    tgtPoints.setSize(nPoints);
-    tgtFaceIDs.setSize(nFaces);
-
-    nFaces = 0;
-    nPoints = 0;
-
-    // My own data first
-    {
-        const labelList& faceIDs = allTgtFaceIDs[Pstream::myProcNo()];
-        SubList<label>(tgtFaceIDs, faceIDs.size()).assign(faceIDs);
-
-        const faceList& fcs = allFaces[Pstream::myProcNo()];
-        forAll(fcs, i)
-        {
-            const face& f = fcs[i];
-            face& newF = tgtFaces[nFaces++];
-            newF.setSize(f.size());
-            forAll(f, fp)
-            {
-                newF[fp] = f[fp] + nPoints;
-            }
-        }
-
-        const pointField& pts = allPoints[Pstream::myProcNo()];
-        forAll(pts, i)
-        {
-            tgtPoints[nPoints++] = pts[i];
-        }
-    }
-
-
-    // Other proc data follows
-    forAll(allFaces, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            const labelList& faceIDs = allTgtFaceIDs[procI];
-            SubList<label>(tgtFaceIDs, faceIDs.size(), nFaces).assign(faceIDs);
-
-            const faceList& fcs = allFaces[procI];
-            forAll(fcs, i)
-            {
-                const face& f = fcs[i];
-                face& newF = tgtFaces[nFaces++];
-                newF.setSize(f.size());
-                forAll(f, fp)
-                {
-                    newF[fp] = f[fp] + nPoints;
-                }
-            }
-
-            const pointField& pts = allPoints[procI];
-            forAll(pts, i)
-            {
-                tgtPoints[nPoints++] = pts[i];
-            }
-        }
-    }
-
-    // Merge
-    labelList oldToNew;
-    pointField newTgtPoints;
-    bool hasMerged = mergePoints
-    (
-        tgtPoints,
-        SMALL,
-        false,
-        oldToNew,
-        newTgtPoints
-    );
-
-    if (hasMerged)
-    {
-        if (debug)
-        {
-            Pout<< "Merged from " << tgtPoints.size()
-                << " down to " << newTgtPoints.size() << " points" << endl;
-        }
-
-        tgtPoints.transfer(newTgtPoints);
-        forAll(tgtFaces, i)
-        {
-            inplaceRenumber(oldToNew, tgtFaces[i]);
-        }
-    }
-}
-
-
-template<class SourcePatch, class TargetPatch>
-Foam::autoPtr<Foam::mapDistribute>
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
-(
-    const SourcePatch& srcPatch,
-    const TargetPatch& tgtPatch
-) const
-{
-    // Get decomposition of patch
-    List<treeBoundBoxList> procBb(Pstream::nProcs());
-
-    if (srcPatch.size())
-    {
-        procBb[Pstream::myProcNo()] = treeBoundBoxList
-        (
-            1,  // For now single bounding box per proc
-            treeBoundBox
-            (
-                srcPatch.points(),
-                srcPatch.meshPoints()
-            )
-        );
-    }
-    else
-    {
-        procBb[Pstream::myProcNo()] = treeBoundBoxList();
-    }
-
-    // slightly increase size of bounding boxes to allow for cases where
-    // bounding boxes are perfectly alligned
-    forAll(procBb[Pstream::myProcNo()], bbI)
-    {
-        treeBoundBox& bb = procBb[Pstream::myProcNo()][bbI];
-        bb.inflate(0.01);
-    }
-
-    Pstream::gatherList(procBb);
-    Pstream::scatterList(procBb);
-
-
-    if (debug)
-    {
-        Info<< "Determining extent of srcPatch per processor:" << nl
-            << "\tproc\tbb" << endl;
-        forAll(procBb, procI)
-        {
-            Info<< '\t' << procI << '\t' << procBb[procI] << endl;
-        }
-    }
-
-
-    // Determine which faces of tgtPatch overlaps srcPatch per proc
-    const faceList& faces = tgtPatch.localFaces();
-    const pointField& points = tgtPatch.localPoints();
-
-    labelListList sendMap;
-
-    {
-        // Per processor indices into all segments to send
-        List<DynamicList<label> > dynSendMap(Pstream::nProcs());
-
-        // Work array - whether processor bb overlaps the face bounds
-        boolList procBbOverlaps(Pstream::nProcs());
-
-        forAll(faces, faceI)
-        {
-            if (faces[faceI].size())
-            {
-                treeBoundBox faceBb(points, faces[faceI]);
-
-                // Find the processor this face overlaps
-                calcOverlappingProcs(procBb, faceBb, procBbOverlaps);
-
-                forAll(procBbOverlaps, procI)
-                {
-                    if (procBbOverlaps[procI])
-                    {
-                        dynSendMap[procI].append(faceI);
-                    }
-                }
-            }
-        }
-
-        // Convert dynamicList to labelList
-        sendMap.setSize(Pstream::nProcs());
-        forAll(sendMap, procI)
-        {
-            sendMap[procI].transfer(dynSendMap[procI]);
-        }
-    }
-
-    // Debug printing
-    if (debug)
-    {
-        Pout<< "Of my " << faces.size() << " I need to send to:" << nl
-            << "\tproc\tfaces" << endl;
-        forAll(sendMap, procI)
-        {
-            Pout<< '\t' << procI << '\t' << sendMap[procI].size() << endl;
-        }
-    }
-
-
-    // Send over how many faces I need to receive
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
-    forAll(sendMap, procI)
-    {
-        sendSizes[Pstream::myProcNo()][procI] = sendMap[procI].size();
-    }
-    Pstream::gatherList(sendSizes);
-    Pstream::scatterList(sendSizes);
-
-
-    // Determine order of receiving
-    labelListList constructMap(Pstream::nProcs());
-
-    // My local segment first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label segmentI = constructMap[Pstream::myProcNo()].size();
-    forAll(constructMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            // What I need to receive is what other processor is sending to me
-            label nRecv = sendSizes[procI][Pstream::myProcNo()];
-            constructMap[procI].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[procI][i] = segmentI++;
-            }
-        }
-    }
-
-    autoPtr<mapDistribute> mapPtr
-    (
-        new mapDistribute
-        (
-            segmentI,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
-    );
-
-    return mapPtr;
-}
-
-
-template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
 (
     const searchableSurface& surf,
@@ -713,7 +263,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
 
     const pointField& srcPts = srcPatch.points();
     const face& srcFace = srcPatch[srcFaceI];
-    const point& srcPt = srcFace.centre(srcPts);
+    const point srcPt = srcFace.centre(srcPts);
     const scalar srcFaceArea = srcMagSf_[srcFaceI];
 
 //    pointIndexHit sample = treePtr_->findNearest(srcPt, sqr(0.1*bb.mag()));
@@ -783,6 +333,62 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::appendNbrFaces
 
 
 template<class SourcePatch, class TargetPatch>
+bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::processSourceFace
+(
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
+    const label srcFaceI,
+    const label tgtStartFaceI,
+
+    // list of tgt face neighbour faces
+    DynamicList<label>& nbrFaces,
+    // list of faces currently visited for srcFaceI to avoid multiple hits
+    DynamicList<label>& visitedFaces,
+
+    // temporary storage for addressing and weights
+    List<DynamicList<label> >& srcAddr,
+    List<DynamicList<scalar> >& srcWght,
+    List<DynamicList<label> >& tgtAddr,
+    List<DynamicList<scalar> >& tgtWght
+)
+{
+    nbrFaces.clear();
+    visitedFaces.clear();
+
+    // append initial target face and neighbours
+    nbrFaces.append(tgtStartFaceI);
+    appendNbrFaces(tgtStartFaceI, tgtPatch, visitedFaces, nbrFaces);
+
+    bool faceProcessed = false;
+
+    do
+    {
+        // process new target face
+        label tgtFaceI = nbrFaces.remove();
+        visitedFaces.append(tgtFaceI);
+        scalar area = interArea(srcFaceI, tgtFaceI, srcPatch, tgtPatch);
+
+        // store when intersection area > 0
+        if (area > 0)
+        {
+            srcAddr[srcFaceI].append(tgtFaceI);
+            srcWght[srcFaceI].append(area);
+
+            tgtAddr[tgtFaceI].append(srcFaceI);
+            tgtWght[tgtFaceI].append(area);
+
+            appendNbrFaces(tgtFaceI, tgtPatch, visitedFaces, nbrFaces);
+
+            faceProcessed = true;
+        }
+
+    } while (nbrFaces.size() > 0);
+
+    return faceProcessed;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
 (
     label& startSeedI,
@@ -811,7 +417,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
                 label faceT = visitedFaces[j];
                 scalar area = interArea(faceS, faceT, srcPatch0, tgtPatch0);
 
-                if (area > 0)
+                // Check that faces have enough overlap for robust walking
+                if (area/srcMagSf_[srcFaceI] > faceAreaIntersect::tolerance())
                 {
                     // TODO - throwing area away - re-use in next iteration?
 
@@ -864,7 +471,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
                 << "target face" << endl;
         }
 
-//        foundNextSeed = false;
+        foundNextSeed = false;
         for (label faceI = startSeedI; faceI < mapFlag.size(); faceI++)
         {
             if (mapFlag[faceI])
@@ -887,7 +494,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
 
         FatalErrorIn
         (
-            "void Foam::cyclicAMIPolyPatch::setNextFaces"
+            "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+            "setNextFaces"
             "("
                 "label&, "
                 "label&, "
@@ -946,6 +554,25 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     {
         area = inter.calc(src, tgt, n, triMode_);
     }
+    else
+    {
+        WarningIn
+        (
+            "void Foam::AMIInterpolation<SourcePatch, TargetPatch>::"
+            "interArea"
+            "("
+                "const label, "
+                "const label, "
+                "const SourcePatch&, "
+                "const TargetPatch&"
+            ") const"
+        )   << "Invalid normal for source face " << srcFaceI
+            << " points " << UIndirectList<point>(srcPoints, src)
+            << " target face " << tgtFaceI
+            << " points " << UIndirectList<point>(tgtPoints, tgt)
+            << endl;
+    }
+
 
     if ((debug > 1) && (area > 0))
     {
@@ -953,6 +580,105 @@ Foam::scalar Foam::AMIInterpolation<SourcePatch, TargetPatch>::interArea
     }
 
     return area;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+void Foam::AMIInterpolation<SourcePatch, TargetPatch>::
+restartUncoveredSourceFace
+(
+    const SourcePatch& srcPatch,
+    const TargetPatch& tgtPatch,
+    List<DynamicList<label> >& srcAddr,
+    List<DynamicList<scalar> >& srcWght,
+    List<DynamicList<label> >& tgtAddr,
+    List<DynamicList<scalar> >& tgtWght
+)
+{
+    // Collect all src faces with a low weight
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    labelHashSet lowWeightFaces(100);
+    forAll(srcWght, srcFaceI)
+    {
+        scalar s = sum(srcWght[srcFaceI]);
+        scalar t = s/srcMagSf_[srcFaceI];
+
+        if (t < 0.5)
+        {
+            lowWeightFaces.insert(srcFaceI);
+        }
+    }
+
+    Info<< "AMIInterpolation : restarting search on "
+        << returnReduce(lowWeightFaces.size(), sumOp<label>())
+        << " faces since sum of weights < 0.5" << endl;
+
+    if (lowWeightFaces.size() > 0)
+    {
+        // Erase all the lowWeight source faces from the target
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        DynamicList<label> okSrcFaces(10);
+        DynamicList<scalar> okSrcWeights(10);
+        forAll(tgtAddr, tgtFaceI)
+        {
+            okSrcFaces.clear();
+            okSrcWeights.clear();
+            DynamicList<label>& srcFaces = tgtAddr[tgtFaceI];
+            DynamicList<scalar>& srcWeights = tgtWght[tgtFaceI];
+            forAll(srcFaces, i)
+            {
+                if (!lowWeightFaces.found(srcFaces[i]))
+                {
+                    okSrcFaces.append(srcFaces[i]);
+                    okSrcWeights.append(srcWeights[i]);
+                }
+            }
+            if (okSrcFaces.size() < srcFaces.size())
+            {
+                srcFaces.transfer(okSrcFaces);
+                srcWeights.transfer(okSrcWeights);
+            }
+        }
+
+
+
+        // Restart search from best hit
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // list of tgt face neighbour faces
+        DynamicList<label> nbrFaces(10);
+
+        // list of faces currently visited for srcFaceI to avoid multiple hits
+        DynamicList<label> visitedFaces(10);
+
+        forAllConstIter(labelHashSet, lowWeightFaces, iter)
+        {
+            label srcFaceI = iter.key();
+            label tgtFaceI = findTargetFace(srcFaceI, srcPatch);
+            if (tgtFaceI != -1)
+            {
+                //bool faceProcessed =
+                processSourceFace
+                (
+                    srcPatch,
+                    tgtPatch,
+                    srcFaceI,
+                    tgtFaceI,
+
+                    nbrFaces,
+                    visitedFaces,
+
+                    srcAddr,
+                    srcWght,
+                    tgtAddr,
+                    tgtWght
+                );
+                // ? Check faceProcessed to see if restarting has worked.
+            }
+        }
+    }
 }
 
 
@@ -1073,37 +799,22 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
     DynamicList<label> nonOverlapFaces;
     do
     {
-        nbrFaces.clear();
-        visitedFaces.clear();
+        // Do advancing front starting from srcFaceI,tgtFaceI
+        bool faceProcessed = processSourceFace
+        (
+            srcPatch,
+            tgtPatch,
+            srcFaceI,
+            tgtFaceI,
 
-        // append initial target face and neighbours
-        nbrFaces.append(tgtFaceI);
-        appendNbrFaces(tgtFaceI, tgtPatch, visitedFaces, nbrFaces);
+            nbrFaces,
+            visitedFaces,
 
-        bool faceProcessed = false;
-
-        do
-        {
-            // process new target face
-            tgtFaceI = nbrFaces.remove();
-            visitedFaces.append(tgtFaceI);
-            scalar area = interArea(srcFaceI, tgtFaceI, srcPatch, tgtPatch);
-
-            // store when intersection area > 0
-            if (area > 0)
-            {
-                srcAddr[srcFaceI].append(tgtFaceI);
-                srcWght[srcFaceI].append(area);
-
-                tgtAddr[tgtFaceI].append(srcFaceI);
-                tgtWght[tgtFaceI].append(area);
-
-                appendNbrFaces(tgtFaceI, tgtPatch, visitedFaces, nbrFaces);
-
-                faceProcessed = true;
-            }
-
-        } while (nbrFaces.size() > 0);
+            srcAddr,
+            srcWght,
+            tgtAddr,
+            tgtWght
+        );
 
         mapFlag[srcFaceI] = false;
 
@@ -1139,6 +850,22 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcAddressing
 
         srcNonOverlap_.transfer(nonOverlapFaces);
     }
+
+
+    // Check for badly covered faces
+    if (debug)
+    {
+        restartUncoveredSourceFace
+        (
+            srcPatch,
+            tgtPatch,
+            srcAddr,
+            srcWght,
+            tgtAddr,
+            tgtWght
+        );
+    }
+
 
     // transfer data to persistent storage
     forAll(srcAddr, i)

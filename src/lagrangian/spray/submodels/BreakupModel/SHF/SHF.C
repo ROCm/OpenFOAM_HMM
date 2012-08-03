@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -176,11 +176,11 @@ bool Foam::SHF<CloudType>::update
 
     if (weGas > weConst_)
     {
-        if(weGas < weCrit1_)
+        if (weGas < weCrit1_)
         {
             tCharSecond = c1_*pow((weGas - weConst_), cExp1_);
         }
-        else if(weGas >= weCrit1_ && weGas <= weCrit2_)
+        else if (weGas >= weCrit1_ && weGas <= weCrit2_)
         {
             tCharSecond = c2_*pow((weGas - weConst_), cExp2_);
         }

@@ -264,6 +264,8 @@ void Foam::ReactingMultiphaseCloud<CloudType>::autoMap
     tdType td(*this);
 
     Cloud<parcelType>::template autoMap<tdType>(td, mapper);
+
+    this->updateMesh();
 }
 
 

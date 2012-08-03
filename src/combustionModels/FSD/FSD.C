@@ -272,7 +272,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 
     forAll(ft_, cellI)
     {
-        if(ft_[cellI] < ftStoich)
+        if (ft_[cellI] < ftStoich)
         {
             pc[cellI] = ft_[cellI]*(YprodTotal/ftStoich);
         }

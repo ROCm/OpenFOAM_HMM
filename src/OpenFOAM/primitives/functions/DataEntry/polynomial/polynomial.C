@@ -25,14 +25,14 @@ License
 
 #include "polynomial.H"
 #include "Time.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(polynomial, 0);
-    DataEntry<scalar>::adddictionaryConstructorToTable<polynomial>
-        addpolynomialConstructorToTable_;
+    addToRunTimeSelectionTable(scalarDataEntry, polynomial, dictionary);
 }
 
 
@@ -40,7 +40,7 @@ namespace Foam
 
 Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
 :
-    DataEntry<scalar>(entryName),
+    scalarDataEntry(entryName),
     coeffs_(),
     canIntegrate_(true),
     dimensions_(dimless)
@@ -52,15 +52,17 @@ Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
     is.putBack(firstToken);
     if (firstToken == token::BEGIN_SQR)
     {
-        is >> this->dimensions_;
+        is  >> this->dimensions_;
     }
 
     is  >> coeffs_;
 
     if (!coeffs_.size())
     {
-        FatalErrorIn("Foam::polynomial::polynomial(const word&, dictionary&)")
-            << "polynomial coefficients for entry " << this->name_
+        FatalErrorIn
+        (
+            "Foam::polynomial::polynomial(const word&, const dictionary&)"
+        )   << "polynomial coefficients for entry " << this->name_
             << " are invalid (empty)" << nl << exit(FatalError);
     }
 
@@ -77,8 +79,10 @@ Foam::polynomial::polynomial(const word& entryName, const dictionary& dict)
     {
         if (!canIntegrate_)
         {
-            WarningIn("Foam::polynomial::polynomial(const word&, dictionary&)")
-                << "Polynomial " << this->name_ << " cannot be integrated"
+            WarningIn
+            (
+                "Foam::polynomial::polynomial(const word&, const dictionary&)"
+            )   << "Polynomial " << this->name_ << " cannot be integrated"
                 << endl;
         }
     }
@@ -91,7 +95,7 @@ Foam::polynomial::polynomial
     const List<Tuple2<scalar, scalar> >& coeffs
 )
 :
-    DataEntry<scalar>(entryName),
+    scalarDataEntry(entryName),
     coeffs_(coeffs),
     canIntegrate_(true),
     dimensions_(dimless)
@@ -101,7 +105,7 @@ Foam::polynomial::polynomial
         FatalErrorIn
         (
             "Foam::polynomial::polynomial"
-            "(const word&, const List<Tuple2<scalar, scalar> >&&)"
+            "(const word&, const List<Tuple2<scalar, scalar> >&)"
         )   << "polynomial coefficients for entry " << this->name_
             << " are invalid (empty)" << nl << exit(FatalError);
     }
@@ -122,7 +126,7 @@ Foam::polynomial::polynomial
             WarningIn
             (
                 "Foam::polynomial::polynomial"
-                "(const word&, const List<Tuple2<scalar, scalar> >&&)"
+                "(const word&, const List<Tuple2<scalar, scalar> >&)"
             )   << "Polynomial " << this->name_ << " cannot be integrated"
                 << endl;
         }
@@ -132,7 +136,7 @@ Foam::polynomial::polynomial
 
 Foam::polynomial::polynomial(const polynomial& poly)
 :
-    DataEntry<scalar>(poly),
+    scalarDataEntry(poly),
     coeffs_(poly.coeffs_),
     canIntegrate_(poly.canIntegrate_),
     dimensions_(poly.dimensions_)
@@ -201,7 +205,8 @@ Foam::dimensioned<Foam::scalar> Foam::polynomial::dimValue
 
 Foam::dimensioned<Foam::scalar> Foam::polynomial::dimIntegrate
 (
-    const scalar x1, const scalar x2
+    const scalar x1,
+    const scalar x2
 ) const
 {
     return dimensioned<scalar>
@@ -211,5 +216,6 @@ Foam::dimensioned<Foam::scalar> Foam::polynomial::dimIntegrate
         integrate(x1, x2)
     );
 }
+
 
 // ************************************************************************* //

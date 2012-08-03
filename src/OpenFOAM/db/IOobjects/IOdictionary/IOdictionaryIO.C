@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,7 +95,9 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
             }
 
             // Note: use ASCII for now - binary IO of dictionaries is
-            // not currently supported
+            // not currently supported or rather the primitiveEntries of
+            // the dictionary think they are in binary form whereas they are
+            // not. Could reset all the ITstreams to ascii?
             IPstream fromAbove
             (
                 Pstream::scheduled,
