@@ -187,6 +187,7 @@ Foam::calculatedFvPatchField<Type>::valueBoundaryCoeffs
     return *this;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::calculatedFvPatchField<Type>::gradientInternalCoeffs() const
@@ -207,6 +208,7 @@ Foam::calculatedFvPatchField<Type>::gradientInternalCoeffs() const
 
     return *this;
 }
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
