@@ -169,6 +169,16 @@ Foam::scalar Foam::InjectionModelList<CloudType>::averageParcelMass()
 
 
 template<class CloudType>
+void Foam::InjectionModelList<CloudType>::updateMesh()
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).updateMesh();
+    }
+}
+
+
+template<class CloudType>
 template<class TrackData>
 void Foam::InjectionModelList<CloudType>::inject(TrackData& td)
 {

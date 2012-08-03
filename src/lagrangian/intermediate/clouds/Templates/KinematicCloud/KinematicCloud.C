@@ -817,6 +817,13 @@ void Foam::KinematicCloud<CloudType>::patchData
 
 
 template<class CloudType>
+void Foam::KinematicCloud<CloudType>::updateMesh()
+{
+    injectors_.updateMesh();
+}
+
+
+template<class CloudType>
 void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 {
     typedef typename particle::TrackingData<KinematicCloud<CloudType> > tdType;
@@ -824,6 +831,8 @@ void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
     tdType td(*this);
 
     Cloud<parcelType>::template autoMap<tdType>(td, mapper);
+
+    updateMesh();
 }
 
 

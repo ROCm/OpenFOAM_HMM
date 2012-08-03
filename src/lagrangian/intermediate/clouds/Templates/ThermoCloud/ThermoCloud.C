@@ -487,6 +487,8 @@ void Foam::ThermoCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
     tdType td(*this);
 
     Cloud<parcelType>::template autoMap<tdType>(td, mapper);
+
+    this->updateMesh();
 }
 
 

@@ -408,6 +408,13 @@ Foam::InjectionModel<CloudType>::~InjectionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::InjectionModel<CloudType>::updateMesh()
+{
+    // do nothing
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::timeEnd() const
 {
     notImplemented

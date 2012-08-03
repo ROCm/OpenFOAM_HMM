@@ -250,6 +250,12 @@ public:
 
     // Member Functions
 
+        // Mapping
+
+            //- Update mesh
+            virtual void updateMesh();
+
+
         // Global information
 
             //- Return the start-of-injection time

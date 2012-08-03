@@ -97,6 +97,12 @@ public:
             scalar averageParcelMass();
 
 
+        // Edit
+
+            //- Set injector locations when mesh is updated
+            void updateMesh();
+
+
         // Per-injection event functions
 
             //- Main injection loop

@@ -185,60 +185,7 @@ Foam::CellZoneInjection<CloudType>::CellZoneInjection
         )
     )
 {
-    const fvMesh& mesh = owner.mesh();
-    const label zoneI = mesh.cellZones().findZoneID(cellZoneName_);
-
-    if (zoneI < 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::CellZoneInjection<CloudType>::CellZoneInjection"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Unknown cell zone name: " << cellZoneName_
-            << ". Valid cell zones are: " << mesh.cellZones().names()
-            << nl << exit(FatalError);
-    }
-
-    const labelList& cellZoneCells = mesh.cellZones()[zoneI];
-    const label nCells = cellZoneCells.size();
-    const scalar nCellsTotal = returnReduce(nCells, sumOp<label>());
-    const scalar VCells = sum(scalarField(mesh.V(), cellZoneCells));
-    const scalar VCellsTotal = returnReduce(VCells, sumOp<scalar>());
-    Info<< "    cell zone size      = " << nCellsTotal << endl;
-    Info<< "    cell zone volume    = " << VCellsTotal << endl;
-
-    if ((nCells == 0) || (VCellsTotal*numberDensity_ < 1))
-    {
-        WarningIn
-        (
-            "Foam::CellZoneInjection<CloudType>::CellZoneInjection"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Number of particles to be added to cellZone " << cellZoneName_
-            << " is zero" << endl;
-    }
-    else
-    {
-        setPositions(cellZoneCells);
-
-        Info<< "    number density      = " << numberDensity_ << nl
-            << "    number of particles = " << positions_.size() << endl;
-
-        // Construct parcel diameters
-        diameters_.setSize(positions_.size());
-        forAll(diameters_, i)
-        {
-            diameters_[i] = sizeDistribution_->sample();
-        }
-    }
-
-    // Determine volume of particles to inject
-    this->volumeTotal_ = sum(pow3(diameters_))*constant::mathematical::pi/6.0;
+    updateMesh();
 }
 
 
@@ -269,6 +216,55 @@ Foam::CellZoneInjection<CloudType>::~CellZoneInjection()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::CellZoneInjection<CloudType>::updateMesh()
+{
+    // Set/cache the injector cells
+    const fvMesh& mesh = this->owner().mesh();
+    const label zoneI = mesh.cellZones().findZoneID(cellZoneName_);
+
+    if (zoneI < 0)
+    {
+        FatalErrorIn("Foam::CellZoneInjection<CloudType>::updateMesh()")
+            << "Unknown cell zone name: " << cellZoneName_
+            << ". Valid cell zones are: " << mesh.cellZones().names()
+            << nl << exit(FatalError);
+    }
+
+    const labelList& cellZoneCells = mesh.cellZones()[zoneI];
+    const label nCells = cellZoneCells.size();
+    const scalar nCellsTotal = returnReduce(nCells, sumOp<label>());
+    const scalar VCells = sum(scalarField(mesh.V(), cellZoneCells));
+    const scalar VCellsTotal = returnReduce(VCells, sumOp<scalar>());
+    Info<< "    cell zone size      = " << nCellsTotal << endl;
+    Info<< "    cell zone volume    = " << VCellsTotal << endl;
+
+    if ((nCells == 0) || (VCellsTotal*numberDensity_ < 1))
+    {
+        WarningIn("Foam::CellZoneInjection<CloudType>::updateMesh()")
+            << "Number of particles to be added to cellZone " << cellZoneName_
+            << " is zero" << endl;
+    }
+    else
+    {
+        setPositions(cellZoneCells);
+
+        Info<< "    number density      = " << numberDensity_ << nl
+            << "    number of particles = " << positions_.size() << endl;
+
+        // Construct parcel diameters
+        diameters_.setSize(positions_.size());
+        forAll(diameters_, i)
+        {
+            diameters_[i] = sizeDistribution_->sample();
+        }
+    }
+
+    // Determine volume of particles to inject
+    this->volumeTotal_ = sum(pow3(diameters_))*constant::mathematical::pi/6.0;
+}
+
 
 template<class CloudType>
 Foam::scalar Foam::CellZoneInjection<CloudType>::timeEnd() const
