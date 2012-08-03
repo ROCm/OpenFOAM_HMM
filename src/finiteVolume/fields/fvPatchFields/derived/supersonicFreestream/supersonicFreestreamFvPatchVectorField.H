@@ -58,7 +58,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     This boundary condition is ill-posed if the free-stream flow is normal
     to the boundary.
 

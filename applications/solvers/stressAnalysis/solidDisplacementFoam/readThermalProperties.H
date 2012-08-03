@@ -81,7 +81,7 @@ if (thermalStress)
         );
 
     }
-    else if(CType == "field")
+    else if (CType == "field")
     {
         CIO.readOpt() = IOobject::MUST_READ;
 
@@ -214,7 +214,7 @@ if (thermalStress)
     {
         FatalErrorIn
         (
-             "readThermalProperties.H"
+            "readThermalProperties.H"
         )   << "Valid type entries are uniform or field for alpha"
             << abort(FatalError);
     }
@@ -228,5 +228,4 @@ if (thermalStress)
 
     threeKalpha = threeK*alpha;
     DT = k/C;
-
 }

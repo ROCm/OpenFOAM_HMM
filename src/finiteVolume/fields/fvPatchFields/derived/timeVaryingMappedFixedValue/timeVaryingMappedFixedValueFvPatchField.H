@@ -61,7 +61,7 @@ Description
     }
     /endverbatim
 
-    \note
+Note
     Switch on debug flag to have it dump the triangulation (in transformed
     space) and transform face centres.
 

@@ -96,21 +96,20 @@ Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-template<class Type2>
 Foam::tmp<Foam::fvPatchField<Type> >
 Foam::fvPatchField<Type>::NewCalculatedType
 (
-    const fvPatchField<Type2>& pf
+    const fvPatch& p
 )
 {
     typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(pf.patch().type());
+        patchConstructorTablePtr_->find(p.type());
 
     if (patchTypeCstrIter != patchConstructorTablePtr_->end())
     {
         return patchTypeCstrIter()
         (
-            pf.patch(),
+            p,
             DimensionedField<Type, volMesh>::null()
         );
     }
@@ -120,11 +119,22 @@ Foam::fvPatchField<Type>::NewCalculatedType
         (
             new calculatedFvPatchField<Type>
             (
-                pf.patch(),
+                p,
                 DimensionedField<Type, volMesh>::null()
             )
         );
     }
+}
+
+
+template<class Type>
+template<class Type2>
+Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::NewCalculatedType
+(
+    const fvPatchField<Type2>& pf
+)
+{
+    return NewCalculatedType(pf.patch());
 }
 
 
@@ -177,6 +187,7 @@ Foam::calculatedFvPatchField<Type>::valueBoundaryCoeffs
     return *this;
 }
 
+
 template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::calculatedFvPatchField<Type>::gradientInternalCoeffs() const
@@ -197,6 +208,7 @@ Foam::calculatedFvPatchField<Type>::gradientInternalCoeffs() const
 
     return *this;
 }
+
 
 template<class Type>
 Foam::tmp<Foam::Field<Type> >

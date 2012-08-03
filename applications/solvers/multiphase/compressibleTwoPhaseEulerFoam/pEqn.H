@@ -2,11 +2,6 @@
     rho1 = rho10 + psi1*p;
     rho2 = rho20 + psi2*p;
 
-    mrfZones.absoluteFlux(phi1.oldTime());
-    mrfZones.absoluteFlux(phi1);
-    mrfZones.absoluteFlux(phi2.oldTime());
-    mrfZones.absoluteFlux(phi2);
-
     surfaceScalarField alpha1f(fvc::interpolate(alpha1));
     surfaceScalarField alpha2f(scalar(1) - alpha1f);
 
@@ -22,35 +17,53 @@
     volVectorField HbyA2("HbyA2", U2);
     HbyA2 = rAU2*U2Eqn.H();
 
+    mrfZones.absoluteFlux(phi1.oldTime());
+    mrfZones.absoluteFlux(phi1);
+    mrfZones.absoluteFlux(phi2.oldTime());
+    mrfZones.absoluteFlux(phi2);
+
+    surfaceScalarField ppDrag("ppDrag", 0.0*phi1);
+
+    if (g0.value() > 0.0)
+    {
+        ppDrag -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
+    }
+
+    if (kineticTheory.on())
+    {
+        ppDrag -=
+            fvc::interpolate(1.0/rho1)*rAlphaAU1f
+           *fvc::snGrad(kineticTheory.pa())*mesh.magSf();
+    }
+
     surfaceScalarField phiHbyA1
     (
         "phiHbyA1",
         (fvc::interpolate(HbyA1) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU1, alpha1, U1, phi1)
-      + fvc::interpolate((1.0/rho1)*rAU1*dragCoeff)*phi2
-      + rAlphaAU1f*(g & mesh.Sf())
     );
-
-    if (g0.value() > 0.0)
-    {
-        phiHbyA1 -= ppMagf*fvc::snGrad(alpha1)*mesh.magSf();
-    }
-
-    if (kineticTheory.on())
-    {
-        phiHbyA1 -=
-            fvc::interpolate((1.0/rho1)*rAU1)
-           *fvc::snGrad(kineticTheory.pa())*mesh.magSf();
-    }
-
-    mrfZones.relativeFlux(phiHbyA1);
 
     surfaceScalarField phiHbyA2
     (
         "phiHbyA2",
         (fvc::interpolate(HbyA2) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU2, alpha2, U2, phi2)
-      + fvc::interpolate((1.0/rho2)*rAU2*dragCoeff)*phi1
+    );
+
+    phi = alpha1f*phiHbyA1 + alpha2f*phiHbyA2;
+    mrfZones.relativeFlux(phi);
+
+    phiHbyA1 +=
+    (
+        fvc::interpolate((1.0/rho1)*rAU1*dragCoeff)*phi2
+      + ppDrag
+      + rAlphaAU1f*(g & mesh.Sf())
+    );
+    mrfZones.relativeFlux(phiHbyA1);
+
+    phiHbyA2 +=
+    (
+        fvc::interpolate((1.0/rho2)*rAU2*dragCoeff)*phi1
       + rAlphaAU2f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA2);
@@ -135,7 +148,8 @@
             U1 = HbyA1
                + fvc::reconstruct
                  (
-                     rAlphaAU1f
+                     ppDrag
+                   + rAlphaAU1f
                     *(
                          (g & mesh.Sf())
                        + mSfGradp/fvc::interpolate(rho1)

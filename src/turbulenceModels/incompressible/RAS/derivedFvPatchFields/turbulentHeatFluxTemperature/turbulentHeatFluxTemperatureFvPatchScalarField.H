@@ -41,11 +41,6 @@ Description
         alphaEff     | turbulent thermal diffusivity field name | yes |
     \endtable
 
-    \note
-    - it is assumed that the units of \c alphaEff are [kg/m/s]
-    - the specific heat capcaity is read from the transport dictionary entry
-      \c Cp0
-    
     Example of the boundary condition specification:
     \verbatim
     myPatch
@@ -58,6 +53,11 @@ Description
     }
     \endverbatim
 
+Note
+    - it is assumed that the units of \c alphaEff are [kg/m/s]
+    - the specific heat capcaity is read from the transport dictionary entry
+      \c Cp0
+    
 SourceFiles
     turbulentHeatFluxTemperatureFvPatchScalarField.C
 

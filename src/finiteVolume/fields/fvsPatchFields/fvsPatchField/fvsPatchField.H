@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -245,6 +245,13 @@ public:
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
             const dictionary&
+        );
+
+        //- Return a pointer to a new calculatedFvsPatchField created on
+        //  freestore without setting patchField values
+        static tmp<fvsPatchField<Type> > NewCalculatedType
+        (
+            const fvPatch&
         );
 
         //- Return a pointer to a new calculatedFvsPatchField created on

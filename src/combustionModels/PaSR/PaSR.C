@@ -138,7 +138,7 @@ void Foam::combustionModels::PaSR<Type>::correct()
 
 template<class Type>
 Foam::tmp<Foam::fvScalarMatrix>
-Foam::combustionModels::PaSR<Type>::R(const volScalarField& Y) const
+Foam::combustionModels::PaSR<Type>::R(volScalarField& Y) const
 {
     tmp<fvScalarMatrix> tSu(new fvScalarMatrix(Y, dimMass/dimTime));
 

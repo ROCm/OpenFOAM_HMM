@@ -78,6 +78,9 @@ void Foam::DevolatilisationModel<CloudType>::calculate
     const scalar,
     const scalar,
     const scalar,
+    const scalar,
+    const scalarField&,
+    const scalarField&,
     const scalarField&,
     bool&,
     scalarField&
@@ -91,6 +94,9 @@ void Foam::DevolatilisationModel<CloudType>::calculate
             "const scalar, "
             "const scalar, "
             "const scalar, "
+            "const scalar, "
+            "const scalarField&, "
+            "const scalarField&, "
             "const scalarField&, "
             "bool&, "
             "scalarField&"

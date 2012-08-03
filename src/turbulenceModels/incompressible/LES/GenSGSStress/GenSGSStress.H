@@ -131,11 +131,19 @@ public:
 
         //- Return the effective sub-grid turbulence stress tensor
         //  including the laminar stress
-        virtual tmp<volSymmTensorField> devBeff() const;
+        virtual tmp<volSymmTensorField> devReff() const;
 
-        //- Returns div(B).
-        // This is the additional term due to the filtering of the NSE.
-        virtual tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
+        //- Return the deviatoric part of the effective sub-grid
+        //  turbulence stress tensor including the laminar stress
+        virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
+
+        //- Return the deviatoric part of the effective sub-grid
+        //  turbulence stress tensor including the laminar stress
+        virtual tmp<fvVectorMatrix> divDevRhoReff
+        (
+            const volScalarField& rho,
+            volVectorField& U
+        ) const;
 
         //- Read LESProperties dictionary
         virtual bool read();

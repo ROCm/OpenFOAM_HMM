@@ -46,9 +46,6 @@ Description
         L       | length scale
     \endvartable
 
-    \note
-    In the event of reverse flow, a zero-gradient condition is applied
-
     \heading Patch usage
 
     \table
@@ -67,6 +64,9 @@ Description
         value           uniform 200;   // placeholder
     }
     \endverbatim
+
+Note
+    In the event of reverse flow, a zero-gradient condition is applied
 
 SeeAlso
     Foam::inletOutletFvPatchField

@@ -56,7 +56,7 @@ Description
 
     The above example shows the use of a constant jump condition.
 
-    \note
+Note
      The underlying \c patchType should be set to \c cyclic
 
 SeeAlso

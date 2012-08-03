@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,15 +68,13 @@ Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR
     (
         "Foam::scalar Foam::NoBinaryCollision<CloudType>::sigmaTcR"
         "("
-            "label typeIdP,"
-            "label typeIdQ,"
-            "const vector& UP,"
-            "const vector& UQ"
+            "const typename CloudType::parcelType&, "
+            "const typename CloudType::parcelType"
         ") const"
     )
         << "sigmaTcR called on NoBinaryCollision model, this should "
         << "not happen, this is not an actual model." << nl
-        << "Enclose calls to sigmaTcR within a if(binaryCollision().active()) "
+        << "Enclose calls to sigmaTcR within a if (binaryCollision().active()) "
         << " check."
         << abort(FatalError);
 

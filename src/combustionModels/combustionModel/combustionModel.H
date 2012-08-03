@@ -135,7 +135,7 @@ public:
         virtual void correct() = 0;
 
         //- Fuel consumption rate matrix, i.e. source term for fuel equation
-        virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const = 0;
+        virtual tmp<fvScalarMatrix> R(volScalarField& Y) const = 0;
 
         //- Heat release rate calculated from fuel consumption rate matrix
         virtual tmp<volScalarField> dQ() const = 0;

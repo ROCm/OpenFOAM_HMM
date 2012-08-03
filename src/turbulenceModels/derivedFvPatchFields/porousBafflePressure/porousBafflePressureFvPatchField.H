@@ -73,7 +73,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
      The underlying \c patchType should be set to \c cyclic
 
 SourceFiles

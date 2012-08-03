@@ -44,9 +44,6 @@ Description
     - base: average over 'time', or 'iteration' (\f$N\f$ in the above)
     - window: optional averaging window, specified in 'base' units
 
-    \note
-    To employ the \c prime2Mean option, the \c mean option must be selecetd.
-
     Average field names are constructed by concatenating the base field with
     the averaging type, e.g. when averaging field 'U', the resultant fields
     are:
@@ -98,6 +95,9 @@ Description
         );
     }
     \endverbatim
+
+Note
+    To employ the \c prime2Mean option, the \c mean option must be selecetd.
 
 SourceFiles
     fieldAverage.C

@@ -64,7 +64,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     If reverse flow is possible or expected use the
     pressureInletOutletVelocity condition instead.
 

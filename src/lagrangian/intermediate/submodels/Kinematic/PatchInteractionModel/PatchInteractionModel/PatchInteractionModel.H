@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,18 +163,6 @@ public:
             const scalar trackFraction,
             const tetIndices& tetIs
         );
-
-        //- Calculate the patch normal and velocity to interact with,
-        //  accounting for patch motion if required.
-        void patchData
-        (
-            typename CloudType::parcelType& p,
-            const polyPatch& pp,
-            const scalar trackFraction,
-            const tetIndices& tetIs,
-            vector& normal,
-            vector& Up
-        ) const;
 
 
         // I-O

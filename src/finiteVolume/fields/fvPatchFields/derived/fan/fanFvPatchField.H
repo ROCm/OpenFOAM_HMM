@@ -66,7 +66,7 @@ Description
     The above example shows the use of a comma separated (CSV) file to specify
     the jump condition.
 
-    \note
+Note
      The underlying \c patchType should be set to \c cyclic
 
 SeeAlso

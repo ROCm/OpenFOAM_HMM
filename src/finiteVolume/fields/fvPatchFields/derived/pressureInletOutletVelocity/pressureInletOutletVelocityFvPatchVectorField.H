@@ -54,7 +54,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     Sign conventions:
     - positive flux (out of domain): apply zero-gradient condition
     - negative flux (into of domain): derive from the flux in the patch-normal

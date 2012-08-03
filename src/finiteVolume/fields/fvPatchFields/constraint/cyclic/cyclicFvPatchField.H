@@ -31,11 +31,6 @@ Description
     This boundary condition enforces a cyclic condition between a pair of
     boundaries.
 
-    \note
-    The patches must be topologically similar, i.e. if the owner patch is
-    transformed to the neighbour patch, the patches should be identical (or
-    very similar).
-
     \heading Patch usage
 
     Example of the boundary condition specification:
@@ -45,6 +40,11 @@ Description
         type            cyclic;
     }
     \endverbatim
+
+Note
+    The patches must be topologically similar, i.e. if the owner patch is
+    transformed to the neighbour patch, the patches should be identical (or
+    very similar).
 
 SourceFiles
     cyclicFvPatchField.C

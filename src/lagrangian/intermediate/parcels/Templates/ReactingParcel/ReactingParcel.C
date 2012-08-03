@@ -458,6 +458,16 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
         td.cloud().hsCoeff()[cellI] += np0*Sph;
+
+        // Update radiation fields
+        if (td.cloud().radiation())
+        {
+            const scalar ap = this->areaP();
+            const scalar T4 = pow4(this->T_);
+            td.cloud().radAreaP()[cellI] += dt*np0*ap;
+            td.cloud().radT4()[cellI] += dt*np0*T4;
+            td.cloud().radAreaP()[cellI] += dt*np0*ap*T4;
+        }
     }
 }
 

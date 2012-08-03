@@ -33,10 +33,6 @@ Description
     of U+ as a function of near-wall Reynolds number.  The table should be
     located in the $FOAM_CASE/constant folder.
 
-    \note
-    the tables are not registered since the same table object may be used for
-    more than one patch.
-
     \heading Patch usage
 
     \table
@@ -52,6 +48,10 @@ Description
         uPlusTable      myUPlusTable;
     }
     \endverbatim
+
+Note
+    The tables are not registered since the same table object may be used for
+    more than one patch.
 
 SeeAlso
     Foam::nutWallFunctionFvPatchScalarField

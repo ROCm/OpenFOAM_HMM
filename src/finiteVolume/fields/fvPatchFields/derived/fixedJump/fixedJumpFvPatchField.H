@@ -30,7 +30,7 @@ Group
 Description
     Base class for "jump" of a field<type>
 
-    \note
+Note
     not used directly
 
 SeeAlso

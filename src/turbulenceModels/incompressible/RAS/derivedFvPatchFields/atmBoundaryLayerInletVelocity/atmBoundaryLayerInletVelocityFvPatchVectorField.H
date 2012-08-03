@@ -64,12 +64,6 @@ Description
         layer", Journal of Wind Engineering and Industrial Aerodynamics
         95(2007), pp 355-369.
 
-    \note
-        D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the
-        k-epsilon model should be changed from 1.3 to 1.11 for consistency.
-        The roughness height (Er) is given by Er = 20 z0 following the same
-        reference.
-
     \heading Patch usage
 
     \table
@@ -97,6 +91,12 @@ Description
         zGround         uniform 0.0;
     }
     \endverbatim
+
+Note
+    D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the
+    k-epsilon model should be changed from 1.3 to 1.11 for consistency.
+    The roughness height (Er) is given by Er = 20 z0 following the same
+    reference.
 
 SourceFiles
     atmBoundaryLayerInletVelocityFvPatchVectorField.C

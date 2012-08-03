@@ -80,11 +80,9 @@ Foam::PatchInjection<CloudType>::PatchInjection
             << nl << exit(FatalError);
     }
 
-    const polyPatch& patch = owner.mesh().boundaryMesh()[patchId_];
-
     duration_ = owner.db().time().userTimeToTime(duration_);
 
-    cellOwners_ = patch.faceCells();
+    updateMesh();
 
     label patchSize = cellOwners_.size();
     label totalPatchSize = patchSize;
@@ -126,6 +124,15 @@ Foam::PatchInjection<CloudType>::~PatchInjection()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::PatchInjection<CloudType>::updateMesh()
+{
+    // Set/cache the injector cells
+    const polyPatch& patch = this->owner().mesh().boundaryMesh()[patchId_];
+    cellOwners_ = patch.faceCells();
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::PatchInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
@@ -141,7 +148,7 @@ Foam::label Foam::PatchInjection<CloudType>::parcelsToInject
 {
     if ((time0 >= 0.0) && (time0 < duration_))
     {
-        scalar nParcels =fraction_*(time1 - time0)*parcelsPerSecond_;
+        scalar nParcels = fraction_*(time1 - time0)*parcelsPerSecond_;
 
         cachedRandom& rnd = this->owner().rndGen();
 

@@ -53,7 +53,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     Since this condition can be applied on a per-field and per-patch basis,
     it is possible to duplicate the mapping information.  If possible, employ
     the \c mapped condition in preference to avoid this situation, and only

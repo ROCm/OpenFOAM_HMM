@@ -44,9 +44,6 @@ Description
         pressure     | total pressure as a function of time | yes |
     \endtable
 
-    \note
-    The default boundary behaviour is for subsonic, incompressible flow.
-
     Example of the boundary condition specification:
     \verbatim
     myPatch
@@ -62,9 +59,12 @@ Description
     }
     \endverbatim
 
-
     The \c pressure entry is specified as a DataEntry type, able to describe
     time varying functions.
+
+Note
+    The default boundary behaviour is for subsonic, incompressible flow.
+
 
 SeeAlso
     Foam::DataEntry

@@ -58,21 +58,18 @@ Description
         lInf         | distance beyond patch for \c fieldInf | no |
     \endtable
 
-    \note
-    If \c lInf is specified, \c fieldInf will be required; \c rho is only
-    required in the case of a mass-based flux.
-
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
         type            advective;
         phi             phi;
-        // rho          rho; // Not needed for volumetric-based flux
-        // fieldInf     1e5; // Optional
-        // lInf         0.1; // Optional
     }
     \endverbatim
+
+Note
+    If \c lInf is specified, \c fieldInf will be required; \c rho is only
+    required in the case of a mass-based flux.
 
 SourceFiles
     advectiveFvPatchField.C

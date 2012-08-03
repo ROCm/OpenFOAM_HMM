@@ -51,7 +51,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     - the value is positive into the domain
     - may not work correctly for transonic inlets
     - strange behaviour with potentialFoam since the momentum equation is

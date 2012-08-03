@@ -53,7 +53,8 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
         ),
         this->mesh(),
         dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
-    )
+    ),
+    semiImplicit_(readBool(this->coeffs_.lookup("semiImplicit")))
 {
     if (isA<singleStepReactingMixture<ThermoType> >(this->thermo()))
     {
@@ -79,6 +80,15 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
             << "Please select a thermo package based on "
             << "singleStepReactingMixture" << exit(FatalError);
     }
+
+    if (semiImplicit_)
+    {
+        Info<< "Combustion mode: semi-implicit" << endl;
+    }
+    else
+    {
+        Info<< "Combustion mode: explicit" << endl;
+    }
 }
 
 
@@ -94,17 +104,28 @@ singleStepCombustion<CombThermoType, ThermoType>::~singleStepCombustion()
 template<class CombThermoType, class ThermoType>
 tmp<fvScalarMatrix> singleStepCombustion<CombThermoType, ThermoType>::R
 (
-    const volScalarField& Y
+    volScalarField& Y
 ) const
 {
     const label specieI = this->thermoPtr_->composition().species()[Y.name()];
 
-    const volScalarField wSpecie
+    volScalarField wSpecie
     (
         wFuel_*singleMixturePtr_->specieStoichCoeffs()[specieI]
     );
 
-    return wSpecie + fvm::Sp(0.0*wSpecie, Y);
+    if (semiImplicit_)
+    {
+        const label fNorm = singleMixturePtr_->specieProd()[specieI];
+        const volScalarField fres(singleMixturePtr_->fres(specieI));
+        wSpecie /= max(fNorm*(Y - fres), 1e-2);
+
+        return -fNorm*wSpecie*fres + fNorm*fvm::Sp(wSpecie, Y);
+    }
+    else
+    {
+        return wSpecie + fvm::Sp(0.0*wSpecie, Y);
+    }
 }
 
 
@@ -113,7 +134,8 @@ tmp<volScalarField>
 singleStepCombustion<CombThermoType, ThermoType>::Sh() const
 {
     const label fuelI = singleMixturePtr_->fuelIndex();
-    const volScalarField& YFuel = this->thermoPtr_->composition().Y(fuelI);
+    volScalarField& YFuel =
+        const_cast<volScalarField&>(this->thermoPtr_->composition().Y(fuelI));
 
     return -singleMixturePtr_->qFuel()*(R(YFuel) & YFuel);
 }

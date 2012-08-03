@@ -43,6 +43,7 @@ SourceFiles
 
 #include "InjectionModel.H"
 #include "distributionModel.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class ManualInjection Declaration
+                       Class ManualInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -83,6 +84,9 @@ class ManualInjection
 
         //- Parcel size distribution model
         const autoPtr<distributionModels::distributionModel> sizeDistribution_;
+
+        //- Flag to suppress errors if particle injection site is out-of-bounds
+        Switch ignoreOutOfBounds_;
 
 
 public:
@@ -119,6 +123,9 @@ public:
 
 
     // Member Functions
+
+        //- Set injector locations when mesh is updated
+        virtual void updateMesh();
 
         //- Return the end-of-injection time
         scalar timeEnd() const;

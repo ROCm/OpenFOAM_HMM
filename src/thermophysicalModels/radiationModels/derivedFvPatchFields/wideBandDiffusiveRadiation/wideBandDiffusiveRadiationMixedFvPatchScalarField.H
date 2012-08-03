@@ -33,6 +33,11 @@ Description
 
     \heading Patch usage
 
+    \table
+        Property     | Description             | Required    | Default value
+        T            | temperature field name  | no          | T
+    \endtable
+
     Example of the boundary condition specification:
     \verbatim
     myPatch

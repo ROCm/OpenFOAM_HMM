@@ -55,8 +55,8 @@ Description
         }
     \endverbatim
 
-    \note
-    Only supply \h an \c Ta, or \c q in the dictionary (see above)
+Note
+    Only supply \c h and \c Ta, or \c q in the dictionary (see above)
 
 SourceFiles
     externalWallHeatFluxTemperatureFvPatchScalarField.C

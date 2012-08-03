@@ -101,9 +101,6 @@ Description
         p0           | static pressure reference | yes       |
     \endtable
 
-    \note
-    The default boundary behaviour is for subsonic, incompressible flow.
-
     Example of the boundary condition specification:
     \verbatim
     myPatch
@@ -117,6 +114,9 @@ Description
         p0              uniform 1e5;
     }
     \endverbatim
+
+Note
+    The default boundary behaviour is for subsonic, incompressible flow.
 
 SeeAlso
     Foam::fixedValueFvPatchField
