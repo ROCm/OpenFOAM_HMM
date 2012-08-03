@@ -19,6 +19,8 @@
         fvc::makeAbsolute(phiHbyA, U);
     }
 
+    phiAbs = phiHbyA;
+
     surfaceScalarField phig
     (
         (

@@ -71,6 +71,9 @@ protected:
         //- Fuel consumption rate
         volScalarField wFuel_;
 
+        //- Semi-implicit (true) or explicit (false) treatment
+        bool semiImplicit_;
+
 
 public:
 
@@ -89,7 +92,7 @@ public:
         // Evolution
 
             //- Fuel consumption rate matrix
-            virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const;
+            virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
 
             //- Heat release rate calculated from fuel consumption rate matrix
             virtual tmp<volScalarField> dQ() const;

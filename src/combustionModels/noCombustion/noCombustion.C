@@ -59,7 +59,7 @@ template<class CombThermoType>
 Foam::tmp<Foam::fvScalarMatrix>
 Foam::combustionModels::noCombustion<CombThermoType>::R
 (
-    const volScalarField& Y
+    volScalarField& Y
 ) const
 {
     tmp<fvScalarMatrix> tSu

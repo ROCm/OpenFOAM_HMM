@@ -34,6 +34,7 @@ Description
 
 #include "PatchInteractionModel.H"
 #include "patchInteractionDataList.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,6 +70,16 @@ class LocalInteraction
             List<scalar> massStick_;
 
 
+        //- Flag to output data as fields
+        Switch writeFields_;
+
+        //- Mass escape field
+        autoPtr<volScalarField> massEscapePtr_;
+
+        //- Mass stick field
+        autoPtr<volScalarField> massStickPtr_;
+
+
 public:
 
     //- Runtime type information
@@ -98,6 +109,12 @@ public:
 
 
     // Member Functions
+
+        //- Return access to the massEscape field
+        volScalarField& massEscape();
+
+        //- Return access to the massStick field
+        volScalarField& massStick();
 
         //- Apply velocity correction
         //  Returns true if particle remains in same cell

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -299,6 +299,43 @@ interpolate
         interpolate(tvf());
     tvf.clear();
     return tsf;
+}
+
+
+template<class Type>
+tmp<FieldField<fvsPatchField, Type> > interpolate
+(
+    const FieldField<fvPatchField, Type>& fvpff
+)
+{
+    FieldField<fvsPatchField, Type>* fvspffPtr
+    (
+        new FieldField<fvsPatchField, Type>(fvpff.size())
+    );
+
+    forAll(*fvspffPtr, patchi)
+    {
+        fvspffPtr->set
+        (
+            patchi,
+            fvsPatchField<Type>::NewCalculatedType(fvpff[patchi].patch()).ptr()
+        );
+        (*fvspffPtr)[patchi] = fvpff[patchi];
+    }
+
+    return tmp<FieldField<fvsPatchField, Type> >(fvspffPtr);
+}
+
+
+template<class Type>
+tmp<FieldField<fvsPatchField, Type> > interpolate
+(
+    const tmp<FieldField<fvPatchField, Type> >& tfvpff
+)
+{
+    tmp<FieldField<fvsPatchField, Type> > tfvspff = interpolate(tfvpff());
+    tfvpff.clear();
+    return tfvspff;
 }
 
 

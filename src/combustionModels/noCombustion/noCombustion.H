@@ -84,8 +84,8 @@ public:
             //- Correct combustion rate
             virtual void correct();
 
-            //- Fuel consumption rate matrix.
-            virtual tmp<fvScalarMatrix> R(const volScalarField& Y) const;
+            //- Fuel consumption rate matrix
+            virtual tmp<fvScalarMatrix> R(volScalarField& Y) const;
 
             //- Heat release rate calculated from fuel consumption rate matrix
             virtual tmp<volScalarField> dQ() const;

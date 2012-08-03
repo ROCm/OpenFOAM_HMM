@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,8 +129,7 @@ void Foam::sixDoFRigidBodyMotion::applyConstraints(scalar deltaT)
         {
             FatalErrorIn
             (
-                "Foam::sixDoFRigidBodyMotion::applyConstraints"
-                "(scalar deltaT)"
+                "Foam::sixDoFRigidBodyMotion::applyConstraints(scalar)"
             )
                 << nl << "Maximum number of sixDoFRigidBodyMotion constraint "
                 << "iterations ("
@@ -391,8 +390,8 @@ void Foam::sixDoFRigidBodyMotion::updatePosition
             (
                 "void Foam::sixDoFRigidBodyMotion::updatePosition"
                 "("
-                    "scalar deltaT, "
-                    "scalar deltaT0"
+                    "scalar, "
+                    "scalar"
                 ")"
             )
                 << "Limited acceleration " << a()
@@ -449,9 +448,9 @@ void Foam::sixDoFRigidBodyMotion::updateForce
             (
                 "void Foam::sixDoFRigidBodyMotion::updateForce"
                 "("
-                    "const vector& fGlobal, "
-                    "const vector& tauGlobal, "
-                    "scalar deltaT"
+                    "const vector&, "
+                    "const vector&, "
+                    "scalar"
                 ")"
             )
                 << "Limited acceleration " << a()
@@ -463,7 +462,7 @@ void Foam::sixDoFRigidBodyMotion::updateForce
 
         pi() += 0.5*(1 - cDamp_)*deltaT*tau();
 
-        if(report_)
+        if (report_)
         {
             status();
         }

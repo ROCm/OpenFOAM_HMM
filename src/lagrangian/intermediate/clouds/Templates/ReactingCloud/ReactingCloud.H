@@ -121,12 +121,6 @@ protected:
             PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
 
 
-        // Check
-
-            //- Total mass transferred to continuous phase via phase change
-            scalar dMassPhaseChange_;
-
-
     // Protected Member Functions
 
         // New parcel helper functions

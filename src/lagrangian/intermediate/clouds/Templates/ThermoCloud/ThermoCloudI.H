@@ -91,6 +91,114 @@ inline bool Foam::ThermoCloud<CloudType>::radiation() const
 
 template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radAreaP()
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radAreaP()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radAreaP_();
+}
+
+
+template<class CloudType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radAreaP() const
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radAreaP()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radAreaP_();
+}
+
+
+template<class CloudType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radT4()
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radT4()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radT4_();
+}
+
+
+template<class CloudType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radT4() const
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radT4()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radT4_();
+}
+
+
+template<class CloudType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radAreaPT4()
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radAreaPT4()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radAreaPT4_();
+}
+
+
+template<class CloudType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<CloudType>::radAreaPT4() const
+{
+    if (!radiation_)
+    {
+        FatalErrorIn
+        (
+            "inline Foam::DimensionedField<Foam::scalar, Foam::volMesh> "
+            "Foam::ThermoCloud<CloudType>::radAreaPT4()"
+        )   << "Radiation field requested, but radiation model not active"
+            << abort(FatalError);
+    }
+
+    return radAreaPT4_();
+}
+
+
+template<class CloudType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<CloudType>::hsTrans()
 {
     return hsTrans_();
@@ -182,21 +290,15 @@ inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::Ep() const
         )
     );
 
-    // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->solution().coupled())
+    if (radiation_)
     {
         scalarField& Ep = tEp().internalField();
+        const scalar dt = this->db().time().deltaTValue();
         const scalarField& V = this->mesh().V();
         const scalar epsilon = constProps_.epsilon0();
+        const scalarField& sumAreaPT4 = radAreaPT4_->field();
 
-        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
-        {
-            const parcelType& p = iter();
-            const label cellI = p.cell();
-            Ep[cellI] += p.nParticle()*p.areaP()*pow4(p.T());
-        }
-
-        Ep *= epsilon*physicoChemical::sigma.value()/V;
+        Ep = sumAreaPT4*epsilon*physicoChemical::sigma.value()/V/dt;
     }
 
     return tEp;
@@ -224,21 +326,15 @@ inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::ap() const
         )
     );
 
-    // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->solution().coupled())
+    if (radiation_)
     {
         scalarField& ap = tap().internalField();
+        const scalar dt = this->db().time().deltaTValue();
         const scalarField& V = this->mesh().V();
         const scalar epsilon = constProps_.epsilon0();
+        const scalarField& sumAreaP = radAreaP_->field();
 
-        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
-        {
-            const parcelType& p = iter();
-            const label cellI = p.cell();
-            ap[cellI] += p.nParticle()*p.areaP();
-        }
-
-        ap *= epsilon/V;
+        ap = sumAreaP*epsilon/V/dt;
     }
 
     return tap;
@@ -267,23 +363,16 @@ Foam::ThermoCloud<CloudType>::sigmap() const
         )
     );
 
-    // Need to check if coupled as field is created on-the-fly
-    if (radiation_ && this->solution().coupled())
+    if (radiation_)
     {
         scalarField& sigmap = tsigmap().internalField();
-
+        const scalar dt = this->db().time().deltaTValue();
         const scalarField& V = this->mesh().V();
         const scalar epsilon = constProps_.epsilon0();
         const scalar f = constProps_.f0();
+        const scalarField& sumAreaP = radAreaP_->field();
 
-        forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
-        {
-            const parcelType& p = iter();
-            const label cellI = p.cell();
-            sigmap[cellI] += p.nParticle()*p.areaP();
-        }
-
-        sigmap *= (1.0 - f)*(1.0 - epsilon)/V;
+        sigmap *= sumAreaP*(1.0 - f)*(1.0 - epsilon)/V/dt;
     }
 
     return tsigmap;

@@ -154,6 +154,13 @@ Foam::InflationInjection<CloudType>::~InflationInjection()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::InflationInjection<CloudType>::updateMesh()
+{
+    // do nothing
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::InflationInjection<CloudType>::timeEnd() const
 {
     return this->SOI_ + duration_;
@@ -234,8 +241,8 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                 "Foam::label "
                 "Foam::InflationInjection<CloudType>::parcelsToInject"
                 "("
-                    "const scalar time0, "
-                    "const scalar time1"
+                    "const scalar, "
+                    "const scalar"
                 ")"
             )
                 << "Maximum particle split iterations ("

@@ -287,6 +287,23 @@ tmp<fvVectorMatrix> NonlinearKEShih::divDevReff(volVectorField& U) const
 }
 
 
+tmp<fvVectorMatrix> NonlinearKEShih::divDevRhoReff
+(
+    const volScalarField& rho,
+    volVectorField& U
+) const
+{
+    volScalarField muEff("muEff", rho*nuEff());
+
+    return
+    (
+        fvc::div(rho*nonlinearStress_)
+      - fvm::laplacian(muEff, U)
+      - fvc::div(muEff*dev(T(fvc::grad(U))))
+    );
+}
+
+
 bool NonlinearKEShih::read()
 {
     if (RASModel::read())

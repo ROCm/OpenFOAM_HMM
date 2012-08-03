@@ -53,6 +53,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "SubModelBase.H"
 #include "vector.H"
+#include "TimeDataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,6 +103,9 @@ protected:
             //- Total mass to inject [kg]
             scalar massTotal_;
 
+            //- Mass flow rate profile for steady calculations
+            TimeDataEntry<scalar> massFlowRate_;
+
             //- Total mass injected to date [kg]
             scalar massInjected_;
 
@@ -138,7 +142,7 @@ protected:
         virtual bool validInjection(const label parcelI);
 
         //- Determine properties for next time step/injection interval
-        virtual void prepareForNextTimeStep
+        virtual bool prepareForNextTimeStep
         (
             const scalar time,
             label& newParcels,
@@ -245,6 +249,12 @@ public:
 
 
     // Member Functions
+
+        // Mapping
+
+            //- Update mesh
+            virtual void updateMesh();
+
 
         // Global information
 
