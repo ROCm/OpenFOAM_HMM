@@ -30,6 +30,7 @@ solution
             U               semiImplicit 1;
             Yi              semiImplicit 1;
             h               semiImplicit 1;
+            radiation       semiImplicit 1;
         }
     }
 

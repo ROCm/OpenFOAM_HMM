@@ -28,6 +28,7 @@ solution
         {
             U               explicit 1;
             h               explicit 1;
+            radiation       explicit 1;
         }
     }
 
