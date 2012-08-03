@@ -68,17 +68,11 @@ void Foam::interRegionHeatTransferModel::check()
         }
     }
 
-    if(!secSourceFound)
+    if (!secSourceFound)
     {
         FatalErrorIn
         (
-            "constantHeatTransfer::interRegionHeatTransferModel"
-            "("
-            "   const word& name,"
-            "   const word& modelType,"
-            "   const dictionary& dict,"
-            "   const fvMesh& mesh"
-            ")"
+            "constantHeatTransfer::interRegionHeatTransferModel::check()"
         )   << "Secondary source name not found" << secondarySourceName_
             << " in region " << secondaryMesh.name()
             << nl
@@ -125,8 +119,11 @@ Foam::interRegionHeatTransferModel::interRegionHeatTransferModel
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::interRegionHeatTransferModel::~interRegionHeatTransferModel()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -222,7 +219,7 @@ void Foam::interRegionHeatTransferModel::addSup
                     << endl;
             }
         }
-        else if(h.dimensions() == dimTemperature)
+        else if (h.dimensions() == dimTemperature)
         {
             eEqn += htc_*Tmapped - fvm::Sp(htc_, h);
 
@@ -269,4 +266,6 @@ bool Foam::interRegionHeatTransferModel::read(const dictionary& dict)
         return false;
     }
 }
+
+
 // ************************************************************************* //

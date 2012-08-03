@@ -161,7 +161,7 @@ void Foam::solidReaction::setLRhs(Istream& is)
             {
                 if (t == token::ADD)
                 {
-                    if(isGas)
+                    if (isGas)
                     {
                         grhs_ = dlsrhs.shrink();
                         dlsrhs.clear();
@@ -177,7 +177,7 @@ void Foam::solidReaction::setLRhs(Istream& is)
                 }
                 else if (t == token::ASSIGN)
                 {
-                    if(isGas)
+                    if (isGas)
                     {
                         Info << "Pyrolysis Gases should appear on lhs of the"
                                 "reaction" << endl;
@@ -188,7 +188,7 @@ void Foam::solidReaction::setLRhs(Istream& is)
                         dlsrhs.clear();
                     }
                 }
-                else if(isGas)
+                else if (isGas)
                 {
                     grhs_ = dlsrhs.shrink();
                     is.putBack(t);
@@ -201,7 +201,7 @@ void Foam::solidReaction::setLRhs(Istream& is)
                     return;
                 }
             }
-            else if(isGas)
+            else if (isGas)
             {
                 grhs_ = dlsrhs.shrink();
                 is.putBack(t);

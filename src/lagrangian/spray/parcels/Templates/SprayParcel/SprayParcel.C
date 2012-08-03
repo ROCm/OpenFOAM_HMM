@@ -404,7 +404,7 @@ void Foam::SprayParcel<ParcelType>::solveTABEq
     // oscillation frequency (squared)
     scalar omega2 = TABComega*sigma/(rho*r3) - rtd*rtd;
 
-    if(omega2 > 0)
+    if (omega2 > 0)
     {
         scalar omega = sqrt(omega2);
         scalar rhoc = this->rhoc();
