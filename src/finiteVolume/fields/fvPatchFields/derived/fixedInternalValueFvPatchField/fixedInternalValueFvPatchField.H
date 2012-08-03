@@ -43,7 +43,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     This is used as a base for conditions such as the turbulence \c epsilon
     wall function, which applies a near-wall constraint for high Reynolds
     number flows.

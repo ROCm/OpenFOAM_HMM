@@ -46,7 +46,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     The uniformValue entry is a DataEntry type, able to describe time
     varying functions.  The example above gives the usage for supplying a
     constant value.

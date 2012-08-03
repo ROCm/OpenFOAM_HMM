@@ -57,7 +57,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     - the \c flowRate and \c rpm entries are DataEntry types, able to describe
       time varying functions.  The example above gives the usage for supplying
       constant values.

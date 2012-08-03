@@ -53,7 +53,7 @@ Description
     The mode of operation is determined by the sign of the flux across the
     patch faces.
 
-    \note
+Note
     Sign conventions:
     - positive flux (out of domain): apply the user-specified fixed value
     - negative flux (into of domain): apply zero-gradient condition

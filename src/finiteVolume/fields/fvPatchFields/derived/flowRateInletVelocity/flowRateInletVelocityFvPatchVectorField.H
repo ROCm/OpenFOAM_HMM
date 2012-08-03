@@ -64,7 +64,7 @@ Description
     The \c flowRate entry is a \c DataEntry type, meaning that it can be
     specified as constant, a polynomial fuction of time, and ...
 
-    \note
+Note
     - the value is positive into the domain (as an inlet)
     - may not work correctly for transonic inlets
     - strange behaviour with potentialFoam since the U equation is not solved

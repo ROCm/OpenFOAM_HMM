@@ -47,7 +47,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     Sign conventions:
     - the value is positive for outward-pointing vectors
 

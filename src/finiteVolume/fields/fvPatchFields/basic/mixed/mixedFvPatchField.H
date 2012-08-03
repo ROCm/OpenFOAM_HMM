@@ -57,7 +57,7 @@ Description
         refGrad      | patch normal gradient   | yes         |
     \endtable
 
-    \note
+Note
     This condition is not usually applied directly; instead, use a derived
     mixed condition such as \c inletOutlet
 

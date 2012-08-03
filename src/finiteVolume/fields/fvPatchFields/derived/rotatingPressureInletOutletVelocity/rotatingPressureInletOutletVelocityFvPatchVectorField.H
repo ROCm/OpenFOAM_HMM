@@ -56,7 +56,7 @@ Description
     The \c omega entry is a DataEntry type, able to describe time varying
     functions.
 
-    \note
+Note
     Sign conventions:
     - positive flux (out of domain): apply zero-gradient condition
     - negative flux (into of domain): derive from the flux in the patch-normal

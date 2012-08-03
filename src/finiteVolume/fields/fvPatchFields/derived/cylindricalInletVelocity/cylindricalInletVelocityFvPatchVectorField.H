@@ -56,7 +56,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     The \c axialVelocity, \c radialVelocity and \c rpm entries are DataEntry
     types, able to describe time varying functions.  The example above gives
     the usage for supplying constant values.

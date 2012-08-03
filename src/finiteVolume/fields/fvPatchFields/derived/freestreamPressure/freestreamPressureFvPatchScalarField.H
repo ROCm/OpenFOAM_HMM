@@ -42,7 +42,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     This condition is designed to operate with a freestream velocity condition
 
 SeeAlso

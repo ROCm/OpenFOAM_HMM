@@ -32,9 +32,6 @@ Description
     This boundary condition provides a kinematic turbulent thermal conductivity
     for using wall functions, using the Jayatilleke 'P' function.
 
-    \note
-    The units of kinematic turbulent thermal conductivity are m2/s
-
     \heading Patch usage
 
     \table
@@ -52,6 +49,9 @@ Description
         type            kappatJayatillekeWallFunction;
     }
     \endverbatim
+
+Note
+    The units of kinematic turbulent thermal conductivity are [m2/s]
 
 SeeAlso
     Foam::fixedValueFvPatchField

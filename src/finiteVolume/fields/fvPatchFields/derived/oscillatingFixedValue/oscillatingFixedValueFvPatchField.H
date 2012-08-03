@@ -68,7 +68,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     The amplitude and frequency entries are DataEntry types, able to describe
     time varying functions.  The example above gives the usage for supplying
     constant values.

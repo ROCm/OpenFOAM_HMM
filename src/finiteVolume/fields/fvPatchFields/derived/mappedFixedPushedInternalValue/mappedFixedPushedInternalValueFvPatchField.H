@@ -52,7 +52,7 @@ Description
     }
     \endverbatim
 
-    \note
+Note
     This boundary condition can only be applied to patches that are of
     the \c mappedPolyPatch type.
 

@@ -65,7 +65,7 @@ Description
     boundary faces and both faces sample into the cell, both faces will get the
     same value.
 
-    \note
+Note
     It is not possible to sample internal faces since volume fields are not
     defined on faces.
 

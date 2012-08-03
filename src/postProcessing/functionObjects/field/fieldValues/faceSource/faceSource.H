@@ -74,7 +74,7 @@ Description
     For example, to calculate the volumetric or mass flux across a patch,
     apply the 'sum' operator to the flux field (typically \c phi)
 
-    \note
+Note
     - faces on empty patches get ignored
     - if the field is a volField the \c faceZone can only consist of boundary
       faces
