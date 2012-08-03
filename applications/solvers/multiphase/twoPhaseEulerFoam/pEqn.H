@@ -18,13 +18,6 @@
     mrfZones.absoluteFlux(phi1);
     mrfZones.absoluteFlux(phi2.oldTime());
     mrfZones.absoluteFlux(phi2);
-    mrfZones.absoluteFlux(phi);
-
-    U.boundaryField() =
-        alpha1.boundaryField()*U1.boundaryField()
-      + alpha2.boundaryField()*U2.boundaryField();
-    phi.boundaryField() =
-        fvc::interpolate(U.boundaryField()) & mesh.Sf().boundaryField();
 
     surfaceScalarField ppDrag("ppDrag", 0.0*phi1);
 
@@ -43,18 +36,29 @@
         "phiHbyA1",
         (fvc::interpolate(HbyA1) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU1, U1, phi1)
-      + fvc::interpolate(alpha2/rho1*K*rAU1)*phi2
-      + ppDrag
-      + rAU1f*(g & mesh.Sf())
     );
-    mrfZones.relativeFlux(phiHbyA1);
 
     surfaceScalarField phiHbyA2
     (
         "phiHbyA2",
         (fvc::interpolate(HbyA2) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU2, U2, phi2)
-      + fvc::interpolate(alpha1/rho2*K*rAU2)*phi1
+    );
+
+    phi = alpha1f*phiHbyA1 + alpha2f*phiHbyA2;
+    mrfZones.relativeFlux(phi);
+
+    phiHbyA1 +=
+    (
+        fvc::interpolate(alpha2/rho1*K*rAU1)*phi2
+      + ppDrag
+      + rAU1f*(g & mesh.Sf())
+    );
+    mrfZones.relativeFlux(phiHbyA1);
+
+    phiHbyA2 +=
+    (
+        fvc::interpolate(alpha1/rho2*K*rAU2)*phi1
       + rAU2f*(g & mesh.Sf())
     );
     mrfZones.relativeFlux(phiHbyA2);
@@ -63,7 +67,6 @@
     mrfZones.relativeFlux(phi1);
     mrfZones.relativeFlux(phi2.oldTime());
     mrfZones.relativeFlux(phi2);
-    mrfZones.relativeFlux(phi);
 
     surfaceScalarField phiHbyA("phiHbyA", alpha1f*phiHbyA1 + alpha2f*phiHbyA2);
 

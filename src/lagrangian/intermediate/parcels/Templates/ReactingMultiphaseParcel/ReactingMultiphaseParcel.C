@@ -268,12 +268,15 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     (
         td,
         dt,
+        this->age_,
         Ts,
         d0,
         T0,
         mass0,
         this->mass0_,
         YMix[GAS]*YGas_,
+        YMix[LIQ]*YLiquid_,
+        YMix[SLD]*YSolid_,
         canCombust_,
         dMassDV,
         Sh,
@@ -466,6 +469,16 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         // Update sensible enthalpy transfer
         td.cloud().hsTrans()[cellI] += np0*dhsTrans;
         td.cloud().hsCoeff()[cellI] += np0*Sph;
+
+        // Update radiation fields
+        if (td.cloud().radiation())
+        {
+            const scalar ap = this->areaP();
+            const scalar T4 = pow4(this->T_);
+            td.cloud().radAreaP()[cellI] += dt*np0*ap;
+            td.cloud().radT4()[cellI] += dt*np0*T4;
+            td.cloud().radAreaP()[cellI] += dt*np0*ap*T4;
+        }
     }
 }
 
@@ -476,12 +489,15 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
 (
     TrackData& td,
     const scalar dt,
+    const scalar age,
     const scalar Ts,
     const scalar d,
     const scalar T,
     const scalar mass,
     const scalar mass0,
     const scalarField& YGasEff,
+    const scalarField& YLiquidEff,
+    const scalarField& YSolidEff,
     bool& canCombust,
     scalarField& dMassDV,
     scalar& Sh,
@@ -510,10 +526,13 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     td.cloud().devolatilisation().calculate
     (
         dt,
+        age,
         mass0,
         mass,
         T,
         YGasEff,
+        YLiquidEff,
+        YSolidEff,
         canCombust,
         dMassDV
     );
@@ -638,7 +657,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ParcelType(p),
     YGas_(p.YGas_),
     YLiquid_(p.YLiquid_),
-    YSolid_(p.YSolid_)
+    YSolid_(p.YSolid_),
+    canCombust_(p.canCombust_)
 {}
 
 
@@ -652,7 +672,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ParcelType(p, mesh),
     YGas_(p.YGas_),
     YLiquid_(p.YLiquid_),
-    YSolid_(p.YSolid_)
+    YSolid_(p.YSolid_),
+    canCombust_(p.canCombust_)
 {}
 
 

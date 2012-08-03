@@ -132,6 +132,15 @@ protected:
             //- Include radiation
             Switch radiation_;
 
+            //- Radiation sum of parcel projected areas
+            autoPtr<DimensionedField<scalar, volMesh> > radAreaP_;
+
+            //- Radiation sum of parcel temperature^4
+            autoPtr<DimensionedField<scalar, volMesh> > radT4_;
+
+            //- Radiation sum of parcel projected areas * temperature^4
+            autoPtr<DimensionedField<scalar, volMesh> > radAreaPT4_;
+
 
         // Sources
 
@@ -243,6 +252,26 @@ public:
 
                  //- Radiation flag
                 inline bool radiation() const;
+
+                //- Radiation sum of parcel projected areas [m2]
+                inline DimensionedField<scalar, volMesh>& radAreaP();
+
+                //- Radiation sum of parcel projected areas [m2]
+                inline const DimensionedField<scalar, volMesh>&
+                    radAreaP() const;
+
+                //- Radiation sum of parcel temperature^4 [K4]
+                inline DimensionedField<scalar, volMesh>& radT4();
+
+                //- Radiation sum of parcel temperature^4 [K4]
+                inline const DimensionedField<scalar, volMesh>& radT4() const;
+
+                //- Radiation sum of parcel projected area*temperature^4 [m2K4]
+                inline DimensionedField<scalar, volMesh>& radAreaPT4();
+
+                //- Radiation sum of parcel temperature^4 [m2K4]
+                inline const DimensionedField<scalar, volMesh>&
+                    radAreaPT4() const;
 
 
             // Sources

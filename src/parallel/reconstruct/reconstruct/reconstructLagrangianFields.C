@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,7 +163,7 @@ void Foam::reconstructLagrangianFields
 
     IOobjectList fields = objects.lookupClass(fieldClassName);
 
-    if(fields.size())
+    if (fields.size())
     {
         Info<< "    Reconstructing lagrangian "
             << fieldClassName << "s\n" << endl;

@@ -55,7 +55,7 @@ Foam::wordList Foam::heThermo<BasicThermo, MixtureType>::heBoundaryTypes()
         {
             hbt[patchi] = gradientEnergyFvPatchScalarField::typeName;
         }
-        else if(isA<mixedFvPatchScalarField>(tbf[patchi]))
+        else if (isA<mixedFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = mixedEnergyFvPatchScalarField::typeName;
         }

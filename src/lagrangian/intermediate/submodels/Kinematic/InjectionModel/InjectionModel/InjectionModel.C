@@ -284,6 +284,7 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
+    massFlowRate_(owner.db().time(), "massFlowRate"),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<label>("nInjections")),
     parcelsAddedTotal_
@@ -310,6 +311,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     SOI_(0.0),
     volumeTotal_(0.0),
     massTotal_(0.0),
+    massFlowRate_(owner.db().time(), "massFlowRate"),
     massInjected_(this->template getModelProperty<scalar>("massInjected")),
     nInjections_(this->template getModelProperty<scalar>("nInjections")),
     parcelsAddedTotal_
@@ -335,7 +337,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     }
     else
     {
-        this->coeffDict().lookup("massFlowRate") >> massTotal_;
+        massFlowRate_.reset(this->coeffDict());
+        massTotal_ = massFlowRate_.value(owner.db().time().value());
     }
 
     const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
@@ -384,6 +387,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     SOI_(im.SOI_),
     volumeTotal_(im.volumeTotal_),
     massTotal_(im.massTotal_),
+    massFlowRate_(im.massFlowRate_),
     massInjected_(im.massInjected_),
     nInjections_(im.nInjections_),
     parcelsAddedTotal_(im.parcelsAddedTotal_),
@@ -402,6 +406,13 @@ Foam::InjectionModel<CloudType>::~InjectionModel()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::updateMesh()
+{
+    // do nothing
+}
+
 
 template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::timeEnd() const
@@ -458,7 +469,16 @@ Foam::scalar Foam::InjectionModel<CloudType>::volumeToInject
 template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::averageParcelMass()
 {
-    label nTotal = parcelsToInject(0.0, timeEnd() - timeStart());
+    label nTotal = 0.0;
+    if (this->owner().solution().transient())
+    {
+        nTotal = parcelsToInject(0.0, timeEnd() - timeStart());
+    }
+    else
+    {
+        nTotal = parcelsToInject(0.0, 1.0);
+    }
+
     return massTotal_/nTotal;
 }
 
@@ -593,6 +613,8 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
 
     const polyMesh& mesh = this->owner().mesh();
     typename TrackData::cloudType& cloud = td.cloud();
+
+    massTotal_ = massFlowRate_.value(mesh.time().value());
 
     // Reset counters
     time0_ = 0.0;

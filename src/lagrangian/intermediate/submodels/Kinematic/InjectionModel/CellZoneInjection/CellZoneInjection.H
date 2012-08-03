@@ -130,6 +130,9 @@ public:
 
     // Member Functions
 
+        //- Set injector locations when mesh is updated
+        virtual void updateMesh();
+
         //- Return the end-of-injection time
         scalar timeEnd() const;
 

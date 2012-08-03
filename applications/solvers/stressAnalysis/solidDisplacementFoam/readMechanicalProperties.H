@@ -161,7 +161,7 @@
             )
         );
     }
-    else if(nuType == "field")
+    else if (nuType == "field")
     {
         nuIO.readOpt() = IOobject::MUST_READ;
         nuPtr.reset
