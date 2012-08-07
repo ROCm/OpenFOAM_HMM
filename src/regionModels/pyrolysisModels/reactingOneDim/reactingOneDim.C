@@ -232,12 +232,22 @@ void reactingOneDim::solveContinuity()
         Info<< "reactingOneDim::solveContinuity()" << endl;
     }
 
-    solve
-    (
-        fvm::ddt(rho_)
-     ==
-      - solidChemistry_->RRg()
-    );
+    if (moveMesh_)
+    {
+        const scalarField mass0 = rho_*regionMesh().V();
+
+        fvScalarMatrix rhoEqn
+        (
+            fvm::ddt(rho_)
+         ==
+          - solidChemistry_->RRg()
+        );
+
+        rhoEqn.solve();
+
+        updateMesh(mass0);
+
+    }
 }
 
 
@@ -261,14 +271,15 @@ void reactingOneDim::solveSpeciesMass()
             solidChemistry_->RRs(i)
         );
 
-        if (moveMesh_)
+        if (regionMesh().moving())
         {
-            surfaceScalarField phiRhoMesh
+            surfaceScalarField phiYiRhoMesh
             (
                 fvc::interpolate(Yi*rho_)*regionMesh().phi()
             );
 
-            YiEqn -= fvc::div(phiRhoMesh);
+            YiEqn += fvc::div(phiYiRhoMesh);
+
         }
 
         YiEqn.solve(regionMesh().solver("Yi"));
@@ -303,14 +314,14 @@ void reactingOneDim::solveEnergy()
       + fvc::div(phiGas)
     );
 
-    if (moveMesh_)
+    if (regionMesh().moving())
     {
-        surfaceScalarField phiMesh
+        surfaceScalarField phihMesh
         (
             fvc::interpolate(rho_*h_)*regionMesh().phi()
         );
 
-        hEqn -= fvc::div(phiMesh);
+        hEqn += fvc::div(phihMesh);
     }
 
     hEqn.relax();
@@ -349,7 +360,18 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
     pyrolysisModel(modelType, mesh),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
     solidThermo_(solidChemistry_->solid()),
-    rho_(solidThermo_.rho()),
+    rho_
+    (
+        IOobject
+        (
+            "rho",
+            regionMesh().time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        solidThermo_.rho()
+    ),
     Ys_(solidThermo_.composition().Y()),
     h_(solidThermo_.he()),
     primaryRadFluxName_(coeffs().lookupOrDefault<word>("radFluxName", "Qr")),
@@ -449,7 +471,18 @@ reactingOneDim::reactingOneDim
     pyrolysisModel(modelType, mesh, dict),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
     solidThermo_(solidChemistry_->solid()),
-    rho_(solidThermo_.rho()),
+    rho_
+    (
+        IOobject
+        (
+            "rho",
+            regionMesh().time().timeName(),
+            regionMesh(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        solidThermo_.rho()
+    ),
     Ys_(solidThermo_.composition().Y()),
     h_(solidThermo_.he()),
     primaryRadFluxName_(dict.lookupOrDefault<word>("radFluxName", "Qr")),
@@ -681,17 +714,15 @@ void reactingOneDim::evolveRegion()
 {
     Info<< "\nEvolving pyrolysis in region: " << regionMesh().name() << endl;
 
-    const scalarField mass0 = rho_*regionMesh().V();
-
     solidChemistry_->solve
     (
         time().value() - time().deltaTValue(),
         time().deltaTValue()
     );
 
-    solveContinuity();
+    calculateMassTransfer();
 
-    updateMesh(mass0);
+    solveContinuity();
 
     chemistrySh_ = solidChemistry_->Sh()();
 
@@ -704,9 +735,9 @@ void reactingOneDim::evolveRegion()
         solveEnergy();
     }
 
-    calculateMassTransfer();
-
     solidThermo_.correct();
+
+    rho_ = solidThermo_.rho();
 }
 
 

@@ -117,6 +117,8 @@ void Foam::regionModels::regionModel1D::initialise()
     }
 
     boundaryFaceOppositeFace_.setSize(localPyrolysisFaceI);
+    boundaryFaceFaces_.setSize(localPyrolysisFaceI);
+    boundaryFaceCells_.setSize(localPyrolysisFaceI);
 
     surfaceScalarField& nMagSf = nMagSfPtr_();
 
@@ -192,6 +194,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 
     const polyBoundaryMesh& bm = regionMesh().boundaryMesh();
 
+    label totalFaceId = 0;
     forAll(intCoupledPatchIDs_, localPatchI)
     {
         label patchI = intCoupledPatchIDs_[localPatchI];
@@ -200,8 +203,9 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 
         forAll(pp, patchFaceI)
         {
-            const labelList& faces = boundaryFaceFaces_[patchFaceI];
-            const labelList& cells = boundaryFaceCells_[patchFaceI];
+            const labelList& faces = boundaryFaceFaces_[totalFaceId];
+            const labelList& cells = boundaryFaceCells_[totalFaceId];
+
             const vector n = pp.faceNormals()[patchFaceI];
             const vector sf = pp.faceAreas()[patchFaceI];
 
@@ -231,7 +235,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
 
                     if
                     (
-                        ((nbrCf - (oldPoints[pointI] + newDelta)) & n)
+                        mag((nbrCf - (oldPoints[pointI] + newDelta)) & n)
                       > minDelta
                     )
                     {
@@ -242,19 +246,17 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
                 }
                 nbrCf = oldCf[i + 1] + localDelta;
             }
-
             // Modify boundary
-            const label bFaceI = boundaryFaceOppositeFace_[patchFaceI];
+            const label bFaceI = boundaryFaceOppositeFace_[totalFaceId];
             const face f = regionMesh().faces()[bFaceI];
             const label cellI = cells[cells.size() - 1];
             newDelta += (deltaV[cellI]/mag(sf))*n;
             forAll(f, pti)
             {
                 const label pointI = f[pti];
-
                 if
                 (
-                    ((nbrCf - (oldPoints[pointI] + newDelta)) & n)
+                    mag((nbrCf - (oldPoints[pointI] + newDelta)) & n)
                   > minDelta
                 )
                 {
@@ -262,9 +264,9 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
                     cellMoveMap[cellI] = 1;
                 }
             }
+            totalFaceId ++;
         }
     }
-
     // Move points
     regionMesh().movePoints(newPoints);
 

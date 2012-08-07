@@ -84,14 +84,8 @@ protected:
 
         // Reference to solid thermo properties
 
-//             //- Absorption coefficient [1/m]
-//             const volScalarField& kappaRad_;
-//
-//             //- Thermal conductivity [W/m/K]
-//             const volScalarField& kappa_;
-
             //- Density [kg/m3]
-            volScalarField& rho_;
+            volScalarField rho_;
 
             //- List of solid components
             PtrList<volScalarField>& Ys_;
@@ -221,8 +215,8 @@ public:
 
             //- Fields
 
-                //- Return density [kg/m3]
-                virtual const volScalarField& rho() const;
+                //- Return const density [Kg/m3]
+                const volScalarField& rho() const;
 
                 //- Return const temperature [K]
                 virtual const volScalarField& T() const;
