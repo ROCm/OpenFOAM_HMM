@@ -127,13 +127,8 @@ class sampledSurfaces
 
     // Private Member Functions
 
-        //- Clear old field groups
-        void clearFieldGroups();
 
-        //- Append fieldName to the appropriate group
-        label appendFieldGroup(const word& fieldName, const word& fieldType);
-
-        //- Classify field types, returns the number of fields
+        //- Return number of fields
         label classifyFields();
 
         //- Write geometry only

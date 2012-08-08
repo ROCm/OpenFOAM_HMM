@@ -188,7 +188,6 @@ void Foam::sampledSurfaces::read(const dictionary& dict)
     if (surfacesFound)
     {
         dict.lookup("fields") >> fieldSelection_;
-        clearFieldGroups();
 
         dict.lookup("interpolationScheme") >> interpolationScheme_;
         const word writeType(dict.lookup("surfaceFormat"));
