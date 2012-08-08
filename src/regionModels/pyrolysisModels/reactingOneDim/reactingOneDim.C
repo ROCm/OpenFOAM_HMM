@@ -187,8 +187,8 @@ void reactingOneDim::updatePhiGas()
                         << " is : " << massInt
                         << " [kg/s] " << endl;
                 }
+                totalFaceId ++;
             }
-            totalFaceId ++;
         }
         tHsiGas().clear();
     }
