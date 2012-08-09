@@ -31,9 +31,9 @@ FoamFile
 
             radFluxName     Qr;
 
-            minimumDelta    1e-8;
+            minimumDelta    1e-12;
 
-            reactionDeltaMin 1e-8;
+            reactionDeltaMin 1e-12;
 
             moveMesh        false;
         }
