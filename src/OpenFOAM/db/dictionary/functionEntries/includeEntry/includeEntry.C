@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,13 +74,15 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
     fileName fName(is);
     fName.expand();
 
-    // relative name
-    if (!fName.isAbsolute())
+    if (fName.empty() || fName.isAbsolute())
     {
-        fName = fileName(is.name()).path()/fName;
+        return fName;
     }
-
-    return fName;
+    else
+    {
+        // relative name
+        return fileName(is.name()).path()/fName;
+    }
 }
 
 
