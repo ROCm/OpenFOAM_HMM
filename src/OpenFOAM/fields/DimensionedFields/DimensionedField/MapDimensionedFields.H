@@ -45,10 +45,19 @@ void MapDimensionedFields(const MeshMapper& mapper)
     typedef DimensionedField<Type, GeoMesh> FieldType;
     typedef HashTable<const FieldType*> TableType;
 
-    TableType fields
-    (
-        mapper.thisDb().objectRegistry::template lookupClass<FieldType>(true)
-    );
+    TableType fields(mapper.thisDb().size());
+
+    forAllConstIter(objectRegistry, mapper.thisDb(), iter)
+    {
+        if (isType<FieldType>(*iter()))
+        {
+            fields.insert
+            (
+                iter()->name(),
+                dynamic_cast<const FieldType*>(iter())
+            );
+        }
+    }
 
     forAllConstIter(typename TableType, fields, fieldIter)
     {
