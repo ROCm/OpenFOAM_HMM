@@ -58,15 +58,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     for (const_iterator iter = begin(); iter != end(); ++iter)
     {
-        if (strict && isType<Type>(*iter()))
-        {
-            objectsOfClass.insert
-            (
-                iter()->name(),
-                dynamic_cast<const Type*>(iter())
-            );
-        }
-        else if (isA<Type>(*iter()))
+        if ((strict && isType<Type>(*iter())) || isA<Type>(*iter()))
         {
             objectsOfClass.insert
             (
