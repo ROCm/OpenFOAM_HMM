@@ -157,7 +157,7 @@ public:
 
             //- Lookup and return all objects of the given Type
             template<class Type>
-            HashTable<const Type*> lookupClass() const;
+            HashTable<const Type*> lookupClass(const bool strict = false) const;
 
             //- Is the named Type found?
             template<class Type>

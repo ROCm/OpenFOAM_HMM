@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
                 (
                     IOobject
                     (
-                        this->name() + "rhoTrans",
+                        this->name() + "::rhoTrans",
                         this->db().time().timeName(),
                         this->db(),
                         IOobject::NO_READ,
@@ -155,7 +155,7 @@ Foam::ReactingCloud<CloudType>::Srho(const label i) const
         (
             IOobject
             (
-                this->name() + "rhoTrans",
+                this->name() + "::rhoTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -192,7 +192,7 @@ Foam::ReactingCloud<CloudType>::Srho() const
         (
             IOobject
             (
-                this->name() + "rhoTrans",
+                this->name() + "::rhoTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -236,7 +236,7 @@ Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
             (
                 IOobject
                 (
-                    this->name() + "rhoTrans",
+                    this->name() + "::rhoTrans",
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,
