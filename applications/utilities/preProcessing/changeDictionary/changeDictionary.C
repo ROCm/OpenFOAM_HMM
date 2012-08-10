@@ -58,10 +58,14 @@ Usage
     - changeDictionary [OPTION]
 
     \param -literalRE \n
-    Do not interpret regular expressions; treat them as any other keyword.
+    Do not interpret regular expressions or patchGroups;
+    treat them as any other keyword.
 
     \param -enableFunctionEntries \n
     By default all dictionary preprocessing of fields is disabled
+
+    \param -disablePatchGroups \n
+    By default all keys are also checked for being patchGroups
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,7 +88,47 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool merge(dictionary&, const dictionary&, const bool);
+// Extract groupPatch (= shortcut) info from boundary file info
+HashTable<wordList, word> extractPatchGroups(const dictionary& boundaryDict)
+{
+    HashTable<wordList, word> groupToPatch;
+
+    forAllConstIter(dictionary, boundaryDict, iter)
+    {
+        const word& patchName = iter().keyword();
+        const dictionary& patchDict = iter().dict();
+
+        wordList groups;
+        if (patchDict.readIfPresent("inGroups", groups))
+        {
+            forAll(groups, i)
+            {
+                HashTable<wordList, word>::iterator fndGroup = groupToPatch.find
+                (
+                    groups[i]
+                );
+                if (fndGroup == groupToPatch.end())
+                {
+                    groupToPatch.insert(groups[i], wordList(1, patchName));
+                }
+                else
+                {
+                    fndGroup().append(patchName);
+                }
+            }
+        }
+    }
+    return groupToPatch;
+}
+
+
+bool merge
+(
+    dictionary&,
+    const dictionary&,
+    const bool,
+    const HashTable<wordList, word>&
+);
 
 
 // Add thisEntry to dictionary thisDict.
@@ -93,7 +137,8 @@ bool addEntry
     dictionary& thisDict,
     entry& thisEntry,
     const entry& mergeEntry,
-    const bool literalRE
+    const bool literalRE,
+    const HashTable<wordList, word>& shortcuts
 )
 {
     bool changed = false;
@@ -108,7 +153,8 @@ bool addEntry
             (
                 const_cast<dictionary&>(thisEntry.dict()),
                 mergeEntry.dict(),
-                literalRE
+                literalRE,
+                shortcuts
             )
         )
         {
@@ -135,7 +181,8 @@ bool merge
 (
     dictionary& thisDict,
     const dictionary& mergeDict,
-    const bool literalRE
+    const bool literalRE,
+    const HashTable<wordList, word>& shortcuts
 )
 {
     bool changed = false;
@@ -156,7 +203,7 @@ bool merge
     {
         const keyType& key = mergeIter().keyword();
 
-        if (literalRE || !key.isPattern())
+        if (literalRE || !(key.isPattern() || shortcuts.found(key)))
         {
             entry* entryPtr = thisDict.lookupEntryPtr
             (
@@ -179,7 +226,8 @@ bool merge
                         thisDict,
                        *entryPtr,
                         mergeIter(),
-                        literalRE
+                        literalRE,
+                        shortcuts
                     )
                 )
                 {
@@ -196,44 +244,70 @@ bool merge
     }
 
 
-    // Pass 2. Wildcard matches (if any) on any non-match keys.
+    // Pass 2. Wildcard or shortcut matches (if any) on any non-match keys.
 
     if (!literalRE && thisKeysSet.size() > 0)
     {
+        // Pick up remaining dictionary entries
         wordList thisKeys(thisKeysSet.toc());
 
         forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
         {
             const keyType& key = mergeIter().keyword();
 
+            // List of indices into thisKeys
+            labelList matches;
+
             if (key.isPattern())
             {
-                // Find all matching entries in the original thisDict
+                // Wildcard match
+                matches = findStrings(key, thisKeys);
 
-                labelList matches = findStrings(key, thisKeys);
-
-                forAll(matches, i)
+            }
+            else if (shortcuts.size())
+            {
+                // See if patchGroups expand to valid thisKeys
+                const wordList shortcutNames = shortcuts.toc();
+                labelList indices = findStrings(key, shortcutNames);
+                forAll(indices, i)
                 {
-                    label matchI = matches[i];
-
-                    entry& thisEntry = const_cast<entry&>
-                    (
-                        thisDict.lookupEntry(thisKeys[matchI], false, false)
-                    );
-
-                    if
-                    (
-                        addEntry
-                        (
-                            thisDict,
-                            thisEntry,
-                            mergeIter(),
-                            literalRE
-                        )
-                    )
+                    const word& name = shortcutNames[indices[i]];
+                    const wordList& keys = shortcuts[name];
+                    forAll(keys, j)
                     {
-                        changed = true;
+                        label index = findIndex(thisKeys, keys[j]);
+                        if (index != -1)
+                        {
+                            matches.append(index);
+                        }
                     }
+                }
+            }
+
+            // Add all matches
+            forAll(matches, i)
+            {
+                const word& thisKey = thisKeys[matches[i]];
+
+                entry& thisEntry = const_cast<entry&>
+                (
+                    thisDict.lookupEntry(thisKey, false, false)
+                );
+
+                if
+                (
+                    addEntry
+                    (
+                        thisDict,
+                        thisEntry,
+                        mergeIter(),
+                        literalRE,
+                        HashTable<wordList, word>(0)    // no shortcuts
+                                                        // at deeper levels
+                    )
+                )
+                {
+                    changed = true;
                 }
             }
         }
@@ -273,6 +347,12 @@ int main(int argc, char *argv[])
         "enableFunctionEntries",
         "enable expansion of dictionary directives - #include, #codeStream etc"
     );
+    argList::addBoolOption
+    (
+        "disablePatchGroups",
+        "disable matching keys to patch groups"
+    );
+
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
@@ -304,7 +384,6 @@ int main(int argc, char *argv[])
     }
 
     const bool literalRE = args.optionFound("literalRE");
-
     if (literalRE)
     {
         Info<< "Not interpreting any regular expressions (RE)"
@@ -325,6 +404,15 @@ int main(int argc, char *argv[])
     {
         // By default disable dictionary expansion for fields
         entry::disableFunctionEntries = 1;
+    }
+
+
+    const bool disablePatchGroups = args.optionFound("disablePatchGroups");
+    if (disablePatchGroups)
+    {
+        Info<< "Not interpreting any keys in the changeDictionary"
+            << " as patchGroups"
+            << endl;
     }
 
 
@@ -369,6 +457,70 @@ int main(int argc, char *argv[])
         << replaceDicts.toc() << endl;
 
 
+
+    // Always read boundary to get patch groups
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    Info<< "Reading polyMesh/boundary file to extract patch names"
+        << endl;
+
+    // Read PtrList of dictionary as dictionary.
+    const word oldTypeName = IOPtrList<entry>::typeName;
+    const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
+    IOPtrList<entry> dictList
+    (
+        IOobject
+        (
+            "boundary",
+            runTime.findInstance
+            (
+                regionPrefix/polyMesh::meshSubDir,
+                "boundary",
+                IOobject::READ_IF_PRESENT
+            ),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+    const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
+    // Fake type back to what was in field
+    const_cast<word&>(dictList.type()) = dictList.headerClassName();
+
+    // Temporary convert to dictionary
+    dictionary fieldDict;
+    forAll(dictList, i)
+    {
+        fieldDict.add(dictList[i].keyword(), dictList[i].dict());
+    }
+
+    if (dictList.size())
+    {
+        Info<< "Loaded dictionary " << dictList.name()
+            << " with entries " << fieldDict.toc() << endl;
+    }
+
+    // Extract any patchGroups information (= shortcut for set of
+    // patches)
+    HashTable<wordList, word> patchGroups;
+    if (!disablePatchGroups)
+    {
+        patchGroups = extractPatchGroups(fieldDict);
+        if (patchGroups.size())
+        {
+            Info<< "Extracted patch groups:" << endl;
+            wordList groups(patchGroups.sortedToc());
+            forAll(groups, i)
+            {
+                Info<< "    group " << groups[i] << " with patches "
+                    << patchGroups[groups[i]] << endl;
+            }
+        }
+    }
+
+
     // Every replacement is a dictionary name and a keyword in this
 
     forAllConstIter(dictionary, replaceDicts, fieldIter)
@@ -384,46 +536,12 @@ int main(int argc, char *argv[])
             Info<< "Special handling of " << fieldName
                 << " as polyMesh/boundary file." << endl;
 
-            // Read PtrList of dictionary as dictionary.
-            const word oldTypeName = IOPtrList<entry>::typeName;
-            const_cast<word&>(IOPtrList<entry>::typeName) = word::null;
-            IOPtrList<entry> dictList
-            (
-                IOobject
-                (
-                    fieldName,
-                    runTime.findInstance
-                    (
-                        regionPrefix/polyMesh::meshSubDir,
-                        fieldName
-                    ),
-                    polyMesh::meshSubDir,
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-            const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
-            // Fake type back to what was in field
-            const_cast<word&>(dictList.type()) = dictList.headerClassName();
-
-            // Temporary convert to dictionary
-            dictionary fieldDict;
-            forAll(dictList, i)
-            {
-                fieldDict.add(dictList[i].keyword(), dictList[i].dict());
-            }
-
-            Info<< "Loaded dictionary " << fieldName
-                << " with entries " << fieldDict.toc() << endl;
-
             // Get the replacement dictionary for the field
             const dictionary& replaceDict = fieldIter().dict();
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            merge(fieldDict, replaceDict, literalRE);
+            merge(fieldDict, replaceDict, literalRE, patchGroups);
 
             Info<< "fieldDict:" << fieldDict << endl;
 
@@ -492,7 +610,7 @@ int main(int argc, char *argv[])
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            merge(fieldDict, replaceDict, literalRE);
+            merge(fieldDict, replaceDict, literalRE, patchGroups);
 
             Info<< "Writing modified fieldDict " << fieldName << endl;
             fieldDict.regIOobject::write();

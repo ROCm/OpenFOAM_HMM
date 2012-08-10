@@ -70,6 +70,7 @@ fluxRequired
 {
     default         no;
     p_rgh;
+    phiMesh;
 }
 
 

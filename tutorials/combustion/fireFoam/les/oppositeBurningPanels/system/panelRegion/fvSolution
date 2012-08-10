@@ -32,7 +32,7 @@ solvers
         relTol          0;
     }
 
-    rhoThermo
+    rho
     {
         solver          PCG;
         preconditioner  DIC;

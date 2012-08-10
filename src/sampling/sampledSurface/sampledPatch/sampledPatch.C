@@ -28,6 +28,7 @@ License
 #include "polyMesh.H"
 #include "polyPatch.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -273,6 +274,49 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
     return sampleField(vField);
 }
 
+
+Foam::tmp<Foam::scalarField> Foam::sampledPatch::sample
+(
+    const surfaceScalarField& sField
+) const
+{
+    return sampleField(sField);
+}
+
+
+Foam::tmp<Foam::vectorField> Foam::sampledPatch::sample
+(
+    const surfaceVectorField& sField
+) const
+{
+    return sampleField(sField);
+}
+
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledPatch::sample
+(
+    const surfaceSphericalTensorField& sField
+) const
+{
+    return sampleField(sField);
+}
+
+
+Foam::tmp<Foam::symmTensorField> Foam::sampledPatch::sample
+(
+    const surfaceSymmTensorField& sField
+) const
+{
+    return sampleField(sField);
+}
+
+
+Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
+(
+    const surfaceTensorField& sField
+) const
+{
+    return sampleField(sField);
+}
 
 Foam::tmp<Foam::scalarField> Foam::sampledPatch::interpolate
 (

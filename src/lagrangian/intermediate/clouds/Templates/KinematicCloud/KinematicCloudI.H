@@ -539,7 +539,7 @@ Foam::KinematicCloud<CloudType>::theta() const
         (
             IOobject
             (
-                this->name() + "Theta",
+                this->name() + "::theta",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -578,7 +578,7 @@ Foam::KinematicCloud<CloudType>::alpha() const
         (
             IOobject
             (
-                this->name() + "Alpha",
+                this->name() + "::alpha",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -615,7 +615,7 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
         (
             IOobject
             (
-                this->name() + "RhoEff",
+                this->name() + "::rhoEff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
