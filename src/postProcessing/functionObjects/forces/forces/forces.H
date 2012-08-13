@@ -28,16 +28,49 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Calculates the forces and moments by integrating the pressure and
-    skin-friction forces over a given list of patches.
+    This function object calculates the forces and moments by integrating the
+    pressure and skin-friction forces over a given list of patches.
 
     Member function forces::write() calculates the forces/moments and
     writes the forces/moments into the file \<timeDir\>/forces.dat
 
+    Example of function object specification:
+    \verbatim
+    forces1
+    {
+        type        forces;
+        functionObjectLibs ("libforces.so");
+        ...
+        log         yes;
+        patches     (walls);
+        
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: forces       | yes         |
+        log          | write force data to standard output | no | no
+        patches      | patches included in the forces calculation | yes |
+        pName        | pressure field name     | no          | p
+        UName        | velocity field name     | no          | U
+        rhoName      | density field name (see below) | no   | rho
+        CofR         | centre of rotation (see below) | no   |
+        directForceDensity | force density supplied directly (see below)|no|no
+        fDName       | name of force density field (see below) | no | fD
+    \endtable
+
 Note
-    The centre of rotation for moment calculations can either be specified
-    by an \c CofR entry, or be taken from origin of the local coordinateSystem.
-    For example,
+  - For incompressible cases, set \c rhoName to \c rhoInf.  You will then be
+    required to provide a \c rhoInf value corresponding to the free-stream
+    constant density.
+  - If the force density is supplied directly, set the \c directForceDensity
+    flag to 'yes', and supply the force density field using the \c
+    fDName entry
+  - The centre of rotation (CofR) for moment calculations can either be
+    specified by an \c CofR entry, or be taken from origin of the local
+    coordinate system.  For example,
     \verbatim
         CofR        (0 0 0);
     \endverbatim
@@ -50,6 +83,11 @@ Note
             e1      (1 0 0);
         }
     \endverbatim
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::forceCoeffs
 
 SourceFiles
     forces.C

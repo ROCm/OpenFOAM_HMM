@@ -28,8 +28,45 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
+    This function object extends the Foam::forces function object by providing
+    lift, drag and moment coefficients.
+
+    Example of function object specification:
+    \verbatim
+    forceCoeffs1
+    {
+        type        forceCoeffs;
+        functionObjectLibs ("libforces.so");
+        ...
+        log         yes;
+        patches     (walls);
+        liftDir     (0 1 0);
+        dragDir     (-1 0 0);
+        pitchAxis   (0 0 1);
+        magUInf     100;
+        lRef        3.5;
+        ARef        2.2;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: forces       | yes         |
+        log          | write force data to standard output | no | no
+        patches      | patches included in the forces calculation | yes |
+        liftDir      | lift direction          | yes         |
+        dragDir      | drag direction          | yes         |
+        pitchAxis    | picth axis              | yes         |
+        magUInf      | free stream velocity magnitude | yes  |
+        lRef         | reference length scale for moment calculations | yes |
+        ARef         | reference area          | yes |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::forces
 
 SourceFiles
     forceCoeffs.C
@@ -48,7 +85,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                         Class forceCoeffs Declaration
 \*---------------------------------------------------------------------------*/
 
 class forceCoeffs
