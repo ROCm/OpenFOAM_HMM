@@ -28,7 +28,7 @@ Group
     grpCloudFunctionObjects
 
 Description
-    This function object outputs lagrangian cloud information to a file.  The
+    This function object outputs Lagrangian cloud information to a file.  The
     current outputs include:
     - total current number of parcels
     - total current mass of parcels
@@ -37,13 +37,9 @@ Description
     \verbatim
     cloudInfo1
     {
-        // Type of functionObject
-        type cloudInfo;
-
-        // Where to load it from (if not already in solver)
+        type        cloudInfo;
         functionObjectLibs ("libcloudFunctionObjects.so");
-
-        // Clouds to process
+        ...
         clouds
         (
             kinematicCloud1
@@ -51,6 +47,21 @@ Description
         );
     }
     \endverbatim
+
+
+    \heading Function object usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: cloudInfo    | yes         |
+        clouds       | list of clouds names to process |yes  |
+    \endtable
+
+    The output data of each cloud is written to a file named \<cloudName\>.dat
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     cloudInfo.C

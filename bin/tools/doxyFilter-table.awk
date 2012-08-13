@@ -48,6 +48,26 @@ BEGIN {
 }
 
 
+/\\plaintable/ {
+    flag = 3;
+    firstRow = 1;
+    next;
+}
+
+
+/\\endplaintable/ {
+    if (data != "")
+    {
+        printf "<table border="0">\n";
+        printf data;
+        printf "</table>\n";
+    }
+
+    data = "";
+    flag = 0;
+    next;
+}
+
 {
     if (flag > 0)
     {
@@ -81,6 +101,21 @@ BEGIN {
                 {
                     data = (data "    <td style=\"padding-left: 10px\">\\f$"$i"\\f$</td>\n");
                     data = (data "    <td style=\"padding-left: 10px; padding-right: 10px;\">=</td>\n");
+                }
+                else if (i > 1)
+                {
+                    data = (data "    <td>"$i"</td>\n");
+                }
+            }
+        }
+        else if (flag == 3)
+        {
+            for (i = 0; i <= NF; i++)
+            {
+                if (i == 1)
+                {
+                    data = (data "    <td style=\"padding-left: 10px\">"$i"</td>\n");
+                    data = (data "    <td style=\"padding-left: 10px; padding-right: 10px;\">:</td>\n");
                 }
                 else if (i > 1)
                 {

@@ -55,29 +55,21 @@ Description
     \c fieldAveragingProperties dictionary, located in \<time\>/uniform
 
     When restarting form a previous calculation, the averaging is continuous.
-    However, the averaging process can be restarted using the \c cleanRestart
+    However, the averaging process can be restarted using the \c resetOnRestart
     option.
 
-    To restart the averaging process after each calculation output time,
-    the \c resetOnOutput option can be applied.
+    To restart the averaging process after each calculation output time, use
+    the \c resetOnOutput option.
 
     Example of function object specification:
     \verbatim
     fieldAverage1
     {
-        // Type of functionObject
         type fieldAverage;
-
-        // Where to load it from (if not already in solver)
         functionObjectLibs ("libfieldFunctionObjects.so");
-
-        // Perform a clean restart?
-        cleanRestart true;
-
-        // Reset the averaged fields after they have been written?
+        ...
+        resetOnRestart true;
         resetOnOutput false;
-
-        // Fields to be averaged
         fields
         (
             U
@@ -96,8 +88,22 @@ Description
     }
     \endverbatim
 
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: fieldAverage | yes         |
+        resetOnRestart | flag to reset the averaging on restart | yes  |
+        resetOnOutput| flag to reset the averaging on output | yes |
+        fields       | list of fields and averaging options | yes |
+    \endtable
+
+
 Note
     To employ the \c prime2Mean option, the \c mean option must be selecetd.
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     fieldAverage.C
@@ -158,10 +164,10 @@ protected:
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
 
-        //- Clean restart flag
-        Switch cleanRestart_;
+        //- Reset the averaging process on restart flag
+        Switch resetOnRestart_;
 
-        //- resetOnOutput flag
+        //- Reset the averaging process on output flag
         Switch resetOnOutput_;
 
         //- List of field average items, describing what averages to be

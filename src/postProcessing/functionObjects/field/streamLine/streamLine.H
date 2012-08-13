@@ -28,7 +28,72 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Generation of streamlines. Samples along track of passive particle.
+    This function object generates streamline data by sampling a set of
+    user-specified fields along a particle track, transported by a
+    user-specified velocity field.
+
+    Example of function object specification:
+    \verbatim
+    streamLine1
+    {
+        type            streamLine;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        setFormat       vtk;
+        UName           U;
+        trackForward    yes;
+        fields
+        (
+            U
+            p
+        );
+        lifeTime        10000;
+        trackLength     1e-3;
+        nSubCycle       5;
+        cloudName       particleTracks;
+        seedSampleSet   uniform;
+        uniformCoeffs
+        {
+            type        uniform;
+            axis        x;  //distance;
+            start       (-0.0205 0.0001 0.00001);
+            end         (-0.0205 0.0005 0.00001);
+            nPoints     100;
+        }
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: streamLine   | yes         |
+        setFormat    | output data type        | yes         |
+        UName        | tracking velocity field name | yes    |
+        fields       | fields to sample        | yes         |
+        lifetime     | maximum number of particle tracking steps | yes |
+        trackLength  | tracking segment length | no          |
+        nSubCycle    | number of tracking steps per cell | no|
+        cloudName    | cloud name to use       | yes         |
+        seedSampleSet| seeding method (see below)| yes       |
+    \endtable
+
+    \linebreak
+    Where \c seedSampleSet is typically one of
+    \plaintable
+        uniform | uniform particle seeding
+        cloud   | cloud of points
+        triSurfaceMeshPointSet | points according to a tri-surface mesh
+    \endplaintable
+
+Note
+    When specifying the track resolution, the \c trackLength OR \c nSubCycle
+    option should be used
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::sampledSet
+    Foam::wallBoundedStreamLine
 
 SourceFiles
     streamLine.C
@@ -83,7 +148,6 @@ class streamLine
         //- On/off switch
         bool active_;
 
-
         //- List of fields to sample
         wordList fields_;
 
@@ -130,9 +194,10 @@ class streamLine
             //- Axis of the sampled points to output
             word sampledSetAxis_;
 
-            //- File output writer
+            //- File writer for scalar data
             autoPtr<writer<scalar> > scalarFormatterPtr_;
 
+            //- File writer for vector data
             autoPtr<writer<vector> > vectorFormatterPtr_;
 
 

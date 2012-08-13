@@ -36,21 +36,15 @@ Description
     \verbatim
     fieldCoordinateSystemTransform1
     {
-        // Type of functionObject
-        type fieldCoordinateSystemTransform;
-
-        // Where to load it from (if not already in solver)
+        type        fieldCoordinateSystemTransform;
         functionObjectLibs ("libfieldFunctionObjects.so");
-
-        // Fields to be transformed
+        ...
         fields
         (
             U
             UMean
             UPrime2Mean
         );
-
-        // Co-ordinate system
         coordinateSystem
         {
             origin  (0.001  0       0);
@@ -60,7 +54,17 @@ Description
     }
     \endverbatim
 
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: fieldCoordinateSystemTransform | yes |
+        fields       | list of fields to be transformed |yes |
+        coordinateSystem | local co-ordinate system | yes    |
+    \endtable
+
 SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
     Foam::coordinateSystem
 
 SourceFiles

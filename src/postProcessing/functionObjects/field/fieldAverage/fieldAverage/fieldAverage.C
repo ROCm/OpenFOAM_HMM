@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -245,7 +245,7 @@ void Foam::fieldAverage::writeAveragingProperties() const
 
 void Foam::fieldAverage::readAveragingProperties()
 {
-    if (cleanRestart_)
+    if (resetOnRestart_)
     {
         Info<< "fieldAverage: starting averaging at time "
             << obr_.time().timeName() << nl << endl;
@@ -306,7 +306,7 @@ Foam::fieldAverage::fieldAverage
     obr_(obr),
     active_(true),
     prevTimeIndex_(-1),
-    cleanRestart_(false),
+    resetOnRestart_(false),
     resetOnOutput_(false),
     faItems_(),
     meanScalarFields_(),
@@ -354,7 +354,7 @@ void Foam::fieldAverage::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.readIfPresent("cleanRestart", cleanRestart_);
+        dict.readIfPresent("resetOnRestart", resetOnRestart_);
         dict.readIfPresent("resetOnOutput", resetOnOutput_);
         dict.lookup("fields") >> faItems_;
 
