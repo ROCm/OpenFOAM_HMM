@@ -34,7 +34,7 @@ Foam::wordList Foam::objectRegistry::names() const
     wordList objectNames(size());
 
     label count=0;
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (isA<Type>(*iter()))
         {
@@ -56,9 +56,13 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 {
     HashTable<const Type*> objectsOfClass(size());
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
-        if ((strict && isType<Type>(*iter())) || isA<Type>(*iter()))
+        if
+        (
+            (strict && isType<Type>(*iter()))
+         || (!strict && isA<Type>(*iter()))
+        )
         {
             objectsOfClass.insert
             (

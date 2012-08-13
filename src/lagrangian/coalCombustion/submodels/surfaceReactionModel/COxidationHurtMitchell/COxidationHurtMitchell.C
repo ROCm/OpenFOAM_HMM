@@ -155,7 +155,7 @@ Foam::scalar Foam::COxidationHurtMitchell<CloudType>::calculate
     }
 
     // Char percentage
-    const scalar charPrc = Ychar/Ydaf*100.0;
+    const scalar charPrc = max(0, min(Ychar/(Ydaf + ROOTVSMALL)*100.0, 100));
 
     // Particle surface area
     const scalar Ap = constant::mathematical::pi*sqr(d);
