@@ -67,11 +67,9 @@ Description
     {
         type fieldAverage;
         functionObjectLibs ("libfieldFunctionObjects.so");
-
+        ...
         resetOnRestart true;
-
         resetOnOutput false;
-
         fields
         (
             U
@@ -104,8 +102,8 @@ Note
     To employ the \c prime2Mean option, the \c mean option must be selecetd.
 
 SeeAlso
-    functionObject.H
-    OutputFilterFunctionObject.H
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     fieldAverage.C

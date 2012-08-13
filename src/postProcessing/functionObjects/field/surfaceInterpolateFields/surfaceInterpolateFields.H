@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,26 +27,39 @@ Class
 Group grpFieldFunctionObjects
 
 Description
-    Linear interpolates volFields to surfaceFields
+    This function object linearly interpolates volume fields to generate
+    surface fields
 
-    - at write it writes the fields
-    - it executes every time step
+    Fields are stored
+    - every time step the field is updated with new values
+    - at output it writes the fields
 
-    so it can either be used to calculate and write the interpolate or
-    (since the interpolates are registered) use some other functionObject
-    to work on them.
+    This functionObject can either be used
+    - to calculate a new field as a  post-processing step or
+    - since the fields are registered, used in another functionObject
 
-    sampleSomeFields
+    Example of function object specification:
+    \verbatim
+    surfaceInterpolateFields1
     {
-        type            surfaceInterpolateFields;
-        ..
-        enabled         true;
-        outputControl   outputTime;
-        ..
-        // Name of volField and corresponding surfaceField
-        fields          ((p pInterpolate)(U UInterpolate));
+        type        surfaceInterpolateFields;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        fields      ((p pNear)(U UNear));
     }
+    \endverbatim
 
+    \heading Function object usage
+    \table
+        Property | Description               | Required    | Default value
+        type     | type name: nearWallFields | yes         |
+        fields   | list of fields with correspoding output field names | yes |
+    \endtable
+
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     surfaceInterpolateFields.C
@@ -72,7 +85,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                         Class surfaceInterpolateFields Declaration
+                  Class surfaceInterpolateFields Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceInterpolateFields

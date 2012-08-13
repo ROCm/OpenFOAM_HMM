@@ -28,7 +28,72 @@ Group
     grpFieldFunctionObjects
 
 Description
-    Generation of streamlines. Samples along track of passive particle.
+    This function object generates streamline data by sampling a set of
+    user-specified fields along a particle track, transported by a
+    user-specified velocity field, constrained to a patch.
+
+    Example of function object specification:
+    \verbatim
+    wallBoundedStreamLine1
+    {
+        type            wallBoundedStreamLine;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        setFormat       vtk;
+        UName           UNear;
+        trackForward    yes;
+        fields
+        (
+            UNear
+            p
+        );
+        lifeTime        10000;
+        trackLength     1e-3;
+        nSubCycle       5;
+        cloudName       particleTracks;
+        seedSampleSet   patchSeed;
+        patchSeedCoeffs
+        {
+            type        patchSeed;
+            patches     (wall);
+            axis        x;
+            maxPoints   20000;
+        }
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: wallBoundedStreamLine| yes |
+        setFormat    | output data type        | yes         |
+        UName        | tracking velocity field name | yes    |
+        fields       | fields to sample        | yes         |
+        lifetime     | maximum number of particle tracking steps | yes |
+        trackLength  | tracking segment length | no          |
+        nSubCycle    | number of tracking steps per cell | no|
+        cloudName    | cloud name to use       | yes         |
+        seedSampleSet| seeding method (see below)| yes       |
+    \endtable
+
+    \linebreak
+    Where \c seedSampleSet is typically one of
+    \plaintable
+        uniform | uniform particle seeding
+        cloud   | cloud of points
+        patchSeed | seeding via patch faces
+        triSurfaceMeshPointSet | points according to a tri-surface mesh
+    \endplaintable
+
+Note
+    When specifying the track resolution, the \c trackLength OR \c nSubCycle
+    option should be used
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::sampledSet
+    Foam::streamLine
 
 SourceFiles
     wallBoundedStreamLine.C
@@ -63,7 +128,7 @@ class meshSearch;
 class sampledSet;
 
 /*---------------------------------------------------------------------------*\
-                         Class wallBoundedStreamLine Declaration
+                    Class wallBoundedStreamLine Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallBoundedStreamLine

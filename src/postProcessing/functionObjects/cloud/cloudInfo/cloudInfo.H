@@ -39,7 +39,7 @@ Description
     {
         type        cloudInfo;
         functionObjectLibs ("libcloudFunctionObjects.so");
-
+        ...
         clouds
         (
             kinematicCloud1
@@ -60,8 +60,8 @@ Description
     The output data of each cloud is written to a file named \<cloudName\>.dat
 
 SeeAlso
-    functionObject.H
-    OutputFilterFunctionObject.H
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     cloudInfo.C
