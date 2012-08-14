@@ -38,11 +38,7 @@ namespace Foam
 
 void Foam::basicChemistryModel::correct()
 {
-    if (mesh_.changing())
-    {
-        deltaTChem_.setSize(mesh_.nCells());
-        deltaTChem_ = deltaTChemIni_;
-    }
+    // do nothing
 }
 
 
