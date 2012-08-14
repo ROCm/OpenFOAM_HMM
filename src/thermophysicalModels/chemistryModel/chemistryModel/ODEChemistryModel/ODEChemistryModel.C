@@ -64,7 +64,19 @@ Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
         RR_.set
         (
             fieldI,
-            new scalarField(mesh.nCells(), 0.0)
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    "RR::" + Y_[fieldI].name(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            )
         );
     }
 
@@ -706,7 +718,7 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
         for (label i=0; i<nSpecie_; i++)
         {
             RR_[i].setSize(rho.size());
-            RR_[i] = 0.0;
+            RR_[i].field() = 0.0;
         }
     }
 
@@ -766,7 +778,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
         for (label i = 0; i < nSpecie_; i++)
         {
             RR_[i].setSize(this->mesh().nCells());
-            RR_[i] = 0.0;
+            RR_[i].field() = 0.0;
         }
     }
 

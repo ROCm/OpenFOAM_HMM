@@ -153,10 +153,10 @@ void reactingOneDim::updatePhiGas()
         tmp<volScalarField> tHsiGas =
             solidChemistry_->gasHs(solidThermo_.p(), solidThermo_.T(), gasI);
 
-        tmp<volScalarField> tRRiGas = solidChemistry_->RRg(gasI);
-
         const volScalarField& HsiGas = tHsiGas();
-        const volScalarField& RRiGas = tRRiGas();
+
+        const DimensionedField<scalar, volMesh>& RRiGas =
+            solidChemistry_->RRg(gasI);
 
         label totalFaceId = 0;
         forAll(intCoupledPatchIDs_, i)

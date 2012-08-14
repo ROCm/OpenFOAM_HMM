@@ -71,7 +71,19 @@ ODESolidChemistryModel
         RRs_.set
         (
             fieldI,
-            new scalarField(mesh.nCells(), 0.0)
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    "RRs::" + Ys_[fieldI].name(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            )
         );
 
 
@@ -134,7 +146,8 @@ ODESolidChemistryModel
                     Y0Default
                 )
             );
-        // Calculate inital values of Ysi0 = rho*delta*Yi
+
+            // Calculate inital values of Ysi0 = rho*delta*Yi
             Ys0_[fieldI].internalField() =
                 this->solid().rho()
                *max(Ys_[fieldI], scalar(0.001))*mesh.V();
@@ -143,7 +156,23 @@ ODESolidChemistryModel
 
     forAll(RRg_, fieldI)
     {
-        RRg_.set(fieldI, new scalarField(mesh.nCells(), 0.0));
+        RRg_.set
+        (
+            fieldI,
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    "RRg::" + pyrolisisGases_[fieldI],
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            )
+        );
     }
 
     forAll(gasThermo_, gasI)
@@ -551,11 +580,11 @@ calculate()
 
     forAll(RRs_, i)
     {
-        RRs_[i] = 0.0;
+        RRs_[i].field() = 0.0;
     }
     forAll(RRg_, i)
     {
-        RRg_[i] = 0.0;
+        RRg_[i].field() = 0.0;
     }
 
     if (this->chemistry_)
@@ -631,11 +660,11 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
 
     forAll(RRs_, i)
     {
-        RRs_[i] = 0.0;
+        RRs_[i].field() = 0.0;
     }
     forAll(RRg_, i)
     {
-        RRg_[i] = 0.0;
+        RRg_[i].field() = 0.0;
     }
 
     if (!this->chemistry_)
@@ -798,7 +827,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::solve
             "const scalar, "
             "const scalar, "
             "const scalar"
-        ")"
+        ") const"
     );
     return (0);
 }
