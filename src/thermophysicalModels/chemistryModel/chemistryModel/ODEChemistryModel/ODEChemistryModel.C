@@ -856,7 +856,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
             "const scalar, "
             "const scalar, "
             "const scalar"
-        ")"
+        ") const"
     );
 
     return (0);
