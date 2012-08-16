@@ -41,7 +41,7 @@ Note
     To use the \c -fixedValue option, the \c -field option should also be used
 
 SeeAlso
-    Foam::helkpType
+    Foam::helpType
     Foam::fvPatchField
 
 SourceFiles
