@@ -58,6 +58,9 @@ class helpType
 
 protected:
 
+    //- Return file path to the Doxygen sources (if available)
+    fileName doxygenPath() const;
+
     //- Display the list of documentation options
     void displayDocOptions
     (

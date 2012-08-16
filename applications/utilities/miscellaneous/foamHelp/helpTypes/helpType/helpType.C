@@ -37,49 +37,53 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::fileName Foam::helpType::doxygenPath() const
+{
+    const dictionary& docDict = debug::controlDict().subDict("Documentation");
+    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+
+    label dirI = -1;
+    forAll(docDirs, i)
+    {
+        if (isDir(docDirs[i].expand()))
+        {
+            dirI = i;
+            break;
+        }
+    }
+
+    if (dirI == -1)
+    {
+        Info<< "No Doxygen sources found under search paths: "
+            << docDirs << endl;
+        return fileName();
+    }
+
+    return docDirs[dirI];
+}
+
+
 void Foam::helpType::displayDocOptions
 (
     const string& searchStr,
     const bool exactMatch
 ) const
 {
-    const dictionary& docDict = debug::controlDict().subDict("Documentation");
-    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+    fileName doxyPath(doxygenPath());
 
-    label i = -1;
-    forAll(docDirs, dirI)
+    if (!doxyPath.empty())
     {
-        if (isDir(docDirs[dirI].expand()))
-        {
-            i = dirI;
-            break;
-        }
-    }
-
-    if (i != -1)
-    {
-        Info<< "Found doxygen help in " << docDirs[i].c_str() << nl << endl;
-
-        string docBrowser = getEnv("FOAM_DOC_BROWSER");
-        if (docBrowser.empty())
-        {
-            docDict.lookup("docBrowser") >> docBrowser;
-        }
+        Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
 
         doxygenXmlParser parser
         (
-            docDirs[i]/"../DTAGS",
+            doxyPath/"../DTAGS",
             "tagfile",
             searchStr,
             exactMatch
         );
 
         Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
-    }
-    else
-    {
-        Info<< "No Doxygen sources found under search paths: "
-            << docDirs << endl;
     }
 }
 
@@ -91,32 +95,23 @@ void Foam::helpType::displayDoc
     const bool exactMatch
 ) const
 {
-    const dictionary& docDict = debug::controlDict().subDict("Documentation");
-    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+    fileName doxyPath(doxygenPath());
 
-    label i = -1;
-    forAll(docDirs, dirI)
+    if (!doxyPath.empty())
     {
-        if (isDir(docDirs[dirI].expand()))
-        {
-            i = dirI;
-            break;
-        }
-    }
-
-    if (i != -1)
-    {
-        Info<< "Found doxygen help in " << docDirs[i].c_str() << nl << endl;
+        Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
 
         string docBrowser = getEnv("FOAM_DOC_BROWSER");
         if (docBrowser.empty())
         {
+            const dictionary& docDict =
+                debug::controlDict().subDict("Documentation");
             docDict.lookup("docBrowser") >> docBrowser;
         }
 
         doxygenXmlParser parser
         (
-            docDirs[i]/"../DTAGS",
+            doxyPath/"../DTAGS",
             "tagfile",
             searchStr,
             exactMatch
@@ -131,7 +126,7 @@ void Foam::helpType::displayDoc
         {
             fileName docFile
             (
-                docDirs[i]/parser.subDict(className).lookup("filename")
+                doxyPath/parser.subDict(className).lookup("filename")
             );
 
             // can use FOAM_DOC_BROWSER='application file://%f' if required
@@ -158,11 +153,6 @@ void Foam::helpType::displayDoc
                 << SortableList<word>(parser.toc())
                 << exit(FatalError);
         }
-    }
-    else
-    {
-        Info<< "No Doxygen sources found under search paths: "
-            << docDirs << endl;
     }
 }
 
