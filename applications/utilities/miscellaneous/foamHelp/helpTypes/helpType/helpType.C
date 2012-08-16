@@ -71,20 +71,22 @@ void Foam::helpType::displayDocOptions
 {
     fileName doxyPath(doxygenPath());
 
-    if (!doxyPath.empty())
+    if (doxyPath.empty())
     {
-        Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
-
-        doxygenXmlParser parser
-        (
-            doxyPath/"../DTAGS",
-            "tagfile",
-            searchStr,
-            exactMatch
-        );
-
-        Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
+        return;
     }
+
+    Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
+
+    doxygenXmlParser parser
+    (
+        doxyPath/"../DTAGS",
+        "tagfile",
+        searchStr,
+        exactMatch
+    );
+
+    Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
 }
 
 
@@ -97,62 +99,60 @@ void Foam::helpType::displayDoc
 {
     fileName doxyPath(doxygenPath());
 
-    if (!doxyPath.empty())
+    if (doxyPath.empty())
     {
-        Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
+        return;
+    }
 
-        string docBrowser = getEnv("FOAM_DOC_BROWSER");
-        if (docBrowser.empty())
-        {
-            const dictionary& docDict =
-                debug::controlDict().subDict("Documentation");
-            docDict.lookup("docBrowser") >> docBrowser;
-        }
+    Info<< "Found doxygen help in " << doxyPath.c_str() << nl << endl;
 
-        doxygenXmlParser parser
+    string docBrowser = getEnv("FOAM_DOC_BROWSER");
+    if (docBrowser.empty())
+    {
+        const dictionary& docDict =
+            debug::controlDict().subDict("Documentation");
+        docDict.lookup("docBrowser") >> docBrowser;
+    }
+
+    doxygenXmlParser parser
+    (
+        doxyPath/"../DTAGS",
+        "tagfile",
+        searchStr,
+        exactMatch
+    );
+
+    if (debug)
+    {
+        Info<< parser;
+    }
+
+    if (parser.found(className))
+    {
+        fileName docFile(doxyPath/parser.subDict(className).lookup("filename"));
+
+        // can use FOAM_DOC_BROWSER='application file://%f' if required
+        docBrowser.replaceAll("%f", docFile);
+
+        fileName classFolder(parser.subDict(className).lookup("path"));
+        word classFile(parser.subDict(className).lookup("name"));
+
+        Info<< "Showing documentation for type " << className << nl << endl;
+
+        Info<< "Source file: " << classFolder.c_str() << classFile << nl
+            << endl;
+
+        system(docBrowser);
+    }
+    else
+    {
+        FatalErrorIn
         (
-            doxyPath/"../DTAGS",
-            "tagfile",
-            searchStr,
-            exactMatch
-        );
-
-        if (debug)
-        {
-            Info<< parser;
-        }
-
-        if (parser.found(className))
-        {
-            fileName docFile
-            (
-                doxyPath/parser.subDict(className).lookup("filename")
-            );
-
-            // can use FOAM_DOC_BROWSER='application file://%f' if required
-            docBrowser.replaceAll("%f", docFile);
-
-            fileName classFolder(parser.subDict(className).lookup("path"));
-            word classFile(parser.subDict(className).lookup("name"));
-
-            Info<< "Showing documentation for type " << className << nl << endl;
-
-            Info<< "Source file: " << classFolder.c_str() << classFile << nl
-                << endl;
-
-            system(docBrowser);
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "void Foam::helpType::displayDoc(const word, const string)"
-            )
-                << "No help for type " << className << " found."
-                << "  Valid options include:"
-                << SortableList<word>(parser.toc())
-                << exit(FatalError);
-        }
+            "void Foam::helpType::displayDoc(const word, const string)"
+        )
+            << "No help for type " << className << " found."
+            << "  Valid options include:" << SortableList<word>(parser.toc())
+            << exit(FatalError);
     }
 }
 
