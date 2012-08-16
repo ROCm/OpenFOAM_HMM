@@ -25,7 +25,17 @@ Class
     Foam::helpFunctionObject
 
 Description
-    
+    This class provides help for functionObjects.  When no additional arguments
+    are given, the utility outputs all known function objects.
+
+    Usage:
+    \plaintable
+        \c -browse \<patch type\> | open documentation for object in browser
+    \endplaintable
+
+SeeAlso
+    Foam::helpType
+    Foam::functionObject
 
 SourceFiles
     helpFunctionObject.C

@@ -25,7 +25,24 @@ Class
     Foam::helpBoundary
 
 Description
-    
+    This class provides help for boundary conditions (patch fields).  When no
+    additional arguments are given, the utility outputs all known boundary
+    conditions.
+
+    Usage:
+    \plaintable
+        \c -browse \<patch type\> | open documentation for patch in browser
+        \c -field \<name\>        | boundary conditions for a given field
+        \c -constraint            | list constraint boundary conditions
+        \c -fixedValue            | list \c fixedValue type boundary conditions
+    \endplaintable
+
+Note
+    To use the \c -fixedValue option, the \c -field option should also be used
+
+SeeAlso
+    Foam::helkpType
+    Foam::fvPatchField
 
 SourceFiles
     helpBoundary.C
