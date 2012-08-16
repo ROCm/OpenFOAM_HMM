@@ -58,6 +58,13 @@ class helpType
 
 protected:
 
+    //- Display the list of documentation options
+    void displayDocOptions
+    (
+        const string& searchStr,
+        const bool exactMatch
+    ) const;
+
     //- Display the help documentation in a browser
     void displayDoc
     (

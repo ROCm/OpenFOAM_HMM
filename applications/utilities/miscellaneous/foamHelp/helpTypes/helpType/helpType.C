@@ -37,6 +37,53 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::helpType::displayDocOptions
+(
+    const string& searchStr,
+    const bool exactMatch
+) const
+{
+    const dictionary& docDict = debug::controlDict().subDict("Documentation");
+    List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
+
+    label i = -1;
+    forAll(docDirs, dirI)
+    {
+        if (isDir(docDirs[dirI].expand()))
+        {
+            i = dirI;
+            break;
+        }
+    }
+
+    if (i != -1)
+    {
+        Info<< "Found doxygen help in " << docDirs[i].c_str() << nl << endl;
+
+        string docBrowser = getEnv("FOAM_DOC_BROWSER");
+        if (docBrowser.empty())
+        {
+            docDict.lookup("docBrowser") >> docBrowser;
+        }
+
+        doxygenXmlParser parser
+        (
+            docDirs[i]/"../DTAGS",
+            "tagfile",
+            searchStr,
+            exactMatch
+        );
+
+        Info<< "Valid types include:" << nl << SortableList<word>(parser.toc());
+    }
+    else
+    {
+        Info<< "No Doxygen sources found under search paths: "
+            << docDirs << endl;
+    }
+}
+
+
 void Foam::helpType::displayDoc
 (
     const word& className,

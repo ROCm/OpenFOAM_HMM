@@ -179,6 +179,13 @@ void Foam::helpTypes::helpBoundary::execute
             << "-field option must be specified when using the -fixedValue "
             << "option" << exit(FatalError);
     }
+    else
+    {
+        // TODO: strip scoping info if present?
+        // e.g. conditions with leading "compressible::" will not be found
+        // ".*[fF]vPatchField.*" + className + ".*"
+        displayDocOptions(".*[fF]vPatchField.*", false);
+    }
 }
 
 

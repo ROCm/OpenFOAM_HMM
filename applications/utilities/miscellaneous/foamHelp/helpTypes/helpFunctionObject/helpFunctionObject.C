@@ -78,6 +78,10 @@ void Foam::helpTypes::helpFunctionObject::execute
     {
         displayDoc(function, ".*[fF]unctionObject.*", true);
     }
+    else
+    {
+        displayDocOptions(".*[fF]unctionObject.*", true);
+    }
 }
 
 
