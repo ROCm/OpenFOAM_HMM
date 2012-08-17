@@ -423,6 +423,10 @@ void Foam::Cloud<ParticleType>::autoMap
                 trackStartCell = 0;
                 p.cell() = 0;
             }
+            else
+            {
+                p.cell() = trackStartCell;
+            }
 
             vector pos = p.position();
 

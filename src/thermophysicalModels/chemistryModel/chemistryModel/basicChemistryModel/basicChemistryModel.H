@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,8 @@ SourceFiles
 #include "Switch.H"
 #include "scalarField.H"
 #include "volFieldsFwd.H"
+#include "volMesh.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,14 +82,14 @@ protected:
         const scalar deltaTChemIni_;
 
         //- Latest estimation of integration step
-        scalarField deltaTChem_;
+        DimensionedField<scalar, volMesh> deltaTChem_;
 
 
     // Protected Member Functions
 
         //- Return non-const access to the latest estimation of integration
         //  step, e.g. for multi-chemistry model
-        scalarField& deltaTChem();
+        inline DimensionedField<scalar, volMesh>& deltaTChem();
 
         //- Correct function - updates due to mesh changes
         void correct();
@@ -118,7 +120,7 @@ public:
         inline Switch chemistry() const;
 
         //- Return the latest estimation of integration step
-        inline const scalarField& deltaTChem() const;
+        inline const DimensionedField<scalar, volMesh>& deltaTChem() const;
 
 
         // Functions to be derived in derived classes
@@ -126,7 +128,10 @@ public:
             // Fields
 
                 //- Return const access to chemical source terms [kg/m3/s]
-                virtual tmp<volScalarField> RR(const label i) const = 0;
+                virtual const DimensionedField<scalar, volMesh>& RR
+                (
+                    const label i
+                ) const = 0;
 
 
             // Chemistry solution

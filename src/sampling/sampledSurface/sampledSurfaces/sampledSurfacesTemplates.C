@@ -159,7 +159,7 @@ void Foam::sampledSurfaces::sampleAndWrite
     forAll(*this, surfI)
     {
         const sampledSurface& s = operator[](surfI);
-        Field<Type> values = s.sample(sField);
+        Field<Type> values(s.sample(sField));
         writeSurface<Type>(values, surfI, fieldName, outputDir);
     }
 }

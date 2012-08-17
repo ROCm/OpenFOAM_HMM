@@ -41,6 +41,7 @@ SourceFiles
 #include "solidReaction.H"
 #include "ODE.H"
 #include "volFieldsFwd.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,19 +97,19 @@ protected:
         label nReaction_;
 
         //- List of reaction rate per solid [kg/m3/s]
-        PtrList<scalarField> RRs_;
+        PtrList<DimensionedField<scalar, volMesh> > RRs_;
 
         //- List of reaction rate per gas [kg/m3/s]
-        PtrList<scalarField> RRg_;
+        PtrList<DimensionedField<scalar, volMesh> > RRg_;
 
 
     // Protected Member Functions
 
         //- Write access to source terms for solids
-        inline PtrList<scalarField>& RRs();
+        inline PtrList<DimensionedField<scalar, volMesh> >& RRs();
 
         //- Write access to source terms for gases
-        inline PtrList<scalarField>& RRg();
+        inline PtrList<DimensionedField<scalar, volMesh> >& RRg();
 
 
 private:
@@ -203,19 +204,28 @@ public:
         // Chemistry model functions
 
             //- Return const access to the chemical source terms for solids
-            inline tmp<volScalarField> RRs(const label i) const;
+            inline const DimensionedField<scalar, volMesh>& RRs
+            (
+                const label i
+            ) const;
 
             //- Return const access to the chemical source terms for gases
-            inline tmp<volScalarField> RRg(const label i) const;
+            inline const DimensionedField<scalar, volMesh>& RRg
+            (
+                const label i
+            ) const;
 
             //- Return total gas source term
-            inline tmp<volScalarField> RRg() const;
+            inline tmp<DimensionedField<scalar, volMesh> > RRg() const;
 
             //- Return total solid source term
-            inline tmp<volScalarField> RRs() const;
+            inline tmp<DimensionedField<scalar, volMesh> > RRs() const;
 
             //- Return const access to the total source terms
-            inline tmp<volScalarField> RR(const label i) const;
+            inline const DimensionedField<scalar, volMesh>& RR
+            (
+                const label i
+            ) const;
 
             //- Return sensible enthalpy for gas i [J/Kg]
             virtual tmp<volScalarField> gasHs

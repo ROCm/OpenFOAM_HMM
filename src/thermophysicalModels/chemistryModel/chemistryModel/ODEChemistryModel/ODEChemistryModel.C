@@ -64,7 +64,19 @@ Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
         RR_.set
         (
             fieldI,
-            new scalarField(mesh.nCells(), 0.0)
+            new DimensionedField<scalar, volMesh>
+            (
+                IOobject
+                (
+                    "RR::" + Y_[fieldI].name(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh,
+                dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            )
         );
     }
 
@@ -687,6 +699,11 @@ Foam::label Foam::ODEChemistryModel<CompType, ThermoType>::nEqns() const
 template<class CompType, class ThermoType>
 void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
 {
+    if (!this->chemistry_)
+    {
+        return;
+    }
+
     const volScalarField rho
     (
         IOobject
@@ -701,36 +718,24 @@ void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
         this->thermo().rho()
     );
 
-    if (this->mesh().changing())
+    forAll(rho, celli)
     {
+        const scalar rhoi = rho[celli];
+        const scalar Ti = this->thermo().T()[celli];
+        const scalar pi = this->thermo().p()[celli];
+
+        scalarField c(nSpecie_, 0.0);
         for (label i=0; i<nSpecie_; i++)
         {
-            RR_[i].setSize(rho.size());
-            RR_[i] = 0.0;
+            const scalar Yi = Y_[i][celli];
+            c[i] = rhoi*Yi/specieThermo_[i].W();
         }
-    }
 
-    if (this->chemistry_)
-    {
-        forAll(rho, celli)
+        const scalarField dcdt(omega(c, Ti, pi));
+
+        for (label i=0; i<nSpecie_; i++)
         {
-            const scalar rhoi = rho[celli];
-            const scalar Ti = this->thermo().T()[celli];
-            const scalar pi = this->thermo().p()[celli];
-
-            scalarField c(nSpecie_, 0.0);
-            for (label i=0; i<nSpecie_; i++)
-            {
-                const scalar Yi = Y_[i][celli];
-                c[i] = rhoi*Yi/specieThermo_[i].W();
-            }
-
-            const scalarField dcdt(omega(c, Ti, pi));
-
-            for (label i=0; i<nSpecie_; i++)
-            {
-                RR_[i][celli] = dcdt[i]*specieThermo_[i].W();
-            }
+            RR_[i][celli] = dcdt[i]*specieThermo_[i].W();
         }
     }
 }
@@ -747,6 +752,11 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 
     scalar deltaTMin = GREAT;
 
+    if (!this->chemistry_)
+    {
+        return deltaTMin;
+    }
+
     const volScalarField rho
     (
         IOobject
@@ -760,21 +770,6 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
         ),
         this->thermo().rho()
     );
-
-    if (this->mesh().changing())
-    {
-        for (label i = 0; i < nSpecie_; i++)
-        {
-            RR_[i].setSize(this->mesh().nCells());
-            RR_[i] = 0.0;
-        }
-    }
-
-    if (!this->chemistry_)
-    {
-        return deltaTMin;
-    }
-
 
     tmp<volScalarField> thc = this->thermo().hc();
     const scalarField& hc = thc();
@@ -856,7 +851,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
             "const scalar, "
             "const scalar, "
             "const scalar"
-        ")"
+        ") const"
     );
 
     return (0);

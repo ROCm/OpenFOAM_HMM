@@ -346,7 +346,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         (
             IOobject
             (
-                this->name() + "UTrans",
+                this->name() + "::UTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::READ_IF_PRESENT,
@@ -362,7 +362,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         (
             IOobject
             (
-                this->name() + "UCoeff",
+                this->name() + "::UCoeff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::READ_IF_PRESENT,
@@ -426,7 +426,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         (
             IOobject
             (
-                this->name() + "UTrans",
+                this->name() + "::UTrans",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -442,7 +442,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         (
             IOobject
             (
-                name + "UCoeff",
+                name + "::UCoeff",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,

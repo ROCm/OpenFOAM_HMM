@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ SourceFiles
 #include "ODE.H"
 #include "volFieldsFwd.H"
 #include "simpleMatrix.H"
+#include "DimensionedField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,14 +91,14 @@ protected:
         label nReaction_;
 
         //- List of reaction rate per specie [kg/m3/s]
-        PtrList<scalarField> RR_;
+        PtrList<DimensionedField<scalar, volMesh> > RR_;
 
 
     // Protected Member Functions
 
         //- Write access to chemical source terms
         //  (e.g. for multi-chemistry model)
-        inline PtrList<scalarField>& RR();
+        inline PtrList<DimensionedField<scalar, volMesh> >& RR();
 
 
 public:
@@ -205,8 +206,11 @@ public:
         // Chemistry model functions (overriding abstract functions in
         // basicChemistryModel.H)
 
-            //- Return const access to the chemical source terms
-            inline tmp<volScalarField> RR(const label i) const;
+            //- Return const access to the chemical source terms for specie, i
+            inline const DimensionedField<scalar, volMesh>& RR
+            (
+                const label i
+            ) const;
 
             //- Solve the reaction system for the given start time and time
             //  step and return the characteristic time

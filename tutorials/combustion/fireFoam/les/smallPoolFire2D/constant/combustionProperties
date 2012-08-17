@@ -23,7 +23,8 @@ active  true;
 
 infinitelyFastChemistryCoeffs
 {
-    C       5.0;
+    semiImplicit no;
+    C           5.0;
 }
 
 FSDCoeffs

@@ -110,6 +110,7 @@ void reactingOneDim::updateQr()
     const volScalarField kappaRad_(kappaRad());
 
     // Propagate Qr through 1-D regions
+    label totalFaceId = 0;
     forAll(intCoupledPatchIDs_, i)
     {
         const label patchI = intCoupledPatchIDs_[i];
@@ -121,7 +122,7 @@ void reactingOneDim::updateQr()
         {
             const scalar Qr0 = Qrp[faceI];
             point Cf0 = Cf[faceI];
-            const labelList& cells = boundaryFaceCells_[faceI];
+            const labelList& cells = boundaryFaceCells_[totalFaceId];
             scalar kappaInt = 0.0;
             forAll(cells, k)
             {
@@ -132,6 +133,7 @@ void reactingOneDim::updateQr()
                 Qr_[cellI] = Qr0*exp(-kappaInt);
                 Cf0 = Cf1;
             }
+            totalFaceId ++;
         }
     }
 
@@ -151,11 +153,12 @@ void reactingOneDim::updatePhiGas()
         tmp<volScalarField> tHsiGas =
             solidChemistry_->gasHs(solidThermo_.p(), solidThermo_.T(), gasI);
 
-        tmp<volScalarField> tRRiGas = solidChemistry_->RRg(gasI);
-
         const volScalarField& HsiGas = tHsiGas();
-        const volScalarField& RRiGas = tRRiGas();
 
+        const DimensionedField<scalar, volMesh>& RRiGas =
+            solidChemistry_->RRg(gasI);
+
+        label totalFaceId = 0;
         forAll(intCoupledPatchIDs_, i)
         {
             const label patchI = intCoupledPatchIDs_[i];
@@ -164,7 +167,7 @@ void reactingOneDim::updatePhiGas()
 
             forAll(phiGasp, faceI)
             {
-                const labelList& cells = boundaryFaceCells_[faceI];
+                const labelList& cells = boundaryFaceCells_[totalFaceId];
                 scalar massInt = 0.0;
                 forAllReverse(cells, k)
                 {
@@ -184,6 +187,7 @@ void reactingOneDim::updatePhiGas()
                         << " is : " << massInt
                         << " [kg/s] " << endl;
                 }
+                totalFaceId ++;
             }
         }
         tHsiGas().clear();

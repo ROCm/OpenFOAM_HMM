@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,12 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::wordList
-Foam::objectRegistry::names() const
+Foam::wordList Foam::objectRegistry::names() const
 {
     wordList objectNames(size());
 
     label count=0;
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
         if (isA<Type>(*iter()))
         {
@@ -50,14 +49,20 @@ Foam::objectRegistry::names() const
 
 
 template<class Type>
-Foam::HashTable<const Type*>
-Foam::objectRegistry::lookupClass() const
+Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
+(
+    const bool strict
+) const
 {
     HashTable<const Type*> objectsOfClass(size());
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    forAllConstIter(HashTable<regIOobject*>, *this, iter)
     {
-        if (isA<Type>(*iter()))
+        if
+        (
+            (strict && isType<Type>(*iter()))
+         || (!strict && isA<Type>(*iter()))
+        )
         {
             objectsOfClass.insert
             (

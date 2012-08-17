@@ -22,6 +22,7 @@ active  on;
 
 infinitelyFastChemistryCoeffs
 {
+    semiImplicit no;
     C       5.0;
 }
 
