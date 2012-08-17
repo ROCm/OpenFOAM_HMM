@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
             U[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
         }
     }
+    U.correctBoundaryConditions();
 
     Info<< "Writing U\n" << endl;
     U.write();
