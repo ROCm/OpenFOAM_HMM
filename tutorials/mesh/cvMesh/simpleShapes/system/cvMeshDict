@@ -139,7 +139,7 @@ surfaceConformation
             // conformation, initial protrusion tests.
             surfacePtReplaceDistCoeff   0.5;
 
-            
+
             surfacePtExclusionDistanceCoeff 0.5;
         }
 
