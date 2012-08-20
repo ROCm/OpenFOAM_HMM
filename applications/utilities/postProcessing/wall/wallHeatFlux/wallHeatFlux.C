@@ -32,7 +32,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "RASModel.H"
+#include "turbulenceModel.H"
+#include "solidThermo.H"
 #include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +57,14 @@ int main(int argc, char *argv[])
 
         surfaceScalarField heatFlux
         (
-            fvc::interpolate(RASModel->alphaEff())*fvc::snGrad(h)
+            fvc::interpolate
+            (
+                (
+                    turbulence.valid()
+                  ? turbulence->alphaEff()()
+                  : thermo->alpha()
+                )
+            )*fvc::snGrad(h)
         );
 
         const surfaceScalarField::GeometricBoundaryField& patchHeatFlux =
