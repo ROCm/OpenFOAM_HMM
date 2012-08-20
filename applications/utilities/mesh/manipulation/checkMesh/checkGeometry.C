@@ -341,8 +341,9 @@ bool Foam::checkCoupledPoints
             }
             return true;
         }
-    }
 
+        reduce(maxSize, maxOp<label>());
+    }
 
 
     label nErrorFaces = 0;
