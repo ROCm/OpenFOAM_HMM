@@ -28,10 +28,33 @@ Group
     grpIOFunctionObjects
 
 Description
-    Allows some fields/registered objects to be written more often than others.
+    This function object allows user-selected fields/registered objects to be
+    written at a custom write interval.  It operates by deleting all entries
+    except those selected after writing.
 
-    Works in the opposite way: deletes at intermediate times all
-    but selected fields.
+    Example of function object specification:
+    \verbatim
+    partialWrite1
+    {
+        type        partialWrite;
+        functionObjectLibs ("libIOFunctionObjects.so");
+        ...
+        objectNames (p U T);
+        writeInterval 100;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: partialWrite | yes         |
+        objectNames  | objects to write        | yes         |
+        writeInterval | write interval         | yes         |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     partialWrite.C
@@ -58,7 +81,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                   Class partialWrite Declaration
+                        Class partialWrite Declaration
 \*---------------------------------------------------------------------------*/
 
 class partialWrite

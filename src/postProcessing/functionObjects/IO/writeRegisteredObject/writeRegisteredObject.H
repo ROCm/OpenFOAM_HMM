@@ -28,7 +28,30 @@ Group
     grpIOFunctionObjects
 
 Description
-    Takes over the writing of registered IO objects
+    This function object takes-over the writing of objects registered to the
+    database.
+
+    Example of function object specification:
+    \verbatim
+    writeRegisteredObject1
+    {
+        type        writeRegisteredObject;
+        functionObjectLibs ("libIOFunctionObjects.so");
+        ...
+        objectNames (obj1 obj2);   
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: writeRegisteredObject | yes |
+        objectNames  | objects to write        | yes         |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     writeRegisteredObject.C

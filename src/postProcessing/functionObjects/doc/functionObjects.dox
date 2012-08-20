@@ -34,7 +34,7 @@ extract predicted field and derived quantities at run-time.  Alternatively,
 the actions can be executed afterwards using the \c execFlowFunctionObjects
 utility.
 
-<br>
+\linebreak
 The current range of features comprises of:
 - \ref grpCloudFunctionObjects
 - \ref grpFieldFunctionObjects
@@ -43,12 +43,13 @@ The current range of features comprises of:
 - \ref grpJobControlFunctionObjects
 - \ref grpUtilitiesFunctionObjects
 
-<br>
+\linebreak
 \subsection secFieldFunctionObjectUsage Using function objects
 
 Function objects are defined by additional entries in the
 $FOAM_CASE/system/controlDict input dictionary.  Each object is listed in a
-\c functions sub-dictionary entry, e.g. for `output' type objects:
+\c functions sub-dictionary entry, e.g. the following shows the input options
+applicable to `output' -type objects:
 
 \verbatim
 functions

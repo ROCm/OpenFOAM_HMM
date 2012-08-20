@@ -28,7 +28,13 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    functionObject using dynamic code compilation.
+    This function object provides a general interface to enable dynamic code
+    compilation.
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::codedBase
 
 SourceFiles
     codedFunctionObject.C
@@ -47,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class codedFunctionObject Declaration
+                     Class codedFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class codedFunctionObject

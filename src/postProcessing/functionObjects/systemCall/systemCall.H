@@ -28,7 +28,55 @@ Group
     grpFunctionObjects
 
 Description
-    Executes system calls, entered in the form of a string list
+    This function object executes system calls, entered in the form of a
+    string lists.  Calls can be made at the following points in the
+    calculation:
+    - every time step
+    - every output time
+    - end of the calculation
+
+    Example of function object specification:
+    \verbatim
+    systemCall1
+    {
+        type        systemCall;
+        functionObjectLibs ("libsystemCall.so");
+        ...
+        executeCalls
+        (
+            "echo execute"
+        );
+        writeCalls
+        (
+            "echo \*\*\* writing data \*\*\*"
+        );
+        endCalls
+        (
+            "echo \*\*\* writing .bashrc \*\*\*"
+            "cat ~/.bashrc"
+            "echo \*\*\* done \*\*\*"
+        );
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: systemCall   | yes         |
+        executeCalls | list of calls on execute | yes        |
+        writeCalls   | list of calls on write  | yes         |
+        endCalls     | list of calls on end    | yes         |
+    \endtable
+
+Note
+    Since this function object executes system calls, there is a potential
+    security risk.  In order to use the \c systemCall function object, the
+    \c allowSystemOperations must be set to '1'; otherwise, system calls will
+    not be allowed.
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     systemCall.C
@@ -53,7 +101,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class systemCall Declaration
+                         Class systemCall Declaration
 \*---------------------------------------------------------------------------*/
 
 class systemCall

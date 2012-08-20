@@ -43,7 +43,6 @@ Description
         ...
         log         yes;
         patches     (walls);
-        
     }
     \endverbatim
 
