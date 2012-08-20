@@ -262,6 +262,74 @@ bool Foam::checkWedges
 }
 
 
+namespace Foam
+{
+    //- Default transformation behaviour for position
+    class transformPositionList
+    {
+    public:
+
+        //- Transform patch-based field
+        void operator()
+        (
+            const coupledPolyPatch& cpp,
+            List<pointField>& pts
+        ) const
+        {
+            // Each element of pts is all the points in the face. Convert into
+            // lists of size cpp to transform.
+
+            List<pointField> newPts(pts.size());
+            forAll(pts, faceI)
+            {
+                newPts[faceI].setSize(pts.size());
+            }
+
+            label index = 0;
+            while (true)
+            {
+                label n = 0;
+
+                // Extract for every face the i'th position
+                pointField ptsAtIndex(pts.size(), vector::zero);
+                forAll(cpp, faceI)
+                {
+                    const pointField& facePts = pts[faceI];
+                    if (facePts.size() > index)
+                    {
+                        ptsAtIndex[faceI] = facePts[index];
+                        n++;
+                    }
+                }
+
+                if (n == 0)
+                {
+                    break;
+                }
+
+                // Now ptsAtIndex will have for every face either zero or
+                // the position of the i'th vertex. Transform.
+                cpp.transformPosition(ptsAtIndex);
+
+                // Extract back from ptsAtIndex into newPts
+                forAll(cpp, faceI)
+                {
+                    pointField& facePts = newPts[faceI];
+                    if (facePts.size() > index)
+                    {
+                        facePts[index] = ptsAtIndex[faceI];
+                    }
+                }
+
+                index++;
+            }
+
+            pts.transfer(newPts);
+        }
+    };
+}
+
+
 bool Foam::checkCoupledPoints
 (
     const polyMesh& mesh,
@@ -274,7 +342,8 @@ bool Foam::checkCoupledPoints
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     // Zero'th point on coupled faces
-    pointField nbrZeroPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
+    //pointField nbrZeroPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
+    List<pointField> nbrPoints(fcs.size()-mesh.nInternalFaces());
 
     // Exchange zero point
     forAll(patches, patchI)
@@ -289,17 +358,28 @@ bool Foam::checkCoupledPoints
             forAll(cpp, i)
             {
                 label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                const point& p0 = p[cpp[i][0]];
-                nbrZeroPoint[bFaceI] = p0;
+                const face& f = cpp[i];
+                nbrPoints[bFaceI].setSize(f.size());
+                forAll(f, fp)
+                {
+                    const point& p0 = p[f[fp]];
+                    nbrPoints[bFaceI][fp] = p0;
+                }
             }
         }
     }
-    syncTools::swapBoundaryFacePositions(mesh, nbrZeroPoint);
+    syncTools::syncBoundaryFaceList
+    (
+        mesh,
+        nbrPoints,
+        eqOp<pointField>(),
+        transformPositionList()
+    );
 
     // Compare to local ones. Use same tolerance as for matching
     label nErrorFaces = 0;
     scalar avgMismatch = 0;
-    label nCoupledFaces = 0;
+    label nCoupledPoints = 0;
 
     forAll(patches, patchI)
     {
@@ -326,20 +406,28 @@ bool Foam::checkCoupledPoints
                 forAll(cpp, i)
                 {
                     label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                    const point& p0 = p[cpp[i][0]];
+                    const face& f = cpp[i];
 
-                    scalar d = mag(p0 - nbrZeroPoint[bFaceI]);
-
-                    if (d > smallDist[i])
+                    label fp = 0;
+                    forAll(f, j)
                     {
-                        if (setPtr)
+                        const point& p0 = p[f[fp]];
+                        scalar d = mag(p0 - nbrPoints[bFaceI][j]);
+
+                        if (d > smallDist[i])
                         {
-                            setPtr->insert(cpp.start()+i);
+                            if (setPtr)
+                            {
+                                setPtr->insert(cpp.start()+i);
+                            }
+                            nErrorFaces++;
+                            break;
                         }
-                        nErrorFaces++;
+                        avgMismatch += d;
+                        nCoupledPoints++;
+
+                        fp = f.rcIndex(fp);
                     }
-                    avgMismatch += d;
-                    nCoupledFaces++;
                 }
             }
         }
@@ -347,11 +435,11 @@ bool Foam::checkCoupledPoints
 
     reduce(nErrorFaces, sumOp<label>());
     reduce(avgMismatch, maxOp<scalar>());
-    reduce(nCoupledFaces, sumOp<label>());
+    reduce(nCoupledPoints, sumOp<label>());
 
-    if (nCoupledFaces > 0)
+    if (nCoupledPoints > 0)
     {
-        avgMismatch /= nCoupledFaces;
+        avgMismatch /= nCoupledPoints;
     }
 
     if (nErrorFaces > 0)
@@ -360,7 +448,7 @@ bool Foam::checkCoupledPoints
         {
             Info<< "  **Error in coupled point location: "
                 << nErrorFaces
-                << " faces have their 0th vertex not opposite"
+                << " faces have their 0th or consecutive vertex not opposite"
                 << " their coupled equivalent. Average mismatch "
                 << avgMismatch << "."
                 << endl;
@@ -581,7 +669,8 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             if (nFaces > 0)
             {
                 Info<< "  <<Writing " << nFaces
-                    << " faces with incorrectly matched 0th vertex to set "
+                    << " faces with incorrectly matched 0th (or consecutive)"
+                    << " vertex to set "
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();
