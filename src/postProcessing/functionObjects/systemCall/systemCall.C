@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,26 +73,18 @@ void Foam::systemCall::read(const dictionary& dict)
     }
     else if (!dynamicCode::allowSystemOperations)
     {
-        FatalErrorIn
-        (
-            "systemCall::read(const dictionary&)"
-        )   <<  "Executing user-supplied system calls is not"
-            << " enabled by default" << endl
-            << "because of security issues. If you trust the case you can"
-            << " enable this" << endl
-            << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict:" << endl
-            << endl
-            << "    allowSystemOperations 1" << endl
-            << endl
-            << "The system controlDict is either" << endl
-            << endl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << endl
-            << endl
-            << "or" << endl
-            << endl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << endl
-            << endl
+        FatalErrorIn("systemCall::read(const dictionary&)")
+            << "Executing user-supplied system calls is not enabled by "
+            << "default because of " << nl
+            << "security issues.  If you trust the case you can enable this "
+            << "facility by " << nl
+            << "adding to the InfoSwitches setting in the system controlDict:"
+            << nl << nl
+            << "    allowSystemOperations 1" << nl << nl
+            << "The system controlDict is either" << nl << nl
+            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
+            << "or" << nl << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl << nl
             << exit(FatalError);
     }
 }
