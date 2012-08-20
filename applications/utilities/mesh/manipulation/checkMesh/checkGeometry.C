@@ -262,74 +262,6 @@ bool Foam::checkWedges
 }
 
 
-namespace Foam
-{
-    //- Default transformation behaviour for position
-    class transformPositionList
-    {
-    public:
-
-        //- Transform patch-based field
-        void operator()
-        (
-            const coupledPolyPatch& cpp,
-            List<pointField>& pts
-        ) const
-        {
-            // Each element of pts is all the points in the face. Convert into
-            // lists of size cpp to transform.
-
-            List<pointField> newPts(pts.size());
-            forAll(pts, faceI)
-            {
-                newPts[faceI].setSize(pts.size());
-            }
-
-            label index = 0;
-            while (true)
-            {
-                label n = 0;
-
-                // Extract for every face the i'th position
-                pointField ptsAtIndex(pts.size(), vector::zero);
-                forAll(cpp, faceI)
-                {
-                    const pointField& facePts = pts[faceI];
-                    if (facePts.size() > index)
-                    {
-                        ptsAtIndex[faceI] = facePts[index];
-                        n++;
-                    }
-                }
-
-                if (n == 0)
-                {
-                    break;
-                }
-
-                // Now ptsAtIndex will have for every face either zero or
-                // the position of the i'th vertex. Transform.
-                cpp.transformPosition(ptsAtIndex);
-
-                // Extract back from ptsAtIndex into newPts
-                forAll(cpp, faceI)
-                {
-                    pointField& facePts = newPts[faceI];
-                    if (facePts.size() > index)
-                    {
-                        facePts[index] = ptsAtIndex[faceI];
-                    }
-                }
-
-                index++;
-            }
-
-            pts.transfer(newPts);
-        }
-    };
-}
-
-
 bool Foam::checkCoupledPoints
 (
     const polyMesh& mesh,
@@ -341,92 +273,163 @@ bool Foam::checkCoupledPoints
     const faceList& fcs = mesh.faces();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    // Zero'th point on coupled faces
-    //pointField nbrZeroPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
-    List<pointField> nbrPoints(fcs.size()-mesh.nInternalFaces());
-
-    // Exchange zero point
-    forAll(patches, patchI)
+    // Check size of faces
+    label maxSize = 0;
     {
-        if (patches[patchI].coupled())
+        labelList nbrSize(fcs.size()-mesh.nInternalFaces(), 0);
+
+        // Exchange size
+        forAll(patches, patchI)
         {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchI]
-            );
-
-            forAll(cpp, i)
+            if (patches[patchI].coupled())
             {
-                label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                const face& f = cpp[i];
-                nbrPoints[bFaceI].setSize(f.size());
-                forAll(f, fp)
-                {
-                    const point& p0 = p[f[fp]];
-                    nbrPoints[bFaceI][fp] = p0;
-                }
-            }
-        }
-    }
-    syncTools::syncBoundaryFaceList
-    (
-        mesh,
-        nbrPoints,
-        eqOp<pointField>(),
-        transformPositionList()
-    );
-
-    // Compare to local ones. Use same tolerance as for matching
-    label nErrorFaces = 0;
-    scalar avgMismatch = 0;
-    label nCoupledPoints = 0;
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchI]
-            );
-
-            if (cpp.owner())
-            {
-                scalarField smallDist
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
                 (
-                    cpp.calcFaceTol
-                    (
-                        //cpp.matchTolerance(),
-                        cpp,
-                        cpp.points(),
-                        cpp.faceCentres()
-                    )
+                    patches[patchI]
                 );
 
                 forAll(cpp, i)
                 {
                     label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                    const face& f = cpp[i];
+                    nbrSize[bFaceI] = cpp[i].size();
+                    maxSize = max(maxSize, cpp[i].size());
+                }
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh, nbrSize);
 
-                    label fp = 0;
-                    forAll(f, j)
+
+        // Check on owner
+        label nErrorFaces = 0;
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                if (cpp.owner())
+                {
+                    forAll(cpp, i)
                     {
-                        const point& p0 = p[f[fp]];
-                        scalar d = mag(p0 - nbrPoints[bFaceI][j]);
+                        label bFaceI = cpp.start()+i-mesh.nInternalFaces();
 
-                        if (d > smallDist[i])
+                        if (cpp[i].size() != nbrSize[bFaceI])
                         {
                             if (setPtr)
                             {
                                 setPtr->insert(cpp.start()+i);
                             }
                             nErrorFaces++;
-                            break;
                         }
-                        avgMismatch += d;
-                        nCoupledPoints++;
+                    }
+                }
+            }
+        }
 
-                        fp = f.rcIndex(fp);
+        reduce(nErrorFaces, sumOp<label>());
+        if (nErrorFaces > 0)
+        {
+            if (report)
+            {
+                Info<< "  **Error in coupled faces: "
+                    << nErrorFaces
+                    << " faces have different size "
+                    << " compared to their coupled equivalent." << endl;
+            }
+            return true;
+        }
+    }
+
+
+
+    label nErrorFaces = 0;
+    scalar avgMismatch = 0;
+    label nCoupledPoints = 0;
+
+    for (label index = 0; index < maxSize; index++)
+    {
+        // point at index on coupled faces
+        pointField nbrPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
+
+        // Exchange point
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                forAll(cpp, i)
+                {
+                    const face& f = cpp[i];
+                    if (f.size() > index)
+                    {
+                        label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                        nbrPoint[bFaceI] = p[f[index]];
+                    }
+                }
+            }
+        }
+        syncTools::swapBoundaryFacePositions(mesh, nbrPoint);
+
+
+        // Compare to local ones. Use same tolerance as for matching
+
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                if (cpp.owner())
+                {
+                    scalarField smallDist
+                    (
+                        cpp.calcFaceTol
+                        (
+                            //cpp.matchTolerance(),
+                            cpp,
+                            cpp.points(),
+                            cpp.faceCentres()
+                        )
+                    );
+
+                    forAll(cpp, i)
+                    {
+                        const face& f = cpp[i];
+                        if (f.size() > index)
+                        {
+                            label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                            label reverseIndex = (f.size()-index)%f.size();
+                            scalar d = mag(p[f[reverseIndex]]-nbrPoint[bFaceI]);
+
+                            if (d > smallDist[i])
+                            {
+                                if (setPtr)
+                                {
+                                    // Avoid duplicate counting of faces
+                                    if (setPtr->insert(cpp.start()+i))
+                                    {
+                                        nErrorFaces++;
+                                    }
+                                }
+                                else
+                                {
+                                    // No checking on duplicates
+                                    nErrorFaces++;
+                                }
+                            }
+                            avgMismatch += d;
+                            nCoupledPoints++;
+                        }
                     }
                 }
             }
