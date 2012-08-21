@@ -169,14 +169,15 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, mu);
     const forceSuSp Feff = Fcp + Fncp;
+    const scalar massEff = forces.massEff(p, mass);
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector abp = (Feff.Sp()*Uc_ + (Feff.Su() + Su))/mass;
-    const scalar bp = Feff.Sp()/mass;
+    const vector abp = (Feff.Sp()*Uc_ + (Feff.Su() + Su))/massEff;
+    const scalar bp = Feff.Sp()/massEff;
 
     Spu = dt*Feff.Sp();
 
