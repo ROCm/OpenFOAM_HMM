@@ -59,14 +59,18 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
-    pMin_(0.0),
+    pMin_(1000.0),
     constantVolume_(false),
     Tvap_(0.0),
     Tbp_(0.0)
 {
     if (readFields)
     {
-        this->dict().lookup("pMin") >> pMin_;
+        if (this->dict().readIfPresent("pMin", pMin_))
+        {
+            Info<< "    employing parcel pMin of " << pMin_ << endl;
+        }
+
         this->dict().lookup("constantVolume") >> constantVolume_;
         this->dict().lookup("Tvap") >> Tvap_;
         this->dict().lookup("Tbp") >> Tbp_;

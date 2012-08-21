@@ -65,8 +65,8 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 :
     ParcelType::constantProperties(parentDict, readFields),
     T0_(0.0),
-    TMin_(0.0),
-    TMax_(VGREAT),
+    TMin_(200),
+    TMax_(5000),
     Cp0_(0.0),
     epsilon0_(0.0),
     f0_(0.0),
@@ -74,9 +74,16 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 {
     if (readFields)
     {
+        if (this->dict().readIfPresent("TMin", TMin_))
+        {
+            Info<< "    employing parcel TMin of " << TMin_ << endl;
+        }
+        if (this->dict().readIfPresent("TMax", TMax_))
+        {
+            Info<< "    employing parcel TMax of " << TMax_ << endl;
+        }
+
         this->dict().lookup("T0") >> T0_;
-        this->dict().lookup("TMin") >> TMin_;
-        this->dict().lookup("TMax") >> TMax_;
         this->dict().lookup("Cp0") >> Cp0_;
         this->dict().lookup("epsilon0") >> epsilon0_;
         this->dict().lookup("f0") >> f0_;
