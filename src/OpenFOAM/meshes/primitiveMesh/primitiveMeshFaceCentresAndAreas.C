@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,8 +118,19 @@ void Foam::primitiveMesh::makeFaceCentresAndAreas
                 sumAc += a*c;
             }
 
-            fCtrs[facei] = (1.0/3.0)*sumAc/(sumA + VSMALL);
-            fAreas[facei] = 0.5*sumN;
+
+            if (sumA < ROOTVSMALL)
+            {
+                // Sum of area too small. No chance of reliably calculating
+                // centroid so fallback to average.
+                fCtrs[facei] = fCentre;
+                fAreas[facei] = 0.5*sumN;
+            }
+            else
+            {
+                fCtrs[facei] = (1.0/3.0)*sumAc/sumA;
+                fAreas[facei] = 0.5*sumN;
+            }
         }
     }
 }

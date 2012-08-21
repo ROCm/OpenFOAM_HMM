@@ -172,7 +172,7 @@ Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
             maxLenSqr = max(maxLenSqr, magSqr(pt - cc));
             maxCmpt = max(maxCmpt, cmptMax(cmptMag(pt)));
         }
-        tols[faceI] = max(SMALL*maxCmpt, Foam::sqrt(maxLenSqr));
+        tols[faceI] = max(SMALL, max(SMALL*maxCmpt, Foam::sqrt(maxLenSqr)));
     }
     return tols;
 }
@@ -200,12 +200,40 @@ Foam::label Foam::coupledPolyPatch::getRotation
         }
     }
 
-    if (anchorFp == -1 || mag(minDistSqr) > tol)
+    if (anchorFp == -1 || Foam::sqrt(minDistSqr) > tol)
     {
         return -1;
     }
     else
     {
+        // Check that anchor is unique.
+        forAll(f, fp)
+        {
+            scalar distSqr = magSqr(anchor - points[f[fp]]);
+
+            if (distSqr == minDistSqr && fp != anchorFp)
+            {
+                WarningIn
+                (
+                    "label coupledPolyPatch::getRotation\n"
+                    "(\n"
+                    "    const pointField&,\n"
+                    "    const face&,\n"
+                    "    const point&,\n"
+                    "    const scalar\n"
+                    ")"
+                )   << "Cannot determine unique anchor point on face "
+                    << UIndirectList<point>(points, f)
+                    << endl
+                    << "Both at index " << anchorFp << " and " << fp
+                    << " the vertices have the same distance "
+                    << Foam::sqrt(minDistSqr)
+                    << " to the anchor " << anchor
+                    << ". Continuing but results might be wrong."
+                    << endl;
+            }
+        }
+
         // Positive rotation
         return (f.size() - anchorFp) % f.size();
     }

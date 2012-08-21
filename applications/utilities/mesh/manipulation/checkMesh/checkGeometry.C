@@ -273,73 +273,165 @@ bool Foam::checkCoupledPoints
     const faceList& fcs = mesh.faces();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    // Zero'th point on coupled faces
-    pointField nbrZeroPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
-
-    // Exchange zero point
-    forAll(patches, patchI)
+    // Check size of faces
+    label maxSize = 0;
     {
-        if (patches[patchI].coupled())
+        labelList nbrSize(fcs.size()-mesh.nInternalFaces(), 0);
+
+        // Exchange size
+        forAll(patches, patchI)
         {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchI]
-            );
-
-            forAll(cpp, i)
+            if (patches[patchI].coupled())
             {
-                label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                const point& p0 = p[cpp[i][0]];
-                nbrZeroPoint[bFaceI] = p0;
-            }
-        }
-    }
-    syncTools::swapBoundaryFacePositions(mesh, nbrZeroPoint);
-
-    // Compare to local ones. Use same tolerance as for matching
-    label nErrorFaces = 0;
-    scalar avgMismatch = 0;
-    label nCoupledFaces = 0;
-
-    forAll(patches, patchI)
-    {
-        if (patches[patchI].coupled())
-        {
-            const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
-            (
-                patches[patchI]
-            );
-
-            if (cpp.owner())
-            {
-                scalarField smallDist
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
                 (
-                    cpp.calcFaceTol
-                    (
-                        //cpp.matchTolerance(),
-                        cpp,
-                        cpp.points(),
-                        cpp.faceCentres()
-                    )
+                    patches[patchI]
                 );
 
                 forAll(cpp, i)
                 {
                     label bFaceI = cpp.start()+i-mesh.nInternalFaces();
-                    const point& p0 = p[cpp[i][0]];
+                    nbrSize[bFaceI] = cpp[i].size();
+                    maxSize = max(maxSize, cpp[i].size());
+                }
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh, nbrSize);
 
-                    scalar d = mag(p0 - nbrZeroPoint[bFaceI]);
 
-                    if (d > smallDist[i])
+        // Check on owner
+        label nErrorFaces = 0;
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                if (cpp.owner())
+                {
+                    forAll(cpp, i)
                     {
-                        if (setPtr)
+                        label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+
+                        if (cpp[i].size() != nbrSize[bFaceI])
                         {
-                            setPtr->insert(cpp.start()+i);
+                            if (setPtr)
+                            {
+                                setPtr->insert(cpp.start()+i);
+                            }
+                            nErrorFaces++;
                         }
-                        nErrorFaces++;
                     }
-                    avgMismatch += d;
-                    nCoupledFaces++;
+                }
+            }
+        }
+
+        reduce(nErrorFaces, sumOp<label>());
+        if (nErrorFaces > 0)
+        {
+            if (report)
+            {
+                Info<< "  **Error in coupled faces: "
+                    << nErrorFaces
+                    << " faces have different size "
+                    << " compared to their coupled equivalent." << endl;
+            }
+            return true;
+        }
+
+        reduce(maxSize, maxOp<label>());
+    }
+
+
+    label nErrorFaces = 0;
+    scalar avgMismatch = 0;
+    label nCoupledPoints = 0;
+
+    for (label index = 0; index < maxSize; index++)
+    {
+        // point at index on coupled faces
+        pointField nbrPoint(fcs.size()-mesh.nInternalFaces(), vector::max);
+
+        // Exchange point
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                forAll(cpp, i)
+                {
+                    const face& f = cpp[i];
+                    if (f.size() > index)
+                    {
+                        label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                        nbrPoint[bFaceI] = p[f[index]];
+                    }
+                }
+            }
+        }
+        syncTools::swapBoundaryFacePositions(mesh, nbrPoint);
+
+
+        // Compare to local ones. Use same tolerance as for matching
+
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>
+                (
+                    patches[patchI]
+                );
+
+                if (cpp.owner())
+                {
+                    scalarField smallDist
+                    (
+                        cpp.calcFaceTol
+                        (
+                            //cpp.matchTolerance(),
+                            cpp,
+                            cpp.points(),
+                            cpp.faceCentres()
+                        )
+                    );
+
+                    forAll(cpp, i)
+                    {
+                        const face& f = cpp[i];
+                        if (f.size() > index)
+                        {
+                            label bFaceI = cpp.start()+i-mesh.nInternalFaces();
+                            label reverseIndex = (f.size()-index)%f.size();
+                            scalar d = mag(p[f[reverseIndex]]-nbrPoint[bFaceI]);
+
+                            if (d > smallDist[i])
+                            {
+                                if (setPtr)
+                                {
+                                    // Avoid duplicate counting of faces
+                                    if (setPtr->insert(cpp.start()+i))
+                                    {
+                                        nErrorFaces++;
+                                    }
+                                }
+                                else
+                                {
+                                    // No checking on duplicates
+                                    nErrorFaces++;
+                                }
+                            }
+                            avgMismatch += d;
+                            nCoupledPoints++;
+                        }
+                    }
                 }
             }
         }
@@ -347,11 +439,11 @@ bool Foam::checkCoupledPoints
 
     reduce(nErrorFaces, sumOp<label>());
     reduce(avgMismatch, maxOp<scalar>());
-    reduce(nCoupledFaces, sumOp<label>());
+    reduce(nCoupledPoints, sumOp<label>());
 
-    if (nCoupledFaces > 0)
+    if (nCoupledPoints > 0)
     {
-        avgMismatch /= nCoupledFaces;
+        avgMismatch /= nCoupledPoints;
     }
 
     if (nErrorFaces > 0)
@@ -360,7 +452,7 @@ bool Foam::checkCoupledPoints
         {
             Info<< "  **Error in coupled point location: "
                 << nErrorFaces
-                << " faces have their 0th vertex not opposite"
+                << " faces have their 0th or consecutive vertex not opposite"
                 << " their coupled equivalent. Average mismatch "
                 << avgMismatch << "."
                 << endl;
@@ -581,7 +673,8 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
             if (nFaces > 0)
             {
                 Info<< "  <<Writing " << nFaces
-                    << " faces with incorrectly matched 0th vertex to set "
+                    << " faces with incorrectly matched 0th (or consecutive)"
+                    << " vertex to set "
                     << faces.name() << endl;
                 faces.instance() = mesh.pointsInstance();
                 faces.write();

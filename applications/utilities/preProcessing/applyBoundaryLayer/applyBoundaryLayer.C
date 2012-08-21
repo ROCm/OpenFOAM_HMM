@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
             U[celli] *= ::pow(y[celli]/yblv, (1.0/7.0));
         }
     }
+    U.correctBoundaryConditions();
 
     Info<< "Writing U\n" << endl;
     U.write();
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("writenut"))
     {
-        Info<< "Writing nut" << endl;
+        Info<< "Writing " << nut.name() << nl << endl;
         nut.write();
     }
 
@@ -126,7 +127,7 @@ int main(int argc, char *argv[])
     k = sqr(nut/(ck0*min(y, ybl)));
     k.correctBoundaryConditions();
 
-    Info<< "Writing k\n" << endl;
+    Info<< "Writing " << k.name() << nl << endl;
     k.write();
 
 
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
     epsilon = ce0*k*sqrt(k)/min(y, ybl);
     epsilon.correctBoundaryConditions();
 
-    Info<< "Writing epsilon\n" << endl;
+    Info<< "Writing " << epsilon.name() << nl << endl;
     epsilon.write();
 
 
