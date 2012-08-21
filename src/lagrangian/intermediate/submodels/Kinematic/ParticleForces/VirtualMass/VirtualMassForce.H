@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,22 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ParticleForceList
+    Foam::VirtualMassForce
 
 Description
-    List of particle forces
+    Calculates particle virtual mass force
 
 SourceFiles
-    ParticleForceListI.H
-    ParticleForceList.C
+    VirtualMassForceI.H
+    VirtualMassForce.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ParticleForceList_H
-#define ParticleForceList_H
+#ifndef VirtualMassForce_H
+#define VirtualMassForce_H
 
 #include "ParticleForce.H"
-#include "forceSuSp.H"
+#include "volFields.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,65 +46,71 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class ParticleForceList Declaration
+                      Class VirtualMassForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class ParticleForceList
+class VirtualMassForce
 :
-    public PtrList<ParticleForce<CloudType> >
+    public ParticleForce<CloudType>
 {
     // Private data
 
-        //- Reference to the owner cloud
-        CloudType& owner_;
+        //- Name of velocity field
+        const word UName_;
 
-        //- Reference to the mesh database
-        const fvMesh& mesh_;
+        //- Virtual mass coefficient - typically 0.5
+        scalar Cvm_;
 
-        //- Forces dictionary
-        const dictionary dict_;
+        //- Rate of change of carrier phase velocity
+        volVectorField* DUcDtPtr_;
+
+        //- Rate of change of carrier phase velocity interpolator
+        autoPtr<interpolation<vector> > DUcDtInterpPtr_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("virtualMass");
+
+
     // Constructors
 
-        //- Null constructor
-        ParticleForceList(CloudType& owner, const fvMesh& mesh);
-
         //- Construct from mesh
-        ParticleForceList
+        VirtualMassForce
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict,
-            const bool readFields
+            const dictionary& dict
         );
 
         //- Construct copy
-        ParticleForceList(const ParticleForceList& pfl);
+        VirtualMassForce(const VirtualMassForce& pgf);
+
+        //- Construct and return a clone
+        virtual autoPtr<ParticleForce<CloudType> > clone() const
+        {
+            return autoPtr<ParticleForce<CloudType> >
+            (
+                new VirtualMassForce<CloudType>(*this)
+            );
+        }
 
 
     //- Destructor
-    virtual ~ParticleForceList();
+    virtual ~VirtualMassForce();
 
 
     // Member Functions
 
         // Access
 
-            //- Return const access to the cloud owner
-            inline const CloudType& owner() const;
+            //- Return the rate of change of carrier phase velocity
+            inline const volVectorField& DUcDt() const;
 
-            //- Return refernce to the cloud owner
-            inline CloudType& owner();
-
-            //- Return the mesh database
-            inline const fvMesh& mesh() const;
-
-            //- Return the forces dictionary
-            inline const dictionary& dict() const;
+            //- Return the rate of change of carrier phase velocity interpolator
+            inline const interpolation<vector>& DUcDtInterp() const;
 
 
         // Evaluation
@@ -111,7 +118,7 @@ public:
             //- Cache fields
             virtual void cacheFields(const bool store);
 
-            //- Calculate the coupled force
+            //- Calculate the non-coupled force
             virtual forceSuSp calcCoupled
             (
                 const typename CloudType::parcelType& p,
@@ -121,18 +128,8 @@ public:
                 const scalar muc
             ) const;
 
-            //- Calculate the non-coupled force
-            virtual forceSuSp calcNonCoupled
-            (
-                const typename CloudType::parcelType& p,
-                const scalar dt,
-                const scalar mass,
-                const scalar Re,
-                const scalar muc
-            ) const;
-
-            //- Return the effective mass
-            virtual scalar massEff
+            //- Return the added mass
+            virtual scalar massAdd
             (
                 const typename CloudType::parcelType& p,
                 const scalar mass
@@ -146,10 +143,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ParticleForceListI.H"
+#include "VirtualMassForceI.H"
 
 #ifdef NoRepository
-    #include "ParticleForceList.C"
+    #include "VirtualMassForce.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

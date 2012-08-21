@@ -124,16 +124,22 @@ public:
         inline const solidReactionThermo& solid() const;
 
         //- Return total gases mass source term [kg/m3/s]
-        virtual tmp<volScalarField> RRg() const = 0;
+        virtual tmp<DimensionedField<scalar, volMesh> > RRg() const = 0;
 
         //- Return total solids mass source term [kg/m3/s]
-        virtual tmp<volScalarField> RRs() const = 0;
+        virtual tmp<DimensionedField<scalar, volMesh> > RRs() const = 0;
 
         //- Return chemical source terms for solids [kg/m3/s]
-        virtual tmp<volScalarField> RRs(const label i) const = 0;
+        virtual const DimensionedField<scalar, volMesh>& RRs
+        (
+            const label i
+        ) const = 0;
 
         //- Return chemical source terms for gases [kg/m3/s]
-        virtual tmp<volScalarField> RRg(const label i) const = 0;
+        virtual const DimensionedField<scalar, volMesh>& RRg
+        (
+            const label i
+        ) const = 0;
 
         //- Return sensible enthalpy for gas i [J/Kg]
         virtual tmp<volScalarField> gasHs

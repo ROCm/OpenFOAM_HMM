@@ -38,11 +38,7 @@ namespace Foam
 
 void Foam::basicChemistryModel::correct()
 {
-    if (mesh_.changing())
-    {
-        deltaTChem_.setSize(mesh_.nCells());
-        deltaTChem_ = deltaTChemIni_;
-    }
+    // do nothing
 }
 
 
@@ -64,7 +60,19 @@ Foam::basicChemistryModel::basicChemistryModel(const fvMesh& mesh)
     mesh_(mesh),
     chemistry_(lookup("chemistry")),
     deltaTChemIni_(readScalar(lookup("initialChemicalTimeStep"))),
-    deltaTChem_(mesh.nCells(), deltaTChemIni_)
+    deltaTChem_
+    (
+        IOobject
+        (
+            "deltaTChem",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("deltaTChem0", dimTime, deltaTChemIni_)
+    )
 {}
 
 

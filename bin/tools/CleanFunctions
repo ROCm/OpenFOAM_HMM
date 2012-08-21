@@ -88,7 +88,7 @@ cleanCase()
             rm -rf \
             allOwner* cell* face* meshModifiers* \
             owner* neighbour* point* edge* \
-            cellLevel* pointLevel* refinementHistory* level0Edge surfaceIndex* sets \
+            cellLevel* pointLevel* refinementHistory* level0Edge* surfaceIndex* sets \
             > /dev/null 2>&1 \
         )
     fi

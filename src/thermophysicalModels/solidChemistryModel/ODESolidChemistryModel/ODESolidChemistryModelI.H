@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::PtrList<Foam::scalarField>&
+inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRs()
 {
     return RRs_;
@@ -37,7 +37,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRs()
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::PtrList<Foam::scalarField>&
+inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRg()
 {
     return RRg_;
@@ -87,80 +87,34 @@ nReaction() const
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::tmp<Foam::volScalarField>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRs
 (
     const label i
 ) const
 {
-    tmp<volScalarField> tRRs
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "RRs(" + Ys_[i].name() + ')',
-                this->time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->chemistry_)
-    {
-        tRRs().internalField() = RRs_[i];
-        tRRs().correctBoundaryConditions();
-    }
-    return tRRs;
+    return RRs_[i];
 }
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::tmp<Foam::volScalarField>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRg
 (
     const label i
 ) const
 {
-    tmp<volScalarField> tRRg
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "RRg(" + this->pyrolisisGases_[i] + ')',
-                this->time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->chemistry_)
-    {
-        tRRg().internalField() = RRg_[i];
-        tRRg().correctBoundaryConditions();
-    }
-    return tRRg;
+    return RRg_[i];
 }
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::tmp<Foam::volScalarField>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRg() const
 {
-    tmp<volScalarField> tRRg
+    tmp<DimensionedField<scalar, volMesh> > tRRg
     (
-        new volScalarField
+        new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
@@ -171,30 +125,29 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRg() const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
         )
     );
 
     if (this->chemistry_)
     {
+        DimensionedField<scalar, volMesh>& RRg = tRRg();
         for (label i=0; i < nGases_; i++)
         {
-            tRRg().internalField() += RRg_[i];
+            RRg += RRg_[i];
         }
-        tRRg().correctBoundaryConditions();
     }
     return tRRg;
 }
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::tmp<Foam::volScalarField>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRs() const
 {
-    tmp<volScalarField> tRRs
+    tmp<DimensionedField<scalar, volMesh> > tRRs
     (
-        new volScalarField
+        new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
@@ -205,32 +158,31 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRs() const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
         )
     );
 
     if (this->chemistry_)
     {
+        DimensionedField<scalar, volMesh>& RRs = tRRs();
         for (label i=0; i < nSolids_; i++)
         {
-            tRRs().internalField() += RRs_[i];
+            RRs += RRs_[i];
         }
-        tRRs().correctBoundaryConditions();
     }
     return tRRs;
 }
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline Foam::tmp<Foam::volScalarField>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RR
 (
     const label i
 ) const
 {
     notImplemented("ODESolidChemistryModel::RR(const label)");
-    return (Foam::volScalarField::null());
+    return (DimensionedField<scalar, volMesh>::null());
 }
 
 

@@ -5,6 +5,7 @@ autoPtr<basicThermo> thermo
 
 const volScalarField& h = thermo->he();
 
+// Register copy of thermo density
 volScalarField rho
 (
     IOobject
@@ -16,28 +17,40 @@ volScalarField rho
     thermo->rho()
 );
 
-volVectorField U
-(
-    IOobject
+// Construct turbulence model (if fluid)
+autoPtr<volVectorField> UPtr;
+autoPtr<surfaceScalarField> phiPtr;
+autoPtr<compressible::turbulenceModel> turbulence;
+
+if (!isA<solidThermo>(thermo()))
+{
+    UPtr.reset
     (
-        "U",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh
-);
+        new volVectorField
+        (
+            IOobject
+            (
+                "U",
+                runTime.timeName(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh
+        )
+    );
+    const volVectorField& U = UPtr();
 
-#include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
+    // Copy phi to autoPtr. Rename to make sure copy is now registered as 'phi'.
+    phi.rename("phiFluid");
+    phiPtr.reset(new surfaceScalarField("phi", phi));
 
-autoPtr<compressible::RASModel> RASModel
-(
-    compressible::RASModel::New
+    turbulence = compressible::turbulenceModel::New
     (
         rho,
         U,
-        phi,
+        phiPtr(),
         thermo()
-    )
-);
+    );
+}

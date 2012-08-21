@@ -151,7 +151,7 @@ motionControl
         {
             priority            1;
             mode                bothSides;
-            
+
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {

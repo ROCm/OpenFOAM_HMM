@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,15 +109,6 @@ class layerParameters
 
     // Private Member Functions
 
-        //- Extract patch-wise number of layers
-        static labelList readNumLayers
-        (
-            const PtrList<dictionary>& surfaceDicts,
-            const refinementSurfaces& refineSurfaces,
-            const labelList& globalToPatch,
-            const polyBoundaryMesh& boundaryMesh
-        );
-
         //- Disallow default bitwise copy construct
         layerParameters(const layerParameters&);
 
@@ -129,17 +120,7 @@ public:
 
     // Constructors
 
-        ////- Construct from dictionary - old syntax
-        //layerParameters
-        //(
-        //    const PtrList<dictionary>& surfaceDicts,
-        //    const refinementSurfaces& refineSurfaces,
-        //    const labelList& globalToPatch,
-        //    const dictionary& dict,
-        //    const polyBoundaryMesh& boundaryMesh
-        //);
-
-        //- Construct from dictionary - new syntax
+        //- Construct from dictionary
         layerParameters(const dictionary& dict, const polyBoundaryMesh&);
 
 

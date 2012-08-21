@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CompType, class ThermoType>
-inline Foam::PtrList<Foam::scalarField>&
+inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
 Foam::ODEChemistryModel<CompType, ThermoType>::RR()
 {
     return RR_;
@@ -69,36 +69,13 @@ Foam::ODEChemistryModel<CompType, ThermoType>::nReaction() const
 
 
 template<class CompType, class ThermoType>
-inline Foam::tmp<Foam::volScalarField>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ODEChemistryModel<CompType, ThermoType>::RR
 (
     const label i
 ) const
 {
-    tmp<volScalarField> tRR
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "RR(" + this->Y_[i].name() + ')',
-                this->time().timeName(),
-                this->mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
-
-    if (this->chemistry_)
-    {
-        tRR().internalField() = RR_[i];
-        tRR().correctBoundaryConditions();
-    }
-    return tRR;
+    return RR_[i];
 }
 
 

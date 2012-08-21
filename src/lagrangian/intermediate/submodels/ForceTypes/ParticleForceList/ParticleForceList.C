@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,6 +177,23 @@ Foam::forceSuSp Foam::ParticleForceList<CloudType>::calcNonCoupled
     }
 
     return value;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::ParticleForceList<CloudType>::massEff
+(
+    const typename CloudType::parcelType& p,
+    const scalar mass
+) const
+{
+    scalar massEff = mass;
+    forAll(*this, i)
+    {
+        massEff += this->operator[](i).massAdd(p, mass);
+    }
+
+    return massEff;
 }
 
 

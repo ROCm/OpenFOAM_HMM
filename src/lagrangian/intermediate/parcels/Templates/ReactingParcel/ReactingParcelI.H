@@ -59,14 +59,18 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ParcelType::constantProperties(parentDict, readFields),
-    pMin_(0.0),
+    pMin_(1000.0),
     constantVolume_(false),
     Tvap_(0.0),
     Tbp_(0.0)
 {
     if (readFields)
     {
-        this->dict().lookup("pMin") >> pMin_;
+        if (this->dict().readIfPresent("pMin", pMin_))
+        {
+            Info<< "    employing parcel pMin of " << pMin_ << endl;
+        }
+
         this->dict().lookup("constantVolume") >> constantVolume_;
         this->dict().lookup("Tvap") >> Tvap_;
         this->dict().lookup("Tbp") >> Tbp_;
@@ -85,6 +89,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     const scalar poissonsRatio,
     const scalar T0,
     const scalar TMin,
+    const scalar TMax,
     const scalar Cp0,
     const scalar epsilon0,
     const scalar f0,
@@ -105,6 +110,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
         poissonsRatio,
         T0,
         TMin,
+        TMax,
         Cp0,
         epsilon0,
         f0,

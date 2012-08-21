@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::fvMesh& Foam::basicChemistryModel::mesh() const
+template<class CloudType>
+const Foam::volVectorField& Foam::VirtualMassForce<CloudType>::DUcDt() const
 {
-    return mesh_;
+    if (DUcDtPtr_)
+    {
+        return *DUcDtPtr_;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "const volVectorField& VirtualMassForce<CloudType>::DUcDt()"
+            "const"
+        )   << "DUcDt field not allocated" << abort(FatalError);
+
+        return *reinterpret_cast<const volVectorField*>(0);
+    }
 }
 
 
-inline Foam::Switch Foam::basicChemistryModel::chemistry() const
+template<class CloudType>
+inline const Foam::interpolation<Foam::vector>&
+Foam::VirtualMassForce<CloudType>::DUcDtInterp() const
 {
-    return chemistry_;
-}
+    if (!DUcDtInterpPtr_.valid())
+    {
+        FatalErrorIn
+        (
+            "inline const Foam::interpolation<Foam::vector>&"
+            "Foam::VirtualMassForce<CloudType>::DUcDtInterp() const"
+        )   << "Carrier pahase DUcDt interpolation object not set"
+            << abort(FatalError);
+    }
 
-
-inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::basicChemistryModel::deltaTChem() const
-{
-    return deltaTChem_;
-}
-
-
-inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::basicChemistryModel::deltaTChem()
-{
-    return deltaTChem_;
+    return DUcDtInterpPtr_();
 }
 
 

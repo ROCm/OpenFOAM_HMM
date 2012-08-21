@@ -53,10 +53,6 @@ constantProperties
 {
     parcelTypeId    2;
 
-    rhoMin          1e-15;
-    TMin            200;
-    minParticleMass 1e-15;
-
     rho0            2500;
     T0              300;
     Cp0             900;
