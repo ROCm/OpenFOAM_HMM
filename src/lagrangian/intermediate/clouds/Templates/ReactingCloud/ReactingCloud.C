@@ -336,7 +336,6 @@ void Foam::ReactingCloud<CloudType>::evolve()
 }
 
 
-
 template<class CloudType>
 void Foam::ReactingCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 {
