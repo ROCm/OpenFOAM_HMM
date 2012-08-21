@@ -45,4 +45,22 @@ const Foam::volVectorField& Foam::VirtualMassForce<CloudType>::DUcDt() const
 }
 
 
+template<class CloudType>
+inline const Foam::interpolation<Foam::vector>&
+Foam::VirtualMassForce<CloudType>::DUcDtInterp() const
+{
+    if (!DUcDtInterpPtr_.valid())
+    {
+        FatalErrorIn
+        (
+            "inline const Foam::interpolation<Foam::vector>&"
+            "Foam::VirtualMassForce<CloudType>::DUcDtInterp() const"
+        )   << "Carrier pahase DUcDt interpolation object not set"
+            << abort(FatalError);
+    }
+
+    return DUcDtInterpPtr_();
+}
+
+
 // ************************************************************************* //

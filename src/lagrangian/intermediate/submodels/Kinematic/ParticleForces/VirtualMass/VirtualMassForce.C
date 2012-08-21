@@ -40,7 +40,8 @@ Foam::VirtualMassForce<CloudType>::VirtualMassForce
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     UName_(this->coeffs().template lookupOrDefault<word>("U", "U")),
     Cvm_(readScalar(this->coeffs().lookup("Cvm"))),
-    DUcDtPtr_(NULL)
+    DUcDtPtr_(NULL),
+    DUcDtInterpPtr_(NULL)
 {}
 
 
@@ -53,7 +54,8 @@ Foam::VirtualMassForce<CloudType>::VirtualMassForce
     ParticleForce<CloudType>(vmf),
     UName_(vmf.UName_),
     Cvm_(vmf.Cvm_),
-    DUcDtPtr_(NULL)
+    DUcDtPtr_(NULL),
+    DUcDtInterpPtr_(NULL)
 {}
 
 
@@ -74,10 +76,25 @@ void Foam::VirtualMassForce<CloudType>::cacheFields(const bool store)
         const volVectorField& Uc = this->mesh().template
             lookupObject<volVectorField>(UName_);
 
-        DUcDtPtr_ = new volVectorField(fvc::ddt(Uc) + (Uc & fvc::grad(Uc)));
+        DUcDtPtr_ = new volVectorField
+        (
+            "DUcDt",
+            fvc::ddt(Uc) + (Uc & fvc::grad(Uc))
+        );
+
+        DUcDtInterpPtr_.reset
+        (
+            interpolation<vector>::New
+            (
+                this->owner().solution().interpolationSchemes(),
+                *DUcDtPtr_
+            ).ptr()
+        );
     }
     else
     {
+        DUcDtInterpPtr_.clear();
+
         if (DUcDtPtr_)
         {
             delete DUcDtPtr_;
@@ -99,7 +116,10 @@ Foam::forceSuSp Foam::VirtualMassForce<CloudType>::calcCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    value.Su() = mass*p.rhoc()/p.rho()*Cvm_*DUcDt()[p.cell()];
+    vector DUcDt =
+        DUcDtInterp().interpolate(p.position(), p.currentTetIndices());
+
+    value.Su() = mass*p.rhoc()/p.rho()*Cvm_*DUcDt;
 
     return value;
 }

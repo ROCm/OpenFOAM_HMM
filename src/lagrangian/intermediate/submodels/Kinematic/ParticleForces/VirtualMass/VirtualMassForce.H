@@ -38,6 +38,7 @@ SourceFiles
 
 #include "ParticleForce.H"
 #include "volFields.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +64,9 @@ class VirtualMassForce
 
         //- Rate of change of carrier phase velocity
         volVectorField* DUcDtPtr_;
+
+        //- Rate of change of carrier phase velocity interpolator
+        autoPtr<interpolation<vector> > DUcDtInterpPtr_;
 
 
 public:
@@ -104,6 +108,9 @@ public:
 
             //- Return the rate of change of carrier phase velocity
             inline const volVectorField& DUcDt() const;
+
+            //- Return the rate of change of carrier phase velocity interpolator
+            inline const interpolation<vector>& DUcDtInterp() const;
 
 
         // Evaluation
