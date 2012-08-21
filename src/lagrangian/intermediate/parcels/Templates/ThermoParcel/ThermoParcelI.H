@@ -31,6 +31,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties()
     ParcelType::constantProperties(),
     T0_(0.0),
     TMin_(0.0),
+    TMax_(VGREAT),
     Cp0_(0.0),
     epsilon0_(0.0),
     f0_(0.0),
@@ -47,6 +48,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     ParcelType::constantProperties(cp),
     T0_(cp.T0_),
     TMin_(cp.TMin_),
+    TMax_(cp.TMax_),
     Cp0_(cp.Cp0_),
     epsilon0_(cp.epsilon0_),
     f0_(cp.f0_),
@@ -64,6 +66,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     ParcelType::constantProperties(parentDict, readFields),
     T0_(0.0),
     TMin_(0.0),
+    TMax_(VGREAT),
     Cp0_(0.0),
     epsilon0_(0.0),
     f0_(0.0),
@@ -73,6 +76,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     {
         this->dict().lookup("T0") >> T0_;
         this->dict().lookup("TMin") >> TMin_;
+        this->dict().lookup("TMax") >> TMax_;
         this->dict().lookup("Cp0") >> Cp0_;
         this->dict().lookup("epsilon0") >> epsilon0_;
         this->dict().lookup("f0") >> f0_;
@@ -92,6 +96,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     const scalar poissonsRatio,
     const scalar T0,
     const scalar TMin,
+    const scalar TMax,
     const scalar Cp0,
     const scalar epsilon0,
     const scalar f0,
@@ -109,6 +114,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     ),
     T0_(T0),
     TMin_(TMin),
+    TMax_(TMax),
     Cp0_(Cp0),
     epsilon0_(epsilon0),
     f0_(f0),
@@ -192,6 +198,14 @@ inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
 {
     return TMin_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ThermoParcel<ParcelType>::constantProperties::TMax() const
+{
+    return TMax_;
 }
 
 

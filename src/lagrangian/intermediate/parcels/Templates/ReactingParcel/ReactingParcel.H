@@ -115,6 +115,7 @@ public:
                 const scalar poissonsRatio,
                 const scalar T0,
                 const scalar TMin,
+                const scalar TMax,
                 const scalar Cp0,
                 const scalar epsilon0,
                 const scalar f0,
