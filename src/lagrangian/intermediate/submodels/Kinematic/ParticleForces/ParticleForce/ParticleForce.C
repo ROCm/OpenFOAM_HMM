@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "ParticleForce.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 template<class CloudType>
 Foam::ParticleForce<CloudType>::ParticleForce
@@ -117,6 +116,17 @@ Foam::forceSuSp Foam::ParticleForce<CloudType>::calcNonCoupled
     value.Sp() = 0.0;
 
     return value;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::ParticleForce<CloudType>::massAdd
+(
+    const typename CloudType::parcelType& p,
+    const scalar mass
+) const
+{
+    return 0.0;
 }
 
 

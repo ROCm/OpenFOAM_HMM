@@ -130,6 +130,13 @@ public:
                 const scalar Re,
                 const scalar muc
             ) const;
+
+            //- Return the effective mass
+            virtual scalar massEff
+            (
+                const typename CloudType::parcelType& p,
+                const scalar mass
+            ) const;
 };
 
 
