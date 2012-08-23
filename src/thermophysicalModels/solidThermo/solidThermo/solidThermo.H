@@ -25,7 +25,7 @@ Class
     Foam::solidThermo
 
 Description
-    Basic solid thermodynamic properties
+    Fundamental solid thermodynamic properties
 
 SourceFiles
     solidThermo.C

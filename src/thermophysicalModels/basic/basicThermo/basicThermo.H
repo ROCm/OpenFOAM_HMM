@@ -25,7 +25,7 @@ Class
     Foam::basicThermo
 
 Description
-    Basic thermodynamic properties
+    Abstract base-class for fluid and solid thermodynamic properties
 
 SourceFiles
     basicThermo.C

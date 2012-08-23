@@ -25,7 +25,7 @@ Class
     Foam::fluidThermo
 
 Description
-    Basic thermodynamic properties
+    Fundamental fluid thermodynamic properties
 
 SourceFiles
     fluidThermo.C
