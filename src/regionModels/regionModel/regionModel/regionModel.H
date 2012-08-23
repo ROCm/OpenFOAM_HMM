@@ -262,7 +262,7 @@ public:
             //- Evolve the region
             virtual void evolveRegion();
 
-            //- Evolve the film
+            //- Evolve the region
             virtual void evolve();
 
 

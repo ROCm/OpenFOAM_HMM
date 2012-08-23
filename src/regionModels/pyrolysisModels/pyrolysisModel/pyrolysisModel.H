@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -161,7 +161,7 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected pyrolysis film model
+        //- Return a reference to the selected pyrolysis model
         static autoPtr<pyrolysisModel> New(const fvMesh& mesh);
 
         //- Return a reference to a named selected pyrolysis model

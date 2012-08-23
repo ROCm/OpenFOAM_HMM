@@ -67,19 +67,31 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(parentDict.subOrEmptyDict("constantProperties")),
-    parcelTypeId_(-1),
-    rhoMin_(0.0),
+    parcelTypeId_(1),
+    rhoMin_(1e-15),
     rho0_(0.0),
-    minParticleMass_(0.0),
+    minParticleMass_(1e-15),
     youngsModulus_(0.0),
     poissonsRatio_(0.0)
 {
     if (readFields)
     {
-        dict_.lookup("parcelTypeId") >> parcelTypeId_;
-        dict_.lookup("rhoMin") >> rhoMin_;
+        if (dict_.readIfPresent("parcelTypeId", parcelTypeId_))
+        {
+            Info<< "    employing parcel parcelTypeId of " << parcelTypeId_
+                << endl;
+        }
+        if (dict_.readIfPresent("rhoMin", rhoMin_))
+        {
+            Info<< "    employing parcel rhoMin of " << rhoMin_ << endl;
+        }
+        if (dict_.readIfPresent("minParticleMass", minParticleMass_))
+        {
+            Info<< "    employing parcel minParticleMass of "
+                << minParticleMass_ << endl;
+        }
+
         dict_.lookup("rho0") >> rho0_;
-        dict_.lookup("minParticleMass") >> minParticleMass_;
         dict_.lookup("youngsModulus") >> youngsModulus_;
         dict_.lookup("poissonsRatio") >> poissonsRatio_;
     }

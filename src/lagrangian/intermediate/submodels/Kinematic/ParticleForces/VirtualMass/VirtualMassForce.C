@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,115 +23,117 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ParticleForce.H"
+#include "VirtualMassForce.H"
+#include "fvcDdt.H"
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::ParticleForce<CloudType>::ParticleForce
+Foam::VirtualMassForce<CloudType>::VirtualMassForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict,
-    const word& forceType,
-    const bool readCoeffs
+    const dictionary& dict
 )
 :
-    owner_(owner),
-    mesh_(mesh),
-    coeffs_(readCoeffs ? dict : dictionary::null)
-{
-    if (readCoeffs && (coeffs_.dictName() != forceType))
-    {
-        FatalIOErrorIn
-        (
-            "Foam::ParticleForce<CloudType>::ParticleForce"
-            "("
-                "CloudType&, "
-                "const fvMesh&, "
-                "const dictionary&, "
-                "const word&, "
-                "const bool"
-            ")",
-            dict
-        )   << "Force " << forceType << " must be specified as a dictionary"
-            << exit(FatalIOError);
-    }
-}
+    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
+    UName_(this->coeffs().template lookupOrDefault<word>("U", "U")),
+    Cvm_(readScalar(this->coeffs().lookup("Cvm"))),
+    DUcDtPtr_(NULL),
+    DUcDtInterpPtr_(NULL)
+{}
 
 
 template<class CloudType>
-Foam::ParticleForce<CloudType>::ParticleForce(const ParticleForce& pf)
+Foam::VirtualMassForce<CloudType>::VirtualMassForce
+(
+    const VirtualMassForce& vmf
+)
 :
-    owner_(pf.owner_),
-    mesh_(pf.mesh_),
-    coeffs_(pf.coeffs_)
+    ParticleForce<CloudType>(vmf),
+    UName_(vmf.UName_),
+    Cvm_(vmf.Cvm_),
+    DUcDtPtr_(NULL),
+    DUcDtInterpPtr_(NULL)
 {}
 
 
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::ParticleForce<CloudType>::~ParticleForce()
+Foam::VirtualMassForce<CloudType>::~VirtualMassForce()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::ParticleForce<CloudType>::cacheFields(const bool store)
-{}
+void Foam::VirtualMassForce<CloudType>::cacheFields(const bool store)
+{
+    if (store && !DUcDtPtr_)
+    {
+        const volVectorField& Uc = this->mesh().template
+            lookupObject<volVectorField>(UName_);
+
+        DUcDtPtr_ = new volVectorField
+        (
+            "DUcDt",
+            fvc::ddt(Uc) + (Uc & fvc::grad(Uc))
+        );
+
+        DUcDtInterpPtr_.reset
+        (
+            interpolation<vector>::New
+            (
+                this->owner().solution().interpolationSchemes(),
+                *DUcDtPtr_
+            ).ptr()
+        );
+    }
+    else
+    {
+        DUcDtInterpPtr_.clear();
+
+        if (DUcDtPtr_)
+        {
+            delete DUcDtPtr_;
+            DUcDtPtr_ = NULL;
+        }
+    }
+}
 
 
 template<class CloudType>
-Foam::forceSuSp Foam::ParticleForce<CloudType>::calcCoupled
+Foam::forceSuSp Foam::VirtualMassForce<CloudType>::calcCoupled
 (
-    const typename CloudType::parcelType&,
+    const typename CloudType::parcelType& p,
     const scalar dt,
     const scalar mass,
     const scalar Re,
     const scalar muc
 ) const
 {
-    forceSuSp value;
-    value.Su() = vector::zero;
-    value.Sp() = 0.0;
+    forceSuSp value(vector::zero, 0.0);
+
+    vector DUcDt =
+        DUcDtInterp().interpolate(p.position(), p.currentTetIndices());
+
+    value.Su() = mass*p.rhoc()/p.rho()*Cvm_*DUcDt;
 
     return value;
 }
 
 
 template<class CloudType>
-Foam::forceSuSp Foam::ParticleForce<CloudType>::calcNonCoupled
-(
-    const typename CloudType::parcelType&,
-    const scalar dt,
-    const scalar mass,
-    const scalar Re,
-    const scalar muc
-) const
-{
-    forceSuSp value;
-    value.Su() = vector::zero;
-    value.Sp() = 0.0;
-
-    return value;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::ParticleForce<CloudType>::massAdd
+Foam::scalar Foam::VirtualMassForce<CloudType>::massAdd
 (
     const typename CloudType::parcelType& p,
     const scalar mass
 ) const
 {
-    return 0.0;
+    return mass*p.rhoc()/p.rho()*Cvm_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "ParticleForceNew.C"
 
 // ************************************************************************* //

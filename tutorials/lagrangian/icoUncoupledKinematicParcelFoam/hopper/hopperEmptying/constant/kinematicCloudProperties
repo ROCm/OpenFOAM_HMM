@@ -45,11 +45,6 @@ solution
 
 constantProperties
 {
-    parcelTypeId    1;
-
-    rhoMin          1e-15;
-    minParticleMass 1e-15;
-
     rho0            964;
     youngsModulus   6e8;
     poissonsRatio   0.35;

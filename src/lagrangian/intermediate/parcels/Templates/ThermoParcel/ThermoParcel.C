@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -324,7 +324,16 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T_, dt, ap*bp, bp);
 
-    scalar Tnew = max(Tres.value(), td.cloud().constProps().TMin());
+    scalar Tnew =
+        min
+        (
+            max
+            (
+                Tres.value(),
+                td.cloud().constProps().TMin()
+            ),
+            td.cloud().constProps().TMax()
+        );
 
     Sph = dt*htc*As;
 

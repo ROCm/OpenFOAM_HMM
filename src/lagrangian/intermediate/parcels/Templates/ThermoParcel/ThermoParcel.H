@@ -82,6 +82,9 @@ public:
             //- Minimum temperature [K]
             scalar TMin_;
 
+            //- Maximum temperature [K]
+            scalar TMax_;
+
             //- Particle specific heat capacity [J/(kg.K)]
             scalar Cp0_;
 
@@ -123,6 +126,7 @@ public:
                 const scalar poissonsRatio,
                 const scalar T0,
                 const scalar TMin,
+                const scalar TMax,
                 const scalar Cp0,
                 const scalar epsilon0,
                 const scalar f0,
@@ -139,6 +143,9 @@ public:
 
                 //- Return const access to minimum temperature [K]
                 inline scalar TMin() const;
+
+                //- Return const access to maximum temperature [K]
+                inline scalar TMax() const;
 
                 //- Return const access to the particle specific heat capacity
                 //  [J/(kg.K)]

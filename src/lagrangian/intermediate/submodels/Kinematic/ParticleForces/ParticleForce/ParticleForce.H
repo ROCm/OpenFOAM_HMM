@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class ParticleForce Declaration
+                        Class ParticleForce Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -168,6 +168,13 @@ public:
                 const scalar mass,
                 const scalar Re,
                 const scalar muc
+            ) const;
+
+            //- Return the added mass
+            virtual scalar massAdd
+            (
+                const typename CloudType::parcelType& p,
+                const scalar mass
             ) const;
 };
 
