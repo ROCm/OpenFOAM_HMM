@@ -39,7 +39,7 @@ License
 namespace Foam
 {
     typedef ODESolidChemistryModel
-        <solidChemistryModel, constSolidThermoPhysics, gasThermoPhysics>
+        <solidChemistryModel, hConstSolidThermoPhysics, gasThermoPhysics>
             solidODEChemistryConstThermo;
 
     makeChemistrySolver(solidODEChemistryConstThermo)
@@ -49,12 +49,12 @@ namespace Foam
         ode,
         ODESolidChemistryModel,
         solidChemistryModel,
-        constSolidThermoPhysics,
+        hConstSolidThermoPhysics,
         gasThermoPhysics
     )
 
     typedef ODESolidChemistryModel
-        <solidChemistryModel, expoSolidThermoPhysics, gasThermoPhysics>
+        <solidChemistryModel, hExponentialSolidThermoPhysics, gasThermoPhysics>
             solidODEChemistryExpThermo;
 
     makeChemistrySolver(solidODEChemistryExpThermo)
@@ -64,7 +64,7 @@ namespace Foam
         ode,
         ODESolidChemistryModel,
         solidChemistryModel,
-        expoSolidThermoPhysics,
+        hExponentialSolidThermoPhysics,
         gasThermoPhysics
     )
 }

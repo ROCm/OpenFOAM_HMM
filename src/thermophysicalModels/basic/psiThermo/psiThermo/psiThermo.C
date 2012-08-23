@@ -38,7 +38,35 @@ namespace Foam
 
 Foam::psiThermo::psiThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh)
+    basicThermo(mesh),
+
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, -2, 2, 0, 0)
+    ),
+
+    mu_
+    (
+        IOobject
+        (
+            "mu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
+    )
 {}
 
 
@@ -46,6 +74,26 @@ Foam::psiThermo::psiThermo(const fvMesh& mesh)
 
 Foam::psiThermo::~psiThermo()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField> Foam::psiThermo::rho() const
+{
+    return p_*psi();
+}
+
+
+const Foam::volScalarField& Foam::psiThermo::psi() const
+{
+    return psi_;
+}
+
+
+const Foam::volScalarField& Foam::psiThermo::mu() const
+{
+    return mu_;
+}
 
 
 // ************************************************************************* //

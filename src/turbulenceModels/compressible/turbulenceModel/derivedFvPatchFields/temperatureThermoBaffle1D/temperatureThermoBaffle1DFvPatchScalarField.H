@@ -81,7 +81,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             transportDict_(dict.subDict("transport")),
             radiationDict_(dict.subDict("radiation")),
             thermoDict_(dict.subDict("thermodynamics")),
-            densityDict_(dict.subDict("density"))
+            densityDict_(dict.subDict("equationOfState"))
         {}
 
 

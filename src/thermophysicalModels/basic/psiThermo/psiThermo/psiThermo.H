@@ -55,6 +55,15 @@ class psiThermo
 
 protected:
 
+    // Protected data
+
+        //- Compressibility [s^2/m^2]
+        volScalarField psi_;
+
+        //- Dynamic viscosity [kg/m/s]
+        volScalarField mu_;
+
+
     // Protected Member Functions
 
         //- Construct as copy (not implemented)
@@ -97,10 +106,16 @@ public:
         // Fields derived from thermodynamic state variables
 
             //- Density [kg/m^3] - uses current value of pressure
-            virtual tmp<volScalarField> rho() const
-            {
-                return p_*psi();
-            }
+            virtual tmp<volScalarField> rho() const;
+
+            //- Compressibility [s^2/m^2]
+            virtual const volScalarField& psi() const;
+
+
+        // Access to transport state variables
+
+            //- Dynamic viscosity of mixture [kg/m/s]
+            virtual const volScalarField& mu() const;
 };
 
 

@@ -41,7 +41,8 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "basicSolidMixture.H"
-#include "rhoThermo.H"
+#include "veryBasicThermo.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,8 +55,17 @@ namespace Foam
 
 class solidThermo
 :
-    public rhoThermo
+    public veryBasicThermo
 {
+
+protected:
+
+    // Protected data
+
+        //- Density field [kg/m^3]
+        //  Named 'rhoThermo' to avoid (potential) conflict with solver density
+        volScalarField rho_;
+
 
 public:
 
@@ -107,8 +117,13 @@ public:
 
     // Member functions
 
+        // Fields derived from thermodynamic state variables
 
-        // Derived thermal properties
+            //- Density [kg/m^3]
+            virtual tmp<volScalarField> rho() const;
+
+            //- Return non-const access to the local density field [kg/m^3]
+            virtual volScalarField& rho();
 
             //- Thermal conductivity [W/m/K]
             virtual tmp<volVectorField> Kappa() const = 0;

@@ -24,14 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicThermo.H"
-#include "fvMesh.H"
-#include "HashTable.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedEnergyFvPatchScalarField.H"
-#include "gradientEnergyFvPatchScalarField.H"
-#include "mixedEnergyFvPatchScalarField.H"
-#include "temperatureJumpFvPatchScalarField.H"
-#include "energyJumpFvPatchScalarField.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -46,171 +38,14 @@ namespace Foam
 
 Foam::basicThermo::basicThermo(const fvMesh& mesh)
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            "thermophysicalProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-
-    p_
-    (
-        IOobject
-        (
-            "p",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
-
-    psi_
-    (
-        IOobject
-        (
-            "psi",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
-    ),
-
-    T_
-    (
-        IOobject
-        (
-            "T",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
-
-    mu_
-    (
-        IOobject
-        (
-            "mu",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
-    ),
-
-    alpha_
-    (
-        IOobject
-        (
-            "alpha",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
-    )
+    veryBasicThermo(mesh)
 {}
 
 
 
 Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
 :
-    IOdictionary
-    (
-        IOobject
-        (
-            "thermophysicalProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        dict
-    ),
-
-    p_
-    (
-        IOobject
-        (
-            "p",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
-
-    psi_
-    (
-        IOobject
-        (
-            "psi",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
-    ),
-
-    T_
-    (
-        IOobject
-        (
-            "T",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    ),
-
-    mu_
-    (
-        IOobject
-        (
-            "mu",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
-    ),
-
-    alpha_
-    (
-        IOobject
-        (
-            "alpha",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
-    )
+    veryBasicThermo(mesh, dict)
 {}
 
 
@@ -218,50 +53,6 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
 
 Foam::basicThermo::~basicThermo()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::volScalarField& Foam::basicThermo::p()
-{
-    return p_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::p() const
-{
-    return p_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::psi() const
-{
-    return psi_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::T() const
-{
-    return T_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::mu() const
-{
-    return mu_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::alpha() const
-{
-    return alpha_;
-}
-
-
-bool Foam::basicThermo::read()
-{
-    return regIOobject::read();
-}
 
 
 // ************************************************************************* //

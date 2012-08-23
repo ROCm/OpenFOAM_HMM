@@ -21,41 +21,73 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::solidChemistryModel
+Typedefs
+    Foam::solidThermoPhysicsTypes
 
 Description
-    Creates solid chemistry model instances templated on the type of
-    solid thermodynamics
+    Type definitions for solid-thermo-physics models
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeChemistryModel.H"
+#ifndef solidThermoPhysicsTypes_H
+#define solidThermoPhysicsTypes_H
 
-#include "ODESolidChemistryModel.H"
-#include "solidChemistryModel.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
+#include "incompressible.H"
+
+#include "hConstThermo.H"
+#include "hExponentialThermo.H"
+
+#include "constIsoSolidTransport.H"
+#include "constAnIsoSolidTransport.H"
+#include "exponentialSolidTransport.H"
+
+#include "constSolidRad.H"
+
+#include "sensibleEnthalpy.H"
+#include "specieThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hConstSolidThermoPhysics,
-        gasThermoPhysics
-    );
+    typedef
+        constIsoSolidTransport
+        <
+            constSolidRad
+            <
+                specieThermo
+                <
+                    hConstThermo
+                    <
+                        incompressible
+                    >,
+                    sensibleEnthalpy
+                >
+            >
+        >
+        hConstSolidThermoPhysics;
 
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hExponentialSolidThermoPhysics,
-        gasThermoPhysics
-    );
+    typedef
+        exponentialSolidTransport
+        <
+            constSolidRad
+            <
+                specieThermo
+                <
+                    hExponentialThermo
+                    <
+                        incompressible
+                    >,
+                    sensibleEnthalpy
+                >
+            >
+        >
+        hExponentialSolidThermoPhysics;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -59,7 +59,7 @@ Description
             <constIsoSolidTransport
                 <constSolidRad
                     <specieThermo
-                        <constSolidThermo<constRho>,sensibleEnthalpy>
+                        <hConstThermo<incompressible>,sensibleEnthalpy>
                     >
                  >
             >

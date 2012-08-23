@@ -104,7 +104,7 @@ public:
 
          // Thermo properties
 
-            //- Return const reference to the basicSolidThermo
+            //- Return const reference to the solidThermo
             virtual const solidThermo& thermo() const;
 
 

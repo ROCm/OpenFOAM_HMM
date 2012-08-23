@@ -33,7 +33,7 @@ Description
 #define makesolidThermo_H
 
 #include "addToRunTimeSelectionTable.H"
-#include "basicThermo.H"
+#include "veryBasicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 namespace Foam
@@ -131,7 +131,7 @@ addToRunTimeSelectionTable                                                    \
 );                                                                            \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
+    veryBasicThermo,                                                          \
     Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
     fvMesh                                                                    \
 );                                                                            \

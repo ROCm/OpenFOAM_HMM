@@ -39,7 +39,7 @@ namespace compressible
 defineTemplateTypeNameAndDebugWithName
 (
     constSolid_temperatureThermoBaffle1DFvPatchScalarField,
-    "compressible::temperatureThermoBaffle1D<constSolidThermoPhysics>",
+    "compressible::temperatureThermoBaffle1D<hConstSolidThermoPhysics>",
     0
 );
 
@@ -52,7 +52,7 @@ addToPatchFieldRunTimeSelection
 defineTemplateTypeNameAndDebugWithName
 (
     expoSolid_temperatureThermoBaffle1DFvPatchScalarField,
-    "compressible::temperatureThermoBaffle1D<expoSolidThermoPhysics>",
+    "compressible::temperatureThermoBaffle1D<hExponentialSolidThermoPhysics>",
     0
 );
 

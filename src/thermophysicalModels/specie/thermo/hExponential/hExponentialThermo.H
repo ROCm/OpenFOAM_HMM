@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::exponentialSolidThermo
+    Foam::hExponentialThermo
 
 Description
-    Exponential thermodynamics package for solids templated into the rhoType.
+    Exponential properties thermodynamics package
+    templated into the equationOfState.
 
 SourceFiles
-    exponentialSolidThermoI.H
-    exponentialSolidThermo.C
+    hExponentialThermoI.H
+    hExponentialThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exponentialSolidThermo_H
-#define exponentialSolidThermo_H
+#ifndef hExponentialThermo_H
+#define hExponentialThermo_H
 
 #include "scalar.H"
 #include "dictionary.H"
@@ -45,32 +46,32 @@ SourceFiles
 namespace Foam
 {
 
-template<class rhoType> class exponentialSolidThermo;
+template<class equationOfState> class hExponentialThermo;
 
-template<class rhoType>
-inline exponentialSolidThermo<rhoType> operator*
+template<class equationOfState>
+inline hExponentialThermo<equationOfState> operator*
 (
     const scalar,
-    const exponentialSolidThermo<rhoType>&
+    const hExponentialThermo<equationOfState>&
 );
 
 
-template<class rhoType>
+template<class equationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const exponentialSolidThermo<rhoType>&
+    const hExponentialThermo<equationOfState>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                         Class exponentialSolidThermo Declaration
+                         Class hExponentialThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class rhoType>
-class exponentialSolidThermo
+template<class equationOfState>
+class hExponentialThermo
 :
-    public rhoType
+    public equationOfState
 {
 
     // Private data
@@ -95,9 +96,9 @@ public:
     // Constructors
 
         //- Construct from components
-        inline exponentialSolidThermo
+        inline hExponentialThermo
         (
-            const rhoType& st,
+            const equationOfState& st,
             const scalar c0,
             const scalar n0,
             const scalar Tref,
@@ -105,13 +106,13 @@ public:
         );
 
         //- Construct from dictionary
-        exponentialSolidThermo(const dictionary&);
+        hExponentialThermo(const dictionary&);
 
         //- Construct as a named copy
-        inline exponentialSolidThermo
+        inline hExponentialThermo
         (
             const word&,
-            const exponentialSolidThermo&
+            const hExponentialThermo&
         );
 
 
@@ -141,30 +142,30 @@ public:
 
     // Member operators
 
-        inline exponentialSolidThermo& operator=
+        inline hExponentialThermo& operator=
         (
-            const exponentialSolidThermo&
+            const hExponentialThermo&
         );
-        inline void operator+=(const exponentialSolidThermo&);
-        inline void operator-=(const exponentialSolidThermo&);
+        inline void operator+=(const hExponentialThermo&);
+        inline void operator-=(const hExponentialThermo&);
 
 
     // Friend operators
 
 
-        friend exponentialSolidThermo operator* <rhoType>
+        friend hExponentialThermo operator* <equationOfState>
         (
             const scalar,
-            const exponentialSolidThermo&
+            const hExponentialThermo&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<< <rhoType>
+        friend Ostream& operator<< <equationOfState>
         (
             Ostream&,
-            const exponentialSolidThermo&
+            const hExponentialThermo&
         );
 };
 
@@ -177,8 +178,8 @@ public:
 
 
 #ifdef NoRepository
-#   include "exponentialSolidThermoI.H"
-#   include "exponentialSolidThermo.C"
+#   include "hExponentialThermoI.H"
+#   include "hExponentialThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

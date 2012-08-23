@@ -21,15 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Mixture instantiation
+
 \*---------------------------------------------------------------------------*/
 
+#include "basicMixture.H"
+#include "makeBasicMixture.H"
 
-#include "makeSolidThermo.H"
 
-#include "constRho.H"
+#include "incompressible.H"
 
-#include "constSolidThermo.H"
-#include "exponentialSolidThermo.H"
+#include "hConstThermo.H"
+#include "hExponentialThermo.H"
 
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
@@ -37,92 +41,68 @@ License
 
 #include "constSolidRad.H"
 
+#include "sensibleInternalEnergy.H"
+#include "sensibleEnthalpy.H"
+#include "specieThermo.H"
+
 #include "pureSolidMixture.H"
 #include "multiComponentSolidMixture.H"
 #include "reactingSolidMixture.H"
 
-#include "sensibleEnthalpy.H"
-#include "sensibleInternalEnergy.H"
-#include "specieThermo.H"
-
-#include "heThermo.H"
-
-#include "solidThermo.H"
-#include "solidReactionThermo.H"
-#include "heSolidThermo.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/* * * * * * * * * * * * * * * * * Enthalpy-based * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-makeSolidThermo
+makeBasicMixture
 (
-    solidThermo,
-    heSolidThermo,
     pureSolidMixture,
     constIsoSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
-    constSolidThermo,
-    constRho
+    hConstThermo,
+    incompressible
 );
 
-makeSolidThermo
+makeBasicMixture
 (
-    solidThermo,
-    heSolidThermo,
     pureSolidMixture,
     constAnIsoSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
-    constSolidThermo,
-    constRho
+    hConstThermo,
+    incompressible
 );
 
-makeSolidThermo
+makeBasicMixture
 (
-    solidThermo,
-    heSolidThermo,
     pureSolidMixture,
     exponentialSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
-    exponentialSolidThermo,
-    constRho
+    hExponentialThermo,
+    incompressible
 );
 
-makeSolidThermo
+makeBasicMixture
 (
-    solidThermo,
-    heSolidThermo,
     multiComponentSolidMixture,
     constIsoSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
-    constSolidThermo,
-    constRho
+    hConstThermo,
+    incompressible
 );
 
-// Reacting solid thermo
-makeSolidThermo
+makeBasicMixture
 (
-    solidReactionThermo,
-    heSolidThermo,
     reactingSolidMixture,
     constIsoSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
-    constSolidThermo,
-    constRho
+    hConstThermo,
+    incompressible
 );
 
-/* * * * * * * * * * * * * * Internal-energy-based * * * * * * * * * * * * * */
-/*
-
-*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

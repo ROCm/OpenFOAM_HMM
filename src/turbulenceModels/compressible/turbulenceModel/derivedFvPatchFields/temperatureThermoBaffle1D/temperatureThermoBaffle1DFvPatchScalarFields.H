@@ -40,12 +40,12 @@ namespace compressible
 
     typedef temperatureThermoBaffle1DFvPatchScalarField
     <
-        constSolidThermoPhysics
+        hConstSolidThermoPhysics
     >constSolid_temperatureThermoBaffle1DFvPatchScalarField;
 
     typedef temperatureThermoBaffle1DFvPatchScalarField
     <
-        expoSolidThermoPhysics
+        hExponentialSolidThermoPhysics
     >expoSolid_temperatureThermoBaffle1DFvPatchScalarField;
 
 

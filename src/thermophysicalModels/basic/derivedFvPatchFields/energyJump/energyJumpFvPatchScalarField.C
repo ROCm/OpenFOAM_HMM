@@ -26,7 +26,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "energyJumpFvPatchScalarField.H"
 #include "temperatureJumpFvPatchScalarField.H"
-#include "basicThermo.H"
+#include "veryBasicThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -103,7 +103,7 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        const basicThermo& thermo = db().lookupObject<basicThermo>
+        const veryBasicThermo& thermo = db().lookupObject<veryBasicThermo>
         (
             "thermophysicalProperties"
         );

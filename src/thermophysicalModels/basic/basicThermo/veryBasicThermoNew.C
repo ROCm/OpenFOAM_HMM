@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,41 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::solidChemistryModel
-
-Description
-    Creates solid chemistry model instances templated on the type of
-    solid thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
-#include "makeChemistryModel.H"
-
-#include "ODESolidChemistryModel.H"
-#include "solidChemistryModel.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
+#include "veryBasicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::veryBasicThermo> Foam::veryBasicThermo::New
+(
+    const fvMesh& mesh
+)
 {
-    makeSolidChemistryModel
+    // get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
     (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hConstSolidThermoPhysics,
-        gasThermoPhysics
+        IOdictionary
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).lookup("thermoType")
     );
 
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hExponentialSolidThermoPhysics,
-        gasThermoPhysics
-    );
+    Info<< "Selecting thermodynamics package " << modelType << endl;
+
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("veryBasicThermo::New(const fvMesh&)")
+            << "Unknown veryBasicThermo type " << modelType << nl << nl
+            << "Valid veryBasicThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->sortedToc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<veryBasicThermo>(cstrIter()(mesh));
 }
+
 
 // ************************************************************************* //

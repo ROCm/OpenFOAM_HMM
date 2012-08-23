@@ -25,8 +25,7 @@ License
 
 #include "solidThermo.H"
 #include "fvMesh.H"
-#include "volFields.H"
-#include "HashTable.H"
+
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -42,7 +41,20 @@ namespace Foam
 
 Foam::solidThermo::solidThermo(const fvMesh& mesh)
 :
-    rhoThermo(mesh)
+    veryBasicThermo(mesh),
+    rho_
+    (
+        IOobject
+        (
+            "rhoThermo",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimDensity
+    )
 {}
 
 
@@ -52,7 +64,20 @@ Foam::solidThermo::solidThermo
     const dictionary& dict
 )
 :
-    rhoThermo(mesh, dict)
+    veryBasicThermo(mesh, dict),
+    rho_
+    (
+        IOobject
+        (
+            "rhoThermo",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimDensity
+    )
 {}
 
 
@@ -63,6 +88,18 @@ Foam::solidThermo::~solidThermo()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::volScalarField> Foam::solidThermo::rho() const
+{
+    return rho_;
+}
+
+
+Foam::volScalarField& Foam::solidThermo::rho()
+{
+    return rho_;
+}
+
 
 bool Foam::solidThermo::read()
 {

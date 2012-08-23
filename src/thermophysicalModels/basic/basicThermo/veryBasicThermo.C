@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,55 +23,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rhoThermo.H"
+#include "veryBasicThermo.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rhoThermo, 0);
-    defineRunTimeSelectionTable(rhoThermo, fvMesh);
+    defineTypeNameAndDebug(veryBasicThermo, 0);
+    defineRunTimeSelectionTable(veryBasicThermo, fvMesh);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
+Foam::veryBasicThermo::veryBasicThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh),
-    rho_
+    IOdictionary
     (
         IOobject
         (
-            "rhoThermo",
-            mesh.time().timeName(),
+            "thermophysicalProperties",
+            mesh.time().constant(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
-        ),
-        mesh,
-        dimDensity
+        )
     ),
 
-    psi_
+    p_
     (
         IOobject
         (
-            "psi",
+            "p",
             mesh.time().timeName(),
             mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
+        mesh
     ),
 
-    mu_
+    T_
     (
         IOobject
         (
-            "mu",
+            "T",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -83,42 +93,57 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 {}
 
 
-Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
+
+Foam::veryBasicThermo::veryBasicThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
 :
-    basicThermo(mesh, dict),
-    rho_
+    IOdictionary
     (
         IOobject
         (
-            "rhoThermo",
-            mesh.time().timeName(),
+            "thermophysicalProperties",
+            mesh.time().constant(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mesh,
-        dimDensity
+        dict
     ),
 
-    psi_
+    p_
     (
         IOobject
         (
-            "psi",
+            "p",
             mesh.time().timeName(),
             mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
+        mesh
     ),
 
-    mu_
+    T_
     (
         IOobject
         (
-            "mu",
+            "T",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -132,33 +157,39 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::rhoThermo::~rhoThermo()
+Foam::veryBasicThermo::~veryBasicThermo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::rhoThermo::rho() const
+Foam::volScalarField& Foam::veryBasicThermo::p()
 {
-    return rho_;
+    return p_;
 }
 
 
-Foam::volScalarField& Foam::rhoThermo::rho()
+const Foam::volScalarField& Foam::veryBasicThermo::p() const
 {
-    return rho_;
+    return p_;
 }
 
 
-const Foam::volScalarField& Foam::rhoThermo::psi() const
+const Foam::volScalarField& Foam::veryBasicThermo::T() const
 {
-    return psi_;
+    return T_;
 }
 
 
-const Foam::volScalarField& Foam::rhoThermo::mu() const
+const Foam::volScalarField& Foam::veryBasicThermo::alpha() const
 {
-    return mu_;
+    return alpha_;
+}
+
+
+bool Foam::veryBasicThermo::read()
+{
+    return regIOobject::read();
 }
 
 

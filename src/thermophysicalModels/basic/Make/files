@@ -1,6 +1,9 @@
 mixtures/basicMixture/basicMixture.C
 mixtures/basicMixture/basicMixtures.C
 
+basicThermo/veryBasicThermo.C
+basicThermo/veryBasicThermoNew.C
+
 basicThermo/basicThermo.C
 basicThermo/basicThermoNew.C
 

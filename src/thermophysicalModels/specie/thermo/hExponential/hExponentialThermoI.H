@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exponentialSolidThermo.H"
+#include "hExponentialThermo.H"
 #include "specie.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class rhoType>
-inline void Foam::exponentialSolidThermo<rhoType>::checkT(const scalar T) const
+template<class equationOfState>
+inline void Foam::hExponentialThermo<equationOfState>::checkT
+(
+    const scalar T
+) const
 {
     if (T < 0.0)
     {
         FatalErrorIn
         (
-            "exponentialSolidThermo<rhoType>::checkT(const scalar T) const"
-        )   << "attempt to use exponentialSolidThermo<rhoType>"
+            "hExponentialThermo<equationOfState>::checkT(const scalar T) const"
+        )   << "attempt to use hExponentialThermo<equationOfState>"
                " out of temperature range "
             << T
             << abort(FatalError);
@@ -44,8 +47,8 @@ inline void Foam::exponentialSolidThermo<rhoType>::checkT(const scalar T) const
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::integrateCp
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::integrateCp
 (
     const scalar T
 ) const
@@ -60,14 +63,14 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::integrateCp
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class rhoType>
-inline Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
+template<class equationOfState>
+inline Foam::hExponentialThermo<equationOfState>::hExponentialThermo
 (
     const word& name,
-    const exponentialSolidThermo& jt
+    const hExponentialThermo& jt
 )
 :
-    rhoType(name, jt),
+    equationOfState(name, jt),
     c0_(jt.c0_),
     n0_(jt.n0_),
     Tref_(jt.Tref_),
@@ -75,17 +78,17 @@ inline Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
 {}
 
 
-template<class rhoType>
-inline Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
+template<class equationOfState>
+inline Foam::hExponentialThermo<equationOfState>::hExponentialThermo
 (
-    const rhoType& st,
+    const equationOfState& st,
     const scalar c0,
     const scalar n0,
     const scalar Tref,
     const scalar Hf
 )
 :
-    rhoType(st),
+    equationOfState(st),
     c0_(c0),
     n0_(n0),
     Tref_(Tref),
@@ -95,8 +98,8 @@ inline Foam::exponentialSolidThermo<rhoType>::exponentialSolidThermo
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::limit
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::limit
 (
     const scalar T
 ) const
@@ -105,8 +108,8 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::limit
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::cp
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::cp
 (
     const scalar p, const scalar T
 ) const
@@ -115,8 +118,8 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::cp
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::ha
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::ha
 (
     const scalar p, const scalar T
 ) const
@@ -130,8 +133,8 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::ha
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hs
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::hs
 (
     const scalar p, const scalar T
 ) const
@@ -141,22 +144,22 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hs
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::hc() const
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::hc() const
 {
     return Hf_*this->W();
 }
 
 
-template<class rhoType>
-inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::s
+template<class equationOfState>
+inline Foam::scalar Foam::hExponentialThermo<equationOfState>::s
 (
     const scalar p, const scalar T
 ) const
 {
     notImplemented
     (
-        "scalar exponentialSolidThermo<rhoType>::"
+        "scalar hExponentialThermo<equationOfState>::"
         "s(const scalar p, const scalar T) const"
     );
     return T;
@@ -165,14 +168,14 @@ inline Foam::scalar Foam::exponentialSolidThermo<rhoType>::s
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 
-template<class rhoType>
-inline Foam::exponentialSolidThermo<rhoType>&
-Foam::exponentialSolidThermo<rhoType>::operator=
+template<class equationOfState>
+inline Foam::hExponentialThermo<equationOfState>&
+Foam::hExponentialThermo<equationOfState>::operator=
 (
-    const exponentialSolidThermo<rhoType>& ct
+    const hExponentialThermo<equationOfState>& ct
 )
 {
-    rhoType::operator=(ct);
+    equationOfState::operator=(ct);
 
     Hf_ = ct.Hf_;
     c0_ = ct.c0_;
@@ -183,15 +186,15 @@ Foam::exponentialSolidThermo<rhoType>::operator=
 }
 
 
-template<class rhoType>
-inline void Foam::exponentialSolidThermo<rhoType>::operator+=
+template<class equationOfState>
+inline void Foam::hExponentialThermo<equationOfState>::operator+=
 (
-    const exponentialSolidThermo<rhoType>& ct
+    const hExponentialThermo<equationOfState>& ct
 )
 {
     scalar molr1 = this->nMoles();
 
-    rhoType::operator+=(ct);
+    equationOfState::operator+=(ct);
 
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
@@ -203,15 +206,15 @@ inline void Foam::exponentialSolidThermo<rhoType>::operator+=
 }
 
 
-template<class rhoType>
-inline void Foam::exponentialSolidThermo<rhoType>::operator-=
+template<class equationOfState>
+inline void Foam::hExponentialThermo<equationOfState>::operator-=
 (
-    const exponentialSolidThermo<rhoType>& ct
+    const hExponentialThermo<equationOfState>& ct
 )
 {
     scalar molr1 = this->nMoles();
 
-    rhoType::operator-=(ct);
+    equationOfState::operator-=(ct);
 
     molr1 /= this->nMoles();
     scalar molr2 = ct.nMoles()/this->nMoles();
@@ -225,21 +228,22 @@ inline void Foam::exponentialSolidThermo<rhoType>::operator-=
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<class rhoType>
-inline Foam::exponentialSolidThermo<rhoType> Foam::operator*
+template<class equationOfState>
+inline Foam::hExponentialThermo<equationOfState> Foam::operator*
 (
     const scalar s,
-    const exponentialSolidThermo<rhoType>& ct
+    const hExponentialThermo<equationOfState>& ct
 )
 {
-    return exponentialSolidThermo<rhoType>
+    return hExponentialThermo<equationOfState>
     (
-        s*static_cast<const rhoType&>(ct),
+        s*static_cast<const equationOfState&>(ct),
         ct.Hf_,
         ct.c0_,
         ct.n0_,
         ct.Tref_
     );
 }
+
 
 // ************************************************************************* //

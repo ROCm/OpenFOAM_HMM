@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,25 +23,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constRho.H"
+#include "hExponentialThermo.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::constRho::constRho(const dictionary& dict)
+template<class equationOfState>
+Foam::hExponentialThermo<equationOfState>::hExponentialThermo
+(
+    const dictionary& dict
+)
 :
-    specie(dict),
-    rho_(readScalar(dict.subDict("density").lookup("rho")))
+    equationOfState(dict),
+    c0_(readScalar(dict.subDict("thermodynamics").lookup("C0"))),
+    n0_(readScalar(dict.subDict("thermodynamics").lookup("n0"))),
+    Tref_(readScalar(dict.subDict("thermodynamics").lookup("Tref"))),
+    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf")))
 {}
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const constRho& cr)
+template<class equationOfState>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const hExponentialThermo<equationOfState>& et
+)
 {
-    os  << static_cast<const specie&>(cr);
-    os << cr.rho_;
+    os  << static_cast<const equationOfState&>(et) << nl
+        << "    " << et.c0_
+        << tab << et.n0_
+        << tab << et.Tref_
+        << tab << et.Hf_;
 
-    os.check("Ostream& operator<<(Ostream& os, const constRho& cr)");
+    os << nl << "    ";
+
+    os << endl;
+
+    os.check
+    (
+        "operator<<(Ostream& os, const hExponentialThermo<equationOfState>& et)"
+    );
+
     return os;
 }
 

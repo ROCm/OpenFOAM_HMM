@@ -35,7 +35,6 @@ SourceFiles
 #ifndef solidReactionThermo_H
 #define solidReactionThermo_H
 
-#include "rhoThermo.H"
 #include "basicSolidMixture.H"
 #include "solidThermo.H"
 #include "autoPtr.H"

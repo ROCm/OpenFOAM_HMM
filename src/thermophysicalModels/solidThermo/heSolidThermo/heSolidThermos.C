@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,21 +21,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedefs
-    Foam::solidThermoPhysicsTypes
-
-Description
-    Type definitions for solid-thermo-physics models
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidThermoPhysicsTypes_H
-#define solidThermoPhysicsTypes_H
 
-#include "constRho.H"
+#include "makeSolidThermo.H"
 
-#include "constSolidThermo.H"
-#include "exponentialSolidThermo.H"
+#include "incompressible.H"
+
+#include "hConstThermo.H"
+#include "hExponentialThermo.H"
 
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
@@ -43,51 +37,90 @@ Description
 
 #include "constSolidRad.H"
 
+#include "pureSolidMixture.H"
+#include "multiComponentSolidMixture.H"
+#include "reactingSolidMixture.H"
+
 #include "sensibleEnthalpy.H"
+#include "sensibleInternalEnergy.H"
 #include "specieThermo.H"
+
+#include "heThermo.H"
+
+#include "solidThermo.H"
+#include "solidReactionThermo.H"
+#include "heSolidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef
-        constIsoSolidTransport
-        <
-            constSolidRad
-            <
-                specieThermo
-                <
-                    constSolidThermo
-                    <
-                        constRho
-                    >,
-                    sensibleEnthalpy
-                >
-            >
-        >
-        constSolidThermoPhysics;
 
-    typedef
-        exponentialSolidTransport
-        <
-            constSolidRad
-            <
-                specieThermo
-                <
-                    exponentialSolidThermo
-                    <
-                        constRho
-                    >,
-                    sensibleEnthalpy
-                >
-            >
-        >
-        expoSolidThermoPhysics;
-}
+/* * * * * * * * * * * * * * * * * Enthalpy-based * * * * * * * * * * * * * */
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    constIsoSolidTransport,
+    constSolidRad,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressible
+);
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    constAnIsoSolidTransport,
+    constSolidRad,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressible
+);
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    exponentialSolidTransport,
+    constSolidRad,
+    sensibleEnthalpy,
+    hExponentialThermo,
+    incompressible
+);
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    multiComponentSolidMixture,
+    constIsoSolidTransport,
+    constSolidRad,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressible
+);
+
+makeSolidThermo
+(
+    solidReactionThermo,
+    heSolidThermo,
+    reactingSolidMixture,
+    constIsoSolidTransport,
+    constSolidRad,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressible
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+} // End namespace Foam
 
 // ************************************************************************* //
