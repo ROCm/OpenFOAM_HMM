@@ -36,7 +36,7 @@ Description
             type            compressible::turbulentHeatFluxTemperature;
             heatSource      flux;        // power [W]; flux [W/m2]
             q               uniform 10;  // heat power or flux
-            kappa           basicThermo; // calculate kappa=alphaEff*thermo.Cp
+            kappa           fluidThermo; // calculate kappa=alphaEff*thermo.Cp
             value           uniform 300; // initial temperature value
         }
 

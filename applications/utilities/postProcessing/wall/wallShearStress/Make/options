@@ -7,7 +7,7 @@ EXE_INC = \
 EXE_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleRASModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -lfiniteVolume \

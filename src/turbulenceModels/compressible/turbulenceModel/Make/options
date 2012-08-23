@@ -9,7 +9,7 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lsolidThermo \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lfiniteVolume \
     -lmeshTools \

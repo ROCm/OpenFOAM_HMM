@@ -58,7 +58,7 @@ LESModel::LESModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel,
+    const fluidThermo& thermoPhysicalModel,
     const word& turbulenceModelName
 )
 :
@@ -98,7 +98,7 @@ autoPtr<LESModel> LESModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel,
+    const fluidThermo& thermoPhysicalModel,
     const word& turbulenceModelName
 )
 {
@@ -134,7 +134,7 @@ autoPtr<LESModel> LESModel::New
                 "const volScalarField&, "
                 "const volVectorField&, "
                 "const surfaceScalarField&, "
-                "const basicThermo&, "
+                "const fluidThermo&, "
                 "const word&"
             ")"
         )   << "Unknown LESModel type "

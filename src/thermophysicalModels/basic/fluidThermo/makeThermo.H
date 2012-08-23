@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::basicThermo
+    Foam::fluidThermo
 
 Description
     Macros for creating 'basic' density-based thermo packages
@@ -83,7 +83,7 @@ addToRunTimeSelectionTable                                                    \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
+    fluidThermo,                                                              \
     Cthermo##Mixture##Transport##Type##Thermo##EqnOfState,                    \
     fvMesh                                                                    \
 );
@@ -124,7 +124,7 @@ addToRunTimeSelectionTable                                                    \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
+    fluidThermo,                                                              \
     Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics,                    \
     fvMesh                                                                    \
 );

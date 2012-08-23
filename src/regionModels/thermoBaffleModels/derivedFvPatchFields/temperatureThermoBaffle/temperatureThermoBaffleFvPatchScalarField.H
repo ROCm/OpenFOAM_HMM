@@ -38,7 +38,7 @@ Description
 
     // Coupled BC.
     neighbourFieldName  T;
-    kappa               basicThermo;
+    kappa               fluidThermo;
     KName               none;
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,66 +22,82 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::porousMedia::noThermalModel
+    Foam::fluidThermo
 
 Description
-    A dummy thermal model porous media, corresponding to the 'none' option
+    Basic thermodynamic properties
+
+SourceFiles
+    fluidThermo.C
+    fluidThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noThermalModel_H
-#define noThermalModel_H
+#ifndef fluidThermo_H
+#define fluidThermo_H
 
-#include "thermalModel.H"
-#include "runTimeSelectionTables.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace porousMedia
-{
 
 /*---------------------------------------------------------------------------*\
-                       Class noThermalModel Declaration
+                        Class fluidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-class noThermalModel
+class fluidThermo
 :
-    public thermalModel
+    public basicThermo
 {
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("fluidThermo");
 
+
+    //- Declare run-time constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        fluidThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
 
     // Constructors
 
-        //- Construct from porous zone
-        noThermalModel(const porousZone&);
+        //- Construct from mesh
+        fluidThermo(const fvMesh&);
 
+        //- Construct from mesh
+        fluidThermo(const fvMesh&, const dictionary&);
+
+
+    //- Selector
+    static autoPtr<fluidThermo> New(const fvMesh&);
 
     //- Destructor
-    virtual ~noThermalModel();
+    virtual ~fluidThermo();
 
 
-    // Member Functions
+    // Member functions
 
-        //- Add the thermal source to the enthalpy equation
-        virtual void addEnergySource
-        (
-            const fluidThermo&,
-            const volScalarField& rho,
-            fvScalarMatrix& hEqn
-        ) const;
+        // Access to thermodynamic state variables
+
+            //- Compressibility [s^2/m^2]
+            virtual const volScalarField& psi() const = 0;
+
+
+        // Access to transport state variables
+
+            //- Dynamic viscosity of mixture [kg/m/s]
+            virtual const volScalarField& mu() const = 0;
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace porousMedia
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

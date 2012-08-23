@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh),
+    fluidThermo(mesh),
     rho_
     (
         IOobject
@@ -85,7 +85,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 
 Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 :
-    basicThermo(mesh, dict),
+    fluidThermo(mesh, dict),
     rho_
     (
         IOobject

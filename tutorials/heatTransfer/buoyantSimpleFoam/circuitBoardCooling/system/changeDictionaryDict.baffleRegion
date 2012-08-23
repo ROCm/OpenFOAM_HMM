@@ -95,7 +95,7 @@ dictionaryReplacement
 
                 // Coupled BC.
                 neighbourFieldName  T;
-                kappa               basicThermo;
+                kappa               fluidThermo;
                 kappaName           none;
 
 

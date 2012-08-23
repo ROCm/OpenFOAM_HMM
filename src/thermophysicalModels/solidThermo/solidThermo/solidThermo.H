@@ -41,7 +41,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "basicSolidMixture.H"
-#include "veryBasicThermo.H"
+#include "basicThermo.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,7 +55,7 @@ namespace Foam
 
 class solidThermo
 :
-    public veryBasicThermo
+    public basicThermo
 {
 
 protected:

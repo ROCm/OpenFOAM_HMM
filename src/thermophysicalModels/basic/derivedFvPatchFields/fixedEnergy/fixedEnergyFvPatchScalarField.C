@@ -25,7 +25,7 @@ License
 
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "veryBasicThermo.H"
+#include "basicThermo.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fixedEnergyFvPatchScalarField.H"
 
@@ -97,7 +97,7 @@ void Foam::fixedEnergyFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const veryBasicThermo& thermo = db().lookupObject<veryBasicThermo>
+    const basicThermo& thermo = db().lookupObject<basicThermo>
     (
         "thermophysicalProperties"
     );

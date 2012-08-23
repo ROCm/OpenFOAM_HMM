@@ -11,7 +11,7 @@ EXE_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -lcompressibleLESModels \

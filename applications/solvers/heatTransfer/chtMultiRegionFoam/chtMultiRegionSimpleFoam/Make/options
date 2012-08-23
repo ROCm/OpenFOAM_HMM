@@ -19,7 +19,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lfiniteVolume \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lsolidThermo \
     -lspecie \
     -lcompressibleTurbulenceModel \

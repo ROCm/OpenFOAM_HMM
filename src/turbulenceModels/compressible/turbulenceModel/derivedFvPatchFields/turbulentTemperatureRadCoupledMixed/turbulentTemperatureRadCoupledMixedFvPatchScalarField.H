@@ -48,7 +48,7 @@ Description
             lookup/calculate
      kappa:
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-    - 'basicThermo' : use basicThermo and compressible::RASmodel to calculate K
+    - 'fluidThermo' : use fluidThermo and compressible::RASmodel to calculate K
     - 'solidThermo' : use solidThermo kappa()
     - 'directionalSolidThermo' directionalKappa()
 

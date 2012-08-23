@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,70 +22,34 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::porousMedia::noThermalModel
+    Foam::fluidThermoCloud
 
 Description
-    A dummy thermal model porous media, corresponding to the 'none' option
+    Cloud class to introduce thermodynamic parcels
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noThermalModel_H
-#define noThermalModel_H
+#ifndef fluidThermoCloud_H
+#define fluidThermoCloud_H
 
-#include "thermalModel.H"
-#include "runTimeSelectionTables.H"
+#include "ThermoCloud.H"
+#include "fluidThermoParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace porousMedia
-{
-
-/*---------------------------------------------------------------------------*\
-                       Class noThermalModel Declaration
-\*---------------------------------------------------------------------------*/
-
-class noThermalModel
-:
-    public thermalModel
-{
-
-public:
-
-    //- Runtime type information
-    TypeName("none");
-
-
-    // Constructors
-
-        //- Construct from porous zone
-        noThermalModel(const porousZone&);
-
-
-    //- Destructor
-    virtual ~noThermalModel();
-
-
-    // Member Functions
-
-        //- Add the thermal source to the enthalpy equation
-        virtual void addEnergySource
-        (
-            const fluidThermo&,
-            const volScalarField& rho,
-            fvScalarMatrix& hEqn
-        ) const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace porousMedia
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef ThermoCloud
+    <
+        KinematicCloud
+        <
+            Cloud
+            <
+                fluidThermoParcel
+            >
+        >
+    > fluidThermoCloud;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

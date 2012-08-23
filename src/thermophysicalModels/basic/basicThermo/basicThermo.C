@@ -25,6 +25,7 @@ License
 
 #include "basicThermo.H"
 
+
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 namespace Foam
@@ -38,14 +39,119 @@ namespace Foam
 
 Foam::basicThermo::basicThermo(const fvMesh& mesh)
 :
-    veryBasicThermo(mesh)
+    IOdictionary
+    (
+        IOobject
+        (
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
+
+    p_
+    (
+        IOobject
+        (
+            "p",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    T_
+    (
+        IOobject
+        (
+            "T",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
+    )
 {}
 
 
 
-Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
+Foam::basicThermo::basicThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
 :
-    veryBasicThermo(mesh, dict)
+    IOdictionary
+    (
+        IOobject
+        (
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        dict
+    ),
+
+    p_
+    (
+        IOobject
+        (
+            "p",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    T_
+    (
+        IOobject
+        (
+            "T",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
+
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
+    )
 {}
 
 
@@ -53,6 +159,38 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
 
 Foam::basicThermo::~basicThermo()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::volScalarField& Foam::basicThermo::p()
+{
+    return p_;
+}
+
+
+const Foam::volScalarField& Foam::basicThermo::p() const
+{
+    return p_;
+}
+
+
+const Foam::volScalarField& Foam::basicThermo::T() const
+{
+    return T_;
+}
+
+
+const Foam::volScalarField& Foam::basicThermo::alpha() const
+{
+    return alpha_;
+}
+
+
+bool Foam::basicThermo::read()
+{
+    return regIOobject::read();
+}
 
 
 // ************************************************************************* //

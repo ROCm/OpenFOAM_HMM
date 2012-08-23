@@ -33,7 +33,7 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lspecie \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lsolidProperties \
     -lsolidMixtureProperties \
     -lthermophysicalFunctions \

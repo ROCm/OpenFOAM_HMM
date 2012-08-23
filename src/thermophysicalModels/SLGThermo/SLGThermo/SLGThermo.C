@@ -35,7 +35,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
+Foam::SLGThermo::SLGThermo(const fvMesh& mesh, fluidThermo& thermo)
 :
     MeshObject<fvMesh, SLGThermo>(mesh),
     thermo_(thermo),
@@ -91,7 +91,7 @@ Foam::SLGThermo::~SLGThermo()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::basicThermo& Foam::SLGThermo::thermo() const
+const Foam::fluidThermo& Foam::SLGThermo::thermo() const
 {
     return thermo_;
 }

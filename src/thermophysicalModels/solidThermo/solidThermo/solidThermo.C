@@ -41,7 +41,7 @@ namespace Foam
 
 Foam::solidThermo::solidThermo(const fvMesh& mesh)
 :
-    veryBasicThermo(mesh),
+    basicThermo(mesh),
     rho_
     (
         IOobject
@@ -64,7 +64,7 @@ Foam::solidThermo::solidThermo
     const dictionary& dict
 )
 :
-    veryBasicThermo(mesh, dict),
+    basicThermo(mesh, dict),
     rho_
     (
         IOobject

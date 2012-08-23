@@ -1,11 +1,11 @@
 mixtures/basicMixture/basicMixture.C
 mixtures/basicMixture/basicMixtures.C
 
-basicThermo/veryBasicThermo.C
-basicThermo/veryBasicThermoNew.C
-
 basicThermo/basicThermo.C
 basicThermo/basicThermoNew.C
+
+fluidThermo/fluidThermo.C
+fluidThermo/fluidThermoNew.C
 
 psiThermo/psiThermo/psiThermo.C
 psiThermo/psiThermo/psiThermoNew.C
@@ -22,4 +22,4 @@ derivedFvPatchFields/energyJump/energyJumpFvPatchScalarField.C
 
 derivedFvPatchFields/wallHeatTransfer/wallHeatTransferFvPatchScalarField.C
 
-LIB = $(FOAM_LIBBIN)/libbasicThermophysicalModels
+LIB = $(FOAM_LIBBIN)/libfluidThermophysicalModels

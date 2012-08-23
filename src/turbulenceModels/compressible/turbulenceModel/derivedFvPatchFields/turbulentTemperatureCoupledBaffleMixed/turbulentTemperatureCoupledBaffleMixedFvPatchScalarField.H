@@ -51,7 +51,7 @@ Description
     Note: kappa : heat conduction at patch. Gets supplied how to lookup
         calculate kappa:
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-    - 'basicThermo' : use basicThermo and compressible::RASmodel to calculate
+    - 'fluidThermo' : use fluidThermo and compressible::RASmodel to calculate
         kappa
     - 'solidThermo' : use solidThermo kappa()
     - 'directionalSolidThermo' directionalKappa()

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,40 +21,38 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::basicThermoParcel
-
-Description
-    Definition of basic thermo parcel
-
-SourceFiles
-    basicThermoParcel.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicThermoParcel_H
-#define basicThermoParcel_H
+#include "fluidThermo.H"
 
-#include "contiguous.H"
-#include "particle.H"
-#include "KinematicParcel.H"
-#include "ThermoParcel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 namespace Foam
 {
-    typedef ThermoParcel<KinematicParcel<particle> > basicThermoParcel;
-
-    template<>
-    inline bool contiguous<basicThermoParcel>()
-    {
-        return true;
-    }
+    defineTypeNameAndDebug(fluidThermo, 0);
+    defineRunTimeSelectionTable(fluidThermo, fvMesh);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fluidThermo::fluidThermo(const fvMesh& mesh)
+:
+    basicThermo(mesh)
+{}
+
+
+
+Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const dictionary& dict)
+:
+    basicThermo(mesh, dict)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::fluidThermo::~fluidThermo()
+{}
+
 
 // ************************************************************************* //

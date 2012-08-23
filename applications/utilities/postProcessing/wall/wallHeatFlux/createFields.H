@@ -1,6 +1,6 @@
-autoPtr<veryBasicThermo> thermo
+autoPtr<basicThermo> thermo
 (
-    veryBasicThermo::New(mesh)
+    basicThermo::New(mesh)
 );
 
 const volScalarField& h = thermo->he();
@@ -22,7 +22,7 @@ autoPtr<volVectorField> UPtr;
 autoPtr<surfaceScalarField> phiPtr;
 autoPtr<compressible::turbulenceModel> turbulence;
 
-if (isA<basicThermo>(thermo()))
+if (isA<fluidThermo>(thermo()))
 {
     UPtr.reset
     (
@@ -51,6 +51,6 @@ if (isA<basicThermo>(thermo()))
         rho,
         U,
         phiPtr(),
-        refCast<const basicThermo>(thermo())
+        refCast<const fluidThermo>(thermo())
     );
 }

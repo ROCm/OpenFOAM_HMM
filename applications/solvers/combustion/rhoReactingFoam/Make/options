@@ -16,7 +16,7 @@ EXE_LIBS = \
     -lcompressibleLESModels \
     -lreactionThermophysicalModels \
     -lspecie \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lchemistryModel \
     -lODE \
     -lfiniteVolume \

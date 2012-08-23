@@ -31,7 +31,7 @@ Description
         kappa:
 
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-    - 'basicThermo' : use basicThermo and default compressible::turbulenceModel
+    - 'fluidThermo' : use fluidThermo and default compressible::turbulenceModel
        to calculate kappa
     - 'solidThermo' : use solidThermo kappa()
     - 'directionalSolidThermo' directionalKappa()

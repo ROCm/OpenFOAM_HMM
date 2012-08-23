@@ -46,7 +46,7 @@ SourceFiles
 #define SLGThermo_H
 
 #include "MeshObject.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "basicMultiComponentMixture.H"
 #include "liquidMixtureProperties.H"
 #include "solidMixtureProperties.H"
@@ -67,7 +67,7 @@ class SLGThermo
     // Private data
 
         //- Thermo package
-        basicThermo& thermo_;
+        fluidThermo& thermo_;
 
         //- Reference to the multi-component carrier phase thermo
         basicMultiComponentMixture* carrier_;
@@ -87,7 +87,7 @@ public:
     // Constructors
 
         //- Construct from mesh
-        SLGThermo(const fvMesh& mesh, basicThermo& thermo);
+        SLGThermo(const fvMesh& mesh, fluidThermo& thermo);
 
 
     //- Destructor
@@ -99,7 +99,7 @@ public:
         // Access
 
             //- Return reference to the thermo database
-            const basicThermo& thermo() const;
+            const fluidThermo& thermo() const;
 
             //- Return reference to the gaseous components
             const basicMultiComponentMixture& carrier() const;

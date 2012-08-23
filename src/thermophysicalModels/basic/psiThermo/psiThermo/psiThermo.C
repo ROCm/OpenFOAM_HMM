@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::psiThermo::psiThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh),
+    fluidThermo(mesh),
 
     psi_
     (

@@ -106,7 +106,7 @@ SourceFiles
 #include "absorptionEmissionModel.H"
 #include "HashTable.H"
 #include "absorptionCoeffs.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -160,7 +160,7 @@ private:
         mutable interpolationLookUpTable<scalar> lookUpTable_;
 
         //- Thermo package
-        const basicThermo& thermo_;
+        const fluidThermo& thermo_;
 
         //- Bands
         label nBands_;

@@ -50,7 +50,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName,
     const word& modelName
 )
@@ -253,7 +253,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         (
             "LaunderGibsonRSTM::LaunderGibsonRSTM"
             "(const volScalarField&, const volVectorField&"
-            ", const surfaceScalarField&, basicThermo&)"
+            ", const surfaceScalarField&, fluidThermo&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);

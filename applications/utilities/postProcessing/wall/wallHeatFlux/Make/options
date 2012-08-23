@@ -14,5 +14,5 @@ EXE_LIBS = \
     -lgenericPatchFields \
     -lspecie \
     -lsolid \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lsolidThermo

@@ -11,7 +11,7 @@ LIB_LIBS = \
     -lincompressibleTransportModels \
     -lincompressibleRASModels \
     -lincompressibleLESModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lcompressibleRASModels \
     -lcompressibleLESModels \

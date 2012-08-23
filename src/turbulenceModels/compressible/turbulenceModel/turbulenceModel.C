@@ -47,7 +47,7 @@ turbulenceModel::turbulenceModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName
 )
 :
@@ -81,7 +81,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName
 )
 {
@@ -114,7 +114,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
         (
             "turbulenceModel::New(const volScalarField&, "
             "const volVectorField&, const surfaceScalarField&, "
-            "basicThermo&, const word&)"
+            "fluidThermo&, const word&)"
         )   << "Unknown turbulenceModel type "
             << modelType << nl << nl
             << "Valid turbulenceModel types:" << endl

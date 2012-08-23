@@ -10,4 +10,4 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lspecie \
     -lsolidSpecie \
-    -lbasicThermophysicalModels
+    -lfluidThermophysicalModels

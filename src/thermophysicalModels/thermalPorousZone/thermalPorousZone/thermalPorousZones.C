@@ -48,7 +48,7 @@ Foam::thermalPorousZones::thermalPorousZones
 
 void Foam::thermalPorousZones::addEnergySource
 (
-    const basicThermo& thermo,
+    const fluidThermo& thermo,
     const volScalarField& rho,
     fvScalarMatrix& hEqn
 ) const

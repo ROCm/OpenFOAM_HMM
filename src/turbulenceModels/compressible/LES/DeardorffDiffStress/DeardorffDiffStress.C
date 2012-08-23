@@ -60,7 +60,7 @@ DeardorffDiffStress::DeardorffDiffStress
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel,
+    const fluidThermo& thermoPhysicalModel,
     const word& turbulenceModelName,
     const word& modelName
 )

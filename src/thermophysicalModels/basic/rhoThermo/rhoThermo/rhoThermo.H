@@ -36,7 +36,7 @@ SourceFiles
 #ifndef rhoThermo_H
 #define rhoThermo_H
 
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace Foam
 
 class rhoThermo
 :
-    public basicThermo
+    public fluidThermo
 {
 
 protected:

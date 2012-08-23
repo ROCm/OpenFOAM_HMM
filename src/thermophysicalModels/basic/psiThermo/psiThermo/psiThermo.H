@@ -36,7 +36,7 @@ SourceFiles
 #ifndef psiThermo_H
 #define psiThermo_H
 
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace Foam
 
 class psiThermo
 :
-    public basicThermo
+    public fluidThermo
 {
 
 protected:

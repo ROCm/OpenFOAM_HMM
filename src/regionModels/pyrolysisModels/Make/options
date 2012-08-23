@@ -21,7 +21,7 @@ LIB_LIBS = \
     -lspecie \
     -lspecie \
     -lsolid \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lsolidChemistryModel \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
