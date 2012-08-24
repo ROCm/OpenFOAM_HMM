@@ -49,7 +49,7 @@ SourceFiles
 #include "fvm.H"
 #include "fvc.H"
 #include "fvMatrices.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "IOdictionary.H"
 #include "Switch.H"
 #include "bound.H"
@@ -130,7 +130,7 @@ public:
                 const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                const basicThermo& thermoPhysicalModel,
+                const fluidThermo& thermoPhysicalModel,
                 const word& turbulenceModelName
             ),
             (rho, U, phi, thermoPhysicalModel, turbulenceModelName)
@@ -146,7 +146,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel,
+            const fluidThermo& thermoPhysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName
         );
 
@@ -159,7 +159,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel,
+            const fluidThermo& thermoPhysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName
         );
 

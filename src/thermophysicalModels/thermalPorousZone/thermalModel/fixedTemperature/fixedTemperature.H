@@ -80,7 +80,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         virtual void addEnergySource
         (
-            const basicThermo&,
+            const fluidThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;

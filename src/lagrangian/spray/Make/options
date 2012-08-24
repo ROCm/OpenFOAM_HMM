@@ -27,7 +27,7 @@ LIB_LIBS = \
     -llagrangianIntermediate \
     -ldistributionModels \
     -lspecie \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lliquidProperties \
     -lliquidMixtureProperties \
     -lsolidProperties \

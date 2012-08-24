@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solidChemistryModel  ODESolidChemistryModel<constSolidThermoPhysics>;
+solidChemistryModel  ODESolidChemistryModel<hConstSolidThermoPhysics>;
 
 gasThermoModel      gasThermoPhysics;
 

@@ -27,7 +27,7 @@ License
 #include "volFields.H"
 #include "solidThermo.H"
 #include "turbulenceModel.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -40,7 +40,7 @@ namespace Foam
         4
     >::names[] =
     {
-        "basicThermo",
+        "fluidThermo",
         "solidThermo",
         "directionalSolidThermo",
         "lookup"

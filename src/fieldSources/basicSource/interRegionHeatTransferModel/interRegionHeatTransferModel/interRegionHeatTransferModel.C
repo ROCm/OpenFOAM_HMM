@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "interRegionHeatTransferModel.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "fvm.H"
 #include "IObasicSourceList.H"
 #include "zeroGradientFvPatchFields.H"
@@ -203,8 +203,8 @@ void Foam::interRegionHeatTransferModel::addSup
 
         if (h.dimensions() == dimEnergy/dimMass)
         {
-            const basicThermo& primaryThermo =
-                mesh_.lookupObject<basicThermo>("thermophysicalProperties");
+            const fluidThermo& primaryThermo =
+                mesh_.lookupObject<fluidThermo>("thermophysicalProperties");
 
             eEqn += htc_*Tmapped - fvm::Sp(htc_/primaryThermo.Cp(), h);
 

@@ -88,7 +88,7 @@ dictionaryReplacement
         {
             "baffle.*"
             {
-                type        compressible::temperatureThermoBaffle1D<constSolidThermoPhysics>;
+                type        compressible::temperatureThermoBaffle1D<hConstSolidThermoPhysics>;
                 baffleActivated yes;
                 thickness       uniform 0.005;  // thickness [m]
                 Qs              uniform 100;    // heat flux [W/m2]
@@ -107,7 +107,7 @@ dictionaryReplacement
                     Hf              0;
                     Cp              0;
                 }
-                density
+                equationOfState
                 {
                     rho             0;
                 }

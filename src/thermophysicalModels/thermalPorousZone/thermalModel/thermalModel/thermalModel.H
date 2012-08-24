@@ -44,7 +44,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class basicThermo;
+class fluidThermo;
 
 namespace porousMedia
 {
@@ -107,7 +107,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         virtual void addEnergySource
         (
-            const basicThermo&,
+            const fluidThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const = 0;

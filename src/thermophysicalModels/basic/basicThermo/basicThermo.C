@@ -24,14 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicThermo.H"
-#include "fvMesh.H"
-#include "HashTable.H"
-#include "zeroGradientFvPatchFields.H"
-#include "fixedEnergyFvPatchScalarField.H"
-#include "gradientEnergyFvPatchScalarField.H"
-#include "mixedEnergyFvPatchScalarField.H"
-#include "temperatureJumpFvPatchScalarField.H"
-#include "energyJumpFvPatchScalarField.H"
+
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -71,20 +64,6 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh)
         mesh
     ),
 
-    psi_
-    (
-        IOobject
-        (
-            "psi",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
-    ),
-
     T_
     (
         IOobject
@@ -96,20 +75,6 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh)
             IOobject::AUTO_WRITE
         ),
         mesh
-    ),
-
-    mu_
-    (
-        IOobject
-        (
-            "mu",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
     ),
 
     alpha_
@@ -129,7 +94,11 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh)
 
 
 
-Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
+Foam::basicThermo::basicThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
 :
     IOdictionary
     (
@@ -157,20 +126,6 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
         mesh
     ),
 
-    psi_
-    (
-        IOobject
-        (
-            "psi",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(0, -2, 2, 0, 0)
-    ),
-
     T_
     (
         IOobject
@@ -182,20 +137,6 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh, const dictionary& dict)
             IOobject::AUTO_WRITE
         ),
         mesh
-    ),
-
-    mu_
-    (
-        IOobject
-        (
-            "mu",
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionSet(1, -1, -1, 0, 0)
     ),
 
     alpha_
@@ -234,21 +175,9 @@ const Foam::volScalarField& Foam::basicThermo::p() const
 }
 
 
-const Foam::volScalarField& Foam::basicThermo::psi() const
-{
-    return psi_;
-}
-
-
 const Foam::volScalarField& Foam::basicThermo::T() const
 {
     return T_;
-}
-
-
-const Foam::volScalarField& Foam::basicThermo::mu() const
-{
-    return mu_;
 }
 
 

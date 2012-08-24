@@ -14,7 +14,7 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lcompressibleRASModels \
     -lreactionThermophysicalModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lchemistryModel \
     -lODE \
     -lthermophysicalFunctions \

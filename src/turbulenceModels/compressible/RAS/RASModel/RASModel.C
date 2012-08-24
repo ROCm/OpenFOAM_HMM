@@ -59,7 +59,7 @@ RASModel::RASModel
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName
 )
 :
@@ -102,7 +102,7 @@ autoPtr<RASModel> RASModel::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermophysicalModel,
+    const fluidThermo& thermophysicalModel,
     const word& turbulenceModelName
 )
 {
@@ -138,7 +138,7 @@ autoPtr<RASModel> RASModel::New
                 "const volScalarField&, "
                 "const volVectorField&, "
                 "const surfaceScalarField&, "
-                "basicThermo&, "
+                "fluidThermo&, "
                 "const word&"
             ")"
         )   << "Unknown RASModel type "

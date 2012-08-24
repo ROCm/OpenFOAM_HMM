@@ -22,7 +22,7 @@ autoPtr<volVectorField> UPtr;
 autoPtr<surfaceScalarField> phiPtr;
 autoPtr<compressible::turbulenceModel> turbulence;
 
-if (!isA<solidThermo>(thermo()))
+if (isA<fluidThermo>(thermo()))
 {
     UPtr.reset
     (
@@ -51,6 +51,6 @@ if (!isA<solidThermo>(thermo()))
         rho,
         U,
         phiPtr(),
-        thermo()
+        refCast<const fluidThermo>(thermo())
     );
 }

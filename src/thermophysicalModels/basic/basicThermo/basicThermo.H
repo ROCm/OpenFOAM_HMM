@@ -25,7 +25,7 @@ Class
     Foam::basicThermo
 
 Description
-    Basic thermodynamic properties
+    Abstract base-class for fluid and solid thermodynamic properties
 
 SourceFiles
     basicThermo.C
@@ -64,14 +64,8 @@ protected:
             //- Pressure [Pa]
             volScalarField p_;
 
-            //- Compressibility [s^2/m^2]
-            volScalarField psi_;
-
             //- Temperature [K]
             volScalarField T_;
-
-            //- Laminar dynamic viscosity [kg/m/s]
-            volScalarField mu_;
 
             //- Laminar thermal diffusuvity [kg/m/s]
             volScalarField alpha_;
@@ -130,9 +124,6 @@ public:
 
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const = 0;
-
-            //- Compressibility [s^2/m^2]
-            virtual const volScalarField& psi() const;
 
             //- Enthalpy/Internal energy [J/kg]
             //  Non-const access allowed for transport equations
@@ -241,9 +232,6 @@ public:
 
 
         // Access to transport state variables
-
-            //- Dynamic viscosity of mixture [kg/m/s]
-            virtual const volScalarField& mu() const;
 
             //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
             virtual const volScalarField& alpha() const;
