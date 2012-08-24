@@ -84,6 +84,9 @@ class sixDoFRigidBodyDisplacementPointPatchVectorField
         //- Gravity vector to store when not available from the db
         vector g_;
 
+        //- Optional under-relaxation factor for the motion
+        scalar relaxationFactor_;
+
 
 public:
 
