@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
     ),
     diffusivityPtr_
     (
-        motionDiffusivity::New(*this, lookup("diffusivity"))
+        motionDiffusivity::New(fvMesh_, lookup("diffusivity"))
     )
 {}
 
@@ -128,7 +128,7 @@ Foam::displacementSBRStressFvMotionSolver::curPoints() const
 void Foam::displacementSBRStressFvMotionSolver::solve()
 {
     // The points have moved so before interpolation update
-    // the fvMotionSolver accordingly
+    // the motionSolver accordingly
     movePoints(fvMesh_.points());
 
     diffusivityPtr_->correct();
@@ -197,7 +197,7 @@ void Foam::displacementSBRStressFvMotionSolver::updateMesh
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
     diffusivityPtr_.reset(NULL);
-    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
+    diffusivityPtr_ = motionDiffusivity::New(fvMesh_, lookup("diffusivity"));
 }
 
 

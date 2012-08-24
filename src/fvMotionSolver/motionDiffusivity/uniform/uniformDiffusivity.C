@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,22 +45,22 @@ namespace Foam
 
 Foam::uniformDiffusivity::uniformDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream&
 )
 :
-    motionDiffusivity(mSolver),
+    motionDiffusivity(mesh),
     faceDiffusivity_
     (
         IOobject
         (
             "faceDiffusivity",
-            mSolver.mesh().time().timeName(),
-            mSolver.mesh(),
+            mesh.time().timeName(),
+            mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        mSolver.mesh(),
+        mesh,
         dimensionedScalar("1.0", dimless, 1.0)
     )
 {}

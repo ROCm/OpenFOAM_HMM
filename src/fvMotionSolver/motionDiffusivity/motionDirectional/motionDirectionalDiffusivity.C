@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "surfaceInterpolate.H"
 #include "zeroGradientFvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvMotionSolver.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,11 +48,11 @@ namespace Foam
 
 Foam::motionDirectionalDiffusivity::motionDirectionalDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    uniformDiffusivity(mSolver, mdData),
+    uniformDiffusivity(mesh, mdData),
     diffusivityVector_(mdData)
 {}
 
@@ -66,22 +67,20 @@ Foam::motionDirectionalDiffusivity::~motionDirectionalDiffusivity()
 
 void Foam::motionDirectionalDiffusivity::correct()
 {
-    const fvMesh& mesh = mSolver().mesh();
-
     static bool first = true;
 
     if (!first)
     {
         const volVectorField& cellMotionU =
-            mesh.lookupObject<volVectorField>("cellMotionU");
+            mesh().lookupObject<volVectorField>("cellMotionU");
 
         volVectorField D
         (
             IOobject
             (
                 "D",
-                mesh.time().timeName(),
-                mesh
+                mesh().time().timeName(),
+                mesh()
             ),
             diffusivityVector_.y()*vector::one
           + (diffusivityVector_.x() - diffusivityVector_.y())*cellMotionU
@@ -90,13 +89,17 @@ void Foam::motionDirectionalDiffusivity::correct()
         );
         D.correctBoundaryConditions();
 
-        const surfaceVectorField n(mesh.Sf()/mesh.magSf());
+        const surfaceVectorField n(mesh().Sf()/mesh().magSf());
         faceDiffusivity_ == (n & cmptMultiply(fvc::interpolate(D), n));
     }
     else
     {
         first = false;
-        const_cast<fvMotionSolver&>(mSolver()).solve();
+
+        const fvMotionSolver& mSolver =
+            mesh().lookupObject<fvMotionSolver>("dynamicMeshDict");
+
+        const_cast<fvMotionSolver&>(mSolver).solve();
         correct();
     }
 }

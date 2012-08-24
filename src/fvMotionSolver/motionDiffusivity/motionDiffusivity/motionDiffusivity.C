@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,9 +36,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::motionDiffusivity::motionDiffusivity(const fvMotionSolver& mSolver)
+Foam::motionDiffusivity::motionDiffusivity(const fvMesh& mesh)
 :
-    mSolver_(mSolver)
+    mesh_(mesh)
 {}
 
 
@@ -46,7 +46,7 @@ Foam::motionDiffusivity::motionDiffusivity(const fvMotionSolver& mSolver)
 
 Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 {
@@ -61,7 +61,7 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
     {
         FatalErrorIn
         (
-            "motionDiffusivity::New(const tetPolyMesh& tetMesh, "
+            "motionDiffusivity::New(const fvMesh&, "
             "const Istream& dict)"
         )   << "Unknown diffusion type "
             << motionType << nl << nl
@@ -70,7 +70,7 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
             << exit(FatalError);
     }
 
-    return autoPtr<motionDiffusivity>(cstrIter()(mSolver, mdData));
+    return autoPtr<motionDiffusivity>(cstrIter()(mesh, mdData));
 }
 
 

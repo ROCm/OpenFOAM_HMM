@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,7 @@ public:
         virtual void solve() = 0;
 
         //- Update the pointMesh corresponding to the new points
-        void movePoints(const pointField&);
+        virtual void movePoints(const pointField&);
 
         //- Update the mesh corresponding to given map
         virtual void updateMesh(const mapPolyMesh&);

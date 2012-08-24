@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,11 @@ namespace Foam
 
 Foam::inverseVolumeDiffusivity::inverseVolumeDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    uniformDiffusivity(mSolver, mdData)
+    uniformDiffusivity(mesh, mdData)
 {
     correct();
 }
@@ -69,22 +69,20 @@ Foam::inverseVolumeDiffusivity::~inverseVolumeDiffusivity()
 
 void Foam::inverseVolumeDiffusivity::correct()
 {
-    const fvMesh& mesh = mSolver().mesh();
-
     volScalarField V
     (
         IOobject
         (
             "V",
-            mesh.time().timeName(),
-            mesh
+            mesh().time().timeName(),
+            mesh()
         ),
-        mesh,
+        mesh(),
         dimless,
         zeroGradientFvPatchScalarField::typeName
     );
 
-    V.internalField() = mesh.V();
+    V.internalField() = mesh().V();
     V.correctBoundaryConditions();
 
     faceDiffusivity_ = 1.0/fvc::interpolate(V);
