@@ -61,9 +61,6 @@ Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
 
 bool Foam::dynamicMotionSolverFvMesh::update()
 {
-    //***HGW Info<< "Foam::dynamicMotionSolverFvMesh::update() relax" << endl;
-    //***HGW fvMesh::movePoints(0.5*(points() + motionPtr_->newPoints()));
-
     fvMesh::movePoints(motionPtr_->newPoints());
 
     if (foundObject<volVectorField>("U"))
