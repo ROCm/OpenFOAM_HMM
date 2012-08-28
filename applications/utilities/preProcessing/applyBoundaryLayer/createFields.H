@@ -62,13 +62,6 @@ License
         // Calculate boundary layer thickness as Cbl * mean distance to wall
         ybl.value() = gAverage(y) * args.optionRead<scalar>("Cbl");
     }
-    else
-    {
-        FatalErrorIn(args.executable())
-            << "Neither option 'ybl' or 'Cbl' have been provided to calculate "
-            << "the boundary-layer thickness"
-            << exit(FatalError);
-    }
 
     Info<< "\nCreating boundary-layer for U of thickness "
         << ybl.value() << " m" << nl << endl;
