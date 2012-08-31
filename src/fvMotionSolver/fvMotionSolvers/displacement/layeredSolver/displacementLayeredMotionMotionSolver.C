@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "displacementLayeredMotionFvMotionSolver.H"
+#include "displacementLayeredMotionMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "pointEdgeStructuredWalk.H"
 #include "pointFields.H"
@@ -35,12 +35,12 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(displacementLayeredMotionFvMotionSolver, 0);
+    defineTypeNameAndDebug(displacementLayeredMotionMotionSolver, 0);
 
     addToRunTimeSelectionTable
     (
-        fvMotionSolver,
-        displacementLayeredMotionFvMotionSolver,
+        motionSolver,
+        displacementLayeredMotionMotionSolver,
         dictionary
     );
 }
@@ -48,7 +48,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::displacementLayeredMotionFvMotionSolver::calcZoneMask
+void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
 (
     const label cellZoneI,
     PackedBoolList& isZonePoint,
@@ -121,7 +121,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::calcZoneMask
 
 
 // Find distance to starting point
-void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
+void Foam::displacementLayeredMotionMotionSolver::walkStructured
 (
     const label cellZoneI,
     const PackedBoolList& isZonePoint,
@@ -209,7 +209,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::walkStructured
 
 // Evaluate faceZone patch
 Foam::tmp<Foam::vectorField>
-Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
+Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
 (
     const faceZone& fz,
     const labelList& meshPoints,
@@ -239,7 +239,7 @@ Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
         {
             FatalIOErrorIn
             (
-                "displacementLayeredMotionFvMotionSolver::faceZoneEvaluate(..)",
+                "displacementLayeredMotionMotionSolver::faceZoneEvaluate(..)",
                 *this
             )   << "slip can only be used on second faceZonePatch of pair."
                 << "FaceZone:" << fz.name()
@@ -257,7 +257,7 @@ Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
     {
         FatalIOErrorIn
         (
-            "displacementLayeredMotionFvMotionSolver::faceZoneEvaluate(..)",
+            "displacementLayeredMotionMotionSolver::faceZoneEvaluate(..)",
             *this
         )   << "Unknown faceZonePatch type " << type << " for faceZone "
             << fz.name() << exit(FatalIOError);
@@ -266,7 +266,7 @@ Foam::displacementLayeredMotionFvMotionSolver::faceZoneEvaluate
 }
 
 
-void Foam::displacementLayeredMotionFvMotionSolver::cellZoneSolve
+void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
 (
     const label cellZoneI,
     const dictionary& zoneDict
@@ -282,7 +282,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::cellZoneSolve
     {
         FatalIOErrorIn
         (
-            "displacementLayeredMotionFvMotionSolver::"
+            "displacementLayeredMotionMotionSolver::"
             "correctBoundaryConditions(..)",
             *this
         )   << "Can only handle 2 faceZones (= patches) per cellZone. "
@@ -304,7 +304,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::cellZoneSolve
         {
             FatalIOErrorIn
             (
-                "displacementLayeredMotionFvMotionSolver::"
+                "displacementLayeredMotionMotionSolver::"
                 "correctBoundaryConditions(..)",
                 *this
             )   << "Cannot find faceZone " << faceZoneName
@@ -476,26 +476,14 @@ Info<< "For cellZone:" << cellZoneI
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::displacementLayeredMotionFvMotionSolver::
-displacementLayeredMotionFvMotionSolver
+Foam::displacementLayeredMotionMotionSolver::
+displacementLayeredMotionMotionSolver
 (
     const polyMesh& mesh,
-    Istream& is
+    const IOdictionary& dict
 )
 :
-    displacementFvMotionSolver(mesh, is),
-    pointDisplacement_
-    (
-        IOobject
-        (
-            "pointDisplacement",
-            fvMesh_.time().timeName(),
-            fvMesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pointMesh::New(fvMesh_)
-    )
+    displacementMotionSolver(mesh, dict, typeName)
 {
     pointDisplacement_.correctBoundaryConditions();
 }
@@ -503,15 +491,15 @@ displacementLayeredMotionFvMotionSolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::displacementLayeredMotionFvMotionSolver::
-~displacementLayeredMotionFvMotionSolver()
+Foam::displacementLayeredMotionMotionSolver::
+~displacementLayeredMotionMotionSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField>
-Foam::displacementLayeredMotionFvMotionSolver::curPoints() const
+Foam::displacementLayeredMotionMotionSolver::curPoints() const
 {
     tmp<pointField> tcurPoints
     (
@@ -520,27 +508,19 @@ Foam::displacementLayeredMotionFvMotionSolver::curPoints() const
 
     twoDCorrectPoints(tcurPoints());
 
-//    const pointField& pts = tcurPoints();
-//    forAll(pts, pointI)
-//    {
-//        Info<< "    from:" << mesh().points()[pointI]
-//            << " to:" << pts[pointI]
-//            << endl;
-//    }
-
-
     return tcurPoints;
 }
 
 
-void Foam::displacementLayeredMotionFvMotionSolver::solve()
+void Foam::displacementLayeredMotionMotionSolver::solve()
 {
-    const dictionary& ms = mesh().lookupObject<motionSolver>("dynamicMeshDict");
-    const dictionary& solverDict = ms.subDict(typeName + "Coeffs");
+    // The points have moved so before interpolation update
+    // the motionSolver accordingly
+    movePoints(mesh().points());
 
     // Apply all regions (=cellZones)
 
-    const dictionary& regionDicts = solverDict.subDict("regions");
+    const dictionary& regionDicts = coeffDict().subDict("regions");
     forAllConstIter(dictionary, regionDicts, regionIter)
     {
         const word& cellZoneName = regionIter().keyword();
@@ -555,7 +535,7 @@ void Foam::displacementLayeredMotionFvMotionSolver::solve()
         {
             FatalIOErrorIn
             (
-                "displacementLayeredMotionFvMotionSolver::solve(..)",
+                "displacementLayeredMotionMotionSolver::solve(..)",
                 *this
             )   << "Cannot find cellZone " << cellZoneName
                 << endl << "Valid zones are " << mesh().cellZones().names()
@@ -567,12 +547,12 @@ void Foam::displacementLayeredMotionFvMotionSolver::solve()
 }
 
 
-void Foam::displacementLayeredMotionFvMotionSolver::updateMesh
+void Foam::displacementLayeredMotionMotionSolver::updateMesh
 (
     const mapPolyMesh& mpm
 )
 {
-    displacementFvMotionSolver::updateMesh(mpm);
+    displacementMotionSolver::updateMesh(mpm);
 }
 
 

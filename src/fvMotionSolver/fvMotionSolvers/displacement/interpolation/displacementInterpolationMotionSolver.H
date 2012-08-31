@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::displacementInterpolationFvMotionSolver
+    Foam::displacementInterpolationMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.
@@ -40,14 +40,14 @@ Note
     could be a motionSolver - does not use any fvMesh structure.
 
 SourceFiles
-    displacementInterpolationFvMotionSolver.C
+    displacementInterpolationMotionSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef displacementInterpolationFvMotionSolver_H
-#define displacementInterpolationFvMotionSolver_H
+#ifndef displacementInterpolationMotionSolver_H
+#define displacementInterpolationMotionSolver_H
 
-#include "displacementFvMotionSolver.H"
+#include "displacementMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,18 +55,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class displacementInterpolationFvMotionSolver Declaration
+        Class displacementInterpolationMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class displacementInterpolationFvMotionSolver
+class displacementInterpolationMotionSolver
 :
-    public displacementFvMotionSolver
+    public displacementMotionSolver
 {
     // Private data
-
-        //- Additional settings for motion solver
-        dictionary dynamicMeshCoeffs_;
-
 
         // Face zone information (note: could pack these to only contain
         // used zones)
@@ -94,13 +90,13 @@ class displacementInterpolationFvMotionSolver
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        displacementInterpolationFvMotionSolver
+        displacementInterpolationMotionSolver
         (
-            const displacementInterpolationFvMotionSolver&
+            const displacementInterpolationMotionSolver&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const displacementInterpolationFvMotionSolver&);
+        void operator=(const displacementInterpolationMotionSolver&);
 
 
 public:
@@ -111,16 +107,16 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream
-        displacementInterpolationFvMotionSolver
+        //- Construct from polyMesh and IOdictionary
+        displacementInterpolationMotionSolver
         (
             const polyMesh&,
-            Istream& msDataUnused
+            const IOdictionary& dict
         );
 
 
     //- Destructor
-    ~displacementInterpolationFvMotionSolver();
+    ~displacementInterpolationMotionSolver();
 
 
     // Member Functions

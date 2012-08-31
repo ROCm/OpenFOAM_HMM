@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::velocityComponentLaplacianFvMotionSolver
+    Foam::displacementComponentLaplacianFvMotionSolver
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
-    Laplacian for the given component of the motion velocity.
+    Laplacian for the given component of the motion displacement.
 
 SourceFiles
-    velocityComponentLaplacianFvMotionSolver.C
+    displacementComponentLaplacianFvMotionSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef velocityComponentLaplacianFvMotionSolver_H
-#define velocityComponentLaplacianFvMotionSolver_H
+#ifndef displacementComponentLaplacianFvMotionSolver_H
+#define displacementComponentLaplacianFvMotionSolver_H
 
-#include "fvMotionSolver.H"
+#include "componentDisplacementMotionSolver.H"
+#include "fvMotionSolverCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,70 +48,73 @@ namespace Foam
 class motionDiffusivity;
 
 /*---------------------------------------------------------------------------*\
-          Class velocityComponentLaplacianFvMotionSolver Declaration
+        Class displacementComponentLaplacianFvMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class velocityComponentLaplacianFvMotionSolver
+class displacementComponentLaplacianFvMotionSolver
 :
-    public fvMotionSolver
+    public componentDisplacementMotionSolver,
+    public fvMotionSolverCore
 {
     // Private data
 
-        //- The component name to solve for
-        word cmptName_;
-
-        //- The component to solve for
-        direction cmpt_;
-
-        //- Point motion field
-        mutable pointScalarField pointMotionU_;
-
         //- Cell-centre motion field
-        mutable volScalarField cellMotionU_;
+        mutable volScalarField cellDisplacement_;
+
+        //- Optionally read point-position field. Used only for position
+        //  boundary conditions.
+        mutable autoPtr<pointVectorField> pointLocation_;
 
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
+
+        //- Frozen points (that are not on patches). -1 or points that are
+        //  fixed to be at points0_ location
+        label frozenPointsZone_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        velocityComponentLaplacianFvMotionSolver
+        displacementComponentLaplacianFvMotionSolver
         (
-            const velocityComponentLaplacianFvMotionSolver&
+            const displacementComponentLaplacianFvMotionSolver&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const velocityComponentLaplacianFvMotionSolver&);
+        void operator=(const displacementComponentLaplacianFvMotionSolver&);
+
+        //- Return the component corresponding to the given component name
+        direction cmpt(const word& cmptName) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("velocityComponentLaplacian");
+    TypeName("displacementComponentLaplacian");
 
 
     // Constructors
 
-        //- Construct from polyMesh and data stream (provides component)
-        velocityComponentLaplacianFvMotionSolver
+        //- Construct from polyMesh and IOdictionary
+        displacementComponentLaplacianFvMotionSolver
         (
             const polyMesh&,
-            Istream& msData
+            const IOdictionary&
         );
 
 
     //- Destructor
-    ~velocityComponentLaplacianFvMotionSolver();
+    ~displacementComponentLaplacianFvMotionSolver();
 
 
     // Member Functions
 
-        //- Non-const access to the cellMotionU in order to allow changes
-        //  to the boundary motion
-        volScalarField& cellMotionU()
+        //- Non-const access to the cellDisplacement in order to allow
+        //  changes to the boundary motion
+        volScalarField& cellDisplacement()
         {
-            return cellMotionU_;
+            return cellDisplacement_;
         }
 
         //- Return point location obtained from the current motion field
@@ -121,6 +125,10 @@ public:
 
         //- Update topology
         virtual void updateMesh(const mapPolyMesh&);
+
+//        //- Handle changes of geometry
+//        virtual void movePoints(const pointField& p);
+
 };
 
 
