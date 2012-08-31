@@ -215,18 +215,6 @@ Foam::displacementComponentLaplacianFvMotionSolver::curPoints() const
 }
 
 
-//void Foam::displacementComponentLaplacianFvMotionSolver::movePoints
-//(
-//    const pointField& p
-//)
-//{
-//    // Movement of pointMesh and volPointInterpolation already
-//    // done by polyMesh,fvMesh
-//    componentDisplacementMotionSolver::movePoints(p);
-//
-//}
-
-
 void Foam::displacementComponentLaplacianFvMotionSolver::solve()
 {
     // The points have moved so before interpolation update

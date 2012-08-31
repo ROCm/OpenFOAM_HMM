@@ -135,16 +135,6 @@ void Foam::velocityComponentLaplacianFvMotionSolver::solve()
 }
 
 
-//void Foam::velocityComponentLaplacianFvMotionSolver::movePoints
-//(
-//    const pointField& p
-//)
-//{
-//    // Movement of pointMesh and volPointInterpolation already
-//    // done by polyMesh,fvMesh
-//}
-
-
 void Foam::velocityComponentLaplacianFvMotionSolver::updateMesh
 (
     const mapPolyMesh& mpm

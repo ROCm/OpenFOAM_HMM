@@ -126,9 +126,6 @@ public:
         //- Update topology
         virtual void updateMesh(const mapPolyMesh&);
 
-//        //- Handle changes of geometry
-//        virtual void movePoints(const pointField& p);
-
 };
 
 

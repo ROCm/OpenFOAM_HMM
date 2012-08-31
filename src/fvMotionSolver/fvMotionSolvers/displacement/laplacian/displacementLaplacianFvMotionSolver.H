@@ -126,9 +126,6 @@ public:
         //- Solve for motion
         virtual void solve();
 
-//        //- Update the pointMesh corresponding to the new points
-//        void movePoints(const pointField&);
-
         //- Update topology
         virtual void updateMesh(const mapPolyMesh&);
 };
