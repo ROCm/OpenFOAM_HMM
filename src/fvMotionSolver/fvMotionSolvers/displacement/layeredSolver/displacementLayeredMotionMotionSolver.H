@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::displacementLayeredMotionFvMotionSolver
+    Foam::displacementLayeredMotionMotionSolver
 
 Description
     Mesh motion solver for an (multi-block) extruded fvMesh. Gets given the
@@ -52,14 +52,14 @@ Description
           specified by the first faceZone. (= removes the normal component).
 
 SourceFiles
-    displacementLayeredMotionFvMotionSolver.C
+    displacementLayeredMotionMotionSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef displacementLayeredMotionFvMotionSolver_H
-#define displacementLayeredMotionFvMotionSolver_H
+#ifndef displacementLayeredMotionMotionSolver_H
+#define displacementLayeredMotionMotionSolver_H
 
-#include "displacementFvMotionSolver.H"
+#include "displacementMotionSolver.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -70,19 +70,13 @@ namespace Foam
 // Forward class declarations
 
 /*---------------------------------------------------------------------------*\
-             Class displacementLayeredMotionFvMotionSolver Declaration
+             Class displacementLayeredMotionMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class displacementLayeredMotionFvMotionSolver
+class displacementLayeredMotionMotionSolver
 :
-    public displacementFvMotionSolver
+    public displacementMotionSolver
 {
-    // Private data
-
-        //- Point motion field
-        mutable pointVectorField pointDisplacement_;
-
-
     // Private Member Functions
 
         void calcZoneMask
@@ -120,13 +114,13 @@ class displacementLayeredMotionFvMotionSolver
 
 
         //- Disallow default bitwise copy construct
-        displacementLayeredMotionFvMotionSolver
+        displacementLayeredMotionMotionSolver
         (
-            const displacementLayeredMotionFvMotionSolver&
+            const displacementLayeredMotionMotionSolver&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const displacementLayeredMotionFvMotionSolver&);
+        void operator=(const displacementLayeredMotionMotionSolver&);
 
 
 public:
@@ -137,31 +131,19 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream
-        displacementLayeredMotionFvMotionSolver
+        //- Construct from polyMesh and IOdictionary
+        displacementLayeredMotionMotionSolver
         (
             const polyMesh&,
-            Istream& msDataUnused
+            const IOdictionary&
         );
 
 
     //- Destructor
-    ~displacementLayeredMotionFvMotionSolver();
+    ~displacementLayeredMotionMotionSolver();
 
 
     // Member Functions
-
-        //- Return reference to the point motion displacement field
-        pointVectorField& pointDisplacement()
-        {
-            return pointDisplacement_;
-        }
-
-        //- Return const reference to the point motion displacement field
-        const pointVectorField& pointDisplacement() const
-        {
-            return pointDisplacement_;
-        }
 
         //- Return point location obtained from the current motion field
         virtual tmp<pointField> curPoints() const;

@@ -27,7 +27,7 @@ License
 #include "surfaceInterpolate.H"
 #include "zeroGradientFvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvMotionSolver.H"
+#include "velocityMotionSolver.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -96,10 +96,10 @@ void Foam::motionDirectionalDiffusivity::correct()
     {
         first = false;
 
-        const fvMotionSolver& mSolver =
-            mesh().lookupObject<fvMotionSolver>("dynamicMeshDict");
+        const velocityMotionSolver& mSolver =
+            mesh().lookupObject<velocityMotionSolver>("dynamicMeshDict");
 
-        const_cast<fvMotionSolver&>(mSolver).solve();
+        const_cast<velocityMotionSolver&>(mSolver).solve();
         correct();
     }
 }

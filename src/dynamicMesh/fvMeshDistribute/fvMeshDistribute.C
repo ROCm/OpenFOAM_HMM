@@ -2445,32 +2445,69 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // parallel comms. After this points and edges should again be consistent.
     mergeSharedPoints(constructPointMap);
 
+//    // Bit of hack: processorFvPatchField does not get reset since created
+//    // from nothing so explicitly reset.
+//    initPatchFields<volScalarField, processorFvPatchField<scalar> >
+//    (
+//        pTraits<scalar>::zero
+//    );
+//    initPatchFields<volVectorField, processorFvPatchField<vector> >
+//    (
+//        pTraits<vector>::zero
+//    );
+//    initPatchFields
+//    <
+//        volSphericalTensorField,
+//        processorFvPatchField<sphericalTensor>
+//    >
+//    (
+//        pTraits<sphericalTensor>::zero
+//    );
+//    initPatchFields<volSymmTensorField, processorFvPatchField<symmTensor> >
+//    (
+//        pTraits<symmTensor>::zero
+//    );
+//    initPatchFields<volTensorField, processorFvPatchField<tensor> >
+//    (
+//        pTraits<tensor>::zero
+//    );
+//    initPatchFields<surfaceScalarField, processorFvsPatchField<scalar> >
+//    (
+//        pTraits<scalar>::zero
+//    );
+//    initPatchFields<surfaceVectorField, processorFvsPatchField<vector> >
+//    (
+//        pTraits<vector>::zero
+//    );
+//    initPatchFields
+//    <
+//        surfaceSphericalTensorField,
+//        processorFvsPatchField<sphericalTensor>
+//    >
+//    (
+//        pTraits<sphericalTensor>::zero
+//    );
+//    initPatchFields
+//    <
+//        surfaceSymmTensorField,
+//        processorFvsPatchField<symmTensor>
+//    >
+//    (
+//        pTraits<symmTensor>::zero
+//    );
+//    initPatchFields<surfaceTensorField, processorFvsPatchField<tensor> >
+//    (
+//        pTraits<tensor>::zero
+//    );
+//XXXXX
     // Bit of hack: processorFvPatchField does not get reset since created
     // from nothing so explicitly reset.
-    initPatchFields<volScalarField, processorFvPatchField<scalar> >
-    (
-        pTraits<scalar>::zero
-    );
-    initPatchFields<volVectorField, processorFvPatchField<vector> >
-    (
-        pTraits<vector>::zero
-    );
-    initPatchFields
-    <
-        volSphericalTensorField,
-        processorFvPatchField<sphericalTensor>
-    >
-    (
-        pTraits<sphericalTensor>::zero
-    );
-    initPatchFields<volSymmTensorField, processorFvPatchField<symmTensor> >
-    (
-        pTraits<symmTensor>::zero
-    );
-    initPatchFields<volTensorField, processorFvPatchField<tensor> >
-    (
-        pTraits<tensor>::zero
-    );
+    correctBoundaryConditions<volScalarField>();
+    correctBoundaryConditions<volVectorField>();
+    correctBoundaryConditions<volSphericalTensorField>();
+    correctBoundaryConditions<volSymmTensorField>();
+    correctBoundaryConditions<volTensorField>();
+
     initPatchFields<surfaceScalarField, processorFvsPatchField<scalar> >
     (
         pTraits<scalar>::zero
@@ -2499,7 +2536,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     (
         pTraits<tensor>::zero
     );
-
+//XXXXX
 
     mesh_.setInstance(mesh_.time().timeName());
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,10 @@ class pointMesh
 
 
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("pointMesh");
+
 
     typedef pointMesh Mesh;
     typedef pointBoundaryMesh BoundaryMesh;

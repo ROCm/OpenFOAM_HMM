@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,96 +22,96 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fvMotionSolver
+    Foam::componentVelocityMotionSolver
 
 Description
-    Virtual base class for finite volume mesh motion solvers.
+    Virtual base class for velocity motion solver
 
-    The boundary motion is set as a boundary condition on the motion velocity
-    variable motionU.
+    The boundary displacement is set as a boundary condition
+    on the pointMotionUX pointScalarField.
 
 SourceFiles
-    fvMotionSolver.C
+    componentVelocityMotionSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fvMotionSolver_H
-#define fvMotionSolver_H
+#ifndef componentVelocityMotionSolver_H
+#define componentVelocityMotionSolver_H
 
 #include "motionSolver.H"
-#include "pointFieldsFwd.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class fvMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class fvMotionSolver Declaration
+                   Class componentVelocityMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class fvMotionSolver
+class componentVelocityMotionSolver
 :
     public motionSolver
 {
-
 protected:
 
     // Protected data
 
-        //- The fvMesh to be moved
-        const fvMesh& fvMesh_;
+        //- The component name to solve for
+        word cmptName_;
 
+        //- The component to solve for
+        direction cmpt_;
 
-    // Protected Member Functions
+        //- Point motion field
+        mutable pointScalarField pointMotionU_;
 
-        //- Create the corresponding patch types for cellMotion from those
-        //  of the given pointMotion
-        template<class Type>
-        wordList cellMotionBoundaryTypes
+private:
+
+    // Private Member Functions
+
+        //- Return the component corresponding to the given component name
+        direction cmpt(const word& cmptName) const;
+
+        //- Disallow default bitwise copy construct
+        componentVelocityMotionSolver
         (
-            const typename GeometricField<Type, pointPatchField, pointMesh>::
-            GeometricBoundaryField& pmUbf
-        ) const;
+            const componentVelocityMotionSolver&
+        );
 
+        //- Disallow default bitwise assignment
+        void operator=(const componentVelocityMotionSolver&);
 
 public:
 
     //- Runtime type information
-    TypeName("fvMotionSolver");
+    TypeName("componentVelocityMotionSolver");
 
 
     // Constructors
 
-        //- Construct from polyMesh
-        fvMotionSolver(const polyMesh& mesh);
+        //- Construct from mesh and dictionary
+        componentVelocityMotionSolver
+        (
+            const polyMesh&,
+            const IOdictionary&,
+            const word& type
+        );
 
 
     //- Destructor
-    virtual ~fvMotionSolver();
+    virtual ~componentVelocityMotionSolver();
 
 
     // Member Functions
 
-        //- Return reference to the fvMesh to be moved
-        const fvMesh& mesh() const
-        {
-            return fvMesh_;
-        }
-
-        //- Return point location obtained from the current motion field
-        virtual tmp<pointField> curPoints() const = 0;
-
-        //- Solve for motion
-        virtual void solve() = 0;
-
-        //- Update the pointMesh corresponding to the new points
+        //- Update local data for geometry changes
         virtual void movePoints(const pointField&);
 
-        //- Update the mesh corresponding to given map
+        //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&);
 };
 
@@ -119,12 +119,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "fvMotionSolverTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,50 +21,42 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    testPointField
-
-Description
-    For each time calculate the magnitude of velocity.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "pointMesh.H"
-#include "pointFields.H"
+#include "fvMotionSolverCore.H"
+#include "fixedValuePointPatchFields.H"
+#include "cellMotionFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+template<class Type>
+Foam::wordList Foam::fvMotionSolverCore::cellMotionBoundaryTypes
+(
+    const typename GeometricField<Type, pointPatchField, pointMesh>::
+    GeometricBoundaryField& pmUbf
+) const
 {
+    wordList cmUbf = pmUbf.types();
 
-#   include "setRootCase.H"
+    // Remove global patches from the end of the list
+    cmUbf.setSize(fvMesh_.boundary().size());
 
-#   include "createTime.H"
-#   include "createMesh.H"
+    forAll(cmUbf, patchi)
+    {
+        if (isA<fixedValuePointPatchField<Type> >(pmUbf[patchi]))
+        {
+            cmUbf[patchi] = cellMotionFvPatchField<Type>::typeName;
+        }
 
-    const pointMesh& pMesh = pointMesh::New(mesh);
+        if (debug)
+        {
+            Pout<< "Patch:" << fvMesh_.boundary()[patchi].patch().name()
+                << " pointType:" << pmUbf.types()[patchi]
+                << " cellType:" << cmUbf[patchi] << endl;
+        }
+    }
 
-    pointVectorField U
-    (
-        IOobject
-        (
-            "U",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pMesh,
-        dimensionedVector("fvmU", dimLength, vector::zero),
-        pointPatchVectorField::calculatedType()
-    );
-
-    pointVectorField V(U + 2*U);
-
-    Info<< "End\n" << endl;
-
-    return 0;
+    return cmUbf;
 }
 
 

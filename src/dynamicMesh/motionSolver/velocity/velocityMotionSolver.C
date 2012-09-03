@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,44 +23,61 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMotionSolver.H"
-#include "volPointInterpolation.H"
+#include "velocityMotionSolver.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(fvMotionSolver, 0);
+    defineTypeNameAndDebug(velocityMotionSolver, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fvMotionSolver::fvMotionSolver(const polyMesh& mesh)
+Foam::velocityMotionSolver::velocityMotionSolver
+(
+    const polyMesh& mesh,
+    const IOdictionary& dict,
+    const word& type
+)
 :
-    motionSolver(mesh),
-    fvMesh_(refCast<const fvMesh>(mesh))
+    motionSolver(mesh, dict, type),
+    pointMotionU_
+    (
+        IOobject
+        (
+            "pointMotionU",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pointMesh::New(mesh)
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fvMotionSolver::~fvMotionSolver()
+Foam::velocityMotionSolver::~velocityMotionSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fvMotionSolver::movePoints(const pointField& p)
+void Foam::velocityMotionSolver::movePoints(const pointField& p)
 {
-    // Movement of pointMesh and volPointInterpolation done by polyMesh,fvMesh
+    // No local data that needs adapting.
 }
 
 
-void Foam::fvMotionSolver::updateMesh(const mapPolyMesh& mpm)
+void Foam::velocityMotionSolver::updateMesh(const mapPolyMesh& mpm)
 {
+    // pointMesh already updates pointFields.
+
     motionSolver::updateMesh(mpm);
-    // Update of pointMesh and volPointInterpolation done by polyMesh,fvMesh
 }
 
 

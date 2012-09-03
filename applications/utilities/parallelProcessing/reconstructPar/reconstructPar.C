@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
         {
             Info<< "Reconstructing point fields" << nl << endl;
 
-            pointMesh pMesh(mesh);
+            const pointMesh& pMesh = pointMesh::New(mesh);
             PtrList<pointMesh> pMeshes(procMeshes.meshes().size());
 
             forAll(pMeshes, procI)

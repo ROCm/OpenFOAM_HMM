@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::surfaceSlipDisplacementPointPatchVectorField
 
 Description
-    Displacement follows a triSurface. Use in a displacement fvMotionSolver
+    Displacement follows a triSurface. Use in a displacementMotionSolver
     as a bc on the pointDisplacement field.
     Following is done by calculating the projection onto the surface according
     to the projectMode

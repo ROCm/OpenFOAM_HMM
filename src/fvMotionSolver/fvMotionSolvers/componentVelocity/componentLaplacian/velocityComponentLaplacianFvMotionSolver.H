@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,8 @@ SourceFiles
 #ifndef velocityComponentLaplacianFvMotionSolver_H
 #define velocityComponentLaplacianFvMotionSolver_H
 
-#include "fvMotionSolver.H"
+#include "componentVelocityMotionSolver.H"
+#include "fvMotionSolverCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,18 +53,10 @@ class motionDiffusivity;
 
 class velocityComponentLaplacianFvMotionSolver
 :
-    public fvMotionSolver
+    public componentVelocityMotionSolver,
+    public fvMotionSolverCore
 {
     // Private data
-
-        //- The component name to solve for
-        word cmptName_;
-
-        //- The component to solve for
-        direction cmpt_;
-
-        //- Point motion field
-        mutable pointScalarField pointMotionU_;
 
         //- Cell-centre motion field
         mutable volScalarField cellMotionU_;
@@ -92,11 +85,11 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream (provides component)
+        //- Construct from polyMesh and IOdictionary
         velocityComponentLaplacianFvMotionSolver
         (
             const polyMesh&,
-            Istream& msData
+            const IOdictionary&
         );
 
 
@@ -121,6 +114,7 @@ public:
 
         //- Update topology
         virtual void updateMesh(const mapPolyMesh&);
+
 };
 
 

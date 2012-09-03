@@ -37,7 +37,7 @@ namespace Foam
 
     addToRunTimeSelectionTable
     (
-        fvMotionSolver,
+        motionSolver,
         velocityLaplacianFvMotionSolver,
         dictionary
     );
@@ -49,22 +49,11 @@ namespace Foam
 Foam::velocityLaplacianFvMotionSolver::velocityLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream&
+    const IOdictionary& dict
 )
 :
-    fvMotionSolver(mesh),
-    pointMotionU_
-    (
-        IOobject
-        (
-            "pointMotionU",
-            fvMesh_.time().timeName(),
-            fvMesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pointMesh::New(fvMesh_)
-    ),
+    velocityMotionSolver(mesh, dict, typeName),
+    fvMotionSolverCore(mesh),
     cellMotionU_
     (
         IOobject
@@ -86,7 +75,7 @@ Foam::velocityLaplacianFvMotionSolver::velocityLaplacianFvMotionSolver
     ),
     diffusivityPtr_
     (
-        motionDiffusivity::New(fvMesh_, lookup("diffusivity"))
+        motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
     )
 {}
 
@@ -141,17 +130,28 @@ void Foam::velocityLaplacianFvMotionSolver::solve()
 }
 
 
+//void Foam::velocityLaplacianFvMotionSolver::movePoints(const pointField& p)
+//{
+//    // Movement of pointMesh and volPointInterpolation already
+//    // done by polyMesh,fvMesh
+//}
+
+
 void Foam::velocityLaplacianFvMotionSolver::updateMesh
 (
     const mapPolyMesh& mpm
 )
 {
-    fvMotionSolver::updateMesh(mpm);
+    velocityMotionSolver::updateMesh(mpm);
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
     diffusivityPtr_.reset(NULL);
-    diffusivityPtr_ = motionDiffusivity::New(mesh(), lookup("diffusivity"));
+    diffusivityPtr_ = motionDiffusivity::New
+    (
+        fvMesh_,
+        coeffDict().lookup("diffusivity")
+    );
 }
 
 

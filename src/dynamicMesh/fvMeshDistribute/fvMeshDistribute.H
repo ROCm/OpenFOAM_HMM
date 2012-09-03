@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,6 +137,10 @@ class fvMeshDistribute
             (
                 const typename GeoField::value_type& initVal
             );
+
+            //- Call correctBoundaryConditions on fields
+            template<class GeoField>
+            void correctBoundaryConditions();
 
             //- Delete all processor patches. Move any processor faces into
             //  patchI.

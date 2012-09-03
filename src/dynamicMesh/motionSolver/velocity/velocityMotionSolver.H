@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,102 +22,99 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::velocityLaplacianFvMotionSolver
+    Foam::velocityMotionSolver
 
 Description
-    Mesh motion solver for an fvMesh.  Based on solving the cell-centre
-    Laplacian for the motion velocity.
+    Virtual base class for velocity motion solver
+
+    The boundary displacement is set as a boundary condition
+    on the pointMotionU pointVectorField.
 
 SourceFiles
-    velocityLaplacianFvMotionSolver.C
+    velocityMotionSolver.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef velocityLaplacianFvMotionSolver_H
-#define velocityLaplacianFvMotionSolver_H
+#ifndef velocityMotionSolver_H
+#define velocityMotionSolver_H
 
-#include "velocityMotionSolver.H"
-#include "fvMotionSolverCore.H"
+#include "motionSolver.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward class declarations
-class motionDiffusivity;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-              Class velocityLaplacianFvMotionSolver Declaration
+                   Class velocityMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class velocityLaplacianFvMotionSolver
+class velocityMotionSolver
 :
-    public velocityMotionSolver,
-    public fvMotionSolverCore
+    public motionSolver
 {
-    // Private data
+protected:
 
-        //- Cell-centre motion field
-        mutable volVectorField cellMotionU_;
+    // Protected data
 
-        //- Diffusivity used to control the motion
-        autoPtr<motionDiffusivity> diffusivityPtr_;
+        //- Point motion field
+        mutable pointVectorField pointMotionU_;
 
+private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        velocityLaplacianFvMotionSolver
+        velocityMotionSolver
         (
-            const velocityLaplacianFvMotionSolver&
+            const velocityMotionSolver&
         );
 
         //- Disallow default bitwise assignment
-        void operator=(const velocityLaplacianFvMotionSolver&);
-
+        void operator=(const velocityMotionSolver&);
 
 public:
 
     //- Runtime type information
-    TypeName("velocityLaplacian");
+    TypeName("velocityMotionSolver");
 
 
     // Constructors
 
-        //- Construct from polyMesh and IOdictionary
-        velocityLaplacianFvMotionSolver
+        //- Construct from mesh and dictionary
+        velocityMotionSolver
         (
             const polyMesh&,
-            const IOdictionary&
+            const IOdictionary&,
+            const word& type
         );
 
 
     //- Destructor
-    ~velocityLaplacianFvMotionSolver();
+    virtual ~velocityMotionSolver();
 
 
     // Member Functions
 
-        //- Return reference to the cell motion velocity field
-        volVectorField& cellMotionU()
+        //- Return reference to the point motion velocity field
+        pointVectorField& pointMotionU()
         {
-            return cellMotionU_;
+            return pointMotionU_;
         }
 
-        //- Return const reference to the cell motion velocity field
-        const volVectorField& cellMotionU() const
+        //- Return const reference to the point motion velocity field
+        const pointVectorField& pointMotionU() const
         {
-            return cellMotionU_;
+            return pointMotionU_;
         }
 
-        //- Return point location obtained from the current motion field
-        virtual tmp<pointField> curPoints() const;
+        //- Update local data for geometry changes
+        virtual void movePoints(const pointField&);
 
-        //- Solve for motion
-        virtual void solve();
-
-        //- Update topology
+        //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&);
 };
 
