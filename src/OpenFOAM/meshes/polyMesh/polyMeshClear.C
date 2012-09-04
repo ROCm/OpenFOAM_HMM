@@ -142,6 +142,7 @@ void Foam::polyMesh::clearOut()
 {
     clearGeom();
     clearAddressing();
+
     pointMesh::Delete(*this);
 }
 
