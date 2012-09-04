@@ -55,7 +55,8 @@ Foam::outputFilterOutputControl::outputFilterOutputControl
 :
     time_(t),
     outputControl_(ocTimeStep),
-    outputInterval_(0)
+    outputInterval_(0),
+    outputTimeLastDump_(0)
 {
     read(dict);
 }
@@ -88,6 +89,12 @@ void Foam::outputFilterOutputControl::read(const dictionary& dict)
             break;
         }
 
+        case ocOutputTime:
+        {
+            outputInterval_ = dict.lookupOrDefault<label>("outputInterval", 1);
+            break;
+        }
+
         default:
         {
             // do nothing
@@ -97,7 +104,7 @@ void Foam::outputFilterOutputControl::read(const dictionary& dict)
 }
 
 
-bool Foam::outputFilterOutputControl::output() const
+bool Foam::outputFilterOutputControl::output()
 {
     switch (outputControl_)
     {
@@ -113,7 +120,11 @@ bool Foam::outputFilterOutputControl::output() const
 
         case ocOutputTime:
         {
-            return time_.outputTime();
+            if (time_.outputTime())
+            {
+                outputTimeLastDump_ ++;
+                return !(outputTimeLastDump_ % outputInterval_);
+            }
             break;
         }
 

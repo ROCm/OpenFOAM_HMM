@@ -78,6 +78,9 @@ private:
         //  a value <= 1 means execute at every time step
         label outputInterval_;
 
+        //- Dumping counter for ocOutputTime
+        label outputTimeLastDump_;
+
 
     // Private Member Functions
 
@@ -110,7 +113,7 @@ public:
         }
 
         //- Flag to indicate whether to output
-        bool output() const;
+        bool output();
 };
 
 
