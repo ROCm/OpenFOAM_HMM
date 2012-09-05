@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ Foam::Ostream& Foam::operator<<(Foam::Ostream& os, const Foam::UList<T>& L)
             // Write end delimiter
             os << token::END_BLOCK;
         }
-        else if (L.size() < 11 && contiguous<T>())
+        else if (L.size() == 1 || (L.size() < 11 && contiguous<T>()))
         {
             // Write size and start delimiter
             os << L.size() << token::BEGIN_LIST;
