@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,8 @@ SourceFiles
 #ifndef displacementLaplacianFvMotionSolver_H
 #define displacementLaplacianFvMotionSolver_H
 
-#include "displacementFvMotionSolver.H"
+#include "displacementMotionSolver.H"
+#include "fvMotionSolverCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,12 +53,11 @@ class motionDiffusivity;
 
 class displacementLaplacianFvMotionSolver
 :
-    public displacementFvMotionSolver
+//    public displacementFvMotionSolver
+    public displacementMotionSolver,
+    public fvMotionSolverCore
 {
     // Private data
-
-        //- Point motion field
-        mutable pointVectorField pointDisplacement_;
 
         //- Cell-centre motion field
         mutable volVectorField cellDisplacement_;
@@ -94,11 +94,11 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream
+        //- Construct from polyMesh and IOdictionary
         displacementLaplacianFvMotionSolver
         (
             const polyMesh&,
-            Istream& msDataUnused
+            const IOdictionary&
         );
 
 
@@ -107,18 +107,6 @@ public:
 
 
     // Member Functions
-
-        //- Return reference to the point motion displacement field
-        pointVectorField& pointDisplacement()
-        {
-            return pointDisplacement_;
-        }
-
-        //- Return const reference to the point motion displacement field
-        const pointVectorField& pointDisplacement() const
-        {
-            return pointDisplacement_;
-        }
 
         //- Return reference to the cell motion displacement field
         volVectorField& cellDisplacement()
@@ -130,18 +118,6 @@ public:
         const volVectorField& cellDisplacement() const
         {
             return cellDisplacement_;
-        }
-
-        //- Return const reference to the diffusivity
-        const motionDiffusivity& diffusivity() const
-        {
-            return diffusivityPtr_();
-        }
-
-        //- Return reference to the diffusivity
-        motionDiffusivity& diffusivity()
-        {
-            return diffusivityPtr_();
         }
 
         //- Return point location obtained from the current motion field

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,6 +237,24 @@ void Foam::fvMeshDistribute::initPatchFields
                 bfld[patchI] == initVal;
             }
         }
+    }
+}
+
+
+// correctBoundaryConditions patch fields of certain type
+template<class GeoField>
+void Foam::fvMeshDistribute::correctBoundaryConditions()
+{
+    HashTable<const GeoField*> flds
+    (
+        mesh_.objectRegistry::lookupClass<GeoField>()
+    );
+
+    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
+    {
+        const GeoField& fld = *iter();
+
+        const_cast<GeoField&>(fld).correctBoundaryConditions();
     }
 }
 

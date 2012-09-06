@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,13 +46,13 @@ namespace Foam
 
 Foam::exponentialDiffusivity::exponentialDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    motionDiffusivity(mSolver),
+    motionDiffusivity(mesh),
     alpha_(readScalar(mdData)),
-    basicDiffusivityPtr_(motionDiffusivity::New(mSolver, mdData))
+    basicDiffusivityPtr_(motionDiffusivity::New(mesh, mdData))
 {}
 
 

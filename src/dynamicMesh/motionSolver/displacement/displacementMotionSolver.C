@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,27 +23,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "displacementFvMotionSolver.H"
-#include "addToRunTimeSelectionTable.H"
+#include "displacementMotionSolver.H"
 #include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(displacementFvMotionSolver, 0);
+    defineTypeNameAndDebug(displacementMotionSolver, 0);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::displacementFvMotionSolver::displacementFvMotionSolver
+Foam::displacementMotionSolver::displacementMotionSolver
 (
     const polyMesh& mesh,
-    Istream&
+    const IOdictionary& dict,
+    const word& type
 )
 :
-    fvMotionSolver(mesh),
+    motionSolver(mesh, dict, type),
+    pointDisplacement_
+    (
+        IOobject
+        (
+            "pointDisplacement",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pointMesh::New(mesh)
+    ),
     points0_
     (
         pointIOField
@@ -65,10 +77,11 @@ Foam::displacementFvMotionSolver::displacementFvMotionSolver
     {
         FatalErrorIn
         (
-            "displacementFvMotionSolver::displacementFvMotionSolver\n"
+            "displacementMotionSolver::"
+            "displacementMotionSolver\n"
             "(\n"
             "    const polyMesh&,\n"
-            "    Istream&\n"
+            "    const IOdictionary&\n"
             ")"
         )   << "Number of points in mesh " << mesh.nPoints()
             << " differs from number of points " << points0_.size()
@@ -91,15 +104,23 @@ Foam::displacementFvMotionSolver::displacementFvMotionSolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::displacementFvMotionSolver::~displacementFvMotionSolver()
+Foam::displacementMotionSolver::~displacementMotionSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::displacementFvMotionSolver::updateMesh(const mapPolyMesh& mpm)
+void Foam::displacementMotionSolver::movePoints(const pointField&)
 {
-    fvMotionSolver::updateMesh(mpm);
+    // No local data to update
+}
+
+
+void Foam::displacementMotionSolver::updateMesh(const mapPolyMesh& mpm)
+{
+    // pointMesh already updates pointFields.
+
+    motionSolver::updateMesh(mpm);
 
     // Map points0_. Bit special since we somehow have to come up with
     // a sensible points0 position for introduced points.
@@ -110,7 +131,7 @@ void Foam::displacementFvMotionSolver::updateMesh(const mapPolyMesh& mpm)
     (
         mpm.hasMotionPoints()
       ? mpm.preMotionPoints()
-      : fvMesh_.points()
+      : mesh().points()
     );
 
     // Note: boundBox does reduce
@@ -147,8 +168,8 @@ void Foam::displacementFvMotionSolver::updateMesh(const mapPolyMesh& mpm)
         {
             FatalErrorIn
             (
-                "displacementLaplacianFvMotionSolver::updateMesh"
-                "(const mapPolyMesh& mpm)"
+                "displacementMotionSolver::updateMesh"
+                "(const mapPolyMesh&)"
             )   << "Cannot work out coordinates of introduced vertices."
                 << " New vertex " << pointI << " at coordinate "
                 << points[pointI] << exit(FatalError);

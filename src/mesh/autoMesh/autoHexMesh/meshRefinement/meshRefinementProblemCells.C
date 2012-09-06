@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -541,7 +541,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
         Info<< "markFacesOnProblemCells :"
             << " Deleting all-anchor surface cells only if"
-            << "snapping them violates mesh quality constraints:" << nl
+            << " snapping them violates mesh quality constraints:" << nl
             << "    snapped/original cell volume < " << volFraction << nl
             << "    face area                    < " << minArea << nl
             << "    non-orthogonality            > " << maxNonOrtho << nl

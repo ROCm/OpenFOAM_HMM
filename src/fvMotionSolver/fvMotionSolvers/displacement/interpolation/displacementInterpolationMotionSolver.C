@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "displacementInterpolationFvMotionSolver.H"
+#include "displacementInterpolationMotionSolver.H"
 #include "addToRunTimeSelectionTable.H"
 #include "SortableList.H"
 #include "IOList.H"
@@ -35,12 +35,12 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(displacementInterpolationFvMotionSolver, 0);
+    defineTypeNameAndDebug(displacementInterpolationMotionSolver, 0);
 
     addToRunTimeSelectionTable
     (
-        fvMotionSolver,
-        displacementInterpolationFvMotionSolver,
+        motionSolver,
+        displacementInterpolationMotionSolver,
         dictionary
     );
 
@@ -53,36 +53,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::displacementInterpolationFvMotionSolver::
-displacementInterpolationFvMotionSolver
+Foam::displacementInterpolationMotionSolver::
+displacementInterpolationMotionSolver
 (
     const polyMesh& mesh,
-    Istream& is
+    const IOdictionary& dict
 )
 :
-    displacementFvMotionSolver(mesh, is),
-    dynamicMeshCoeffs_
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                "dynamicMeshDict",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).subDict(typeName + "Coeffs")
-    )
+    displacementMotionSolver(mesh, dict, typeName)
 {
     // Get zones and their interpolation tables for displacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     List<Pair<word> > faceZoneToTable
     (
-        dynamicMeshCoeffs_.lookup("interpolationTables")
+        coeffDict().lookup("interpolationTables")
     );
 
     const faceZoneMesh& fZones = mesh.faceZones();
@@ -99,8 +84,8 @@ displacementInterpolationFvMotionSolver
         {
             FatalErrorIn
             (
-                "displacementInterpolationFvMotionSolver::"
-                "displacementInterpolationFvMotionSolver(const polyMesh&,"
+                "displacementInterpolationMotionSolver::"
+                "displacementInterpolationMotionSolver(const polyMesh&,"
                 "Istream&)"
             )   << "Cannot find zone " << zoneName << endl
                 << "Valid zones are " << mesh.faceZones().names()
@@ -267,8 +252,8 @@ displacementInterpolationFvMotionSolver
             {
                 FatalErrorIn
                 (
-                    "displacementInterpolationFvMotionSolver::"
-                    "displacementInterpolationFvMotionSolver"
+                    "displacementInterpolationMotionSolver::"
+                    "displacementInterpolationMotionSolver"
                     "(const polyMesh&, Istream&)"
                 )   << "Did not find point " << points0()[pointI]
                     << " coordinate " << meshCoords[pointI]
@@ -316,21 +301,21 @@ displacementInterpolationFvMotionSolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::displacementInterpolationFvMotionSolver::
-~displacementInterpolationFvMotionSolver()
+Foam::displacementInterpolationMotionSolver::
+~displacementInterpolationMotionSolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::pointField>
-Foam::displacementInterpolationFvMotionSolver::curPoints() const
+Foam::displacementInterpolationMotionSolver::curPoints() const
 {
     if (mesh().nPoints() != points0().size())
     {
         FatalErrorIn
         (
-            "displacementInterpolationFvMotionSolver::curPoints() const"
+            "displacementInterpolationMotionSolver::curPoints() const"
         )   << "The number of points in the mesh seems to have changed." << endl
             << "In constant/polyMesh there are " << points0().size()
             << " points; in the current mesh there are " << mesh().nPoints()

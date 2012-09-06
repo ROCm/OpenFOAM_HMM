@@ -33,6 +33,14 @@ fvMesh mesh
 
 List<polyPatch*> patches(1);
 
-patches[0] = new emptyPolyPatch("boundary", 6, 0, 0, mesh.boundaryMesh());
+patches[0] = new emptyPolyPatch
+(
+    "boundary",
+    6,
+    0,
+    0,
+    mesh.boundaryMesh(),
+    emptyPolyPatch::typeName
+);
 
 mesh.addFvPatches(patches);

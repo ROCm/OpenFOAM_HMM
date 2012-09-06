@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ namespace Foam
 
     addToRunTimeSelectionTable
     (
-        fvMotionSolver,
+        motionSolver,
         velocityComponentLaplacianFvMotionSolver,
         dictionary
     );
@@ -50,24 +50,11 @@ Foam::velocityComponentLaplacianFvMotionSolver::
 velocityComponentLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream& msData
+    const IOdictionary& dict
 )
 :
-    fvMotionSolver(mesh),
-    cmptName_(msData),
-    cmpt_(0),
-    pointMotionU_
-    (
-        IOobject
-        (
-            "pointMotionU" + cmptName_,
-            fvMesh_.time().timeName(),
-            fvMesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pointMesh::New(fvMesh_)
-    ),
+    componentVelocityMotionSolver(mesh, dict, typeName),
+    fvMotionSolverCore(mesh),
     cellMotionU_
     (
         IOobject
@@ -89,32 +76,9 @@ velocityComponentLaplacianFvMotionSolver
     ),
     diffusivityPtr_
     (
-        motionDiffusivity::New(*this, lookup("diffusivity"))
+        motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
     )
-{
-    if (cmptName_ == "x")
-    {
-        cmpt_ = vector::X;
-    }
-    else if (cmptName_ == "y")
-    {
-        cmpt_ = vector::Y;
-    }
-    else if (cmptName_ == "z")
-    {
-        cmpt_ = vector::Z;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "velocityComponentLaplacianFvMotionSolver::"
-            "velocityComponentLaplacianFvMotionSolver"
-            "(const polyMesh& mesh, Istream& msData)"
-        )   << "Given component name " << cmptName_ << " should be x, y or z"
-            << exit(FatalError);
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -176,12 +140,16 @@ void Foam::velocityComponentLaplacianFvMotionSolver::updateMesh
     const mapPolyMesh& mpm
 )
 {
-    fvMotionSolver::updateMesh(mpm);
+    componentVelocityMotionSolver::updateMesh(mpm);
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
     diffusivityPtr_.reset(NULL);
-    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
+    diffusivityPtr_ = motionDiffusivity::New
+    (
+        fvMesh_,
+        coeffDict().lookup("diffusivity")
+    );
 }
 
 

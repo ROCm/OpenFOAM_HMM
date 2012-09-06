@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,6 +56,7 @@ class motionSolver
 :
     public IOdictionary
 {
+
 private:
 
     // Private data
@@ -66,6 +67,14 @@ private:
         //- 2-D motion corrector pointer
         twoDPointCorrector twoDPointCorrector_;
 
+        //- Model coefficients dictionary
+        dictionary coeffDict_;
+
+
+    // Private Member Functions
+
+        //- De-register object if registered and assign to current
+        static IOobject stealRegistration(const IOdictionary& dict);
 
 public:
 
@@ -80,21 +89,33 @@ public:
             autoPtr,
             motionSolver,
             dictionary,
-            (const polyMesh& mesh, Istream& msData),
-            (mesh, msData)
+            (const polyMesh& mesh, const IOdictionary& dict),
+            (mesh, dict)
         );
 
 
     // Selectors
 
         //- Select constructed from polyMesh
-        static autoPtr<motionSolver> New(const polyMesh& mesh);
+        static autoPtr<motionSolver> New(const polyMesh&);
+
+        //- Select constructed from polyMesh and dictionary. If dictionary
+        //  was registered this will 'steal' that registration.
+        static autoPtr<motionSolver> New(const polyMesh&, const IOdictionary&);
 
 
     // Constructors
 
         //- Construct from polyMesh
         motionSolver(const polyMesh& mesh);
+
+        //- Construct from polyMesh and dictionary and type.
+        motionSolver
+        (
+            const polyMesh& mesh,
+            const IOdictionary&,
+            const word& type
+        );
 
 
     //- Destructor
@@ -109,6 +130,12 @@ public:
             return mesh_;
         }
 
+        //- Const access to the coefficients dictionary
+        const dictionary& coeffDict() const
+        {
+            return coeffDict_;
+        }
+
         //- Provide new points for motion.  Solves for motion
         virtual tmp<pointField> newPoints();
 
@@ -120,7 +147,10 @@ public:
         //- Solve for motion
         virtual void solve() = 0;
 
-        //- Update topology
+        //- Update local data for geometry changes
+        virtual void movePoints(const pointField&) = 0;
+
+        //-  Update local data for topology changes
         virtual void updateMesh(const mapPolyMesh&) = 0;
 };
 

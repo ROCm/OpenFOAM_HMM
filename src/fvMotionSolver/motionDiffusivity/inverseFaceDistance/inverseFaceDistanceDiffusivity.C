@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,11 +48,11 @@ namespace Foam
 
 Foam::inverseFaceDistanceDiffusivity::inverseFaceDistanceDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    uniformDiffusivity(mSolver, mdData),
+    uniformDiffusivity(mesh, mdData),
     patchNames_(mdData)
 {
     correct();
@@ -69,8 +69,7 @@ Foam::inverseFaceDistanceDiffusivity::~inverseFaceDistanceDiffusivity()
 
 void Foam::inverseFaceDistanceDiffusivity::correct()
 {
-    const polyMesh& mesh = mSolver().mesh();
-    const polyBoundaryMesh& bdry = mesh.boundaryMesh();
+    const polyBoundaryMesh& bdry = mesh().boundaryMesh();
 
     labelHashSet patchSet(bdry.size());
 
@@ -112,16 +111,16 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
 
     MeshWave<wallPoint> waveInfo
     (
-        mesh,
+        mesh(),
         changedFaces,
         faceDist,
-        mesh.globalData().nTotalCells()+1   // max iterations
+        mesh().globalData().nTotalCells()+1   // max iterations
     );
 
     const List<wallPoint>& faceInfo = waveInfo.allFaceInfo();
     const List<wallPoint>& cellInfo = waveInfo.allCellInfo();
 
-    for (label faceI=0; faceI<mesh.nInternalFaces(); faceI++)
+    for (label faceI=0; faceI<mesh().nInternalFaces(); faceI++)
     {
         scalar dist = faceInfo[faceI].distSqr();
 

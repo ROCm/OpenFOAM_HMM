@@ -370,10 +370,11 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     const label size,
     const label start,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    coupledPolyPatch(name, size, start, index, bm),
+    coupledPolyPatch(name, size, start, index, bm, patchType),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
     transform_(UNKNOWN),
@@ -395,10 +396,11 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     const word& name,
     const dictionary& dict,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    coupledPolyPatch(name, dict, index, bm),
+    coupledPolyPatch(name, dict, index, bm, patchType),
     nbrPatchName_(dict.lookup("neighbourPatch")),
     nbrPatchID_(-1),
     transform_(UNKNOWN),

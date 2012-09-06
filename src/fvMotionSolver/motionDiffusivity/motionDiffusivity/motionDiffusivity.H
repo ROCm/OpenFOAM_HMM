@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,8 @@ SourceFiles
 #ifndef motionDiffusivity_H
 #define motionDiffusivity_H
 
-#include "fvMotionSolver.H"
 #include "surfaceFieldsFwd.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +51,8 @@ class motionDiffusivity
 {
     // Private data
 
-        //- Motion solver reference
-        const fvMotionSolver& mSolver_;
+        //- mesh reference
+        const fvMesh& mesh_;
 
 public:
 
@@ -68,10 +68,10 @@ public:
             motionDiffusivity,
             Istream,
             (
-                const fvMotionSolver& mSolver,
+                const fvMesh& mesh,
                 Istream& mdData
             ),
-            (mSolver, mdData)
+            (mesh, mdData)
         );
 
 
@@ -80,15 +80,15 @@ public:
         //- Select null constructed
         static autoPtr<motionDiffusivity> New
         (
-            const fvMotionSolver& mSolver,
+            const fvMesh& mesh,
             Istream& mdData
         );
 
 
     // Constructors
 
-        //- Construct for the given fvMotionSolver
-        motionDiffusivity(const fvMotionSolver& mSolver);
+        //- Construct for the given fvMesh
+        motionDiffusivity(const fvMesh& mesh);
 
 
     //- Destructor
@@ -97,10 +97,10 @@ public:
 
     // Member Functions
 
-        //- Return reference to the motion solver
-        const fvMotionSolver& mSolver() const
+        //- Return reference to the mesh
+        const fvMesh& mesh() const
         {
-            return mSolver_;
+            return mesh_;
         }
 
         //- Return diffusivity field

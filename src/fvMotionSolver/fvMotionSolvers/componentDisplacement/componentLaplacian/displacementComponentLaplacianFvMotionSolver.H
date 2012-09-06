@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,8 @@ SourceFiles
 #ifndef displacementComponentLaplacianFvMotionSolver_H
 #define displacementComponentLaplacianFvMotionSolver_H
 
-#include "fvMotionSolver.H"
+#include "componentDisplacementMotionSolver.H"
+#include "fvMotionSolverCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,21 +53,10 @@ class motionDiffusivity;
 
 class displacementComponentLaplacianFvMotionSolver
 :
-    public fvMotionSolver
+    public componentDisplacementMotionSolver,
+    public fvMotionSolverCore
 {
     // Private data
-
-        //- The component name to solve for
-        word cmptName_;
-
-        //- The component to solve for
-        direction cmpt_;
-
-        //- Reference point field for this component
-        scalarField points0_;
-
-        //- Point motion field
-        mutable pointScalarField pointDisplacement_;
 
         //- Cell-centre motion field
         mutable volScalarField cellDisplacement_;
@@ -106,11 +96,11 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream
+        //- Construct from polyMesh and IOdictionary
         displacementComponentLaplacianFvMotionSolver
         (
             const polyMesh&,
-            Istream& msData
+            const IOdictionary&
         );
 
 
@@ -119,12 +109,6 @@ public:
 
 
     // Member Functions
-
-        //- Return reference to the reference field
-        const scalarField& points0() const
-        {
-            return points0_;
-        }
 
         //- Non-const access to the cellDisplacement in order to allow
         //  changes to the boundary motion
@@ -141,6 +125,7 @@ public:
 
         //- Update topology
         virtual void updateMesh(const mapPolyMesh&);
+
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvMotionSolver.H"
-#include "fixedValuePointPatchFields.H"
-#include "cellMotionFvPatchFields.H"
+#include "fvMotionSolverCore.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::wordList Foam::fvMotionSolver::cellMotionBoundaryTypes
-(
-    const typename GeometricField<Type, pointPatchField, pointMesh>::
-    GeometricBoundaryField& pmUbf
-) const
+namespace Foam
 {
-    wordList cmUbf = pmUbf.types();
-
-    // Remove global patches from the end of the list
-    cmUbf.setSize(fvMesh_.boundary().size());
-
-    forAll(cmUbf, patchi)
-    {
-        if (isA<fixedValuePointPatchField<Type> >(pmUbf[patchi]))
-        {
-            cmUbf[patchi] = cellMotionFvPatchField<Type>::typeName;
-        }
-
-        if (debug)
-        {
-            Pout<< "Patch:" << fvMesh_.boundary()[patchi].patch().name()
-                << " pointType:" << pmUbf.types()[patchi]
-                << " cellType:" << cmUbf[patchi] << endl;
-        }
-    }
-
-    return cmUbf;
+    defineTypeNameAndDebug(fvMotionSolverCore, 0);
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fvMotionSolverCore::fvMotionSolverCore(const polyMesh& mesh)
+:
+    fvMesh_(refCast<const fvMesh>(mesh))
+{}
 
 
 // ************************************************************************* //

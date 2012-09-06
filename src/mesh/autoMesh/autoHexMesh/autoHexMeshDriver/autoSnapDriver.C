@@ -1020,7 +1020,8 @@ void Foam::autoSnapDriver::smoothDisplacement
         vectorField actualPatchDisp(disp, pp.meshPoints());
         dumpMove
         (
-            mesh.time().path()/"actualPatchDisplacement.obj",
+            mesh.time().path()
+          / "actualPatchDisplacement_" + meshRefiner_.timeName() + ".obj",
             pp.localPoints(),
             pp.localPoints() + actualPatchDisp
         );
