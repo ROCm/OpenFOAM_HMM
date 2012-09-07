@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,23 +112,6 @@ private:
 public:
 
     // Constructors
-
-        //- Construct from components
-        shellSurfaces
-        (
-            const searchableSurfaces& allGeometry,
-            const labelList& shells,
-            const List<refineMode>& modes,
-            const List<scalarField>& distances,
-            const labelListList& levels
-        );
-
-        //- Construct from geometry and dictionaries
-        shellSurfaces
-        (
-            const searchableSurfaces& allGeometry,
-            const PtrList<dictionary>& shellDicts
-        );
 
         //- Construct from geometry and dictionary
         shellSurfaces
