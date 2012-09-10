@@ -36,9 +36,9 @@ processorCyclic
     type  processorCyclic;
 }
 
-symmetry
+symmetryPlane
 {
-    type  symmetry;
+    type  symmetryPlane;
 }
 
 wedge
