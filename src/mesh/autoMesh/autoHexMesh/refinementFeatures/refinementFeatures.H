@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,15 +69,31 @@ private:
 
     // Private Member Functions
 
+        //- Read set of feature edge meshes
+        void read(const objectRegistry&, const PtrList<dictionary>&);
+
+        //- Build edge tree and feature point tree
+        void buildTrees(const label, const labelList&);
+
+
 public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from description
         refinementFeatures
         (
             const objectRegistry& io,
             const PtrList<dictionary>& featDicts
+        );
+
+        //- Construct from description and do geometric analysis to determine
+        //  feature points
+        refinementFeatures
+        (
+            const objectRegistry& io,
+            const PtrList<dictionary>& featDicts,
+            const scalar minCos
         );
 
 
