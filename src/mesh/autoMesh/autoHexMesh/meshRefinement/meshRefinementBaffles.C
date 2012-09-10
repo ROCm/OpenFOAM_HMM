@@ -43,6 +43,7 @@ License
 #include "OFstream.H"
 #include "regionSplit.H"
 #include "removeCells.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -213,6 +214,45 @@ Foam::label Foam::meshRefinement::getBafflePatch
         << "Using arbitrary patch " << 0 << " instead." << endl;
 
     return 0;
+}
+
+
+// Check if we are a boundary face and normal of surface does
+// not align with test vector. In this case there'd probably be
+// a freestanding 'baffle' so we might as well not create it.
+// Note that since it is not a proper baffle we cannot detect it
+// afterwards so this code cannot be merged with the
+// filterDuplicateFaces code.
+bool Foam::meshRefinement::validBaffleTopology
+(
+    const label faceI,
+    const vector& n1,
+    const vector& n2,
+    const vector& testDir
+) const
+{
+
+    label patchI = mesh_.boundaryMesh().whichPatch(faceI);
+    if (patchI == -1 || mesh_.boundaryMesh()[patchI].coupled())
+    {
+        return true;
+    }
+    else if (mag(n1&n2) > cos(degToRad(30)))
+    {
+        // Both normals aligned. Check that test vector perpendicularish to
+        // surface normal
+        scalar magTestDir = mag(testDir);
+        if (magTestDir > VSMALL)
+        {
+            if (mag(n1&(testDir/magTestDir)) < cos(degToRad(45)))
+            {
+                //Pout<< "** disabling baffling face "
+                //    << mesh_.faceCentres()[faceI] << endl;
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 
@@ -745,7 +785,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 // Done by counting the number of baffles faces per mesh edge. If edge
 // has 2 boundary faces and both are baffle faces it is the edge of a baffle
 // region.
-Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
+Foam::List<Foam::labelPair> Foam::meshRefinement::freeStandingBaffles
 (
     const List<labelPair>& couples
 ) const
@@ -852,11 +892,111 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
     }
     filteredCouples.setSize(filterI);
 
-    //Info<< "filterDuplicateFaces : from "
+    //Info<< "freeStandingBaffles : from "
     //    << returnReduce(couples.size(), sumOp<label>())
     //    << " down to "
     //    << returnReduce(filteredCouples.size(), sumOp<label>())
     //    << " baffles." << nl << endl;
+
+
+
+//XXXXXX
+//    {
+//        // Collect segments
+//        // ~~~~~~~~~~~~~~~~
+//
+//        pointField start(filteredCouples.size());
+//        pointField end(filteredCouples.size());
+//
+//        const pointField& cellCentres = mesh_.cellCentres();
+//
+//        forAll(filteredCouples, i)
+//        {
+//            const labelPair& couple = couples[i];
+//            start[i] = cellCentres[mesh_.faceOwner()[couple.first()]];
+//            end[i] = cellCentres[mesh_.faceOwner()[couple.second()]];
+//        }
+//
+//        // Extend segments a bit
+//        {
+//            const vectorField smallVec(Foam::sqrt(SMALL)*(end-start));
+//            start -= smallVec;
+//            end += smallVec;
+//        }
+//
+//
+//        // Do test for intersections
+//        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+//        labelList surface1;
+//        List<pointIndexHit> hit1;
+//        labelList region1;
+//        vectorField normal1;
+//
+//        labelList surface2;
+//        List<pointIndexHit> hit2;
+//        labelList region2;
+//        vectorField normal2;
+//
+//        surfaces_.findNearestIntersection
+//        (
+//            surfacesToBaffle,
+//            start,
+//            end,
+//
+//            surface1,
+//            hit1,
+//            region1,
+//            normal1,
+//
+//            surface2,
+//            hit2,
+//            region2,
+//            normal2
+//        );
+//
+//        forAll(testFaces, i)
+//        {
+//            if (hit1[i].hit() && hit2[i].hit())
+//            {
+//                bool createBaffle = true;
+//
+//                label faceI = couples[i].first();
+//                label patchI = mesh_.boundaryMesh().whichPatch(faceI);
+//                if (patchI != -1 && !mesh_.boundaryMesh()[patchI].coupled())
+//                {
+//                    // Check if we are a boundary face and normal of surface
+//                    // does
+//                    // not align with test vector. In this case there'd
+//                    // probably be
+//                    // a freestanding 'baffle' so we might as well not
+//                    // create it.
+//                    // Note that since it is not a proper baffle we cannot
+//                    // detect it
+//                    // afterwards so this code cannot be merged with the
+//                    // filterDuplicateFaces code.
+//                    if (mag(normal1[i]&normal2[i]) > cos(degToRad(30)))
+//                    {
+//                        // Both normals aligned
+//                        vector n = end[i]-start[i];
+//                        scalar magN = mag(n);
+//                        if (magN > VSMALL)
+//                        {
+//                            n /= magN;
+//
+//                            if (mag(normal1[i]&n) < cos(degToRad(45)))
+//                            {
+//                                Pout<< "** disabling baffling face "
+//                                    << mesh_.faceCentres()[faceI] << endl;
+//                                createBaffle = false;
+//                            }
+//                        }
+//                    }
+//                }
+//
+//
+//        }
+//XXXXXX
+
 
     return filteredCouples;
 }
@@ -1717,11 +1857,6 @@ void Foam::meshRefinement::baffleAndSplitMesh
         neiPatch
     );
 
-    if (debug)
-    {
-        runTime++;
-    }
-
     createBaffles(ownPatch, neiPatch);
 
     if (debug)
@@ -1874,15 +2009,11 @@ void Foam::meshRefinement::baffleAndSplitMesh
             << "---------------------------" << nl
             << endl;
 
-        if (debug)
-        {
-            runTime++;
-        }
 
         // List of pairs of freestanding baffle faces.
         List<labelPair> couples
         (
-            filterDuplicateFaces    // filter out freestanding baffles
+            freeStandingBaffles    // filter out freestanding baffles
             (
                 getDuplicateFaces   // get all baffles
                 (
@@ -2484,11 +2615,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         // the information already in surfaceIndex_.
 
         labelList surface1;
+        List<pointIndexHit> hit1;
+        vectorField normal1;
         labelList surface2;
+        List<pointIndexHit> hit2;
+        vectorField normal2;
         {
-            List<pointIndexHit> hit1;
             labelList region1;
-            List<pointIndexHit> hit2;
             labelList region2;
             surfaces_.findNearestIntersection
             (
@@ -2511,9 +2644,36 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
             if (surface1[i] != -1)
             {
-                // If both hit should probably choose nearest. For later.
-                namedSurfaceIndex[faceI] = surface1[i];
-                nSurfFaces[surface1[i]]++;
+                //- Not allowed not to create baffle - is vital for regioning.
+                //  Have logic instead at erosion!
+                //bool createBaffle = validBaffleTopology
+                //(
+                //    faceI,
+                //    normal1[i],
+                //    normal2[i],
+                //    end[i]-start[i]
+                //);
+                //
+
+
+                // If both hit should probably choose 'nearest'
+                if
+                (
+                    surface2[i] != -1
+                 && (
+                        magSqr(hit2[i].hitPoint())
+                      < magSqr(hit1[i].hitPoint())
+                    )
+                )
+                {
+                    namedSurfaceIndex[faceI] = surface2[i];
+                    nSurfFaces[surface2[i]]++;
+                }
+                else
+                {
+                    namedSurfaceIndex[faceI] = surface1[i];
+                    nSurfFaces[surface1[i]]++;
+                }
             }
             else if (surface2[i] != -1)
             {

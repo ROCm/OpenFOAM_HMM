@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "scalar.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +63,10 @@ class snapParameters
         const label nSnap_;
 
         const label nFeatureSnap_;
+
+        const Switch explicitFeatureSnap_;
+
+        const Switch implicitFeatureSnap_;
 
 
     // Private Member Functions
@@ -117,6 +122,16 @@ public:
             label nFeatureSnap() const
             {
                 return nFeatureSnap_;
+            }
+
+            Switch explicitFeatureSnap() const
+            {
+                return explicitFeatureSnap_;
+            }
+
+            Switch implicitFeatureSnap() const
+            {
+                return implicitFeatureSnap_;
             }
 
 };

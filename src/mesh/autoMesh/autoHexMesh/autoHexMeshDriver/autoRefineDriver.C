@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -663,17 +663,10 @@ void Foam::autoRefineDriver::mergePatchFaces
     const dictionary& motionDict
 )
 {
-    const fvMesh& mesh = meshRefiner_.mesh();
-
     Info<< nl
         << "Merge refined boundary faces" << nl
         << "----------------------------" << nl
         << endl;
-
-    if (debug)
-    {
-        const_cast<Time&>(mesh.time())++;
-    }
 
     meshRefiner_.mergePatchFacesUndo
     (
