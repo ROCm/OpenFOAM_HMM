@@ -28,6 +28,7 @@ Description
 
 SourceFiles
     extrudedMesh.C
+    extrudedMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 

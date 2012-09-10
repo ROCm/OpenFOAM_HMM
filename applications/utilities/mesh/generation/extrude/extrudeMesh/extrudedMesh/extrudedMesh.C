@@ -24,10 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "extrudedMesh.H"
-#include "wallPolyPatch.H"
-#include "meshTools.H"
-#include "ListOps.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
