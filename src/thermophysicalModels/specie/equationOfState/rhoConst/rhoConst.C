@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "incompressible.H"
+#include "rhoConst.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::incompressible::incompressible(Istream& is)
+Foam::rhoConst::rhoConst(Istream& is)
 :
     specie(is),
     rho_(readScalar(is))
 {
-    is.check("incompressible::incompressible(Istream& is)");
+    is.check("rhoConst::rhoConst(Istream& is)");
 }
 
 
-Foam::incompressible::incompressible(const dictionary& dict)
+Foam::rhoConst::rhoConst(const dictionary& dict)
 :
     specie(dict),
     rho_(readScalar(dict.subDict("equationOfState").lookup("rho")))
@@ -46,7 +46,7 @@ Foam::incompressible::incompressible(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::incompressible::write(Ostream& os) const
+void Foam::rhoConst::write(Ostream& os) const
 {
     specie::write(os);
 
@@ -59,12 +59,12 @@ void Foam::incompressible::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const incompressible& ico)
+Foam::Ostream& Foam::operator<<(Ostream& os, const rhoConst& ico)
 {
     os  << static_cast<const specie&>(ico)
         << token::SPACE << ico.rho_;
 
-    os.check("Ostream& operator<<(Ostream& os, const incompressible& ico)");
+    os.check("Ostream& operator<<(Ostream& os, const rhoConst& ico)");
     return os;
 }
 

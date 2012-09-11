@@ -6,8 +6,8 @@ reactions = reaction/reactions
 $(atomicWeights)/atomicWeights.C
 $(specie)/specie.C
 $(equationOfState)/perfectGas/perfectGas.C
-$(equationOfState)/incompressible/incompressible.C
-$(equationOfState)/isobaricPerfectGas/isobaricPerfectGas.C
+$(equationOfState)/rhoConst/rhoConst.C
+$(equationOfState)/incompressiblePerfectGas/incompressiblePerfectGas.C
 $(reactions)/makeReactionThermoReactions.C
 $(reactions)/makeLangmuirHinshelwoodReactions.C
 

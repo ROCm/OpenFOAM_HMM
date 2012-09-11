@@ -110,7 +110,7 @@ dictionaryReplacement
 
 
                 // Solid thermo
-                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<incompressible>,sensibleEnthalpy>>>>>;
+                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<rhoConst>,sensibleEnthalpy>>>>>;
 
 
                 mixture

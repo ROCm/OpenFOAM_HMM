@@ -35,13 +35,21 @@ namespace Foam
 {
     makeChemistrySolverTypes(psiChemistryModel, constGasThermoPhysics);
     makeChemistrySolverTypes(psiChemistryModel, gasThermoPhysics);
-    makeChemistrySolverTypes(psiChemistryModel, constIsobaricGasThermoPhysics);
-    makeChemistrySolverTypes(psiChemistryModel, isobaricGasThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        psiChemistryModel,
+        constIncompressibleGasThermoPhysics
+    );
+    makeChemistrySolverTypes(psiChemistryModel, incompressibleGasThermoPhysics);
     makeChemistrySolverTypes(psiChemistryModel, icoPoly8ThermoPhysics);
     makeChemistrySolverTypes(rhoChemistryModel, constGasThermoPhysics);
     makeChemistrySolverTypes(rhoChemistryModel, gasThermoPhysics);
-    makeChemistrySolverTypes(rhoChemistryModel, constIsobaricGasThermoPhysics);
-    makeChemistrySolverTypes(rhoChemistryModel, isobaricGasThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        rhoChemistryModel,
+        constIncompressibleGasThermoPhysics
+    );
+    makeChemistrySolverTypes(rhoChemistryModel, incompressibleGasThermoPhysics);
     makeChemistrySolverTypes(rhoChemistryModel, icoPoly8ThermoPhysics);
 }
 

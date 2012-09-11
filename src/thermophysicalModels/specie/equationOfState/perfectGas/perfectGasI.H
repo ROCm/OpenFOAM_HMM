@@ -82,6 +82,12 @@ inline Foam::scalar Foam::perfectGas::Z(scalar, scalar) const
 }
 
 
+inline Foam::scalar Foam::perfectGas::cpMcv(scalar, scalar) const
+{
+    return this->RR;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::perfectGas::operator+=(const perfectGas& pg)

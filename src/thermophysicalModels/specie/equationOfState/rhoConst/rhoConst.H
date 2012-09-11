@@ -22,20 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isobaricPerfectGas
+    Foam::rhoConst
 
 Description
-    Perfect gas equation of state using a reference pressure
-    rather than the local pressure.
+    RhoConst (rho = const) of state.
 
 SourceFiles
-    isobaricPerfectGasI.H
-    isobaricPerfectGas.C
+    rhoConstI.H
+    rhoConst.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isobaricPerfectGas_H
-#define isobaricPerfectGas_H
+#ifndef rhoConst_H
+#define rhoConst_H
 
 #include "specie.H"
 #include "autoPtr.H"
@@ -46,17 +45,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class isobaricPerfectGas Declaration
+                        Class rhoConst Declaration
 \*---------------------------------------------------------------------------*/
 
-class isobaricPerfectGas
+class rhoConst
 :
     public specie
 {
     // Private data
 
-        //- Reference pressure
-        scalar pRef_;
+        //- Density
+        scalar rho_;
 
 
 public:
@@ -64,30 +63,35 @@ public:
     // Constructors
 
         //- Construct from components
-        inline isobaricPerfectGas(const specie& sp);
+        inline rhoConst(const specie& sp, const scalar rho);
 
         //- Construct from Istream
-        isobaricPerfectGas(Istream&);
+        rhoConst(Istream&);
 
         //- Construct from dictionary
-        isobaricPerfectGas(const dictionary& dict);
+        rhoConst(const dictionary& dict);
 
         //- Construct as named copy
-        inline isobaricPerfectGas(const word& name, const isobaricPerfectGas&);
+        inline rhoConst(const word& name, const rhoConst&);
 
         //- Construct and return a clone
-        inline autoPtr<isobaricPerfectGas> clone() const;
+        inline autoPtr<rhoConst> clone() const;
 
         // Selector from Istream
-        inline static autoPtr<isobaricPerfectGas> New(Istream& is);
-
-        // Selector from dictionary
-        inline static autoPtr<isobaricPerfectGas> New(const dictionary& dict);
+        inline static autoPtr<rhoConst> New(Istream& is);
 
 
     // Member functions
 
         // Fundamental properties
+
+            //- Return true if the equation of state is rhoConst
+            //  i.e. rho != f(p)
+            static const bool incompressible = false;
+
+            //- Return true if the equation of state is isochoric
+            //  i.e. rho = const
+            static const bool isochoric = true;
 
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
@@ -98,8 +102,11 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
+            //- Return (cp - cv) [J/(kmol K]
+            inline scalar cpMcv(scalar p, scalar T) const;
 
-        // I-O
+
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
@@ -107,42 +114,42 @@ public:
 
     // Member operators
 
-        inline void operator+=(const isobaricPerfectGas&);
-        inline void operator-=(const isobaricPerfectGas&);
+        inline void operator+=(const rhoConst&);
+        inline void operator-=(const rhoConst&);
 
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        inline friend isobaricPerfectGas operator+
+        inline friend rhoConst operator+
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const rhoConst&,
+            const rhoConst&
         );
 
-        inline friend isobaricPerfectGas operator-
+        inline friend rhoConst operator-
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const rhoConst&,
+            const rhoConst&
         );
 
-        inline friend isobaricPerfectGas operator*
+        inline friend rhoConst operator*
         (
             const scalar s,
-            const isobaricPerfectGas&
+            const rhoConst&
         );
 
-        inline friend isobaricPerfectGas operator==
+        inline friend rhoConst operator==
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const rhoConst&,
+            const rhoConst&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const isobaricPerfectGas&);
+        friend Ostream& operator<<(Ostream&, const rhoConst&);
 };
 
 
@@ -152,7 +159,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "isobaricPerfectGasI.H"
+#include "rhoConstI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

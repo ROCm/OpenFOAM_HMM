@@ -57,14 +57,14 @@ namespace Foam
     (
         ODEChemistryModel,
         psiChemistryModel,
-        constIsobaricGasThermoPhysics
+        constIncompressibleGasThermoPhysics
     );
 
     makeChemistryModel
     (
         ODEChemistryModel,
         psiChemistryModel,
-        isobaricGasThermoPhysics
+        incompressibleGasThermoPhysics
     );
 
     makeChemistryModel

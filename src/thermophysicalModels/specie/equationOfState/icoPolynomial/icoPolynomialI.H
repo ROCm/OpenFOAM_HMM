@@ -117,6 +117,17 @@ inline Foam::scalar Foam::icoPolynomial<PolySize>::Z(scalar, scalar) const
 }
 
 
+template<int PolySize>
+inline Foam::scalar Foam::icoPolynomial<PolySize>::cpMcv
+(
+    scalar p,
+    scalar T
+) const
+{
+    return -(p/sqr(rhoCoeffs_.value(T)))*rhoCoeffs_.derivative(T);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<int PolySize>

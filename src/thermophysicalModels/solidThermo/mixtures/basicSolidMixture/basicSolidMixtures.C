@@ -30,7 +30,7 @@ Description
 #include "makeBasicMixture.H"
 
 
-#include "incompressible.H"
+#include "rhoConst.H"
 
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
@@ -64,7 +64,7 @@ makeBasicMixture
     constIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicMixture
@@ -73,7 +73,7 @@ makeBasicMixture
     constAnIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicMixture
@@ -82,7 +82,7 @@ makeBasicMixture
     exponentialSolidTransport,
     sensibleEnthalpy,
     hExponentialThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicMixture
@@ -91,7 +91,7 @@ makeBasicMixture
     constIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicMixture
@@ -100,7 +100,7 @@ makeBasicMixture
     constIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 

@@ -85,8 +85,12 @@ namespace Foam
 {
     makeReactions(constGasThermoPhysics, constGasReaction)
     makeReactions(gasThermoPhysics, gasReaction)
-    makeReactions(constIsobaricGasThermoPhysics, constIsobaricGasReaction)
-    makeReactions(isobaricGasThermoPhysics, isobaricGasReaction)
+    makeReactions
+    (
+        constIncompressibleGasThermoPhysics,
+        constIncompressibleGasReaction
+    )
+    makeReactions(incompressibleGasThermoPhysics, incompressibleGasReaction)
     makeReactions(icoPoly8ThermoPhysics, icoPoly8Reaction)
 }
 

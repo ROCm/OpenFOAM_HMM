@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible
+    Foam::incompressiblePerfectGas
 
 Description
-    Incompressible gas/liquid equation of state.
+    Incompressible gas equation of state using a constant reference pressure in
+    the perfect gas equation of state rather than the local pressure so that the
+    density only varies with temperature and composition.
 
 SourceFiles
-    incompressibleI.H
-    incompressible.C
+    incompressiblePerfectGasI.H
+    incompressiblePerfectGas.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef incompressible_H
-#define incompressible_H
+#ifndef incompressiblePerfectGas_H
+#define incompressiblePerfectGas_H
 
 #include "specie.H"
 #include "autoPtr.H"
@@ -45,17 +47,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class incompressible Declaration
+                    Class incompressiblePerfectGas Declaration
 \*---------------------------------------------------------------------------*/
 
-class incompressible
+class incompressiblePerfectGas
 :
     public specie
 {
     // Private data
 
-        //- Density
-        scalar rho_;
+        //- Reference pressure
+        scalar pRef_;
 
 
 public:
@@ -63,27 +65,45 @@ public:
     // Constructors
 
         //- Construct from components
-        inline incompressible(const specie& sp, const scalar rho);
+        inline incompressiblePerfectGas(const specie& sp);
 
         //- Construct from Istream
-        incompressible(Istream&);
+        incompressiblePerfectGas(Istream&);
 
         //- Construct from dictionary
-        incompressible(const dictionary& dict);
+        incompressiblePerfectGas(const dictionary& dict);
 
         //- Construct as named copy
-        inline incompressible(const word& name, const incompressible&);
+        inline incompressiblePerfectGas
+        (
+            const word& name,
+            const incompressiblePerfectGas&
+        );
 
         //- Construct and return a clone
-        inline autoPtr<incompressible> clone() const;
+        inline autoPtr<incompressiblePerfectGas> clone() const;
 
         // Selector from Istream
-        inline static autoPtr<incompressible> New(Istream& is);
+        inline static autoPtr<incompressiblePerfectGas> New(Istream& is);
+
+        // Selector from dictionary
+        inline static autoPtr<incompressiblePerfectGas> New
+        (
+            const dictionary& dict
+        );
 
 
     // Member functions
 
         // Fundamental properties
+
+            //- Return true if the equation of state is incompressible
+            //  i.e. rho != f(p)
+            static const bool incompressible = true;
+
+            //- Return true if the equation of state is isochoric
+            //  i.e. rho = const
+            static const bool isochoric = false;
 
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
@@ -94,8 +114,11 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
+            //- Return (cp - cv) [J/(kmol K]
+            inline scalar cpMcv(scalar p, scalar T) const;
 
-        // I-O
+
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
@@ -103,42 +126,42 @@ public:
 
     // Member operators
 
-        inline void operator+=(const incompressible&);
-        inline void operator-=(const incompressible&);
+        inline void operator+=(const incompressiblePerfectGas&);
+        inline void operator-=(const incompressiblePerfectGas&);
 
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        inline friend incompressible operator+
+        inline friend incompressiblePerfectGas operator+
         (
-            const incompressible&,
-            const incompressible&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
-        inline friend incompressible operator-
+        inline friend incompressiblePerfectGas operator-
         (
-            const incompressible&,
-            const incompressible&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
-        inline friend incompressible operator*
+        inline friend incompressiblePerfectGas operator*
         (
             const scalar s,
-            const incompressible&
+            const incompressiblePerfectGas&
         );
 
-        inline friend incompressible operator==
+        inline friend incompressiblePerfectGas operator==
         (
-            const incompressible&,
-            const incompressible&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const incompressible&);
+        friend Ostream& operator<<(Ostream&, const incompressiblePerfectGas&);
 };
 
 
@@ -148,7 +171,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "incompressibleI.H"
+#include "incompressiblePerfectGasI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
