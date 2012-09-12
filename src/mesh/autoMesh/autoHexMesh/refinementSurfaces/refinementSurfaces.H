@@ -317,6 +317,24 @@ public:
                 labelList& region2
             ) const;
 
+            //- findNearestIntersection but also get normals
+            void findNearestIntersection
+            (
+                const labelList& surfacesToTest,
+                const pointField& start,
+                const pointField& end,
+
+                labelList& surface1,
+                List<pointIndexHit>& hit1,
+                labelList& region1,
+                vectorField& normal1,
+
+                labelList& surface2,
+                List<pointIndexHit>& hit2,
+                labelList& region2,
+                vectorField& normal2
+            ) const;
+
             //- Used for debugging only: find intersection of edge.
             void findAnyIntersection
             (

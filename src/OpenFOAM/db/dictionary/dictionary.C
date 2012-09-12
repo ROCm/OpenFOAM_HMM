@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -414,6 +414,120 @@ Foam::ITstream& Foam::dictionary::lookup
 ) const
 {
     return lookupEntry(keyword, recursive, patternMatch).stream();
+}
+
+
+const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
+(
+    const word& keyword,
+    bool recursive,
+    bool patternMatch
+) const
+{
+    string::size_type dotPos = keyword.find('.');
+
+    if (dotPos == string::npos)
+    {
+        return lookupEntryPtr(keyword, recursive, patternMatch);
+    }
+    else
+    {
+        if (dotPos == 0)
+        {
+            const dictionary* dictPtr = this;
+            while (&dictPtr->parent_ != &dictionary::null)
+            {
+                dictPtr = &dictPtr->parent_;
+            }
+
+            // At top
+            return dictPtr->lookupScopedEntryPtr
+            (
+                keyword.substr(1, keyword.size()-1),
+                false,
+                patternMatch
+            );
+        }
+        else
+        {
+            wordList entryNames(fileName(keyword).components('.'));
+
+            const entry* entPtr = lookupEntryPtr(entryNames[0], false, true);
+
+            for (int i=1; i<entryNames.size(); ++i)
+            {
+                if (!entPtr)
+                {
+                    FatalIOErrorIn
+                    (
+                        "dictionary::lookupScopedEntryPtr"
+                        "(const word&, bool, bool)",
+                        *this
+                    )   << "keyword " << keyword
+                        << " is undefined in dictionary "
+                        << name()
+                        << exit(FatalIOError);
+                }
+                if (!entPtr->isDict())
+                {
+                    FatalIOErrorIn
+                    (
+                        "dictionary::lookupScopedEntryPtr"
+                        "(const word&, bool, bool)",
+                        *this
+                    )   << "Entry " << entPtr->name()
+                        << " is not a dictionary so cannot lookup sub entry "
+                        << entryNames[i]
+                        << exit(FatalIOError);
+                }
+
+                entPtr = entPtr->dict().lookupEntryPtr
+                (
+                    entryNames[i],
+                    false,
+                    true
+                );
+            }
+
+            if (!entPtr)
+            {
+                FatalIOErrorIn
+                (
+                    "dictionary::lookupScopedEntryPtr"
+                    "(const word&, bool, bool)",
+                    *this
+                )   << "keyword " << keyword
+                    << " is not a valid scoped entry in dictionary "
+                    << name()
+                    << exit(FatalIOError);
+            }
+            return entPtr;
+        }
+    }
+}
+
+
+bool Foam::dictionary::substituteScopedKeyword(const word& keyword)
+{
+    word varName = keyword(1, keyword.size()-1);
+
+    // lookup the variable name in the given dictionary
+    const entry* ePtr = lookupScopedEntryPtr(varName, true, true);
+
+    // if defined insert its entries into this dictionary
+    if (ePtr != NULL)
+    {
+        const dictionary& addDict = ePtr->dict();
+
+        forAllConstIter(IDLList<entry>, addDict, iter)
+        {
+            add(iter());
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 

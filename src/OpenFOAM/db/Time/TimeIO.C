@@ -30,6 +30,13 @@ License
 
 void Foam::Time::readDict()
 {
+    word application;
+    if (controlDict_.readIfPresent("application", application))
+    {
+        // Do not override if already set so external application can override
+        setEnv("FOAM_APPLICATION", application, false);
+    }
+
     if (!deltaTchanged_)
     {
         deltaT_ = readScalar(controlDict_.lookup("deltaT"));

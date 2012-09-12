@@ -326,6 +326,16 @@ private:
                 const labelList& globalToPatch
             ) const;
 
+            //- Geometric test on see whether face needs to be baffled:
+            //  is face boundary face and perpendicular to surface normal?
+            bool validBaffleTopology
+            (
+                const label faceI,
+                const vector& n1,
+                const vector& n2,
+                const vector& testDir
+            ) const;
+
             //- Determine patches for baffles
             void getBafflePatches
             (
@@ -414,7 +424,7 @@ private:
 
             //- Extract those baffles (duplicate) faces that are on the edge
             //  of a baffle region. These are candidates for merging.
-            List<labelPair> filterDuplicateFaces(const List<labelPair>&) const;
+            List<labelPair> freeStandingBaffles(const List<labelPair>&) const;
 
 
         // Zone handling

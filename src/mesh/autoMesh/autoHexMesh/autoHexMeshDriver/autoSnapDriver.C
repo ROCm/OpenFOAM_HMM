@@ -1465,6 +1465,7 @@ void Foam::autoSnapDriver::doSnap
             {
                 disp = calcNearestSurfaceFeature
                 (
+                    snapParams,
                     iter,
                     featureCos,
                     scalar(iter+1)/nFeatIter,
