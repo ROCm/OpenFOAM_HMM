@@ -32,7 +32,7 @@ Description
 #ifndef solidThermoPhysicsTypes_H
 #define solidThermoPhysicsTypes_H
 
-#include "incompressible.H"
+#include "rhoConst.H"
 
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
@@ -59,7 +59,7 @@ namespace Foam
                 <
                     hConstThermo
                     <
-                        incompressible
+                        rhoConst
                     >,
                     sensibleEnthalpy
                 >
@@ -76,7 +76,7 @@ namespace Foam
                 <
                     hExponentialThermo
                     <
-                        incompressible
+                        rhoConst
                     >,
                     sensibleEnthalpy
                 >

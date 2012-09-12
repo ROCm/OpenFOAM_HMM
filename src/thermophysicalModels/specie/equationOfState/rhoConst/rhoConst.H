@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible
+    Foam::rhoConst
 
 Description
-    Incompressible gas/liquid equation of state.
+    RhoConst (rho = const) of state.
 
 SourceFiles
-    incompressibleI.H
-    incompressible.C
+    rhoConstI.H
+    rhoConst.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef incompressible_H
-#define incompressible_H
+#ifndef rhoConst_H
+#define rhoConst_H
 
 #include "specie.H"
 #include "autoPtr.H"
@@ -45,10 +45,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class incompressible Declaration
+                        Class rhoConst Declaration
 \*---------------------------------------------------------------------------*/
 
-class incompressible
+class rhoConst
 :
     public specie
 {
@@ -63,27 +63,33 @@ public:
     // Constructors
 
         //- Construct from components
-        inline incompressible(const specie& sp, const scalar rho);
+        inline rhoConst(const specie& sp, const scalar rho);
 
         //- Construct from Istream
-        incompressible(Istream&);
+        rhoConst(Istream&);
 
         //- Construct from dictionary
-        incompressible(const dictionary& dict);
+        rhoConst(const dictionary& dict);
 
         //- Construct as named copy
-        inline incompressible(const word& name, const incompressible&);
+        inline rhoConst(const word& name, const rhoConst&);
 
         //- Construct and return a clone
-        inline autoPtr<incompressible> clone() const;
+        inline autoPtr<rhoConst> clone() const;
 
         // Selector from Istream
-        inline static autoPtr<incompressible> New(Istream& is);
+        inline static autoPtr<rhoConst> New(Istream& is);
 
 
     // Member functions
 
         // Fundamental properties
+
+            //- Is the equation of state is incompressible i.e. rho != f(p)
+            static const bool incompressible = false;
+
+            //- Is the equation of state is isochoric i.e. rho = const
+            static const bool isochoric = true;
 
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
@@ -94,8 +100,11 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
+            //- Return (cp - cv) [J/(kmol K]
+            inline scalar cpMcv(scalar p, scalar T) const;
 
-        // I-O
+
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
@@ -103,42 +112,42 @@ public:
 
     // Member operators
 
-        inline void operator+=(const incompressible&);
-        inline void operator-=(const incompressible&);
+        inline void operator+=(const rhoConst&);
+        inline void operator-=(const rhoConst&);
 
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        inline friend incompressible operator+
+        inline friend rhoConst operator+
         (
-            const incompressible&,
-            const incompressible&
+            const rhoConst&,
+            const rhoConst&
         );
 
-        inline friend incompressible operator-
+        inline friend rhoConst operator-
         (
-            const incompressible&,
-            const incompressible&
+            const rhoConst&,
+            const rhoConst&
         );
 
-        inline friend incompressible operator*
+        inline friend rhoConst operator*
         (
             const scalar s,
-            const incompressible&
+            const rhoConst&
         );
 
-        inline friend incompressible operator==
+        inline friend rhoConst operator==
         (
-            const incompressible&,
-            const incompressible&
+            const rhoConst&,
+            const rhoConst&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const incompressible&);
+        friend Ostream& operator<<(Ostream&, const rhoConst&);
 };
 
 
@@ -148,7 +157,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "incompressibleI.H"
+#include "rhoConstI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

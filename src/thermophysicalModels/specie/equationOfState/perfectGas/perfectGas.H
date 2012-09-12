@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,12 @@ public:
 
         // Fundamental properties
 
+            //- Is the equation of state is incompressible i.e. rho != f(p)
+            static const bool incompressible = false;
+
+            //- Is the equation of state is isochoric i.e. rho = const
+            static const bool isochoric = false;
+
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
 
@@ -92,8 +98,11 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
+            //- Return (cp - cv) [J/(kmol K]
+            inline scalar cpMcv(scalar p, scalar T) const;
 
-        // I-O
+
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;

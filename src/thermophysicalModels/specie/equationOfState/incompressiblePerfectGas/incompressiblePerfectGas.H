@@ -22,20 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isobaricPerfectGas
+    Foam::incompressiblePerfectGas
 
 Description
-    Perfect gas equation of state using a reference pressure
-    rather than the local pressure.
+    Incompressible gas equation of state using a constant reference pressure in
+    the perfect gas equation of state rather than the local pressure so that the
+    density only varies with temperature and composition.
 
 SourceFiles
-    isobaricPerfectGasI.H
-    isobaricPerfectGas.C
+    incompressiblePerfectGasI.H
+    incompressiblePerfectGas.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isobaricPerfectGas_H
-#define isobaricPerfectGas_H
+#ifndef incompressiblePerfectGas_H
+#define incompressiblePerfectGas_H
 
 #include "specie.H"
 #include "autoPtr.H"
@@ -46,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class isobaricPerfectGas Declaration
+                    Class incompressiblePerfectGas Declaration
 \*---------------------------------------------------------------------------*/
 
-class isobaricPerfectGas
+class incompressiblePerfectGas
 :
     public specie
 {
@@ -64,30 +65,43 @@ public:
     // Constructors
 
         //- Construct from components
-        inline isobaricPerfectGas(const specie& sp);
+        inline incompressiblePerfectGas(const specie& sp);
 
         //- Construct from Istream
-        isobaricPerfectGas(Istream&);
+        incompressiblePerfectGas(Istream&);
 
         //- Construct from dictionary
-        isobaricPerfectGas(const dictionary& dict);
+        incompressiblePerfectGas(const dictionary& dict);
 
         //- Construct as named copy
-        inline isobaricPerfectGas(const word& name, const isobaricPerfectGas&);
+        inline incompressiblePerfectGas
+        (
+            const word& name,
+            const incompressiblePerfectGas&
+        );
 
         //- Construct and return a clone
-        inline autoPtr<isobaricPerfectGas> clone() const;
+        inline autoPtr<incompressiblePerfectGas> clone() const;
 
         // Selector from Istream
-        inline static autoPtr<isobaricPerfectGas> New(Istream& is);
+        inline static autoPtr<incompressiblePerfectGas> New(Istream& is);
 
         // Selector from dictionary
-        inline static autoPtr<isobaricPerfectGas> New(const dictionary& dict);
+        inline static autoPtr<incompressiblePerfectGas> New
+        (
+            const dictionary& dict
+        );
 
 
     // Member functions
 
         // Fundamental properties
+
+            //- Is the equation of state is incompressible i.e. rho != f(p)
+            static const bool incompressible = true;
+
+            //- Is the equation of state is isochoric i.e. rho = const
+            static const bool isochoric = false;
 
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
@@ -98,8 +112,11 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
+            //- Return (cp - cv) [J/(kmol K]
+            inline scalar cpMcv(scalar p, scalar T) const;
 
-        // I-O
+
+        // IO
 
             //- Write to Ostream
             void write(Ostream& os) const;
@@ -107,42 +124,42 @@ public:
 
     // Member operators
 
-        inline void operator+=(const isobaricPerfectGas&);
-        inline void operator-=(const isobaricPerfectGas&);
+        inline void operator+=(const incompressiblePerfectGas&);
+        inline void operator-=(const incompressiblePerfectGas&);
 
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        inline friend isobaricPerfectGas operator+
+        inline friend incompressiblePerfectGas operator+
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
-        inline friend isobaricPerfectGas operator-
+        inline friend incompressiblePerfectGas operator-
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
-        inline friend isobaricPerfectGas operator*
+        inline friend incompressiblePerfectGas operator*
         (
             const scalar s,
-            const isobaricPerfectGas&
+            const incompressiblePerfectGas&
         );
 
-        inline friend isobaricPerfectGas operator==
+        inline friend incompressiblePerfectGas operator==
         (
-            const isobaricPerfectGas&,
-            const isobaricPerfectGas&
+            const incompressiblePerfectGas&,
+            const incompressiblePerfectGas&
         );
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const isobaricPerfectGas&);
+        friend Ostream& operator<<(Ostream&, const incompressiblePerfectGas&);
 };
 
 
@@ -152,7 +169,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "isobaricPerfectGasI.H"
+#include "incompressiblePerfectGasI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

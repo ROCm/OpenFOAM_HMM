@@ -26,7 +26,7 @@ License
 
 #include "makeSolidThermo.H"
 
-#include "incompressible.H"
+#include "rhoConst.H"
 
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
@@ -67,7 +67,7 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeSolidThermo
@@ -79,7 +79,7 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeSolidThermo
@@ -91,7 +91,7 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hExponentialThermo,
-    incompressible
+    rhoConst
 );
 
 makeSolidThermo
@@ -103,7 +103,7 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeSolidThermo
@@ -115,7 +115,7 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 

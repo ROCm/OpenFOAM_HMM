@@ -27,8 +27,8 @@ License
 #include "makeThermo.H"
 
 #include "perfectGas.H"
-#include "isobaricPerfectGas.H"
-#include "incompressible.H"
+#include "incompressiblePerfectGas.H"
+#include "rhoConst.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
@@ -94,7 +94,7 @@ makeThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makePolyThermo
@@ -123,7 +123,7 @@ makeThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeThermo
@@ -134,7 +134,7 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeThermo
@@ -145,7 +145,7 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 
@@ -192,7 +192,7 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makePolyThermo
@@ -221,7 +221,7 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeThermo
@@ -232,7 +232,7 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeThermo
@@ -243,7 +243,7 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 

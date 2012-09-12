@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "incompressible.H"
+#include "rhoConst.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline Foam::incompressible::incompressible
+inline Foam::rhoConst::rhoConst
 (
     const specie& sp,
     const scalar rho
@@ -40,42 +40,52 @@ inline Foam::incompressible::incompressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::incompressible::incompressible
+inline Foam::rhoConst::rhoConst
 (
     const word& name,
-    const incompressible& ico
+    const rhoConst& ico
 )
 :
     specie(name, ico),
     rho_(ico.rho_)
 {}
 
-inline Foam::autoPtr<Foam::incompressible>
-Foam::incompressible::clone() const
+
+inline Foam::autoPtr<Foam::rhoConst>
+Foam::rhoConst::clone() const
 {
-    return autoPtr<incompressible>(new incompressible(*this));
+    return autoPtr<rhoConst>(new rhoConst(*this));
 }
 
-inline Foam::autoPtr<Foam::incompressible>
-Foam::incompressible::New(Istream& is)
+
+inline Foam::autoPtr<Foam::rhoConst>
+Foam::rhoConst::New(Istream& is)
 {
-    return autoPtr<incompressible>(new incompressible(is));
+    return autoPtr<rhoConst>(new rhoConst(is));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::incompressible::rho(scalar p, scalar T) const
+inline Foam::scalar Foam::rhoConst::rho(scalar p, scalar T) const
 {
     return rho_;
 }
 
-inline Foam::scalar Foam::incompressible::psi(scalar, scalar T) const
+
+inline Foam::scalar Foam::rhoConst::psi(scalar, scalar T) const
 {
     return 0.0;
 }
 
-inline Foam::scalar Foam::incompressible::Z(scalar, scalar) const
+
+inline Foam::scalar Foam::rhoConst::Z(scalar, scalar) const
+{
+    return 0.0;
+}
+
+
+inline Foam::scalar Foam::rhoConst::cpMcv(scalar, scalar) const
 {
     return 0.0;
 }
@@ -83,7 +93,7 @@ inline Foam::scalar Foam::incompressible::Z(scalar, scalar) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::incompressible::operator+=(const incompressible& ico)
+inline void Foam::rhoConst::operator+=(const rhoConst& ico)
 {
     scalar molr1 = this->nMoles();
 
@@ -95,7 +105,8 @@ inline void Foam::incompressible::operator+=(const incompressible& ico)
     rho_ = molr1*rho_ + molr2*ico.rho_;
 }
 
-inline void Foam::incompressible::operator-=(const incompressible& ico)
+
+inline void Foam::rhoConst::operator-=(const rhoConst& ico)
 {
     scalar molr1 = this->nMoles();
 
@@ -107,7 +118,8 @@ inline void Foam::incompressible::operator-=(const incompressible& ico)
     rho_ = molr1*rho_ - molr2*ico.rho_;
 }
 
-inline void Foam::incompressible::operator*=(const scalar s)
+
+inline void Foam::rhoConst::operator*=(const scalar s)
 {
     specie::operator*=(s);
 }
@@ -115,17 +127,17 @@ inline void Foam::incompressible::operator*=(const scalar s)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline Foam::incompressible Foam::operator+
+inline Foam::rhoConst Foam::operator+
 (
-    const incompressible& ico1,
-    const incompressible& ico2
+    const rhoConst& ico1,
+    const rhoConst& ico2
 )
 {
     scalar nMoles = ico1.nMoles() + ico2.nMoles();
     scalar molr1 = ico1.nMoles()/nMoles;
     scalar molr2 = ico2.nMoles()/nMoles;
 
-    return incompressible
+    return rhoConst
     (
         static_cast<const specie&>(ico1)
       + static_cast<const specie&>(ico2),
@@ -133,17 +145,18 @@ inline Foam::incompressible Foam::operator+
     );
 }
 
-inline Foam::incompressible Foam::operator-
+
+inline Foam::rhoConst Foam::operator-
 (
-    const incompressible& ico1,
-    const incompressible& ico2
+    const rhoConst& ico1,
+    const rhoConst& ico2
 )
 {
     scalar nMoles = ico1.nMoles() + ico2.nMoles();
     scalar molr1 = ico1.nMoles()/nMoles;
     scalar molr2 = ico2.nMoles()/nMoles;
 
-    return incompressible
+    return rhoConst
     (
         static_cast<const specie&>(ico1)
       - static_cast<const specie&>(ico2),
@@ -151,19 +164,21 @@ inline Foam::incompressible Foam::operator-
     );
 }
 
-inline Foam::incompressible Foam::operator*
+
+inline Foam::rhoConst Foam::operator*
 (
     const scalar s,
-    const incompressible& ico
+    const rhoConst& ico
 )
 {
-    return incompressible(s*static_cast<const specie&>(ico), ico.rho_);
+    return rhoConst(s*static_cast<const specie&>(ico), ico.rho_);
 }
 
-inline Foam::incompressible Foam::operator==
+
+inline Foam::rhoConst Foam::operator==
 (
-    const incompressible& ico1,
-    const incompressible& ico2
+    const rhoConst& ico1,
+    const rhoConst& ico2
 )
 {
     return ico2 - ico1;
