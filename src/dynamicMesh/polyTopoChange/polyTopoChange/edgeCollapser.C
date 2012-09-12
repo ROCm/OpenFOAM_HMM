@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -499,7 +499,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
 
                         if (nFaces < 4)
                         {
-                            Info<< "Cell:" << cellI
+                            Pout<< "Cell:" << cellI
                                 << " uses faces:" << cFaces
                                 << " of which too many are marked for removal:"
                                 << endl
@@ -508,10 +508,10 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                             {
                                 if (newFaces[cFaces[j]].size() < 3)
                                 {
-                                    Info<< ' '<< cFaces[j];
+                                    Pout<< ' '<< cFaces[j];
                                 }
                             }
-                            Info<< endl;
+                            Pout<< endl;
 
                             cellRemoved[cellI] = true;
 
