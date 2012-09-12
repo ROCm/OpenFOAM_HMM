@@ -115,6 +115,20 @@ public:
             return *this;
         }
 
+        //- Return true if the equation of state is incompressible
+        //  i.e. rho != f(p)
+        virtual bool incompressible() const
+        {
+            return MixtureType::thermoType::incompressible;
+        }
+
+        //- Return true if the equation of state is isochoric
+        //  i.e. rho = const
+        virtual bool isochoric() const
+        {
+            return MixtureType::thermoType::isochoric;
+        }
+
 
         // Access to thermodynamic state variables
 

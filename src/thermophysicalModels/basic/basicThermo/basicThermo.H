@@ -112,6 +112,14 @@ public:
         //- Update properties
         virtual void correct() = 0;
 
+        //- Return true if the equation of state is incompressible
+        //  i.e. rho != f(p)
+        virtual bool incompressible() const = 0;
+
+        //- Return true if the equation of state is isochoric
+        //  i.e. rho = const
+        virtual bool isochoric() const = 0;
+
 
         // Access to thermodynamic state variables
 

@@ -85,12 +85,10 @@ public:
 
         // Fundamental properties
 
-            //- Return true if the equation of state is rhoConst
-            //  i.e. rho != f(p)
+            //- Is the equation of state is incompressible i.e. rho != f(p)
             static const bool incompressible = false;
 
-            //- Return true if the equation of state is isochoric
-            //  i.e. rho = const
+            //- Is the equation of state is isochoric i.e. rho = const
             static const bool isochoric = true;
 
             //- Return density [kg/m^3]
