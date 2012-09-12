@@ -10,6 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volVectorField;
+    location    "0";
     object      U;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -24,11 +25,11 @@ boundaryField
     {
         type            zeroGradient;
     }
-
     empty
     {
         type            empty;
     }
 }
+
 
 // ************************************************************************* //

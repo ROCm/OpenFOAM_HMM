@@ -29,25 +29,17 @@ divSchemes
 {
     default         none;
     div(phi,U)      Gauss limitedLinearV 1;
+    div(phi,e)      Gauss limitedLinear 1;
+    div(phi,Ekp)    Gauss limitedLinear 1;
+    div(phid,p)     Gauss limitedLinear 1;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
-    div(phi,R)      Gauss upwind;
-    div(R)          Gauss linear;
-    div(phid,p)     Gauss limitedLinear 1;
-    div(phi,K)      Gauss limitedLinear 1;
-    div(phi,e)      Gauss limitedLinear 1;
     div((muEff*dev2(T(grad(U))))) Gauss linear;
 }
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear corrected;
-    laplacian(DREff,R) Gauss linear corrected;
-    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
-    laplacian(Dp,p) Gauss linear corrected;
-    laplacian(alphaEff,e) Gauss linear corrected;
+    default         Gauss linear corrected;
 }
 
 interpolationSchemes

@@ -86,7 +86,7 @@ public:
         // Fundamental properties
 
             //- Is the equation of state is incompressible i.e. rho != f(p)
-            static const bool incompressible = false;
+            static const bool incompressible = true;
 
             //- Is the equation of state is isochoric i.e. rho = const
             static const bool isochoric = true;
