@@ -39,3 +39,4 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+K = 0.5*magSqr(U);
