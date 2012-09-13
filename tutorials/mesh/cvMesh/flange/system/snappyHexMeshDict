@@ -278,12 +278,12 @@ addLayersControls
 
 
 
-// Generic mesh quality settings. At any undoable phase these determine
-// where to undo.
-#include "meshQualityControls"
-
 meshQualityControls
 {
+    // Generic mesh quality settings. At any undoable phase these determine
+    // where to undo.
+    #include "meshQualityDict"
+
     //- Number of error distribution iterations
     nSmoothScale 4;
     //- amount to scale back displacement at error points
