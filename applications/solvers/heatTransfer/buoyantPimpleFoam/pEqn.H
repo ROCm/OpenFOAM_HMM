@@ -61,7 +61,10 @@
     // Second part of thermodynamic density update
     thermo.rho() += psi*p_rgh;
 
-    dpdt = fvc::ddt(p);
+    if (thermo.dpdt())
+    {
+        dpdt = fvc::ddt(p);
+    }
 
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"

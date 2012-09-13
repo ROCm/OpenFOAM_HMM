@@ -180,5 +180,8 @@
     K1 = 0.5*magSqr(U1);
     K2 = 0.5*magSqr(U2);
 
-    dpdt = fvc::ddt(p);
+    //***HGW if (thermo.dpdt())
+    {
+        dpdt = fvc::ddt(p);
+    }
 }

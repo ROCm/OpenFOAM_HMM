@@ -89,9 +89,10 @@ Foam::basicThermo::basicThermo(const fvMesh& mesh)
         ),
         mesh,
         dimensionSet(1, -1, -1, 0, 0)
-    )
-{}
+    ),
 
+    dpdt_(lookupOrDefault<Switch>("dpdt", true))
+{}
 
 
 Foam::basicThermo::basicThermo

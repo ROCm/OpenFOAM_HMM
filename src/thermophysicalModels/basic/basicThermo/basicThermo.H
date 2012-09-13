@@ -70,6 +70,8 @@ protected:
             //- Laminar thermal diffusuvity [kg/m/s]
             volScalarField alpha_;
 
+        //- Should the dpdt term be included in the enthalpy equation
+        Switch dpdt_;
 
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
@@ -119,6 +121,12 @@ public:
         //- Return true if the equation of state is isochoric
         //  i.e. rho = const
         virtual bool isochoric() const = 0;
+
+        //- Should the dpdt term be included in the enthalpy equation
+        Switch dpdt() const
+        {
+            return dpdt_;
+        }
 
 
         // Access to thermodynamic state variables
