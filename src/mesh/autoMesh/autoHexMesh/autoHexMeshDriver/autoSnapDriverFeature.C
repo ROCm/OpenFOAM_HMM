@@ -2565,6 +2565,76 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         }
     }
 
+
+    // Collect additionally 'normal' boundary faces for boundaryPoints of pp
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // points on the boundary of pp should pick up non-pp normals
+    // as well for the feature-reconstruction to behave correctly.
+    // (the movement is already constrained outside correctly so it
+    //  is only that the unconstrained attraction vector is calculated
+    //  correctly)
+    {
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+        labelList patchID(pbm.patchID());
+
+        // Unmark all non-coupled boundary faces
+        forAll(pbm, patchI)
+        {
+            const polyPatch& pp = pbm[patchI];
+
+            if (pp.coupled() || isA<emptyPolyPatch>(pp))
+            {
+                forAll(pp, i)
+                {
+                    label meshFaceI = pp.start()+i;
+                    patchID[meshFaceI-mesh.nInternalFaces()] = -1;
+                }
+            }
+        }
+
+        // Remove any meshed faces
+        PackedBoolList ppFaces(mesh.nFaces());
+        forAll(pp.addressing(), i)
+        {
+            label meshFaceI = pp.addressing()[i];
+            patchID[meshFaceI-mesh.nInternalFaces()] = -1;
+        }
+
+        // See if pp point uses any non-meshed boundary faces
+
+        const labelList& boundaryPoints = pp.boundaryPoints();
+        forAll(boundaryPoints, i)
+        {
+            label pointI = boundaryPoints[i];
+            label meshPointI = pp.meshPoints()[pointI];
+            const point& pt = mesh.points()[meshPointI];
+            const labelList& pFaces = mesh.pointFaces()[meshPointI];
+
+            List<point>& pNormals = pointFaceSurfNormals[pointI];
+            List<point>& pDisp = pointFaceDisp[pointI];
+            List<point>& pFc = pointFaceCentres[pointI];
+            labelList& pFid = pointFacePatchID[pointI];
+
+            forAll(pFaces, i)
+            {
+                label meshFaceI = pFaces[i];
+                if (!mesh.isInternalFace(meshFaceI))
+                {
+                    label patchI = patchID[meshFaceI-mesh.nInternalFaces()];
+
+                    if (patchI != -1)
+                    {
+                        vector fn = mesh.faceAreas()[meshFaceI];
+                        pNormals.append(fn/mag(fn));
+                        pDisp.append(mesh.faceCentres()[meshFaceI]-pt);
+                        pFc.append(mesh.faceCentres()[meshFaceI]);
+                        pFid.append(patchI);
+                    }
+                }
+            }
+        }
+    }
+
     syncTools::syncPointList
     (
         mesh,
