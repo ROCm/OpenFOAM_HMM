@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,6 @@ uniformTotalPressureFvPatchScalarField
     rhoName_("none"),
     psiName_("none"),
     gamma_(0.0),
-    p0_(0.0),
     pressure_()
 {}
 
@@ -63,7 +62,6 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(dict.lookupOrDefault<word>("rho", "none")),
     psiName_(dict.lookupOrDefault<word>("psi", "none")),
     gamma_(readScalar(dict.lookup("gamma"))),
-    p0_(readScalar(dict.lookup("p0"))),
     pressure_(DataEntry<scalar>::New("pressure", dict))
 {
     if (dict.found("value"))
@@ -75,7 +73,8 @@ uniformTotalPressureFvPatchScalarField
     }
     else
     {
-        fvPatchField<scalar>::operator=(p0_);
+        scalar p0 = pressure_->value(this->db().time().timeOutputValue());
+        fvPatchField<scalar>::operator=(p0);
     }
 }
 
@@ -95,7 +94,6 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_),
     pressure_(ptf.pressure_().clone().ptr())
 {}
 
@@ -112,7 +110,6 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(tppsf.rhoName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
-    p0_(tppsf.p0_),
     pressure_(tppsf.pressure_().clone().ptr())
 {}
 
@@ -130,7 +127,6 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(tppsf.rhoName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
-    p0_(tppsf.p0_),
     pressure_(tppsf.pressure_().clone().ptr())
 {}
 
@@ -147,14 +143,14 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    p0_ = pressure_->value(this->db().time().timeOutputValue());
+    scalar p0 = pressure_->value(this->db().time().timeOutputValue());
 
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
     if (psiName_ == "none" && rhoName_ == "none")
     {
-        operator==(p0_ - 0.5*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0 - 0.5*(1.0 - pos(phip))*magSqr(Up));
     }
     else if (rhoName_ == "none")
     {
@@ -167,7 +163,7 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
 
             operator==
             (
-                p0_
+                p0
                /pow
                 (
                     (1.0 + 0.5*psip*gM1ByG*(1.0 - pos(phip))*magSqr(Up)),
@@ -177,7 +173,7 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
         }
         else
         {
-            operator==(p0_/(1.0 + 0.5*psip*(1.0 - pos(phip))*magSqr(Up)));
+            operator==(p0/(1.0 + 0.5*psip*(1.0 - pos(phip))*magSqr(Up)));
         }
     }
     else if (psiName_ == "none")
@@ -185,7 +181,7 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs
         const fvPatchField<scalar>& rho =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        operator==(p0_ - 0.5*rho*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0 - 0.5*rho*(1.0 - pos(phip))*magSqr(Up));
     }
     else
     {
@@ -219,7 +215,6 @@ void Foam::uniformTotalPressureFvPatchScalarField::write(Ostream& os) const
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
-    os.writeKeyword("p0") << p0_ << token::END_STATEMENT << nl;
     pressure_->writeData(os);
     writeEntry("value", os);
 }
