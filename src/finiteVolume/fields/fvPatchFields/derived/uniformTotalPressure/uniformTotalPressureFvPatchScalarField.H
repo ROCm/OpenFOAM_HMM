@@ -40,7 +40,6 @@ Description
         rho          | density field name      | no          | none
         psi          | compressibility field name | no       | none
         gamma        | ratio of specific heats (Cp/Cv) | yes |
-        p0           | static pressure reference | yes       |
         pressure     | total pressure as a function of time | yes |
     \endtable
 
@@ -54,8 +53,7 @@ Description
         rho             rho;
         psi             psi;
         gamma           1.4;
-        p0              uniform 1e5;
-        pressure        uniform 0.0;
+        pressure        uniform 1e5;
     }
     \endverbatim
 
