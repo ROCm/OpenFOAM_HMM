@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -360,84 +360,48 @@ void Foam::shellSurfaces::findHigherLevel
 Foam::shellSurfaces::shellSurfaces
 (
     const searchableSurfaces& allGeometry,
-    const PtrList<dictionary>& shellDicts
-)
-:
-    allGeometry_(allGeometry)
-{
-    shells_.setSize(shellDicts.size());
-    modes_.setSize(shellDicts.size());
-    distances_.setSize(shellDicts.size());
-    levels_.setSize(shellDicts.size());
-
-    forAll(shellDicts, shellI)
-    {
-        const dictionary& dict = shellDicts[shellI];
-        const word name = dict.lookup("name");
-        const word type = dict.lookup("type");
-
-        shells_[shellI] = allGeometry_.findSurfaceID(name);
-
-        if (shells_[shellI] == -1)
-        {
-            FatalErrorIn
-            (
-                "shellSurfaces::shellSurfaces"
-                "(const searchableSurfaces&, const PtrList<dictionary>&)"
-            )   << "No surface called " << name << endl
-                << "Valid surfaces are " << allGeometry_.names()
-                << exit(FatalError);
-        }
-
-        modes_[shellI] = refineModeNames_.read(dict.lookup("refineMode"));
-
-        // Read pairs of distance+level
-        setAndCheckLevels(shellI, dict.lookup("levels"));
-    }
-
-    // Orient shell surfaces before any searching is done. Note that this
-    // only needs to be done for inside or outside. Orienting surfaces
-    // constructs lots of addressing which we want to avoid.
-    orient();
-}
-
-
-Foam::shellSurfaces::shellSurfaces
-(
-    const searchableSurfaces& allGeometry,
     const dictionary& shellsDict
 )
 :
     allGeometry_(allGeometry)
 {
-    shells_.setSize(shellsDict.size());
-    modes_.setSize(shellsDict.size());
-    distances_.setSize(shellsDict.size());
-    levels_.setSize(shellsDict.size());
+    // Wilcard specification : loop over all surfaces and try to find a match.
 
+    // Count number of shells.
     label shellI = 0;
-    forAllConstIter(dictionary, shellsDict, iter)
+    forAll(allGeometry.names(), geomI)
     {
-        shells_[shellI] = allGeometry_.findSurfaceID(iter().keyword());
+        const word& geomName = allGeometry_.names()[geomI];
 
-        if (shells_[shellI] == -1)
+        if (shellsDict.found(geomName))
         {
-            FatalErrorIn
-            (
-                "shellSurfaces::shellSurfaces"
-                "(const searchableSurfaces&, const dictionary>&"
-            )   << "No surface called " << iter().keyword() << endl
-                << "Valid surfaces are " << allGeometry_.names()
-                << exit(FatalError);
+            shellI++;
         }
-        const dictionary& dict = shellsDict.subDict(iter().keyword());
+    }
 
-        modes_[shellI] = refineModeNames_.read(dict.lookup("mode"));
 
-        // Read pairs of distance+level
-        setAndCheckLevels(shellI, dict.lookup("levels"));
+    // Size lists
+    shells_.setSize(shellI);
+    modes_.setSize(shellI);
+    distances_.setSize(shellI);
+    levels_.setSize(shellI);
 
-        shellI++;
+    shellI = 0;
+    forAll(allGeometry.names(), geomI)
+    {
+        const word& geomName = allGeometry_.names()[geomI];
+
+        if (shellsDict.found(geomName))
+        {
+            shells_[shellI] = geomI;
+            const dictionary& dict = shellsDict.subDict(geomName);
+            modes_[shellI] = refineModeNames_.read(dict.lookup("mode"));
+
+            // Read pairs of distance+level
+            setAndCheckLevels(shellI, dict.lookup("levels"));
+
+            shellI++;
+        }
     }
 
     // Orient shell surfaces before any searching is done. Note that this

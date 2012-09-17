@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,8 @@ SourceFiles
 #ifndef velocityLaplacianFvMotionSolver_H
 #define velocityLaplacianFvMotionSolver_H
 
-#include "fvMotionSolver.H"
+#include "velocityMotionSolver.H"
+#include "fvMotionSolverCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,12 +53,10 @@ class motionDiffusivity;
 
 class velocityLaplacianFvMotionSolver
 :
-    public fvMotionSolver
+    public velocityMotionSolver,
+    public fvMotionSolverCore
 {
     // Private data
-
-        //- Point motion field
-        mutable pointVectorField pointMotionU_;
 
         //- Cell-centre motion field
         mutable volVectorField cellMotionU_;
@@ -86,11 +85,11 @@ public:
 
     // Constructors
 
-        //- Construct from polyMesh and data stream
+        //- Construct from polyMesh and IOdictionary
         velocityLaplacianFvMotionSolver
         (
             const polyMesh&,
-            Istream& msDataUnused
+            const IOdictionary&
         );
 
 
@@ -99,18 +98,6 @@ public:
 
 
     // Member Functions
-
-        //- Return reference to the point motion velocity field
-        pointVectorField& pointMotionU()
-        {
-            return pointMotionU_;
-        }
-
-        //- Return const reference to the point motion velocity field
-        const pointVectorField& pointMotionU() const
-        {
-            return pointMotionU_;
-        }
 
         //- Return reference to the cell motion velocity field
         volVectorField& cellMotionU()

@@ -85,7 +85,11 @@ motionSmoother/motionSmoother.C
 motionSmoother/motionSmootherCheck.C
 motionSmoother/polyMeshGeometry/polyMeshGeometry.C
 
-motionSolver/motionSolver.C
+motionSolver/motionSolver/motionSolver.C
+motionSolver/displacement/displacementMotionSolver.C
+motionSolver/componentDisplacement/componentDisplacementMotionSolver.C
+motionSolver/velocity/velocityMotionSolver.C
+motionSolver/componentVelocity/componentVelocityMotionSolver.C
 
 createShellMesh/createShellMesh.C
 

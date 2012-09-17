@@ -55,14 +55,14 @@ namespace Foam
     {
         FaceCellWave<Type, TrackingData>& solver_;
 
-        const polyPatch& patch_;
+        const cyclicAMIPolyPatch& patch_;
 
         public:
 
             combine
             (
                 FaceCellWave<Type, TrackingData>& solver,
-                const polyPatch& patch
+                const cyclicAMIPolyPatch& patch
             )
             :
                 solver_(solver),
@@ -80,10 +80,19 @@ namespace Foam
             {
                 if (y.valid(solver_.data()))
                 {
+                    label meshFaceI = -1;
+                    if (patch_.owner())
+                    {
+                        meshFaceI = patch_.start() + faceI;
+                    }
+                    else
+                    {
+                        meshFaceI = patch_.neighbPatch().start() + faceI;
+                    }
                     x.updateFace
                     (
                         solver_.mesh(),
-                        patch_.start() + faceI,
+                        meshFaceI,
                         y,
                         solver_.propagationTol(),
                         solver_.data()
@@ -725,17 +734,18 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
                     )
                 );
 
-                // Adapt sendInfo for leaving domain
-                const vectorField::subField fc = nbrPatch.faceCentres();
-                forAll(sendInfo, i)
+                if (!nbrPatch.parallel() || nbrPatch.separated())
                 {
-                    sendInfo[i].leaveDomain(mesh_, nbrPatch, i, fc[i], td_);
+                    // Adapt sendInfo for leaving domain
+                    const vectorField::subField fc = nbrPatch.faceCentres();
+                    forAll(sendInfo, i)
+                    {
+                        sendInfo[i].leaveDomain(mesh_, nbrPatch, i, fc[i], td_);
+                    }
                 }
-
 
                 // Transfer sendInfo to cycPatch
                 combine<Type, TrackingData> cmb(*this, cycPatch);
-
                 cycPatch.interpolate(sendInfo, cmb, receiveInfo);
             }
 
@@ -750,11 +760,14 @@ void Foam::FaceCellWave<Type, TrackingData>::handleAMICyclicPatches()
                 );
             }
 
-            // Adapt receiveInfo for entering domain
-            const vectorField::subField fc = cycPatch.faceCentres();
-            forAll(receiveInfo, i)
+            if (!cycPatch.parallel() || cycPatch.separated())
             {
-                receiveInfo[i].enterDomain(mesh_, cycPatch, i, fc[i], td_);
+                // Adapt receiveInfo for entering domain
+                const vectorField::subField fc = cycPatch.faceCentres();
+                forAll(receiveInfo, i)
+                {
+                    receiveInfo[i].enterDomain(mesh_, cycPatch, i, fc[i], td_);
+                }
             }
 
             // Merge into global storage

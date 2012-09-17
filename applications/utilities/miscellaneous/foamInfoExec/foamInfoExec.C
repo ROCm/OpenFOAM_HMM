@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,41 +94,59 @@ int main(int argc, char *argv[])
 
             if (args.optionFound("entry"))
             {
-                wordList entryNames
-                (
-                    fileName(args.option("entry")).components(':')
-                );
+                fileName entryName(args.option("entry"));
 
-                if (dict.found(entryNames[0]))
+                const entry* entPtr = NULL;
+
+                if (entryName.find('.') != string::npos)
                 {
-                    const entry* entPtr = &dict.lookupEntry
+                    // New syntax
+                    entPtr = dict.lookupScopedEntryPtr
                     (
-                        entryNames[0],
+                        entryName,
                         false,
                         true            // wildcards
                     );
-
-                    for (int i=1; i<entryNames.size(); ++i)
+                }
+                else
+                {
+                    // Old syntax
+                    wordList entryNames(entryName.components(':'));
+                    if (dict.found(entryNames[0]))
                     {
-                        if (entPtr->dict().found(entryNames[i]))
+                        entPtr = &dict.lookupEntry
+                        (
+                            entryNames[0],
+                            false,
+                            true            // wildcards
+                        );
+
+                        for (int i=1; i<entryNames.size(); ++i)
                         {
-                            entPtr = &entPtr->dict().lookupEntry
-                            (
-                                entryNames[i],
-                                false,
-                                true    // wildcards
-                            );
-                        }
-                        else
-                        {
-                            FatalErrorIn(args.executable())
-                                << "Cannot find sub-entry " << entryNames[i]
-                                << " in entry " << args["entry"]
-                                << " in dictionary " << dictFileName;
-                            FatalError.exit(3);
+                            if (entPtr->dict().found(entryNames[i]))
+                            {
+                                entPtr = &entPtr->dict().lookupEntry
+                                (
+                                    entryNames[i],
+                                    false,
+                                    true    // wildcards
+                                );
+                            }
+                            else
+                            {
+                                FatalErrorIn(args.executable())
+                                    << "Cannot find sub-entry " << entryNames[i]
+                                    << " in entry " << args["entry"]
+                                    << " in dictionary " << dictFileName;
+                                FatalError.exit(3);
+                            }
                         }
                     }
+                }
 
+
+                if (entPtr)
+                {
                     if (args.optionFound("keywords"))
                     {
                         /*
@@ -158,7 +176,7 @@ int main(int argc, char *argv[])
                 {
                     FatalErrorIn(args.executable())
                         << "Cannot find entry "
-                        << entryNames[0]
+                        << entryName
                         << " in dictionary " << dictFileName;
                     FatalError.exit(2);
                 }

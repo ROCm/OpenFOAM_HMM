@@ -203,7 +203,7 @@ void pyrolysisModel::preEvolveRegion()
 
 scalar pyrolysisModel::solidRegionDiffNo() const
 {
-    return VSMALL;
+    return -GREAT;
 }
 
 

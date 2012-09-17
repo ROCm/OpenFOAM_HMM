@@ -175,8 +175,19 @@
             i,
             new volScalarField
             (
-                "dpdt",
-                fvc::ddt(thermoFluid[i].p())
+                IOobject
+                (
+                    "dpdt",
+                    runTime.timeName(),
+                    fluidRegions[i]
+                ),
+                fluidRegions[i],
+                dimensionedScalar
+                (
+                    "dpdt",
+                    thermoFluid[i].p().dimensions()/dimTime,
+                    0
+                )
             )
         );
 
@@ -194,5 +205,3 @@
             new porousZones(fluidRegions[i])
         );
     }
-
-

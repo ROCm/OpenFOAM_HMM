@@ -95,7 +95,7 @@ dictionaryReplacement
 
                 // Coupled BC.
                 neighbourFieldName  T;
-                kappa               basicThermo;
+                kappa               fluidThermo;
                 kappaName           none;
 
 
@@ -110,7 +110,7 @@ dictionaryReplacement
 
 
                 // Solid thermo
-                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
+                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<rhoConst>,sensibleEnthalpy>>>>>;
 
 
                 mixture
@@ -135,7 +135,7 @@ dictionaryReplacement
                         Hf              0;
                         Cp              15;
                     }
-                    density
+                    equationOfState
                     {
                         rho             80;
                     }

@@ -36,7 +36,7 @@ SourceFiles
 #ifndef rhoThermo_H
 #define rhoThermo_H
 
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace Foam
 
 class rhoThermo
 :
-    public basicThermo
+    public fluidThermo
 {
 
 protected:
@@ -60,6 +60,12 @@ protected:
         //- Density field [kg/m^3]
         //  Named 'rhoThermo' to avoid (potential) conflict with solver density
         volScalarField rho_;
+
+        //- Compressibility [s^2/m^2]
+        volScalarField psi_;
+
+        //- Dynamic viscosity [kg/m/s]
+        volScalarField mu_;
 
 
     // Protected Member Functions
@@ -111,6 +117,15 @@ public:
 
             //- Return non-const access to the local density field [kg/m^3]
             virtual volScalarField& rho();
+
+            //- Compressibility [s^2/m^2]
+            virtual const volScalarField& psi() const;
+
+
+        // Access to transport state variables
+
+            //- Dynamic viscosity of mixture [kg/m/s]
+            virtual const volScalarField& mu() const;
 };
 
 

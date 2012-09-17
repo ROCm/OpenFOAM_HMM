@@ -29,7 +29,7 @@ License
 #include "heRhoReactionThermo.H"
 
 #include "perfectGas.H"
-#include "isobaricPerfectGas.H"
+#include "incompressiblePerfectGas.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
@@ -137,7 +137,7 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeReactionThermo
@@ -149,7 +149,7 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeReactionThermo
@@ -161,7 +161,7 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeReactionThermo
@@ -173,7 +173,7 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeReactionThermo
@@ -185,7 +185,7 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeReactionThermo
@@ -197,7 +197,7 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 
@@ -227,7 +227,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     multiComponentMixture,
-    constIsobaricGasThermoPhysics
+    constIncompressibleGasThermoPhysics
 );
 
 makeReactionMixtureThermo
@@ -236,7 +236,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     multiComponentMixture,
-    isobaricGasThermoPhysics
+    incompressibleGasThermoPhysics
 );
 
 makeReactionMixtureThermo
@@ -275,7 +275,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     reactingMixture,
-    constIsobaricGasThermoPhysics
+    constIncompressibleGasThermoPhysics
 );
 
 makeReactionMixtureThermo
@@ -284,7 +284,7 @@ makeReactionMixtureThermo
     rhoReactionThermo,
     heRhoReactionThermo,
     reactingMixture,
-    isobaricGasThermoPhysics
+    incompressibleGasThermoPhysics
 );
 
 makeReactionMixtureThermo

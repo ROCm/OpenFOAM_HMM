@@ -49,7 +49,7 @@ namespace Foam
 {
 
 class fvMesh;
-class basicThermo;
+class fluidThermo;
 
 /*---------------------------------------------------------------------------*\
                        Class thermalPorousZone Declaration
@@ -127,7 +127,7 @@ public:
         //- Add the thermal source to the enthalpy equation
         void addEnergySource
         (
-            const basicThermo&,
+            const fluidThermo&,
             const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;

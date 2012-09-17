@@ -74,8 +74,11 @@
 
     p = p_rgh + rho*gh;
 
-    // Update pressure time derivative
-    dpdt = fvc::ddt(p);
+    // Update pressure time derivative if needed
+    if (thermo.dpdt())
+    {
+        dpdt = fvc::ddt(p);
+    }
 
     // Solve continuity
     #include "rhoEqn.H"

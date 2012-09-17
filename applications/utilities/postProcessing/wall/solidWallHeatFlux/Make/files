@@ -1,3 +1,0 @@
-solidWallHeatFlux.C
-
-EXE = $(FOAM_APPBIN)/solidWallHeatFlux

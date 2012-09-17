@@ -142,7 +142,7 @@ void Foam::radiation::radiationModel::correct()
 
 Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
 (
-    basicThermo& thermo
+    fluidThermo& thermo
 ) const
 {
     volScalarField& he = thermo.he();

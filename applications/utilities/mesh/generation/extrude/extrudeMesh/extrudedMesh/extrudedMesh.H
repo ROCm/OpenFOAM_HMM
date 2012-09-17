@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ Description
 
 SourceFiles
     extrudedMesh.C
+    extrudedMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -114,12 +115,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "extrudedMesh.C"
-#else
-#   ifdef xlC
-#   pragma implementation("extrudedMesh.C")
-#   endif
+#   include "extrudedMeshTemplates.C"
 #endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

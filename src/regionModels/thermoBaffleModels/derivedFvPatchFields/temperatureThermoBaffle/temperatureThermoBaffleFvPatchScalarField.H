@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ Description
 
     // Coupled BC.
     neighbourFieldName  T;
-    kappa               basicThermo;
+    kappa               fluidThermo;
     KName               none;
 
 
@@ -62,7 +62,7 @@ Description
             <constIsoSolidTransport
                 <constSolidRad
                     <specieThermo
-                        <constSolidThermo<constRho>,sensibleEnthalpy>
+                        <hConstThermo<incompressible>,sensibleEnthalpy>
                     >
                  >
             >

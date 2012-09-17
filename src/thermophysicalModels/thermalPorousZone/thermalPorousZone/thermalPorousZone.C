@@ -24,7 +24,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "thermalPorousZone.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "volFields.H"
 #include "fvMatrices.H"
 
@@ -46,7 +46,7 @@ Foam::thermalPorousZone::thermalPorousZone
 
 void Foam::thermalPorousZone::addEnergySource
 (
-    const basicThermo& thermo,
+    const fluidThermo& thermo,
     const volScalarField& rho,
     fvScalarMatrix& hEqn
 ) const

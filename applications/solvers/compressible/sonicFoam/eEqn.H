@@ -5,7 +5,7 @@
       + fvm::div(phi, e)
       - fvm::laplacian(turbulence->alphaEff(), e)
      ==
-      - p*fvc::div(phi/fvc::interpolate(rho))
+      - (fvc::ddt(rho, K) + fvc::div(phi, volScalarField("Ekp", K + p/rho)))
     );
 
     thermo.correct();

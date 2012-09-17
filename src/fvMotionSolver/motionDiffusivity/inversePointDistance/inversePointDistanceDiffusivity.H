@@ -73,12 +73,8 @@ public:
 
     // Constructors
 
-        //- Construct for the given fvMotionSolver and data Istream
-        inversePointDistanceDiffusivity
-        (
-            const fvMotionSolver& mSolver,
-            Istream& mdData
-        );
+        //- Construct for the given fvMesh and data Istream
+        inversePointDistanceDiffusivity(const fvMesh& mesh, Istream& mdData);
 
 
     //- Destructor

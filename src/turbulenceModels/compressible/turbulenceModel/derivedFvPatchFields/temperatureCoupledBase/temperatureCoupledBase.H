@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,9 +31,9 @@ Description
         kappa:
 
     - 'lookup' : lookup volScalarField (or volSymmTensorField) with name
-    - 'basicThermo' : use basicThermo and default compressible::turbulenceModel
+    - 'fluidThermo' : use fluidThermo and default compressible::turbulenceModel
        to calculate kappa
-    - 'solidThermo' : use basicSolidThermo kappa()
+    - 'solidThermo' : use solidThermo kappa()
     - 'directionalSolidThermo' directionalKappa()
 
 SourceFiles

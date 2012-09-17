@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "Time.H"
 #include "transformField.H"
 #include "fvMesh.H"
-#include "displacementFvMotionSolver.H"
+#include "displacementMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,7 +94,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
     }
 
     // Get the starting locations from the motionSolver
-    const pointField& points0 = mesh.lookupObject<displacementFvMotionSolver>
+    const pointField& points0 = mesh.lookupObject<displacementMotionSolver>
     (
         "dynamicMeshDict"
     ).points0();

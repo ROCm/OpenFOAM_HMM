@@ -233,9 +233,17 @@ snapControls
     //  before upon reaching a correct mesh.
     nRelaxIter 5;
 
-    //- Highly experimental and wip: number of feature edge snapping
-    //  iterations. Leave out altogether to disable.
-    //nFeatureSnapIter 20;
+    // Feature snapping
+
+        //- Number of feature edge snapping iterations.
+        //  Leave out altogether to disable.
+        nFeatureSnapIter 10;
+
+        //- Detect (geometric) features by sampling the surface (default=false)
+        implicitFeatureSnap false;
+
+        //- Use castellatedMeshControls::features (default = true)
+        explicitFeatureSnap true;
 }
 
 // Settings for the layer addition.

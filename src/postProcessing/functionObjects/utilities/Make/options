@@ -22,4 +22,4 @@ LIB_LIBS = \
     -lincompressibleRASModels \
     -lcompressibleLESModels \
     -lincompressibleLESModels \
-    -lbasicThermophysicalModels
+    -lfluidThermophysicalModels

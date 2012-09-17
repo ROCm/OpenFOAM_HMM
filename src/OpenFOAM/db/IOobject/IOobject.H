@@ -276,6 +276,12 @@ public:
             }
 
             //- Register object created from this IOobject with registry if true
+            bool& registerObject()
+            {
+                return registerObject_;
+            }
+
+            //- Register object created from this IOobject with registry if true
             bool registerObject() const
             {
                 return registerObject_;

@@ -23,7 +23,7 @@ EXE_LIBS = \
     -lmeshTools \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lreactionThermophysicalModels \
     -lspecie \
     -llaminarFlameSpeedModels \

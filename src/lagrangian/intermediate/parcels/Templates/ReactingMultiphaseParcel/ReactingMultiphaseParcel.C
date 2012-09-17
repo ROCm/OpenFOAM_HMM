@@ -636,7 +636,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
        *(sum(dMassSRGas) + sum(dMassSRLiquid) + sum(dMassSRSolid))
     );
 
-    const scalar xsi = min(T/5000.0, 1.0);
+    const scalar xsi = min(T/td.cloud().constProps().TMax(), 1.0);
     const scalar coeff =
         (1.0 - xsi*xsi)*td.cloud().constProps().hRetentionCoeff();
 

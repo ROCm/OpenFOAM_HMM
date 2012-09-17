@@ -13,6 +13,6 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lfiniteVolume

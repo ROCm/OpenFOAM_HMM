@@ -17,6 +17,11 @@ FoamFile
 
 solvers
 {
+    rho
+    {
+        solver          diagonal;
+    }
+
     p
     {
         solver          PBiCG;
@@ -25,34 +30,23 @@ solvers
         relTol          0;
     }
 
-    rho
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
     "(U|e|R)"
     {
         $p;
         tolerance       1e-05;
-        relTol          0;
     }
 
     "(k|epsilon)"
     {
         $p;
         tolerance       1e-08;
-        relTol          0;
     }
-
 }
 
 PISO
 {
     nCorrectors     2;
-    nNonOrthogonalCorrectors 2;
+    nNonOrthogonalCorrectors 0;
 }
 
 

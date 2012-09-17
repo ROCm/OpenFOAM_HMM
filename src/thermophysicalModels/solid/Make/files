@@ -1,8 +1,0 @@
-rhoType/const/constRho.C
-
-reaction/Reactions/solidReaction/solidReaction.C
-
-reaction/reactions/makeSolidReactionThermoReactions.C
-
-
-LIB = $(FOAM_LIBBIN)/libsolid

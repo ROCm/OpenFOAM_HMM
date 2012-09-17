@@ -108,8 +108,8 @@ calculateHtc()
             "turbulenceModel"
         );
 
-    const basicThermo& secondaryThermo =
-        secondaryMesh.lookupObject<basicThermo>
+    const fluidThermo& secondaryThermo =
+        secondaryMesh.lookupObject<fluidThermo>
         (
             "thermophysicalProperties"
         );

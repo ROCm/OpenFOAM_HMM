@@ -50,7 +50,7 @@ boundaryField
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
         Tnbr            T;
-        kappa           basicThermo;
+        kappa           fluidThermo;
         QrNbr           none;
         Qr              Qr;
         kappaName       none;

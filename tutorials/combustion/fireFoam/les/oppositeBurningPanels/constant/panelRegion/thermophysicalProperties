@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heSolidThermo<reactingSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
+thermoType heSolidThermo<reactingSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<rhoConst>,sensibleEnthalpy>>>>>;
 
 solidComponents
 (
@@ -43,7 +43,7 @@ vCoeffs
         Cp          696;
         Hf          -1.41e6;
     }
-    density
+    equationOfState
     {
         rho         114.7;
     }
@@ -71,7 +71,7 @@ charCoeffs
         Cp          611;
         Hf          0;
     }
-    density
+    equationOfState
     {
         rho         11.5;
     }

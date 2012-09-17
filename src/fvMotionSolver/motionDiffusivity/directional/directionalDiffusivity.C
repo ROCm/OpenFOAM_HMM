@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,11 +45,11 @@ namespace Foam
 
 Foam::directionalDiffusivity::directionalDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    uniformDiffusivity(mSolver, mdData),
+    uniformDiffusivity(mesh, mdData),
     diffusivityVector_(mdData)
 {
     correct();
@@ -66,9 +66,7 @@ Foam::directionalDiffusivity::~directionalDiffusivity()
 
 void Foam::directionalDiffusivity::correct()
 {
-    const fvMesh& mesh = mSolver().mesh();
-
-    const surfaceVectorField n(mesh.Sf()/mesh.magSf());
+    const surfaceVectorField n(mesh().Sf()/mesh().magSf());
     faceDiffusivity_ == (n & cmptMultiply(diffusivityVector_, n));
 }
 

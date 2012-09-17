@@ -612,7 +612,7 @@ scalar reactingOneDim::addMassSources(const label patchI, const label faceI)
 
 scalar reactingOneDim::solidRegionDiffNo() const
 {
-    scalar DiNum = 0.0;
+    scalar DiNum = -GREAT;
 
     if (regionMesh().nInternalFaces() > 0)
     {

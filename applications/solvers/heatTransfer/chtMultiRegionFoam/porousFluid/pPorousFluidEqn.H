@@ -56,6 +56,8 @@ porousU -= rAUPorous*fvc::grad(porousP);
 porousU.correctBoundaryConditions();
 porousK = 0.5*magSqr(porousU);
 
-// Update pressure time derivative
-porousdpdt = fvc::ddt(porousP);
-
+// Update pressure time derivative if needed
+if (porousThermo.dpdt())
+{
+    porousdpdt = fvc::ddt(porousP);
+}

@@ -25,7 +25,7 @@ License
 
 #include "fixedTemperature.H"
 #include "addToRunTimeSelectionTable.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "volFields.H"
 #include "fvMatrices.H"
 
@@ -66,7 +66,7 @@ Foam::porousMedia::fixedTemperature::~fixedTemperature()
 
 void Foam::porousMedia::fixedTemperature::addEnergySource
 (
-    const basicThermo& thermo,
+    const fluidThermo& thermo,
     const volScalarField& rho,
     fvScalarMatrix& hEqn
 ) const

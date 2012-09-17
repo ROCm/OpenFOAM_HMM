@@ -47,8 +47,6 @@ Description
 #include "snapParameters.H"
 #include "layerParameters.H"
 
-#include "faceSet.H"
-#include "motionSmoother.H"
 
 using namespace Foam;
 
@@ -430,7 +428,7 @@ int main(int argc, char *argv[])
         // Refinement parameters
         refinementParameters refineParams(refineDict);
 
-        if (!overwrite)
+        if (!overwrite && !debug)
         {
             const_cast<Time&>(mesh.time())++;
         }
@@ -467,7 +465,7 @@ int main(int argc, char *argv[])
             curvature = refineParams.curvature();
         }
 
-        if (!overwrite)
+        if (!overwrite && !debug)
         {
             const_cast<Time&>(mesh.time())++;
         }
@@ -507,7 +505,7 @@ int main(int argc, char *argv[])
         }
 
 
-        if (!overwrite)
+        if (!overwrite &&  !debug)
         {
             const_cast<Time&>(mesh.time())++;
         }

@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
 
         // Construct the point fields
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-        pointMesh pMesh(mesh);
+        const pointMesh& pMesh = pointMesh::New(mesh);
 
         PtrList<pointScalarField> pointScalarFields;
         readFields(pMesh, objects, pointScalarFields);

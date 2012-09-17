@@ -20,7 +20,10 @@ motionSolverLibs ("libfvMotionSolvers.so");
 
 solver            displacementLaplacian;
 
-diffusivity       inverseDistance (floatingObject);
+displacementLaplacianCoeffs
+{
+    diffusivity       inverseDistance (floatingObject);
+}
 
 
 // ************************************************************************* //
