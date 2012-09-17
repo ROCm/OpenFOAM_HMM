@@ -99,6 +99,76 @@ void Foam::autoLayerDriver::sumWeights
 
 
 // Smooth field on moving patch
+//void Foam::autoLayerDriver::smoothField
+//(
+//    const motionSmoother& meshMover,
+//    const PackedBoolList& isMasterEdge,
+//    const labelList& meshEdges,
+//    const scalarField& fieldMin,
+//    const label nSmoothDisp,
+//    scalarField& field
+//) const
+//{
+//    const indirectPrimitivePatch& pp = meshMover.patch();
+//    const edgeList& edges = pp.edges();
+//    const labelList& meshPoints = pp.meshPoints();
+//
+//    scalarField invSumWeight(pp.nPoints());
+//    sumWeights
+//    (
+//        isMasterEdge,
+//        meshEdges,
+//        meshPoints,
+//        edges,
+//        invSumWeight
+//    );
+//
+//    // Get smoothly varying patch field.
+//    Info<< "shrinkMeshDistance : Smoothing field ..." << endl;
+//
+//    for (label iter = 0; iter < nSmoothDisp; iter++)
+//    {
+//        scalarField average(pp.nPoints());
+//        averageNeighbours
+//        (
+//            meshMover.mesh(),
+//            isMasterEdge,
+//            meshEdges,
+//            meshPoints,
+//            pp.edges(),
+//            invSumWeight,
+//            field,
+//            average
+//        );
+//
+//        // Transfer to field
+//        forAll(field, pointI)
+//        {
+//            //full smoothing neighbours + point value
+//            average[pointI] = 0.5*(field[pointI]+average[pointI]);
+//
+//            // perform monotonic smoothing
+//            if
+//            (
+//                average[pointI] < field[pointI]
+//             && average[pointI] >= fieldMin[pointI]
+//            )
+//            {
+//                field[pointI] = average[pointI];
+//            }
+//        }
+//
+//        // Do residual calculation every so often.
+//        if ((iter % 10) == 0)
+//        {
+//            Info<< "    Iteration " << iter << "   residual "
+//                <<  gSum(mag(field-average))
+//                   /returnReduce(average.size(), sumOp<label>())
+//                << endl;
+//        }
+//    }
+//}
+//XXXXXXXXX
 void Foam::autoLayerDriver::smoothField
 (
     const motionSmoother& meshMover,
@@ -126,9 +196,15 @@ void Foam::autoLayerDriver::smoothField
     // Get smoothly varying patch field.
     Info<< "shrinkMeshDistance : Smoothing field ..." << endl;
 
-    for (label iter = 0; iter < nSmoothDisp; iter++)
+
+    const scalar lambda = 0.33;
+    const scalar mu = -0.34;
+
+    for (label iter = 0; iter < 90; iter++)
     {
         scalarField average(pp.nPoints());
+
+        // Calculate average of field
         averageNeighbours
         (
             meshMover.mesh(),
@@ -141,22 +217,36 @@ void Foam::autoLayerDriver::smoothField
             average
         );
 
-        // Transfer to field
-        forAll(field, pointI)
+        forAll(field, i)
         {
-            //full smoothing neighbours + point value
-            average[pointI] = 0.5*(field[pointI]+average[pointI]);
-
-            // perform monotonic smoothing
-            if
-            (
-                average[pointI] < field[pointI]
-             && average[pointI] >= fieldMin[pointI]
-            )
+            if (field[i] >= fieldMin[i])
             {
-                field[pointI] = average[pointI];
+                field[i] = (1-lambda)*field[i]+lambda*average[i];
             }
         }
+
+
+        // Calculate average of field
+        averageNeighbours
+        (
+            meshMover.mesh(),
+            isMasterEdge,
+            meshEdges,
+            meshPoints,
+            pp.edges(),
+            invSumWeight,
+            field,
+            average
+        );
+
+        forAll(field, i)
+        {
+            if (field[i] >= fieldMin[i])
+            {
+                field[i] = (1-mu)*field[i]+mu*average[i];
+            }
+        }
+
 
         // Do residual calculation every so often.
         if ((iter % 10) == 0)
@@ -168,7 +258,7 @@ void Foam::autoLayerDriver::smoothField
         }
     }
 }
-
+//XXXXXXXXX
 
 // Smooth normals on moving patch.
 void Foam::autoLayerDriver::smoothPatchNormals
@@ -480,7 +570,6 @@ void Foam::autoLayerDriver::findIsolatedRegions
     const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const scalar minCosLayerTermination,
-    scalarField& field,
     List<extrudeMode>& extrudeStatus,
     pointField& patchDisp,
     labelList& patchNLayers
@@ -661,7 +750,6 @@ void Foam::autoLayerDriver::findIsolatedRegions
                         )
                     )
                     {
-                        field[f[fp]] = 0.0;
                         nPointCounter++;
                     }
                 }
@@ -670,7 +758,8 @@ void Foam::autoLayerDriver::findIsolatedRegions
     }
 
     reduce(nPointCounter, sumOp<label>());
-    Info<< "Number isolated points extrusion stopped : "<< nPointCounter<< endl;
+    Info<< "Number isolated points extrusion stopped : "<< nPointCounter
+        << endl;
 }
 
 
@@ -875,11 +964,14 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
+            //const pointPatchVectorField& pvf =
+            //    meshMover.displacement().boundaryField()[patchI];
 
             if
             (
                 !pp.coupled()
              && !isA<emptyPolyPatch>(pp)
+             //&&  pvf.constraintType() != word::null //exclude fixedValue
              && !adaptPatches.found(patchI)
             )
             {
@@ -1168,11 +1260,21 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         isMasterEdge,
         meshEdges,
         minCosLayerTermination,
-        thickness,
+
         extrudeStatus,
         patchDisp,
         patchNLayers
     );
+
+    // Update thickess for changed extrusion
+    forAll(thickness, patchPointI)
+    {
+        if (extrudeStatus[patchPointI] == NOEXTRUDE)
+        {
+            thickness[patchPointI] = 0.0;
+        }
+    }
+
 
     // smooth layer thickness on moving patch
     smoothField
@@ -1182,6 +1284,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
         meshEdges,
         minThickness,
         nSmoothThickness,
+
         thickness
     );
 

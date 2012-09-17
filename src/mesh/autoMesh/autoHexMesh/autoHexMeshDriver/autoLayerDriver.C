@@ -48,6 +48,10 @@ Description
 #include "globalIndex.H"
 #include "DynamicField.H"
 #include "PatchTools.H"
+#include "slipPointPatchFields.H"
+#include "fixedValuePointPatchFields.H"
+#include "calculatedPointPatchFields.H"
+#include "cyclicSlipPointPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,7 +75,7 @@ void Foam::autoLayerDriver::dumpDisplacement
 )
 {
     OFstream dispStr(prefix + "_disp.obj");
-    Info<< "Writing all displacements to " << dispStr.name() << nl << endl;
+    Info<< "Writing all displacements to " << dispStr.name() << endl;
 
     label vertI = 0;
 
@@ -87,7 +91,7 @@ void Foam::autoLayerDriver::dumpDisplacement
 
 
     OFstream illStr(prefix + "_illegal.obj");
-    Info<< "Writing invalid displacements to " << illStr.name() << nl << endl;
+    Info<< "Writing invalid displacements to " << illStr.name() << endl;
 
     vertI = 0;
 
@@ -798,6 +802,81 @@ void Foam::autoLayerDriver::setNumLayers
     //Info<< "Set displacement to zero for " << nConflicts
     //    << " points due to points being on multiple regions"
     //    << " with inconsistent nLayers specification." << endl;
+}
+
+
+// Construct pointVectorField with correct boundary conditions for adding
+// layers
+Foam::tmp<Foam::pointVectorField>
+Foam::autoLayerDriver::makeLayerDisplacementField
+(
+    const pointMesh& pMesh,
+    const labelList& numLayers
+)
+{
+    // Construct displacement field.
+    const pointBoundaryMesh& pointPatches = pMesh.boundary();
+
+    wordList patchFieldTypes
+    (
+        pointPatches.size(),
+        slipPointPatchVectorField::typeName
+    );
+
+    forAll(numLayers, patchI)
+    {
+        //  0 layers: do not allow lslip so fixedValue 0
+        // >0 layers: fixedValue which gets adapted
+        if (numLayers[patchI] >= 0)
+        {
+            patchFieldTypes[patchI] = fixedValuePointPatchVectorField::typeName;
+        }
+    }
+
+    forAll(pointPatches, patchI)
+    {
+        if (isA<processorPointPatch>(pointPatches[patchI]))
+        {
+            patchFieldTypes[patchI] = calculatedPointPatchVectorField::typeName;
+        }
+        else if (isA<cyclicPointPatch>(pointPatches[patchI]))
+        {
+            patchFieldTypes[patchI] = cyclicSlipPointPatchVectorField::typeName;
+        }
+    }
+
+
+//Pout<< "*** makeLayerDisplacementField : boundary conditions:" << endl;
+//forAll(patchFieldTypes, patchI)
+//{
+//    Pout<< "\t" << patchI << " name:" << pointPatches[patchI].name()
+//        << " type:" << patchFieldTypes[patchI]
+//        << " nLayers:" << numLayers[patchI]
+//        << endl;
+//}
+
+    const polyMesh& mesh = pMesh();
+
+    // Note: time().timeName() instead of meshRefinement::timeName() since
+    // postprocessable field.
+    tmp<pointVectorField> tfld
+    (
+        new pointVectorField
+        (
+            IOobject
+            (
+                "pointDisplacement",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            pMesh,
+            dimensionedVector("displacement", dimLength, vector::zero),
+            patchFieldTypes
+        )
+    );
+    return tfld;
 }
 
 
@@ -2392,10 +2471,10 @@ void Foam::autoLayerDriver::addLayers
             mesh,
             pp(),
             patchIDs,
-            meshRefinement::makeDisplacementField
+            makeLayerDisplacementField
             (
                 pointMesh::New(mesh),
-                patchIDs
+                layerParams.numLayers()
             ),
             motionDict
         )
@@ -3186,7 +3265,7 @@ void Foam::autoLayerDriver::doLayers
     // Merge coplanar boundary faces
     mergePatchFacesUndo(layerParams, motionDict);
 
-    // Per patch the number of layers (0 if no layer)
+    // Per patch the number of layers (-1 or 0 if no layer)
     const labelList& numLayers = layerParams.numLayers();
 
     // Patches that need to get a layer

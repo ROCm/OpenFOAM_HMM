@@ -131,6 +131,10 @@ public:
             // Per patch information
 
                 //- How many layers to add.
+                //  -1 : no specification. Assume 0 layers but allow sliding
+                //       to make layers
+                //   0 : specified to have 0 layers. No sliding allowed.
+                //  >0 : number of layers
                 const labelList& numLayers() const
                 {
                     return numLayers_;

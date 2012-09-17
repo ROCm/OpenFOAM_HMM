@@ -571,7 +571,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             hitInfo
         );
 
-        // Start of from current points
+        // Start off from current points
         newPoints = mesh_.points();
 
         forAll(hitInfo, i)
@@ -580,6 +580,17 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             {
                 newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
             }
+        }
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh_.time())++;
+            pointField oldPoints(mesh_.points());
+            mesh_.movePoints(newPoints);
+            Pout<< "Writing newPoints mesh to time " << timeName()
+                << endl;
+            write(debug, mesh_.time().path()/"newPoints");
+            mesh_.movePoints(oldPoints);
         }
     }
 

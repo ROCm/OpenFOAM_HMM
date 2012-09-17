@@ -43,7 +43,7 @@ Foam::layerParameters::layerParameters
     const polyBoundaryMesh& boundaryMesh
 )
 :
-    numLayers_(boundaryMesh.size(), 0),
+    numLayers_(boundaryMesh.size(), -1),
     expansionRatio_
     (
         boundaryMesh.size(),
