@@ -465,7 +465,8 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
                         *this
                     )   << "keyword " << keyword
                         << " is undefined in dictionary "
-                        << name()
+                        << name() << endl
+                        << "Valid keywords are " << keys()
                         << exit(FatalIOError);
                 }
                 if (!entPtr->isDict())
