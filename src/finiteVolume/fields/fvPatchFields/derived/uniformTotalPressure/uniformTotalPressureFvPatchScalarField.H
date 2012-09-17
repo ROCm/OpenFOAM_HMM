@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,9 +74,6 @@ class uniformTotalPressureFvPatchScalarField
 
         //- Heat capacity ratio
         scalar gamma_;
-
-        //- Total pressure
-        scalar p0_;
 
         //- Table of time vs total pressure, including the bounding treatment
         autoPtr<DataEntry<scalar> > pressure_;
@@ -176,18 +173,6 @@ public:
             scalar& gamma()
             {
                 return gamma_;
-            }
-
-            //- Return the total pressure
-            scalar p0() const
-            {
-                return p0_;
-            }
-
-            //- Return reference to the total pressure to allow adjustment
-            scalar p0()
-            {
-                return p0_;
             }
 
 
