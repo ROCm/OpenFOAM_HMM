@@ -223,7 +223,8 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                     newBoundary[patchI].size(),
                     newBoundary[patchI].start(),
                     patchI,
-                    boundary_
+                    boundary_,
+                    newBoundary[patchI].type()
                 );
             }
         }

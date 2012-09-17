@@ -69,7 +69,7 @@ dictionaryReplacement
             {
                 type            compressible::turbulentTemperatureCoupledBaffleMixed;
                 neighbourFieldName T;
-                kappa           basicThermo;
+                kappa           fluidThermo;
                 kappaName       none;
                 value           uniform 300;
             }

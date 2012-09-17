@@ -47,9 +47,10 @@ namespace Foam
 
     typedef Reaction<gasThermoPhysics> gasReaction;
 
-    typedef Reaction<constIsobaricGasThermoPhysics> constIsobaricGasReaction;
+    typedef Reaction<constIncompressibleGasThermoPhysics>
+        constIncompressibleGasReaction;
 
-    typedef Reaction<isobaricGasThermoPhysics> isobaricGasReaction;
+    typedef Reaction<incompressibleGasThermoPhysics> incompressibleGasReaction;
 
     typedef Reaction<icoPoly8ThermoPhysics> icoPoly8Reaction;
 }

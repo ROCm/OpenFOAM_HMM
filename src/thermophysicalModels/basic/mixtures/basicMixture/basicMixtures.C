@@ -32,8 +32,8 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
-#include "incompressible.H"
-#include "isobaricPerfectGas.H"
+#include "rhoConst.H"
+#include "incompressiblePerfectGas.H"
 
 #include "eConstThermo.H"
 
@@ -94,7 +94,7 @@ makeBasicMixture
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicPolyMixture
@@ -118,7 +118,7 @@ makeBasicMixture
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeBasicMixture
@@ -127,7 +127,7 @@ makeBasicMixture
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeBasicMixture
@@ -136,7 +136,7 @@ makeBasicMixture
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 
@@ -175,7 +175,7 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    incompressible
+    rhoConst
 );
 
 makeBasicPolyMixture
@@ -199,7 +199,7 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeBasicMixture
@@ -208,7 +208,7 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 makeBasicMixture
@@ -217,7 +217,7 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    isobaricPerfectGas
+    incompressiblePerfectGas
 );
 
 

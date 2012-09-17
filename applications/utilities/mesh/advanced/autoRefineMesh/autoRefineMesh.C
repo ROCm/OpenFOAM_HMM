@@ -208,7 +208,8 @@ label addPatch(polyMesh& mesh, const word& patchName)
                 0,
                 mesh.nInternalFaces(),
                 patchI,
-                patches
+                patches,
+                emptyPolyPatch::typeName
             );
 
         forAll(patches, i)

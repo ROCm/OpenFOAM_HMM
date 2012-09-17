@@ -14,8 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
-//thermoType heSolidThermo<multiComponentSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<constSolidThermo<constRho>,sensibleEnthalpy>>>>>;
+thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<rhoConst>,sensibleEnthalpy>>>>>;
 
 mixture
 {
@@ -24,23 +23,26 @@ mixture
         nMoles      1;
         molWeight   12;
     }
+
     transport
     {
         kappa   80;
-        //kappa  (80 80 80);
     }
+
     radiation
     {
         sigmaS      0.0;
         kappaRad    0.0;
         emissivity  0.0;
     }
+
     thermodynamics
     {
         Hf      0;
         Cp      450;
     }
-    density
+
+    equationOfState
     {
         rho     8000;
     }
@@ -58,22 +60,26 @@ pmmaCoeffs
         nMoles      1;
         molWeight   100;
     }
+
     transport
     {
         kappa   0.152;
     }
+
     radiation
     {
         sigmaS      0.0;
         kappaRad    0.0;
         emissivity  0.1;
     }
+
     thermodynamics
     {
         Hf      0;
         Cp      1462;
     }
-    density
+
+    equationOfState
     {
         rho     1114.0;
     }
@@ -86,6 +92,7 @@ charCoeffs
         nMoles      1;
         molWeight   50;
     }
+
     transport
     {
         kappa   0.4;
@@ -104,9 +111,11 @@ charCoeffs
         Cp      611.0;
     }
 
-    density
+    equationOfState
     {
         rho     11.5;
     }
 }
+
+
 // ************************************************************************* //

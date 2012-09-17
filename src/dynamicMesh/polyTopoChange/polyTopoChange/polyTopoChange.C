@@ -495,6 +495,21 @@ void Foam::polyTopoChange::makeCells
 
     for (label faceI = 0; faceI < nActiveFaces; faceI++)
     {
+        if (faceOwner_[faceI] < 0)
+        {
+            FatalErrorIn
+            (
+                "polyTopoChange::makeCells\n"
+                "(\n"
+                "    const label,\n"
+                "    labelList&,\n"
+                "    labelList&\n"
+                ") const\n"
+            )   << "Face " << faceI << " is active but its owner has"
+                << " been deleted. This is usually due to deleting cells"
+                << " without modifying exposed faces to be boundary faces."
+                << exit(FatalError);
+        }
         nNbrs[faceOwner_[faceI]]++;
     }
     for (label faceI = 0; faceI < nActiveFaces; faceI++)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ namespace Foam
 
     addToRunTimeSelectionTable
     (
-        fvMotionSolver,
+        motionSolver,
         displacementLaplacianFvMotionSolver,
         dictionary
     );
@@ -52,22 +52,11 @@ namespace Foam
 Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream& is
+    const IOdictionary& dict
 )
 :
-    displacementFvMotionSolver(mesh, is),
-    pointDisplacement_
-    (
-        IOobject
-        (
-            "pointDisplacement",
-            fvMesh_.time().timeName(),
-            fvMesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pointMesh::New(fvMesh_)
-    ),
+    displacementMotionSolver(mesh, dict, typeName),
+    fvMotionSolverCore(mesh),
     cellDisplacement_
     (
         IOobject
@@ -90,12 +79,12 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
     pointLocation_(NULL),
     diffusivityPtr_
     (
-        motionDiffusivity::New(*this, lookup("diffusivity"))
+        motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
     ),
     frozenPointsZone_
     (
-        found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(lookup("frozenPointsZone"))
+        coeffDict().found("frozenPointsZone")
+      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
       : -1
     )
 {
@@ -131,7 +120,8 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
         {
             Info<< "displacementLaplacianFvMotionSolver :"
                 << " Read pointVectorField "
-                << io.name() << " to be used for boundary conditions on points."
+                << io.name()
+                << " to be used for boundary conditions on points."
                 << nl
                 << "Boundary conditions:"
                 << pointLocation_().boundaryField().types() << endl;
@@ -217,7 +207,7 @@ Foam::displacementLaplacianFvMotionSolver::curPoints() const
 void Foam::displacementLaplacianFvMotionSolver::solve()
 {
     // The points have moved so before interpolation update
-    // the fvMotionSolver accordingly
+    // the motionSolver accordingly
     movePoints(fvMesh_.points());
 
     diffusivityPtr_->correct();
@@ -240,12 +230,16 @@ void Foam::displacementLaplacianFvMotionSolver::updateMesh
     const mapPolyMesh& mpm
 )
 {
-    displacementFvMotionSolver::updateMesh(mpm);
+    displacementMotionSolver::updateMesh(mpm);
 
     // Update diffusivity. Note two stage to make sure old one is de-registered
     // before creating/registering new one.
     diffusivityPtr_.reset(NULL);
-    diffusivityPtr_ = motionDiffusivity::New(*this, lookup("diffusivity"));
+    diffusivityPtr_ = motionDiffusivity::New
+    (
+        fvMesh_,
+        coeffDict().lookup("diffusivity")
+    );
 }
 
 

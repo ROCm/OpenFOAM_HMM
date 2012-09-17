@@ -25,8 +25,8 @@ $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
 
 /* thermo parcel sub-models */
-THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
-$(THERMOPARCEL)/basicThermoParcel.C
+THERMOPARCEL=$(DERIVEDPARCELS)/fluidThermoParcel
+$(THERMOPARCEL)/fluidThermoParcel.C
 $(THERMOPARCEL)/defineBasicThermoParcel.C
 $(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
 

@@ -45,7 +45,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "volFields.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "fvMatrices.H"
 #include "blackBodyEmission.H"
 
@@ -177,7 +177,7 @@ public:
             virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
 
             //- Energy source term
-            virtual tmp<fvScalarMatrix> Sh(basicThermo& thermo) const;
+            virtual tmp<fvScalarMatrix> Sh(fluidThermo& thermo) const;
 };
 
 

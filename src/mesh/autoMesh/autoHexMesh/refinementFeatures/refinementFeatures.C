@@ -26,21 +26,14 @@ License
 #include "refinementFeatures.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::refinementFeatures::refinementFeatures
+void Foam::refinementFeatures::read
 (
     const objectRegistry& io,
     const PtrList<dictionary>& featDicts
 )
-:
-    PtrList<featureEdgeMesh>(featDicts.size()),
-    levels_(featDicts.size()),
-    edgeTrees_(featDicts.size()),
-    pointTrees_(featDicts.size())
 {
-    // Read features
-
     forAll(featDicts, i)
     {
         const dictionary& dict = featDicts[i];
@@ -75,50 +68,87 @@ Foam::refinementFeatures::refinementFeatures
             << " (" << eMesh.points().size() << " points, "
             << eMesh.edges().size() << " edges)." << endl;
     }
+}
 
+
+void Foam::refinementFeatures::buildTrees
+(
+    const label featI,
+    const labelList& featurePoints
+)
+{
+    const featureEdgeMesh& eMesh = operator[](featI);
+    const pointField& points = eMesh.points();
+    const edgeList& edges = eMesh.edges();
+
+    // Calculate bb of all points
+    treeBoundBox bb(points);
+
+    // Random number generator. Bit dodgy since not exactly random ;-)
+    Random rndGen(65431);
+
+    // Slightly extended bb. Slightly off-centred just so on symmetric
+    // geometry there are less face/edge aligned items.
+    bb = bb.extend(rndGen, 1e-4);
+    bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    edgeTrees_.set
+    (
+        featI,
+        new indexedOctree<treeDataEdge>
+        (
+            treeDataEdge
+            (
+                false,                  // do not cache bb
+                edges,
+                points,
+                identity(edges.size())
+            ),
+            bb,     // overall search domain
+            8,      // maxLevel
+            10,     // leafsize
+            3.0     // duplicity
+        )
+    );
+
+    pointTrees_.set
+    (
+        featI,
+        new indexedOctree<treeDataPoint>
+        (
+            treeDataPoint(points, featurePoints),
+            bb,     // overall search domain
+            8,      // maxLevel
+            10,     // leafsize
+            3.0     // duplicity
+        )
+    );
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::refinementFeatures::refinementFeatures
+(
+    const objectRegistry& io,
+    const PtrList<dictionary>& featDicts
+)
+:
+    PtrList<featureEdgeMesh>(featDicts.size()),
+    levels_(featDicts.size()),
+    edgeTrees_(featDicts.size()),
+    pointTrees_(featDicts.size())
+{
+    // Read features
+    read(io, featDicts);
 
     // Search engines
-
     forAll(*this, i)
     {
         const featureEdgeMesh& eMesh = operator[](i);
-        const pointField& points = eMesh.points();
-        const edgeList& edges = eMesh.edges();
-
-        // Calculate bb of all points
-        treeBoundBox bb(points);
-
-        // Random number generator. Bit dodgy since not exactly random ;-)
-        Random rndGen(65431);
-
-        // Slightly extended bb. Slightly off-centred just so on symmetric
-        // geometry there are less face/edge aligned items.
-        bb = bb.extend(rndGen, 1e-4);
-        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-
-        edgeTrees_.set
-        (
-            i,
-            new indexedOctree<treeDataEdge>
-            (
-                treeDataEdge
-                (
-                    false,                  // do not cache bb
-                    edges,
-                    points,
-                    identity(edges.size())
-                ),
-                bb,     // overall search domain
-                8,      // maxLevel
-                10,     // leafsize
-                3.0     // duplicity
-            )
-        );
-
-
-        // Detect feature points from edges.
         const labelListList& pointEdges = eMesh.pointEdges();
+
         DynamicList<label> featurePoints;
         forAll(pointEdges, pointI)
         {
@@ -129,21 +159,79 @@ Foam::refinementFeatures::refinementFeatures
         }
 
         Info<< "Detected " << featurePoints.size()
-            << " featurePoints out of " << points.size()
+            << " featurePoints out of " << pointEdges.size()
             << " on feature " << eMesh.name() << endl;
 
-        pointTrees_.set
-        (
-            i,
-            new indexedOctree<treeDataPoint>
-            (
-                treeDataPoint(points, featurePoints),
-                bb,     // overall search domain
-                8,      // maxLevel
-                10,     // leafsize
-                3.0     // duplicity
-            )
-        );
+        buildTrees(i, featurePoints);
+    }
+}
+
+
+Foam::refinementFeatures::refinementFeatures
+(
+    const objectRegistry& io,
+    const PtrList<dictionary>& featDicts,
+    const scalar minCos
+)
+:
+    PtrList<featureEdgeMesh>(featDicts.size()),
+    levels_(featDicts.size()),
+    edgeTrees_(featDicts.size()),
+    pointTrees_(featDicts.size())
+{
+    // Read features
+    read(io, featDicts);
+
+    // Search engines
+    forAll(*this, i)
+    {
+        const featureEdgeMesh& eMesh = operator[](i);
+        const pointField& points = eMesh.points();
+        const edgeList& edges = eMesh.edges();
+        const labelListList& pointEdges = eMesh.pointEdges();
+
+        DynamicList<label> featurePoints;
+        forAll(pointEdges, pointI)
+        {
+            const labelList& pEdges = pointEdges[pointI];
+            if (pEdges.size() > 2)
+            {
+                featurePoints.append(pointI);
+            }
+            else if (pEdges.size() == 2)
+            {
+                // Check the angle
+                const edge& e0 = edges[pEdges[0]];
+                const edge& e1 = edges[pEdges[1]];
+
+                const point& p = points[pointI];
+                const point& p0 = points[e0.otherVertex(pointI)];
+                const point& p1 = points[e1.otherVertex(pointI)];
+
+                vector v0 = p-p0;
+                scalar v0Mag = mag(v0);
+
+                vector v1 = p1-p;
+                scalar v1Mag = mag(v1);
+
+                if
+                (
+                    v0Mag > SMALL
+                 && v1Mag > SMALL
+                 && ((v0/v0Mag & v1/v1Mag) < minCos)
+                )
+                {
+                    featurePoints.append(pointI);
+                }
+            }
+        }
+
+        Info<< "Detected " << featurePoints.size()
+            << " featurePoints out of " << points.size()
+            << " on feature " << eMesh.name()
+            << " when using feature cos " << minCos << endl;
+
+        buildTrees(i, featurePoints);
     }
 }
 

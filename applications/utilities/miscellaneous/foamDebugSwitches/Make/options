@@ -1,8 +1,8 @@
 EXE_LIBS = \
     -lautoMesh \
     -lbarotropicCompressibilityModel \
-    -lbasicSolidThermo \
-    -lbasicThermophysicalModels \
+    -lsolidThermo \
+    -lfluidThermophysicalModels \
     -lblockMesh \
     -lchemistryModel \
     -lcoalCombustion \

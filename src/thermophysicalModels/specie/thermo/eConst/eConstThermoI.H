@@ -106,7 +106,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::cp
     const scalar T
 ) const
 {
-    return Cv_*this->W() + specie::RR;
+    return Cv_*this->W() + this->cpMcv(p, T);
 }
 
 

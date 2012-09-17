@@ -33,7 +33,7 @@ Description
 #define thermoPhysicsTypes_H
 
 #include "perfectGas.H"
-#include "isobaricPerfectGas.H"
+#include "incompressiblePerfectGas.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
@@ -82,11 +82,11 @@ namespace Foam
         <
             hConstThermo
             <
-                isobaricPerfectGas
+                incompressiblePerfectGas
             >,
             sensibleEnthalpy
         >
-    > constIsobaricGasThermoPhysics;
+    > constIncompressibleGasThermoPhysics;
 
     typedef
     sutherlandTransport
@@ -95,11 +95,11 @@ namespace Foam
         <
             janafThermo
             <
-                isobaricPerfectGas
+                incompressiblePerfectGas
             >,
             sensibleEnthalpy
         >
-    > isobaricGasThermoPhysics;
+    > incompressibleGasThermoPhysics;
 
     typedef
     polynomialTransport

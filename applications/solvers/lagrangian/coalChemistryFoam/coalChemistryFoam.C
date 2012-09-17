@@ -37,7 +37,7 @@ Description
 
 #include "fvCFD.H"
 #include "turbulenceModel.H"
-#include "basicThermoCloud.H"
+#include "fluidThermoCloud.H"
 #include "coalCloud.H"
 #include "psiCombustionModel.H"
 #include "IObasicSourceList.H"

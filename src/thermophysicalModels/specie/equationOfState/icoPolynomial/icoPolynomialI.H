@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,6 +114,17 @@ template<int PolySize>
 inline Foam::scalar Foam::icoPolynomial<PolySize>::Z(scalar, scalar) const
 {
     return 0.0;
+}
+
+
+template<int PolySize>
+inline Foam::scalar Foam::icoPolynomial<PolySize>::cpMcv
+(
+    scalar p,
+    scalar T
+) const
+{
+    return -(p/sqr(rhoCoeffs_.value(T)))*rhoCoeffs_.derivative(T);
 }
 
 

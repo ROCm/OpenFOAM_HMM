@@ -1,0 +1,10 @@
+solidThermo/solidThermo.C
+solidThermo/solidThermoNew.C
+
+mixtures/basicSolidMixture/basicSolidMixture.C
+
+solidReactionThermo/solidReactionThermo.C
+solidReactionThermo/solidReactionThermoNew.C
+heSolidThermo/heSolidThermos.C
+
+LIB = $(FOAM_LIBBIN)/libsolidThermo

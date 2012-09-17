@@ -66,7 +66,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel,
+            const fluidThermo& thermophysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName
         );
 
@@ -79,7 +79,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermophysicalModel,
+            const fluidThermo& thermophysicalModel,
             const word& turbulenceModelName = turbulenceModel::typeName
         );
 

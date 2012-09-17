@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,11 +49,11 @@ namespace Foam
 
 Foam::inverseDistanceDiffusivity::inverseDistanceDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    uniformDiffusivity(mSolver, mdData),
+    uniformDiffusivity(mesh, mdData),
     patchNames_(mdData)
 {
     correct();
@@ -70,37 +70,33 @@ Foam::inverseDistanceDiffusivity::~inverseDistanceDiffusivity()
 
 Foam::tmp<Foam::scalarField> Foam::inverseDistanceDiffusivity::y() const
 {
-    const polyMesh& mesh = mSolver().mesh();
-
-    labelHashSet patchSet(mesh.boundaryMesh().patchSet(patchNames_));
+    labelHashSet patchSet(mesh().boundaryMesh().patchSet(patchNames_));
 
     if (patchSet.size())
     {
         return tmp<scalarField>
         (
-            new scalarField(patchWave(mesh, patchSet, false).distance())
+            new scalarField(patchWave(mesh(), patchSet, false).distance())
         );
     }
     else
     {
-        return tmp<scalarField>(new scalarField(mesh.nCells(), 1.0));
+        return tmp<scalarField>(new scalarField(mesh().nCells(), 1.0));
     }
 }
 
 
 void Foam::inverseDistanceDiffusivity::correct()
 {
-    const fvMesh& mesh = mSolver().mesh();
-
     volScalarField y_
     (
         IOobject
         (
             "y",
-            mesh.time().timeName(),
-            mesh
+            mesh().time().timeName(),
+            mesh()
         ),
-        mesh,
+        mesh(),
         dimless,
         zeroGradientFvPatchScalarField::typeName
     );

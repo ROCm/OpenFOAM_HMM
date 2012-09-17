@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,10 +45,11 @@ Foam::mappedPolyPatch::mappedPolyPatch
     const label size,
     const label start,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    polyPatch(name, size, start, index, bm),
+    polyPatch(name, size, start, index, bm, patchType),
     mappedPatchBase(static_cast<const polyPatch&>(*this))
 {}
 
@@ -66,7 +67,7 @@ Foam::mappedPolyPatch::mappedPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, size, start, index, bm),
+    polyPatch(name, size, start, index, bm, typeName),
     mappedPatchBase
     (
         static_cast<const polyPatch&>(*this),
@@ -91,7 +92,7 @@ Foam::mappedPolyPatch::mappedPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, size, start, index, bm),
+    polyPatch(name, size, start, index, bm, typeName),
     mappedPatchBase
     (
         static_cast<const polyPatch&>(*this),
@@ -108,10 +109,11 @@ Foam::mappedPolyPatch::mappedPolyPatch
     const word& name,
     const dictionary& dict,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    polyPatch(name, dict, index, bm),
+    polyPatch(name, dict, index, bm, patchType),
     mappedPatchBase(*this, dict)
 {}
 

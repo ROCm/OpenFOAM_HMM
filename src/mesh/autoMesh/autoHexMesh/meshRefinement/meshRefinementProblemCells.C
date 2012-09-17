@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -541,7 +541,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
         Info<< "markFacesOnProblemCells :"
             << " Deleting all-anchor surface cells only if"
-            << "snapping them violates mesh quality constraints:" << nl
+            << " snapping them violates mesh quality constraints:" << nl
             << "    snapped/original cell volume < " << volFraction << nl
             << "    face area                    < " << minArea << nl
             << "    non-orthogonality            > " << maxNonOrtho << nl
@@ -571,7 +571,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             hitInfo
         );
 
-        // Start of from current points
+        // Start off from current points
         newPoints = mesh_.points();
 
         forAll(hitInfo, i)
@@ -580,6 +580,17 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             {
                 newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
             }
+        }
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh_.time())++;
+            pointField oldPoints(mesh_.points());
+            mesh_.movePoints(newPoints);
+            Pout<< "Writing newPoints mesh to time " << timeName()
+                << endl;
+            write(debug, mesh_.time().path()/"newPoints");
+            mesh_.movePoints(oldPoints);
         }
     }
 

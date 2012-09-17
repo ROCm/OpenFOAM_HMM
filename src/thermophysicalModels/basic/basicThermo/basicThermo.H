@@ -25,7 +25,7 @@ Class
     Foam::basicThermo
 
 Description
-    Basic thermodynamic properties
+    Abstract base-class for fluid and solid thermodynamic properties
 
 SourceFiles
     basicThermo.C
@@ -64,18 +64,14 @@ protected:
             //- Pressure [Pa]
             volScalarField p_;
 
-            //- Compressibility [s^2/m^2]
-            volScalarField psi_;
-
             //- Temperature [K]
             volScalarField T_;
-
-            //- Laminar dynamic viscosity [kg/m/s]
-            volScalarField mu_;
 
             //- Laminar thermal diffusuvity [kg/m/s]
             volScalarField alpha_;
 
+        //- Should the dpdt term be included in the enthalpy equation
+        Switch dpdt_;
 
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
@@ -118,6 +114,20 @@ public:
         //- Update properties
         virtual void correct() = 0;
 
+        //- Return true if the equation of state is incompressible
+        //  i.e. rho != f(p)
+        virtual bool incompressible() const = 0;
+
+        //- Return true if the equation of state is isochoric
+        //  i.e. rho = const
+        virtual bool isochoric() const = 0;
+
+        //- Should the dpdt term be included in the enthalpy equation
+        Switch dpdt() const
+        {
+            return dpdt_;
+        }
+
 
         // Access to thermodynamic state variables
 
@@ -130,9 +140,6 @@ public:
 
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const = 0;
-
-            //- Compressibility [s^2/m^2]
-            virtual const volScalarField& psi() const;
 
             //- Enthalpy/Internal energy [J/kg]
             //  Non-const access allowed for transport equations
@@ -241,9 +248,6 @@ public:
 
 
         // Access to transport state variables
-
-            //- Dynamic viscosity of mixture [kg/m/s]
-            virtual const volScalarField& mu() const;
 
             //- Thermal diffusivity for enthalpy of mixture [kg/m/s]
             virtual const volScalarField& alpha() const;

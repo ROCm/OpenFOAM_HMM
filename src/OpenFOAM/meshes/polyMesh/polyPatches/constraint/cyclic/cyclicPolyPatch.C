@@ -600,10 +600,11 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const label size,
     const label start,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    coupledPolyPatch(name, size, start, index, bm),
+    coupledPolyPatch(name, size, start, index, bm, patchType),
     neighbPatchName_(word::null),
     neighbPatchID_(-1),
     transform_(UNKNOWN),
@@ -632,7 +633,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const vector& separationVector
 )
 :
-    coupledPolyPatch(name, size, start, index, bm),
+    coupledPolyPatch(name, size, start, index, bm, typeName),
     neighbPatchName_(neighbPatchName),
     neighbPatchID_(-1),
     transform_(transform),
@@ -652,10 +653,11 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     const word& name,
     const dictionary& dict,
     const label index,
-    const polyBoundaryMesh& bm
+    const polyBoundaryMesh& bm,
+    const word& patchType
 )
 :
-    coupledPolyPatch(name, dict, index, bm),
+    coupledPolyPatch(name, dict, index, bm, patchType),
     neighbPatchName_(dict.lookupOrDefault("neighbourPatch", word::null)),
     neighbPatchID_(-1),
     transform_(UNKNOWN),

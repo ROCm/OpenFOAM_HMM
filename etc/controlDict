@@ -102,7 +102,7 @@ DebugSwitches
     ChomiakInjector     0;
     Cloud<basicKinematicParcel> 0;
     Cloud<basicReactingParcel>  0;
-    Cloud<basicThermoParcel>    0;
+    Cloud<fluidThermoParcel>    0;
     Cloud<indexedParticle>  0;
     Cloud<parcel>           0;
     Cloud<passiveParticle>  0;
@@ -170,9 +170,9 @@ DebugSwitches
     KRR4                0;
     KinematicCloud<basicKinematicParcel> 0;
     KinematicCloud<basicReactingParcel> 0;
-    KinematicCloud<basicThermoParcel>   0;
+    KinematicCloud<fluidThermoParcel>   0;
     KinematicParcel<basicReactingParcel> 0;
-    KinematicParcel<basicThermoParcel>  0;
+    KinematicParcel<fluidThermoParcel>  0;
     LESModel            0;
     LESdelta            0;
     LESfilter           0;
@@ -280,9 +280,9 @@ DebugSwitches
     TAB                 0;
     Table               0;
     ThermoCloud<basicReactingParcel>    0;
-    ThermoCloud<basicThermoParcel>      0;
+    ThermoCloud<fluidThermoParcel>      0;
     ThermoParcel<basicReactingParcel>   0;
-    ThermoParcel<basicThermoParcel>     0;
+    ThermoParcel<fluidThermoParcel>     0;
     UMIST               0;
     UMISTV              0;
     UpwindFitData<cubicUpwindFitPolynomial> 0;
@@ -321,9 +321,9 @@ DebugSwitches
     basicMixture        0;
     basicReactingCloud  0;
     basicReactingParcel 0;
-    basicThermo         0;
-    basicThermoCloud    0;
-    basicThermoParcel   0;
+    fluidThermo         0;
+    fluidThermoCloud    0;
+    fluidThermoParcel   0;
     biLinearFit         0;
     binaryAbsorptionEmission 0;
     blended             0;

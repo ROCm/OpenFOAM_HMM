@@ -19,7 +19,7 @@ EXE_INC = \
 LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lliquidProperties \
     -lliquidMixtureProperties \

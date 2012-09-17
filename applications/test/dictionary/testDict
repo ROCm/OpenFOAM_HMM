@@ -51,7 +51,7 @@ boundaryField
     inlet_4  { $inactive }
     inlet_5  "a primitiveEntry is squashed by a directory entry";
     inlet_5  { $inactive }
-    inlet_6  { $inactive }
+    inlet_6  { $.inactive }     // Test scoping
     inlet_7  { $inactive }
     inlet_8  { $inactive }
 

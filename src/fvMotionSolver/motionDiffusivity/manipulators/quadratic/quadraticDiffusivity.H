@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,12 +73,8 @@ public:
 
     // Constructors
 
-        //- Construct for the given fvMotionSolver and data Istream
-        quadraticDiffusivity
-        (
-            const fvMotionSolver& mSolver,
-            Istream& mdData
-        );
+        //- Construct for the given fvMesh and data Istream
+        quadraticDiffusivity(const fvMesh& mesh, Istream& mdData);
 
 
     //- Destructor

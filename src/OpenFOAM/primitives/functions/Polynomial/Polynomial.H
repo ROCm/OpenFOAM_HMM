@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,13 +27,14 @@ Class
 Description
     Polynomial templated on size (order):
 
-        poly = logCoeff*log(x) + sum(coeff_[i]*x^i)
+        poly = sum(coeff_[i]*x^i) logCoeff*log(x)
 
     where 0 \<= i \<= N
 
     - integer powers, starting at zero
     - value(x) to evaluate the poly for a given value
-    - integrate(x1, x2) between two scalar values
+    - derivative(x) returns derivative at value
+    - integral(x1, x2) returns integral between two scalar values
     - integral() to return a new, integral coeff polynomial
       - increases the size (order)
     - integralMinus1() to return a new, integral coeff polynomial where
@@ -136,16 +137,18 @@ public:
             //- Return polynomial value
             scalar value(const scalar x) const;
 
-            //- Integrate between two values
-            scalar integrate(const scalar x1, const scalar x2) const;
+            //- Return derivative of the polynomial at the given x
+            scalar derivative(const scalar x) const;
 
+            //- Return integral between two values
+            scalar integral(const scalar x1, const scalar x2) const;
 
             //- Return integral coefficients.
-            //  Argument becomes zeroth element (constant of integration)
+            //  Argument becomes zero'th element (constant of integration)
             intPolyType integral(const scalar intConstant = 0.0) const;
 
             //- Return integral coefficients when lowest order is -1.
-            //  Argument becomes zeroth element (constant of integration)
+            //  Argument becomes zero'th element (constant of integration)
             polyType integralMinus1(const scalar intConstant = 0.0) const;
 
 

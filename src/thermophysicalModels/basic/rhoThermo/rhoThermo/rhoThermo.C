@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 :
-    basicThermo(mesh),
+    fluidThermo(mesh),
     rho_
     (
         IOobject
@@ -51,13 +51,41 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
         ),
         mesh,
         dimDensity
+    ),
+
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, -2, 2, 0, 0)
+    ),
+
+    mu_
+    (
+        IOobject
+        (
+            "mu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
     )
 {}
 
 
 Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 :
-    basicThermo(mesh, dict),
+    fluidThermo(mesh, dict),
     rho_
     (
         IOobject
@@ -70,6 +98,34 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
         ),
         mesh,
         dimDensity
+    ),
+
+    psi_
+    (
+        IOobject
+        (
+            "psi",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, -2, 2, 0, 0)
+    ),
+
+    mu_
+    (
+        IOobject
+        (
+            "mu",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(1, -1, -1, 0, 0)
     )
 {}
 
@@ -91,6 +147,18 @@ Foam::tmp<Foam::volScalarField> Foam::rhoThermo::rho() const
 Foam::volScalarField& Foam::rhoThermo::rho()
 {
     return rho_;
+}
+
+
+const Foam::volScalarField& Foam::rhoThermo::psi() const
+{
+    return psi_;
+}
+
+
+const Foam::volScalarField& Foam::rhoThermo::mu() const
+{
+    return mu_;
 }
 
 

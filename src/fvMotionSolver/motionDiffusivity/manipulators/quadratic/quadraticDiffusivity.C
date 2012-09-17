@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,12 +46,12 @@ namespace Foam
 
 Foam::quadraticDiffusivity::quadraticDiffusivity
 (
-    const fvMotionSolver& mSolver,
+    const fvMesh& mesh,
     Istream& mdData
 )
 :
-    motionDiffusivity(mSolver),
-    basicDiffusivityPtr_(motionDiffusivity::New(mSolver, mdData))
+    motionDiffusivity(mesh),
+    basicDiffusivityPtr_(motionDiffusivity::New(mesh, mdData))
 {}
 
 

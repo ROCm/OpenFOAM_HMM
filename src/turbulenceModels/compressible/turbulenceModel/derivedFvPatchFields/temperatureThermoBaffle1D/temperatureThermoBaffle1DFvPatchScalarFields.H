@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,12 +40,12 @@ namespace compressible
 
     typedef temperatureThermoBaffle1DFvPatchScalarField
     <
-        constSolidThermoPhysics
+        hConstSolidThermoPhysics
     >constSolid_temperatureThermoBaffle1DFvPatchScalarField;
 
     typedef temperatureThermoBaffle1DFvPatchScalarField
     <
-        expoSolidThermoPhysics
+        hExponentialSolidThermoPhysics
     >expoSolid_temperatureThermoBaffle1DFvPatchScalarField;
 
 

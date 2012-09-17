@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,7 +81,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             transportDict_(dict.subDict("transport")),
             radiationDict_(dict.subDict("radiation")),
             thermoDict_(dict.subDict("thermodynamics")),
-            densityDict_(dict.subDict("density"))
+            densityDict_(dict.subDict("equationOfState"))
         {}
 
 

@@ -23,6 +23,9 @@ internalField   uniform $flowVelocity;
 
 boundaryField
 {
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+
     #include "include/fixedInlet"
 
     outlet

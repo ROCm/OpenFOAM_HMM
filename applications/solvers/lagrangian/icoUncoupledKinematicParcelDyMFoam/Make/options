@@ -21,7 +21,7 @@ EXE_LIBS = \
     -llagrangian \
     -llagrangianIntermediate \
     -lthermophysicalFunctions \
-    -lbasicThermophysicalModels \
+    -lfluidThermophysicalModels \
     -lspecie \
     -lradiationModels \
     -lincompressibleRASModels \

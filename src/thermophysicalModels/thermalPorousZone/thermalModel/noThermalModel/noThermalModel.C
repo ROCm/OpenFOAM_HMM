@@ -25,7 +25,7 @@ License
 
 #include "noThermalModel.H"
 #include "addToRunTimeSelectionTable.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "volFields.H"
 #include "fvMatrices.H"
 
@@ -65,7 +65,7 @@ Foam::porousMedia::noThermalModel::~noThermalModel()
 
 void Foam::porousMedia::noThermalModel::addEnergySource
 (
-    const basicThermo&,
+    const fluidThermo&,
     const volScalarField&,
     fvScalarMatrix&
 ) const

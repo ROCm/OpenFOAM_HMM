@@ -56,16 +56,12 @@ int main(int argc, char *argv[])
         #include "compressibleCourantNo.H"
 
         #include "rhoEqn.H"
-
         #include "UEqn.H"
 
-        #include "eEqn.H"
-
-
         // --- PISO loop
-
         for (int corr=0; corr<nCorr; corr++)
         {
+            #include "eEqn.H"
             #include "pEqn.H"
         }
 

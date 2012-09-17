@@ -48,7 +48,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
-#include "basicThermo.H"
+#include "fluidThermo.H"
 #include "nearWallDist.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -84,7 +84,7 @@ protected:
         const volVectorField& U_;
         const surfaceScalarField& phi_;
 
-        const basicThermo& thermophysicalModel_;
+        const fluidThermo& thermophysicalModel_;
 
         //- Near wall distance boundary field
         nearWallDist y_;
@@ -118,7 +118,7 @@ public:
                 const volScalarField& rho,
                 const volVectorField& U,
                 const surfaceScalarField& phi,
-                const basicThermo& thermoPhysicalModel,
+                const fluidThermo& thermoPhysicalModel,
                 const word& turbulenceModelName
             ),
             (rho, U, phi, thermoPhysicalModel, turbulenceModelName)
@@ -133,7 +133,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel,
+            const fluidThermo& thermoPhysicalModel,
             const word& turbulenceModelName = typeName
         );
 
@@ -146,7 +146,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel,
+            const fluidThermo& thermoPhysicalModel,
             const word& turbulenceModelName = typeName
         );
 
@@ -177,7 +177,7 @@ public:
         }
 
         //- Access function to thermophysical model
-        const basicThermo& thermo() const
+        const fluidThermo& thermo() const
         {
              return thermophysicalModel_;
         }

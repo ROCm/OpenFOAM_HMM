@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::SLGThermo::SLGThermo(const fvMesh& mesh, basicThermo& thermo)
+Foam::SLGThermo::SLGThermo(const fvMesh& mesh, fluidThermo& thermo)
 :
     MeshObject<fvMesh, SLGThermo>(mesh),
     thermo_(thermo),
@@ -91,7 +91,7 @@ Foam::SLGThermo::~SLGThermo()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::basicThermo& Foam::SLGThermo::thermo() const
+const Foam::fluidThermo& Foam::SLGThermo::thermo() const
 {
     return thermo_;
 }
