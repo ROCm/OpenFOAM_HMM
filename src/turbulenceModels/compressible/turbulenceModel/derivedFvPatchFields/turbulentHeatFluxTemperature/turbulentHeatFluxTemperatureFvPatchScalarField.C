@@ -201,7 +201,7 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         case hsPower:
         {
             const scalar Ap = gSum(patch().magSf());
-            gradient() = (q_/Ap + qr)/kappa(Tp));
+            gradient() = (q_/Ap + qr)/kappa(Tp);
             break;
         }
         case hsFlux:
