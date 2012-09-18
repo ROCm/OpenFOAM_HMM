@@ -337,7 +337,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 
     reduce(d, maxOp<scalar>());
 
-    return d;
+    return max(0.0, d);
 }
 
 
