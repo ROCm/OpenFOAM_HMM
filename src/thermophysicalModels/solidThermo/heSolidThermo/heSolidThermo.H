@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class heSolidThermo Declaration
+                        Class heSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MixtureType, class BasicSolidThermo>
@@ -61,6 +61,7 @@ class heSolidThermo
 
         //- Construct as copy (not implemented)
         heSolidThermo(const heSolidThermo<MixtureType, BasicSolidThermo>&);
+
 
 public:
 
@@ -104,30 +105,17 @@ public:
 
         // Per patch calculation
 
-            //- Anisotropic thermal conductivity [W//m/K]
-            virtual tmp<vectorField> Kappa
-            (
-                const label patchI
-            ) const;
+            //- Anisotropic thermal conductivity [W/m/K]
+            virtual tmp<vectorField> Kappa(const label patchI) const;
 
              //- Absorption coefficient [1/m]
-            virtual tmp<scalarField> kappaRad
-            (
-                const label patchI
-            ) const;
+            virtual tmp<scalarField> kappaRad(const label patchI) const;
 
             //- Scatter coefficient
-            virtual tmp<scalarField> sigmaS
-            (
-                const label patchI
-            ) const;
+            virtual tmp<scalarField> sigmaS(const label patchI) const;
 
             //- Emissivity coefficient [1/m]
-            virtual tmp<scalarField> emissivity
-            (
-                const label patchI
-            ) const;
-
+            virtual tmp<scalarField> emissivity(const label patchI) const;
 };
 
 
@@ -135,7 +123,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
 #   include "heSolidThermo.C"
