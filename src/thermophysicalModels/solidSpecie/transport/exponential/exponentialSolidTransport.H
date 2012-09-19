@@ -60,7 +60,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                        Class exponentialSolidTransport Declaration
+                  Class exponentialSolidTransport Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class thermo>
@@ -115,6 +115,9 @@ public:
 
         //- Thermal conductivity [W/mK]
         inline vector Kappa(const scalar T) const;
+
+        //- Write to Ostream
+        void write(Ostream& os) const;
 
 
     // Member operators

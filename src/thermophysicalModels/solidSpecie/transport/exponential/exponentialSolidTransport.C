@@ -46,6 +46,24 @@ Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void Foam::exponentialSolidTransport<thermo>::exponentialSolidTransport::write
+(
+    Ostream& os
+) const
+{
+    thermo::write(os);
+
+    dictionary dict("transport");
+    dict.add("kappa0", kappa0_);
+    dict.add("n0", n0_);
+    dict.add("Tref", Tref_);
+    os  << indent << dict.dictName() << dict;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class thermo>
