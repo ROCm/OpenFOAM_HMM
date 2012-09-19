@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::gaussConvectionScheme
+    Foam::fv::boundedConvectionScheme
 
 Description
-    Basic second-order convection using face-gradients and Gauss' theorem.
+    Bounded form of the selected convection scheme.
+
+    Boundedness is achieved by subtracting div(phi)*vf or Sp(div(phi), vf)
+    which is non-conservative if div(phi) != 0 but conservative otherwise.
+
+    Can be used for convection of bounded scalar properties in steady-state
+    solvers to improve stability if insufficient convergence of the pressure
+    equation causes temporary divergence of the flux field.
 
 SourceFiles
-    gaussConvectionScheme.C
+    boundedConvectionScheme.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef gaussConvectionScheme_H
-#define gaussConvectionScheme_H
+#ifndef boundedConvectionScheme_H
+#define boundedConvectionScheme_H
 
 #include "convectionScheme.H"
 
@@ -47,55 +54,39 @@ namespace Foam
 namespace fv
 {
 
-//- Temporary debug switch to provide warning about backward-compatibility
-//  issue with setting div schemes for steady-state
-extern int warnUnboundedGauss;
-
 /*---------------------------------------------------------------------------*\
-                       Class gaussConvectionScheme Declaration
+                       Class boundedConvectionScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class gaussConvectionScheme
+class boundedConvectionScheme
 :
     public fv::convectionScheme<Type>
 {
     // Private data
 
-        tmp<surfaceInterpolationScheme<Type> > tinterpScheme_;
+        tmp<fv::convectionScheme<Type> > scheme_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        gaussConvectionScheme(const gaussConvectionScheme&);
+        boundedConvectionScheme(const boundedConvectionScheme&);
 
         //- Disallow default bitwise assignment
-        void operator=(const gaussConvectionScheme&);
+        void operator=(const boundedConvectionScheme&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("Gauss");
+    TypeName("bounded");
 
 
     // Constructors
 
-        //- Construct from flux and interpolation scheme
-        gaussConvectionScheme
-        (
-            const fvMesh& mesh,
-            const surfaceScalarField& faceFlux,
-            const tmp<surfaceInterpolationScheme<Type> >& scheme
-        )
-        :
-            convectionScheme<Type>(mesh, faceFlux),
-            tinterpScheme_(scheme)
-        {}
-
         //- Construct from flux and Istream
-        gaussConvectionScheme
+        boundedConvectionScheme
         (
             const fvMesh& mesh,
             const surfaceScalarField& faceFlux,
@@ -103,33 +94,11 @@ public:
         )
         :
             convectionScheme<Type>(mesh, faceFlux),
-            tinterpScheme_
+            scheme_
             (
-                surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
+                fv::convectionScheme<Type>::New(mesh, faceFlux, is)
             )
-        {
-            is.rewind();
-            word bounded(is);
-
-            if
-            (
-                warnUnboundedGauss
-             && word(mesh.ddtScheme("default")) == "steadyState"
-             && bounded != "bounded"
-            )
-            {
-                fileNameList controlDictFiles(findEtcFiles("controlDict"));
-
-                IOWarningIn("gaussConvectionScheme", is)
-                    << "Unbounded 'Gauss' div scheme used in "
-                       "steady-state solver, use 'bounded Gauss' "
-                       "to ensure boundedness.\n"
-                    << "    To remove this warning switch off "
-                    << "'boundedGauss' in "
-                    << controlDictFiles[controlDictFiles.size()-1]
-                    << endl;
-            }
-        }
+        {}
 
 
     // Member Functions
@@ -171,7 +140,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussConvectionScheme.C"
+#   include "boundedConvectionScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

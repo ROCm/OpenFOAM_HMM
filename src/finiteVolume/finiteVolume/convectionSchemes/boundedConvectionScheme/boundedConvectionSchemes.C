@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,61 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-    rhoSimpleFoam
-
-Description
-    Steady-state SIMPLE solver for laminar or turbulent RANS flow of
-    compressible fluids.
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "psiThermo.H"
-#include "RASModel.H"
-#include "simpleControl.H"
+#include "boundedConvectionScheme.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-    #include "createMesh.H"
-
-    simpleControl simple(mesh);
-
-    #include "createFields.H"
-    #include "initContinuityErrs.H"
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    Info<< "\nStarting time loop\n" << endl;
-
-    while (simple.loop())
-    {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
-
-        // Pressure-velocity SIMPLE corrector
-        {
-            #include "UEqn.H"
-            #include "EEqn.H"
-            #include "pEqn.H"
-        }
-
-        turbulence->correct();
-
-        runTime.write();
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info<< "End\n" << endl;
-
-    return 0;
+namespace fv
+{
+    makeFvConvectionScheme(boundedConvectionScheme)
 }
-
+}
 
 // ************************************************************************* //

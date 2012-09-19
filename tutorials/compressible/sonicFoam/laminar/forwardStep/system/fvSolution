@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    p
+    "p.*"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -25,14 +25,14 @@ solvers
         relTol          0;
     }
 
-    "(U|e)"
+    "(U|e).*"
     {
         $p;
         tolerance       1e-05;
         relTol          0;
     }
 
-    rho
+    "rho.*"
     {
         solver          PCG;
         preconditioner  DIC;
@@ -41,9 +41,10 @@ solvers
     }
 }
 
-PISO
+PIMPLE
 {
-    nCorrectors     2;
+    nOuterCorrectors 2;
+    nCorrectors      1;
     nNonOrthogonalCorrectors 0;
 }
 

@@ -5,6 +5,7 @@
         rhoThermo::New(mesh)
     );
     rhoThermo& thermo = pThermo();
+    thermo.validate(args.executable(), "h", "e");
 
     volScalarField rho
     (
@@ -20,7 +21,6 @@
     );
 
     volScalarField& p = thermo.p();
-    volScalarField& e = thermo.he();
 
     Info<< "Reading field U\n" << endl;
     volVectorField U

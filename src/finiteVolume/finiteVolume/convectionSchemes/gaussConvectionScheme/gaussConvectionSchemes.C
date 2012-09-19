@@ -32,6 +32,11 @@ namespace Foam
 {
 namespace fv
 {
+    int warnUnboundedGauss
+    (
+        Foam::debug::debugSwitch("warnUnboundedGauss", true)
+    );
+
     makeFvConvectionScheme(gaussConvectionScheme)
 }
 }

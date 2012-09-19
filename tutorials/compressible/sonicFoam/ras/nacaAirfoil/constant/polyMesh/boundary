@@ -32,6 +32,7 @@ FoamFile
     SYMP3
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          80000;
         startFace       80170;
     }

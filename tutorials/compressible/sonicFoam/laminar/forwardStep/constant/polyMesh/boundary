@@ -32,12 +32,14 @@ FoamFile
     bottom
     {
         type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          25;
         startFace       10415;
     }
     top
     {
         type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          125;
         startFace       10440;
     }
@@ -50,6 +52,7 @@ FoamFile
     defaultFaces
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          10500;
         startFace       10675;
     }

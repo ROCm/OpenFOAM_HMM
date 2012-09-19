@@ -147,6 +147,24 @@ makeBasicMixture
     pureMixture,
     constTransport,
     sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
     hConstThermo,
     perfectGas
 );
