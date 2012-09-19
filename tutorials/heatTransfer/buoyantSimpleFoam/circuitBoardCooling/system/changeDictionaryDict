@@ -77,7 +77,7 @@ dictionaryReplacement
         {
             "baffle.*"
             {
-                type            buoyantPressure;
+                type            fixedFluxPressure;
                 value           uniform 0;
             }
         }
