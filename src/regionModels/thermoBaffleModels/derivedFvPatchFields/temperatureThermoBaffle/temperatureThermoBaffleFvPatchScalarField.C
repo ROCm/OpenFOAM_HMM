@@ -123,7 +123,7 @@ temperatureThermoBaffleFvPatchScalarField
      && !owner_
     )
     {
-        Info << "Creating thermal baffle..." <<  nbrMesh << endl;
+        Info << "Creating thermal baffle" <<  nbrMesh << endl;
         baffle_.reset(baffle::New(thisMesh, dict).ptr());
         owner_ = true;
         dict.lookup("thermoType") >> solidThermoType_;
