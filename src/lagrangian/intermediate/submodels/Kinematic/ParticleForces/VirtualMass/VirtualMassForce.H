@@ -28,7 +28,6 @@ Description
     Calculates particle virtual mass force
 
 SourceFiles
-    VirtualMassForceI.H
     VirtualMassForce.C
 
 \*---------------------------------------------------------------------------*/
@@ -36,9 +35,7 @@ SourceFiles
 #ifndef VirtualMassForce_H
 #define VirtualMassForce_H
 
-#include "ParticleForce.H"
-#include "volFields.H"
-#include "interpolation.H"
+#include "PressureGradientForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,21 +49,12 @@ namespace Foam
 template<class CloudType>
 class VirtualMassForce
 :
-    public ParticleForce<CloudType>
+    public PressureGradientForce<CloudType>
 {
     // Private data
 
-        //- Name of velocity field
-        const word UName_;
-
         //- Virtual mass coefficient - typically 0.5
         scalar Cvm_;
-
-        //- Rate of change of carrier phase velocity
-        volVectorField* DUcDtPtr_;
-
-        //- Rate of change of carrier phase velocity interpolator
-        autoPtr<interpolation<vector> > DUcDtInterpPtr_;
 
 
 public:
@@ -82,7 +70,8 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& forceType = typeName
         );
 
         //- Construct copy
@@ -103,15 +92,6 @@ public:
 
 
     // Member Functions
-
-        // Access
-
-            //- Return the rate of change of carrier phase velocity
-            inline const volVectorField& DUcDt() const;
-
-            //- Return the rate of change of carrier phase velocity interpolator
-            inline const interpolation<vector>& DUcDtInterp() const;
-
 
         // Evaluation
 
@@ -142,8 +122,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "VirtualMassForceI.H"
 
 #ifdef NoRepository
     #include "VirtualMassForce.C"

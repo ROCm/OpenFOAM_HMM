@@ -470,8 +470,8 @@ public:
             //- Total rotational kinetic energy in the system
             inline scalar rotationalKineticEnergyOfSystem() const;
 
-            //- Penetration for percentage of the current total mass
-            inline scalar penetration(const scalar& prc) const;
+            //- Penetration for fraction [0-1] of the current total mass
+            inline scalar penetration(const scalar& fraction) const;
 
             //- Mean diameter Dij
             inline scalar Dij(const label i, const label j) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,23 +26,20 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-const Foam::volTensorField& Foam::PressureGradientForce<CloudType>::gradU()
-const
+inline const Foam::interpolation<Foam::vector>&
+Foam::PressureGradientForce<CloudType>::DUcDtInterp() const
 {
-    if (gradUPtr_)
-    {
-        return *gradUPtr_;
-    }
-    else
+    if (!DUcDtInterpPtr_.valid())
     {
         FatalErrorIn
         (
-            "const volTensorField& PressureGradientForce<CloudType>::gradU()"
-            "const"
-        )   << "gradU field not allocated" << abort(FatalError);
-
-        return *reinterpret_cast<const volTensorField*>(0);
+            "inline const Foam::interpolation<Foam::vector>&"
+            "Foam::PressureGradientForce<CloudType>::DUcDtInterp() const"
+        )   << "Carrier phase DUcDt interpolation object not set"
+            << abort(FatalError);
     }
+
+    return DUcDtInterpPtr_();
 }
 
 

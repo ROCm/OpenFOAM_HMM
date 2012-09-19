@@ -506,7 +506,7 @@ void Foam::autoSnapDriver::dumpMove
 )
 {
     // Dump direction of growth into file
-    Pout<< nl << "Dumping move direction to " << fName << endl;
+    Info<< "Dumping move direction to " << fName << endl;
 
     OFstream nearestStream(fName);
 
@@ -721,14 +721,14 @@ void Foam::autoSnapDriver::preSmoothPatch
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing patch smoothed mesh to time "
+        Info<< "Writing patch smoothed mesh to time "
             << meshRefiner_.timeName() << '.' << endl;
         meshRefiner_.write
         (
             debug,
             mesh.time().path()/meshRefiner_.timeName()
         );
-        Pout<< "Dumped mesh in = "
+        Info<< "Dumped mesh in = "
             << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
     }
 
@@ -998,7 +998,7 @@ void Foam::autoSnapDriver::smoothDisplacement
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing smoothed mesh to time " << meshRefiner_.timeName()
+        Info<< "Writing smoothed mesh to time " << meshRefiner_.timeName()
             << endl;
 
         // Moving mesh creates meshPhi. Can be cleared out by a mesh.clearOut
@@ -1010,13 +1010,12 @@ void Foam::autoSnapDriver::smoothDisplacement
             debug,
             mesh.time().path()/meshRefiner_.timeName()
         );
-
-        Pout<< "Writing displacement field ..." << endl;
+        Info<< "Writing displacement field ..." << endl;
         disp.write();
         tmp<pointScalarField> magDisp(mag(disp));
         magDisp().write();
 
-        Pout<< "Writing actual patch displacement ..." << endl;
+        Info<< "Writing actual patch displacement ..." << endl;
         vectorField actualPatchDisp(disp, pp.meshPoints());
         dumpMove
         (
@@ -1068,11 +1067,11 @@ bool Foam::autoSnapDriver::scaleMesh
         if (debug)
         {
             const_cast<Time&>(mesh.time())++;
-            Pout<< "Writing scaled mesh to time " << meshRefiner_.timeName()
+            Info<< "Writing scaled mesh to time " << meshRefiner_.timeName()
                 << endl;
             mesh.write();
 
-            Pout<< "Writing displacement field ..." << endl;
+            Info<< "Writing displacement field ..." << endl;
             meshMover.displacement().write();
             tmp<pointScalarField> magDisp(mag(meshMover.displacement()));
             magDisp().write();
@@ -1521,14 +1520,14 @@ void Foam::autoSnapDriver::doSnap
             if (debug)
             {
                 const_cast<Time&>(mesh.time())++;
-                Pout<< "Writing scaled mesh to time "
+                Info<< "Writing scaled mesh to time "
                     << meshRefiner_.timeName() << endl;
                 meshRefiner_.write
                 (
                     debug,
                     mesh.time().path()/meshRefiner_.timeName()
                 );
-                Pout<< "Writing displacement field ..." << endl;
+                Info<< "Writing displacement field ..." << endl;
                 meshMover.displacement().write();
                 tmp<pointScalarField> magDisp(mag(meshMover.displacement()));
                 magDisp().write();
@@ -1564,7 +1563,7 @@ void Foam::autoSnapDriver::doSnap
     if (nChanged > 0 && debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing patchFace merged mesh to time "
+        Info<< "Writing patchFace merged mesh to time "
             << meshRefiner_.timeName() << endl;
         meshRefiner_.write
         (

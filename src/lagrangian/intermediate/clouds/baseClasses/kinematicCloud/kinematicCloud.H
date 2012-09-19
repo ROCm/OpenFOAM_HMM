@@ -89,7 +89,7 @@ public:
             virtual scalar rotationalKineticEnergyOfSystem() const = 0;
 
             //- Penetration for percentage of the current total mass
-//            virtual scalar penetration(const scalar& prc) const = 0;
+//            virtual scalar penetration(const scalar& fraction) const = 0;
 
             //- Mean diameter Dij
             virtual scalar Dij(const label i, const label j) const = 0;

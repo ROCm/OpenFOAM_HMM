@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ SourceFiles
 
 #include "ParticleForce.H"
 #include "volFields.H"
+#include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,13 +54,15 @@ class PressureGradientForce
 :
     public ParticleForce<CloudType>
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Name of velocity field
         const word UName_;
 
-        //- Velocity gradient field
-        const volTensorField* gradUPtr_;
+        //- Rate of change of carrier phase velocity interpolator
+        autoPtr<interpolation<vector> > DUcDtInterpPtr_;
 
 
 public:
@@ -75,7 +78,8 @@ public:
         (
             CloudType& owner,
             const fvMesh& mesh,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& forceType = typeName
         );
 
         //- Construct copy
@@ -99,8 +103,8 @@ public:
 
         // Access
 
-            //- Return const access to the velocity gradient field
-            inline const volTensorField& gradU() const;
+            //- Return the rate of change of carrier phase velocity interpolator
+            inline const interpolation<vector>& DUcDtInterp() const;
 
 
         // Evaluation
@@ -116,6 +120,13 @@ public:
                 const scalar mass,
                 const scalar Re,
                 const scalar muc
+            ) const;
+
+            //- Return the added mass
+            virtual scalar massAdd
+            (
+                const typename CloudType::parcelType& p,
+                const scalar mass
             ) const;
 };
 

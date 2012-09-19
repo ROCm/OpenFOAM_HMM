@@ -51,7 +51,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class GenEddyVisc Declaration
+                         Class GenEddyVisc Declaration
 \*---------------------------------------------------------------------------*/
 
 class GenEddyVisc
@@ -108,7 +108,21 @@ public:
         //- Return sub-grid disipation rate
         virtual tmp<volScalarField> epsilon() const
         {
-            return ce_*k()*sqrt(k())/delta();
+            return tmp<volScalarField>
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (   
+                        "epsilon",
+                        runTime_.timeName(),
+                        mesh_,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    ce_*k()*sqrt(k())/delta()
+                )
+            );
         }
 
         //- Return viscosity

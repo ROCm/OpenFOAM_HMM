@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VirtualMassForce.H"
-#include "fvcDdt.H"
-#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -34,14 +32,12 @@ Foam::VirtualMassForce<CloudType>::VirtualMassForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& forceType
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
-    UName_(this->coeffs().template lookupOrDefault<word>("U", "U")),
-    Cvm_(readScalar(this->coeffs().lookup("Cvm"))),
-    DUcDtPtr_(NULL),
-    DUcDtInterpPtr_(NULL)
+    PressureGradientForce<CloudType>(owner, mesh, dict, forceType),
+    Cvm_(readScalar(this->coeffs().lookup("Cvm")))
 {}
 
 
@@ -51,11 +47,8 @@ Foam::VirtualMassForce<CloudType>::VirtualMassForce
     const VirtualMassForce& vmf
 )
 :
-    ParticleForce<CloudType>(vmf),
-    UName_(vmf.UName_),
-    Cvm_(vmf.Cvm_),
-    DUcDtPtr_(NULL),
-    DUcDtInterpPtr_(NULL)
+    PressureGradientForce<CloudType>(vmf),
+    Cvm_(vmf.Cvm_)
 {}
 
 
@@ -71,36 +64,7 @@ Foam::VirtualMassForce<CloudType>::~VirtualMassForce()
 template<class CloudType>
 void Foam::VirtualMassForce<CloudType>::cacheFields(const bool store)
 {
-    if (store && !DUcDtPtr_)
-    {
-        const volVectorField& Uc = this->mesh().template
-            lookupObject<volVectorField>(UName_);
-
-        DUcDtPtr_ = new volVectorField
-        (
-            "DUcDt",
-            fvc::ddt(Uc) + (Uc & fvc::grad(Uc))
-        );
-
-        DUcDtInterpPtr_.reset
-        (
-            interpolation<vector>::New
-            (
-                this->owner().solution().interpolationSchemes(),
-                *DUcDtPtr_
-            ).ptr()
-        );
-    }
-    else
-    {
-        DUcDtInterpPtr_.clear();
-
-        if (DUcDtPtr_)
-        {
-            delete DUcDtPtr_;
-            DUcDtPtr_ = NULL;
-        }
-    }
+    PressureGradientForce<CloudType>::cacheFields(store);
 }
 
 
@@ -114,12 +78,10 @@ Foam::forceSuSp Foam::VirtualMassForce<CloudType>::calcCoupled
     const scalar muc
 ) const
 {
-    forceSuSp value(vector::zero, 0.0);
+    forceSuSp value =
+        PressureGradientForce<CloudType>::calcCoupled(p, dt, mass, Re, muc);
 
-    vector DUcDt =
-        DUcDtInterp().interpolate(p.position(), p.currentTetIndices());
-
-    value.Su() = mass*p.rhoc()/p.rho()*Cvm_*DUcDt;
+    value.Su() *= Cvm_;
 
     return value;
 }

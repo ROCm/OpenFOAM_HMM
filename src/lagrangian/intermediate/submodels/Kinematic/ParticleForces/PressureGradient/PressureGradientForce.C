@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PressureGradientForce.H"
+#include "fvcDdt.H"
 #include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -33,12 +34,13 @@ Foam::PressureGradientForce<CloudType>::PressureGradientForce
 (
     CloudType& owner,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& forceType
 )
 :
-    ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
-    UName_(this->coeffs().lookup("U")),
-    gradUPtr_(NULL)
+    ParticleForce<CloudType>(owner, mesh, dict, forceType, true),
+    UName_(this->coeffs().template lookupOrDefault<word>("U", "U")),
+    DUcDtInterpPtr_(NULL)
 {}
 
 
@@ -50,7 +52,7 @@ Foam::PressureGradientForce<CloudType>::PressureGradientForce
 :
     ParticleForce<CloudType>(pgf),
     UName_(pgf.UName_),
-    gradUPtr_(NULL)
+    DUcDtInterpPtr_(NULL)
 {}
 
 
@@ -66,18 +68,48 @@ Foam::PressureGradientForce<CloudType>::~PressureGradientForce()
 template<class CloudType>
 void Foam::PressureGradientForce<CloudType>::cacheFields(const bool store)
 {
+    static word fName("DUcDt");
+
+    bool fieldExists = this->mesh().template foundObject<volVectorField>(fName);
+
     if (store)
     {
-        const volVectorField& U = this->mesh().template
-            lookupObject<volVectorField>(UName_);
-        gradUPtr_ = fvc::grad(U).ptr();
+        if (!fieldExists)
+        {
+            const volVectorField& Uc = this->mesh().template
+                lookupObject<volVectorField>(UName_);
+
+            volVectorField* DUcDtPtr = new volVectorField
+            (
+                fName,
+                fvc::ddt(Uc) + (Uc & fvc::grad(Uc))
+            );
+
+            DUcDtPtr->store();
+        }
+
+        const volVectorField& DUcDt = this->mesh().template
+            lookupObject<volVectorField>(fName);
+
+        DUcDtInterpPtr_.reset
+        (
+            interpolation<vector>::New
+            (
+                this->owner().solution().interpolationSchemes(),
+                DUcDt
+            ).ptr()
+        );
     }
     else
     {
-        if (gradUPtr_)
+        DUcDtInterpPtr_.clear();
+
+        if (fieldExists)
         {
-            delete gradUPtr_;
-            gradUPtr_ = NULL;
+            const volVectorField& DUcDt = this->mesh().template
+                lookupObject<volVectorField>(fName);
+
+            const_cast<volVectorField&>(DUcDt).checkOut();
         }
     }
 }
@@ -95,10 +127,23 @@ Foam::forceSuSp Foam::PressureGradientForce<CloudType>::calcCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    const volTensorField& gradU = *gradUPtr_;
-    value.Su() = mass*p.rhoc()/p.rho()*(p.U() & gradU[p.cell()]);
+    vector DUcDt =
+        DUcDtInterp().interpolate(p.position(), p.currentTetIndices());
+
+    value.Su() = mass*p.rhoc()/p.rho()*DUcDt;
 
     return value;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::PressureGradientForce<CloudType>::massAdd
+(
+    const typename CloudType::parcelType&,
+    const scalar
+) const
+{
+    return 0.0;
 }
 
 
