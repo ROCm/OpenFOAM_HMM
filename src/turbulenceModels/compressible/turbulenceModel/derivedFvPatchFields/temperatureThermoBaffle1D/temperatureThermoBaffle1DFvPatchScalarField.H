@@ -68,7 +68,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             dictionary  transportDict_;
             dictionary  radiationDict_;
             dictionary  thermoDict_;
-            dictionary  densityDict_;
+            dictionary  eosDict_;
 
 
     public:
@@ -81,7 +81,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             transportDict_(dict.subDict("transport")),
             radiationDict_(dict.subDict("radiation")),
             thermoDict_(dict.subDict("thermodynamics")),
-            densityDict_(dict.subDict("equationOfState"))
+            eosDict_(dict.subDict("equationOfState"))
         {}
 
 
@@ -93,7 +93,7 @@ class temperatureThermoBaffle1DFvPatchScalarField
             transportDict_(),
             radiationDict_(),
             thermoDict_(),
-            densityDict_()
+            eosDict_()
         {}
 
 
@@ -114,10 +114,9 @@ class temperatureThermoBaffle1DFvPatchScalarField
                 os << radiationDict_ <<  nl;
                 os.writeKeyword("thermodynamics");
                 os << thermoDict_ << nl;
-                os.writeKeyword("density");
-                os << densityDict_ << nl;
+                os.writeKeyword("equationOfState");
+                os << eosDict_ << nl;
             }
-
 
             scalar kappa(const scalar T) const
             {
