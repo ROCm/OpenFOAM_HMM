@@ -15,32 +15,32 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 1 -1 0 0 0 0 ];
+dimensions      [0 1 -1 0 0 0 0];
 
-internalField   uniform ( 0.1 0 0 );
+internalField   uniform (0.1 0 0);
 
 boundaryField
 {
     floor
     {
         type            fixedValue;
-        value           uniform ( 0 0 0 );
+        value           uniform (0 0 0);
     }
     ceiling
     {
         type            fixedValue;
-        value           uniform ( 0 0 0 );
+        value           uniform (0 0 0);
     }
     inlet
     {
         type            fixedValue;
-        value           uniform ( 0.1 0 0 );
+        value           uniform (0.1 0 0);
     }
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform ( 0 0 0 );
-        value           uniform ( 0 0 0 );
+        inletValue      uniform (0 0 0);
+        value           uniform (0.1 0 0);
     }
     fixedWalls
     {

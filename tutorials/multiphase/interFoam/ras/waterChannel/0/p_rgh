@@ -34,7 +34,7 @@ boundaryField
 
     ".*"
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           uniform 0;
     }
 }

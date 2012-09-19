@@ -102,7 +102,7 @@ dictionaryReplacement
         {
             ".*"
             {
-                type            buoyantPressure;
+                type            fixedFluxPressure;
                 value           uniform 1e5;
             }
         }
