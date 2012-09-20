@@ -179,16 +179,13 @@ export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 # external (ThirdParty) libraries
 export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
+# site-specific directory
+siteDir="${WM_PROJECT_SITE:-$WM_PROJECT_INST_DIR/site}"
+
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-if [ -n "$WM_PROJECT_SITE" ]
-then
-    export FOAM_SITE_APPBIN=$WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-    export FOAM_SITE_LIBBIN=$WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
-else
-    export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-    export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
-fi
+export FOAM_SITE_APPBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 
 # user executables/libraries
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
@@ -211,6 +208,17 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 # add OpenFOAM scripts to the path
 export PATH=$WM_PROJECT_DIR/bin:$PATH
 
+# add site-specific scripts to path - only if they exist
+if [ -d "$siteDir/bin" ]                        # generic
+then
+    _foamAddPath "$siteDir/bin"
+fi
+if [ -d "$siteDir/$WM_PROJECT_VERSION/bin" ]    # version-specific
+then
+    _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
+fi
+unset siteDir
+
 _foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
 # Make sure to pick up dummy versions of external libraries last
 _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN:$FOAM_EXT_LIBBIN:$FOAM_LIBBIN/dummy
@@ -232,6 +240,12 @@ fi
 case "${foamCompiler}" in
 OpenFOAM | ThirdParty)
     case "$WM_COMPILER" in
+    Gcc463)
+        gcc_version=gcc-4.6.3
+        gmp_version=gmp-5.0.2
+        mpfr_version=mpfr-3.0.1
+        mpc_version=mpc-0.9
+        ;;
     Gcc | Gcc++0x | Gcc46 | Gcc46++0x)
         gcc_version=gcc-4.6.1
         gmp_version=gmp-5.0.4

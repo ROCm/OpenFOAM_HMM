@@ -151,15 +151,17 @@ setenv FOAM_LIBBIN $WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 # external (ThirdParty) libraries
 setenv FOAM_EXT_LIBBIN $WM_THIRD_PARTY_DIR/platforms/$WM_OPTIONS/lib
 
+# site-specific directory
+if ( $?WM_PROJECT_SITE ) then
+    set siteDir=$WM_PROJECT_SITE
+else
+    set siteDir=$WM_PROJECT_INST_DIR/site
+endif
+
 # shared site executables/libraries
 # similar naming convention as ~OpenFOAM expansion
-if ( $?WM_PROJECT_SITE ) then
-    setenv FOAM_SITE_APPBIN $WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-    setenv FOAM_SITE_LIBBIN $WM_PROJECT_SITE/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
-else
-    setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-    setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
-endif
+setenv FOAM_SITE_APPBIN $siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
+setenv FOAM_SITE_LIBBIN $siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 
 # user executables/libraries
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
@@ -181,6 +183,15 @@ setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 if ( -d "${WM_DIR}" ) setenv PATH ${WM_DIR}:${PATH}
 # add OpenFOAM scripts to the path
 setenv PATH ${WM_PROJECT_DIR}/bin:${PATH}
+
+# add site-specific scripts to path - only if they exist
+if ( -d "$siteDir/bin" ) then                       # generic
+    _foamAddPath "$siteDir/bin"
+endif
+if ( -d "$siteDir/$WM_PROJECT_VERSION/bin" ) then   # version-specific
+    _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
+endif
+unset siteDir
 
 _foamAddPath ${FOAM_USER_APPBIN}:${FOAM_SITE_APPBIN}:${FOAM_APPBIN}
 # Make sure to pick up dummy versions of external libraries last
