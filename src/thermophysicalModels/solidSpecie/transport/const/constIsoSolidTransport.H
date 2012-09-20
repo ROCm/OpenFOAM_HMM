@@ -63,7 +63,7 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                         Class constIsoSolidTransport Declaration
+                   Class constIsoSolidTransport Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class thermo>
@@ -73,18 +73,14 @@ class constIsoSolidTransport
 {
     // Private data
 
-        //- Constant isotropic thermal conductivity.
+        //- Constant isotropic thermal conductivity
         scalar kappa_;
 
 
     // Private Member Functions
 
         //- Construct from components
-        inline constIsoSolidTransport
-        (
-            const thermo& t,
-            const scalar kappa
-        );
+        inline constIsoSolidTransport(const thermo& t, const scalar kappa);
 
 
 public:
@@ -99,8 +95,7 @@ public:
         );
 
         //- Construct from Istream
-        //constIsoSolidTransport(Istream&);
-        constIsoSolidTransport(const dictionary&);
+        constIsoSolidTransport(const dictionary& dict);
 
 
     // Member functions
@@ -110,6 +105,9 @@ public:
 
         //- Un-isotropic thermal conductivity [W/mK]
         inline vector Kappa(const scalar T) const;
+
+        //- Write to Ostream
+        void write(Ostream& os) const;
 
 
     // Member operators

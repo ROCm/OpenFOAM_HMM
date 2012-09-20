@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
         // Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
-            #include "eEqn.H"
+            #include "EEqn.H"
             #include "pEqn.H"
         }
 

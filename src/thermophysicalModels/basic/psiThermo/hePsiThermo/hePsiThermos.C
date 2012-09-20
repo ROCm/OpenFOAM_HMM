@@ -84,27 +84,27 @@ makeThermo
 
 /* * * * * * * * * * * * * * Internal-energy-based * * * * * * * * * * * * * */
 
-// makeThermo
-// (
-//     psiThermo,
-//     hePsiThermo,
-//     pureMixture,
-//     constTransport,
-//     sensibleInternalEnergy,
-//     eConstThermo,
-//     perfectGas
-// );
+makeThermo
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas
+);
 
-// makeThermo
-// (
-//     psiThermo,
-//     hePsiThermo,
-//     pureMixture,
-//     sutherlandTransport,
-//     sensibleInternalEnergy,
-//     eConstThermo,
-//     perfectGas
-// );
+makeThermo
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas
+);
 
 makeThermo
 (

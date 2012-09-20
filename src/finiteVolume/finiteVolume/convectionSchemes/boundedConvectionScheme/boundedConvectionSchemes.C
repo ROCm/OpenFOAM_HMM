@@ -23,44 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "boundedConvectionScheme.H"
+#include "fvMesh.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-const Foam::volVectorField& Foam::VirtualMassForce<CloudType>::DUcDt() const
+namespace Foam
 {
-    if (DUcDtPtr_)
-    {
-        return *DUcDtPtr_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "const volVectorField& VirtualMassForce<CloudType>::DUcDt()"
-            "const"
-        )   << "DUcDt field not allocated" << abort(FatalError);
-
-        return *reinterpret_cast<const volVectorField*>(0);
-    }
-}
-
-
-template<class CloudType>
-inline const Foam::interpolation<Foam::vector>&
-Foam::VirtualMassForce<CloudType>::DUcDtInterp() const
+namespace fv
 {
-    if (!DUcDtInterpPtr_.valid())
-    {
-        FatalErrorIn
-        (
-            "inline const Foam::interpolation<Foam::vector>&"
-            "Foam::VirtualMassForce<CloudType>::DUcDtInterp() const"
-        )   << "Carrier pahase DUcDt interpolation object not set"
-            << abort(FatalError);
-    }
-
-    return DUcDtInterpPtr_();
+    makeFvConvectionScheme(boundedConvectionScheme)
 }
-
+}
 
 // ************************************************************************* //

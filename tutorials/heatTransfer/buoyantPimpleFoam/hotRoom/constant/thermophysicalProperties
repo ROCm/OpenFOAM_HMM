@@ -15,7 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      heRhoThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>,sensibleEnthalpy>>>>;
+thermoType heRhoThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>,sensibleEnthalpy>>>>;
+//thermoType heRhoThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>,sensibleInternalEnergy>>>>;
 
 pRef            100000;
 

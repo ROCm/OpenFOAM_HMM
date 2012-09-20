@@ -37,6 +37,7 @@ Description
             heatSource      flux;        // power [W]; flux [W/m2]
             q               uniform 10;  // heat power or flux
             kappa           fluidThermo; // calculate kappa=alphaEff*thermo.Cp
+            Qr              none;        // name of the radiative flux
             value           uniform 300; // initial temperature value
         }
 
@@ -92,6 +93,9 @@ private:
 
         //- Heat power [W] or flux [W/m2]
         scalarField q_;
+
+        //- Name of radiative in flux field
+        word QrName_;
 
 
 public:

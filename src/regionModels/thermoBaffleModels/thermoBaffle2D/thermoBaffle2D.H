@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,9 +132,7 @@ public:
             const word& modelType,
             const fvMesh& mesh,
             const dictionary& dict
-
         );
-
 
 
     //- Destructor
@@ -182,6 +180,7 @@ public:
                 //- Return sensible enthalpy/internal energy
                 inline tmp<volScalarField> he() const;
 
+
         // Evolution
 
             //- Pre-evolve  thermal baffle
@@ -189,7 +188,6 @@ public:
 
             //- Evolve the thermal baffle
             virtual void evolveRegion();
-
 
 
        // I-O

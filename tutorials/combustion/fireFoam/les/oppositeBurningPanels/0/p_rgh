@@ -53,7 +53,7 @@ boundaryField
 
     "(region0_to.*)"
     {
-        type            buoyantPressure;
+        type            fixedFluxPressure;
         value           $internalField;
     }
 }

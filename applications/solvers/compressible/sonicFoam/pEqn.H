@@ -17,7 +17,8 @@ surfaceScalarField phid
 
 volScalarField Dp("Dp", rho*rAU);
 
-for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+// Non-orthogonal pressure corrector loop
+while (pimple.correctNonOrthogonal())
 {
     fvScalarMatrix pEqn
     (
@@ -28,7 +29,7 @@ for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 
     pEqn.solve();
 
-    if (nonOrth == nNonOrthCorr)
+    if (pimple.finalNonOrthogonalIter())
     {
         phi = pEqn.flux();
     }

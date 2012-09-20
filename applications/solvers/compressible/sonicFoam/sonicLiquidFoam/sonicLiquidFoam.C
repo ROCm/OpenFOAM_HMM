@@ -31,6 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
+    pimpleControl pimple(mesh);
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
@@ -52,57 +55,59 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readPISOControls.H"
+        #include "readTimeControls.H"
         #include "compressibleCourantNo.H"
 
         #include "rhoEqn.H"
 
-        fvVectorMatrix UEqn
-        (
-            fvm::ddt(rho, U)
-          + fvm::div(phi, U)
-          - fvm::laplacian(mu, U)
-        );
-
-        solve(UEqn == -fvc::grad(p));
-
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
         {
-            volScalarField rAU(1.0/UEqn.A());
-            U = rAU*UEqn.H();
-
-            surfaceScalarField phid
+            fvVectorMatrix UEqn
             (
-                "phid",
-                psi
-               *(
-                    (fvc::interpolate(U) & mesh.Sf())
-                  + fvc::ddtPhiCorr(rAU, rho, U, phi)
-                )
+                fvm::ddt(rho, U)
+              + fvm::div(phi, U)
+              - fvm::laplacian(mu, U)
             );
 
-            phi = (rhoO/psi)*phid;
-            volScalarField Dp("Dp", rho*rAU);
+            solve(UEqn == -fvc::grad(p));
 
-            fvScalarMatrix pEqn
-            (
-                fvm::ddt(psi, p)
-              + fvc::div(phi)
-              + fvm::div(phid, p)
-              - fvm::laplacian(Dp, p)
-            );
+            // --- Pressure corrector loop
+            while (pimple.correct())
+            {
+                volScalarField rAU(1.0/UEqn.A());
+                U = rAU*UEqn.H();
 
-            pEqn.solve();
+                surfaceScalarField phid
+                (
+                    "phid",
+                    psi
+                   *(
+                       (fvc::interpolate(U) & mesh.Sf())
+                     + fvc::ddtPhiCorr(rAU, rho, U, phi)
+                   )
+                );
 
-            phi += pEqn.flux();
+                phi = (rhoO/psi)*phid;
+                volScalarField Dp("Dp", rho*rAU);
 
-            #include "compressibleContinuityErrs.H"
+                fvScalarMatrix pEqn
+                (
+                    fvm::ddt(psi, p)
+                  + fvc::div(phi)
+                  + fvm::div(phid, p)
+                  - fvm::laplacian(Dp, p)
+                );
 
-            U -= rAU*fvc::grad(p);
-            U.correctBoundaryConditions();
+                pEqn.solve();
+
+                phi += pEqn.flux();
+
+                #include "compressibleContinuityErrs.H"
+
+                U -= rAU*fvc::grad(p);
+                U.correctBoundaryConditions();
+            }
         }
 
         rho = rhoO + psi*p;

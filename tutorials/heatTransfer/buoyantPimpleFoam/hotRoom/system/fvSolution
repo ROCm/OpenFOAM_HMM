@@ -39,7 +39,7 @@ solvers
         relTol          0;
     }
 
-    "(U|h|k|epsilon|R)"
+    "(U|h|e|k|epsilon|R)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -47,7 +47,7 @@ solvers
         relTol          0.1;
     }
 
-    "(U|h|k|epsilon|R)Final"
+    "(U|h|e|k|epsilon|R)Final"
     {
         $U;
         relTol          0;

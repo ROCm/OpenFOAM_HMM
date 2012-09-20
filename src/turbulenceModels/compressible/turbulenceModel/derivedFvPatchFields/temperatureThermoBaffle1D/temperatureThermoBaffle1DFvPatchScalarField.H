@@ -48,7 +48,7 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-        Class temperatureThermoBaffle1DFvPatchScalarField Declaration
+         Class temperatureThermoBaffle1DFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class solidType>
@@ -57,74 +57,6 @@ class temperatureThermoBaffle1DFvPatchScalarField
     public mixedFvPatchScalarField
 {
     // Private data
-
-    class solidThermoData
-    {
-            // Solid thermo
-            autoPtr<solidType> solidPtr_;
-
-            // Solid dictionaries
-            dictionary  specieDict_;
-            dictionary  transportDict_;
-            dictionary  radiationDict_;
-            dictionary  thermoDict_;
-            dictionary  densityDict_;
-
-
-    public:
-
-        // Constructor from components
-        solidThermoData(const dictionary& dict)
-        :
-            solidPtr_(new solidType(dict)),
-            specieDict_(dict.subDict("specie")),
-            transportDict_(dict.subDict("transport")),
-            radiationDict_(dict.subDict("radiation")),
-            thermoDict_(dict.subDict("thermodynamics")),
-            densityDict_(dict.subDict("equationOfState"))
-        {}
-
-
-        // Null constructor
-        solidThermoData()
-        :
-            solidPtr_(),
-            specieDict_(),
-            transportDict_(),
-            radiationDict_(),
-            thermoDict_(),
-            densityDict_()
-        {}
-
-
-        // Destructor
-        virtual ~solidThermoData()
-        {}
-
-
-        // Member Functions
-
-            void write(Ostream& os) const
-            {
-                os.writeKeyword("specie");
-                os << specieDict_  << nl;
-                os.writeKeyword("transport");
-                os << transportDict_  << nl;
-                os.writeKeyword("radiation");
-                os << radiationDict_ <<  nl;
-                os.writeKeyword("thermodynamics");
-                os << thermoDict_ << nl;
-                os.writeKeyword("density");
-                os << densityDict_ << nl;
-            }
-
-
-            scalar kappa(const scalar T) const
-            {
-                return solidPtr_().kappa(T);
-            }
-    };
-
 
         //- Name of the temperature field
         word TName_;
@@ -138,8 +70,16 @@ class temperatureThermoBaffle1DFvPatchScalarField
         //- Superficial heat source [W/m2]
         scalarField Qs_;
 
-        //- Solid thermo
-        autoPtr<solidThermoData> solid_;
+        // Solid thermo
+        autoPtr<solidType> solidPtr_;
+
+
+    // Private Member Functions
+
+        scalar kappa(const scalar T) const
+        {
+            return solidPtr_().kappa(T);
+        }
 
 
 public:

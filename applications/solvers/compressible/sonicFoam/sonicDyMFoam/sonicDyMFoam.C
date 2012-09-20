@@ -34,6 +34,7 @@ Description
 #include "psiThermo.H"
 #include "turbulenceModel.H"
 #include "motionSolver.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
+
+    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,19 +65,23 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
-        #include "UEqn.H"
-
-        #include "eEqn.H"
-
-
-        // --- PISO loop
-
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        while (pimple.loop())
         {
-            #include "pEqn.H"
-        }
+            #include "UEqn.H"
+            #include "EEqn.H"
 
-        turbulence->correct();
+            // --- Pressure corrector loop
+            while (pimple.correct())
+            {
+                #include "pEqn.H"
+            }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
+            }
+        }
 
         rho = thermo.rho();
 
