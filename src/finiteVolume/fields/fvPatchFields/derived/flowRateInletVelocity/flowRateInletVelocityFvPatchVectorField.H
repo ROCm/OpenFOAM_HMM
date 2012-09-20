@@ -28,21 +28,25 @@ Description
     Describes a volumetric/mass flow normal vector boundary condition by its
     magnitude as an integral over its area.
 
-    The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
-
-    If the flux is mass-based
-    - the current density is used to correct the velocity
-    - volumetric flow rate can be applied by setting the 'rho' entry to 'none'
+    Either specify 'volumetricFlowRate' or 'massFlowRate' (requires additional
+    'rho' entry).
 
     Example of the boundary condition specification:
     \verbatim
     inlet
     {
-        type        flowRateInletVelocity;
-        flowRate    0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
-        rho         rho;        // none | rho [m3/s or kg/s]
-        value       uniform (0 0 0); // placeholder
+        type                flowRateInletVelocity;
+        volumetricFlowRate  0.2;  // Volumetric [m3/s]
+    }
+    \endverbatim
+
+    \verbatim
+    inlet
+    {
+        type                flowRateInletVelocity;
+        volumetricFlowRate  0.2;  // mass flow rate [kg/s]
+        rho                 rho;  // rho [m3/s or kg/s]
+        value               uniform (0 0 0); // placeholder
     }
     \endverbatim
 
@@ -79,11 +83,14 @@ class flowRateInletVelocityFvPatchVectorField
         //- Inlet integral flow rate
         autoPtr<DataEntry<scalar> > flowRate_;
 
-        //- Name of the flux transporting the field
-        word phiName_;
+        //- Is volumetric?
+        bool volumetric_;
 
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
+
+        //- Rho initialisation value (for start; if value not supplied)
+        scalar rhoInlet_;
 
 
 public:
@@ -156,6 +163,10 @@ public:
 
 
     // Member functions
+
+        //- Update the coefficients associated with the patch field given
+        //  uniform density field
+        void updateCoeffs(const scalar uniformRho);
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

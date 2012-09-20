@@ -19,25 +19,29 @@ FoamFile
 (
     maxY
     {
-        type            empty;
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          400;
         startFace       22800;
     }
     minX
     {
-        type            empty;
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          400;
         startFace       23200;
     }
     maxX
     {
-        type            empty;
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          400;
         startFace       23600;
     }
     minY
     {
-        type            empty;
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          400;
         startFace       24000;
     }
@@ -49,7 +53,8 @@ FoamFile
     }
     maxZ
     {
-        type            empty;
+        type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          400;
         startFace       24800;
     }

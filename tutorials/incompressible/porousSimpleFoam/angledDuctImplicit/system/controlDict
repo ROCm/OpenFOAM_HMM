@@ -17,7 +17,7 @@ FoamFile
 
 application     porousSimpleFoam;
 
-startFrom       startTime;
+startFrom       latestTime; //startTime;
 
 startTime       0;
 
