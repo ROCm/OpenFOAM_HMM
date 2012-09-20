@@ -46,6 +46,7 @@ boundary
         (
             (3 7 6 2)
         );
+        inGroups (groupWall);
     }
     fixedWalls
     {
@@ -56,6 +57,7 @@ boundary
             (2 6 5 1)
             (1 5 4 0)
         );
+        inGroups (groupWall);
     }
     frontAndBack
     {

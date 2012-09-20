@@ -53,7 +53,6 @@ class motionDiffusivity;
 
 class displacementSBRStressFvMotionSolver
 :
-//    public displacementFvMotionSolver
     public displacementMotionSolver,
     public fvMotionSolverCore
 {
@@ -65,6 +64,8 @@ class displacementSBRStressFvMotionSolver
         //- Diffusivity used to control the motion
         autoPtr<motionDiffusivity> diffusivityPtr_;
 
+        //- Solve on base mesh
+        Switch solveOnPoints0_;
 
     // Private Member Functions
 
