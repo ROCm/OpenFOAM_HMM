@@ -35,9 +35,10 @@ Description
         enabled         true;
         outputControl   outputTime;
         log             true;       // log to screen?
-        valueOutput     true;       // Write values at run-time output times?
-        source          faceZone;   // Type of face source:
-                                    // faceZone,patch,sampledSurface
+        valueOutput     true;       // write the output values
+        surfaceFormat   none;       // output value format (if valueOutput)
+        source          faceZone;   // type of face source:
+                                    // faceZone, patch, sampledSurface
         sourceName      f0;         // faceZone name, see below
         operation       sum;
         weightField     alpha1;     // optional weight field
@@ -97,6 +98,7 @@ SourceFiles
 #include "fieldValue.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -166,10 +168,20 @@ private:
         //- Set faces according to sampledSurface
         void sampledSurfaceFaces(const dictionary&);
 
+        //- Combine faces and points from multiple processors 
+        void combineSurfaceGeometry
+        (
+            faceList& faces,
+            pointField& points
+        ) const;
+
 
 protected:
 
     // Protected data
+
+        //- Surface writer
+        autoPtr<surfaceWriter> surfaceWriterPtr_;
 
         //- Source type
         sourceType source_;
@@ -184,7 +196,7 @@ protected:
         label nFaces_;
 
 
-        // If operating on mesh faces (faceZone,patch)
+        // If operating on mesh faces (faceZone, patch)
 
             //- Local list of face IDs
             labelList faceId_;
@@ -195,6 +207,7 @@ protected:
             //- List of +1/-1 representing face flip map
             //  (1 use as is, -1 negate)
             labelList faceSign_;
+
 
         // If operating on sampledSurface
 

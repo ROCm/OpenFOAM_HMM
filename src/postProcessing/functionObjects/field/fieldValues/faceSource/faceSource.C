@@ -29,6 +29,8 @@ License
 #include "emptyPolyPatch.H"
 #include "coupledPolyPatch.H"
 #include "sampledSurface.H"
+#include "mergePoints.H"
+#include "indirectPrimitivePatch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -222,6 +224,127 @@ void Foam::fieldValues::faceSource::sampledSurfaceFaces(const dictionary& dict)
 }
 
 
+void Foam::fieldValues::faceSource::combineSurfaceGeometry
+(
+    faceList& faces,
+    pointField& points
+) const
+{
+    List<faceList> allFaces(Pstream::nProcs());
+    List<pointField> allPoints(Pstream::nProcs());
+
+    labelList globalFacesIs(faceId_);
+    forAll(globalFacesIs, i)
+    {
+        if (facePatchId_[i] != -1)
+        {
+            label patchI = facePatchId_[i];
+            globalFacesIs[i] += mesh().boundaryMesh()[patchI].start();
+        }
+    }
+
+    // Add local faces and points to the all* lists
+    indirectPrimitivePatch pp
+    (
+        IndirectList<face>(mesh().faces(), globalFacesIs),
+        mesh().points()
+    );
+    allFaces[Pstream::myProcNo()] = pp.localFaces();
+    allPoints[Pstream::myProcNo()] = pp.localPoints();
+
+    Pstream::gatherList(allFaces);
+    Pstream::gatherList(allPoints);
+
+    // Renumber and flatten
+    label nFaces = 0;
+    label nPoints = 0;
+    forAll(allFaces, procI)
+    {
+        nFaces += allFaces[procI].size();
+        nPoints += allPoints[procI].size();
+    }
+
+    faces.setSize(nFaces);
+    points.setSize(nPoints);
+
+    nFaces = 0;
+    nPoints = 0;
+
+    // My own data first
+    {
+        const faceList& fcs = allFaces[Pstream::myProcNo()];
+        forAll(fcs, i)
+        {
+            const face& f = fcs[i];
+            face& newF = faces[nFaces++];
+            newF.setSize(f.size());
+            forAll(f, fp)
+            {
+                newF[fp] = f[fp] + nPoints;
+            }
+        }
+
+        const pointField& pts = allPoints[Pstream::myProcNo()];
+        forAll(pts, i)
+        {
+            points[nPoints++] = pts[i];
+        }
+    }
+
+    // Other proc data follows
+    forAll(allFaces, procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            const faceList& fcs = allFaces[procI];
+            forAll(fcs, i)
+            {
+                const face& f = fcs[i];
+                face& newF = faces[nFaces++];
+                newF.setSize(f.size());
+                forAll(f, fp)
+                {
+                    newF[fp] = f[fp] + nPoints;
+                }
+            }
+
+            const pointField& pts = allPoints[procI];
+            forAll(pts, i)
+            {
+                points[nPoints++] = pts[i];
+            }
+        }
+    }
+
+    // Merge
+    labelList oldToNew;
+    pointField newPoints;
+    bool hasMerged = mergePoints
+    (
+        points,
+        SMALL,
+        false,
+        oldToNew,
+        newPoints
+    );
+
+    if (hasMerged)
+    {
+        if (debug)
+        {
+            Pout<< "Merged from " << points.size()
+                << " down to " << newPoints.size() << " points" << endl;
+        }
+
+        points.transfer(newPoints);
+        forAll(faces, i)
+        {
+            inplaceRenumber(oldToNew, faces[i]);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
@@ -291,6 +414,14 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
     }
 
     Info<< nl << endl;
+
+    if (valueOutput_)
+    {
+        surfaceWriterPtr_.reset
+        (
+            surfaceWriter::New(dict.lookup("surfaceFormat")).ptr()
+        );
+    }
 }
 
 
@@ -355,6 +486,7 @@ Foam::fieldValues::faceSource::faceSource
 )
 :
     fieldValue(name, obr, dict, loadFromFiles),
+    surfaceWriterPtr_(NULL),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
     weightFieldName_("none"),
