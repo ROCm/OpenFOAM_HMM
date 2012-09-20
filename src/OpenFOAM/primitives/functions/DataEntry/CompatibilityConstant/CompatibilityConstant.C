@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,8 @@ License
 template<class Type>
 Foam::CompatibilityConstant<Type>::CompatibilityConstant
 (
-    const word& entryName, const dictionary& dict
+    const word& entryName,
+    const dictionary& dict
 )
 :
     DataEntry<Type>(entryName),
@@ -68,6 +69,7 @@ Foam::CompatibilityConstant<Type>::CompatibilityConstant
     value_(cnst.value_),
     dimensions_(cnst.dimensions_)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
