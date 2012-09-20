@@ -110,7 +110,7 @@ void Foam::wallShearStress::calcShearStress
 
             if (log_)
             {
-                Info<< "   min/max(" << pp.name() << ") = "
+                Info<< "    min/max(" << pp.name() << ") = "
                     << minSsp << ", " << maxSsp << endl;
             }
         }
