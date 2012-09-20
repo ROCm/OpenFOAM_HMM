@@ -99,76 +99,6 @@ void Foam::autoLayerDriver::sumWeights
 
 
 // Smooth field on moving patch
-//void Foam::autoLayerDriver::smoothField
-//(
-//    const motionSmoother& meshMover,
-//    const PackedBoolList& isMasterEdge,
-//    const labelList& meshEdges,
-//    const scalarField& fieldMin,
-//    const label nSmoothDisp,
-//    scalarField& field
-//) const
-//{
-//    const indirectPrimitivePatch& pp = meshMover.patch();
-//    const edgeList& edges = pp.edges();
-//    const labelList& meshPoints = pp.meshPoints();
-//
-//    scalarField invSumWeight(pp.nPoints());
-//    sumWeights
-//    (
-//        isMasterEdge,
-//        meshEdges,
-//        meshPoints,
-//        edges,
-//        invSumWeight
-//    );
-//
-//    // Get smoothly varying patch field.
-//    Info<< "shrinkMeshDistance : Smoothing field ..." << endl;
-//
-//    for (label iter = 0; iter < nSmoothDisp; iter++)
-//    {
-//        scalarField average(pp.nPoints());
-//        averageNeighbours
-//        (
-//            meshMover.mesh(),
-//            isMasterEdge,
-//            meshEdges,
-//            meshPoints,
-//            pp.edges(),
-//            invSumWeight,
-//            field,
-//            average
-//        );
-//
-//        // Transfer to field
-//        forAll(field, pointI)
-//        {
-//            //full smoothing neighbours + point value
-//            average[pointI] = 0.5*(field[pointI]+average[pointI]);
-//
-//            // perform monotonic smoothing
-//            if
-//            (
-//                average[pointI] < field[pointI]
-//             && average[pointI] >= fieldMin[pointI]
-//            )
-//            {
-//                field[pointI] = average[pointI];
-//            }
-//        }
-//
-//        // Do residual calculation every so often.
-//        if ((iter % 10) == 0)
-//        {
-//            Info<< "    Iteration " << iter << "   residual "
-//                <<  gSum(mag(field-average))
-//                   /returnReduce(average.size(), sumOp<label>())
-//                << endl;
-//        }
-//    }
-//}
-//XXXXXXXXX
 void Foam::autoLayerDriver::smoothField
 (
     const motionSmoother& meshMover,
@@ -196,15 +126,9 @@ void Foam::autoLayerDriver::smoothField
     // Get smoothly varying patch field.
     Info<< "shrinkMeshDistance : Smoothing field ..." << endl;
 
-
-    const scalar lambda = 0.33;
-    const scalar mu = -0.34;
-
-    for (label iter = 0; iter < 90; iter++)
+    for (label iter = 0; iter < nSmoothDisp; iter++)
     {
         scalarField average(pp.nPoints());
-
-        // Calculate average of field
         averageNeighbours
         (
             meshMover.mesh(),
@@ -217,36 +141,22 @@ void Foam::autoLayerDriver::smoothField
             average
         );
 
-        forAll(field, i)
+        // Transfer to field
+        forAll(field, pointI)
         {
-            if (field[i] >= fieldMin[i])
+            //full smoothing neighbours + point value
+            average[pointI] = 0.5*(field[pointI]+average[pointI]);
+
+            // perform monotonic smoothing
+            if
+            (
+                average[pointI] < field[pointI]
+             && average[pointI] >= fieldMin[pointI]
+            )
             {
-                field[i] = (1-lambda)*field[i]+lambda*average[i];
+                field[pointI] = average[pointI];
             }
         }
-
-
-        // Calculate average of field
-        averageNeighbours
-        (
-            meshMover.mesh(),
-            isMasterEdge,
-            meshEdges,
-            meshPoints,
-            pp.edges(),
-            invSumWeight,
-            field,
-            average
-        );
-
-        forAll(field, i)
-        {
-            if (field[i] >= fieldMin[i])
-            {
-                field[i] = (1-mu)*field[i]+mu*average[i];
-            }
-        }
-
 
         // Do residual calculation every so often.
         if ((iter % 10) == 0)
@@ -258,6 +168,96 @@ void Foam::autoLayerDriver::smoothField
         }
     }
 }
+//XXXXXXXXX
+//void Foam::autoLayerDriver::smoothField
+//(
+//    const motionSmoother& meshMover,
+//    const PackedBoolList& isMasterEdge,
+//    const labelList& meshEdges,
+//    const scalarField& fieldMin,
+//    const label nSmoothDisp,
+//    scalarField& field
+//) const
+//{
+//    const indirectPrimitivePatch& pp = meshMover.patch();
+//    const edgeList& edges = pp.edges();
+//    const labelList& meshPoints = pp.meshPoints();
+//
+//    scalarField invSumWeight(pp.nPoints());
+//    sumWeights
+//    (
+//        isMasterEdge,
+//        meshEdges,
+//        meshPoints,
+//        edges,
+//        invSumWeight
+//    );
+//
+//    // Get smoothly varying patch field.
+//    Info<< "shrinkMeshDistance : (lambda-mu) Smoothing field ..." << endl;
+//
+//
+//    const scalar lambda = 0.33;
+//    const scalar mu = -0.34;
+//
+//    for (label iter = 0; iter < 90; iter++)
+//    {
+//        scalarField average(pp.nPoints());
+//
+//        // Calculate average of field
+//        averageNeighbours
+//        (
+//            meshMover.mesh(),
+//            isMasterEdge,
+//            meshEdges,
+//            meshPoints,
+//            pp.edges(),
+//            invSumWeight,
+//            field,
+//            average
+//        );
+//
+//        forAll(field, i)
+//        {
+//            if (field[i] >= fieldMin[i])
+//            {
+//                field[i] = (1-lambda)*field[i]+lambda*average[i];
+//            }
+//        }
+//
+//
+//        // Calculate average of field
+//        averageNeighbours
+//        (
+//            meshMover.mesh(),
+//            isMasterEdge,
+//            meshEdges,
+//            meshPoints,
+//            pp.edges(),
+//            invSumWeight,
+//            field,
+//            average
+//        );
+//
+//        forAll(field, i)
+//        {
+//            if (field[i] >= fieldMin[i])
+//            {
+//                field[i] = (1-mu)*field[i]+mu*average[i];
+//            }
+//        }
+//
+//
+//        // Do residual calculation every so often.
+//        if ((iter % 10) == 0)
+//        {
+//            Info<< "    Iteration " << iter << "   residual "
+//                <<  gSum(mag(field-average))
+//                   /returnReduce(average.size(), sumOp<label>())
+//                << endl;
+//        }
+//    }
+//}
 //XXXXXXXXX
 
 // Smooth normals on moving patch.

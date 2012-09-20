@@ -25,6 +25,7 @@ solver displacementSBRStress;   //displacementLaplacian;
 
 displacementSBRStressCoeffs
 {
+    solveOnPoints0 true;
     // diffusivity  uniform;
     // diffusivity  directional (1 200 0);
     // diffusivity  motionDirectional (1 1000 0);
