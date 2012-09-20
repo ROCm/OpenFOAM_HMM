@@ -119,7 +119,7 @@ singleStepCombustion<CombThermoType, ThermoType>::R
     {
         const label fNorm = singleMixturePtr_->specieProd()[specieI];
         const volScalarField fres(singleMixturePtr_->fres(specieI));
-        wSpecie /= max(fNorm*(Y - fres), 1e-2);
+        wSpecie /= max(fNorm*(Y - fres), scalar(1e-2));
 
         return -fNorm*wSpecie*fres + fNorm*fvm::Sp(wSpecie, Y);
     }
