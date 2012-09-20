@@ -964,4 +964,34 @@ DimensionedConstants
 }
 
 
+DimensionSets
+{
+    unitSet             SI; // USCS
+
+    SICoeffs
+    {
+        // Basic units
+        kg  kg  [ 1 0 0 0 0 0 0 ] 1.0;
+        m   m   [ 0 1 0 0 0 0 0 ] 1.0;
+        s   s   [ 0 0 1 0 0 0 0 ] 1.0;
+        K   K   [ 0 0 0 1 0 0 0 ] 1.0;
+        mol mol [ 0 0 0 0 1 0 0 ] 1.0;
+        A   A   [ 0 0 0 0 0 1 0 ] 1.0;
+        Cd  Cd  [ 0 0 0 0 0 0 1 ] 1.0;
+
+        // Derived units
+        Pa  Pa  [ kg^1 m^-2 ] 1.0;
+
+        // Scaled units
+        mm  mm  [ kg^1 m^-2 ] 1e-3;
+
+
+        // Set of units used for printing. Can be any basic or derived
+        // but not scaled (only supported for dimensionedScalar, etc)
+        printUnits (kg m s K mol A Cd);
+    }
+}
+
+
+
 // ************************************************************************* //
