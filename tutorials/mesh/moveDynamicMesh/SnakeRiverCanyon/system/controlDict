@@ -17,23 +17,23 @@ FoamFile
 
 application     moveDynamicMesh;
 
-startFrom       latestTime; //startTime;
+startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         30;
+endTime         25;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   1;
+writeInterval   5;
 
 purgeWrite      0;
 
-writeFormat     ascii;//binary;
+writeFormat     binary;
 
 writePrecision  6;
 

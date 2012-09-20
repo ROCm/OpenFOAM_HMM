@@ -35,18 +35,6 @@ geometry
         radius 4;
     }
 
-//    // Define floor just so we have feature edges behave correctly
-//    floor
-//    {
-//        type searchablePlane;
-//        planeType       pointAndNormal;
-//        pointAndNormalDict
-//        {
-//            basePoint       (0 0 0);
-//            normalVector    (0 0 1);
-//        }
-//    }
-
     box1
     {
         type searchableBox;
@@ -199,11 +187,6 @@ castellatedMeshControls
             // Surface-wise min and max refinement level
             level (1 1);
         }
-//        floor
-//        {
-//            // Surface-wise min and max refinement level
-//            level (1 1);
-//        }
     }
 
     // Resolve sharp angles on fridges
@@ -252,10 +235,7 @@ snapControls
 {
     //- Number of patch smoothing iterations before finding correspondence
     //  to surface
-//    nSmoothPatch 3;
-//nSmoothPatch 0;     //! Only since blockMesh aligned with surfaces it is
-                    //  actually beneficial to run with 0 smoothing.
-nSmoothPatch 1;
+    nSmoothPatch 3;
 
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
@@ -314,7 +294,7 @@ addLayersControls
     //  Relative to undistorted size of cell outside layer.
     //  is the thickness of the layer furthest away from the wall.
     //  See relativeSizes parameter.
-    finalLayerThickness 1;
+    finalLayerThickness 0.5;
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
@@ -393,7 +373,7 @@ meshQualityControls
 // 1 : write intermediate meshes
 // 2 : write volScalarField with cellLevel for postprocessing
 // 4 : write current intersections as .obj files
-debug 7;
+debug 0;
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.

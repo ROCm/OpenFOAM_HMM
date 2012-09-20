@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Which of the steps to run
-castellatedMesh false;
+castellatedMesh true;
 snap            true;
 addLayers       false;
 
@@ -85,10 +85,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-//        {
-//            file "flange.eMesh";
-//            level 0;
-//        }
+        {
+            file "flange.eMesh";
+            level 0;
+        }
     );
 
 
@@ -182,10 +182,10 @@ snapControls
         nFeatureSnapIter 10;
 
         //- Detect (geometric) features by sampling the surface
-        implicitFeatureSnap true;
+        implicitFeatureSnap false;
 
         //- Use castellatedMeshControls::features
-        explicitFeatureSnap false;
+        explicitFeatureSnap true;
 }
 
 

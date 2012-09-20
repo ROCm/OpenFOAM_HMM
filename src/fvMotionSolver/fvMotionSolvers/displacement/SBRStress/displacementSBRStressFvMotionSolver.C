@@ -81,14 +81,8 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
     diffusivityPtr_
     (
         motionDiffusivity::New(fvMesh_, coeffDict().lookup("diffusivity"))
-    ),
-    solveOnPoints0_(coeffDict().lookupOrDefault("solveOnPoints0", false))
-{
-    if (solveOnPoints0_)
-    {
-        Info<< type() << " : solving on points0" << endl;
-    }
-}
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -129,18 +123,11 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
     diffusivityPtr_->correct();
     pointDisplacement_.boundaryField().updateCoeffs();
 
-    pointField oldPoints;
-    if (solveOnPoints0_)
-    {
-        oldPoints = fvMesh_.points();
-        movePoints(points0());
-    }
-
     surfaceScalarField Df(diffusivityPtr_->operator()());
 
     volTensorField gradCd(fvc::grad(cellDisplacement_));
 
-    tmp<fvMatrix<vector> > laplacianDf
+    Foam::solve
     (
         fvm::laplacian
         (
@@ -148,16 +135,7 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
             cellDisplacement_,
             "laplacian(diffusivity,cellDisplacement)"
         )
-    );
 
-//    if (solveOnPoints0_)
-//    {
-//        movePoints(oldPoints);
-//    }
-
-    Foam::solve
-    (
-        laplacianDf
       + fvc::div
         (
             Df
@@ -195,12 +173,6 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
         )
         */
     );
-
-    if (solveOnPoints0_)
-    {
-        movePoints(points0());
-    }
-
 }
 
 
