@@ -359,6 +359,20 @@ FoamFile
 //        cellSet c0;       // name of cellSet of slave side
 //    }
 //
+//
+// pointZoneSet
+// ~~~~~~~~~~~~
+// (mirrors operations on a pointSet into a pointZone)
+//
+//    // Select based on pointSet
+//    source setToPointZone;
+//    sourceInfo
+//    {
+//        set p0;           // name of pointSet
+//    }
+//
+//
+//
 
 actions
 (
