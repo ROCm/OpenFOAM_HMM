@@ -7,9 +7,15 @@ cd ${0%/*} || exit 1    # run from this directory
 # create mesh
 runApplication blockMesh
 
+cp -r 0.org 0
+
 # initialise with potentialFoam solution
 runApplication potentialFoam
+
 rm -f 0/phi
+
+# change flowRateInletVelocity to massFlowRate
+runApplication changeDictionary
 
 # run the solver
 runApplication `getApplication`

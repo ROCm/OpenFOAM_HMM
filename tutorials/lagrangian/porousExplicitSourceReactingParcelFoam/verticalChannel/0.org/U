@@ -32,13 +32,15 @@ boundaryField
     inletCentral
     {
         type            flowRateInletVelocity;
-        massFlowRate    constant 0.00379;
+        //massFlowRate    constant 0.00379;
+        volumetricFlowRate    constant 0.00379;
         value           uniform (0 14.68 0);
     }
     inletSides
     {
         type            flowRateInletVelocity;
-        massFlowRate    constant 0.00832;
+        //massFlowRate  constant 0.00832;
+        volumetricFlowRate  constant 0.00832;
         value           uniform (0 17.79 0);
     }
     outlet
