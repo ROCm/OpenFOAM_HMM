@@ -374,10 +374,8 @@ void kOmegaSST::correct()
     (
         fvm::ddt(omega_)
       + fvm::div(phi_, omega_)
-      - fvm::Sp(fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(F1), omega_)
       + fvm::div(CDkPhiOmega, omega_)
-      - fvm::Sp(fvc::div(CDkPhiOmega), omega_)
      ==
         gamma(F1)*2*S2
       - fvm::Sp(beta(F1)*omega_, omega_)
@@ -395,7 +393,6 @@ void kOmegaSST::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
-      - fvm::Sp(fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(F1), k_)
      ==
         min(G, c1_*betaStar_*k_*omega_)
