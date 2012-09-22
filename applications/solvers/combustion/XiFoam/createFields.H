@@ -5,6 +5,8 @@
         psiuReactionThermo::New(mesh)
     );
     psiuReactionThermo& thermo = pThermo();
+    thermo.validate(args.executable(), "ha");
+
     basicMultiComponentMixture& composition = thermo.composition();
 
     volScalarField rho

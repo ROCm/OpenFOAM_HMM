@@ -66,6 +66,8 @@ constantProperties
     Pr              0.7;
     Tvap            273;
     Tbp             373;
+    LDevol          0;
+    hRetentionCoeff 1;
 
     constantVolume  false;
 }
@@ -107,9 +109,13 @@ subModels
 
     heatTransferModel RanzMarshall;
 
-    compositionModel singlePhaseMixture;
+    compositionModel singleMixtureFraction;
 
     phaseChangeModel liquidEvaporation;
+
+    devolatilisationModel none;
+
+    surfaceReactionModel none;
 
     surfaceFilmModel none;
 
@@ -125,15 +131,24 @@ subModels
         BirdCorrection  true;
     }
 
-    singlePhaseMixtureCoeffs
+    singleMixtureFractionCoeffs
     {
         phases
         (
+            gas
+            {
+            }
             liquid
             {
                 H2O          1;
             }
+            solid
+            {
+            }
         );
+        YGasTot0        0;
+        YLiquidTot0     1;
+        YSolidTot0      0;
     }
 
     liquidEvaporationCoeffs

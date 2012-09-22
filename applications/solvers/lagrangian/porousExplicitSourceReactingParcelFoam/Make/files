@@ -1,3 +1,0 @@
-porousExplicitSourceReactingParcelFoam.C
-
-EXE = $(FOAM_APPBIN)/porousExplicitSourceReactingParcelFoam

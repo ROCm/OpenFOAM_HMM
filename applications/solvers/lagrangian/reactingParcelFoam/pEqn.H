@@ -1,64 +1,42 @@
-rho = thermo.rho();
-
-volScalarField rAU(1.0/UEqn.A());
-volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn == sources(rho, U))().H();
-
-if (pimple.transonic())
 {
-    surfaceScalarField phid
-    (
-        "phid",
-        fvc::interpolate(psi)
-       *(
-            (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        )
-    );
+    rho = thermo.rho();
 
-    while (pimple.correctNonOrthogonal())
+    // Thermodynamic density needs to be updated by psi*d(p) after the
+    // pressure solution - done in 2 parts. Part 1:
+    thermo.rho() -= psi*p;
+
+    volScalarField rAU(1.0/UEqn.A());
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*(UEqn == sources(rho, U))().H();
+
+    surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
+    if (pZones.size() == 0)
     {
-        fvScalarMatrix pEqn
-        (
-            fvm::ddt(psi, p)
-          + fvm::div(phid, p)
-          - fvm::laplacian(rho*rAU, p)
-         ==
-            parcels.Srho()
-          + sources(psi, p, rho.name())
-        );
-
-        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
-
-        if (pimple.finalNonOrthogonalIter())
-        {
-            phi == pEqn.flux();
-        }
+        // ddtPhiCorr only used without porosity
+        phiHbyA += fvc::ddtPhiCorr(rAU, rho, U, phi);
     }
-}
-else
-{
-    surfaceScalarField phiHbyA
+
+    phiHbyA *= fvc::interpolate(rho);
+
+
+    fvScalarMatrix pDDtEqn
     (
-        "phiHbyA",
-        fvc::interpolate(rho)
-       *(
-            (fvc::interpolate(HbyA) & mesh.Sf())
-          + fvc::ddtPhiCorr(rAU, rho, U, phi)
-        )
+        fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+      + fvc::div(phiHbyA)
+     ==
+        parcels.Srho()
+      + sources(psi, p, rho.name())
     );
 
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
         (
-            fvm::ddt(psi, p)
-          + fvc::div(phiHbyA)
+            pDDtEqn
           - fvm::laplacian(rho*rAU, p)
-         ==
-            parcels.Srho()
-          + sources(psi, p, rho.name())
         );
+
+        sources.constrain(pDDtEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -67,17 +45,28 @@ else
             phi = phiHbyA + pEqn.flux();
         }
     }
-}
 
-#include "rhoEqn.H"
-#include "compressibleContinuityErrs.H"
+    p.relax();
 
-U = HbyA - rAU*fvc::grad(p);
-U.correctBoundaryConditions();
-sources.correct(U);
-K = 0.5*magSqr(U);
+    // Second part of thermodynamic density update
+    thermo.rho() += psi*p;
 
-if (thermo.dpdt())
-{
-    dpdt = fvc::ddt(p);
+    #include "rhoEqn.H" // NOTE: flux and time scales now inconsistent
+    #include "compressibleContinuityErrs.H"
+
+    U = HbyA - rAU*fvc::grad(p);
+    U.correctBoundaryConditions();
+    sources.correct(U);
+    K = 0.5*magSqr(U);
+
+    if (thermo.dpdt())
+    {
+        dpdt = fvc::ddt(p);
+    }
+
+    rho = thermo.rho();
+    rho = max(rho, rhoMin);
+    rho = min(rho, rhoMax);
+
+    Info<< "p min/max = " << min(p).value() << ", " << max(p).value() << endl;
 }
