@@ -6,6 +6,7 @@ cd ${0%/*} || exit 1    # run from this directory
 cleanCase
 
 rm -rf VTK
+rm -rf 0
 rm -rf constant/polyMesh/sets constant/polyMesh/faces
 rm -rf constant/polyMesh/faces
 rm -rf constant/polyMesh/points

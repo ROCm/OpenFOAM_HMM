@@ -5,7 +5,7 @@
         psiuReactionThermo::New(mesh)
     );
     psiuReactionThermo& thermo = pThermo();
-    thermo.validate(args.executable(), "ha");
+    thermo.validate(args.executable(), "ha", "ea");
 
     basicMultiComponentMixture& composition = thermo.composition();
 
@@ -24,13 +24,9 @@
 
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
-    volScalarField& ha = thermo.he();
-    volScalarField& hau = thermo.heu();
 
     volScalarField& b = composition.Y("b");
     Info<< "min(b) = " << min(b).value() << endl;
-
-    //const volScalarField& T = thermo->T();
 
     Info<< "\nReading field U\n" << endl;
     volVectorField U
@@ -198,6 +194,6 @@
     }
 
     fields.add(b);
-    fields.add(ha);
-    fields.add(hau);
+    fields.add(thermo.he());
+    fields.add(thermo.heu());
     flameWrinkling->addXi(fields);

@@ -47,22 +47,27 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     Y[inertIndex] = scalar(1) - Yt;
     Y[inertIndex].max(0.0);
 
-    fvScalarMatrix hsEqn
+    volScalarField& he = thermo.he();
+
+    fvScalarMatrix EEqn
     (
-        fvm::ddt(rho, hs)
-      + mvConvection->fvmDiv(phi, hs)
-      - fvm::laplacian(turbulence->alphaEff(), hs)
+        fvm::ddt(rho, he) + mvConvection->fvmDiv(phi, he)
+      + fvc::ddt(rho, K) + fvc::div(phi, K)
+      + (
+            he.name() == "e"
+          ? fvc::div(phi, volScalarField("Ep", p/rho))
+          : -dpdt
+        )
+      - fvm::laplacian(turbulence->alphaEff(), he)
      ==
-        dpdt
-      - (fvc::ddt(rho, K) + fvc::div(phi, K))
-      + combustion->Sh()
+        combustion->Sh()
       + radiation->Sh(thermo)
-      + parcels.Sh(hs)
+      + parcels.Sh(he)
       + surfaceFilm.Sh()
     );
 
-    hsEqn.relax();
-    hsEqn.solve();
+    EEqn.relax();
+    EEqn.solve();
 
     thermo.correct();
 

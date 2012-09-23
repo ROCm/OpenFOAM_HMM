@@ -97,12 +97,12 @@ int main(int argc, char *argv[])
 
             #include "ftEqn.H"
             #include "bEqn.H"
-            #include "hauEqn.H"
-            #include "haEqn.H"
+            #include "EauEqn.H"
+            #include "EaEqn.H"
 
             if (!ign.ignited())
             {
-                hau == ha;
+                thermo.heu() == thermo.he();
             }
 
             // --- Pressure corrector loop

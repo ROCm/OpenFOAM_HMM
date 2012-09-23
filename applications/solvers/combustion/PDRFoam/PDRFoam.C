@@ -123,12 +123,12 @@ int main(int argc, char *argv[])
             {
                 #include "bEqn.H"
                 #include "ftEqn.H"
-                #include "hauEqn.H"
-                #include "haEqn.H"
+                #include "EauEqn.H"
+                #include "EaEqn.H"
 
                 if (!ign.ignited())
                 {
-                    hau == ha;
+                    thermo.heu() == thermo.he();
                 }
 
                 #include "pEqn.H"
