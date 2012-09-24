@@ -2,10 +2,7 @@ mixtures/basicMixture/basicMixture.C
 mixtures/basicMixture/basicMixtures.C
 
 basicThermo/basicThermo.C
-basicThermo/basicThermoNew.C
-
 fluidThermo/fluidThermo.C
-fluidThermo/fluidThermoNew.C
 
 psiThermo/psiThermo/psiThermo.C
 psiThermo/psiThermo/psiThermoNew.C

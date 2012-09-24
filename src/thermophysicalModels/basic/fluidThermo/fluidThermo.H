@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     fluidThermo.C
-    fluidThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -76,9 +75,6 @@ public:
         //- Construct from mesh
         fluidThermo(const fvMesh&, const dictionary&);
 
-
-    //- Selector
-    static autoPtr<fluidThermo> New(const fvMesh&);
 
     //- Destructor
     virtual ~fluidThermo();

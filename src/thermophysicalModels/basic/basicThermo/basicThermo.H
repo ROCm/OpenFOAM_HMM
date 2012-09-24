@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     basicThermo.C
-    basicThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -101,9 +100,6 @@ public:
         //- Construct from mesh
         basicThermo(const fvMesh&, const dictionary&);
 
-
-    //- Selector
-    static autoPtr<basicThermo> New(const fvMesh&);
 
     //- Destructor
     virtual ~basicThermo();
