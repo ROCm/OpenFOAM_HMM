@@ -48,7 +48,7 @@ typedef Cthermo                                                               \
             <                                                                 \
                 Thermo                                                        \
                 <                                                             \
-                    EqnOfState                                                \
+                    EqnOfState<specie>                                        \
                 >,                                                            \
                 Type                                                          \
             >                                                                 \
@@ -97,7 +97,7 @@ typedef polynomialTransport                                                   \
     <                                                                         \
         hPolynomialThermo                                                     \
         <                                                                     \
-            icoPolynomial<Order>,                                             \
+            icoPolynomial<specie, Order>,                                     \
             Order                                                             \
         >,                                                                    \
         Type                                                                  \

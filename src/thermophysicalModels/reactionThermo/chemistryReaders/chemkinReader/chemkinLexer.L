@@ -619,7 +619,7 @@ bool finishReaction = false;
             currentSpecieName,
             new gasThermoPhysics
             (
-                janafThermo<perfectGas>
+                janafThermo<perfectGas<specie> >
                 (
                     specie
                     (

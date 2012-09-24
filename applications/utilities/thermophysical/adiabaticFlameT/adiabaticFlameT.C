@@ -36,15 +36,16 @@ Description
 #include "IFstream.H"
 #include "OSspecific.H"
 
-#include "thermo.H"
-#include "absoluteEnthalpy.H"
-#include "janafThermo.H"
+#include "specie.H"
 #include "perfectGas.H"
+#include "thermo.H"
+#include "janafThermo.H"
+#include "absoluteEnthalpy.H"
 
 using namespace Foam;
 
-typedef species::thermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
-
+typedef species::thermo<janafThermo<perfectGas<specie> >, absoluteEnthalpy>
+    thermo;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

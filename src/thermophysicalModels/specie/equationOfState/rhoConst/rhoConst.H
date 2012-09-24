@@ -36,7 +36,6 @@ SourceFiles
 #ifndef rhoConst_H
 #define rhoConst_H
 
-#include "specie.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,13 +43,54 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+template<class Specie> class rhoConst;
+
+template<class Specie>
+inline rhoConst<Specie> operator+
+(
+    const rhoConst<Specie>&,
+    const rhoConst<Specie>&
+);
+
+template<class Specie>
+inline rhoConst<Specie> operator-
+(
+    const rhoConst<Specie>&,
+    const rhoConst<Specie>&
+);
+
+template<class Specie>
+inline rhoConst<Specie> operator*
+(
+    const scalar,
+    const rhoConst<Specie>&
+);
+
+template<class Specie>
+inline rhoConst<Specie> operator==
+(
+    const rhoConst<Specie>&,
+    const rhoConst<Specie>&
+);
+
+template<class Specie>
+Ostream& operator<<
+(
+    Ostream&,
+    const rhoConst<Specie>&
+);
+
+
 /*---------------------------------------------------------------------------*\
                         Class rhoConst Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class Specie>
 class rhoConst
 :
-    public specie
+    public Specie
 {
     // Private data
 
@@ -63,7 +103,7 @@ public:
     // Constructors
 
         //- Construct from components
-        inline rhoConst(const specie& sp, const scalar rho);
+        inline rhoConst(const Specie& sp, const scalar rho);
 
         //- Construct from Istream
         rhoConst(Istream&);
@@ -120,25 +160,25 @@ public:
 
     // Friend operators
 
-        inline friend rhoConst operator+
+        inline friend rhoConst operator+ <Specie>
         (
             const rhoConst&,
             const rhoConst&
         );
 
-        inline friend rhoConst operator-
+        inline friend rhoConst operator- <Specie>
         (
             const rhoConst&,
             const rhoConst&
         );
 
-        inline friend rhoConst operator*
+        inline friend rhoConst operator* <Specie>
         (
             const scalar s,
             const rhoConst&
         );
 
-        inline friend rhoConst operator==
+        inline friend rhoConst operator== <Specie>
         (
             const rhoConst&,
             const rhoConst&
@@ -147,7 +187,11 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const rhoConst&);
+        friend Ostream& operator<< <Specie>
+        (
+            Ostream&,
+            const rhoConst&
+        );
 };
 
 
@@ -158,6 +202,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "rhoConstI.H"
+
+#ifdef NoRepository
+#   include "rhoConst.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

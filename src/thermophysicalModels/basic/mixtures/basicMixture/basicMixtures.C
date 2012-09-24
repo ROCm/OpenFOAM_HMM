@@ -31,6 +31,7 @@ Description
 #include "basicMixture.H"
 #include "makeBasicMixture.H"
 
+#include "specie.H"
 #include "perfectGas.H"
 #include "rhoConst.H"
 #include "incompressiblePerfectGas.H"

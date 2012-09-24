@@ -28,35 +28,39 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::perfectGas::perfectGas(Istream& is)
+template<class Specie>
+Foam::perfectGas<Specie>::perfectGas(Istream& is)
 :
-    specie(is)
+    Specie(is)
 {
-    is.check("perfectGas::perfectGas(Istream& is)");
+    is.check("perfectGas<Specie>::perfectGas(Istream& is)");
 }
 
 
-Foam::perfectGas::perfectGas(const dictionary& dict)
+template<class Specie>
+Foam::perfectGas<Specie>::perfectGas(const dictionary& dict)
 :
-    specie(dict)
+    Specie(dict)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::perfectGas::write(Ostream& os) const
+template<class Specie>
+void Foam::perfectGas<Specie>::write(Ostream& os) const
 {
-    specie::write(os);
+    Specie::write(os);
 }
 
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const perfectGas& pg)
+template<class Specie>
+Foam::Ostream& Foam::operator<<(Ostream& os, const perfectGas<Specie>& pg)
 {
-    os  << static_cast<const specie&>(pg);
+    os  << static_cast<const Specie&>(pg);
 
-    os.check("Ostream& operator<<(Ostream& os, const perfectGas& st)");
+    os.check("Ostream& operator<<(Ostream& os, const perfectGas<Specie>& st)");
     return os;
 }
 

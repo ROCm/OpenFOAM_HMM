@@ -33,20 +33,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<int PolySize>
-icoPolynomial<PolySize>::icoPolynomial(Istream& is)
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize>::icoPolynomial(Istream& is)
 :
-    specie(is),
+    Specie(is),
     rhoCoeffs_("rhoCoeffs<" + Foam::name(PolySize) + '>', is)
 {
     rhoCoeffs_ *= this->W();
 }
 
 
-template<int PolySize>
-icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize>::icoPolynomial(const dictionary& dict)
 :
-    specie(dict),
+    Specie(dict),
     rhoCoeffs_
 (
     dict.subDict("equationOfState").lookup
@@ -61,10 +61,10 @@ icoPolynomial<PolySize>::icoPolynomial(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<int PolySize>
-void icoPolynomial<PolySize>::write(Ostream& os) const
+template<class Specie, int PolySize>
+void icoPolynomial<Specie, PolySize>::write(Ostream& os) const
 {
-    specie::write(os);
+    Specie::write(os);
 
     dictionary dict("equationOfState");
     dict.add
@@ -79,16 +79,17 @@ void icoPolynomial<PolySize>::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-template<int PolySize>
-Ostream& operator<<(Ostream& os, const icoPolynomial<PolySize>& ip)
+template<class Specie, int PolySize>
+Ostream& operator<<(Ostream& os, const icoPolynomial<Specie, PolySize>& ip)
 {
-    os  << static_cast<const specie&>(ip) << tab
+    os  << static_cast<const Specie&>(ip) << tab
         << "rhoCoeffs<" << Foam::name(PolySize) << '>' << tab
         << ip.rhoCoeffs_/ip.W();
 
     os.check
     (
-        "Ostream& operator<<(Ostream& os, const icoPolynomial<PolySize>& ip)"
+        "Ostream& operator<<"
+        "(Ostream& os, const icoPolynomial<Specie, PolySize>& ip)"
     );
 
     return os;

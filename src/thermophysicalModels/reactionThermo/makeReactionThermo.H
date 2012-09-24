@@ -45,7 +45,7 @@ typedef MixtureThermo                                                         \
                 <                                                             \
                     Thermo                                                    \
                     <                                                         \
-                        EqnOfState                                            \
+                        EqnOfState<specie>                                    \
                     >,                                                        \
                     Type                                                      \
                 >                                                             \

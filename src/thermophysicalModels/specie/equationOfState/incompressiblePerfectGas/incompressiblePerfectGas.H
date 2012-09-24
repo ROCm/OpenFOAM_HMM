@@ -38,7 +38,6 @@ SourceFiles
 #ifndef incompressiblePerfectGas_H
 #define incompressiblePerfectGas_H
 
-#include "specie.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,13 +45,54 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+template<class Specie> class incompressiblePerfectGas;
+
+template<class Specie>
+inline incompressiblePerfectGas<Specie> operator+
+(
+    const incompressiblePerfectGas<Specie>&,
+    const incompressiblePerfectGas<Specie>&
+);
+
+template<class Specie>
+inline incompressiblePerfectGas<Specie> operator-
+(
+    const incompressiblePerfectGas<Specie>&,
+    const incompressiblePerfectGas<Specie>&
+);
+
+template<class Specie>
+inline incompressiblePerfectGas<Specie> operator*
+(
+    const scalar,
+    const incompressiblePerfectGas<Specie>&
+);
+
+template<class Specie>
+inline incompressiblePerfectGas<Specie> operator==
+(
+    const incompressiblePerfectGas<Specie>&,
+    const incompressiblePerfectGas<Specie>&
+);
+
+template<class Specie>
+Ostream& operator<<
+(
+    Ostream&,
+    const incompressiblePerfectGas<Specie>&
+);
+
+
 /*---------------------------------------------------------------------------*\
                     Class incompressiblePerfectGas Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class Specie>
 class incompressiblePerfectGas
 :
-    public specie
+    public Specie
 {
     // Private data
 
@@ -65,7 +105,7 @@ public:
     // Constructors
 
         //- Construct from components
-        inline incompressiblePerfectGas(const specie& sp);
+        inline incompressiblePerfectGas(const Specie& sp);
 
         //- Construct from Istream
         incompressiblePerfectGas(Istream&);
@@ -132,25 +172,25 @@ public:
 
     // Friend operators
 
-        inline friend incompressiblePerfectGas operator+
+        inline friend incompressiblePerfectGas operator+ <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator-
+        inline friend incompressiblePerfectGas operator- <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator*
+        inline friend incompressiblePerfectGas operator* <Specie>
         (
             const scalar s,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator==
+        inline friend incompressiblePerfectGas operator== <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
@@ -159,7 +199,11 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const incompressiblePerfectGas&);
+        friend Ostream& operator<< <Specie>
+        (
+            Ostream&,
+            const incompressiblePerfectGas&
+        );
 };
 
 
@@ -170,6 +214,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "incompressiblePerfectGasI.H"
+
+#ifdef NoRepository
+#   include "incompressiblePerfectGas.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

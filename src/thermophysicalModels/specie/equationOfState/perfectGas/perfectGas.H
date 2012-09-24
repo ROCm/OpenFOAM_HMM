@@ -36,7 +36,6 @@ SourceFiles
 #ifndef perfectGas_H
 #define perfectGas_H
 
-#include "specie.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,13 +43,54 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+template<class Specie> class perfectGas;
+
+template<class Specie>
+inline perfectGas<Specie> operator+
+(
+    const perfectGas<Specie>&,
+    const perfectGas<Specie>&
+);
+
+template<class Specie>
+inline perfectGas<Specie> operator-
+(
+    const perfectGas<Specie>&,
+    const perfectGas<Specie>&
+);
+
+template<class Specie>
+inline perfectGas<Specie> operator*
+(
+    const scalar,
+    const perfectGas<Specie>&
+);
+
+template<class Specie>
+inline perfectGas<Specie> operator==
+(
+    const perfectGas<Specie>&,
+    const perfectGas<Specie>&
+);
+
+template<class Specie>
+Ostream& operator<<
+(
+    Ostream&,
+    const perfectGas<Specie>&
+);
+
+
 /*---------------------------------------------------------------------------*\
                            Class perfectGas Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class Specie>
 class perfectGas
 :
-    public specie
+    public Specie
 {
 
 public:
@@ -58,7 +98,7 @@ public:
     // Constructors
 
         //- Construct from components
-        inline perfectGas(const specie& sp);
+        inline perfectGas(const Specie& sp);
 
         //- Construct from Istream
         perfectGas(Istream&);
@@ -118,25 +158,25 @@ public:
 
     // Friend operators
 
-        inline friend perfectGas operator+
+        inline friend perfectGas operator+ <Specie>
         (
             const perfectGas&,
             const perfectGas&
         );
 
-        inline friend perfectGas operator-
+        inline friend perfectGas operator- <Specie>
         (
             const perfectGas&,
             const perfectGas&
         );
 
-        inline friend perfectGas operator*
+        inline friend perfectGas operator* <Specie>
         (
             const scalar s,
             const perfectGas&
         );
 
-        inline friend perfectGas operator==
+        inline friend perfectGas operator== <Specie>
         (
             const perfectGas&,
             const perfectGas&
@@ -145,7 +185,11 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const perfectGas&);
+        friend Ostream& operator<< <Specie>
+        (
+            Ostream&,
+            const perfectGas&
+        );
 };
 
 
@@ -156,6 +200,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "perfectGasI.H"
+
+#ifdef NoRepository
+#   include "perfectGas.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
