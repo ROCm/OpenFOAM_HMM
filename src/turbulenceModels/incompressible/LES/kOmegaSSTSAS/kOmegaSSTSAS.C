@@ -361,7 +361,6 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         (
             fvm::ddt(k_)
           + fvm::div(phi(), k_)
-          - fvm::Sp(fvc::div(phi()), k_)
           - fvm::laplacian(DkEff(F1), k_)
         ==
             min(G, c1_*betaStar_*k_*omega_)
@@ -385,7 +384,6 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
         (
             fvm::ddt(omega_)
           + fvm::div(phi(), omega_)
-          - fvm::Sp(fvc::div(phi()), omega_)
           - fvm::laplacian(DomegaEff(F1), omega_)
         ==
             gamma(F1)*S2

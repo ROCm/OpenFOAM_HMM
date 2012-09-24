@@ -83,20 +83,19 @@
         }
     }
 
-    scalar hs0 = 0.0;
+    scalar h0 = 0.0;
     forAll(Y, i)
     {
         Y[i] = Y0[i];
-        hs0 += Y0[i]*specieData[i].Hs(p[i], T0);
+        h0 += Y0[i]*specieData[i].Hs(p[i], T0);
     }
 
-    hs = dimensionedScalar("h", dimEnergy/dimMass, hs0);
-
+    thermo.he() = dimensionedScalar("h", dimEnergy/dimMass, h0);
     thermo.correct();
 
     rho = thermo.rho();
     scalar rho0 = rho[0];
-    scalar u0 = hs0 - p0/rho0;
+    scalar u0 = h0 - p0/rho0;
     scalar R0 = p0/(rho0*T0);
     Rspecific[0] = R0;
 

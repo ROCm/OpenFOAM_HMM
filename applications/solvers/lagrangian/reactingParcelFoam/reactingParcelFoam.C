@@ -22,22 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    reactingParcelFoam
+    porousExplicitSourceReactingParcelFoam
 
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    reacting Lagrangian parcels.
+    reacting multiphase Lagrangian parcels for porous media, including explicit
+    sources for mass, momentum and energy
+
+    The solver includes:
+    - reacting multiphase parcel cloud
+    - porous media
+    - mass, momentum and energy sources
+
+    Note: ddtPhiCorr not used here when porous zones are active
+    - not well defined for porous calculations
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "turbulenceModel.H"
-#include "basicReactingCloud.H"
-#include "psiCombustionModel.H"
+#include "basicReactingMultiphaseCloud.H"
+#include "rhoCombustionModel.H"
 #include "radiationModel.H"
+#include "porousZones.H"
+#include "IObasicSourceList.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
-#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,15 +58,18 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
+
+    pimpleControl pimple(mesh);
+
     #include "createFields.H"
-    #include "createClouds.H"
     #include "createRadiationModel.H"
+    #include "createClouds.H"
+    #include "createExplicitSources.H"
+    #include "createPorousZones.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
-
-    pimpleControl pimple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +78,7 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
+        #include "readAdditionalSolutionControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -81,7 +95,7 @@ int main(int argc, char *argv[])
         {
             #include "UEqn.H"
             #include "YEqn.H"
-            #include "hsEqn.H"
+            #include "EEqn.H"
 
             // --- Pressure corrector loop
             while (pimple.correct())

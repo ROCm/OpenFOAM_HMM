@@ -396,7 +396,6 @@ void LaunderGibsonRSTM::correct()
     (
         fvm::ddt(epsilon_)
       + fvm::div(phi_, epsilon_)
-      - fvm::Sp(fvc::div(phi_), epsilon_)
     //- fvm::laplacian(Ceps*(k_/epsilon_)*R_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
@@ -440,7 +439,6 @@ void LaunderGibsonRSTM::correct()
     (
         fvm::ddt(R_)
       + fvm::div(phi_, R_)
-      - fvm::Sp(fvc::div(phi_), R_)
     //- fvm::laplacian(Cs*(k_/epsilon_)*R_, R_)
       - fvm::laplacian(DREff(), R_)
       + fvm::Sp(Clg1_*epsilon_/k_, R_)

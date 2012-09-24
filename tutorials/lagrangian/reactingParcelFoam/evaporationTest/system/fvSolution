@@ -76,16 +76,21 @@ solvers
 PIMPLE
 {
     transonic       no;
+    nOuterCorrectors 1;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
+}
+
+additional
+{
+    solveSpecies    true;
 }
 
 relaxationFactors
 {
     fields
     {
-        ".*Final"       1;
     }
     equations
     {

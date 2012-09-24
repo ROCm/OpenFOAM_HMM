@@ -408,7 +408,6 @@ void SpalartAllmaras::correct()
     (
         fvm::ddt(nuTilda_)
       + fvm::div(phi_, nuTilda_)
-      - fvm::Sp(fvc::div(phi_), nuTilda_)
       - fvm::laplacian(DnuTildaEff(), nuTilda_)
       - Cb2_/sigmaNut_*magSqr(fvc::grad(nuTilda_))
      ==

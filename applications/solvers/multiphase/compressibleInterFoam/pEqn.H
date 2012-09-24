@@ -5,6 +5,27 @@
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
+    volVectorField HbyA("HbyA", U);
+    HbyA = rAU*UEqn.H();
+
+    surfaceScalarField phiHbyA
+    (
+        "phiHbyA",
+        (fvc::interpolate(HbyA) & mesh.Sf())
+      + fvc::ddtPhiCorr(rAU, rho, U, phi)
+    );
+    phi = phiHbyA;
+
+    surfaceScalarField phig
+    (
+        (
+            fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
+          - ghf*fvc::snGrad(rho)
+        )*rAUf*mesh.magSf()
+    );
+
+    phiHbyA += phig;
+
     tmp<fvScalarMatrix> p_rghEqnComp1;
     tmp<fvScalarMatrix> p_rghEqnComp2;
 
@@ -26,27 +47,6 @@
           + fvc::div(phid2, p_rgh)
           - fvc::Sp(fvc::div(phid2), p_rgh);
     }
-
-    volVectorField HbyA("HbyA", U);
-    HbyA = rAU*UEqn.H();
-
-    surfaceScalarField phiHbyA
-    (
-        "phiHbyA",
-        (fvc::interpolate(HbyA) & mesh.Sf())
-      + fvc::ddtPhiCorr(rAU, rho, U, phi)
-    );
-    phi = phiHbyA;
-
-    surfaceScalarField phig
-    (
-        (
-            fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
-          - ghf*fvc::snGrad(rho)
-        )*rAUf*mesh.magSf()
-    );
-
-    phiHbyA += phig;
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
     // pressure solution - done in 2 parts. Part 1:
