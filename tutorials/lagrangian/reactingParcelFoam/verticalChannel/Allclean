@@ -7,10 +7,6 @@ cd ${0%/*} || exit 1    # run from this directory
 # remove old time and post-processing folders
 rm -rf 0 *[1-9]* processor* postProcessing
 
-
-# copy 0.org to 0
-cp -r 0.org 0
-
 cleanCase
 
 # ----------------------------------------------------------------- end-of-file
