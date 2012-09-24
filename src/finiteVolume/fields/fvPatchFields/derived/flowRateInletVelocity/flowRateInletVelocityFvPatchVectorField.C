@@ -72,7 +72,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    rhoInlet_(0.0)
+    rhoInlet_(dict.lookupOrDefault<scalar>("rhoInlet", -VGREAT))
 {
     if (dict.found("volumetricFlowRate"))
     {
@@ -107,14 +107,9 @@ flowRateInletVelocityFvPatchVectorField
             vectorField("value", dict, p.size())
         );
     }
-    else if (volumetric_)
-    {
-        evaluate(Pstream::blocking);
-    }
     else
     {
-        rhoInlet_ = readScalar(dict.lookup("rhoInlet"));
-        updateCoeffs(rhoInlet_);
+        evaluate(Pstream::blocking);
     }
 }
 
@@ -202,10 +197,30 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
     else
     {
         // mass flow-rate
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        if
+        (
+            patch().boundaryMesh().mesh().foundObject<volScalarField>(rhoName_)
+        )
+        {
+            const fvPatchField<scalar>& rhop =
+                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        operator==(n*avgU/rhop);
+            operator==(n*avgU/rhop);
+        }
+        else
+        {
+            // Use constant density
+            if (rhoInlet_ < 0)
+            {
+                FatalErrorIn
+                (
+                    "flowRateInletVelocityFvPatchVectorField::updateCoeffs()"
+                )   << "Did not find registered density field " << rhoName_
+                    << " and no constant density 'rhoInlet' specified"
+                    << exit(FatalError);
+            }
+            operator==(n*avgU/rhoInlet_);
+        }
     }
 
     fixedValueFvPatchField<vector>::updateCoeffs();
@@ -219,7 +234,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
     if (!volumetric_)
     {
         writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-        os.writeKeyword("rhoInlet") << rhoInlet_ << token::END_STATEMENT << nl;
+        writeEntryIfDifferent<scalar>(os, "rhoInlet", -VGREAT, rhoInlet_);
     }
     writeEntry("value", os);
 }

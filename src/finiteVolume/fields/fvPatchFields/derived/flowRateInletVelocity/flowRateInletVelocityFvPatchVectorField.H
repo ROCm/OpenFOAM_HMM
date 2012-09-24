@@ -29,7 +29,7 @@ Description
     magnitude as an integral over its area.
 
     Either specify 'volumetricFlowRate' or 'massFlowRate' (requires additional
-    'rho' entry).
+    'rho' or 'rhoInlet' entry).
 
     Example of the boundary condition specification:
     \verbatim
@@ -44,9 +44,10 @@ Description
     inlet
     {
         type                flowRateInletVelocity;
-        volumetricFlowRate  0.2;  // mass flow rate [kg/s]
+        massFlowRate        0.2;  // mass flow rate [kg/s]
         rho                 rho;  // rho [m3/s or kg/s]
-        value               uniform (0 0 0); // placeholder
+        rhoInlet            1.0   // uniform rho if no rho field registered
+                                  // (e.g. at startup)
     }
     \endverbatim
 

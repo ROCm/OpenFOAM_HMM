@@ -14,9 +14,6 @@ runApplication potentialFoam
 
 rm -f 0/phi
 
-# change flowRateInletVelocity to massFlowRate
-runApplication changeDictionary
-
 # run the solver
 runApplication `getApplication`
 
