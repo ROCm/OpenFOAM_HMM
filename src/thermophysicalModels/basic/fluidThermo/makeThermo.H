@@ -44,7 +44,7 @@ typedef Cthermo                                                               \
     <                                                                         \
         Transport                                                             \
         <                                                                     \
-            specieThermo                                                      \
+            species::thermo                                                   \
             <                                                                 \
                 Thermo                                                        \
                 <                                                             \
@@ -64,13 +64,13 @@ defineTemplateTypeNameAndDebugWithName                                        \
         #Mixture                                                              \
         "<"                                                                   \
             #Transport                                                        \
-            "<specieThermo<"                                                  \
+            "<"                                                               \
                 #Thermo                                                       \
                 "<"                                                           \
                     #EqnOfState                                               \
                 ">,"                                                          \
                 #Type                                                         \
-        ">>>>",                                                               \
+        ">>>",                                                                \
     0                                                                         \
 );                                                                            \
                                                                               \
@@ -93,7 +93,7 @@ addToRunTimeSelectionTable                                                    \
                                                                               \
 typedef polynomialTransport                                                   \
 <                                                                             \
-    specieThermo                                                              \
+    species::thermo                                                           \
     <                                                                         \
         hPolynomialThermo                                                     \
         <                                                                     \

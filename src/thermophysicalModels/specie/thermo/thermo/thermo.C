@@ -23,31 +23,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "specieThermo.H"
+#include "thermo.H"
 #include "IOstreams.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
 template<class Thermo, template<class> class Type>
-const Foam::scalar Foam::specieThermo<Thermo, Type>::tol_ = 1.0e-4;
+const Foam::scalar Foam::species::thermo<Thermo, Type>::tol_ = 1.0e-4;
 
 template<class Thermo, template<class> class Type>
-const int Foam::specieThermo<Thermo, Type>::maxIter_ = 100;
+const int Foam::species::thermo<Thermo, Type>::maxIter_ = 100;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Thermo, template<class> class Type>
-Foam::specieThermo<Thermo, Type>::specieThermo(Istream& is)
+Foam::species::thermo<Thermo, Type>::thermo(Istream& is)
 :
     Thermo(is)
 {
-    is.check("specieThermo<Thermo, Type>::specieThermo(Istream&)");
+    is.check("thermo<Thermo, Type>::thermo(Istream&)");
 }
 
 
 template<class Thermo, template<class> class Type>
-Foam::specieThermo<Thermo, Type>::specieThermo(const dictionary& dict)
+Foam::species::thermo<Thermo, Type>::thermo(const dictionary& dict)
 :
     Thermo(dict)
 {}
@@ -56,7 +56,7 @@ Foam::specieThermo<Thermo, Type>::specieThermo(const dictionary& dict)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Thermo, template<class> class Type>
-void Foam::specieThermo<Thermo, Type>::write(Ostream& os) const
+void Foam::species::thermo<Thermo, Type>::write(Ostream& os) const
 {
     Thermo::write(os);
 }
@@ -65,14 +65,14 @@ void Foam::specieThermo<Thermo, Type>::write(Ostream& os) const
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class Thermo, template<class> class Type>
-Foam::Ostream& Foam::operator<<
+Foam::Ostream& Foam::species::operator<<
 (
-    Ostream& os, const specieThermo<Thermo, Type>& st
+    Ostream& os, const thermo<Thermo, Type>& st
 )
 {
     os  << static_cast<const Thermo&>(st);
 
-    os.check("Ostream& operator<<(Ostream&, const specieThermo&)");
+    os.check("Ostream& operator<<(Ostream&, const thermo&)");
     return os;
 }
 

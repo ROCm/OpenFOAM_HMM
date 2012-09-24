@@ -61,10 +61,10 @@ Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
         thermoTypeName =
             type + '<'
           + mixture + '<'
-          + transport + "<specieThermo<"
+          + transport + '<'
           + thermo + '<'
           + equationOfState + ">,"
-          + energy + ">>>>";
+          + energy + ">>>";
     }
     else
     {

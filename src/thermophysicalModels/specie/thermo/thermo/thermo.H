@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::specieThermo
+    Foam::thermo
 
 Description
     Basic thermodynamics type based on the use of fitting functions for
@@ -30,68 +30,70 @@ Description
     properties are derived from these primitive functions.
 
 SourceFiles
-    specieThermoI.H
-    specieThermo.C
+    thermoI.H
+    thermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef specieThermo_H
-#define specieThermo_H
+#ifndef thermo_H
+#define thermo_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace species
+{
 
 // Forward declaration of friend functions and operators
 
-template<class Thermo, template<class> class Type> class specieThermo;
+template<class Thermo, template<class> class Type> class thermo;
 
 template<class Thermo, template<class> class Type>
-inline specieThermo<Thermo, Type> operator+
+inline thermo<Thermo, Type> operator+
 (
-    const specieThermo<Thermo, Type>&,
-    const specieThermo<Thermo, Type>&
+    const thermo<Thermo, Type>&,
+    const thermo<Thermo, Type>&
 );
 
 template<class Thermo, template<class> class Type>
-inline specieThermo<Thermo, Type> operator-
+inline thermo<Thermo, Type> operator-
 (
-    const specieThermo<Thermo, Type>&,
-    const specieThermo<Thermo, Type>&
+    const thermo<Thermo, Type>&,
+    const thermo<Thermo, Type>&
 );
 
 template<class Thermo, template<class> class Type>
-inline specieThermo<Thermo, Type> operator*
+inline thermo<Thermo, Type> operator*
 (
     const scalar,
-    const specieThermo<Thermo, Type>&
+    const thermo<Thermo, Type>&
 );
 
 template<class Thermo, template<class> class Type>
-inline specieThermo<Thermo, Type> operator==
+inline thermo<Thermo, Type> operator==
 (
-    const specieThermo<Thermo, Type>&,
-    const specieThermo<Thermo, Type>&
+    const thermo<Thermo, Type>&,
+    const thermo<Thermo, Type>&
 );
 
 template<class Thermo, template<class> class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const specieThermo<Thermo, Type>&
+    const thermo<Thermo, Type>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                           Class specieThermo Declaration
+                           Class thermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo, template<class> class Type>
-class specieThermo
+class thermo
 :
     public Thermo,
-    public Type<specieThermo<Thermo, Type> >
+    public Type<thermo<Thermo, Type> >
 {
     // Private data
 
@@ -112,9 +114,9 @@ class specieThermo
             scalar f,
             scalar p,
             scalar T0,
-            scalar (specieThermo::*F)(const scalar, const scalar) const,
-            scalar (specieThermo::*dFdT)(const scalar, const scalar) const,
-            scalar (specieThermo::*limit)(const scalar) const
+            scalar (thermo::*F)(const scalar, const scalar) const,
+            scalar (thermo::*dFdT)(const scalar, const scalar) const,
+            scalar (thermo::*limit)(const scalar) const
         ) const;
 
 
@@ -123,16 +125,16 @@ public:
     // Constructors
 
         //- construct from components
-        inline specieThermo(const Thermo& sp);
+        inline thermo(const Thermo& sp);
 
         //- Construct from Istream
-        specieThermo(Istream&);
+        thermo(Istream&);
 
         //- Construct from dictionary
-        specieThermo(const dictionary& dict);
+        thermo(const dictionary& dict);
 
         //- Construct as named copy
-        inline specieThermo(const word& name, const specieThermo&);
+        inline thermo(const word& name, const thermo&);
 
 
     // Member Functions
@@ -330,36 +332,36 @@ public:
 
     // Member operators
 
-        inline void operator+=(const specieThermo&);
-        inline void operator-=(const specieThermo&);
+        inline void operator+=(const thermo&);
+        inline void operator-=(const thermo&);
 
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
-        friend specieThermo operator+ <Thermo, Type>
+        friend thermo operator+ <Thermo, Type>
         (
-            const specieThermo&,
-            const specieThermo&
+            const thermo&,
+            const thermo&
         );
 
-        friend specieThermo operator- <Thermo, Type>
+        friend thermo operator- <Thermo, Type>
         (
-            const specieThermo&,
-            const specieThermo&
+            const thermo&,
+            const thermo&
         );
 
-        friend specieThermo operator* <Thermo, Type>
+        friend thermo operator* <Thermo, Type>
         (
             const scalar s,
-            const specieThermo&
+            const thermo&
         );
 
-        friend specieThermo operator== <Thermo, Type>
+        friend thermo operator== <Thermo, Type>
         (
-            const specieThermo&,
-            const specieThermo&
+            const thermo&,
+            const thermo&
         );
 
 
@@ -368,21 +370,22 @@ public:
         friend Ostream& operator<< <Thermo, Type>
         (
             Ostream&,
-            const specieThermo&
+            const thermo&
         );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace species
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "specieThermoI.H"
+#include "thermoI.H"
 
 #ifdef NoRepository
-#   include "specieThermo.C"
+#   include "thermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

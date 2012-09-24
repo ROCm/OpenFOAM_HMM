@@ -41,7 +41,7 @@ typedef MixtureThermo                                                         \
         <                                                                     \
             Transport                                                         \
             <                                                                 \
-                specieThermo                                                  \
+                species::thermo                                               \
                 <                                                             \
                     Thermo                                                    \
                     <                                                         \
@@ -62,13 +62,13 @@ defineTemplateTypeNameAndDebugWithName                                        \
         #Mixture                                                              \
         "<"                                                                   \
             #Transport                                                        \
-            "<specieThermo<"                                                  \
+            "<"                                                               \
                 #Thermo                                                       \
                 "<"                                                           \
                     #EqnOfState                                               \
                 ">,"                                                          \
                 #Type                                                         \
-            ">>>>",                                                           \
+            ">>>",                                                            \
     0                                                                         \
 );                                                                            \
                                                                               \

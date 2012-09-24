@@ -33,7 +33,7 @@ License
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"

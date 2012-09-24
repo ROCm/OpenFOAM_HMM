@@ -44,7 +44,7 @@ Description
 #include "constSolidRad.H"
 
 #include "sensibleEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ namespace Foam
         <
             constSolidRad
             <
-                specieThermo
+                species::thermo
                 <
                     hConstThermo
                     <
@@ -72,7 +72,7 @@ namespace Foam
         <
             constSolidRad
             <
-                specieThermo
+                species::thermo
                 <
                     hExponentialThermo
                     <

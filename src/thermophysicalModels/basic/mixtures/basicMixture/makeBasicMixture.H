@@ -39,19 +39,19 @@ Description
 #define makeBasicMixture(Mixture,Transport,Type,Thermo,EqnOfState)            \
                                                                               \
 typedef                                                                       \
-    Mixture<Transport<specieThermo<Thermo<EqnOfState>, Type> > >              \
+    Mixture<Transport<species::thermo<Thermo<EqnOfState>, Type> > >           \
     Mixture##Transport##Type##Thermo##EqnOfState;                             \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
     (Mixture##Transport##Type##Thermo##EqnOfState,                            \
-    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">,"#Type">>>", 0)
+    #Mixture"<"#Transport"<"#Thermo"<"#EqnOfState">,"#Type">>", 0)
 
 
 #define makeBasicPolyMixture(Mixture,Order,Type)                              \
                                                                               \
 typedef polynomialTransport                                                   \
 <                                                                             \
-    specieThermo                                                              \
+    species::thermo                                                           \
     <                                                                         \
         hPolynomialThermo                                                     \
         <                                                                     \

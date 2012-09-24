@@ -87,7 +87,7 @@ public:
         (
             const dictionary&,
             const wordList& specieNames,
-            const HashPtrTable<ThermoType>& specieThermoData,
+            const HashPtrTable<ThermoType>& thermoData,
             const fvMesh&
         );
 

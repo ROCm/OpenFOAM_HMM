@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heheuReactionThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>,absoluteEnthalpy>>>>;
+thermoType heheuReactionThermo<homogeneousMixture<sutherlandTransport<janafThermo<perfectGas>,absoluteEnthalpy>>>;
 
 stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [ 0 0 0 0 0 0 0 ] 15.675;
 

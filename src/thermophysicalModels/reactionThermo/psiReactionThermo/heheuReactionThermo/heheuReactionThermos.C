@@ -34,7 +34,7 @@ License
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "absoluteEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
