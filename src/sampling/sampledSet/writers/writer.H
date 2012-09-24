@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,13 +40,7 @@ Description
         // Output list of points and corresponding values
         scalarFormatter().write
         (
-            coordSet
-            (
-                points,         // sample coordinates
-                "someLine",     // name of coordSet
-                "distance",     // write coordinates as distance to refPoint
-                points[0]       // reference point
-            ),
+            coordSet(...)
             "U.component(0)",   // name of values
             vals                // values
         );
@@ -163,6 +157,17 @@ public:
             const List<const Field<Type>*>&,
             Ostream&
         ) const = 0;
+
+        //- General entry point for writing.
+        //  The data is organized in a set of point with one or more values
+        //  per point
+        virtual void write
+        (
+            const coordSet&,
+            const wordList&,
+            const List<Field<Type> >&,
+            Ostream&
+        ) const;
 
         //- General entry point for writing of multiple coordSets.
         //  Each coordSet (track) has same data variables.
