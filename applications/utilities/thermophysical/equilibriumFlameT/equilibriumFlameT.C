@@ -38,14 +38,14 @@ Description
 #include "OSspecific.H"
 #include "IOmanip.H"
 
-#include "specieThermo.H"
+#include "thermo.H"
 #include "absoluteEnthalpy.H"
 #include "janafThermo.H"
 #include "perfectGas.H"
 
 using namespace Foam;
 
-typedef specieThermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
+typedef species::thermo<janafThermo<perfectGas>, absoluteEnthalpy> thermo;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

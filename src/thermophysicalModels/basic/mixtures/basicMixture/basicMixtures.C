@@ -41,7 +41,7 @@ Description
 #include "janafThermo.H"
 #include "sensibleInternalEnergy.H"
 #include "sensibleEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"

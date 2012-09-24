@@ -43,7 +43,7 @@ Description
 
 #include "sensibleInternalEnergy.H"
 #include "sensibleEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "pureSolidMixture.H"
 #include "multiComponentSolidMixture.H"

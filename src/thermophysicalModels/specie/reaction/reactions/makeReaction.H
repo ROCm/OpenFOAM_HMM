@@ -38,7 +38,7 @@ Description
 #include "ReversibleReaction.H"
 #include "NonEquilibriumReversibleReaction.H"
 
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "sutherlandTransport.H"
 #include "janafThermo.H"

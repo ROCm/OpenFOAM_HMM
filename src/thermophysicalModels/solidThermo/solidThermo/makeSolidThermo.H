@@ -49,7 +49,7 @@ typedef Cthermo                                                               \
         <                                                                     \
             Radiation                                                         \
             <                                                                 \
-                specieThermo                                                  \
+                species::thermo                                               \
                 <                                                             \
                     Thermo                                                    \
                     <                                                         \
@@ -73,14 +73,13 @@ defineTemplateTypeNameAndDebugWithName                                        \
             #Transport                                                        \
             "<"                                                               \
                 #Radiation                                                    \
-                "<specieThermo<"                                              \
+                "<"                                                           \
                     #Thermo                                                   \
                     "<"                                                       \
                         #Rho                                                  \
                     ">,"                                                      \
                     #Type                                                     \
-        ">>>>"                                                                \
-     ">",                                                                     \
+        ">>>>",                                                               \
     0                                                                         \
 );                                                                            \
                                                                               \
@@ -91,7 +90,7 @@ typedef Mixture                                                               \
     <                                                                         \
         Radiation                                                             \
         <                                                                     \
-            specieThermo                                                      \
+            species::thermo                                                   \
             <                                                                 \
                 Thermo                                                        \
                 <                                                             \
@@ -113,13 +112,13 @@ defineTemplateTypeNameAndDebugWithName                                        \
         #Transport                                                            \
         "<"                                                                   \
             #Radiation                                                        \
-            "<specieThermo<"                                                  \
+            "<"                                                               \
                 #Thermo                                                       \
                 "<"                                                           \
                     #Rho                                                      \
                 ">,"                                                          \
                 #Type                                                         \
-    ">>>>",                                                                   \
+    ">>>",                                                                    \
     0                                                                         \
 );                                                                            \
                                                                               \
@@ -131,7 +130,7 @@ addToRunTimeSelectionTable                                                    \
 );                                                                            \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                          \
+    basicThermo,                                                              \
     Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
     fvMesh                                                                    \
 );                                                                            \

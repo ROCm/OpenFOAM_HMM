@@ -37,7 +37,7 @@ SourceFiles
 #ifndef eConstThermo_H
 #define eConstThermo_H
 
-#include "specieThermo.H"
+#include "thermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

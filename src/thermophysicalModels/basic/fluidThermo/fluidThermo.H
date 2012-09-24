@@ -80,6 +80,7 @@ public:
     //- Selector
     static autoPtr<fluidThermo> New(const fvMesh&);
 
+
     //- Destructor
     virtual ~fluidThermo();
 

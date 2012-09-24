@@ -37,7 +37,7 @@ Description
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 #include "sutherlandTransport.H"
 #include "constTransport.H"
 
@@ -52,7 +52,7 @@ namespace Foam
     typedef
     constTransport
     <
-        specieThermo
+        species::thermo
         <
             hConstThermo
             <
@@ -65,7 +65,7 @@ namespace Foam
     typedef
     sutherlandTransport
     <
-        specieThermo
+        species::thermo
         <
             janafThermo
             <
@@ -78,7 +78,7 @@ namespace Foam
     typedef
     constTransport
     <
-        specieThermo
+        species::thermo
         <
             hConstThermo
             <
@@ -91,7 +91,7 @@ namespace Foam
     typedef
     sutherlandTransport
     <
-        specieThermo
+        species::thermo
         <
             janafThermo
             <
@@ -104,7 +104,7 @@ namespace Foam
     typedef
     polynomialTransport
     <
-        specieThermo
+        species::thermo
         <
             hPolynomialThermo
             <

@@ -105,6 +105,7 @@ public:
     //- Selector
     static autoPtr<basicThermo> New(const fvMesh&);
 
+
     //- Destructor
     virtual ~basicThermo();
 
