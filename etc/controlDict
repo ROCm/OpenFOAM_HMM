@@ -989,7 +989,7 @@ DimensionSets
 
         // Set of units used for printing. Can be any basic or derived
         // but not scaled (only supported for dimensionedScalar, etc)
-        printUnits (kg m s K mol A Cd);
+        writeUnits (kg m s K mol A Cd);
     }
 }
 
