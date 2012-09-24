@@ -9,6 +9,9 @@ dsmcFields/dsmcFieldsFunctionObject.C
 pressureCoefficient/pressureCoefficient.C
 pressureCoefficient/pressureCoefficientFunctionObject.C
 
+pressureTools/pressureTools.C
+pressureTools/pressureToolsFunctionObject.C
+
 staticPressure/staticPressure.C
 staticPressure/staticPressureFunctionObject.C
 
