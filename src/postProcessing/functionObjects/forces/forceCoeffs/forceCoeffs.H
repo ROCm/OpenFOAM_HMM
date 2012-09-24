@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
 
 Description
     Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
+    calculate lift, drag and moment coefficients.
 
 SourceFiles
     forceCoeffs.C
@@ -79,6 +79,12 @@ class forceCoeffs
 
             //- Area
             scalar Aref_;
+
+
+        // Bin information
+
+            //- Writer for bin data
+            autoPtr<writer<scalar> > binWriterPtr_;
 
 
     // Private Member Functions
