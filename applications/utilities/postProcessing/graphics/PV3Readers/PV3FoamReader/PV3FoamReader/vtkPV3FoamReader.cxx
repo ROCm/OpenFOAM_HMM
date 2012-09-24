@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,6 +85,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;
+    ShowGroupsOnly = 0;
     InterpolateVolFields = 1;
 
     UpdateGUI = 0;
@@ -459,6 +460,19 @@ void vtkPV3FoamReader::SetShowPatchNames(int val)
     {
         ShowPatchNames = val;
         updatePatchNamesView(ShowPatchNames);
+    }
+}
+
+
+void vtkPV3FoamReader::SetShowGroupsOnly(int val)
+{
+    if (ShowGroupsOnly != val)
+    {
+        ShowGroupsOnly = val;
+        if (foamData_)
+        {
+            foamData_->updateInfo();
+        }
     }
 }
 

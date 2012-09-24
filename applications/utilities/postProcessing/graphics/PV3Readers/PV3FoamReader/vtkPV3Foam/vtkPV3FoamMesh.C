@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 #include "pointSet.H"
 #include "fvMeshSubset.H"
 #include "vtkPV3FoamReader.h"
+#include "uindirectPrimitivePatch.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
@@ -171,21 +172,50 @@ void Foam::vtkPV3Foam::convertMeshPatches
 
     for (int partId = range.start(); partId < range.end(); ++partId)
     {
-        const word patchName = getPartName(partId);
-        const label  patchId = patches.findPatchID(patchName);
-
-        if (!partStatus_[partId] || patchId < 0)
+        if (!partStatus_[partId])
         {
             continue;
         }
 
+        const word patchName = getPartName(partId);
+
+        labelHashSet patchIds(patches.patchSet(List<wordRe>(1, patchName)));
+
         if (debug)
         {
-            Info<< "Creating VTK mesh for patch[" << patchId <<"] "
+            Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
                 << patchName  << endl;
         }
 
-        vtkPolyData* vtkmesh = patchVTKMesh(patches[patchId]);
+        vtkPolyData* vtkmesh = NULL;
+        if (patchIds.size() == 1)
+        {
+            vtkmesh = patchVTKMesh(patchName, patches[patchIds.begin().key()]);
+        }
+        else
+        {
+            // Patch group. Collect patch faces.
+            label sz = 0;
+            forAllConstIter(labelHashSet, patchIds, iter)
+            {
+                sz += patches[iter.key()].size();
+            }
+            labelList meshFaceLabels(sz);
+            sz = 0;
+            forAllConstIter(labelHashSet, patchIds, iter)
+            {
+                const polyPatch& pp = patches[iter.key()];
+                forAll(pp, i)
+                {
+                    meshFaceLabels[sz++] = pp.start()+i;
+                }
+            }
+            UIndirectList<face> fcs(mesh.faces(), meshFaceLabels);
+            uindirectPrimitivePatch pp(fcs, mesh.points());
+
+            vtkmesh = patchVTKMesh(patchName, pp);
+        }
+
 
         if (vtkmesh)
         {
