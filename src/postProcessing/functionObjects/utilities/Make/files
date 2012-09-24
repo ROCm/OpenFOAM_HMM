@@ -6,14 +6,8 @@ CourantNo/CourantNoFunctionObject.C
 dsmcFields/dsmcFields.C
 dsmcFields/dsmcFieldsFunctionObject.C
 
-pressureCoefficient/pressureCoefficient.C
-pressureCoefficient/pressureCoefficientFunctionObject.C
-
 pressureTools/pressureTools.C
 pressureTools/pressureToolsFunctionObject.C
-
-staticPressure/staticPressure.C
-staticPressure/staticPressureFunctionObject.C
 
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
