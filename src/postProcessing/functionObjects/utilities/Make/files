@@ -9,6 +9,9 @@ dsmcFields/dsmcFieldsFunctionObject.C
 pressureTools/pressureTools.C
 pressureTools/pressureToolsFunctionObject.C
 
+scalarTransport/scalarTransport.C
+scalarTransport/scalarTransportFunctionObject.C
+
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
 
