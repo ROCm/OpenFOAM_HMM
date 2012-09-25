@@ -272,14 +272,17 @@ void Foam::vtkPV3Foam::updateInfoPatches
 
                 if (enabledEntriesSet.found(vtkGrpName))
                 {
-                    //enabledEntriesSet.erase(vtkGrpName);
                     if (!reader_->GetShowGroupsOnly())
                     {
+                        enabledEntriesSet.erase(vtkGrpName);
                         forAll(patchIDs, i)
                         {
                             const polyPatch& pp = patches[patchIDs[i]];
-                            string vtkPatchName = pp.name() + " - patch";
-                            enabledEntriesSet.insert(vtkPatchName);
+                            if (pp.size())
+                            {
+                                string vtkPatchName = pp.name() + " - patch";
+                                enabledEntriesSet.insert(vtkPatchName);
+                            }
                         }
                     }
                 }
@@ -406,14 +409,17 @@ void Foam::vtkPV3Foam::updateInfoPatches
 
                     if (enabledEntriesSet.found(vtkGrpName))
                     {
-                        //enabledEntriesSet.erase(vtkGrpName);
                         if (!reader_->GetShowGroupsOnly())
                         {
+                            enabledEntriesSet.erase(vtkGrpName);
                             forAll(patchIDs, i)
                             {
-                                string vtkPatchName =
-                                    names[patchIDs[i]] + " - patch";
-                                enabledEntriesSet.insert(vtkPatchName);
+                                if (sizes[patchIDs[i]])
+                                {
+                                    string vtkPatchName =
+                                        names[patchIDs[i]] + " - patch";
+                                    enabledEntriesSet.insert(vtkPatchName);
+                                }
                             }
                         }
                     }
