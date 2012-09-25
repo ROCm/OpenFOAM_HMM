@@ -27,85 +27,109 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline Foam::incompressiblePerfectGas::incompressiblePerfectGas
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
 (
-    const specie& sp
+    const Specie& sp
 )
 :
-    specie(sp)
+    Specie(sp)
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::incompressiblePerfectGas::incompressiblePerfectGas
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
 (
     const word& name,
-    const incompressiblePerfectGas& pg
+    const incompressiblePerfectGas<Specie>& pg
 )
 :
-    specie(name, pg)
+    Specie(name, pg)
 {}
 
 
-inline Foam::autoPtr<Foam::incompressiblePerfectGas>
-Foam::incompressiblePerfectGas::clone() const
+template<class Specie>
+inline Foam::autoPtr<Foam::incompressiblePerfectGas<Specie> >
+Foam::incompressiblePerfectGas<Specie>::clone() const
 {
-    return autoPtr<incompressiblePerfectGas>
+    return autoPtr<incompressiblePerfectGas<Specie> >
     (
-        new incompressiblePerfectGas(*this)
+        new incompressiblePerfectGas<Specie>(*this)
     );
 }
 
 
-inline Foam::autoPtr<Foam::incompressiblePerfectGas>
-Foam::incompressiblePerfectGas::New
+template<class Specie>
+inline Foam::autoPtr<Foam::incompressiblePerfectGas<Specie> >
+Foam::incompressiblePerfectGas<Specie>::New
 (
     Istream& is
 )
 {
-    return autoPtr<incompressiblePerfectGas>(new incompressiblePerfectGas(is));
+    return autoPtr<incompressiblePerfectGas<Specie> >
+    (
+        new incompressiblePerfectGas<Specie>(is)
+    );
 }
 
 
-inline Foam::autoPtr<Foam::incompressiblePerfectGas>
-Foam::incompressiblePerfectGas::New
+template<class Specie>
+inline Foam::autoPtr<Foam::incompressiblePerfectGas<Specie> >
+Foam::incompressiblePerfectGas<Specie>::New
 (
     const dictionary& dict
 )
 {
-    return autoPtr<incompressiblePerfectGas>
+    return autoPtr<incompressiblePerfectGas<Specie> >
     (
-        new incompressiblePerfectGas(dict)
+        new incompressiblePerfectGas<Specie>(dict)
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::incompressiblePerfectGas::rho
+template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::rho
 (
     scalar p,
     scalar T
 ) const
 {
-    return pRef_/(R()*T);
+    return pRef_/(this->R()*T);
 }
 
 
-inline Foam::scalar Foam::incompressiblePerfectGas::psi(scalar, scalar T) const
+template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::psi
+(
+    scalar,
+    scalar T
+) const
 {
     return 0.0;
 }
 
 
-inline Foam::scalar Foam::incompressiblePerfectGas::Z(scalar, scalar) const
+template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::Z
+(
+    scalar,
+    scalar
+) const
 {
     return 0.0;
 }
 
 
-inline Foam::scalar Foam::incompressiblePerfectGas::cpMcv(scalar, scalar) const
+template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::cpMcv
+(
+    scalar,
+    scalar
+) const
 {
     return this->RR;
 }
@@ -114,74 +138,81 @@ inline Foam::scalar Foam::incompressiblePerfectGas::cpMcv(scalar, scalar) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::incompressiblePerfectGas::operator+=
+template<class Specie>
+inline void Foam::incompressiblePerfectGas<Specie>::operator+=
 (
-    const incompressiblePerfectGas& pg
+    const incompressiblePerfectGas<Specie>& pg
 )
 {
-    specie::operator+=(pg);
+    Specie::operator+=(pg);
 }
 
 
-inline void Foam::incompressiblePerfectGas::operator-=
+template<class Specie>
+inline void Foam::incompressiblePerfectGas<Specie>::operator-=
 (
-    const incompressiblePerfectGas& pg
+    const incompressiblePerfectGas<Specie>& pg
 )
 {
-    specie::operator-=(pg);
+    Specie::operator-=(pg);
 }
 
 
-inline void Foam::incompressiblePerfectGas::operator*=(const scalar s)
+template<class Specie>
+inline void Foam::incompressiblePerfectGas<Specie>::operator*=(const scalar s)
 {
-    specie::operator*=(s);
+    Specie::operator*=(s);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline Foam::incompressiblePerfectGas Foam::operator+
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie> Foam::operator+
 (
-    const incompressiblePerfectGas& pg1,
-    const incompressiblePerfectGas& pg2
+    const incompressiblePerfectGas<Specie>& pg1,
+    const incompressiblePerfectGas<Specie>& pg2
 )
 {
-    return incompressiblePerfectGas
+    return incompressiblePerfectGas<Specie>
     (
-        static_cast<const specie&>(pg1)
-      + static_cast<const specie&>(pg2)
+        static_cast<const Specie&>(pg1)
+      + static_cast<const Specie&>(pg2)
     );
 }
 
 
-inline Foam::incompressiblePerfectGas Foam::operator-
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie> Foam::operator-
 (
-    const incompressiblePerfectGas& pg1,
-    const incompressiblePerfectGas& pg2
+    const incompressiblePerfectGas<Specie>& pg1,
+    const incompressiblePerfectGas<Specie>& pg2
 )
 {
-    return incompressiblePerfectGas
+    return incompressiblePerfectGas<Specie>
     (
-        static_cast<const specie&>(pg1)
-      - static_cast<const specie&>(pg2)
+        static_cast<const Specie&>(pg1)
+      - static_cast<const Specie&>(pg2)
     );
 }
 
 
-inline Foam::incompressiblePerfectGas Foam::operator*
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie> Foam::operator*
 (
     const scalar s,
-    const incompressiblePerfectGas& pg
+    const incompressiblePerfectGas<Specie>& pg
 )
 {
-    return incompressiblePerfectGas(s*static_cast<const specie&>(pg));
+    return incompressiblePerfectGas<Specie>(s*static_cast<const Specie&>(pg));
 }
 
 
-inline Foam::incompressiblePerfectGas Foam::operator==
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie> Foam::operator==
 (
-    const incompressiblePerfectGas& pg1,
-    const incompressiblePerfectGas& pg2
+    const incompressiblePerfectGas<Specie>& pg1,
+    const incompressiblePerfectGas<Specie>& pg2
 )
 {
     return pg2 - pg1;

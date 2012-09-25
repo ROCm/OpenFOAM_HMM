@@ -39,7 +39,7 @@ Description
 #define makeBasicMixture(Mixture,Transport,Type,Thermo,EqnOfState)            \
                                                                               \
 typedef                                                                       \
-    Mixture<Transport<species::thermo<Thermo<EqnOfState>, Type> > >           \
+    Mixture<Transport<species::thermo<Thermo<EqnOfState<specie> >, Type> > >  \
     Mixture##Transport##Type##Thermo##EqnOfState;                             \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
@@ -55,7 +55,7 @@ typedef polynomialTransport                                                   \
     <                                                                         \
         hPolynomialThermo                                                     \
         <                                                                     \
-            icoPolynomial<Order>,                                             \
+            icoPolynomial<specie, Order>,                                     \
             Order                                                             \
         >,                                                                    \
         Type                                                                  \

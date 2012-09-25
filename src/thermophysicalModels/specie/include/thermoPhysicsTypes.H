@@ -32,6 +32,7 @@ Description
 #ifndef thermoPhysicsTypes_H
 #define thermoPhysicsTypes_H
 
+#include "specie.H"
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
 #include "hConstThermo.H"
@@ -56,7 +57,7 @@ namespace Foam
         <
             hConstThermo
             <
-                perfectGas
+                perfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -69,7 +70,7 @@ namespace Foam
         <
             janafThermo
             <
-                perfectGas
+                perfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -82,7 +83,7 @@ namespace Foam
         <
             hConstThermo
             <
-                incompressiblePerfectGas
+                incompressiblePerfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -95,7 +96,7 @@ namespace Foam
         <
             janafThermo
             <
-                incompressiblePerfectGas
+                incompressiblePerfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -108,7 +109,7 @@ namespace Foam
         <
             hPolynomialThermo
             <
-                icoPolynomial<8>,
+                icoPolynomial<specie, 8>,
                 8
             >,
             sensibleEnthalpy

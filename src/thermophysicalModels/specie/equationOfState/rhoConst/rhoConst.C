@@ -28,27 +28,30 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rhoConst::rhoConst(Istream& is)
+template<class Specie>
+Foam::rhoConst<Specie>::rhoConst(Istream& is)
 :
-    specie(is),
+    Specie(is),
     rho_(readScalar(is))
 {
-    is.check("rhoConst::rhoConst(Istream& is)");
+    is.check("rhoConst<Specie>::rhoConst(Istream& is)");
 }
 
 
-Foam::rhoConst::rhoConst(const dictionary& dict)
+template<class Specie>
+Foam::rhoConst<Specie>::rhoConst(const dictionary& dict)
 :
-    specie(dict),
+    Specie(dict),
     rho_(readScalar(dict.subDict("equationOfState").lookup("rho")))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::rhoConst::write(Ostream& os) const
+template<class Specie>
+void Foam::rhoConst<Specie>::write(Ostream& os) const
 {
-    specie::write(os);
+    Specie::write(os);
 
     dictionary dict("equationOfState");
     dict.add("rho", rho_);
@@ -59,12 +62,13 @@ void Foam::rhoConst::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const rhoConst& ico)
+template<class Specie>
+Foam::Ostream& Foam::operator<<(Ostream& os, const rhoConst<Specie>& ico)
 {
-    os  << static_cast<const specie&>(ico)
+    os  << static_cast<const Specie&>(ico)
         << token::SPACE << ico.rho_;
 
-    os.check("Ostream& operator<<(Ostream& os, const rhoConst& ico)");
+    os.check("Ostream& operator<<(Ostream& os, const rhoConst<Specie>& ico)");
     return os;
 }
 

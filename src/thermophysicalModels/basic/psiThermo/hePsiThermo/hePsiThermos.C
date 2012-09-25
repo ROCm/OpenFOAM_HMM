@@ -26,8 +26,8 @@ License
 #include "psiThermo.H"
 #include "makeThermo.H"
 
+#include "specie.H"
 #include "perfectGas.H"
-
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"

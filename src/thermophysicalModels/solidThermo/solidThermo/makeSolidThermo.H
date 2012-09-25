@@ -39,7 +39,7 @@ Description
 namespace Foam
 {
 
-#define makeSolidThermo(BaseThermo,Cthermo,Mixture,Transport,Radiation,Type,Thermo,Rho)\
+#define makeSolidThermo(BaseThermo,Cthermo,Mixture,Transport,Radiation,Type,Thermo,EqnOfState)\
                                                                               \
 typedef Cthermo                                                               \
 <                                                                             \
@@ -53,7 +53,7 @@ typedef Cthermo                                                               \
                 <                                                             \
                     Thermo                                                    \
                     <                                                         \
-                        Rho                                                   \
+                        EqnOfState<specie>                                    \
                     >,                                                        \
                     Type                                                      \
                 >                                                             \
@@ -61,11 +61,11 @@ typedef Cthermo                                                               \
         >                                                                     \
     >,                                                                        \
     BaseThermo                                                                \
->   Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo;    \
+>Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##BaseThermo;\
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
+Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##BaseThermo, \
     #Cthermo                                                                  \
     "<"                                                                       \
         #Mixture                                                              \
@@ -76,7 +76,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                 "<"                                                           \
                     #Thermo                                                   \
                     "<"                                                       \
-                        #Rho                                                  \
+                        #EqnOfState                                           \
                     ">,"                                                      \
                     #Type                                                     \
         ">>>>",                                                               \
@@ -94,19 +94,19 @@ typedef Mixture                                                               \
             <                                                                 \
                 Thermo                                                        \
                 <                                                             \
-                    Rho                                                       \
+                    EqnOfState<specie>                                        \
                 >,                                                            \
                 Type                                                          \
             >                                                                 \
         >                                                                     \
     >                                                                         \
->   Mixture##Transport##Radiation##Type##Thermo##Rho;                         \
+>   Mixture##Transport##Radiation##Type##Thermo##EqnOfState;                  \
                                                                               \
                                                                               \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    Mixture##Transport##Radiation##Type##Thermo##Rho,                         \
+    Mixture##Transport##Radiation##Type##Thermo##EqnOfState,                  \
     #Mixture                                                                  \
     "<"                                                                       \
         #Transport                                                            \
@@ -115,7 +115,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
             "<"                                                               \
                 #Thermo                                                       \
                 "<"                                                           \
-                    #Rho                                                      \
+                    #EqnOfState                                               \
                 ">,"                                                          \
                 #Type                                                         \
     ">>>",                                                                    \
@@ -125,20 +125,20 @@ defineTemplateTypeNameAndDebugWithName                                        \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     BaseThermo,                                                               \
-    Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
+Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##BaseThermo, \
     mesh                                                                      \
 );                                                                            \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     basicThermo,                                                              \
-    Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
+Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##BaseThermo, \
     fvMesh                                                                    \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     BaseThermo,                                                               \
-    Cthermo##Mixture##Transport##Radiation##Type##Thermo##Rho##BaseThermo,    \
+Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##BaseThermo, \
     dictionary                                                                \
 );
 
