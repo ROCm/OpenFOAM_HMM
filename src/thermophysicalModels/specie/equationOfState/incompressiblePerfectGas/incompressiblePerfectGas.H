@@ -172,25 +172,25 @@ public:
 
     // Friend operators
 
-        inline friend incompressiblePerfectGas operator+ <Specie>
+        friend incompressiblePerfectGas operator+ <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator- <Specie>
+        friend incompressiblePerfectGas operator- <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator* <Specie>
+        friend incompressiblePerfectGas operator* <Specie>
         (
             const scalar s,
             const incompressiblePerfectGas&
         );
 
-        inline friend incompressiblePerfectGas operator== <Specie>
+        friend incompressiblePerfectGas operator== <Specie>
         (
             const incompressiblePerfectGas&,
             const incompressiblePerfectGas&
