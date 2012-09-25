@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,12 +33,18 @@ Description
         movingWall
         {
             type            codedMixed;
-            value           uniform 0;
+
+            refValue        uniform (0 0 0);
+            refGradient     uniform (0 0 0);
+            valueFraction   uniform 1;
+
             redirectType    rampedMixed;   // name of generated bc
 
             code
             #{
-                this->refValue() = min(10, 0.1*this->db().time().value());
+                this->refValue() =
+                    vector(1, 0, 0)
+                   *min(10, 0.1*this->db().time().value());
                 this->refGrad() = vector::zero;
                 this->valueFraction() = 1.0;
             #};
