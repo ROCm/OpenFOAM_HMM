@@ -55,15 +55,17 @@ Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
         word mixture(thermoTypeDict.lookup("mixture"));
         word transport(thermoTypeDict.lookup("transport"));
         word thermo(thermoTypeDict.lookup("thermo"));
-        word equationOfState(thermoTypeDict.lookup("equationOfState"));
         word energy(thermoTypeDict.lookup("energy"));
+        word equationOfState(thermoTypeDict.lookup("equationOfState"));
+        word specie(thermoTypeDict.lookup("specie"));
 
         thermoTypeName =
             type + '<'
           + mixture + '<'
           + transport + '<'
           + thermo + '<'
-          + equationOfState + ">,"
+          + equationOfState + '<'
+          + specie + ">>,"
           + energy + ">>>";
     }
     else

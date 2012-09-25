@@ -28,9 +28,9 @@ License
 #include "rhoReactionThermo.H"
 #include "heRhoReactionThermo.H"
 
+#include "specie.H"
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
-
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
@@ -64,7 +64,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -76,7 +77,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -88,7 +90,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -100,7 +103,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -112,7 +116,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -124,7 +129,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 
@@ -137,7 +143,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -149,7 +156,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -161,7 +169,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -173,7 +182,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -185,7 +195,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -197,7 +208,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 

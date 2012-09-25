@@ -56,7 +56,8 @@ makeThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -67,7 +68,8 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -78,7 +80,8 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 
@@ -92,7 +95,8 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     eConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -103,7 +107,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     eConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -114,7 +119,8 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -125,7 +131,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -136,7 +143,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 

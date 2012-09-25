@@ -28,13 +28,12 @@ License
 #include "psiReactionThermo.H"
 #include "hePsiReactionThermo.H"
 
+#include "specie.H"
 #include "perfectGas.H"
-
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
 #include "thermo.H"
-
 #include "constTransport.H"
 #include "sutherlandTransport.H"
 
@@ -65,7 +64,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -77,7 +77,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -89,7 +90,8 @@ makeReactionThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 
@@ -104,7 +106,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -116,7 +119,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -128,7 +132,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 
@@ -143,7 +148,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -155,7 +161,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -167,7 +174,8 @@ makeReactionThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 

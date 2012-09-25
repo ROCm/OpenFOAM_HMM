@@ -90,7 +90,7 @@ Ostream& operator<<
                         Class icoPolynomial Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Specie, int PolySize>
+template<class Specie, int PolySize=8>
 class icoPolynomial
 :
     public Specie
