@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,11 +104,8 @@ Foam::functionEntries::codeStream::getFunction
 
     // codeName: codeStream + _<sha1>
     // codeDir : _<sha1>
-    dynamicCode dynCode
-    (
-        "codeStream" + context.sha1().str(true),
-        context.sha1().str(true)
-    );
+    std::string sha1Str(context.sha1().str(true));
+    dynamicCode dynCode("codeStream" + sha1Str, sha1Str);
 
     // Load library if not already loaded
     // Version information is encoded in the libPath (encoded with the SHA1)
