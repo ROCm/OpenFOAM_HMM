@@ -158,25 +158,25 @@ public:
 
     // Friend operators
 
-        inline friend perfectGas operator+ <Specie>
+        friend perfectGas operator+ <Specie>
         (
             const perfectGas&,
             const perfectGas&
         );
 
-        inline friend perfectGas operator- <Specie>
+        friend perfectGas operator- <Specie>
         (
             const perfectGas&,
             const perfectGas&
         );
 
-        inline friend perfectGas operator* <Specie>
+        friend perfectGas operator* <Specie>
         (
             const scalar s,
             const perfectGas&
         );
 
-        inline friend perfectGas operator== <Specie>
+        friend perfectGas operator== <Specie>
         (
             const perfectGas&,
             const perfectGas&

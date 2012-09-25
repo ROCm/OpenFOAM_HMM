@@ -160,25 +160,25 @@ public:
 
     // Friend operators
 
-        inline friend rhoConst operator+ <Specie>
+        friend rhoConst operator+ <Specie>
         (
             const rhoConst&,
             const rhoConst&
         );
 
-        inline friend rhoConst operator- <Specie>
+        friend rhoConst operator- <Specie>
         (
             const rhoConst&,
             const rhoConst&
         );
 
-        inline friend rhoConst operator* <Specie>
+        friend rhoConst operator* <Specie>
         (
             const scalar s,
             const rhoConst&
         );
 
-        inline friend rhoConst operator== <Specie>
+        friend rhoConst operator== <Specie>
         (
             const rhoConst&,
             const rhoConst&
