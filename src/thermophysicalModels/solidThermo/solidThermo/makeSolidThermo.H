@@ -67,7 +67,8 @@ typedef Cthermo                                                               \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    Cthermo##Mixture##Transport##Radiation##Type##Thermo##EqnOfState##Specie##BaseThermo, \
+    Cthermo##Mixture##Transport##Radiation##Type##Thermo                      \
+         ##EqnOfState##Specie##BaseThermo,                                    \
     #Cthermo                                                                  \
     "<"                                                                       \
         #Mixture                                                              \
