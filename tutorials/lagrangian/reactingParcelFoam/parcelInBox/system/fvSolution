@@ -82,10 +82,6 @@ PIMPLE
     momentumPredictor yes;
 }
 
-additional
-{
-}
-
 relaxationFactors
 {
     fields
