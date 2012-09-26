@@ -43,7 +43,8 @@ SourceFiles
 
 namespace Foam
 {
-    typedef OutputFilterFunctionObject<wallShearStress> wallShearStressFunctionObject;
+    typedef OutputFilterFunctionObject<wallShearStress>
+        wallShearStressFunctionObject;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
