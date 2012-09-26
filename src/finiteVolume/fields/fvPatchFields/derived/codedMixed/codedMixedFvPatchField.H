@@ -43,7 +43,9 @@ Description
 
         code
         #{
-            this->refValue() = min(10, 0.1*this->db().time().value());
+            this->refValue() =
+                vector(1, 0, 0)
+               *min(10, 0.1*this->db().time().value());
             this->refGrad() = vector::zero;
             this->valueFraction() = 1.0;
         #};

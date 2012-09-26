@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ SourceFiles
     vtkPV3FoamFields.C
     vtkPV3FoamMesh.C
     vtkPV3FoamMeshLagrangian.C
-    vtkPV3FoamMeshPatch.C
+    vtkPV3FoamTemplates.C
     vtkPV3FoamMeshSet.C
     vtkPV3FoamMeshVolume.C
     vtkPV3FoamMeshZone.C
@@ -443,7 +443,8 @@ class vtkPV3Foam
             );
 
             //- Add patch mesh
-            vtkPolyData* patchVTKMesh(const polyPatch&);
+            template<class PatchType>
+            vtkPolyData* patchVTKMesh(const word& name, const PatchType&);
 
             //- Add face zone mesh
             vtkPolyData* faceZoneVTKMesh
@@ -733,6 +734,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "vtkPV3FoamTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

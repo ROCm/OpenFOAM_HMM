@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,13 +37,18 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh(const polyPatch& p)
+template<class PatchType>
+vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh
+(
+    const word& name,
+    const PatchType& p
+)
 {
     vtkPolyData* vtkmesh = vtkPolyData::New();
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::patchVTKMesh - " << p.name() << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::patchVTKMesh - " << name << endl;
         printMemory();
     }
 
@@ -83,7 +88,7 @@ vtkPolyData* Foam::vtkPV3Foam::patchVTKMesh(const polyPatch& p)
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::patchVTKMesh - " << p.name() << endl;
+        Info<< "<end> Foam::vtkPV3Foam::patchVTKMesh - " << name << endl;
         printMemory();
     }
 

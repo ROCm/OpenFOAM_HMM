@@ -44,10 +44,7 @@ runApplication `getApplication`
 
 ## Run in parallel
 ## Decompose
-#for i in bottomAir topAir heater leftSolid rightSolid
-#do
-#   decomposePar -region $i > log.decomposePar.$i 2>&1
-#done
+#runApplication decomposePar -allRegions
 #
 #for i in bottomAir topAir
 #do
@@ -63,10 +60,7 @@ runApplication `getApplication`
 #runParallel `getApplication` 4
 #
 ## Reconstruct
-#for i in bottomAir topAir heater leftSolid rightSolid
-#do
-#   reconstructPar -region $i > log.reconstructPar.$i 2>&1
-#done
+#runApplication reconstructPar -allRegions
 
 
 echo

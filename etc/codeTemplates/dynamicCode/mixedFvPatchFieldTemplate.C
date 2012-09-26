@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,18 +73,18 @@ extern "C"
 makeRemovablePatchTypeField
 (
     fvPatch${FieldType},
-    ${typeName}FixedValueFvPatch${FieldType}
+    ${typeName}MixedValueFvPatch${FieldType}
 );
 
 
-const char* const ${typeName}FixedValueFvPatch${FieldType}::SHA1sum =
+const char* const ${typeName}MixedValueFvPatch${FieldType}::SHA1sum =
     "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-${typeName}FixedValueFvPatch${FieldType}::
-${typeName}FixedValueFvPatch${FieldType}
+${typeName}MixedValueFvPatch${FieldType}::
+${typeName}MixedValueFvPatch${FieldType}
 (
     const fvPatch& p,
     const DimensionedField<${TemplateType}, volMesh>& iF
@@ -100,10 +100,10 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
-${typeName}FixedValueFvPatch${FieldType}::
-${typeName}FixedValueFvPatch${FieldType}
+${typeName}MixedValueFvPatch${FieldType}::
+${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}MixedValueFvPatch${FieldType}& ptf,
     const fvPatch& p,
     const DimensionedField<${TemplateType}, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -119,8 +119,8 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
-${typeName}FixedValueFvPatch${FieldType}::
-${typeName}FixedValueFvPatch${FieldType}
+${typeName}MixedValueFvPatch${FieldType}::
+${typeName}MixedValueFvPatch${FieldType}
 (
     const fvPatch& p,
     const DimensionedField<${TemplateType}, volMesh>& iF,
@@ -137,10 +137,10 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
-${typeName}FixedValueFvPatch${FieldType}::
-${typeName}FixedValueFvPatch${FieldType}
+${typeName}MixedValueFvPatch${FieldType}::
+${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf
+    const ${typeName}MixedValueFvPatch${FieldType}& ptf
 )
 :
     mixedFvPatchField<${TemplateType}>(ptf)
@@ -153,10 +153,10 @@ ${typeName}FixedValueFvPatch${FieldType}
 }
 
 
-${typeName}FixedValueFvPatch${FieldType}::
-${typeName}FixedValueFvPatch${FieldType}
+${typeName}MixedValueFvPatch${FieldType}::
+${typeName}MixedValueFvPatch${FieldType}
 (
-    const ${typeName}FixedValueFvPatch${FieldType}& ptf,
+    const ${typeName}MixedValueFvPatch${FieldType}& ptf,
     const DimensionedField<${TemplateType}, volMesh>& iF
 )
 :
@@ -172,8 +172,8 @@ ${typeName}FixedValueFvPatch${FieldType}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-${typeName}FixedValueFvPatch${FieldType}::
-~${typeName}FixedValueFvPatch${FieldType}()
+${typeName}MixedValueFvPatch${FieldType}::
+~${typeName}MixedValueFvPatch${FieldType}()
 {
     if (${verbose:-false})
     {
@@ -184,7 +184,7 @@ ${typeName}FixedValueFvPatch${FieldType}::
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
+void ${typeName}MixedValueFvPatch${FieldType}::updateCoeffs()
 {
     if (this->updated())
     {

@@ -36,27 +36,18 @@ runApplication `getApplication`
 
 
 ## Decompose
-#for i in bottomAir topAir heater leftSolid rightSolid
-#do
-#   decomposePar -region $i > log.decomposePar.$i 2>&1
-#done
+#runApplication decomposePar -allRegions
 #
 ## Run
 #runParallel `getApplication` 4
 #
 ## Reconstruct
-#for i in bottomAir topAir heater leftSolid rightSolid
-#do
-#   reconstructPar -region $i > log.reconstructPar.$i 2>&1
-#done
+#runApplication reconstructPar -allRegions
 
 
 echo
 echo "creating files for paraview post-processing"
 echo
-for i in bottomAir topAir heater leftSolid rightSolid
-do
-   paraFoam -touch -region $i
-done
+paraFoam -touchAll
 
 # ----------------------------------------------------------------- end-of-file

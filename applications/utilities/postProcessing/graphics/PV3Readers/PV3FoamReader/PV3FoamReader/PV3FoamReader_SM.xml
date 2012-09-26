@@ -107,7 +107,6 @@
       <BooleanDomain name="bool"/>
       <Documentation>
         Use vtkPolyhedron instead of decomposing polyhedra.
-        !!Actually uses vtkConvexPointSet until this is properly supported in VTK!!
       </Documentation>
     </IntVectorProperty>
 
@@ -154,6 +153,20 @@
       </Documentation>
     </IntVectorProperty>
 
+    <!-- Show Groups Only check-box -->
+    <IntVectorProperty
+      name="UiShowGroupsOnly"
+      command="SetShowGroupsOnly"
+      number_of_elements="1"
+      default_values="0"
+      is_internal="1"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Show groups only
+      </Documentation>
+    </IntVectorProperty>
+
     <!-- Force GUI update check box -->
     <IntVectorProperty
       name="UpdateGUI"
@@ -193,7 +206,8 @@
         </RequiredProperties>
       </ArraySelectionDomain>
       <Documentation>
-        This property contains a list of the mesh parts (patches, sets, zones).
+        This property contains a list of the mesh parts
+        (patches, groups, sets, zones).
       </Documentation>
     </StringVectorProperty>
 
@@ -281,6 +295,7 @@
     <Property name="UiZeroTime" show="0"/>
     <Property name="UiRefresh" show="0"/>
     <Property name="UiShowPatchNames" show="0"/>
+    <Property name="UiShowGroupsOnly" show="0"/>
     <Property name="UiIncludeSets" show="0"/>
     <Property name="UiIncludeZones" show="0"/>
   </Hints>

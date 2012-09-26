@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,9 @@ class pqPV3FoamReaderPanel
     //- Show Patch Names checkbox
     QCheckBox* ShowPatchNames_;
 
+    //- Show Groups Only checkbox
+    QCheckBox* ShowGroupsOnly_;
+
     //- IncludeSets checkbox
     QCheckBox* IncludeSets_;
 
@@ -90,6 +93,7 @@ protected slots:
     void ZeroTimeToggled();
     void RefreshPressed();
     void ShowPatchNamesToggled();
+    void ShowGroupsOnlyToggled();
     void IncludeSetsToggled();
     void IncludeZonesToggled();
     void InterpolateVolFieldsToggled();
