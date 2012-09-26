@@ -222,6 +222,13 @@ void Foam::wallShearStress::write()
         tmp<volSymmTensorField> Reff;
         if (phi.dimensions() == dimMass/dimTime)
         {
+            if (!mesh.foundObject<cmpModel>("turbulenceModel"))
+            {
+                FatalErrorIn("void Foam::wallShearStress::write()")
+                    << "Unable to find compressible turbulence model in the "
+                    << "database" << exit(FatalError);
+            }
+
             const cmpModel& model =
                 mesh.lookupObject<cmpModel>("turbulenceModel");
 
@@ -229,6 +236,13 @@ void Foam::wallShearStress::write()
         }
         else
         {
+            if (!mesh.foundObject<icoModel>("turbulenceModel"))
+            {
+                FatalErrorIn("void Foam::wallShearStress::write()")
+                    << "Unable to find incompressible turbulence model in the "
+                    << "database" << exit(FatalError);
+            }
+
             const icoModel& model =
                 mesh.lookupObject<icoModel>("turbulenceModel");
 
