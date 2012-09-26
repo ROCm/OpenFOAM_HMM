@@ -41,6 +41,9 @@ namespace Foam
 {
     typedef IOList<word> wordIOList;
     typedef IOList<wordList> wordListIOList;
+
+    // Print word list list as a table
+    void printTable(const List<wordList>&, Ostream&);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
