@@ -68,7 +68,8 @@ makeBasicMixture
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -77,58 +78,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    sutherlandTransport,
-    sensibleEnthalpy,
-    janafThermo,
-    perfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    constTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst
-);
-
-makeBasicPolyMixture
-(
-    pureMixture,
-    3,
-    sensibleEnthalpy
-);
-
-makeBasicPolyMixture
-(
-    pureMixture,
-    8,
-    sensibleEnthalpy
-);
-
-
-makeBasicMixture
-(
-    pureMixture,
-    constTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    incompressiblePerfectGas
-);
-
-makeBasicMixture
-(
-    pureMixture,
-    sutherlandTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -137,7 +88,58 @@ makeBasicMixture
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    incompressiblePerfectGas,
+    specie
 );
 
 
@@ -149,7 +151,8 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     eConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -158,7 +161,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     eConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -167,7 +171,8 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -176,7 +181,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -185,7 +191,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -194,23 +201,19 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
-makeBasicPolyMixture
+makeBasicMixture
 (
     pureMixture,
-    3,
-    sensibleInternalEnergy
+    polynomialTransport,
+    sensibleInternalEnergy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
 );
-
-makeBasicPolyMixture
-(
-    pureMixture,
-    8,
-    sensibleInternalEnergy
-);
-
 
 makeBasicMixture
 (
@@ -218,7 +221,8 @@ makeBasicMixture
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -227,7 +231,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 makeBasicMixture
@@ -236,7 +241,8 @@ makeBasicMixture
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    incompressiblePerfectGas
+    incompressiblePerfectGas,
+    specie
 );
 
 

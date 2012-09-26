@@ -26,21 +26,17 @@ License
 
 #include "makeSolidThermo.H"
 
+#include "specie.H"
 #include "rhoConst.H"
-
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
-
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-
 #include "constSolidRad.H"
-
 #include "pureSolidMixture.H"
 #include "multiComponentSolidMixture.H"
 #include "reactingSolidMixture.H"
-
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
 #include "thermo.H"
@@ -67,7 +63,8 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
 makeSolidThermo
@@ -79,7 +76,8 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
 makeSolidThermo
@@ -91,7 +89,8 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hExponentialThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
 makeSolidThermo
@@ -103,7 +102,8 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
 makeSolidThermo
@@ -115,7 +115,8 @@ makeSolidThermo
     constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
-    rhoConst
+    rhoConst,
+    specie
 );
 
 
