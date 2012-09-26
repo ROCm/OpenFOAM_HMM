@@ -25,7 +25,7 @@ Class
     Foam::compressible::LESModels::SpalartAllmaras
 
 Group
-    grpCmpLESTurbulence
+    grpCmpDESTurbulence
 
 Description
     SpalartAllmaras for compressible flows
@@ -38,7 +38,7 @@ SourceFiles
 #ifndef compressibleSpalartAllmaras_H
 #define compressibleSpalartAllmaras_H
 
-#include "LESModel.H"
+#include "DESModel.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,7 +56,7 @@ namespace LESModels
 
 class SpalartAllmaras
 :
-    public LESModel
+    public DESModel
 {
     // Private data
 
@@ -169,6 +169,9 @@ public:
 
         //- Read LESProperties dictionary
         virtual bool read();
+
+        //- Return the LES field indicator
+        virtual tmp<volScalarField> LESRegion() const;
 };
 
 

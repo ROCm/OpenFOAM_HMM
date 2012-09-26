@@ -25,7 +25,7 @@ Class
     Foam::incompressible::LESModels::SpalartAllmarasIDDES
 
 Group
-    grpIcoLESTurbulence
+    grpIcoDESTurbulence
 
 Description
     SpalartAllmarasIDDES LES turbulence model for incompressible flows

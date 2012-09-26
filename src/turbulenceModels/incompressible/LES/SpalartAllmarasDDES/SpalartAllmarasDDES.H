@@ -25,7 +25,7 @@ Class
     Foam::incompressible::LESModels::SpalartAllmarasDDES
 
 Group
-    grpIcoLESTurbulence
+    grpIcoDESTurbulence
 
 Description
     SpalartAllmaras DDES LES turbulence model for incompressible flows
@@ -55,7 +55,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class SpalartAllmarasDDES Declaration
+                     Class SpalartAllmarasDDES Declaration
 \*---------------------------------------------------------------------------*/
 
 class SpalartAllmarasDDES
