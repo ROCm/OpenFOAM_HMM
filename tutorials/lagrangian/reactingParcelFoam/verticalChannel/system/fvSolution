@@ -88,10 +88,6 @@ potentialFlow
     nNonOrthogonalCorrectors 5;
 }
 
-additional
-{
-}
-
 relaxationFactors
 {
     fields

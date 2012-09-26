@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
     pimpleControl pimple(mesh);
 
     #include "readTimeControls.H"
-    #include "readAdditionalSolutionControls.H"
     #include "createFields.H"
     #include "createRDeltaT.H"
     #include "createRadiationModel.H"
@@ -74,7 +73,6 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        #include "readAdditionalSolutionControls.H"
         #include "readTimeControls.H"
 
         runTime++;

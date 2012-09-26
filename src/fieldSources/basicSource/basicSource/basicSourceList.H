@@ -84,7 +84,10 @@ public:
 
     // Constructors
 
-        //- Construct from components with list of field names
+        //- Construct null
+        basicSourceList(const fvMesh& mesh);
+
+        //- Construct from mesh and dictionary
         basicSourceList(const fvMesh& mesh, const dictionary& dict);
 
 
@@ -94,6 +97,9 @@ public:
 
 
     // Member Functions
+
+        //- Reset the source list
+        void reset(const dictionary& dict);
 
         //- Correct
         template<class Type>

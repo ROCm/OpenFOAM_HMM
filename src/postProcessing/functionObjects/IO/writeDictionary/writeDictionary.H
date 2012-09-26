@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,97 +22,86 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::forceCoeffs
+    Foam::writeDictionary
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift, drag and moment coefficients.
+    This function object writes dictionaries on start-up, and on change
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    writeDictionary.C
+    IOwriteDictionary.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef writeDictionary_H
+#define writeDictionary_H
 
-#include "forces.H"
+#include "pointFieldFwd.H"
+#include "wordList.H"
+#include "runTimeSelectionTables.H"
+#include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+class objectRegistry;
+class dictionary;
+class mapPolyMesh;
+
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                       Class writeDictionary Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
-:
-    public forces
+class writeDictionary
 {
+protected:
+
     // Private data
 
-        // Force coefficient geometry
+        //- Name of this set of writeDictionary
+        word name_;
 
-            //- Lift
-            vector liftDir_;
+        //- Reference to the database
+        const objectRegistry& obr_;
 
-            //- Drag
-            vector  dragDir_;
+        //- Names of dictionaries to monitor
+        wordList dictNames_;
 
-            //- Pitch
-            vector pitchAxis_;
-
-
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
-
-
-        // Reference scales
-
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-        // Bin information
-
-            //- Writer for bin data
-            autoPtr<writer<scalar> > binWriterPtr_;
+        //- List of changed dictionaries (only those registered to database)
+        List<SHA1Digest> digests_;
 
 
     // Private Member Functions
 
+        //- Helper function to write the dictionary if found at location
+        bool tryFolder
+        (
+            const label dictI,
+            const word& location,
+            bool& firstDict
+        );
+
         //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        writeDictionary(const writeDictionary&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
-
-
-protected:
-
-    //- Output file header information
-    virtual void writeFileHeader();
+        void operator=(const writeDictionary&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("forceCoeffs");
+    TypeName("writeDictionary");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        forceCoeffs
+        writeDictionary
         (
             const word& name,
             const objectRegistry&,
@@ -122,12 +111,18 @@ public:
 
 
     //- Destructor
-    virtual ~forceCoeffs();
+    virtual ~writeDictionary();
 
 
     // Member Functions
 
-        //- Read the forces data
+        //- Return name of the writeDictionary
+        virtual const word& name() const
+        {
+            return name_;
+        }
+
+        //- Read the writeDictionary data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -136,8 +131,16 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Write the forces
+        //- Write the writeDictionary
         virtual void write();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 

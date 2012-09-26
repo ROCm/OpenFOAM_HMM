@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
     #include "startSummary.H"
 
     pimpleControl pimple(mesh);
-    bool solveSpecies = true;
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

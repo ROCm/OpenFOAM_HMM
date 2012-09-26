@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
     #include "setInitialDeltaT.H"
 
     pimpleControl pimple(mesh);
-    bool solveSpecies = true;
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

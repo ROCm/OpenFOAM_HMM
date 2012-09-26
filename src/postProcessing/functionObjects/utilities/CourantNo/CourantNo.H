@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,97 +22,86 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::forceCoeffs
+    Foam::CourantNo
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift, drag and moment coefficients.
+    This function object calculates and outputs the Courant number as a
+    volScalarField.  The field is stored on the mesh database so that it can
+    be retrieved and used for other applications.
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    CourantNo.C
+    IOCourantNo.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef CourantNo_H
+#define CourantNo_H
 
-#include "forces.H"
+#include "volFieldsFwd.H"
+#include "surfaceFieldsFwd.H"
+#include "pointFieldFwd.H"
+#include "OFstream.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+class objectRegistry;
+class dictionary;
+class mapPolyMesh;
+
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                          Class CourantNo Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
-:
-    public forces
+class CourantNo
 {
     // Private data
 
-        // Force coefficient geometry
+        //- Name of this set of CourantNo objects
+        word name_;
 
-            //- Lift
-            vector liftDir_;
+        //- Reference to the database
+        const objectRegistry& obr_;
 
-            //- Drag
-            vector  dragDir_;
+        //- On/off switch
+        bool active_;
 
-            //- Pitch
-            vector pitchAxis_;
+        //- Name of flux field, default is "phi"
+        word phiName_;
 
-
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
-
-
-        // Reference scales
-
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-        // Bin information
-
-            //- Writer for bin data
-            autoPtr<writer<scalar> > binWriterPtr_;
+        //- Name of density field (optional)
+        word rhoName_;
 
 
     // Private Member Functions
 
+        //- Return 1 if the flux field is volumetric, otherwise return rho
+        //  from the database
+        tmp<volScalarField> rho(const surfaceScalarField& p) const;
+
         //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        CourantNo(const CourantNo&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
-
-
-protected:
-
-    //- Output file header information
-    virtual void writeFileHeader();
+        void operator=(const CourantNo&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("forceCoeffs");
+    TypeName("CourantNo");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        forceCoeffs
+        CourantNo
         (
             const word& name,
             const objectRegistry&,
@@ -122,12 +111,18 @@ public:
 
 
     //- Destructor
-    virtual ~forceCoeffs();
+    virtual ~CourantNo();
 
 
     // Member Functions
 
-        //- Read the forces data
+        //- Return name of the set of CourantNo
+        virtual const word& name() const
+        {
+            return name_;
+        }
+
+        //- Read the CourantNo data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -136,8 +131,16 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Write the forces
+        //- Calculate the CourantNo and write
         virtual void write();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 

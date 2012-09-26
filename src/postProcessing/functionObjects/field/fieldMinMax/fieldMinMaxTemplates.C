@@ -96,7 +96,7 @@ void Foam::fieldMinMax::calcMinMaxFields
                         }
 
                         fieldMinMaxFilePtr_()
-                             << token::TAB << maxValue << token::TAB << maxC;
+                            << token::TAB << maxValue << token::TAB << maxC;
 
                         if (Pstream::parRun())
                         {

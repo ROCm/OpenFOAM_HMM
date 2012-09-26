@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,6 +151,25 @@ Foam::writer<Type>::~writer()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::writer<Type>::write
+(
+    const coordSet& points,
+    const wordList& valueSetNames,
+    const List<Field<Type> >& valueSets,
+    Ostream& os
+) const
+{
+    List<const Field<Type>*> valueSetPtrs(valueSets.size());
+    forAll(valueSetPtrs, i)
+    {
+        valueSetPtrs[i] = &valueSets[i];
+    }
+    
+    write(points, valueSetNames, valueSetPtrs, os);
+}
+
 
 template<class Type>
 Foam::Ostream& Foam::writer<Type>::write

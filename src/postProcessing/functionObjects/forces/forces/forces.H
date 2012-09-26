@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,13 @@ Description
 
     Member function forces::write() calculates the forces/moments and
     writes the forces/moments into the file \<timeDir\>/forces.dat
+
+    The data can optionally be collected into bins, using e.g.
+    \verbaitim
+        nBin        20;          // output data into bins
+        binDir      (1 0 0);     // bin direction
+        binFormat   gnuplot;
+    \endverbatim
 
 Note
     The centre of rotation for moment calculations can either be specified
@@ -66,6 +73,7 @@ SourceFiles
 #include "OFstream.H"
 #include "Switch.H"
 #include "pointFieldFwd.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,46 +91,9 @@ class mapPolyMesh;
 
 class forces
 {
-public:
-
-    // Tuple for pressure (.first()) and viscous (.second()) forces
-    typedef Tuple2<vector, vector> pressureViscous;
-
-    // Tuple for forces (.first()) and moment (.second())
-    // pressure/viscous forces Tuples.
-    typedef Tuple2<pressureViscous, pressureViscous> forcesMoments;
-
-    //- Sum operation class to accumulate pressure/viscous forces and moments
-    class sumOp
-    {
-    public:
-
-        forcesMoments operator()
-        (
-            const forcesMoments& fm1,
-            const forcesMoments& fm2
-        ) const
-        {
-            return forcesMoments
-            (
-                pressureViscous
-                (
-                    fm1.first().first()  + fm2.first().first(),
-                    fm1.first().second() + fm2.first().second()
-                ),
-                pressureViscous
-                (
-                    fm1.second().first()  + fm2.second().first(),
-                    fm1.second().second() + fm2.second().second()
-                )
-            );
-        }
-    };
-
-
 protected:
 
-    // Private data
+    // Protected data
 
         //- Name of this set of forces,
         //  Also used as the name of the probes directory.
@@ -130,11 +101,18 @@ protected:
 
         const objectRegistry& obr_;
 
-        //- on/off switch
+        //- On/off switch
         bool active_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
+
+        //- Pressure and viscous force per bin
+        List<Field<vector> > force_;
+
+        //- Pressure and viscous pressure per bin
+        List<Field<vector> > moment_;
+
 
         // Read from dictionary
 
@@ -169,11 +147,35 @@ protected:
             bool localSystem_;
 
 
+            // Bin information
+
+                //- Number of bins
+                label nBin_;
+
+                //- Direction used to determine bin orientation
+                vector binDir_;
+
+                //- Distance between bin divisions
+                scalar binDx_;
+
+                //- Minimum bin bounds
+                scalar binMin_;
+                
+                //- Bin positions along binDir
+                List<point> binPoints_;
+
+                //- Write format for bin data
+                word binFormat_;
+
+
         //- Forces/moment file ptr
         autoPtr<OFstream> forcesFilePtr_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
+
+        //- Return the base file directory for output
+        fileName baseFileDir() const;
 
         //- If the forces file has not been created create it
         void makeFile();
@@ -190,6 +192,18 @@ protected:
         //- Return rhoRef if the pressure field is dynamic, i.e. p/rho
         //  otherwise return 1
         scalar rho(const volScalarField& p) const;
+
+        //- Accumulate bin data
+        void applyBins
+        (
+            const label patchI,
+            const vectorField fN,
+            const vectorField Md,
+            const vectorField fT
+        );
+
+        //- Helper function to write bin data
+        void writeBins() const;
 
         //- Disallow default bitwise copy construct
         forces(const forces&);
@@ -256,8 +270,14 @@ public:
         //- Write the forces
         virtual void write();
 
-        //- Calculate and return forces and moment
-        virtual forcesMoments calcForcesMoment() const;
+        //- Calculate the forces and moments
+        virtual void calcForcesMoment();
+
+        //- Return the total force
+        virtual vector forceEff() const;
+
+        //- Return the total moment
+        virtual vector momentEff() const;
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&)

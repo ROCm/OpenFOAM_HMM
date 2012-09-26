@@ -254,30 +254,45 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         combineFields(Sf);
         combineFields(weightField);
 
+        // Write raw values on surface if specified
+        if (surfaceWriterPtr_.valid())
+        {
+            faceList faces;
+            pointField points;
+            combineSurfaceGeometry(faces, points);
+
+            fileName outputDir;
+            if (Pstream::parRun())
+            {
+                // Put in undecomposed case (Note: gives problems for
+                // distributed data running)
+                outputDir = obr_.time().path()/".."/name_;
+            }
+            else
+            {
+                outputDir = obr_.time().path()/name_;
+            }
+
+            outputDir = outputDir/"surface"/obr_.time().timeName();
+
+            surfaceWriterPtr_->write
+            (
+                outputDir,
+                word(sourceTypeNames_[source_]) + "_" + sourceName_,
+                points,
+                faces,
+                fieldName,
+                values,
+                false
+            );
+        }
+
         // apply weight field
         values *= weightField;
-
 
         if (Pstream::master())
         {
             Type result = processValues(values, Sf, weightField);
-
-            if (valueOutput_)
-            {
-                IOField<Type>
-                (
-                    IOobject
-                    (
-                        fieldName + "_" + sourceTypeNames_[source_] + "-"
-                            + sourceName_,
-                        obr_.time().timeName(),
-                        obr_,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
-                    values
-                ).write();
-            }
 
             outputFilePtr_()<< tab << result;
 

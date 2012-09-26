@@ -9,11 +9,9 @@ tmp<fv::convectionScheme<scalar> > mvConvection
     )
 );
 
-combustion->correct();
-dQ = combustion->dQ();
-
-if (solveSpecies)
 {
+    combustion->correct();
+    dQ = combustion->dQ();
     label inertIndex = -1;
     volScalarField Yt(0.0*Y[0]);
 

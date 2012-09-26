@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,97 +22,94 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::forceCoeffs
+    Foam::wallShearStress
 
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift, drag and moment coefficients.
+    Evaluates and outputs wall shear stress.  Values written to time folders
+    as field 'wallShearStress'
 
 SourceFiles
-    forceCoeffs.C
-    IOforceCoeffs.H
+    wallShearStress.C
+    IOwallShearStress.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef forceCoeffs_H
-#define forceCoeffs_H
+#ifndef wallShearStress_H
+#define wallShearStress_H
 
-#include "forces.H"
+#include "volFieldsFwd.H"
+#include "pointFieldFwd.H"
+#include "Switch.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+class objectRegistry;
+class dictionary;
+class mapPolyMesh;
+class fvMesh;
+
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                       Class wallShearStress Declaration
 \*---------------------------------------------------------------------------*/
 
-class forceCoeffs
-:
-    public forces
+class wallShearStress
 {
     // Private data
 
-        // Force coefficient geometry
+        //- Name of this set of wallShearStress object
+        word name_;
 
-            //- Lift
-            vector liftDir_;
+        const objectRegistry& obr_;
 
-            //- Drag
-            vector  dragDir_;
+        //- on/off switch
+        bool active_;
 
-            //- Pitch
-            vector pitchAxis_;
+        //- Switch to send output to Info as well as to file
+        Switch log_;
 
+        //- Name of mass/volume flux field (optional, default = phi)
+        word phiName_;
 
-        // Free-stream conditions
-
-            //- Velocity magnitude
-            scalar magUInf_;
-
-
-        // Reference scales
-
-            //- Length
-            scalar lRef_;
-
-            //- Area
-            scalar Aref_;
-
-
-        // Bin information
-
-            //- Writer for bin data
-            autoPtr<writer<scalar> > binWriterPtr_;
+        //- Output file pointer
+        autoPtr<OFstream> outputFilePtr_;
 
 
     // Private Member Functions
 
+        //- Make the output file
+        virtual void makeFile();
+
+        //- Calculate the shear stress
+        void calcShearStress
+        (
+            const fvMesh& mesh,
+            const volSymmTensorField& Reff,
+            volVectorField& shearStress
+        );
+
         //- Disallow default bitwise copy construct
-        forceCoeffs(const forceCoeffs&);
+        wallShearStress(const wallShearStress&);
 
         //- Disallow default bitwise assignment
-        void operator=(const forceCoeffs&);
-
-
-protected:
-
-    //- Output file header information
-    virtual void writeFileHeader();
+        void operator=(const wallShearStress&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("forceCoeffs");
+    TypeName("wallShearStress");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        forceCoeffs
+        wallShearStress
         (
             const word& name,
             const objectRegistry&,
@@ -122,12 +119,18 @@ public:
 
 
     //- Destructor
-    virtual ~forceCoeffs();
+    virtual ~wallShearStress();
 
 
     // Member Functions
 
-        //- Read the forces data
+        //- Return name of the set of wallShearStress
+        virtual const word& name() const
+        {
+            return name_;
+        }
+
+        //- Read the wallShearStress data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -136,8 +139,16 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Write the forces
+        //- Calculate the wallShearStress and write
         virtual void write();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
+
+        //- Update for changes of mesh
+        virtual void movePoints(const pointField&)
+        {}
 };
 
 
