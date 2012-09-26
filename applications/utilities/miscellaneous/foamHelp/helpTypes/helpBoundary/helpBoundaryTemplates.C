@@ -120,7 +120,8 @@ void Foam::helpTypes::helpBoundary::fixedValueFieldConditions
                 0,
                 mesh.nInternalFaces(),
                 0,
-                mesh.boundaryMesh()
+                mesh.boundaryMesh(),
+                patchType
             );
 
             fvPatch fvp(pp, mesh.boundary());
