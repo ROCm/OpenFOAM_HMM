@@ -27,8 +27,6 @@ License
 #include "solidThermoPhysicsTypes.H"
 #include "thermoPhysicsTypes.H"
 
-#include "chemistrySolver.H"
-
 #include "ODESolidChemistryModel.H"
 #include "solidChemistryModel.H"
 
@@ -38,12 +36,6 @@ License
 
 namespace Foam
 {
-    typedef ODESolidChemistryModel
-        <solidChemistryModel, hConstSolidThermoPhysics, gasThermoPhysics>
-            solidODEChemistryConstThermo;
-
-    makeChemistrySolver(solidODEChemistryConstThermo)
-
     makeSolidChemistrySolverType
     (
         ode,
@@ -52,12 +44,6 @@ namespace Foam
         hConstSolidThermoPhysics,
         gasThermoPhysics
     )
-
-    typedef ODESolidChemistryModel
-        <solidChemistryModel, hExponentialSolidThermoPhysics, gasThermoPhysics>
-            solidODEChemistryExpThermo;
-
-    makeChemistrySolver(solidODEChemistryExpThermo)
 
     makeSolidChemistrySolverType
     (

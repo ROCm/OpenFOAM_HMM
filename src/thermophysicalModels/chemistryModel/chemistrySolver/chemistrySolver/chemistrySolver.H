@@ -112,7 +112,6 @@ public:
     );
 
 
-
 #define makeChemistrySolverType(SS, ODEChem, Comp, Thermo)                    \
                                                                               \
     typedef SS<ODEChem<Comp, Thermo> > SS##ODEChem##Comp##Thermo;             \
@@ -128,26 +127,6 @@ public:
     (                                                                         \
         Comp,                                                                 \
         SS##ODEChem##Comp##Thermo,                                            \
-        fvMesh                                                                \
-    );
-
-
-#define makeSolidChemistrySolverType(SS, ODEChem, Comp, SThermo, GThermo)     \
-                                                                              \
-    typedef SS<ODEChem<Comp, SThermo, GThermo> >                              \
-        SS##ODEChem##Comp##SThermo##GThermo;                                  \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        SS##ODEChem##Comp##SThermo##GThermo,                                  \
-        #SS"<"#ODEChem"<"#Comp","#SThermo","#GThermo">>",                     \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        Comp,                                                                 \
-        SS##ODEChem##Comp##SThermo##GThermo,                                  \
         fvMesh                                                                \
     );
 
