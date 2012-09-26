@@ -29,13 +29,12 @@ License
 #include "makeReactionThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
+#include "specie.H"
 #include "perfectGas.H"
-
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "absoluteEnthalpy.H"
-#include "specieThermo.H"
-
+#include "thermo.H"
 #include "constTransport.H"
 #include "sutherlandTransport.H"
 
@@ -62,7 +61,8 @@ makeReactionThermo
     constTransport,
     absoluteEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -74,7 +74,8 @@ makeReactionThermo
     constTransport,
     absoluteEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -86,7 +87,8 @@ makeReactionThermo
     constTransport,
     absoluteEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -98,7 +100,8 @@ makeReactionThermo
     sutherlandTransport,
     absoluteEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -110,7 +113,8 @@ makeReactionThermo
     sutherlandTransport,
     absoluteEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -122,7 +126,8 @@ makeReactionThermo
     sutherlandTransport,
     absoluteEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -134,7 +139,8 @@ makeReactionThermo
     constTransport,
     absoluteEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeReactionThermo
@@ -146,7 +152,8 @@ makeReactionThermo
     sutherlandTransport,
     absoluteEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 

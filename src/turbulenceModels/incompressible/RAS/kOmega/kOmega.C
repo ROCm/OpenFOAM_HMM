@@ -254,7 +254,6 @@ void kOmega::correct()
     (
         fvm::ddt(omega_)
       + fvm::div(phi_, omega_)
-      - fvm::Sp(fvc::div(phi_), omega_)
       - fvm::laplacian(DomegaEff(), omega_)
      ==
         alpha_*G*omega_/k_
@@ -274,7 +273,6 @@ void kOmega::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
-      - fvm::Sp(fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(), k_)
      ==
         G

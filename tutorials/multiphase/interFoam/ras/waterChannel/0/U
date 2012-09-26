@@ -23,8 +23,7 @@ boundaryField
     inlet
     {
         type            flowRateInletVelocity;
-        flowRate        constant 50;
-        value           uniform (0 0 0);
+        volumetricFlowRate constant 50;
     }
 
     walls

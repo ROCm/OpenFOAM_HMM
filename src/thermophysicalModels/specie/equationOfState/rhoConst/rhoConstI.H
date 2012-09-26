@@ -27,65 +27,73 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-inline Foam::rhoConst::rhoConst
+template<class Specie>
+inline Foam::rhoConst<Specie>::rhoConst
 (
-    const specie& sp,
+    const Specie& sp,
     const scalar rho
 )
 :
-    specie(sp),
+    Specie(sp),
     rho_(rho)
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::rhoConst::rhoConst
+template<class Specie>
+inline Foam::rhoConst<Specie>::rhoConst
 (
     const word& name,
-    const rhoConst& ico
+    const rhoConst<Specie>& ico
 )
 :
-    specie(name, ico),
+    Specie(name, ico),
     rho_(ico.rho_)
 {}
 
 
-inline Foam::autoPtr<Foam::rhoConst>
-Foam::rhoConst::clone() const
+template<class Specie>
+inline Foam::autoPtr<Foam::rhoConst<Specie> >
+Foam::rhoConst<Specie>::clone() const
 {
-    return autoPtr<rhoConst>(new rhoConst(*this));
+    return autoPtr<rhoConst<Specie> >(new rhoConst<Specie>(*this));
 }
 
 
-inline Foam::autoPtr<Foam::rhoConst>
-Foam::rhoConst::New(Istream& is)
+template<class Specie>
+inline Foam::autoPtr<Foam::rhoConst<Specie> >
+Foam::rhoConst<Specie>::New(Istream& is)
 {
-    return autoPtr<rhoConst>(new rhoConst(is));
+    return autoPtr<rhoConst<Specie> >(new rhoConst<Specie>(is));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::scalar Foam::rhoConst::rho(scalar p, scalar T) const
+template<class Specie>
+inline Foam::scalar Foam::rhoConst<Specie>::rho(scalar p, scalar T) const
 {
     return rho_;
 }
 
 
-inline Foam::scalar Foam::rhoConst::psi(scalar, scalar T) const
+template<class Specie>
+inline Foam::scalar Foam::rhoConst<Specie>::psi(scalar, scalar T) const
 {
     return 0.0;
 }
 
 
-inline Foam::scalar Foam::rhoConst::Z(scalar, scalar) const
+template<class Specie>
+inline Foam::scalar Foam::rhoConst<Specie>::Z(scalar, scalar) const
 {
     return 0.0;
 }
 
 
-inline Foam::scalar Foam::rhoConst::cpMcv(scalar, scalar) const
+template<class Specie>
+inline Foam::scalar Foam::rhoConst<Specie>::cpMcv(scalar, scalar) const
 {
     return 0.0;
 }
@@ -93,11 +101,12 @@ inline Foam::scalar Foam::rhoConst::cpMcv(scalar, scalar) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::rhoConst::operator+=(const rhoConst& ico)
+template<class Specie>
+inline void Foam::rhoConst<Specie>::operator+=(const rhoConst<Specie>& ico)
 {
     scalar molr1 = this->nMoles();
 
-    specie::operator+=(ico);
+    Specie::operator+=(ico);
 
     molr1 /= this->nMoles();
     scalar molr2 = ico.nMoles()/this->nMoles();
@@ -106,11 +115,12 @@ inline void Foam::rhoConst::operator+=(const rhoConst& ico)
 }
 
 
-inline void Foam::rhoConst::operator-=(const rhoConst& ico)
+template<class Specie>
+inline void Foam::rhoConst<Specie>::operator-=(const rhoConst<Specie>& ico)
 {
     scalar molr1 = this->nMoles();
 
-    specie::operator-=(ico);
+    Specie::operator-=(ico);
 
     molr1 /= this->nMoles();
     scalar molr2 = ico.nMoles()/this->nMoles();
@@ -119,66 +129,71 @@ inline void Foam::rhoConst::operator-=(const rhoConst& ico)
 }
 
 
-inline void Foam::rhoConst::operator*=(const scalar s)
+template<class Specie>
+inline void Foam::rhoConst<Specie>::operator*=(const scalar s)
 {
-    specie::operator*=(s);
+    Specie::operator*=(s);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-inline Foam::rhoConst Foam::operator+
+template<class Specie>
+inline Foam::rhoConst<Specie> Foam::operator+
 (
-    const rhoConst& ico1,
-    const rhoConst& ico2
+    const rhoConst<Specie>& ico1,
+    const rhoConst<Specie>& ico2
 )
 {
     scalar nMoles = ico1.nMoles() + ico2.nMoles();
     scalar molr1 = ico1.nMoles()/nMoles;
     scalar molr2 = ico2.nMoles()/nMoles;
 
-    return rhoConst
+    return rhoConst<Specie>
     (
-        static_cast<const specie&>(ico1)
-      + static_cast<const specie&>(ico2),
+        static_cast<const Specie&>(ico1)
+      + static_cast<const Specie&>(ico2),
         molr1*ico1.rho_ + molr2*ico2.rho_
     );
 }
 
 
-inline Foam::rhoConst Foam::operator-
+template<class Specie>
+inline Foam::rhoConst<Specie> Foam::operator-
 (
-    const rhoConst& ico1,
-    const rhoConst& ico2
+    const rhoConst<Specie>& ico1,
+    const rhoConst<Specie>& ico2
 )
 {
     scalar nMoles = ico1.nMoles() + ico2.nMoles();
     scalar molr1 = ico1.nMoles()/nMoles;
     scalar molr2 = ico2.nMoles()/nMoles;
 
-    return rhoConst
+    return rhoConst<Specie>
     (
-        static_cast<const specie&>(ico1)
-      - static_cast<const specie&>(ico2),
+        static_cast<const Specie&>(ico1)
+      - static_cast<const Specie&>(ico2),
         molr1*ico1.rho_ - molr2*ico2.rho_
     );
 }
 
 
-inline Foam::rhoConst Foam::operator*
+template<class Specie>
+inline Foam::rhoConst<Specie> Foam::operator*
 (
     const scalar s,
-    const rhoConst& ico
+    const rhoConst<Specie>& ico
 )
 {
-    return rhoConst(s*static_cast<const specie&>(ico), ico.rho_);
+    return rhoConst<Specie>(s*static_cast<const Specie&>(ico), ico.rho_);
 }
 
 
-inline Foam::rhoConst Foam::operator==
+template<class Specie>
+inline Foam::rhoConst<Specie> Foam::operator==
 (
-    const rhoConst& ico1,
-    const rhoConst& ico2
+    const rhoConst<Specie>& ico1,
+    const rhoConst<Specie>& ico2
 )
 {
     return ico2 - ico1;

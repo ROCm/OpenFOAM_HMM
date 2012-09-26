@@ -11,6 +11,7 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
     psiReactionThermo& thermo = combustion->thermo();
+    thermo.validate(args.executable(), "h", "e");
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -34,7 +35,6 @@
     );
 
     volScalarField& p = thermo.p();
-    volScalarField& hs = thermo.he();
     const volScalarField& T = thermo.T();
     const volScalarField& psi = thermo.psi();
 
@@ -128,7 +128,7 @@
     {
         fields.add(Y[i]);
     }
-    fields.add(hs);
+    fields.add(thermo.he());
 
     IOdictionary additionalControlsDict
     (

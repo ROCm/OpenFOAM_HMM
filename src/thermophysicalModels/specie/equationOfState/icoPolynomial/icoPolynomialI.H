@@ -27,98 +27,113 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>::icoPolynomial
+template<class Specie, int PolySize>
+inline Foam::icoPolynomial<Specie, PolySize>::icoPolynomial
 (
-    const specie& sp,
+    const Specie& sp,
     const Polynomial<PolySize>& rhoCoeffs
 )
 :
-    specie(sp),
+    Specie(sp),
     rhoCoeffs_(rhoCoeffs)
 {}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>::icoPolynomial
+template<class Specie, int PolySize>
+inline Foam::icoPolynomial<Specie, PolySize>::icoPolynomial
 (
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 :
-    specie(ip),
+    Specie(ip),
     rhoCoeffs_(ip.rhoCoeffs_)
 {}
 
 
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>::icoPolynomial
+template<class Specie, int PolySize>
+inline Foam::icoPolynomial<Specie, PolySize>::icoPolynomial
 (
     const word& name,
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 :
-    specie(name, ip),
+    Specie(name, ip),
     rhoCoeffs_(ip.rhoCoeffs_)
 {}
 
 
-template<int PolySize>
-inline Foam::autoPtr<Foam::icoPolynomial<PolySize> >
-Foam::icoPolynomial<PolySize>::clone() const
+template<class Specie, int PolySize>
+inline Foam::autoPtr<Foam::icoPolynomial<Specie, PolySize> >
+Foam::icoPolynomial<Specie, PolySize>::clone() const
 {
-    return autoPtr<icoPolynomial<PolySize> >
+    return autoPtr<icoPolynomial<Specie, PolySize> >
     (
-        new icoPolynomial<PolySize>(*this)
+        new icoPolynomial<Specie, PolySize>(*this)
     );
 }
 
 
-template<int PolySize>
-inline Foam::autoPtr<Foam::icoPolynomial<PolySize> >
-Foam::icoPolynomial<PolySize>::New(Istream& is)
+template<class Specie, int PolySize>
+inline Foam::autoPtr<Foam::icoPolynomial<Specie, PolySize> >
+Foam::icoPolynomial<Specie, PolySize>::New(Istream& is)
 {
-    return autoPtr<icoPolynomial<PolySize> >(new icoPolynomial<PolySize>(is));
+    return autoPtr<icoPolynomial<Specie, PolySize> >
+    (
+        new icoPolynomial<Specie, PolySize>(is)
+    );
 }
 
 
-template<int PolySize>
-inline Foam::autoPtr<Foam::icoPolynomial<PolySize> >
-Foam::icoPolynomial<PolySize>::New(const dictionary& dict)
+template<class Specie, int PolySize>
+inline Foam::autoPtr<Foam::icoPolynomial<Specie, PolySize> >
+Foam::icoPolynomial<Specie, PolySize>::New(const dictionary& dict)
 {
-    return autoPtr<icoPolynomial<PolySize> >
+    return autoPtr<icoPolynomial<Specie, PolySize> >
     (
-        new icoPolynomial<PolySize>(dict)
+        new icoPolynomial<Specie, PolySize>(dict)
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<int PolySize>
-inline Foam::scalar Foam::icoPolynomial<PolySize>::rho(scalar, scalar T) const
+template<class Specie, int PolySize>
+inline Foam::scalar Foam::icoPolynomial<Specie, PolySize>::rho
+(
+    scalar,
+    scalar T
+) const
 {
     return rhoCoeffs_.value(T)/this->W();
 }
 
 
-template<int PolySize>
-inline Foam::scalar Foam::icoPolynomial<PolySize>::psi(scalar, scalar) const
+template<class Specie, int PolySize>
+inline Foam::scalar Foam::icoPolynomial<Specie, PolySize>::psi
+(
+    scalar,
+    scalar
+) const
 {
     return 0.0;
 }
 
 
-template<int PolySize>
-inline Foam::scalar Foam::icoPolynomial<PolySize>::Z(scalar, scalar) const
+template<class Specie, int PolySize>
+inline Foam::scalar Foam::icoPolynomial<Specie, PolySize>::Z
+(
+    scalar,
+    scalar
+) const
 {
     return 0.0;
 }
 
 
-template<int PolySize>
-inline Foam::scalar Foam::icoPolynomial<PolySize>::cpMcv
+template<class Specie, int PolySize>
+inline Foam::scalar Foam::icoPolynomial<Specie, PolySize>::cpMcv
 (
     scalar p,
     scalar T
@@ -130,13 +145,14 @@ inline Foam::scalar Foam::icoPolynomial<PolySize>::cpMcv
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<int PolySize>
-inline Foam::icoPolynomial<PolySize>& Foam::icoPolynomial<PolySize>::operator=
+template<class Specie, int PolySize>
+inline Foam::icoPolynomial<Specie, PolySize>&
+Foam::icoPolynomial<Specie, PolySize>::operator=
 (
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 {
-    specie::operator=(ip);
+    Specie::operator=(ip);
 
     rhoCoeffs_ = ip.rhoCoeffs_;
 
@@ -144,15 +160,15 @@ inline Foam::icoPolynomial<PolySize>& Foam::icoPolynomial<PolySize>::operator=
 }
 
 
-template<int PolySize>
-inline void Foam::icoPolynomial<PolySize>::operator+=
+template<class Specie, int PolySize>
+inline void Foam::icoPolynomial<Specie, PolySize>::operator+=
 (
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 {
     scalar molr1 = this->nMoles();
 
-    specie::operator+=(ip);
+    Specie::operator+=(ip);
 
     molr1 /= this->nMoles();
     scalar molr2 = ip.nMoles()/this->nMoles();
@@ -161,15 +177,15 @@ inline void Foam::icoPolynomial<PolySize>::operator+=
 }
 
 
-template<int PolySize>
-inline void Foam::icoPolynomial<PolySize>::operator-=
+template<class Specie, int PolySize>
+inline void Foam::icoPolynomial<Specie, PolySize>::operator-=
 (
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 {
     scalar molr1 = this->nMoles();
 
-    specie::operator-=(ip);
+    Specie::operator-=(ip);
 
     molr1 /= this->nMoles();
     scalar molr2 = ip.nMoles()/this->nMoles();
@@ -178,75 +194,75 @@ inline void Foam::icoPolynomial<PolySize>::operator-=
 }
 
 
-template<int PolySize>
-inline void Foam::icoPolynomial<PolySize>::operator*=(const scalar s)
+template<class Specie, int PolySize>
+inline void Foam::icoPolynomial<Specie, PolySize>::operator*=(const scalar s)
 {
-    specie::operator*=(s);
+    Specie::operator*=(s);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-template<int PolySize>
-Foam::icoPolynomial<PolySize> Foam::operator+
+template<class Specie, int PolySize>
+Foam::icoPolynomial<Specie, PolySize> Foam::operator+
 (
-    const icoPolynomial<PolySize>& ip1,
-    const icoPolynomial<PolySize>& ip2
+    const icoPolynomial<Specie, PolySize>& ip1,
+    const icoPolynomial<Specie, PolySize>& ip2
 )
 {
     scalar nMoles = ip1.nMoles() + ip2.nMoles();
     scalar molr1 = ip1.nMoles()/nMoles;
     scalar molr2 = ip2.nMoles()/nMoles;
 
-    return icoPolynomial<PolySize>
+    return icoPolynomial<Specie, PolySize>
     (
-        static_cast<const specie&>(ip1)
-      + static_cast<const specie&>(ip2),
+        static_cast<const Specie&>(ip1)
+      + static_cast<const Specie&>(ip2),
         molr1*ip1.rhoCoeffs_ + molr2*ip2.rhoCoeffs_
     );
 }
 
 
-template<int PolySize>
-Foam::icoPolynomial<PolySize> Foam::operator-
+template<class Specie, int PolySize>
+Foam::icoPolynomial<Specie, PolySize> Foam::operator-
 (
-    const icoPolynomial<PolySize>& ip1,
-    const icoPolynomial<PolySize>& ip2
+    const icoPolynomial<Specie, PolySize>& ip1,
+    const icoPolynomial<Specie, PolySize>& ip2
 )
 {
     scalar nMoles = ip1.nMoles() + ip2.nMoles();
     scalar molr1 = ip1.nMoles()/nMoles;
     scalar molr2 = ip2.nMoles()/nMoles;
 
-    return icoPolynomial<PolySize>
+    return icoPolynomial<Specie, PolySize>
     (
-        static_cast<const specie&>(ip1)
-      - static_cast<const specie&>(ip2),
+        static_cast<const Specie&>(ip1)
+      - static_cast<const Specie&>(ip2),
         molr1*ip1.rhoCoeffs_ - molr2*ip2.rhoCoeffs_
     );
 }
 
 
-template<int PolySize>
-Foam::icoPolynomial<PolySize> Foam::operator*
+template<class Specie, int PolySize>
+Foam::icoPolynomial<Specie, PolySize> Foam::operator*
 (
     const scalar s,
-    const icoPolynomial<PolySize>& ip
+    const icoPolynomial<Specie, PolySize>& ip
 )
 {
-    return icoPolynomial<PolySize>
+    return icoPolynomial<Specie, PolySize>
     (
-        s*static_cast<const specie&>(ip),
+        s*static_cast<const Specie&>(ip),
         ip.rhoCoeffs_
     );
 }
 
 
-template<int PolySize>
-Foam::icoPolynomial<PolySize> Foam::operator==
+template<class Specie, int PolySize>
+Foam::icoPolynomial<Specie, PolySize> Foam::operator==
 (
-    const icoPolynomial<PolySize>& ip1,
-    const icoPolynomial<PolySize>& ip2
+    const icoPolynomial<Specie, PolySize>& ip1,
+    const icoPolynomial<Specie, PolySize>& ip2
 )
 {
     return ip2 - ip1;

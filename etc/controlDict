@@ -510,30 +510,30 @@ DebugSwitches
     gradientUnburntEnthalpy 0;
     granularPressureModel   0;
     hCombustionThermo   0;
-    hMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hMixtureThermo<multiComponentMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<homogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<inhomogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<multiComponentMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
     hMixtureThermo<reactingMixture> 0;
-    hMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hThermo<pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hThermo<pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hMixtureThermo<veryInhomogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hThermo<pureMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
     harmonic            0;
     heatTransferModel   0;
     hexCellLooper       0;
     hexRef8             0;
     hhuCombustionThermo 0;
-    hhuMixtureThermo<egrMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<egrMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<homogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<inhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<veryInhomogeneousMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>> 0;
-    hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<egrMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<egrMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<homogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<inhomogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<constTransport<thermo<hConstThermo<perfectGas>>>>> 0;
+    hhuMixtureThermo<veryInhomogeneousMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>>> 0;
     hierarchical        0;
     hollowConeInjector  0;
     iC3H8O              0;
@@ -711,9 +711,9 @@ DebugSwitches
     processor           0;
     processorLduInterface 0;
     processorLduInterfaceField 0;
-    pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
-    pureMixture<sutherlandTransport<specieThermo<hConstThermo<perfectGas>>>> 0;
-    pureMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>> 0;
+    pureMixture<constTransport<thermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<thermo<hConstThermo<perfectGas>>>> 0;
+    pureMixture<sutherlandTransport<thermo<janafThermo<perfectGas>>>> 0;
     quadratic           0;
     quadraticFit        0;
     quadraticLinearFit  0;
@@ -963,6 +963,36 @@ DimensionedConstants
         }
     }
 }
+
+
+DimensionSets
+{
+    unitSet             SI; // USCS
+
+    SICoeffs
+    {
+        // Basic units
+        kg  kg  [ 1 0 0 0 0 0 0 ] 1.0;
+        m   m   [ 0 1 0 0 0 0 0 ] 1.0;
+        s   s   [ 0 0 1 0 0 0 0 ] 1.0;
+        K   K   [ 0 0 0 1 0 0 0 ] 1.0;
+        mol mol [ 0 0 0 0 1 0 0 ] 1.0;
+        A   A   [ 0 0 0 0 0 1 0 ] 1.0;
+        Cd  Cd  [ 0 0 0 0 0 0 1 ] 1.0;
+
+        // Derived units
+        Pa  Pa  [ kg^1 m^-2 ] 1.0;
+
+        // Scaled units
+        mm  mm  [ kg^1 m^-2 ] 1e-3;
+
+
+        // Set of units used for printing. Can be any basic or derived
+        // but not scaled (only supported for dimensionedScalar, etc)
+        printUnits (kg m s K mol A Cd);
+    }
+}
+
 
 
 // ************************************************************************* //

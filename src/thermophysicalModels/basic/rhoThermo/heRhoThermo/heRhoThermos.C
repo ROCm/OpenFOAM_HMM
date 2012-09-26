@@ -26,15 +26,15 @@ License
 #include "rhoThermo.H"
 #include "makeThermo.H"
 
+#include "specie.H"
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
 #include "rhoConst.H"
-
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
@@ -61,7 +61,8 @@ makeThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -72,69 +73,8 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    sutherlandTransport,
-    sensibleEnthalpy,
-    janafThermo,
-    perfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    constTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst
-);
-
-makePolyThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    3,
-    sensibleEnthalpy
-);
-
-makePolyThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    8,
-    sensibleEnthalpy
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    constTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    incompressiblePerfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    sutherlandTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -145,7 +85,68 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    incompressiblePerfectGas,
+    specie
 );
 
 
@@ -159,7 +160,8 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -170,69 +172,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    sutherlandTransport,
-    sensibleInternalEnergy,
-    janafThermo,
-    perfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    constTransport,
-    sensibleInternalEnergy,
-    hConstThermo,
-    rhoConst
-);
-
-makePolyThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    3,
-    sensibleInternalEnergy
-);
-
-makePolyThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    8,
-    sensibleInternalEnergy
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    constTransport,
-    sensibleInternalEnergy,
-    hConstThermo,
-    incompressiblePerfectGas
-);
-
-makeThermo
-(
-    rhoThermo,
-    heRhoThermo,
-    pureMixture,
-    sutherlandTransport,
-    sensibleInternalEnergy,
-    hConstThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -243,7 +184,68 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    incompressiblePerfectGas
+    perfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    polynomialTransport,
+    sensibleInternalEnergy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    incompressiblePerfectGas,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    incompressiblePerfectGas,
+    specie
 );
 
 

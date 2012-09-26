@@ -5,14 +5,15 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         mesh,
         fields,
         phi,
-        mesh.divScheme("div(phi,Yi_hs)")
+        mesh.divScheme("div(phi,Yi_h)")
     )
 );
 
+combustion->correct();
+dQ = combustion->dQ();
 
+if (solveSpecies)
 {
-    combustion->correct();
-    dQ = combustion->dQ();
     label inertIndex = -1;
     volScalarField Yt(0.0*Y[0]);
 
@@ -22,22 +23,22 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         {
             volScalarField& Yi = Y[i];
 
-            fvScalarMatrix YiEqn
+            fvScalarMatrix YEqn
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
-              ==
+             ==
                 parcels.SYi(i, Yi)
               + combustion->R(Yi)
               + sources(rho, Yi)
             );
 
-            YiEqn.relax();
+            YEqn.relax();
 
-            sources.constrain(YiEqn);
+            sources.constrain(YEqn);
 
-            YiEqn.solve(mesh.solver("Yi"));
+            YEqn.solve(mesh.solver("Yi"));
 
             Yi.max(0.0);
             Yt += Yi;

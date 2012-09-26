@@ -107,6 +107,7 @@ void writeWeights(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
     argList::addBoolOption
     (
         "checkAMI",
@@ -115,7 +116,7 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "createDynamicFvMesh.H"
+#   include "createNamedDynamicFvMesh.H"
 
     const bool checkAMI  = args.optionFound("checkAMI");
 

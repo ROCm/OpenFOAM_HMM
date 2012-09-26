@@ -28,27 +28,37 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::incompressiblePerfectGas::incompressiblePerfectGas(Istream& is)
+template<class Specie>
+Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas(Istream& is)
 :
-    specie(is),
+    Specie(is),
     pRef_(readScalar(is))
 {
-    is.check("incompressiblePerfectGas::incompressiblePerfectGas(Istream& is)");
+    is.check
+    (
+        "incompressiblePerfectGas<Specie>::"
+        "incompressiblePerfectGas(Istream& is)"
+    );
 }
 
 
-Foam::incompressiblePerfectGas::incompressiblePerfectGas(const dictionary& dict)
+template<class Specie>
+Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
+(
+    const dictionary& dict
+)
 :
-    specie(dict),
+    Specie(dict),
     pRef_(readScalar(dict.subDict("equationOfState").lookup("pRef")))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::incompressiblePerfectGas::write(Ostream& os) const
+template<class Specie>
+void Foam::incompressiblePerfectGas<Specie>::write(Ostream& os) const
 {
-    specie::write(os);
+    Specie::write(os);
     dictionary dict("equationOfState");
     dict.add("pRef", pRef_);
 
@@ -58,14 +68,20 @@ void Foam::incompressiblePerfectGas::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const incompressiblePerfectGas& pg)
+template<class Specie>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const incompressiblePerfectGas<Specie>& pg
+)
 {
-    os  << static_cast<const specie&>(pg)
+    os  << static_cast<const Specie&>(pg)
         << token::SPACE << pg.pRef_;
 
     os.check
     (
-        "Ostream& operator<<(Ostream& os, const incompressiblePerfectGas& st)"
+        "Ostream& operator<<"
+        "(Ostream& os, const incompressiblePerfectGas<Specie>& st)"
     );
     return os;
 }

@@ -52,6 +52,7 @@ Description
         }
     }
     \endverbatim
+    Replacement entries starting with '~' will remove the entry.
 
 Usage
 
@@ -172,6 +173,46 @@ bool addEntry
 }
 
 
+
+// List of indices into thisKeys
+labelList findMatches
+(
+    const HashTable<wordList, word>& shortcuts,
+    const wordList& shortcutNames,
+    const wordList& thisKeys,
+    const keyType& key
+)
+{
+    labelList matches;
+
+    if (key.isPattern())
+    {
+        // Wildcard match
+        matches = findStrings(key, thisKeys);
+
+    }
+    else if (shortcuts.size())
+    {
+        // See if patchGroups expand to valid thisKeys
+        labelList indices = findStrings(key, shortcutNames);
+        forAll(indices, i)
+        {
+            const word& name = shortcutNames[indices[i]];
+            const wordList& keys = shortcuts[name];
+            forAll(keys, j)
+            {
+                label index = findIndex(thisKeys, keys[j]);
+                if (index != -1)
+                {
+                    matches.append(index);
+                }
+            }
+        }
+    }
+    return matches;
+}
+
+
 // Dictionary merging/editing.
 // literalRE:
 // - true: behave like dictionary::merge, i.e. add regexps just like
@@ -185,6 +226,8 @@ bool merge
     const HashTable<wordList, word>& shortcuts
 )
 {
+    const wordList shortcutNames(shortcuts.toc());
+
     bool changed = false;
 
     // Save current (non-wildcard) keys before adding items.
@@ -203,7 +246,18 @@ bool merge
     {
         const keyType& key = mergeIter().keyword();
 
-        if (literalRE || !(key.isPattern() || shortcuts.found(key)))
+        if (key[0] == '~')
+        {
+            word eraseKey = key(1, key.size()-1);
+            if (thisDict.remove(eraseKey))
+            {
+                // Mark thisDict entry as having been match for wildcard
+                // handling later on.
+                thisKeysSet.erase(eraseKey);
+            }
+            changed = true;
+        }
+        else if (literalRE || !(key.isPattern() || shortcuts.found(key)))
         {
             entry* entryPtr = thisDict.lookupEntryPtr
             (
@@ -255,59 +309,69 @@ bool merge
         {
             const keyType& key = mergeIter().keyword();
 
-            // List of indices into thisKeys
-            labelList matches;
-
-            if (key.isPattern())
+            if (key[0] == '~')
             {
-                // Wildcard match
-                matches = findStrings(key, thisKeys);
+                word eraseKey = key(1, key.size()-1);
 
-            }
-            else if (shortcuts.size())
-            {
-                // See if patchGroups expand to valid thisKeys
-                const wordList shortcutNames = shortcuts.toc();
-                labelList indices = findStrings(key, shortcutNames);
-                forAll(indices, i)
-                {
-                    const word& name = shortcutNames[indices[i]];
-                    const wordList& keys = shortcuts[name];
-                    forAll(keys, j)
-                    {
-                        label index = findIndex(thisKeys, keys[j]);
-                        if (index != -1)
-                        {
-                            matches.append(index);
-                        }
-                    }
-                }
-            }
-
-            // Add all matches
-            forAll(matches, i)
-            {
-                const word& thisKey = thisKeys[matches[i]];
-
-                entry& thisEntry = const_cast<entry&>
+                // List of indices into thisKeys
+                labelList matches
                 (
-                    thisDict.lookupEntry(thisKey, false, false)
+                    findMatches
+                    (
+                        shortcuts,
+                        shortcutNames,
+                        thisKeys,
+                        eraseKey
+                    )
                 );
 
-                if
-                (
-                    addEntry
-                    (
-                        thisDict,
-                        thisEntry,
-                        mergeIter(),
-                        literalRE,
-                        HashTable<wordList, word>(0)    // no shortcuts
-                                                        // at deeper levels
-                    )
-                )
+                // Remove all matches
+                forAll(matches, i)
                 {
-                    changed = true;
+                    const word& thisKey = thisKeys[matches[i]];
+                    thisKeysSet.erase(thisKey);
+                }
+                changed = true;
+            }
+            else
+            {
+                // List of indices into thisKeys
+                labelList matches
+                (
+                    findMatches
+                    (
+                        shortcuts,
+                        shortcutNames,
+                        thisKeys,
+                        key
+                    )
+                );
+
+                // Add all matches
+                forAll(matches, i)
+                {
+                    const word& thisKey = thisKeys[matches[i]];
+
+                    entry& thisEntry = const_cast<entry&>
+                    (
+                        thisDict.lookupEntry(thisKey, false, false)
+                    );
+
+                    if
+                    (
+                        addEntry
+                        (
+                            thisDict,
+                            thisEntry,
+                            mergeIter(),
+                            literalRE,
+                            HashTable<wordList, word>(0)    // no shortcuts
+                                                            // at deeper levels
+                        )
+                    )
+                    {
+                        changed = true;
+                    }
                 }
             }
         }

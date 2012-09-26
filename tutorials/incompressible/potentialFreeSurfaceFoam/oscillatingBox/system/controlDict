@@ -58,7 +58,6 @@ functions
         type            forces;
         functionObjectLibs ("libforces.so");
         outputControl   outputTime;
-        outputInterval  1;
         patches         (floatingObject);
         pName           p;
         UName           U;
@@ -74,7 +73,7 @@ functions
         functionObjectLibs ("libfieldFunctionObjects.so");
         enabled         true;
         outputControl   timeStep;
-        timeInteval     1;
+        outputInterval  1;
         log             true;
         valueOutput     false;
         source          faceZone;

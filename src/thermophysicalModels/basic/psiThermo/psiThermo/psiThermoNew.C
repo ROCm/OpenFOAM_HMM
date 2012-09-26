@@ -32,33 +32,56 @@ Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
     const fvMesh& mesh
 )
 {
-    // get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
-    const word modelType
+    IOdictionary thermoDict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "thermophysicalProperties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).lookup("thermoType")
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false
+        )
     );
 
-    Info<< "Selecting thermodynamics package " << modelType << endl;
+    word thermoTypeName;
+
+    if (thermoDict.isDict("thermoType"))
+    {
+        const dictionary& thermoTypeDict(thermoDict.subDict("thermoType"));
+
+        word type(thermoTypeDict.lookup("type"));
+        word mixture(thermoTypeDict.lookup("mixture"));
+        word transport(thermoTypeDict.lookup("transport"));
+        word thermo(thermoTypeDict.lookup("thermo"));
+        word energy(thermoTypeDict.lookup("energy"));
+        word equationOfState(thermoTypeDict.lookup("equationOfState"));
+        word specie(thermoTypeDict.lookup("specie"));
+
+        thermoTypeName =
+            type + '<'
+          + mixture + '<'
+          + transport + '<'
+          + thermo + '<'
+          + equationOfState + '<'
+          + specie + ">>,"
+          + energy + ">>>";
+    }
+    else
+    {
+        thermoTypeName = word(thermoDict.lookup("thermoType"));
+    }
+
+    Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(modelType);
+        fvMeshConstructorTablePtr_->find(thermoTypeName);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("psiThermo::New(const fvMesh&)")
-            << "Unknown psiThermo type " << modelType << nl << nl
+            << "Unknown psiThermo type " << thermoTypeName << nl << nl
             << "Valid psiThermo types are:" << nl
             << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);

@@ -92,7 +92,7 @@ Ostream& operator<<
                       Class hPolynomialThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class EquationOfState, int PolySize>
+template<class EquationOfState, int PolySize=8>
 class hPolynomialThermo
 :
     public EquationOfState

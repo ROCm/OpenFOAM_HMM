@@ -28,8 +28,8 @@ boundaryField
     inlet
     {
         type            flowRateInletVelocity;
-        flowRate        constant 0.5;
-        value           uniform (0 0 0);
+        massFlowRate    constant 0.5;
+        rhoInlet        0.5;    // Guess for rho
     }
     outlet
     {

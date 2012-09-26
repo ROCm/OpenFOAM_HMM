@@ -308,7 +308,6 @@ void realizableKE::correct()
     (
         fvm::ddt(epsilon_)
       + fvm::div(phi_, epsilon_)
-      - fvm::Sp(fvc::div(phi_), epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
         C1*magS*epsilon_
@@ -332,7 +331,6 @@ void realizableKE::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
-      - fvm::Sp(fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(), k_)
      ==
         G - fvm::Sp(epsilon_/k_, k_)

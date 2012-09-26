@@ -4,7 +4,7 @@
     rho.storePrevIter();
     {
         #include "UEqn.H"
-        #include "hEqn.H"
+        #include "EEqn.H"
         #include "pEqn.H"
     }
 

@@ -58,7 +58,6 @@ functions
         type            probes;
         functionObjectLibs ("libsampling.so");
         outputControl   outputTime;
-        outputInterval  1;
         probeLocations
         (
             ( 0 9.95 19.77 )
@@ -75,13 +74,12 @@ functions
         type            surfaces;
         functionObjectLibs ("libsampling.so");
         outputControl   outputTime;
-        outputInterval  10;
         surfaceFormat   raw;
-        interpolationScheme isThisNeeded;
         fields
         (
             p
         );
+        interpolationScheme cellPoint;
 
         surfaces
         (

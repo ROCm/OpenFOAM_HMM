@@ -71,20 +71,20 @@ Foam::multiComponentMixture<ThermoType>::multiComponentMixture
 (
     const dictionary& thermoDict,
     const wordList& specieNames,
-    const HashPtrTable<ThermoType>& specieThermoData,
+    const HashPtrTable<ThermoType>& thermoData,
     const fvMesh& mesh
 )
 :
     basicMultiComponentMixture(thermoDict, specieNames, mesh),
     speciesData_(species_.size()),
-    mixture_("mixture", *specieThermoData[specieNames[0]])
+    mixture_("mixture", *thermoData[specieNames[0]])
 {
     forAll(species_, i)
     {
         speciesData_.set
         (
             i,
-            new ThermoType(*specieThermoData[species_[i]])
+            new ThermoType(*thermoData[species_[i]])
         );
     }
 

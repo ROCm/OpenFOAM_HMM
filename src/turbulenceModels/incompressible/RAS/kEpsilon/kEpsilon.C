@@ -245,7 +245,6 @@ void kEpsilon::correct()
     (
         fvm::ddt(epsilon_)
       + fvm::div(phi_, epsilon_)
-      - fvm::Sp(fvc::div(phi_), epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
         C1_*G*epsilon_/k_
@@ -265,7 +264,6 @@ void kEpsilon::correct()
     (
         fvm::ddt(k_)
       + fvm::div(phi_, k_)
-      - fvm::Sp(fvc::div(phi_), k_)
       - fvm::laplacian(DkEff(), k_)
      ==
         G

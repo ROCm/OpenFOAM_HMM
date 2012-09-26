@@ -32,12 +32,14 @@ FoamFile
     front
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          3072;
         startFace       6336;
     }
     back
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          3072;
         startFace       9408;
     }
