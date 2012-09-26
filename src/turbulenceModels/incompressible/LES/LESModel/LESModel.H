@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LESModel_H
-#define LESModel_H
+#ifndef incompressibleLESModel_H
+#define incompressibleLESModel_H
 
 #include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "LESdelta.H"
