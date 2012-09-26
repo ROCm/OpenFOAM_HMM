@@ -35,8 +35,6 @@ SourceFiles
 #ifndef basicMixture_H
 #define basicMixture_H
 
-#include "typeInfo.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -58,18 +56,11 @@ public:
     typedef basicMixture basicMixtureType;
 
 
-    // Runtime type information
-    TypeName("basicMixture");
-
-
     // Constructors
 
         //- Construct from dictionary and mesh
-        basicMixture(const dictionary&, const fvMesh&);
-
-
-    //- Destructor
-    virtual ~basicMixture();
+        basicMixture(const dictionary&, const fvMesh&)
+        {}
 };
 
 

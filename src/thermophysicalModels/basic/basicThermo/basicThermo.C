@@ -156,6 +156,15 @@ Foam::basicThermo::basicThermo
 {}
 
 
+Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return NewThermo<basicThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::basicThermo::~basicThermo()
@@ -244,6 +253,41 @@ void Foam::basicThermo::validate
             << ", thermodynamics package provides " << he().name()
             << exit(FatalError);
     }
+}
+
+
+Foam::wordList Foam::basicThermo::splitThermoName
+(
+    const word& thermoName,
+    const int nCmpt
+)
+{
+    wordList cmpts(nCmpt);
+
+    string::size_type beg=0, end=0;
+    int i = 0;
+
+    while
+    (
+        (end = thermoName.find('<', beg)) != string::npos
+     || (end = thermoName.find(',', beg)) != string::npos
+    )
+    {
+        if (beg < end)
+        {
+            cmpts[i] = thermoName.substr(beg, end-beg);
+            cmpts[i++].replaceAll(">","");
+        }
+        beg = end + 1;
+    }
+
+    if (beg < thermoName.size())
+    {
+        cmpts[i] = thermoName.substr(beg, string::npos);
+        cmpts[i++].replaceAll(">","");
+    }
+
+    return cmpts;
 }
 
 

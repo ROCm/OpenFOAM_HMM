@@ -40,6 +40,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
+#include "wordIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,6 +93,7 @@ public:
         (const fvMesh& mesh),
         (mesh)
     );
+
 
     // Constructors
 
@@ -150,6 +152,12 @@ public:
             const word&
         ) const;
 
+        //- Split name of thermo package into a list of the components names
+        static wordList splitThermoName
+        (
+            const word& thermoName,
+            const int nCmpt
+        );
 
         //- Update properties
         virtual void correct() = 0;
@@ -334,6 +342,126 @@ public:
         //- Read thermophysicalProperties dictionary
         virtual bool read();
 };
+
+
+template<class Thermo>
+autoPtr<Thermo> NewThermo
+(
+    const fvMesh& mesh
+)
+{
+    IOdictionary thermoDict
+    (
+        IOobject
+        (
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    word thermoTypeName;
+
+    if (thermoDict.isDict("thermoType"))
+    {
+        const dictionary& thermoTypeDict(thermoDict.subDict("thermoType"));
+
+        Info<< "Selecting thermodynamics package " << thermoTypeDict << endl;
+
+        const int nCmpt = 7;
+        const char* cmptNames[nCmpt] =
+        {
+            "type",
+            "mixture",
+            "transport",
+            "thermo",
+            "equationOfState",
+            "specie",
+            "energy"
+        };
+
+        // Construct the name of the thermo package from the components
+        thermoTypeName =
+            word(thermoTypeDict.lookup("type")) + '<'
+          + word(thermoTypeDict.lookup("mixture")) + '<'
+          + word(thermoTypeDict.lookup("transport")) + '<'
+          + word(thermoTypeDict.lookup("thermo")) + '<'
+          + word(thermoTypeDict.lookup("equationOfState")) + '<'
+          + word(thermoTypeDict.lookup("specie")) + ">>,"
+          + word(thermoTypeDict.lookup("energy")) + ">>>";
+
+        // Lookup the thermo package
+        typename Thermo::fvMeshConstructorTable::iterator cstrIter =
+            Thermo::fvMeshConstructorTablePtr_->find(thermoTypeName);
+
+        // Print error message if package not found in the table
+        if (cstrIter == Thermo::fvMeshConstructorTablePtr_->end())
+        {
+            FatalErrorIn(Thermo::typeName + "::New(const fvMesh&)")
+                << "Unknown " << Thermo::typeName << " type " << nl
+                << "thermoType" << thermoTypeDict << nl << nl
+                << "Valid " << Thermo::typeName << " types are:" << nl << nl;
+
+            // Get the list of all the suitable thermo packages available
+            wordList validThermoTypeNames
+            (
+                Thermo::fvMeshConstructorTablePtr_->sortedToc()
+            );
+
+            // Build a table of the thermo packages constituent parts
+            // Note: row-0 contains the names of constituent parts
+            List<wordList> validThermoTypeNameCmpts
+            (
+                validThermoTypeNames.size() + 1
+            );
+
+            validThermoTypeNameCmpts[0].setSize(nCmpt);
+            forAll(validThermoTypeNameCmpts[0], j)
+            {
+                validThermoTypeNameCmpts[0][j] = cmptNames[j];
+            }
+
+            // Split the thermo package names into their constituent parts
+            forAll(validThermoTypeNames, i)
+            {
+                validThermoTypeNameCmpts[i+1] =
+                    Thermo::splitThermoName(validThermoTypeNames[i], nCmpt);
+            }
+
+            // Print the table of available packages
+            // in terms of their constituent parts
+            printTable(validThermoTypeNameCmpts, FatalError);
+
+            FatalError<< exit(FatalError);
+        }
+
+        return autoPtr<Thermo>(cstrIter()(mesh));
+    }
+    else
+    {
+        thermoTypeName = word(thermoDict.lookup("thermoType"));
+
+        Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
+
+        typename Thermo::fvMeshConstructorTable::iterator cstrIter =
+            Thermo::fvMeshConstructorTablePtr_->find(thermoTypeName);
+
+        if (cstrIter == Thermo::fvMeshConstructorTablePtr_->end())
+        {
+            FatalErrorIn(Thermo::typeName + "::New(const fvMesh&)")
+                << "Unknown " << Thermo::typeName << " type "
+                << thermoTypeName << nl << nl
+                << "Valid " << Thermo::typeName << " types are:" << nl
+                << Thermo::fvMeshConstructorTablePtr_->sortedToc() << nl
+                << exit(FatalError);
+        }
+
+        return autoPtr<Thermo>(cstrIter()(mesh));
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

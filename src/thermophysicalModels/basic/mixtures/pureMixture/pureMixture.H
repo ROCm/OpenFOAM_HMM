@@ -65,18 +65,10 @@ public:
     typedef ThermoType thermoType;
 
 
-    //- Runtime type information
-    TypeName("pureMixture");
-
-
     // Constructors
 
         //- Construct from dictionary and mesh
         pureMixture(const dictionary&, const fvMesh&);
-
-
-    //- Destructor
-    virtual ~pureMixture();
 
 
     // Member functions

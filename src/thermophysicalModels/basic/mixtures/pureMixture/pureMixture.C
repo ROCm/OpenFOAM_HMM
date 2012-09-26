@@ -45,13 +45,6 @@ pureMixture<ThermoType>::pureMixture
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-pureMixture<ThermoType>::~pureMixture()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ThermoType>
