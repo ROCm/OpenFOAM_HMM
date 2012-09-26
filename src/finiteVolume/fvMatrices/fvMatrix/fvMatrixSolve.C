@@ -65,6 +65,15 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solve
             << endl;
     }
 
+    label maxIter = -1;
+    if (solverControls.readIfPresent("maxIter", maxIter))
+    {
+        if (maxIter == 0)
+        {
+            return solverPerformance();
+        }
+    }
+
     word type(solverControls.lookupOrDefault<word>("type", "segregated"));
 
     if (type == "segregated")
