@@ -168,8 +168,8 @@ Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
     IOobject
     (
         "solutionControl",
-        mesh_.time().timeName(),
-        mesh_
+        mesh.time().timeName(),
+        mesh
     ),
     mesh_(mesh),
     residualControl_(),
