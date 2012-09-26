@@ -212,7 +212,11 @@ void Foam::doxygenXmlParser::skipBlock(IFstream& is, const word blockName) const
 }
 
 
-void Foam::doxygenXmlParser::skipForward(IFstream& is, const word blockName) const
+void Foam::doxygenXmlParser::skipForward
+(
+    IFstream& is,
+    const word blockName
+) const
 {
     // recurse to move forward in 'is' until come across <blockName>
 

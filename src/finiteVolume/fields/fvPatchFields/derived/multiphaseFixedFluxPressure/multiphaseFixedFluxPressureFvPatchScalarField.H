@@ -32,8 +32,8 @@ Description
     on the boundary is that specified by the velocity boundary condition.
 
     The predicted flux to be compensated by the pressure gradient is evaluated
-    as \f$(\phi - \phi_{H/A})\f$, both of which are looked-up from the database, as
-    is the pressure diffusivity Dp used to calculate the gradient using:
+    as \f$(\phi - \phi_{H/A})\f$, both of which are looked-up from the database,
+    as is the pressure diffusivity Dp used to calculate the gradient using:
 
         \f[
             \nabla(p) = \frac{\phi_{H/A} - \phi}{|Sf| Dp}

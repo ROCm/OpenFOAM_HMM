@@ -30,7 +30,8 @@ Group
 Description
     This boundary condition provides a turbulent kinematic viscosity condition
     when using wall functions for rough walls, based on turbulence kinetic
-    energy.  The condition manipulates the E parameter to account for roughness effects.
+    energy.  The condition manipulates the E parameter to account for roughness
+    effects.
 
     Parameter ranges
     - roughness height = sand-grain roughness (0 for smooth walls)

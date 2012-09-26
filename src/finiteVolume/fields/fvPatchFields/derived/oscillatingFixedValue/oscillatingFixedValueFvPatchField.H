@@ -51,7 +51,7 @@ Description
     \table
         Property     | Description             | Required    | Default value
         refValue     | reference value         | yes         |
-        offset       | offset value            | no          | 0.0;                    // optional
+        offset       | offset value            | no          | 0.0
         amplitude    | oscillation amplitude   | yes         |
         frequency    | oscillation frequency   | yes         |
     \endtable
