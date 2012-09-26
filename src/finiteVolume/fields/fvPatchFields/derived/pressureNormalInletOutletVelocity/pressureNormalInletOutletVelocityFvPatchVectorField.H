@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,42 @@ License
 Class
     Foam::pressureNormalInletOutletVelocityFvPatchVectorField
 
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
+
 Description
-    Velocity inlet/outlet boundary condition for patches where the pressure is
-    specified.  zero-gradient is applied for outflow (as defined by the flux)
-    and for inflow the velocity is obtained from the flux with a direction
-    normal to the patch faces.
+    This velocity inlet/outlet boundary condition is applied to patches where
+    the pressure is specified.  A zero-gradient condition is applied for
+    outflow (as defined by the flux); for inflow, the velocity is obtained from
+    the flux with a direction normal to the patch faces.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            pressureNormalInletOutletVelocity;
+        phi             phi;
+        rho             rho;
+        value           uniform 0;
+    }
+    \endverbatim
+
+Note
+    Sign conventions:
+    - positive flux (out of domain): apply zero-gradient condition
+    - negative flux (into of domain): derive from the flux and patch-normal
+      direction
+
+SeeAlso
+    Foam::mixedFvPatchVectorField
 
 SourceFiles
     pressureNormalInletOutletVelocityFvPatchVectorField.C
@@ -47,7 +78,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class pressureNormalInletOutletVelocityFvPatch Declaration
+    Class pressureNormalInletOutletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class pressureNormalInletOutletVelocityFvPatchVectorField
@@ -56,7 +87,10 @@ class pressureNormalInletOutletVelocityFvPatchVectorField
 {
     // Private data
 
+        //- Flux field name
         word phiName_;
+
+        //- Density field name
         word rhoName_;
 
 

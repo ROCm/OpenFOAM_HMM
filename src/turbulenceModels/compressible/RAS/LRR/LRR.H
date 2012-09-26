@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::RASModels::LRR
 
+Group
+    grpCmpRASTurbulence
+
 Description
     Launder, Reece and Rodi Reynolds-stress turbulence model for
     compressible flows.

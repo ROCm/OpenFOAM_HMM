@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::GenSGSStress
 
+Group
+    grpIcoLESTurbulence
+
 Description
     General base class for all incompressible models that directly
     solve for the SGS stress tensor B.

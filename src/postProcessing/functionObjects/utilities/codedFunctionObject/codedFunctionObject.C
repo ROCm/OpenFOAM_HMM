@@ -47,9 +47,6 @@ namespace Foam
     );
 }
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::codedFunctionObject::prepare

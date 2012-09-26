@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,21 @@ License
 Class
     Foam::processorFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::processorFvPatchField
+    This boundary condition enables processor communication across patches.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            processor;
+    }
+    \endverbatim
 
 SourceFiles
     processorFvPatchField.C
@@ -45,7 +58,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class processorFvPatch Declaration
+                    Class processorFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

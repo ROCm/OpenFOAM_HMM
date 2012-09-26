@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,28 +24,32 @@ License
 Class
     Foam::timeActivatedFileUpdate
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     Performs a file copy/replacement once a specified time has been reached.
 
     Example usage to update the fvSolution dictionary at various times
     throughout the calculation:
 
-        fileUpdate1
-        {
-            type              timeActivatedFileUpdate;
-            functionObjectLibs ("libutilityFunctionObjects.so");
-            outputControl     timeStep;
-            outputInterval    1;
-            fileToUpdate      "$FOAM_CASE/system/fvSolution";
-            timeVsFile
-            (
-                (-1 "$FOAM_CASE/system/fvSolution.0")
-                (0.10 "$FOAM_CASE/system/fvSolution.10")
-                (0.20 "$FOAM_CASE/system/fvSolution.20")
-                (0.35 "$FOAM_CASE/system/fvSolution.35")
-            );
-        }
-
+    \verbatim
+    fileUpdate1
+    {
+        type              timeActivatedFileUpdate;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        outputControl     timeStep;
+        outputInterval    1;
+        fileToUpdate      "$FOAM_CASE/system/fvSolution";
+        timeVsFile
+        (
+            (-1 "$FOAM_CASE/system/fvSolution.0")
+            (0.10 "$FOAM_CASE/system/fvSolution.10")
+            (0.20 "$FOAM_CASE/system/fvSolution.20")
+            (0.35 "$FOAM_CASE/system/fvSolution.35")
+        );
+    }
+    \endverbatim
 
 SourceFiles
     timeActivatedFileUpdate.C

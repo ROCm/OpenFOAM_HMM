@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,32 @@ License
 Class
     Foam::translatingWallVelocityFvPatchVectorField
 
+Group
+    grpWallBoundaryConditions grpGenericBoundaryConditions
+
 Description
-    Foam::translatingWallVelocityFvPatchVectorField
+    This boundary condition provides a velocity condition for translational
+    motion on walls.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        U            | translational velocity  | yes|
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            translatingWallVelocity;
+        U               (100 0 0);
+    }
+    \endverbatim
+
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     translatingWallVelocityFvPatchVectorField.C
@@ -43,7 +67,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class translatingWallVelocityFvPatchField Declaration
+            Class translatingWallVelocityFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 class translatingWallVelocityFvPatchVectorField
@@ -52,7 +76,7 @@ class translatingWallVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Origin of the rotation
+        //- Translational velocity
         vector U_;
 
 
@@ -122,7 +146,6 @@ public:
                 new translatingWallVelocityFvPatchVectorField(*this, iF)
             );
         }
-
 
 
     // Member functions

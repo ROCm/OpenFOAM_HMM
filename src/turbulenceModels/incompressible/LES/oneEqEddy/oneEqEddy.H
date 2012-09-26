@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::oneEqEddy
 
+Group
+    grpIcoLESTurbulence
+
 Description
     One Equation Eddy Viscosity Model for incompressible flows
 

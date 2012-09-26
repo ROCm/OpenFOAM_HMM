@@ -54,7 +54,8 @@ then
 #        ;;
     esac
 
-    awk -f $awkScript $1 | \
+    awk -f $WM_PROJECT_DIR/bin/tools/doxyFilter-table.awk $1 | \
+    awk -f $awkScript  | \
     sed -f $WM_PROJECT_DIR/bin/tools/doxyFilter.sed \
         -e s@%filePath%@$filePath@g \
         -e s@%fileName%@$fileName@g \

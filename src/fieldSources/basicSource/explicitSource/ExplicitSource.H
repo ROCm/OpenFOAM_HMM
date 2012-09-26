@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,20 +29,24 @@ Description
 
     Sources described by:
 
-        <Type>ExplicitSourceCoeffs
+    \verbatim
+    <Type>ExplicitSourceCoeffs
+    {
+        volumeMode      absolute; // specific
+        injectionRate
         {
-            volumeMode      absolute; // specific
-            injectionRate
-            {
-                k           30.7;
-                epsilon     1.5;
-            }
+            k           30.7;
+            epsilon     1.5;
         }
+    }
+    \verbatim
 
-    If volumeMode =
-        - absolute: values are given as <quantity>
-        - specific: values are given as <quantity>/m3
+    Valid options for the \c volumeMode entry include:
+    - absolute: values are given as \<quantity\>
+    - specific: values are given as \<quantity\>/m3
 
+SeeAlso
+    Foam::basicSource
 
 SourceFiles
     ExplicitSource.C

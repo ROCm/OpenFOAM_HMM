@@ -24,13 +24,56 @@ License
 Class
     Foam::turbulenceFields
 
+Group
+    grpFieldFunctionObjects
+
 Description
-    Stores turbulence fields on the mesh database for further manipulation.
+    This function object stores turbulence fields on the mesh database for
+    further manipulation.
 
     Fields are stored as copies of the original, with the prefix
     "tubulenceModel::", e.g.
 
         turbulenceModel::R
+
+    Example of function object specification:
+    \verbatim
+    turbulenceFields1
+    {
+        type        turbulenceFields;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        fields
+        (
+            R
+            devRhoReff
+        );
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: processorField | yes       |
+        fields       | fields to store (see below) | yes     |
+    \endtable
+
+    Where \c fields can include:
+    \plaintable
+        R           | Stress tensor
+        devRhoReff  |
+        mut         | turbulence viscosity (compressible)
+        muEff       | effective turbulence viscosity (compressible)
+        alphat      | turbulence thermal diffusivity (compressible)
+        alphaEff    | effective turbulence thermal diffusivity (compressible)
+        devReff     |
+        nut         | turbulence viscosity (incompressible)
+        nuEff       | effective turbulence viscosity (incompressible)
+    \endplaintable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     turbulenceFields.C
@@ -57,7 +100,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                       Class turbulenceFields Declaration
+                      Class turbulenceFields Declaration
 \*---------------------------------------------------------------------------*/
 
 class turbulenceFields

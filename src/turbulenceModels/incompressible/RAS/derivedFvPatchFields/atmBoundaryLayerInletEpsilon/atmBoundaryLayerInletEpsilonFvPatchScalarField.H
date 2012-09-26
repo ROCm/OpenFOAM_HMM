@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,45 +19,76 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    atmBoundaryLayerInletEpsilonFvPatchScalarField
+    Foam::incompressible::atmBoundaryLayerInletEpsilonFvPatchScalarField
+
+Group
+    grpIcoRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    Boundary condition specifies a epsilon inlet for the atmospheric boundary
-    layer (ABL). This boundaty is to be used in conjunction with
-    ABLInletVelocity.
+    This boundary condition specifies an inlet value for the turbulence
+    dissipation, \f$\epsilon\f$ (\c epsilon), appropriate for atmospheric
+    boundary layers (ABL), and designed to be used in conjunction with the
+    \c ABLInletVelocity inlet velocity boundary condition.
 
-    \verbatim
-        epsilon = Ustar^3 / (K(z - zGround + z0))
+        \f[
+            \epsilon = \frac{(U^*)^3}{K(z - z_g + z_0)}
+        \f]
 
-    where:
-
-        Ustar is the frictional velocity
-        K is karman's constant
-        z is the verical coordinate
-        z0 is the surface roughness lenght
-        zGround minium vlaue in z direction
-
-
+    where
+    \vartable
+        U^*     | frictional velocity
+        K       | Karman's constant
+        z       | vertical co-ordinate [m]
+        z_0     | surface roughness length [m]
+        z_g     | minimum vlaue in z direction [m]
+    \endvartable
+ 
     and:
 
-        Ustar = K Uref/ln((Zref + z0)/z0)
+        \f[
+            U^* = K \frac{U_{ref}}{ln\left(\frac{Z_{ref} + z_0}{z_0}\right)}
+        \f]
 
     where:
+    \vartable
+        U_{ref} | reference velocity at \f$Z_{ref}\f$ [m/s]
+        Z_{ref} | reference height [m]
+    \endvartable
 
-        Uref is the reference velocity at Zref
-        Zref is the reference height.
+    \heading Patch usage
 
+    \table
+        Property     | Description             | Required    | Default value
+        z            | vertical co-ordinate [m] | yes        |
+        kappa        | Karman's constanat      | no          | 0.41
+        Uref         | reference velocity [m/s] | yes        |
+        Href         | reference height [m]    | yes         |
+        z0           | surface roughness length [m] | yes    |
+        zGround      | minimum z co-ordinate [m] | yes       |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            atmBoundaryLayerInletEpsilon;
+        z               1.0;
+        kappa           0.41;
+        Uref            1.0;
+        Href            0.0;
+        z0              uniform 0.0;
+        zGround         uniform 0.0;
+    }
     \endverbatim
 
     Reference:
-    D.M. Hargreaves and N.G. Wright
-    "On the use of the k-epsilon model in commercial CFD software to model the
-     neutral atmospheric boundary layer"
-    Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
+        D.M. Hargreaves and N.G. Wright,  "On the use of the k-epsilon model
+        in commercial CFD software to model the neutral atmospheric boundary
+        layer", Journal of Wind Engineering and Industrial Aerodynamics
+        95(2007), pp 355-369.
 
 SourceFiles
     atmBoundaryLayerInletEpsilonFvPatchScalarField.C
@@ -96,13 +127,13 @@ class atmBoundaryLayerInletEpsilonFvPatchScalarField
         //- Reference velocity
         const scalar Uref_;
 
-        //- Reference hight
+        //- Reference height
         const scalar Href_;
 
         //- Surface roughness length
         scalarField z0_;
 
-        //- Minimum coordinate value in z direction
+        //- Minimum co-ordinate value in z direction
         scalarField zGround_;
 
         //- Frictional velocity

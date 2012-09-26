@@ -24,22 +24,36 @@ License
 Class
     Foam::uniformFixedValueFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
-    Enables the specification of a uniform fixed value boundary condition.
+    This boundary condition provides a uniform fixed value condition.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        uniformValue | uniform value           |         yes |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    myPatch
     {
         type            uniformFixedValue;
         uniformValue    constant 0.2;
     }
     \endverbatim
 
+Note
     The uniformValue entry is a DataEntry type, able to describe time
     varying functions.  The example above gives the usage for supplying a
     constant value.
 
+SeeAlso
+    Foam::DataEntry
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     uniformFixedValueFvPatchField.C
@@ -58,7 +72,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class uniformFixedValueFvPatch Declaration
+                Class uniformFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

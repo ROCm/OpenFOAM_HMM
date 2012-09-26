@@ -55,12 +55,14 @@ namespace Foam
 class radiationCoupledBase
 {
 public:
-        //- Type of supplied emissivity
-        enum emissivityMethodType
-        {
-            SOLIDTHERMO,
-            LOOKUP
-        };
+
+    //- Type of supplied emissivity
+    enum emissivityMethodType
+    {
+        SOLIDTHERMO,
+        LOOKUP
+    };
+
 
 private:
 
@@ -71,6 +73,7 @@ private:
 
         //- Underlying patch
         const fvPatch& patch_;
+
 
 protected:
 

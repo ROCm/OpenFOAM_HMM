@@ -24,9 +24,11 @@ License
 Namespace
     Foam::compressible::LESModels
 
+Group
+    grpCmpLESTurbulence
+
 Description
     Namespace for compressible LES models.
-
 
 Class
     Foam::compressible::LESModel

@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::scaleSimilarity
 
+Group
+    grpIcoLESTurbulence
+
 Description
     General base class for all scale similarity models
     for incompressible flows.

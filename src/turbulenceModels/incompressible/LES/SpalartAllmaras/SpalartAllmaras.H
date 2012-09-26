@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::SpalartAllmaras
 
+Group
+    grpIcoDESTurbulence
+
 Description
     SpalartAllmaras DES (SA + LES) turbulence model for incompressible flows
 
@@ -35,7 +38,7 @@ SourceFiles
 #ifndef SpalartAllmaras_H
 #define SpalartAllmaras_H
 
-#include "LESModel.H"
+#include "DESModel.H"
 #include "volFields.H"
 #include "wallDist.H"
 
@@ -54,7 +57,7 @@ namespace LESModels
 
 class SpalartAllmaras
 :
-    public LESModel
+    public DESModel
 {
     // Private Member Functions
 
@@ -191,6 +194,9 @@ public:
 
         //- Read LESProperties dictionary
         virtual bool read();
+
+        //- Return the LES field indicator
+        virtual tmp<volScalarField> LESRegion() const;
 };
 
 

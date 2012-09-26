@@ -102,8 +102,7 @@ singleStepCombustion<CombThermoType, ThermoType>::~singleStepCombustion()
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
-Foam::tmp<Foam::fvScalarMatrix>
-singleStepCombustion<CombThermoType, ThermoType>::R
+tmp<fvScalarMatrix> singleStepCombustion<CombThermoType, ThermoType>::R
 (
     volScalarField& Y
 ) const
@@ -131,8 +130,8 @@ singleStepCombustion<CombThermoType, ThermoType>::R
 
 
 template<class CombThermoType, class ThermoType>
-Foam::tmp<Foam::volScalarField>
-singleStepCombustion< CombThermoType, ThermoType>::Sh() const
+tmp<volScalarField>
+singleStepCombustion<CombThermoType, ThermoType>::Sh() const
 {
     const label fuelI = singleMixturePtr_->fuelIndex();
     volScalarField& YFuel =
@@ -143,8 +142,8 @@ singleStepCombustion< CombThermoType, ThermoType>::Sh() const
 
 
 template<class CombThermoType, class ThermoType>
-Foam::tmp<Foam::volScalarField>
-singleStepCombustion< CombThermoType, ThermoType>::dQ() const
+tmp<volScalarField>
+singleStepCombustion<CombThermoType, ThermoType>::dQ() const
 {
     tmp<volScalarField> tdQ
     (
@@ -175,7 +174,7 @@ singleStepCombustion< CombThermoType, ThermoType>::dQ() const
 
 
 template<class CombThermoType, class ThermoType>
-bool singleStepCombustion< CombThermoType, ThermoType>::read()
+bool singleStepCombustion<CombThermoType, ThermoType>::read()
 {
     if (CombThermoType::read())
     {

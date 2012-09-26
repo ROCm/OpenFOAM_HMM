@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,43 +24,53 @@ License
 Class
     Foam::fanPressureFvPatchScalarField
 
-Description
-    Assigns pressure inlet or outlet total pressure condition for a fan.
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
 
-    User specifies:
-    - pressure drop vs volumetric flow rate table (fan curve) file name;
-    - direction of normal flow through the fan, in or out;
-    - total pressure of the environment.
+Description
+    This boundary condition can be applied to assign either a pressure inlet
+    or outlet total pressure condition for a fan.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        fileName     | fan curve file name     | yes         |
+        outOfBounds  | out of bounds handling  | yes         |
+        direction    | direction of flow through fan [in/out] | yes |
+        p0           | environmental total pressure | yes    |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
-        inlet
-        {
-            type            fanPressure;
-            fileName        "fanCurve"; // Fan curve file name
-            outOfBounds     clamp;      // (error|warn|clamp|repeat)
-            direction       in;         // Direction of flow through fan
-            p0              uniform 0;  // Environmental total pressure
-            value           uniform 0;  // Initial pressure
-        }
+    inlet
+    {
+        type            fanPressure;
+        fileName        "fanCurve";
+        outOfBounds     clamp;
+        direction       in;
+        p0              uniform 0;
+        value           uniform 0;
+    }
 
-        outlet
-        {
-            type            fanPressure;
-            fileName        "fanCurve"; // Fan curve file name
-            outOfBounds     clamp;      // (error|warn|clamp|repeat)
-            direction       out;        // Direction of flow through fan
-            p0              uniform 0;  // Environmental total pressure
-            value           uniform 0;  // Initial pressure
-        }
+    outlet
+    {
+        type            fanPressure;
+        fileName        "fanCurve";
+        outOfBounds     clamp;
+        direction       out;
+        p0              uniform 0;
+        value           uniform 0;
+    }
     \endverbatim
 
 See Also
-    Foam::totalPressureFvPatchScalarField and
+    Foam::fanFvPatchField
+    Foam::totalPressureFvPatchScalarField
     Foam::interpolationTable
 
 SourceFiles
-    fanPressureFvPatchScalarField.C
+   fanPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -93,7 +103,9 @@ public:
             ffdOut
         };
 
+        //- Fan flow directions names
         static const NamedEnum<fanFlowDirection, 2> fanFlowDirectionNames_;
+
 
 private:
 

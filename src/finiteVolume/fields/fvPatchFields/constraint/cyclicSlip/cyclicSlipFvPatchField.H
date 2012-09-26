@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,25 @@ License
 Class
     Foam::cyclicSlipFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::cyclicSlipFvPatchField
+    This boundary condition is a light wrapper around the cyclicFvPatchField
+    condition, providing no new functionality.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            cyclicSlip;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::cyclicFvPatchField
 
 SourceFiles
     cyclicSlipFvPatchField.C
@@ -44,7 +61,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cyclicSlipFvPatch Declaration
+                   Class cyclicSlipFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -52,7 +69,6 @@ class cyclicSlipFvPatchField
 :
     public cyclicFvPatchField<Type>
 {
-    // Private data
 
 public:
 
@@ -119,7 +135,6 @@ public:
                 new cyclicSlipFvPatchField<Type>(*this, iF)
             );
         }
-
 };
 
 

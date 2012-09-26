@@ -1,16 +1,25 @@
 codedFunctionObject/codedFunctionObject.C
 
+CourantNo/CourantNo.C
+CourantNo/CourantNoFunctionObject.C
+
+DESModelRegions/DESModelRegions.C
+DESModelRegions/DESModelRegionsFunctionObject.C
+
 dsmcFields/dsmcFields.C
 dsmcFields/dsmcFieldsFunctionObject.C
 
-pressureCoefficient/pressureCoefficient.C
-pressureCoefficient/pressureCoefficientFunctionObject.C
+pressureTools/pressureTools.C
+pressureTools/pressureToolsFunctionObject.C
 
-staticPressure/staticPressure.C
-staticPressure/staticPressureFunctionObject.C
+scalarTransport/scalarTransport.C
+scalarTransport/scalarTransportFunctionObject.C
 
 timeActivatedFileUpdate/timeActivatedFileUpdate.C
 timeActivatedFileUpdate/timeActivatedFileUpdateFunctionObject.C
+
+wallShearStress/wallShearStress.C
+wallShearStress/wallShearStressFunctionObject.C
 
 yPlusLES/yPlusLES.C
 yPlusLES/yPlusLESFunctionObject.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,23 +24,52 @@ License
 Class
     Foam::waveSurfacePressureFvPatchScalarField
 
+Group
+    grpInletBoundaryConditions
+
 Description
-    Applies the surface wave pressure, based on the wave height
+    This is a pressure boundary condition, whose value is calculated as
+    the hydrostatic pressure based on a given displacement:
 
-        p = -rho.g.zeta
+        \f[
+            p = -\rho*g*\zeta
+        \f]
 
-    Where
+    \vartable
+        \rho  | density [kg/m3]
+        g     | acceleration due to gravity [m/s2]
+        \zeta | wave amplitude [m]
+    \endvartable
 
-        p = pressure - kinematic of dynamic depending on the flux units
-        zeta = wave height vector [m]
-        g = acceleration due to gravity [m/s2]
+    The wave amplitude is updated as part of the calculation, derived from the
+    local volumetric flux.
 
+    \heading Patch usage
+    
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        zeta         | wave amplitude field name | no        | zeta
+    \endtable
 
-    Note:
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            waveSurfacePressure;
+        phi             phi;
+        rho             rho;
+        zeta            zeta;
+        value           uniform 0;  // place holder
+    }
+    \endverbatim
 
-        This boundary also updates the wave height boundary field, which
-        is accessed via lookup from the database
+    The density field is only required if the flux is mass-based as opposed to
+    volumetric-based.
 
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     waveSurfacePressureFvPatchScalarField.C
@@ -51,6 +80,7 @@ SourceFiles
 #define waveSurfacePressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,22 +95,34 @@ class waveSurfacePressureFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+public:
+
+    // Public data
+
+        //- Enumeration defining the available time schemes
+        enum timeSchemeType
+        {
+            tsEuler,
+            tsCrankNicholson,
+            tsBackward
+        };
+
+
+private:
+
     // Private data
 
         //- Flux field name
         word phiName_;
 
-        //- Density field name (if compressible)
-        word rhoName_;
-
         //- Wave height field name
         word zetaName_;
 
-        //- Old-time zeta patch value
-        vectorField zeta0_;
+        //- Density field for mass-based flux evaluations
+        word rhoName_;
 
-        //- Current time index used to store ms0_
-        label curTimeIndex_;
+        //- Time scheme type names
+        static const NamedEnum<timeSchemeType, 3> timeSchemeTypeNames_;
 
 
 public:
@@ -152,22 +194,6 @@ public:
 
 
     // Member functions
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
-
 
         // Evaluation functions
 

@@ -26,7 +26,7 @@ Class
 
 Description
     Extract command arguments and options from the supplied
-    \a argc and @a argv parameters.
+    \a argc and \a argv parameters.
 
     Sequences with "(" ... ")" are transformed into a stringList.
     For example,

@@ -24,12 +24,44 @@ License
 Class
     Foam::cloudInfo
 
-Description
-    Outputs cloud information to file
+Group
+    grpCloudFunctionObjects
 
-    Currently outputs:
-        - total current number of parcels
-        - total current mass of parcels
+Description
+    This function object outputs Lagrangian cloud information to a file.  The
+    current outputs include:
+    - total current number of parcels
+    - total current mass of parcels
+
+    Example of function object specification:
+    \verbatim
+    cloudInfo1
+    {
+        type        cloudInfo;
+        functionObjectLibs ("libcloudFunctionObjects.so");
+        ...
+        clouds
+        (
+            kinematicCloud1
+            thermoCloud1
+        );
+    }
+    \endverbatim
+
+
+    \heading Function object usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: cloudInfo    | yes         |
+        clouds       | list of clouds names to process |yes  |
+    \endtable
+
+    The output data of each cloud is written to a file named \<cloudName\>.dat
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     cloudInfo.C

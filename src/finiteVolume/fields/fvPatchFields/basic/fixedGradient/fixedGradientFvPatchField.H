@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,40 @@ License
 Class
     Foam::fixedGradientFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
-    Foam::fixedGradientFvPatchField
+    This boundary condition supplies a fixed gradient condition, such that
+    the patch values are calculated using:
+
+        \f[
+            x_p = x_c + \frac{\nabla(x)}{\Delta}
+        \f]
+
+    where
+    \vartable
+        x_p      | patch values
+        x_c      | internal field values
+        \nabla(x)| gradient (user-specified)
+        \Delta   | inverse distance from patch face centre to cell centre
+    \endvartable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        gradient     | gradient                | yes         | 
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedGradient;
+        gradient        uniform 0;
+    }
+    \endverbatim
 
 SourceFiles
     fixedGradientFvPatchField.C
@@ -43,7 +75,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class fixedGradientFvPatch Declaration
+                 Class fixedGradientFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

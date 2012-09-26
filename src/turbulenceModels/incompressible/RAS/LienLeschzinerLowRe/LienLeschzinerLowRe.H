@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::LienLeschzinerLowRe
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Lien and Leschziner low-Reynolds k-epsilon turbulence model for
     incompressible flows.

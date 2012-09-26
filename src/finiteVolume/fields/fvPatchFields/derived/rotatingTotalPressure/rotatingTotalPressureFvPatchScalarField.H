@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,46 @@ License
 Class
     Foam::rotatingTotalPressureFvPatchScalarField
 
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
+
 Description
-    Foam::rotatingTotalPressureFvPatchScalarField
+    This boundary condition provides a total pressure condition for patches
+    in a rotating frame.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        U            | velocity field name     | no          | U
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | none
+        psi          | compressibility field name | no       | none
+        gamma        | ratio of specific heats (Cp/Cv) | yes |
+        p0           | static pressure reference | yes       |
+        omega        | angular velocty of the frame [rad/s] | yes    | 
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            rotatingTotalPressure;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             psi;
+        gamma           1.4;
+        p0              uniform 1e5;
+        omega           100;        
+    }
+    \endverbatim
+
+    The \c omega entry is a DataEntry type, able to describe time varying
+    functions.
+
+SeeAlso
+    Foam::totalPressureFvPatchScalarField
 
 SourceFiles
     rotatingTotalPressureFvPatchScalarField.C
@@ -44,7 +82,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class rotatingTotalPressureFvPatch Declaration
+           Class rotatingTotalPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class rotatingTotalPressureFvPatchScalarField

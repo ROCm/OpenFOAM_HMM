@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,31 +24,45 @@ License
 Class
     Foam::nearWallFields
 
+Group
+    grpFieldFunctionObjects
+
 Description
-    Samples near-patch volFields
+    This function object samples near-patch volume fields
 
-    Holds fields
-    - every timestep the field get updated with new values
-    - at write it writes the fields
-    so this functionObject can either be used to calculate a new field
-    as a postprocessing step or (since the fields are registered)
-    use these in another functionObject (e.g. faceSource).
+    Fields are stored
+    - every time step the field is updated with new values
+    - at output it writes the fields
 
-    surfaceValues
+    This functionObject can either be used
+    - to calculate a new field as a  post-processing step or
+    - since the fields are registered, used in another functionObject
+
+    Example of function object specification:
+    \verbatim
+    nearWallFields1
     {
         type        nearWallFields;
-        ..
-        enabled         true;
-        outputControl   outputTime;
-        ..
-        // Name of volField and corresponding surfaceField
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
         fields      ((p pNear)(U UNear));
-        // Name of patch to sample
         patches     (movingWall);
-        // Distance away from the wall
-        distance    0.13;   // distance away from wall
+        distance    0.13;
     }
+    \endverbatim
 
+    \heading Function object usage
+    \table
+        Property | Description               | Required    | Default value
+        type     | type name: nearWallFields | yes         |
+        fields   | list of fields with correspoding output field names | yes |
+        patches  | list of patches to sample | yes         |
+        distance | distance from patch to sample | yes     |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     nearWallFields.C
@@ -74,7 +88,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                         Class nearWallFields Declaration
+                       Class nearWallFields Declaration
 \*---------------------------------------------------------------------------*/
 
 class nearWallFields

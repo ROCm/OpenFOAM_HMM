@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,6 +122,11 @@ public:
     vtkGetMacro(ShowPatchNames, int);
 
     // Description:
+    // OpenFOAM display patchGroups
+    virtual void SetShowGroupsOnly(int);
+    vtkGetMacro(ShowGroupsOnly, int);
+
+    // Description:
     // OpenFOAM volField interpolation
     vtkSetMacro(InterpolateVolFields, int);
     vtkGetMacro(InterpolateVolFields, int);
@@ -231,6 +236,7 @@ private:
     int IncludeSets;
     int IncludeZones;
     int ShowPatchNames;
+    int ShowGroupsOnly;
     int InterpolateVolFields;
 
     //- Dummy variable/switch to invoke a reader update

@@ -24,6 +24,9 @@ License
 Namespace
     Foam::incompressible::LESModels
 
+Group
+    grpIcoLESTurbulence
+
 Description
     Namespace for incompressible LES models.
 
@@ -44,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LESModel_H
-#define LESModel_H
+#ifndef incompressibleLESModel_H
+#define incompressibleLESModel_H
 
 #include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "LESdelta.H"

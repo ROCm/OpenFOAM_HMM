@@ -24,9 +24,31 @@ License
 Class
     Foam::fixedMeanFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
-    Extrapolates field to the patch using the near-cell values and adjusts
-    the distribution to match the specified meanValue.
+    This boundary condition extrapolates field to the patch using the near-cell
+    values and adjusts the distribution to match the specified mean value.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        meanValue    | mean value              | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedMean;
+        meanValue       1.0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     fixedMeanFvPatchField.C
@@ -44,7 +66,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class fixedMeanFvPatch Declaration
+                  Class fixedMeanFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

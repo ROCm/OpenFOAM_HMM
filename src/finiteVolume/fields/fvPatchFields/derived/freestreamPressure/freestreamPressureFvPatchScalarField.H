@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,30 @@ License
 Class
     Foam::freestreamPressureFvPatchScalarField
 
+Group
+    grpInletBoundaryConditions grpOutletBoundaryConditions
+
 Description
-    Foam::freestreamPressureFvPatchScalarField
+    This boundary condition provides a free-stream condition for pressure.
+    It is a zero-gradient condition that constrains the flux across the patch
+    based on the free-stream velocity.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            freestreamPressure;
+    }
+    \endverbatim
+
+Note
+    This condition is designed to operate with a freestream velocity condition
+
+SeeAlso
+    Foam::zeroGradientFvPatchField
+    Foam::freestreamFvPatchField
 
 SourceFiles
     freestreamPressureFvPatchScalarField.C
@@ -44,7 +66,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class freestreamPressureFvPatch Declaration
+             Class freestreamPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class freestreamPressureFvPatchScalarField

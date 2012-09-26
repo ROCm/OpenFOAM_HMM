@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::NonlinearKEShih
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Shih's quadratic non-linear k-epsilon turbulence model for
     incompressible flows

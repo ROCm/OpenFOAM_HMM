@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,49 @@ License
 Class
     Foam::compressible::RASModels::alphatWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Boundary condition for turbulent thermal diffusivity when using wall
-    functions
+    This boundary condition provides a turbulent thermal diffusivity conditon
+    when using wall functions
     - replicates OpenFOAM v1.5 (and earlier) behaviour
-    - Turbulent Prandtl number defaults to 0.85 if unspecified
+
+    The turbulent thermal diffusivity calculated using:
+
+        \f[
+            \alpha_t = \frac{\mu_t}{Pr_t}
+        \f]
+
+    where
+
+    \vartable
+        \alpha_t| turblence thermal diffusivity
+        \mu_t   | turblence viscosity
+        Pr_t    | turblent Prandtl number
+    \endvartable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        mut          | turbulence viscosity field name | no  | mut
+        Prt          | turbulent Prandtl number | no          | 0.85
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            alphatWallFunction;
+        mut             mut;
+        Prt             0.85;
+        value           uniform 0; // optional value entry
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     alphatWallFunctionFvPatchScalarField.C
@@ -59,10 +97,10 @@ class alphatWallFunctionFvPatchScalarField
 {
     // Private data
 
-        //- Name of turbulent viscosity field
+        //- Name of turbulent viscosity field (default = mut)
         word mutName_;
 
-        //- Turbulent Prandtl number
+        //- Turbulent Prandtl number (default = 0.85)
         scalar Prt_;
 
 

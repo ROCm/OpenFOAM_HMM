@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,56 @@ License
 Class
     Foam::forceCoeffs
 
+Group
+    grpForcesFunctionObjects
+
 Description
-    Derived from the forces function object, creates a specialisation to
-    calculate lift and drag forces.
+    This function object extends the Foam::forces function object by providing
+    lift, drag and moment coefficients.  The data can optionally be output into
+    bins, defined in a given direction.
+
+    Example of function object specification:
+    \verbatim
+    forceCoeffs1
+    {
+        type        forceCoeffs;
+        functionObjectLibs ("libforces.so");
+        ...
+        log         yes;
+        patches     (walls);
+        liftDir     (0 1 0);
+        dragDir     (-1 0 0);
+        pitchAxis   (0 0 1);
+        magUInf     100;
+        lRef        3.5;
+        ARef        2.2;
+        nBin        20;
+        binDir      (1 0 0);
+        binFormat   gnuplot;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: forces       | yes         |
+        log          | write force data to standard output | no | no
+        patches      | patches included in the forces calculation | yes |
+        liftDir      | lift direction          | yes         |
+        dragDir      | drag direction          | yes         |
+        pitchAxis    | picth axis              | yes         |
+        magUInf      | free stream velocity magnitude | yes  |
+        lRef         | reference length scale for moment calculations | yes |
+        ARef         | reference area          | yes |
+        nBin         | number of data bins     | no          |
+        binDir       | direction along which bins are defined | no |
+        binFormat    | output format for bin data | no       |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
+    Foam::forces
 
 SourceFiles
     forceCoeffs.C
@@ -45,7 +92,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class forceCoeffs Declaration
+                         Class forceCoeffs Declaration
 \*---------------------------------------------------------------------------*/
 
 class forceCoeffs
@@ -79,6 +126,12 @@ class forceCoeffs
 
             //- Area
             scalar Aref_;
+
+
+        // Bin information
+
+            //- Writer for bin data
+            autoPtr<writer<scalar> > binWriterPtr_;
 
 
     // Private Member Functions

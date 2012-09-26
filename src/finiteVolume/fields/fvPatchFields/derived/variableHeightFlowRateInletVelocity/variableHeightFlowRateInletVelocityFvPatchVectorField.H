@@ -2,16 +2,16 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 2 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,38 +19,46 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 
+Group
+    grpInletBoundaryConditions
+
 Description
-    Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area.
+    This boundary condition provides a velocity boundary condition for
+    multphase flow based on a user-specified volumetric flow rate.
 
-    The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, phi.
-    The current density is used to correct the velocity when applying the
-    mass basis.
+    The flow rate is made proportional to the phase fraction alpha at each
+    face of the patch and alpha is ensured to be bound between 0 and 1.
 
-    The flow rate is made proportional to the phase fraction alpha at each face
-    of the patch and alpha is ensured to be bound between 0 and 1.
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        flowRate     | volumetric flow rate [m3/s] | yes |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
-    inlet
+    myPatch
     {
         type            variableHeightFlowRateInletVelocity;
-        flowRate        0.2;        // Volumetric/mass flow rate [m3/s or kg/s]
+        flowRate        0.2;
         value           uniform (0 0 0); // placeholder
     }
     \endverbatim
 
 Note
-    - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
+    - the value is positive into the domain
+    - may not work correctly for transonic inlets
+    - strange behaviour with potentialFoam since the momentum equation is
+      not solved
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     variableHeightFlowRateInletVelocityFvPatchVectorField.C
@@ -67,7 +75,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-          Class variableHeightFlowRateInletVelocityFvPatch Declaration
+    Class variableHeightFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class variableHeightFlowRateInletVelocityFvPatchVectorField
@@ -78,6 +86,7 @@ class variableHeightFlowRateInletVelocityFvPatchVectorField
 
         //- Inlet integral flow rate
         scalar flowRate_;
+
 
 public:
 
@@ -174,7 +183,6 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
-
 };
 
 

@@ -24,23 +24,33 @@ License
 Class
     Foam::fieldValues::faceSource
 
-Description
-    Face source variant of field value function object. Values of user-
-    specified fields reported for collections of faces.
+Group
+    grpFieldFunctionObjects
 
-    faceObj1                        // Name also used to identify output folder
+Description
+    This function object provides a 'face source' variant of the fieldValues
+    function object.  Given a list of user-specified fields and a selection
+    of mesh (or general surface) faces, a number of operations can be
+    performed, such as sums, averages and integrations.
+
+    \linebreak
+    For example, to calculate the volumetric or mass flux across a patch,
+    apply the 'sum' operator to the flux field (typically \c phi)
+
+    Example of function object specification:
+    \verbatim
+    faceSource1
     {
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
-        enabled         true;
-        outputControl   outputTime;
-        log             true;       // log to screen?
-        valueOutput     true;       // Write values at run-time output times?
-        source          faceZone;   // Type of face source:
-                                    // faceZone,patch,sampledSurface
-        sourceName      f0;         // faceZone name, see below
+        ...
+        log             yes;
+        valueOutput     true;
+        surfaceFormat   none;
+        source          faceZone;
+        sourceName      f0;
         operation       sum;
-        weightField     alpha1;     // optional weight field
+        weightField     alpha1;
         fields
         (
             p
@@ -48,42 +58,69 @@ Description
             U
         );
     }
+    \endverbatim
 
-    source:
-    - faceZone       : requires a 'sourceName' entry to specify the faceZone
-    - patch          :                    ""                        patch
-    - sampledSurface : requires a 'sampledSurfaceDict' subdictionary. See e.g.
-                       sampleDict.
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: faceSource   | yes         |
+        log          | write data to standard output | no    | no
+        valueOutput  | write the output values | yes         |
+        surfaceFormat | output value format    | no          |
+        source       | face source: see below  | yes         |
+        sourceName   | name of face source if required  | no |
+        operation    | operation to perform    | yes         |
+        weightField  | name of field to apply weighting | no |
+        fields       | list of fields to operate on | yes    |
+    \endtable
 
-    operation is one of:
-      - none
-      - sum
-      - average
-      - weightedAverage
-      - areaAverage
-      - areaIntegrate
-      - min
-      - max
-      - CoV (Coefficient of variation: standard deviation/mean)
-      - areaNormalAverage   (vector with first component (average of) inproduct
-                             of value and face area vector)
-      - areaNormalIntegrate (   ,,          ,,           (sum of)       ,,
+    \linebreak
+    Where \c source is defined by
+    \plaintable
+        faceZone     | requires a 'sourceName' entry to specify the faceZone
+        patch        | requires a 'sourceName' entry to specify the patch
+        sampledSurface | requires a 'sampledSurfaceDict' sub-dictionary
+    \endplaintable
 
-    Notes:
+    \linebreak
+    The \c operation is one of:
+    \plaintable
+       none          | no operation
+       sum           | sum
+       average       | ensemble average
+       weightedAverage | weighted average
+       areaAverage   | area weighted average
+       areaIntegrate | area integral
+       min           | minimum
+       max           | maximum
+       CoV           | coefficient of variation: standard deviation/mean
+       areaNormalAverage| area weighted average in face normal direction
+       areaNormalIntegrate | area weighted integral in face normal directon
+    \endplaintable
+
+Note
+    - The values reported by the areaNormalAverage and areaNormalIntegrate
+      operations are written as the first component of a field with the same
+      rank as the input field.
     - faces on empty patches get ignored
-    - if the field is a volField the faceZone can only consist of boundary
-      faces.
-    - all fields get oriented according to the faceZone (so you might e.g. see
-      negative pressure)
-    - using sampledSurfaces:
-            - they do not do surface fields
-            - if interpolate=true they use interpolationCellPoint
-              otherwise they use cell values
-            - each triangle in sampledSurface is logically only in one cell
-              so interpolation will be wrong when triangles are larger than
-              cells. This can only happen for sampling on triSurfaceMesh.
-            - take care when using isoSurfaces - these might have duplicate
-              triangles so integration might be wrong
+    - if the field is a volField the \c faceZone can only consist of boundary
+      faces
+    - all fields are oriented according to the \c faceZone (so you might
+      e.g. see negative pressure)
+    - using \c sampledSurfaces:
+        - not available for surface fields
+        - if interpolate=true they use \c interpolationCellPoint
+          otherwise they use cell values
+        - each triangle in \c sampledSurface is logically only in one cell
+          so interpolation will be wrong when triangles are larger than
+          cells.  This can only happen for sampling on a \c triSurfaceMesh
+        - take care when using isoSurfaces - these might have duplicate
+          triangles and so integration might be wrong
+
+SeeAlso
+    Foam::fieldValues
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     faceSource.C
@@ -97,6 +134,7 @@ SourceFiles
 #include "fieldValue.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -166,10 +204,20 @@ private:
         //- Set faces according to sampledSurface
         void sampledSurfaceFaces(const dictionary&);
 
+        //- Combine faces and points from multiple processors 
+        void combineSurfaceGeometry
+        (
+            faceList& faces,
+            pointField& points
+        ) const;
+
 
 protected:
 
     // Protected data
+
+        //- Surface writer
+        autoPtr<surfaceWriter> surfaceWriterPtr_;
 
         //- Source type
         sourceType source_;
@@ -184,7 +232,7 @@ protected:
         label nFaces_;
 
 
-        // If operating on mesh faces (faceZone,patch)
+        // If operating on mesh faces (faceZone, patch)
 
             //- Local list of face IDs
             labelList faceId_;
@@ -195,6 +243,7 @@ protected:
             //- List of +1/-1 representing face flip map
             //  (1 use as is, -1 negate)
             labelList faceSign_;
+
 
         // If operating on sampledSurface
 

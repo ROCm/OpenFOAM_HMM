@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,58 @@ License
 Class
     Foam::buoyantPressureFvPatchScalarField
 
-Description
-    Set the pressure gradient boundary condition appropriately for buoyant flow.
+Group
+    grpGenericBoundaryConditions grpWallBoundaryConditions
 
-    If the variable name is "pd" assume it is p - rho*g.h and set the gradient
-    appropriately.  Otherwise assume the variable is the static pressure.
+Description
+    This boundary condition sets the pressure gradient appropriately for
+    buoyant flow.
+
+    If the variable name is one of:
+    - \c pd
+    - \c p_rgh
+    - \c ph_rgh
+    we assume that the pressure variable is \f$p - \rho(g \cdot h)\f$ and the
+    gradient set using:
+        \f[
+            \nabla(p) = -\nabla_\perp(\rho)(g \cdot h)
+        \f]
+
+    where
+
+    \vartable
+        \rho   | density [kg/m3]
+        g      | acceleration due to gravity [m/s2]
+        h      | patch face centres [m]
+    \endvartable
+
+    Otherwise we assume that it is the static pressure, and the gradient
+    calculated using:
+        \f[
+            \nabla(p) = \rho(g \cdot n)
+        \f]
+
+    where
+    \vartable
+        n      | patch face normal vectors
+    \endvartable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        rho          | density field name      | no          | rho
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            buoyantPressure;
+        rho             rho;
+        value           uniform 0;
+    }
+    \endverbatim
 
 SourceFiles
     buoyantPressureFvPatchScalarField.C
@@ -47,7 +94,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class buoyantPressureFvPatch Declaration
+             Class buoyantPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class buoyantPressureFvPatchScalarField

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -241,7 +241,6 @@ void Foam::vtkPV3Foam::updateInfoPatches
     {
         const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
         const HashTable<labelList, word>& groups = patches.groupPatchIDs();
-
         const wordList allPatchNames = patches.names();
 
         // Add patch groups
@@ -273,13 +272,19 @@ void Foam::vtkPV3Foam::updateInfoPatches
 
                 if (enabledEntriesSet.found(vtkGrpName))
                 {
-                    forAll(patchIDs, i)
+                    if (!reader_->GetShowGroupsOnly())
                     {
-                        const polyPatch& pp = patches[patchIDs[i]];
-                        string vtkPatchName = pp.name() + " - patch";
-                        enabledEntriesSet.insert(vtkPatchName);
+                        enabledEntriesSet.erase(vtkGrpName);
+                        forAll(patchIDs, i)
+                        {
+                            const polyPatch& pp = patches[patchIDs[i]];
+                            if (pp.size())
+                            {
+                                string vtkPatchName = pp.name() + " - patch";
+                                enabledEntriesSet.insert(vtkPatchName);
+                            }
+                        }
                     }
-                    enabledEntriesSet.erase(vtkGrpName);
                 }
             }
         }
@@ -288,19 +293,22 @@ void Foam::vtkPV3Foam::updateInfoPatches
         // Add patches
         // ~~~~~~~~~~~
 
-        forAll(patches, patchI)
+        if (!reader_->GetShowGroupsOnly())
         {
-            const polyPatch& pp = patches[patchI];
-
-            if (pp.size())
+            forAll(patches, patchI)
             {
-                // Add patch to GUI list
-                arraySelection->AddArray
-                (
-                    (pp.name() + " - patch").c_str()
-                );
+                const polyPatch& pp = patches[patchI];
 
-                ++nPatches;
+                if (pp.size())
+                {
+                    // Add patch to GUI list
+                    arraySelection->AddArray
+                    (
+                        (pp.name() + " - patch").c_str()
+                    );
+
+                    ++nPatches;
+                }
             }
         }
     }
@@ -356,6 +364,7 @@ void Foam::vtkPV3Foam::updateInfoPatches
 
                 wordList groupNames;
                 patchDict.readIfPresent("inGroups", groupNames);
+
                 forAll(groupNames, groupI)
                 {
                     HashTable<labelList, word>::iterator iter = groups.find
@@ -394,20 +403,25 @@ void Foam::vtkPV3Foam::updateInfoPatches
                 if (nFaces)
                 {
                     string vtkGrpName = groupName + " - group";
-
                     arraySelection->AddArray(vtkGrpName.c_str());
 
                     ++nPatches;
 
                     if (enabledEntriesSet.found(vtkGrpName))
                     {
-                        forAll(patchIDs, i)
+                        if (!reader_->GetShowGroupsOnly())
                         {
-                            string vtkPatchName =
-                                names[patchIDs[i]] + " - patch";
-                            enabledEntriesSet.insert(vtkPatchName);
+                            enabledEntriesSet.erase(vtkGrpName);
+                            forAll(patchIDs, i)
+                            {
+                                if (sizes[patchIDs[i]])
+                                {
+                                    string vtkPatchName =
+                                        names[patchIDs[i]] + " - patch";
+                                    enabledEntriesSet.insert(vtkPatchName);
+                                }
+                            }
                         }
-                        enabledEntriesSet.erase(vtkGrpName);
                     }
                 }
             }
@@ -416,17 +430,20 @@ void Foam::vtkPV3Foam::updateInfoPatches
             // Add (non-zero) patches to the list of mesh parts
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            forAll(names, patchI)
+            if (!reader_->GetShowGroupsOnly())
             {
-                // Valid patch if nFace > 0 - add patch to GUI list
-                if (sizes[patchI])
+                forAll(names, patchI)
                 {
-                    arraySelection->AddArray
-                    (
-                        (names[patchI] + " - patch").c_str()
-                    );
+                    // Valid patch if nFace > 0 - add patch to GUI list
+                    if (sizes[patchI])
+                    {
+                        arraySelection->AddArray
+                        (
+                            (names[patchI] + " - patch").c_str()
+                        );
 
-                    ++nPatches;
+                        ++nPatches;
+                    }
                 }
             }
         }

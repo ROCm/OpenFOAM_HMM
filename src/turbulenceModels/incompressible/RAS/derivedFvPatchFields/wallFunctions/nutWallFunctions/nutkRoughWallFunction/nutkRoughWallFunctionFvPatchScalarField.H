@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,15 +24,39 @@ License
 Class
     Foam::incompressible::RASModels::nutkRoughWallFunctionFvPatchScalarField
 
+Group
+    grpIcoWallFunctions
+
 Description
-    Boundary condition for turbulent (kinematic) viscosity when using wall
-    functions for rough walls, based on turbulence kinetic energy.
+    This boundary condition provides a turbulent kinematic viscosity condition
+    when using wall functions for rough walls, based on turbulence kinetic
+    energy.  The condition manipulates the E parameter to account for roughness
+    effects.
 
-    Manipulates the E parameter to account for roughness effects, based on
-    KsPlus.
-
+    Parameter ranges
     - roughness height = sand-grain roughness (0 for smooth walls)
-    - roughness constant = 0.5-1.0 (0.5 default)
+    - roughness constant = 0.5-1.0
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        Ks           | sand-grain roughness height | yes     |
+        Cs           | roughness constant      | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutkRoughWallFunction;
+        Ks              uniform 0;
+        Cs              uniform 0.5;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutkRoughWallFunctionFvPatchScalarField
 
 SourceFiles
     nutkRoughWallFunctionFvPatchScalarField.C

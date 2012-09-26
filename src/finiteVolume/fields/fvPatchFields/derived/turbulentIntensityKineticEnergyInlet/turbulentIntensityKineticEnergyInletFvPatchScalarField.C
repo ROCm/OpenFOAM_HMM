@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,8 +40,8 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     intensity_(0.0),
-    UName_("undefined-U"),
-    phiName_("undefined-phi")
+    UName_("U"),
+    phiName_("phi")
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
@@ -82,12 +82,15 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
         (
             "turbulentIntensityKineticEnergyInletFvPatchScalarField::"
             "turbulentIntensityKineticEnergyInletFvPatchScalarField"
-            "(const fvPatch& p, const DimensionedField<scalar, volMesh>& iF, "
-            "const dictionary& dict)"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<scalar, volMesh>&, "
+                "const dictionary&"
+            ")"
         )   << "Turbulence intensity should be specified as a fraction 0-1 "
                "of the mean velocity\n"
-               "    value given is " << intensity_
-            << "\n    on patch " << this->patch().name()
+               "    value given is " << intensity_ << nl
+            << "    on patch " << this->patch().name()
             << " of field " << this->dimensionedInternalField().name()
             << " in file " << this->dimensionedInternalField().objectPath()
             << exit(FatalError);
@@ -157,8 +160,8 @@ void Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField::write
 {
     fvPatchScalarField::write(os);
     os.writeKeyword("intensity") << intensity_ << token::END_STATEMENT << nl;
-    os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntry("value", os);
 }
 

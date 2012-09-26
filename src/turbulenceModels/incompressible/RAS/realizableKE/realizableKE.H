@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::realizableKE
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Realizable k-epsilon turbulence model for incompressible flows.
 

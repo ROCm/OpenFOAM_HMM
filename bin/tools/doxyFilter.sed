@@ -64,6 +64,17 @@ s/^    /\\class /
 }
 
 
+# Group
+#     groupName
+# =>
+# \ingroup namespaceName
+#
+/^Group *$/,/^[^ ]/{
+s/^Group//
+s/^    /\\ingroup /
+}
+
+
 # Namespace
 #     namespaceName
 # =>
@@ -149,6 +160,13 @@ s? *\([a-zA-Z0-9]*\.[a-zA-Z]*\)?  <li><a href="%dirName%/\1">\1</a></li>?
 }
 
 s/.*\*\//\*\//
+
+
+# convert /heading in source files to bold font and add some space
+s#\\heading \(.*\)#<br><b>\1</b>#g
+
+# add a linebreak
+s#\\linebreak#<br>#g
 
 }
 

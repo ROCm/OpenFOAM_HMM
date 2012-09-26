@@ -165,6 +165,12 @@ void Foam::solutionControl::storePrevIterFields() const
 
 Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
 :
+    IOobject
+    (
+        "solutionControl",
+        mesh.time().timeName(),
+        mesh
+    ),
     mesh_(mesh),
     residualControl_(),
     algorithmName_(algorithmName),

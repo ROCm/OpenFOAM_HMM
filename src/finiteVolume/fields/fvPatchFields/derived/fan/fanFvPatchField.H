@@ -24,47 +24,59 @@ License
 Class
     Foam::fanFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Jump boundary condition. Operates on cyclic. Jump specified as a DataEntry.
-    (table, fileTable, csv etc.)
+    This boundary condition provides a jump condition, using the \c cyclic
+    condition as a base.
+
+    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
+    contant, polynomial, table values.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jump         | current jump value      | yes         |
+        jumpTable    | jump data, e.g. \c csvFile | yes      |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
-        fan_half0
+    myPatch
+    {
+        type            fan;
+        patchType       cyclic;
+        jump            uniform 0;
+        jumpTable       csvFile;
+        csvFileCoeffs
         {
-            type            fan;
-            patchType       cyclic;
-            jump            uniform 0;
-            jumpTable       csvFile;
-            csvFileCoeffs
-            {
-                hasHeaderLine   1;
-                refColumn       0;
-                componentColumns 1(1);
-                separator       ",";
-                fileName        "$FOAM_CASE/constant/pressureVsU";
-            }
-            value           uniform 0;
+            hasHeaderLine   1;
+            refColumn       0;
+            componentColumns 1(1);
+            separator       ",";
+            fileName        "$FOAM_CASE/constant/pressureVsU";
         }
+        value           uniform 0;
+    }
     \endverbatim
 
+    The above example shows the use of a comma separated (CSV) file to specify
+    the jump condition.
 
-    Backwards compatibility: if the 'f' keyword is detected it assumes
-    it is a power of the flowrate.
+Note
+     The underlying \c patchType should be set to \c cyclic
 
-    \verbatim
-        fan_half0
-        {
-            type            fan;
-            patchType       cyclic;
-            jump            uniform 0;
-            f               2(100 -0.1);
-            value           uniform 0;
-        }
-    \endverbatim
+SeeAlso
+    Foam::DataEntry
 
 SourceFiles
     fanFvPatchField.C
+    fanFvPatchFields.H
+    fanFvPatchFields.C
+    fanFvPatchFieldsFwd.H
 
 \*---------------------------------------------------------------------------*/
 

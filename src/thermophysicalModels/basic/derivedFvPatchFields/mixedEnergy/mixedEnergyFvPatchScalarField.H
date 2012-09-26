@@ -24,8 +24,14 @@ License
 Class
     Foam::mixedEnergyFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions
+
 Description
-    Mixed boundary conditions for internal energy
+    This boundary condition provides a mixed condition for internal energy
+
+SeeAlso
+    Foam::mixedFvPatchField
 
 SourceFiles
     mixedEnergyFvPatchScalarField.C
@@ -43,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-            Class mixedEnergyFvPatchScalarField Declaration
+               Class mixedEnergyFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class mixedEnergyFvPatchScalarField

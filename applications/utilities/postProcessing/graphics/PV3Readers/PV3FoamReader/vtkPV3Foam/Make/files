@@ -2,7 +2,6 @@ vtkPV3Foam.C
 vtkPV3FoamFields.C
 vtkPV3FoamMesh.C
 vtkPV3FoamMeshLagrangian.C
-vtkPV3FoamMeshPatch.C
 vtkPV3FoamMeshSet.C
 vtkPV3FoamMeshVolume.C
 vtkPV3FoamMeshZone.C

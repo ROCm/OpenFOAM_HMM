@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,12 +24,46 @@ License
 Class
     Foam::uniformDensityHydrostaticPressureFvPatchScalarField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
-    Hydrostatic pressure boundary condition calculated as
+    This boundary condition provides a hydrostatic pressure condition,
+    calculated as:
 
-    pRefValue + rho*g.(x - pRefPoint)
+        \f[
+            p_{hyd} = p_{ref} + \rho g (x - x_{ref})
+        \f]
 
-    where rho is provided and assumed uniform.
+    where
+    \vartable
+        p_{hyd} | hyrostatic pressure [Pa]
+        p_{ref} | reference pressure [Pa]
+        x_{ref} | reference point in Cartesian co-ordinates
+        \rho    | density (assumed uniform)
+        g       | acceleration due to gravity [m/s2]
+    \endtable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        rho          | uniform density [kg/m3] | yes         |
+        pRefValue    | reference pressure [Pa] | yes         |
+        pRefPoint    | reference pressure location | yes     |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            uniformDensityHydrostaticPressure;
+        rho             rho;
+        pRefValue       1e5;
+        pRefPoint       (0 0 0);
+        value           uniform 0; // optional initial value
+    }
+    \endverbatim
 
 SourceFiles
     uniformDensityHydrostaticPressureFvPatchScalarField.C
@@ -47,7 +81,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class uniformDensityHydrostaticPressureFvPatch Declaration
+     Class uniformDensityHydrostaticPressureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class uniformDensityHydrostaticPressureFvPatchScalarField

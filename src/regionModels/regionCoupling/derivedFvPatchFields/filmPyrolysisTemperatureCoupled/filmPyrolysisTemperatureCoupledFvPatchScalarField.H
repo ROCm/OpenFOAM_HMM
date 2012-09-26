@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,33 @@ Class
     Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField
 
 Description
-    Temperature boundary condition for patches on the primary region:
+    This boundary condition is designed to be used in conjunction with surface
+    film and pyrolysis modelling.  It provides a temperature boundary condition
+    for patches on the primary region based on whether the patch is seen to
+    be 'wet', specified by:
 
-    - where the film height > height threshold value:
-        apply film surface temperature values
-    - else
-        apply pyrolysis surface temperature values
+        \f[
+            delta > delta_wet
+        \f]
+
+    where
+        \var delta     = film height [m]
+        \var delta_wet = film height above which the surface is considered wet
+
+    \li if the patch is wet, the temperature is set using the film temperature
+    \li otherwise, it is set using pyrolysis temperature
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            filmPyrolysisTemperatureCoupled;
+            phi             phi;      // name of flux field (default = phi)
+            rho             rho;      // name of density field (default = rho)
+            deltaWet        1e-4;     // threshold height for 'wet' film
+            value           uniform   300; // initial temperature / [K]
+        }
+    \endverbatim
 
 SourceFiles
     filmPyrolysisTemperatureCoupledFvPatchScalarField.C
@@ -63,7 +84,7 @@ class filmPyrolysisTemperatureCoupledFvPatchScalarField
         //- Name of density field
         word rhoName_;
 
-        //- Film height threshold beyond which it is considered 'wet'
+        //- Film height threshold beyond which it is considered 'wet' [m]
         scalar deltaWet_;
 
 

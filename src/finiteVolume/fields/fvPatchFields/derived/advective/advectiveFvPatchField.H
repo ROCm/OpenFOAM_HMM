@@ -24,36 +24,52 @@ License
 Class
     Foam::advectiveFvPatchField
 
+Group
+    grpOutletBoundaryConditions
+
 Description
-    Advective outflow boundary condition based on solving DDt(psi, U) = 0
-    at the boundary.
+    This boundary condition provides an advective outflow condition, based on
+    solving DDt(psi, U) = 0 at the boundary.
 
     The standard (Euler, backward, CrankNicholson) time schemes are
     supported.  Additionally an optional mechanism to relax the value at
     the boundary to a specified far-field value is provided which is
-    switched on by specifying the relaxation length-scale lInf and the
-    far-field value fieldInf.
+    switched on by specifying the relaxation length-scale \c lInf and the
+    far-field value \c fieldInf.
 
     The flow/wave speed at the outlet is provided by the virtual function
     advectionSpeed() the default implementation of which requires the name of
-    the flux field (phi) and optionally the density (rho) if the mass-flux
-    rather than the volumetric-flux is given.
-    \verbatim
-        outlet
-        {
-            type            advective;
-            phi             phi;
-            // rho          rho; // Not needed, phi volumetric
-            // fieldInf     1e5; // Optional
-            // lInf         0.1; // Optional
-        }
-    \endverbatim
+    the flux field \c (phi) and optionally the density \c (rho) if the
+    mass-flux rather than the volumetric-flux is given.
 
     The flow/wave speed at the outlet can be changed by deriving a specialised
-    BC from this class and overriding advectionSpeed() e.g. in
+    BC from this class and over-riding advectionSpeed()  e.g. in
     waveTransmissiveFvPatchField the advectionSpeed() calculates and returns
     the flow-speed plus the acoustic wave speed creating an acoustic wave
     transmissive boundary condition.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        fieldInf     | value of field beyond patch | no      |
+        lInf         | distance beyond patch for \c fieldInf | no |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            advective;
+        phi             phi;
+    }
+    \endverbatim
+
+Note
+    If \c lInf is specified, \c fieldInf will be required; \c rho is only
+    required in the case of a mass-based flux.
 
 SourceFiles
     advectiveFvPatchField.C
@@ -71,7 +87,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class advectiveFvPatch Declaration
+                  Class advectiveFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

@@ -24,11 +24,26 @@ License
 Class
     Foam::compressible::RASModels::mutLowReWallFunctionFvPatchScalarField
 
-Description
-    Boundary condition for turbulent (kinematic) viscosity when for use with
-    low Reynolds number models.
+Group
+    grpCmpWallFunctions
 
-    Sets mut to zero, and provides an access to calculate y+.
+Description
+    This boundary condition provides a turbulent viscosity condition for use
+    with low Reynolds number models.  It sets \c nut to zero, and provides an
+    access function to calculate y+.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            mutLowReWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mutWallFunctionFvPatchScalarField
 
 SourceFiles
     mutLowReWallFunctionFvPatchScalarField.C

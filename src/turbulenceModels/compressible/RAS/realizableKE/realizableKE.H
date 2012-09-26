@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::RASModels::realizableKE
 
+Group
+    grpCmpRASTurbulence
+
 Description
     Realizable k-epsilon turbulence model for compressible flows.
 

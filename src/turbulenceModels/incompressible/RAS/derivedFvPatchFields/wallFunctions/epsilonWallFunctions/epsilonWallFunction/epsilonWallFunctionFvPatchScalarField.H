@@ -24,10 +24,45 @@ License
 Class
     Foam::incompressible::RASModels::epsilonWallFunctionFvPatchScalarField
 
+Group
+    grpIcoWallFunctions
+
 Description
-    Boundary condition for epsilon when using wall functions
-    - calculates epsilon and G
-    - epsilon values added directly into the matrix to act as a constraint
+    This boundary condition provides a turbulence dissipation wall function
+    condition for high Reynolds number, turbulent flow cases.
+
+    The condition can be applied to wall boundaries, whereby it
+    - calculates \c epsilon and \c G
+    - inserts near wall epsilon values directly into the epsilon equation
+        to act as a constraint
+
+    where
+
+    \vartable
+        epsilon | turblence dissipation field
+        G       | turblence generation field
+    \endvartable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        G            | turbulence generation field name | no | G
+        Cmu          | model coefficient       | no          | 0.09
+        kappa        | Von Karman constant     | no          | 0.41
+        E            | model coefficient       | no          | 9.8
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            epsilonWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedInternalValueFvPatchField
 
 SourceFiles
     epsilonWallFunctionFvPatchScalarField.C
@@ -71,7 +106,6 @@ protected:
 
         //- E coefficient
         scalar E_;
-
 
         //- Y+ at the edge of the laminar sublayer
         scalar yPlusLam_;

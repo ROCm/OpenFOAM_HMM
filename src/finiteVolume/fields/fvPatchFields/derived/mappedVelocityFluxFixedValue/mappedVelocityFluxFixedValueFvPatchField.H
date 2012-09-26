@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,12 +24,42 @@ License
 Class
     Foam::mappedVelocityFluxFixedValueFvPatchField
 
-Description
-    Recycles the velocity and flux at a patch to this patch
+Group
+    grpInletBoundaryConditions grpCoupledBoundaryConditions
 
-    mode = NEARESTPATCHFACE : sample nearest face on selected patch
-    mode = NEARESTFACE : sample nearest face on any patch. Note: does not
-                         warn if nearest actually is on internal face!
+Description
+    This boundary condition maps the velocity and flux from a neighbour patch
+    to this patch
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            mappedVelocityFlux;
+        phi             phi;
+        value           uniform 0;  // place holder
+    }
+    \endverbatim
+
+    The underlying sample mode should be set to \c nearestPatchFace or
+    \c nearestFace
+
+Note
+    This boundary condition can only be applied to patches that are of
+    the \c mappedPolyPatch type.
+
+SeeAlso
+    Foam::mappedPatchBase
+    Foam::mappedPolyPatch
+    Foam::mappedFvPatch
+    Foam::fixedValueFvPatchVectorField
 
 SourceFiles
     mappedVelocityFluxFixedValueFvPatchField.C

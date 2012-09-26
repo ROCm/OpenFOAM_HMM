@@ -152,7 +152,7 @@ SpalartAllmaras::SpalartAllmaras
     const word& modelName
 )
 :
-    LESModel(modelName, U, phi, transport, turbulenceModelName),
+    DESModel(modelName, U, phi, transport, turbulenceModelName),
 
     sigmaNut_
     (
@@ -392,6 +392,30 @@ bool SpalartAllmaras::read()
     {
         return false;
     }
+}
+
+
+tmp<volScalarField> SpalartAllmaras::LESRegion() const
+{
+    tmp<volScalarField> tLESRegion
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "DES::LESRegion",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            neg(dTilda(S(fvc::grad(U_))) - y_)
+//            mesh_,
+//            dimensionedScalar("zero", dimless, 0.0)
+        )
+    );
+
+    return tLESRegion;
 }
 
 

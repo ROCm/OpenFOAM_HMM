@@ -24,7 +24,31 @@ License
 Class
     Foam::energyJumpFvPatchScalarField
 
+Group
+    grpThermoBoundaryConditions grpCoupledBoundaryConditions
+
 Description
+    This boundary condition provides an energy jump condition across a pair
+    of coupled patches.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        jump         | energy jump values      | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            energyJump;
+        jump            uniform 100;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedJumpFvPatchField
 
 SourceFiles
     energyJumpFvPatchScalarField.C
@@ -43,7 +67,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class energyJumpFvPatchScalarField Declaration
+                Class energyJumpFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class energyJumpFvPatchScalarField
@@ -119,7 +143,6 @@ public:
 
 
     // Member functions
-
 
         // Evaluation functions
 

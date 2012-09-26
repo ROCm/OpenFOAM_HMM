@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,33 @@ Class
     Foam::filmPyrolysisVelocityCoupledFvPatchVectorField
 
 Description
-    Velocity boundary condition for patches on the primary region:
+    This boundary condition is designed to be used in conjunction with surface
+    film and pyrolysis modelling.  It provides a velocity boundary condition
+    for patches on the primary region based on whether the patch is seen to
+    be 'wet', specified by:
 
-    - where the film height > height threshold value:
-        apply film surface velocity values
-    - else
-        apply pyrolysis out-gassing velocity values
+        \f[
+            delta > delta_wet
+        \f]
+
+    where
+        \var delta     = film height [m]
+        \var delta_wet = film height above which the surface is considered wet
+
+    \li if the patch is wet, the velocity is set using the film velocity
+    \li otherwise, it is set using pyrolysis out-gassing velocity
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
+        {
+            type            filmPyrolysisVelocityCoupled;
+            phi             phi;      // name of flux field (default = phi)
+            rho             rho;      // name of density field (default = rho)
+            deltaWet        1e-4;     // threshold height for 'wet' film
+            value           uniform   (0 0 0); // initial velocity / [m/s]
+        }
+    \endverbatim
 
 SourceFiles
     filmPyrolysisVelocityCoupledFvPatchVectorField.C

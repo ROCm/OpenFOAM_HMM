@@ -24,38 +24,49 @@ License
 Class
     Foam::timeVaryingMappedFixedValueFvPatchField
 
+Group
+    grpInletBoundaryConditions grpCoupledBoundaryConditions
+
 Description
-    Foam::timeVaryingMappedFixedValueFvPatchField
+    This boundary conditions interpolates the values from a set of supplied
+    points in space and time.  Supplied data should be specified in
+    constant/boundaryData/\<patchname\> where:
+    - points : pointField with locations
+    - ddd    : supplied values at time ddd
+    The points should be more or less on a plane since they get triangulated
+    in 2-D.
 
-    Interpolates from a set of supplied points in space and time. Supplied
-    data in constant/boundaryData/<patchname>:
-        - points : pointField with locations
-        - ddd    : supplied values at time ddd
-    Points need to be more or less on a plane since get triangulated in 2D.
+    At startup, this condition generates the triangulation and performs a
+    linear interpolation (triangle it is in and weights to the 3 vertices)
+    for every face centre.
 
-    At startup this bc does the triangulation and determines linear
-    interpolation (triangle it is in and weights to the 3 vertices)
-    for every face centre. Interpolates linearly inbetween times.
+    Values are interpolated linearly between times.
 
-    @verbatim
-        inlet
-        {
-            type            timeVaryingMappedFixedValue;
+    \heading Patch usage
 
-            // Maintain average to that of the supplied values
-            setAverage      false;
+    \table
+        Property     | Description             | Required    | Default value
+        setAverage   | flag to activate setting of average value | yes |
+        perturb      | perturb points for regular geometries | no | 1e-5
+        fieldTableName | alternative field name to sample | no| this field name
+    \endtable
 
-            // Optional: change perturbation (default 1e-5) to avoid any ties
-            // in triangulating regular geometries.
-            //perturb       0.0;
+    /verbatim
+    myPatch
+    {
+        type            timeVaryingMappedFixedValue;
+        setAverage      false;
+        //perturb       0.0;
+        //fieldTableName samples;
+    }
+    /endverbatim
 
-            // Optional: use name instead of patchname for location of data
-            //fieldTableName samples;
-        }
-    @endverbatim
-
+Note
     Switch on debug flag to have it dump the triangulation (in transformed
     space) and transform face centres.
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     timeVaryingMappedFixedValueFvPatchField.C
@@ -76,7 +87,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class timeVaryingMappedFixedValueFvPatch Declaration
+          Class timeVaryingMappedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -118,6 +129,7 @@ class timeVaryingMappedFixedValueFvPatchField
 
         //- If setAverage: end average value
         Type endAverage_;
+
 
 public:
 

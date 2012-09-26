@@ -31,19 +31,13 @@ done
 #runApplication chtMultiRegionFoam
 
 # Decompose
-for i in bottomWater topAir heater leftSolid rightSolid
-do
-   decomposePar -region $i > log.decomposePar.$i 2>&1
-done
+runApplication decomposePar -allRegions
 
 # Run
 runParallel `getApplication` 4
 
 # Reconstruct
-for i in bottomWater topAir heater leftSolid rightSolid
-do
-   reconstructPar -region $i > log.reconstructPar.$i 2>&1
-done
+runApplication reconstructPar -allRegions
 
 
 echo

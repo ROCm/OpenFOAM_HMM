@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,11 +24,53 @@ License
 Class
     Foam::fluxCorrectedVelocityFvPatchVectorField
 
+Group
+    grpOutletBoundaryConditions
+
 Description
-    Velocity outlet boundary condition for patches where the pressure is
-    specified. The outflow velocity is obtained by "zeroGradient" and then
-    corrected from the flux.  If reverse flow is possible or expected use
-    the "pressureInletOutletVelocityFvPatchVectorField" BC instead.
+    This boundary condition provides a velocity outlet boundary condition for
+    patches where the pressure is specified.  The outflow velocity is obtained
+    by "zeroGradient" and then corrected from the flux:
+
+        \f[
+            U_p = U_c - n*(n.U_c) + \frac{n*\phi_p}{|Sf|}
+        \f]
+
+    where
+
+    \vartable
+        U_p | velocity at the patch [m/s]
+        U_c | velocity in cells adjacent to the patch [m/s]
+        n   | patch normal vectors
+        \phi_p | flux at the patch [m3/s or kg/s]
+        Sf  | patch face area vectors [m2]
+    \endvartable
+
+    where
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | name of flux field      | no          | phi
+        rho          | name of density field   | no          | rho
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fluxCorrectedVelocity;
+        phi             phi;
+        rho             rho;
+    }
+    \endverbatim
+
+Note
+    If reverse flow is possible or expected use the
+    pressureInletOutletVelocity condition instead.
+
+SeeAlso
+    Foam::zeroGradientFvPatchField
+    Foam::pressureInletOutletVelocityFvPatchVectorField
 
 SourceFiles
     fluxCorrectedVelocityFvPatchVectorField.C
@@ -47,7 +89,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class fluxCorrectedVelocityFvPatch Declaration
+           Class fluxCorrectedVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fluxCorrectedVelocityFvPatchVectorField
@@ -56,7 +98,10 @@ class fluxCorrectedVelocityFvPatchVectorField
 {
     // Private data
 
+        //- Name of flux field
         word phiName_;
+
+        //- Name of density field
         word rhoName_;
 
 

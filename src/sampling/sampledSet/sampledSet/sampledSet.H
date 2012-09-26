@@ -24,6 +24,9 @@ License
 Class
     Foam::sampledSet
 
+Group
+    grpFunctionObjects
+
 Description
     Holds list of sampling points which is filled at construction time.
     Various implementations of this base class to e.g. get sampling points

@@ -43,7 +43,7 @@ solvers
         relTol          0;
     }
 
-    "(U|k|epsion)"
+    "(U|k|epsilon)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;

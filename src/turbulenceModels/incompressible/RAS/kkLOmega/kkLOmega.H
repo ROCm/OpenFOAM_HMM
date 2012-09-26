@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::kkLOmega
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Low Reynolds-number k-kl-omega turbulence model for
     incompressible flows.

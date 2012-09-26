@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         A templated FixedValueFvPatch
+                     A templated MixedValueFvPatchField
 \*---------------------------------------------------------------------------*/
 
-class ${typeName}FixedValueFvPatch${FieldType}
+class ${typeName}MixedValueFvPatch${FieldType}
 :
     public mixedFvPatchField<${TemplateType}>
 {
@@ -62,14 +62,14 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        ${typeName}FixedValueFvPatch${FieldType}
+        ${typeName}MixedValueFvPatch${FieldType}
         (
             const fvPatch&,
             const DimensionedField<${TemplateType}, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        ${typeName}FixedValueFvPatch${FieldType}
+        ${typeName}MixedValueFvPatch${FieldType}
         (
             const fvPatch&,
             const DimensionedField<${TemplateType}, volMesh>&,
@@ -77,18 +77,18 @@ public:
         );
 
         //- Construct by mapping a copy onto a new patch
-        ${typeName}FixedValueFvPatch${FieldType}
+        ${typeName}MixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatch${FieldType}&,
+            const ${typeName}MixedValueFvPatch${FieldType}&,
             const fvPatch&,
             const DimensionedField<${TemplateType}, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        ${typeName}FixedValueFvPatch${FieldType}
+        ${typeName}MixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatch${FieldType}&
+            const ${typeName}MixedValueFvPatch${FieldType}&
         );
 
         //- Construct and return a clone
@@ -96,14 +96,14 @@ public:
         {
             return tmp< fvPatch${FieldType} >
             (
-                new ${typeName}FixedValueFvPatch${FieldType}(*this)
+                new ${typeName}MixedValueFvPatch${FieldType}(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        ${typeName}FixedValueFvPatch${FieldType}
+        ${typeName}MixedValueFvPatch${FieldType}
         (
-            const ${typeName}FixedValueFvPatch${FieldType}&,
+            const ${typeName}MixedValueFvPatch${FieldType}&,
             const DimensionedField<${TemplateType}, volMesh>&
         );
 
@@ -115,13 +115,13 @@ public:
         {
             return tmp< fvPatch${FieldType} >
             (
-                new ${typeName}FixedValueFvPatch${FieldType}(*this, iF)
+                new ${typeName}MixedValueFvPatch${FieldType}(*this, iF)
             );
         }
 
 
     //- Destructor
-    virtual ~${typeName}FixedValueFvPatch${FieldType}();
+    virtual ~${typeName}MixedValueFvPatch${FieldType}();
 
 
     // Member functions

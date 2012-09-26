@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,35 @@ License
 Class
     Foam::surfaceNormalFixedValueFvPatchVectorField
 
+Group
+    grpGenericBoundaryConditions grpInletBoundaryConditions
+
 Description
-    Describes a surface normal vector boundary condition by its magnitude.
-    Note: The value is positive for outward-pointing vectors
+    This boundary condition provides a surface-normal vector boundary condition
+    by its magnitude.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        refValue     | reference value         | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            surfaceNormalFixedValue;
+        refValue        -10;           // 10 INTO the domain
+    }
+    \endverbatim
+
+Note
+    Sign conventions:
+    - the value is positive for outward-pointing vectors
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     surfaceNormalFixedValueFvPatchVectorField.C
@@ -45,7 +71,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class surfaceNormalFixedValueFvPatch Declaration
+          Class surfaceNormalFixedValueFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceNormalFixedValueFvPatchVectorField

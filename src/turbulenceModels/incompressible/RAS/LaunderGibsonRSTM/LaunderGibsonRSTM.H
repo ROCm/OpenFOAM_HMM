@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::LaunderGibsonRSTM
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Launder-Gibson Reynolds stress turbulence model for incompressible flows.
 

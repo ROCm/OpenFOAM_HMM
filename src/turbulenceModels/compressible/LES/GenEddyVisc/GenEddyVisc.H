@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::LESModels::GenEddyVisc
 
+Group
+    grpCmpLESTurbulence
+
 Description
     General base class for all compressible models that can be implemented as
     an eddy viscosity, i.e. algebraic and one-equation models.

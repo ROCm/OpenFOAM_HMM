@@ -24,6 +24,9 @@ License
 Class
     Foam::sampledSurface
 
+Group
+    grpFunctionObjects
+
 Description
     An abstract class for surfaces with sampling.
 

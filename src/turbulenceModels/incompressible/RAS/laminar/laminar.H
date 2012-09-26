@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::laminar
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Dummy turbulence model for laminar incompressible flow.
 

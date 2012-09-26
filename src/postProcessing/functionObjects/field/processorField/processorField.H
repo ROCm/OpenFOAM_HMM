@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,32 @@ License
 Class
     Foam::processorField
 
+Group
+    grpFieldFunctionObjects
+
 Description
-    Writes a scalar field whose value is the local processor ID.  Output
-    field name is processorID.
+    This function object writes a scalar field whose value is the local
+    processor ID.  The output field name is 'processorID'.
+
+    Example of function object specification:
+    \verbatim
+    processorField1
+    {
+        type        processorField;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: processorField | yes       |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     processorField.C
@@ -54,7 +77,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class processorField Declaration
+                       Class processorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class processorField

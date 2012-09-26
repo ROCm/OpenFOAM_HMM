@@ -24,11 +24,27 @@ License
 Class
     Foam::symmetryFvPatchField
 
+Group
+    grpConstraintBoundaryConditions
+
 Description
-    Foam::symmetryFvPatchField
+    This boundary condition enforces a symmetry constraint
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            symmetryPlane;
+    }
+    \endverbatim
 
 SourceFiles
     symmetryFvPatchField.C
+    symmetryFvPatchFields.C
+    symmetryFvPatchFields.H
+    symmetryFvPatchFieldsFwd.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class symmetryFvPatch Declaration
+                         Class symmetryFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

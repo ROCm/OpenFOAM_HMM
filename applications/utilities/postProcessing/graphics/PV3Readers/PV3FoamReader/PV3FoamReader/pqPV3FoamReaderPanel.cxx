@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,7 +109,7 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
 
     QFrame* hline1 = new QFrame(this);
     hline1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-    form->addWidget(hline1, 1, 0, 1, 2);
+    form->addWidget(hline1, 1, 0, 1, 3);
 
     // checkbox for caching mesh
     if ((prop = this->proxy()->GetProperty("UiCacheMesh")) != 0)
@@ -162,6 +162,34 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
             SIGNAL(stateChanged(int)),
             this,
             SLOT(ShowPatchNamesToggled())
+        );
+    }
+
+
+    // checkbox for Groups Only
+    if ((prop = this->proxy()->GetProperty("UiShowGroupsOnly")) != 0)
+    {
+        // immediate update on the Server Manager side
+        prop->SetImmediateUpdate(true);
+
+        ShowGroupsOnly_ = new QCheckBox("Groups Only");
+        ShowGroupsOnly_->setChecked
+        (
+            vtkSMIntVectorProperty::SafeDownCast(prop)->GetElement(0)
+        );
+        ShowGroupsOnly_->setToolTip
+        (
+            "Show patchGroups only."
+        );
+
+        // row/col 2, 2
+        form->addWidget(ShowGroupsOnly_, 2, 2, Qt::AlignLeft);
+        connect
+        (
+            ShowGroupsOnly_,
+            SIGNAL(stateChanged(int)),
+            this,
+            SLOT(ShowGroupsOnlyToggled())
         );
     }
 
@@ -278,7 +306,7 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
 
     QFrame* hline2 = new QFrame(this);
     hline2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-    form->addWidget(hline2, 5, 0, 1, 2);
+    form->addWidget(hline2, 5, 0, 1, 3);
 }
 
 
@@ -333,6 +361,22 @@ void pqPV3FoamReaderPanel::ShowPatchNamesToggled()
     }
     // OR: update all views
     // pqApplicationCore::instance()->render();
+}
+
+
+void pqPV3FoamReaderPanel::ShowGroupsOnlyToggled()
+{
+    vtkSMProperty* prop;
+
+    vtkSMIntVectorProperty::SafeDownCast
+    (
+        this->proxy()->GetProperty("UiShowGroupsOnly")
+    )->SetElement(0, ShowGroupsOnly_->isChecked());
+
+    if ((prop = this->proxy()->GetProperty("PartArrayStatus")) != 0)
+    {
+        this->proxy()->UpdatePropertyInformation(prop);
+    }
 }
 
 

@@ -24,8 +24,15 @@ License
 Class
     Foam::jumpCyclicFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::jumpCyclicFvPatchField
+    This boundary condition provides a base class for coupled-cyclic
+    conditions with a specified 'jump' (or offset) between the values
+
+SeeAlso
+    Foam::cyclicFvPatchField
 
 SourceFiles
     jumpCyclicFvPatchField.C
@@ -43,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cyclicFvPatch Declaration
+                   Class jumpCyclicFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
