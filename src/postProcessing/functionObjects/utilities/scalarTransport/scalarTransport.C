@@ -240,7 +240,6 @@ void Foam::scalarTransport::execute()
         (
             fvm::ddt(T_)
           + fvm::div(phi, T_, divScheme)
-          - fvm::Sp(fvc::div(phi), T_)
           - fvm::laplacian(DT, T_, laplacianScheme)
          ==
             sources_(T_)
