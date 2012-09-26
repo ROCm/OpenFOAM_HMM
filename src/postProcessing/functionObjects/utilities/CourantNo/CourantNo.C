@@ -68,74 +68,6 @@ Foam::tmp<Foam::volScalarField> Foam::CourantNo::rho
 }
 
 
-void Foam::CourantNo::makeFile()
-{
-    // Create the CourantNo file if not already created
-    if (CourantNoFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating CourantNo file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName CourantNoDir;
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                CourantNoDir =
-                    obr_.time().path()/".."/name_/obr_.time().timeName();
-            }
-            else
-            {
-                CourantNoDir =
-                    obr_.time().path()/name_/obr_.time().timeName();
-            }
-
-            // Create directory if does not exist.
-            mkDir(CourantNoDir);
-
-            // Open new file at start up
-            CourantNoFilePtr_.reset
-            (
-                new OFstream(CourantNoDir/(type() + ".dat"))
-            );
-
-            // Add headers to output data
-            writeFileHeader();
-        }
-    }
-}
-
-
-void Foam::CourantNo::writeFileHeader()
-{
-    if (CourantNoFilePtr_.valid())
-    {
-        CourantNoFilePtr_()
-            << "# Time" << token::TAB << "min" << token::TAB << "position(min)";
-
-        if (Pstream::parRun())
-        {
-            CourantNoFilePtr_() << token::TAB << "proc";
-        }
-
-        CourantNoFilePtr_()
-            << token::TAB << "max" << token::TAB << "position(max)";
-
-        if (Pstream::parRun())
-        {
-            CourantNoFilePtr_() << token::TAB << "proc";
-        }
-
-        CourantNoFilePtr_() << endl;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::CourantNo::CourantNo
@@ -149,10 +81,8 @@ Foam::CourantNo::CourantNo
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
     phiName_("phi"),
-    rhoName_("rho"),
-    CourantNoFilePtr_(NULL)
+    rhoName_("rho")
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -172,6 +102,30 @@ Foam::CourantNo::CourantNo
     }
 
     read(dict);
+
+    if (active_)
+    {
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+
+        volScalarField* CourantNoPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    type(),
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ
+                ),
+                mesh,
+                dimensionedScalar("0", dimless, 0.0),
+                zeroGradientFvPatchScalarField::typeName
+            )
+        );
+
+        mesh.objectRegistry::store(CourantNoPtr);
+    }
 }
 
 
@@ -189,7 +143,6 @@ void Foam::CourantNo::read(const dictionary& dict)
     {
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
         rhoName_ = dict.lookupOrDefault<word>("rhoName", "rho");
-        log_ = dict.lookupOrDefault<Switch>("log", false);
     }
 }
 
@@ -210,26 +163,16 @@ void Foam::CourantNo::write()
 {
     if (active_)
     {
-        makeFile();
-
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         const surfaceScalarField& phi =
             mesh.lookupObject<surfaceScalarField>(phiName_);
 
-        volScalarField CourantNo
-        (
-            IOobject
+        volScalarField& CourantNo =
+            const_cast<volScalarField&>
             (
-                "CourantNo",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ
-            ),
-            mesh,
-            dimensionedScalar("0", dimless, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        );
+                mesh.lookupObject<volScalarField>(type())
+            );
 
         scalarField& iField = CourantNo.internalField();
 
@@ -243,83 +186,10 @@ void Foam::CourantNo::write()
 
         CourantNo.correctBoundaryConditions();
 
-        const label procI = Pstream::myProcNo();
-
-        labelList minIs(Pstream::nProcs());
-        scalarList minVs(Pstream::nProcs());
-        List<vector> minCs(Pstream::nProcs());
-        minIs[procI] = findMin(iField);
-        minVs[procI] = iField[minIs[procI]];
-        minCs[procI] = mesh.C()[minIs[procI]];
-
-        Pstream::gatherList(minIs);
-        Pstream::gatherList(minVs);
-        Pstream::gatherList(minCs);
-
-        labelList maxIs(Pstream::nProcs());
-        scalarList maxVs(Pstream::nProcs());
-        List<vector> maxCs(Pstream::nProcs());
-        maxIs[procI] = findMax(iField);
-        maxVs[procI] = iField[maxIs[procI]];
-        maxCs[procI] = mesh.C()[maxIs[procI]];
-
-        Pstream::gatherList(maxIs);
-        Pstream::gatherList(maxVs);
-        Pstream::gatherList(maxCs);
-
-        if (Pstream::master())
-        {
-            label minI = findMin(minVs);
-            scalar minValue = minVs[minI];
-            const vector& minC = minCs[minI];
-
-            label maxI = findMax(maxVs);
-            scalar maxValue = maxVs[maxI];
-            const vector& maxC = maxCs[maxI];
-
-            CourantNoFilePtr_()
-                << obr_.time().value() << token::TAB
-                << minValue << token::TAB << minC;
-
-            if (Pstream::parRun())
-            {
-                CourantNoFilePtr_() << token::TAB << minI;
-            }
-
-            CourantNoFilePtr_()
-                << token::TAB << maxValue << token::TAB << maxC;
-
-            if (Pstream::parRun())
-            {
-                CourantNoFilePtr_() << token::TAB << maxI;
-            }
-
-            CourantNoFilePtr_() << endl;
-
-            if (log_)
-            {
-                Info<< type() << " output:" << nl
-                    << "    min = " << minValue << " at position " << minC;
-
-                if (Pstream::parRun())
-                {
-                    Info<< " on processor " << minI;
-                }
-
-                Info<< nl << "    max = " << maxValue << " at position "
-                    << maxC;
-
-                if (Pstream::parRun())
-                {
-                    Info<< " on processor " << maxI;
-                }
-
-                Info<< nl << endl;
-            }
-        }
-
-
         CourantNo.write();
+
+        Info<< type() << " output:" << nl
+            << "    writing " << CourantNo.name() << "field" << nl << endl;
     }
 }
 

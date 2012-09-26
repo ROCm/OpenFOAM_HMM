@@ -25,7 +25,9 @@ Class
     Foam::CourantNo
 
 Description
-    Calculates and outputs the Courant number
+    This function object calculates and outputs the Courant number as a
+    volScalarField.  The field is stored on the mesh database so that it can
+    be retrieved and used for other applications.
 
 SourceFiles
     CourantNo.C
@@ -63,13 +65,11 @@ class CourantNo
         //- Name of this set of CourantNo objects
         word name_;
 
+        //- Reference to the database
         const objectRegistry& obr_;
 
-        //- on/off switch
+        //- On/off switch
         bool active_;
-
-        //- Switch to send output to Info as well
-        Switch log_;
 
         //- Name of flux field, default is "phi"
         word phiName_;
@@ -77,21 +77,12 @@ class CourantNo
         //- Name of density field (optional)
         word rhoName_;
 
-        //- Courant number file ptr
-        autoPtr<OFstream> CourantNoFilePtr_;
-
 
     // Private Member Functions
 
         //- Return 1 if the flux field is volumetric, otherwise return rho
         //  from the database
         tmp<volScalarField> rho(const surfaceScalarField& p) const;
-
-        //- If the output file has not been created create it
-        void makeFile();
-
-        //- Output file header information
-        virtual void writeFileHeader();
 
         //- Disallow default bitwise copy construct
         CourantNo(const CourantNo&);
