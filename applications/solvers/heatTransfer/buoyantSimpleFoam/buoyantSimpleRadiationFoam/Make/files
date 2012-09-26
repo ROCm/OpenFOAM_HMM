@@ -1,0 +1,3 @@
+buoyantSimpleRadiationFoam.C
+
+EXE = $(FOAM_APPBIN)/buoyantSimpleRadiationFoam

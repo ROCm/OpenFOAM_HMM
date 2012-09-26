@@ -87,7 +87,7 @@ Ostream& operator<<
                      Class polynomialTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Thermo, int PolySize>
+template<class Thermo, int PolySize=8>
 class polynomialTransport
 :
     public Thermo

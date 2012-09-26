@@ -67,7 +67,6 @@ turbulenceModels/Allwmake $*
 wmake $makeType combustionModels
 regionModels/Allwmake $*
 lagrangian/Allwmake $*
-postProcessing/Allwmake $*
 mesh/Allwmake $*
 
 fvAgglomerationMethods/Allwmake $*
@@ -76,5 +75,7 @@ wmake $makeType fvMotionSolver
 wmake $makeType engine
 
 wmake $makeType fieldSources
+
+postProcessing/Allwmake $*
 
 # ----------------------------------------------------------------- end-of-file

@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         // Velocity-pressure-enthalpy SIMPLEC corrector
         {
             #include "UEqn.H"
-            #include "eEqn.H"
+            #include "EEqn.H"
             #include "pEqn.H"
         }
 

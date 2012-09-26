@@ -61,7 +61,7 @@ Description
         <pureSolidMixture
             <constIsoSolidTransport
                 <constSolidRad
-                    <specieThermo
+                    <thermo
                         <hConstThermo<incompressible>,sensibleEnthalpy>
                     >
                  >

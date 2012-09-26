@@ -77,7 +77,7 @@ dictionaryReplacement
         {
             "baffle1.*"
             {
-                type            buoyantPressure;
+                type            fixedFluxPressure;
                 value           $internalField;
             }
         }

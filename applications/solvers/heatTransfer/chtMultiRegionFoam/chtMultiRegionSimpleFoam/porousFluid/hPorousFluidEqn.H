@@ -2,7 +2,6 @@
     fvScalarMatrix hPorousEqn
     (
         fvm::div(porousPhi, porousH)
-      - fvm::Sp(fvc::div(porousPhi), porousH)
       - fvm::laplacian(turbPorous.alphaEff(), porousH)
      ==
       - fvc::div(porousPhi, 0.5*magSqr(porousU), "div(phi,K)")

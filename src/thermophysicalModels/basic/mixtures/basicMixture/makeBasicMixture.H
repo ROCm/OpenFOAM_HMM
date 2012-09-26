@@ -25,6 +25,7 @@ InClass
     Foam::basicMixture
 
 Description
+    Macros for creating 'basic' mixtures for basic fluid thermo packages
 
 \*---------------------------------------------------------------------------*/
 
@@ -32,44 +33,19 @@ Description
 #define makeBasicMixture_H
 
 #include "basicMixture.H"
-#include "sensibleEnthalpy.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicMixture(Mixture,Transport,Type,Thermo,EqnOfState)            \
+#define makeBasicMixture(Mixture,Transport,Type,Thermo,EqnOfState,Specie)     \
                                                                               \
 typedef                                                                       \
-    Mixture<Transport<specieThermo<Thermo<EqnOfState>, Type> > >              \
-    Mixture##Transport##Type##Thermo##EqnOfState;                             \
+    Mixture<Transport<species::thermo<Thermo<EqnOfState<Specie> >, Type> > >  \
+    Mixture##Transport##Type##Thermo##EqnOfState##Specie;                     \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (Mixture##Transport##Type##Thermo##EqnOfState,                            \
-    #Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">,"#Type">>>", 0)
-
-
-#define makeBasicPolyMixture(Mixture,Order,Type)                              \
-                                                                              \
-typedef polynomialTransport                                                   \
-<                                                                             \
-    specieThermo                                                              \
-    <                                                                         \
-        hPolynomialThermo                                                     \
-        <                                                                     \
-            icoPolynomial<Order>,                                             \
-            Order                                                             \
-        >,                                                                    \
-        Type                                                                  \
-    >,                                                                        \
-    Order                                                                     \
-> icoPoly##Order##Type##ThermoPhysics;                                        \
-                                                                              \
-typedef Mixture<icoPoly##Order##Type##ThermoPhysics>                          \
-    Mixture##icoPoly##Order##Type##ThermoPhysics;                             \
-                                                                              \
-defineTemplateTypeNameAndDebugWithName                                        \
-    (Mixture##icoPoly##Order##Type##ThermoPhysics,                            \
-    #Mixture"<icoPoly"#Order#Type"ThermoPhysics>", 0)
-
+    (Mixture##Transport##Type##Thermo##EqnOfState##Specie,                    \
+    #Mixture"<"#Transport"<"#Thermo"<"#EqnOfState"<"#Specie">>,"#Type">>", 0)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

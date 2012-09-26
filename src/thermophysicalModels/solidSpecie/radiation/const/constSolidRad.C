@@ -43,6 +43,21 @@ constSolidRad<thermo>::constSolidRad(const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void Foam::constSolidRad<thermo>::constSolidRad::write(Ostream& os) const
+{
+    thermo::write(os);
+
+    dictionary dict("radiation");
+    dict.add("kappaRad", kappaRad_);
+    dict.add("sigmaS", sigmaS_);
+    dict.add("emissivity", emissivity_);
+    os  << indent << dict.dictName() << dict;
+}
+
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class thermo>

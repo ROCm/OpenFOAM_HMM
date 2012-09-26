@@ -51,7 +51,7 @@ temperatureThermoBaffle1DFvPatchScalarField
     baffleActivated_(true),
     thickness_(p.size()),
     Qs_(p.size()),
-    solid_(NULL)
+    solidPtr_(NULL)
 {}
 
 
@@ -70,7 +70,7 @@ temperatureThermoBaffle1DFvPatchScalarField
     baffleActivated_(ptf.baffleActivated_),
     thickness_(ptf.thickness_),
     Qs_(ptf.Qs_),
-    solid_(ptf.solid_)
+    solidPtr_(ptf.solidPtr_)
 {}
 
 
@@ -88,19 +88,19 @@ temperatureThermoBaffle1DFvPatchScalarField
     baffleActivated_(readBool(dict.lookup("baffleActivated"))),
     thickness_(scalarField("thickness", dict, p.size())),
     Qs_(scalarField("Qs", dict, p.size())),
-    solid_(new solidThermoData(dict))
+    solidPtr_(new solidType(dict))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
             "temperatureThermoBaffle1DFvPatchScalarField::"
-            "temperatureThermoBaffle1DFvPatchScalarField\n"
-            "(\n"
-            "    const fvPatch& p,\n"
-            "    const DimensionedField<scalar, volMesh>& iF,\n"
-            "    const dictionary& dict\n"
-            ")\n"
+            "temperatureThermoBaffle1DFvPatchScalarField"
+            "("
+                "const fvPatch&,\n"
+                "const DimensionedField<scalar, volMesh>&, "
+                "const dictionary&"
+            ")"
         )   << "\n    patch type '" << patch().type()
             << "' not type '" << mappedPatchBase::typeName << "'"
             << "\n    for patch " << patch().name()
@@ -141,7 +141,7 @@ temperatureThermoBaffle1DFvPatchScalarField
     baffleActivated_(ptf.baffleActivated_),
     thickness_(ptf.thickness_),
     Qs_(ptf.Qs_),
-    solid_(ptf.solid_)
+    solidPtr_(ptf.solidPtr_)
 {}
 
 
@@ -158,7 +158,7 @@ temperatureThermoBaffle1DFvPatchScalarField
     baffleActivated_(ptf.baffleActivated_),
     thickness_(ptf.thickness_),
     Qs_(ptf.Qs_),
-    solid_(ptf.solid_)
+    solidPtr_(ptf.solidPtr_)
 {}
 
 
@@ -197,10 +197,8 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
-    (
-        patch().patch()
-    );
+    const mappedPatchBase& mpp =
+        refCast<const mappedPatchBase>(patch().patch());
 
     const label patchI = patch().index();
 
@@ -208,8 +206,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 
     if (baffleActivated_)
     {
-        const fvPatch& nbrPatch =
-            patch().boundaryMesh()[mpp.samplePolyPatch().index()];
+        const fvPatch& nbrPatch = patch().boundaryMesh()[nbrPatchI];
 
         const compressible::turbulenceModel& model =
             db().template lookupObject<compressible::turbulenceModel>
@@ -248,10 +245,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         const temperatureThermoBaffle1DFvPatchScalarField& nbrField =
         refCast<const temperatureThermoBaffle1DFvPatchScalarField>
         (
-            nbrPatch.template lookupPatchField<volScalarField, scalar>
-            (
-                TName_
-            )
+            nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_)
         );
 
         scalarField nbrTi(nbrField.patchInternalField());
@@ -278,7 +272,8 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         // Create fields for solid properties
         forAll(KDeltaw, i)
         {
-            KDeltaw[i] = solid_().kappa((Tp[i] + nbrTw[i])/2.0)/thickness_[i];
+            KDeltaw[i] =
+                solidPtr_().kappa((Tp[i] + nbrTw[i])/2.0)/thickness_[i];
         }
 
         const scalarField q
@@ -362,7 +357,7 @@ write(Ostream& os) const
     os.writeKeyword("baffleActivated")
         << baffleActivated_ << token::END_STATEMENT << nl;
     Qs_.writeEntry("Qs", os);
-    solid_().write(os);
+    solidPtr_->write(os);
 }
 
 

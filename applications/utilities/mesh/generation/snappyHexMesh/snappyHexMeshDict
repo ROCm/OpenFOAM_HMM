@@ -239,7 +239,8 @@ snapControls
         //  Leave out altogether to disable.
         nFeatureSnapIter 10;
 
-        //- Detect (geometric) features by sampling the surface (default=false)
+        //- Detect (geometric only) features by sampling the surface
+        //  (default=false).
         implicitFeatureSnap false;
 
         //- Use castellatedMeshControls::features (default = true)

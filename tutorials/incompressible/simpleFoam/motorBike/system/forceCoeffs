@@ -12,6 +12,7 @@ forces
     functionObjectLibs ( "libforces.so" );
     outputControl timeStep;
     outputInterval 1;
+    log         yes;
 
     patches     ( "motorBike.*" );
     pName       p;
@@ -26,6 +27,10 @@ forces
     magUInf     20;
     lRef        1.42;        // Wheelbase length
     Aref        0.75;        // Estimated
+
+    nBin        20;          // output data into bins
+    binDir      (1 0 0);     // bin direction
+    binFormat   gnuplot;
 }
 
 

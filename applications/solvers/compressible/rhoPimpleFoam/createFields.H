@@ -5,9 +5,9 @@
         psiThermo::New(mesh)
     );
     psiThermo& thermo = pThermo();
+    thermo.validate(args.executable(), "h", "e");
 
     volScalarField& p = thermo.p();
-    volScalarField& h = thermo.he();
     const volScalarField& psi = thermo.psi();
 
     volScalarField rho

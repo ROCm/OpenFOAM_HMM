@@ -308,6 +308,7 @@ $(ddtSchemes)/backwardDdtScheme/backwardDdtSchemes.C
 $(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtScheme.C
 $(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtSchemes.C
 $(ddtSchemes)/CrankNicholsonDdtScheme/CrankNicholsonDdtSchemes.C
+$(ddtSchemes)/boundedDdtScheme/boundedDdtSchemes.C
 
 d2dt2Schemes = finiteVolume/d2dt2Schemes
 $(d2dt2Schemes)/d2dt2Scheme/d2dt2Schemes.C
@@ -345,6 +346,7 @@ convectionSchemes = finiteVolume/convectionSchemes
 $(convectionSchemes)/convectionScheme/convectionSchemes.C
 $(convectionSchemes)/gaussConvectionScheme/gaussConvectionSchemes.C
 $(convectionSchemes)/multivariateGaussConvectionScheme/multivariateGaussConvectionSchemes.C
+$(convectionSchemes)/boundedConvectionScheme/boundedConvectionSchemes.C
 
 laplacianSchemes = finiteVolume/laplacianSchemes
 $(laplacianSchemes)/laplacianScheme/laplacianSchemes.C

@@ -37,7 +37,6 @@ SourceFiles
 #ifndef icoPolynomial_H
 #define icoPolynomial_H
 
-#include "specie.H"
 #include "autoPtr.H"
 #include "Polynomial.H"
 
@@ -48,42 +47,42 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<int PolySize>
+template<class Specie, int PolySize>
 class icoPolynomial;
 
-template<int PolySize>
-icoPolynomial<PolySize> operator+
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize> operator+
 (
-    const icoPolynomial<PolySize>&,
-    const icoPolynomial<PolySize>&
+    const icoPolynomial<Specie, PolySize>&,
+    const icoPolynomial<Specie, PolySize>&
 );
 
-template<int PolySize>
-icoPolynomial<PolySize> operator-
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize> operator-
 (
-    const icoPolynomial<PolySize>&,
-    const icoPolynomial<PolySize>&
+    const icoPolynomial<Specie, PolySize>&,
+    const icoPolynomial<Specie, PolySize>&
 );
 
-template<int PolySize>
-icoPolynomial<PolySize> operator*
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize> operator*
 (
     const scalar,
-    const icoPolynomial<PolySize>&
+    const icoPolynomial<Specie, PolySize>&
 );
 
-template<int PolySize>
-icoPolynomial<PolySize> operator==
+template<class Specie, int PolySize>
+icoPolynomial<Specie, PolySize> operator==
 (
-    const icoPolynomial<PolySize>&,
-    const icoPolynomial<PolySize>&
+    const icoPolynomial<Specie, PolySize>&,
+    const icoPolynomial<Specie, PolySize>&
 );
 
-template<int PolySize>
+template<class Specie, int PolySize>
 Ostream& operator<<
 (
     Ostream&,
-    const icoPolynomial<PolySize>&
+    const icoPolynomial<Specie, PolySize>&
 );
 
 
@@ -91,10 +90,10 @@ Ostream& operator<<
                         Class icoPolynomial Declaration
 \*---------------------------------------------------------------------------*/
 
-template<int PolySize>
+template<class Specie, int PolySize=8>
 class icoPolynomial
 :
-    public specie
+    public Specie
 {
     // Private data
 
@@ -110,7 +109,7 @@ public:
         //- Construct from components
         inline icoPolynomial
         (
-            const specie& sp,
+            const Specie& sp,
             const Polynomial<PolySize>& rhoPoly
         );
 
@@ -176,25 +175,25 @@ public:
 
     // Friend operators
 
-        friend icoPolynomial operator+ <PolySize>
+        friend icoPolynomial operator+ <Specie, PolySize>
         (
             const icoPolynomial&,
             const icoPolynomial&
         );
 
-        friend icoPolynomial operator- <PolySize>
+        friend icoPolynomial operator- <Specie, PolySize>
         (
             const icoPolynomial&,
             const icoPolynomial&
         );
 
-        friend icoPolynomial operator* <PolySize>
+        friend icoPolynomial operator* <Specie, PolySize>
         (
             const scalar s,
             const icoPolynomial&
         );
 
-        friend icoPolynomial operator== <PolySize>
+        friend icoPolynomial operator== <Specie, PolySize>
         (
             const icoPolynomial&,
             const icoPolynomial&
@@ -203,7 +202,11 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <PolySize>(Ostream&, const icoPolynomial&);
+        friend Ostream& operator<< <Specie, PolySize>
+        (
+            Ostream&,
+            const icoPolynomial&
+        );
 };
 
 
@@ -217,7 +220,7 @@ public:
                                                                              \
 defineTemplateTypeNameAndDebugWithName                                       \
 (                                                                            \
-    icoPolynomial<PolySize>,                                                 \
+    icoPolynomial<Specie, PolySize>,                                         \
     "icoPolynomial<"#PolySize">",                                            \
     0                                                                        \
 );

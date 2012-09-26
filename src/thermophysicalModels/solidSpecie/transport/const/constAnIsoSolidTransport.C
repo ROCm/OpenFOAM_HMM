@@ -39,6 +39,22 @@ Foam::constAnIsoSolidTransport<thermo>::constAnIsoSolidTransport
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class thermo>
+void Foam::constAnIsoSolidTransport<thermo>::constAnIsoSolidTransport::write
+(
+    Ostream& os
+) const
+{
+    thermo::write(os);
+
+    dictionary dict("transport");
+    dict.add("kappa", kappa_);
+    os  << indent << dict.dictName() << dict;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class thermo>

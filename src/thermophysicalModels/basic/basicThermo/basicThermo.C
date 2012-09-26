@@ -164,6 +164,89 @@ Foam::basicThermo::~basicThermo()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::basicThermo::validate
+(
+    const word& app,
+    const word& a
+) const
+{
+    if (!(he().name() == a))
+    {
+        FatalErrorIn(app)
+            << "Supported energy type is " << a
+            << ", thermodynamics package provides " << he().name()
+            << exit(FatalError);
+    }
+}
+
+void Foam::basicThermo::validate
+(
+    const word& app,
+    const word& a,
+    const word& b
+) const
+{
+    if (!(he().name() == a || he().name() == b))
+    {
+        FatalErrorIn(app)
+            << "Supported energy types are " << a << " and " << b
+            << ", thermodynamics package provides " << he().name()
+            << exit(FatalError);
+    }
+}
+
+void Foam::basicThermo::validate
+(
+    const word& app,
+    const word& a,
+    const word& b,
+    const word& c
+) const
+{
+    if
+    (
+       !(
+            he().name() == a
+         || he().name() == b
+         || he().name() == c
+        )
+    )
+    {
+        FatalErrorIn(app)
+            << "Supported energy types are " << a << ", " << b << " and " << c
+            << ", thermodynamics package provides " << he().name()
+            << exit(FatalError);
+    }
+}
+
+void Foam::basicThermo::validate
+(
+    const word& app,
+    const word& a,
+    const word& b,
+    const word& c,
+    const word& d
+) const
+{
+    if
+    (
+       !(
+            he().name() == a
+         || he().name() == b
+         || he().name() == c
+         || he().name() == d
+        )
+    )
+    {
+        FatalErrorIn(app)
+            << "Supported energy types are " << a << ", " << b
+            << ", " << c << " and " << d
+            << ", thermodynamics package provides " << he().name()
+            << exit(FatalError);
+    }
+}
+
+
 Foam::volScalarField& Foam::basicThermo::p()
 {
     return p_;

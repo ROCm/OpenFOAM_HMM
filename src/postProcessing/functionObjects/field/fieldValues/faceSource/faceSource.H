@@ -45,7 +45,8 @@ Description
         functionObjectLibs ("libfieldFunctionObjects.so");
         ...
         log             yes;
-        valueOutput     yes;
+        valueOutput     true;
+        surfaceFormat   none;
         source          faceZone;
         sourceName      f0;
         operation       sum;
@@ -64,7 +65,8 @@ Description
         Property     | Description             | Required    | Default value
         type         | type name: faceSource   | yes         |
         log          | write data to standard output | no    | no
-        valueOutput  | write the raw output values | yes     |
+        valueOutput  | write the output values | yes         |
+        surfaceFormat | output value format    | no          |
         source       | face source: see below  | yes         |
         sourceName   | name of face source if required  | no |
         operation    | operation to perform    | yes         |
@@ -132,6 +134,7 @@ SourceFiles
 #include "fieldValue.H"
 #include "surfaceFieldsFwd.H"
 #include "volFieldsFwd.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -201,10 +204,20 @@ private:
         //- Set faces according to sampledSurface
         void sampledSurfaceFaces(const dictionary&);
 
+        //- Combine faces and points from multiple processors 
+        void combineSurfaceGeometry
+        (
+            faceList& faces,
+            pointField& points
+        ) const;
+
 
 protected:
 
     // Protected data
+
+        //- Surface writer
+        autoPtr<surfaceWriter> surfaceWriterPtr_;
 
         //- Source type
         sourceType source_;
@@ -219,7 +232,7 @@ protected:
         label nFaces_;
 
 
-        // If operating on mesh faces (faceZone,patch)
+        // If operating on mesh faces (faceZone, patch)
 
             //- Local list of face IDs
             labelList faceId_;
@@ -230,6 +243,7 @@ protected:
             //- List of +1/-1 representing face flip map
             //  (1 use as is, -1 negate)
             labelList faceSign_;
+
 
         // If operating on sampledSurface
 

@@ -24,6 +24,7 @@ solvers
         tolerance       0;
         relTol          0.1;
     }
+
     rhoFinal
     {
         solver          PCG;
@@ -31,6 +32,7 @@ solvers
         tolerance       1e-4;
         relTol          0;
     }
+
     p
     {
         solver           GAMG;
@@ -81,18 +83,13 @@ PIMPLE
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
-    rhoMin          rhoMin [1 -3 0 0 0] 0.1;
-    rhoMax          rhoMax [1 -3 0 0 0] 1.5;
+    rhoMin          0.1;
+    rhoMax          1.5;
 
     maxCo           0.5;
     rDeltaTSmoothingCoeff 0.1;
     maxDeltaT       1;
     alphaTemp       0.005;
-}
-
-additional
-{
-    solveSpecies    true;
 }
 
 

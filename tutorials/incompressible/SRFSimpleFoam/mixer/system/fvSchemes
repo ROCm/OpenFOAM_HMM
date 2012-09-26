@@ -30,13 +30,13 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,Urel)   Gauss upwind;
-    div(phi,k)      Gauss upwind;
-    div(phi,epsilon) Gauss upwind;
-    div(phi,omega)  Gauss upwind;
-    div(phi,R)      Gauss upwind;
+    div(phi,Urel)   bounded Gauss upwind;
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,epsilon) bounded Gauss upwind;
+    div(phi,omega)  bounded Gauss upwind;
+    div(phi,R)      bounded Gauss upwind;
     div(R)          Gauss linear;
-    div(phi,nuTilda) Gauss upwind;
+    div(phi,nuTilda) bounded Gauss upwind;
     div((nuEff*dev(T(grad(Urel))))) Gauss linear;
 }
 

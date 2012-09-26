@@ -32,13 +32,12 @@ Description
     from the flux (volumetric or mass-based), whose direction is assumed
     to be normal to the patch.
 
-    The basis of the patch (volumetric or mass) is determined by the
-    dimensions of the flux, \c phi, and the value of the density field name,
-    \c rhoName entry.
-
     For a mass-based flux:
-    - if \c rhoName is a valid density field name, the flow rate is in kg/s
+    - the flow rate should be provided in kg/s
     - if \c rhoName is "none" the flow rate is in m3/s
+    - otherwise \c rhoName should correspond to the name of the density field
+    - if the density field cannot be found in the database, the user must
+      specify the inlet density using the \c rhoInlet entry
 
     For a volumetric-based flux:
     - the flow rate is in m3/s
@@ -47,24 +46,38 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        flowRate     | volumetric [m3/s] OR mass flow rate [kg/s] | yes |
+        massFlowRate | mass flow rate [kg/s]   | no          |
+        volumetricFlowRate | volumetric flow rate [m3/s]| no |
+        rhoInlet     | inlet density           | no          |
     \endtable
 
-    Example of the boundary condition specification:
+    Example of the boundary condition specification for a volumetric flow rate:
     \verbatim
     myPatch
     {
         type        flowRateInletVelocity;
-        flowRate    0.2;
-        rho         rho;
+        volumetricFlowRate  0.2;
         value       uniform (0 0 0); // placeholder
     }
     \endverbatim
 
+    Example of the boundary condition specification for a mass flow rate:
+    \verbatim
+    myPatch
+    {
+        type                flowRateInletVelocity;
+        massFlowRate        0.2;
+        rho                 rho;
+        rhoInlet            1.0;
+    }
+    \endverbatim
+    
     The \c flowRate entry is a \c DataEntry type, meaning that it can be
     specified as constant, a polynomial fuction of time, and ...
 
 Note
+    - \c rhoInlet is required for the case of a mass flow rate, where the
+      density field is not available at start-up
     - the value is positive into the domain (as an inlet)
     - may not work correctly for transonic inlets
     - strange behaviour with potentialFoam since the U equation is not solved
@@ -101,11 +114,14 @@ class flowRateInletVelocityFvPatchVectorField
         //- Inlet integral flow rate
         autoPtr<DataEntry<scalar> > flowRate_;
 
-        //- Name of the flux transporting the field
-        word phiName_;
+        //- Is volumetric?
+        bool volumetric_;
 
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
+
+        //- Rho initialisation value (for start; if value not supplied)
+        scalar rhoInlet_;
 
 
 public:
@@ -178,6 +194,10 @@ public:
 
 
     // Member functions
+
+        //- Update the coefficients associated with the patch field given
+        //  uniform density field
+        void updateCoeffs(const scalar uniformRho);
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

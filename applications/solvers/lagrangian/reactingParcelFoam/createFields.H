@@ -1,11 +1,12 @@
     Info<< "Creating combustion model\n" << endl;
 
-    autoPtr<combustionModels::psiCombustionModel> combustion
+    autoPtr<combustionModels::rhoCombustionModel> combustion
     (
-        combustionModels::psiCombustionModel::New(mesh)
+        combustionModels::rhoCombustionModel::New(mesh)
     );
 
-    psiReactionThermo& thermo = combustion->thermo();
+    rhoReactionThermo& thermo = combustion->thermo();
+    thermo.validate(args.executable(), "h", "e");
 
     SLGThermo slgThermo(mesh, thermo);
 
@@ -23,7 +24,6 @@
     }
 
     volScalarField& p = thermo.p();
-    volScalarField& hs = thermo.he();
     const volScalarField& T = thermo.T();
     const volScalarField& psi = thermo.psi();
 
@@ -56,6 +56,22 @@
 
     #include "compressibleCreatePhi.H"
 
+    dimensionedScalar rhoMax
+    (
+        "rhoMax",
+        dimDensity,
+        mesh.solutionDict().subDict("PIMPLE")
+       .lookupOrDefault<scalar>("rhoMax", GREAT)
+    );
+
+    dimensionedScalar rhoMin
+    (
+        "rhoMin",
+        dimDensity,
+        mesh.solutionDict().subDict("PIMPLE")
+       .lookupOrDefault<scalar>("rhoMin", -GREAT)
+    );
+
     Info<< "Creating turbulence model\n" << endl;
     autoPtr<compressible::turbulenceModel> turbulence
     (
@@ -86,13 +102,15 @@
 
     Info<< "Creating field kinetic energy K\n" << endl;
     volScalarField K("K", 0.5*magSqr(U));
+
+    Info<< "Creating multi-variate interpolation scheme\n" << endl;
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
     forAll(Y, i)
     {
         fields.add(Y[i]);
     }
-    fields.add(hs);
+    fields.add(thermo.he());
 
     volScalarField dQ
     (
@@ -107,6 +125,3 @@
         mesh,
         dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
-
-    Info<< "Creating sources\n" << endl;
-    IObasicSourceList sources(mesh);

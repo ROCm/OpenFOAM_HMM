@@ -78,7 +78,7 @@ dictionaryReplacement
         {
             "region0_to_.*"
             {
-                type            buoyantPressure;
+                type            fixedFluxPressure;
                 value           $internalField;
             }
 
@@ -110,7 +110,7 @@ dictionaryReplacement
 
 
                 // Solid thermo
-                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<specieThermo<hConstThermo<rhoConst>,sensibleEnthalpy>>>>>;
+                thermoType heSolidThermo<pureSolidMixture<constIsoSolidTransport<constSolidRad<hConstThermo<rhoConst<specie>>,sensibleEnthalpy>>>>;
 
 
                 mixture

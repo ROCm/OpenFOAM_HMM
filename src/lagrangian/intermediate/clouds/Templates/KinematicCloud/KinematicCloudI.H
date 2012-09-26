@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvmSup.H"
+#include "SortableList.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -336,106 +337,130 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 
     reduce(d, maxOp<scalar>());
 
-    return d;
+    return max(0.0, d);
 }
 
 
 template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
 (
-    const scalar& prc
+    const scalar& fraction
 ) const
 {
-    scalar distance = 0.0;
-    scalar mTot = 0.0;
-
-    label np = this->size();
-
-    // arrays containing the parcels mass and
-    // distance from injector in ascending order
-    scalarField mass(np);
-    scalarField dist(np);
-
-    if (np > 0)
+    if ((fraction < 0) || (fraction > 1))
     {
-        label n = 0;
-
-        // first arrange the parcels in ascending order
-        // the first parcel is closest to its injection position
-        // and the last one is most far away.
-        forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
-        {
-            const parcelType& p = iter();
-            scalar mi = p.nParticle()*p.mass();
-            scalar di = mag(p.position() - p.position0());
-            mTot += mi;
-
-            // insert at the last place
-            mass[n] = mi;
-            dist[n] = di;
-
-            label i = 0;
-            bool found = false;
-
-            // insert the parcel in the correct place
-            // and move the others
-            while ((i < n) && (!found))
-            {
-                if (di < dist[i])
-                {
-                    found = true;
-                    for (label j=n; j>i; j--)
-                    {
-                        mass[j] = mass[j-1];
-                        dist[j] = dist[j-1];
-                    }
-                    mass[i] = mi;
-                    dist[i] = di;
-                }
-                i++;
-            }
-            n++;
-        }
+        FatalErrorIn
+        (
+            "inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration"
+            "("
+                "const scalar&"
+            ") const"
+        )
+            << "fraction should be in the range 0 < fraction < 1"
+            << exit(FatalError);
     }
 
-    reduce(mTot, sumOp<scalar>());
+    scalar distance = 0.0;
 
-    if (np > 0)
+    const label nParcel = this->size();
+    globalIndex globalParcels(nParcel);
+    const label nParcelSum = globalParcels.size();
+
+    if (nParcelSum == 0)
     {
-        scalar mLimit = prc*mTot;
-        scalar mOff = (1.0 - prc)*mTot;
+        return distance;
+    }
 
-        if (np > 1)
+    // lists of parcels mass and distance from initial injection point
+    List<scalar> mass(nParcel, 0.0);
+    List<scalar> dist(nParcel, 0.0);
+
+    label i = 0;
+    scalar mSum = 0.0;
+    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        scalar m = p.nParticle()*p.mass();
+        scalar d = mag(p.position() - p.position0());
+        mSum += m;
+
+        mass[i] = m;
+        dist[i] = d;
+
+        i++;
+    }
+
+    // calculate total mass across all processors
+    reduce(mSum, sumOp<scalar>());
+
+    // flatten the mass list
+    List<scalar> allMass(nParcelSum, 0.0);
+    SubList<scalar>
+    (
+        allMass,
+        globalParcels.localSize(Pstream::myProcNo()),
+        globalParcels.offset(Pstream::myProcNo())
+    ).assign(mass);
+
+    // flatten the distance list
+    SortableList<scalar> allDist(nParcelSum, 0.0);
+    SubList<scalar>
+    (
+        allDist,
+        globalParcels.localSize(Pstream::myProcNo()),
+        globalParcels.offset(Pstream::myProcNo())
+    ).assign(dist);
+
+    // sort allDist distances into ascending order
+    // note: allMass masses are left unsorted
+    allDist.sort();
+
+    if (nParcelSum > 1)
+    {
+        const scalar mLimit = fraction*mSum;
+        const labelList& indices = allDist.indices();
+
+        if (mLimit > (mSum - allMass[indices.last()]))
         {
-            // 'prc' is large enough that the parcel most far
-            // away will be used, no need to loop...
-            if (mLimit > mTot - mass[np-1])
-            {
-                distance = dist[np-1];
-            }
-            else
-            {
-                scalar mOffSum = 0.0;
-                label i = np;
-
-                while ((mOffSum < mOff) && (i>0))
-                {
-                    i--;
-                    mOffSum += mass[i];
-                }
-                distance =
-                    dist[i+1]
-                  + (dist[i] - dist[i+1])*(mOffSum - mOff)
-                   /mass[i+1] ;
-            }
+            distance = allDist.last();
         }
         else
         {
-            distance = dist[0];
+            // assuming that 'fraction' is generally closer to 1 than 0, loop
+            // through in reverse distance order
+            const scalar mThreshold = (1.0 - fraction)*mSum;
+            scalar mCurrent = 0.0;
+            label i0 = 0;
+
+            forAllReverse(indices, i)
+            {
+                label indI = indices[i];
+
+                mCurrent += allMass[indI];
+
+                if (mCurrent > mThreshold)
+                {
+                    i0 = i;
+                    break;
+                }
+            }
+
+            if (i0 == indices.size() - 1)
+            {
+                distance = allDist.last();
+            }
+            else
+            {
+                // linearly interpolate to determine distance
+                scalar alpha = (mCurrent - mThreshold)/allMass[indices[i0]];
+                distance = allDist[i0] + alpha*(allDist[i0+1] - allDist[i0]);
+            }
         }
     }
-
-    reduce(distance, maxOp<scalar>());
+    else
+    {
+        distance = allDist.first();
+    }
 
     return distance;
 }

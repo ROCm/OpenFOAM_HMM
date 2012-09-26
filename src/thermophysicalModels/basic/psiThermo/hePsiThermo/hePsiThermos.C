@@ -26,14 +26,14 @@ License
 #include "psiThermo.H"
 #include "makeThermo.H"
 
+#include "specie.H"
 #include "perfectGas.H"
-
 #include "hConstThermo.H"
 #include "eConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
@@ -56,7 +56,8 @@ makeThermo
     constTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -67,7 +68,8 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -78,33 +80,36 @@ makeThermo
     sutherlandTransport,
     sensibleEnthalpy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 
 /* * * * * * * * * * * * * * Internal-energy-based * * * * * * * * * * * * * */
 
-// makeThermo
-// (
-//     psiThermo,
-//     hePsiThermo,
-//     pureMixture,
-//     constTransport,
-//     sensibleInternalEnergy,
-//     eConstThermo,
-//     perfectGas
-// );
+makeThermo
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas,
+    specie
+);
 
-// makeThermo
-// (
-//     psiThermo,
-//     hePsiThermo,
-//     pureMixture,
-//     sutherlandTransport,
-//     sensibleInternalEnergy,
-//     eConstThermo,
-//     perfectGas
-// );
+makeThermo
+(
+    psiThermo,
+    hePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    perfectGas,
+    specie
+);
 
 makeThermo
 (
@@ -114,7 +119,8 @@ makeThermo
     constTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -125,7 +131,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     hConstThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 makeThermo
@@ -136,7 +143,8 @@ makeThermo
     sutherlandTransport,
     sensibleInternalEnergy,
     janafThermo,
-    perfectGas
+    perfectGas,
+    specie
 );
 
 

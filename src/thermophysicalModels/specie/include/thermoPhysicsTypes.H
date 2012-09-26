@@ -32,12 +32,13 @@ Description
 #ifndef thermoPhysicsTypes_H
 #define thermoPhysicsTypes_H
 
+#include "specie.H"
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
-#include "specieThermo.H"
+#include "thermo.H"
 #include "sutherlandTransport.H"
 #include "constTransport.H"
 
@@ -52,11 +53,11 @@ namespace Foam
     typedef
     constTransport
     <
-        specieThermo
+        species::thermo
         <
             hConstThermo
             <
-                perfectGas
+                perfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -65,11 +66,11 @@ namespace Foam
     typedef
     sutherlandTransport
     <
-        specieThermo
+        species::thermo
         <
             janafThermo
             <
-                perfectGas
+                perfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -78,11 +79,11 @@ namespace Foam
     typedef
     constTransport
     <
-        specieThermo
+        species::thermo
         <
             hConstThermo
             <
-                incompressiblePerfectGas
+                incompressiblePerfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -91,11 +92,11 @@ namespace Foam
     typedef
     sutherlandTransport
     <
-        specieThermo
+        species::thermo
         <
             janafThermo
             <
-                incompressiblePerfectGas
+                incompressiblePerfectGas<specie>
             >,
             sensibleEnthalpy
         >
@@ -104,11 +105,11 @@ namespace Foam
     typedef
     polynomialTransport
     <
-        specieThermo
+        species::thermo
         <
             hPolynomialThermo
             <
-                icoPolynomial<8>,
+                icoPolynomial<specie, 8>,
                 8
             >,
             sensibleEnthalpy

@@ -29,7 +29,8 @@ Group
 
 Description
     This function object extends the Foam::forces function object by providing
-    lift, drag and moment coefficients.
+    lift, drag and moment coefficients.  The data can optionally be output into
+    bins, defined in a given direction.
 
     Example of function object specification:
     \verbatim
@@ -46,6 +47,9 @@ Description
         magUInf     100;
         lRef        3.5;
         ARef        2.2;
+        nBin        20;
+        binDir      (1 0 0);
+        binFormat   gnuplot;
     }
     \endverbatim
 
@@ -61,6 +65,9 @@ Description
         magUInf      | free stream velocity magnitude | yes  |
         lRef         | reference length scale for moment calculations | yes |
         ARef         | reference area          | yes |
+        nBin         | number of data bins     | no          |
+        binDir       | direction along which bins are defined | no |
+        binFormat    | output format for bin data | no       |
     \endtable
 
 SeeAlso
@@ -119,6 +126,12 @@ class forceCoeffs
 
             //- Area
             scalar Aref_;
+
+
+        // Bin information
+
+            //- Writer for bin data
+            autoPtr<writer<scalar> > binWriterPtr_;
 
 
     // Private Member Functions

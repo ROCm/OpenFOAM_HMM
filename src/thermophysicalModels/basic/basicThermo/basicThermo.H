@@ -105,11 +105,51 @@ public:
     //- Selector
     static autoPtr<basicThermo> New(const fvMesh&);
 
+
     //- Destructor
     virtual ~basicThermo();
 
 
     // Member functions
+
+        //- Check that the thermodynamics package is consistent
+        //  with energy forms supported by the application
+        void validate
+        (
+            const word& app,
+            const word&
+        ) const;
+
+        //- Check that the thermodynamics package is consistent
+        //  with energy forms supported by the application
+        void validate
+        (
+            const word& app,
+            const word&,
+            const word&
+        ) const;
+
+        //- Check that the thermodynamics package is consistent
+        //  with energy forms supported by the application
+        void validate
+        (
+            const word& app,
+            const word&,
+            const word&,
+            const word&
+        ) const;
+
+        //- Check that the thermodynamics package is consistent
+        //  with energy forms supported by the application
+        void validate
+        (
+            const word& app,
+            const word&,
+            const word&,
+            const word&,
+            const word&
+        ) const;
+
 
         //- Update properties
         virtual void correct() = 0;

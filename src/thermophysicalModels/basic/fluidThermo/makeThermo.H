@@ -25,18 +25,19 @@ InClass
     Foam::fluidThermo
 
 Description
-    Macros for creating 'basic' density-based thermo packages
+    Macros for creating basic fluid thermo packages
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef makeThermo_H
 #define makeThermo_H
 
+#include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState)\
+#define makeThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState,Specie)\
                                                                               \
 typedef Cthermo                                                               \
 <                                                                             \
@@ -44,88 +45,53 @@ typedef Cthermo                                                               \
     <                                                                         \
         Transport                                                             \
         <                                                                     \
-            specieThermo                                                      \
+            species::thermo                                                   \
             <                                                                 \
                 Thermo                                                        \
                 <                                                             \
                     EqnOfState                                                \
+                    <                                                         \
+                        Specie                                                \
+                    >                                                         \
                 >,                                                            \
                 Type                                                          \
             >                                                                 \
         >                                                                     \
     >                                                                         \
->   Cthermo##Mixture##Transport##Type##Thermo##EqnOfState;                    \
+>   Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie;            \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState,                    \
+    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,            \
     #Cthermo                                                                  \
     "<"                                                                       \
         #Mixture                                                              \
         "<"                                                                   \
             #Transport                                                        \
-            "<specieThermo<"                                                  \
+            "<"                                                               \
                 #Thermo                                                       \
                 "<"                                                           \
                     #EqnOfState                                               \
+                    "<"                                                       \
+                        #Specie                                               \
+                    ">"                                                       \
                 ">,"                                                          \
                 #Type                                                         \
-        ">>>>",                                                               \
+        ">>>",                                                                \
     0                                                                         \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     BaseThermo,                                                               \
-    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState,                    \
+    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,            \
     fvMesh                                                                    \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     fluidThermo,                                                              \
-    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState,                    \
-    fvMesh                                                                    \
-);
-
-
-#define makePolyThermo(BaseThermo,Cthermo,Mixture,Order,Type)                 \
-                                                                              \
-typedef polynomialTransport                                                   \
-<                                                                             \
-    specieThermo                                                              \
-    <                                                                         \
-        hPolynomialThermo                                                     \
-        <                                                                     \
-            icoPolynomial<Order>,                                             \
-            Order                                                             \
-        >,                                                                    \
-        Type                                                                  \
-    >,                                                                        \
-    Order                                                                     \
-> icoPoly##Order##Type##ThermoPhysics;                                        \
-                                                                              \
-typedef Cthermo<Mixture<icoPoly##Order##Type##ThermoPhysics> >                \
-    Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics;                    \
-                                                                              \
-defineTemplateTypeNameAndDebugWithName                                        \
-(                                                                             \
-    Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics,                    \
-    #Cthermo"<"#Mixture"<icoPoly"#Order#Type"ThermoPhysics>>",                \
-    0                                                                         \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    BaseThermo,                                                               \
-    Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics,                    \
-    fvMesh                                                                    \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    fluidThermo,                                                              \
-    Cthermo##Mixture##icoPoly##Order##Type##ThermoPhysics,                    \
+    Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,            \
     fvMesh                                                                    \
 );
 

@@ -58,7 +58,7 @@ Ostream& operator<<
 );
 
 /*---------------------------------------------------------------------------*\
-                      Class constSolidRad Declaration
+                        Class constSolidRad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class thermo>
@@ -115,6 +115,9 @@ public:
 
         //- Return  emissivity[]
         inline scalar emissivity(scalar T) const;
+
+        //- Write to Ostream
+        void write(Ostream& os) const;
 
 
     // Member operators

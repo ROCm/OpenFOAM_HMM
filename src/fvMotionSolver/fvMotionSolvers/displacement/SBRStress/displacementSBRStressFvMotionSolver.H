@@ -53,7 +53,6 @@ class motionDiffusivity;
 
 class displacementSBRStressFvMotionSolver
 :
-//    public displacementFvMotionSolver
     public displacementMotionSolver,
     public fvMotionSolverCore
 {
