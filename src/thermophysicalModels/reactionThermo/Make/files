@@ -9,7 +9,6 @@ psiReactionThermo/psiReactionThermo/psiReactionThermoNew.C
 psiReactionThermo/hePsiReactionThermo/hePsiReactionThermos.C
 
 psiReactionThermo/psiuReactionThermo/psiuReactionThermo.C
-psiReactionThermo/psiuReactionThermo/psiuReactionThermoNew.C
 psiReactionThermo/heheuReactionThermo/heheuReactionThermos.C
 
 rhoReactionThermo/rhoReactionThermo/rhoReactionThermo.C

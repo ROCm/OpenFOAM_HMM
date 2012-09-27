@@ -26,8 +26,7 @@ License
 #include "rhoReactionThermo.H"
 #include "fvMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+/*
 Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
 (
     const fvMesh& mesh
@@ -68,6 +67,7 @@ Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
 
     return autoPtr<rhoReactionThermo>(cstrIter()(mesh));
 }
+*/
 
 
 Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::NewType
