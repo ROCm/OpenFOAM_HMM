@@ -24,8 +24,11 @@ License
 Class
     Foam::coupledFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::coupledFvPatchField
+    Abstract base class for coupled patches.
 
 SourceFiles
     coupledFvPatchField.C
@@ -45,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class coupledFvPatch Declaration
+                       Class coupledFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

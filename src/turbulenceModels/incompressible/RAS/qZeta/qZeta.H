@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::qZeta
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Gibson and Dafa'Alla's q-zeta two-equation low-Re turbulence model
     for incompressible flows

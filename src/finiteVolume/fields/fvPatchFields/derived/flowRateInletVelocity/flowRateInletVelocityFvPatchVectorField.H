@@ -24,37 +24,67 @@ License
 Class
     Foam::flowRateInletVelocityFvPatchVectorField
 
+Group
+    grpInletBoundaryConditions
+
 Description
-    Describes a volumetric/mass flow normal vector boundary condition by its
-    magnitude as an integral over its area.
+    This boundary condition provides a velocity boundary condition, derived
+    from the flux (volumetric or mass-based), whose direction is assumed
+    to be normal to the patch.
 
-    Either specify 'volumetricFlowRate' or 'massFlowRate' (requires additional
-    'rho' or 'rhoInlet' entry).
+    For a mass-based flux:
+    - the flow rate should be provided in kg/s
+    - if \c rhoName is "none" the flow rate is in m3/s
+    - otherwise \c rhoName should correspond to the name of the density field
+    - if the density field cannot be found in the database, the user must
+      specify the inlet density using the \c rhoInlet entry
 
-    Example of the boundary condition specification:
+    For a volumetric-based flux:
+    - the flow rate is in m3/s
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        massFlowRate | mass flow rate [kg/s]   | no          |
+        volumetricFlowRate | volumetric flow rate [m3/s]| no |
+        rhoInlet     | inlet density           | no          |
+    \endtable
+
+    Example of the boundary condition specification for a volumetric flow rate:
     \verbatim
-    inlet
+    myPatch
     {
-        type                flowRateInletVelocity;
-        volumetricFlowRate  0.2;  // Volumetric [m3/s]
+        type        flowRateInletVelocity;
+        volumetricFlowRate  0.2;
+        value       uniform (0 0 0); // placeholder
     }
     \endverbatim
 
+    Example of the boundary condition specification for a mass flow rate:
     \verbatim
-    inlet
+    myPatch
     {
         type                flowRateInletVelocity;
-        massFlowRate        0.2;  // mass flow rate [kg/s]
-        rho                 rho;  // rho [m3/s or kg/s]
-        rhoInlet            1.0   // uniform rho if no rho field registered
-                                  // (e.g. at startup)
+        massFlowRate        0.2;
+        rho                 rho;
+        rhoInlet            1.0;
     }
     \endverbatim
+    
+    The \c flowRate entry is a \c DataEntry type, meaning that it can be
+    specified as constant, a polynomial fuction of time, and ...
 
 Note
-    - The value is positive inwards
-    - May not work correctly for transonic inlets
-    - Strange behaviour with potentialFoam since the U equation is not solved
+    - \c rhoInlet is required for the case of a mass flow rate, where the
+      density field is not available at start-up
+    - the value is positive into the domain (as an inlet)
+    - may not work correctly for transonic inlets
+    - strange behaviour with potentialFoam since the U equation is not solved
+
+SeeAlso
+    Foam::DataEntry
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     flowRateInletVelocityFvPatchVectorField.C
@@ -72,7 +102,7 @@ SourceFiles
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-               Class flowRateInletVelocityFvPatch Declaration
+           Class flowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class flowRateInletVelocityFvPatchVectorField

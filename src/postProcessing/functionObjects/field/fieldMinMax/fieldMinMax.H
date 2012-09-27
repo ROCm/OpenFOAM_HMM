@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,14 +24,48 @@ License
 Class
     Foam::fieldMinMax
 
+Group
+    grpFieldFunctionObjects
+
 Description
-    Calculates scalar minimim and maximum field values.
+    This function object calculates the value and position of scalar minimim
+    and maximum for a list of user-specified fields.  For variables with a rank
+    greater than zero, either the min/max of a component value or the magnitude
+    is reported.  When operating in parallel, the processor owning the value
+    is also given.
 
-    For variables with rank > 0, computes the magnitude of the min/max
-    values.
+    Example of function object specification:
+    \verbatim
+    fieldMinMax1
+    {
+        type        fieldMinMax;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        write       yes;
+        log         yes;
+        mode        magnitude;
+        fields
+        (
+            U
+            p
+        );
+    }
+    \endverbatim
 
-    Data written to the file \<timeDir\>/fieldMinMax.dat
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: fieldMinMax  | yes         |
+        write        | write min/max data to file |  no      | yes
+        log          | write min/max data to standard output | no | no
+        mode         | calculation mode: magnitude or component | no | magnitude
+    \endtable
 
+    Output data is written to the file \<timeDir\>/fieldMinMax.dat
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     fieldMinMax.C

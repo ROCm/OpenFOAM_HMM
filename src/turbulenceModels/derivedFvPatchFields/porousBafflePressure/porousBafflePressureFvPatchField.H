@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,18 +24,57 @@ License
 Class
     Foam::porousBafflePressureFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::porousBafflePressureFvPatchField
-    the porous baffle operates on a cyclic patch and introduce a jump on the p
-    field as follow:
+    This boundary condition provides a jump condition, using the \cyclic
+    condition as a base.
 
-    deltaP = -(I*mu*U + 0.5*D*rho*magSqr(U)*L)
+    The porous baffle introduces a pressure jump defined by:
 
-    where:
+        \f[
+            \Delta p = -(I \mu U + 0.5 D \rho |U|^2 L)
+        \f]
 
-    I is the inertial coefficient
-    D is the darcy coeafficient
-    L is the porous media lenght in the flow direction
+    where
+
+    \vartable
+        p      | pressure [Pa]
+        \rho   | density [kg/m3]
+        \mu    | viscosity [Pa s]
+        I      | inertial coefficient
+        D      | Darcy coefficient
+        L      | porous media length in the flow direction
+    \endvartable
+
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        D            | Darcy coefficient       | yes         |
+        I            | inertial coefficient    | yes         |
+        L            | porous media length in the flow direction | yes |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            porousBafflePressure;
+        patchType       cyclic;
+        jump            uniform 0;
+        D               1000000;
+        I               0.001;
+        L               0.1;
+        value           uniform 0;
+    }
+    \endverbatim
+
+Note
+     The underlying \c patchType should be set to \c cyclic
 
 SourceFiles
     porousBafflePressureFvPatchField.C
@@ -63,7 +102,7 @@ class porousBafflePressureFvPatchField
 {
     // Private data
 
-        //- Darcy pressure lost coefficient
+        //- Darcy pressure loss coefficient
         scalar D_;
 
         //- Inertia pressure lost coefficient

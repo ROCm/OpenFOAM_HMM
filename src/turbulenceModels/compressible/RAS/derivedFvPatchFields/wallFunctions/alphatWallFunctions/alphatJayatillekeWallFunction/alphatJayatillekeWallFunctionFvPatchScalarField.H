@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,37 @@ License
 Class
     alphatJayatillekeWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Thermal wall function for turbulent thermal diffusivity based on the
-    Jayatilleke thermal wall function
+    This boundary condition provides a thermal wall function for turbulent
+    thermal diffusivity (usually\c alphat) based on the Jayatilleke model.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        Prt          | turbulent Prandtl number | no         | 0.85
+        Cmu          | model coefficient       | no          | 0.09
+        kappa        | Von Karman constant     | no          | 0.41
+        E            | model coefficient       | no          | 9.8
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            alphatJayatillekeWallFunction;
+        Prt             0.85;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 0; // optional value entry
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::fixedValueFvPatchField
 
 SourceFiles
     alphatJayatillekeWallFunctionFvPatchScalarField.C
@@ -48,7 +76,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class alphatJayatillekeWallFunctionFvPatchScalarField Declaration
+      Class alphatJayatillekeWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class alphatJayatillekeWallFunctionFvPatchScalarField

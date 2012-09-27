@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,52 @@ License
 Class
     Foam::waveTransmissiveFvPatchField
 
+Group
+    grpOutletBoundaryConditions
+
 Description
-    Foam::waveTransmissiveFvPatchField
+    This boundary condition provides a wave transmissive outflow condition,
+    based onsolving DDt(psi, U) = 0 at the boundary.
+
+    The wave speed is calculated using:
+
+        \f[
+            x_p = \frac{\phi_p}{|Sf|} + \sqrt{\frac{\gamma}{\psi_p}}
+        \f]
+
+    where
+
+    \vartable
+        x_p     | patch values
+        \phi_p  | patch face flux
+        \psi_p  | patch compressibility
+        Sf      | patch face area vector
+        \gamma  | ratio of specific heats
+    \endvartable
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        rho          | density field name      | no          | rho
+        psi          | compressibility field name | no       | psi
+        gamma        | ratio of specific heats (Cp/Cv) | yes |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            waveTransmissive;
+        phi             phi;
+        psi             psi;
+        gamma           1.4;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::advectiveFvPatchField
 
 SourceFiles
     waveTransmissiveFvPatchField.C
@@ -43,7 +87,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class waveTransmissiveFvPatch Declaration
+                Class waveTransmissiveFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

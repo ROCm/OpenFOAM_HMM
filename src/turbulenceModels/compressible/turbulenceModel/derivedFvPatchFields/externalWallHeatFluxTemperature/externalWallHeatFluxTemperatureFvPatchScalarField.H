@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,26 +25,38 @@ Class
     externalWallHeatFluxTemperatureFvPatchScalarField
 
 Description
-    Heat flux boundary condition for temperature on external wall.
+    This boundary condition supplies a heat flux condition for temperature
+    on an external wall.
 
-    If h and Ta are specified then fixed_heat_transfer_coefficient mode is used
-    If q is specified then fixed_heat_flux is used.
+    The condition can operate in two modes:
+        \li fixed heat transfer coefficient: supply h and Ta
+        \li fixed heat flux: supply q
 
-    Example usage:
-        myWallPatch
+    where
+        \var h  = heat transfer coefficient [W/m2/K]
+        \var Ta = ambient temperature [K]
+        \var q  = heat flux [W/m2]
+
+    The thermal conductivity, \c kappa, can either be retrieved from the
+    mesh database using the \c lookup option, or from a \c solidThermo
+    thermophysical package.
+
+    Example of the boundary condition specification:
+    \verbatim
+        myPatch
         {
             type            externalWallHeatFluxTemperature;
             kappa           solidThermo;       // solidThermo or lookup
-            q               uniform 1000;      // Heat flux / [W/m2]
-            Ta              uniform 300.0;     // Tambient temperature /[K]
-            h               uniform 10.0;      // Heat transfer coeff /[W/Km2]
-            value           uniform 300.0;     // Initial temperature / [K]
+            q               uniform 1000;      // heat flux / [W/m2]
+            Ta              uniform 300.0;     // ambient temperature /[K]
+            h               uniform 10.0;      // heat transfer coeff /[W/Km2]
+            value           uniform 300.0;     // initial temperature / [K]
             kappaName       none;
         }
+    \endverbatim
 
-Note:
-    Only the pair h, Ta or q can be specified in the dictionary.
-
+Note
+    Only supply \c h and \c Ta, or \c q in the dictionary (see above)
 
 SourceFiles
     externalWallHeatFluxTemperatureFvPatchScalarField.C
@@ -177,6 +189,7 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
 
         // I-O
 

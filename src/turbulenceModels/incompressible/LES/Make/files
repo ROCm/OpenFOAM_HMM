@@ -2,6 +2,8 @@ vanDriestDelta/vanDriestDelta.C
 
 LESModel/LESModel.C
 
+DESModel/DESModel.C
+
 GenEddyVisc/GenEddyVisc.C
 GenSGSStress/GenSGSStress.C
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,25 @@ License
 Class
     Foam::wedgeFvPatchField
 
+Group
+    grpConstraintBoundaryConditions
+
 Description
-    Foam::wedgeFvPatchField
+    This boundary condition is similar to the cyclic condition, except that
+    it is applied to 2-D geometries.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            wedge;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::cyclicFvPatchField
 
 SourceFiles
     wedgeFvPatchField.C
@@ -44,7 +61,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class wedgeFvPatch Declaration
+                       Class wedgeFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

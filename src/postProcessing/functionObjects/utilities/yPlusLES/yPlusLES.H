@@ -24,6 +24,9 @@ License
 Class
     Foam::yPlusLES
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     Evaluates and outputs turbulence y+ for LES models.  Values written to
     time folders as field 'yPlusLES'

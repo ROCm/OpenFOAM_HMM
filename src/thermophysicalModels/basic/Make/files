@@ -1,18 +1,10 @@
-mixtures/basicMixture/basicMixture.C
-mixtures/basicMixture/basicMixtures.C
-
 basicThermo/basicThermo.C
-basicThermo/basicThermoNew.C
-
 fluidThermo/fluidThermo.C
-fluidThermo/fluidThermoNew.C
 
 psiThermo/psiThermo/psiThermo.C
-psiThermo/psiThermo/psiThermoNew.C
 psiThermo/hePsiThermo/hePsiThermos.C
 
 rhoThermo/rhoThermo/rhoThermo.C
-rhoThermo/rhoThermo/rhoThermoNew.C
 rhoThermo/heRhoThermo/heRhoThermos.C
 
 derivedFvPatchFields/fixedEnergy/fixedEnergyFvPatchScalarField.C

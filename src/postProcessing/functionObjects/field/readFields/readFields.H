@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,38 @@ License
 Class
     Foam::readFields
 
+Group
+    grpFieldFunctionObjects
+
 Description
-    Reads fields from the time folders and adds them to the mesh database
-    for further post-processing.
+    This function object reads fields from the time folders and adds them to
+    the mesh database for further post-processing.
+
+    Example of function object specification:
+    \verbatim
+    readFields1
+    {
+        type        readFields;
+        functionObjectLibs ("libfieldFunctionObjects.so");
+        ...
+        fields
+        (
+            U
+            p
+        );
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: readFields   | yes         |
+        fields       | list of fields to read  |  no         |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     readFields.C

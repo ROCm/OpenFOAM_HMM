@@ -24,6 +24,9 @@ License
 Class
     Foam::basicSymmetryFvPatchField
 
+Group
+    grpConstraintBoundaryConditions
+
 Description
     A symmetry patch
 

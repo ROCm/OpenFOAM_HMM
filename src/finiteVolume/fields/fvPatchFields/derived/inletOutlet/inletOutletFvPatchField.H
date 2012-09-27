@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,43 @@ License
 Class
     Foam::inletOutletFvPatchField
 
+Group
+    grpOutletBoundaryConditions
+
 Description
-    Foam::inletOutletFvPatchField
+    This boundary condition provides a generic outflow condition, with
+    specified inflow for the case of return flow.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | flux field name         | no          | phi
+        inletValue   | inlet value for reverse flow | yes    |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            inletOutlet;
+        phi             phi;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
+    \endverbatim
+
+    The mode of operation is determined by the sign of the flux across the
+    patch faces.
+
+Note
+    Sign conventions:
+    - positive flux (out of domain): apply zero-gradient condition
+    - negative flux (into of domain): apply the user-specified fixed value
+
+SeeAlso
+    Foam::mixedFvPatchField
+    Foam::zeroGradientFvPatchField
 
 SourceFiles
     inletOutletFvPatchField.C
@@ -43,7 +78,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class inletOutletFvPatch Declaration
+                   Class inletOutletFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

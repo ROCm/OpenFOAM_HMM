@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::SpalartAllmaras
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Spalart-Allmaras 1-eqn mixing-length model for incompressible external
     flows.

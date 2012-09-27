@@ -24,41 +24,42 @@ License
 Class
     Foam::codedMixedFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
     Constructs on-the-fly a new boundary condition (derived from
     mixedFvPatchField) which is then used to evaluate.
 
+    \heading Patch usage
+
     Example:
     \verbatim
-        movingWall
-        {
-            type            codedMixed;
+    myPatch
+    {
+        type            codedMixed;
+        value           uniform 0;
+        redirectType    rampedMixed;   // name of generated BC
 
-            refValue        uniform (0 0 0);
-            refGradient     uniform (0 0 0);
-            valueFraction   uniform 1;
+        code
+        #{
+            this->refValue() =
+                vector(1, 0, 0)
+               *min(10, 0.1*this->db().time().value());
+            this->refGrad() = vector::zero;
+            this->valueFraction() = 1.0;
+        #};
 
-            redirectType    rampedMixed;   // name of generated bc
+        //codeInclude
+        //#{
+        //    #include "fvCFD.H"
+        //#};
 
-            code
-            #{
-                this->refValue() =
-                    vector(1, 0, 0)
-                   *min(10, 0.1*this->db().time().value());
-                this->refGrad() = vector::zero;
-                this->valueFraction() = 1.0;
-            #};
-
-            //codeInclude
-            //#{
-            //    #include "fvCFD.H"
-            //#};
-
-            //codeOptions
-            //#{
-            //    -I$(LIB_SRC)/finiteVolume/lnInclude
-            //#};
-        }
+        //codeOptions
+        //#{
+        //    -I$(LIB_SRC)/finiteVolume/lnInclude
+        //#};
+    }
     \endverbatim
 
     A special form is if the 'code' section is not supplied. In this case
@@ -66,19 +67,20 @@ Description
     which would have a corresponding entry
 
     \verbatim
-        rampedMixed
-        {
-            code
-            #{
-                this->refValue() = min(10, 0.1*this->db().time().value());
-                this->refGrad() = vector::zero;
-                this->valueFraction() = 1.0;
-            #};
-        }
+    myPatch
+    {
+        code
+        #{
+            this->refValue() = min(10, 0.1*this->db().time().value());
+            this->refGrad() = vector::zero;
+            this->valueFraction() = 1.0;
+        #};
+    }
     \endverbatim
 
 SeeAlso
-    Foam::dynamicCode and Foam::functionEntries::codeStream
+    Foam::dynamicCode
+    Foam::functionEntries::codeStream
 
 SourceFiles
     codedMixedFvPatchField.C
@@ -102,7 +104,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                     Class codedMixedFvPatch Declaration
+                   Class codedMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -119,6 +121,7 @@ class codedMixedFvPatchField
         const word redirectType_;
 
         mutable autoPtr<mixedFvPatchField<Type> > redirectPatchFieldPtr_;
+
 
     // Private Member Functions
 
@@ -141,6 +144,7 @@ class codedMixedFvPatchField
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
 
 public:
 
@@ -217,8 +221,6 @@ public:
                 new codedMixedFvPatchField<Type>(*this, iF)
             );
         }
-
-
 
 
     // Member functions

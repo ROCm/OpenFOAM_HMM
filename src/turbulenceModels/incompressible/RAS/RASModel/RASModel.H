@@ -24,6 +24,9 @@ License
 Namespace
     Foam::incompressible::RASModels
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Namespace for incompressible RAS turbulence models.
 

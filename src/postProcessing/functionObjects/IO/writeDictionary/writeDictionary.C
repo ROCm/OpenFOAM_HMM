@@ -26,6 +26,7 @@ License
 #include "writeDictionary.H"
 #include "dictionary.H"
 #include "Time.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -108,7 +109,9 @@ Foam::writeDictionary::~writeDictionary()
 
 void Foam::writeDictionary::read(const dictionary& dict)
 {
-    dict.lookup("dictNames") >> dictNames_;
+    wordList dictNames(dict.lookup("dictNames"));
+    HashSet<word> uniqueNames(dictNames);
+    dictNames_ = uniqueNames.toc();
 
     digests_.setSize(dictNames_.size(), SHA1Digest());
 

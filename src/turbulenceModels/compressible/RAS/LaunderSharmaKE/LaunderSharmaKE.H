@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::RASModels::LaunderSharmaKE
 
+Group
+    grpCmpRASTurbulence
+
 Description
     Launder and Sharma low-Reynolds k-epsilon turbulence model for
     compressible and combusting flows.

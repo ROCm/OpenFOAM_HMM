@@ -567,4 +567,17 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::We
 }
 
 
+template<class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::Eo
+(
+    const vector& a,
+    const scalar d,
+    const scalar sigma
+) const
+{
+    vector dir = U_/(mag(U_) + ROOTVSMALL);
+    return mag(a & dir)*(rho_ - rhoc_)*sqr(d)/(sigma + ROOTVSMALL);
+}
+
+
 // ************************************************************************* //

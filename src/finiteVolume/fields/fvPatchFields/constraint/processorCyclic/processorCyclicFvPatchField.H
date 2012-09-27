@@ -24,11 +24,31 @@ License
 Class
     Foam::processorCyclicFvPatchField
 
+Group
+    grpCoupledBoundaryConditions
+
 Description
-    Foam::processorCyclicFvPatchField
+    This boundary condition enables processor communication across cyclic
+    patches.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            processor;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::processorFvPatchField
 
 SourceFiles
     processorCyclicFvPatchField.C
+    processorCyclicFvPatchFields.H
+    processorCyclicFvPatchFields.C
+    processorCyclicFvPatchFieldsFwd.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +64,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class processorCyclicFvPatch Declaration
+                 Class processorCyclicFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

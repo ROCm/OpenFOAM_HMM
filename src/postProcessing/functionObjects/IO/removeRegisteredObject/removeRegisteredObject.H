@@ -24,8 +24,33 @@ License
 Class
     Foam::removeRegisteredObject
 
+Group
+    grpIOFunctionObjects
+
 Description
-    Removes registered IO objects if present in the database
+    This function object removes registered objects if present in the database
+
+    Example of function object specification:
+    \verbatim
+    removeRegisteredObject1
+    {
+        type        removeRegisteredObject;
+        functionObjectLibs ("libIOFunctionObjects.so");
+        ...
+        objectNames (obj1 obj2);
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: removeRegisteredObject | yes |
+        objectNames  | objects to remove       | yes         |
+    \endtable
+
+SeeAlso
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     removeRegisteredObject.C

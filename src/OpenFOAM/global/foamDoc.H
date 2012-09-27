@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,6 +21,8 @@ License
     You should have received a copy of the GNU General Public License along with
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 \mainpage OpenFOAM&reg;: open source CFD
 
 \section about About OpenFOAM
@@ -33,5 +35,30 @@ License
     solve anything from complex fluid flows involving chemical reactions,
     turbulence and heat transfer, to solid dynamics and electromagnetics.
     <a href="http://www.openfoam.org/features">More ...</a>
+
+
+\section layout Code Layout
+
+    The OpenFOAM source code comprises of four main components:
+    - src:
+        the core OpenFOAM source code
+
+    - applications:
+        collections of library functionality wrapped up into applications,
+        such as solvers and utilities
+        
+    - tutorials:
+        a suite of test cases that highlight a broad cross-section of
+        OpenFOAM's capabilities
+
+    - doc:
+        supporting documentation
+
+
+\section usingTheCode Using the code
+
+    - \subpage pagePostProcessing
+    - \subpage pageBoundaryConditions
+
 
 \*---------------------------------------------------------------------------*/

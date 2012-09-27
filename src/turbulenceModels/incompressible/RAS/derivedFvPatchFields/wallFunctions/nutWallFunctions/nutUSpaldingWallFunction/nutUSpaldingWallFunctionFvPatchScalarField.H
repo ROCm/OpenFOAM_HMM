@@ -24,9 +24,39 @@ License
 Class
     Foam::incompressible::RASModels::nutUSpaldingWallFunctionFvPatchScalarField
 
+Group
+    grpIcoWallFunctions
+
 Description
-    Wall function boundary condition for walls, based on velocity, using
-    Spaldings law to give a continuous nut profile to the wall (y+ = 0)
+    This boundary condition provides a turbulent kinematic viscosity condition
+    when using wall functions for rough walls, based on velocity,  using
+    Spalding's law to give a continuous nut profile to the wall (y+ = 0)
+
+        \f[
+            y^+ = u^+ + \frac{1}{E} \left[exp(\kappa u^+) - 1 - \kappa u^+\,
+                - 0.5 (\kappa u^+)^2 - \frac{1}{6} (\kappa u^+)^3\right]
+        \f]
+
+    where
+    \vartable
+        y^+     | non-dimensional position
+        u^+     | non-dimensional velocity
+        \kappa  | Von Karman constant
+    \endvartable
+
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutUSpaldingWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
@@ -48,7 +78,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-              Class nutUSpaldingWallFunctionFvPatch Declaration
+          Class nutUSpaldingWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class nutUSpaldingWallFunctionFvPatchScalarField

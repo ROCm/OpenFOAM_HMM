@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,42 @@ License
 Class
     Foam::mappedFixedInternalValueFvPatchField
 
+Group
+    grpGenericBoundaryConditions grpCoupledBoundaryConditions
+
 Description
-    Recycles the boundary and internal values of a neighbour patch field to
-    the boundary and internal values of *this.
+    This boundary condition maps the boundary and internal values of a
+    neighbour patch field to the boundary and internal values of *this.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        fieldName    | name of field to be mapped | no       | this field name
+        setAverage   | flag to activate setting of average value | yes |
+        average      | average value to apply if \c setAverage = yes | yes |
+    \endtable
+
+    \verbatim
+    myPatch
+    {
+        type            mappedFixedInternalValue;
+        fieldName       T;
+        setAverage      no;
+        average         0;
+        value           uniform 0;
+    }
+    \endverbatim
+
+Note
+    This boundary condition can only be applied to patches that are of
+    the \c mappedPolyPatch type.
+
+SeeAlso
+    Foam::mappedPatchBase
+    Foam::mappedPolyPatch
+    Foam::mappedFvPatch
+    Foam::mappedFixedValueFvPatchField
 
 SourceFiles
     mappedFixedInternalValueFvPatchField.C
@@ -44,7 +77,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-         Class mappedFixedInternalValueFvPatchField Declaration
+           Class mappedFixedInternalValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

@@ -24,9 +24,25 @@ License
 Class
     Foam::compressible::RASModels::kqRWallFunctionFvPatchField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Boundary condition for turbulence k, Q, and R when using wall functions.
-    Simply acts as a zero gradient condition.
+    This boundary condition is applied to turbulence \c k, \c q, and \c R
+    when using wall functions, and simply enforces a zero-gradient condition.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            compressible::kqRWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::zeroGradientFvPatchField
 
 SourceFiles
     kqRWallFunctionFvPatchField.C

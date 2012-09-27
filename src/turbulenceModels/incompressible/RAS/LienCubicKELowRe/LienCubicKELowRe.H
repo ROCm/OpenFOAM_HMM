@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::LienCubicKELowRe
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Lien cubic non-linear low-Reynolds k-epsilon turbulence models for
     incompressible flows.

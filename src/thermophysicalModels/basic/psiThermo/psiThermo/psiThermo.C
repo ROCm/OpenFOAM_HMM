@@ -70,6 +70,15 @@ Foam::psiThermo::psiThermo(const fvMesh& mesh)
 {}
 
 
+Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return NewThermo<psiThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::psiThermo::~psiThermo()

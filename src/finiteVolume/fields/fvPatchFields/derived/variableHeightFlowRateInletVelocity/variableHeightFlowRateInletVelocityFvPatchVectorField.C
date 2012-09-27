@@ -121,8 +121,10 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 }
 
 
-void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
-::write(Ostream& os) const
+void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<vector>::write(os);
 

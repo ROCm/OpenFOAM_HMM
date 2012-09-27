@@ -40,7 +40,6 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-
 tmp<scalarField> nutkAtmRoughWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();

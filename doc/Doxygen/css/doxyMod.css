@@ -61,3 +61,19 @@ tr.memlist
     margin-top: 0px;
     width: 200px;
 }
+
+.OFTable {
+    width: 100%;
+    border: 1px solid rgb(175,175,175);
+    margin-top: 10px;
+    margin-bottom: 10px;
+/*    background-color: #F0F0F0; */
+    padding: 5px;
+}
+
+.OFTable th {
+    padding: 5px;
+    border-bottom: 2px solid rgb(175,175,175);
+}
+
+

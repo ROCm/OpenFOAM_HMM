@@ -24,39 +24,75 @@ License
 Class
     Foam::fieldValues::cellSource
 
-Description
-    Cell source variant of field value function object. Values of user-
-    specified fields reported for collections of cells.
+Group
+    grpFieldFunctionObjects
 
-    cellObj1                        // Name also used to identify output folder
+Description
+    This function object provides a 'cell source' variant of the fieldValues
+    function object.  Given a list of user-specified fields and a selection
+    of mesh cells, a number of operations can be performed, such as sums,
+    averages and integrations.
+
+
+    Example of function object specification:
+    \verbatim
+    cellSource1
     {
         type            cellSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
-        enabled         true;
-        outputControl   outputTime;
-        log             true;       // log to screen?
-        valueOutput     true;       // Write values at run-time output times?
-        source          cellZone;   // Type of cell source
+        ...
+        log             true;
+        valueOutput     true;
+        source          cellZone;
         sourceName      c0;
         operation       volAverage;
-        weightField     alpha1;     // optional weight field
+        weightField     alpha1;
         fields
         (
             p
             U
         );
     }
+    \endverbatim
 
-    where operation is one of:
-      - none
-      - sum
-      - average
-      - weightedAverage
-      - volAverage
-      - volIntegrate
-      - CoV (Coefficient of variation: standard deviation/mean)
-      - min
-      - max
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: cellSource   | yes         |
+        log          | write data to standard output | no    | no
+        valueOutput  | write the raw output values | yes     |
+        source       | cell source: see below  | yes         |
+        sourceName   | name of cell source if required  | no |
+        operation    | operation to perform    | yes         |
+        weightField  | name of field to apply weighting | no |
+        fields       | list of fields to operate on | yes    |
+    \endtable
+
+    \linebreak
+    Where \c source is defined by
+    \plaintable
+        cellZone     | requires a 'sourceName' entry to specify the cellZone
+        all          | all cells
+    \endplaintable
+
+    \linebreak
+    The \c operation is one of:
+    \plaintable
+       none          | no operation
+       sum           | sum
+       average       | ensemble average
+       weightedAverage | weighted average
+       volAverage    | volume weighted average
+       volIntegrate  | volume integral
+       min           | minimum
+       max           | maximum
+       CoV           | coefficient of variation: standard deviation/mean
+    \endplaintable
+
+SeeAlso
+    Foam::fieldValues
+    Foam::functionObject
+    Foam::OutputFilterFunctionObject
 
 SourceFiles
     cellSource.C

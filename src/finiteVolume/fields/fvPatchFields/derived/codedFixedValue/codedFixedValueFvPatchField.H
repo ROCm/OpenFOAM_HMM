@@ -24,41 +24,46 @@ License
 Class
     Foam::codedFixedValueFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
+    \heading Patch usage
+
     Example:
     \verbatim
-        movingWall
-        {
-            type            codedFixedValue;
-            value           uniform 0;
-            redirectType    rampedFixedValue;   // name of generated bc
+    myPatch
+    {
+        type            codedFixedValue;
+        value           uniform 0;
+        redirectType    rampedFixedValue;   // name of generated BC
 
-            code
-            #{
-                operator==(min(10, 0.1*this->db().time().value()));
-            #};
+        code
+        #{
+            operator==(min(10, 0.1*this->db().time().value()));
+        #};
 
-            //codeInclude
-            //#{
-            //    #include "fvCFD.H"
-            //#};
+        //codeInclude
+        //#{
+        //    #include "fvCFD.H"
+        //#};
 
-            //codeOptions
-            //#{
-            //    -I$(LIB_SRC)/finiteVolume/lnInclude
-            //#};
-        }
+        //codeOptions
+        //#{
+        //    -I$(LIB_SRC)/finiteVolume/lnInclude
+        //#};
+    }
     \endverbatim
 
     A special form is if the 'code' section is not supplied. In this case
-    the code gets read from a (runTimeModifiable!) dictionary system/codeDict
-    which would have a corresponding entry
+    the code is read from a (runTimeModifiable!) dictionary system/codeDict
+    which would have a corresponding entry:
 
     \verbatim
-    rampedFixedValue
+    myPatch
     {
         code
         #{
@@ -68,7 +73,8 @@ Description
     \endverbatim
 
 SeeAlso
-    Foam::dynamicCode and Foam::functionEntries::codeStream
+    Foam::dynamicCode
+    Foam::functionEntries::codeStream
 
 SourceFiles
     codedFixedValueFvPatchField.C
@@ -92,7 +98,7 @@ class dynamicCodeContext;
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
-                     Class codedFixedValueFvPatch Declaration
+                 Class codedFixedValueFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -109,6 +115,7 @@ class codedFixedValueFvPatchField
         const word redirectType_;
 
         mutable autoPtr<fvPatchField<Type> > redirectPatchFieldPtr_;
+
 
     // Private Member Functions
 
@@ -131,6 +138,7 @@ class codedFixedValueFvPatchField
 
         // Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
+
 
 public:
 
@@ -207,8 +215,6 @@ public:
                 new codedFixedValueFvPatchField<Type>(*this, iF)
             );
         }
-
-
 
 
     // Member functions

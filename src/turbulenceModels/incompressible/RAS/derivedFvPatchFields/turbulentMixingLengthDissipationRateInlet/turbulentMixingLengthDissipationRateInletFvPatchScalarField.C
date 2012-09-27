@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,13 +48,14 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
     inletOutletFvPatchScalarField(p, iF),
     mixingLength_(0.0),
-    phiName_("undefined-phi"),
-    kName_("undefined-k")
+    phiName_("phi"),
+    kName_("k")
 {
     this->refValue() = 0.0;
     this->refGrad() = 0.0;
     this->valueFraction() = 0.0;
 }
+
 
 turbulentMixingLengthDissipationRateInletFvPatchScalarField::
 turbulentMixingLengthDissipationRateInletFvPatchScalarField
@@ -70,6 +71,7 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
     phiName_(ptf.phiName_),
     kName_(ptf.kName_)
 {}
+
 
 turbulentMixingLengthDissipationRateInletFvPatchScalarField::
 turbulentMixingLengthDissipationRateInletFvPatchScalarField
@@ -91,6 +93,7 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
     this->valueFraction() = 0.0;
 }
 
+
 turbulentMixingLengthDissipationRateInletFvPatchScalarField::
 turbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
@@ -102,6 +105,7 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
     phiName_(ptf.phiName_),
     kName_(ptf.kName_)
 {}
+
 
 turbulentMixingLengthDissipationRateInletFvPatchScalarField::
 turbulentMixingLengthDissipationRateInletFvPatchScalarField

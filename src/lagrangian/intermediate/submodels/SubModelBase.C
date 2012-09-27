@@ -199,10 +199,11 @@ template<class CloudType>
 template<class Type>
 Type Foam::SubModelBase<CloudType>::getBaseProperty
 (
-    const word& entryName
+    const word& entryName,
+    const Type& defaultValue
 ) const
 {
-    Type result = pTraits<Type>::zero;
+    Type result = defaultValue;
 
     const dictionary& properties = this->owner().outputProperties();
 
@@ -213,6 +214,24 @@ Type Foam::SubModelBase<CloudType>::getBaseProperty
     }
 
     return result;
+}
+
+
+template<class CloudType>
+template<class Type>
+void Foam::SubModelBase<CloudType>::getBaseProperty
+(
+    const word& entryName,
+    Type& value
+) const
+{
+    const dictionary& properties = this->owner().outputProperties();
+
+    if (properties.found(baseName_))
+    {
+        const dictionary& baseDict = properties.subDict(baseName_);
+        baseDict.readIfPresent(entryName, value);
+    }
 }
 
 
@@ -243,10 +262,11 @@ template<class CloudType>
 template<class Type>
 Type Foam::SubModelBase<CloudType>::getModelProperty
 (
-    const word& entryName
+    const word& entryName,
+    const Type& defaultValue
 ) const
 {
-    Type result = pTraits<Type>::zero;
+    Type result = defaultValue;
 
     const dictionary& properties = this->owner().outputProperties();
 

@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::RASModels::RNGkEpsilon
 
+Group
+    grpCmpRASTurbulence
+
 Description
     Renormalisation group k-epsilon turbulence model for compressible flows.
 

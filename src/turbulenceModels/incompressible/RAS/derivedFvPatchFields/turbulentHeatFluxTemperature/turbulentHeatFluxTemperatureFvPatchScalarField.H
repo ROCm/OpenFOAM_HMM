@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,26 +22,42 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::turbulentHeatFluxTemperatureFvPatchScalarField
+    Foam::incompressible::turbulentHeatFluxTemperatureFvPatchScalarField
+
+Group
+    grpIcoRASBoundaryConditions grpWallBoundaryConditions
 
 Description
     Fixed heat boundary condition to specify temperature gradient. Input
     heat source either specified in terms of an absolute power [W], or as a
     flux [W/m2].
 
-    Example usage:
+    \heading Patch usage
 
-        hotWall
-        {
-            type            turbulentHeatFluxTemperature;
-            heatSource      flux;        // power [W]; flux [W/m2]
-            q               uniform 10;  // heat power or flux
-            alphaEff        alphaEff;    // alphaEff field name;
-                                         // alphaEff in [kg/m/s]
-            Cp              Cp;          // Cp field name; Cp in [J/kg/K]
-            value           uniform 300; // initial temperature value
-        }
+    \table
+        Property     | Description             | Required    | Default value
+        heatSource   | heat source type: \c flux [W/m2] or \c power [W]| yes |
+        q            | heat source value       | yes          |
+        alphaEff     | turbulent thermal diffusivity field name | yes |
+    \endtable
 
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            turbulentHeatFluxTemperature;
+        heatSource      flux;
+        q               uniform 10;
+        alphaEff        alphaEff;
+        value           uniform 300; // place holder
+    }
+    \endverbatim
+
+Note
+    - it is assumed that the units of \c alphaEff are [kg/m/s]
+    - the specific heat capcaity is read from the transport dictionary entry
+      \c Cp0
+    
 SourceFiles
     turbulentHeatFluxTemperatureFvPatchScalarField.C
 

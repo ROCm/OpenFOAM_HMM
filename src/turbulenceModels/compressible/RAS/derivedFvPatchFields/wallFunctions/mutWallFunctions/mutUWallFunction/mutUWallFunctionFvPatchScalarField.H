@@ -24,8 +24,25 @@ License
 Class
     Foam::compressible::RASModels::mutUWallFunctionFvPatchScalarField
 
+Group
+    grpCmpWallFunctions
+
 Description
-    Wall function boundary condition for walls, based on velocity.
+    This boundary condition provides a turbulent viscosity condition when
+    using wall functions, based on velocity.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            mutUWallFunction;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mutWallFunctionFvPatchScalarField
 
 SourceFiles
     mutUWallFunctionFvPatchScalarField.C

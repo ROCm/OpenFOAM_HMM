@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::RASModels::LaunderSharmaKE
 
+Group
+    grpIcoRASTurbulence
+
 Description
     Launder and Sharma low-Reynolds k-epsilon turbulence model for
     incompressible flows.

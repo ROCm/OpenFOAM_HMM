@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,16 +25,16 @@ Class
     Foam::fieldAverageItem
 
 Description
-    Helper class to describe what form of averaging to apply. A set will be
+    Helper class to describe what form of averaging to apply.  A set will be
     applied to each base field in Foam::fieldAverage, of the form:
 
     \verbatim
-        {
-            mean            on;
-            prime2Mean      on;
-            base            time; // iteration
-            window          200;  // optional averaging window
-        }
+    {
+        mean            on;
+        prime2Mean      on;
+        base            time; // iteration
+        window          200;  // optional averaging window
+    }
     \endverbatim
 
     The averaging window corresponds to the averaging interval (iters or time)

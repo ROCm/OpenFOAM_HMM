@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,43 @@ License
 Class
     Foam::inletOutletTotalTemperatureFvPatchScalarField
 
+Group
+    grpOutletBoundaryConditions
+
 Description
-    Foam::inletOutletTotalTemperatureFvPatchScalarField
+    This boundary condition provides an outflow condition for total
+    temperature for use with supersonic cases, where a user-specified
+    value is applied in the case of reverse flow.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        U            | velocity field name     | no          | U
+        phi          | flux field name         | no          | phi
+        psi          | compressibility field name |  no      | psi
+        gamma        | heat capacity ration (Cp/Cv) | yes    |
+        inletValue   | reverse flow (inlet) value | yes      |
+        T0           | static temperature [K]  | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            inletOutletTotalTemperature;
+        U               U;
+        phi             phi;
+        psi             psi;
+        gamma           gamma;
+        inletValue      uniform 0;
+        T0              uniform 0;
+        value           uniform 0;
+    }
+    \endverbatim
+   
+SeeAlso
+    Foam::inletOutletFvPatchField
 
 SourceFiles
     inletOutletTotalTemperatureFvPatchScalarField.C
@@ -43,7 +78,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class inletOutletTotalTemperatureFvPatch Declaration
+       Class inletOutletTotalTemperatureFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class inletOutletTotalTemperatureFvPatchScalarField

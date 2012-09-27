@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::mixedSmagorinsky
 
+Group
+    grpIcoLESTurbulence
+
 Description
     The mixed Isochoric Smagorinsky Model for incompressible flows.
 

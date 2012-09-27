@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::RASModels::laminar
 
+Group
+    grpCmpRASTurbulence
+
 Description
     Dummy turbulence model for laminar compressible flow.
 

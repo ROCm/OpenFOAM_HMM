@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,34 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "uniformDimensionedFields.H"
+#include "EulerDdtScheme.H"
+#include "CrankNicholsonDdtScheme.H"
+#include "backwardDdtScheme.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::waveSurfacePressureFvPatchScalarField::timeSchemeType,
+        3
+    >::names[] =
+    {
+        fv::EulerDdtScheme<scalar>::typeName.c_str(),
+        fv::CrankNicholsonDdtScheme<scalar>::typeName.c_str(),
+        fv::backwardDdtScheme<scalar>::typeName.c_str()
+    };
+}
+
+
+const Foam::NamedEnum
+<
+    Foam::waveSurfacePressureFvPatchScalarField::timeSchemeType,
+    3
+>   Foam::waveSurfacePressureFvPatchScalarField::timeSchemeTypeNames_;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -41,10 +69,8 @@ waveSurfacePressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     phiName_("phi"),
-    rhoName_("rho"),
     zetaName_("zeta"),
-    zeta0_(p.size(), vector::zero),
-    curTimeIndex_(-1)
+    rhoName_("rho")
 {}
 
 
@@ -58,10 +84,8 @@ waveSurfacePressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     zetaName_(dict.lookupOrDefault<word>("zeta", "zeta")),
-    zeta0_(p.size(), vector::zero),
-    curTimeIndex_(-1)
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchField<scalar>::operator=
     (
@@ -81,10 +105,8 @@ waveSurfacePressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
     zetaName_(ptf.zetaName_),
-    zeta0_(ptf.zeta0_),
-    curTimeIndex_(-1)
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -96,10 +118,8 @@ waveSurfacePressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wspsf),
     phiName_(wspsf.phiName_),
-    rhoName_(wspsf.rhoName_),
     zetaName_(wspsf.zetaName_),
-    zeta0_(wspsf.zeta0_),
-    curTimeIndex_(wspsf.curTimeIndex_)
+    rhoName_(wspsf.rhoName_)
 {}
 
 
@@ -112,39 +132,12 @@ waveSurfacePressureFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wspsf, iF),
     phiName_(wspsf.phiName_),
-    rhoName_(wspsf.rhoName_),
     zetaName_(wspsf.zetaName_),
-    zeta0_(wspsf.zeta0_),
-    curTimeIndex_(wspsf.curTimeIndex_)
+    rhoName_(wspsf.rhoName_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::waveSurfacePressureFvPatchScalarField::autoMap
-(
-    const fvPatchFieldMapper& m
-)
-{
-    fixedValueFvPatchScalarField::autoMap(m);
-    zeta0_.autoMap(m);
-}
-
-
-void Foam::waveSurfacePressureFvPatchScalarField::rmap
-(
-    const fvPatchScalarField& ptf,
-    const labelList& addr
-)
-{
-    fixedValueFvPatchScalarField::rmap(ptf, addr);
-
-    const waveSurfacePressureFvPatchScalarField& wspsf =
-        refCast<const waveSurfacePressureFvPatchScalarField>(ptf);
-
-    zeta0_.rmap(wspsf.zeta0_, addr);
-}
-
 
 void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 {
@@ -153,64 +146,89 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalar dt = db().time().deltaTValue();
-    const scalar timeI = db().time().timeIndex();
-    const scalar patchI = patch().index();
+    const label patchI = patch().index();
 
+    const scalar dt = db().time().deltaTValue();
+
+    // retrieve non-const access to zeta field from the database
     volVectorField& zeta =
         const_cast<volVectorField&>
         (
             db().lookupObject<volVectorField>(zetaName_)
         );
-
     vectorField& zetap = zeta.boundaryField()[patchI];
 
-    if (curTimeIndex_ != timeI)
-    {
-        zeta0_ = zetap;
-        curTimeIndex_ = timeI;
-    }
+    // lookup d/dt scheme from database for zeta
+    const word ddtSchemeName(zeta.mesh().ddtScheme(zeta.name()));
+    timeSchemeType timeScheme(timeSchemeTypeNames_[ddtSchemeName]);
 
+    // retrieve the flux field from the database
     const surfaceScalarField& phi =
         db().lookupObject<surfaceScalarField>(phiName_);
 
-    const scalarField& phip = phi.boundaryField()[patchI];
-
-    const uniformDimensionedVectorField& g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
-
+    // cache the patch face-normal vectors
     tmp<vectorField> nf(patch().nf());
 
-    if (phi.dimensions() == dimVelocity*dimArea)
-    {
-        zetap = zeta0_ + nf()*dt*phip/patch().magSf();
+    // change in zeta due to flux
+    vectorField dZetap(dt*nf()*phi.boundaryField()[patchI]/patch().magSf());
 
-        operator==(-g.value() & zetap);
-    }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const scalarField& rhop =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        zetap = zeta0_ + nf()*dt*phip/rhop/patch().magSf();
-
-        operator==(-rhop*(g.value() & zetap));
+        dZetap /= rhop;
     }
-    else
+
+    switch (timeScheme)
     {
-        FatalErrorIn
-        (
-            "waveSurfacePressureFvPatchScalarField::updateCoeffs()"
-        )
-            << "dimensions of phi are incorrect" << nl
-            << "    on patch " << this->patch().name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
-            << exit(FatalError);
+        case tsEuler:
+        case tsCrankNicholson:
+        {
+            zetap = zeta.oldTime().boundaryField()[patchI] + dZetap;
+
+            break;
+        }
+        case tsBackward:
+        {
+            scalar dt0 = db().time().deltaT0Value();
+
+            scalar c = 1.0 + dt/(dt + dt0);
+            scalar c00 = dt*dt/(dt0*(dt + dt0));
+            scalar c0 = c + c00;
+
+            zetap =         
+                (
+                    c0*zeta.oldTime().boundaryField()[patchI]
+                  - c00*zeta.oldTime().oldTime().boundaryField()[patchI]
+                  + dZetap
+                )/c;
+
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "waveSurfacePressureFvPatchScalarField<Type>::updateCoeffs()"
+            )   << "    Unsupported temporal differencing scheme : "
+                << ddtSchemeName << nl
+                << "    on patch " << this->patch().name()
+                << " of field " << this->dimensionedInternalField().name()
+                << " in file " << this->dimensionedInternalField().objectPath()
+                << abort(FatalError);
+        }
     }
 
-    Info<< "min/max(zetap) = " << gMin(zetap & nf()) << ", "
+
+    Info<< "min/max zetap = " << gMin(zetap & nf()) << ", "
         << gMax(zetap & nf()) << endl;
+
+    // update the surface pressure
+    const uniformDimensionedVectorField& g =
+        db().lookupObject<uniformDimensionedVectorField>("g");
+
+    operator==(-g.value() & zetap);
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
@@ -220,8 +238,8 @@ void Foam::waveSurfacePressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "zeta", "zeta", zetaName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", zetaName_);
     writeEntry("value", os);
 }
 

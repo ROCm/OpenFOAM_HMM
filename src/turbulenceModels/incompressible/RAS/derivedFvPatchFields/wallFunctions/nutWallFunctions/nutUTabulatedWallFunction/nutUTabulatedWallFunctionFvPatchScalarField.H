@@ -24,12 +24,37 @@ License
 Class
     Foam::incompressible::RASModels::nutUTabulatedWallFunctionFvPatchScalarField
 
-Description
-    Wall function boundary condition for turbulence kinematic viscosity. Uses a
-    table to return the value of U+ as a function of near-wall Reynolds number.
+Group
+    grpIcoWallFunctions
 
-    Note: the tables are not registered since the same table object may be used
-    for more than one patch.
+Description
+    This boundary condition provides a turbulent kinematic viscosity condition
+    when using wall functions.  As input, the user specifies a look-up table
+    of U+ as a function of near-wall Reynolds number.  The table should be
+    located in the $FOAM_CASE/constant folder.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        uPlusTable   | U+ as a function of Re table name | yes |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            nutTabulatedWallFunction;
+        uPlusTable      myUPlusTable;
+    }
+    \endverbatim
+
+Note
+    The tables are not registered since the same table object may be used for
+    more than one patch.
+
+SeeAlso
+    Foam::nutWallFunctionFvPatchScalarField
 
 SourceFiles
     nutUTabulatedWallFunctionFvPatchScalarField.C

@@ -24,6 +24,9 @@ License
 Class
     Foam::incompressible::LESModels::kOmegaSSTSAS
 
+Group
+    grpIcoLESTurbulence
+
 Description
     kOmegaSSTSAS LES turbulence model for incompressible flows
     based on:

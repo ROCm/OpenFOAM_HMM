@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,24 @@ License
 Class
     Foam::calculatedFvPatchField
 
+Group
+    grpGenericBoundaryConditions
+
 Description
-    Foam::calculatedFvPatchField
+    This boundary condition is not designed to be evaluated; it is assmued
+    that the value is assigned via field assignment, and not via a call to
+    e.g. \c updateCoeffs or \c evaluate.
+
+    \heading Patch usage
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            calculated;
+        value           uniform (0 0 0);    // optional value entry
+    }
+    \endverbatim
 
 SourceFiles
     calculatedFvPatchField.C
@@ -43,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class calculatedFvPatch Declaration
+                   Class calculatedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

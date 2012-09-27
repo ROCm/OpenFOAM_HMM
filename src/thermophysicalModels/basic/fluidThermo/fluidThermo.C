@@ -49,6 +49,15 @@ Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const dictionary& dict)
 {}
 
 
+Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return NewThermo<fluidThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fluidThermo::~fluidThermo()

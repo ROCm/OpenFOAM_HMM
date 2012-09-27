@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::LESModels::GenSGSStress
 
+Group
+    grpCmpLESTurbulence
+
 Description
     General base class for all compressible models that directly
     solve for the SGS stress tensor B.
@@ -52,7 +55,7 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class GenSGSStress Declaration
+                         Class GenSGSStress Declaration
 \*---------------------------------------------------------------------------*/
 
 class GenSGSStress

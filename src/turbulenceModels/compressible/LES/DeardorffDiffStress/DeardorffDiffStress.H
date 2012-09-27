@@ -24,6 +24,9 @@ License
 Class
     Foam::compressible::LESModels::DeardorffDiffStress
 
+Group
+    grpCmpLESTurbulence
+
 Description
     Differential SGS Stress Equation Model for compressible flows
 

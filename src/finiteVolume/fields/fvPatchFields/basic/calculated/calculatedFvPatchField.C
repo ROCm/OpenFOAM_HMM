@@ -28,19 +28,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 template<class Type>
-const word& fvPatchField<Type>::calculatedType()
+const Foam::word& Foam::fvPatchField<Type>::calculatedType()
 {
     return calculatedFvPatchField<Type>::typeName;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-calculatedFvPatchField<Type>::calculatedFvPatchField
+Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -51,7 +49,7 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-calculatedFvPatchField<Type>::calculatedFvPatchField
+Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const calculatedFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -64,7 +62,7 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-calculatedFvPatchField<Type>::calculatedFvPatchField
+Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -77,7 +75,7 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-calculatedFvPatchField<Type>::calculatedFvPatchField
+Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const calculatedFvPatchField<Type>& ptf
 )
@@ -87,7 +85,7 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-calculatedFvPatchField<Type>::calculatedFvPatchField
+Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
 (
     const calculatedFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -98,7 +96,8 @@ calculatedFvPatchField<Type>::calculatedFvPatchField
 
 
 template<class Type>
-tmp<fvPatchField<Type> > fvPatchField<Type>::NewCalculatedType
+Foam::tmp<Foam::fvPatchField<Type> >
+Foam::fvPatchField<Type>::NewCalculatedType
 (
     const fvPatch& p
 )
@@ -130,7 +129,7 @@ tmp<fvPatchField<Type> > fvPatchField<Type>::NewCalculatedType
 
 template<class Type>
 template<class Type2>
-tmp<fvPatchField<Type> > fvPatchField<Type>::NewCalculatedType
+Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::NewCalculatedType
 (
     const fvPatchField<Type2>& pf
 )
@@ -142,7 +141,8 @@ tmp<fvPatchField<Type> > fvPatchField<Type>::NewCalculatedType
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > calculatedFvPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type> >
+Foam::calculatedFvPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -165,7 +165,8 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > calculatedFvPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type> >
+Foam::calculatedFvPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -186,8 +187,10 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::valueBoundaryCoeffs
     return *this;
 }
 
+
 template<class Type>
-tmp<Field<Type> > calculatedFvPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type> >
+Foam::calculatedFvPatchField<Type>::gradientInternalCoeffs() const
 {
     FatalErrorIn
     (
@@ -206,8 +209,10 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::gradientInternalCoeffs() const
     return *this;
 }
 
+
 template<class Type>
-tmp<Field<Type> > calculatedFvPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type> >
+Foam::calculatedFvPatchField<Type>::gradientBoundaryCoeffs() const
 {
     FatalErrorIn
     (
@@ -227,17 +232,12 @@ tmp<Field<Type> > calculatedFvPatchField<Type>::gradientBoundaryCoeffs() const
 }
 
 
-// Write
 template<class Type>
-void calculatedFvPatchField<Type>::write(Ostream& os) const
+void Foam::calculatedFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

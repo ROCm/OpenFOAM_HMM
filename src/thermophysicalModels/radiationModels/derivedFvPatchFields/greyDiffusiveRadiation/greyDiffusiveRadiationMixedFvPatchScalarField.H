@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,41 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::greyDiffusiveRadiationMixedFvPatchScalarField
+    Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField
+
+Group
+    grpThermoBoundaryConditions
 
 Description
-    Radiation temperature specified
+    This boundary condition provides a grey-diffuse condition for radiation
+    intensity, \c I, for use with the finite-volume discrete-ordinates model
+    (fvDOM), in which the radiation temperature is retrieved from the
+    temperature field boundary condition.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        T            | temperature field name  | no          | T
+        emissivityMode | emissivity mode: solidThermo or lookup | yes |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            greyDiffusiveRadiation;
+        T               T;
+        emissivityMode  solidThermo;
+        value           uniform 0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::radiation::radiationModel
+    Foam::radiation::fvDOM
+    Foam::radiationCoupledBase
+    Foam::mixedFvPatchField
 
 SourceFiles
     greyDiffusiveRadiationMixedFvPatchScalarField.C

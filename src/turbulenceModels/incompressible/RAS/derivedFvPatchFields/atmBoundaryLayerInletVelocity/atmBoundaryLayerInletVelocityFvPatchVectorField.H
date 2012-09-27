@@ -8,10 +8,10 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation; either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,49 +19,84 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM; if not, write to the Free Software Foundation,
-    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    atmBoundaryLayerInletVelocityFvPatchVectorField
+    Foam::incompressible::atmBoundaryLayerInletVelocityFvPatchVectorField
+
+Group
+    grpIcoRASBoundaryConditions grpInletBoundaryConditions
 
 Description
-    Boundary condition specifies a atmospheric boundary layer (ABL)
-    velocity inlet profile given the friction velocity value,
-    flow direction n and direction of the parabolic coordinate z.
+    This boundary condition specifies a velocity inlet profile appropriate
+    for atmospheric boundary layers (ABL).  The profile is derived from the
+    friction velocity, flow direction and the direction of the parabolic
+    co-ordinate \c z.
 
-    \verbatim
-        U = (Ustar/K) ln((z - zGround + z0)/z0)
+        \f[
+            U = \frac{U^*}{K} ln\left(\frac{z - z_g + z_0}{z_0}\right)
+        \f]
 
-    where:
-
-        Ustar is the frictional velocity
-        K is karman's constant
-        z0 is the surface roughness lenght
-        z is the verical coordinate
-        zGround is the minumum coordinate value in z direction.
+    where
+    \vartable
+        U^*     | frictional velocity
+        K       | Karman's constant
+        z       | vertical co-ordinate [m]
+        z_0     | surface roughness length [m]
+        z_g     | minimum vlaue in z direction [m]
+    \endvartable
 
     and:
 
-        Ustar = K Uref/ln((Zref + z0)/z0)
+        \f[
+            U^* = K \frac{U_{ref}}{ln\left(\frac{Z_{ref} + z_0}{z_0}\right)}
+        \f]
 
     where:
-
-        Uref is the reference velocity at Zref
-        Zref is the reference height.
-
-    \endverbatim
+    \vartable
+        U_{ref} | reference velocity at \f$Z_{ref}\f$ [m/s]
+        Z_{ref} | reference height [m]
+    \endvartable
 
     Reference:
-    D.M. Hargreaves and N.G. Wright
-    "On the use of the k-epsilon model in commercial CFD software to model the
-     neutral atmospheric boundary layer"
-    Journal of Wind Engineering and Industrial Aerodynamics 95(2007) 355-369.
+        D.M. Hargreaves and N.G. Wright,  "On the use of the k-epsilon model
+        in commercial CFD software to model the neutral atmospheric boundary
+        layer", Journal of Wind Engineering and Industrial Aerodynamics
+        95(2007), pp 355-369.
 
-NOTE: D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the k-epsilon
-      model should be changed from 1.3 to 1.11 for consistency.
-      The roughness height (Er) is given by Er = 20 z0 following the same
-      reference
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        n            | flow direction          | yes         |
+        z            | vertical co-ordinate [m] | yes        |
+        kappa        | Karman's constanat      | no          | 0.41
+        Uref         | reference velocity [m/s] | yes        |
+        Href         | reference height [m]    | yes         |
+        z0           | surface roughness length [m] | yes    |
+        zGround      | minimum z co-ordinate [m] | yes       |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            atmBoundaryLayerInletVelocity;
+        n               (0 1 0);
+        z               1.0;
+        kappa           0.41;
+        Uref            1.0;
+        Href            0.0;
+        z0              uniform 0.0;
+        zGround         uniform 0.0;
+    }
+    \endverbatim
+
+Note
+    D.M. Hargreaves and N.G. Wright recommend Gamma epsilon in the
+    k-epsilon model should be changed from 1.3 to 1.11 for consistency.
+    The roughness height (Er) is given by Er = 20 z0 following the same
+    reference.
 
 SourceFiles
     atmBoundaryLayerInletVelocityFvPatchVectorField.C

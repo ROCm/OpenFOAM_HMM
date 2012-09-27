@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,12 @@ Class
     Foam::genericFvPatchField
 
 Description
-    A generic version of calculatedFvPatchField, useful as a fallback for
-    handling unknown patch types.
+    This boundary condition provides a generic version of the \c calculated
+    condition, useful as a fallback for handling unknown patch types.  Not
+    generally applicable as a user-specified condition.
+
+SeeAlso
+    Foam::calculatedFvPatchField
 
 SourceFiles
     genericFvPatchField.C

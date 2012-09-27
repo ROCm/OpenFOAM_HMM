@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,34 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::wideBandDiffusiveRadiationMixedFvPatchScalarField
+    Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField
+
+Group
+    grpThermoBoundaryConditions
 
 Description
-    Radiation temperature specified
+    This boundary condition provides a wide-band, diffusive radiation
+    condition, where the patch temperature is specified.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        T            | temperature field name  | no          | T
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            wideBandDiffusiveRadiation;
+        value           uniform 0;
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::mixedFvPatchScalarField
+    Foam::radiationCoupledBase
 
 SourceFiles
     wideBandDiffusiveRadiationMixedFvPatchScalarField.C

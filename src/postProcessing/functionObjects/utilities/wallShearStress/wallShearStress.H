@@ -24,9 +24,26 @@ License
 Class
     Foam::wallShearStress
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
-    Evaluates and outputs wall shear stress.  Values written to time folders
-    as field 'wallShearStress'
+    This function object evaluates and outputs the shear stress at wall
+    patches.  The result is written as a volVectorField to time folders as
+    field 'wallShearStress'
+
+        \f[
+            Stress = R \dot n
+        \f]
+
+    The shear stress (symmetrical) tensor field is retrieved from the
+    turbulence model.
+
+    where
+    \vartable
+        R       | stress tensor
+        n       | patch normal vector (into the domain)
+    \endvartable
 
 SourceFiles
     wallShearStress.C

@@ -97,10 +97,8 @@ void Foam::gradientEnergyFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const basicThermo& thermo = db().lookupObject<basicThermo>
-    (
-        "thermophysicalProperties"
-    );
+    const basicThermo& thermo =
+        db().lookupObject<basicThermo>("thermophysicalProperties");
 
     const label patchi = patch().index();
 

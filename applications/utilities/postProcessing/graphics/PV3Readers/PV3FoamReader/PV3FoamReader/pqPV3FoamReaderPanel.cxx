@@ -62,6 +62,9 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
     QGridLayout* form = new QGridLayout();
     this->PanelLayout->addLayout(form, 0, 0, 1, -1);
 
+    // ROW 0
+    // ~~~~~
+
     vtkSMProperty* prop = 0;
 
     // refresh button for updating times/fields
@@ -107,9 +110,15 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
     }
 
+    // ROW 1
+    // ~~~~~
+
     QFrame* hline1 = new QFrame(this);
     hline1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
     form->addWidget(hline1, 1, 0, 1, 3);
+
+    // ROW 2
+    // ~~~~~
 
     // checkbox for caching mesh
     if ((prop = this->proxy()->GetProperty("UiCacheMesh")) != 0)
@@ -137,62 +146,10 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
     }
 
+    // cell 2,1 empty
 
-    // checkbox for patch names
-    if ((prop = this->proxy()->GetProperty("UiShowPatchNames")) != 0)
-    {
-        // immediate update on the Server Manager side
-        prop->SetImmediateUpdate(true);
-
-        ShowPatchNames_ = new QCheckBox("Patch Names");
-        ShowPatchNames_->setChecked
-        (
-            vtkSMIntVectorProperty::SafeDownCast(prop)->GetElement(0)
-        );
-        ShowPatchNames_->setToolTip
-        (
-            "Show patch names in render window."
-        );
-
-        // row/col 0,1
-        form->addWidget(ShowPatchNames_, 2, 1, Qt::AlignLeft);
-        connect
-        (
-            ShowPatchNames_,
-            SIGNAL(stateChanged(int)),
-            this,
-            SLOT(ShowPatchNamesToggled())
-        );
-    }
-
-
-    // checkbox for Groups Only
-    if ((prop = this->proxy()->GetProperty("UiShowGroupsOnly")) != 0)
-    {
-        // immediate update on the Server Manager side
-        prop->SetImmediateUpdate(true);
-
-        ShowGroupsOnly_ = new QCheckBox("Groups Only");
-        ShowGroupsOnly_->setChecked
-        (
-            vtkSMIntVectorProperty::SafeDownCast(prop)->GetElement(0)
-        );
-        ShowGroupsOnly_->setToolTip
-        (
-            "Show patchGroups only."
-        );
-
-        // row/col 2, 2
-        form->addWidget(ShowGroupsOnly_, 2, 2, Qt::AlignLeft);
-        connect
-        (
-            ShowGroupsOnly_,
-            SIGNAL(stateChanged(int)),
-            this,
-            SLOT(ShowGroupsOnlyToggled())
-        );
-    }
-
+    // ROW 3
+    // ~~~~~
 
     // checkbox for include sets
     if ((prop = this->proxy()->GetProperty("UiIncludeSets")) != 0)
@@ -221,6 +178,36 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
     }
 
+    // checkbox for Groups Only
+    if ((prop = this->proxy()->GetProperty("UiShowGroupsOnly")) != 0)
+    {
+        // immediate update on the Server Manager side
+        prop->SetImmediateUpdate(true);
+
+        ShowGroupsOnly_ = new QCheckBox("Groups Only");
+        ShowGroupsOnly_->setChecked
+        (
+            vtkSMIntVectorProperty::SafeDownCast(prop)->GetElement(0)
+        );
+        ShowGroupsOnly_->setToolTip
+        (
+            "Show patchGroups only."
+        );
+
+        // row/col 2, 2
+        form->addWidget(ShowGroupsOnly_, 3, 1, Qt::AlignLeft);
+        connect
+        (
+            ShowGroupsOnly_,
+            SIGNAL(stateChanged(int)),
+            this,
+            SLOT(ShowGroupsOnlyToggled())
+        );
+    }
+
+
+    // ROW 4
+    // ~~~~~
 
     // checkbox for include zones
     if ((prop = this->proxy()->GetProperty("UiIncludeZones")) != 0)
@@ -240,7 +227,7 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
 
         // row/col 1,1
-        form->addWidget(IncludeZones_, 3, 1, Qt::AlignLeft);
+        form->addWidget(IncludeZones_, 4, 0, Qt::AlignLeft);
         connect
         (
             IncludeZones_,
@@ -249,6 +236,43 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
             SLOT(IncludeZonesToggled())
         );
     }
+
+    // checkbox for patch names
+    if ((prop = this->proxy()->GetProperty("UiShowPatchNames")) != 0)
+    {
+        // immediate update on the Server Manager side
+        prop->SetImmediateUpdate(true);
+
+        ShowPatchNames_ = new QCheckBox("Patch Names");
+        ShowPatchNames_->setChecked
+        (
+            vtkSMIntVectorProperty::SafeDownCast(prop)->GetElement(0)
+        );
+        ShowPatchNames_->setToolTip
+        (
+            "Show patch names in render window."
+        );
+
+        // row/col 0,1
+        form->addWidget(ShowPatchNames_, 4, 1, Qt::AlignLeft);
+        connect
+        (
+            ShowPatchNames_,
+            SIGNAL(stateChanged(int)),
+            this,
+            SLOT(ShowPatchNamesToggled())
+        );
+    }
+
+    // ROW 5
+    // ~~~~~
+
+    QFrame* hline2 = new QFrame(this);
+    hline2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    form->addWidget(hline2, 5, 0, 1, 3);
+
+    // ROW 6
+    // ~~~~~
 
     // checkbox for vol field interpolation
     if ((prop = this->proxy()->GetProperty("UiInterpolateVolFields")) != 0)
@@ -267,7 +291,7 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
 
         // row/col 1,1
-        form->addWidget(InterpolateVolFields_, 4, 0, Qt::AlignLeft);
+        form->addWidget(InterpolateVolFields_, 6, 0, Qt::AlignLeft);
         connect
         (
             InterpolateVolFields_,
@@ -294,7 +318,7 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
 
         // row/col 1,1
-        form->addWidget(ExtrapolatePatches_, 4, 1, Qt::AlignLeft);
+        form->addWidget(ExtrapolatePatches_, 6, 1, Qt::AlignLeft);
         connect
         (
             ExtrapolatePatches_,
@@ -304,9 +328,12 @@ pqPV3FoamReaderPanel::pqPV3FoamReaderPanel
         );
     }
 
-    QFrame* hline2 = new QFrame(this);
-    hline2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-    form->addWidget(hline2, 5, 0, 1, 3);
+    // ROW 7
+    // ~~~~~
+
+    QFrame* hline3 = new QFrame(this);
+    hline3->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+    form->addWidget(hline3, 7, 0, 1, 3);
 }
 
 

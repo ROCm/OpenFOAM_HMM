@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,30 @@ License
 Class
     Foam::fixedNormalSlipFvPatchField
 
+Group
+    grpGenericBoundaryConditions grpWallBoundaryConditions
+
 Description
-    Foam::fixedNormalSlipFvPatchField
+    This boundary condition sets the patch-normal component to a fixed value.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        fixedValue   | fixed value             | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedNormalSlip;
+        fixedValue      uniform 0;     // example entry for a scalar field
+    }
+    \endverbatim
+
+SeeAlso
+    Foam::transformFvPatchField
 
 SourceFiles
     fixedNormalSlipFvPatchField.C
@@ -43,7 +65,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class fixedNormalSlipFvPatch Declaration
+                 Class fixedNormalSlipFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

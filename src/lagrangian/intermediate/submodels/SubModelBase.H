@@ -163,25 +163,42 @@ public:
             //- Return non-const access to the owner cloud for manipulation
             CloudType& owner();
 
-            //- Retrieve generic property from sub-model
-            template<class Type>
-            Type getModelProperty(const word& entryName) const;
+            // Base properties
 
-            //- Retrieve generic property from sub-model
-            template<class Type>
-            void getModelProperty(const word& entryName, Type& value) const;
+                //- Retrieve generic property from the base model
+                template<class Type>
+                Type getBaseProperty
+                (
+                    const word& entryName,
+                    const Type& defaultValue = pTraits<Type>::zero
+                ) const;
 
-            //- Add generic property from sub-model
-            template<class Type>
-            void setModelProperty(const word& entryName, const Type& value);
+                //- Retrieve generic property from the base model
+                template<class Type>
+                void getBaseProperty(const word& entryName, Type& value) const;
 
-            //- Retrieve generic property from base model
-            template<class Type>
-            Type getBaseProperty(const word& entryName) const;
+                //- Add generic property to the base model
+                template<class Type>
+                void setBaseProperty(const word& entryName, const Type& value);
 
-            //- Add generic property from base model
-            template<class Type>
-            void setBaseProperty(const word& entryName, const Type& value);
+
+            // Model properties
+
+                //- Retrieve generic property from the sub-model
+                template<class Type>
+                Type getModelProperty
+                (
+                    const word& entryName,
+                    const Type& defaultValue = pTraits<Type>::zero
+                ) const;
+
+                //- Retrieve generic property from the sub-model
+                template<class Type>
+                void getModelProperty(const word& entryName, Type& value) const;
+
+                //- Add generic property to the sub-model
+                template<class Type>
+                void setModelProperty(const word& entryName, const Type& value);
 
 
         // I-O
