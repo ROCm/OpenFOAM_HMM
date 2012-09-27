@@ -76,7 +76,8 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 
 Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 (
-    const fvMesh& mesh, const dictionary& dict
+    const fvMesh& mesh,
+    const dictionary& dict
 )
 {
     if (debug)
@@ -105,5 +106,6 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 
     return autoPtr<solidThermo>(cstrIter()(mesh, dict));
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -15,7 +15,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heRhoThermo<pureMixture<sutherlandTransport<hConstThermo<perfectGas<specie>>,sensibleInternalEnergy>>>;
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       sutherlandTransport;
+    thermo          hConstThermo;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
 
 mixture
 {

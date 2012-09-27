@@ -15,7 +15,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hePsiThermo<pureMixture<constTransport<hConstThermo<perfectGas<specie>>,sensibleInternalEnergy>>>;
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       constTransport;
+    thermo          hConstThermo;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
 
 // Note: these are the properties for a "normalised" inviscid gas
 //       for which the speed of sound is 1 m/s at a temperature of 1K
