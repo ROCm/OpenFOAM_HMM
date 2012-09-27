@@ -79,10 +79,6 @@ protected:
 
 public:
 
-    //- Runtime type information
-    TypeName("pressureGradient");
-
-
     // Constructors
 
         //- Construct from mesh
@@ -91,7 +87,7 @@ public:
             CloudType& owner,
             const fvMesh& mesh,
             const dictionary& dict,
-            const word& forceType = typeName
+            const word& forceType
         );
 
         //- Construct copy
