@@ -572,6 +572,14 @@ public:
                 const scalar sigma      // particle surface tension
             ) const;
 
+            //- Eotvos number
+            inline scalar Eo
+            (
+                const vector& a,        // acceleration
+                const scalar d,         // particle diameter
+                const scalar sigma      // particle surface tension
+            ) const;
+
 
         // Main calculation loop
 
