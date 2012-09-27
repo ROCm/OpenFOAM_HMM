@@ -130,12 +130,14 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
 Foam::autoPtr<Foam::rhoThermo> Foam::rhoThermo::New
 (
     const fvMesh& mesh
 )
 {
-    return NewThermo<rhoThermo>(mesh);
+    return basicThermo::New<rhoThermo>(mesh);
 }
 
 

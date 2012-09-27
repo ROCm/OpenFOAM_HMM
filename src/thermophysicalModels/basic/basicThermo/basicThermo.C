@@ -156,12 +156,14 @@ Foam::basicThermo::basicThermo
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
 Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 (
     const fvMesh& mesh
 )
 {
-    return NewThermo<basicThermo>(mesh);
+    return New<basicThermo>(mesh);
 }
 
 

@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     psiThermo.C
-    psiThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
