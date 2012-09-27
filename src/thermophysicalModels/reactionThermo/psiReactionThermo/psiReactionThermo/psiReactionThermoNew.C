@@ -26,8 +26,7 @@ License
 #include "psiReactionThermo.H"
 #include "fvMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+/*
 Foam::autoPtr<Foam::psiReactionThermo> Foam::psiReactionThermo::New
 (
     const fvMesh& mesh
@@ -68,7 +67,7 @@ Foam::autoPtr<Foam::psiReactionThermo> Foam::psiReactionThermo::New
 
     return autoPtr<psiReactionThermo>(cstrIter()(mesh));
 }
-
+*/
 
 Foam::autoPtr<Foam::psiReactionThermo> Foam::psiReactionThermo::NewType
 (
