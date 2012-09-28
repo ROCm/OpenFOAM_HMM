@@ -38,9 +38,9 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::waveSurfacePressureFvPatchScalarField::timeSchemeType,
+        waveSurfacePressureFvPatchScalarField::timeSchemeType,
         3
     >::names[] =
     {
