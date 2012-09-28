@@ -38,7 +38,11 @@ Description
     myPatch
     {
         type            codedMixed;
-        value           uniform 0;
+
+        refValue        uniform (0 0 0);
+        refGradient     uniform (0 0 0);
+        valueFraction   uniform 1;
+
         redirectType    rampedMixed;   // name of generated BC
 
         code

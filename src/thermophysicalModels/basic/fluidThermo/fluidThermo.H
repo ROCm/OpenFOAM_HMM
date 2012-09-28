@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     fluidThermo.C
-    fluidThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -70,12 +70,14 @@ Foam::psiThermo::psiThermo(const fvMesh& mesh)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
 Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
 (
     const fvMesh& mesh
 )
 {
-    return NewThermo<psiThermo>(mesh);
+    return basicThermo::New<psiThermo>(mesh);
 }
 
 

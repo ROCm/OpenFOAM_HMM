@@ -42,6 +42,17 @@ Foam::psiReactionThermo::psiReactionThermo(const fvMesh& mesh)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::psiReactionThermo> Foam::psiReactionThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<psiReactionThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::psiReactionThermo::~psiReactionThermo()

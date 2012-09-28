@@ -49,12 +49,14 @@ Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const dictionary& dict)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
 Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
 (
     const fvMesh& mesh
 )
 {
-    return NewThermo<fluidThermo>(mesh);
+    return basicThermo::New<fluidThermo>(mesh);
 }
 
 

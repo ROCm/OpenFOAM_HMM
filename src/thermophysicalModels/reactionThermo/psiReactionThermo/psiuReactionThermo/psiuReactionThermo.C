@@ -106,6 +106,17 @@ psiuReactionThermo::psiuReactionThermo(const fvMesh& mesh)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::psiuReactionThermo> Foam::psiuReactionThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<psiuReactionThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 psiuReactionThermo::~psiuReactionThermo()

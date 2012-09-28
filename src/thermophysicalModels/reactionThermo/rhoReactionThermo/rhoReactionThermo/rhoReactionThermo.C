@@ -42,6 +42,17 @@ Foam::rhoReactionThermo::rhoReactionThermo(const fvMesh& mesh)
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::rhoReactionThermo> Foam::rhoReactionThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<rhoReactionThermo>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::rhoReactionThermo::~rhoReactionThermo()

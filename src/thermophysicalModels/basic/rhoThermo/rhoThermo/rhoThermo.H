@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     rhoThermo.C
-    rhoThermoNew.C
 
 \*---------------------------------------------------------------------------*/
 
