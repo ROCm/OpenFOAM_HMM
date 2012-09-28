@@ -44,7 +44,7 @@ Foam::psiChemistryModel::psiChemistryModel
 )
 :
     basicChemistryModel(mesh),
-    thermo_(psiReactionThermo::NewType(mesh, thermoTypeName))
+    thermo_(psiReactionThermo::New(mesh))
 {}
 
 
