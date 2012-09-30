@@ -67,8 +67,6 @@ public:
     //- The type of thermo package this mixture is instantiated for
     typedef ThermoSolidType thermoType;
 
-    //- Runtime type information
-    TypeName("reactingSolidMixture");
 
     // Constructors
 

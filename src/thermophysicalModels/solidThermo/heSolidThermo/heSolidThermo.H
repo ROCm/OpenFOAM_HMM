@@ -36,8 +36,6 @@ SourceFiles
 #define heSolidThermo_H
 
 #include "heThermo.H"
-#include "solidThermo.H"
-#include "coordinateSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +46,7 @@ namespace Foam
                         Class heSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 class heSolidThermo
 :
     public heThermo<BasicSolidThermo, MixtureType>
@@ -60,7 +58,7 @@ class heSolidThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        heSolidThermo(const heSolidThermo<MixtureType, BasicSolidThermo>&);
+        heSolidThermo(const heSolidThermo<BasicSolidThermo, MixtureType>&);
 
 
 public:

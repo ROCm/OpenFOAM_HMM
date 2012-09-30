@@ -65,10 +65,6 @@ public:
     typedef ThermoType thermoType;
 
 
-    //- Runtime type information
-    TypeName("pureSolidMixture");
-
-
     // Constructors
 
         //- Construct from dictionary and mesh

@@ -208,7 +208,6 @@ public:
 
             //- Specific heat capacity
             virtual scalar Cp(scalar p, scalar T, label celli) const = 0;
-
 };
 
 
