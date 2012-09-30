@@ -266,15 +266,28 @@ Foam::wordList Foam::basicThermo::splitThermoName
 {
     wordList cmpts(nCmpt);
 
-    string::size_type beg=0, end=0;
+    string::size_type beg=0, end=0, endb=0, endc=0;
     int i = 0;
 
     while
     (
-        (end = thermoName.find('<', beg)) != string::npos
-     || (end = thermoName.find(',', beg)) != string::npos
+        (endb = thermoName.find('<', beg)) != string::npos
+     || (endc = thermoName.find(',', beg)) != string::npos
     )
     {
+        if (endb == string::npos)
+        {
+            end = endc;
+        }
+        else if ((endc = thermoName.find(',', beg)) != string::npos)
+        {
+            end = min(endb, endc);
+        }
+        else
+        {
+            end = endb;
+        }
+
         if (beg < end)
         {
             cmpts[i] = thermoName.substr(beg, end-beg);

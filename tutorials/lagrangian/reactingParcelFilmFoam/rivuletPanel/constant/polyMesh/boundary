@@ -44,7 +44,7 @@ FoamFile
         sampleRegion    wallFilmRegion;
         samplePatch     region0_to_wallFilmRegion_wallFilmFaces;
         offsetMode      nonuniform;
-        offsets
+        offsets         nonuniform List<vector> 
 43200
 (
 (-6.938893904e-18 -0 -0)

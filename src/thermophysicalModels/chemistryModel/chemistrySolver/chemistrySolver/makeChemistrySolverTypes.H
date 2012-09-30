@@ -37,11 +37,26 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define makeChemistrySolverType(SS, ODEChem, Comp, Thermo)                    \
+                                                                              \
+    typedef SS<ODEChem<Comp, Thermo> > SS##ODEChem##Comp##Thermo;             \
+                                                                              \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##ODEChem##Comp##Thermo,                                            \
+        (#SS"<"#ODEChem"<"#Comp"," + Thermo::typeName() + ">>").c_str(),      \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Comp,                                                                 \
+        SS##ODEChem##Comp##Thermo,                                            \
+        fvMesh                                                                \
+    );
+
+
 #define makeChemistrySolverTypes(CompChemModel,Thermo)                        \
-                                                                              \
-    typedef ODEChemistryModel<CompChemModel, Thermo> CompChemModel##Thermo;   \
-                                                                              \
-    makeChemistrySolver(CompChemModel##Thermo);                               \
                                                                               \
     makeChemistrySolverType                                                   \
     (                                                                         \

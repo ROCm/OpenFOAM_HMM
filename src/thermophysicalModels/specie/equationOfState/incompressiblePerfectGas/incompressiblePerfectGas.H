@@ -135,6 +135,15 @@ public:
 
     // Member functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return
+                "incompressiblePerfectGas<"
+              + word(Specie::typeName_()) + '>';
+        }
+
+
         // Fundamental properties
 
             //- Is the equation of state is incompressible i.e. rho != f(p)

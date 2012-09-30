@@ -1,11 +1,9 @@
 chemistryModel/basicChemistryModel/basicChemistryModel.C
 
 chemistryModel/psiChemistryModel/psiChemistryModel.C
-chemistryModel/psiChemistryModel/psiChemistryModelNew.C
 chemistryModel/psiChemistryModel/psiChemistryModels.C
 
 chemistryModel/rhoChemistryModel/rhoChemistryModel.C
-chemistryModel/rhoChemistryModel/rhoChemistryModelNew.C
 chemistryModel/rhoChemistryModel/rhoChemistryModels.C
 
 chemistrySolver/chemistrySolver/makeChemistrySolvers.C

@@ -48,6 +48,17 @@ Foam::psiChemistryModel::psiChemistryModel
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicChemistryModel::New<psiChemistryModel>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::psiChemistryModel::~psiChemistryModel()

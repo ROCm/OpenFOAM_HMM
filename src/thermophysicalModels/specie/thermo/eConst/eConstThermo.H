@@ -135,8 +135,15 @@ public:
 
     // Member Functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "eConst<" + EquationOfState::typeName() + '>';
+        }
+
         //- Limit the temperature to be in the range Tlow_ to Thigh_
         inline scalar limit(const scalar T) const;
+
 
         // Fundamental properties
 

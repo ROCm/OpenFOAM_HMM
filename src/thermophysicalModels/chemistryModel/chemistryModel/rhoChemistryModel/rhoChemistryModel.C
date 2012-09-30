@@ -48,6 +48,17 @@ Foam::rhoChemistryModel::rhoChemistryModel
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicChemistryModel::New<rhoChemistryModel>(mesh);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::rhoChemistryModel::~rhoChemistryModel()
