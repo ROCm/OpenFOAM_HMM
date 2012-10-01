@@ -55,10 +55,10 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
         ).lookup("thermoType")
     );
 
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(thermoType);
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(thermoType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
@@ -66,7 +66,7 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
         )   << "Unknown solidThermo type " << thermoType
             << endl << endl
             << "Valid solidThermo types are :" << endl
-            << meshConstructorTablePtr_->toc()
+            << fvMeshConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 

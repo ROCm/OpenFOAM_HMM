@@ -77,11 +77,10 @@ public:
     (
         autoPtr,
         solidThermo,
-        mesh,
+        fvMesh,
         (const fvMesh& mesh),
         (mesh)
     );
-
 
      // Declare run-time constructor selection tables
     declareRunTimeSelectionTable

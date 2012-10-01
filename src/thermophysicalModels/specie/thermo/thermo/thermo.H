@@ -139,6 +139,14 @@ public:
 
     // Member Functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return
+                  Thermo::typeName() + ','
+                + Type<thermo<Thermo, Type> >::typeName();
+        }
+
         // Fundamental properties
         // (These functions must be provided in derived types)
 

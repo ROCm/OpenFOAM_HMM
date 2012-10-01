@@ -19,8 +19,8 @@ thermoType
 {
     type            hePsiThermo;
     mixture         pureMixture;
-    transport       sutherlandTransport;
-    thermo          janafThermo;
+    transport       sutherland;
+    thermo          janaf;
     equationOfState perfectGas;
     specie          specie;
     energy          sensibleInternalEnergy;

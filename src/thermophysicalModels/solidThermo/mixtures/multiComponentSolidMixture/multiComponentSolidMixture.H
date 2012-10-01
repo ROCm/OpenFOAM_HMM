@@ -82,9 +82,6 @@ public:
     //- The type of thermodynamics this mixture is instantiated for
     typedef ThermoType thermoType;
 
-    //- Runtime type information
-    TypeName("multiComponentSolidMixture");
-
 
     // Constructors
 

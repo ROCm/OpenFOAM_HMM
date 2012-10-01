@@ -107,6 +107,13 @@ public:
         basicChemistryModel(const fvMesh& mesh);
 
 
+    // Selectors
+
+        //- Generic New for each of the related chemistry model
+        template<class Thermo>
+        static autoPtr<Thermo> New(const fvMesh&);
+
+
     //- Destructor
     virtual ~basicChemistryModel();
 
@@ -161,6 +168,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "basicChemistryModelI.H"
+
+#ifdef NoRepository
+#   include "basicChemistryModelTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

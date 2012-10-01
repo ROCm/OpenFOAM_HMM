@@ -19,8 +19,8 @@ thermoType
 {
     type            heheuReactionThermo;
     mixture         inhomogeneousMixture;
-    transport       sutherlandTransport;
-    thermo          janafThermo;
+    transport       sutherland;
+    thermo          janaf;
     equationOfState perfectGas;
     specie          specie;
     energy          absoluteEnthalpy;

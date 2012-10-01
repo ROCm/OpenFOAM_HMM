@@ -45,20 +45,20 @@ SourceFiles
 namespace Foam
 {
 
-template<class thermo> class constIsoSolidTransport;
+template<class Thermo> class constIsoSolidTransport;
 
-template<class thermo>
-inline constIsoSolidTransport<thermo> operator*
+template<class Thermo>
+inline constIsoSolidTransport<Thermo> operator*
 (
     const scalar,
-    const constIsoSolidTransport<thermo>&
+    const constIsoSolidTransport<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const constIsoSolidTransport<thermo>&
+    const constIsoSolidTransport<Thermo>&
 );
 
 
@@ -66,10 +66,10 @@ Ostream& operator<<
                    Class constIsoSolidTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class constIsoSolidTransport
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
@@ -80,7 +80,7 @@ class constIsoSolidTransport
     // Private Member Functions
 
         //- Construct from components
-        inline constIsoSolidTransport(const thermo& t, const scalar kappa);
+        inline constIsoSolidTransport(const Thermo& t, const scalar kappa);
 
 
 public:
@@ -99,6 +99,12 @@ public:
 
 
     // Member functions
+
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "constIso<" + Thermo::typeName() + '>';
+        }
 
         //- Isotropic thermal conductivity [W/mK]
         inline scalar kappa(const scalar T) const;
@@ -122,7 +128,7 @@ public:
 
     // Friend operators
 
-        friend constIsoSolidTransport operator* <thermo>
+        friend constIsoSolidTransport operator* <Thermo>
         (
             const scalar,
             const constIsoSolidTransport&
@@ -131,7 +137,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const constIsoSolidTransport&

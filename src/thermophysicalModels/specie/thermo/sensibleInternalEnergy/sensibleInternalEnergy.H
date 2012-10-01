@@ -57,6 +57,12 @@ public:
 
     // Member Functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "sensibleInternalEnergy";
+        }
+
         // Fundamental properties
 
             static word name()

@@ -15,14 +15,22 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hePsiReactionThermo<reactingMixture<gasThermoPhysics>>;
+thermoType
+{
+    type            hePsiReactionThermo;
+    mixture         reactingMixture;
+    transport       sutherland;
+    thermo          janaf;
+    energy          sensibleEnthalpy;
+    equationOfState perfectGas;
+    specie          specie;
+}
 
 CHEMKINFile     "$FOAM_CASE/chemkin/chem.inp";
 
 CHEMKINThermoFile "~OpenFOAM/thermoData/therm.dat";
 
 inertSpecie     N2;
-
 
 liquids
 {

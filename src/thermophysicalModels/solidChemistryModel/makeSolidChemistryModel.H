@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,41 +21,41 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::solidChemistryModel
-
 Description
-    Creates solid chemistry model instances templated on the type of
-    solid thermodynamics
+    Macros for instantiating solid chemistry models
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidChemistryModel.H"
+#ifndef makeSolidChemistryModel_H
+#define makeSolidChemistryModel_H
 
-#include "ODESolidChemistryModel.H"
-#include "solidChemistryModel.H"
-#include "solidThermoPhysicsTypes.H"
-#include "thermoPhysicsTypes.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hConstSolidThermoPhysics,
-        gasThermoPhysics
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeSolidChemistryModel(SS, Comp, SThermo, GThermo)                   \
+                                                                              \
+    typedef SS<Comp, SThermo, GThermo> SS##Comp##SThermo##GThermo;            \
+                                                                              \
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##Comp##SThermo##GThermo,                                           \
+        #SS"<"#Comp","#SThermo","#GThermo">",                                 \
+        0                                                                     \
     );
 
-    makeSolidChemistryModel
-    (
-        ODESolidChemistryModel,
-        solidChemistryModel,
-        hExponentialSolidThermoPhysics,
-        gasThermoPhysics
-    );
-}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

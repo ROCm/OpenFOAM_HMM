@@ -44,8 +44,19 @@ Foam::psiChemistryModel::psiChemistryModel
 )
 :
     basicChemistryModel(mesh),
-    thermo_(psiReactionThermo::NewType(mesh, thermoTypeName))
+    thermo_(psiReactionThermo::New(mesh))
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicChemistryModel::New<psiChemistryModel>(mesh);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

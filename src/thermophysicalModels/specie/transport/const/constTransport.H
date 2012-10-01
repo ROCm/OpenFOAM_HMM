@@ -137,6 +137,12 @@ public:
 
     // Member functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "const<" + Thermo::typeName() + '>';
+        }
+
         //- Dynamic viscosity [kg/ms]
         inline scalar mu(const scalar p, const scalar T) const;
 

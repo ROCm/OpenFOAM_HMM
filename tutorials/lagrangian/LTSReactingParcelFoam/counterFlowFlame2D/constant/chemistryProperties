@@ -15,11 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-rhoChemistryModel  ODEChemistryModel<icoPoly8ThermoPhysics>;
+chemistryType
+{
+    chemistryModel    ODEChemistryModel;
+    chemistrySolver   noChemistrySolver;
+}
 
 chemistry           on; // off;
-
-chemistrySolver     noChemistrySolver;
 
 chemCalcFreq        1;
 
