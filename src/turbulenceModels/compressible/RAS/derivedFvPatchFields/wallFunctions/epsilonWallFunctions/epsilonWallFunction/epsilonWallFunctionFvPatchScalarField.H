@@ -107,9 +107,6 @@ protected:
         //- E coefficient
         scalar E_;
 
-        //- Y+ at the edge of the laminar sublayer
-        scalar yPlusLam_;
-
 
     // Protected Member Functions
 

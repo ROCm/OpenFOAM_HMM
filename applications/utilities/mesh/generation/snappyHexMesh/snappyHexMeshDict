@@ -255,6 +255,8 @@ addLayersControls
     relativeSizes true;
 
     // Per final patch (so not geometry!) the layer information
+    // Note: This behaviour changed after 21x. Any non-mentioned patches
+    //       now slide unless nSurfaceLayers is explicitly mentioned to be 0.
     layers
     {
         sphere.stl_firstSolid
@@ -265,6 +267,17 @@ addLayersControls
         maxY
         {
             nSurfaceLayers 1;
+            // Per patch layer data
+            expansionRatio 1.3;
+            finalLayerThickness 0.3;
+            minThickness 0.1;
+        }
+
+        // Disable any mesh shrinking and layer addition on any point of
+        // a patch by setting nSurfaceLayers to 0
+        frozenPatches
+        {
+            nSurfaceLayers 0;
         }
     }
 
@@ -281,6 +294,7 @@ addLayersControls
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
+    //  Relative to undistorted size of cell outside layer.
     //  See relativeSizes parameter.
     minThickness 0.25;
 
@@ -417,7 +431,7 @@ meshQualityControls
 // Flags for optional output
 // 0 : only write final meshes
 // 1 : write intermediate meshes
-// 2 : write volScalarFields with cellLevel and cell centres for postprocessing
+// 2 : write volScalarField with cellLevel for postprocessing
 // 4 : write current intersections as .obj files
 debug 0;
 

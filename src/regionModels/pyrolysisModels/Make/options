@@ -19,8 +19,7 @@ LIB_LIBS = \
     -lmeshTools \
     -lchemistryModel \
     -lspecie \
-    -lspecie \
-    -lsolid \
+    -lsolidSpecie \
     -lfluidThermophysicalModels \
     -lsolidChemistryModel \
     -lcompressibleTurbulenceModel \

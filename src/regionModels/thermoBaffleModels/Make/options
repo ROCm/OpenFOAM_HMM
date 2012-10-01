@@ -17,4 +17,4 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lOpenFOAM \
-    -lsolid
+    -lsolidSpecie
