@@ -98,7 +98,14 @@ typedef                                                                        \
         >                                                                      \
     > Transport##Type##Thermo##EqnOfState##Specie;                             \
                                                                                \
-makeReactionMixtureThermo(BaseThermo,CThermo,MixtureThermo,Mixture,Transport##Type##Thermo##EqnOfState##Specie)
+makeReactionMixtureThermo                                                      \
+(                                                                              \
+    BaseThermo,                                                                \
+    CThermo,                                                                   \
+    MixtureThermo,                                                             \
+    Mixture,                                                                   \
+    Transport##Type##Thermo##EqnOfState##Specie                                \
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
