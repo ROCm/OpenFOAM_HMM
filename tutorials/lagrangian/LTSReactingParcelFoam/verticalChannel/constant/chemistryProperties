@@ -17,8 +17,8 @@ FoamFile
 
 chemistryType
 {
-    chemistryModel    ODEChemistryModel;
     chemistrySolver   noChemistrySolver;
+    chemistryThermo   psiChemistryModel;
 }
 
 chemistry       off;

@@ -28,7 +28,7 @@ License
 
 #include "chemistrySolver.H"
 
-#include "ODEChemistryModel.H"
+#include "chemistryModel.H"
 
 #include "noChemistrySolver.H"
 #include "EulerImplicit.H"
@@ -37,21 +37,22 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistrySolverType(SS, ODEChem, Comp, Thermo)                    \
+#define makeChemistrySolverType(SS, Comp, Thermo)                             \
                                                                               \
-    typedef SS<ODEChem<Comp, Thermo> > SS##ODEChem##Comp##Thermo;             \
+    typedef SS<chemistryModel<Comp, Thermo> > SS##Comp##Thermo;               \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        SS##ODEChem##Comp##Thermo,                                            \
-        (#SS"<"#ODEChem"<"#Comp"," + Thermo::typeName() + ">>").c_str(),      \
+        SS##Comp##Thermo,                                                     \
+        (#SS"<" + word(Comp::typeName_())                                     \
+      + "," + Thermo::typeName() + ">").c_str(),                              \
         0                                                                     \
     );                                                                        \
                                                                               \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
         Comp,                                                                 \
-        SS##ODEChem##Comp##Thermo,                                            \
+        SS##Comp##Thermo,                                                     \
         fvMesh                                                                \
     );
 
@@ -61,7 +62,6 @@ License
     makeChemistrySolverType                                                   \
     (                                                                         \
         noChemistrySolver,                                                    \
-        ODEChemistryModel,                                                    \
         CompChemModel,                                                        \
         Thermo                                                                \
     );                                                                        \
@@ -69,7 +69,6 @@ License
     makeChemistrySolverType                                                   \
     (                                                                         \
         EulerImplicit,                                                        \
-        ODEChemistryModel,                                                    \
         CompChemModel,                                                        \
         Thermo                                                                \
     );                                                                        \
@@ -77,7 +76,6 @@ License
     makeChemistrySolverType                                                   \
     (                                                                         \
         ode,                                                                  \
-        ODEChemistryModel,                                                    \
         CompChemModel,                                                        \
         Thermo                                                                \
     );                                                                        \
@@ -85,7 +83,6 @@ License
     makeChemistrySolverType                                                   \
     (                                                                         \
         sequential,                                                           \
-        ODEChemistryModel,                                                    \
         CompChemModel,                                                        \
         Thermo                                                                \
     );

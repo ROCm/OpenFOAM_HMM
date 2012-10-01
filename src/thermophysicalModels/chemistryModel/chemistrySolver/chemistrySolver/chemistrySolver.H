@@ -35,7 +35,7 @@ SourceFiles
 #ifndef chemistrySolver_H
 #define chemistrySolver_H
 
-#include "ODEChemistryModel.H"
+#include "chemistryModel.H"
 #include "IOdictionary.H"
 #include "scalarField.H"
 

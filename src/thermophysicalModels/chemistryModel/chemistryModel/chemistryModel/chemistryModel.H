@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ODEChemistryModel
+    Foam::chemistryModel
 
 Description
     Extends base chemistry model by adding a thermo package, and ODE functions.
@@ -30,13 +30,13 @@ Description
     terms.
 
 SourceFiles
-    ODEChemistryModelI.H
-    ODEChemistryModel.C
+    chemistryModelI.H
+    chemistryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ODEChemistryModel_H
-#define ODEChemistryModel_H
+#ifndef chemistryModel_H
+#define chemistryModel_H
 
 #include "Reaction.H"
 #include "ODE.H"
@@ -53,11 +53,11 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class ODEChemistryModel Declaration
+                      Class chemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CompType, class ThermoType>
-class ODEChemistryModel
+class chemistryModel
 :
     public CompType,
     public ODE
@@ -65,10 +65,10 @@ class ODEChemistryModel
     // Private Member Functions
 
         //- Disallow copy constructor
-        ODEChemistryModel(const ODEChemistryModel&);
+        chemistryModel(const chemistryModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const ODEChemistryModel&);
+        void operator=(const chemistryModel&);
 
 
 protected:
@@ -104,13 +104,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ODEChemistryModel");
+    TypeName("chemistryModel");
 
 
     // Constructors
 
         //- Construct from components
-        ODEChemistryModel
+        chemistryModel
         (
             const fvMesh& mesh,
             const word& ODEModelName,
@@ -119,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~ODEChemistryModel();
+    virtual ~chemistryModel();
 
 
     // Member Functions
@@ -263,12 +263,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ODEChemistryModelI.H"
+#include "chemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ODEChemistryModel.C"
+#   include "chemistryModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

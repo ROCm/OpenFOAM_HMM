@@ -78,7 +78,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("rhoChemistryModel");
+    TypeName("rho");
 
 
     //- Declare run-time constructor selection tables

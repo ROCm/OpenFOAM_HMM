@@ -78,7 +78,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("psiChemistryModel");
+    TypeName("psi");
 
 
     //- Declare run-time constructor selection tables

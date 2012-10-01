@@ -30,7 +30,7 @@ License
 
 template<class CompType, class ThermoType>
 inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
-Foam::ODEChemistryModel<CompType, ThermoType>::RR()
+Foam::chemistryModel<CompType, ThermoType>::RR()
 {
     return RR_;
 }
@@ -38,7 +38,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::RR()
 
 template<class CompType, class ThermoType>
 inline const Foam::PtrList<Foam::Reaction<ThermoType> >&
-Foam::ODEChemistryModel<CompType, ThermoType>::reactions() const
+Foam::chemistryModel<CompType, ThermoType>::reactions() const
 {
     return reactions_;
 }
@@ -46,7 +46,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::reactions() const
 
 template<class CompType, class ThermoType>
 inline const Foam::PtrList<ThermoType>&
-Foam::ODEChemistryModel<CompType, ThermoType>::specieThermo() const
+Foam::chemistryModel<CompType, ThermoType>::specieThermo() const
 {
     return specieThermo_;
 }
@@ -54,7 +54,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::specieThermo() const
 
 template<class CompType, class ThermoType>
 inline Foam::label
-Foam::ODEChemistryModel<CompType, ThermoType>::nSpecie() const
+Foam::chemistryModel<CompType, ThermoType>::nSpecie() const
 {
     return nSpecie_;
 }
@@ -62,7 +62,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::nSpecie() const
 
 template<class CompType, class ThermoType>
 inline Foam::label
-Foam::ODEChemistryModel<CompType, ThermoType>::nReaction() const
+Foam::chemistryModel<CompType, ThermoType>::nReaction() const
 {
     return nReaction_;
 }
@@ -70,7 +70,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::nReaction() const
 
 template<class CompType, class ThermoType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ODEChemistryModel<CompType, ThermoType>::RR
+Foam::chemistryModel<CompType, ThermoType>::RR
 (
     const label i
 ) const

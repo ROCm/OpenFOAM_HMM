@@ -58,12 +58,11 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
         Info<< "Selecting chemistry type " << chemistryTypeDict << endl;
 
-        const int nCmpt = 8;
+        const int nCmpt = 7;
         const char* cmptNames[nCmpt] =
         {
             "chemistrySolver",
-            "chemistryModel",
-            "???ChemistryModel",
+            "chemistryThermo",
             "transport",
             "thermo",
             "equationOfState",
@@ -109,9 +108,8 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
         // Construct the name of the chemistry type from the components
         chemistryTypeName =
             word(chemistryTypeDict.lookup("chemistrySolver")) + '<'
-          + word(chemistryTypeDict.lookup("chemistryModel")) + '<'
-          + ChemistryModel::typeName + ','
-          + thermoTypeName + ">>";
+          + word(chemistryTypeDict.lookup("chemistryThermo")) + ','
+          + thermoTypeName + ">";
 
         typename ChemistryModel::fvMeshConstructorTable::iterator cstrIter =
             ChemistryModel::fvMeshConstructorTablePtr_->find(chemistryTypeName);
