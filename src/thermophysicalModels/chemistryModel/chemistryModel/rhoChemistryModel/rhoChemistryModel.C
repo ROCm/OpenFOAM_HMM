@@ -44,8 +44,19 @@ Foam::rhoChemistryModel::rhoChemistryModel
 )
 :
     basicChemistryModel(mesh),
-    thermo_(rhoReactionThermo::NewType(mesh, thermoTypeName))
+    thermo_(rhoReactionThermo::New(mesh))
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicChemistryModel::New<rhoChemistryModel>(mesh);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

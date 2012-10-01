@@ -41,30 +41,30 @@ SourceFiles
 namespace Foam
 {
 
-template<class thermo> class constSolidRad;
+template<class Thermo> class constSolidRad;
 
-template<class thermo>
-inline constSolidRad<thermo> operator*
+template<class Thermo>
+inline constSolidRad<Thermo> operator*
 (
     const scalar,
-    const constSolidRad<thermo>&
+    const constSolidRad<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const constSolidRad<thermo>&
+    const constSolidRad<Thermo>&
 );
 
 /*---------------------------------------------------------------------------*\
                         Class constSolidRad Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class constSolidRad
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
@@ -81,7 +81,7 @@ class constSolidRad
          //- Construct from components
         inline constSolidRad
         (
-            const thermo& t,
+            const Thermo& t,
             const scalar kappaRad,
             const scalar sigmaS,
             const scalar emissivity
@@ -107,6 +107,12 @@ public:
 
     // Member functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "const<" + Thermo::typeName() + '>';
+        }
+
         //- Return absorption coefficient [1/m]
         inline scalar kappaRad(scalar T) const;
 
@@ -129,7 +135,7 @@ public:
 
     // Friend operators
 
-        friend constSolidRad operator* <thermo>
+        friend constSolidRad operator* <Thermo>
         (
             const scalar,
             const constSolidRad&
@@ -138,7 +144,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const constSolidRad&

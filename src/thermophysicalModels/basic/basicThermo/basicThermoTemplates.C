@@ -76,6 +76,8 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
           + word(thermoTypeDict.lookup("specie")) + ">>,"
           + word(thermoTypeDict.lookup("energy")) + ">>>";
 
+        Info<< thermoTypeName << endl;
+
         // Lookup the thermo package
         typename Thermo::fvMeshConstructorTable::iterator cstrIter =
             Thermo::fvMeshConstructorTablePtr_->find(thermoTypeName);

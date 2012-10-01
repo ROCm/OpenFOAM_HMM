@@ -44,41 +44,41 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class equationOfState> class hConstThermo;
+template<class EquationOfState> class hConstThermo;
 
-template<class equationOfState>
-inline hConstThermo<equationOfState> operator+
+template<class EquationOfState>
+inline hConstThermo<EquationOfState> operator+
 (
-    const hConstThermo<equationOfState>&,
-    const hConstThermo<equationOfState>&
+    const hConstThermo<EquationOfState>&,
+    const hConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline hConstThermo<equationOfState> operator-
+template<class EquationOfState>
+inline hConstThermo<EquationOfState> operator-
 (
-    const hConstThermo<equationOfState>&,
-    const hConstThermo<equationOfState>&
+    const hConstThermo<EquationOfState>&,
+    const hConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline hConstThermo<equationOfState> operator*
+template<class EquationOfState>
+inline hConstThermo<EquationOfState> operator*
 (
     const scalar,
-    const hConstThermo<equationOfState>&
+    const hConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
-inline hConstThermo<equationOfState> operator==
+template<class EquationOfState>
+inline hConstThermo<EquationOfState> operator==
 (
-    const hConstThermo<equationOfState>&,
-    const hConstThermo<equationOfState>&
+    const hConstThermo<EquationOfState>&,
+    const hConstThermo<EquationOfState>&
 );
 
-template<class equationOfState>
+template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const hConstThermo<equationOfState>&
+    const hConstThermo<EquationOfState>&
 );
 
 
@@ -86,10 +86,10 @@ Ostream& operator<<
                            Class hConstThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class equationOfState>
+template<class EquationOfState>
 class hConstThermo
 :
-    public equationOfState
+    public EquationOfState
 {
     // Private data
 
@@ -102,7 +102,7 @@ class hConstThermo
         //- Construct from components
         inline hConstThermo
         (
-            const equationOfState& st,
+            const EquationOfState& st,
             const scalar cp,
             const scalar hf
         );
@@ -133,8 +133,15 @@ public:
 
     // Member Functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "hConst<" + EquationOfState::typeName() + '>';
+        }
+
         //- Limit the temperature to be in the range Tlow_ to Thigh_
         inline scalar limit(const scalar T) const;
+
 
         // Fundamental properties
 
@@ -168,25 +175,25 @@ public:
 
     // Friend operators
 
-        friend hConstThermo operator+ <equationOfState>
+        friend hConstThermo operator+ <EquationOfState>
         (
             const hConstThermo&,
             const hConstThermo&
         );
 
-        friend hConstThermo operator- <equationOfState>
+        friend hConstThermo operator- <EquationOfState>
         (
             const hConstThermo&,
             const hConstThermo&
         );
 
-        friend hConstThermo operator* <equationOfState>
+        friend hConstThermo operator* <EquationOfState>
         (
             const scalar,
             const hConstThermo&
         );
 
-        friend hConstThermo operator== <equationOfState>
+        friend hConstThermo operator== <EquationOfState>
         (
             const hConstThermo&,
             const hConstThermo&
@@ -195,7 +202,7 @@ public:
 
     // IOstream Operators
 
-        friend Ostream& operator<< <equationOfState>
+        friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
             const hConstThermo&

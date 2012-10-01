@@ -32,7 +32,7 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(solidThermo, 0);
-    defineRunTimeSelectionTable(solidThermo, mesh);
+    defineRunTimeSelectionTable(solidThermo, fvMesh);
     defineRunTimeSelectionTable(solidThermo, dictionary);
 }
 

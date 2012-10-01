@@ -57,10 +57,10 @@ functions
     {
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
-        enabled         true;
+        enabled         yes;
         outputControl   outputTime;
-        log             true;
-        valueOutput     true;
+        log             yes;
+        valueOutput     no;
         source          patch;
         sourceName      outlet;
         operation       weightedAverage;

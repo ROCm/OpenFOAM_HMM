@@ -41,11 +41,6 @@ namespace Foam
 
 #define makeSolidChemistrySolverType(SS, ODEChem, Comp, SThermo, GThermo)     \
                                                                               \
-    typedef ODESolidChemistryModel<Comp, SThermo, GThermo>                    \
-        ODESolidChemistryModel##Comp##SThermo##GThermo;                       \
-                                                                              \
-    makeChemistrySolver(ODESolidChemistryModel##Comp##SThermo##GThermo)       \
-                                                                              \
     typedef SS<ODEChem<Comp, SThermo, GThermo> >                              \
         SS##ODEChem##Comp##SThermo##GThermo;                                  \
                                                                               \

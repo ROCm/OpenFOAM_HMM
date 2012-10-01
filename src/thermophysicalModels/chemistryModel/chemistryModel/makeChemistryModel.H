@@ -46,19 +46,7 @@ namespace Foam
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
         SS##Comp##Thermo,                                                     \
-        #SS"<"#Comp","#Thermo">",                                             \
-        0                                                                     \
-    );
-
-
-#define makeSolidChemistryModel(SS, Comp, SThermo, GThermo)                   \
-                                                                              \
-    typedef SS<Comp, SThermo, GThermo> SS##Comp##SThermo##GThermo;            \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        SS##Comp##SThermo##GThermo,                                           \
-        #SS"<"#Comp","#SThermo","#GThermo">",                                 \
+        (#SS"<"#Comp"," + Thermo::typeName() + ">").c_str(),                  \
         0                                                                     \
     );
 

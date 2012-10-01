@@ -38,12 +38,14 @@ FoamFile
     symmetry
     {
         type            symmetryPlane;
+        inGroups        1(symmetryPlane);
         nFaces          100;
         startFace       5045;
     }
     frontAndBack
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          5000;
         startFace       5145;
     }

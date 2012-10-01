@@ -42,20 +42,20 @@ SourceFiles
 namespace Foam
 {
 
-template<class thermo> class exponentialSolidTransport;
+template<class Thermo> class exponentialSolidTransport;
 
-template<class thermo>
-inline exponentialSolidTransport<thermo> operator*
+template<class Thermo>
+inline exponentialSolidTransport<Thermo> operator*
 (
     const scalar,
-    const exponentialSolidTransport<thermo>&
+    const exponentialSolidTransport<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const exponentialSolidTransport<thermo>&
+    const exponentialSolidTransport<Thermo>&
 );
 
 
@@ -63,10 +63,10 @@ Ostream& operator<<
                   Class exponentialSolidTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class exponentialSolidTransport
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
@@ -85,7 +85,7 @@ class exponentialSolidTransport
         //- Construct from components
         inline exponentialSolidTransport
         (
-            const thermo& t,
+            const Thermo& t,
             const scalar kappa0,
             const scalar n0,
             const scalar Tref
@@ -110,6 +110,12 @@ public:
 
     // Member functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "exponential<" + Thermo::typeName() + '>';
+        }
+
         //- Thermal conductivity [W/mK]
         inline scalar kappa(const scalar T) const;
 
@@ -132,7 +138,7 @@ public:
 
     // Friend operators
 
-        friend exponentialSolidTransport operator* <thermo>
+        friend exponentialSolidTransport operator* <Thermo>
         (
             const scalar,
             const exponentialSolidTransport&
@@ -140,7 +146,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const exponentialSolidTransport&

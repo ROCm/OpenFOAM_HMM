@@ -18,8 +18,8 @@ thermoType
 {
     type            heRhoThermo;
     mixture         pureMixture;
-    transport       constTransport;
-    thermo          hConstThermo;
+    transport       const;
+    thermo          hConst;
     equationOfState rhoConst;
     specie          specie;
     energy          sensibleEnthalpy;

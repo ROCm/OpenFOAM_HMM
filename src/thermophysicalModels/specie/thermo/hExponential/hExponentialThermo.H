@@ -46,21 +46,21 @@ SourceFiles
 namespace Foam
 {
 
-template<class equationOfState> class hExponentialThermo;
+template<class EquationOfState> class hExponentialThermo;
 
-template<class equationOfState>
-inline hExponentialThermo<equationOfState> operator*
+template<class EquationOfState>
+inline hExponentialThermo<EquationOfState> operator*
 (
     const scalar,
-    const hExponentialThermo<equationOfState>&
+    const hExponentialThermo<EquationOfState>&
 );
 
 
-template<class equationOfState>
+template<class EquationOfState>
 Ostream& operator<<
 (
     Ostream&,
-    const hExponentialThermo<equationOfState>&
+    const hExponentialThermo<EquationOfState>&
 );
 
 
@@ -68,10 +68,10 @@ Ostream& operator<<
                          Class hExponentialThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class equationOfState>
+template<class EquationOfState>
 class hExponentialThermo
 :
-    public equationOfState
+    public EquationOfState
 {
 
     // Private data
@@ -98,7 +98,7 @@ public:
         //- Construct from components
         inline hExponentialThermo
         (
-            const equationOfState& st,
+            const EquationOfState& st,
             const scalar c0,
             const scalar n0,
             const scalar Tref,
@@ -117,6 +117,12 @@ public:
 
 
     // Member Functions
+
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "hExponential<" + EquationOfState::typeName() + '>';
+        }
 
         //- Limit the temperature to be in the range Tlow_ to Thigh_
         inline scalar limit(const scalar T) const;
@@ -153,7 +159,7 @@ public:
     // Friend operators
 
 
-        friend hExponentialThermo operator* <equationOfState>
+        friend hExponentialThermo operator* <EquationOfState>
         (
             const scalar,
             const hExponentialThermo&
@@ -162,7 +168,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <equationOfState>
+        friend Ostream& operator<< <EquationOfState>
         (
             Ostream&,
             const hExponentialThermo&

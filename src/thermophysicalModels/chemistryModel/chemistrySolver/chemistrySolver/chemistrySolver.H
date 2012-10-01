@@ -63,10 +63,6 @@ protected:
 
 public:
 
-        //- Runtime type information
-        TypeName("chemistrySolver");
-
-
     // Constructors
 
         //- Construct from components
@@ -99,37 +95,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeChemistrySolver(ODEChem)                                          \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        chemistrySolver<ODEChem>,                                             \
-        "chemistrySolver<"#ODEChem">",                                        \
-        0                                                                     \
-    );
-
-
-#define makeChemistrySolverType(SS, ODEChem, Comp, Thermo)                    \
-                                                                              \
-    typedef SS<ODEChem<Comp, Thermo> > SS##ODEChem##Comp##Thermo;             \
-                                                                              \
-    defineTemplateTypeNameAndDebugWithName                                    \
-    (                                                                         \
-        SS##ODEChem##Comp##Thermo,                                            \
-        #SS"<"#ODEChem"<"#Comp","#Thermo">>",                                 \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    addToRunTimeSelectionTable                                                \
-    (                                                                         \
-        Comp,                                                                 \
-        SS##ODEChem##Comp##Thermo,                                            \
-        fvMesh                                                                \
-    );
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

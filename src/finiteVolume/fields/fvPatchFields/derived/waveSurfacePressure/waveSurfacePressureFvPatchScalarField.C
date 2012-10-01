@@ -38,15 +38,15 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::waveSurfacePressureFvPatchScalarField::timeSchemeType,
+        waveSurfacePressureFvPatchScalarField::timeSchemeType,
         3
     >::names[] =
     {
-        fv::EulerDdtScheme<scalar>::typeName.c_str(),
-        fv::CrankNicholsonDdtScheme<scalar>::typeName.c_str(),
-        fv::backwardDdtScheme<scalar>::typeName.c_str()
+        fv::EulerDdtScheme<scalar>::typeName_(),
+        fv::CrankNicholsonDdtScheme<scalar>::typeName_(),
+        fv::backwardDdtScheme<scalar>::typeName_()
     };
 }
 

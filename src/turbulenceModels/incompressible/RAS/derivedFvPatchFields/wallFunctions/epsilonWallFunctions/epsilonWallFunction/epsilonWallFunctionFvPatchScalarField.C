@@ -78,8 +78,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     GName_("RASModel::G"),
     Cmu_(0.09),
     kappa_(0.41),
-    E_(9.8),
-    yPlusLam_(nutkWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
+    E_(9.8)
 {
     checkType();
 }
@@ -97,8 +96,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     GName_(ptf.GName_),
     Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
-    E_(ptf.E_),
-    yPlusLam_(ptf.yPlusLam_)
+    E_(ptf.E_)
 {
     checkType();
 }
@@ -115,8 +113,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
-    yPlusLam_(nutkWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_))
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }
@@ -131,8 +128,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     GName_(ewfpsf.GName_),
     Cmu_(ewfpsf.Cmu_),
     kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_),
-    yPlusLam_(ewfpsf.yPlusLam_)
+    E_(ewfpsf.E_)
 {
     checkType();
 }
@@ -148,8 +144,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     GName_(ewfpsf.GName_),
     Cmu_(ewfpsf.Cmu_),
     kappa_(ewfpsf.kappa_),
-    E_(ewfpsf.E_),
-    yPlusLam_(ewfpsf.yPlusLam_)
+    E_(ewfpsf.E_)
 {
     checkType();
 }

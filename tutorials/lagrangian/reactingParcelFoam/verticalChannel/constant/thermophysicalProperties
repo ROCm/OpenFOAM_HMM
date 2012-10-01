@@ -15,7 +15,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      heRhoReactionThermo<reactingMixture<icoPoly8ThermoPhysics>>;
+thermoType
+{
+    type            heRhoReactionThermo;
+    mixture         reactingMixture;
+    transport       polynomial;
+    thermo          hPolynomial;
+    energy          sensibleEnthalpy;
+    equationOfState icoPolynomial;
+    specie          specie;
+}
+
 dpdt no;
 
 chemistryReader foamChemistryReader;

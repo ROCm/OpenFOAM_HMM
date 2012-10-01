@@ -82,13 +82,6 @@ public:
         //- Standard selection based on fvMesh
         static autoPtr<psiReactionThermo> New(const fvMesh&);
 
-        //- Select and check that package contains 'thermoType'
-        static autoPtr<psiReactionThermo> NewType
-        (
-            const fvMesh&,
-            const word& thermoType
-        );
-
 
     //- Destructor
     virtual ~psiReactionThermo();

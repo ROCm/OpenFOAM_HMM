@@ -28,10 +28,9 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class MixtureType, class BasicSolidThermo>
-void Foam::heSolidThermo<MixtureType, BasicSolidThermo>::calculate()
+template<class BasicSolidThermo, class MixtureType>
+void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
 {
-
     scalarField& TCells = this->T_.internalField();
 
     const scalarField& hCells = this->he_.internalField();
@@ -123,8 +122,8 @@ void Foam::heSolidThermo<MixtureType, BasicSolidThermo>::calculate()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class MixtureType, class BasicSolidThermo>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::
+template<class BasicSolidThermo, class MixtureType>
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::
 heSolidThermo(const fvMesh& mesh)
 :
     heThermo<BasicSolidThermo, MixtureType>(mesh)
@@ -133,8 +132,8 @@ heSolidThermo(const fvMesh& mesh)
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::
+template<class BasicSolidThermo, class MixtureType>
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::
 heSolidThermo(const fvMesh& mesh, const dictionary& dict)
 :
     heThermo<BasicSolidThermo, MixtureType>(mesh, dict)
@@ -145,15 +144,15 @@ heSolidThermo(const fvMesh& mesh, const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class MixtureType, class BasicSolidThermo>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::~heSolidThermo()
+template<class BasicSolidThermo, class MixtureType>
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::~heSolidThermo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class MixtureType, class BasicSolidThermo>
-void Foam::heSolidThermo<MixtureType, BasicSolidThermo>::correct()
+template<class BasicSolidThermo, class MixtureType>
+void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::correct()
 {
     if (debug)
     {
@@ -169,9 +168,9 @@ void Foam::heSolidThermo<MixtureType, BasicSolidThermo>::correct()
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::volVectorField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::Kappa() const
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::Kappa() const
 {
     const fvMesh& mesh = this->T_.mesh();
 
@@ -231,9 +230,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::Kappa() const
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::kappaRad() const
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::kappaRad() const
 {
     const fvMesh& mesh = this->T_.mesh();
 
@@ -293,9 +292,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::kappaRad() const
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::sigmaS() const
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::sigmaS() const
 {
     const fvMesh& mesh = this->T_.mesh();
 
@@ -355,9 +354,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::sigmaS() const
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::emissivity() const
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::emissivity() const
 {
     const fvMesh& mesh = this->T_.mesh();
 
@@ -417,9 +416,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::emissivity() const
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::vectorField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::Kappa
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::Kappa
 (
     const label patchi
 ) const
@@ -446,9 +445,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::Kappa
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::kappaRad
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::kappaRad
 (
     const label patchi
 ) const
@@ -474,9 +473,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::kappaRad
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::sigmaS
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::sigmaS
 (
     const label patchi
 ) const
@@ -503,9 +502,9 @@ Foam::heSolidThermo<MixtureType, BasicSolidThermo>::sigmaS
 }
 
 
-template<class MixtureType, class BasicSolidThermo>
+template<class BasicSolidThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heSolidThermo<MixtureType, BasicSolidThermo>::emissivity
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::emissivity
 (
     const label patchi
 ) const
