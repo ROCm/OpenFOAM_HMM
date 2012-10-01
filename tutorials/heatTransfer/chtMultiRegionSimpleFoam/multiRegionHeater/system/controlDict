@@ -52,16 +52,16 @@ functions
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
 
-        enabled         true;
+        enabled         yes;
         outputControl   outputTime;
 
         region          topAir;
 
-        // Output to log&file (true) or to file only
-        log             true;
+        // Output to log&file (yes) or to file only
+        log             yes;
 
         // Output field values as well
-        valueOutput     false;  //true;
+        valueOutput     no;
 
         // Type of source: patch/faceZone/sampledSurface
         source          patch;
@@ -85,16 +85,16 @@ functions
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
 
-        enabled         true;
+        enabled         yes;
         outputControl   outputTime;
 
         region          topAir;
 
-        // Output to log&file (true) or to file only
-        log             true;
+        // Output to log&file (yes) or to file only
+        log             yes;
 
         // Output field values as well
-        valueOutput     false;  //true;
+        valueOutput     no;
 
         // Type of source: patch/faceZone/sampledSurface
         source          patch;
