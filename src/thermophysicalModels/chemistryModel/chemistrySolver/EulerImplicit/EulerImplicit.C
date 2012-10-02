@@ -29,15 +29,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::EulerImplicit<ODEChemistryType>::EulerImplicit
+template<class ChemistryModel>
+Foam::EulerImplicit<ChemistryModel>::EulerImplicit
 (
-    const fvMesh& mesh,
-    const word& ODEModelName,
-    const word& thermoType
+    const fvMesh& mesh
 )
 :
-    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
+    chemistrySolver<ChemistryModel>(mesh),
     coeffsDict_(this->subDict("EulerImplicitCoeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
@@ -46,15 +44,15 @@ Foam::EulerImplicit<ODEChemistryType>::EulerImplicit
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::EulerImplicit<ODEChemistryType>::~EulerImplicit()
+template<class ChemistryModel>
+Foam::EulerImplicit<ChemistryModel>::~EulerImplicit()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::scalar Foam::EulerImplicit<ODEChemistryType>::solve
+template<class ChemistryModel>
+Foam::scalar Foam::EulerImplicit<ChemistryModel>::solve
 (
     scalarField &c,
     const scalar T,

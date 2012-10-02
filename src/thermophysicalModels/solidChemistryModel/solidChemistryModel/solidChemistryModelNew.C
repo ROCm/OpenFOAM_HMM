@@ -104,8 +104,7 @@ Foam::autoPtr<Foam::solidChemistryModel> Foam::solidChemistryModel::New
         }
     }
 
-    return autoPtr<solidChemistryModel>
-        (cstrIter()(mesh, ODEModelName, thermoTypeName));
+    return autoPtr<solidChemistryModel>(cstrIter()(mesh));
 }
 
 

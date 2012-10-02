@@ -109,13 +109,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        chemistryModel
-        (
-            const fvMesh& mesh,
-            const word& ODEModelName,
-            const word& thermoTypeName
-        );
+        //- Construct from mesh
+        chemistryModel(const fvMesh& mesh);
 
 
     //- Destructor

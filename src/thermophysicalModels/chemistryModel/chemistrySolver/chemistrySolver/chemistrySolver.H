@@ -48,30 +48,18 @@ namespace Foam
                       Class chemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ODEChemistryType>
+template<class ChemistryModel>
 class chemistrySolver
 :
-    public ODEChemistryType
+    public ChemistryModel
 {
-protected:
-
-    // Protected data
-
-        //- Name of the chemistry solver
-        const word name_;
-
 
 public:
 
     // Constructors
 
         //- Construct from components
-        chemistrySolver
-        (
-            const fvMesh& mesh,
-            const word& ODEModelName,
-            const word& thermoType
-        );
+        chemistrySolver(const fvMesh& mesh);
 
 
     //- Destructor

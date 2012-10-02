@@ -87,19 +87,15 @@ public:
         autoPtr,
         psiChemistryModel,
         fvMesh,
-        (
-            const fvMesh& mesh,
-            const word& compTypeName,
-            const word& thermoTypeName
-        ),
-        (mesh, compTypeName, thermoTypeName)
+        (const fvMesh& mesh),
+        (mesh)
     );
 
 
     // Constructors
 
         //- Construct from mesh
-        psiChemistryModel(const fvMesh& mesh, const word& thermoTypeName);
+        psiChemistryModel(const fvMesh& mesh);
 
 
     //- Selector

@@ -47,10 +47,10 @@ namespace Foam
                      Class noChemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ODEChemistryType>
+template<class ChemistryModel>
 class noChemistrySolver
 :
-    public chemistrySolver<ODEChemistryType>
+    public chemistrySolver<ChemistryModel>
 {
 
 public:
@@ -61,14 +61,8 @@ public:
 
     // Constructors
 
-
         //- Construct from components
-        noChemistrySolver
-        (
-            const fvMesh& mesh,
-            const word& ODEModelName,
-            const word& thermoType
-        );
+        noChemistrySolver(const fvMesh& mesh);
 
 
     //- Destructor

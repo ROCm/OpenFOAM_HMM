@@ -88,18 +88,16 @@ public:
         rhoChemistryModel,
         fvMesh,
         (
-            const fvMesh& mesh,
-            const word& compTypeName,
-            const word& thermoTypeName
+            const fvMesh& mesh
         ),
-        (mesh, compTypeName, thermoTypeName)
+        (mesh)
     );
 
 
     // Constructors
 
         //- Construct from mesh
-        rhoChemistryModel(const fvMesh& mesh, const word& thermoTypeName);
+        rhoChemistryModel(const fvMesh& mesh);
 
 
     //- Selector

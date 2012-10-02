@@ -39,8 +39,7 @@ namespace Foam
 
 Foam::rhoChemistryModel::rhoChemistryModel
 (
-    const fvMesh& mesh,
-    const word& thermoTypeName
+    const fvMesh& mesh
 )
 :
     basicChemistryModel(mesh),

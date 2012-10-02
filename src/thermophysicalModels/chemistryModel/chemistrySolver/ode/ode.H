@@ -47,10 +47,10 @@ namespace Foam
                             Class ode Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ODEChemistryType>
+template<class ChemistryModel>
 class ode
 :
-    public chemistrySolver<ODEChemistryType>
+    public chemistrySolver<ChemistryModel>
 {
     // Private data
 
@@ -66,18 +66,13 @@ class ode
 public:
 
     //- Runtime type information
-    TypeName("ODE");
+    TypeName("ode");
 
 
     // Constructors
 
-        //- Construct from components
-        ode
-        (
-            const fvMesh& mesh,
-            const word& ODEModeNewlName,
-            const word& thermoType
-        );
+        //- Construct from mesh
+        ode(const fvMesh& mesh);
 
 
     //- Destructor

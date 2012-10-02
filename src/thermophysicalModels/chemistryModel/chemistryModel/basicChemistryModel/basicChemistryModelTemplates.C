@@ -158,8 +158,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             FatalError<< exit(FatalError);
         }
 
-        return autoPtr<ChemistryModel>
-            (cstrIter()(mesh, typeName, chemistryTypeName));
+        return autoPtr<ChemistryModel>(cstrIter()(mesh));
     }
     else
     {
@@ -181,8 +180,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
                 << exit(FatalError);
         }
 
-        return autoPtr<ChemistryModel>
-            (cstrIter()(mesh, typeName, chemistryTypeName));
+        return autoPtr<ChemistryModel>(cstrIter()(mesh));
     }
 }
 

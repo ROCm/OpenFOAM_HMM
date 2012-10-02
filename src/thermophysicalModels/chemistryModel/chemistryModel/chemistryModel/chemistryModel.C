@@ -32,12 +32,10 @@ License
 template<class CompType, class ThermoType>
 Foam::chemistryModel<CompType, ThermoType>::chemistryModel
 (
-    const fvMesh& mesh,
-    const word& ODEModelName,
-    const word& thermoTypeName
+    const fvMesh& mesh
 )
 :
-    CompType(mesh, thermoTypeName),
+    CompType(mesh),
 
     ODE(),
 

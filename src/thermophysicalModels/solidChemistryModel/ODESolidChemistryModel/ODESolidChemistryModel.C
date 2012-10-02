@@ -32,12 +32,10 @@ template<class CompType, class SolidThermo, class GasThermo>
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::
 ODESolidChemistryModel
 (
-    const fvMesh& mesh,
-    const word& compTypeName,
-    const word& solidThermoName
+    const fvMesh& mesh
 )
 :
-    CompType(mesh, solidThermoName),
+    CompType(mesh),
     ODE(),
     Ys_(this->solid().composition().Y()),
     pyrolisisGases_
