@@ -204,7 +204,14 @@ private:
         //- Set faces according to sampledSurface
         void sampledSurfaceFaces(const dictionary&);
 
-        //- Combine faces and points from multiple processors 
+        //- Combine mesh faces and points from multiple processors 
+        void combineMeshGeometry
+        (
+            faceList& faces,
+            pointField& points
+        ) const;
+
+        //- Combine surface faces and points from multiple processors 
         void combineSurfaceGeometry
         (
             faceList& faces,

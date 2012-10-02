@@ -31,6 +31,7 @@ License
 #include "sampledSurface.H"
 #include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -224,7 +225,7 @@ void Foam::fieldValues::faceSource::sampledSurfaceFaces(const dictionary& dict)
 }
 
 
-void Foam::fieldValues::faceSource::combineSurfaceGeometry
+void Foam::fieldValues::faceSource::combineMeshGeometry
 (
     faceList& faces,
     pointField& points
@@ -340,6 +341,45 @@ void Foam::fieldValues::faceSource::combineSurfaceGeometry
         forAll(faces, i)
         {
             inplaceRenumber(oldToNew, faces[i]);
+        }
+    }
+}
+
+
+void Foam::fieldValues::faceSource::combineSurfaceGeometry
+(
+    faceList& faces,
+    pointField& points
+) const
+{
+    if (surfacePtr_.valid())
+    {
+        const sampledSurface& s = surfacePtr_();
+
+        if (Pstream::parRun())
+        {
+            // dimension as fraction of mesh bounding box
+            scalar mergeDim = 1e-10*mesh().bounds().mag();
+
+            labelList pointsMap;
+
+            PatchTools::gatherAndMerge
+            (
+                mergeDim,
+                primitivePatch
+                (
+                    SubList<face>(s.faces(), s.faces().size()),
+                    s.points()
+                ),
+                points,
+                faces,
+                pointsMap
+            );
+        }
+        else
+        {
+            faces = s.faces();
+            points = s.points();
         }
     }
 }
