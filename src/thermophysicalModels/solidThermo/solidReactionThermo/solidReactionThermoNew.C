@@ -53,16 +53,16 @@ Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
 
     Info<< "Selecting thermodynamics package " << modelType << endl;
 
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(modelType);
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("solidReactionThermo::New(const fvMesh&)")
             << "Unknown solidReactionThermo type "
             << modelType << nl << nl
             << "Valid solidReactionThermo types:" << nl
-            << meshConstructorTablePtr_->sortedToc() << nl
+            << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }
 
