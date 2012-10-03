@@ -318,7 +318,13 @@ const tmp<volScalarField> thermoBaffle2D::Cp() const
 
 const volScalarField& thermoBaffle2D::kappaRad() const
 {
-    return thermo_->kappaRad();
+    // ***HGW return thermo_->kappaRad();
+    FatalErrorIn
+    (
+        "thermoBaffle2D::kappaRad()"
+    )   << "not currently supported"
+        << exit(FatalError);
+    return volScalarField::null();
 }
 
 

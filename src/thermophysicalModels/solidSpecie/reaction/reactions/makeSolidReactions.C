@@ -21,81 +21,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::heRhoThermo
-
-Description
-    Enthalpy for a mixture based on density
-
-SourceFiles
-    heRhoThermo.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef heRhoThermo_H
-#define heRhoThermo_H
-
-#include "rhoThermo.H"
-#include "heThermo.H"
+#include "makeSolidReaction.H"
+#include "solidArrheniusReactionRate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                         Class heRhoThermo Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * Make Solid reactions  * * * * * * * * * * * * //
 
-template<class MixtureType>
-class heRhoThermo
-:
-    public heThermo<rhoThermo, MixtureType>
-{
-    // Private Member Functions
-
-        //- Calculate the thermo variables
-        void calculate();
-
-        //- Construct as copy (not implemented)
-        heRhoThermo(const heRhoThermo<MixtureType>&);
-
-
-public:
-
-    //- Runtime type information
-    TypeName("heRhoThermo");
-
-
-    // Constructors
-
-        //- Construct from mesh
-        heRhoThermo(const fvMesh&);
-
-
-    //- Destructor
-    virtual ~heRhoThermo();
-
-
-    // Member functions
-
-        //- Update properties
-        virtual void correct();
-};
-
+makeIRReactions(solidArrheniusReactionRate)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-#ifdef NoRepository
-#   include "heRhoThermo.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

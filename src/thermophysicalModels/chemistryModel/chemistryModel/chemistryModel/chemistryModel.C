@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "chemistryModel.H"
-#include "chemistrySolver.H"
 #include "reactingMixture.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -568,6 +567,8 @@ Foam::chemistryModel<CompType, ThermoType>::tc() const
     );
 
     scalarField& tc = ttc();
+    const scalarField& T = this->thermo().T();
+    const scalarField& p = this->thermo().p();
 
     const label nReaction = reactions_.size();
 
@@ -576,8 +577,8 @@ Foam::chemistryModel<CompType, ThermoType>::tc() const
         forAll(rho, celli)
         {
             scalar rhoi = rho[celli];
-            scalar Ti = this->thermo().T()[celli];
-            scalar pi = this->thermo().p()[celli];
+            scalar Ti = T[celli];
+            scalar pi = p[celli];
             scalarField c(nSpecie_);
             scalar cSum = 0.0;
 
@@ -716,11 +717,14 @@ void Foam::chemistryModel<CompType, ThermoType>::calculate()
         this->thermo().rho()
     );
 
+    const scalarField& T = this->thermo().T();
+    const scalarField& p = this->thermo().p();
+
     forAll(rho, celli)
     {
         const scalar rhoi = rho[celli];
-        const scalar Ti = this->thermo().T()[celli];
-        const scalar pi = this->thermo().p()[celli];
+        const scalar Ti = T[celli];
+        const scalar pi = p[celli];
 
         scalarField c(nSpecie_, 0.0);
         for (label i=0; i<nSpecie_; i++)
@@ -771,13 +775,16 @@ Foam::scalar Foam::chemistryModel<CompType, ThermoType>::solve
 
     tmp<volScalarField> thc = this->thermo().hc();
     const scalarField& hc = thc();
+    const scalarField& he = this->thermo().he();
+    const scalarField& T = this->thermo().T();
+    const scalarField& p = this->thermo().p();
 
     forAll(rho, celli)
     {
         const scalar rhoi = rho[celli];
-        const scalar hi = this->thermo().he()[celli] + hc[celli];
-        const scalar pi = this->thermo().p()[celli];
-        scalar Ti = this->thermo().T()[celli];
+        const scalar hi = he[celli] + hc[celli];
+        const scalar pi = p[celli];
+        scalar Ti = T[celli];
 
         scalarField c(nSpecie_, 0.0);
         scalarField c0(nSpecie_, 0.0);

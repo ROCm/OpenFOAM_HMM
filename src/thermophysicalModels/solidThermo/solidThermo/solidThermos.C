@@ -21,80 +21,85 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::hePsiReactionThermo
-
-Description
-    Foam::hePsiReactionThermo
-
-SourceFiles
-    hePsiReactionThermo.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef hePsiReactionThermo_H
-#define hePsiReactionThermo_H
+#include "makeSolidThermo.H"
+#include "solidThermo.H"
+#include "heSolidThermo.H"
 
-#include "heThermo.H"
-#include "psiReactionThermo.H"
+#include "specie.H"
+#include "rhoConst.H"
+#include "hConstThermo.H"
+#include "hExponentialThermo.H"
+#include "constIsoSolidTransport.H"
+#include "constAnIsoSolidTransport.H"
+#include "exponentialSolidTransport.H"
+#include "pureSolidMixture.H"
+#include "multiComponentSolidMixture.H"
+#include "reactingSolidMixture.H"
+#include "sensibleEnthalpy.H"
+#include "sensibleInternalEnergy.H"
+#include "thermo.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                      Class hePsiReactionThermo Declaration
-\*---------------------------------------------------------------------------*/
+/* * * * * * * * * * * * * * * * * Enthalpy-based * * * * * * * * * * * * * */
 
-template<class MixtureType>
-class hePsiReactionThermo
-:
-    public heThermo<psiReactionThermo, MixtureType>
-{
-    // Private Member Functions
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    constIsoSolidTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
 
-        void calculate();
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    constAnIsoSolidTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
 
-        //- Construct as copy (not implemented)
-        hePsiReactionThermo(const hePsiReactionThermo<MixtureType>&);
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureSolidMixture,
+    exponentialSolidTransport,
+    sensibleEnthalpy,
+    hExponentialThermo,
+    rhoConst,
+    specie
+);
 
-
-public:
-
-    //- Runtime type information
-    TypeName("hePsiReactionThermo");
-
-
-    // Constructors
-
-        //- Construct from mesh
-        hePsiReactionThermo(const fvMesh&);
-
-
-    //- Destructor
-    virtual ~hePsiReactionThermo();
-
-
-    // Member functions
-
-        //- Update properties
-        virtual void correct();
-};
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    multiComponentSolidMixture,
+    constIsoSolidTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    specie
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "hePsiReactionThermo.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

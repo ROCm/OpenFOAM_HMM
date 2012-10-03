@@ -14,7 +14,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heSolidThermo<reactingSolidMixture<constIso<const<hConst<rhoConst<specie>>,sensibleEnthalpy>>>>;
+thermoType
+{
+    type            heSolidThermo;
+    mixture         reactingSolidMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
 
 solidComponents
 (

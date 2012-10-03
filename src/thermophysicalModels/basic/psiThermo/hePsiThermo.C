@@ -23,14 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "hePsiReactionThermo.H"
-#include "fvMesh.H"
-#include "fixedValueFvPatchFields.H"
+#include "hePsiThermo.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class MixtureType>
-void Foam::hePsiReactionThermo<MixtureType>::calculate()
+template<class BasicPsiThermo, class MixtureType>
+void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::calculate()
 {
     const scalarField& hCells = this->he_.internalField();
     const scalarField& pCells = this->p_.internalField();
@@ -42,20 +40,20 @@ void Foam::hePsiReactionThermo<MixtureType>::calculate()
 
     forAll(TCells, celli)
     {
-        const typename MixtureType::thermoType& mixture =
+        const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture.THE
+        TCells[celli] = mixture_.THE
         (
             hCells[celli],
             pCells[celli],
             TCells[celli]
         );
 
-        psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
 
-        muCells[celli] = mixture.mu(pCells[celli], TCells[celli]);
-        alphaCells[celli] = mixture.alphah(pCells[celli], TCells[celli]);
+        muCells[celli] = mixture_.mu(pCells[celli], TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
     }
 
     forAll(this->T_.boundaryField(), patchi)
@@ -66,35 +64,35 @@ void Foam::hePsiReactionThermo<MixtureType>::calculate()
 
         fvPatchScalarField& ph = this->he_.boundaryField()[patchi];
 
-        fvPatchScalarField& pmu_ = this->mu_.boundaryField()[patchi];
-        fvPatchScalarField& palpha_ = this->alpha_.boundaryField()[patchi];
+        fvPatchScalarField& pmu = this->mu_.boundaryField()[patchi];
+        fvPatchScalarField& palpha = this->alpha_.boundaryField()[patchi];
 
         if (pT.fixesValue())
         {
             forAll(pT, facei)
             {
-                const typename MixtureType::thermoType& mixture =
+                const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                ph[facei] = mixture.HE(pp[facei], pT[facei]);
+                ph[facei] = mixture_.HE(pp[facei], pT[facei]);
 
-                ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
-                pmu_[facei] = mixture.mu(pp[facei], pT[facei]);
-                palpha_[facei] = mixture.alphah(pp[facei], pT[facei]);
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
             }
         }
         else
         {
             forAll(pT, facei)
             {
-                const typename MixtureType::thermoType& mixture =
+                const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture.THE(ph[facei], pp[facei], pT[facei]);
+                pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
 
-                ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
-                pmu_[facei] = mixture.mu(pp[facei], pT[facei]);
-                palpha_[facei] = mixture.alphah(pp[facei], pT[facei]);
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
             }
         }
     }
@@ -103,10 +101,10 @@ void Foam::hePsiReactionThermo<MixtureType>::calculate()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class MixtureType>
-Foam::hePsiReactionThermo<MixtureType>::hePsiReactionThermo(const fvMesh& mesh)
+template<class BasicPsiThermo, class MixtureType>
+Foam::hePsiThermo<BasicPsiThermo, MixtureType>::hePsiThermo(const fvMesh& mesh)
 :
-    heThermo<psiReactionThermo, MixtureType>(mesh)
+    heThermo<BasicPsiThermo, MixtureType>(mesh)
 {
     calculate();
 
@@ -117,19 +115,19 @@ Foam::hePsiReactionThermo<MixtureType>::hePsiReactionThermo(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class MixtureType>
-Foam::hePsiReactionThermo<MixtureType>::~hePsiReactionThermo()
+template<class BasicPsiThermo, class MixtureType>
+Foam::hePsiThermo<BasicPsiThermo, MixtureType>::~hePsiThermo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class MixtureType>
-void Foam::hePsiReactionThermo<MixtureType>::correct()
+template<class BasicPsiThermo, class MixtureType>
+void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
     if (debug)
     {
-        Info<< "entering hePsiReactionThermo<MixtureType>::correct()" << endl;
+        Info<< "entering hePsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
     }
 
     // force the saving of the old-time values
@@ -139,7 +137,7 @@ void Foam::hePsiReactionThermo<MixtureType>::correct()
 
     if (debug)
     {
-        Info<< "exiting hePsiReactionThermo<MixtureType>::correct()" << endl;
+        Info<< "exiting hePsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
     }
 }
 

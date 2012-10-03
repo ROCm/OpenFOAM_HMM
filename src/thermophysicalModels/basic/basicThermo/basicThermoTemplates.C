@@ -27,25 +27,13 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-template<class Thermo>
-Foam::autoPtr<Thermo> Foam::basicThermo::New
+template<class Thermo, class Table>
+typename Table::iterator Foam::basicThermo::lookupThermo
 (
-    const fvMesh& mesh
+    const dictionary& thermoDict,
+    Table* tablePtr
 )
 {
-    IOdictionary thermoDict
-    (
-        IOobject
-        (
-            "thermophysicalProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     word thermoTypeName;
 
     if (thermoDict.isDict("thermoType"))
@@ -76,16 +64,13 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
           + word(thermoTypeDict.lookup("specie")) + ">>,"
           + word(thermoTypeDict.lookup("energy")) + ">>>";
 
-        Info<< thermoTypeName << endl;
-
         // Lookup the thermo package
-        typename Thermo::fvMeshConstructorTable::iterator cstrIter =
-            Thermo::fvMeshConstructorTablePtr_->find(thermoTypeName);
+        typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
 
         // Print error message if package not found in the table
-        if (cstrIter == Thermo::fvMeshConstructorTablePtr_->end())
+        if (cstrIter == tablePtr->end())
         {
-            FatalErrorIn(Thermo::typeName + "::New(const fvMesh&)")
+            FatalErrorIn(Thermo::typeName + "::New")
                 << "Unknown " << Thermo::typeName << " type " << nl
                 << "thermoType" << thermoTypeDict << nl << nl
                 << "Valid " << Thermo::typeName << " types are:" << nl << nl;
@@ -93,7 +78,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             // Get the list of all the suitable thermo packages available
             wordList validThermoTypeNames
             (
-                Thermo::fvMeshConstructorTablePtr_->sortedToc()
+                tablePtr->sortedToc()
             );
 
             // Build a table of the thermo packages constituent parts
@@ -123,7 +108,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             FatalError<< exit(FatalError);
         }
 
-        return autoPtr<Thermo>(cstrIter()(mesh));
+        return cstrIter;
     }
     else
     {
@@ -131,21 +116,68 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
 
         Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
-        typename Thermo::fvMeshConstructorTable::iterator cstrIter =
-            Thermo::fvMeshConstructorTablePtr_->find(thermoTypeName);
+        typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
 
-        if (cstrIter == Thermo::fvMeshConstructorTablePtr_->end())
+        if (cstrIter == tablePtr->end())
         {
-            FatalErrorIn(Thermo::typeName + "::New(const fvMesh&)")
+            FatalErrorIn(Thermo::typeName + "::New")
                 << "Unknown " << Thermo::typeName << " type "
                 << thermoTypeName << nl << nl
                 << "Valid " << Thermo::typeName << " types are:" << nl
-                << Thermo::fvMeshConstructorTablePtr_->sortedToc() << nl
+                << tablePtr->sortedToc() << nl
                 << exit(FatalError);
         }
 
-        return autoPtr<Thermo>(cstrIter()(mesh));
+        return cstrIter;
     }
+}
+
+
+template<class Thermo>
+Foam::autoPtr<Thermo> Foam::basicThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    IOdictionary thermoDict
+    (
+        IOobject
+        (
+            "thermophysicalProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    typename Thermo::fvMeshConstructorTable::iterator cstrIter =
+        lookupThermo<Thermo, typename Thermo::fvMeshConstructorTable>
+        (
+            thermoDict,
+            Thermo::fvMeshConstructorTablePtr_
+        );
+
+    return autoPtr<Thermo>(cstrIter()(mesh));
+}
+
+
+template<class Thermo>
+Foam::autoPtr<Thermo> Foam::basicThermo::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    typename Thermo::dictionaryConstructorTable::iterator cstrIter =
+        lookupThermo<Thermo, typename Thermo::dictionaryConstructorTable>
+        (
+            dict,
+            Thermo::dictionaryConstructorTablePtr_
+        );
+
+    return autoPtr<Thermo>(cstrIter()(mesh, dict));
 }
 
 

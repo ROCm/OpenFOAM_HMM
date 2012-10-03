@@ -135,33 +135,39 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
         case SOLIDTHERMO:
         {
             // Get the coupling information from the mappedPatchBase
-            const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>
-                (
-                    patch_.patch()
-                );
+            // const mappedPatchBase& mpp =
+            //     refCast<const mappedPatchBase>
+            //     (
+            //         patch_.patch()
+            //     );
 
-            const polyMesh& nbrMesh = mpp.sampleMesh();
+            // const polyMesh& nbrMesh = mpp.sampleMesh();
 
-            const solidThermo& thermo =
-                nbrMesh.lookupObject<solidThermo>
-                (
-                    "thermophysicalProperties"
-                );
+            // const solidThermo& thermo =
+            //     nbrMesh.lookupObject<solidThermo>
+            //     (
+            //         "thermophysicalProperties"
+            //     );
 
             // Force recalculation of mapping and schedule
-            const mapDistribute& distMap = mpp.map();
+            // const mapDistribute& distMap = mpp.map();
 
-            const fvPatch& nbrPatch = refCast<const fvMesh>
+            // const fvPatch& nbrPatch = refCast<const fvMesh>
+            // (
+            //     nbrMesh
+            // ).boundary()[mpp.samplePolyPatch().index()];
+
+            // scalarField emissivity(thermo.emissivity(nbrPatch.index()));
+            // distMap.distribute(emissivity);
+
+            // return emissivity;
+            FatalErrorIn
             (
-                nbrMesh
-            ).boundary()[mpp.samplePolyPatch().index()];
+                "radiationCoupledBase::emissivity(const scalarField&)"
+            )   << "Solid radiation properties temporarily removed"
+                << exit(FatalError);
 
-            scalarField emissivity(thermo.emissivity(nbrPatch.index()));
-            distMap.distribute(emissivity);
-
-            return emissivity;
-
+            return scalarField(0);
         }
         break;
 
@@ -176,8 +182,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
             FatalErrorIn
             (
                 "radiationCoupledBase::emissivity(const scalarField&)"
-            )
-                << "Unimplemented method " << method_ << endl
+            )   << "Unimplemented method " << method_ << endl
                 << "Please set 'emissivity' to one of "
                 << emissivityMethodTypeNames_.toc()
                 << " and 'emissivityName' to the name of the volScalar"
@@ -185,6 +190,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
         }
         break;
     }
+
     return scalarField(0);
 }
 

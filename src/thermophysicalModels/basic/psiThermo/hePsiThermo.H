@@ -21,22 +21,80 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::hePsiThermo
+
+Description
+    Energy for a mixture based on compressibility
+
+SourceFiles
+    hePsiThermo.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidReactionThermo.H"
-#include "solidArrheniusReactionRate.H"
+#ifndef hePsiThermo_H
+#define hePsiThermo_H
+
+#include "psiThermo.H"
+#include "heThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * Make Solid reactions  * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                         Class hePsiThermo Declaration
+\*---------------------------------------------------------------------------*/
 
-makeIRReactions(solidArrheniusReactionRate)
+template<class BasicPsiThermo, class MixtureType>
+class hePsiThermo
+:
+    public heThermo<BasicPsiThermo, MixtureType>
+{
+    // Private Member Functions
+
+        //- Calculate the thermo variables
+        void calculate();
+
+        //- Construct as copy (not implemented)
+        hePsiThermo(const hePsiThermo<BasicPsiThermo, MixtureType>&);
+
+public:
+
+    //- Runtime type information
+    TypeName("hePsiThermo");
+
+
+    // Constructors
+
+        //- Construct from mesh
+        hePsiThermo(const fvMesh&);
+
+
+    //- Destructor
+    virtual ~hePsiThermo();
+
+
+    // Member functions
+
+        //- Update properties
+        virtual void correct();
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+#ifdef NoRepository
+#   include "hePsiThermo.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

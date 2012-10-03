@@ -32,48 +32,20 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
     const fvMesh& mesh
 )
 {
-    if (debug)
-    {
-        Info<< "solidThermo::New(const fvMesh&): "
-            << "constructing solidThermo"
-            << endl;
-    }
-
-    const word thermoType
-    (
-        IOdictionary
-        (
-            IOobject
-            (
-                "thermophysicalProperties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).lookup("thermoType")
-    );
-
-    fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(thermoType);
-
-    if (cstrIter == fvMeshConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "solidThermo::New(const fvMesh&)"
-        )   << "Unknown solidThermo type " << thermoType
-            << endl << endl
-            << "Valid solidThermo types are :" << endl
-            << fvMeshConstructorTablePtr_->toc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<solidThermo>(cstrIter()(mesh));
+    return basicThermo::New<solidThermo>(mesh);
 }
 
 
+Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    return basicThermo::New<solidThermo>(mesh, dict);
+}
+
+/*
 Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 (
     const fvMesh& mesh,
@@ -106,6 +78,7 @@ Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 
     return autoPtr<solidThermo>(cstrIter()(mesh, dict));
 }
+*/
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

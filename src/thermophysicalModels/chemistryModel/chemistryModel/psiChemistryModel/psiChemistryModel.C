@@ -25,7 +25,6 @@ License
 
 #include "psiChemistryModel.H"
 #include "fvMesh.H"
-#include "Time.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -34,6 +33,7 @@ namespace Foam
     defineTypeNameAndDebug(psiChemistryModel, 0);
     defineRunTimeSelectionTable(psiChemistryModel, fvMesh);
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
