@@ -312,7 +312,8 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                     {
                         Pout<< "Adding particle from point:" << pointI
                             << " coord:" << featureMesh.points()[pointI]
-                            << " pEdges:" << pointEdges[pointI]
+                            << " since number of emanating edges:"
+                            << pointEdges[pointI].size()
                             << endl;
                     }
 
