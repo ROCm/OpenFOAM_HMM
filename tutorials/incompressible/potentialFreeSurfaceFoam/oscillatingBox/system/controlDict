@@ -62,7 +62,7 @@ functions
         pName           p;
         UName           U;
         rhoName         rhoInf;
-        log             true;
+        log             yes;
         rhoInf          1000;
         CofR            (0 0 0);
     }
@@ -71,11 +71,11 @@ functions
     {
         type            faceSource;
         functionObjectLibs ("libfieldFunctionObjects.so");
-        enabled         true;
+        enabled         yes;
         outputControl   timeStep;
         outputInterval  1;
-        log             true;
-        valueOutput     false;
+        log             yes;
+        valueOutput     no;
         source          faceZone;
         sourceName      f0;
         operation       areaAverage;

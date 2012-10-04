@@ -1,11 +1,6 @@
-atomicWeights = atomicWeights
-specie = specie
-equationOfState = equationOfState
-reactions = reaction/reactions
-
-$(atomicWeights)/atomicWeights.C
-$(specie)/specie.C
-$(reactions)/makeReactionThermoReactions.C
-$(reactions)/makeLangmuirHinshelwoodReactions.C
+atomicWeights/atomicWeights.C
+specie/specie.C
+reaction/reactions/makeReactions.C
+reaction/reactions/makeLangmuirHinshelwoodReactions.C
 
 LIB = $(FOAM_LIBBIN)/libspecie

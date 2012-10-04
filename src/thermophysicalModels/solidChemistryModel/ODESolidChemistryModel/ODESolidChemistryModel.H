@@ -138,13 +138,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        ODESolidChemistryModel
-        (
-            const fvMesh& mesh,
-            const word& compTypeName,
-            const word& SolidThermoName
-        );
+        //- Construct from mesh
+        ODESolidChemistryModel(const fvMesh& mesh);
 
 
     //- Destructor

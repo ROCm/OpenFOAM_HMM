@@ -22,20 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::hePsiThermo
+    Foam::heSolidThermo
 
 Description
-    Enthalpy for a mixture based on compressibility
+    Energy for a solid mixture
 
 SourceFiles
-    hePsiThermo.C
+    heSolidThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hePsiThermo_H
-#define hePsiThermo_H
+#ifndef heSolidThermo_H
+#define heSolidThermo_H
 
-#include "psiThermo.H"
 #include "heThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,13 +43,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class hePsiThermo Declaration
+                        Class heSolidThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MixtureType>
-class hePsiThermo
+template<class BasicSolidThermo, class MixtureType>
+class heSolidThermo
 :
-    public heThermo<psiThermo, MixtureType>
+    public heThermo<BasicSolidThermo, MixtureType>
 {
     // Private Member Functions
 
@@ -58,28 +57,44 @@ class hePsiThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        hePsiThermo(const hePsiThermo<MixtureType>&);
+        heSolidThermo(const heSolidThermo<BasicSolidThermo, MixtureType>&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("hePsiThermo");
+    TypeName("heSolidThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        hePsiThermo(const fvMesh&);
+        heSolidThermo(const fvMesh&);
+
+        //- Construct from mesh and dictionary
+        heSolidThermo(const fvMesh&, const dictionary&);
 
 
     //- Destructor
-    virtual ~hePsiThermo();
+    virtual ~heSolidThermo();
 
 
     // Member functions
 
         //- Update properties
         virtual void correct();
+
+
+        // Derived thermal properties
+
+            //- Anisotropic thermal conductivity [W/m/K]
+            virtual tmp<volVectorField> Kappa() const;
+
+
+        // Per patch calculation
+
+            //- Anisotropic thermal conductivity [W/m/K]
+            virtual tmp<vectorField> Kappa(const label patchI) const;
 };
 
 
@@ -87,10 +102,10 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "hePsiThermo.C"
+#   include "heSolidThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

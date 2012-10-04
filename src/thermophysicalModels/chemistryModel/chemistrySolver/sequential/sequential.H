@@ -48,16 +48,15 @@ namespace Foam
                          Class sequential Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ODEChemistryType>
+template<class ChemistryModel>
 class sequential
 :
-    public chemistrySolver<ODEChemistryType>
+    public chemistrySolver<ChemistryModel>
 {
     // Private data
 
         //- Coefficients dictionary
         dictionary coeffsDict_;
-
 
         // Model constants
 
@@ -76,13 +75,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        sequential
-        (
-            const fvMesh& mesh,
-            const word& ODEModelName,
-            const word& thermoType
-        );
+        //- Construct from mesh
+        sequential(const fvMesh& mesh);
 
 
     //- Destructor

@@ -28,15 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::sequential<ODEChemistryType>::sequential
+template<class ChemistryModel>
+Foam::sequential<ChemistryModel>::sequential
 (
-    const fvMesh& mesh,
-    const word& ODEModelName,
-    const word& thermoType
+    const fvMesh& mesh
 )
 :
-    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
+    chemistrySolver<ChemistryModel>(mesh),
     coeffsDict_(this->subDict("sequentialCoeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     eqRateLimiter_(coeffsDict_.lookup("equilibriumRateLimiter"))
@@ -45,15 +43,15 @@ Foam::sequential<ODEChemistryType>::sequential
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::sequential<ODEChemistryType>::~sequential()
+template<class ChemistryModel>
+Foam::sequential<ChemistryModel>::~sequential()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::scalar Foam::sequential<ODEChemistryType>::solve
+template<class ChemistryModel>
+Foam::scalar Foam::sequential<ChemistryModel>::solve
 (
     scalarField &c,
     const scalar T,

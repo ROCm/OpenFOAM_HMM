@@ -1,4 +1,4 @@
 reaction/Reactions/solidReaction/solidReaction.C
-reaction/reactions/makeSolidReactionThermoReactions.C
+reaction/reactions/makeSolidReactions.C
 
 LIB = $(FOAM_LIBBIN)/libsolidSpecie

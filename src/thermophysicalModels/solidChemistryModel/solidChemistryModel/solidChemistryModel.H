@@ -88,23 +88,15 @@ public:
         autoPtr,
         solidChemistryModel,
         fvMesh,
-        (
-            const fvMesh& mesh,
-            const word& compTypeName,
-            const word& solidThermoTypeName
-        ),
-        (mesh, compTypeName, solidThermoTypeName)
+        (const fvMesh& mesh),
+        (mesh)
     );
 
 
     // Constructors
 
-        //- Construct from mesh and thermo type name
-        solidChemistryModel
-        (
-            const fvMesh& mesh,
-            const word& solidThermoTypeName
-        );
+        //- Construct from mesh
+        solidChemistryModel(const fvMesh& mesh);
 
 
     //- Selector

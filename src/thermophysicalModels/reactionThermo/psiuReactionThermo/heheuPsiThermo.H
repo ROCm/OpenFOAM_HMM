@@ -36,7 +36,6 @@ SourceFiles
 #define heheuReactionThermo_H
 
 #include "heThermo.H"
-#include "psiuReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,13 +43,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class heheuReactionThermo Declaration
+                      Class heheuPsiThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MixtureType>
-class heheuReactionThermo
+template<class BasicPsiThermo, class MixtureType>
+class heheuPsiThermo
 :
-    public heThermo<psiuReactionThermo, MixtureType>
+    public heThermo<BasicPsiThermo, MixtureType>
 {
     // Private Member Functions
 
@@ -63,23 +62,26 @@ class heheuReactionThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        heheuReactionThermo(const heheuReactionThermo<MixtureType>&);
+        heheuPsiThermo
+        (
+            const heheuPsiThermo<BasicPsiThermo, MixtureType>&
+        );
 
 
 public:
 
     //- Runtime type information
-    TypeName("heheuReactionThermo");
+    TypeName("heheuPsiThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        heheuReactionThermo(const fvMesh&);
+        heheuPsiThermo(const fvMesh&);
 
 
     //- Destructor
-    virtual ~heheuReactionThermo();
+    virtual ~heheuPsiThermo();
 
 
     // Member functions
@@ -155,7 +157,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifdef NoRepository
-#   include "heheuReactionThermo.C"
+#   include "heheuPsiThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

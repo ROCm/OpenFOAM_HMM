@@ -23,20 +23,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidReactionThermo.H"
-#include "solidArrheniusReactionRate.H"
+#include "volFields.H"
+#include "zeroGradientFvPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CompType, class ThermoType>
+inline Foam::PtrList<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >&
+Foam::chemistryModel<CompType, ThermoType>::RR()
 {
+    return RR_;
+}
 
-// * * * * * * * * * * * * * Make Solid reactions  * * * * * * * * * * * * //
 
-makeIRReactions(solidArrheniusReactionRate)
+template<class CompType, class ThermoType>
+inline const Foam::PtrList<Foam::Reaction<ThermoType> >&
+Foam::chemistryModel<CompType, ThermoType>::reactions() const
+{
+    return reactions_;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<class CompType, class ThermoType>
+inline const Foam::PtrList<ThermoType>&
+Foam::chemistryModel<CompType, ThermoType>::specieThermo() const
+{
+    return specieThermo_;
+}
+
+
+template<class CompType, class ThermoType>
+inline Foam::label
+Foam::chemistryModel<CompType, ThermoType>::nSpecie() const
+{
+    return nSpecie_;
+}
+
+
+template<class CompType, class ThermoType>
+inline Foam::label
+Foam::chemistryModel<CompType, ThermoType>::nReaction() const
+{
+    return nReaction_;
+}
+
+
+template<class CompType, class ThermoType>
+inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::chemistryModel<CompType, ThermoType>::RR
+(
+    const label i
+) const
+{
+    return RR_[i];
+}
+
 
 // ************************************************************************* //

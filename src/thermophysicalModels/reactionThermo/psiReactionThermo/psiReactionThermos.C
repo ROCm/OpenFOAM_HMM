@@ -26,7 +26,7 @@ License
 #include "makeReactionThermo.H"
 
 #include "psiReactionThermo.H"
-#include "hePsiReactionThermo.H"
+#include "hePsiThermo.H"
 
 #include "specie.H"
 #include "perfectGas.H"
@@ -59,7 +59,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     homogeneousMixture,
     constTransport,
     sensibleEnthalpy,
@@ -72,7 +72,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     inhomogeneousMixture,
     constTransport,
     sensibleEnthalpy,
@@ -85,7 +85,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     veryInhomogeneousMixture,
     constTransport,
     sensibleEnthalpy,
@@ -101,7 +101,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     homogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -114,7 +114,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     inhomogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -127,7 +127,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     veryInhomogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -143,7 +143,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     homogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -156,7 +156,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     inhomogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -169,7 +169,7 @@ makeReactionThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     veryInhomogeneousMixture,
     sutherlandTransport,
     sensibleEnthalpy,
@@ -185,7 +185,7 @@ makeReactionMixtureThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     multiComponentMixture,
     constGasThermoPhysics
 );
@@ -194,7 +194,7 @@ makeReactionMixtureThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     multiComponentMixture,
     gasThermoPhysics
 );
@@ -206,7 +206,7 @@ makeReactionMixtureThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     reactingMixture,
     constGasThermoPhysics
 );
@@ -215,7 +215,7 @@ makeReactionMixtureThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     reactingMixture,
     gasThermoPhysics
 );
@@ -224,7 +224,7 @@ makeReactionMixtureThermo
 (
     psiThermo,
     psiReactionThermo,
-    hePsiReactionThermo,
+    hePsiThermo,
     singleStepReactingMixture,
     gasThermoPhysics
 );

@@ -149,6 +149,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
                     "radiationProperties"
                 );
 
+
             // Force recalculation of mapping and schedule
             const mapDistribute& distMap = mpp.map();
 
@@ -156,6 +157,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
             (
                 nbrMesh
             ).boundary()[mpp.samplePolyPatch().index()];
+
 
             scalarField emissivity
             (
@@ -182,8 +184,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
             FatalErrorIn
             (
                 "radiationCoupledBase::emissivity(const scalarField&)"
-            )
-                << "Unimplemented method " << method_ << endl
+            )   << "Unimplemented method " << method_ << endl
                 << "Please set 'emissivity' to one of "
                 << emissivityMethodTypeNames_.toc()
                 << " and 'emissivityName' to the name of the volScalar"
@@ -191,6 +192,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
         }
         break;
     }
+
     return scalarField(0);
 }
 

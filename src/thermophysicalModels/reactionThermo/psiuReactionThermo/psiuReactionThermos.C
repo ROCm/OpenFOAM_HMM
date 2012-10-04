@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "psiuReactionThermo.H"
-#include "heheuReactionThermo.H"
+#include "heheuPsiThermo.H"
 
 #include "makeReactionThermo.H"
 #include "addToRunTimeSelectionTable.H"
@@ -56,7 +56,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     homogeneousMixture,
     constTransport,
     absoluteEnthalpy,
@@ -69,7 +69,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     inhomogeneousMixture,
     constTransport,
     absoluteEnthalpy,
@@ -82,7 +82,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     veryInhomogeneousMixture,
     constTransport,
     absoluteEnthalpy,
@@ -95,7 +95,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     homogeneousMixture,
     sutherlandTransport,
     absoluteEnthalpy,
@@ -108,7 +108,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     inhomogeneousMixture,
     sutherlandTransport,
     absoluteEnthalpy,
@@ -121,7 +121,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     veryInhomogeneousMixture,
     sutherlandTransport,
     absoluteEnthalpy,
@@ -134,7 +134,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     egrMixture,
     constTransport,
     absoluteEnthalpy,
@@ -147,7 +147,7 @@ makeReactionThermo
 (
     psiThermo,
     psiuReactionThermo,
-    heheuReactionThermo,
+    heheuPsiThermo,
     egrMixture,
     sutherlandTransport,
     absoluteEnthalpy,

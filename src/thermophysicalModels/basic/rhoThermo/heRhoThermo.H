@@ -25,7 +25,7 @@ Class
     Foam::heRhoThermo
 
 Description
-    Enthalpy for a mixture based on density
+    Energy for a mixture based on density
 
 SourceFiles
     heRhoThermo.C
@@ -47,10 +47,10 @@ namespace Foam
                          Class heRhoThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 class heRhoThermo
 :
-    public heThermo<rhoThermo, MixtureType>
+    public heThermo<BasicPsiThermo, MixtureType>
 {
     // Private Member Functions
 
@@ -58,7 +58,7 @@ class heRhoThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        heRhoThermo(const heRhoThermo<MixtureType>&);
+        heRhoThermo(const heRhoThermo<BasicPsiThermo, MixtureType>&);
 
 
 public:

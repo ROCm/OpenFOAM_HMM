@@ -46,7 +46,7 @@ temperatureThermoBaffleFvPatchScalarField
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField(p, iF),
     owner_(false),
     baffle_(),
-    solidThermoType_("undefined"),
+    solidThermoType_(new primitiveEntry("thermoType", "undefined")),
     dict_(dictionary::null)
 {}
 
@@ -69,7 +69,7 @@ temperatureThermoBaffleFvPatchScalarField
     ),
     owner_(ptf.owner_),
     baffle_(ptf.baffle_),
-    solidThermoType_(ptf.solidThermoType_),
+    solidThermoType_(ptf.solidThermoType_().clone()),
     dict_(ptf.dict_)
 {}
 
@@ -85,7 +85,7 @@ temperatureThermoBaffleFvPatchScalarField
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField(p, iF, dict),
     owner_(false),
     baffle_(),
-    solidThermoType_(),
+    solidThermoType_(new primitiveEntry("thermoType", "undefined")),
     dict_(dict)
 {
     if (!isA<mappedPatchBase>(patch().patch()))
@@ -126,7 +126,7 @@ temperatureThermoBaffleFvPatchScalarField
         Info << "Creating thermal baffle" <<  nbrMesh << endl;
         baffle_.reset(baffle::New(thisMesh, dict).ptr());
         owner_ = true;
-        dict.lookup("thermoType") >> solidThermoType_;
+        solidThermoType_ = dict.lookupEntry("thermoType", false, false).clone();
         baffle_->rename(nbrMesh);
     }
 }
@@ -142,7 +142,7 @@ temperatureThermoBaffleFvPatchScalarField
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField(ptf, iF),
     owner_(ptf.owner_),
     baffle_(ptf.baffle_),
-    solidThermoType_(ptf.solidThermoType_),
+    solidThermoType_(ptf.solidThermoType_().clone()),
     dict_(ptf.dict_)
 {}
 
@@ -219,8 +219,7 @@ void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
         os.writeKeyword(word(thermoModel + "Coeffs"));
         os << dict_.subDict(thermoModel + "Coeffs") << nl;
 
-        os.writeKeyword("thermoType") << solidThermoType_
-            << token::END_STATEMENT << nl;
+        os << solidThermoType_() << nl;
 
         os.writeKeyword("mixture");
         os << dict_.subDict("mixture") << nl;

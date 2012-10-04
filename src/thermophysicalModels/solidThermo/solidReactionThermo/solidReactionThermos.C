@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 #include "makeSolidThermo.H"
+#include "solidReactionThermo.H"
+#include "heSolidThermo.H"
 
 #include "specie.H"
 #include "rhoConst.H"
@@ -33,19 +34,10 @@ License
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-#include "constSolidRad.H"
-#include "pureSolidMixture.H"
-#include "multiComponentSolidMixture.H"
 #include "reactingSolidMixture.H"
 #include "sensibleEnthalpy.H"
-#include "sensibleInternalEnergy.H"
 #include "thermo.H"
 
-#include "heThermo.H"
-
-#include "solidThermo.H"
-#include "solidReactionThermo.H"
-#include "heSolidThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,63 +48,10 @@ namespace Foam
 
 makeSolidThermo
 (
-    solidThermo,
-    heSolidThermo,
-    pureSolidMixture,
-    constIsoSolidTransport,
-    constSolidRad,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst,
-    specie
-);
-
-makeSolidThermo
-(
-    solidThermo,
-    heSolidThermo,
-    pureSolidMixture,
-    constAnIsoSolidTransport,
-    constSolidRad,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst,
-    specie
-);
-
-makeSolidThermo
-(
-    solidThermo,
-    heSolidThermo,
-    pureSolidMixture,
-    exponentialSolidTransport,
-    constSolidRad,
-    sensibleEnthalpy,
-    hExponentialThermo,
-    rhoConst,
-    specie
-);
-
-makeSolidThermo
-(
-    solidThermo,
-    heSolidThermo,
-    multiComponentSolidMixture,
-    constIsoSolidTransport,
-    constSolidRad,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst,
-    specie
-);
-
-makeSolidThermo
-(
     solidReactionThermo,
     heSolidThermo,
     reactingSolidMixture,
     constIsoSolidTransport,
-    constSolidRad,
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,

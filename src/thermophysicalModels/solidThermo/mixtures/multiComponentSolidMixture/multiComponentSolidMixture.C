@@ -317,36 +317,6 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::rho
 
 
 template<class ThermoType>
-Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::kappaRad
-(
-    scalar p, scalar T, label celli
-) const
-{
-    scalar tmp = 0.0;
-    forAll(solidData_, i)
-    {
-        tmp += solidData_[i].kappaRad(T)*X(i, celli, p, T);
-    }
-    return tmp;
-}
-
-
-template<class ThermoType>
-Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::sigmaS
-(
-    scalar p, scalar T, label celli
-) const
-{
-    scalar tmp = 0.0;
-    forAll(solidData_, i)
-    {
-        tmp += solidData_[i].sigmaS(T)*X(i, celli, p, T);
-    }
-    return tmp;
-}
-
-
-template<class ThermoType>
 Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::kappa
 (
     scalar p, scalar T, label celli
@@ -356,21 +326,6 @@ Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::kappa
     forAll(solidData_, i)
     {
         tmp += solidData_[i].kappa(T)*X(i, celli, p, T);
-    }
-    return tmp;
-}
-
-
-template<class ThermoType>
-Foam::scalar Foam::multiComponentSolidMixture<ThermoType>::emissivity
-(
-    scalar p, scalar T, label celli
-) const
-{
-    scalar tmp = 0.0;
-    forAll(solidData_, i)
-    {
-        tmp += solidData_[i].emissivity(T)*X(i, celli, p, T);
     }
     return tmp;
 }
