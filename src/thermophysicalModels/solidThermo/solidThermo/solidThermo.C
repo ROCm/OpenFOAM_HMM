@@ -81,6 +81,27 @@ Foam::solidThermo::solidThermo
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<solidThermo>(mesh);
+}
+
+
+Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    return basicThermo::New<solidThermo>(mesh, dict);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::solidThermo::~solidThermo()

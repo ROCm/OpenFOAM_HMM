@@ -54,6 +54,27 @@ Foam::solidReactionThermo::solidReactionThermo
 {}
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<solidReactionThermo>(mesh);
+}
+
+
+Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    return basicThermo::New<solidReactionThermo>(mesh, dict);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::solidReactionThermo::~solidReactionThermo()
