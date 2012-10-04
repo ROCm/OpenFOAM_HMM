@@ -208,21 +208,11 @@ public:
             //- Density
             virtual scalar rho(scalar p, scalar T, label celli) const;
 
-            //- Absorption coefficient
-            virtual scalar kappaRad(scalar p, scalar T, label celli) const;
-
-            //- Scatter coefficient
-            virtual scalar sigmaS(scalar p, scalar T, label celli) const;
-
             //- Thermal conductivity
             virtual scalar kappa(scalar p, scalar T, label celli) const;
 
-            //- Emissivity coefficient
-            virtual scalar emissivity(scalar p, scalar T, label celli) const;
-
             //- Specific heat capacity
             virtual scalar Cp(scalar p, scalar T, label celli) const;
-
 };
 
 

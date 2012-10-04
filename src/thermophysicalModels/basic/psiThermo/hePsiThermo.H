@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::heRhoReactionThermo
+    Foam::hePsiThermo
 
 Description
-    Foam::heRhoReactionThermo
+    Energy for a mixture based on compressibility
 
 SourceFiles
-    heRhoReactionThermo.C
+    hePsiThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heRhoReactionThermo_H
-#define heRhoReactionThermo_H
+#ifndef hePsiThermo_H
+#define hePsiThermo_H
 
+#include "psiThermo.H"
 #include "heThermo.H"
-#include "rhoReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,36 +44,36 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class heRhoReactionThermo Declaration
+                         Class hePsiThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class MixtureType>
-class heRhoReactionThermo
+template<class BasicPsiThermo, class MixtureType>
+class hePsiThermo
 :
-    public heThermo<rhoReactionThermo, MixtureType>
+    public heThermo<BasicPsiThermo, MixtureType>
 {
     // Private Member Functions
 
+        //- Calculate the thermo variables
         void calculate();
 
         //- Construct as copy (not implemented)
-        heRhoReactionThermo(const heRhoReactionThermo<MixtureType>&);
-
+        hePsiThermo(const hePsiThermo<BasicPsiThermo, MixtureType>&);
 
 public:
 
     //- Runtime type information
-    TypeName("heRhoReactionThermo");
+    TypeName("hePsiThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        heRhoReactionThermo(const fvMesh&);
+        hePsiThermo(const fvMesh&);
 
 
     //- Destructor
-    virtual ~heRhoReactionThermo();
+    virtual ~hePsiThermo();
 
 
     // Member functions
@@ -87,10 +87,10 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 #ifdef NoRepository
-#   include "heRhoReactionThermo.C"
+#   include "hePsiThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

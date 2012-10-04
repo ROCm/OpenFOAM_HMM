@@ -28,29 +28,27 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::noChemistrySolver<ODEChemistryType>::noChemistrySolver
+template<class ChemistryModel>
+Foam::noChemistrySolver<ChemistryModel>::noChemistrySolver
 (
-    const fvMesh& mesh,
-    const word& ODEModelName,
-    const word& thermoType
+    const fvMesh& mesh
 )
 :
-    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType)
+    chemistrySolver<ChemistryModel>(mesh)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::noChemistrySolver<ODEChemistryType>::~noChemistrySolver()
+template<class ChemistryModel>
+Foam::noChemistrySolver<ChemistryModel>::~noChemistrySolver()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::scalar Foam::noChemistrySolver<ODEChemistryType>::solve
+template<class ChemistryModel>
+Foam::scalar Foam::noChemistrySolver<ChemistryModel>::solve
 (
     scalarField&,
     const scalar,

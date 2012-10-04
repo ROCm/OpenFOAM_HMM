@@ -46,10 +46,10 @@ namespace Foam
                        Class EulerImplicit Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ODEChemistryType>
+template<class ChemistryModel>
 class EulerImplicit
 :
-    public chemistrySolver<ODEChemistryType>
+    public chemistrySolver<ChemistryModel>
 {
     // Private data
 
@@ -74,13 +74,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        EulerImplicit
-        (
-            const fvMesh& mesh,
-            const word& ODEmodelName,
-            const word& thermoType
-        );
+        //- Construct from mesh
+        EulerImplicit(const fvMesh& mesh);
 
 
     //- Destructor

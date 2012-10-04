@@ -23,14 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "heheuReactionThermo.H"
+#include "heheuPsiThermo.H"
 #include "fvMesh.H"
 #include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class MixtureType>
-void Foam::heheuReactionThermo<MixtureType>::calculate()
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
 {
     const scalarField& hCells = this->he_.internalField();
     const scalarField& heuCells = this->heu_.internalField();
@@ -118,8 +118,11 @@ void Foam::heheuReactionThermo<MixtureType>::calculate()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class MixtureType>
-Foam::heheuReactionThermo<MixtureType>::heheuReactionThermo(const fvMesh& mesh)
+template<class BasicPsiThermo, class MixtureType>
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo
+(
+    const fvMesh& mesh
+)
 :
     heThermo<psiuReactionThermo, MixtureType>(mesh),
     Tu_
@@ -188,19 +191,20 @@ Foam::heheuReactionThermo<MixtureType>::heheuReactionThermo(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class MixtureType>
-Foam::heheuReactionThermo<MixtureType>::~heheuReactionThermo()
+template<class BasicPsiThermo, class MixtureType>
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::~heheuPsiThermo()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class MixtureType>
-void Foam::heheuReactionThermo<MixtureType>::correct()
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
     if (debug)
     {
-        Info<< "entering heheuReactionThermo<MixtureType>::correct()" << endl;
+        Info<< "entering heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 
     // force the saving of the old-time values
@@ -210,14 +214,15 @@ void Foam::heheuReactionThermo<MixtureType>::correct()
 
     if (debug)
     {
-        Info<< "exiting heheuReactionThermo<MixtureType>::correct()" << endl;
+        Info<< "exiting heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heheuReactionThermo<MixtureType>::heu
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heu
 (
     const scalarField& p,
     const scalarField& Tu,
@@ -236,9 +241,9 @@ Foam::heheuReactionThermo<MixtureType>::heu
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::scalarField>
-Foam::heheuReactionThermo<MixtureType>::heu
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heu
 (
     const scalarField& p,
     const scalarField& Tu,
@@ -258,9 +263,9 @@ Foam::heheuReactionThermo<MixtureType>::heu
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heheuReactionThermo<MixtureType>::Tb() const
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::Tb() const
 {
     tmp<volScalarField> tTb
     (
@@ -314,9 +319,9 @@ Foam::heheuReactionThermo<MixtureType>::Tb() const
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heheuReactionThermo<MixtureType>::psiu() const
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psiu() const
 {
     tmp<volScalarField> tpsiu
     (
@@ -365,9 +370,9 @@ Foam::heheuReactionThermo<MixtureType>::psiu() const
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heheuReactionThermo<MixtureType>::psib() const
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
 {
     tmp<volScalarField> tpsib
     (
@@ -417,9 +422,9 @@ Foam::heheuReactionThermo<MixtureType>::psib() const
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heheuReactionThermo<MixtureType>::muu() const
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::muu() const
 {
     tmp<volScalarField> tmuu
     (
@@ -472,9 +477,9 @@ Foam::heheuReactionThermo<MixtureType>::muu() const
 }
 
 
-template<class MixtureType>
+template<class BasicPsiThermo, class MixtureType>
 Foam::tmp<Foam::volScalarField>
-Foam::heheuReactionThermo<MixtureType>::mub() const
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::mub() const
 {
     tmp<volScalarField> tmub
     (

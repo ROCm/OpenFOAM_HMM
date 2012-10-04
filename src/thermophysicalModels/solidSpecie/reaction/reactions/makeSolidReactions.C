@@ -23,53 +23,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constSolidRad.H"
-#include "IOstreams.H"
+#include "makeSolidReaction.H"
+#include "solidArrheniusReactionRate.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Make Solid reactions  * * * * * * * * * * * * //
 
-template<class thermo>
-constSolidRad<thermo>::constSolidRad(const dictionary& dict)
-:
-    thermo(dict),
-    kappaRad_(readScalar(dict.subDict("radiation").lookup("kappaRad"))),
-    sigmaS_(readScalar(dict.subDict("radiation").lookup("sigmaS"))),
-    emissivity_(readScalar(dict.subDict("radiation").lookup("emissivity")))
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class thermo>
-void Foam::constSolidRad<thermo>::constSolidRad::write(Ostream& os) const
-{
-    thermo::write(os);
-
-    dictionary dict("radiation");
-    dict.add("kappaRad", kappaRad_);
-    dict.add("sigmaS", sigmaS_);
-    dict.add("emissivity", emissivity_);
-    os  << indent << dict.dictName() << dict;
-}
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-template<class thermo>
-Ostream& operator<<(Ostream& os, const constSolidRad<thermo>& pg)
-{
-    os  << static_cast<const thermo&>(pg);
-    os << tab << pg.kappaRad_ << tab << pg.sigmaS_ << tab << pg.emissivity_;
-
-    os.check("Ostream& operator<<(Ostream& os, const constSolidRad& st)");
-    return os;
-}
-
+makeIRReactions(solidArrheniusReactionRate)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

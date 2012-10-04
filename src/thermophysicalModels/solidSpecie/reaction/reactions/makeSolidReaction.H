@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 InClass
-    Foam::makeSolidReactionThermo
+    Foam::makeSolidReaction
 
 Description
-    Macros for instantiating reactions on given solid thermo packages
+    Macros for instantiating reactions for solid
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,6 +78,5 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
-
 
 // ************************************************************************* //

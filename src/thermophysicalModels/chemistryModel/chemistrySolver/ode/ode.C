@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,19 +24,17 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ode.H"
-#include "ODEChemistryModel.H"
+#include "chemistryModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::ode<ODEChemistryType>::ode
+template<class ChemistryModel>
+Foam::ode<ChemistryModel>::ode
 (
-    const fvMesh& mesh,
-    const word& ODEModelName,
-    const word& thermoType
+    const fvMesh& mesh
 )
 :
-    chemistrySolver<ODEChemistryType>(mesh, ODEModelName, thermoType),
+    chemistrySolver<ChemistryModel>(mesh),
     coeffsDict_(this->subDict("odeCoeffs")),
     solverName_(coeffsDict_.lookup("solver")),
     odeSolver_(ODESolver::New(solverName_, *this)),
@@ -46,15 +44,15 @@ Foam::ode<ODEChemistryType>::ode
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::ode<ODEChemistryType>::~ode()
+template<class ChemistryModel>
+Foam::ode<ChemistryModel>::~ode()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ODEChemistryType>
-Foam::scalar Foam::ode<ODEChemistryType>::solve
+template<class ChemistryModel>
+Foam::scalar Foam::ode<ChemistryModel>::solve
 (
     scalarField& c,
     const scalar T,
