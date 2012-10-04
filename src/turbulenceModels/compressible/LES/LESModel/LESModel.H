@@ -51,7 +51,7 @@ SourceFiles
 #define compressibleLESModel_H
 
 #include "compressible/turbulenceModel/turbulenceModel.H"
-#include "LESdelta.H"
+#include "compressibleLESdelta.H"
 #include "fvm.H"
 #include "fvc.H"
 #include "fvMatrices.H"
@@ -86,7 +86,7 @@ protected:
 
         dimensionedScalar kMin_;
 
-        autoPtr<LESdelta> delta_;
+        autoPtr<Foam::LESdelta> delta_;
 
 
     // Protected Member Functions

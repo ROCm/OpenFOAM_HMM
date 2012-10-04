@@ -22,88 +22,84 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IDDESDelta
+    Foam::compressible::LESdelta
 
 Description
-    IDDESDelta used by the IDDES (improved low Re Spalart-Allmaras DES model)
-    The min and max delta are calculated using the double distance of the min or
-    max from the face centre to the cell centre.
+    Abstract base class for compressible LES deltas
 
 SourceFiles
-    IDDESDelta.C
+    compressibleLESdelta.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IDDESDeltaDelta_H
-#define IDDESDeltaDelta_H
+#ifndef compressibleLESdelta_H
+#define compressibleLESdelta_H
 
-#include "incompressibleLESdelta.H"
+#include "LESdelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// To avoid macro problems typedef scoped class
+typedef Foam::LESdelta foamLESdelta;
+
+namespace compressible
+{
+
 /*---------------------------------------------------------------------------*\
-                         Class IDDESDelta Declaration
+                          Class LESdelta Declaration
 \*---------------------------------------------------------------------------*/
 
-class IDDESDelta
+class LESdelta
 :
-    public LESdelta
+    public foamLESdelta
 {
-    // Private data
-
-        autoPtr<Foam::LESdelta> hmax_;
-        scalar deltaCoeff_;
-        scalar cw_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct and assignment
-        IDDESDelta(const IDDESDelta&);
-        void operator=(const IDDESDelta&);
-
-        //- Calculate the delta values
-        void calcDelta();
-
 
 public:
 
-    //- Runtime type information
-    TypeName("IDDESDelta");
+    // Declare run-time constructor selection table
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            foamLESdelta,
+            dictionary,
+            (
+                const word& name,
+                const fvMesh& mesh,
+                const dictionary& LESdeltaDict
+            ),
+            (name, mesh, LESdeltaDict)
+        );
 
     // Constructors
 
-        //- Construct from name, mesh and IOdictionary
-        IDDESDelta
+        //- Construct from name and mesh
+        LESdelta(const word& name, const fvMesh& mesh);
+
+
+    // Selectors
+
+        //- Return a reference to the selected LES delta
+        static autoPtr<foamLESdelta> New
         (
             const word& name,
             const fvMesh& mesh,
-            const dictionary&
+            const dictionary& dict
         );
 
 
-    // Destructor
-
-        ~IDDESDelta()
-        {}
-
-
-    // Member Functions
-
-        //- Read the LESdelta dictionary
-        void read(const dictionary&);
-
-        // Correct values
-        void correct();
+    //- Destructor
+    virtual ~LESdelta()
+    {}
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

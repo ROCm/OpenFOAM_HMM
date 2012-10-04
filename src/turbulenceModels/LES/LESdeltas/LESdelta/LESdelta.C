@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,6 +67,8 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 {
     const word deltaType(dict.lookup("delta"));
 
+    Info<< "Selecting LES delta type " << deltaType << endl;
+
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(deltaType);
 
@@ -83,6 +85,53 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     }
 
     return autoPtr<LESdelta>(cstrIter()(name, mesh, dict));
+}
+
+
+Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
+(
+    const word& name,
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const dictionaryConstructorTable& additionalConstructors
+)
+{
+    const word deltaType(dict.lookup("delta"));
+
+    Info<< "Selecting LES delta type " << deltaType << endl;
+
+    // First on additional ones
+    dictionaryConstructorTable::const_iterator cstrIter =
+        additionalConstructors.find(deltaType);
+
+    if (cstrIter != additionalConstructors.end())
+    {
+        return autoPtr<LESdelta>(cstrIter()(name, mesh, dict));
+    }
+    else
+    {
+        dictionaryConstructorTable::const_iterator cstrIter =
+            dictionaryConstructorTablePtr_->find(deltaType);
+
+        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        {
+            FatalErrorIn
+            (
+                "LESdelta::New(const fvMesh&, const dictionary&)"
+            )   << "Unknown LESdelta type "
+                << deltaType << nl << nl
+                << "Valid LESdelta types are :" << endl
+                << additionalConstructors.sortedToc()
+                << " and "
+                << dictionaryConstructorTablePtr_->sortedToc()
+                << exit(FatalError);
+            return autoPtr<LESdelta>();
+        }
+        else
+        {
+            return autoPtr<LESdelta>(cstrIter()(name, mesh, dict));
+        }
+    }
 }
 
 

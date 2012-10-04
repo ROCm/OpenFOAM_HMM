@@ -224,7 +224,8 @@ LRR::LRR
         (
             "LRR::LRR"
             "( const volScalarField&, const volVectorField&"
-            ", const surfaceScalarField&, incompressibleTransportModel&)"
+            ", const surfaceScalarField&, fluidThermo&, const word&"
+            ", const word&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
