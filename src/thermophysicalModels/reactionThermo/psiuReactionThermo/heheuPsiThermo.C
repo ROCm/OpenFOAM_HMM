@@ -119,7 +119,10 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicPsiThermo, class MixtureType>
-Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo(const fvMesh& mesh)
+Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo
+(
+    const fvMesh& mesh
+)
 :
     heThermo<psiuReactionThermo, MixtureType>(mesh),
     Tu_
@@ -200,7 +203,8 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
     if (debug)
     {
-        Info<< "entering heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
+        Info<< "entering heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 
     // force the saving of the old-time values
@@ -210,7 +214,8 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()
 
     if (debug)
     {
-        Info<< "exiting heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
+        Info<< "exiting heheuPsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 }
 

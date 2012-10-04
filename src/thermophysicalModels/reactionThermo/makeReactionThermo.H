@@ -34,7 +34,8 @@ License
 #define makeReactionMixtureThermo(BaseThermo,CThermo,MixtureThermo,Mixture,ThermoPhys)   \
                                                                                \
 typedef MixtureThermo                                                          \
-<   CThermo,                                                                           \
+<                                                                              \
+    CThermo,                                                                   \
     SpecieMixture                                                              \
     <                                                                          \
         Mixture                                                                \

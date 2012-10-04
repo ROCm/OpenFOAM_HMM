@@ -127,7 +127,8 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::correct()
 {
     if (debug)
     {
-        Info<< "entering hePsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
+        Info<< "entering hePsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 
     // force the saving of the old-time values
@@ -137,7 +138,8 @@ void Foam::hePsiThermo<BasicPsiThermo, MixtureType>::correct()
 
     if (debug)
     {
-        Info<< "exiting hePsiThermo<BasicPsiThermo, MixtureType>::correct()" << endl;
+        Info<< "exiting hePsiThermo<BasicPsiThermo, MixtureType>::correct()"
+            << endl;
     }
 }
 
