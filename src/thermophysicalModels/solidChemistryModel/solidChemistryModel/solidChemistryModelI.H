@@ -25,14 +25,14 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::solidReactionThermo& Foam::solidChemistryModel::solid()
+inline Foam::solidReactionThermo& Foam::solidChemistryModel::solidThermo()
 {
     return solidThermo_();
 }
 
 
 inline const Foam::solidReactionThermo&
-Foam::solidChemistryModel::solid() const
+Foam::solidChemistryModel::solidThermo() const
 {
     return solidThermo_();
 }
