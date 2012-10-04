@@ -848,17 +848,17 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
         vector d = r.refPoint()-pt;
         d -= (d&n)*n;
 
-        // Correct for attraction to non-dominant face
-        correctAttraction
-        (
-            surfacePoints,
-            surfaceCount,
-            r.refPoint(),
-            n,                  // normalised normal
-            pt,
-
-            d                   // perpendicular offset vector
-        );
+        //// Correct for attraction to non-dominant face
+        //correctAttraction
+        //(
+        //    surfacePoints,
+        //    surfaceCount,
+        //    r.refPoint(),
+        //    n,                  // normalised normal
+        //    pt,
+        //
+        //    d                   // perpendicular offset vector
+        //);
 
         // Trim to snap distance
         if (magSqr(d) > sqr(snapDist[pointI]))
@@ -893,6 +893,15 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
         patchConstraint.applyConstraint(surfaceNormals[0]);
         patchConstraint.applyConstraint(surfaceNormals[1]);
         patchConstraint.applyConstraint(surfaceNormals[2]);
+
+        //Pout<< "# Feature point " << pt << nl;
+        //meshTools::writeOBJ(Pout, pt);
+        //meshTools::writeOBJ(Pout, surfacePoints[0]);
+        //meshTools::writeOBJ(Pout, surfacePoints[1]);
+        //meshTools::writeOBJ(Pout, surfacePoints[2]);
+        //Pout<< "l 1 2" << nl
+        //    << "l 1 3" << nl
+        //    << "l 1 4" << nl;
     }
 }
 
@@ -996,6 +1005,195 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
                 fpVertI++;
                 fpStr() << "l " << fpVertI-1 << ' ' << fpVertI << nl;
             }
+        }
+    }
+}
+
+
+void Foam::autoSnapDriver::stringFeatureEdges
+(
+    const label iter,
+    const scalar featureCos,
+
+    const indirectPrimitivePatch& pp,
+    const scalarField& snapDist,
+
+    const vectorField& rawPatchAttraction,
+    const List<pointConstraint>& rawPatchConstraints,
+
+    vectorField& patchAttraction,
+    List<pointConstraint>& patchConstraints
+) const
+{
+    // Snap edges to feature edges
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Walk existing edges and snap remaining ones (that are marked as
+    // feature edges in rawPatchConstraints)
+
+    // What this does is fill in any faces where not all points
+    // on the face are being attracted:
+    /*
+           +
+          / \
+         /   \
+      ---+    +---
+         \   /
+          \ /
+           +
+    */
+    // so the top and bottom will never get attracted since the nearest
+    // back from the feature edge will always be one of the left or right
+    // points since the face is diamond like. So here we walk the feature edges
+    // and add any non-attracted points.
+
+
+    while (true)
+    {
+        label nChanged = 0;
+
+        const labelListList& pointEdges = pp.pointEdges();
+        forAll(pointEdges, pointI)
+        {
+            if (patchConstraints[pointI].first() == 2)
+            {
+                const point& pt = pp.localPoints()[pointI];
+                const labelList& pEdges = pointEdges[pointI];
+                const vector& featVec = patchConstraints[pointI].second();
+
+                // Detect whether there are edges in both directions.
+                // (direction along the feature edge that is)
+                bool hasPos = false;
+                bool hasNeg = false;
+
+                forAll(pEdges, pEdgeI)
+                {
+                    const edge& e = pp.edges()[pEdges[pEdgeI]];
+                    label nbrPointI = e.otherVertex(pointI);
+
+                    if (patchConstraints[nbrPointI].first() > 1)
+                    {
+                        const point& nbrPt = pp.localPoints()[nbrPointI];
+                        const point featPt =
+                            nbrPt + patchAttraction[nbrPointI];
+                        const scalar cosAngle = (featVec & (featPt-pt));
+
+                        if (cosAngle > 0)
+                        {
+                            hasPos = true;
+                        }
+                        else
+                        {
+                            hasNeg = true;
+                        }
+                    }
+                }
+
+                if (!hasPos || !hasNeg)
+                {
+                    //Pout<< "**Detected feature string end at  "
+                    //    << pp.localPoints()[pointI] << endl;
+
+                    // No string. Assign best choice on either side
+                    label bestPosPointI = -1;
+                    scalar minPosDistSqr = GREAT;
+                    label bestNegPointI = -1;
+                    scalar minNegDistSqr = GREAT;
+
+                    forAll(pEdges, pEdgeI)
+                    {
+                        const edge& e = pp.edges()[pEdges[pEdgeI]];
+                        label nbrPointI = e.otherVertex(pointI);
+
+                        if
+                        (
+                            patchConstraints[nbrPointI].first() <= 1
+                         && rawPatchConstraints[nbrPointI].first() > 1
+                        )
+                        {
+                            const vector& nbrFeatVec =
+                                rawPatchConstraints[pointI].second();
+
+                            if (mag(featVec&nbrFeatVec) > featureCos)
+                            {
+                                // nbrPointI attracted to sameish feature
+                                // Note: also check on position.
+
+                                scalar d2 = magSqr
+                                (
+                                    rawPatchAttraction[nbrPointI]
+                                );
+
+                                const point featPt =
+                                    pp.localPoints()[nbrPointI]
+                                  + rawPatchAttraction[nbrPointI];
+                                const scalar cosAngle =
+                                    (featVec & (featPt-pt));
+
+                                if (cosAngle > 0)
+                                {
+                                    if (!hasPos && d2 < minPosDistSqr)
+                                    {
+                                        minPosDistSqr = d2;
+                                        bestPosPointI = nbrPointI;
+                                    }
+                                }
+                                else
+                                {
+                                    if (!hasNeg && d2 < minNegDistSqr)
+                                    {
+                                        minNegDistSqr = d2;
+                                        bestNegPointI = nbrPointI;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (bestPosPointI != -1)
+                    {
+                        // Use reconstructed-feature attraction. Use only
+                        // part of it since not sure...
+                        //const point& bestPt =
+                        //    pp.localPoints()[bestPosPointI];
+                        //Pout<< "**Overriding point " << bestPt
+                        //    << " on reconstructed feature edge at "
+                        //    << rawPatchAttraction[bestPosPointI]+bestPt
+                        //    << " to attracted-to-feature-edge." << endl;
+                        patchAttraction[bestPosPointI] =
+                            0.5*rawPatchAttraction[bestPosPointI];
+                        patchConstraints[bestPosPointI] =
+                            rawPatchConstraints[bestPosPointI];
+
+                        nChanged++;
+                    }
+                    if (bestNegPointI != -1)
+                    {
+                        // Use reconstructed-feature attraction. Use only
+                        // part of it since not sure...
+                        //const point& bestPt =
+                        //    pp.localPoints()[bestNegPointI];
+                        //Pout<< "**Overriding point " << bestPt
+                        //    << " on reconstructed feature edge at "
+                        //    << rawPatchAttraction[bestNegPointI]+bestPt
+                        //    << " to attracted-to-feature-edge." << endl;
+                        patchAttraction[bestNegPointI] =
+                            0.5*rawPatchAttraction[bestNegPointI];
+                        patchConstraints[bestNegPointI] =
+                            rawPatchConstraints[bestNegPointI];
+
+                        nChanged++;
+                    }
+                }
+            }
+        }
+
+
+        reduce(nChanged, sumOp<label>());
+        Info<< "Stringing feature edges : changed " << nChanged << " points"
+            << endl;
+        if (nChanged == 0)
+        {
+            break;
         }
     }
 }
@@ -2113,156 +2311,20 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     // Walk existing edges and snap remaining ones (that are marked as
     // feature edges in allPatchConstraints)
 
-    while (true)
-    {
-        label nChanged = 0;
+    stringFeatureEdges
+    (
+        iter,
+        featureCos,
 
-        const labelListList& pointEdges = pp.pointEdges();
-        forAll(pointEdges, pointI)
-        {
-            if (patchConstraints[pointI].first() == 2)
-            {
-                const point& pt = pp.localPoints()[pointI];
-                const labelList& pEdges = pointEdges[pointI];
-                const vector& featVec = patchConstraints[pointI].second();
+        pp,
+        snapDist,
 
-                // Detect whether there are edges in both directions.
-                // (direction along the feature edge that is)
-                bool hasPos = false;
-                bool hasNeg = false;
+        allPatchAttraction,
+        allPatchConstraints,
 
-                forAll(pEdges, pEdgeI)
-                {
-                    const edge& e = pp.edges()[pEdges[pEdgeI]];
-                    label nbrPointI = e.otherVertex(pointI);
-
-                    if (patchConstraints[nbrPointI].first() > 1)
-                    {
-                        const point& nbrPt = pp.localPoints()[nbrPointI];
-                        const point featPt =
-                            nbrPt + patchAttraction[nbrPointI];
-                        const scalar cosAngle = (featVec & (featPt-pt));
-
-                        if (cosAngle > 0)
-                        {
-                            hasPos = true;
-                        }
-                        else
-                        {
-                            hasNeg = true;
-                        }
-                    }
-                }
-
-                if (!hasPos || !hasNeg)
-                {
-                    //Pout<< "**Detected feature string end at  "
-                    //    << pp.localPoints()[pointI] << endl;
-
-                    // No string. Assign best choice on either side
-                    label bestPosPointI = -1;
-                    scalar minPosDistSqr = GREAT;
-                    label bestNegPointI = -1;
-                    scalar minNegDistSqr = GREAT;
-
-                    forAll(pEdges, pEdgeI)
-                    {
-                        const edge& e = pp.edges()[pEdges[pEdgeI]];
-                        label nbrPointI = e.otherVertex(pointI);
-
-                        if
-                        (
-                            patchConstraints[nbrPointI].first() <= 1
-                         && allPatchConstraints[nbrPointI].first() > 1
-                        )
-                        {
-                            const vector& nbrFeatVec =
-                                allPatchConstraints[pointI].second();
-
-                            if (mag(featVec&nbrFeatVec) > featureCos)
-                            {
-                                // nbrPointI attracted to sameish feature
-                                // Note: also check on position.
-
-                                scalar d2 = magSqr
-                                (
-                                    allPatchAttraction[nbrPointI]
-                                );
-
-                                const point featPt =
-                                    pp.localPoints()[nbrPointI]
-                                  + allPatchAttraction[nbrPointI];
-                                const scalar cosAngle =
-                                    (featVec & (featPt-pt));
-
-                                if (cosAngle > 0)
-                                {
-                                    if (!hasPos && d2 < minPosDistSqr)
-                                    {
-                                        minPosDistSqr = d2;
-                                        bestPosPointI = nbrPointI;
-                                    }
-                                }
-                                else
-                                {
-                                    if (!hasNeg && d2 < minNegDistSqr)
-                                    {
-                                        minNegDistSqr = d2;
-                                        bestNegPointI = nbrPointI;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (bestPosPointI != -1)
-                    {
-                        // Use reconstructed-feature attraction. Use only
-                        // part of it since not sure...
-                        //const point& bestPt =
-                        //    pp.localPoints()[bestPosPointI];
-                        //Pout<< "**Overriding point " << bestPt
-                        //    << " on reconstructed feature edge at "
-                        //    << allPatchAttraction[bestPosPointI]+bestPt
-                        //    << " to attracted-to-feature-edge." << endl;
-                        patchAttraction[bestPosPointI] =
-                            0.5*allPatchAttraction[bestPosPointI];
-                        patchConstraints[bestPosPointI] =
-                            allPatchConstraints[bestPosPointI];
-
-                        nChanged++;
-                    }
-                    if (bestNegPointI != -1)
-                    {
-                        // Use reconstructed-feature attraction. Use only
-                        // part of it since not sure...
-                        //const point& bestPt =
-                        //    pp.localPoints()[bestNegPointI];
-                        //Pout<< "**Overriding point " << bestPt
-                        //    << " on reconstructed feature edge at "
-                        //    << allPatchAttraction[bestNegPointI]+bestPt
-                        //    << " to attracted-to-feature-edge." << endl;
-                        patchAttraction[bestNegPointI] =
-                            0.5*allPatchAttraction[bestNegPointI];
-                        patchConstraints[bestNegPointI] =
-                            allPatchConstraints[bestNegPointI];
-
-                        nChanged++;
-                    }
-                }
-            }
-        }
-
-
-        reduce(nChanged, sumOp<label>());
-        Info<< "Stringing feature edges : changed " << nChanged << " points"
-            << endl;
-        if (nChanged == 0)
-        {
-            break;
-        }
-    }
-
+        patchAttraction,
+        patchConstraints
+    );
 
 
     // Avoid diagonal attraction

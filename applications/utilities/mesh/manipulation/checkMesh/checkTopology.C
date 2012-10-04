@@ -7,6 +7,7 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 #include "emptyPolyPatch.H"
+#include "processorPolyPatch.H"
 
 Foam::label Foam::checkTopology
 (
@@ -289,10 +290,18 @@ Foam::label Foam::checkTopology
         }
     }
 
-    if (!Pstream::parRun())
+
     {
-        Pout<< "\nChecking patch topology for multiply connected surfaces ..."
-            << endl;
+        if (!Pstream::parRun())
+        {
+            Info<< "\nChecking patch topology for multiply connected"
+                << " surfaces..." << endl;
+        }
+        else
+        {
+            Info<< "\nChecking basic patch addressing..." << endl;
+        }
+
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -301,90 +310,101 @@ Foam::label Foam::checkTopology
         (
             mesh,
             "nonManifoldPoints",
-            mesh.nPoints()/100
+            mesh.nPoints()/1000
         );
 
         Pout.setf(ios_base::left);
 
-        Pout<< "    "
+        Info<< "    "
             << setw(20) << "Patch"
             << setw(9) << "Faces"
-            << setw(9) << "Points"
-            << setw(34) << "Surface topology";
+            << setw(9) << "Points";
+        if (!Pstream::parRun())
+        {
+            Info<< setw(34) << "Surface topology";
+        }
         if (allGeometry)
         {
-            Pout<< " Bounding box";
+            Info<< " Bounding box";
         }
-        Pout<< endl;
+        Info<< endl;
 
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
-                Pout<< "    "
+            if (!isA<processorPolyPatch>(pp))
+            {
+                Info<< "    "
                     << setw(20) << pp.name()
-                    << setw(9) << pp.size()
-                    << setw(9) << pp.nPoints();
+                    << setw(9) << returnReduce(pp.size(), sumOp<label>())
+                    << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
 
-
-            primitivePatch::surfaceTopo pTyp = pp.surfaceType();
-
-            if (pp.empty())
-            {
-                Pout<< setw(34) << "ok (empty)";
-            }
-            else if (pTyp == primitivePatch::MANIFOLD)
-            {
-                if (pp.checkPointManifold(true, &points))
+                if (!Pstream::parRun())
                 {
-                    Pout<< setw(34) << "multiply connected (shared point)";
-                }
-                else
-                {
-                    Pout<< setw(34) << "ok (closed singly connected)";
-                }
+                    primitivePatch::surfaceTopo pTyp = pp.surfaceType();
 
-                // Add points on non-manifold edges to make set complete
-                pp.checkTopology(false, &points);
-            }
-            else
-            {
-                pp.checkTopology(false, &points);
-
-                if (pTyp == primitivePatch::OPEN)
-                {
-                    Pout<< setw(34) << "ok (non-closed singly connected)";
-                }
-                else
-                {
-                    Pout<< setw(34) << "multiply connected (shared edge)";
-                }
-            }
-
-            if (allGeometry)
-            {
-                const pointField& pts = pp.points();
-                const labelList& mp = pp.meshPoints();
-
-                if (returnReduce(mp.size(), sumOp<label>()) > 0)
-                {
-                    boundBox bb(point::max, point::min);
-                    forAll (mp, i)
+                    if (pp.empty())
                     {
-                        bb.min() = min(bb.min(), pts[mp[i]]);
-                        bb.max() = max(bb.max(), pts[mp[i]]);
+                        Info<< setw(34) << "ok (empty)";
                     }
-                    reduce(bb.min(), minOp<vector>());
-                    reduce(bb.max(), maxOp<vector>());
-                    Pout<< ' ' << bb;
+                    else if (pTyp == primitivePatch::MANIFOLD)
+                    {
+                        if (pp.checkPointManifold(true, &points))
+                        {
+                            Info<< setw(34)
+                                << "multiply connected (shared point)";
+                        }
+                        else
+                        {
+                            Info<< setw(34) << "ok (closed singly connected)";
+                        }
+
+                        // Add points on non-manifold edges to make set complete
+                        pp.checkTopology(false, &points);
+                    }
+                    else
+                    {
+                        pp.checkTopology(false, &points);
+
+                        if (pTyp == primitivePatch::OPEN)
+                        {
+                            Info<< setw(34)
+                                << "ok (non-closed singly connected)";
+                        }
+                        else
+                        {
+                            Info<< setw(34)
+                                << "multiply connected (shared edge)";
+                        }
+                    }
                 }
+
+                if (allGeometry)
+                {
+                    const pointField& pts = pp.points();
+                    const labelList& mp = pp.meshPoints();
+
+                    if (returnReduce(mp.size(), sumOp<label>()) > 0)
+                    {
+                        boundBox bb(point::max, point::min);
+                        forAll (mp, i)
+                        {
+                            bb.min() = min(bb.min(), pts[mp[i]]);
+                            bb.max() = max(bb.max(), pts[mp[i]]);
+                        }
+                        reduce(bb.min(), minOp<vector>());
+                        reduce(bb.max(), maxOp<vector>());
+                        Info<< ' ' << bb;
+                    }
+                }
+                Info<< endl;
             }
-            Pout<< endl;
         }
 
         if (points.size())
         {
-            Pout<< "  <<Writing " << points.size()
+            Info<< "  <<Writing " << returnReduce(points.size(), sumOp<label>())
                 << " conflicting points to set "
                 << points.name() << endl;
 
@@ -392,7 +412,7 @@ Foam::label Foam::checkTopology
             points.write();
         }
 
-        //Pout.setf(ios_base::right);
+        //Info.setf(ios_base::right);
     }
 
     // Force creation of all addressing if requested.

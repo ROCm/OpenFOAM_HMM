@@ -710,7 +710,8 @@ void Foam::autoLayerDriver::setNumLayers
     const indirectPrimitivePatch& pp,
     pointField& patchDisp,
     labelList& patchNLayers,
-    List<extrudeMode>& extrudeStatus
+    List<extrudeMode>& extrudeStatus,
+    label& nAddedCells
 ) const
 {
     const fvMesh& mesh = meshRefiner_.mesh();
@@ -796,6 +797,24 @@ void Foam::autoLayerDriver::setNumLayers
             patchNLayers[i] = maxLayers[i];
         }
     }
+
+
+    // Calculate number of cells to create
+    nAddedCells = 0;
+    forAll(pp.localFaces(), faceI)
+    {
+        const face& f = pp.localFaces()[faceI];
+
+        // Get max of extrusion per point
+        label nCells = 0;
+        forAll(f, fp)
+        {
+            nCells = max(nCells, patchNLayers[f[fp]]);
+        }
+
+        nAddedCells += nCells;
+    }
+    reduce(nAddedCells, sumOp<label>());
 
     //reduce(nConflicts, sumOp<label>());
     //
@@ -2491,8 +2510,12 @@ void Foam::autoLayerDriver::addLayers
     // extrudeStatus = EXTRUDE.
     labelList patchNLayers(pp().nPoints(), 0);
 
+    // Ideal number of cells added
+    label nIdealAddedCells = 0;
+
     // Whether to add edge for all pp.localPoints.
     List<extrudeMode> extrudeStatus(pp().nPoints(), EXTRUDE);
+
 
     {
         // Get number of layer per point from number of layers per patch
@@ -2506,7 +2529,8 @@ void Foam::autoLayerDriver::addLayers
 
             patchDisp,
             patchNLayers,
-            extrudeStatus
+            extrudeStatus,
+            nIdealAddedCells
         );
 
         // Precalculate mesh edge labels for patch edges
@@ -2776,6 +2800,7 @@ void Foam::autoLayerDriver::addLayers
         layerParams.nSmoothNormals(),
         layerParams.nSmoothSurfaceNormals(),
         layerParams.minMedianAxisAngleCos(),
+        layerParams.featureAngle(),
 
         dispVec,
         medialRatio,
@@ -3101,10 +3126,24 @@ void Foam::autoLayerDriver::addLayers
 
         label nExtruded = countExtrusion(pp, extrudeStatus);
         label nTotFaces = returnReduce(pp().size(), sumOp<label>());
+        label nAddedCells = 0;
+        {
+            forAll(flaggedCells, cellI)
+            {
+                if (flaggedCells[cellI])
+                {
+                    nAddedCells++;
+                }
+            }
+            reduce(nAddedCells, sumOp<label>());
+        }
         Info<< "Extruding " << nExtruded
             << " out of " << nTotFaces
             << " faces (" << 100.0*nExtruded/nTotFaces << "%)."
             << " Removed extrusion at " << nTotChanged << " faces."
+            << endl
+            << "Added " << nAddedCells << " out of " << nIdealAddedCells
+            << " cells (" << 100.0*nAddedCells/nIdealAddedCells << "%)."
             << endl;
 
         if (nTotChanged == 0)
