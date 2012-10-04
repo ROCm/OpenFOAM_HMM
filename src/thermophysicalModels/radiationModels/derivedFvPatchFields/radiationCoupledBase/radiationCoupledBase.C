@@ -29,7 +29,7 @@ License
 
 #include "mappedPatchBase.H"
 #include "fvPatchFieldMapper.H"
-#include "solidThermo.H"
+#include "radiationModel.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -143,10 +143,10 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
 
             const polyMesh& nbrMesh = mpp.sampleMesh();
 
-            const solidThermo& thermo =
-                nbrMesh.lookupObject<solidThermo>
+            const radiation::radiationModel& radiation =
+                nbrMesh.lookupObject<radiation::radiationModel>
                 (
-                    "thermophysicalProperties"
+                    "radiationProperties"
                 );
 
             // Force recalculation of mapping and schedule
@@ -157,7 +157,13 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
                 nbrMesh
             ).boundary()[mpp.samplePolyPatch().index()];
 
-            scalarField emissivity(thermo.emissivity(nbrPatch.index()));
+            scalarField emissivity
+            (
+                radiation.absorptionEmission().e()().boundaryField()
+                [
+                    nbrPatch.index()
+                ]
+            );
             distMap.distribute(emissivity);
 
             return emissivity;

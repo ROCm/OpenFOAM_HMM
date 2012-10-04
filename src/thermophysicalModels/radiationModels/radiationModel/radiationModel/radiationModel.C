@@ -89,7 +89,7 @@ Foam::radiation::radiationModel::radiationModel
     T_(T),
     radiation_(lookup("radiation")),
     coeffs_(subDict(type + "Coeffs")),
-    solverFreq_(readLabel(lookup("solverFreq"))),
+    solverFreq_(lookupOrDefault<label>("solverFreq", 1)),
     firstIter_(true),
     absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
     scatter_(scatterModel::New(*this, mesh_))
@@ -155,6 +155,13 @@ Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
       - fvm::Sp(4.0*Rp()*T3/Cpv, he)
       - Rp()*T3*(T_ - 4.0*he/Cpv)
     );
+}
+
+
+const Foam::radiation::absorptionEmissionModel&
+Foam::radiation::radiationModel::absorptionEmission() const
+{
+    return absorptionEmission_();
 }
 
 

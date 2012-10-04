@@ -48,6 +48,7 @@ SourceFiles
 #include "fluidThermo.H"
 #include "fvMatrices.H"
 #include "blackBodyEmission.H"
+#include "absorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +58,6 @@ namespace radiation
 {
 
 // Forward declaration of classes
-class absorptionEmissionModel;
 class scatterModel;
 
 /*---------------------------------------------------------------------------*\
@@ -178,6 +178,9 @@ public:
 
             //- Energy source term
             virtual tmp<fvScalarMatrix> Sh(fluidThermo& thermo) const;
+
+            //- Access to absorptionEmissionModel
+            const absorptionEmissionModel& absorptionEmission() const;
 };
 
 
