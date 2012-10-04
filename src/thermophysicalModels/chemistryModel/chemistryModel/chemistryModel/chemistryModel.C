@@ -35,11 +35,8 @@ Foam::chemistryModel<CompType, ThermoType>::chemistryModel
 )
 :
     CompType(mesh),
-
     ODE(),
-
     Y_(this->thermo().composition().Y()),
-
     reactions_
     (
         dynamic_cast<const reactingMixture<ThermoType>&>(this->thermo())

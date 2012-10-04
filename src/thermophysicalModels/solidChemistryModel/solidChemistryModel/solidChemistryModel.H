@@ -110,10 +110,10 @@ public:
     // Member Functions
 
         //- Return access to the solid thermo package
-        inline solidReactionThermo& solid();
+        inline solidReactionThermo& solidThermo();
 
         //- Return const access to the solid thermo package
-        inline const solidReactionThermo& solid() const;
+        inline const solidReactionThermo& solidThermo() const;
 
         //- Return total gases mass source term [kg/m3/s]
         virtual tmp<DimensionedField<scalar, volMesh> > RRg() const = 0;
