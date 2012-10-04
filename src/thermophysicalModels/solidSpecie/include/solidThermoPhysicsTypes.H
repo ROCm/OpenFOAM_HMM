@@ -39,7 +39,6 @@ Description
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-#include "constSolidRad.H"
 #include "sensibleEnthalpy.H"
 #include "thermo.H"
 
@@ -50,16 +49,13 @@ namespace Foam
     typedef
         constIsoSolidTransport
         <
-            constSolidRad
+            species::thermo
             <
-                species::thermo
+                hConstThermo
                 <
-                    hConstThermo
-                    <
-                        rhoConst<specie>
-                    >,
-                    sensibleEnthalpy
-                >
+                    rhoConst<specie>
+                >,
+                sensibleEnthalpy
             >
         >
         hConstSolidThermoPhysics;
@@ -67,16 +63,13 @@ namespace Foam
     typedef
         exponentialSolidTransport
         <
-            constSolidRad
+            species::thermo
             <
-                species::thermo
+                hExponentialThermo
                 <
-                    hExponentialThermo
-                    <
-                        rhoConst<specie>
-                    >,
-                    sensibleEnthalpy
-                >
+                    rhoConst<specie>
+                >,
+                sensibleEnthalpy
             >
         >
         hExponentialSolidThermoPhysics;
