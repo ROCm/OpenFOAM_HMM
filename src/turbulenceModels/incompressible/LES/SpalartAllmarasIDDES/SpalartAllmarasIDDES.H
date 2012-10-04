@@ -61,8 +61,8 @@ class SpalartAllmarasIDDES
 
         // Model constants
 
-            autoPtr<LESdelta> hmax_;
-            autoPtr<LESdelta> IDDESDelta_;
+            autoPtr<Foam::LESdelta> hmax_;
+            autoPtr<Foam::LESdelta> IDDESDelta_;
             dimensionedScalar fwStar_;
             dimensionedScalar cl_;
             dimensionedScalar ct_;
