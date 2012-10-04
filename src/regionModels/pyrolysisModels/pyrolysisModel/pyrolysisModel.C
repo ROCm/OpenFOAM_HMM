@@ -78,6 +78,8 @@ void pyrolysisModel::constructMeshObjects()
             }
         }
 
+        radiation_.reset(radiation::radiationModel::New(T()).ptr());
+
         if (!foundCoupledPatch)
         {
             WarningIn("void pyrolysisModels::constructMeshObjects()")
@@ -135,7 +137,8 @@ pyrolysisModel::pyrolysisModel(const fvMesh& mesh)
     regionModel1D(mesh),
     filmCoupled_(false),
     filmDeltaPtr_(NULL),
-    reactionDeltaMin_(0.0)
+    reactionDeltaMin_(0.0),
+    radiation_(NULL)
 {}
 
 
@@ -144,7 +147,8 @@ pyrolysisModel::pyrolysisModel(const word& modelType, const fvMesh& mesh)
     regionModel1D(mesh, "pyrolysis", modelType),
     filmCoupled_(false),
     filmDeltaPtr_(NULL),
-    reactionDeltaMin_(0.0)
+    reactionDeltaMin_(0.0),
+    radiation_(NULL)
 {
     if (active_)
     {
@@ -164,7 +168,8 @@ pyrolysisModel::pyrolysisModel
     regionModel1D(mesh, "pyrolysis", modelType, dict),
     filmCoupled_(false),
     filmDeltaPtr_(NULL),
-    reactionDeltaMin_(0.0)
+    reactionDeltaMin_(0.0),
+    radiation_(NULL)
 {
     if (active_)
     {

@@ -40,6 +40,8 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "solidThermo.H"
 #include "regionModel1D.H"
+#include "radiationModel.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,6 +89,9 @@ protected:
 
         //- Is thickness constant
         bool constantThickness_;
+
+        //- Pointer to radiation model
+        autoPtr<radiation::radiationModel> radiation_;
 
 
     // Protected Member Functions

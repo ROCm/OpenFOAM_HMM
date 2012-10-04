@@ -656,7 +656,7 @@ const tmp<volScalarField> reactingOneDim::Cp() const
 
 tmp<volScalarField> reactingOneDim::kappaRad() const
 {
-    return solidThermo_.kappaRad();
+    return radiation_->absorptionEmission().a();
 }
 
 

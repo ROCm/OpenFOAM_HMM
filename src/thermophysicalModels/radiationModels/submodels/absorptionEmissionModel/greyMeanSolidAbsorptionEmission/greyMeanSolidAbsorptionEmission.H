@@ -50,7 +50,8 @@ SourceFiles
 #define greyMeanSolidAbsorptionEmission_H
 
 #include "absorptionEmissionModel.H"
-#include "fluidThermo.H"
+#include "solidThermo.H"
+#include "basicMultiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,13 +84,18 @@ private:
         dictionary coeffsDict_;
 
         //- SLG thermo package
-        const fluidThermo& thermo_;
+        const solidThermo& thermo_;
 
         //- Hash table of species names
         HashTable<label> speciesNames_;
 
+        //- Basic multicomponent mixture
+        const basicMultiComponentMixture& mixture_;
+
         //- List of solid species data
         List<FixedList<scalar, 2> > solidData_;
+
+
 
 
     // Private member functions

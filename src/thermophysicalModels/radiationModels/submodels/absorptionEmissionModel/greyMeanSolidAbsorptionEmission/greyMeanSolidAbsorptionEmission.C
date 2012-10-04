@@ -43,33 +43,8 @@ namespace Foam
             greyMeanSolidAbsorptionEmission,
             dictionary
         );
-/*
-        template<>
-        const char* Foam::NamedEnum
-        <
-            Foam::radiation::greyMeanSolidAbsorptionEmission::
-            radiativePropertiesNumbering,
-            3
-        >::names[] =
-        {
-            "absorptivity",
-            "emissivity",
-            "emission"
-        };
-*/
     }
 }
-
-/*
-const Foam::NamedEnum
-    <
-        Foam::radiation::greyMeanSolidAbsorptionEmission::
-        radiativePropertiesNumbering,
-        3
-    >
-    Foam::radiation::greyMeanSolidAbsorptionEmission::
-    radiativePropertiesNumberingNames_;
-*/
 
 // * * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * //
 
@@ -82,10 +57,7 @@ greyMeanSolidAbsorptionEmission::X
     const volScalarField& T = thermo_.T();
     const volScalarField& p = thermo_.p();
 
-    const basicMultiComponentMixture& mixture =
-        dynamic_cast<const basicMultiComponentMixture&>(thermo_);
-
-    const label mySpecieI = mixture.species()[Yj.name()];
+    const label mySpecieI = mixture_.species()[Yj.name()];
 
     tmp<volScalarField> tXj
     (
@@ -110,20 +82,20 @@ greyMeanSolidAbsorptionEmission::X
     tmp<scalarField> tRhoInv(Xj);
     scalarField& rhoInv = tRhoInv();
 
-    forAll(mixture.Y(), specieI)
+    forAll(mixture_.Y(), specieI)
     {
-        const volScalarField& Yi = mixture.Y(specieI);
+        const volScalarField& Yi = mixture_.Y(specieI);
 
         forAll(Xj, iCell)
         {
             rhoInv[iCell] +=
-                Yi[iCell]/mixture.rho(specieI, p[iCell], T[iCell]);
+                Yi[iCell]/mixture_.rho(specieI, p[iCell], T[iCell]);
         }
     }
 
     forAll(Xj, iCell)
     {
-        Xj[iCell] = Yj[iCell]/mixture.rho(mySpecieI, p[iCell], T[iCell]);
+        Xj[iCell] = Yj[iCell]/mixture_.rho(mySpecieI, p[iCell], T[iCell]);
     }
 
     return (Xj/rhoInv);
@@ -140,15 +112,10 @@ greyMeanSolidAbsorptionEmission
 :
     absorptionEmissionModel(dict, mesh),
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
-    thermo_(mesh.lookupObject<fluidThermo>("thermophysicalProperties")),
+    thermo_(mesh.lookupObject<solidThermo>("thermophysicalProperties")),
     speciesNames_(0),
-    solidData_
-    (
-        dynamic_cast
-        <
-            const basicMultiComponentMixture&
-        >(thermo_).species().size()
-    )
+    mixture_(dynamic_cast<const basicMultiComponentMixture&>(thermo_)),
+    solidData_(mixture_.Y().size())
 {
     if (!isA<basicMultiComponentMixture>(thermo_))
     {
@@ -195,11 +162,8 @@ Foam::radiation::greyMeanSolidAbsorptionEmission::
 
 Foam::tmp<Foam::volScalarField>
 Foam::radiation::greyMeanSolidAbsorptionEmission::
-calc(const label property) const
+calc(const label propertyId) const
 {
-    const basicMultiComponentMixture& mixture =
-        dynamic_cast<const basicMultiComponentMixture&>(thermo_);
-
     tmp<volScalarField> ta
     (
         new volScalarField
@@ -222,10 +186,10 @@ calc(const label property) const
 
     forAllConstIter(HashTable<label>, speciesNames_, iter)
     {
-        if (mixture.contains(iter.key()))
+        if (mixture_.contains(iter.key()))
         {
-            const volScalarField& Y = mixture.Y(iter.key());
-            a += solidData_[iter()][property]*X(Y);
+            const volScalarField& Y = mixture_.Y(iter.key());
+            a += solidData_[iter()][propertyId]*X(Y);
         }
     }
 

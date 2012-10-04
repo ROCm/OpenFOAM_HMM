@@ -135,31 +135,31 @@ void noPyrolysis::evolveRegion()
 
 const volScalarField& noPyrolysis::rho() const
 {
-    return (solidThermo_->rho());
+    return solidThermo_->rho();
 }
 
 
 const volScalarField& noPyrolysis::T() const
 {
-    return (solidThermo_->T());
+    return solidThermo_->T();
 }
 
 
 const tmp<volScalarField> noPyrolysis::Cp() const
 {
-    return (solidThermo_->Cp());
+    return solidThermo_->Cp();
 }
 
 
 tmp<volScalarField> noPyrolysis::kappaRad() const
 {
-    return (solidThermo_->kappaRad());
+    return radiation_->absorptionEmission().a();
 }
 
 
 tmp<volScalarField> noPyrolysis::kappa() const
 {
-     return (solidThermo_->kappa());
+     return solidThermo_->kappa();
 }
 
 

@@ -90,7 +90,7 @@ protected:
             //- List of solid components
             PtrList<volScalarField>& Ys_;
 
-            // Non-const access to temperature
+            // Non-const access to enthalpy
             volScalarField& h_;
 
 

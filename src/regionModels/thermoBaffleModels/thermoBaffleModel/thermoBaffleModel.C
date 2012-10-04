@@ -192,6 +192,9 @@ void thermoBaffleModel::init()
                 }
             }
         }
+
+        // Create radiation model
+        radiation_.reset(radiation::radiationModel::New(T()).ptr());
     }
 }
 
@@ -204,7 +207,8 @@ thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(true)
+    constantThickness_(true),
+    radiation_(NULL)
 {}
 
 
@@ -220,7 +224,8 @@ thermoBaffleModel::thermoBaffleModel
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true))
+    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true)),
+    radiation_(NULL)
 {
     init();
 }
@@ -232,7 +237,8 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(lookupOrDefault<bool>("constantThickness", true))
+    constantThickness_(lookupOrDefault<bool>("constantThickness", true)),
+    radiation_(NULL)
 {
     init();
 }
