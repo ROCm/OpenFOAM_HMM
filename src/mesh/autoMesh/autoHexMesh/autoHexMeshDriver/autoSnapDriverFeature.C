@@ -1323,7 +1323,7 @@ Foam::labelPair Foam::autoSnapDriver::findNearFeaturePoint
                 patchConstraints[oldPointI] = pointConstraint();
 
                 label edgeFeatI;
-                const pointIndexHit nearInfo = findNearFeatureEdge
+                findNearFeatureEdge
                 (
                     pp,
                     snapDist,
@@ -1919,7 +1919,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                             // the old point to attract to nearest edge
                             // instead.
                             label edgeFeatI;
-                            const pointIndexHit nearInfo = findNearFeatureEdge
+                            findNearFeatureEdge
                             (
                                 pp,
                                 snapDist,
@@ -1950,7 +1950,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                     //    << endl;
 
                     label featI;
-                    const pointIndexHit nearInfo = findNearFeatureEdge
+                    findNearFeatureEdge
                     (
                         pp,
                         snapDist,
