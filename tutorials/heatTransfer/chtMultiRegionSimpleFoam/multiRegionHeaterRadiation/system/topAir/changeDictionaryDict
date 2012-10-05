@@ -180,7 +180,7 @@ dictionaryReplacement
             "topAir_to_.*"
             {
                 type            greyDiffusiveRadiationViewFactor;
-                emissivityMode  solidThermo;
+                emissivityMode  solidRadiation;
                 Qro             uniform 0;
                 value           uniform 0;
             }
@@ -205,7 +205,7 @@ dictionaryReplacement
             {
                 type            MarshakRadiation;
                 T               T;
-                emissivityMode  solidThermo;
+                emissivityMode  solidRadiation;
                 value           uniform 0;
             }
         }
@@ -229,7 +229,7 @@ dictionaryReplacement
             {
                 type            greyDiffusiveRadiation;
                 T               T;
-                emissivityMode  solidThermo;
+                emissivityMode  solidRadiation;
                 value           uniform 0;
             }
         }

@@ -59,7 +59,7 @@ public:
     //- Type of supplied emissivity
     enum emissivityMethodType
     {
-        SOLIDTHERMO,
+        SOLIDRADIATION,
         LOOKUP
     };
 

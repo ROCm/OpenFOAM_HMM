@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 #include "zeroGradientFvPatchFields.H"
-#include "basicMultiComponentMixture.H"
+#include "basicSolidMixture.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -49,50 +49,29 @@ namespace Foam
 // * * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField> Foam::radiation::
-greyMeanSolidAbsorptionEmission::X
-(
-    const volScalarField& Yj
-) const
+greyMeanSolidAbsorptionEmission::X(const word specie) const
 {
     const volScalarField& T = thermo_.T();
     const volScalarField& p = thermo_.p();
 
-    const label mySpecieI = mixture_.species()[Yj.name()];
+    tmp<scalarField> tXj(new scalarField(T.internalField().size(), 0.0));
+    scalarField& Xj = tXj();
 
-    tmp<volScalarField> tXj
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "Xj",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh(),
-            dimensionedScalar("Xj", dimless, 0.0),
-            zeroGradientFvPatchVectorField::typeName
-        )
-    );
-
-    scalarField& Xj = tXj().internalField();
-
-    tmp<scalarField> tRhoInv(Xj);
+    tmp<scalarField> tRhoInv(new scalarField(T.internalField().size(), 0.0));
     scalarField& rhoInv = tRhoInv();
 
     forAll(mixture_.Y(), specieI)
     {
-        const volScalarField& Yi = mixture_.Y(specieI);
+        const scalarField& Yi = mixture_.Y()[specieI];
 
-        forAll(Xj, iCell)
+        forAll (rhoInv, iCell)
         {
             rhoInv[iCell] +=
                 Yi[iCell]/mixture_.rho(specieI, p[iCell], T[iCell]);
         }
     }
-
+    const scalarField& Yj = mixture_.Y(specie);
+    const label mySpecieI = mixture_.components()[specie];
     forAll(Xj, iCell)
     {
         Xj[iCell] = Yj[iCell]/mixture_.rho(mySpecieI, p[iCell], T[iCell]);
@@ -114,10 +93,10 @@ greyMeanSolidAbsorptionEmission
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
     thermo_(mesh.lookupObject<solidThermo>("thermophysicalProperties")),
     speciesNames_(0),
-    mixture_(dynamic_cast<const basicMultiComponentMixture&>(thermo_)),
+    mixture_(dynamic_cast<const basicSolidMixture&>(thermo_)),
     solidData_(mixture_.Y().size())
 {
-    if (!isA<basicMultiComponentMixture>(thermo_))
+    if (!isA<basicSolidMixture>(thermo_))
     {
         FatalErrorIn
         (
@@ -144,8 +123,8 @@ greyMeanSolidAbsorptionEmission
         const word& key = iter().keyword();
         speciesNames_.insert(key, nFunc);
         const dictionary& dict = iter().dict();
-        dict.lookup("a") >> solidData_[nFunc][absorptivity];
-        dict.lookup("e") >> solidData_[nFunc][emissivity];
+        dict.lookup("absorptivity") >> solidData_[nFunc][absorptivity];
+        dict.lookup("emissivity") >> solidData_[nFunc][emissivity];
 
         nFunc++;
     }
@@ -188,8 +167,7 @@ calc(const label propertyId) const
     {
         if (mixture_.contains(iter.key()))
         {
-            const volScalarField& Y = mixture_.Y(iter.key());
-            a += solidData_[iter()][propertyId]*X(Y);
+            a += solidData_[iter()][propertyId]*X(iter.key());
         }
     }
 

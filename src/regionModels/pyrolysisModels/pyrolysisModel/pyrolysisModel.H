@@ -38,7 +38,6 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "volFieldsFwd.H"
 #include "regionModel1D.H"
-#include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,9 +90,6 @@ protected:
 
         //- Film height below which reactions can occur [m]
         scalar reactionDeltaMin_;
-
-        //- Pointer to radiation model
-        autoPtr<radiation::radiationModel> radiation_;
 
 
     // Protected Member Functions

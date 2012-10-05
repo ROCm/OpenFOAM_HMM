@@ -42,7 +42,7 @@ namespace Foam
         2
     >::names[] =
     {
-        "solidThermo",
+        "solidRadiation",
         "lookup"
     };
 }
@@ -78,7 +78,7 @@ Foam::radiationCoupledBase::radiationCoupledBase
 {
     switch (method_)
     {
-        case SOLIDTHERMO:
+        case SOLIDRADIATION:
         {
             if (!isA<mappedPatchBase>(patch_.patch()))
             {
@@ -132,7 +132,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
 {
     switch (method_)
     {
-        case SOLIDTHERMO:
+        case SOLIDRADIATION:
         {
             // Get the coupling information from the mappedPatchBase
             const mappedPatchBase& mpp =

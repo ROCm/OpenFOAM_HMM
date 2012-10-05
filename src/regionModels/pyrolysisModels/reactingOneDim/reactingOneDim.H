@@ -37,7 +37,7 @@ SourceFiles
 
 #include "pyrolysisModel.H"
 #include "solidChemistryModel.H"
-
+#include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -80,6 +80,9 @@ protected:
 
         //- Reference to solid thermo
         solidReactionThermo& solidThermo_;
+
+        //- Pointer to radiation model
+        autoPtr<radiation::radiationModel> radiation_;
 
 
         // Reference to solid thermo properties

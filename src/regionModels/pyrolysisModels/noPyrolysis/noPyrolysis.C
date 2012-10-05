@@ -51,7 +51,8 @@ void noPyrolysis::constructThermoChemistry()
         solidChemistryModel::New(regionMesh()).ptr()
     );
 
-    solidThermo_.reset(&solidChemistry_->solid());
+    solidThermo_.reset(&solidChemistry_->solidThermo());
+    radiation_.reset(radiation::radiationModel::New(solidThermo_->T()).ptr());
 }
 
 bool noPyrolysis::read()
@@ -88,7 +89,8 @@ noPyrolysis::noPyrolysis(const word& modelType, const fvMesh& mesh)
 :
     pyrolysisModel(mesh),
     solidChemistry_(NULL),
-    solidThermo_(NULL)
+    solidThermo_(NULL),
+    radiation_(NULL)
 {
     if (active())
     {
@@ -105,7 +107,8 @@ noPyrolysis::noPyrolysis
 ):
     pyrolysisModel(mesh),
     solidChemistry_(NULL),
-    solidThermo_(NULL)
+    solidThermo_(NULL),
+    radiation_(NULL)
 {
     if (active())
     {

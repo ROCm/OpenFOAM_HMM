@@ -90,18 +90,16 @@ private:
         HashTable<label> speciesNames_;
 
         //- Basic multicomponent mixture
-        const basicMultiComponentMixture& mixture_;
+        const basicSolidMixture& mixture_;
 
         //- List of solid species data
         List<FixedList<scalar, 2> > solidData_;
 
 
-
-
     // Private member functions
 
        //- Calculate the volumetric fraction of Yj
-       tmp<scalarField> X(const volScalarField& Yj) const;
+       tmp<scalarField> X(const word specie) const;
 
        //- Calculate the property mixing
        tmp<volScalarField> calc(const label) const;

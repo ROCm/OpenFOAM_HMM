@@ -41,12 +41,6 @@ vCoeffs
     {
         kappa       0.135;
     }
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;  //opaque
-        emissivity  0.17;
-    }
     thermodynamics
     {
         Cp          696;
@@ -68,12 +62,6 @@ charCoeffs
     transport
     {
         kappa       0.4;
-    }
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;
-        emissivity  0.85;
     }
     thermodynamics
     {

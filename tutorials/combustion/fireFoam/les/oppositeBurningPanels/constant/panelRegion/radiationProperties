@@ -18,24 +18,12 @@ FoamFile
 
 radiation       off;
 
-radiationModel  none;
+radiationModel  opaqueSolid;
 
-noRadiation
+opaqueSolidCoeffs
 {
 }
 
-P1Coeffs
-{
-}
-
-fvDOMCoeffs
-{
-}
-
-// Number of flow iterations per radiation iteration
-solverFreq 10;
-
-//absorptionEmissionModel constantAbsorptionEmission;
 absorptionEmissionModel greyMeanSolidAbsorptionEmission;
 
 
@@ -44,16 +32,14 @@ greyMeanSolidAbsorptionEmissionCoeffs
 
     v
     {
-        sigmaS      0.0;
-        a           0.0;  //opaque
-        emissivity  0.17;
+        absorptivity    0.0;  //opaque
+        emissivity      0.17;
     }
 
     char
     {
-        sigmaS      0.0;
-        a           0.0;
-        emissivity  0.85;
+        absorptivity    0.0;
+        emissivity      0.85;
     }
 
 }

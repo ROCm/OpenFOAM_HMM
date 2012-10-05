@@ -363,7 +363,8 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
 :
     pyrolysisModel(modelType, mesh),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solid()),
+    solidThermo_(solidChemistry_->solidThermo()),
+    radiation_(radiation::radiationModel::New(solidThermo_.T())),
     rho_
     (
         IOobject
@@ -474,7 +475,8 @@ reactingOneDim::reactingOneDim
 :
     pyrolysisModel(modelType, mesh, dict),
     solidChemistry_(solidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solid()),
+    solidThermo_(solidChemistry_->solidThermo()),
+    radiation_(radiation::radiationModel::New(solidThermo_.T())),
     rho_
     (
         IOobject
