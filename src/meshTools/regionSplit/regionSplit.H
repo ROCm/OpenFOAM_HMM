@@ -98,6 +98,7 @@ SourceFiles
 #include "globalIndex.H"
 #include "labelPair.H"
 #include "boolList.H"
+#include "MeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,12 +113,10 @@ class polyMesh;
 
 class regionSplit
 :
+    public MeshObject<polyMesh, regionSplit>,
     public labelList
 {
     // Private data
-
-        //- Reference to mesh
-        const polyMesh& mesh_;
 
         mutable autoPtr<globalIndex> globalNumberingPtr_;
 
@@ -161,10 +160,12 @@ class regionSplit
             labelList& cellRegion
         ) const;
 
+
 public:
 
     //- Runtime type information
     ClassName("regionSplit");
+
 
     // Constructors
 
@@ -185,6 +186,7 @@ public:
             const List<labelPair>&
         );
 
+
     // Member Functions
 
         //- Return global region numbering
@@ -198,7 +200,6 @@ public:
         {
             return globalNumbering().size();
         }
-
 };
 
 
