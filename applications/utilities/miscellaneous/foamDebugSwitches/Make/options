@@ -56,7 +56,6 @@ EXE_LIBS = \
     -lsolidMixtureProperties \
     -lsolidParticle \
     -lsolidProperties \
-    -lsolid \
     -lspecie \
     -lsurfaceFilmModels \
     -lsurfMesh \

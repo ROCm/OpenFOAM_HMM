@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ SourceFiles
 #ifndef vanDriestDelta_H
 #define vanDriestDelta_H
 
-#include "LESdelta.H"
+#include "incompressibleLESdelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ class vanDriestDelta
 {
     // Private data
 
-        autoPtr<LESdelta> geometricDelta_;
+        autoPtr<Foam::LESdelta> geometricDelta_;
         scalar kappa_;
         scalar Aplus_;
         scalar Cdelta_;

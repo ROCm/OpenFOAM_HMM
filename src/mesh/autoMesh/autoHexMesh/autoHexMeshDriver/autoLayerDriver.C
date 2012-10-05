@@ -2800,7 +2800,7 @@ void Foam::autoLayerDriver::addLayers
         layerParams.nSmoothNormals(),
         layerParams.nSmoothSurfaceNormals(),
         layerParams.minMedianAxisAngleCos(),
-        layerParams.featureAngle(),
+        layerParams.slipFeatureAngle(),
 
         dispVec,
         medialRatio,

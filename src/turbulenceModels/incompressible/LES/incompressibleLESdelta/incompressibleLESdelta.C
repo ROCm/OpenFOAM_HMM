@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,56 +23,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LimitedScheme.H"
-#include "Limited01.H"
-#include "MUSCL.H"
+#include "incompressibleLESdelta.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeLimitedSurfaceInterpolationScheme(MUSCL, MUSCLLimiter)
-    makeLimitedVSurfaceInterpolationScheme(MUSCLV, MUSCLLimiter)
+namespace incompressible
+{
 
-    makeLLimitedSurfaceInterpolationTypeScheme
-    (
-        limitedMUSCL,
-        LimitedLimiter,
-        MUSCLLimiter,
-        NVDTVD,
-        magSqr,
-        scalar
-    )
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    makeLLimitedSurfaceInterpolationTypeScheme
-    (
-        MUSCL01,
-        Limited01Limiter,
-        MUSCLLimiter,
-        NVDTVD,
-        magSqr,
-        scalar
-    )
+defineRunTimeSelectionTable(LESdelta, dictionary);
 
-/*
-    makeLimitedSurfaceInterpolationTypeScheme
-    (
-        MUSCL,
-        MUSCLLimiter,
-        NVDTVD,
-        rhoMagSqr,
-        scalar
-    )
 
-    makeLimitedSurfaceInterpolationTypeScheme
-    (
-        MUSCL,
-        MUSCLLimiter,
-        NVDTVD,
-        rhoMagSqr,
-        vector
-    )
-*/
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+LESdelta::LESdelta(const word& name, const fvMesh& mesh)
+:
+    foamLESdelta(name, mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<foamLESdelta> LESdelta::New
+(
+    const word& name,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    return foamLESdelta::New(name, mesh, dict, *dictionaryConstructorTablePtr_);
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace incompressible
+} // End namespace Foam
 
 // ************************************************************************* //

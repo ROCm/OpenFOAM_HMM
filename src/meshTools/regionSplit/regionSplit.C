@@ -69,7 +69,7 @@ void Foam::regionSplit::transferCoupledFaceRegion
                   "regionSplit::transferCoupledFaceRegion"
                   "(const label, const label, labelList&, labelList&) const"
               )   << "Problem : coupled face " << faceI
-                  << " on patch " << mesh_.boundaryMesh().whichPatch(faceI)
+                  << " on patch " << mesh().boundaryMesh().whichPatch(faceI)
                   << " has region " << faceRegion[faceI]
                   << " but coupled face " << otherFaceI
                   << " has region " << faceRegion[otherFaceI]
@@ -109,7 +109,7 @@ void Foam::regionSplit::fillSeedMask
 
 
     // Collect faces on seed cell
-    const cell& cFaces = mesh_.cells()[seedCellID];
+    const cell& cFaces = mesh().cells()[seedCellID];
 
     label nFaces = 0;
 
@@ -144,7 +144,7 @@ void Foam::regionSplit::fillSeedMask
         {
             label faceI = changedFaces[i];
 
-            label own = mesh_.faceOwner()[faceI];
+            label own = mesh().faceOwner()[faceI];
 
             if (cellRegion[own] == -1)
             {
@@ -152,9 +152,9 @@ void Foam::regionSplit::fillSeedMask
                 changedCells.append(own);
             }
 
-            if (mesh_.isInternalFace(faceI))
+            if (mesh().isInternalFace(faceI))
             {
-                label nei = mesh_.faceNeighbour()[faceI];
+                label nei = mesh().faceNeighbour()[faceI];
 
                 if (cellRegion[nei] == -1)
                 {
@@ -178,7 +178,7 @@ void Foam::regionSplit::fillSeedMask
         {
             label cellI = changedCells[i];
 
-            const cell& cFaces = mesh_.cells()[cellI];
+            const cell& cFaces = mesh().cells()[cellI];
 
             forAll(cFaces, cFaceI)
             {
@@ -203,7 +203,7 @@ void Foam::regionSplit::fillSeedMask
         // Check for changes to any locally coupled face.
         // Global connections are done later.
 
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
         forAll(patches, patchI)
         {
@@ -274,7 +274,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
         {
             // Check that blockedFace is synced.
             boolList syncBlockedFace(blockedFace);
-            syncTools::swapFaceList(mesh_, syncBlockedFace);
+            syncTools::swapFaceList(mesh(), syncBlockedFace);
 
             forAll(syncBlockedFace, faceI)
             {
@@ -295,7 +295,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
     // Region per face.
     // -1 unassigned
     // -2 blocked
-    labelList faceRegion(mesh_.nFaces(), -1);
+    labelList faceRegion(mesh().nFaces(), -1);
 
     if (blockedFace.size())
     {
@@ -321,7 +321,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
     {
         // Find first unset cell
 
-        for (; unsetCellI < mesh_.nCells(); unsetCellI++)
+        for (; unsetCellI < mesh().nCells(); unsetCellI++)
         {
             if (cellRegion[unsetCellI] == -1)
             {
@@ -329,7 +329,7 @@ Foam::label Foam::regionSplit::calcLocalRegionSplit
             }
         }
 
-        if (unsetCellI >= mesh_.nCells())
+        if (unsetCellI >= mesh().nCells())
         {
             break;
         }
@@ -430,9 +430,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
         }
 
 
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
-        labelList nbrRegion(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+        labelList nbrRegion(mesh().nFaces()-mesh().nInternalFaces(), -1);
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
@@ -444,7 +444,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
                 (
                     nbrRegion,
                     pp.size(),
-                    pp.start()-mesh_.nInternalFaces()
+                    pp.start()-mesh().nInternalFaces()
                 );
 
                 forAll(patchCells, i)
@@ -457,9 +457,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
                 }
             }
         }
-        syncTools::swapBoundaryFaceList(mesh_, nbrRegion);
+        syncTools::swapBoundaryFaceList(mesh(), nbrRegion);
 
-        Map<label> globalToMerged(mesh_.nFaces()-mesh_.nInternalFaces());
+        Map<label> globalToMerged(mesh().nFaces()-mesh().nInternalFaces());
 
         forAll(patches, patchI)
         {
@@ -472,7 +472,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
                 (
                     nbrRegion,
                     pp.size(),
-                    pp.start()-mesh_.nInternalFaces()
+                    pp.start()-mesh().nInternalFaces()
                 );
 
                 forAll(patchCells, i)
@@ -486,7 +486,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
                             //Pout<< "on patch:" << pp.name()
                             //    << " cell:" << patchCells[i]
                             //    << " at:"
-                            // << mesh_.cellCentres()[patchCells[i]]
+                            // << mesh().cellCentres()[patchCells[i]]
                             //    << " was:" << cellRegion[patchCells[i]]
                             //    << " nbr:" << patchNbrRegion[i]
                             //    << endl;
@@ -534,7 +534,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
     // 4a: count. Use a labelHashSet to count regions only once.
     label nCompact = 0;
     {
-        labelHashSet localRegion(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelHashSet localRegion(mesh().nFaces()-mesh().nInternalFaces());
         forAll(cellRegion, cellI)
         {
             if
@@ -692,8 +692,8 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
 Foam::regionSplit::regionSplit(const polyMesh& mesh)
 :
-    labelList(mesh.nCells(), -1),
-    mesh_(mesh)
+    MeshObject<polyMesh, regionSplit>(mesh),
+    labelList(mesh.nCells(), -1)
 {
     globalNumberingPtr_ = calcRegionSplit
     (
@@ -710,8 +710,8 @@ Foam::regionSplit::regionSplit
     const boolList& blockedFace
 )
 :
-    labelList(mesh.nCells(), -1),
-    mesh_(mesh)
+    MeshObject<polyMesh, regionSplit>(mesh),
+    labelList(mesh.nCells(), -1)
 {
     globalNumberingPtr_ = calcRegionSplit
     (
@@ -729,8 +729,8 @@ Foam::regionSplit::regionSplit
     const List<labelPair>& explicitConnections
 )
 :
-    labelList(mesh.nCells(), -1),
-    mesh_(mesh)
+    MeshObject<polyMesh, regionSplit>(mesh),
+    labelList(mesh.nCells(), -1)
 {
     globalNumberingPtr_ = calcRegionSplit
     (

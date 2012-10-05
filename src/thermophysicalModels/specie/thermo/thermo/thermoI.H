@@ -298,15 +298,22 @@ template<class Thermo, template<class> class Type>
 inline Foam::scalar
 Foam::species::thermo<Thermo, Type>::K(const scalar p, const scalar T) const
 {
-    scalar arg = -this->nMoles()*this->g(p, T)/(this->RR*T);
-
-    if (arg < 600.0)
+    if (equal(this->nMoles(), SMALL))
     {
-        return ::exp(arg);
+        return 1.0;
     }
     else
     {
-        return VGREAT;
+        scalar arg = -this->nMoles()*this->g(p, T)/(this->RR*T);
+
+        if (arg < 600.0)
+        {
+            return exp(arg);
+        }
+        else
+        {
+            return VGREAT;
+        }
     }
 }
 

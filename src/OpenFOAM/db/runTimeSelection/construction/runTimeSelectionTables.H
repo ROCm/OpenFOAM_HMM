@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,13 @@ Description
         )                                                                     \
         {                                                                     \
             construct##argNames##ConstructorTables();                         \
-            argNames##ConstructorTablePtr_->insert(lookup, New);              \
+            if (!argNames##ConstructorTablePtr_->insert(lookup, New))         \
+            {                                                                 \
+                std::cerr<< "Duplicate entry " << lookup                      \
+                    << " in runtime selection table " << #baseType            \
+                    << std::endl;                                             \
+                error::safePrintStack(std::cerr);                             \
+            }                                                                 \
         }                                                                     \
                                                                               \
         ~add##argNames##ConstructorToTable()                                  \
@@ -167,11 +173,20 @@ Description
         )                                                                     \
         {                                                                     \
             construct##argNames##ConstructorTables();                         \
-            argNames##ConstructorTablePtr_->insert                            \
+            if                                                                \
             (                                                                 \
-                lookup,                                                       \
-                New##baseType                                                 \
-            );                                                                \
+               !argNames##ConstructorTablePtr_->insert                        \
+                (                                                             \
+                    lookup,                                                   \
+                    New##baseType                                             \
+                )                                                             \
+            )                                                                 \
+            {                                                                 \
+                std::cerr<< "Duplicate entry " << lookup                      \
+                    << " in runtime selection table " << #baseType            \
+                    << std::endl;                                             \
+                error::safePrintStack(std::cerr);                             \
+            }                                                                 \
         }                                                                     \
                                                                               \
         ~add##argNames##ConstructorToTable()                                  \

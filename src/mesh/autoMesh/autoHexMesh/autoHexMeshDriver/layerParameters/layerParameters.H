@@ -79,6 +79,8 @@ class layerParameters
 
         scalar featureAngle_;
 
+        scalar slipFeatureAngle_;
+
         scalar concaveAngle_;
 
         label nGrow_;
@@ -176,6 +178,13 @@ public:
             scalar featureAngle() const
             {
                 return featureAngle_;
+            }
+
+            //- At non-patched sides allow mesh to slip if extrusion
+            //  direction makes angle larger than slipFeatureAngle.
+            scalar slipFeatureAngle() const
+            {
+                return slipFeatureAngle_;
             }
 
             scalar concaveAngle() const
