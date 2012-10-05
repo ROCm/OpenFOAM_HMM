@@ -51,7 +51,7 @@ SourceFiles
 #define compressibleLESModel_H
 
 #include "compressible/turbulenceModel/turbulenceModel.H"
-#include "compressibleLESdelta.H"
+#include "compressible/LES/compressibleLESdelta/compressibleLESdelta.H"
 #include "fvm.H"
 #include "fvc.H"
 #include "fvMatrices.H"
