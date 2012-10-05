@@ -113,7 +113,7 @@ bool Foam::radiation::radiationModel::read()
         lookup("radiation") >> radiation_;
         coeffs_ = subDict(type() + "Coeffs");
 
-        lookupOrDefault<label>("solverFreq", 1) >> solverFreq_;
+        solverFreq_ = lookupOrDefault<label>("solverFreq", 1);
         solverFreq_ = max(1, solverFreq_);
 
         return true;
