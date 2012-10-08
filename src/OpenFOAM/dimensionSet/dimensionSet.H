@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,10 +40,12 @@ SourceFiles
 #ifndef dimensionSet_H
 #define dimensionSet_H
 
-#include "scalar.H"
 #include "bool.H"
 #include "dimensionedScalarFwd.H"
 #include "className.H"
+#include "scalarField.H"
+#include "PtrList.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +55,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class dimensionSet;
+class dimensionSets;
 
 // Friend functions
 
@@ -140,6 +143,64 @@ public:
 
 private:
 
+    // Private classes
+
+        class tokeniser
+        {
+            // Private data
+
+                Istream& is_;
+
+                List<token> tokens_;
+
+                label start_;
+
+                label size_;
+
+            // Private Member Functions
+
+                void push(const token&);
+
+                token pop();
+
+                void unpop(const token&);
+
+        public:
+
+            // Constructors
+
+                 tokeniser(Istream&);
+
+            // Member Functions
+
+                Istream& stream()
+                {
+                    return is_;
+                }
+
+                bool hasToken() const;
+
+                token nextToken();
+
+                void putBack(const token&);
+
+                void splitWord(const word&);
+
+                static bool valid(char c);
+
+                static label priority(const token& t);
+
+        };
+
+
+        dimensionedScalar parse
+        (
+            const label lastPrior,
+            tokeniser& tis,
+            const HashTable<dimensionedScalar>&
+        ) const;
+
+
     // private data
 
         // dimensionSet stored as an array of dimension exponents
@@ -189,14 +250,56 @@ public:
 
         void reset(const dimensionSet&);
 
-        //- Return a text representation for added readability
-        string asText() const;
+
+    // I/O
+
+        //- Read using provided units. Used only in initial parsing
+        Istream& read
+        (
+            Istream& is,
+            scalar& multiplier,
+            const dictionary&
+        );
+
+        //- Read using provided units
+        Istream& read
+        (
+            Istream& is,
+            scalar& multiplier,
+            const HashTable<dimensionedScalar>&
+        );
+
+        //- Read using system units
+        Istream& read
+        (
+            Istream& is,
+            scalar& multiplier
+        );
+
+        //- Write using provided units
+        Ostream& write
+        (
+            Ostream& os,
+            scalar& multiplier,
+            const dimensionSets&
+        ) const;
+
+        //- Write using system units
+        Ostream& write
+        (
+            Ostream& os,
+            scalar& multiplier
+        ) const;
 
 
     // Member operators
 
         scalar operator[](const dimensionType) const;
         scalar& operator[](const dimensionType);
+
+        scalar operator[](const label) const;
+        scalar& operator[](const label);
+
         bool operator==(const dimensionSet&) const;
         bool operator!=(const dimensionSet&) const;
 
