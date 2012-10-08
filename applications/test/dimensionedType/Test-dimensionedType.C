@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,45 @@ int main(int argc, char *argv[])
     dimensionedScalar ds("ds", dimless, 1.0);
 
     Info<< ds*dt << " " << dt*ds << endl;
+
+
+    // dimensionSet
+    {
+        Pout<< "dimensionSet construct from is:"
+            << dimensionSet(IStringStream("[Pa m^2 s^-2]")())
+            << endl;
+
+        IStringStream is("[Pa m^2 s^-2]");
+        dimensionSet dset(dimless);
+        is >> dset;
+        Pout<< "dimensionSet read:" << dset << endl;
+    }
+    // dimensionedType
+    {
+        Pout<< "construct from is:"
+            << dimensionedScalar(IStringStream("bla [Pa mm^2 s^-2] 3.0")())
+            << endl;
+        Pout<< "construct from name,is:"
+            <<  dimensionedScalar
+                (
+                    "ABC",
+                    IStringStream("[Pa mm^2 s^-2] 3.0")()
+                ) << endl;
+        Pout<< "construct from name,dimensionSet,is:"
+            <<  dimensionedScalar
+                (
+                    "ABC",
+                    dimLength,
+                    IStringStream("bla [mm] 3.0")()
+                ) << endl;
+        {
+            IStringStream is("bla [mm] 3.0");
+            dimensionedScalar ds;
+            is >> ds;
+            Pout<< "read:" << ds << endl;
+        }
+    }
+
 
     Info<< "End\n" << endl;
 
