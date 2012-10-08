@@ -79,7 +79,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("solidChemistryModel");
+    TypeName("solid");
 
 
     //- Declare run-time constructor selection tables
