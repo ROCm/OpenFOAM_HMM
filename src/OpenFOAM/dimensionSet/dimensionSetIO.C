@@ -420,7 +420,7 @@ Foam::Istream& Foam::dimensionSet::read
         multiplier = ds.value();
         for (int i=0; i < dimensionSet::nDimensions; ++i)
         {
-            exponents_[i] += ds.dimensions()[i];
+            exponents_[i] = ds.dimensions()[i];
         }
     }
     else
