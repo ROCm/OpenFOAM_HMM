@@ -148,4 +148,39 @@ void Foam::fvc::makeAbsolute
 }
 
 
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
+(
+    const tmp<surfaceScalarField>& tphi,
+    const volVectorField& U
+)
+{
+    if (tphi().mesh().moving())
+    {
+        return tphi + fvc::meshPhi(U);
+    }
+    else
+    {
+        return tphi;
+    }
+}
+
+
+Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
+(
+    const tmp<surfaceScalarField>& tphi,
+    const volScalarField& rho,
+    const volVectorField& U
+)
+{
+    if (tphi().mesh().moving())
+    {
+        return tphi + fvc::meshPhi(rho, U);
+    }
+    else
+    {
+        return tphi;
+    }
+}
+
+
 // ************************************************************************* //

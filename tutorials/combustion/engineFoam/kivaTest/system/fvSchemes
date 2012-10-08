@@ -31,6 +31,8 @@ divSchemes
     div(phi,U)      Gauss upwind;
     div(phi,K)      Gauss upwind;
     div(phid,p)     Gauss upwind;
+    div(meshPhi,p)  Gauss upwind;
+    div(phiv,p)     Gauss upwind;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div(phi,R)      Gauss upwind;
@@ -45,6 +47,8 @@ divSchemes
         b   limitedLinear01 1;
         ha  limitedLinear 1;
         hau limitedLinear 1;
+        ea  limitedLinear 1;
+        eau limitedLinear 1;
     };
     div(U)          Gauss linear;
     div((Su*grad(b))) Gauss linear;
@@ -54,17 +58,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         none;
-    laplacian(muEff,U) Gauss linear corrected;
-    laplacian(DkEff,k) Gauss linear limited 0.5;
-    laplacian(DepsilonEff,epsilon) Gauss linear limited 0.5;
-    laplacian(DREff,R) Gauss linear limited 0.5;
-    laplacian((rho*(1|A(U))),p) Gauss linear limited 0.5;
-    laplacian(alphaEff,b) Gauss linear limited 0.5;
-    laplacian(muEff,ft) Gauss linear limited 0.5;
-    laplacian(alphaEff,ha) Gauss linear limited 0.5;
-    laplacian(alphaEff,hau) Gauss linear limited 0.5;
-    laplacian(alphaEff,ft) Gauss linear limited 0.5;
+    default         Gauss linear limited 0.5;
 }
 
 interpolationSchemes

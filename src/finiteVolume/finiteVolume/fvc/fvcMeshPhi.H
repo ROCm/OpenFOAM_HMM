@@ -116,6 +116,22 @@ namespace fvc
         const volScalarField& rho,
         const volVectorField& U
     );
+
+
+    //- Return the given relative flux in absolute form
+    tmp<surfaceScalarField> absolute
+    (
+        const tmp<surfaceScalarField>& tphi,
+        const volVectorField& U
+    );
+
+    //- Return the given relative flux in absolute form
+    tmp<surfaceScalarField> absolute
+    (
+        const tmp<surfaceScalarField>& tphi,
+        const volScalarField& rho,
+        const volVectorField& U
+    );
 }
 
 
