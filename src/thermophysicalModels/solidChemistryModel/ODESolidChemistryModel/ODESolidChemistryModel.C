@@ -41,7 +41,7 @@ ODESolidChemistryModel
     pyrolisisGases_
     (
         mesh.lookupObject<dictionary>
-            ("chemistryProperties").lookup("species")
+            ("thermophysicalProperties").lookup("gaseousSpecies")
     ),
     reactions_
     (
@@ -183,8 +183,8 @@ ODESolidChemistryModel
         dictionary thermoDict =
             mesh.lookupObject<dictionary>
             (
-                "chemistryProperties"
-            ).subDict(pyrolisisGases_[gasI]);
+                "thermophysicalProperties"
+            ).subDict(pyrolisisGases_[gasI] + "Coeffs");
 
         gasThermo_.set
         (

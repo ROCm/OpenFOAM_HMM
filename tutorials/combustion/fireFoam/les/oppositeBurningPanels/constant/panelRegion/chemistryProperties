@@ -23,15 +23,6 @@ chemistryType
 
 chemistry           on;
 
-gasThermoType
-{
-    transport       sutherland;
-    thermo          janaf;
-    equationOfState perfectGas;
-    specie          specie;
-    energy          sensibleEnthalpy;
-}
-
 initialChemicalTimeStep 1e-07;
 
 odeCoeffs
@@ -39,34 +30,6 @@ odeCoeffs
     solver          SIBS;
     eps             0.05;
 }
-
-species
-(
-    gas
-);
-
-gas
-{
-    specie
-    {
-        nMoles          1;
-        molWeight       18.0153;
-    }
-    thermodynamics
-    {
-        Tlow            200;
-        Thigh           5000;
-        Tcommon         1000;
-        highCpCoeffs    ( 2.67215 0.00305629 -8.73026e-07 1.20100e-10 -6.39162e-15 -29899.2 6.86282 );
-        lowCpCoeffs     ( 3.38684 0.00347498 -6.35470e-06 6.96858e-09 -2.50659e-12 -30208.1 2.59023 );
-    }
-    transport
-    {
-        As              1.67212e-06;
-        Ts              170.672;
-    }
-}
-
 
 reactions
 (

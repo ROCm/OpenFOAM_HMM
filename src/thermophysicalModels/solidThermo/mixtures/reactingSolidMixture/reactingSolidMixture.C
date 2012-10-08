@@ -48,7 +48,7 @@ Foam::reactingSolidMixture<ThermoSolidType>::reactingSolidMixture
         (
             this->components_,
             mesh.lookupObject<dictionary>
-                ("chemistryProperties").lookup("species")
+                ("thermophysicalProperties").lookup("gaseousSpecies")
         )
     )
 {}

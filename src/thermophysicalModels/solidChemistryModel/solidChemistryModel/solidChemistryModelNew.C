@@ -92,7 +92,7 @@ Foam::autoPtr<Foam::solidChemistryModel> Foam::solidChemistryModel::New
       + word(solidThermoTypeDict.lookup("energy")) + ">"
     );
 
-    const dictionary& gasThermoTypeDict(chemistryDict.subDict("gasThermoType"));
+    const dictionary& gasThermoTypeDict(thermoDict.subDict("gasThermoType"));
     word gasThermoTypeName
     (
         word(gasThermoTypeDict.lookup("transport")) + '<'
