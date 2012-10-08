@@ -33,10 +33,12 @@ License
 #include "perfectGas.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
-#include "absoluteEnthalpy.H"
 #include "thermo.H"
 #include "constTransport.H"
 #include "sutherlandTransport.H"
+
+#include "absoluteEnthalpy.H"
+#include "absoluteInternalEnergy.H"
 
 #include "homogeneousMixture.H"
 #include "inhomogeneousMixture.H"
@@ -96,6 +98,20 @@ makeReactionThermo
     psiThermo,
     psiuReactionThermo,
     heheuPsiThermo,
+    egrMixture,
+    constTransport,
+    absoluteEnthalpy,
+    hConstThermo,
+    perfectGas,
+    specie
+);
+
+
+makeReactionThermo
+(
+    psiThermo,
+    psiuReactionThermo,
+    heheuPsiThermo,
     homogeneousMixture,
     sutherlandTransport,
     absoluteEnthalpy,
@@ -136,9 +152,49 @@ makeReactionThermo
     psiuReactionThermo,
     heheuPsiThermo,
     egrMixture,
-    constTransport,
+    sutherlandTransport,
     absoluteEnthalpy,
-    hConstThermo,
+    janafThermo,
+    perfectGas,
+    specie
+);
+
+
+makeReactionThermo
+(
+    psiThermo,
+    psiuReactionThermo,
+    heheuPsiThermo,
+    homogeneousMixture,
+    sutherlandTransport,
+    absoluteInternalEnergy,
+    janafThermo,
+    perfectGas,
+    specie
+);
+
+makeReactionThermo
+(
+    psiThermo,
+    psiuReactionThermo,
+    heheuPsiThermo,
+    inhomogeneousMixture,
+    sutherlandTransport,
+    absoluteInternalEnergy,
+    janafThermo,
+    perfectGas,
+    specie
+);
+
+makeReactionThermo
+(
+    psiThermo,
+    psiuReactionThermo,
+    heheuPsiThermo,
+    veryInhomogeneousMixture,
+    sutherlandTransport,
+    absoluteInternalEnergy,
+    janafThermo,
     perfectGas,
     specie
 );
@@ -150,7 +206,7 @@ makeReactionThermo
     heheuPsiThermo,
     egrMixture,
     sutherlandTransport,
-    absoluteEnthalpy,
+    absoluteInternalEnergy,
     janafThermo,
     perfectGas,
     specie

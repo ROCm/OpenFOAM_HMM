@@ -413,14 +413,14 @@ inline Foam::scalar Foam::species::thermo<Thermo, Type>::THs
 template<class Thermo, template<class> class Type>
 inline Foam::scalar Foam::species::thermo<Thermo, Type>::THa
 (
-    const scalar ht,
+    const scalar ha,
     const scalar p,
     const scalar T0
 ) const
 {
     return T
     (
-        ht,
+        ha,
         p,
         T0,
         &thermo<Thermo, Type>::Ha,
@@ -453,7 +453,7 @@ inline Foam::scalar Foam::species::thermo<Thermo, Type>::TEs
 template<class Thermo, template<class> class Type>
 inline Foam::scalar Foam::species::thermo<Thermo, Type>::TEa
 (
-    const scalar e,
+    const scalar ea,
     const scalar p,
     const scalar T0
 ) const
