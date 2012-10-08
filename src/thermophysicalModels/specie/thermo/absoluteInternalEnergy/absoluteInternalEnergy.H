@@ -22,16 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sensibleInternalEnergy
+    Foam::absoluteInternalEnergy
 
 Description
-    Thermodynamics mapping class to expose the sensible internal energy function
+    Thermodynamics mapping class to expose the absolute internal energy function
     as the standard internal energy function e(T).
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sensibleInternalEnergy_H
-#define sensibleInternalEnergy_H
+#ifndef absoluteInternalEnergy_H
+#define absoluteInternalEnergy_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,11 +39,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sensibleInternalEnergy Declaration
+                       Class absoluteInternalEnergy Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo>
-class sensibleInternalEnergy
+class absoluteInternalEnergy
 {
 
 public:
@@ -51,7 +51,7 @@ public:
     // Constructors
 
         //- Construct
-        sensibleInternalEnergy()
+        absoluteInternalEnergy()
         {}
 
 
@@ -60,27 +60,28 @@ public:
         //- Return the instantiated type name
         static word typeName()
         {
-            return "sensibleInternalEnergy";
+            return "absoluteInternalEnergy";
         }
 
         // Fundamental properties
 
             static word name()
             {
-                return "e";
+                return "ea";
             }
 
-            //- Sensible Internal energy [J/kmol]
+            // Absolute internal energy [J/kmol]
             scalar he
             (
                 const Thermo& thermo,
                 const scalar p,
-                const scalar T) const
+                const scalar T
+            ) const
             {
-                return thermo.es(p, T);
+                return thermo.ea(p, T);
             }
 
-            //- Heat capacity at constant volume [J/(kmol K)]
+            // Heat capacity at constant volume [J/(kmol K)]
             scalar cpv
             (
                 const Thermo& thermo,
@@ -102,7 +103,7 @@ public:
                 return thermo.gamma(p, T);
             }
 
-            //- Sensible internal energy [J/kg]
+            // Absolute internal energy [J/kg]
             scalar HE
             (
                 const Thermo& thermo,
@@ -110,10 +111,10 @@ public:
                 const scalar T
             ) const
             {
-                return thermo.Es(p, T);
+                return thermo.Ea(p, T);
             }
 
-            //- Temperature from sensible internal energy
+            //- Temperature from absolute internal energy
             //  given an initial temperature T0
             scalar THE
             (
@@ -123,7 +124,7 @@ public:
                 const scalar T0
             ) const
             {
-                return thermo.TEs(e, p, T0);
+                return thermo.TEa(e, p, T0);
             }
 };
 
