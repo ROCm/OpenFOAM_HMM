@@ -97,10 +97,10 @@ dimensioned<Type>::dimensioned
     Istream& is
 )
 :
-    name_(is),
-    dimensions_(is),
-    value_(pTraits<Type>(is))
-{}
+    dimensions_(dimless)
+{
+    read(is);
+}
 
 
 template <class Type>
@@ -111,9 +111,13 @@ dimensioned<Type>::dimensioned
 )
 :
     name_(name),
-    dimensions_(is),
-    value_(pTraits<Type>(is))
-{}
+    dimensions_(dimless)
+{
+    scalar multiplier;
+    dimensions_.read(is, multiplier);
+    is >> value_;
+    value_ *= multiplier;
+}
 
 
 template <class Type>
@@ -141,24 +145,29 @@ dimensioned<Type>::dimensioned
     }
 
     // If the dimensions are provided compare with the argument
+    scalar multiplier = 1.0;
+
     if (nextToken == token::BEGIN_SQR)
     {
-        dimensionSet dims(is);
+        dimensionSet dims(dimless);
+        dims.read(is, multiplier);
 
         if (dims != dimensions_)
         {
-            FatalErrorIn
+            FatalIOErrorIn
             (
                 "dimensioned<Type>::dimensioned"
-                "(const word&, const dimensionSet&, Istream&)"
+                "(const word&, const dimensionSet&, Istream&)",
+                is
             ) << "The dimensions " << dims
               << " provided do not match the required dimensions "
               << dimensions_
-              << abort(FatalError);
+              << abort(FatalIOError);
         }
     }
 
     is >> value_;
+    value_ *= multiplier;
 }
 
 
@@ -244,6 +253,83 @@ template <class Type>
 bool dimensioned<Type>::readIfPresent(const dictionary& dict)
 {
     return dict.readIfPresent(name_, value_);
+}
+
+
+template <class Type>
+Foam::Istream& dimensioned<Type>::read(Istream& is, const dictionary& readSet)
+{
+    // Read name
+    is >> name_;
+
+    // Read dimensionSet + multiplier
+    scalar mult;
+    dimensions_.read(is, mult, readSet);
+
+    // Read value
+    is >> value_;
+    value_ *= mult;
+
+    // Check state of Istream
+    is.check
+    (
+        "Istream& dimensioned<Type>::read(Istream& is, const dictionary&)"
+    );
+
+    return is;
+}
+
+
+template <class Type>
+Foam::Istream& dimensioned<Type>::read
+(
+    Istream& is,
+    const HashTable<dimensionedScalar>& readSet
+)
+{
+    // Read name
+    is >> name_;
+
+    // Read dimensionSet + multiplier
+    scalar mult;
+    dimensions_.read(is, mult, readSet);
+
+    // Read value
+    is >> value_;
+    value_ *= mult;
+
+    // Check state of Istream
+    is.check
+    (
+        "Istream& dimensioned<Type>::read"
+        "(Istream& is, const HashTable<dimensionedScalar>&)"
+    );
+
+    return is;
+}
+
+
+template <class Type>
+Foam::Istream& dimensioned<Type>::read(Istream& is)
+{
+    // Read name
+    is >> name_;
+
+    // Read dimensionSet + multiplier
+    scalar mult;
+    dimensions_.read(is, mult);
+
+    // Read value
+    is >> value_;
+    value_ *= mult;
+
+    // Check state of Istream
+    is.check
+    (
+        "Istream& dimensioned<Type>::read(Istream& is)"
+    );
+
+    return is;
 }
 
 
@@ -414,13 +500,15 @@ Istream& operator>>(Istream& is, dimensioned<Type>& dt)
     }
 
     // If the dimensions are provided reset the dimensions to those read
+    scalar multiplier = 1.0;
     if (nextToken == token::BEGIN_SQR)
     {
-        is >> dt.dimensions_;
+        dt.dimensions_.read(is, multiplier);
     }
 
     // Read the value
     is >> dt.value_;
+    dt.value_ *= multiplier;
 
     // Check state of Istream
     is.check("Istream& operator>>(Istream&, dimensioned<Type>&)");
@@ -432,10 +520,17 @@ Istream& operator>>(Istream& is, dimensioned<Type>& dt)
 template <class Type>
 Ostream& operator<<(Ostream& os, const dimensioned<Type>& dt)
 {
-    // do a stream write op for a dimensions()et
-    os  << dt.name() << token::SPACE
-        << dt.dimensions() << token::SPACE
-        << dt.value();
+    // Write the name
+    os << dt.name() << token::SPACE;
+
+    // Write the dimensions
+    scalar mult;
+    dt.dimensions().write(os, mult);
+
+    os << token::SPACE;
+
+    // Write the value
+    os << dt.value()/mult;
 
     // Check state of Ostream
     os.check("Ostream& operator<<(Ostream&, const dimensioned<Type>&)");
