@@ -39,7 +39,6 @@ namespace Foam
     makeSolidChemistrySolverType
     (
         ode,
-        ODESolidChemistryModel,
         solidChemistryModel,
         hConstSolidThermoPhysics,
         gasThermoPhysics
@@ -48,7 +47,6 @@ namespace Foam
     makeSolidChemistrySolverType
     (
         ode,
-        ODESolidChemistryModel,
         solidChemistryModel,
         hExponentialSolidThermoPhysics,
         gasThermoPhysics

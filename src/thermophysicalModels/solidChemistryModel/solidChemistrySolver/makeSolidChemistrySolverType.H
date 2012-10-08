@@ -39,22 +39,23 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeSolidChemistrySolverType(SS, ODEChem, Comp, SThermo, GThermo)     \
+#define makeSolidChemistrySolverType(SS, Comp, SThermo, GThermo)              \
                                                                               \
-    typedef SS<ODEChem<Comp, SThermo, GThermo> >                              \
-        SS##ODEChem##Comp##SThermo##GThermo;                                  \
+    typedef SS<ODESolidChemistryModel<Comp, SThermo, GThermo> >               \
+        SS##Comp##SThermo##GThermo;                                           \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        SS##ODEChem##Comp##SThermo##GThermo,                                  \
-        #SS"<"#ODEChem"<"#Comp","#SThermo","#GThermo">>",                     \
+        SS##Comp##SThermo##GThermo,                                           \
+        (#SS"<" + word(Comp::typeName_())                                     \
+      + "," + SThermo::typeName() + "," + GThermo::typeName() + ">").c_str(), \
         0                                                                     \
     );                                                                        \
                                                                               \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
         Comp,                                                                 \
-        SS##ODEChem##Comp##SThermo##GThermo,                                  \
+        SS##Comp##SThermo##GThermo,                                           \
         fvMesh                                                                \
     );
 
