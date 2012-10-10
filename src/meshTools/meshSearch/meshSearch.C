@@ -799,7 +799,7 @@ Foam::label Foam::meshSearch::findCell
         }
         else
         {
-             return findCellLinear(location);
+            return findCellLinear(location);
         }
     }
     else
