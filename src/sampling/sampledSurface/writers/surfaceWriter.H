@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ Class
     Foam::surfaceWriter
 
 Description
+    Base class for surface writers
 
 SourceFiles
     surfaceWriter.C
@@ -115,7 +116,6 @@ public:
             return false;
         }
 
-
         //- Write single surface geometry to file.
         virtual void write
         (
@@ -126,7 +126,6 @@ public:
             const bool verbose = false
         ) const
         {}
-
 
         //- Write scalarField for a single surface to file.
         //  One value per face or vertex (isNodeValues = true)
@@ -202,8 +201,6 @@ public:
             const bool verbose = false
         ) const
         {}
-
-
 };
 
 
