@@ -191,7 +191,12 @@ void Foam::FacePostProcessing<CloudType>::write()
 
                 autoPtr<surfaceWriter> writer
                 (
-                    surfaceWriter::New(surfaceFormat_)
+                    surfaceWriter::New
+                    (
+                        surfaceFormat_,
+                        this->coeffDict().subOrEmptyDict("formatOptions").
+                            subOrEmptyDict(surfaceFormat_)
+                    )
                 );
 
                 writer->write

@@ -457,9 +457,16 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 
     if (valueOutput_)
     {
+        const word surfaceFormat(dict.lookup("surfaceFormat"));
+
         surfaceWriterPtr_.reset
         (
-            surfaceWriter::New(dict.lookup("surfaceFormat")).ptr()
+            surfaceWriter::New
+            (
+                surfaceFormat,
+                dict.subOrEmptyDict("formatOptions").
+                    subOrEmptyDict(surfaceFormat)
+            ).ptr()
         );
     }
 }
