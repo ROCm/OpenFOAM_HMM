@@ -160,7 +160,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
     }
     else
     {
-        return tphi;
+        return tmp<surfaceScalarField>(tphi, true);
     }
 }
 
@@ -178,7 +178,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
     }
     else
     {
-        return tphi;
+        return tmp<surfaceScalarField>(tphi, true);
     }
 }
 

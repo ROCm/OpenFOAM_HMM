@@ -69,6 +69,38 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
 
 
 template<class T>
+inline Foam::tmp<T>::tmp(const tmp<T>& t, bool allowTransfer)
+:
+    isTmp_(t.isTmp_),
+    ptr_(t.ptr_),
+    ref_(t.ref_)
+{
+    if (isTmp_)
+    {
+        if (allowTransfer)
+        {
+            const_cast<tmp<T>&>(t).ptr_ = 0;
+        }
+        else
+        {
+            if (ptr_)
+            {
+                ptr_->operator++();
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "Foam::tmp<T>::tmp(const tmp<T>&, bool allowTransfer)"
+                )   << "attempted copy of a deallocated temporary"
+                    << abort(FatalError);
+            }
+        }
+    }
+}
+
+
+template<class T>
 inline Foam::tmp<T>::~tmp()
 {
     if (isTmp_ && ptr_)

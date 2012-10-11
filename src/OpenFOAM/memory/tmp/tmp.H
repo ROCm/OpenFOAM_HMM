@@ -79,6 +79,9 @@ public:
         //- Construct copy and increment reference count
         inline tmp(const tmp<T>&);
 
+        //- Construct copy transferring content of temporary if required
+        inline tmp(const tmp<T>&, bool allowTransfer);
+
 
     //- Destructor, delete object when reference count == 0
     inline ~tmp();
