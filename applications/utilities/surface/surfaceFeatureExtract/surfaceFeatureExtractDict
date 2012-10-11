@@ -59,15 +59,21 @@ surface2.nas
     {
         // Use a plane to select feature edges
         // (normal)(basePoint)
+        // Keep only edges that intersect the plane will be included
         plane               (1 0 0)(0 0 0);
 
         // Select feature edges using a box
         // (minPt)(maxPt)
+        // Keep edges inside the box:
         insideBox           (0 0 0)(1 1 1);
+        // Keep edges outside the box:
         outsideBox          (0 0 0)(1 1 1);
 
-        // Remove any non-manifold (open or > 2 connected faces) edges
-        manifoldEdges       no;
+        // Keep nonManifold edges (edges with >2 connected faces)
+        nonManifoldEdges       yes;
+
+        // Keep open edges (edges with 1 connected face)
+        openEdges       yes;
     }
 
     addFeatures
