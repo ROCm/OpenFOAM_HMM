@@ -27,6 +27,7 @@ License
 #include "dictionary.H"
 #include "IFstream.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -68,11 +69,12 @@ namespace functionEntries
 
 Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 (
-    Istream& is
+    Istream& is,
+    const dictionary& dict
 )
 {
     fileName fName(is);
-    fName.expand();
+    stringOps::inplaceExpand(fName, dict);
 
     if (fName.empty() || fName.isAbsolute())
     {
@@ -94,7 +96,7 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is));
+    const fileName fName(includeFileName(is, parentDict));
     IFstream ifs(fName);
 
     if (ifs)
@@ -129,7 +131,7 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is));
+    const fileName fName(includeFileName(is, parentDict));
     IFstream ifs(fName);
 
     if (ifs)
