@@ -33,7 +33,7 @@ Description
     by "zeroGradient" and then corrected from the flux:
 
         \f[
-            U_p = U_c - n*(n.U_c) + \frac{n*\phi_p}{|Sf|}
+            U_p = U_c - n (n \cdot U_c) + \frac{n \phi_p}{|S_f|}
         \f]
 
     where
@@ -43,7 +43,7 @@ Description
         U_c | velocity in cells adjacent to the patch [m/s]
         n   | patch normal vectors
         \phi_p | flux at the patch [m3/s or kg/s]
-        Sf  | patch face area vectors [m2]
+        S_f | patch face area vectors [m2]
     \endvartable
 
     where
