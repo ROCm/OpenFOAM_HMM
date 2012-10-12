@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,38 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
             FatalErrorIn("Foam::tmp<T>::tmp(const tmp<T>&)")
                 << "attempted copy of a deallocated temporary"
                 << abort(FatalError);
+        }
+    }
+}
+
+
+template<class T>
+inline Foam::tmp<T>::tmp(const tmp<T>& t, bool allowTransfer)
+:
+    isTmp_(t.isTmp_),
+    ptr_(t.ptr_),
+    ref_(t.ref_)
+{
+    if (isTmp_)
+    {
+        if (allowTransfer)
+        {
+            const_cast<tmp<T>&>(t).ptr_ = 0;
+        }
+        else
+        {
+            if (ptr_)
+            {
+                ptr_->operator++();
+            }
+            else
+            {
+                FatalErrorIn
+                (
+                    "Foam::tmp<T>::tmp(const tmp<T>&, bool allowTransfer)"
+                )   << "attempted copy of a deallocated temporary"
+                    << abort(FatalError);
+            }
         }
     }
 }

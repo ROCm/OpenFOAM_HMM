@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,6 +78,9 @@ public:
 
         //- Construct copy and increment reference count
         inline tmp(const tmp<T>&);
+
+        //- Construct copy transferring content of temporary if required
+        inline tmp(const tmp<T>&, bool allowTransfer);
 
 
     //- Destructor, delete object when reference count == 0
