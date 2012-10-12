@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #include "IOobject.H"
 #include "IFstream.H"
 #include "dictionary.H"
+#include "stringOps.H"
 
 using namespace Foam;
 
@@ -44,6 +45,16 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.insert("dict .. dictN");
     argList args(argc, argv, false, true);
+
+    {
+        dictionary dict;
+        dict.add("aaOPENMPIcc", 1);
+
+        string s("DDD${aa${WM_MPLIB}cc}EEE");
+        stringOps::inplaceExpand(s, dict, true, false);
+        Info<< "variable expansion:" << s << endl;
+    }
+
 
     Info<< nl
         << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
