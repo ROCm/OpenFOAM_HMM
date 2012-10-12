@@ -248,6 +248,218 @@ Foam::string Foam::stringOps::expand
 }
 
 
+Foam::string Foam::stringOps::getVariable
+(
+    const word& name,
+    const dictionary& dict,
+    const bool allowEnvVars,
+    const bool allowEmpty
+)
+{
+    string value;
+
+    const entry* ePtr = dict.lookupScopedEntryPtr
+    (
+        name,
+        true,
+        false
+    );
+    if (ePtr)
+    {
+        OStringStream buf;
+        // Force floating point numbers to be printed with at least
+        // some decimal digits.
+        buf << fixed;
+        buf.precision(IOstream::defaultPrecision());
+
+        // fail for non-primitiveEntry
+        dynamicCast<const primitiveEntry>
+        (
+            *ePtr
+        ).write(buf, true);
+
+        value = buf.str();
+    }
+    else if (allowEnvVars)
+    {
+        value = getEnv(name);
+
+        if (value.empty())
+        {
+            FatalIOErrorIn
+            (
+                "stringOps::getVariable\n"
+                "(\n"
+                "    const word&,\n"
+                "    const dictionary&,\n"
+                "    const bool,\n"
+                "    const bool\n"
+                ")\n",
+                dict
+            )   << "Cannot find dictionary or environment variable "
+                << name << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "stringOps::getVariable\n"
+            "(\n"
+            "    const word&,\n"
+            "    const dictionary&,\n"
+            "    const bool,\n"
+            "    const bool\n"
+            ")\n",
+            dict
+        )   << "Cannot find environment variable "
+            << name << exit(FatalIOError);
+    }
+
+    return value;
+}
+
+
+Foam::string Foam::stringOps::expand
+(
+    const string& s,
+    string::size_type& index,
+    const dictionary& dict,
+    const bool allowEnvVars,
+    const bool allowEmpty
+)
+{
+    string newString;
+
+    while (index < s.size())
+    {
+        if (s[index] == '$' && s[index+1] == '{')
+        {
+            // Recurse to parse variable name
+            index += 2;
+            string val = expand(s, index, dict, allowEnvVars, allowEmpty);
+            newString.append(val);
+        }
+        else if (s[index] == '}')
+        {
+            return getVariable(newString, dict, allowEnvVars, allowEmpty);
+        }
+        else
+        {
+            newString.append(string(s[index]));
+        }
+        index++;
+    }
+    return newString;
+}
+
+
+Foam::string& Foam::stringOps::inplaceExpand
+(
+    string& s,
+    const dictionary& dict,
+    const bool allowEnvVars,
+    const bool allowEmpty,
+    const char sigil
+)
+{
+    string::size_type begVar = 0;
+
+    // Expand $VAR or ${VAR}
+    // Repeat until nothing more is found
+    while
+    (
+        (begVar = s.find(sigil, begVar)) != string::npos
+     && begVar < s.size()-1
+    )
+    {
+        if (begVar == 0 || s[begVar-1] != '\\')
+        {
+            if (s[begVar+1] == '{')
+            {
+                // Recursive variable expansion mode
+                label stringStart = begVar;
+                begVar += 2;
+                string varValue
+                (
+                    expand
+                    (
+                        s,
+                        begVar,
+                        dict,
+                        allowEnvVars,
+                        allowEmpty
+                    )
+                );
+
+                s.std::string::replace
+                (
+                    stringStart,
+                    begVar - stringStart + 1,
+                    varValue
+                );
+            }
+            else
+            {
+                string::iterator iter = s.begin() + begVar + 1;
+
+                // more generous in accepting keywords than for env variables
+                string::size_type endVar = begVar;
+                while
+                (
+                    iter != s.end()
+                 &&
+                    (
+                        isalnum(*iter)
+                     || *iter == '.'
+                     || *iter == ':'
+                     || *iter == '_'
+                    )
+                )
+                {
+                    ++iter;
+                    ++endVar;
+                }
+
+                const word varName
+                (
+                    s.substr
+                    (
+                        begVar + 1,
+                        endVar - begVar
+                    ),
+                    false
+                );
+
+                string varValue
+                (
+                    getVariable
+                    (
+                        varName,
+                        dict,
+                        allowEnvVars,
+                        allowEmpty
+                    )
+                );
+
+                s.std::string::replace
+                (
+                    begVar,
+                    varName.size()+1,
+                    varValue
+                );
+                begVar += varValue.size();
+            }
+        }
+        else
+        {
+            ++begVar;
+        }
+    }
+    return s;
+}
+
+
 Foam::string& Foam::stringOps::inplaceExpand
 (
     string& s,
