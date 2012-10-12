@@ -51,7 +51,6 @@ addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle2D, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-
 bool thermoBaffle2D::read()
 {
     this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
@@ -157,7 +156,6 @@ void thermoBaffle2D::solveEnergy()
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 thermoBaffle2D::thermoBaffle2D
 (
@@ -278,17 +276,11 @@ void thermoBaffle2D::init()
     {
         label patchI = intCoupledPatchIDs_[0];
         const label Qsb = Qs_.boundaryField()[patchI].size();
+
         if (Qsb!= thickness_.size())
         {
-            FatalErrorIn
-            (
-                "thermoBaffle2D::thermoBaffle2D"
-                "("
-                "   const word& modelType,"
-                "   const fvMesh& mesh,"
-                "   const dictionary& dict"
-                ")"
-            )   << "the boundary field of Qs is "
+            FatalErrorIn("thermoBaffle2D::init()")
+                << "the boundary field of Qs is "
                 << Qsb << " and " << nl
                 << "the field 'thickness' is " << thickness_.size() << nl
                 << exit(FatalError);
@@ -349,7 +341,7 @@ const solidThermo& thermoBaffle2D::thermo() const
 void thermoBaffle2D::info() const
 {
     const labelList& coupledPatches = intCoupledPatchIDs();
-    forAll (coupledPatches, i)
+    forAll(coupledPatches, i)
     {
         const label patchI = coupledPatches[i];
         const fvPatchScalarField& ph = h_.boundaryField()[patchI];
