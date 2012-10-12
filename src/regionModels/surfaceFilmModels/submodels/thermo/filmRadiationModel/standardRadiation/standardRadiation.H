@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,8 +59,8 @@ private:
 
     // Private data
 
-        //- Radiative flux mapped from  the primary region / [kg/s3]
-        volScalarField QrPrimary_;
+        //- Radiative incident flux mapped from  the primary region / [kg/s3]
+        volScalarField QinPrimary_;
 
         //- Remaining radiative flux after removing local contribution
         volScalarField QrNet_;

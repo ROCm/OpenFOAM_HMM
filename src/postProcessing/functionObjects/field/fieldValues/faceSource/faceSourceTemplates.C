@@ -259,7 +259,15 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         {
             faceList faces;
             pointField points;
-            combineSurfaceGeometry(faces, points);
+
+            if (surfacePtr_.valid())
+            {
+                combineSurfaceGeometry(faces, points);
+            }
+            else
+            {
+                combineMeshGeometry(faces, points);
+            }
 
             fileName outputDir;
             if (Pstream::parRun())

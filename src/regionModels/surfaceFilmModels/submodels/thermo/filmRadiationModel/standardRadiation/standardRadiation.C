@@ -57,11 +57,11 @@ standardRadiation::standardRadiation
 )
 :
     filmRadiationModel(typeName, owner, dict),
-    QrPrimary_
+    QinPrimary_
     (
         IOobject
         (
-            "Qr", // same name as Qr on primary region to enable mapping
+            "Qin", // same name as Qin on primary region to enable mapping
             owner.time().timeName(),
             owner.regionMesh(),
             IOobject::NO_READ,
@@ -103,7 +103,7 @@ standardRadiation::~standardRadiation()
 void standardRadiation::correct()
 {
     // Transfer Qr from primary region
-    QrPrimary_.correctBoundaryConditions();
+    QinPrimary_.correctBoundaryConditions();
 }
 
 
@@ -128,13 +128,13 @@ tmp<volScalarField> standardRadiation::Shs()
     );
 
     scalarField& Shs = tShs();
-    const scalarField& QrP = QrPrimary_.internalField();
+    const scalarField& QinP = QinPrimary_.internalField();
     const scalarField& delta = delta_.internalField();
 
-    Shs = beta_*(QrP*pos(delta - deltaMin_))*(1.0 - exp(-kappaBar_*delta));
+    Shs = beta_*(QinP*pos(delta - deltaMin_))*(1.0 - exp(-kappaBar_*delta));
 
     // Update net Qr on local region
-    QrNet_.internalField() = QrP - Shs;
+    QrNet_.internalField() = QinP - Shs;
     QrNet_.correctBoundaryConditions();
 
     return tShs;
