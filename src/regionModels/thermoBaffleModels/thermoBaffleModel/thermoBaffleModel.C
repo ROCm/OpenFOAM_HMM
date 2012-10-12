@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,11 +107,12 @@ void thermoBaffleModel::init()
             const label patchI = intCoupledPatchIDs_[i];
             const polyPatch& pp = rbm[patchI];
 
-            if  (
-                    !isA<mappedVariableThicknessWallPolyPatch>(pp)
-                 && oneD_
-                 && !constantThickness_
-                )
+            if
+            (
+                !isA<mappedVariableThicknessWallPolyPatch>(pp)
+             && oneD_
+             && !constantThickness_
+            )
             {
                 FatalErrorIn
                 (
@@ -192,9 +193,6 @@ void thermoBaffleModel::init()
                 }
             }
         }
-
-        // Create radiation model
-        radiation_.reset(radiation::radiationModel::New(T()).ptr());
     }
 }
 
@@ -207,8 +205,7 @@ thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(true),
-    radiation_(NULL)
+    constantThickness_(true)
 {}
 
 
@@ -224,8 +221,7 @@ thermoBaffleModel::thermoBaffleModel
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true)),
-    radiation_(NULL)
+    constantThickness_(dict.lookupOrDefault<bool>("constantThickness", true))
 {
     init();
 }
@@ -237,8 +233,7 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
-    constantThickness_(lookupOrDefault<bool>("constantThickness", true)),
-    radiation_(NULL)
+    constantThickness_(lookupOrDefault<bool>("constantThickness", true))
 {
     init();
 }

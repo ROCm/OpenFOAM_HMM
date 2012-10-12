@@ -203,7 +203,8 @@ thermoBaffle2D::thermoBaffle2D
             dimEnergy/dimVolume/dimTime,
             pTraits<scalar>::zero
         )
-    )
+    ),
+    radiation_(radiation::radiationModel::New(thermo_->T()))
 {
     init();
     thermo_->correct();
@@ -255,7 +256,8 @@ thermoBaffle2D::thermoBaffle2D
             dimEnergy/dimVolume/dimTime,
             pTraits<scalar>::zero
         )
-    )
+    ),
+    radiation_(radiation::radiationModel::New(thermo_->T()))
 {
     init();
     thermo_->correct();
@@ -341,6 +343,7 @@ const solidThermo& thermoBaffle2D::thermo() const
 void thermoBaffle2D::info() const
 {
     const labelList& coupledPatches = intCoupledPatchIDs();
+
     forAll(coupledPatches, i)
     {
         const label patchI = coupledPatches[i];
