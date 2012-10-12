@@ -88,7 +88,8 @@ void noThermo::evolveRegion()
 const tmp<volScalarField> noThermo::Cp() const
 {
     FatalErrorIn("const tmp<volScalarField>& noThermo::Cp() const")
-        << "Cp field not available for " << type() << abort(FatalError);
+        << "Cp field not available for " << type()
+        << abort(FatalError);
 
     return tmp<volScalarField>
     (
@@ -112,7 +113,8 @@ const tmp<volScalarField> noThermo::Cp() const
 const volScalarField& noThermo::kappaRad() const
 {
     FatalErrorIn("const volScalarField& noThermo::kappaRad() const")
-        << "kappa field not available for " << type() << abort(FatalError);
+        << "kappa field not available for " << type()
+        << abort(FatalError);
     return volScalarField::null();
 }
 
@@ -120,7 +122,8 @@ const volScalarField& noThermo::kappaRad() const
 const volScalarField& noThermo::rho() const
 {
     FatalErrorIn("const volScalarField& noThermo::rho() const")
-        << "rho field not available for " << type() << abort(FatalError);
+        << "rho field not available for " << type()
+        << abort(FatalError);
     return volScalarField::null();
 }
 
@@ -128,7 +131,8 @@ const volScalarField& noThermo::rho() const
 const volScalarField& noThermo::kappa() const
 {
    FatalErrorIn("const volScalarField& noThermo::kappa() const")
-        << "K field not available for " << type() << abort(FatalError);
+        << "K field not available for " << type()
+        << abort(FatalError);
     return volScalarField::null();
 }
 
@@ -136,7 +140,8 @@ const volScalarField& noThermo::kappa() const
 const volScalarField& noThermo::T() const
 {
     FatalErrorIn("const volScalarField& noThermo::T() const")
-        << "T field not available for " << type() << abort(FatalError);
+        << "T field not available for " << type()
+        << abort(FatalError);
     return volScalarField::null();
 }
 
@@ -144,7 +149,8 @@ const volScalarField& noThermo::T() const
 const solidThermo& noThermo::thermo() const
 {
     FatalErrorIn("const volScalarField& noThermo::T() const")
-        << "T field not available for " << type() << abort(FatalError);
+        << "T field not available for " << type()
+        << abort(FatalError);
     return reinterpret_cast<const solidThermo&>(null);
 }
 

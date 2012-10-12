@@ -78,7 +78,7 @@ ODESolidChemistryModel
             (
                 IOobject
                 (
-                    "RRs::" + Ys_[fieldI].name(),
+                    "RRs." + Ys_[fieldI].name(),
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -166,7 +166,7 @@ ODESolidChemistryModel
             (
                 IOobject
                 (
-                    "RRg::" + pyrolisisGases_[fieldI],
+                    "RRg." + pyrolisisGases_[fieldI],
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,

@@ -46,8 +46,8 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 {
     if (writeFields_)
     {
-        word massEscapeName(this->owner().name() + "::massEscape");
-        word massStickName(this->owner().name() + "::massStick");
+        word massEscapeName(this->owner().name() + ".massEscape");
+        word massStickName(this->owner().name() + ".massStick");
         Info<< "    Interaction fields will be written to " << massEscapeName
             << " and " << massStickName << endl;
 
@@ -121,7 +121,7 @@ Foam::volScalarField& Foam::LocalInteraction<CloudType>::massEscape()
             (
                 IOobject
                 (
-                    this->owner().name() + "::massEscape",
+                    this->owner().name() + ".massEscape",
                     mesh.time().timeName(),
                     mesh,
                     IOobject::READ_IF_PRESENT,
@@ -150,7 +150,7 @@ Foam::volScalarField& Foam::LocalInteraction<CloudType>::massStick()
             (
                 IOobject
                 (
-                    this->owner().name() + "::massStick",
+                    this->owner().name() + ".massStick",
                     mesh.time().timeName(),
                     mesh,
                     IOobject::READ_IF_PRESENT,

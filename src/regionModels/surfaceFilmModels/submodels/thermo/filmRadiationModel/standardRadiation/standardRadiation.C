@@ -115,7 +115,7 @@ tmp<volScalarField> standardRadiation::Shs()
         (
             IOobject
             (
-                typeName + "::Shs",
+                typeName + ".Shs",
                 owner().time().timeName(),
                 owner().regionMesh(),
                 IOobject::NO_READ,

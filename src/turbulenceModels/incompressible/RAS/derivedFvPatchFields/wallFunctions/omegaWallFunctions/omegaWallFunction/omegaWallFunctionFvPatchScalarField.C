@@ -59,7 +59,7 @@ void omegaWallFunctionFvPatchScalarField::checkType()
 
 void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
+    writeEntryIfDifferent<word>(os, "G", "RASModel.G", GName_);
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
@@ -76,7 +76,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF),
-    GName_("RASModel::G"),
+    GName_("RASModel.G"),
     Cmu_(0.09),
     kappa_(0.41),
     E_(9.8),
@@ -115,7 +115,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF, dict),
-    GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
+    GName_(dict.lookupOrDefault<word>("G", "RASModel.G")),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),

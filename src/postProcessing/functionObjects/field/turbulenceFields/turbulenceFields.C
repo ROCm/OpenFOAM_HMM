@@ -141,7 +141,7 @@ void Foam::turbulenceFields::read(const dictionary& dict)
             Info<< "storing fields:" << nl;
             forAllConstIter(wordHashSet, fieldSet_, iter)
             {
-                Info<< "    " << modelName << "::" << iter.key() << nl;
+                Info<< "    " << modelName << '.' << iter.key() << nl;
             }
             Info<< endl;
         }

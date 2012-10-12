@@ -186,7 +186,7 @@ Foam::primitiveEntry::primitiveEntry
     entry(key),
     ITstream
     (
-        is.name() + "::" + key,
+        is.name() + '.' + key,
         tokenList(10),
         is.format(),
         is.version()
@@ -201,7 +201,7 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, Istream& is)
     entry(key),
     ITstream
     (
-        is.name() + "::" + key,
+        is.name() + '.' + key,
         tokenList(10),
         is.format(),
         is.version()
