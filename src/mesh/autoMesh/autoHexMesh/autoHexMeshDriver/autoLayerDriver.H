@@ -192,7 +192,8 @@ class autoLayerDriver
                     const indirectPrimitivePatch& pp,
                     pointField& patchDisp,
                     labelList& patchNLayers,
-                    List<extrudeMode>& extrudeStatus
+                    List<extrudeMode>& extrudeStatus,
+                    label& nIdealAddedCells
                 ) const;
 
                 //- Helper function to make a pointVectorField with correct
@@ -469,6 +470,7 @@ class autoLayerDriver
                     const label nSmoothNormals,
                     const label nSmoothSurfaceNormals,
                     const scalar minMedianAxisAngleCos,
+                    const scalar featureAngle,
 
                     pointVectorField& dispVec,
                     pointScalarField& medialRatio,

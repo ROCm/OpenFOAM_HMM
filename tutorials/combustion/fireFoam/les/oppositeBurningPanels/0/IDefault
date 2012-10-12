@@ -32,7 +32,7 @@ boundaryField
     {
         type            greyDiffusiveRadiation;
         T               T;
-        emissivityMode  solidThermo;
+        emissivityMode  solidRadiation;
         value           uniform 0;
     }
 }

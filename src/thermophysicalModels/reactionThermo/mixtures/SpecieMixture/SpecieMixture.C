@@ -207,4 +207,16 @@ Foam::scalar Foam::SpecieMixture<MixtureType>::alphah
 }
 
 
+template<class MixtureType>
+Foam::scalar Foam::SpecieMixture<MixtureType>::rho
+(
+    const label speciei,
+    const scalar p,
+    const scalar T
+) const
+{
+    return this->getLocalThermo(speciei).rho(p, T);
+}
+
+
 // ************************************************************************* //

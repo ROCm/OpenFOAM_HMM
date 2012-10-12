@@ -1,4 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------* \
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
@@ -14,7 +14,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heSolidThermo<pureSolidMixture<constIso<const<hConst<rhoConst<specie>>,sensibleEnthalpy>>>>;
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureSolidMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
 
 mixture
 {
@@ -27,13 +36,6 @@ mixture
     transport
     {
         kappa   80;
-    }
-
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;
-        emissivity  0.5;
     }
 
     thermodynamics
@@ -66,13 +68,6 @@ pmmaCoeffs
         kappa   0.152;
     }
 
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;
-        emissivity  0.1;
-    }
-
     thermodynamics
     {
         Hf      0;
@@ -96,13 +91,6 @@ charCoeffs
     transport
     {
         kappa   0.4;
-    }
-
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;
-        emissivity  0.0;
     }
 
     thermodynamics

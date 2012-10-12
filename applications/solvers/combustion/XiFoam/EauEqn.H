@@ -8,7 +8,12 @@ if (ign.ignited())
       + (fvc::ddt(rho, K) + fvc::div(phi, K))*rho/thermo.rhou()
       + (
             heau.name() == "eau"
-          ? fvc::div(phi, volScalarField("Ep", p/rho))*rho/thermo.rhou()
+          ? fvc::div
+            (
+                fvc::absolute(phi/fvc::interpolate(rho), U),
+                p,
+                "div(phiv,p)"
+            )*rho/thermo.rhou()
           : -dpdt*rho/thermo.rhou()
         )
       - fvm::laplacian(turbulence->alphaEff(), heau)

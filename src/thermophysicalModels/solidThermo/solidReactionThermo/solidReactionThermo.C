@@ -31,7 +31,7 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(solidReactionThermo, 0);
-    defineRunTimeSelectionTable(solidReactionThermo, mesh);
+    defineRunTimeSelectionTable(solidReactionThermo, fvMesh);
     defineRunTimeSelectionTable(solidReactionThermo, dictionary);
 }
 
@@ -52,6 +52,27 @@ Foam::solidReactionThermo::solidReactionThermo
 :
     solidThermo(mesh, dict)
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
+(
+    const fvMesh& mesh
+)
+{
+    return basicThermo::New<solidReactionThermo>(mesh);
+}
+
+
+Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    return basicThermo::New<solidReactionThermo>(mesh, dict);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

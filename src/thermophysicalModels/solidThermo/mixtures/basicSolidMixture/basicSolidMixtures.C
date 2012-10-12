@@ -29,7 +29,6 @@ Description
 #include "basicMixture.H"
 #include "makeBasicMixture.H"
 
-
 #include "rhoConst.H"
 
 #include "hConstThermo.H"
@@ -38,8 +37,6 @@ Description
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-
-#include "constSolidRad.H"
 
 #include "sensibleInternalEnergy.H"
 #include "sensibleEnthalpy.H"

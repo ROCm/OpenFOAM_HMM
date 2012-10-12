@@ -25,7 +25,6 @@ License
 
 #include "rhoChemistryModel.H"
 #include "fvMesh.H"
-#include "Time.H"
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
@@ -35,12 +34,12 @@ namespace Foam
     defineRunTimeSelectionTable(rhoChemistryModel, fvMesh);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::rhoChemistryModel::rhoChemistryModel
 (
-    const fvMesh& mesh,
-    const word& thermoTypeName
+    const fvMesh& mesh
 )
 :
     basicChemistryModel(mesh),

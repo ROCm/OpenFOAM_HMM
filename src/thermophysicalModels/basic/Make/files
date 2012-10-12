@@ -1,11 +1,11 @@
 basicThermo/basicThermo.C
 fluidThermo/fluidThermo.C
 
-psiThermo/psiThermo/psiThermo.C
-psiThermo/hePsiThermo/hePsiThermos.C
+psiThermo/psiThermo.C
+psiThermo/psiThermos.C
 
-rhoThermo/rhoThermo/rhoThermo.C
-rhoThermo/heRhoThermo/heRhoThermos.C
+rhoThermo/rhoThermo.C
+rhoThermo/rhoThermos.C
 
 derivedFvPatchFields/fixedEnergy/fixedEnergyFvPatchScalarField.C
 derivedFvPatchFields/gradientEnergy/gradientEnergyFvPatchScalarField.C

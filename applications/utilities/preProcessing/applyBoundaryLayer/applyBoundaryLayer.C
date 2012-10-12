@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
         }
 
         // Create G field - used by RAS wall functions
-        volScalarField G("RASModel::G", nut*2*sqr(S));
+        volScalarField G("RASModel.G", nut*2*sqr(S));
 
 
         //--- Read and modify turbulence fields

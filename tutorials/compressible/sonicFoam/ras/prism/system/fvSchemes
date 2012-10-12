@@ -30,8 +30,9 @@ divSchemes
     default         none;
     div(phi,U)      Gauss limitedLinearV 1;
     div(phi,e)      Gauss limitedLinear 1;
-    div(phi,Ekp)    Gauss limitedLinear 1;
     div(phid,p)     Gauss limitedLinear 1;
+    div(phi,K)      Gauss limitedLinear 1;
+    div(phiv,p)     Gauss limitedLinear 1;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div((muEff*dev2(T(grad(U))))) Gauss linear;

@@ -267,7 +267,7 @@ void RNGkEpsilon::correct()
     }
 
     const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
-    volScalarField G("RASModel::G", nut_*S2);
+    volScalarField G("RASModel.G", nut_*S2);
 
     const volScalarField eta(sqrt(S2)*k_/epsilon_);
     volScalarField R

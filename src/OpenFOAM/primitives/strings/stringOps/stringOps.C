@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -322,7 +322,12 @@ Foam::string& Foam::stringOps::inplaceExpand
 
 
                 // lookup in the dictionary
-                const entry* ePtr = dict.lookupEntryPtr(varName, true, true);
+                const entry* ePtr = dict.lookupScopedEntryPtr
+                (
+                    varName,
+                    true,
+                    false   // wildcards disabled. See primitiveEntry
+                );
 
                 // if defined - copy its entries
                 if (ePtr)

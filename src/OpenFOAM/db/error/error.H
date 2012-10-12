@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -161,6 +161,10 @@ public:
         //- Create and return a dictionary
         operator dictionary() const;
 
+
+        //- Helper function to print a stack (if OpenFOAM IO not yet
+        //  initialised)
+        static void safePrintStack(std::ostream&);
 
         //- Helper function to print a stack
         static void printStack(Ostream&);

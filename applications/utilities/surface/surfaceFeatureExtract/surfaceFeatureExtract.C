@@ -721,16 +721,34 @@ int main(int argc, char *argv[])
                 deleteBox(surf, bb, true, edgeStat);
             }
 
-            const Switch manifoldEdges =
-                subsetDict.lookupOrDefault<Switch>("manifoldEdges", "no");
+            const Switch nonManifoldEdges =
+                subsetDict.lookupOrDefault<Switch>("nonManifoldEdges", "yes");
 
-            if (manifoldEdges)
+            if (!nonManifoldEdges)
             {
-                Info<< "Removing all non-manifold edges" << endl;
+                Info<< "Removing all non-manifold edges"
+                    << " (edges with > 2 connected faces)" << endl;
 
                 forAll(edgeStat, edgeI)
                 {
-                    if (surf.edgeFaces()[edgeI].size() != 2)
+                    if (surf.edgeFaces()[edgeI].size() > 2)
+                    {
+                        edgeStat[edgeI] = surfaceFeatures::NONE;
+                    }
+                }
+            }
+
+            const Switch openEdges =
+                subsetDict.lookupOrDefault<Switch>("openEdges", "yes");
+
+            if (!openEdges)
+            {
+                Info<< "Removing all open edges"
+                    << " (edges with 1 connected face)" << endl;
+
+                forAll(edgeStat, edgeI)
+                {
+                    if (surf.edgeFaces()[edgeI].size() == 1)
                     {
                         edgeStat[edgeI] = surfaceFeatures::NONE;
                     }

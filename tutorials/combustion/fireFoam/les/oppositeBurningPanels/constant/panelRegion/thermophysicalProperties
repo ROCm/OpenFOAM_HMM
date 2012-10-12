@@ -14,11 +14,34 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType heSolidThermo<reactingSolidMixture<constIso<const<hConst<rhoConst<specie>>,sensibleEnthalpy>>>>;
+thermoType
+{
+    type            heSolidThermo;
+    mixture         reactingSolidMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+gasThermoType
+{
+    transport       sutherland;
+    thermo          janaf;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
 
 solidComponents
 (
     v char
+);
+
+gaseousSpecies
+(
+    gas
 );
 
 vCoeffs
@@ -31,12 +54,6 @@ vCoeffs
     transport
     {
         kappa       0.135;
-    }
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;  //opaque
-        emissivity  0.17;
     }
     thermodynamics
     {
@@ -60,12 +77,6 @@ charCoeffs
     {
         kappa       0.4;
     }
-    radiation
-    {
-        sigmaS      0.0;
-        kappaRad    0.0;
-        emissivity  0.85;
-    }
     thermodynamics
     {
         Cp          611;
@@ -76,5 +87,28 @@ charCoeffs
         rho         11.5;
     }
 };
+
+gasCoeffs
+{
+    specie
+    {
+        nMoles          1;
+        molWeight       18.0153;
+    }
+    thermodynamics
+    {
+        Tlow            200;
+        Thigh           5000;
+        Tcommon         1000;
+        highCpCoeffs    ( 2.67215 0.00305629 -8.73026e-07 1.20100e-10 -6.39162e-15 -29899.2 6.86282 );
+        lowCpCoeffs     ( 3.38684 0.00347498 -6.35470e-06 6.96858e-09 -2.50659e-12 -30208.1 2.59023 );
+    }
+    transport
+    {
+        As              1.67212e-06;
+        Ts              170.672;
+    }
+}
+
 
 // ************************************************************************* //

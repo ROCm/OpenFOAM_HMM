@@ -981,15 +981,29 @@ DimensionSets
         Cd  Cd  [ 0 0 0 0 0 0 1 ] 1.0;
 
         // Derived units
-        Pa  Pa  [ kg^1 m^-2 ] 1.0;
+        Hz  Hz  [ s^-1 ] 1.0;
+        N   N   [ kg m s^-2 ] 1.0;
+        Pa  Pa  [ N m^-2 ] 1.0;
+        J   J   [ N m ] 1.0;
+        W   W   [ J s^-1 ] 1.0;
 
-        // Scaled units
-        mm  mm  [ kg^1 m^-2 ] 1e-3;
+        // Some non-symbolic ones
+        area area [m^2] 1.0;
+        volume volume [m^3] 1.0;
+        density density [ kg m^-3 ] 1.0;
+        acceleration acceleration  [ m s^-2 ] 1.0;
+        kinematicPressure kinematicPressure [ Pa density^-1 ] 1.0;
 
+        // Scaled units. Only allowed in dymensionedType (dimensionedScalar,
+        // dimensionedVector etc.) and UniformDimensionedField, not
+        // in DimensionedField or GeometricField
+        cm  cm  [ m ] 1e-2;
+        mm  mm  [ m ] 1e-3;
+        km  km  [ m ] 1e3;
 
         // Set of units used for printing. Can be any basic or derived
         // but not scaled (only supported for dimensionedScalar, etc)
-        writeUnits (kg m s K mol A Cd);
+        //writeUnits (kg m s K mol A Cd);
     }
 }
 

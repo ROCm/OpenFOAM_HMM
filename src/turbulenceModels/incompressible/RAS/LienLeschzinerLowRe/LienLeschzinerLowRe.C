@@ -319,7 +319,7 @@ void LienLeschzinerLowRe::correct()
 
     const volScalarField f2(scalar(1) - 0.3*exp(-sqr(Rt)));
 
-    volScalarField G("RASModel::G", Cmu_*fMu*sqr(k_)/epsilon_*S2);
+    volScalarField G("RASModel.G", Cmu_*fMu*sqr(k_)/epsilon_*S2);
 
 
     // Dissipation equation

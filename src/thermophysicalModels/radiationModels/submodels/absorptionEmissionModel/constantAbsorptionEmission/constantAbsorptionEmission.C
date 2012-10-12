@@ -54,8 +54,8 @@ Foam::radiation::constantAbsorptionEmission::constantAbsorptionEmission
 :
     absorptionEmissionModel(dict, mesh),
     coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    a_(coeffsDict_.lookup("a")),
-    e_(coeffsDict_.lookup("e")),
+    a_(coeffsDict_.lookup("absorptivity")),
+    e_(coeffsDict_.lookup("emissivity")),
     E_(coeffsDict_.lookup("E"))
 {}
 

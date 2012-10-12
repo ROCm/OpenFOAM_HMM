@@ -110,7 +110,16 @@ dictionaryReplacement
 
 
                 // Solid thermo
-                thermoType heSolidThermo<pureSolidMixture<constIso<const<hConst<rhoConst<specie>>,sensibleEnthalpy>>>>;
+                thermoType
+                {
+                    type            heSolidThermo;
+                    mixture         pureSolidMixture;
+                    transport       constIso;
+                    thermo          hConst;
+                    equationOfState rhoConst;
+                    specie          specie;
+                    energy          sensibleEnthalpy;
+                }
 
 
                 mixture
@@ -123,12 +132,6 @@ dictionaryReplacement
                     transport
                     {
                         kappa           0.01;
-                    }
-                    radiation
-                    {
-                        sigmaS          0;
-                        kappaRad        0;
-                        emissivity      1;
                     }
                     thermodynamics
                     {

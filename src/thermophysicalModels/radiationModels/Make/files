@@ -8,6 +8,7 @@ radiationModel/fvDOM/radiativeIntensityRay/radiativeIntensityRay.C
 radiationModel/fvDOM/blackBodyEmission/blackBodyEmission.C
 radiationModel/fvDOM/absorptionCoeffs/absorptionCoeffs.C
 radiationModel/viewFactor/viewFactor.C
+radiationModel/opaqueSolid/opaqueSolid.C
 
 /* Scatter model */
 submodels/scatterModel/scatterModel/scatterModel.C
@@ -23,6 +24,7 @@ submodels/absorptionEmissionModel/constantAbsorptionEmission/constantAbsorptionE
 submodels/absorptionEmissionModel/binaryAbsorptionEmission/binaryAbsorptionEmission.C
 submodels/absorptionEmissionModel/greyMeanAbsorptionEmission/greyMeanAbsorptionEmission.C
 submodels/absorptionEmissionModel/wideBandAbsorptionEmission/wideBandAbsorptionEmission.C
+submodels/absorptionEmissionModel/greyMeanSolidAbsorptionEmission/greyMeanSolidAbsorptionEmission.C
 
 
 /* Boundary conditions */

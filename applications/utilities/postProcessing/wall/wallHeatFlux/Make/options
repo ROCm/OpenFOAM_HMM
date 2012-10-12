@@ -13,6 +13,5 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
     -lspecie \
-    -lsolid \
     -lfluidThermophysicalModels \
     -lsolidThermo

@@ -37,7 +37,7 @@ Foam::dictionary::dictionary
     Istream& is
 )
 :
-    dictionaryName(parentDict.name() + "::" + name),
+    dictionaryName(parentDict.name() + '.' + name),
     parent_(parentDict)
 {
     read(is);

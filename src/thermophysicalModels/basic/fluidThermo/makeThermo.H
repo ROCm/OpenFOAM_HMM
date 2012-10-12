@@ -37,7 +37,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState,Specie)\
+#define makeThermoTypedefs(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState,Specie)\
                                                                               \
 typedef                                                                       \
     Transport                                                                 \
@@ -58,10 +58,8 @@ typedef                                                                       \
 typedef                                                                       \
     Cthermo                                                                   \
     <                                                                         \
-        Mixture                                                               \
-        <                                                                     \
-            Transport##Type##Thermo##EqnOfState##Specie                       \
-        >                                                                     \
+        BaseThermo,                                                           \
+        Mixture<Transport##Type##Thermo##EqnOfState##Specie>                  \
     > Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie;          \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
@@ -73,7 +71,22 @@ defineTemplateTypeNameAndDebugWithName                                        \
       + ">>"                                                                  \
     ).c_str(),                                                                \
     0                                                                         \
-);                                                                            \
+);
+
+
+#define makeThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState,Specie)\
+                                                                              \
+makeThermoTypedefs                                                            \
+(                                                                             \
+    BaseThermo,                                                               \
+    Cthermo,                                                                  \
+    Mixture,                                                                  \
+    Transport,                                                                \
+    Type,                                                                     \
+    Thermo,                                                                   \
+    EqnOfState,                                                               \
+    Specie                                                                    \
+)                                                                             \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \

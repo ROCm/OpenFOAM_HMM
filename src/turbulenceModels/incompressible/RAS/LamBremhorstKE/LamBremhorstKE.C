@@ -252,7 +252,7 @@ void LamBremhorstKE::correct()
         y_.correct();
     }
 
-    volScalarField G("RASModel::G", nut_*2*magSqr(symm(fvc::grad(U_))));
+    volScalarField G("RASModel.G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
 
     // Calculate parameters and coefficients for low-Reynolds number model

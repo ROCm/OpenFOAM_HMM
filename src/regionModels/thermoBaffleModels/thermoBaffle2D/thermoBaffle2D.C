@@ -318,7 +318,7 @@ const tmp<volScalarField> thermoBaffle2D::Cp() const
 
 const volScalarField& thermoBaffle2D::kappaRad() const
 {
-    return thermo_->kappaRad();
+    return radiation_->absorptionEmission().a();
 }
 
 

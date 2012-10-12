@@ -61,6 +61,12 @@ Foam::layerParameters::layerParameters
         readScalar(dict.lookup("minThickness"))
     ),
     featureAngle_(readScalar(dict.lookup("featureAngle"))),
+    slipFeatureAngle_
+    (
+        dict.found("slipFeatureAngle")
+      ? readScalar(dict.lookup("slipFeatureAngle"))
+      : 0.5*featureAngle_
+    ),
     concaveAngle_
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)

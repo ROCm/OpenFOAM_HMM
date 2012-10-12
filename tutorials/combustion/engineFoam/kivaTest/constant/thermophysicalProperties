@@ -17,13 +17,14 @@ FoamFile
 
 thermoType
 {
-    type            heheuReactionThermo;
+    type            heheuPsiThermo;
     mixture         inhomogeneousMixture;
     transport       sutherland;
     thermo          janaf;
     equationOfState perfectGas;
     specie          specie;
     energy          absoluteEnthalpy;
+    //energy          absoluteInternalEnergy;
 }
 
 stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [ 0 0 0 0 0 0 0 ] 15.0336;

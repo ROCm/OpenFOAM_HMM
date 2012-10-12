@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,6 @@ Description
 
 SourceFiles
     LESdelta.C
-    newDelta.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -109,6 +108,15 @@ public:
             const word& name,
             const fvMesh&,
             const dictionary&
+        );
+
+        //- Return a reference to the selected LES delta
+        static autoPtr<LESdelta> New
+        (
+            const word& name,
+            const fvMesh&,
+            const dictionary&,
+            const dictionaryConstructorTable&
         );
 
 

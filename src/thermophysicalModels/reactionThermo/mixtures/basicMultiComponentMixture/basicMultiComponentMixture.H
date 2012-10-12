@@ -227,6 +227,14 @@ public:
                 const scalar p,
                 const scalar T
             ) const = 0;
+
+            //- Density [kg/m3]
+            virtual scalar rho
+            (
+                const label specieI,
+                const scalar p,
+                const scalar T
+            ) const = 0;
 };
 
 

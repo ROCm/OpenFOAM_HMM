@@ -39,12 +39,11 @@ namespace Foam
 
 Foam::solidChemistryModel::solidChemistryModel
 (
-    const fvMesh& mesh,
-    const word& solidThermoTypeName
+    const fvMesh& mesh
 )
 :
     basicChemistryModel(mesh),
-    solidThermo_(solidReactionThermo::New(mesh)) //, thermoTypeName))
+    solidThermo_(solidReactionThermo::New(mesh))
 {}
 
 

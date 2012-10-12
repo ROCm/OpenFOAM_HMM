@@ -189,7 +189,7 @@ Foam::dictionary::dictionary
     parent_(parentDict)
 {
     transfer(dict());
-    name() = parentDict.name() + "::" + name();
+    name() = parentDict.name() + '.' + name();
 }
 
 
@@ -622,7 +622,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
         }
         else
         {
-            return dictionary(*this, dictionary(name() + "::" + keyword));
+            return dictionary(*this, dictionary(name() + '.' + keyword));
         }
     }
     else
@@ -690,7 +690,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
             if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
             {
-                entryPtr->name() = name() + "::" + entryPtr->keyword();
+                entryPtr->name() = name() + '.' + entryPtr->keyword();
 
                 if (entryPtr->keyword().isPattern())
                 {
@@ -718,7 +718,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
     if (hashedEntries_.insert(entryPtr->keyword(), entryPtr))
     {
-        entryPtr->name() = name() + "::" + entryPtr->keyword();
+        entryPtr->name() = name() + '.' + entryPtr->keyword();
         IDLList<entry>::append(entryPtr);
 
         if (entryPtr->keyword().isPattern())
@@ -925,7 +925,7 @@ bool Foam::dictionary::changeKeyword
 
     // change name and HashTable, but leave DL-List untouched
     iter()->keyword() = newKeyword;
-    iter()->name() = name() + "::" + newKeyword;
+    iter()->name() = name() + '.' + newKeyword;
     hashedEntries_.erase(oldKeyword);
     hashedEntries_.insert(newKeyword, iter());
 

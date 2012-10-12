@@ -105,9 +105,21 @@ public:
 
     // Selectors
 
+        //- Generic lookup for each of the related thermodynamics packages
+        template<class Thermo, class Table>
+        static typename Table::iterator lookupThermo
+        (
+            const dictionary& thermoDict,
+            Table* tablePtr
+        );
+
         //- Generic New for each of the related thermodynamics packages
         template<class Thermo>
         static autoPtr<Thermo> New(const fvMesh&);
+
+        //- Generic New for each of the related thermodynamics packages
+        template<class Thermo>
+        static autoPtr<Thermo> New(const fvMesh&, const dictionary&);
 
         //- Specialisation of the Generic New for basicThermo
         static autoPtr<basicThermo> New(const fvMesh&);

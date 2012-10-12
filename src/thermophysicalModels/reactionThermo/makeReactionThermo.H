@@ -35,6 +35,7 @@ License
                                                                                \
 typedef MixtureThermo                                                          \
 <                                                                              \
+    CThermo,                                                                   \
     SpecieMixture                                                              \
     <                                                                          \
         Mixture                                                                \

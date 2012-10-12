@@ -127,39 +127,11 @@ public:
             //- Thermal conductivity [W/m/K]
             virtual tmp<volVectorField> Kappa() const = 0;
 
-            //- Absorption coefficient [1/m]
-            virtual tmp<volScalarField> kappaRad() const = 0;
-
-            //- Scatter coefficient
-            virtual tmp<volScalarField> sigmaS() const = 0;
-
-            //- Emissivity coefficient [1/m]
-            virtual tmp<volScalarField> emissivity() const = 0;
-
 
         // Per patch calculation
 
-
             //- Anisotropic thermal conductivity [W/m/K]
             virtual tmp<vectorField> Kappa
-            (
-                const label patchI
-            ) const = 0;
-
-             //- Absorption coefficient [1/m]
-            virtual tmp<scalarField> kappaRad
-            (
-                const label patchI
-            ) const = 0;
-
-            //- Scatter coefficient
-            virtual tmp<scalarField> sigmaS
-            (
-                const label patchI
-            ) const = 0;
-
-            //- Emissivity coefficient [1/m]
-            virtual tmp<scalarField> emissivity
             (
                 const label patchI
             ) const = 0;
@@ -169,7 +141,6 @@ public:
 
         //- Read thermophysicalProperties dictionary
         virtual bool read();
-
 };
 
 

@@ -1,5 +1,6 @@
     fvMesh& mesh = solidRegions[i];
     solidThermo& thermo = thermos[i];
+    const radiation::radiationModel& radiation = radiations[i];
 
     tmp<volScalarField> trho = thermo.rho();
     const volScalarField& rho = trho();

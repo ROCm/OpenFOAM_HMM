@@ -4,14 +4,14 @@ chemistryReaders/chemistryReader/makeChemistryReaders.C
 
 mixtures/basicMultiComponentMixture/basicMultiComponentMixture.C
 
-psiReactionThermo/psiReactionThermo/psiReactionThermo.C
-psiReactionThermo/hePsiReactionThermo/hePsiReactionThermos.C
+psiReactionThermo/psiReactionThermo.C
+psiReactionThermo/psiReactionThermos.C
 
-psiReactionThermo/psiuReactionThermo/psiuReactionThermo.C
-psiReactionThermo/heheuReactionThermo/heheuReactionThermos.C
+psiuReactionThermo/psiuReactionThermo.C
+psiuReactionThermo/psiuReactionThermos.C
 
-rhoReactionThermo/rhoReactionThermo/rhoReactionThermo.C
-rhoReactionThermo/heRhoReactionThermo/heRhoReactionThermos.C
+rhoReactionThermo/rhoReactionThermo.C
+rhoReactionThermo/rhoReactionThermos.C
 
 derivedFvPatchFields/fixedUnburntEnthalpy/fixedUnburntEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/gradientUnburntEnthalpy/gradientUnburntEnthalpyFvPatchScalarField.C

@@ -304,7 +304,7 @@ void LaunderSharmaKE::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField G("RASModel.G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
 

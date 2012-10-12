@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -164,6 +164,26 @@ void getSymbolForRaw
         }
     }
     os  << "Uninterpreted: " << raw.c_str();
+}
+
+
+void error::safePrintStack(std::ostream& os)
+{
+    // Get raw stack symbols
+    void *array[100];
+    size_t size = backtrace(array, 100);
+    char **strings = backtrace_symbols(array, size);
+
+    // See if they contain function between () e.g. "(__libc_start_main+0xd0)"
+    // and see if cplus_demangle can make sense of part before +
+    for (size_t i = 0; i < size; i++)
+    {
+        string msg(strings[i]);
+        fileName programFile;
+        word address;
+
+        os  << '#' << label(i) << '\t' << msg << std::endl;
+    }
 }
 
 

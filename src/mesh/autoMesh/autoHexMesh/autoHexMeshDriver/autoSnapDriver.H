@@ -178,6 +178,24 @@ class autoSnapDriver
                     vector& edgeOffset  // offset from pt to point on edge
                 ) const;
 
+
+                //- For any reverse (so from feature back to mesh) attraction:
+                //  add attraction if diagonal points on face attracted
+                void stringFeatureEdges
+                (
+                    const label iter,
+                    const scalar featureCos,
+
+                    const indirectPrimitivePatch& pp,
+                    const scalarField& snapDist,
+
+                    const vectorField& rawPatchAttraction,
+                    const List<pointConstraint>& rawPatchConstraints,
+
+                    vectorField& patchAttraction,
+                    List<pointConstraint>& patchConstraints
+                ) const;
+
                 //- Return hit if on multiple points
                 pointIndexHit findMultiPatchPoint
                 (

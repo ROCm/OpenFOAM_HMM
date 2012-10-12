@@ -37,7 +37,7 @@ SourceFiles
 
 #include "pyrolysisModel.H"
 #include "solidChemistryModel.H"
-
+#include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +81,9 @@ protected:
         //- Reference to solid thermo
         solidReactionThermo& solidThermo_;
 
+        //- Pointer to radiation model
+        autoPtr<radiation::radiationModel> radiation_;
+
 
         // Reference to solid thermo properties
 
@@ -90,7 +93,7 @@ protected:
             //- List of solid components
             PtrList<volScalarField>& Ys_;
 
-            // Non-const access to temperature
+            // Non-const access to enthalpy
             volScalarField& h_;
 
 

@@ -33,9 +33,10 @@ Description
 #include "motionSmoother.H"
 #include "pointData.H"
 #include "PointEdgeWave.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 #include "meshTools.H"
 #include "PatchTools.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -775,6 +776,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
     const label nSmoothNormals,
     const label nSmoothSurfaceNormals,
     const scalar minMedianAxisAngleCos,
+    const scalar featureAngle,
 
     pointVectorField& dispVec,
     pointScalarField& medialRatio,
@@ -904,7 +906,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
                 const edge& e = edges[edgeI];
                 // Approximate medial axis location on edge.
                 //const point medialAxisPt = e.centre(points);
-                vector eVec = e.vec(mesh.points());
+                vector eVec = e.vec(points);
                 scalar eMag = mag(eVec);
                 if (eMag > VSMALL)
                 {
@@ -961,42 +963,111 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
         labelHashSet adaptPatches(meshMover.adaptPatchIDs());
 
+
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
-            //const pointPatchVectorField& pvf =
-            //    meshMover.displacement().boundaryField()[patchI];
+            const pointPatchVectorField& pvf =
+                meshMover.displacement().boundaryField()[patchI];
 
             if
             (
                 !pp.coupled()
              && !isA<emptyPolyPatch>(pp)
-             //&&  pvf.constraintType() != word::null //exclude fixedValue
              && !adaptPatches.found(patchI)
             )
             {
-                Info<< "Inserting points on patch " << pp.name() << endl;
-
                 const labelList& meshPoints = pp.meshPoints();
 
-                forAll(meshPoints, i)
+                // Check the type of the patchField. The types are
+                //  - fixedValue (0 or more layers) but the >0 layers have
+                //    already been handled in the adaptPatches loop
+                //  - constraint (but not coupled) types, e.g. symmetryPlane,
+                //    slip.
+                if (pvf.fixesValue())
                 {
-                    label pointI = meshPoints[i];
+                    // Disable all movement on fixedValue patchFields
+                    Info<< "Inserting all points on patch " << pp.name()
+                        << endl;
 
-                    if (!pointMedialDist[pointI].valid(dummyTrackData))
+                    forAll(meshPoints, i)
                     {
-                        maxPoints.append(pointI);
-                        maxInfo.append
-                        (
-                            pointData
+                        label pointI = meshPoints[i];
+                        if (!pointMedialDist[pointI].valid(dummyTrackData))
+                        {
+                            maxPoints.append(pointI);
+                            maxInfo.append
                             (
-                                points[pointI],
-                                0.0,
-                                pointI,         // passive data
-                                vector::zero    // passive data
-                            )
-                        );
-                        pointMedialDist[pointI] = maxInfo.last();
+                                pointData
+                                (
+                                    points[pointI],
+                                    0.0,
+                                    pointI,         // passive data
+                                    vector::zero    // passive data
+                                )
+                            );
+                            pointMedialDist[pointI] = maxInfo.last();
+                        }
+                    }
+                }
+                else
+                {
+                    // Based on geometry: analyse angle w.r.t. nearest moving
+                    // point. In the pointWallDist we transported the
+                    // normal as the passive vector. Note that this points
+                    // out of the originating wall so inside of the domain
+                    // on this patch.
+                    Info<< "Inserting points on patch " << pp.name()
+                        << " if angle to nearest layer patch > "
+                        << featureAngle << " degrees." << endl;
+
+                    scalar featureAngleCos = Foam::cos(degToRad(featureAngle));
+                    pointField pointNormals
+                    (
+                        PatchTools::pointNormals
+                        (
+                            mesh,
+                            pp,
+                            identity(pp.size())+pp.start()
+                        )
+                    );
+
+                    forAll(meshPoints, i)
+                    {
+                        label pointI = meshPoints[i];
+
+                        if (!pointMedialDist[pointI].valid(dummyTrackData))
+                        {
+                            // Check if angle not too large.
+                            scalar cosAngle =
+                            (
+                               -pointWallDist[pointI].v()
+                              & pointNormals[i]
+                            );
+                            if (cosAngle > featureAngleCos)
+                            {
+                                // Extrusion direction practically perpendicular
+                                // to the patch. Disable movement at the patch.
+
+                                maxPoints.append(pointI);
+                                maxInfo.append
+                                (
+                                    pointData
+                                    (
+                                        points[pointI],
+                                        0.0,
+                                        pointI,         // passive data
+                                        vector::zero    // passive data
+                                    )
+                                );
+                                pointMedialDist[pointI] = maxInfo.last();
+                            }
+                            else
+                            {
+                                // Extrusion direction makes angle with patch
+                                // so allow sliding - don't insert zero points
+                            }
+                        }
                     }
                 }
             }
@@ -1141,13 +1212,12 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
     // reduce thickness where thickness/medial axis distance large
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    autoPtr<OFstream> str;
-    label vertI = 0;
+    autoPtr<OBJstream> str;
     if (debug)
     {
         str.reset
         (
-            new OFstream
+            new OBJstream
             (
                 mesh.time().path()
               / "thicknessRatioExcludePoints_"
@@ -1159,13 +1229,12 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             << str().name() << endl;
     }
 
-    autoPtr<OFstream> medialVecStr;
-    label medialVertI = 0;
+    autoPtr<OBJstream> medialVecStr;
     if (debug)
     {
         medialVecStr.reset
         (
-            new OFstream
+            new OBJstream
             (
                 mesh.time().path()
               / "thicknessRatioExcludeMedialVec_"
@@ -1227,21 +1296,19 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
                 if (str.valid())
                 {
                     const point& pt = mesh.points()[pointI];
-                    meshTools::writeOBJ(str(), pt);
-                    vertI++;
-                    meshTools::writeOBJ(str(), pt+patchDisp[patchPointI]);
-                    vertI++;
-                    str()<< "l " << vertI-1 << ' ' << vertI << nl;
+                    str().write(linePointRef(pt, pt+patchDisp[patchPointI]));
                 }
                 if (medialVecStr.valid())
                 {
                     const point& pt = mesh.points()[pointI];
-                    meshTools::writeOBJ(medialVecStr(), pt);
-                    medialVertI++;
-                    meshTools::writeOBJ(medialVecStr(), medialVec[pointI]);
-                    medialVertI++;
-                    medialVecStr()<< "l " << medialVertI-1
-                        << ' ' << medialVertI << nl;
+                    medialVecStr().write
+                    (
+                        linePointRef
+                        (
+                            pt,
+                            medialVec[pointI]
+                        )
+                    );
                 }
             }
         }

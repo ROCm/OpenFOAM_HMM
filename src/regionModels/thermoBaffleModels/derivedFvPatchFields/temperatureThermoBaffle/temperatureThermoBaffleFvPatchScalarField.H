@@ -140,7 +140,7 @@ class temperatureThermoBaffleFvPatchScalarField
         autoPtr<regionModels::thermoBaffleModels::thermoBaffleModel> baffle_;
 
         //- Solid thermo type
-        word solidThermoType_;
+        autoPtr<entry> solidThermoType_;
 
         //- Dictionary
         dictionary dict_;

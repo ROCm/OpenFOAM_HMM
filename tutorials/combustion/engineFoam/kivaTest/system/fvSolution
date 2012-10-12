@@ -47,14 +47,14 @@ solvers
         relTol          0;
     }
 
-    "(U|Xi|hau|ft|b|ha|k|epsilon)"
+    "(U|Xi|hau|eau|ft|b|ha|ea|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
         relTol          0.1;
     }
-    "(U|ft|Xi|hau|b|ha|k|epsilon)Final"
+    "(U|ft|Xi|hau|eau|b|ha|ea|k|epsilon)Final"
     {
         $U;
         tolerance       1e-05;

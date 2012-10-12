@@ -66,7 +66,7 @@ public:
     (
         autoPtr,
         solidReactionThermo,
-        mesh,
+        fvMesh,
         (const fvMesh& mesh),
         (mesh)
     );

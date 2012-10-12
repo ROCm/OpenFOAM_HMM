@@ -224,7 +224,8 @@ LRR::LRR
         (
             "LRR::LRR"
             "( const volScalarField&, const volVectorField&"
-            ", const surfaceScalarField&, incompressibleTransportModel&)"
+            ", const surfaceScalarField&, fluidThermo&, const word&"
+            ", const word&)"
         )   << "couplingFactor = " << couplingFactor_
             << " is not in range 0 - 1" << nl
             << exit(FatalError);
@@ -341,7 +342,7 @@ void LRR::correct()
     RASModel::correct();
 
     volSymmTensorField P(-twoSymm(R_ & fvc::grad(U_)));
-    volScalarField G("RASModel::G", 0.5*mag(tr(P)));
+    volScalarField G("RASModel.G", 0.5*mag(tr(P)));
 
     // Update epsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();

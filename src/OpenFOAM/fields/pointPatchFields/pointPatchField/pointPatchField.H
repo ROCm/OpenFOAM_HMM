@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -276,6 +276,12 @@ public:
             const Field<Type>& internalField() const
             {
                 return internalField_;
+            }
+
+            //- Return true if this patch field fixes a value
+            virtual bool fixesValue() const
+            {
+                return false;
             }
 
             //- Return true if this patch field is coupled

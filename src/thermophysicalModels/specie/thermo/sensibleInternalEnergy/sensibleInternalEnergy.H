@@ -102,7 +102,7 @@ public:
                 return thermo.gamma(p, T);
             }
 
-            //- Sensible enthalpy [J/kg]
+            //- Sensible internal energy [J/kg]
             scalar HE
             (
                 const Thermo& thermo,
