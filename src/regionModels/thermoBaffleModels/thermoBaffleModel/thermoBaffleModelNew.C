@@ -38,7 +38,6 @@ namespace thermoBaffleModels
 
 autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
 {
-
     word modelType;
     {
         IOdictionary thermoBafflePropertiesDict
@@ -56,6 +55,7 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
 
         thermoBafflePropertiesDict.lookup("thermoBaffleModel") >> modelType;
     }
+
     Info<< "Selecting baffle model " << modelType << endl;
 
     meshConstructorTable::iterator cstrIter =
@@ -82,7 +82,6 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New
     const dictionary& dict
 )
 {
-
     word modelType = dict.lookup("thermoBaffleModel");
 
     Info<< "Selecting baffle model " << modelType << endl;
@@ -93,7 +92,7 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
 
-        FatalErrorIn("thermoBaffleModel::New(const fvMesh&,const dictionary&)")
+        FatalErrorIn("thermoBaffleModel::New(const fvMesh&, const dictionary&)")
             << "Unknown thermoBaffleModel type " << modelType
             << nl << nl
             <<  "Valid thermoBaffleModel types are:" << nl

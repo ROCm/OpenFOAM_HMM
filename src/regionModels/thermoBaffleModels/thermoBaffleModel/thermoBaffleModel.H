@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -157,7 +157,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected model
-         static autoPtr<thermoBaffleModel> New(const fvMesh& mesh);
+        static autoPtr<thermoBaffleModel> New(const fvMesh& mesh);
 
         //- Return a reference to the selected model using dictionary
         static autoPtr<thermoBaffleModel> New
@@ -172,7 +172,6 @@ public:
 
 
     // Member Functions
-
 
         // Access
 
