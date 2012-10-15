@@ -629,8 +629,8 @@ void Foam::streamLine::write()
             fileName vtkPath
             (
                 Pstream::parRun()
-              ? runTime.path()/".."/"sets"/name()
-              : runTime.path()/"sets"/name()
+              ? runTime.path()/".."/"postProcessing"/"sets"/name()
+              : runTime.path()/"postProcessing"/"sets"/name()
             );
             if (mesh.name() != fvMesh::defaultRegion)
             {
