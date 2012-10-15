@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "P1.H"
-#include "addToRunTimeSelectionTable.H"
 #include "fvm.H"
 
 #include "absorptionEmissionModel.H"
@@ -40,13 +39,7 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(P1, 0);
-
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            P1,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(P1);
     }
 }
 

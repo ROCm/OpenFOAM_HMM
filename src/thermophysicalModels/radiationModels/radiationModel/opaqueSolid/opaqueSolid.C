@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "opaqueSolid.H"
-#include "addToRunTimeSelectionTable.H"
 #include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -35,12 +34,7 @@ namespace Foam
     {
         defineTypeNameAndDebug(opaqueSolid, 0);
 
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            opaqueSolid,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(opaqueSolid);
     }
 }
 

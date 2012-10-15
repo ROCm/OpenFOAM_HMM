@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvDOM.H"
-#include "addToRunTimeSelectionTable.H"
-
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
@@ -40,13 +38,7 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(fvDOM, 0);
-
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            fvDOM,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(fvDOM);
     }
 }
 

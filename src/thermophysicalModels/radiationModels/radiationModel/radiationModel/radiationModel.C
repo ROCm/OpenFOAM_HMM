@@ -41,6 +41,24 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::radiation::radiationModel::initialise()
+{
+    if (radiation_)
+    {
+        solverFreq_ = max(1, lookupOrDefault<label>("solverFreq", 1));
+
+        absorptionEmission_.reset
+        (
+            absorptionEmissionModel::New(*this, mesh_).ptr()
+        );
+
+        scatter_.reset(scatterModel::New(*this, mesh_).ptr());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
@@ -120,12 +138,12 @@ Foam::radiation::radiationModel::radiationModel
     T_(T),
     radiation_(lookupOrDefault("radiation", true)),
     coeffs_(subOrEmptyDict(type + "Coeffs")),
-    solverFreq_(lookupOrDefault<label>("solverFreq", 1)),
+    solverFreq_(1),
     firstIter_(true),
-    absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
-    scatter_(scatterModel::New(*this, mesh_))
+    absorptionEmission_(NULL),
+    scatter_(NULL)
 {
-    solverFreq_ = max(1, solverFreq_);
+    initialise();
 }
 
 
@@ -153,12 +171,12 @@ Foam::radiation::radiationModel::radiationModel
     T_(T),
     radiation_(lookupOrDefault("radiation", true)),
     coeffs_(subOrEmptyDict(type + "Coeffs")),
-    solverFreq_(lookupOrDefault<label>("solverFreq", 1)),
+    solverFreq_(1),
     firstIter_(true),
-    absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
-    scatter_(scatterModel::New(*this, mesh_))
+    absorptionEmission_(NULL),
+    scatter_(NULL)
 {
-    solverFreq_ = max(1, solverFreq_);
+    initialise();
 }
 
 
@@ -175,7 +193,7 @@ bool Foam::radiation::radiationModel::read()
     if (regIOobject::read())
     {
         lookup("radiation") >> radiation_;
-        coeffs_ = subDict(type() + "Coeffs");
+        coeffs_ = subOrEmptyDict(type() + "Coeffs");
 
         solverFreq_ = lookupOrDefault<label>("solverFreq", 1);
         solverFreq_ = max(1, solverFreq_);

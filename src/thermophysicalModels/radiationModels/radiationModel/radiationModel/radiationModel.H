@@ -45,6 +45,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "fluidThermo.H"
 #include "fvMatrices.H"
@@ -108,6 +109,9 @@ protected:
 private:
 
     // Private Member Functions
+
+        //- Initialise
+        void initialise();
 
         //- Disallow default bitwise copy construct
         radiationModel(const radiationModel&);
@@ -214,6 +218,24 @@ public:
             const absorptionEmissionModel& absorptionEmission() const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define addToRadiationRunTimeSelectionTables(model)                           \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        radiationModel,                                                       \
+        model,                                                                \
+        dictionary                                                            \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        radiationModel,                                                       \
+        model,                                                                \
+        T                                                                     \
+    );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

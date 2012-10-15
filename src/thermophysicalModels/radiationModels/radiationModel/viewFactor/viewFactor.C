@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "viewFactor.H"
-#include "addToRunTimeSelectionTable.H"
 #include "constants.H"
 #include "greyDiffusiveViewFactorFixedValueFvPatchScalarField.H"
 #include "typeInfo.H"
@@ -39,13 +38,7 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(viewFactor, 0);
-
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            viewFactor,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(viewFactor);
     }
 }
 
