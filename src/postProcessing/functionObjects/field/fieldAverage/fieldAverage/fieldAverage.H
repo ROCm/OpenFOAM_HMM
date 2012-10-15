@@ -128,7 +128,6 @@ namespace Foam
 class objectRegistry;
 class dictionary;
 class fieldAverageItem;
-class OFstream;
 template<class Type>
 class List;
 class mapPolyMesh;
