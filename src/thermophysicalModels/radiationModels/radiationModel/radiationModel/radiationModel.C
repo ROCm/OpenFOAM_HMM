@@ -35,6 +35,7 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(radiationModel, 0);
+        defineRunTimeSelectionTable(radiationModel, T);
         defineRunTimeSelectionTable(radiationModel, dictionary);
     }
 }
@@ -69,6 +70,36 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
 
 Foam::radiation::radiationModel::radiationModel
 (
+    const dictionary& dict,
+    const volScalarField& T
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "radiationProperties",
+            T.time().constant(),
+            T.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        dict
+    ),
+    mesh_(T.mesh()),
+    time_(T.time()),
+    T_(T),
+    radiation_(false),
+    coeffs_(dictionary::null),
+    solverFreq_(0),
+    firstIter_(true),
+    absorptionEmission_(NULL),
+    scatter_(NULL)
+{}
+
+
+Foam::radiation::radiationModel::radiationModel
+(
     const word& type,
     const volScalarField& T
 )
@@ -83,6 +114,39 @@ Foam::radiation::radiationModel::radiationModel
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
+    ),
+    mesh_(T.mesh()),
+    time_(T.time()),
+    T_(T),
+    radiation_(lookup("radiation")),
+    coeffs_(subDict(type + "Coeffs")),
+    solverFreq_(lookupOrDefault<label>("solverFreq", 1)),
+    firstIter_(true),
+    absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
+    scatter_(scatterModel::New(*this, mesh_))
+{
+    solverFreq_ = max(1, solverFreq_);
+}
+
+
+Foam::radiation::radiationModel::radiationModel
+(
+    const word& type,
+    const dictionary& dict,
+    const volScalarField& T
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "radiationProperties",
+            T.time().constant(),
+            T.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        dict
     ),
     mesh_(T.mesh()),
     time_(T.time()),

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -53,10 +52,10 @@ Foam::radiation::radiationModel::New
 
     Info<< "Selecting radiationModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    TConstructorTable::iterator cstrIter =
+        TConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (cstrIter == TConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
@@ -64,11 +63,41 @@ Foam::radiation::radiationModel::New
         )   << "Unknown radiationModel type "
             << modelType << nl << nl
             << "Valid radiationModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << TConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<radiationModel>(cstrIter()(T));
+}
+
+
+Foam::autoPtr<Foam::radiation::radiationModel>
+Foam::radiation::radiationModel::New
+(
+    const dictionary& dict,
+    const volScalarField& T
+)
+{
+    const word modelType(dict.lookup("radiationModel"));
+
+    Info<< "Selecting radiationModel " << modelType << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "radiationModel::New(const dictionary&, const volScalarField&)"
+        )   << "Unknown radiationModel type "
+            << modelType << nl << nl
+            << "Valid radiationModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<radiationModel>(cstrIter()(dict, T));
 }
 
 

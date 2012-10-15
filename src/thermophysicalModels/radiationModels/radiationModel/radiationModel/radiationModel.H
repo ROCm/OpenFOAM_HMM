@@ -35,6 +35,7 @@ Description
 
 SourceFiles
     radiationModel.C
+    radiationModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -123,16 +124,28 @@ public:
 
     // Declare runtime constructor selection table
 
-         declareRunTimeSelectionTable
-         (
-             autoPtr,
-             radiationModel,
-             dictionary,
-             (
-                 const volScalarField& T
-             ),
-             (T)
-         );
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            radiationModel,
+            T,
+            (
+                const volScalarField& T
+            ),
+            (T)
+        );
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            radiationModel,
+            dictionary,
+            (
+                const dictionary& dict,
+                const volScalarField& T
+            ),
+            (dict, T)
+        );
 
 
     // Constructors
@@ -140,14 +153,32 @@ public:
         //- Null constructor
         radiationModel(const volScalarField& T);
 
+        //- Construct with dictionary
+        radiationModel(const dictionary& dict, const volScalarField& T);
+
         //- Construct from components
         radiationModel(const word& type, const volScalarField& T);
+
+        //- Construct from components
+        radiationModel
+        (
+            const word& type,
+            const dictionary& dict,
+            const volScalarField& T
+        );
 
 
     // Selectors
 
-         //- Return a reference to the selected radiation model
-         static autoPtr<radiationModel> New(const volScalarField& T);
+        //- Return a reference to the selected radiation model
+        static autoPtr<radiationModel> New(const volScalarField& T);
+
+        //- Return a reference to the selected radiation model
+        static autoPtr<radiationModel> New
+        (
+            const dictionary& dict,
+            const volScalarField& T
+        );
 
 
     //- Destructor
