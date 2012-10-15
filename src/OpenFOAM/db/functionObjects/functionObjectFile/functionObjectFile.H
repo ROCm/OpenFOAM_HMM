@@ -56,9 +56,9 @@ namespace Foam
 
 class functionObjectFile
 {
-protected:
+private:
 
-    // Protected data
+    // Private data
 
         //- Reference to the database
         const objectRegistry& obr_;
@@ -72,6 +72,8 @@ protected:
         //- File pointer
         PtrList<OFstream> filePtrs_;
 
+
+protected:
 
     // Protected Member Functions
 
