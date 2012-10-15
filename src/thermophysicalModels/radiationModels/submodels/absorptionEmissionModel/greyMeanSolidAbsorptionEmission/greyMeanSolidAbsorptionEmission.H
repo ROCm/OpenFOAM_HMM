@@ -125,7 +125,7 @@ public:
     virtual ~greyMeanSolidAbsorptionEmission();
 
 
-    // Member Operators
+    // Member Functions
 
         // Access
 

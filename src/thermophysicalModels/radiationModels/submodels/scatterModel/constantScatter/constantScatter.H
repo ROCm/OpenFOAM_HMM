@@ -85,7 +85,7 @@ public:
     virtual ~constantScatter();
 
 
-    // Public Member Functions
+    // Member Functions
 
         //- Return scatter coefficient
         tmp<volScalarField> sigmaEff() const;

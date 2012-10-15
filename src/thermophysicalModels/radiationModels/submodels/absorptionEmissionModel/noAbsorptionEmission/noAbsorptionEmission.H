@@ -62,11 +62,7 @@ public:
     // Constructors
 
         //- Construct from components
-        noAbsorptionEmission
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+        noAbsorptionEmission(const dictionary& dict, const fvMesh& mesh);
 
 
     //- Destructor
