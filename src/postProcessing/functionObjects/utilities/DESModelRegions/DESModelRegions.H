@@ -43,6 +43,7 @@ SourceFiles
 #ifndef DESModelRegions_H
 #define DESModelRegions_H
 
+#include "functionObjectFile.H"
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
 #include "Switch.H"
@@ -64,8 +65,12 @@ class fvMesh;
 \*---------------------------------------------------------------------------*/
 
 class DESModelRegions
+:
+    public functionObjectFile
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Name of this set of DESModelRegions object
         word name_;
@@ -78,14 +83,11 @@ class DESModelRegions
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
 
+    // Protected Member Functions
 
-    // Private Member Functions
-
-        //- Make the output file
-        virtual void makeFile();
+        //- File header information
+        virtual void writeFileHeader(const label i);
 
         //- Disallow default bitwise copy construct
         DESModelRegions(const DESModelRegions&);

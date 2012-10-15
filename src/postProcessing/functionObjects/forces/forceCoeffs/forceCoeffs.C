@@ -85,14 +85,11 @@ void Foam::forceCoeffs::read(const dictionary& dict)
 }
 
 
-void Foam::forceCoeffs::writeFileHeader()
+void Foam::forceCoeffs::writeFileHeader(const label i)
 {
-    if (forcesFilePtr_.valid())
-    {
-        forcesFilePtr_()
-            << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
-            << "Cl(f)" << "Cl(r)" << endl;
-    }
+    file()
+        << "# Time" << tab << "Cm" << tab << "Cd" << tab << "Cl" << tab
+        << "Cl(f)" << "Cl(r)" << endl;
 }
 
 
@@ -112,12 +109,12 @@ void Foam::forceCoeffs::write()
 {
     if (active_)
     {
-        // Create the forces file if not already created
-        makeFile();
         forces::calcForcesMoment();
 
         if (Pstream::master())
         {
+            functionObjectFile::write();
+
             scalar pDyn = 0.5*rhoRef_*magUInf_*magUInf_;
 
             Field<vector> totForce(force_[0] + force_[1]);
@@ -140,7 +137,7 @@ void Foam::forceCoeffs::write()
             scalar Clf = Cl/2.0 - Cm;
             scalar Clr = Cl/2.0 + Cm;
 
-            forcesFilePtr_()
+            file()
                 << obr_.time().value() << tab
                 << Cm << tab << Cd << tab << Cl << tab << Clf << tab << Clr
                 << endl;

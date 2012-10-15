@@ -69,26 +69,19 @@ void Foam::regionSizeDistribution::writeGraph
 
     const wordList valNames(1, valueName);
 
-    fileName outputPath;
-    if (Pstream::parRun())
-    {
-        outputPath = mesh.time().path()/".."/name_;
-    }
-    else
-    {
-        outputPath = mesh.time().path()/name_;
-    }
+    fileName outputPath = baseFileDir()/name_;
 
     if (mesh.name() != fvMesh::defaultRegion)
     {
         outputPath = outputPath/mesh.name();
     }
 
-    mkDir(outputPath/mesh.time().timeName());
+    outputPath = outputPath/mesh.time().timeName();
+
+    mkDir(outputPath);
     OFstream str
     (
         outputPath
-      / mesh.time().timeName()
       / formatterPtr_().getFileName(coords, valNames)
     );
     Info<< "Writing distribution of " << valueName << " to " << str.name()
@@ -341,6 +334,7 @@ Foam::regionSizeDistribution::regionSizeDistribution
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),

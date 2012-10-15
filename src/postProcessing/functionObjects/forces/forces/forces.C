@@ -45,74 +45,21 @@ defineTypeNameAndDebug(Foam::forces, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::fileName Foam::forces::baseFileDir() const
+void Foam::forces::writeFileHeader(const label i)
 {
-    fileName baseDir;
+    file()
+        << "# Time" << tab
+        << "forces(pressure, viscous) moment(pressure, viscous)";
 
-    if (Pstream::parRun())
+    if (localSystem_)
     {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        baseDir = obr_.time().path()/".."/name_;
-    }
-    else
-    {
-        baseDir = obr_.time().path()/name_;
+        file()
+            << tab
+            << "local forces(pressure, viscous) "
+            << "local moment(pressure, viscous)";
     }
 
-    return baseDir;
-}
-
-
-void Foam::forces::makeFile()
-{
-    // Create the forces file if not already created
-    if (forcesFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating forces file" << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            word startTimeName =
-                obr_.time().timeName(obr_.time().startTime().value());
-
-            fileName forcesDir = baseFileDir()/startTimeName;
-
-            // Create directory if does not exist.
-            mkDir(forcesDir);
-
-            // Open new file at start up
-            forcesFilePtr_.reset(new OFstream(forcesDir/(type() + ".dat")));
-
-            // Add headers to output data
-            writeFileHeader();
-        }
-    }
-}
-
-
-void Foam::forces::writeFileHeader()
-{
-    if (forcesFilePtr_.valid())
-    {
-        forcesFilePtr_()
-            << "# Time" << tab
-            << "forces(pressure, viscous) moment(pressure, viscous)";
-
-        if (localSystem_)
-        {
-            forcesFilePtr_()
-                << tab
-                << "local forces(pressure, viscous) "
-                << "local moment(pressure, viscous)";
-        }
-
-        forcesFilePtr_()<< endl;
-    }
+    file()<< endl;
 }
 
 
@@ -281,13 +228,12 @@ void Foam::forces::writeBins() const
     autoPtr<writer<vector> > binWriterPtr(writer<vector>::New(binFormat_));
     coordSet axis("forces", "distance", binPoints_, mag(binPoints_));
 
-    fileName forcesDir = baseFileDir()/"bins"/obr_.time().timeName();
+    fileName forcesDir = baseFileDir()/name_/"bins"/obr_.time().timeName();
     mkDir(forcesDir);
 
     if (log_)
     {
         Info<< "    Writing bins to " << forcesDir << endl;
-
     }
 
     wordList fieldNames(IStringStream("(pressure viscous)")());
@@ -327,6 +273,7 @@ Foam::forces::forces
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
@@ -348,8 +295,7 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined"),
-    forcesFilePtr_(NULL)
+    binFormat_("undefined")
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -385,6 +331,7 @@ Foam::forces::forces
     const coordinateSystem& coordSys
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
@@ -406,8 +353,7 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined"),
-    forcesFilePtr_(NULL)
+    binFormat_("undefined")
 {}
 
 
@@ -592,13 +538,12 @@ void Foam::forces::write()
         return;
     }
 
-    // Create the forces file if not already created
-    makeFile();
-
     calcForcesMoment();
 
     if (Pstream::master())
     {
+        functionObjectFile::write();
+
         if (log_)
         {
             Info<< type() << " output:" << nl
@@ -609,7 +554,7 @@ void Foam::forces::write()
                 << nl;
         }
 
-        forcesFilePtr_() << obr_.time().value() << tab
+        file() << obr_.time().value() << tab
             << "(" << sum(force_[0]) << "," << sum(force_[1]) << ") "
             << "(" << sum(moment_[0]) << "," << sum(moment_[1]) << ")"
             << endl;
@@ -621,7 +566,7 @@ void Foam::forces::write()
             vectorField localMomentP(coordSys_.localVector(moment_[0]));
             vectorField localMomentV(coordSys_.localVector(moment_[1]));
 
-            forcesFilePtr_() << obr_.time().value() << tab
+            file() << obr_.time().value() << tab
                 << "(" << sum(localForceP) << "," << sum(localForceV) << ") "
                 << "(" << sum(localMomentP) << "," << sum(localMomentV) << ")"
                 << endl;
@@ -633,8 +578,6 @@ void Foam::forces::write()
         {
             Info<< endl;
         }
-
-        forcesFilePtr_() << endl;
     }
 }
 

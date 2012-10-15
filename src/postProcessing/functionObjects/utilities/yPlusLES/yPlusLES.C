@@ -39,48 +39,12 @@ defineTypeNameAndDebug(Foam::yPlusLES, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::yPlusLES::makeFile()
+void Foam::yPlusLES::writeFileHeader(const label i)
 {
-    // Create the output file if not already created
-    if (outputFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName outputDir;
-            word startTimeName =
-                obr_.time().timeName(obr_.time().startTime().value());
-
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir =
-                    obr_.time().path()/".."/name_/startTimeName;
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_/startTimeName;
-            }
-
-            // Create directory if does not exist
-            mkDir(outputDir);
-
-            // Open new file at start up
-            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
-
-            // Add headers to output data
-            outputFilePtr_() << "# y+ (LES)" << nl
-                << "# time " << token::TAB << "patch" << token::TAB
-                << "min" << token::TAB << "max" << token::TAB << "average"
-                << endl;
-        }
-    }
+    file() << "# y+ (LES)" << nl
+        << "# time " << token::TAB << "patch" << token::TAB
+        << "min" << token::TAB << "max" << token::TAB << "average"
+        << endl;
 }
 
 
@@ -133,7 +97,7 @@ void Foam::yPlusLES::calcIncompressibleYPlus
 
             if (Pstream::master())
             {
-                outputFilePtr_() << obr_.time().value() << token::TAB
+                file() << obr_.time().value() << token::TAB
                     << currPatch.name() << token::TAB
                     << minYp << token::TAB << maxYp << token::TAB
                     << avgYp << endl;
@@ -199,7 +163,7 @@ void Foam::yPlusLES::calcCompressibleYPlus
 
             if (Pstream::master())
             {
-                outputFilePtr_() << obr_.time().value() << token::TAB
+                file() << obr_.time().value() << token::TAB
                     << currPatch.name() << token::TAB
                     << minYp << token::TAB << maxYp << token::TAB
                     << avgYp << endl;
@@ -224,13 +188,13 @@ Foam::yPlusLES::yPlusLES
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
     log_(false),
     phiName_("phi"),
-    UName_("U"),
-    outputFilePtr_(NULL)
+    UName_("U")
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -248,8 +212,6 @@ Foam::yPlusLES::yPlusLES
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
-
-    makeFile();
 }
 
 
@@ -287,6 +249,8 @@ void Foam::yPlusLES::write()
 {
     if (active_)
     {
+        functionObjectFile::write();
+
         const surfaceScalarField& phi =
             obr_.lookupObject<surfaceScalarField>(phiName_);
 

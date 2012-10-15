@@ -83,28 +83,24 @@ void Foam::fieldMinMax::calcMinMaxFields
                     scalar maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    if (write_)
+                    file()
+                        << obr_.time().value() << token::TAB
+                        << fieldName << token::TAB
+                        << minValue << token::TAB << minC;
+
+                    if (Pstream::parRun())
                     {
-                        fieldMinMaxFilePtr_()
-                            << obr_.time().value() << token::TAB
-                            << fieldName << token::TAB
-                            << minValue << token::TAB << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << minI;
-                        }
-
-                        fieldMinMaxFilePtr_()
-                            << token::TAB << maxValue << token::TAB << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << maxI;
-                        }
-
-                        fieldMinMaxFilePtr_() << endl;
+                        file() << token::TAB << minI;
                     }
+
+                    file() << token::TAB << maxValue << token::TAB << maxC;
+
+                    if (Pstream::parRun())
+                    {
+                        file() << token::TAB << maxI;
+                    }
+
+                    file() << endl;
 
                     if (log_)
                     {
@@ -163,28 +159,24 @@ void Foam::fieldMinMax::calcMinMaxFields
                     Type maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    if (write_)
+                    file()
+                        << obr_.time().value() << token::TAB
+                        << fieldName << token::TAB
+                        << minValue << token::TAB << minC;
+
+                    if (Pstream::parRun())
                     {
-                        fieldMinMaxFilePtr_()
-                            << obr_.time().value() << token::TAB
-                            << fieldName << token::TAB
-                            << minValue << token::TAB << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << minI;
-                        }
-
-                        fieldMinMaxFilePtr_()
-                             << token::TAB << maxValue << token::TAB << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << maxI;
-                        }
-
-                        fieldMinMaxFilePtr_() << endl;
+                        file() << token::TAB << minI;
                     }
+
+                    file() << token::TAB << maxValue << token::TAB << maxC;
+
+                    if (Pstream::parRun())
+                    {
+                        file() << token::TAB << maxI;
+                    }
+
+                    file() << endl;
 
                     if (log_)
                     {

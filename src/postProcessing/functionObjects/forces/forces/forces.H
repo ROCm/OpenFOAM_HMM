@@ -103,6 +103,7 @@ SourceFiles
 #ifndef forces_H
 #define forces_H
 
+#include "functionObjectFile.H"
 #include "coordinateSystem.H"
 #include "coordinateSystems.H"
 #include "primitiveFieldsFwd.H"
@@ -129,6 +130,8 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class forces
+:
+    public functionObjectFile
 {
 protected:
 
@@ -207,20 +210,10 @@ protected:
                 word binFormat_;
 
 
-        //- Forces/moment file ptr
-        autoPtr<OFstream> forcesFilePtr_;
-
-
     // Protected Member Functions
 
-        //- Return the base file directory for output
-        fileName baseFileDir() const;
-
-        //- If the forces file has not been created create it
-        void makeFile();
-
         //- Output file header information
-        virtual void writeFileHeader();
+        virtual void writeFileHeader(const label i);
 
         //- Return the effective viscous stress (laminar + turbulent).
         tmp<volSymmTensorField> devRhoReff() const;

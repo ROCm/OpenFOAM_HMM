@@ -62,14 +62,13 @@ Foam::fieldMinMax::fieldMinMax
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
-    write_(true),
     log_(false),
     mode_(mdMag),
-    fieldSet_(),
-    fieldMinMaxFilePtr_(NULL)
+    fieldSet_()
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -99,7 +98,6 @@ void Foam::fieldMinMax::read(const dictionary& dict)
 {
     if (active_)
     {
-        write_ = dict.lookupOrDefault<Switch>("write", true);
         log_ = dict.lookupOrDefault<Switch>("log", false);
 
         mode_ = modeTypeNames_[dict.lookupOrDefault<word>("mode", "magnitude")];
@@ -108,72 +106,25 @@ void Foam::fieldMinMax::read(const dictionary& dict)
 }
 
 
-void Foam::fieldMinMax::makeFile()
+void Foam::fieldMinMax::writeFileHeader(const label i)
 {
-    // Create the fieldMinMax file if not already created
-    if (fieldMinMaxFilePtr_.empty())
+    file()
+        << "# Time" << token::TAB << "field" << token::TAB
+        << "min" << token::TAB << "position(min)";
+
+    if (Pstream::parRun())
     {
-        if (debug)
-        {
-            Info<< "Creating fieldMinMax file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName fieldMinMaxDir;
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                fieldMinMaxDir =
-                    obr_.time().path()/".."/name_/obr_.time().timeName();
-            }
-            else
-            {
-                fieldMinMaxDir =
-                    obr_.time().path()/name_/obr_.time().timeName();
-            }
-
-            // Create directory if does not exist.
-            mkDir(fieldMinMaxDir);
-
-            // Open new file at start up
-            fieldMinMaxFilePtr_.reset
-            (
-                new OFstream(fieldMinMaxDir/(type() + ".dat"))
-            );
-
-            // Add headers to output data
-            writeFileHeader();
-        }
+        file() << token::TAB << "proc";
     }
-}
 
+    file() << token::TAB << "max" << token::TAB << "position(max)";
 
-void Foam::fieldMinMax::writeFileHeader()
-{
-    if (fieldMinMaxFilePtr_.valid())
+    if (Pstream::parRun())
     {
-        fieldMinMaxFilePtr_()
-            << "# Time" << token::TAB << "field" << token::TAB
-            << "min" << token::TAB << "position(min)";
-
-        if (Pstream::parRun())
-        {
-            fieldMinMaxFilePtr_() << token::TAB << "proc";
-        }
-
-        fieldMinMaxFilePtr_()
-            << token::TAB << "max" << token::TAB << "position(max)";
-
-        if (Pstream::parRun())
-        {
-            fieldMinMaxFilePtr_() << token::TAB << "proc";
-        }
-
-        fieldMinMaxFilePtr_() << endl;
+        file() << token::TAB << "proc";
     }
+
+    file() << endl;
 }
 
 
@@ -193,11 +144,7 @@ void Foam::fieldMinMax::write()
 {
     if (active_)
     {
-        // Create the fieldMinMax file if not already created
-        if (write_)
-        {
-            makeFile();
-        }
+        functionObjectFile::write();
 
         if (log_)
         {

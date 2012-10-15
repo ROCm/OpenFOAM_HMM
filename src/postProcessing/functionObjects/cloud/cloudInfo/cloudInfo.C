@@ -34,53 +34,9 @@ defineTypeNameAndDebug(Foam::cloudInfo, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::cloudInfo::makeFiles()
+void Foam::cloudInfo::writeFileHeader(const label i)
 {
-    if (debug)
-    {
-        Info<< "Creating cloudInfo output files." << endl;
-    }
-
-    outputFilePtr_.clear();
-    outputFilePtr_.setSize(cloudSet_.size());
-
-    if (Pstream::master())
-    {
-        label i = 0;
-        forAllConstIter(wordHashSet, cloudSet_, iter)
-        {
-            const word& cloudName = iter.key();
-            fileName cloudInfoDir(obr_.time().path());
-            word timeName = Foam::name(obr_.time().startTime().value());
-
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                cloudInfoDir = cloudInfoDir/".."/name_/timeName;
-            }
-            else
-            {
-                cloudInfoDir = cloudInfoDir/name_/timeName;
-            }
-
-            // Create directory if does not exist
-            mkDir(cloudInfoDir);
-
-            // Open new files at start up
-            outputFilePtr_.set
-            (
-                i,
-                new OFstream(cloudInfoDir/(cloudName + ".dat"))
-            );
-
-            // Add headers
-            outputFilePtr_[i]
-                << "# Time" << tab << "nParcels" << tab << "mass" << endl;
-
-            i++;
-        }
-    }
+    file(i) << "# Time" << tab << "nParcels" << tab << "mass" << endl;
 }
 
 
@@ -94,11 +50,10 @@ Foam::cloudInfo::cloudInfo
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name),
     name_(name),
     obr_(obr),
-    active_(true),
-    cloudSet_(),
-    outputFilePtr_()
+    active_(true)
 {
     read(dict);
 }
@@ -116,19 +71,17 @@ void Foam::cloudInfo::read(const dictionary& dict)
 {
     if (active_)
     {
-        cloudSet_.insert(wordList(dict.lookup("clouds")));
+        functionObjectFile::resetNames(dict.lookup("clouds"));
 
         Info<< type() << ": ";
-        if (cloudSet_.size())
+        if (names_.size())
         {
             Info<< "applying to clouds:" << nl;
-            forAllConstIter(wordHashSet, cloudSet_, iter)
+            forAllConstIter(wordHashSet, names_, iter)
             {
                 Info<< "    " << iter.key() << nl;
             }
             Info<< endl;
-
-            makeFiles();
         }
         else
         {
@@ -154,8 +107,10 @@ void Foam::cloudInfo::write()
 {
     if (active_)
     {
+        functionObjectFile::write();
+
         label i = 0;
-        forAllConstIter(wordHashSet, cloudSet_, iter)
+        forAllConstIter(wordHashSet, names_, iter)
         {
             const word& cloudName = iter.key();
 
@@ -168,7 +123,7 @@ void Foam::cloudInfo::write()
 
             if (Pstream::master())
             {
-                outputFilePtr_[i]
+                file(i)
                     << obr_.time().value() << token::TAB
                     << nParcels << token::TAB
                     << massInSystem << endl;
