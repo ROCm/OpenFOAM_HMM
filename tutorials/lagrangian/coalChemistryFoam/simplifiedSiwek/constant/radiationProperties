@@ -15,15 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
-
 solverFreq      1;
 
 radiationModel  P1;
-
-noRadiation
-{
-}
 
 P1Coeffs
 {
