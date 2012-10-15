@@ -204,7 +204,14 @@ thermoBaffle2D::thermoBaffle2D
             pTraits<scalar>::zero
         )
     ),
-    radiation_(radiation::radiationModel::New(thermo_->T()))
+    radiation_
+    (
+        radiation::radiationModel::New
+        (
+            dict.subDict("radiation"),
+            thermo_->T()
+        )
+    )
 {
     init();
     thermo_->correct();
@@ -257,7 +264,13 @@ thermoBaffle2D::thermoBaffle2D
             pTraits<scalar>::zero
         )
     ),
-    radiation_(radiation::radiationModel::New(thermo_->T()))
+    radiation_
+    (
+        radiation::radiationModel::New
+        (
+            thermo_->T()
+        )
+    )
 {
     init();
     thermo_->correct();
