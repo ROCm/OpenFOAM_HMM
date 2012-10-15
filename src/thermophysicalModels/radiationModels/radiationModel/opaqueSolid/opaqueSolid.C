@@ -47,12 +47,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::radiation::opaqueSolid::opaqueSolid(const volScalarField& T)
+:
+    radiationModel(typeName, T)
+{}
+
+
 Foam::radiation::opaqueSolid::opaqueSolid
 (
+    const dictionary& dict,
     const volScalarField& T
 )
 :
-    radiationModel(typeName, T)
+    radiationModel(typeName, dict, T)
 {}
 
 

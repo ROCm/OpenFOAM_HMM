@@ -50,57 +50,9 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
-:
-    radiationModel(typeName, T),
-    finalAgglom_
-    (
-        IOobject
-        (
-            "finalAgglom",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-    map_(),
-    coarseMesh_
-    (
-        IOobject
-        (
-            mesh_.name(),
-            mesh_.polyMesh::instance(),
-            mesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        finalAgglom_
-    ),
-    Qr_
-    (
-        IOobject
-        (
-            "Qr",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_
-    ),
-    Fmatrix_(),
-    CLU_(),
-    selectedPatches_(mesh_.boundary().size(), -1),
-    totalNCoarseFaces_(0),
-    nLocalCoarseFaces_(0),
-    constEmissivity_(false),
-    iterCounter_(0),
-    pivotIndices_(0)
+void Foam::radiation::viewFactor::initialise()
 {
     const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
     const volScalarField::GeometricBoundaryField& Qrp = Qr_.boundaryField();
@@ -278,6 +230,120 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
             pivotIndices_.setSize(CLU_().n());
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
+:
+    radiationModel(typeName, T),
+    finalAgglom_
+    (
+        IOobject
+        (
+            "finalAgglom",
+            mesh_.facesInstance(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+    map_(),
+    coarseMesh_
+    (
+        IOobject
+        (
+            mesh_.name(),
+            mesh_.polyMesh::instance(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        finalAgglom_
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+    Fmatrix_(),
+    CLU_(),
+    selectedPatches_(mesh_.boundary().size(), -1),
+    totalNCoarseFaces_(0),
+    nLocalCoarseFaces_(0),
+    constEmissivity_(false),
+    iterCounter_(0),
+    pivotIndices_(0)
+{
+    initialise();
+}
+
+
+Foam::radiation::viewFactor::viewFactor
+(
+    const dictionary& dict,
+    const volScalarField& T
+)
+:
+    radiationModel(typeName, dict, T),
+    finalAgglom_
+    (
+        IOobject
+        (
+            "finalAgglom",
+            mesh_.facesInstance(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    ),
+    map_(),
+    coarseMesh_
+    (
+        IOobject
+        (
+            mesh_.name(),
+            mesh_.polyMesh::instance(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        finalAgglom_
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+    Fmatrix_(),
+    CLU_(),
+    selectedPatches_(mesh_.boundary().size(), -1),
+    totalNCoarseFaces_(0),
+    nLocalCoarseFaces_(0),
+    constEmissivity_(false),
+    iterCounter_(0),
+    pivotIndices_(0)
+{
+    initialise();
 }
 
 

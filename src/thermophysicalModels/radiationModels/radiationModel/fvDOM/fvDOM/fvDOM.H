@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,6 +124,9 @@ class fvDOM
 
     // Private Member Functions
 
+        //- Initialise
+        void initialise();
+
         //- Disallow default bitwise copy construct
         fvDOM(const fvDOM&);
 
@@ -144,6 +147,9 @@ public:
 
         //- Construct from components
         fvDOM(const volScalarField& T);
+
+        //- Construct from components
+        fvDOM(const dictionary& dict, const volScalarField& T);
 
 
     //- Destructor

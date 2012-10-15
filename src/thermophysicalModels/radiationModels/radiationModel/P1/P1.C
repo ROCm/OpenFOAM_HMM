@@ -123,6 +123,76 @@ Foam::radiation::P1::P1(const volScalarField& T)
 {}
 
 
+Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
+:
+    radiationModel(typeName, dict, T),
+    G_
+    (
+        IOobject
+        (
+            "G",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
+    ),
+    a_
+    (
+        IOobject
+        (
+            "a",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    e_
+    (
+        IOobject
+        (
+            "e",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    E_
+    (
+        IOobject
+        (
+            "E",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+    )
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::radiation::P1::~P1()

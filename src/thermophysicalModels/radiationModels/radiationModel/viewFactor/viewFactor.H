@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,6 +107,9 @@ class viewFactor
 
     // Private Member Functions
 
+        //- Initialise
+        void initialise();
+
         //- Insert view factors into main matrix
         void insertMatrixElements
         (
@@ -134,6 +137,9 @@ public:
 
         //- Construct from components
         viewFactor(const volScalarField& T);
+
+        //- Construct from components
+        viewFactor(const dictionary& dict, const volScalarField& T);
 
 
     //- Destructor

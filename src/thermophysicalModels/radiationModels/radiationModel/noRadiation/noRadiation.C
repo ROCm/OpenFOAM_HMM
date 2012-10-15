@@ -53,6 +53,16 @@ Foam::radiation::noRadiation::noRadiation(const volScalarField& T)
 {}
 
 
+Foam::radiation::noRadiation::noRadiation
+(
+    const dictionary& dict,
+    const volScalarField& T
+)
+:
+    radiationModel(dict, T)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::radiation::noRadiation::~noRadiation()

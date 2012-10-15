@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                             Class noRadiation Declaration
+                         Class noRadiation Declaration
 \*---------------------------------------------------------------------------*/
 
 class noRadiation
@@ -72,6 +72,9 @@ public:
 
         //- Construct from components
         noRadiation(const volScalarField& T);
+
+        //- Construct from components
+        noRadiation(const dictionary& dict, const volScalarField& T);
 
 
     //- Destructor
