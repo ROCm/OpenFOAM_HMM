@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::constantAbsorptionEmission
+    Foam::radiation::noScatter
 
 Description
-    Constant radiation absorption and emission coefficients for continuous
-    phase
+    Dummy scatter model for 'none'
 
 SourceFiles
-    constantAbsorptionEmission.C
+    scatterModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstantAbsorptionEmission_H
-#define radiationConstantAbsorptionEmission_H
+#ifndef radiationConstantScatter_H
+#define radiationConstantScatter_H
 
-#include "absorptionEmissionModel.H"
+#include "scatterModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,72 +45,34 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class constantAbsorptionEmission Declaration
+                          Class noScatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantAbsorptionEmission
+class noScatter
 :
-    public absorptionEmissionModel
+    public scatterModel
 {
-    // Private data
-
-        //- Absorption model dictionary
-        dictionary coeffsDict_;
-
-        //- Absorption coefficient / [1/m]
-        dimensionedScalar a_;
-
-        //- Emission coefficient / [1/m]
-        dimensionedScalar e_;
-
-        //- Emission contribution / [kg/(m s^3)]
-        dimensionedScalar E_;
-
 
 public:
 
     //- Runtime type information
-    TypeName("constantAbsorptionEmission");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from components
-        constantAbsorptionEmission(const dictionary& dict, const fvMesh& mesh);
+        noScatter(const dictionary& dict, const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~constantAbsorptionEmission();
+    virtual ~noScatter();
 
 
     // Member Functions
 
-        // Access
-
-            // Absorption coefficient
-
-                //- Absorption coefficient for continuous phase
-                tmp<volScalarField> aCont(const label bandI = 0) const;
-
-
-            // Emission coefficient
-
-                //- Emission coefficient for continuous phase
-                tmp<volScalarField> eCont(const label bandI = 0) const;
-
-
-            // Emission contribution
-
-                //- Emission contribution for continuous phase
-                tmp<volScalarField> ECont(const label bandI = 0) const;
-
-
-    // Member Functions
-
-        inline bool isGrey() const
-        {
-            return true;
-        }
+        //- Return scatter coefficient
+        tmp<volScalarField> sigmaEff() const;
 };
 
 

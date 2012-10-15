@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "P1.H"
-#include "addToRunTimeSelectionTable.H"
 #include "fvm.H"
 
 #include "absorptionEmissionModel.H"
@@ -40,13 +39,7 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(P1, 0);
-
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            P1,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(P1);
     }
 }
 
@@ -56,6 +49,76 @@ namespace Foam
 Foam::radiation::P1::P1(const volScalarField& T)
 :
     radiationModel(typeName, T),
+    G_
+    (
+        IOobject
+        (
+            "G",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
+    ),
+    a_
+    (
+        IOobject
+        (
+            "a",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    e_
+    (
+        IOobject
+        (
+            "e",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    E_
+    (
+        IOobject
+        (
+            "E",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+    )
+{}
+
+
+Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
+:
+    radiationModel(typeName, dict, T),
     G_
     (
         IOobject

@@ -98,7 +98,6 @@ dictionaryReplacement
                 kappa               fluidThermo;
                 kappaName           none;
 
-
                 // Thermo baffle model
                 thermoBaffleModel   thermoBaffle2D;
                 regionName          baffleRegion;
@@ -107,7 +106,6 @@ dictionaryReplacement
                 thermoBaffle2DCoeffs
                 {
                 }
-
 
                 // Solid thermo
                 thermoType
@@ -120,7 +118,6 @@ dictionaryReplacement
                     specie          specie;
                     energy          sensibleEnthalpy;
                 }
-
 
                 mixture
                 {
@@ -142,6 +139,13 @@ dictionaryReplacement
                     {
                         rho             80;
                     }
+                }
+
+                radiation
+                {
+                    radiationModel  opaqueSolid;
+                    absorptionEmissionModel none;
+                    scatterModel    none;
                 }
 
                 value               uniform 300;

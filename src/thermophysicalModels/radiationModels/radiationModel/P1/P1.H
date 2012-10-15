@@ -96,6 +96,9 @@ public:
         //- Construct from components
         P1(const volScalarField& T);
 
+        //- Construct from components
+        P1(const dictionary& dict, const volScalarField& T);
+
 
     //- Destructor
     virtual ~P1();

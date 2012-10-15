@@ -35,6 +35,7 @@ Description
 
 SourceFiles
     radiationModel.C
+    radiationModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,11 +45,10 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "volFieldsFwd.H"
 #include "fluidThermo.H"
-#include "fvMatrices.H"
-#include "blackBodyEmission.H"
-#include "absorptionEmissionModel.H"
+#include "fvMatricesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +58,7 @@ namespace radiation
 {
 
 // Forward declaration of classes
+class absorptionEmissionModel;
 class scatterModel;
 
 /*---------------------------------------------------------------------------*\
@@ -108,6 +109,9 @@ private:
 
     // Private Member Functions
 
+        //- Initialise
+        void initialise();
+
         //- Disallow default bitwise copy construct
         radiationModel(const radiationModel&);
 
@@ -123,16 +127,28 @@ public:
 
     // Declare runtime constructor selection table
 
-         declareRunTimeSelectionTable
-         (
-             autoPtr,
-             radiationModel,
-             dictionary,
-             (
-                 const volScalarField& T
-             ),
-             (T)
-         );
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            radiationModel,
+            T,
+            (
+                const volScalarField& T
+            ),
+            (T)
+        );
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            radiationModel,
+            dictionary,
+            (
+                const dictionary& dict,
+                const volScalarField& T
+            ),
+            (dict, T)
+        );
 
 
     // Constructors
@@ -140,14 +156,32 @@ public:
         //- Null constructor
         radiationModel(const volScalarField& T);
 
+        //- Construct with dictionary
+        radiationModel(const dictionary& dict, const volScalarField& T);
+
         //- Construct from components
         radiationModel(const word& type, const volScalarField& T);
+
+        //- Construct from components
+        radiationModel
+        (
+            const word& type,
+            const dictionary& dict,
+            const volScalarField& T
+        );
 
 
     // Selectors
 
-         //- Return a reference to the selected radiation model
-         static autoPtr<radiationModel> New(const volScalarField& T);
+        //- Return a reference to the selected radiation model
+        static autoPtr<radiationModel> New(const volScalarField& T);
+
+        //- Return a reference to the selected radiation model
+        static autoPtr<radiationModel> New
+        (
+            const dictionary& dict,
+            const volScalarField& T
+        );
 
 
     //- Destructor
@@ -183,6 +217,24 @@ public:
             const absorptionEmissionModel& absorptionEmission() const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define addToRadiationRunTimeSelectionTables(model)                           \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        radiationModel,                                                       \
+        model,                                                                \
+        dictionary                                                            \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        radiationModel,                                                       \
+        model,                                                                \
+        T                                                                     \
+    );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

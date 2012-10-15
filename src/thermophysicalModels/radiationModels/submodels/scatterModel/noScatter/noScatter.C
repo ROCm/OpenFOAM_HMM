@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noRadiation.H"
-#include "physicoChemicalConstants.H"
+#include "noScatter.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,51 +32,33 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(noRadiation, 0);
-        addToRadiationRunTimeSelectionTables(noRadiation);
+        defineTypeNameAndDebug(noScatter, 0);
+        addToRunTimeSelectionTable(scatterModel, noScatter, dictionary);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::noRadiation::noRadiation(const volScalarField& T)
-:
-    radiationModel(T)
-{}
-
-
-Foam::radiation::noRadiation::noRadiation
+Foam::radiation::noScatter::noScatter
 (
     const dictionary& dict,
-    const volScalarField& T
+    const fvMesh& mesh
 )
 :
-    radiationModel(dict, T)
+    scatterModel(dict, mesh)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radiation::noRadiation::~noRadiation()
+Foam::radiation::noScatter::~noScatter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::radiation::noRadiation::read()
-{
-    return radiationModel::read();
-}
-
-
-void Foam::radiation::noRadiation::calculate()
-{
-    // Do nothing
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
+Foam::tmp<Foam::volScalarField> Foam::radiation::noScatter::sigmaEff() const
 {
     return tmp<volScalarField>
     (
@@ -84,44 +66,15 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
         (
             IOobject
             (
-                "Rp",
+                "sigma",
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             mesh_,
-            dimensionedScalar
-            (
-                "Rp",
-                constant::physicoChemical::sigma.dimensions()/dimLength,
-                0.0
-            )
-        )
-    );
-}
-
-
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::radiation::noRadiation::Ru() const
-{
-    return tmp<DimensionedField<scalar, volMesh> >
-    (
-        new DimensionedField<scalar, volMesh>
-        (
-            IOobject
-            (
-                "Ru",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar
-            (
-                "Ru", dimMass/dimLength/pow3(dimTime), 0.0
-            )
+            dimensionedScalar("zero", dimless/dimLength, 0.0)
         )
     );
 }

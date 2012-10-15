@@ -152,18 +152,14 @@ public:
     // Constructors
 
         //- Construct from components
-        greyMeanAbsorptionEmission
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+        greyMeanAbsorptionEmission(const dictionary& dict, const fvMesh& mesh);
 
 
     //- Destructor
     virtual ~greyMeanAbsorptionEmission();
 
 
-    // Member Operators
+    // Member Functions
 
         // Access
 

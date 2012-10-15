@@ -15,31 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
-
-radiationModel  viewFactor;//fvDOM;//P1;
+radiationModel  viewFactor;
 
 viewFactorCoeffs
 {
     smoothing true; //Smooth view factor matrix (use when in a close surface
                     //to force Sum(Fij = 1)
     constantEmissivity true; //constant emissivity on surfaces.
-}
-
-noRadiation
-{
-}
-
-P1Coeffs
-{
-}
-
-fvDOMCoeffs
-{
-    nPhi    3;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
-    nTheta  4;          // polar angles in PI (from Z to X-Y plane)
-    convergence 1e-3;   // convergence criteria for radiation iteration
-    maxIter 5;          // maximum number of iterations
 }
 
 // Number of flow iterations per radiation iteration
@@ -144,13 +126,7 @@ greyMeanAbsorptionEmissionCoeffs
 
 }
 
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+scatterModel    none;
 
 
 // ************************************************************************* //

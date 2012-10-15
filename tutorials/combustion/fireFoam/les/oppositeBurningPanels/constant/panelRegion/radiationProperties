@@ -16,20 +16,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       off;
-
 radiationModel  opaqueSolid;
-
-opaqueSolidCoeffs
-{
-}
 
 absorptionEmissionModel greyMeanSolidAbsorptionEmission;
 
 
 greyMeanSolidAbsorptionEmissionCoeffs
 {
-
     v
     {
         absorptivity    0.0;  //opaque
@@ -41,16 +34,9 @@ greyMeanSolidAbsorptionEmissionCoeffs
         absorptivity    0.0;
         emissivity      0.85;
     }
-
 }
 
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+scatterModel    none;
 
 
 // ************************************************************************* //
