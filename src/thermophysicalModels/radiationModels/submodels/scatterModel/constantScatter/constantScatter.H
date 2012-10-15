@@ -82,15 +82,13 @@ public:
 
 
     //- Destructor
-    ~constantScatter();
+    virtual ~constantScatter();
 
 
-    // Member Operators
+    // Public Member Functions
 
-        // Access
-
-            //- Return scatter coefficient
-            tmp<volScalarField> sigmaEff() const;
+        //- Return scatter coefficient
+        tmp<volScalarField> sigmaEff() const;
 };
 
 
