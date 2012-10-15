@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "viewFactor.H"
+#include "surfaceFields.H"
 #include "constants.H"
 #include "greyDiffusiveViewFactorFixedValueFvPatchScalarField.H"
 #include "typeInfo.H"

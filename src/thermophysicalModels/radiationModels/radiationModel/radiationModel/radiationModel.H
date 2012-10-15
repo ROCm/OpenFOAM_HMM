@@ -46,11 +46,9 @@ SourceFiles
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "addToRunTimeSelectionTable.H"
-#include "volFields.H"
+#include "volFieldsFwd.H"
 #include "fluidThermo.H"
-#include "fvMatrices.H"
-#include "blackBodyEmission.H"
-#include "absorptionEmissionModel.H"
+#include "fvMatricesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +58,7 @@ namespace radiation
 {
 
 // Forward declaration of classes
+class absorptionEmissionModel;
 class scatterModel;
 
 /*---------------------------------------------------------------------------*\
