@@ -55,6 +55,24 @@ void Foam::primitiveEntry::append
             newElmt(tokenIndex()++) = currToken;
         }
     }
+    else if (currToken.isString())
+    {
+        const string& w = currToken.stringToken();
+
+        if
+        (
+            disableFunctionEntries
+         || w.size() <= 3
+         || !(
+                w[0] == '$'
+             && w[1] == token::BEGIN_BLOCK
+             && expandVariable(w, dict)
+            )
+        )
+        {
+            newElmt(tokenIndex()++) = currToken;
+        }
+    }
     else
     {
         newElmt(tokenIndex()++) = currToken;

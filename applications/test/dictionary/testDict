@@ -38,6 +38,15 @@ inactive
     type            zeroGradient;
 }
 
+
+// Indirection
+varType active;
+
+// Indirection of values
+x 5;
+varName x;
+
+
 boundaryField
 {
     Default_Boundary_Region
@@ -52,7 +61,7 @@ boundaryField
     inlet_5  "a primitiveEntry is squashed by a directory entry";
     inlet_5  { $inactive }
     inlet_6  { $.inactive }     // Test scoping
-    inlet_7  { $inactive }
+    inlet_7  { ${inactive}}     // Test variable expansion
     inlet_8  { $inactive }
 
     #include "testDictInc"
@@ -63,14 +72,14 @@ boundaryField
         inletValue      $internalField;
         value           #include "value";
         // error           #remove self;
-        x               5;
+        x               ${${varName}};  // Test indirection/recursive expansion
         y               6;
     }
 
     // this should have no effect
     #remove inactive
 
-    inlet_7  { $active }
+    inlet_7  { ${${varType}}}   // Test indirection/recursive expansion
     #inputMode overwrite
     inlet_8  { $active }
 }
