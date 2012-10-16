@@ -100,10 +100,10 @@ echo "run $args" > $PWD/gdbCommands
 echo "where" >> $PWD/gdbCommands
 echo "Constructed gdb initialization file $PWD/gdbCommands"
 
-$ECHO "Choose running method: 0)normal  1)gdb+xterm  2)gdb  3)log  4)log+xterm  5)xterm+valgrind: \c"
+$ECHO "Choose running method: 0)normal  1)gdb+xterm  2)gdb  3)log  4)log+xterm  5)xterm+valgrind  6)gperftools(callgrind): \c"
 read method
 case "$method" in
-0 | 1 | 2 | 3 | 4 | 5 )
+0 | 1 | 2 | 3 | 4 | 5 | 6)
     # okay
     ;;
 *)
@@ -198,6 +198,11 @@ do
     5)
         echo "$sourceFoam; cd $PWD; valgrind $exec $args; read dummy" >> $procCmdFile
         echo "${node}xterm -font fixed -title 'processor'$proc $geom -e $procCmdFile" >> $PWD/mpirun.schema
+        ;;
+    6)
+        echo "$sourceFoam; cd $PWD; CPUPROFILE=log.profiler_$proc $exec $args; \
+             pprof --callgrind $exec log.profiler_$proc > log.profiler_$proc.callgrind;" >> $procCmdFile
+        echo "${node}$procCmdFile" >> $PWD/mpirun.schema
         ;;
     esac
 
