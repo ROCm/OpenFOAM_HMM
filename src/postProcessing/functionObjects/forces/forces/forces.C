@@ -228,7 +228,7 @@ void Foam::forces::writeBins() const
     autoPtr<writer<vector> > binWriterPtr(writer<vector>::New(binFormat_));
     coordSet axis("forces", "distance", binPoints_, mag(binPoints_));
 
-    fileName forcesDir = baseFileDir()/name_/"bins"/obr_.time().timeName();
+    fileName forcesDir = baseFileDir()/name_/obr_.time().timeName();
     mkDir(forcesDir);
 
     if (log_)
@@ -238,10 +238,10 @@ void Foam::forces::writeBins() const
 
     wordList fieldNames(IStringStream("(pressure viscous)")());
 
-    OFstream osForce(forcesDir/"force");
+    OFstream osForce(forcesDir/"force_bins");
     binWriterPtr->write(axis, fieldNames, force_, osForce);
 
-    OFstream osMoment(forcesDir/"moment");
+    OFstream osMoment(forcesDir/"moment_bins");
     binWriterPtr->write(axis, fieldNames, moment_, osMoment);
 
 
@@ -273,7 +273,7 @@ Foam::forces::forces
     const bool loadFromFiles
 )
 :
-    functionObjectFile(obr, name, typeName),
+    functionObjectFile(obr, name, word(dict.lookup("type"))),
     name_(name),
     obr_(obr),
     active_(true),

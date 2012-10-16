@@ -167,7 +167,7 @@ void Foam::forceCoeffs::write()
                 );
 
                 fileName forcesDir =
-                    baseFileDir()/"bins"/obr_.time().timeName();
+                    baseFileDir()/name_/obr_.time().timeName();
                 mkDir(forcesDir);
 
                 if (log_)
@@ -175,7 +175,7 @@ void Foam::forceCoeffs::write()
                     Info<< "    Writing bins to " << forcesDir << endl;
                 }
 
-                OFstream osCoeffs(forcesDir/"forceCoeffs");
+                OFstream osCoeffs(forcesDir/"forceCoeffs_bins");
                 binWriterPtr->write(axis, fieldNames, coeffs, osCoeffs);
             }
 
