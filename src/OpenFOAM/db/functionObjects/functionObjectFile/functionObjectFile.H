@@ -77,8 +77,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Return the base file directory for output
+        //- Return the base directory for output
         virtual fileName baseFileDir() const;
+
+        //- Return the base directory for the current time value
+        virtual fileName baseTimeDir() const;
 
         //- Create the output file
         virtual void createFiles();

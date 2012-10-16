@@ -51,6 +51,12 @@ Foam::fileName Foam::functionObjectFile::baseFileDir() const
 }
 
 
+Foam::fileName Foam::functionObjectFile::baseTimeDir() const
+{
+    return baseFileDir()/prefix_/obr_.time().timeName();
+}
+
+
 void Foam::functionObjectFile::createFiles()
 {
     const word startTimeName =
