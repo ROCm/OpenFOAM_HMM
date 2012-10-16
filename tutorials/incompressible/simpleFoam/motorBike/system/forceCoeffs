@@ -6,7 +6,7 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-forces
+forceCoeffs1
 {
     type        forceCoeffs;
     functionObjectLibs ( "libforces.so" );
