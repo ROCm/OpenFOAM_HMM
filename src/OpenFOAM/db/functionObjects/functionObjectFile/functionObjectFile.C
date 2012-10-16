@@ -208,6 +208,12 @@ Foam::functionObjectFile::~functionObjectFile()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const Foam::wordHashSet& Foam::functionObjectFile::names() const
+{
+    return names_;
+}
+
+
 Foam::OFstream& Foam::functionObjectFile::file()
 {
     if (!Pstream::master())

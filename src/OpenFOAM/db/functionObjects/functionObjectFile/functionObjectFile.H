@@ -138,6 +138,9 @@ public:
 
     // Member Functions
 
+        //- Return const access to the names
+        const wordHashSet& names() const;
+
         //- Return access to the file (if only 1)
         OFstream& file();
 
