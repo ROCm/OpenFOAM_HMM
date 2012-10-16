@@ -87,14 +87,13 @@ void Foam::nastranSurfaceWriter::formatOS(OFstream& os) const
 void Foam::nastranSurfaceWriter::writeCoord
 (
     const point& p,
-    label& nPoint,
-    label& continuation,
-    Ostream& os
+    const label pointI,
+    OFstream& os
 ) const
 {
     // Fixed short/long formats:
     // 1 GRID
-    // 2 ID   : point ID
+    // 2 ID   : point ID - requires starting index of 1
     // 3 CP   : co-ordinate system ID                (blank)
     // 4 X1   : point x cp-ordinate
     // 5 X2   : point x cp-ordinate
@@ -107,35 +106,46 @@ void Foam::nastranSurfaceWriter::writeCoord
     {
         case wfShort:
         {
-            os  << setw(8) << "GRID"
-                << setw(8) << ++nPoint
+            os.setf(ios_base::left);
+            os  << setw(8) << "GRID";
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(8) << pointI + 1
                 << "        " 
                 << setw(8) << p.x()
                 << setw(8) << p.y()
                 << setw(8) << p.z()
                 << nl;
+            os.unsetf(ios_base::right);
 
             break;
         }
         case wfLong:
         {
-            os  << setw(8) << "GRID*"
-                << setw(16) << ++nPoint
+            os.setf(ios_base::left);
+            os  << setw(8) << "GRID*";
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(16) << pointI + 1
                 << "                "
                 << setw(16) << p.x()
                 << setw(16) << p.y()
-                << setw(8) << ++continuation
-                << nl
-                << setw(8) << continuation
-                << setw(16) << p.z()
                 << nl;
+            os.unsetf(ios_base::right);
+            os.setf(ios_base::left);
+            os  << setw(8) << "*";
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(16) << p.z()
+                << nl;
+            os.unsetf(ios_base::right);
 
             break;
         }
         case wfFree:
         {
             os  << "GRID"
-                << ',' << ++nPoint
+                << ',' << pointI + 1
                 << ','
                 << ',' << p.x()
                 << ',' << p.y()
@@ -163,7 +173,7 @@ void Foam::nastranSurfaceWriter::writeFace
     const word& faceType,
     const labelList& facePts,
     label& nFace,
-    Ostream& os
+    OFstream& os
 ) const
 {
     // Only valid surface elements are CTRIA3 and CQUAD4
@@ -172,7 +182,7 @@ void Foam::nastranSurfaceWriter::writeFace
     // 1 CQUAD4
     // 2 EID  : element ID
     // 3 PID  : property element ID; default = EID   (blank)
-    // 4 G1   : grid point index
+    // 4 G1   : grid point index - requires starting index of 1
     // 5 G2   : grid point index
     // 6 G3   : grid point index
     // 7 G4   : grid point index
@@ -183,18 +193,49 @@ void Foam::nastranSurfaceWriter::writeFace
     switch (writeFormat_)
     {
         case wfShort:
-        case wfLong:
         {
-            os  << setw(8) << faceType
-                << setw(8) << ++nFace
+            os.setf(ios_base::left);
+            os  << setw(8) << faceType;
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(8) << nFace++
                 << "        ";
 
             forAll(facePts, i)
             {
-                os  << setw(8) << facePts[i];
+                os  << setw(8) << facePts[i] + 1;
             }
 
             os  << nl;
+            os.unsetf(ios_base::right);
+
+            break;
+        }
+        case wfLong:
+        {
+            os.setf(ios_base::left);
+            os  << setw(8) << word(faceType + "*");
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(16) << nFace++
+                << "                ";
+
+            forAll(facePts, i)
+            {
+                os  << setw(16) << facePts[i] + 1;
+                if (i == 1)
+                {
+                    os  << nl;
+                    os.unsetf(ios_base::right);
+                    os.setf(ios_base::left);
+                    os  << setw(8) << "*";
+                    os.unsetf(ios_base::left);
+                    os.setf(ios_base::right);
+                }
+            }
+
+            os  << nl;
+            os.unsetf(ios_base::right);
 
             break;
         }
@@ -205,7 +246,7 @@ void Foam::nastranSurfaceWriter::writeFace
 
             forAll(facePts, i)
             {
-                os  << ',' << facePts[i];
+                os  << ',' << facePts[i] + 1;
             }
 
             os  << nl;
@@ -235,7 +276,7 @@ void Foam::nastranSurfaceWriter::writeGeometry
     const pointField& points,
     const faceList& faces,
     List<DynamicList<face> >& decomposedFaces,
-    Ostream& os
+    OFstream& os
 ) const
 {
     // write points
@@ -244,12 +285,9 @@ void Foam::nastranSurfaceWriter::writeGeometry
         << "$ Points" << nl
         << "$" << nl;
 
-    label nPoint = 0;
-    label continuation = 0;
-
     forAll(points, pointI)
     {
-        writeCoord(points[pointI], nPoint, continuation, os);
+        writeCoord(points[pointI], pointI, os);
     }
 
 
@@ -259,7 +297,7 @@ void Foam::nastranSurfaceWriter::writeGeometry
         << "$ Faces" << nl
         << "$" << nl;
 
-    label nFace = 0;
+    label nFace = 1;
 
     forAll(faces, faceI)
     {
@@ -352,7 +390,7 @@ void Foam::nastranSurfaceWriter::write
         Info<< "Writing nastran file to " << os.name() << endl;
     }
 
-    os  << "TITLE=OpeNFOAM " << surfaceName.c_str() << " mesh" << nl
+    os  << "TITLE=OpenFOAM " << surfaceName.c_str() << " mesh" << nl
         << "$" << nl
         << "BEGIN BULK" << nl;
 

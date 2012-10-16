@@ -85,9 +85,8 @@ private:
         void writeCoord
         (
             const point& p,
-            label& nPoint,
-            label& continuation,
-            Ostream& os
+            const label pointI,
+            OFstream& os
         ) const;
 
         //- Write a face element (CTRIA3 or CQUAD4)
@@ -96,7 +95,7 @@ private:
             const word& faceType,
             const labelList& facePts,
             label& nFace,
-            Ostream& os
+            OFstream& os
         ) const;
 
         //- Main driver to write the surface mesh geometry
@@ -105,7 +104,7 @@ private:
             const pointField& points,
             const faceList& faces,
             List<DynamicList<face> >& decomposedFaces,
-            Ostream& os
+            OFstream& os
         ) const;
 
         //- Write a face-based value
@@ -115,7 +114,7 @@ private:
             const word& nasFieldName,
             const Type& value,
             const label EID,
-            Ostream& os
+            OFstream& os
         ) const;
 
         //- Templated write operation
