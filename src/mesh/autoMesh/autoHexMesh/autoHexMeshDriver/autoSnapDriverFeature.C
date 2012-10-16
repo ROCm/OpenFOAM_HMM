@@ -2655,7 +2655,6 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurfaceFeature
         }
 
         // Remove any meshed faces
-        PackedBoolList ppFaces(mesh.nFaces());
         forAll(pp.addressing(), i)
         {
             label meshFaceI = pp.addressing()[i];
