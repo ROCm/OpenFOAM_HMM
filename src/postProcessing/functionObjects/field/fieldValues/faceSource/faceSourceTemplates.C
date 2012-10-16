@@ -269,19 +269,8 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
                 combineMeshGeometry(faces, points);
             }
 
-            fileName outputDir;
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir = obr_.time().path()/".."/name_;
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_;
-            }
-
-            outputDir = outputDir/"surface"/obr_.time().timeName();
+            fileName outputDir =
+                baseFileDir()/name_/"surface"/obr_.time().timeName();
 
             surfaceWriterPtr_->write
             (
@@ -302,7 +291,7 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         {
             Type result = processValues(values, Sf, weightField);
 
-            outputFilePtr_()<< tab << result;
+            file()<< tab << result;
 
             if (log_)
             {

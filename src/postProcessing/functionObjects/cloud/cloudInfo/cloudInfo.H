@@ -72,7 +72,7 @@ SourceFiles
 #ifndef cloudInfo_H
 #define cloudInfo_H
 
-#include "OFstream.H"
+#include "functionObjectFile.H"
 #include "PtrList.H"
 #include "pointFieldFwd.H"
 #include "volFields.H"
@@ -93,6 +93,8 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class cloudInfo
+:
+    public functionObjectFile
 {
 protected:
 
@@ -101,22 +103,17 @@ protected:
         //- Name of this set of cloudInfo object
         word name_;
 
+        //- Reference to the database
         const objectRegistry& obr_;
 
         //- on/off switch
         bool active_;
 
-        //- Clouds to process
-        wordHashSet cloudSet_;
-
-        //- Output file pointers
-        PtrList<OFstream> outputFilePtr_;
-
 
     // Protected Member Functions
 
-        //- If the output file has not been created create it
-        void makeFiles();
+        //- File header information
+        virtual void writeFileHeader(const label i);
 
         //- Disallow default bitwise copy construct
         cloudInfo(const cloudInfo&);

@@ -215,9 +215,15 @@ void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
         os.writeKeyword(word(thermoModel + "Coeffs"));
         os << dict_.subDict(thermoModel + "Coeffs") << nl;
 
+        os.writeKeyword("thermoType");
+        os << dict_.subDict("thermoType") << nl;
+ 
         os.writeKeyword("mixture");
         os << dict_.subDict("mixture") << nl;
-    }
+ 
+        os.writeKeyword("radiation");
+        os << dict_.subDict("radiation") << nl;
+   }
 }
 
 

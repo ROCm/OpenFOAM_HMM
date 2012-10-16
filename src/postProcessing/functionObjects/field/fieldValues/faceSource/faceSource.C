@@ -472,24 +472,21 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 }
 
 
-void Foam::fieldValues::faceSource::writeFileHeader()
+void Foam::fieldValues::faceSource::writeFileHeader(const label i)
 {
-    if (outputFilePtr_.valid())
+    file()
+        << "# Source : " << sourceTypeNames_[source_] << " "
+        << sourceName_ <<  nl << "# Faces  : " << nFaces_ << nl
+        << "# Time" << tab << "sum(magSf)";
+
+    forAll(fields_, i)
     {
-        outputFilePtr_()
-            << "# Source : " << sourceTypeNames_[source_] << " "
-            << sourceName_ <<  nl << "# Faces  : " << nFaces_ << nl
-            << "# Time" << tab << "sum(magSf)";
-
-        forAll(fields_, i)
-        {
-            outputFilePtr_()
-                << tab << operationTypeNames_[operation_]
-                << "(" << fields_[i] << ")";
-        }
-
-        outputFilePtr_() << endl;
+        file()
+            << tab << operationTypeNames_[operation_]
+            << "(" << fields_[i] << ")";
     }
+
+    file() << endl;
 }
 
 
@@ -532,7 +529,7 @@ Foam::fieldValues::faceSource::faceSource
     const bool loadFromFiles
 )
 :
-    fieldValue(name, obr, dict, loadFromFiles),
+    fieldValue(name, obr, dict, typeName, loadFromFiles),
     surfaceWriterPtr_(NULL),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
@@ -586,7 +583,7 @@ void Foam::fieldValues::faceSource::write()
 
         if (Pstream::master())
         {
-            outputFilePtr_() << obr_.time().value() << tab << totalArea;
+            file() << obr_.time().value() << tab << totalArea;
         }
 
         forAll(fields_, i)
@@ -600,7 +597,7 @@ void Foam::fieldValues::faceSource::write()
 
         if (Pstream::master())
         {
-            outputFilePtr_()<< endl;
+            file()<< endl;
         }
 
         if (log_)

@@ -40,6 +40,7 @@ SourceFiles
 #ifndef yPlusLES_H
 #define yPlusLES_H
 
+#include "functionObjectFile.H"
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
 #include "Switch.H"
@@ -61,6 +62,8 @@ class fvMesh;
 \*---------------------------------------------------------------------------*/
 
 class yPlusLES
+:
+    public functionObjectFile
 {
     // Private data
 
@@ -81,14 +84,11 @@ class yPlusLES
         //- Name of velocity field
         word UName_;
 
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
-
 
     // Private Member Functions
 
-        //- Make the output file
-        virtual void makeFile();
+        //- File header information
+        virtual void writeFileHeader(const label i);
 
         //- Calculate incompressible form of y+
         void calcIncompressibleYPlus

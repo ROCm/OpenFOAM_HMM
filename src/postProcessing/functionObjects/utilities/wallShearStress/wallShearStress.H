@@ -54,6 +54,7 @@ SourceFiles
 #ifndef wallShearStress_H
 #define wallShearStress_H
 
+#include "functionObjectFile.H"
 #include "volFieldsFwd.H"
 #include "pointFieldFwd.H"
 #include "Switch.H"
@@ -75,8 +76,12 @@ class fvMesh;
 \*---------------------------------------------------------------------------*/
 
 class wallShearStress
+:
+    public functionObjectFile
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Name of this set of wallShearStress object
         word name_;
@@ -92,14 +97,11 @@ class wallShearStress
         //- Name of mass/volume flux field (optional, default = phi)
         word phiName_;
 
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
 
+    // Protected Member Functions
 
-    // Private Member Functions
-
-        //- Make the output file
-        virtual void makeFile();
+        //- File header information
+        virtual void writeFileHeader(const label i);
 
         //- Calculate the shear stress
         void calcShearStress
