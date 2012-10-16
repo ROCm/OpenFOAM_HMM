@@ -74,7 +74,8 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 )
 {
     fileName fName(is);
-    // Substitute dictionary and environment variables
+    // Substitute dictionary and environment variables. Allow empty
+    // substitutions.
     stringOps::inplaceExpand(fName, dict, true, true);
 
     if (fName.empty() || fName.isAbsolute())

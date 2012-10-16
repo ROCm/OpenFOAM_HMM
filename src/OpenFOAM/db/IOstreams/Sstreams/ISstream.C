@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,6 @@ License
 #include "int.H"
 #include "token.H"
 #include <cctype>
-#include "IOstreams.H"
-
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -239,6 +237,44 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
                 readWordToken(t);
 
+                return *this;
+            }
+        }
+
+        case '$':
+        {
+            // Look ahead
+            char nextC;
+            if (read(nextC).bad())
+            {
+                // Return $ as word
+                t = token(word(c));
+                return *this;
+            }
+            else if (nextC == token::BEGIN_BLOCK)
+            {
+                putback(nextC);
+                putback(c);
+
+                string* sPtr = new string;
+
+                if (readVariable(*sPtr).bad())
+                {
+                    delete sPtr;
+                    t.setBad();
+                }
+                else
+                {
+                    t = sPtr;
+                    t.type() = token::STRING;
+                }
+                return *this;
+            }
+            else
+            {
+                putback(nextC);
+                putback(c);
+                readWordToken(t);
                 return *this;
             }
         }
@@ -544,6 +580,127 @@ Foam::Istream& Foam::ISstream::read(string& str)
     FatalIOErrorIn("ISstream::read(string&)", *this)
         << "problem while reading string \"" << buf << "...\""
         << exit(FatalIOError);
+
+    return *this;
+}
+
+
+// Special handling of '{' in variables
+Foam::Istream& Foam::ISstream::readVariable(string& str)
+{
+    static const int maxLen = 1024;
+    static const int errLen = 80; // truncate error message for readability
+    static char buf[maxLen];
+
+    register int nChar = 0;
+    register int blockCount = 0;
+    char c;
+
+    if (!get(c) || c != '$')
+    {
+        FatalIOErrorIn("ISstream::readVariable(string&)", *this)
+            << "invalid first character found : " << c
+            << exit(FatalIOError);
+    }
+
+    buf[nChar++] = c;
+
+    // Read next character to see if '{'
+    if (get(c) && c == token::BEGIN_BLOCK)
+    {
+        // Read, counting brackets
+        buf[nChar++] = c;
+
+        while
+        (
+            get(c)
+         && (
+                c == token::BEGIN_BLOCK
+             || c == token::END_BLOCK
+             || word::valid(c)
+            )
+        )
+        {
+            buf[nChar++] = c;
+            if (nChar == maxLen)
+            {
+                buf[errLen] = '\0';
+
+                FatalIOErrorIn("ISstream::readVariable(string&)", *this)
+                    << "word '" << buf << "...'\n"
+                    << "    is too long (max. " << maxLen << " characters)"
+                    << exit(FatalIOError);
+
+                return *this;
+            }
+
+            if (c == token::BEGIN_BLOCK)
+            {
+                blockCount++;
+            }
+            else if (c == token::END_BLOCK)
+            {
+                if (blockCount)
+                {
+                    blockCount--;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        buf[nChar++] = c;
+
+        while (get(c) && word::valid(c))
+        {
+            buf[nChar++] = c;
+            if (nChar == maxLen)
+            {
+                buf[errLen] = '\0';
+
+                FatalIOErrorIn("ISstream::readVariable(string&)", *this)
+                    << "word '" << buf << "...'\n"
+                    << "    is too long (max. " << maxLen << " characters)"
+                    << exit(FatalIOError);
+
+                return *this;
+            }
+        }
+    }
+
+    // we could probably skip this check
+    if (bad())
+    {
+        buf[errLen] = buf[nChar] = '\0';
+
+        FatalIOErrorIn("ISstream::readVariable(string&)", *this)
+            << "problem while reading string '" << buf << "...' after "
+            << nChar << " characters\n"
+            << exit(FatalIOError);
+
+        return *this;
+    }
+
+    if (nChar == 0)
+    {
+        FatalIOErrorIn("ISstream::readVariable(string&)", *this)
+            << "invalid first character found : " << c
+            << exit(FatalIOError);
+    }
+
+    // done reading
+    buf[nChar] = '\0';
+    str = buf;
+
+    // Note: check if we exited due to '}' or just !word::valid.
+    if (c != token::END_BLOCK)
+    {
+        putback(c);
+    }
 
     return *this;
 }
