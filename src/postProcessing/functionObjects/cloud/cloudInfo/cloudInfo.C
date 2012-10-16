@@ -74,10 +74,10 @@ void Foam::cloudInfo::read(const dictionary& dict)
         functionObjectFile::resetNames(dict.lookup("clouds"));
 
         Info<< type() << ": ";
-        if (names_.size())
+        if (names().size())
         {
             Info<< "applying to clouds:" << nl;
-            forAllConstIter(wordHashSet, names_, iter)
+            forAllConstIter(wordHashSet, names(), iter)
             {
                 Info<< "    " << iter.key() << nl;
             }
@@ -110,7 +110,7 @@ void Foam::cloudInfo::write()
         functionObjectFile::write();
 
         label i = 0;
-        forAllConstIter(wordHashSet, names_, iter)
+        forAllConstIter(wordHashSet, names(), iter)
         {
             const word& cloudName = iter.key();
 
