@@ -25,6 +25,7 @@ License
 
 #include "functionObjectFile.H"
 #include "Time.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,6 +48,16 @@ Foam::fileName Foam::functionObjectFile::baseFileDir() const
         baseDir = baseDir/outputPrefix;
     }
 
+    // append mesh name if not default region
+    if (isA<polyMesh>(obr_))
+    {
+        const polyMesh& mesh = refCast<const polyMesh>(obr_);
+        if (mesh.name() != polyMesh::defaultRegion)
+        {
+            baseDir = baseDir/mesh.name();
+        }
+    }
+
     return baseDir;
 }
 
@@ -59,21 +70,24 @@ Foam::fileName Foam::functionObjectFile::baseTimeDir() const
 
 void Foam::functionObjectFile::createFiles()
 {
-    const word startTimeName =
-        obr_.time().timeName(obr_.time().startTime().value());
-
-    label i = 0;
-    forAllConstIter(wordHashSet, names_, iter)
+    if (Pstream::master())
     {
-        if (Pstream::master() && !filePtrs_.set(i))
+        const word startTimeName =
+            obr_.time().timeName(obr_.time().startTime().value());
+
+        label i = 0;
+        forAllConstIter(wordHashSet, names_, iter)
         {
-            fileName outputDir(baseFileDir()/prefix_/startTimeName);
+            if (!filePtrs_.set(i))
+            {
+                fileName outputDir(baseFileDir()/prefix_/startTimeName);
 
-            mkDir(outputDir);
+                mkDir(outputDir);
 
-            filePtrs_.set(i, new OFstream(outputDir/(iter.key() + ".dat")));
+                filePtrs_.set(i, new OFstream(outputDir/(iter.key() + ".dat")));
 
-            writeFileHeader(i);
+                writeFileHeader(i);
+            }
         }
     }
 }
@@ -87,34 +101,37 @@ void Foam::functionObjectFile::writeFileHeader(const label i)
 
 void Foam::functionObjectFile::write()
 {
-    if (Pstream::master())
-    {
-        createFiles();
-    }
+    createFiles();
 }
 
 
 void Foam::functionObjectFile::resetNames(const wordList& names)
 {
-    names_.clear();
-    names_.insert(names);
+    if (Pstream::master())
+    {
+        names_.clear();
+        names_.insert(names);
 
-    filePtrs_.clear();
-    filePtrs_.setSize(names_.toc().size());
+        filePtrs_.clear();
+        filePtrs_.setSize(names_.toc().size());
 
-    createFiles();
+        createFiles();
+    }
 }
 
 
 void Foam::functionObjectFile::resetName(const word& name)
 {
-    names_.clear();
-    names_.insert(name);
+    if (Pstream::master())
+    {
+        names_.clear();
+        names_.insert(name);
 
-    filePtrs_.clear();
-    filePtrs_.setSize(1);
+        filePtrs_.clear();
+        filePtrs_.setSize(1);
 
-    createFiles();
+        createFiles();
+    }
 }
 
 
@@ -145,11 +162,16 @@ Foam::functionObjectFile::functionObjectFile
     names_(),
     filePtrs_()
 {
-    names_.clear();
-    names_.insert(name);
+    if (Pstream::master())
+    {
+        names_.clear();
+        names_.insert(name);
 
-    filePtrs_.clear();
-    filePtrs_.setSize(names_.toc().size());
+        filePtrs_.clear();
+        filePtrs_.setSize(names_.toc().size());
+
+        // cannot create files - need to access virtual function
+    }
 }
 
 
@@ -165,11 +187,16 @@ Foam::functionObjectFile::functionObjectFile
     names_(names),
     filePtrs_()
 {
-    names_.clear();
-    names_.insert(names);
+    if (Pstream::master())
+    {
+        names_.clear();
+        names_.insert(names);
 
-    filePtrs_.clear();
-    filePtrs_.setSize(names_.toc().size());
+        filePtrs_.clear();
+        filePtrs_.setSize(names_.toc().size());
+
+        // cannot create files - need to access virtual function
+    }
 }
 
 
@@ -183,6 +210,13 @@ Foam::functionObjectFile::~functionObjectFile()
 
 Foam::OFstream& Foam::functionObjectFile::file()
 {
+    if (!Pstream::master())
+    {
+        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::file()")
+            << "Request for file() can only be done by the master process"
+            << abort(FatalError);
+    }
+
     if (filePtrs_.size() != 1)
     {
         WarningIn("Foam::Ostream& Foam::functionObjectFile::file()")
@@ -196,12 +230,29 @@ Foam::OFstream& Foam::functionObjectFile::file()
 
 Foam::PtrList<Foam::OFstream>& Foam::functionObjectFile::files()
 {
+    if (!Pstream::master())
+    {
+        FatalErrorIn("Foam::OFstream& Foam::functionObjectFile::files()")
+            << "Request for files() can only be done by the master process"
+            << abort(FatalError);
+    }
+
     return filePtrs_;
 }
 
 
 Foam::OFstream& Foam::functionObjectFile::file(const label i)
 {
+    if (!Pstream::master())
+    {
+        FatalErrorIn
+        (
+            "Foam::OFstream& Foam::functionObjectFile::file(const label)"
+        )
+            << "Request for file(i) can only be done by the master process"
+            << abort(FatalError);
+    }
+
     return filePtrs_[i];
 }
 
