@@ -66,12 +66,15 @@ void Foam::wallShearStress::calcShearStress
 
             ssp = (-Sfp/magSfp) & Reffp;
 
-            vector minSsp = min(ssp);
-            vector maxSsp = max(ssp);
+            vector minSsp = gMin(ssp);
+            vector maxSsp = gMax(ssp);
 
-            file() << mesh.time().timeName() << token::TAB
-                << pp.name() << token::TAB << minSsp
-                << token::TAB << maxSsp << endl;
+            if (Pstream::master())
+            {
+                file() << mesh.time().timeName() << token::TAB
+                    << pp.name() << token::TAB << minSsp
+                    << token::TAB << maxSsp << endl;
+            }
 
             if (log_)
             {

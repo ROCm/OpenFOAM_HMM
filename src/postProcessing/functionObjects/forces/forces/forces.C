@@ -228,7 +228,7 @@ void Foam::forces::writeBins() const
     autoPtr<writer<vector> > binWriterPtr(writer<vector>::New(binFormat_));
     coordSet axis("forces", "distance", binPoints_, mag(binPoints_));
 
-    fileName forcesDir = baseFileDir()/name_/obr_.time().timeName();
+    fileName forcesDir = baseTimeDir();
     mkDir(forcesDir);
 
     if (log_)

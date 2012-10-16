@@ -79,9 +79,9 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
             yPlus.boundaryField()[patchI] = nutPw.yPlus();
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            scalar minYp = min(Yp);
-            scalar maxYp = max(Yp);
-            scalar avgYp = average(Yp);
+            scalar minYp = gMin(Yp);
+            scalar maxYp = gMax(Yp);
+            scalar avgYp = gAverage(Yp);
 
             if (log_)
             {
@@ -137,9 +137,9 @@ void Foam::yPlusRAS::calcCompressibleYPlus
             yPlus.boundaryField()[patchI] = mutPw.yPlus();
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            scalar minYp = min(Yp);
-            scalar maxYp = max(Yp);
-            scalar avgYp = average(Yp);
+            scalar minYp = gMin(Yp);
+            scalar maxYp = gMax(Yp);
+            scalar avgYp = gAverage(Yp);
 
             if (log_)
             {

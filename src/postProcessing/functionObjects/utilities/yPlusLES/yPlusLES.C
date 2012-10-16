@@ -84,15 +84,15 @@ void Foam::yPlusLES::calcIncompressibleYPlus
 
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            scalar minYp = min(Yp);
-            scalar maxYp = max(Yp);
-            scalar avgYp = average(Yp);
+            scalar minYp = gMin(Yp);
+            scalar maxYp = gMax(Yp);
+            scalar avgYp = gAverage(Yp);
 
             if (log_)
             {
                 Info<< "    patch " << currPatch.name()
-                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
-                    << ", average = " << average(Yp) << nl;
+                    << " y+ : min = " << minYp << ", max = " << maxYp
+                    << ", average = " << avgYp << nl;
             }
 
             if (Pstream::master())
@@ -150,15 +150,15 @@ void Foam::yPlusLES::calcCompressibleYPlus
 
             const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-            scalar minYp = min(Yp);
-            scalar maxYp = max(Yp);
-            scalar avgYp = average(Yp);
+            scalar minYp = gMin(Yp);
+            scalar maxYp = gMax(Yp);
+            scalar avgYp = gAverage(Yp);
 
             if (log_)
             {
                 Info<< "    patch " << currPatch.name()
-                    << " y+ : min = " << min(Yp) << ", max = " << max(Yp)
-                    << ", average = " << average(Yp) << nl;
+                    << " y+ : min = " << minYp << ", max = " << maxYp
+                    << ", average = " << avgYp << nl;
             }
 
             if (Pstream::master())
