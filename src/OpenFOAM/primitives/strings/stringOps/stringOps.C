@@ -398,6 +398,8 @@ Foam::string& Foam::stringOps::inplaceExpand
                     begVar - stringStart + 1,
                     varValue
                 );
+
+                begVar = stringStart+varValue.size();
             }
             else
             {
@@ -744,8 +746,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                     FatalErrorIn
                     (
                         "stringOps::inplaceExpand(string&, const bool)"
-                    )
-                        << "Unknown variable name '" << varName << "'"
+                    )   << "Unknown variable name '" << varName << "'"
                         << exit(FatalError);
                 }
             }
