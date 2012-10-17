@@ -372,7 +372,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
 
         label vertI = 0;
         autoPtr<OFstream> str;
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             str.reset
             (
@@ -2427,8 +2427,7 @@ void Foam::autoLayerDriver::addLayers
     List<labelPair> baffles;
     meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
 
-
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing baffled mesh to " << meshRefiner_.timeName() << endl;
@@ -2926,7 +2925,7 @@ void Foam::autoLayerDriver::addLayers
 
 
         // Dump to .obj file for debugging.
-        if (debug)
+        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
         {
             dumpDisplacement
             (
@@ -3078,7 +3077,7 @@ void Foam::autoLayerDriver::addLayers
         );
 
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Info<< "Writing layer mesh to " << meshRefiner_.timeName() << endl;
             newMesh.write();
