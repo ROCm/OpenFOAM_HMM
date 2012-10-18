@@ -33,7 +33,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
-#include "porousZones.H"
+#include "IOporosityModelList.H"
 #include "simpleControl.H"
 #include "IObasicSourceList.H"
 
