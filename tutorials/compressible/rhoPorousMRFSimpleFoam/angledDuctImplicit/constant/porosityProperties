@@ -11,26 +11,36 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      porousZones;
+    object      porosityProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-1
-(
-    porosity
+porosity1
+{
+    type            DarcyForchheimer;
+    active          yes;
+    cellZone        porosity;
+
+    DarcyForchheimerCoeffs
     {
+        d   d [0 -2 0 0 0 0 0] (5e7 -1000 -1000);
+        f   f [0 -1 0 0 0 0 0] (0 0 0);
+
         coordinateSystem
         {
             e1  (0.70710678 0.70710678 0);
             e2  (0 0 1);
         }
-
-        Darcy
-        {
-            d   d [0 -2 0 0 0 0 0] (5e7 -1000 -1000);
-            f   f [0 -1 0 0 0 0 0] (0 0 0);
-        }
     }
-)
+
+    thermalModel
+    {
+        type        none; // fixedTemperature;
+
+        // fixedTemperature coefficients
+        T           350;
+    }
+}
+
 
 // ************************************************************************* //
