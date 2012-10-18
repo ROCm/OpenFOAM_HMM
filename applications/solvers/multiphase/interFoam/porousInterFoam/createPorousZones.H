@@ -1,1 +1,1 @@
-    porousZones pZones(mesh);
+    IOporosityModelList pZones(mesh);

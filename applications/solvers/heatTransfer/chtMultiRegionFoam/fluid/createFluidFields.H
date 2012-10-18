@@ -15,7 +15,7 @@
     List<scalar> initialMassFluid(fluidRegions.size());
 
     PtrList<IObasicSourceList> heatSources(fluidRegions.size());
-    PtrList<porousZones> porousZonesFluid(fluidRegions.size());
+    PtrList<IOporosityModelList> porousZonesFluid(fluidRegions.size());
 
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
@@ -202,6 +202,6 @@
         porousZonesFluid.set
         (
             i,
-            new porousZones(fluidRegions[i])
+            new IOporosityModelList(fluidRegions[i])
         );
     }

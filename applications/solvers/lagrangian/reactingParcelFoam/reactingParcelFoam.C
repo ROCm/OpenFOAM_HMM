@@ -44,7 +44,7 @@ Description
 #include "basicReactingMultiphaseCloud.H"
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
-#include "porousZones.H"
+#include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"

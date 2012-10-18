@@ -38,7 +38,7 @@ Description
 #include "turbulenceModel.H"
 #include "bound.H"
 #include "MRFZones.H"
-#include "porousZones.H"
+#include "IOporosityModelList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
