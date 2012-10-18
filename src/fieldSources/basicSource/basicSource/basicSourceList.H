@@ -157,7 +157,7 @@ public:
             //- Read dictionary
             virtual bool read(const dictionary& dict);
 
-            //- Write data to Istream
+            //- Write data to Ostream
             virtual bool writeData(Ostream& os) const;
 
             //- Ostream operator
