@@ -105,7 +105,7 @@ public:
 
         // Evaluation
 
-            //- Set value on vector field
+            //- Set value on field
             virtual void setValue(fvMatrix<Type>& eqn, const label fieldI);
 
 
