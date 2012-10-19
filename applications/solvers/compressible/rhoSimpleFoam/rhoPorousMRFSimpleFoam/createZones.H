@@ -1,7 +1,7 @@
     MRFZones mrfZones(mesh);
     mrfZones.correctBoundaryVelocity(U);
 
-    thermalPorousZones pZones(mesh);
+    IOporosityModelList pZones(mesh);
     Switch pressureImplicitPorosity(false);
 
     // nUCorrectors used for pressureImplicitPorosity

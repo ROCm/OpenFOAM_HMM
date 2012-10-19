@@ -10,11 +10,12 @@
           : fvc::div(phi, volScalarField("K", 0.5*magSqr(U)))
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
+     ==
+        sources(rho, he)
     );
 
-    pZones.addEnergySource(thermo, rho, EEqn);
-
     EEqn.relax();
+    sources.constrain(EEqn);
     EEqn.solve();
 
     thermo.correct();

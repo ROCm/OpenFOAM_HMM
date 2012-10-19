@@ -5,7 +5,7 @@ rho.relax();
 
 volScalarField rAU(1.0/UEqn().A());
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*UEqn().H();
+HbyA = rAU*(UEqn() == sources(rho, U))().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -34,7 +34,11 @@ if (pimple.transonic())
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
           - fvm::laplacian(Dp, p)
+         ==
+            sources(psi, p, rho.name())
         );
+
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -68,7 +72,11 @@ else
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
           - fvm::laplacian(Dp, p)
+         ==
+            sources(psi, p, rho.name())
         );
+
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -94,6 +102,7 @@ Info<< "rho max/min : " << max(rho).value()
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+sources.correct(U);
 K = 0.5*magSqr(U);
 
 if (thermo.dpdt())

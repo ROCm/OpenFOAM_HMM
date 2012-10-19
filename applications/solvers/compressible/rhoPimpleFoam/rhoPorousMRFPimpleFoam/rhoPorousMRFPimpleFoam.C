@@ -39,6 +39,7 @@ Description
 #include "bound.H"
 #include "MRFZones.H"
 #include "IOporosityModelList.H"
+#include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -4,15 +4,17 @@
     rho = min(rho, rhoMax);
     rho.relax();
 
+    const volScalarField& psi = thermo.psi();
+
     volVectorField HbyA("HbyA", U);
 
     if (pressureImplicitPorosity)
     {
-        HbyA = trTU() & UEqn().H();
+        HbyA = trTU() & (UEqn() == sources(rho, U))().H();
     }
     else
     {
-        HbyA = trAU()*UEqn().H();
+        HbyA = trAU()*(UEqn() == sources(rho, U))().H();
     }
 
     UEqn.clear();
@@ -35,14 +37,28 @@
 
         if (pressureImplicitPorosity)
         {
-            tpEqn = (fvm::laplacian(rho*trTU(), p) == fvc::div(phiHbyA));
+            tpEqn =
+            (
+                fvm::laplacian(rho*trTU(), p)
+              + sources(psi, p, rho.name())
+             ==
+                fvc::div(phiHbyA)
+            );
         }
         else
         {
-            tpEqn = (fvm::laplacian(rho*trAU(), p) == fvc::div(phiHbyA));
+            tpEqn =
+            (
+                fvm::laplacian(rho*trAU(), p)
+              + sources(psi, p, rho.name())
+             ==
+                fvc::div(phiHbyA)
+            );
         }
 
         tpEqn().setReference(pRefCell, pRefValue);
+
+        sources.constrain(tpEqn(), rho.name());
 
         tpEqn().solve();
 
@@ -67,12 +83,12 @@
     }
 
     U.correctBoundaryConditions();
+    sources.correct(U);
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
     {
-        const volScalarField& psi = thermo.psi();
         p += (initialMass - fvc::domainIntegrate(psi*p))
             /fvc::domainIntegrate(psi);
     }

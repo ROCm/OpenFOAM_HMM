@@ -6,7 +6,7 @@
 
     volScalarField rAU(1.0/UEqn().A());
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*UEqn().H();
+    HbyA = rAU*(UEqn() == sources(rho, U))().H();
 
     UEqn.clear();
 
@@ -25,11 +25,15 @@
             fvScalarMatrix pEqn
             (
                 fvm::div(phid, p)
-                - fvm::laplacian(rho*rAU, p)
+              - fvm::laplacian(rho*rAU, p)
+              ==
+                sources(psi, p, rho.name())
             );
 
             // Relax the pressure equation to ensure diagonal-dominance
             pEqn.relax();
+
+            sources.constrain(pEqn, rho.name());
 
             pEqn.setReference(pRefCell, pRefValue);
 
@@ -56,10 +60,14 @@
             fvScalarMatrix pEqn
             (
                 fvc::div(phiHbyA)
-                - fvm::laplacian(rho*rAU, p)
+              - fvm::laplacian(rho*rAU, p)
+              ==
+                sources(psi, p, rho.name())
             );
 
             pEqn.setReference(pRefCell, pRefValue);
+
+            sources.constrain(pEqn, rho.name());
 
             pEqn.solve();
 
@@ -78,6 +86,7 @@
 
     U = HbyA - rAU*fvc::grad(p);
     U.correctBoundaryConditions();
+    sources.correct(U);
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity

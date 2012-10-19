@@ -39,6 +39,7 @@ Description
 #include "turbulenceModel.H"
 #include "MRFZones.H"
 #include "IOporosityModelList.H"
+#include "IObasicSourceList.H"
 #include "fvcSmooth.H"
 #include "pimpleControl.H"
 #include "bound.H"
