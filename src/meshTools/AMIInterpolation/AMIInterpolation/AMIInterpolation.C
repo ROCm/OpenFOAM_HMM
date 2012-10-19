@@ -266,7 +266,6 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::findTargetFace
     const point srcPt = srcFace.centre(srcPts);
     const scalar srcFaceArea = srcMagSf_[srcFaceI];
 
-//    pointIndexHit sample = treePtr_->findNearest(srcPt, sqr(0.1*bb.mag()));
     pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
 
 
@@ -295,7 +294,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::appendNbrFaces
     DynamicList<label>& faceIDs
 ) const
 {
-//    const labelList& nbrFaces = patch.pointFaces()[faceI];
     const labelList& nbrFaces = patch.faceFaces()[faceI];
 
     // filter out faces already visited from src face neighbours
@@ -401,7 +399,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::setNextFaces
     const DynamicList<label>& visitedFaces
 ) const
 {
-//    const labelList& srcNbrFaces = srcPatch0.pointFaces()[srcFaceI];
     const labelList& srcNbrFaces = srcPatch0.faceFaces()[srcFaceI];
 
     // set possible seeds for later use
@@ -610,9 +607,12 @@ restartUncoveredSourceFace
         }
     }
 
-    Info<< "AMIInterpolation : restarting search on "
-        << returnReduce(lowWeightFaces.size(), sumOp<label>())
-        << " faces since sum of weights < 0.5" << endl;
+    if (debug)
+    {
+        Pout<< "AMIInterpolation: restarting search on "
+            << lowWeightFaces.size() << " faces since sum of weights < 0.5"
+            << endl;
+    }
 
     if (lowWeightFaces.size() > 0)
     {
