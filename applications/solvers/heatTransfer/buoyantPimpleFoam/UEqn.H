@@ -22,6 +22,7 @@
                   - fvc::snGrad(p_rgh)
                 )*mesh.magSf()
             )
+          + sources(rho, U)
         );
         K = 0.5*magSqr(U);
     }
