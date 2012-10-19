@@ -1,34 +1,35 @@
-basicSource/basicSource/basicSource.C
-basicSource/basicSource/basicSourceIO.C
-basicSource/basicSource/basicSourceList.C
-basicSource/basicSource/IObasicSourceList.C
+basicSource/basicSource.C
+basicSource/basicSourceIO.C
+basicSource/basicSourceList.C
+basicSource/IObasicSourceList.C
 
-basicSource/pressureGradientExplicitSource/pressureGradientExplicitSource.C
-basicSource/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
+general/explicitSource/explicitSource.C
+general/explicitSetValue/explicitSetValue.C
+general/codedSource/codedSource.C
 
-basicSource/explicitSource/explicitSource.C
-basicSource/explicitSetValue/explicitSetValue.C
+derived/pressureGradientExplicitSource/pressureGradientExplicitSource.C
+derived/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
 
-basicSource/rotorDiskSource/rotorDiskSource.C
-basicSource/rotorDiskSource/bladeModel/bladeModel.C
-basicSource/rotorDiskSource/profileModel/profileModel.C
-basicSource/rotorDiskSource/profileModel/profileModelList.C
-basicSource/rotorDiskSource/profileModel/lookup/lookupProfile.C
-basicSource/rotorDiskSource/profileModel/series/seriesProfile.C
-basicSource/rotorDiskSource/trimModel/trimModel/trimModel.C
-basicSource/rotorDiskSource/trimModel/trimModel/trimModelNew.C
-basicSource/rotorDiskSource/trimModel/fixed/fixedTrim.C
-basicSource/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
+derived/rotorDiskSource/rotorDiskSource.C
+derived/rotorDiskSource/bladeModel/bladeModel.C
+derived/rotorDiskSource/profileModel/profileModel.C
+derived/rotorDiskSource/profileModel/profileModelList.C
+derived/rotorDiskSource/profileModel/lookup/lookupProfile.C
+derived/rotorDiskSource/profileModel/series/seriesProfile.C
+derived/rotorDiskSource/trimModel/trimModel/trimModel.C
+derived/rotorDiskSource/trimModel/trimModel/trimModelNew.C
+derived/rotorDiskSource/trimModel/fixed/fixedTrim.C
+derived/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
 
-basicSource/actuationDiskSource/actuationDiskSource.C
-basicSource/radialActuationDiskSource/radialActuationDiskSource.C
+derived/actuationDiskSource/actuationDiskSource.C
+derived/radialActuationDiskSource/radialActuationDiskSource.C
 
-interRegion = basicSource/interRegionHeatTransferModel
+interRegion = derived/interRegionHeatTransferModel
 $(interRegion)/interRegionHeatTransferModel/interRegionHeatTransferModel.C
 $(interRegion)/constantHeatTransfer/constantHeatTransfer.C
 $(interRegion)/tabulatedHeatTransfer/tabulatedHeatTransfer.C
 $(interRegion)/variableHeatTransfer/variableHeatTransfer.C
 
-basicSource/codedSource/codedSource.C
+derived/fixedTemperatureSource/fixedTemperatureSource.C
 
 LIB = $(FOAM_LIBBIN)/libfieldSources
