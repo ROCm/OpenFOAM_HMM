@@ -45,6 +45,7 @@ Description
 
 SourceFiles
     DarcyForchheimer.C
+    DarcyForchheimerTemplates.C
 
 \*---------------------------------------------------------------------------*/
 

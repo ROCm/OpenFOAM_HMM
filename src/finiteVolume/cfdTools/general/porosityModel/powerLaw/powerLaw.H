@@ -33,13 +33,14 @@ Description
 
     where
     \vartable
-        C_0      | model coefficient
-        C_1      | model coefficient
+        C_0      | model linear coefficient
+        C_1      | model exponent coefficient
     \endvartable
 
 
 SourceFiles
     powerLaw.C
+    powerLawTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
