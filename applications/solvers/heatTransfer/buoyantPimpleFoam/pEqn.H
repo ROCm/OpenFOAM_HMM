@@ -29,7 +29,7 @@
         fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
       + fvc::div(phiHbyA)
       ==
-        sources(psi, p, rho.name())
+        sources(psi, p_rgh, rho.name())
     );
 
     while (pimple.correctNonOrthogonal())
