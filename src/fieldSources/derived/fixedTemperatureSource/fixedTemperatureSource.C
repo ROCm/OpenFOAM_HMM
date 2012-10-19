@@ -54,7 +54,7 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
     const fvMesh& mesh
 )
 :
-    ExplicitSetValue<scalar>(name, modelType, dict, mesh),
+    basicSource(name, modelType, dict, mesh),
     T_(readScalar(coeffs_.lookup("temperature")))
 {
     fieldNames_.setSize(1, "energy");
@@ -77,7 +77,7 @@ void Foam::fixedTemperatureSource::setValue
 )
 {
     const basicThermo& thermo =
-        mesh_.lookupObject<basicThermo>("thermophsicalProperties");
+        mesh_.lookupObject<basicThermo>("thermophysicalProperties");
 
     if (eqn.psi().name() == thermo.he().name())
     {

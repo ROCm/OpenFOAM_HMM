@@ -38,14 +38,14 @@ Description
 
 
 SourceFiles
-    fixedTemperatureSource.C
+    basicSource.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef fixedTemperatureSource_H
 #define fixedTemperatureSource_H
 
-#include "ExplicitSetValue.H"
+#include "basicSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace Foam
 
 class fixedTemperatureSource
 :
-    public ExplicitSetValue<scalar>
+    public basicSource
 {
 
 protected:
