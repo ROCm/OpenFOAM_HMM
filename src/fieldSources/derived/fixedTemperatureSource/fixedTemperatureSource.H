@@ -105,6 +105,9 @@ public:
 
     // Member Functions
 
+        virtual bool alwaysApply() const;
+
+
         // Set values directly
 
             //- Scalar

@@ -57,25 +57,33 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
     ExplicitSetValue<scalar>(name, modelType, dict, mesh),
     T_(readScalar(coeffs_.lookup("temperature")))
 {
-    coeffs_.lookup("fieldNames") >> fieldNames_;
-    applied_.setSize(fieldNames_.size(), false);
+    fieldNames_.setSize(1, "energy");
+    applied_.setSize(1, false);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::fixedTemperatureSource::alwaysApply() const
+{
+    return true;
+}
+
+
 void Foam::fixedTemperatureSource::setValue
 (
     fvMatrix<scalar>& eqn,
-    const label fieldI
+    const label
 )
 {
     const basicThermo& thermo =
         mesh_.lookupObject<basicThermo>("thermophsicalProperties");
 
-    const scalarField Tfield(cells_.size(), T_);
-
-    eqn.setValues(cells_, thermo.he(thermo.p(), Tfield, cells_));
+    if (eqn.psi().name() == thermo.he().name())
+    {
+        const scalarField Tfield(cells_.size(), T_);
+        eqn.setValues(cells_, thermo.he(thermo.p(), Tfield, cells_));
+    }
 }
 
 
