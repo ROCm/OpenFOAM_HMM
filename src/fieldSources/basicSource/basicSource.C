@@ -56,6 +56,12 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+bool Foam::basicSource::alwaysApply() const
+{
+    return false;
+}
+
+
 void Foam::basicSource::setSelection(const dictionary& dict)
 {
     switch (selectionMode_)
@@ -314,6 +320,7 @@ Foam::basicSource::~basicSource()
     }
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::basicSource::isActive()
@@ -341,6 +348,11 @@ bool Foam::basicSource::isActive()
 
 Foam::label Foam::basicSource::applyToField(const word& fieldName) const
 {
+    if (alwaysApply())
+    {
+        return 0;
+    }
+
     forAll(fieldNames_, i)
     {
         if (fieldNames_[i] == fieldName)

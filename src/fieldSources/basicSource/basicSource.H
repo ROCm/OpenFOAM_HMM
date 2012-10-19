@@ -150,6 +150,9 @@ protected:
 
     // Protected functions
 
+        //- Flag to bypass the apply flag list checking
+        virtual bool alwaysApply() const;
+
         //- Set the cellSet or points selection
         void setSelection(const dictionary& dict);
 
