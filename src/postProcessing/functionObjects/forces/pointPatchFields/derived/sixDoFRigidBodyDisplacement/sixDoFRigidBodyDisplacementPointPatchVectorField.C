@@ -211,6 +211,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     dictionary forcesDict;
 
+    forcesDict.add("type", forces::typeName);
     forcesDict.add("patches", wordList(1, ptPatch.name()));
     forcesDict.add("rhoInf", rhoInf_);
     forcesDict.add("rhoName", rhoName_);
