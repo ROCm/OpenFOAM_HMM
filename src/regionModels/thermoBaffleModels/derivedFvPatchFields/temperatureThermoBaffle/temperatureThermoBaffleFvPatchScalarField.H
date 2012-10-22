@@ -28,78 +28,91 @@ Group
     grpThermoBoundaryConditions
 
 Description
-    This boundary condition provides a coupled condition between the primary
-    baffle mesh regions.
+    This boundary condition provides a coupled temperature condition between
+    multiple mesh regions.  The regions are generally referred to as the:
+    - primary region, and
+    - baffle region
 
-    The primary region creates it and evolves the thermal baffle heat transfer
-    equation.
+    The primary region creates the baffle region and evolves its energy
+    equation either:
+    - 1-D, normal to each patch face
+    - 2-D, normal and tangential components
 
-    The solid thermo and baffle dictionaries are located on the
-    primary region.
+    The thermodynamic properties of the baffle material are specified via
+    dictionary entries.
 
-    type                compressible::temperatureThermoBaffle;
+    \heading Patch usage
 
-    // Coupled BC.
-    neighbourFieldName  T;
-    kappa               fluidThermo;
-    KName               none;
-
-
-    // Thermo baffle model
-    thermoBaffleModel   thermoBaffle2D;
-    regionName          baffleRegion;
-    infoOutput          yes;
-    active              yes;
-    thermoBaffle2DCoeffs
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
     {
-    }
+        type                compressible::temperatureThermoBaffle;
+
+        // Coupled boundary condition
+        neighbourFieldName  T;
+        kappa               fluidThermo;
+        KName               none;
 
 
-    // Solid thermo
-    thermoType
-    heSolidThermo
-        <pureSolidMixture
-            <constIsoSolidTransport
-                <constSolidRad
-                    <thermo
-                        <hConstThermo<incompressible>,sensibleEnthalpy>
-                    >
-                 >
-            >
-         >;
-
-    mixture
-    {
-        specie
+        // Thermo baffle model
+        thermoBaffleModel   thermoBaffle2D;
+        regionName          baffleRegion;
+        infoOutput          yes;
+        active              yes;
+        thermoBaffle2DCoeffs
         {
-            nMoles          1;
-            molWeight       20;
         }
-        transport
+
+
+        // Solid thermo
+        thermoType
         {
-            kappa           0.01;
+            type            heSolidThermo;
+            mixture         pureSolidMixture;
+            transport       constIso;
+            thermo          hConst;
+            equationOfState rhoConst;
+            specie          specie;
+            energy          sensibleEnthalpy;
         }
+
+        mixture
+        {
+            specie
+            {
+                nMoles          1;
+                molWeight       20;
+            }
+            transport
+            {
+                kappa           0.01;
+            }
+            thermodynamics
+            {
+                Hf              0;
+                Cp              15;
+            }
+            density
+            {
+                rho             80;
+            }
+        }
+
         radiation
         {
-            sigmaS          0;
-            kappaRad        0;
-            emissivity      1;
+            radiationModel  opaqueSolid;
+            absorptionEmissionModel none;
+            scatterModel    none;
         }
-        thermodynamics
-        {
-            Hf              0;
-            Cp              15;
-        }
-        density
-        {
-            rho             80;
-        }
-    }
 
-    value               uniform 300;
+        value               uniform 300;
+    }
+    \endverbatim
 
 SeeAlso
     Foam::turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
+    Foam::regionModels::thermoBaffleModels::thermoBaffleModel
 
 SourceFiles
     temperatureThermoBaffleFvPatchScalarField.C

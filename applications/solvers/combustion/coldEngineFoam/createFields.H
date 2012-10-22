@@ -69,3 +69,6 @@
 
     Info<< "Creating field kinetic energy K\n" << endl;
     volScalarField K("K", 0.5*magSqr(U));
+
+    Info<< "Creating sources\n" << endl;
+    IObasicSourceList sources(mesh);

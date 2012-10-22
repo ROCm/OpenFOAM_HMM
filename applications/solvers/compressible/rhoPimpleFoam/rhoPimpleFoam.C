@@ -38,6 +38,7 @@ Description
 #include "turbulenceModel.H"
 #include "bound.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

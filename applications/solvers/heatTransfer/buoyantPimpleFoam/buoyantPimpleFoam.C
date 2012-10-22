@@ -37,6 +37,7 @@ Description
 #include "rhoThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
+#include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -7,7 +7,7 @@ volScalarField rAU(1.0/UEqn().A());
 volScalarField rAtU(1.0/(1.0/rAU - UEqn().H1()));
 
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*UEqn().H();
+HbyA = rAU*(UEqn() == sources(rho, U))().H();
 
 if (pimple.nCorrPIMPLE() <= 1)
 {
@@ -44,10 +44,14 @@ if (pimple.transonic())
           + fvm::div(phid, p)
           + fvc::div(phic)
           - fvm::laplacian(Dp, p)
+         ==
+            sources(psi, p, rho.name())
         );
 
         // Relax the pressure equation to maintain diagonal dominance
         pEqn.relax();
+
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve();
 
@@ -81,7 +85,11 @@ else
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
           - fvm::laplacian(Dp, p)
+         ==
+            sources(psi, p, rho.name())
         );
+
+        sources.constrain(pEqn, rho.name());
 
         pEqn.solve();
 
@@ -100,6 +108,7 @@ p.relax();
 
 U = HbyA - rAtU*fvc::grad(p);
 U.correctBoundaryConditions();
+sources.correct(U);
 K = 0.5*magSqr(U);
 
 if (thermo.dpdt())

@@ -34,7 +34,7 @@ void Foam::nastranSurfaceWriter::writeFaceValue
     const word& nasFieldName,
     const Type& value,
     const label EID,
-    Ostream& os
+    OFstream& os
 ) const
 {
     // Fixed short/long formats:
@@ -43,25 +43,49 @@ void Foam::nastranSurfaceWriter::writeFaceValue
     // 3 EID  : element ID
     // 4 onwards: load values
 
-    label SID = 0;
+    label SID = 1;
 
-    label w = 16;
     switch (writeFormat_)
     {
         case wfShort:
         {
-            w = 8;
-        }
-        case wfLong:
-        {
-            os  << setw(8) << nasFieldName
-                << setw(8) << SID
+            os.setf(ios_base::left);
+            os  << setw(8) << nasFieldName;
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(8) << SID
                 << setw(8) << EID;
 
             for (direction dirI = 0; dirI < pTraits<Type>::nComponents; dirI++)
             {
-                os  << setw(w) << component(value, dirI);
+                os  << setw(8) << component(value, dirI);
             }
+
+            os.unsetf(ios_base::right);
+
+            break;
+        }
+        case wfLong:
+        {
+            os.setf(ios_base::left);
+            os  << setw(8) << word(nasFieldName + "*");
+            os.unsetf(ios_base::left);
+            os.setf(ios_base::right);
+            os  << setw(16) << SID
+                << setw(16) << EID;
+
+            for (direction dirI = 0; dirI < pTraits<Type>::nComponents; dirI++)
+            {
+                os  << setw(16) << component(value, dirI);
+            }
+
+            os.unsetf(ios_base::right);
+
+            os  << nl;
+
+            os.setf(ios_base::left);
+            os  << '*';
+            os.unsetf(ios_base::left);
 
             break;
         }

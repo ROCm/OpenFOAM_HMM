@@ -10,7 +10,7 @@
     HbyA = rAU*(UEqn == sources(rho, U))().H();
 
     surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
-    if (pZones.size() == 0)
+    if (!pZones.active())
     {
         // ddtPhiCorr only used without porosity
         phiHbyA += fvc::ddtPhiCorr(rAU, rho, U, phi);

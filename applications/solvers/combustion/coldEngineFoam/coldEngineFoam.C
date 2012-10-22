@@ -35,6 +35,7 @@ Description
 #include "psiThermo.H"
 #include "turbulenceModel.H"
 #include "OFstream.H"
+#include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

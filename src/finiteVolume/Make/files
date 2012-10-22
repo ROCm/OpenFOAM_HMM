@@ -364,9 +364,13 @@ $(solutionControl)/solutionControl/solutionControl.C
 $(solutionControl)/simpleControl/simpleControl.C
 $(solutionControl)/pimpleControl/pimpleControl.C
 
-porousMedia = $(general)/porousMedia
-$(porousMedia)/porousZone.C
-$(porousMedia)/porousZones.C
+porosity = $(general)/porosityModel
+$(porosity)/porosityModel/porosityModel.C
+$(porosity)/porosityModel/porosityModelNew.C
+$(porosity)/porosityModel/porosityModelList.C
+$(porosity)/porosityModel/IOporosityModelList.C
+$(porosity)/DarcyForchheimer/DarcyForchheimer.C
+$(porosity)/powerLaw/powerLaw.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C
