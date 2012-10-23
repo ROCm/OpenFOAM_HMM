@@ -68,9 +68,10 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
         (
             "Foam::porosityModels::DarcyForchheimer::DarcyForchheimer"
             "("
-                "const dictionary&, "
-                "const coordinateSystem&, "
-                "const keyType&"
+                "const word&, "
+                "const word&, "
+                "const fvMesh&, "
+                "const dictionary&"
             ")",
             coeffs_
         )   << "incorrect dimensions for d: " << d.dimensions()
@@ -92,9 +93,10 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
         (
             "Foam::porosityModels::DarcyForchheimer::DarcyForchheimer"
             "("
-                "const dictionary&, "
-                "const coordinateSystem&, "
-                "const keyType&"
+                "const word&, "
+                "const word&, "
+                "const fvMesh&, "
+                "const dictionary&"
             ")",
             coeffs_
         )   << "incorrect dimensions for f: " << f.dimensions()
