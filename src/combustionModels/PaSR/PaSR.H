@@ -24,9 +24,10 @@ Class
     Foam::combustionModels::PaSR
 
 Description
-    Simple infinitely fast chemistry combustion model based on the principle
-    mixed is burnt. Additional parameter C is used to distribute the heat
-    release rate.in time
+    Partially stirred reactor combustion model.  The model calculates a finite
+    rate, based on both turbulence and chemistry time scales.  Depending on
+    mesh resolution, the Cmix parameter can be used to scale the turbulence
+    mixing time scale.
 
 SourceFiles
     PaSR.C

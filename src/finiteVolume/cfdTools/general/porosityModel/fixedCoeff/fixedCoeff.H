@@ -22,32 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::powerLaw
+    Foam::fixedCoeff
 
 Description
-    Power law porosity model, given by:
+    Fixed coefficient form of porosity model
 
         \f[
-            S = - \rho C_0 |U|^{(C_1 - 1)} U
+            S = - \rho_ref (\alpha + \beta |U|) U
         \f]
 
-    where
-    \vartable
-        C_0      | model linear coefficient
-        C_1      | model exponent coefficient
-    \endvartable
-
+    In the case of compressible flow, a value for the reference density is
+    required
 
 SourceFiles
-    powerLaw.C
-    powerLawTemplates.C
+    fixedCoeff.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef powerLaw_H
-#define powerLaw_H
+#ifndef fixedCoeff_H
+#define fixedCoeff_H
 
 #include "porosityModel.H"
+#include "coordinateSystem.H"
+#include "dimensionedTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,10 +54,10 @@ namespace porosityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class powerLaw Declaration
+                      Class fixedCoeff Declaration
 \*---------------------------------------------------------------------------*/
 
-class powerLaw
+class fixedCoeff
 :
     public porosityModel
 {
@@ -68,51 +65,50 @@ private:
 
     // Private data
 
-        //- C0 coefficient
-        scalar C0_;
+        //- Local co-ordinate system
+        coordinateSystem coordSys_;
 
-        //- C1 coefficient
-        scalar C1_;
+        //- Model alpha coefficient [1/s]
+        dimensionedTensor alpha_;
 
-        //- Name of density field
-        word rhoName_;
+        //- Model beta coefficient [1/m]
+        dimensionedTensor beta_;
 
 
     // Private Member Functions
 
-        //- Apply resistance
-        template<class RhoFieldType>
+        //- Apply
         void apply
         (
             scalarField& Udiag,
+            vectorField& Usource,
             const scalarField& V,
-            const RhoFieldType& rho,
-            const vectorField& U
+            const vectorField& U,
+            const scalar rho
         ) const;
 
-        //- Apply resistance
-        template<class RhoFieldType>
+        //- Apply
         void apply
         (
             tensorField& AU,
-            const RhoFieldType& rho,
-            const vectorField& U
+            const vectorField& U,
+            const scalar rho
         ) const;
 
         //- Disallow default bitwise copy construct
-        powerLaw(const powerLaw&);
+        fixedCoeff(const fixedCoeff&);
 
         //- Disallow default bitwise assignment
-        void operator=(const powerLaw&);
+        void operator=(const fixedCoeff&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("powerLaw");
+    TypeName("fixedCoeff");
 
     //- Constructor
-    powerLaw
+    fixedCoeff
     (
         const word& name,
         const word& modelType,
@@ -121,7 +117,7 @@ public:
     );
 
     //- Destructor
-    virtual ~powerLaw();
+    virtual ~fixedCoeff();
 
 
     // Member Functions
@@ -155,12 +151,6 @@ public:
 
 } // End namespace porosityModels
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "powerLawTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
