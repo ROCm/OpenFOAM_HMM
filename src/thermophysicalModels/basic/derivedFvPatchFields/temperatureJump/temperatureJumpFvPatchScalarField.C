@@ -61,12 +61,11 @@ Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
 )
 :
     fixedJumpFvPatchField<scalar>(p, iF),
-    jumpTable_(new DataEntry<scalar>("jumpTable"))
+    jumpTable_(0)
 {
-
     if (this->cyclicPatch().owner())
     {
-         jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
+        jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
     }
 
     if (dict.found("value"))
