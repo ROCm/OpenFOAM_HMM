@@ -228,13 +228,10 @@ int main(int argc, char *argv[])
 
         if (!inviscid)
         {
-            volScalarField k("k", thermo.Cp()*muEff/Pr);
             solve
             (
                 fvm::ddt(rho, e) - fvc::ddt(rho, e)
               - fvm::laplacian(turbulence->alphaEff(), e)
-              + fvc::laplacian(turbulence->alpha(), e)
-              - fvc::laplacian(k, T)
             );
             thermo.correct();
             rhoE = rho*(e + 0.5*magSqr(U));
