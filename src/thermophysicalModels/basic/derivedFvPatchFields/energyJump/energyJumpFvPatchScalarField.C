@@ -103,10 +103,8 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        const basicThermo& thermo = db().lookupObject<basicThermo>
-        (
-            "thermophysicalProperties"
-        );
+        const basicThermo& thermo =
+            db().lookupObject<basicThermo>("thermophysicalProperties");
 
         label patchID = patch().index();
 
@@ -120,7 +118,8 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
         const scalar time = this->db().time().value();
         const scalarField jumpTb
         (
-            patch().size(), TbPatch.jumpTable().value(time)
+            patch().size(),
+            TbPatch.jumpTable().value(time)
         );
 
         const labelUList& faceCells = this->patch().faceCells();
