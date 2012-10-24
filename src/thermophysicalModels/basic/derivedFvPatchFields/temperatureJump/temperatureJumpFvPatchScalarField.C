@@ -84,7 +84,6 @@ Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
     const temperatureJumpFvPatchScalarField& ptf
 )
 :
-    cyclicLduInterfaceField(),
     fixedJumpFvPatchField<scalar>(ptf),
     jumpTable_(ptf.jumpTable_().clone().ptr())
 {}
@@ -102,6 +101,17 @@ Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::tmp<Foam::scalarField>
+Foam::temperatureJumpFvPatchScalarField::jump() const
+{
+    const scalar time = this->db().time().value();
+
+    tmp<scalarField> tj(new scalarField(this->size(), jumpTable_->value(time)));
+
+    return tj;
+}
+
 
 void Foam::temperatureJumpFvPatchScalarField::write(Ostream& os) const
 {

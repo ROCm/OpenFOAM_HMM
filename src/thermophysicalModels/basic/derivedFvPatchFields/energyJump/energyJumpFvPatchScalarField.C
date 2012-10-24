@@ -77,7 +77,6 @@ Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
     const energyJumpFvPatchScalarField& ptf
 )
 :
-    cyclicLduInterfaceField(),
     fixedJumpFvPatchField<scalar>(ptf)
 {}
 
@@ -115,16 +114,9 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
                 thermo.T().boundaryField()[patchID]
             );
 
-        const scalar time = this->db().time().value();
-        const scalarField jumpTb
-        (
-            patch().size(),
-            TbPatch.jumpTable().value(time)
-        );
-
         const labelUList& faceCells = this->patch().faceCells();
 
-        jump_ = thermo.he(pp, jumpTb, faceCells);
+        jump_ = thermo.he(pp, TbPatch.jump(), faceCells);
     }
 
     fixedJumpFvPatchField<scalar>::updateCoeffs();

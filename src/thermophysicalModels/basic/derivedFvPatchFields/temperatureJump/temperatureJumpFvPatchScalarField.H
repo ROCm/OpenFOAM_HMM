@@ -166,6 +166,9 @@ public:
 
         // Access functions
 
+            //- Return a field of the temperature jump
+            virtual tmp<scalarField> jump() const;
+
             //- Return jumpTable
             const DataEntry<scalar>& jumpTable() const
             {
