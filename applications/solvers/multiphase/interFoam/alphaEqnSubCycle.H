@@ -23,6 +23,4 @@ else
     #include "alphaEqn.H"
 }
 
-interface.correct();
-
 rho == alpha1*rho1 + (scalar(1) - alpha1)*rho2;

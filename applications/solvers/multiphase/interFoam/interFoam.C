@@ -43,7 +43,6 @@ Description
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "turbulenceModel.H"
-#include "interpolationTable.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,6 +81,7 @@ int main(int argc, char *argv[])
         twoPhaseProperties.correct();
 
         #include "alphaEqnSubCycle.H"
+        interface.correct();
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())

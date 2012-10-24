@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
         threePhaseProperties.correct();
 
         #include "alphaEqnsSubCycle.H"
+        interface.correct();
 
         #define twoPhaseProperties threePhaseProperties
 

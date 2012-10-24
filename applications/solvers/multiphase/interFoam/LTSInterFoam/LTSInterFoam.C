@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
         twoPhaseProperties.correct();
 
         #include "alphaEqnSubCycle.H"
+        interface.correct();
 
         turbulence->correct();
 

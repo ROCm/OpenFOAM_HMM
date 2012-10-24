@@ -82,6 +82,11 @@ int main(int argc, char *argv[])
 
         #include "alphaEqnSubCycle.H"
 
+        if (pimple.nCorrPIMPLE() == 1)
+        {
+            interface.correct();
+        }
+
         turbulence->correct();
 
         // --- Pressure-velocity PIMPLE corrector loop

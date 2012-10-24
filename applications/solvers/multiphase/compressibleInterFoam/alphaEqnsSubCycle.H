@@ -6,7 +6,7 @@
     surfaceScalarField phic(mag(phi/mesh.magSf()));
     phic = min(interface.cAlpha()*phic, max(phic));
 
-    volScalarField divU(fvc::div(phi));
+    volScalarField divU(fvc::div(fvc::absolute(phi, U)));
 
     if (nAlphaSubCycles > 1)
     {
@@ -28,11 +28,5 @@
     else
     {
         #include "alphaEqns.H"
-    }
-
-    // correct interface on first PIMPLE corrector
-    if (pimple.corr() == 1)
-    {
-        interface.correct();
     }
 }
