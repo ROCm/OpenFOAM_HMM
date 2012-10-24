@@ -103,7 +103,6 @@ Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::temperatureJumpFvPatchScalarField::write(Ostream& os) const
 {
     fixedJumpFvPatchField<scalar>::write(os);

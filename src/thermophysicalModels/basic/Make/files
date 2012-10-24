@@ -11,6 +11,7 @@ derivedFvPatchFields/fixedEnergy/fixedEnergyFvPatchScalarField.C
 derivedFvPatchFields/gradientEnergy/gradientEnergyFvPatchScalarField.C
 derivedFvPatchFields/mixedEnergy/mixedEnergyFvPatchScalarField.C
 derivedFvPatchFields/energyJump/energyJumpFvPatchScalarField.C
+derivedFvPatchFields/temperatureJump/temperatureJumpFvPatchScalarField.C
 
 derivedFvPatchFields/wallHeatTransfer/wallHeatTransferFvPatchScalarField.C
 

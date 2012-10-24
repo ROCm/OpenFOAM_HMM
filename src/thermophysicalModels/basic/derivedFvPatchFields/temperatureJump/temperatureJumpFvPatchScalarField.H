@@ -29,7 +29,7 @@ Group
 
 Description
     This boundary condition provides a temperature jump condition across a
-    coupled pair of cyclic patches.
+    coupled pair of cyclic patches when solving for energy.
 
     The jump is specified as a \c DataEntry type, to enable the use of, e.g.
     contant, polynomial, table values.
@@ -61,6 +61,7 @@ Note
 
 SeeAlso
     Foam::fixedJumpFvPatchField
+    Foam::energyJumpFvPatchScalarField
 
 SourceFiles
     temperatureJumpFvPatchScalarField.C
