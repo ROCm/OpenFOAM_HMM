@@ -72,6 +72,9 @@ protected:
 
 public:
 
+    //- Runtime type information
+    TypeName("fixedJump");
+
     // Constructors
 
         //- Construct from patch and internal field
