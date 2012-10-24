@@ -35,15 +35,16 @@ const Foam::interpolationWeights& Foam::TableBase<Type>::interpolator() const
     if (interpolatorPtr_.empty())
     {
         // Re-work table into linear list
-        tableSamples_.setSize(table_.size());
+        tableSamplesPtr_.reset(new scalarField(table_.size()));
+        scalarField& tableSamples = tableSamplesPtr_();
         forAll(table_, i)
         {
-            tableSamples_[i] = table_[i].first();
+            tableSamples[i] = table_[i].first();
         }
         interpolatorPtr_ = interpolationWeights::New
         (
             interpolationScheme_,
-            tableSamples_
+            tableSamples
         );
     }
 
@@ -81,7 +82,7 @@ Foam::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
     interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
     dimensions_(tbl.dimensions_),
-    tableSamples_(tbl.tableSamples_),
+    tableSamplesPtr_(tbl.tableSamplesPtr_),
     interpolatorPtr_(tbl.interpolatorPtr_)
 {}
 
@@ -341,7 +342,7 @@ void Foam::TableBase<Type>::convertTimeBase(const Time& t)
         table_[i].first() = t.userTimeToTime(value);
     }
 
-    tableSamples_.clear();
+    tableSamplesPtr_.clear();
     interpolatorPtr_.clear();
 }
 
