@@ -718,7 +718,7 @@ void Foam::autoSnapDriver::preSmoothPatch
     // The current mesh is the starting mesh to smooth from.
     meshMover.correct();
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing patch smoothed mesh to time "
@@ -995,7 +995,7 @@ void Foam::autoSnapDriver::smoothDisplacement
     Info<< "Displacement smoothed in = "
         << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing smoothed mesh to time " << meshRefiner_.timeName()
@@ -1064,7 +1064,7 @@ bool Foam::autoSnapDriver::scaleMesh
             Info<< "Successfully moved mesh" << endl;
             break;
         }
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             const_cast<Time&>(mesh.time())++;
             Info<< "Writing scaled mesh to time " << meshRefiner_.timeName()
@@ -1517,7 +1517,7 @@ void Foam::autoSnapDriver::doSnap
                 break;
             }
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 const_cast<Time&>(mesh.time())++;
                 Info<< "Writing scaled mesh to time "
@@ -1560,7 +1560,7 @@ void Foam::autoSnapDriver::doSnap
         motionDict
     );
 
-    if (nChanged > 0 && debug)
+    if (nChanged > 0 && debug&meshRefinement::MESH)
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing patchFace merged mesh to time "

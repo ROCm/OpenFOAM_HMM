@@ -203,7 +203,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "getChangedFaces : Detected "
             << " local:" << changedFaces.size()
@@ -308,7 +308,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
             {
                 if (pointEdges[pointI].size() != 2)
                 {
-                    if (debug)
+                    if (debug&meshRefinement::FEATURESEEDS)
                     {
                         Pout<< "Adding particle from point:" << pointI
                             << " coord:" << featureMesh.points()[pointI]
@@ -353,7 +353,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                 {
                     const edge& e = featureMesh.edges()[edgeI];
                     label pointI = e.start();
-                    if (debug)
+                    if (debug&meshRefinement::FEATURESEEDS)
                     {
                         Pout<< "Adding particle from point:" << pointI
                             << " coord:" << featureMesh.points()[pointI]
@@ -1330,7 +1330,7 @@ Foam::meshRefinement::refineAndBalance
     // Do all refinement
     refine(cellsToRefine);
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing refined but unbalanced " << msg
             << " mesh to time " << timeName() << endl;
@@ -1394,7 +1394,7 @@ Foam::meshRefinement::refineAndBalance
             printMeshInfo(debug, "After balancing " + msg);
 
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 Pout<< "Writing balanced " << msg
                     << " mesh to time " << timeName() << endl;
@@ -1516,7 +1516,7 @@ Foam::meshRefinement::balanceAndRefine
 
         printMeshInfo(debug, "After balancing " + msg);
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Pout<< "Writing balanced " << msg
                 << " mesh to time " << timeName() << endl;
@@ -1539,7 +1539,7 @@ Foam::meshRefinement::balanceAndRefine
 
     refine(cellsToRefine);
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing refined " << msg
             << " mesh to time " << timeName() << endl;

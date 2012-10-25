@@ -97,7 +97,7 @@ protected:
         dimensionSet dimensions_;
 
         //- Extracted values
-        mutable scalarField tableSamples_;
+        mutable autoPtr<scalarField> tableSamplesPtr_;
 
         //- Interpolator method
         mutable autoPtr<interpolationWeights> interpolatorPtr_;

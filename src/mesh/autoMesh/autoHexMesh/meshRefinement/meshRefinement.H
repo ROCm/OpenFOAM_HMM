@@ -88,7 +88,9 @@ public:
         {
             MESH = 1,
             SCALARLEVELS = 2,
-            OBJINTERSECTIONS = 4
+            OBJINTERSECTIONS = 4,
+            FEATURESEEDS = 8,
+            LAYERINFO = 16
         };
 
 

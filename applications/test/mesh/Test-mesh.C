@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,58 @@ int main(int argc, char *argv[])
     surfaceVectorField Cf = mesh.Cf();
 
     Info<< Cf << endl;
+
+    // Test construct from cellShapes
+    {
+        pointField points(mesh.points());
+        cellShapeList shapes(mesh.cellShapes());
+
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+        faceListList boundaryFaces(pbm.size());
+        forAll(pbm, patchI)
+        {
+            boundaryFaces[patchI] = pbm[patchI];
+        }
+        wordList boundaryPatchNames(pbm.names());
+        PtrList<dictionary> boundaryDicts(pbm.size());
+        forAll(pbm, patchI)
+        {
+            OStringStream os;
+            os << pbm[patchI];
+            IStringStream is(os.str());
+            boundaryDicts.set(patchI, new dictionary(is));
+        }
+
+        word defaultBoundaryPatchName = "defaultFaces";
+        word defaultBoundaryPatchType = emptyPolyPatch::typeName;
+
+        fvMesh newMesh
+        (
+            IOobject
+            (
+                "newMesh",
+                runTime.timeName(),
+                runTime,
+                Foam::IOobject::NO_READ
+            ),
+            Xfer<pointField>(points),
+            shapes,
+            boundaryFaces,
+            boundaryPatchNames,
+            boundaryDicts,
+            defaultBoundaryPatchName,
+            defaultBoundaryPatchType
+        );
+
+        Info<< newMesh.C() << endl;
+        Info<< newMesh.V() << endl;
+
+        surfaceVectorField Cf = newMesh.Cf();
+
+        Info<< Cf << endl;
+    }
+
 
     Info<< "End\n" << endl;
 

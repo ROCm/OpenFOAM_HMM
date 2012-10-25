@@ -1122,7 +1122,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         }
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
         Info<< "medialAxisSmoothingInfo :"
             << " Writing:" << nl
@@ -1409,7 +1409,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             *dispVec[pointI];
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
         const_cast<Time&>(mesh.time())++;
         Info<< "Writing wanted-displacement mesh (possibly illegal) to "
@@ -1439,6 +1439,9 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             debug,
             mesh.time().path()/meshRefiner_.timeName()
         );
+        dispVec.write();
+        medialDist.write();
+        medialRatio.write();
         meshMover.movePoints(oldPoints);
     }
 
