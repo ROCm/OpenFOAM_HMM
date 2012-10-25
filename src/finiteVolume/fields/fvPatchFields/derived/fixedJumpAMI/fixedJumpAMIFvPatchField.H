@@ -27,6 +27,36 @@ Class
 Group
     grpCoupledBoundaryConditions
 
+Description
+    This boundary condition provides a jump condition, across non-conformal
+    cyclic path-pairs, employing an arbitraryMeshInterface (AMI).
+
+    The jump is specified as a fixed value field, applied as an offset to the
+    'owner' patch.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jump         | current jump value      | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedJumpAMI;
+        patchType       cyclic;
+        jump            uniform 10;
+    }
+    \endverbatim
+
+    The above example shows the use of a fixed jump of '10'.
+
+Note
+     The underlying \c patchType should be set to \c cyclicAMI
+
 SeeAlso
     Foam::jumpCyclicAMIFvPatchField
 

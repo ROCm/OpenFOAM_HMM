@@ -29,7 +29,7 @@ Group
 
 Description
     This boundary condition provides a temperature jump condition across a
-    coupled pair of cyclic patches when solving for energy.
+    coupled pair of cyclic patches, when solving for energy.
 
     The jump is specified as a \c DataEntry type, to enable the use of, e.g.
     contant, polynomial, table values.
@@ -39,7 +39,6 @@ Description
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
-        jump         | current jump value      | yes         |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 
@@ -54,7 +53,7 @@ Description
     }
     \endverbatim
 
-    The above example shows the use of a constant jump condition.
+    The above example shows the use of a constant jump condition of 300 K.
 
 Note
      The underlying \c patchType should be set to \c cyclic

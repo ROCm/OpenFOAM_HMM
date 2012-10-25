@@ -27,11 +27,39 @@ Class
 Group
     grpCoupledBoundaryConditions
 
-Description
-    Uniform jump
+    This boundary condition provides a jump condition, using the \c cyclic
+    condition as a base.  The jump is specified as a time-varying uniform
+    value across the patch.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jumpTable    | jump value              | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedJump;
+        patchType       cyclic;
+        jumpTable       constant 10;
+    }
+    \endverbatim
+
+    The above example shows the use of a fixed jump of '10'.
+
+Note
+    The uniformValue entry is a DataEntry type, able to describe time
+    varying functions.  The example above gives the usage for supplying a
+    constant value.
+
+    The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
-    Foam::jumpCyclicFvPatchField
+    Foam::fixedJumpFvPatchField
 
 SourceFiles
     uniformJumpFvPatchField.C
