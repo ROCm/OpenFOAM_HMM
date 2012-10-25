@@ -110,8 +110,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given uniformTemperatureJumpFvPatchScalarField onto a
-        //  new patch
+        //- Construct by mapping given
+        //  uniformTemperatureJumpFvPatchScalarField onto a new patch
         uniformTemperatureJumpFvPatchScalarField
         (
             const uniformTemperatureJumpFvPatchScalarField&,
