@@ -96,13 +96,11 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 template<class Type>
 void Foam::fanFvPatchField<Type>::write(Ostream& os) const
 {
-
     fixedJumpFvPatchField<Type>::write(os);
     if (this->cyclicPatch().owner())
     {
         jumpTable_->writeData(os);
     }
-    this->writeEntry("value", os);
 }
 
 
