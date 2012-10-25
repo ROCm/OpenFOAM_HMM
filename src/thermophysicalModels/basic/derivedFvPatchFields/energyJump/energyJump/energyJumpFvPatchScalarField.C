@@ -61,7 +61,6 @@ Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 :
     fixedJumpFvPatchField<scalar>(p, iF)
 {
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
