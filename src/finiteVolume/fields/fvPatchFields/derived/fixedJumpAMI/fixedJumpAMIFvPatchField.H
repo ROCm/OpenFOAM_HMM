@@ -135,24 +135,8 @@ public:
 
         // Access
 
-            //- Return the "jump" across the patch.
-            virtual tmp<Field<Type> > jump() const
-            {
-                if (this->cyclicAMIPatch().owner())
-                {
-                    return jump_;
-                }
-                else
-                {
-                    tmp<Field<Type> > nbrJump =
-                        refCast<const fixedJumpAMIFvPatchField<Type> >
-                        (
-                            this->neighbourPatchField()
-                        ).jump();
-
-                    return this->cyclicAMIPatch().interpolate(nbrJump);
-                }
-            }
+            //- Return the "jump" across the patch
+            virtual tmp<Field<Type> > jump() const;
 
 
         // Mapping functions

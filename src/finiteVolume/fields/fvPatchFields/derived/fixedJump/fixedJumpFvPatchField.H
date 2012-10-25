@@ -141,21 +141,8 @@ public:
 
         // Access
 
-            //- Return the "jump" across the patch.
-            virtual tmp<Field<Type> > jump() const
-            {
-                if (this->cyclicPatch().owner())
-                {
-                    return jump_;
-                }
-                else
-                {
-                    return refCast<const fixedJumpFvPatchField<Type> >
-                    (
-                        this->neighbourPatchField()
-                    ).jump();
-                }
-            }
+            //- Return the "jump" across the patch
+            virtual tmp<Field<Type> > jump() const;
 
 
         // Mapping functions

@@ -92,6 +92,26 @@ Foam::fixedJumpAMIFvPatchField<Type>::fixedJumpAMIFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fixedJumpAMIFvPatchField<Type>::jump() const
+{
+    if (this->cyclicAMIPatch().owner())
+    {
+        return jump_;
+    }
+    else
+    {
+        const fixedJumpAMIFvPatchField& nbrPatch =
+            refCast<const fixedJumpAMIFvPatchField<Type> >
+            (
+                this->neighbourPatchField()
+            );
+
+        return this->cyclicAMIPatch().interpolate(nbrPatch.jump());
+    }
+}
+
+
+template<class Type>
 void Foam::fixedJumpAMIFvPatchField<Type>::autoMap
 (
     const fvPatchFieldMapper& m
