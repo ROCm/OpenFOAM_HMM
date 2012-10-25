@@ -40,10 +40,5 @@ surfaceScalarField rhoPhi
         #include "alphaEqn.H"
     }
 
-    if (pimple.nCorrPIMPLE() == 1)
-    {
-        interface.correct();
-    }
-
     rho == alpha1*rho1 + (scalar(1) - alpha1)*rho2;
 }

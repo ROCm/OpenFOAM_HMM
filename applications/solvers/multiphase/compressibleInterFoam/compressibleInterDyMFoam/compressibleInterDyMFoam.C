@@ -122,6 +122,12 @@ int main(int argc, char *argv[])
         {
             #include "alphaEqnsSubCycle.H"
 
+            // correct interface on first PIMPLE corrector
+            if (pimple.corr() == 1)
+            {
+                interface.correct();
+            }
+
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
             #include "UEqn.H"

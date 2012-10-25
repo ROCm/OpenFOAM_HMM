@@ -34,8 +34,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(0)
+    uniformJumpFvPatchField<Type>(p, iF)
 {}
 
 
@@ -48,8 +47,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf, p, iF, mapper)
 {}
 
 
@@ -61,8 +59,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(DataEntry<Type>::New("jumpTable", dict))
+    uniformJumpFvPatchField<Type>(p, iF, dict)
 {}
 
 
@@ -72,9 +69,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const fanFvPatchField<Type>& ptf
 )
 :
-    cyclicLduInterfaceField(),
-    fixedJumpFvPatchField<Type>(ptf),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf)
 {}
 
 
@@ -85,25 +80,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, iF),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf, iF)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-template<class Type>
-void Foam::fanFvPatchField<Type>::write(Ostream& os) const
-{
-
-    fixedJumpFvPatchField<Type>::write(os);
-    if (this->cyclicPatch().owner())
-    {
-        jumpTable_->writeData(os);
-    }
-    this->writeEntry("value", os);
-}
 
 
 // ************************************************************************* //

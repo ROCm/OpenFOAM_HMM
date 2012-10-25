@@ -22,44 +22,56 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::energyJumpFvPatchScalarField
+    Foam::uniformTemperatureJumpFvPatchScalarField
 
 Group
-    grpThermoBoundaryConditions grpCoupledBoundaryConditions
+    grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides an energy jump condition across a pair
-    of coupled patches.
+    This boundary condition provides a temperature jump condition across a
+    coupled pair of cyclic patches, when solving for energy.
+
+    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
+    contant, polynomial, table values.
 
     \heading Patch usage
 
     \table
         Property     | Description             | Required    | Default value
-        jump         | energy jump values      | yes         |
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
-        type            energyJump;
-        jump            uniform 100;
+        type            uniformTemperatureJump;
+        patchType       cyclic;
+        jumpTable       constant 100;
+        value           uniform 300;
     }
     \endverbatim
 
+    The above example shows the use of a constant jump condition of 300 K.
+
+Note
+     The underlying \c patchType should be set to \c cyclic
+
 SeeAlso
-    Foam::fixedJumpFvPatchField
+    Foam::uniformJumpFvPatchField
+    Foam::energyJumpFvPatchScalarField
 
 SourceFiles
-    energyJumpFvPatchScalarField.C
+    uniformTemperatureJumpFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef energyJumpFvPatchScalarField_H
-#define energyJumpFvPatchScalarField_H
+#ifndef uniformTemperatureJumpFvPatchScalarField_H
+#define uniformTemperatureJumpFvPatchScalarField_H
 
-#include "fixedJumpFvPatchField.H"
-#include "DataEntry.H"
+#include "temperatureJumpBase.H"
+#include "uniformJumpFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,50 +79,51 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class energyJumpFvPatchScalarField Declaration
+           Class uniformTemperatureJumpFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class energyJumpFvPatchScalarField
+class uniformTemperatureJumpFvPatchScalarField
 :
-    public fixedJumpFvPatchField<scalar>
+    public temperatureJumpBase,
+    public uniformJumpFvPatchField<scalar>
 {
 
 public:
 
     //- Runtime type information
-    TypeName("energyJump");
+    TypeName("uniformTemperatureJump");
 
     // Constructors
 
         //- Construct from patch and internal field
-        energyJumpFvPatchScalarField
+        uniformTemperatureJumpFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        energyJumpFvPatchScalarField
+        uniformTemperatureJumpFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given energyJumpFvPatchScalarField onto a
-        //  new patch
-        energyJumpFvPatchScalarField
+        //- Construct by mapping given
+        //  uniformTemperatureJumpFvPatchScalarField onto a new patch
+        uniformTemperatureJumpFvPatchScalarField
         (
-            const energyJumpFvPatchScalarField&,
+            const uniformTemperatureJumpFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        energyJumpFvPatchScalarField
+        uniformTemperatureJumpFvPatchScalarField
         (
-            const energyJumpFvPatchScalarField&
+            const uniformTemperatureJumpFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -118,14 +131,14 @@ public:
         {
             return tmp<fvPatchField<scalar> >
             (
-                new energyJumpFvPatchScalarField(*this)
+                new uniformTemperatureJumpFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        energyJumpFvPatchScalarField
+        uniformTemperatureJumpFvPatchScalarField
         (
-            const energyJumpFvPatchScalarField&,
+            const uniformTemperatureJumpFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -137,21 +150,17 @@ public:
         {
             return tmp<fvPatchField<scalar> >
             (
-                new energyJumpFvPatchScalarField(*this, iF)
+                new uniformTemperatureJumpFvPatchScalarField(*this, iF)
             );
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Evaluation functions
-
-            //- Update the coefficients
-            virtual void updateCoeffs();
-
-
-        //- Write
-        virtual void write(Ostream&) const;
+        virtual tmp<Field<scalar> > jump() const
+        {
+            return uniformJumpFvPatchField::jump();
+        }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

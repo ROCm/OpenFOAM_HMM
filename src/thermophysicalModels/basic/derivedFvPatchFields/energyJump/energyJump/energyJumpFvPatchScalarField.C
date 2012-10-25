@@ -25,7 +25,7 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 #include "energyJumpFvPatchScalarField.H"
-#include "temperatureJumpFvPatchScalarField.H"
+#include "temperatureJumpBase.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -61,7 +61,6 @@ Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 :
     fixedJumpFvPatchField<scalar>(p, iF)
 {
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
@@ -77,7 +76,6 @@ Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
     const energyJumpFvPatchScalarField& ptf
 )
 :
-    cyclicLduInterfaceField(),
     fixedJumpFvPatchField<scalar>(ptf)
 {}
 
@@ -103,29 +101,21 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        const basicThermo& thermo = db().lookupObject<basicThermo>
-        (
-            "thermophysicalProperties"
-        );
+        const basicThermo& thermo =
+            db().lookupObject<basicThermo>("thermophysicalProperties");
 
         label patchID = patch().index();
 
         const scalarField& pp = thermo.p().boundaryField()[patchID];
-        const temperatureJumpFvPatchScalarField& TbPatch =
-            refCast<const temperatureJumpFvPatchScalarField>
+        const temperatureJumpBase& TbPatch =
+            refCast<const temperatureJumpBase>
             (
                 thermo.T().boundaryField()[patchID]
             );
 
-        const scalar time = this->db().time().value();
-        const scalarField jumpTb
-        (
-            patch().size(), TbPatch.jumpTable().value(time)
-        );
-
         const labelUList& faceCells = this->patch().faceCells();
 
-        jump_ = thermo.he(pp, jumpTb, faceCells);
+        jump_ = thermo.he(pp, TbPatch.jump(), faceCells);
     }
 
     fixedJumpFvPatchField<scalar>::updateCoeffs();

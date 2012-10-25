@@ -22,53 +22,53 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::temperatureJumpFvPatchScalarField
+    Foam::uniformJumpFvPatchField
 
 Group
     grpCoupledBoundaryConditions
 
 Description
-    This boundary condition provides a temperature jump condition across a
-    coupled pair of cyclic patches.
-
-    The jump is specified as a \c DataEntry type, to enable the use of, e.g.
-    contant, polynomial, table values.
+    This boundary condition provides a jump condition, using the \c cyclic
+    condition as a base.  The jump is specified as a time-varying uniform
+    value across the patch.
 
     \heading Patch usage
 
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
-        jump         | current jump value      | yes         |
-        jumpTable    | jump data, e.g. \c csvFile | yes      |
+        jumpTable    | jump value              | yes         |
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     myPatch
     {
-        type            temperatureJump;
+        type            uniformJump;
         patchType       cyclic;
-        jumpTable       constant 100;
-        value           uniform 300;
+        jumpTable       constant 10;
     }
     \endverbatim
 
-    The above example shows the use of a constant jump condition.
+    The above example shows the use of a fixed jump of '10'.
 
 Note
-     The underlying \c patchType should be set to \c cyclic
+    The uniformValue entry is a DataEntry type, able to describe time
+    varying functions.  The example above gives the usage for supplying a
+    constant value.
+
+    The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
     Foam::fixedJumpFvPatchField
 
 SourceFiles
-    temperatureJumpFvPatchScalarField.C
+    uniformJumpFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureJumpFvPatchScalarField_H
-#define temperatureJumpFvPatchScalarField_H
+#ifndef uniformJumpFvPatchField_H
+#define uniformJumpFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
 #include "DataEntry.H"
@@ -79,106 +79,112 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class temperatureJumpFvPatchScalarField Declaration
+                   Class uniformJumpFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
-class temperatureJumpFvPatchScalarField
+template<class Type>
+class uniformJumpFvPatchField
 :
-    public fixedJumpFvPatchField<scalar>
+    public fixedJumpFvPatchField<Type>
 {
 
-    // Private data
+protected:
 
-        //- Interpolation table
-        autoPtr<DataEntry<scalar> > jumpTable_;
+    // Protected data
+
+        //- "jump" table
+        autoPtr<DataEntry<Type> > jumpTable_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("temperatureJump");
+    TypeName("uniformJump");
 
     // Constructors
 
         //- Construct from patch and internal field
-        temperatureJumpFvPatchScalarField
+        uniformJumpFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        temperatureJumpFvPatchScalarField
+        uniformJumpFvPatchField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given temperatureJumpFvPatchScalarField onto a
+        //- Construct by mapping given uniformJumpFvPatchField onto a
         //  new patch
-        temperatureJumpFvPatchScalarField
+        uniformJumpFvPatchField
         (
-            const temperatureJumpFvPatchScalarField&,
+            const uniformJumpFvPatchField<Type>&,
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        temperatureJumpFvPatchScalarField
+        uniformJumpFvPatchField
         (
-            const temperatureJumpFvPatchScalarField&
+            const uniformJumpFvPatchField<Type>&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<scalar> > clone() const
+        virtual tmp<fvPatchField<Type> > clone() const
         {
-            return tmp<fvPatchField<scalar> >
+            return tmp<fvPatchField<Type> >
             (
-                new temperatureJumpFvPatchScalarField(*this)
+                new uniformJumpFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        temperatureJumpFvPatchScalarField
+        uniformJumpFvPatchField
         (
-            const temperatureJumpFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const uniformJumpFvPatchField<Type>&,
+            const DimensionedField<Type, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<scalar> > clone
+        virtual tmp<fvPatchField<Type> > clone
         (
-            const DimensionedField<scalar, volMesh>& iF
+            const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<scalar> >
+            return tmp<fvPatchField<Type> >
             (
-                new temperatureJumpFvPatchScalarField(*this, iF)
+                new uniformJumpFvPatchField<Type>(*this, iF)
             );
         }
 
 
     // Member functions
 
+        // Access
 
-        // Access functions
-
-            //- Return jumpTable
-            const DataEntry<scalar>& jumpTable() const
-            {
-                return jumpTable_();
-            }
+            //- Return the "jump" across the patch.
+            virtual tmp<Field<Type> > jump() const;
 
 
         //- Write
         virtual void write(Ostream&) const;
 };
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "uniformJumpFvPatchField.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
