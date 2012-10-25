@@ -51,14 +51,15 @@ class temperatureJumpAMIBase
 
 public:
 
+    //- Runtime type information
+    TypeName("temperatureJumpAMIBase");
+
     //- Construct null
-    temperatureJumpAMIBase()
-    {}
+    temperatureJumpAMIBase();
 
 
     //- Destructor
-    virtual ~temperatureJumpAMIBase()
-    {}    
+    virtual ~temperatureJumpAMIBase();
 
 
     // Member functions

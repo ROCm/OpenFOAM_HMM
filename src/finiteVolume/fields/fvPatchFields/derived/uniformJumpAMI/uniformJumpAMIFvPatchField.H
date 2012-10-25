@@ -36,7 +36,7 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
+        patchType    | underlying patch type should be \c cyclicAMI| yes |
         jumpTable    | jump value              | yes         |
     \endtable
 
@@ -169,22 +169,6 @@ public:
 
             //- Return the "jump" across the patch.
             virtual tmp<Field<Type> > jump() const;
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>&,
-                const labelList&
-            );
 
 
         //- Write

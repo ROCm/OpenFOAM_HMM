@@ -39,7 +39,7 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
+        patchType    | underlying patch type should be \c cyclicAMI| yes |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 

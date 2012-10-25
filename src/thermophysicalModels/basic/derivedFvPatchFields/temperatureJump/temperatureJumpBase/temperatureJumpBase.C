@@ -21,59 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Base class for temperature jump boundary conditions that provides access
-    to the jump field
-
-SourceFiles
-    temperatureJumpBase.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureJumpBase_H
-#define temperatureJumpBase_H
+#include "temperatureJumpBase.H"
 
-#include "typeInfo.H"
-#include "scalarField.H"
-#include "tmp.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                     Class temperatureJumpBase Declaration
-\*---------------------------------------------------------------------------*/
-
-class temperatureJumpBase
-{
-
-public:
-
-    //- Runtime type information
-    TypeName("temperatureJumpBase");
-
-    //- Construct null
-    temperatureJumpBase();
+    defineTypeNameAndDebug(temperatureJumpBase, 0);
+}
 
 
-    //-Destructor
-    virtual ~temperatureJumpBase();
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::temperatureJumpBase::temperatureJumpBase()
+{}
 
 
-    // Member functions
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-        //- Return a field of the temperature jump
-        virtual tmp<scalarField> jump() const = 0;
-};
+Foam::temperatureJumpBase::~temperatureJumpBase()
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -62,13 +62,8 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(0)
+    jumpTable_(DataEntry<Type>::New("jumpTable", dict))
 {
-    if (this->cyclicPatch().owner())
-    {
-        jumpTable_ = DataEntry<Type>::New("jumpTable", dict);
-    }
-
     if (dict.found("value"))
     {
         fvPatchField<Type>::operator=

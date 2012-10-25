@@ -141,6 +141,7 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeKeyword("patchType") << "cyclic" << token::END_STATEMENT << nl;
     jump_.writeEntry("jump", os);
+    this->writeEntry("value", os);
 }
 
 

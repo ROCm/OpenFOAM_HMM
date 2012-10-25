@@ -27,6 +27,7 @@ Class
 Group
     grpCoupledBoundaryConditions
 
+Description
     This boundary condition provides a jump condition, using the \c cyclic
     condition as a base.  The jump is specified as a time-varying uniform
     value across the patch.
@@ -43,7 +44,7 @@ Group
     \verbatim
     myPatch
     {
-        type            fixedJump;
+        type            uniformJump;
         patchType       cyclic;
         jumpTable       constant 10;
     }
@@ -168,22 +169,6 @@ public:
 
             //- Return the "jump" across the patch.
             virtual tmp<Field<Type> > jump() const;
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>&,
-                const labelList&
-            );
 
 
         //- Write
