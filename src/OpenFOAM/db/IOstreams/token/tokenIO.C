@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,6 +72,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& t)
         case token::STRING:
         case token::VERBATIMSTRING:
             os << *t.stringTokenPtr_;
+        break;
+
+        case token::VARIABLE:
+            // Write variable as word so without ""
+            os.writeQuoted(*t.stringTokenPtr_, false);
         break;
 
         case token::LABEL:
@@ -157,6 +162,10 @@ ostream& Foam::operator<<(ostream& os, const InfoProxy<token>& ip)
             os  << " the string " << t.stringToken();
         break;
 
+        case token::VARIABLE:
+            os  << " the variable " << t.stringToken();
+        break;
+
         case token::VERBATIMSTRING:
             os  << " the verbatim string " << t.stringToken();
         break;
@@ -229,6 +238,10 @@ Ostream& operator<<(Ostream& os, const InfoProxy<token>& ip)
 
         case token::STRING:
             os  << " the string " << t.stringToken();
+        break;
+
+        case token::VARIABLE:
+            os  << " the variable " << t.stringToken();
         break;
 
         case token::VERBATIMSTRING:
