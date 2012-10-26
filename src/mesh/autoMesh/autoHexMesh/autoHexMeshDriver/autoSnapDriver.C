@@ -1406,9 +1406,10 @@ void Foam::autoSnapDriver::doSnap
                 adaptPatchIDs
             )
         );
+        indirectPrimitivePatch& pp = ppPtr();
 
         // Distance to attract to nearest feature on surface
-        const scalarField snapDist(calcSnapDistance(snapParams, ppPtr()));
+        const scalarField snapDist(calcSnapDistance(snapParams, pp));
 
 
         // Construct iterative mesh mover.
@@ -1420,7 +1421,7 @@ void Foam::autoSnapDriver::doSnap
         motionSmoother meshMover
         (
             mesh,
-            ppPtr(),
+            pp,
             adaptPatchIDs,
             meshRefinement::makeDisplacementField(pMesh, adaptPatchIDs),
             motionDict
@@ -1475,7 +1476,7 @@ void Foam::autoSnapDriver::doSnap
             }
 
             // Check for displacement being outwards.
-            outwardsDisplacement(ppPtr(), disp);
+            outwardsDisplacement(pp, disp);
 
             // Set initial distribution of displacement field (on patches)
             // from patchDisp and make displacement consistent with b.c.
@@ -1489,8 +1490,8 @@ void Foam::autoSnapDriver::doSnap
                 (
                     mesh.time().path()
                   / "patchDisplacement_" + name(iter) + ".obj",
-                    ppPtr().localPoints(),
-                    ppPtr().localPoints() + disp
+                    pp.localPoints(),
+                    pp.localPoints() + disp
                 );
             }
 
