@@ -102,25 +102,19 @@ Foam::uniformJumpAMIFvPatchField<Type>::uniformJumpAMIFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> >
-Foam::uniformJumpAMIFvPatchField<Type>::jump() const
+void Foam::uniformJumpAMIFvPatchField<Type>::updateCoeffs()
 {
+    if (this->updated())
+    {
+        return;
+    }
+
     if (this->cyclicAMIPatch().owner())
     {
-        Type j = jumpTable_->value(this->db().time().value());
-
-        return tmp<Field<Type> >(new Field<Type>(this->size(), j));
+        this->jump_ = jumpTable_->value(this->db().time().value());
     }
-    else
-    {
-        const uniformJumpAMIFvPatchField& nbrPatch =
-            refCast<const uniformJumpAMIFvPatchField<Type> >
-            (
-                this->neighbourPatchField()
-            );
 
-        return this->cyclicAMIPatch().interpolate(nbrPatch.jump());
-    }
+    fixedJumpAMIFvPatchField<Type>::updateCoeffs();
 }
 
 

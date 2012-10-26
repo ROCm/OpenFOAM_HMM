@@ -76,6 +76,10 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
             Field<Type>("value", dict, p.size())
         );
     }
+    else
+    {
+        this->evaluate(Pstream::blocking);
+    }
 }
 
 
@@ -105,24 +109,19 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::uniformJumpFvPatchField<Type>::jump() const
+void Foam::uniformJumpFvPatchField<Type>::updateCoeffs()
 {
+    if (this->updated())
+    {
+        return;
+    }
+
     if (this->cyclicPatch().owner())
     {
-        const Type value = jumpTable_->value(this->db().time().value());
-
-        return tmp<Field<Type> >(new Field<Type>(this->patch().size(), value));
+        this->jump_ = jumpTable_->value(this->db().time().value());
     }
-    else
-    {
-        const uniformJumpFvPatchField& nbrPatch =
-            refCast<const uniformJumpFvPatchField<Type> >
-            (
-                this->neighbourPatchField()
-            );
 
-        return nbrPatch.jump();
-    }
+    fixedJumpFvPatchField<Type>::updateCoeffs();
 }
 
 

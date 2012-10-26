@@ -101,6 +101,12 @@ class fanFvPatchField
     public uniformJumpFvPatchField<Type>
 {
 
+    // Private Member Functions
+
+        //- Calculate the fan pressure jump
+        void calcFanJump();
+
+
 public:
 
     //- Runtime type information
@@ -182,18 +188,15 @@ public:
 
 //- Specialisation of the jump-condition for the pressure
 template<>
+void fanFvPatchField<scalar>::calcFanJump();
+
+template<>
 fanFvPatchField<scalar>::fanFvPatchField
 (
     const fvPatch&,
     const DimensionedField<scalar, volMesh>&,
     const dictionary&
 );
-
-template<>
-tmp<Field<scalar> > fanFvPatchField<scalar>::jump() const;
-
-template<>
-void fanFvPatchField<scalar>::updateCoeffs();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
