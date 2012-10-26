@@ -72,7 +72,6 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     const fixedJumpFvPatchField<Type>& ptf
 )
 :
-    cyclicLduInterfaceField(),
     jumpCyclicFvPatchField<Type>(ptf),
     jump_(ptf.jump_)
 {}
@@ -91,6 +90,23 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fixedJumpFvPatchField<Type>::jump() const
+{
+    if (this->cyclicPatch().owner())
+    {
+        return jump_;
+    }
+    else
+    {
+        return refCast<const fixedJumpFvPatchField<Type> >
+        (
+            this->neighbourPatchField()
+        ).jump();
+    }
+}
+
 
 template<class Type>
 void Foam::fixedJumpFvPatchField<Type>::autoMap
@@ -124,6 +140,7 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeKeyword("patchType") << "cyclic" << token::END_STATEMENT << nl;
     jump_.writeEntry("jump", os);
+    this->writeEntry("value", os);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeBasicSource.H"
-#include "ExplicitSource.H"
+#ifndef uniformJumpAMIFvPatchFields_H
+#define uniformJumpAMIFvPatchFields_H
+
+#include "uniformJumpAMIFvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeBasicSource(ExplicitSource, scalar);
-    makeBasicSource(ExplicitSource, vector);
-    makeBasicSource(ExplicitSource, sphericalTensor);
-    makeBasicSource(ExplicitSource, symmTensor);
-    makeBasicSource(ExplicitSource, tensor);
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makePatchTypeFieldTypedefs(uniformJumpAMI);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

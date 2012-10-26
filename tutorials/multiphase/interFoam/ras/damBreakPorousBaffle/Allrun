@@ -16,7 +16,7 @@ unset FOAM_SETNAN
 # Create faceZones for porous baffles
 runApplication topoSet
 
-createBaffles cyclicZoneFaces '(porous_half0 porous_half1)' -overwrite > log.createBaffles 2>&1
+runApplication createBaffles cyclicZoneFaces '(porous_half0 porous_half1)' -overwrite
 
 runApplication changeDictionary
 

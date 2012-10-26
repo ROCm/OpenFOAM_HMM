@@ -24,51 +24,43 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "addToRunTimeSelectionTable.H"
-#include "temperatureJumpFvPatchScalarField.H"
-#include "volFields.H"
+#include "energyJumpFvPatchScalarField.H"
+#include "fixedJumpFvPatchFields.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<scalar>(p, iF),
-    jumpTable_(0)
+    fixedJumpFvPatchField<scalar>(p, iF)
 {}
 
 
-Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const temperatureJumpFvPatchScalarField& ptf,
+    const energyJumpFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedJumpFvPatchField<scalar>(ptf, p, iF, mapper),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    fixedJumpFvPatchField<scalar>(ptf, p, iF, mapper)
 {}
 
 
-Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<scalar>(p, iF),
-    jumpTable_(new DataEntry<scalar>("jumpTable"))
+    fixedJumpFvPatchField<scalar>(p, iF)
 {
-
-    if (this->cyclicPatch().owner())
-    {
-         jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
-    }
-
     if (dict.found("value"))
     {
         fvPatchScalarField::operator=
@@ -79,38 +71,60 @@ Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
 }
 
 
-Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const temperatureJumpFvPatchScalarField& ptf
+    const energyJumpFvPatchScalarField& ptf
 )
 :
-    cyclicLduInterfaceField(),
-    fixedJumpFvPatchField<scalar>(ptf),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    fixedJumpFvPatchField<scalar>(ptf)
 {}
 
 
-Foam::temperatureJumpFvPatchScalarField::temperatureJumpFvPatchScalarField
+Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 (
-    const temperatureJumpFvPatchScalarField& ptf,
+    const energyJumpFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<scalar>(ptf, iF),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    fixedJumpFvPatchField<scalar>(ptf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-void Foam::temperatureJumpFvPatchScalarField::write(Ostream& os) const
+void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 {
-    fixedJumpFvPatchField<scalar>::write(os);
+    if (this->updated())
+    {
+        return;
+    }
+
     if (this->cyclicPatch().owner())
     {
-        jumpTable_->writeData(os);
+        const basicThermo& thermo =
+            db().lookupObject<basicThermo>("thermophysicalProperties");
+
+        label patchID = patch().index();
+
+        const scalarField& pp = thermo.p().boundaryField()[patchID];
+        const fixedJumpFvPatchScalarField& TbPatch =
+            refCast<const fixedJumpFvPatchScalarField>
+            (
+                thermo.T().boundaryField()[patchID]
+            );
+
+        const labelUList& faceCells = this->patch().faceCells();
+
+        jump_ = thermo.he(pp, TbPatch.jump(), faceCells);
     }
+
+    fixedJumpFvPatchField<scalar>::updateCoeffs();
+}
+
+
+void Foam::energyJumpFvPatchScalarField::write(Ostream& os) const
+{
+    fixedJumpFvPatchField<scalar>::write(os);
     this->writeEntry("value", os);
 }
 
@@ -122,7 +136,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchScalarField,
-       temperatureJumpFvPatchScalarField
+       energyJumpFvPatchScalarField
    );
 }
 

@@ -3,7 +3,7 @@ basicSource/basicSourceIO.C
 basicSource/basicSourceList.C
 basicSource/IObasicSourceList.C
 
-general/explicitSource/explicitSource.C
+general/semiImplicitSource/semiImplicitSource.C
 general/explicitSetValue/explicitSetValue.C
 general/codedSource/codedSource.C
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#ifndef uniformJumpAMIFvPatchFieldsFwd_H
+#define uniformJumpAMIFvPatchFieldsFwd_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "fieldTypes.H"
 
-template<class Type>
-inline const typename Foam::ExplicitSource<Type>::volumeModeType&
-Foam::ExplicitSource<Type>::volumeMode() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return volumeMode_;
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-inline const Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate() const
-{
-    return injectionRate_;
-}
+template<class Type> class uniformJumpAMIFvPatchField;
 
+makePatchTypeFieldTypedefs(uniformJumpAMI);
 
-template<class Type>
-inline typename Foam::ExplicitSource<Type>::volumeModeType&
-Foam::ExplicitSource<Type>::volumeMode()
-{
-    return volumeMode_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
-template<class Type>
-inline Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate()
-{
-    return injectionRate_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#endif
 
 // ************************************************************************* //

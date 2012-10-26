@@ -125,7 +125,7 @@ public:
         //- Construct from dictionary - note table is not populated
         TableBase(const word& name, const dictionary& dict);
 
-        //- Copy constructor
+        //- Copy constructor. Note: steals interpolator, tableSamples
         TableBase(const TableBase<Type>& tbl);
 
 

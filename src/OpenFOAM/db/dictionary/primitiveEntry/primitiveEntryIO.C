@@ -55,7 +55,7 @@ void Foam::primitiveEntry::append
             newElmt(tokenIndex()++) = currToken;
         }
     }
-    else if (currToken.isString())
+    else if (currToken.isVariable())
     {
         const string& w = currToken.stringToken();
 

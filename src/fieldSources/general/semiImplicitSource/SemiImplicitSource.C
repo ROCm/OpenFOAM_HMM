@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,15 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#include "SemiImplicitSource.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "DimensionedField.H"
+#include "fvmSup.H"
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::wordList Foam::ExplicitSource<Type>::
+const Foam::wordList Foam::SemiImplicitSource<Type>::
 volumeModeTypeNames_
 (
     IStringStream("(absolute specific)")()
@@ -41,8 +42,8 @@ volumeModeTypeNames_
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-typename Foam::ExplicitSource<Type>::volumeModeType
-Foam::ExplicitSource<Type>::wordToVolumeModeType
+typename Foam::SemiImplicitSource<Type>::volumeModeType
+Foam::SemiImplicitSource<Type>::wordToVolumeModeType
 (
     const word& vmtName
 ) const
@@ -57,8 +58,8 @@ Foam::ExplicitSource<Type>::wordToVolumeModeType
 
     FatalErrorIn
     (
-        "ExplicitSource<Type>::volumeModeType"
-        "ExplicitSource<Type>::wordToVolumeModeType(const word&)"
+        "SemiImplicitSource<Type>::volumeModeType"
+        "SemiImplicitSource<Type>::wordToVolumeModeType(const word&)"
     )   << "Unknown volumeMode type " << vmtName
         << ". Valid volumeMode types are:" << nl << volumeModeTypeNames_
         << exit(FatalError);
@@ -68,7 +69,7 @@ Foam::ExplicitSource<Type>::wordToVolumeModeType
 
 
 template<class Type>
-Foam::word Foam::ExplicitSource<Type>::volumeModeTypeToWord
+Foam::word Foam::SemiImplicitSource<Type>::volumeModeTypeToWord
 (
     const volumeModeType& vmtType
 ) const
@@ -85,7 +86,7 @@ Foam::word Foam::ExplicitSource<Type>::volumeModeTypeToWord
 
 
 template<class Type>
-void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
+void Foam::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
     injectionRate_.setSize(fieldNames_.size());
@@ -111,7 +112,7 @@ void Foam::ExplicitSource<Type>::setFieldData(const dictionary& dict)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::ExplicitSource<Type>::ExplicitSource
+Foam::SemiImplicitSource<Type>::SemiImplicitSource
 (
     const word& name,
     const word& modelType,
@@ -131,7 +132,7 @@ Foam::ExplicitSource<Type>::ExplicitSource
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ExplicitSource<Type>::addSup
+void Foam::SemiImplicitSource<Type>::addSup
 (
     fvMatrix<Type>& eqn,
     const label fieldI
@@ -139,15 +140,17 @@ void Foam::ExplicitSource<Type>::addSup
 {
     if (debug)
     {
-        Info<< "ExplicitSource<"<< pTraits<Type>::typeName
+        Info<< "SemiImplicitSource<" << pTraits<Type>::typeName
             << ">::addSup for source " << name_ << endl;
     }
+
+    const GeometricField<Type, fvPatchField, volMesh>& psi = eqn.psi();
 
     DimensionedField<Type, volMesh> Su
     (
         IOobject
         (
-            name_ + fieldNames_[fieldI] + "Sup",
+            name_ + fieldNames_[fieldI] + "Su",
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -163,9 +166,31 @@ void Foam::ExplicitSource<Type>::addSup
         false
     );
 
-    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldI]/VDash_;
+    UIndirectList<Type>(Su, cells_) = injectionRate_[fieldI].first()/VDash_;
 
-    eqn += Su;
+    DimensionedField<scalar, volMesh> Sp
+    (
+        IOobject
+        (
+            name_ + fieldNames_[fieldI] + "Sp",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensioned<scalar>
+        (
+            "zero",
+            Su.dimensions()/psi.dimensions(),
+            0.0
+        ),
+        false
+    );
+
+    UIndirectList<scalar>(Sp, cells_) = injectionRate_[fieldI].second()/VDash_;
+
+    eqn += Su + fvm::Sp(Sp, psi);
 }
 
 

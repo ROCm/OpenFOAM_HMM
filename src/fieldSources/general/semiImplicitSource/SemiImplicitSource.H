@@ -22,21 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::ExplicitSource
+    Foam::SemiImplicitSource
 
 Description
-    Explicit source
+    Semi-implicit source, described using an input dictionary.  The injection
+    rate coefficients are specified as pairs of Su-Sp coefficients, i.e.
 
-    Sources described by:
+        \f[
+            S(x) = S_u + S_p x
+        \f]
+
+    where
+    \vartable
+        S(x)    | net source for field 'x'
+        S_u     | explicit source contribution
+        S_p     | linearised implicit contribution
+    \endvartable
+
+    Example of the source specification:
 
     \verbatim
-    <Type>ExplicitSourceCoeffs
+    <Type>SemiImplicitSourceCoeffs
     {
         volumeMode      absolute; // specific
-        injectionRate
+        injectionRateSuSp
         {
-            k           30.7;
-            epsilon     1.5;
+            k           (30.7 0);
+            epsilon     (1.5  0);
         }
     }
     \verbatim
@@ -49,12 +61,12 @@ SeeAlso
     Foam::basicSource
 
 SourceFiles
-    ExplicitSource.C
+    SemiImplicitSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ExplicitSource_H
-#define ExplicitSource_H
+#ifndef SemiImplicitSource_H
+#define SemiImplicitSource_H
 
 #include "Tuple2.H"
 #include "basicSource.H"
@@ -69,7 +81,7 @@ namespace Foam
 class fvMesh;
 
 template<class Type>
-class ExplicitSource;
+class SemiImplicitSource;
 
 // Forward declaration of friend functions
 
@@ -77,15 +89,15 @@ template<class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const ExplicitSource<Type>&
+    const SemiImplicitSource<Type>&
 );
 
 /*---------------------------------------------------------------------------*\
-                      Class ExplicitSource Declaration
+                     Class SemiImplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class ExplicitSource
+class SemiImplicitSource
 :
     public basicSource
 {
@@ -115,7 +127,7 @@ protected:
         scalar VDash_;
 
         //- Source field values
-        List<Type> injectionRate_;
+        List<Tuple2<Type, scalar> > injectionRate_;
 
 
     // Protected functions
@@ -133,13 +145,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("ExplicitSource");
+    TypeName("SemiImplicitSource");
 
 
     // Constructors
 
         //- Construct from components
-        ExplicitSource
+        SemiImplicitSource
         (
             const word& name,
             const word& modelType,
@@ -156,7 +168,7 @@ public:
             inline const volumeModeType& volumeMode() const;
 
             //- Return const access to the source field values
-            inline const List<Type>& injectionRate() const;
+            inline const List<Tuple2<Type, scalar> >& injectionRate() const;
 
 
         // Edit
@@ -165,7 +177,7 @@ public:
             inline volumeModeType& volumeMode();
 
             //- Return access to the source field values
-            inline List<Type>& injectionRate();
+            inline List<Tuple2<Type, scalar> >& injectionRate();
 
 
         // Evaluation
@@ -191,13 +203,13 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ExplicitSource.C"
-#   include "ExplicitSourceIO.C"
+#   include "SemiImplicitSource.C"
+#   include "SemiImplicitSourceIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ExplicitSourceI.H"
+#include "SemiImplicitSourceI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

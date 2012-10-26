@@ -83,7 +83,7 @@ SourceFiles
 #ifndef fanFvPatchField_H
 #define fanFvPatchField_H
 
-#include "fixedJumpFvPatchField.H"
+#include "uniformJumpFvPatchField.H"
 #include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,13 +98,8 @@ namespace Foam
 template<class Type>
 class fanFvPatchField
 :
-    public fixedJumpFvPatchField<Type>
+    public uniformJumpFvPatchField<Type>
 {
-    // Private data
-
-        //- Interpolation table
-        autoPtr<DataEntry<Type> > jumpTable_;
-
 
 public:
 
@@ -179,10 +174,6 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
-
-
-        //- Write
-        virtual void write(Ostream&) const;
 };
 
 

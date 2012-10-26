@@ -53,8 +53,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<scalar>(p, iF),
-    jumpTable_(new DataEntry<scalar>("jumpTable"))
+    uniformJumpFvPatchField<scalar>(p, iF)
 {
     if (this->cyclicPatch().owner())
     {
@@ -83,7 +82,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
                 }
             }
 
-            jumpTable_.reset
+            this->jumpTable_.reset
             (
                 new polynomial("jumpTable", coeffs)
             );
@@ -91,10 +90,14 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
         else
         {
             // Generic input constructed from dictionary
-            jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
+            this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
         }
     }
-
+    else
+    {
+        // Dummy jump table
+        this->jumpTable_.reset(new DataEntry<scalar>("jumpTable"));
+    }
 
     if (dict.found("value"))
     {
@@ -136,10 +139,10 @@ void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
             Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
         }
 
-        jump_ = jumpTable_->value(Un);
+        this->jump_ = this->jumpTable_->value(Un);
     }
 
-    fixedJumpFvPatchField<scalar>::updateCoeffs();
+    uniformJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 

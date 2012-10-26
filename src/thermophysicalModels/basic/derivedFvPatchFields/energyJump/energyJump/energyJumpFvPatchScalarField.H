@@ -29,23 +29,8 @@ Group
 
 Description
     This boundary condition provides an energy jump condition across a pair
-    of coupled patches.
-
-    \heading Patch usage
-
-    \table
-        Property     | Description             | Required    | Default value
-        jump         | energy jump values      | yes         |
-    \endtable
-
-    Example of the boundary condition specification:
-    \verbatim
-    myPatch
-    {
-        type            energyJump;
-        jump            uniform 100;
-    }
-    \endverbatim
+    of coupled patches.  It is not applied directly, but is employed on-the-fly
+    when converting temperature boundary conditions into energy.
 
 SeeAlso
     Foam::fixedJumpFvPatchField

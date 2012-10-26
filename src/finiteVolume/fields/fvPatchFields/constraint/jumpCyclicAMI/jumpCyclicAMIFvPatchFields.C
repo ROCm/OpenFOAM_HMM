@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#include "jumpCyclicAMIFvPatchFields.H"
+#include "addToRunTimeSelectionTable.H"
+#include "volFields.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::ExplicitSource<Type>::writeData(Ostream& os) const
+namespace Foam
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
-}
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-bool Foam::ExplicitSource<Type>::read(const dictionary& dict)
-{
-    if (basicSource::read(dict))
-    {
-        volumeMode_ = wordToVolumeModeType(coeffs_.lookup("volumeMode"));
-        setFieldData(coeffs_.subDict("injectionRate"));
+makePatchFieldsTypeName(jumpCyclicAMI);
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

@@ -266,7 +266,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 else
                 {
                     t = sPtr;
-                    t.type() = token::STRING;
+                    t.type() = token::VARIABLE;
                 }
                 return *this;
             }

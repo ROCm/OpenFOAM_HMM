@@ -25,7 +25,8 @@ Application
     surfaceFeatureExtract
 
 Description
-    Extracts and writes surface features to file
+    Extracts and writes surface features to file. All but the basic feature
+    extraction is WIP.
 
 \*---------------------------------------------------------------------------*/
 
@@ -472,6 +473,176 @@ void unmarkBaffles
 }
 
 
+//- Divide into multiple normal bins
+//  - return REGION if != 2 normals
+//  - return REGION if 2 normals that make feature angle
+//  - otherwise return NONE and set normals,bins
+surfaceFeatures::edgeStatus checkFlatRegionEdge
+(
+    const triSurface& surf,
+    const scalar tol,
+    const scalar includedAngle,
+    const label edgeI
+)
+{
+    const edge& e = surf.edges()[edgeI];
+    const labelList& eFaces = surf.edgeFaces()[edgeI];
+
+    // Bin according to normal
+
+    DynamicList<Foam::vector> normals(2);
+    DynamicList<labelList> bins(2);
+
+    forAll(eFaces, eFaceI)
+    {
+        const Foam::vector& n = surf.faceNormals()[eFaces[eFaceI]];
+
+        // Find the normal in normals
+        label index = -1;
+        forAll(normals, normalI)
+        {
+            if (mag(n&normals[normalI]) > (1-tol))
+            {
+                index = normalI;
+                break;
+            }
+        }
+
+        if (index != -1)
+        {
+            bins[index].append(eFaceI);
+        }
+        else if (normals.size() >= 2)
+        {
+            // Would be third normal. Mark as feature.
+            //Pout<< "** at edge:" << surf.localPoints()[e[0]]
+            //    << surf.localPoints()[e[1]]
+            //    << " have normals:" << normals
+            //    << " and " << n << endl;
+            return surfaceFeatures::REGION;
+        }
+        else
+        {
+            normals.append(n);
+            bins.append(labelList(1, eFaceI));
+        }
+    }
+
+
+    // Check resulting number of bins
+    if (bins.size() == 1)
+    {
+        // Note: should check here whether they are two sets of faces
+        // that are planar or indeed 4 faces al coming together at an edge.
+        //Pout<< "** at edge:"
+        //    << surf.localPoints()[e[0]]
+        //    << surf.localPoints()[e[1]]
+        //    << " have single normal:" << normals[0]
+        //    << endl;
+        return surfaceFeatures::NONE;
+    }
+    else
+    {
+        // Two bins. Check if normals make an angle
+
+        //Pout<< "** at edge:"
+        //    << surf.localPoints()[e[0]]
+        //    << surf.localPoints()[e[1]] << nl
+        //    << "    normals:" << normals << nl
+        //    << "    bins   :" << bins << nl
+        //    << endl;
+
+        if (includedAngle >= 0)
+        {
+            scalar minCos = Foam::cos(degToRad(180.0 - includedAngle));
+
+            forAll(eFaces, i)
+            {
+                const Foam::vector& ni = surf.faceNormals()[eFaces[i]];
+                for (label j=i+1; j<eFaces.size(); j++)
+                {
+                    const Foam::vector& nj = surf.faceNormals()[eFaces[j]];
+                    if (mag(ni & nj) < minCos)
+                    {
+                        //Pout<< "have sharp feature between normal:" << ni
+                        //    << " and " << nj << endl;
+
+                        // Is feature. Keep as region or convert to
+                        // feature angle? For now keep as region.
+                        return surfaceFeatures::REGION;
+                    }
+                }
+            }
+        }
+
+
+        // So now we have two normals bins but need to make sure both
+        // bins have the same regions in it.
+
+         // 1. store + or - region number depending
+        //    on orientation of triangle in bins[0]
+        const labelList& bin0 = bins[0];
+        labelList regionAndNormal(bin0.size());
+        forAll(bin0, i)
+        {
+            const labelledTri& t = surf.localFaces()[eFaces[bin0[i]]];
+            int dir = t.edgeDirection(e);
+
+            if (dir > 0)
+            {
+                regionAndNormal[i] = t.region()+1;
+            }
+            else if (dir == 0)
+            {
+                FatalErrorIn("problem.")
+                    << exit(FatalError);
+            }
+            else
+            {
+                regionAndNormal[i] = -(t.region()+1);
+            }
+        }
+
+        // 2. check against bin1
+        const labelList& bin1 = bins[1];
+        labelList regionAndNormal1(bin1.size());
+        forAll(bin1, i)
+        {
+            const labelledTri& t = surf.localFaces()[eFaces[bin1[i]]];
+            int dir = t.edgeDirection(e);
+
+            label myRegionAndNormal;
+            if (dir > 0)
+            {
+                myRegionAndNormal = t.region()+1;
+            }
+            else
+            {
+                myRegionAndNormal = -(t.region()+1);
+            }
+
+            regionAndNormal1[i] = myRegionAndNormal;
+
+            label index = findIndex(regionAndNormal, -myRegionAndNormal);
+            if (index == -1)
+            {
+                // Not found.
+                //Pout<< "cannot find region " << myRegionAndNormal
+                //    << " in regions " << regionAndNormal << endl;
+
+                return surfaceFeatures::REGION;
+            }
+        }
+
+        // Passed all checks, two normal bins with the same contents.
+        //Pout<< "regionAndNormal:" << regionAndNormal << endl;
+        //Pout<< "myRegionAndNormal:" << regionAndNormal1 << endl;
+
+        return surfaceFeatures::NONE;
+    }
+}
+
+
 void writeStats(const extendedFeatureEdgeMesh& fem, Ostream& os)
 {
     os  << "    points : " << fem.points().size() << nl
@@ -610,6 +781,8 @@ int main(int argc, char *argv[])
 
         surfaceFeatures set(surf);
 
+        scalar includedAngle = -1;
+
         if (extractionMethod == "extractFromFile")
         {
             const fileName featureEdgeFile =
@@ -630,14 +803,13 @@ int main(int argc, char *argv[])
         }
         else if (extractionMethod == "extractFromSurface")
         {
-            const scalar includedAngle =
-                readScalar
+            includedAngle = readScalar
+            (
+                surfaceDict.subDict("extractFromSurfaceCoeffs").lookup
                 (
-                    surfaceDict.subDict("extractFromSurfaceCoeffs").lookup
-                    (
-                        "includedAngle"
-                    )
-                );
+                    "includedAngle"
+                )
+            );
 
             Info<< nl << "Constructing feature set from included angle "
                 << includedAngle << endl;
@@ -727,13 +899,27 @@ int main(int argc, char *argv[])
             if (!nonManifoldEdges)
             {
                 Info<< "Removing all non-manifold edges"
-                    << " (edges with > 2 connected faces)" << endl;
+                    << " (edges with > 2 connected faces) unless they"
+                    << " cross multiple regions" << endl;
 
                 forAll(edgeStat, edgeI)
                 {
-                    if (surf.edgeFaces()[edgeI].size() > 2)
+                    const labelList& eFaces = surf.edgeFaces()[edgeI];
+
+                    if
+                    (
+                        eFaces.size() > 2
+                     && edgeStat[edgeI] == surfaceFeatures::REGION
+                     && (eFaces.size() % 2) == 0
+                    )
                     {
-                        edgeStat[edgeI] = surfaceFeatures::NONE;
+                        edgeStat[edgeI] = checkFlatRegionEdge
+                        (
+                            surf,
+                            1e-5,   //tol,
+                            includedAngle,
+                            edgeI
+                        );
                     }
                 }
             }

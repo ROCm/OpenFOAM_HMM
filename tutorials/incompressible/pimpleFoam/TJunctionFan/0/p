@@ -56,7 +56,6 @@ boundaryField
     {
         type            fan;
         patchType       cyclic;
-        jump            uniform 0;
         jumpTable       polynomial
 
 2
@@ -71,7 +70,6 @@ boundaryField
     {
         type            fan;
         patchType       cyclic;
-        jump            uniform 0;
         value           uniform 0;
     }
     defaultFaces

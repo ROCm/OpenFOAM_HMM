@@ -21,10 +21,12 @@ setsToZones -noFlipMap > log.setsToZones 2>&1
 # - use binary writing to avoid 'nan'
 # - use setFields to set values
 unset FOAM_SIGFPE
-createBaffles cycLeft '(cycLeft_half0 cycLeft_half1)' -overwrite > log.createBaffles1 2>&1
+runApplication createBaffles cycLeft '(cycLeft_half0 cycLeft_half1)' -overwrite
+mv log.createBaffles log.createBaffles1
 
 # create the second cyclic - rhs of porous zone
-createBaffles cycRight '(cycRight_half0 cycRight_half1)' -overwrite > log.createBaffles2 2>&1
+runApplication createBaffles cycRight '(cycRight_half0 cycRight_half1)' -overwrite
+mv log.createBaffles log.createBaffles2
 
 # Initialise newly created patchFields to 0
 runApplication changeDictionary

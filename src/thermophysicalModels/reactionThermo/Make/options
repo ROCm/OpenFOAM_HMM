@@ -1,7 +1,11 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude
+    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude
 
 LIB_LIBS = \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lfluidThermophysicalModels \
+    -lspecie \
+    -lmeshTools
