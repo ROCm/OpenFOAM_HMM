@@ -69,7 +69,8 @@ surface2.nas
         // Keep edges outside the box:
         outsideBox          (0 0 0)(1 1 1);
 
-        // Keep nonManifold edges (edges with >2 connected faces)
+        // Keep nonManifold edges (edges with >2 connected faces where
+        // the faces form more than two different normal planes)
         nonManifoldEdges       yes;
 
         // Keep open edges (edges with 1 connected face)

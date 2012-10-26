@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,12 +80,18 @@ void Foam::regExp::set(const char* pattern, const bool ignoreCase) const
             cflags |= REG_ICASE;
         }
 
-        if (regcomp(preg_, pattern, cflags) != 0)
+        int err = regcomp(preg_, pattern, cflags);
+
+        if (err != 0)
         {
+            char errbuf[200];
+            regerror(err, preg_, errbuf, sizeof(errbuf));
+
             FatalErrorIn
             (
                 "regExp::set(const char*)"
             )   << "Failed to compile regular expression '" << pattern << "'"
+                << nl << errbuf
                 << exit(FatalError);
         }
     }
