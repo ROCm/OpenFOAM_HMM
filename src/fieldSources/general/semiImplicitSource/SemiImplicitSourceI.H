@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,32 +23,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#include "SemiImplicitSource.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ExplicitSource<Type>::writeData(Ostream& os) const
+inline const typename Foam::SemiImplicitSource<Type>::volumeModeType&
+Foam::SemiImplicitSource<Type>::volumeMode() const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    return volumeMode_;
 }
 
 
 template<class Type>
-bool Foam::ExplicitSource<Type>::read(const dictionary& dict)
+inline const Foam::List<Foam::Tuple2<Type, Foam::scalar> >&
+Foam::SemiImplicitSource<Type>::injectionRate() const
 {
-    if (basicSource::read(dict))
-    {
-        volumeMode_ = wordToVolumeModeType(coeffs_.lookup("volumeMode"));
-        setFieldData(coeffs_.subDict("injectionRate"));
+    return injectionRate_;
+}
 
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+template<class Type>
+inline typename Foam::SemiImplicitSource<Type>::volumeModeType&
+Foam::SemiImplicitSource<Type>::volumeMode()
+{
+    return volumeMode_;
+}
+
+
+template<class Type>
+inline Foam::List<Foam::Tuple2<Type,
+Foam::scalar> >& Foam::SemiImplicitSource<Type>::injectionRate()
+{
+    return injectionRate_;
 }
 
 

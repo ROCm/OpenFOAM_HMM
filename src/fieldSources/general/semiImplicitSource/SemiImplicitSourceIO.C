@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeBasicSource.H"
-#include "ExplicitSource.H"
+#include "SemiImplicitSource.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+void Foam::SemiImplicitSource<Type>::writeData(Ostream& os) const
 {
-    makeBasicSource(ExplicitSource, scalar);
-    makeBasicSource(ExplicitSource, vector);
-    makeBasicSource(ExplicitSource, sphericalTensor);
-    makeBasicSource(ExplicitSource, symmTensor);
-    makeBasicSource(ExplicitSource, tensor);
+    os  << indent << name_ << endl;
+    dict_.write(os);
+}
+
+
+template<class Type>
+bool Foam::SemiImplicitSource<Type>::read(const dictionary& dict)
+{
+    if (basicSource::read(dict))
+    {
+        volumeMode_ = wordToVolumeModeType(coeffs_.lookup("volumeMode"));
+        setFieldData(coeffs_.subDict("injectionRateSuSp"));
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 

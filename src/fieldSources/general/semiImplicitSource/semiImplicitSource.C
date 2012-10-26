@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,37 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ExplicitSource.H"
+#include "makeBasicSource.H"
+#include "SemiImplicitSource.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class Type>
-inline const typename Foam::ExplicitSource<Type>::volumeModeType&
-Foam::ExplicitSource<Type>::volumeMode() const
+namespace Foam
 {
-    return volumeMode_;
-}
-
-
-template<class Type>
-inline const Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate() const
-{
-    return injectionRate_;
-}
-
-
-template<class Type>
-inline typename Foam::ExplicitSource<Type>::volumeModeType&
-Foam::ExplicitSource<Type>::volumeMode()
-{
-    return volumeMode_;
-}
-
-
-template<class Type>
-inline Foam::List<Type>& Foam::ExplicitSource<Type>::injectionRate()
-{
-    return injectionRate_;
+    makeBasicSource(SemiImplicitSource, scalar);
+    makeBasicSource(SemiImplicitSource, vector);
+    makeBasicSource(SemiImplicitSource, sphericalTensor);
+    makeBasicSource(SemiImplicitSource, symmTensor);
+    makeBasicSource(SemiImplicitSource, tensor);
 }
 
 
