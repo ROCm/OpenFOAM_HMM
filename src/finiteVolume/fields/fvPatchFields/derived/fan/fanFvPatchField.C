@@ -84,4 +84,13 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::fanFvPatchField<Type>::jump() const
+{
+    return uniformJumpFvPatchField<Type>::jump();
+}
+
+
 // ************************************************************************* //

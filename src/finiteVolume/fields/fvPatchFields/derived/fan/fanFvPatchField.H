@@ -172,6 +172,9 @@ public:
 
         // Evaluation functions
 
+            //- Return the "jump" across the patch
+            tmp<Field<Type> > jump() const;
+
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 };
@@ -185,6 +188,10 @@ fanFvPatchField<scalar>::fanFvPatchField
     const DimensionedField<scalar, volMesh>&,
     const dictionary&
 );
+
+template<>
+tmp<Field<scalar> > fanFvPatchField<scalar>::jump() const;
+
 template<>
 void fanFvPatchField<scalar>::updateCoeffs();
 
