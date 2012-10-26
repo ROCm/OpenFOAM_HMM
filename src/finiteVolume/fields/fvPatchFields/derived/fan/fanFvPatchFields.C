@@ -30,18 +30,16 @@ License
 #include "Tuple2.H"
 #include "polynomial.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makeTemplatePatchTypeField
-(
-    fvPatchScalarField,
-    fanFvPatchScalarField
-);
+    makeTemplatePatchTypeField
+    (
+        fvPatchScalarField,
+        fanFvPatchScalarField
+    );
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -115,15 +113,10 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Specialisation of the jump-condition for the pressure
 template<>
-void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
+Foam::tmp<Foam::Field<Foam::scalar> >
+Foam::fanFvPatchField<Foam::scalar>::jump() const
 {
-    if (this->updated())
-    {
-        return;
-    }
-
     if (this->cyclicPatch().owner())
     {
         const surfaceScalarField& phi =
@@ -139,15 +132,33 @@ void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
             Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
         }
 
-        this->jump_ = this->jumpTable_->value(Un);
+        return this->jumpTable_->value(Un);
+    }
+    else
+    {
+        return refCast<const fanFvPatchField<scalar> >
+        (
+            this->neighbourPatchField()
+        ).jump();
+    }
+}
+
+
+template<>
+void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
+{
+    if (this->updated())
+    {
+        return;
+    }
+
+    if (this->cyclicPatch().owner())
+    {
+        this->jump_ = jump();
     }
 
     uniformJumpFvPatchField<scalar>::updateCoeffs();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
