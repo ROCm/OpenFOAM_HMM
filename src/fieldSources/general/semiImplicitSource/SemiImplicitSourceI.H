@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,29 +21,42 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 \*---------------------------------------------------------------------------*/
 
-#include "temperatureJumpAMIBase.H"
+#include "SemiImplicitSource.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+inline const typename Foam::SemiImplicitSource<Type>::volumeModeType&
+Foam::SemiImplicitSource<Type>::volumeMode() const
 {
-    defineTypeNameAndDebug(temperatureJumpAMIBase, 0);
+    return volumeMode_;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+template<class Type>
+inline const Foam::List<Foam::Tuple2<Type, Foam::scalar> >&
+Foam::SemiImplicitSource<Type>::injectionRate() const
+{
+    return injectionRate_;
+}
 
-Foam::temperatureJumpAMIBase::temperatureJumpAMIBase()
-{}
+
+template<class Type>
+inline typename Foam::SemiImplicitSource<Type>::volumeModeType&
+Foam::SemiImplicitSource<Type>::volumeMode()
+{
+    return volumeMode_;
+}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::temperatureJumpAMIBase::~temperatureJumpAMIBase()
-{}
+template<class Type>
+inline Foam::List<Foam::Tuple2<Type,
+Foam::scalar> >& Foam::SemiImplicitSource<Type>::injectionRate()
+{
+    return injectionRate_;
+}
 
 
 // ************************************************************************* //

@@ -25,7 +25,7 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 #include "energyJumpAMIFvPatchScalarField.H"
-#include "temperatureJumpBase.H"
+#include "fixedJumpAMIFvPatchFields.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -107,8 +107,8 @@ void Foam::energyJumpAMIFvPatchScalarField::updateCoeffs()
         label patchID = patch().index();
 
         const scalarField& pp = thermo.p().boundaryField()[patchID];
-        const temperatureJumpBase& TbPatch =
-            refCast<const temperatureJumpBase>
+        const fixedJumpAMIFvPatchScalarField& TbPatch =
+            refCast<const fixedJumpAMIFvPatchScalarField>
             (
                 thermo.T().boundaryField()[patchID]
             );

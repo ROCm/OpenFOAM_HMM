@@ -16,9 +16,13 @@ unset FOAM_SETNAN
 
 # Create faceZones for fan and baffles
 runApplication topoSet
+
 # Create fan cyclics
-createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite > log.createBaffles 2>&1
+runApplication createBaffles cyclicFaces '(fan_half0 fan_half1)' -overwrite
+mv log.createBaffles log.createBaffles.1
+
 # Create wall baffles
-createBaffles baffleFaces '(baffles baffles)' -overwrite > log.createBaffles 2>&1
+runApplication createBaffles baffleFaces '(baffles baffles)' -overwrite
+mv log.createBaffles log.createBaffles.2
 
 runApplication $application

@@ -28,8 +28,8 @@ License
 #include "fixedEnergyFvPatchScalarField.H"
 #include "gradientEnergyFvPatchScalarField.H"
 #include "mixedEnergyFvPatchScalarField.H"
-#include "temperatureJumpBase.H"
-#include "temperatureJumpAMIBase.H"
+#include "fixedJumpFvPatchFields.H"
+#include "fixedJumpAMIFvPatchFields.H"
 #include "energyJumpFvPatchScalarField.H"
 #include "energyJumpAMIFvPatchScalarField.H"
 
@@ -61,11 +61,11 @@ Foam::wordList Foam::heThermo<BasicThermo, MixtureType>::heBoundaryTypes()
         {
             hbt[patchi] = mixedEnergyFvPatchScalarField::typeName;
         }
-        else if (isA<temperatureJumpBase>(tbf[patchi]))
+        else if (isA<fixedJumpFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = energyJumpFvPatchScalarField::typeName;
         }
-        else if (isA<temperatureJumpAMIBase>(tbf[patchi]))
+        else if (isA<fixedJumpAMIFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = energyJumpAMIFvPatchScalarField::typeName;
         }
