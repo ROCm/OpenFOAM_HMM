@@ -109,9 +109,9 @@ Foam::tmp<Foam::Field<Type> > Foam::uniformJumpFvPatchField<Type>::jump() const
 {
     if (this->cyclicPatch().owner())
     {
-        Type j = jumpTable_->value(this->db().time().value());
+        const Type value = jumpTable_->value(this->db().time().value());
 
-        return tmp<Field<Type> >(new Field<Type>(this->size(), j));
+        return tmp<Field<Type> >(new Field<Type>(this->patch().size(), value));
     }
     else
     {
@@ -134,7 +134,6 @@ void Foam::uniformJumpFvPatchField<Type>::write(Ostream& os) const
     {
         jumpTable_->writeData(os);
     }
-    this->writeEntry("value", os);
 }
 
 

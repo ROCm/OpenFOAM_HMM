@@ -132,7 +132,6 @@ void Foam::uniformJumpAMIFvPatchField<Type>::write(Ostream& os) const
     {
         jumpTable_->writeData(os);
     }
-    this->writeEntry("value", os);
 }
 
 

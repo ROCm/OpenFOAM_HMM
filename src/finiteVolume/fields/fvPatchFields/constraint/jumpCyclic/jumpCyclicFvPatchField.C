@@ -77,7 +77,6 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
     const jumpCyclicFvPatchField<Type>& ptf
 )
 :
-    cyclicLduInterfaceField(),
     cyclicFvPatchField<Type>(ptf)
 {}
 
@@ -105,12 +104,11 @@ tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
     tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf();
 
-    tmp<Field<Type> > tjf = jump();
+    Field<Type> jf(this->jump());
     if (!this->cyclicPatch().owner())
     {
-        tjf = -tjf;
+        jf *= -1.0;
     }
-    const Field<Type>& jf = tjf();
 
     if (this->doTransform())
     {
@@ -152,12 +150,12 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     // for AMG solve - only apply jump to finest level
     if (psiInternal.size() == this->internalField().size())
     {
-        tmp<Field<scalar> > tjf = jump()().component(cmpt);
+        Field<scalar> jf(this->jump()().component(cmpt));
+
         if (!this->cyclicPatch().owner())
         {
-            tjf = -tjf;
+            jf *= -1.0;
         }
-        const Field<scalar>& jf = tjf();
 
         forAll(*this, facei)
         {
@@ -201,12 +199,12 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     // for AMG solve - only apply jump to finest level
     if (psiInternal.size() == this->internalField().size())
     {
-        tmp<Field<Type> > tjf = jump();
+        Field<Type> jf(this->jump());
+
         if (!this->cyclicPatch().owner())
         {
-            tjf = -tjf;
+            jf *= -1.0;
         }
-        const Field<Type>& jf = tjf();
 
         forAll(*this, facei)
         {

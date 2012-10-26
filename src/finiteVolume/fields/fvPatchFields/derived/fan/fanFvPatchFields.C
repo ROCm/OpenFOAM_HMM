@@ -95,10 +95,9 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     }
     else
     {
-        // Generic input constructed from dictionary
+        // Dummy jump table
         this->jumpTable_.reset(new DataEntry<scalar>("jumpTable"));
     }
-
 
     if (dict.found("value"))
     {

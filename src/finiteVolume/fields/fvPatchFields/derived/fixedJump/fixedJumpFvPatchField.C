@@ -72,7 +72,6 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
     const fixedJumpFvPatchField<Type>& ptf
 )
 :
-    cyclicLduInterfaceField(),
     jumpCyclicFvPatchField<Type>(ptf),
     jump_(ptf.jump_)
 {}
