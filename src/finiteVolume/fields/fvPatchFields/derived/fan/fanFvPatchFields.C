@@ -116,11 +116,6 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
             this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
         }
     }
-    else
-    {
-        // Dummy jump table
-        this->jumpTable_.reset(new DataEntry<scalar>("jumpTable"));
-    }
 
     if (dict.found("value"))
     {

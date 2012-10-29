@@ -144,6 +144,17 @@ public:
             ) const;
 };
 
+//- Update result field based on interface functionality
+template<>
+void jumpCyclicFvPatchField<scalar>::updateInterfaceMatrix
+(
+    scalarField& result,
+    const scalarField& psiInternal,
+    const scalarField& coeffs,
+    const direction cmpt,
+    const Pstream::commsTypes commsType
+) const;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

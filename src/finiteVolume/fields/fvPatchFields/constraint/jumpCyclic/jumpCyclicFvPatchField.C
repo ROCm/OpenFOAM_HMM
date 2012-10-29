@@ -142,43 +142,17 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    scalarField pnf(this->size());
-
-    const labelUList& nbrFaceCells =
-        this->cyclicPatch().neighbFvPatch().faceCells();
-
-    // for AMG solve - only apply jump to finest level
-    if (psiInternal.size() == this->internalField().size())
-    {
-        Field<scalar> jf(this->jump()().component(cmpt));
-
-        if (!this->cyclicPatch().owner())
-        {
-            jf *= -1.0;
-        }
-
-        forAll(*this, facei)
-        {
-            pnf[facei] = psiInternal[nbrFaceCells[facei]] - jf[facei];
-        }
-    }
-    else
-    {
-        forAll(*this, facei)
-        {
-            pnf[facei] = psiInternal[nbrFaceCells[facei]];
-        }
-    }
-
-    // Transform according to the transformation tensors
-    this->transformCoupleField(pnf, cmpt);
-
-    // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = this->cyclicPatch().faceCells();
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    notImplemented
+    (
+        "void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix"
+        "("
+            "scalarField&, "
+            "const scalarField&, "
+            "const scalarField&, "
+            "const direction, "
+            "const Pstream::commsTypes"
+        ") const"
+    );
 }
 
 
@@ -196,8 +170,8 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     const labelUList& nbrFaceCells =
         this->cyclicPatch().neighbFvPatch().faceCells();
 
-    // for AMG solve - only apply jump to finest level
-    if (psiInternal.size() == this->internalField().size())
+    // only apply jump to original field
+    if (&psiInternal == &this->internalField())
     {
         Field<Type> jf(this->jump());
 

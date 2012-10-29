@@ -35,7 +35,7 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(0)
+    jumpTable_(new DataEntry<Type>("jumpTable"))
 {}
 
 

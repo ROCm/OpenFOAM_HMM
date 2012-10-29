@@ -129,33 +129,17 @@ void Foam::jumpCyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes
 ) const
 {
-    const labelUList& nbrFaceCells =
-        this->cyclicAMIPatch().cyclicAMIPatch().neighbPatch().faceCells();
-
-    scalarField pnf(psiInternal, nbrFaceCells);
-
-    pnf = this->cyclicAMIPatch().interpolate(pnf);
-
-    // for AMG solve - only apply jump to finest level
-    if (psiInternal.size() == this->internalField().size())
-    {
-        tmp<Field<scalar> > tjf = jump()().component(cmpt);
-        if (!this->cyclicAMIPatch().owner())
-        {
-            tjf = -tjf;
-        }
-        pnf -= tjf;
-    }
-
-    // Transform according to the transformation tensors
-    this->transformCoupleField(pnf, cmpt);
-
-    // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = this->cyclicAMIPatch().faceCells();
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    notImplemented
+    (
+        "void Foam::jumpCyclicAMIFvPatchField<Type>::updateInterfaceMatrix"
+        "("
+            "scalarField&, "
+            "const scalarField&, "
+            "const scalarField& coeffs,"
+            "const direction, "
+            "const Pstream::commsTypes"
+        ") const"
+    );
 }
 
 
@@ -175,15 +159,16 @@ void Foam::jumpCyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 
     pnf = this->cyclicAMIPatch().interpolate(pnf);
 
-    // for AMG solve - only apply jump to finest level
-    if (psiInternal.size() == this->internalField().size())
+    // only apply jump to original field
+    if (&psiInternal == &this->internalField())
     {
-        tmp<Field<Type> > tjf = jump();
+        Field<Type> jf(this->jump());
         if (!this->cyclicAMIPatch().owner())
         {
-            tjf = -tjf;
+            jf *= -1.0;
         }
-        pnf -= tjf;
+
+        pnf -= jf;
     }
 
     // Transform according to the transformation tensors

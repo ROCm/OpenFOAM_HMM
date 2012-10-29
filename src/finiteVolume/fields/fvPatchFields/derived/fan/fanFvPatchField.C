@@ -99,13 +99,6 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fanFvPatchField<Type>::jump() const
-{
-    return this->jump_;
-}
-
-
-template<class Type>
 void Foam::fanFvPatchField<Type>::updateCoeffs()
 {
     if (this->updated())

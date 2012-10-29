@@ -39,7 +39,6 @@ Description
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
-        jump         | current jump value      | yes         |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 
@@ -49,7 +48,6 @@ Description
     {
         type            fan;
         patchType       cyclic;
-        jump            uniform 0;
         jumpTable       csvFile;
         csvFileCoeffs
         {
@@ -176,13 +174,8 @@ public:
 
     // Member functions
 
-        // Evaluation functions
-
-            //- Return the "jump" across the patch
-            tmp<Field<Type> > jump() const;
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 };
 
 
