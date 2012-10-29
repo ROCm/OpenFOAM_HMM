@@ -27,19 +27,17 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makePatchFieldsTypeName(jumpCyclic);
+    makePatchFieldsTypeName(jumpCyclic);
+}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<>
-void jumpCyclicFvPatchField<scalar>::updateInterfaceMatrix
+void Foam::jumpCyclicFvPatchField<Foam::scalar>::updateInterfaceMatrix
 (
     scalarField& result,
     const scalarField& psiInternal,
@@ -87,9 +85,5 @@ void jumpCyclicFvPatchField<scalar>::updateInterfaceMatrix
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

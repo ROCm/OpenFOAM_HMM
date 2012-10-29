@@ -25,15 +25,10 @@ License
 
 #include "jumpCyclicFvPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
+Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -44,7 +39,7 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 
 
 template<class Type>
-jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
+Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const jumpCyclicFvPatchField<Type>& ptf,
     const fvPatch& p,
@@ -57,7 +52,7 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 
 
 template<class Type>
-jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
+Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -72,7 +67,7 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 
 
 template<class Type>
-jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
+Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const jumpCyclicFvPatchField<Type>& ptf
 )
@@ -82,7 +77,7 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 
 
 template<class Type>
-jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
+Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 (
     const jumpCyclicFvPatchField<Type>& ptf,
     const DimensionedField<Type, volMesh>& iF
@@ -95,7 +90,8 @@ jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
+Foam::tmp<Foam::Field<Type> >
+Foam::jumpCyclicFvPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
     const labelUList& nbrFaceCells =
@@ -133,7 +129,7 @@ tmp<Field<Type> > jumpCyclicFvPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
-void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
+void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
     const scalarField& psiInternal,
@@ -144,7 +140,7 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 {
     notImplemented
     (
-        "void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix"
+        "void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix"
         "("
             "scalarField&, "
             "const scalarField&, "
@@ -157,7 +153,7 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 
 
 template<class Type>
-void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
+void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const Field<Type>& psiInternal,
@@ -204,9 +200,5 @@ void jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
