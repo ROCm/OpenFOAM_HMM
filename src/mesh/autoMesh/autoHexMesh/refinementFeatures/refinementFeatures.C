@@ -25,6 +25,7 @@ License
 
 #include "refinementFeatures.H"
 #include "Time.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -34,15 +35,15 @@ void Foam::refinementFeatures::read
     const PtrList<dictionary>& featDicts
 )
 {
-    forAll(featDicts, i)
+    forAll(featDicts, featI)
     {
-        const dictionary& dict = featDicts[i];
+        const dictionary& dict = featDicts[featI];
 
         fileName featFileName(dict.lookup("file"));
 
         set
         (
-            i,
+            featI,
             new featureEdgeMesh
             (
                 IOobject
@@ -58,15 +59,74 @@ void Foam::refinementFeatures::read
             )
         );
 
-        const featureEdgeMesh& eMesh = operator[](i);
+        const featureEdgeMesh& eMesh = operator[](featI);
 
         //eMesh.mergePoints(meshRefiner_.mergeDistance());
-        levels_[i] = readLabel(dict.lookup("level"));
 
-        Info<< "Refinement level " << levels_[i]
-            << " for all cells crossed by feature " << featFileName
-            << " (" << eMesh.points().size() << " points, "
+        if (dict.found("levels"))
+        {
+            List<Tuple2<scalar, label> > distLevels(dict["levels"]);
+
+            if (dict.size() < 1)
+            {
+                FatalErrorIn
+                (
+                    "refinementFeatures::read"
+                    "(const objectRegistry&"
+                    ", const PtrList<dictionary>&)"
+                )   << " : levels should be at least size 1" << endl
+                    << "levels : "  << dict["levels"]
+                    << exit(FatalError);
+            }
+
+            distances_[featI].setSize(distLevels.size());
+            levels_[featI].setSize(distLevels.size());
+
+            forAll(distLevels, j)
+            {
+                distances_[featI][j] = distLevels[j].first();
+                levels_[featI][j] = distLevels[j].second();
+
+                // Check in incremental order
+                if (j > 0)
+                {
+                    if
+                    (
+                        (distances_[featI][j] <= distances_[featI][j-1])
+                     || (levels_[featI][j] > levels_[featI][j-1])
+                    )
+                    {
+                        FatalErrorIn
+                        (
+                            "refinementFeatures::read"
+                            "(const objectRegistry&"
+                            ", const PtrList<dictionary>&)"
+                        )   << " : Refinement should be specified in order"
+                            << " of increasing distance"
+                            << " (and decreasing refinement level)." << endl
+                            << "Distance:" << distances_[featI][j]
+                            << " refinementLevel:" << levels_[featI][j]
+                            << exit(FatalError);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Look up 'level' for single level
+            levels_[featI] = labelList(1, readLabel(dict.lookup("level")));
+            distances_[featI] = scalarField(1, 0.0);
+        }
+
+        Info<< "Refinement level according to distance to "
+            << featFileName << " (" << eMesh.points().size() << " points, "
             << eMesh.edges().size() << " edges)." << endl;
+        forAll(levels_[featI], j)
+        {
+            Info<< "    level " << levels_[featI][j]
+                << " for all cells within " << distances_[featI][j]
+                << " meter." << endl;
+        }
     }
 }
 
@@ -127,6 +187,80 @@ void Foam::refinementFeatures::buildTrees
 }
 
 
+
+// Find maximum level of a shell.
+void Foam::refinementFeatures::findHigherLevel
+(
+    const pointField& pt,
+    const label featI,
+    labelList& maxLevel
+) const
+{
+    const labelList& levels = levels_[featI];
+
+    const scalarField& distances = distances_[featI];
+
+    // Collect all those points that have a current maxLevel less than
+    // (any of) the shell. Also collect the furthest distance allowable
+    // to any shell with a higher level.
+
+    pointField candidates(pt.size());
+    labelList candidateMap(pt.size());
+    scalarField candidateDistSqr(pt.size());
+    label candidateI = 0;
+
+    forAll(maxLevel, pointI)
+    {
+        forAllReverse(levels, levelI)
+        {
+            if (levels[levelI] > maxLevel[pointI])
+            {
+                candidates[candidateI] = pt[pointI];
+                candidateMap[candidateI] = pointI;
+                candidateDistSqr[candidateI] = sqr(distances[levelI]);
+                candidateI++;
+                break;
+            }
+        }
+    }
+    candidates.setSize(candidateI);
+    candidateMap.setSize(candidateI);
+    candidateDistSqr.setSize(candidateI);
+
+    // Do the expensive nearest test only for the candidate points.
+    const indexedOctree<treeDataEdge>& tree = edgeTrees_[featI];
+
+    List<pointIndexHit> nearInfo(candidates.size());
+    forAll(candidates, candidateI)
+    {
+        nearInfo[candidateI] = tree.findNearest
+        (
+            candidates[candidateI],
+            candidateDistSqr[candidateI]
+        );
+    }
+
+    // Update maxLevel
+    forAll(nearInfo, candidateI)
+    {
+        if (nearInfo[candidateI].hit())
+        {
+            // Check which level it actually is in.
+            label minDistI = findLower
+            (
+                distances,
+                mag(nearInfo[candidateI].hitPoint()-candidates[candidateI])
+            );
+
+            label pointI = candidateMap[candidateI];
+
+            // pt is inbetween shell[minDistI] and shell[minDistI+1]
+            maxLevel[pointI] = levels[minDistI+1];
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::refinementFeatures::refinementFeatures
@@ -136,6 +270,7 @@ Foam::refinementFeatures::refinementFeatures
 )
 :
     PtrList<featureEdgeMesh>(featDicts.size()),
+    distances_(featDicts.size()),
     levels_(featDicts.size()),
     edgeTrees_(featDicts.size()),
     pointTrees_(featDicts.size())
@@ -175,6 +310,7 @@ Foam::refinementFeatures::refinementFeatures
 )
 :
     PtrList<featureEdgeMesh>(featDicts.size()),
+    distances_(featDicts.size()),
     levels_(featDicts.size()),
     edgeTrees_(featDicts.size()),
     pointTrees_(featDicts.size())
@@ -333,6 +469,34 @@ void Foam::refinementFeatures::findNearestPoint
             }
         }
     }
+}
+
+
+void Foam::refinementFeatures::findHigherLevel
+(
+    const pointField& pt,
+    const labelList& ptLevel,
+    labelList& maxLevel
+) const
+{
+    // Maximum level of any shell. Start off with level of point.
+    maxLevel = ptLevel;
+
+    forAll(*this, featI)
+    {
+        findHigherLevel(pt, featI, maxLevel);
+    }
+}
+
+
+Foam::scalar Foam::refinementFeatures::maxDistance() const
+{
+    scalar overallMax = -GREAT;
+    forAll(distances_, featI)
+    {
+        overallMax = max(overallMax, max(distances_[featI]));
+    }
+    return overallMax;
 }
 
 
