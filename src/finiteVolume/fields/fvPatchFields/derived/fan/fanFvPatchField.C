@@ -25,6 +25,18 @@ License
 
 #include "fanFvPatchField.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::fanFvPatchField<Type>::calcFanJump()
+{
+    if (this->cyclicPatch().owner())
+    {
+        this->jump_ = this->jumpTable_->value(this->db().time().value());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -87,9 +99,17 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::fanFvPatchField<Type>::jump() const
+void Foam::fanFvPatchField<Type>::updateCoeffs()
 {
-    return uniformJumpFvPatchField<Type>::jump();
+    if (this->updated())
+    {
+        return;
+    }
+
+    calcFanJump();
+
+    // call fixedJump variant - uniformJump will overwrite the jump value
+    fixedJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 

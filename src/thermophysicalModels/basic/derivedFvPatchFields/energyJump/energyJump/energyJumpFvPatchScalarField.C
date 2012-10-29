@@ -113,9 +113,15 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
                 thermo.T().boundaryField()[patchID]
             );
 
+        fixedJumpFvPatchScalarField& Tbp =
+            const_cast<fixedJumpFvPatchScalarField&>(TbPatch);
+
+        // force update of jump
+        Tbp.updateCoeffs();
+
         const labelUList& faceCells = this->patch().faceCells();
 
-        jump_ = thermo.he(pp, TbPatch.jump(), faceCells);
+        jump_ = thermo.he(pp, Tbp.jump(), faceCells);
     }
 
     fixedJumpFvPatchField<scalar>::updateCoeffs();

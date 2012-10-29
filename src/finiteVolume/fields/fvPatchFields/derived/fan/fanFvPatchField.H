@@ -39,7 +39,6 @@ Description
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
-        jump         | current jump value      | yes         |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 
@@ -49,7 +48,6 @@ Description
     {
         type            fan;
         patchType       cyclic;
-        jump            uniform 0;
         jumpTable       csvFile;
         csvFileCoeffs
         {
@@ -100,6 +98,12 @@ class fanFvPatchField
 :
     public uniformJumpFvPatchField<Type>
 {
+
+    // Private Member Functions
+
+        //- Calculate the fan pressure jump
+        void calcFanJump();
+
 
 public:
 
@@ -170,17 +174,15 @@ public:
 
     // Member functions
 
-        // Evaluation functions
-
-            //- Return the "jump" across the patch
-            tmp<Field<Type> > jump() const;
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 };
 
 
 //- Specialisation of the jump-condition for the pressure
+template<>
+void fanFvPatchField<scalar>::calcFanJump();
+
 template<>
 fanFvPatchField<scalar>::fanFvPatchField
 (
@@ -188,12 +190,6 @@ fanFvPatchField<scalar>::fanFvPatchField
     const DimensionedField<scalar, volMesh>&,
     const dictionary&
 );
-
-template<>
-tmp<Field<scalar> > fanFvPatchField<scalar>::jump() const;
-
-template<>
-void fanFvPatchField<scalar>::updateCoeffs();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

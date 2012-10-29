@@ -41,6 +41,31 @@ namespace Foam
     );
 }
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<>
+void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
+{
+    if (this->cyclicPatch().owner())
+    {
+        const surfaceScalarField& phi =
+            db().lookupObject<surfaceScalarField>("phi");
+
+        const fvsPatchField<scalar>& phip =
+            patch().patchField<surfaceScalarField, scalar>(phi);
+
+        scalarField Un(max(phip/patch().magSf(), scalar(0)));
+
+        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        {
+            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
+        }
+
+        this->jump_ = this->jumpTable_->value(Un);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<>
@@ -91,11 +116,6 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
             this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
         }
     }
-    else
-    {
-        // Dummy jump table
-        this->jumpTable_.reset(new DataEntry<scalar>("jumpTable"));
-    }
 
     if (dict.found("value"))
     {
@@ -108,56 +128,6 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     {
         this->evaluate(Pstream::blocking);
     }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<>
-Foam::tmp<Foam::Field<Foam::scalar> >
-Foam::fanFvPatchField<Foam::scalar>::jump() const
-{
-    if (this->cyclicPatch().owner())
-    {
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>("phi");
-
-        const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
-
-        scalarField Un(max(phip/patch().magSf(), scalar(0)));
-
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
-        {
-            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
-        }
-
-        return this->jumpTable_->value(Un);
-    }
-    else
-    {
-        return refCast<const fanFvPatchField<scalar> >
-        (
-            this->neighbourPatchField()
-        ).jump();
-    }
-}
-
-
-template<>
-void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
-{
-    if (this->updated())
-    {
-        return;
-    }
-
-    if (this->cyclicPatch().owner())
-    {
-        this->jump_ = jump();
-    }
-
-    uniformJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 
