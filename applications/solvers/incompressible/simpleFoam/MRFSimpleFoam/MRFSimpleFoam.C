@@ -33,7 +33,7 @@ Description
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "simpleControl.H"
 #include "IObasicSourceList.H"
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "initContinuityErrs.H"
 
-    MRFZones mrfZones(mesh);
+    IOMRFZoneList mrfZones(mesh);
     mrfZones.correctBoundaryVelocity(U);
 
     simpleControl simple(mesh);

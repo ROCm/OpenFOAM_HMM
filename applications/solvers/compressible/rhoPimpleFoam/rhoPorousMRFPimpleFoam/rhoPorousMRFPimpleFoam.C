@@ -37,7 +37,7 @@ Description
 #include "psiThermo.H"
 #include "turbulenceModel.H"
 #include "bound.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 #include "pimpleControl.H"

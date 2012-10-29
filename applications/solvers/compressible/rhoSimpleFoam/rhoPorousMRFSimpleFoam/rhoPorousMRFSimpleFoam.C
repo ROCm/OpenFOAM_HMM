@@ -34,7 +34,7 @@ Description
 #include "fvCFD.H"
 #include "rhoThermo.H"
 #include "RASModel.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "IObasicSourceList.H"
 #include "IOporosityModelList.H"
 #include "simpleControl.H"
