@@ -8,6 +8,8 @@
 
     UEqn().relax();
 
+    mrfZones.addCoriolis(rho, UEqn());
+
     if (simple.momentumPredictor())
     {
         solve
