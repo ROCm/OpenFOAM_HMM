@@ -379,7 +379,8 @@ $(porosity)/fixedCoeff/fixedCoeff.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C
-$(MRF)/MRFZones.C
+$(MRF)/MRFZoneList.C
+$(MRF)/IOMRFZoneList.C
 
 SRF = $(general)/SRF
 $(SRF)/SRFModel/SRFModel/SRFModel.C

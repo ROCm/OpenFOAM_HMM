@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,60 +22,76 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::MRFZones
+    Foam::MRFZoneList
 
 Description
-    Container class for a set of MRFZones with the MRFZone member functions
-    implemented to loop over the functions for each MRFZone.
+    List container for MRF zomes
 
 SourceFiles
-    MRFZones.C
+    MRFZoneList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MRFZones_H
-#define MRFZones_H
+#ifndef MRFZoneList_H
+#define MRFZoneList_H
 
+#include "fvMesh.H"
+#include "dictionary.H"
+#include "fvMatricesFwd.H"
 #include "MRFZone.H"
-#include "IOPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+class MRFZoneList;
+Ostream& operator<<(Ostream& os, const MRFZoneList& models);
+
 /*---------------------------------------------------------------------------*\
-                           Class MRFZones Declaration
+                         Class MRFZoneList Declaration
 \*---------------------------------------------------------------------------*/
 
-class MRFZones
+class MRFZoneList
 :
-    public IOPtrList<MRFZone>
+    PtrList<MRFZone>
 {
-    // Private data
-
-        //- Reference to mesh
-        const fvMesh& mesh_;
-
+private:
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        MRFZones(const MRFZones&);
+        MRFZoneList(const MRFZoneList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const MRFZones&);
+        void operator=(const MRFZoneList&);
+
+
+protected:
+
+    // Protected data
+
+        //- Reference to the mesh database
+        const fvMesh& mesh_;
 
 
 public:
 
-    // Constructors
+    //- Constructor
+    MRFZoneList(const fvMesh& mesh, const dictionary& dict);
 
-        //- Construct from fvMesh
-        MRFZones(const fvMesh& mesh);
+    //- Destructor
+    ~MRFZoneList();
 
 
     // Member Functions
+
+        //- Return active status
+        bool active() const;
+
+        //- Reset the source list
+        void reset(const dictionary& dict);
 
         //- Add the Coriolis force contribution to the acceleration field
         void addCoriolis(const volVectorField& U, volVectorField& ddtU) const;
@@ -116,13 +132,21 @@ public:
         void correctBoundaryVelocity(volVectorField& U) const;
 
 
-    // I-O
+        // I-O
 
-        //- Read from Istream
-        virtual bool readData(Istream&);
+            //- Read dictionary
+            bool read(const dictionary& dict);
 
+            //- Write data to Ostream
+            bool writeData(Ostream& os) const;
+
+            //- Ostream operator
+            friend Ostream& operator<<
+            (
+                Ostream& os,
+                const MRFZoneList& models
+            );
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
