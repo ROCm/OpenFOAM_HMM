@@ -26,12 +26,6 @@ License
 #include "porosityModelList.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-/*
-void Foam::porosityModelList::XXX()
-{}
-*/
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::porosityModelList::porosityModelList
