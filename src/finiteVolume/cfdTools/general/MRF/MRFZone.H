@@ -70,7 +70,7 @@ class MRFZone
         //- Reference to the mesh database
         const fvMesh& mesh_;
 
-        //- Name of the MRF region model
+        //- Name of the MRF region
         const word name_;
 
         //- Coefficients dictionary
@@ -158,10 +158,10 @@ public:
 
         // Access
 
-            //- Return const access to the porosity model name
+            //- Return const access to the MRF region name
             inline const word& name() const;
 
-            //- Return const access to the porosity active flag
+            //- Return const access to the MRF active flag
             inline bool active() const;
 
 
