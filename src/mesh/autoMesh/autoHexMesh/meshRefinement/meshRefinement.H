@@ -264,6 +264,14 @@ private:
                 label& nRefine
             ) const;
 
+            //- Mark cells for distance-to-feature based refinement.
+            label markInternalDistanceToFeatureRefinement
+            (
+                const label nAllowRefine,
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
             //- Mark cells for refinement-shells based refinement.
             label markInternalRefinement
             (
@@ -656,6 +664,7 @@ public:
                 const scalar curvature,
 
                 const bool featureRefinement,
+                const bool featureDistanceRefinement,
                 const bool internalRefinement,
                 const bool surfaceRefinement,
                 const bool curvatureRefinement,

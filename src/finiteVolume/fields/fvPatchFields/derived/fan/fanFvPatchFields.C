@@ -30,18 +30,41 @@ License
 #include "Tuple2.H"
 #include "polynomial.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makeTemplatePatchTypeField
+    (
+        fvPatchScalarField,
+        fanFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-makeTemplatePatchTypeField
-(
-    fvPatchScalarField,
-    fanFvPatchScalarField
-);
+template<>
+void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
+{
+    if (this->cyclicPatch().owner())
+    {
+        const surfaceScalarField& phi =
+            db().lookupObject<surfaceScalarField>("phi");
+
+        const fvsPatchField<scalar>& phip =
+            patch().patchField<surfaceScalarField, scalar>(phi);
+
+        scalarField Un(max(phip/patch().magSf(), scalar(0)));
+
+        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        {
+            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
+        }
+
+        this->jump_ = this->jumpTable_->value(Un);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -93,11 +116,6 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
             this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
         }
     }
-    else
-    {
-        // Dummy jump table
-        this->jumpTable_.reset(new DataEntry<scalar>("jumpTable"));
-    }
 
     if (dict.found("value"))
     {
@@ -112,42 +130,5 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     }
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//- Specialisation of the jump-condition for the pressure
-template<>
-void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
-{
-    if (this->updated())
-    {
-        return;
-    }
-
-    if (this->cyclicPatch().owner())
-    {
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>("phi");
-
-        const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
-
-        scalarField Un(max(phip/patch().magSf(), scalar(0)));
-
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
-        {
-            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
-        }
-
-        this->jump_ = this->jumpTable_->value(Un);
-    }
-
-    uniformJumpFvPatchField<scalar>::updateCoeffs();
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -165,11 +165,8 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return the "jump" across the patch.
-            virtual tmp<Field<Type> > jump() const;
-
+        //- Update the coefficients
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;

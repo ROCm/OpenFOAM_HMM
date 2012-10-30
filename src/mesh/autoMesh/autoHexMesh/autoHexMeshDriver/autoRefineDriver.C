@@ -97,6 +97,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                     refineParams.curvature(),
 
                     true,               // featureRefinement
+                    false,              // featureDistanceRefinement
                     false,              // internalRefinement
                     false,              // surfaceRefinement
                     false,              // curvatureRefinement
@@ -207,6 +208,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 refineParams.curvature(),
 
                 false,              // featureRefinement
+                false,              // featureDistanceRefinement
                 false,              // internalRefinement
                 true,               // surfaceRefinement
                 true,               // curvatureRefinement
@@ -368,6 +370,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 refineParams.curvature(),
 
                 false,              // featureRefinement
+                true,               // featureDistanceRefinement
                 true,               // internalRefinement
                 false,              // surfaceRefinement
                 false,              // curvatureRefinement

@@ -141,14 +141,6 @@ class autoSnapDriver
                     vectorField& pointSurfaceNormal,
                     vectorField& pointRotation
                 ) const;
-                //void calcNearestFace
-                //(
-                //    const label iter,
-                //    const indirectPrimitivePatch& pp,
-                //    vectorField& faceDisp,
-                //    vectorField& faceSurfaceNormal,
-                //    vectorField& faceRotation
-                //) const;
                 void calcNearestFace
                 (
                     const label iter,
@@ -158,15 +150,19 @@ class autoSnapDriver
                     labelList& faceSurfaceRegion,
                     vectorField& faceRotation
                 ) const;
-                void interpolateFaceToPoint
+                void calcNearestFacePointProperties
                 (
                     const label iter,
                     const indirectPrimitivePatch& pp,
-                    const List<List<point> >& pointFaceDisp,
-                    const List<List<point> >& pointFaceRotation,
-                    const List<List<point> >& pointFaceCentres,
-                    vectorField& patchDisp
-                    //vectorField& patchRotationDisp
+
+                    const vectorField& faceDisp,
+                    const vectorField& faceSurfaceNormal,
+                    const labelList& faceSurfaceRegion,
+
+                    List<List<point> >& pointFaceSurfNormals,
+                    List<List<point> >& pointFaceDisp,
+                    List<List<point> >& pointFaceCentres,
+                    List<labelList>&    pointFacePatchID
                 ) const;
                 void correctAttraction
                 (
@@ -276,6 +272,7 @@ class autoSnapDriver
                 (
                     const label iter,
                     const scalar featureCos,
+                    const bool multiRegionFeatureSnap,
 
                     const indirectPrimitivePatch&,
                     const scalarField&,
@@ -339,6 +336,7 @@ class autoSnapDriver
                 (
                     const label iter,
                     const scalar featureCos,
+                    const bool multiRegionFeatureSnap,
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
 
