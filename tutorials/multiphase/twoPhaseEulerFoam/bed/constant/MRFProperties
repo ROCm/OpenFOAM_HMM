@@ -11,11 +11,10 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      MRFZones;
+    object      MRFProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-0
-()
+// none
 
 // ************************************************************************* //

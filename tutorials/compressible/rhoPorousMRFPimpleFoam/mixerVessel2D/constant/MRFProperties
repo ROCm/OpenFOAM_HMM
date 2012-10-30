@@ -11,10 +11,20 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      MRFZones;
+    object      MRFProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-0()
+zone1
+{
+    cellZone    rotor;
+
+    // Fixed patches (by default they 'move' with the MRF zone)
+    nonRotatingPatches ();
+
+    origin    (0 0 0);
+    axis      (0 0 1);
+    omega     constant 1047.2;
+}
 
 // ************************************************************************* //
