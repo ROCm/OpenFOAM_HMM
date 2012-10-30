@@ -25,7 +25,24 @@ Class
     Foam::IOMRFZoneList
 
 Description
-    List of MRF zones with IO functionality
+    List of MRF zones with IO functionality.  MRF zones are specified by a list
+    of dictionary entries, e.g.
+
+    \verbatim
+    zone1
+    {
+        cellZone    rotor1;
+        active      yes;
+        ...
+    }
+
+    zone2
+    {
+        cellZone    rotor2;
+        active      yes;
+        ...
+    }
+    \endverbatim
 
 SourceFiles
     IOMRFZoneList.C
