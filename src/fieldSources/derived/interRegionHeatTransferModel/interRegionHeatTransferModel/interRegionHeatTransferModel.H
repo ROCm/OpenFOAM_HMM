@@ -27,7 +27,6 @@ Class
 Description
     Base class for inter region heat exchange. The derived classes must
     provide the heat transfer coefficient (htc)
-    NOTE: mapToMap does to work in paralell
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class interRegionHeatTransferModel Declaration
+                Class interRegionHeatTransferModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class interRegionHeatTransferModel
