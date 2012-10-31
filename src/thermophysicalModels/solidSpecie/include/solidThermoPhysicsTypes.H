@@ -32,7 +32,7 @@ Description
 #ifndef solidThermoPhysicsTypes_H
 #define solidThermoPhysicsTypes_H
 
-#include "specie.H"
+#include "solidSpecie.H"
 #include "rhoConst.H"
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
@@ -53,7 +53,7 @@ namespace Foam
             <
                 hConstThermo
                 <
-                    rhoConst<specie>
+                    rhoConst<solidSpecie>
                 >,
                 sensibleEnthalpy
             >
@@ -67,7 +67,7 @@ namespace Foam
             <
                 hExponentialThermo
                 <
-                    rhoConst<specie>
+                    rhoConst<solidSpecie>
                 >,
                 sensibleEnthalpy
             >

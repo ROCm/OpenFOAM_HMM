@@ -17,20 +17,19 @@ FoamFile
 thermoType
 {
     type            heSolidThermo;
-    mixture         pureSolidMixture;
+    mixture         pureMixture;
     transport       constIso;
     thermo          hConst;
     equationOfState rhoConst;
-    specie          specie;
+    specie          solidSpecie;
     energy          sensibleEnthalpy;
 }
 
 mixture
 {
-    specie
+    solidSpecie
     {
         nMoles      1;
-        molWeight   12;
     }
 
     transport
@@ -50,17 +49,16 @@ mixture
     }
 }
 
-solidComponents
+species
 (
     pmma char
 );
 
-pmmaCoeffs
+pmma
 {
-    specie
+    solidSpecie
     {
         nMoles      1;
-        molWeight   100;
     }
 
     transport
@@ -80,9 +78,9 @@ pmmaCoeffs
     }
 }
 
-charCoeffs
+char
 {
-    specie
+    solidSpecie
     {
         nMoles      1;
         molWeight   50;

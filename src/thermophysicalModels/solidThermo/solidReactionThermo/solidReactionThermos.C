@@ -23,18 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeSolidThermo.H"
+#include "makeReactingSolidThermo.H"
 #include "solidReactionThermo.H"
 #include "heSolidThermo.H"
 
-#include "specie.H"
+#include "solidSpecie.H"
 #include "rhoConst.H"
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-#include "reactingSolidMixture.H"
+
+#include "reactingMixture.H"
+#include "multiComponentMixture.H"
+
 #include "sensibleEnthalpy.H"
 #include "thermo.H"
 
@@ -46,16 +49,29 @@ namespace Foam
 
 /* * * * * * * * * * * * * * * * * Enthalpy-based * * * * * * * * * * * * * */
 
-makeSolidThermo
+makeReactingSolidThermo
 (
     solidReactionThermo,
     heSolidThermo,
-    reactingSolidMixture,
+    reactingMixture,
     constIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
-    specie
+    solidSpecie
+);
+
+
+makeReactingSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    multiComponentMixture,
+    constIsoSolidTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    rhoConst,
+    solidSpecie
 );
 
 

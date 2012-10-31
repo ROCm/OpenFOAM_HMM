@@ -28,26 +28,26 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport
+template<class Thermo>
+Foam::constIsoSolidTransport<Thermo>::constIsoSolidTransport
 (
     const dictionary& dict
 )
 :
-    thermo(dict),
+    Thermo(dict),
     kappa_(readScalar(dict.subDict("transport").lookup("kappa")))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-void Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport::write
+template<class Thermo>
+void Foam::constIsoSolidTransport<Thermo>::constIsoSolidTransport::write
 (
     Ostream& os
 ) const
 {
-    thermo::write(os);
+    Thermo::write(os);
 
     dictionary dict("transport");
     dict.add("kappa", kappa_);
@@ -57,14 +57,14 @@ void Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport::write
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class thermo>
+template<class Thermo>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const constIsoSolidTransport<thermo>& ct
+    const constIsoSolidTransport<Thermo>& ct
 )
 {
-    operator<<(os, static_cast<const thermo&>(ct));
+    operator<<(os, static_cast<const Thermo&>(ct));
     os << tab << ct.kappa_;
 
     os.check

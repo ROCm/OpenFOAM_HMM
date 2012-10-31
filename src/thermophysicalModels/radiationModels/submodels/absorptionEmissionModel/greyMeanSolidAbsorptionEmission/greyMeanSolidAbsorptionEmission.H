@@ -90,7 +90,7 @@ private:
         HashTable<label> speciesNames_;
 
         //- Basic multicomponent mixture
-        const basicSolidMixture& mixture_;
+        const basicMultiComponentMixture& mixture_;
 
         //- List of solid species data
         List<FixedList<scalar, 2> > solidData_;

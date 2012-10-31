@@ -67,6 +67,9 @@ Reaction<ReactionThermo>::rhs() const
 template<class ReactionThermo>
 inline Ostream& operator<<(Ostream& os, const Reaction<ReactionThermo>& r)
 {
+    //os.writeKeyword("reaction")
+    //    << r.reactionStr()<< token::END_STATEMENT <<nl;
+
     os << r.type() << nl << "    ";
 
     forAll(r.lhs_, i)

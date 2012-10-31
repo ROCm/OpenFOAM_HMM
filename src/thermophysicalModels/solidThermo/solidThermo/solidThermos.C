@@ -27,16 +27,14 @@ License
 #include "solidThermo.H"
 #include "heSolidThermo.H"
 
-#include "specie.H"
+#include "solidSpecie.H"
 #include "rhoConst.H"
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
 #include "constIsoSolidTransport.H"
 #include "constAnIsoSolidTransport.H"
 #include "exponentialSolidTransport.H"
-#include "pureSolidMixture.H"
-#include "multiComponentSolidMixture.H"
-#include "reactingSolidMixture.H"
+#include "pureMixture.H"
 #include "sensibleEnthalpy.H"
 #include "sensibleInternalEnergy.H"
 #include "thermo.H"
@@ -53,50 +51,37 @@ makeSolidThermo
 (
     solidThermo,
     heSolidThermo,
-    pureSolidMixture,
+    pureMixture,
     constIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
-    specie
+    solidSpecie
 );
 
 makeSolidThermo
 (
     solidThermo,
     heSolidThermo,
-    pureSolidMixture,
+    pureMixture,
     constAnIsoSolidTransport,
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
-    specie
+    solidSpecie
 );
 
 makeSolidThermo
 (
     solidThermo,
     heSolidThermo,
-    pureSolidMixture,
+    pureMixture,
     exponentialSolidTransport,
     sensibleEnthalpy,
     hExponentialThermo,
     rhoConst,
-    specie
+    solidSpecie
 );
-
-makeSolidThermo
-(
-    solidThermo,
-    heSolidThermo,
-    multiComponentSolidMixture,
-    constIsoSolidTransport,
-    sensibleEnthalpy,
-    hConstThermo,
-    rhoConst,
-    specie
-);
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

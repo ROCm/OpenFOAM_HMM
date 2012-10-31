@@ -61,7 +61,7 @@ namespace Foam
                                                                               \
     typedef Reaction<Thermo> Reaction##Thermo;                                \
                                                                               \
-    typedef ReactionType<Thermo, ReactionRate>                                \
+    typedef ReactionType<Reaction, Thermo, ReactionRate>                      \
         ReactionType##Thermo##ReactionRate;                                   \
                                                                               \
     template<>                                                                \

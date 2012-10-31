@@ -25,53 +25,89 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::constAnIsoSolidTransport<thermo>::constAnIsoSolidTransport
+template<class Thermo>
+inline Foam::constAnIsoSolidTransport<Thermo>::constAnIsoSolidTransport
 (
-    const thermo& t,
+    const Thermo& t,
     const vector kappa
 )
 :
-    thermo(t),
+    Thermo(t),
     kappa_(kappa)
 {}
 
 
-template<class thermo>
-inline Foam::constAnIsoSolidTransport<thermo>::constAnIsoSolidTransport
+template<class Thermo>
+inline Foam::constAnIsoSolidTransport<Thermo>::constAnIsoSolidTransport
 (
     const word& name,
     const constAnIsoSolidTransport& ct
 )
 :
-    thermo(name, ct),
+    Thermo(name, ct),
     kappa_(ct.kappa_)
 {}
 
 
+template<class Thermo>
+inline Foam::autoPtr<Foam::constAnIsoSolidTransport<Thermo> >
+Foam::constAnIsoSolidTransport<Thermo>::New
+(
+    const dictionary& dict
+)
+{
+    return autoPtr<constAnIsoSolidTransport<Thermo> >
+    (
+        new constAnIsoSolidTransport<Thermo>(dict)
+    );
+}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::scalar Foam::constAnIsoSolidTransport<thermo>::
-kappa(const scalar T) const
+template<class Thermo>
+inline Foam::scalar Foam::constAnIsoSolidTransport<Thermo>::
+kappa(const scalar p, const scalar T) const
 {
     return mag(kappa_);
 }
 
-template<class thermo>
-inline Foam::vector Foam::constAnIsoSolidTransport<thermo>::
-Kappa(const scalar T) const
+template<class Thermo>
+inline Foam::vector Foam::constAnIsoSolidTransport<Thermo>::
+Kappa(const scalar p, const scalar T) const
 {
     return kappa_;
 }
 
+
+template<class Thermo>
+inline Foam::scalar Foam::constAnIsoSolidTransport<Thermo>::
+mu(const scalar p, const scalar T) const
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::constAnIsoSolidTransport<Thermo>mu::"
+        "("
+        "    const scalar p, const scalar T"
+        ") const"
+    );
+    return scalar(0);
+}
+
+
+template<class Thermo>
+inline Foam::vector Foam::constAnIsoSolidTransport<Thermo>::
+alphah(const scalar p, const scalar T) const
+{
+    return kappa_/this->Cpv(p, T);
+}
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class thermo>
-inline Foam::constAnIsoSolidTransport<thermo>&
-Foam::constAnIsoSolidTransport<thermo>::operator=
+template<class Thermo>
+inline Foam::constAnIsoSolidTransport<Thermo>&
+Foam::constAnIsoSolidTransport<Thermo>::operator=
 (
-    const constAnIsoSolidTransport<thermo>& ct
+    const constAnIsoSolidTransport<Thermo>& ct
 )
 {
     kappa_ = ct.kappa_;
@@ -80,10 +116,10 @@ Foam::constAnIsoSolidTransport<thermo>::operator=
 }
 
 
-template<class thermo>
-inline void Foam::constAnIsoSolidTransport<thermo>::operator+=
+template<class Thermo>
+inline void Foam::constAnIsoSolidTransport<Thermo>::operator+=
 (
-    const constAnIsoSolidTransport<thermo>& ct
+    const constAnIsoSolidTransport<Thermo>& ct
 )
 {
     scalar molr1 = this->nMoles();
@@ -95,10 +131,10 @@ inline void Foam::constAnIsoSolidTransport<thermo>::operator+=
 }
 
 
-template<class thermo>
-inline void Foam::constAnIsoSolidTransport<thermo>::operator-=
+template<class Thermo>
+inline void Foam::constAnIsoSolidTransport<Thermo>::operator-=
 (
-    const constAnIsoSolidTransport<thermo>& ct
+    const constAnIsoSolidTransport<Thermo>& ct
 )
 {
     scalar molr1 = this->nMoles();
@@ -113,16 +149,16 @@ inline void Foam::constAnIsoSolidTransport<thermo>::operator-=
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
-template<class thermo>
-inline Foam::constAnIsoSolidTransport<thermo> Foam::operator*
+template<class Thermo>
+inline Foam::constAnIsoSolidTransport<Thermo> Foam::operator*
 (
     const scalar s,
-    const constAnIsoSolidTransport<thermo>& ct
+    const constAnIsoSolidTransport<Thermo>& ct
 )
 {
-    return constAnIsoSolidTransport<thermo>
+    return constAnIsoSolidTransport<Thermo>
     (
-        s*static_cast<const thermo&>(ct),
+        s*static_cast<const Thermo&>(ct),
         ct.kappa_
     );
 }

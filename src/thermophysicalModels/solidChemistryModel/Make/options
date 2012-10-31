@@ -12,4 +12,5 @@ EXE_INC = \
 LIB_LIBS = \
     -lchemistryModel \
     -lfiniteVolume \
-    -lODE
+    -lODE\
+    -lreactionThermophysicalModels

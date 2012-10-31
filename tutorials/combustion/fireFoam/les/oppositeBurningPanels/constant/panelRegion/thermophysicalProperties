@@ -17,61 +17,42 @@ FoamFile
 thermoType
 {
     type            heSolidThermo;
-    mixture         reactingSolidMixture;
+    mixture         reactingMixture;
     transport       constIso;
     thermo          hConst;
     equationOfState rhoConst;
-    specie          specie;
+    specie          solidSpecie;
     energy          sensibleEnthalpy;
 }
 
-solidComponents
-(
-    v char
-);
+chemistryReader foamChemistryReader;
 
-vCoeffs
+foamChemistryFile "$FOAM_CASE/constant/panelRegion/reactions";
+
+foamChemistryThermoFile "$FOAM_CASE/constant/panelRegion/thermo.solid";
+
+
+gas
 {
     specie
     {
-        nMoles      1;
-        molWeight   100;
-    }
-    transport
-    {
-        kappa       0.135;
+        nMoles          1;
+        molWeight       18.0153;
     }
     thermodynamics
     {
-        Cp          696;
-        Hf          -1.41e6;
+        Tlow            200;
+        Thigh           5000;
+        Tcommon         1000;
+        highCpCoeffs    ( 2.67215 0.00305629 -8.73026e-07 1.20100e-10 -6.39162e-15 -29899.2 6.86282 );
+        lowCpCoeffs     ( 3.38684 0.00347498 -6.35470e-06 6.96858e-09 -2.50659e-12 -30208.1 2.59023 );
     }
-    equationOfState
+    transport
     {
-        rho         114.7;
+        As              1.67212e-06;
+        Ts              170.672;
     }
-};
+}
 
-charCoeffs
-{
-    specie
-    {
-        nMoles      1;
-        molWeight   50;
-    }
-    transport
-    {
-        kappa       0.4;
-    }
-    thermodynamics
-    {
-        Cp          611;
-        Hf          0;
-    }
-    equationOfState
-    {
-        rho         11.5;
-    }
-};
 
 // ************************************************************************* //

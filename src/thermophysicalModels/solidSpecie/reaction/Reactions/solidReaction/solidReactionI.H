@@ -30,38 +30,13 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const List<label>& solidReaction::slhs() const
-{
-    return slhs_;
-}
-
-
-inline const List<label>& solidReaction::srhs() const
-{
-    return srhs_;
-}
-
-
-inline const List<label>& solidReaction::grhs() const
-{
-    return grhs_;
-}
-
-
-inline const speciesTable& solidReaction::pyrolisisGases() const
-{
-    return pyrolisisGases_;
-}
-
-
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
+template<class ReactionThermo>
 inline Ostream& operator<<
 (
     Ostream& os,
-    const solidReaction& r
+    const solidReaction<ReactionThermo>& r
 )
 {
     r.write(os);

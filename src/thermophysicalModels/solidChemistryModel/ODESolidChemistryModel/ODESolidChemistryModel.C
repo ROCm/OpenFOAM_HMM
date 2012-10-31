@@ -24,7 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ODESolidChemistryModel.H"
-#include "reactingSolidMixture.H"
+#include "reactingMixture.H"
+#include "solidReaction.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,24 +39,20 @@ ODESolidChemistryModel
     CompType(mesh),
     ODE(),
     Ys_(this->solidThermo().composition().Y()),
-    pyrolisisGases_
-    (
-        mesh.lookupObject<dictionary>
-            ("chemistryProperties").lookup("species")
-    ),
     reactions_
     (
-        dynamic_cast<const reactingSolidMixture<SolidThermo>& >
+        dynamic_cast<const reactingMixture<SolidThermo>& >
         (
             this->solidThermo()
         )
     ),
+    pyrolisisGases_(reactions_[0].gasSpecies()),
     solidThermo_
     (
-        dynamic_cast<const reactingSolidMixture<SolidThermo>& >
+        dynamic_cast<const reactingMixture<SolidThermo>& >
         (
             this->solidThermo()
-        ).solidData()
+        ).speciesData()
     ),
     gasThermo_(pyrolisisGases_.size()),
     nGases_(pyrolisisGases_.size()),
@@ -183,7 +180,7 @@ ODESolidChemistryModel
         dictionary thermoDict =
             mesh.lookupObject<dictionary>
             (
-                "chemistryProperties"
+                "thermophysicalProperties"
             ).subDict(pyrolisisGases_[gasI]);
 
         gasThermo_.set
@@ -193,14 +190,13 @@ ODESolidChemistryModel
         );
     }
 
-    Info<< "ODESolidChemistryModel: Number of solids = " << nSolids_
-        << " and reactions = " << nReaction_ << endl;
+    Info<< "solidChemistryModel: Number of solids = " << nSolids_ << endl;
 
-    Info<< "Number of gases from pyrolysis = " << nGases_ << endl;
+    Info<< "solidChemistryModel: Number of gases = " << nGases_ << endl;
 
     forAll(reactions_, i)
     {
-        Info<< indent << "Reaction " << i << nl << reactions_[i] << nl;
+        Info<< indent << reactions_[i] << nl;
     }
 
 }
@@ -235,23 +231,23 @@ ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
 
     forAll(reactions_, i)
     {
-        const solidReaction& R = reactions_[i];
+        const Reaction<SolidThermo>& R = reactions_[i];
 
         scalar omegai = omega
         (
             R, c, T, p, pf, cf, lRef, pr, cr, rRef
         );
         scalar rhoL = 0.0;
-        forAll(R.slhs(), s)
+        forAll(R.lhs(), s)
         {
-            label si = R.slhs()[s];
+            label si = R.lhs()[s].index;
             om[si] -= omegai;
             rhoL = solidThermo_[si].rho(p, T);
         }
         scalar sr = 0.0;
-        forAll(R.srhs(), s)
+        forAll(R.rhs(), s)
         {
-            label si = R.srhs()[s];
+            label si = R.rhs()[s].index;
             scalar rhoR = solidThermo_[si].rho(p, T);
             sr = rhoR/rhoL;
             om[si] += sr*omegai;
@@ -263,7 +259,7 @@ ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
         }
         forAll(R.grhs(), g)
         {
-            label gi = R.grhs()[g];
+            label gi = R.grhs()[g].index;
             om[gi + nSolids_] += (1.0 - sr)*omegai;
         }
     }
@@ -276,7 +272,7 @@ template<class CompType, class SolidThermo, class GasThermo>
 Foam::scalar
 Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
 (
-    const solidReaction& R,
+    const Reaction<SolidThermo>& R,
     const scalarField& c,
     const scalar T,
     const scalar p,
@@ -299,16 +295,17 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::omega
 
     scalar kf = R.kf(p, T, c1);
 
-    const scalar exponent = R.nReact();
+    //const scalar exponent = R.nReact();
 
-    const label Nl = R.slhs().size();
+    const label Nl = R.lhs().size();
 
     for (label s=0; s<Nl; s++)
     {
-        label si = R.slhs()[s];
+        label si = R.lhs()[s].index;
+        const scalar exp = R.lhs()[si].exponent;
 
         kf *=
-            pow(c1[si]/Ys0_[si][cellI], exponent)
+            pow(c1[si]/Ys0_[si][cellI], exp)
            *(Ys0_[si][cellI]);
     }
 
@@ -390,18 +387,18 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
 
     for (label ri=0; ri<reactions_.size(); ri++)
     {
-        const solidReaction& R = reactions_[ri];
+        const Reaction<SolidThermo>& R = reactions_[ri];
 
         scalar kf0 = R.kf(p, T, c2);
 
-        forAll(R.slhs(), j)
+        forAll(R.lhs(), j)
         {
-            label sj = R.slhs()[j];
+            label sj = R.lhs()[j].index;
             scalar kf = kf0;
-            forAll(R.slhs(), i)
+            forAll(R.lhs(), i)
             {
-                label si = R.slhs()[i];
-                scalar exp = R.nReact();
+                label si = R.lhs()[i].index;
+                scalar exp = R.lhs()[i].exponent;
                 if (i == j)
                 {
                     if (exp < 1.0)
@@ -428,14 +425,14 @@ void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::jacobian
                 }
             }
 
-            forAll(R.slhs(), i)
+            forAll(R.lhs(), i)
             {
-                label si = R.slhs()[i];
+                label si = R.lhs()[i].index;
                 dfdc[si][sj] -= kf;
             }
-            forAll(R.srhs(), i)
+            forAll(R.rhs(), i)
             {
-                label si = R.srhs()[i];
+                label si = R.rhs()[i].index;
                 dfdc[si][sj] += kf;
             }
         }
@@ -551,7 +548,8 @@ ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::nEqns() const
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::calculate()
+void Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::
+calculate()
 {
     if (!this->chemistry_)
     {

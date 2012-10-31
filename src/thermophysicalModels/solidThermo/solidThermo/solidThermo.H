@@ -40,7 +40,6 @@ SourceFiles
 #include "fvMesh.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "basicSolidMixture.H"
 #include "basicThermo.H"
 #include "autoPtr.H"
 

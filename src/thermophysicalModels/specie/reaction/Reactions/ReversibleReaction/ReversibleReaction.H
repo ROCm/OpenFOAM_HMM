@@ -47,10 +47,15 @@ namespace Foam
                      Class ReversibleReaction Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ReactionThermo, class ReactionRate>
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
 class ReversibleReaction
 :
-    public Reaction<ReactionThermo>
+    public ReactionType<ReactionThermo>
 {
     // Private data
 
@@ -60,7 +65,15 @@ class ReversibleReaction
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const ReversibleReaction<ReactionThermo, ReactionRate>&);
+        void operator=
+        (
+            const ReversibleReaction
+            <
+                ReactionType,
+                ReactionThermo,
+                ReactionRate
+            >&
+        );
 
 
 public:
@@ -74,14 +87,19 @@ public:
         //- Construct from components
         ReversibleReaction
         (
-            const Reaction<ReactionThermo>& reaction,
+            const ReactionType<ReactionThermo>& reaction,
             const ReactionRate& k
         );
 
         //- Construct as copy given new speciesTable
         ReversibleReaction
         (
-            const ReversibleReaction<ReactionThermo, ReactionRate>&,
+            const ReversibleReaction
+            <
+                ReactionType,
+                ReactionThermo,
+                ReactionRate
+            >&,
             const speciesTable& species
         );
 
@@ -102,23 +120,29 @@ public:
         );
 
         //- Construct and return a clone
-        virtual autoPtr<Reaction<ReactionThermo> > clone() const
+        virtual autoPtr<ReactionType<ReactionThermo> > clone() const
         {
-            return autoPtr<Reaction<ReactionThermo> >
+            return autoPtr<ReactionType<ReactionThermo> >
             (
-                new ReversibleReaction<ReactionThermo, ReactionRate>(*this)
+                new ReversibleReaction
+                <
+                    ReactionType,
+                    ReactionThermo,
+                    ReactionRate
+                >(*this)
             );
         }
 
         //- Construct and return a clone with new speciesTable
-        virtual autoPtr<Reaction<ReactionThermo> > clone
+        virtual autoPtr<ReactionType<ReactionThermo> > clone
         (
             const speciesTable& species
         ) const
         {
-            return autoPtr<Reaction<ReactionThermo> >
+            return autoPtr<ReactionType<ReactionThermo> >
             (
-                new ReversibleReaction<ReactionThermo, ReactionRate>
+                new ReversibleReaction
+                <ReactionType, ReactionThermo, ReactionRate>
                 (
                     *this,
                     species
@@ -154,8 +178,8 @@ public:
             ) const;
 
             //- Reverse rate constant.
-            //  Note this evaluates the forward rate constant and divides by the
-            //  equilibrium constant
+            //  Note this evaluates the forward rate constant and divides by
+            //  the equilibrium constant
             virtual scalar kr
             (
                 const scalar p,

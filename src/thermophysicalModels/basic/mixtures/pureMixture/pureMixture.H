@@ -87,6 +87,27 @@ public:
             return mixture_;
         }
 
+        const ThermoType& cellVolMixture
+        (
+            const scalar,
+            const scalar,
+            const label
+        ) const
+        {
+            return mixture_;
+        }
+
+        const ThermoType& patchFaceVolMixture
+        (
+            const scalar,
+            const scalar,
+            const label,
+            const label
+        ) const
+        {
+            return mixture_;
+        }
+
         //- Read dictionary
         void read(const dictionary&);
 };
