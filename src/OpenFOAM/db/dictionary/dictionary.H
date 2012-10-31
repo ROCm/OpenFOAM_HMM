@@ -117,7 +117,7 @@ public:
         {
             const word scopedName = name_.name();
 
-            string::size_type i = scopedName.rfind(':');
+            string::size_type i = scopedName.rfind('.');
 
             if (i == scopedName.npos)
             {

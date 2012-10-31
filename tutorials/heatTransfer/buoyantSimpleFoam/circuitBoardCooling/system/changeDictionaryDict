@@ -96,12 +96,6 @@ dictionaryReplacement
                 {
                     kappa           1.0;
                 }
-                radiation
-                {
-                    sigmaS          0;
-                    kappaRad        0;
-                    emissivity      0;
-                }
                 thermodynamics
                 {
                     Hf              0;

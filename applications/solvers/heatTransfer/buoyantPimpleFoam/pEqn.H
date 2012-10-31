@@ -9,7 +9,7 @@
     surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*UEqn.H();
+    HbyA = rAU*(UEqn == sources(rho, U))().H();
 
     surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
@@ -28,6 +28,8 @@
     (
         fvc::ddt(rho) + psi*correction(fvm::ddt(p_rgh))
       + fvc::div(phiHbyA)
+      ==
+        sources(psi, p_rgh, rho.name())
     );
 
     while (pimple.correctNonOrthogonal())
@@ -37,6 +39,8 @@
             p_rghDDtEqn
           - fvm::laplacian(rhorAUf, p_rgh)
         );
+
+        sources.constrain(p_rghEqn, rho.name());
 
         p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 
@@ -52,6 +56,7 @@
             // calculated from the relaxed pressure
             U = HbyA + rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
+            sources.correct(U);
             K = 0.5*magSqr(U);
         }
     }

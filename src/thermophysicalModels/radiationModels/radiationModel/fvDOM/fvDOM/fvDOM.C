@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fvDOM.H"
-#include "addToRunTimeSelectionTable.H"
-
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
@@ -40,96 +38,14 @@ namespace Foam
     namespace radiation
     {
         defineTypeNameAndDebug(fvDOM, 0);
-
-        addToRunTimeSelectionTable
-        (
-            radiationModel,
-            fvDOM,
-            dictionary
-        );
+        addToRadiationRunTimeSelectionTables(fvDOM);
     }
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
-:
-    radiationModel(typeName, T),
-    G_
-    (
-        IOobject
-        (
-            "G",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("G", dimMass/pow3(dimTime), 0.0)
-    ),
-    Qr_
-    (
-        IOobject
-        (
-            "Qr",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
-    ),
-    Qem_
-    (
-        IOobject
-        (
-            "Qem",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("Qem", dimMass/pow3(dimTime), 0.0)
-    ),
-    Qin_
-    (
-        IOobject
-        (
-            "Qin",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("Qin", dimMass/pow3(dimTime), 0.0)
-    ),
-    a_
-    (
-        IOobject
-        (
-            "a",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
-    ),
-    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
-    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
-    nRay_(0),
-    nLambda_(absorptionEmission_->nBands()),
-    aLambda_(nLambda_),
-    blackBody_(nLambda_, T),
-    IRay_(0),
-    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
-    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50))
+void Foam::radiation::fvDOM::initialise()
 {
     if (mesh_.nSolutionD() == 3)    //3D
     {
@@ -255,14 +171,185 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
 
     Info<< "fvDOM : Allocated " << IRay_.size()
         << " rays with average orientation:" << nl;
+
     forAll(IRay_, i)
     {
         Info<< '\t' << IRay_[i].I().name()
             << '\t' << IRay_[i].dAve() << nl;
     }
+
     Info<< endl;
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
+:
+    radiationModel(typeName, T),
+    G_
+    (
+        IOobject
+        (
+            "G",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("G", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qem_
+    (
+        IOobject
+        (
+            "Qem",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qem", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qin_
+    (
+        IOobject
+        (
+            "Qin",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qin", dimMass/pow3(dimTime), 0.0)
+    ),
+    a_
+    (
+        IOobject
+        (
+            "a",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
+    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nRay_(0),
+    nLambda_(absorptionEmission_->nBands()),
+    aLambda_(nLambda_),
+    blackBody_(nLambda_, T),
+    IRay_(0),
+    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
+    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50))
+{
+    initialise();
+}
+
+
+Foam::radiation::fvDOM::fvDOM
+(
+    const dictionary& dict,
+    const volScalarField& T
+)
+:
+    radiationModel(typeName, dict, T),
+    G_
+    (
+        IOobject
+        (
+            "G",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("G", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qr_
+    (
+        IOobject
+        (
+            "Qr",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qem_
+    (
+        IOobject
+        (
+            "Qem",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qem", dimMass/pow3(dimTime), 0.0)
+    ),
+    Qin_
+    (
+        IOobject
+        (
+            "Qin",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("Qin", dimMass/pow3(dimTime), 0.0)
+    ),
+    a_
+    (
+        IOobject
+        (
+            "a",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("a", dimless/dimLength, 0.0)
+    ),
+    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
+    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nRay_(0),
+    nLambda_(absorptionEmission_->nBands()),
+    aLambda_(nLambda_),
+    blackBody_(nLambda_, T),
+    IRay_(0),
+    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
+    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50))
+{
+    initialise();
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

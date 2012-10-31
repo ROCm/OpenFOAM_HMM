@@ -99,11 +99,11 @@ Foam::sampledSurfaces::sampledSurfaces
 {
     if (Pstream::parRun())
     {
-        outputPath_ = mesh_.time().path()/".."/name_;
+        outputPath_ = mesh_.time().path()/".."/"postProcessing"/name_;
     }
     else
     {
-        outputPath_ = mesh_.time().path()/name_;
+        outputPath_ = mesh_.time().path()/"postProcessing"/name_;
     }
 
     read(dict);

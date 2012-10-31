@@ -88,7 +88,9 @@ public:
         {
             MESH = 1,
             SCALARLEVELS = 2,
-            OBJINTERSECTIONS = 4
+            OBJINTERSECTIONS = 4,
+            FEATURESEEDS = 8,
+            LAYERINFO = 16
         };
 
 
@@ -258,6 +260,14 @@ private:
                 const point& keepPoint,
                 const label nAllowRefine,
 
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
+            //- Mark cells for distance-to-feature based refinement.
+            label markInternalDistanceToFeatureRefinement
+            (
+                const label nAllowRefine,
                 labelList& refineCell,
                 label& nRefine
             ) const;
@@ -654,6 +664,7 @@ public:
                 const scalar curvature,
 
                 const bool featureRefinement,
+                const bool featureDistanceRefinement,
                 const bool internalRefinement,
                 const bool surfaceRefinement,
                 const bool curvatureRefinement,

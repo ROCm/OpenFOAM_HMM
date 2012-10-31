@@ -7,13 +7,21 @@
       + fvc::ddt(rho, K) + fvc::div(phi, K)
       + (
             he.name() == "e"
-          ? fvc::div(phi, volScalarField("Ep", p/rho))
+          ? fvc::div
+            (
+                fvc::absolute(phi/fvc::interpolate(rho), U),
+                p,
+                "div(phiv,p)"
+            )
           : -dpdt
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
+     ==
+        sources(rho, he)
     );
 
     EEqn.relax();
+    sources.constrain(EEqn);
     EEqn.solve();
 
     thermo.correct();

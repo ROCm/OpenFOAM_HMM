@@ -195,7 +195,7 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
             }
 
 
-            outputFilePtr_()<< tab << result;
+            file()<< tab << result;
 
             if (log_)
             {

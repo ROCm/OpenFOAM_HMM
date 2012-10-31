@@ -35,49 +35,14 @@ License
 defineTypeNameAndDebug(Foam::wallShearStress, 0);
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::wallShearStress::makeFile()
+void Foam::wallShearStress::writeFileHeader(const label i)
 {
-    // Create the output file if not already created
-    if (outputFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName outputDir;
-            word startTimeName =
-                obr_.time().timeName(obr_.time().startTime().value());
-
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir =
-                    obr_.time().path()/".."/name_/startTimeName;
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_/startTimeName;
-            }
-
-            // Create directory if does not exist
-            mkDir(outputDir);
-
-            // Open new file at start up
-            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
-
-            // Add headers to output data
-            outputFilePtr_() << "# Wall shear stress" << nl
-                << "# time " << token::TAB << "patch" << token::TAB
-                << "min" << token::TAB << "max" << endl;
-        }
-    }
+    // Add headers to output data
+    file() << "# Wall shear stress" << nl
+        << "# time " << token::TAB << "patch" << token::TAB
+        << "min" << token::TAB << "max" << endl;
 }
 
 
@@ -101,12 +66,15 @@ void Foam::wallShearStress::calcShearStress
 
             ssp = (-Sfp/magSfp) & Reffp;
 
-            vector minSsp = min(ssp);
-            vector maxSsp = max(ssp);
+            vector minSsp = gMin(ssp);
+            vector maxSsp = gMax(ssp);
 
-            outputFilePtr_() << mesh.time().timeName() << token::TAB
-                << pp.name() << token::TAB << minSsp
-                << token::TAB << maxSsp << endl;
+            if (Pstream::master())
+            {
+                file() << mesh.time().timeName() << token::TAB
+                    << pp.name() << token::TAB << minSsp
+                    << token::TAB << maxSsp << endl;
+            }
 
             if (log_)
             {
@@ -128,12 +96,12 @@ Foam::wallShearStress::wallShearStress
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
     log_(false),
-    phiName_("phi"),
-    outputFilePtr_(NULL)
+    phiName_("phi")
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -151,8 +119,6 @@ Foam::wallShearStress::wallShearStress
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
-
-    makeFile();
 
     read(dict);
 }
@@ -195,6 +161,8 @@ void Foam::wallShearStress::write()
 
     if (active_)
     {
+        functionObjectFile::write();
+
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         volVectorField wallShearStress

@@ -97,6 +97,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                     refineParams.curvature(),
 
                     true,               // featureRefinement
+                    false,              // featureDistanceRefinement
                     false,              // internalRefinement
                     false,              // surfaceRefinement
                     false,              // curvatureRefinement
@@ -207,6 +208,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
                 refineParams.curvature(),
 
                 false,              // featureRefinement
+                false,              // featureDistanceRefinement
                 false,              // internalRefinement
                 true,               // surfaceRefinement
                 true,               // curvatureRefinement
@@ -315,7 +317,7 @@ void Foam::autoRefineDriver::removeInsideCells
         refineParams.keepPoints()[0]
     );
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing subsetted mesh to time "
             << meshRefiner_.timeName() << '.' << endl;
@@ -368,6 +370,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
                 refineParams.curvature(),
 
                 false,              // featureRefinement
+                true,               // featureDistanceRefinement
                 true,               // internalRefinement
                 false,              // surfaceRefinement
                 false,              // curvatureRefinement
@@ -376,7 +379,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
             )
         );
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Pout<< "Dumping " << candidateCells.size()
                 << " cells to cellSet candidateCellsFromShells." << endl;
@@ -555,7 +558,7 @@ void Foam::autoRefineDriver::zonify
             refineParams.allowFreeStandingZoneFaces()
         );
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Pout<< "Writing zoned mesh to time "
                 << meshRefiner_.timeName() << '.' << endl;
@@ -648,7 +651,7 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
             << mesh.time().cpuTimeIncrement() << " s." << endl;
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing handleProblemCells mesh to time "
             << meshRefiner_.timeName() << '.' << endl;

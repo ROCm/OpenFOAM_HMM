@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,7 +79,7 @@ class primitiveEntry
         );
 
         //- Expand the given variable (keyword starts with $)
-        bool expandVariable(const word&, const dictionary&);
+        bool expandVariable(const string&, const dictionary&);
 
         //- Expand the given function (keyword starts with #)
         bool expandFunction

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class constantScatter Declaration
+                       Class constantScatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class constantScatter
@@ -78,25 +78,17 @@ public:
     // Constructors
 
         //- Construct from components
-        constantScatter
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+        constantScatter(const dictionary& dict, const fvMesh& mesh);
 
 
     //- Destructor
-    ~constantScatter();
+    virtual ~constantScatter();
 
 
-    // Member Operators
+    // Member Functions
 
-        // Edit
-
-        // Access
-
-            //- Return scatter coefficient
-            tmp<volScalarField> sigmaEff() const;
+        //- Return scatter coefficient
+        tmp<volScalarField> sigmaEff() const;
 };
 
 

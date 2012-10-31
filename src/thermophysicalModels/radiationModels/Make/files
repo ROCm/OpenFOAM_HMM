@@ -13,6 +13,7 @@ radiationModel/opaqueSolid/opaqueSolid.C
 /* Scatter model */
 submodels/scatterModel/scatterModel/scatterModel.C
 submodels/scatterModel/scatterModel/scatterModelNew.C
+submodels/scatterModel/noScatter/noScatter.C
 submodels/scatterModel/constantScatter/constantScatter.C
 
 

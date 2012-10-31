@@ -677,7 +677,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
         << " pairs of duplicate faces." << nl << endl;
 
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         faceSet duplicateFaceSet(mesh_, "duplicateFaces", 2*dupI);
 
@@ -765,7 +765,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
                     << abort(FatalError);
             }
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 const_cast<Time&>(mesh_.time())++;
                 Pout<< "Writing zone-baffled mesh to time " << timeName()
@@ -1870,7 +1870,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     printMeshInfo(debug, "After introducing baffles");
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
@@ -1906,7 +1906,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             faceSet problemTopo(mesh_, "problemFacesTopo", 100);
 
@@ -1953,7 +1953,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
         printMeshInfo(debug, "After introducing baffles");
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Pout<< "Writing extra baffled mesh to time "
                 << timeName() << endl;
@@ -1989,7 +1989,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     printMeshInfo(debug, "After subsetting");
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;

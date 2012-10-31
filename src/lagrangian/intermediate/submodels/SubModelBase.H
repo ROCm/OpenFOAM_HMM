@@ -61,7 +61,7 @@ protected:
         CloudType& owner_;
 
         //- Reference to the cloud dictionary
-        const dictionary& dict_;
+        const dictionary dict_;
 
         //- Name of the sub-model base class
         const word baseName_;
@@ -73,7 +73,7 @@ protected:
         const word modelName_;
 
         //- Coefficients dictionary
-        const dictionary& coeffDict_;
+        const dictionary coeffDict_;
 
 
     // Protected Member Functions

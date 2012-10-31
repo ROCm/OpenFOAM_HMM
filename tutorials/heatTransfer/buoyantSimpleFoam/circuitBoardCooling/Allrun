@@ -13,7 +13,7 @@ unset FOAM_SETNAN
 unset FOAM_SIGFPE
 
 # Create first baffle
-createBaffles baffleFaces '(baffle1Wall_0 baffle1Wall_1)' -overwrite > log.createBaffles 2>&1
+runApplication createBaffles baffleFaces '(baffle1Wall_0 baffle1Wall_1)' -overwrite
 
 # Create region
 runApplication extrudeToRegionMesh -overwrite

@@ -62,7 +62,7 @@ Foam::chemistryModel<CompType, ThermoType>::chemistryModel
             (
                 IOobject
                 (
-                    "RR::" + Y_[fieldI].name(),
+                    "RR." + Y_[fieldI].name(),
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,

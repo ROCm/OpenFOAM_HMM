@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -298,7 +298,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
 
     if (nFaceSets > 0)
     {
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             faceSet allSets(mesh_, "allFaceSets", allFaceSets.size());
             forAll(allFaceSets, setI)
@@ -365,7 +365,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         }
         updateMesh(map, growFaceCellFace(retestFaces));
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             // Check sync
             Pout<< "Checking sync after initial merging " << nFaceSets
@@ -432,7 +432,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             }
 
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 errorFaces.instance() = timeName();
                 Pout<< "Writing all faces in error to faceSet "
@@ -477,7 +477,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             Info<< "Masters that need to be restored:"
                 << nRestore << endl;
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 faceSet restoreSet(mesh_, "mastersToRestore", mastersToRestore);
                 restoreSet.instance() = timeName();
@@ -569,7 +569,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
                 restoredCells
             );
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 // Check sync
                 Pout<< "Checking sync after restoring " << retestFaces.size()
@@ -878,7 +878,7 @@ Foam::label Foam::meshRefinement::mergeEdgesUndo
                 break;
             }
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 errorFaces.instance() = timeName();
                 Pout<< "**Writing all faces in error to faceSet "
@@ -929,7 +929,7 @@ Foam::label Foam::meshRefinement::mergeEdgesUndo
             doRestorePoints(pointRemover, masterErrorFaces);
         }
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             const_cast<Time&>(mesh_.time())++;
             Pout<< "Writing merged-edges mesh to time "

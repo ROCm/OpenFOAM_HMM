@@ -25,11 +25,21 @@ thermoType
     energy          sensibleEnthalpy;
 }
 
+
 chemistryReader foamChemistryReader;
 
 foamChemistryFile "$FOAM_CASE/constant/panelRegion/reactions";
 
 foamChemistryThermoFile "$FOAM_CASE/constant/panelRegion/thermo.solid";
+
+gasThermoType
+{
+    transport       sutherland;
+    thermo          janaf;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
 
 
 gas

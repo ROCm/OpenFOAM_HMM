@@ -7,36 +7,14 @@ cd ${0%/*} || exit 1    # run from this directory
 # Get application name
 application=`getApplication`
 
-runKivaToFoam()
-{
-    if [ -f log.kivaToFoam ]
-    then
-        echo "kivaToFoam already run: remove log file to re-run"
-    else
-        echo "kivaToFoam: converting kiva file"
-        kivaToFoam -file $1 > log.kivaToFoam 2>&1
-    fi
-}
-
-
-restartApplication()
-{
-    if [ -f log-2.$1 ]
-    then
-        echo "$1 already run: remove log file to re-run"
-    else
-        echo "Running $1"
-        $1 > log-2.$1 2>&1
-    fi
-}
-
-
-runKivaToFoam otape17
+runApplication kivaToFoam -file otape17
 
 cp system/controlDict.1st system/controlDict
 runApplication $application
+mv log.$application log.$application.1
 
 cp system/controlDict.2nd system/controlDict
-restartApplication $application
+runApplication $application
+mv log.$application log.$application.2
 
 # ----------------------------------------------------------------- end-of-file

@@ -36,7 +36,11 @@ Foam::snapParameters::snapParameters(const dictionary& dict)
     nSnap_(readLabel(dict.lookup("nRelaxIter"))),
     nFeatureSnap_(dict.lookupOrDefault("nFeatureSnapIter", -1)),
     explicitFeatureSnap_(dict.lookupOrDefault("explicitFeatureSnap", true)),
-    implicitFeatureSnap_(dict.lookupOrDefault("implicitFeatureSnap", false))
+    implicitFeatureSnap_(dict.lookupOrDefault("implicitFeatureSnap", false)),
+    multiRegionFeatureSnap_
+    (
+        dict.lookupOrDefault("multiRegionFeatureSnap", false)
+    )
 {}
 
 

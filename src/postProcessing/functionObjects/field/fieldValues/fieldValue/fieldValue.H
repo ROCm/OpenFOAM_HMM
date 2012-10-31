@@ -38,6 +38,7 @@ SourceFiles
 #ifndef fieldValue_H
 #define fieldValue_H
 
+#include "functionObjectFile.H"
 #include "Switch.H"
 #include "pointFieldFwd.H"
 #include "OFstream.H"
@@ -58,6 +59,8 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class fieldValue
+:
+    public functionObjectFile
 {
 
 protected:
@@ -85,17 +88,8 @@ protected:
         //- Output field values flag
         Switch valueOutput_;
 
-        //- Output file pointer
-        autoPtr<OFstream> outputFilePtr_;
-
 
         // Functions to be over-ridden from IOoutputFilter class
-
-            //- Make the output file
-            virtual void makeFile();
-
-            //- Write the output file header
-            virtual void writeFileHeader() = 0;
 
             //- Update mesh
             virtual void updateMesh(const mapPolyMesh&);
@@ -116,6 +110,7 @@ public:
         const word& name,
         const objectRegistry& obr,
         const dictionary& dict,
+        const word& valueType,
         const bool loadFromFiles = false
     );
 

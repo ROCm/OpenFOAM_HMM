@@ -29,7 +29,7 @@ solvers
         mergeLevels     1;
     }
 
-    "(k|epsilon)"
+    "(U|k|epsilon)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;

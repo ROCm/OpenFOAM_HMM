@@ -36,6 +36,7 @@ Description
 #include "mixedFvPatchFields.H"
 #include "bound.H"
 #include "simpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

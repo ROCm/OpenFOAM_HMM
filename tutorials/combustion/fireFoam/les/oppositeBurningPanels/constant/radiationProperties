@@ -16,17 +16,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
-
 radiationModel  fvDOM;
-
-noRadiation
-{
-}
-
-P1Coeffs
-{
-}
 
 fvDOMCoeffs
 {
@@ -194,13 +184,7 @@ greyMeanAbsorptionEmissionCoeffs
 
 }
 
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+scatterModel    none;
 
 
 // ************************************************************************* //

@@ -76,6 +76,7 @@ SourceFiles
 #ifndef fieldMinMax_H
 #define fieldMinMax_H
 
+#include "functionObjectFile.H"
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "HashSet.H"
@@ -99,6 +100,8 @@ class mapPolyMesh;
 \*---------------------------------------------------------------------------*/
 
 class fieldMinMax
+:
+    public functionObjectFile
 {
 public:
 
@@ -115,17 +118,14 @@ protected:
         //- Mode type names
         static const NamedEnum<modeType, 2> modeTypeNames_;
 
-        //- Name of this set of field min/max.
-        //  Also used as the name of the output directory.
+        //- Name of this set of field min/max
+        //  Also used as the name of the output directory
         word name_;
 
         const objectRegistry& obr_;
 
         //- on/off switch
         bool active_;
-
-        //- Switch to enable/disable writing to file
-        Switch write_;
 
         //- Switch to send output to Info as well
         Switch log_;
@@ -136,14 +136,8 @@ protected:
         //- Fields to assess min/max
         wordList fieldSet_;
 
-        //- Min/max file ptr
-        autoPtr<OFstream> fieldMinMaxFilePtr_;
-
 
     // Private Member Functions
-
-        //- If the output file has not been created create it
-        void makeFile();
 
         //- Disallow default bitwise copy construct
         fieldMinMax(const fieldMinMax&);
@@ -152,7 +146,7 @@ protected:
         void operator=(const fieldMinMax&);
 
         //- Output file header information
-        virtual void writeFileHeader();
+        virtual void writeFileHeader(const label i);
 
 
 public:

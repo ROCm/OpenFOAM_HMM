@@ -100,6 +100,12 @@ protected:
             volScalarField Q_;
 
 
+        // Sub models
+
+            //- Pointer to radiation model
+            autoPtr<radiation::radiationModel> radiation_;
+
+
     // Protected member functions
 
         //- Read control parameters IO dictionary

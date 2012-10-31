@@ -31,6 +31,7 @@ License
 #include "sampledSurface.H"
 #include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
+#include "PatchTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -224,7 +225,7 @@ void Foam::fieldValues::faceSource::sampledSurfaceFaces(const dictionary& dict)
 }
 
 
-void Foam::fieldValues::faceSource::combineSurfaceGeometry
+void Foam::fieldValues::faceSource::combineMeshGeometry
 (
     faceList& faces,
     pointField& points
@@ -345,6 +346,45 @@ void Foam::fieldValues::faceSource::combineSurfaceGeometry
 }
 
 
+void Foam::fieldValues::faceSource::combineSurfaceGeometry
+(
+    faceList& faces,
+    pointField& points
+) const
+{
+    if (surfacePtr_.valid())
+    {
+        const sampledSurface& s = surfacePtr_();
+
+        if (Pstream::parRun())
+        {
+            // dimension as fraction of mesh bounding box
+            scalar mergeDim = 1e-10*mesh().bounds().mag();
+
+            labelList pointsMap;
+
+            PatchTools::gatherAndMerge
+            (
+                mergeDim,
+                primitivePatch
+                (
+                    SubList<face>(s.faces(), s.faces().size()),
+                    s.points()
+                ),
+                points,
+                faces,
+                pointsMap
+            );
+        }
+        else
+        {
+            faces = s.faces();
+            points = s.points();
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
@@ -417,32 +457,36 @@ void Foam::fieldValues::faceSource::initialise(const dictionary& dict)
 
     if (valueOutput_)
     {
+        const word surfaceFormat(dict.lookup("surfaceFormat"));
+
         surfaceWriterPtr_.reset
         (
-            surfaceWriter::New(dict.lookup("surfaceFormat")).ptr()
+            surfaceWriter::New
+            (
+                surfaceFormat,
+                dict.subOrEmptyDict("formatOptions").
+                    subOrEmptyDict(surfaceFormat)
+            ).ptr()
         );
     }
 }
 
 
-void Foam::fieldValues::faceSource::writeFileHeader()
+void Foam::fieldValues::faceSource::writeFileHeader(const label i)
 {
-    if (outputFilePtr_.valid())
+    file()
+        << "# Source : " << sourceTypeNames_[source_] << " "
+        << sourceName_ <<  nl << "# Faces  : " << nFaces_ << nl
+        << "# Time" << tab << "sum(magSf)";
+
+    forAll(fields_, i)
     {
-        outputFilePtr_()
-            << "# Source : " << sourceTypeNames_[source_] << " "
-            << sourceName_ <<  nl << "# Faces  : " << nFaces_ << nl
-            << "# Time" << tab << "sum(magSf)";
-
-        forAll(fields_, i)
-        {
-            outputFilePtr_()
-                << tab << operationTypeNames_[operation_]
-                << "(" << fields_[i] << ")";
-        }
-
-        outputFilePtr_() << endl;
+        file()
+            << tab << operationTypeNames_[operation_]
+            << "(" << fields_[i] << ")";
     }
+
+    file() << endl;
 }
 
 
@@ -485,7 +529,7 @@ Foam::fieldValues::faceSource::faceSource
     const bool loadFromFiles
 )
 :
-    fieldValue(name, obr, dict, loadFromFiles),
+    fieldValue(name, obr, dict, typeName, loadFromFiles),
     surfaceWriterPtr_(NULL),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
@@ -539,7 +583,7 @@ void Foam::fieldValues::faceSource::write()
 
         if (Pstream::master())
         {
-            outputFilePtr_() << obr_.time().value() << tab << totalArea;
+            file() << obr_.time().value() << tab << totalArea;
         }
 
         forAll(fields_, i)
@@ -553,7 +597,7 @@ void Foam::fieldValues::faceSource::write()
 
         if (Pstream::master())
         {
-            outputFilePtr_()<< endl;
+            file()<< endl;
         }
 
         if (log_)

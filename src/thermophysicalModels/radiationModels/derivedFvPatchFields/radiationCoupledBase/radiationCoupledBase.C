@@ -25,11 +25,10 @@ License
 
 #include "radiationCoupledBase.H"
 #include "volFields.H"
-
-
 #include "mappedPatchBase.H"
 #include "fvPatchFieldMapper.H"
 #include "radiationModel.H"
+#include "absorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -136,10 +135,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
         {
             // Get the coupling information from the mappedPatchBase
             const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>
-                (
-                    patch_.patch()
-                );
+                refCast<const mappedPatchBase>(patch_.patch());
 
             const polyMesh& nbrMesh = mpp.sampleMesh();
 
@@ -153,10 +149,10 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
             // Force recalculation of mapping and schedule
             const mapDistribute& distMap = mpp.map();
 
-            const fvPatch& nbrPatch = refCast<const fvMesh>
-            (
-                nbrMesh
-            ).boundary()[mpp.samplePolyPatch().index()];
+            const fvMesh& nbrFvMesh = refCast<const fvMesh>(nbrMesh);
+
+            const fvPatch& nbrPatch =
+                nbrFvMesh.boundary()[mpp.samplePolyPatch().index()];
 
 
             scalarField emissivity
@@ -187,7 +183,6 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
             )   << "Unimplemented method " << method_ << endl
                 << "Please set 'emissivity' to one of "
                 << emissivityMethodTypeNames_.toc()
-                << " and 'emissivityName' to the name of the volScalar"
                 << exit(FatalError);
         }
         break;

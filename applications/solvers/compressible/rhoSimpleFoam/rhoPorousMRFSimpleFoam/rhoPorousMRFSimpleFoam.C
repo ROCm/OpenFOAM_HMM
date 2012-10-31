@@ -35,7 +35,8 @@ Description
 #include "rhoThermo.H"
 #include "RASModel.H"
 #include "MRFZones.H"
-#include "thermalPorousZones.H"
+#include "IObasicSourceList.H"
+#include "IOporosityModelList.H"
 #include "simpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -153,24 +153,21 @@ void Foam::fieldValues::cellSource::initialise(const dictionary& dict)
 }
 
 
-void Foam::fieldValues::cellSource::writeFileHeader()
+void Foam::fieldValues::cellSource::writeFileHeader(const label i)
 {
-    if (outputFilePtr_.valid())
+    file()
+        << "# Source : " << sourceTypeNames_[source_] << " "
+        << sourceName_ <<  nl << "# Cells  : " << nCells_ << nl
+        << "# Time" << tab << "sum(V)";
+
+    forAll(fields_, i)
     {
-        outputFilePtr_()
-            << "# Source : " << sourceTypeNames_[source_] << " "
-            << sourceName_ <<  nl << "# Cells  : " << nCells_ << nl
-            << "# Time" << tab << "sum(V)";
-
-        forAll(fields_, i)
-        {
-            outputFilePtr_()
-                << tab << operationTypeNames_[operation_]
-                << "(" << fields_[i] << ")";
-        }
-
-        outputFilePtr_() << endl;
+        file()
+            << tab << operationTypeNames_[operation_]
+            << "(" << fields_[i] << ")";
     }
+
+    file() << endl;
 }
 
 
@@ -184,7 +181,7 @@ Foam::fieldValues::cellSource::cellSource
     const bool loadFromFiles
 )
 :
-    fieldValue(name, obr, dict, loadFromFiles),
+    fieldValue(name, obr, dict, typeName, loadFromFiles),
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
     nCells_(0),
@@ -223,7 +220,7 @@ void Foam::fieldValues::cellSource::write()
         scalar totalVolume = gSum(filterField(mesh().V()));
         if (Pstream::master())
         {
-            outputFilePtr_() << obr_.time().value() << tab << totalVolume;
+            file() << obr_.time().value() << tab << totalVolume;
         }
 
         forAll(fields_, i)
@@ -237,7 +234,7 @@ void Foam::fieldValues::cellSource::write()
 
         if (Pstream::master())
         {
-            outputFilePtr_()<< endl;
+            file()<< endl;
         }
 
         if (log_)

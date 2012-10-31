@@ -75,7 +75,7 @@ ODESolidChemistryModel
             (
                 IOobject
                 (
-                    "RRs::" + Ys_[fieldI].name(),
+                    "RRs." + Ys_[fieldI].name(),
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -163,7 +163,7 @@ ODESolidChemistryModel
             (
                 IOobject
                 (
-                    "RRg::" + pyrolisisGases_[fieldI],
+                    "RRg." + pyrolisisGases_[fieldI],
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
@@ -181,7 +181,11 @@ ODESolidChemistryModel
             mesh.lookupObject<dictionary>
             (
                 "thermophysicalProperties"
+<<<<<<< HEAD
             ).subDict(pyrolisisGases_[gasI]);
+=======
+            ).subDict(pyrolisisGases_[gasI] + "Coeffs");
+>>>>>>> 6389bd9649619832d64fcbf6a12a0ec6b8aab09a
 
         gasThermo_.set
         (

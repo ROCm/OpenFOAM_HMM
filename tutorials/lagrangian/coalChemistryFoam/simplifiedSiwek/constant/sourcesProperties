@@ -17,20 +17,16 @@ FoamFile
 
 source1
 {
-    type            scalarExplicitSource;
+    type            fixedTemperatureSource;
     active          true;
     timeStart       0.1;
     duration        0.4;
     selectionMode   cellSet;
     cellSet         ignitionCells;
 
-    scalarExplicitSourceCoeffs
+    fixedTemperatureSourceCoeffs
     {
-        volumeMode      absolute;
-        injectionRate
-        {
-            h               12000;
-        }
+        temperature     2000;
     }
 }
 

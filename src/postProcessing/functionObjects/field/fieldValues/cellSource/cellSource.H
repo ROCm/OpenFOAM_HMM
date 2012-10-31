@@ -214,7 +214,7 @@ protected:
         ) const;
 
         //- Output file header information
-        virtual void writeFileHeader();
+        virtual void writeFileHeader(const label i);
 
 
 public:

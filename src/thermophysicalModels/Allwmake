@@ -13,7 +13,6 @@ wmake $makeType reactionThermo
 wmake $makeType laminarFlameSpeed
 wmake $makeType chemistryModel
 wmake $makeType barotropicCompressibilityModel
-wmake $makeType thermalPorousZone
 wmake $makeType SLGThermo
 
 

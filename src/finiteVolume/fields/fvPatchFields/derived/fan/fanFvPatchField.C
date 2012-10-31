@@ -25,6 +25,18 @@ License
 
 #include "fanFvPatchField.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+void Foam::fanFvPatchField<Type>::calcFanJump()
+{
+    if (this->cyclicPatch().owner())
+    {
+        this->jump_ = this->jumpTable_->value(this->db().time().value());
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -34,8 +46,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(0)
+    uniformJumpFvPatchField<Type>(p, iF)
 {}
 
 
@@ -48,8 +59,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf, p, iF, mapper)
 {}
 
 
@@ -61,8 +71,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<Type>(p, iF),
-    jumpTable_(DataEntry<Type>::New("jumpTable", dict))
+    uniformJumpFvPatchField<Type>(p, iF, dict)
 {}
 
 
@@ -72,9 +81,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const fanFvPatchField<Type>& ptf
 )
 :
-    cyclicLduInterfaceField(),
-    fixedJumpFvPatchField<Type>(ptf),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf)
 {}
 
 
@@ -85,24 +92,24 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    fixedJumpFvPatchField<Type>(ptf, iF),
-    jumpTable_(ptf.jumpTable_().clone().ptr())
+    uniformJumpFvPatchField<Type>(ptf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 template<class Type>
-void Foam::fanFvPatchField<Type>::write(Ostream& os) const
+void Foam::fanFvPatchField<Type>::updateCoeffs()
 {
-
-    fixedJumpFvPatchField<Type>::write(os);
-    if (this->cyclicPatch().owner())
+    if (this->updated())
     {
-        jumpTable_->writeData(os);
+        return;
     }
-    this->writeEntry("value", os);
+
+    calcFanJump();
+
+    // call fixedJump variant - uniformJump will overwrite the jump value
+    fixedJumpFvPatchField<scalar>::updateCoeffs();
 }
 
 

@@ -24,8 +24,6 @@ else
     #include "alphaEqns.H"
 }
 
-interface.correct();
-
 {
     volScalarField rhoNew(alpha1*rho1 + alpha2*rho2 + alpha3*rho3);
 

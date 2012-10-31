@@ -30,18 +30,41 @@ License
 #include "Tuple2.H"
 #include "polynomial.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makeTemplatePatchTypeField
+    (
+        fvPatchScalarField,
+        fanFvPatchScalarField
+    );
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-makeTemplatePatchTypeField
-(
-    fvPatchScalarField,
-    fanFvPatchScalarField
-);
+template<>
+void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
+{
+    if (this->cyclicPatch().owner())
+    {
+        const surfaceScalarField& phi =
+            db().lookupObject<surfaceScalarField>("phi");
+
+        const fvsPatchField<scalar>& phip =
+            patch().patchField<surfaceScalarField, scalar>(phi);
+
+        scalarField Un(max(phip/patch().magSf(), scalar(0)));
+
+        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        {
+            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
+        }
+
+        this->jump_ = this->jumpTable_->value(Un);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -53,8 +76,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     const dictionary& dict
 )
 :
-    fixedJumpFvPatchField<scalar>(p, iF),
-    jumpTable_(new DataEntry<scalar>("jumpTable"))
+    uniformJumpFvPatchField<scalar>(p, iF)
 {
     if (this->cyclicPatch().owner())
     {
@@ -83,7 +105,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
                 }
             }
 
-            jumpTable_.reset
+            this->jumpTable_.reset
             (
                 new polynomial("jumpTable", coeffs)
             );
@@ -91,10 +113,9 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
         else
         {
             // Generic input constructed from dictionary
-            jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
+            this->jumpTable_ = DataEntry<scalar>::New("jumpTable", dict);
         }
     }
-
 
     if (dict.found("value"))
     {
@@ -109,42 +130,5 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     }
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-//- Specialisation of the jump-condition for the pressure
-template<>
-void Foam::fanFvPatchField<Foam::scalar>::updateCoeffs()
-{
-    if (this->updated())
-    {
-        return;
-    }
-
-    if (this->cyclicPatch().owner())
-    {
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>("phi");
-
-        const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
-
-        scalarField Un(max(phip/patch().magSf(), scalar(0)));
-
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
-        {
-            Un /= patch().lookupPatchField<volScalarField, scalar>("rho");
-        }
-
-        jump_ = jumpTable_->value(Un);
-    }
-
-    fixedJumpFvPatchField<scalar>::updateCoeffs();
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

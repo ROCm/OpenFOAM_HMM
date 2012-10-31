@@ -45,31 +45,56 @@ void Foam::fieldMinMax::calcMinMaxFields
         const label procI = Pstream::myProcNo();
 
         const fieldType& field = obr_.lookupObject<fieldType>(fieldName);
+        const fvMesh& mesh = field.mesh();
+
+        const volVectorField::GeometricBoundaryField& CfBoundary =
+            mesh.C().boundaryField();
+
         switch (mode)
         {
             case mdMag:
             {
-                const scalarField magField(mag(field));
+                const volScalarField magField(mag(field));
+                const volScalarField::GeometricBoundaryField& magFieldBoundary =
+                    magField.boundaryField();
 
-                labelList minIs(Pstream::nProcs());
                 scalarList minVs(Pstream::nProcs());
                 List<vector> minCs(Pstream::nProcs());
-                minIs[procI] = findMin(magField);
-                minVs[procI] = magField[minIs[procI]];
-                minCs[procI] = field.mesh().C()[minIs[procI]];
+                label minProcI = findMin(magField);
+                minVs[procI] = magField[minProcI];
+                minCs[procI] = field.mesh().C()[minProcI];
 
-                Pstream::gatherList(minIs);
-                Pstream::gatherList(minVs);
-                Pstream::gatherList(minCs);
 
                 labelList maxIs(Pstream::nProcs());
                 scalarList maxVs(Pstream::nProcs());
                 List<vector> maxCs(Pstream::nProcs());
-                maxIs[procI] = findMax(magField);
-                maxVs[procI] = magField[maxIs[procI]];
-                maxCs[procI] = field.mesh().C()[maxIs[procI]];
+                label maxProcI = findMax(magField);
+                maxVs[procI] = magField[maxProcI];
+                maxCs[procI] = field.mesh().C()[maxProcI];
 
-                Pstream::gatherList(maxIs);
+                forAll(magFieldBoundary, patchI)
+                {
+                    const scalarField& mfp = magFieldBoundary[patchI];
+                    const vectorField& Cfp = CfBoundary[patchI];
+
+                    label minPI = findMin(mfp);
+                    if (mfp[minPI] < minVs[procI])
+                    {
+                        minVs[procI] = mfp[minPI];
+                        minCs[procI] = Cfp[minPI];
+                    }
+
+                    label maxPI = findMax(mfp);
+                    if (mfp[maxPI] > maxVs[procI])
+                    {
+                        maxVs[procI] = mfp[maxPI];
+                        maxCs[procI] = Cfp[maxPI];
+                    }
+                }
+
+                Pstream::gatherList(minVs);
+                Pstream::gatherList(minCs);
+
                 Pstream::gatherList(maxVs);
                 Pstream::gatherList(maxCs);
 
@@ -83,28 +108,24 @@ void Foam::fieldMinMax::calcMinMaxFields
                     scalar maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    if (write_)
+                    file()
+                        << obr_.time().value() << token::TAB
+                        << fieldName << token::TAB
+                        << minValue << token::TAB << minC;
+
+                    if (Pstream::parRun())
                     {
-                        fieldMinMaxFilePtr_()
-                            << obr_.time().value() << token::TAB
-                            << fieldName << token::TAB
-                            << minValue << token::TAB << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << minI;
-                        }
-
-                        fieldMinMaxFilePtr_()
-                            << token::TAB << maxValue << token::TAB << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << maxI;
-                        }
-
-                        fieldMinMaxFilePtr_() << endl;
+                        file() << token::TAB << minI;
                     }
+
+                    file() << token::TAB << maxValue << token::TAB << maxC;
+
+                    if (Pstream::parRun())
+                    {
+                        file() << token::TAB << maxI;
+                    }
+
+                    file() << endl;
 
                     if (log_)
                     {
@@ -131,25 +152,47 @@ void Foam::fieldMinMax::calcMinMaxFields
             }
             case mdCmpt:
             {
-                List<Type> minVs(Pstream::nProcs());
-                labelList minIs(Pstream::nProcs());
-                List<vector> minCs(Pstream::nProcs());
-                minIs[procI] = findMin(field);
-                minVs[procI] = field[minIs[procI]];
-                minCs[procI] = field.mesh().C()[minIs[procI]];
+                const typename fieldType::GeometricBoundaryField&
+                    fieldBoundary = field.boundaryField();
 
-                Pstream::gatherList(minIs);
+                List<Type> minVs(Pstream::nProcs());
+                List<vector> minCs(Pstream::nProcs());
+                label minProcI = findMin(field);
+                minVs[procI] = field[minProcI];
+                minCs[procI] = field.mesh().C()[minProcI];
+
                 Pstream::gatherList(minVs);
                 Pstream::gatherList(minCs);
 
                 List<Type> maxVs(Pstream::nProcs());
-                labelList maxIs(Pstream::nProcs());
                 List<vector> maxCs(Pstream::nProcs());
-                maxIs[procI] = findMax(field);
-                maxVs[procI] = field[maxIs[procI]];
-                maxCs[procI] = field.mesh().C()[maxIs[procI]];
+                label maxProcI = findMax(field);
+                maxVs[procI] = field[maxProcI];
+                maxCs[procI] = field.mesh().C()[maxProcI];
 
-                Pstream::gatherList(maxIs);
+                forAll(fieldBoundary, patchI)
+                {
+                    const Field<Type>& fp = fieldBoundary[patchI];
+                    const vectorField& Cfp = CfBoundary[patchI];
+
+                    label minPI = findMin(fp);
+                    if (fp[minPI] < minVs[procI])
+                    {
+                        minVs[procI] = fp[minPI];
+                        minCs[procI] = Cfp[minPI];
+                    }
+
+                    label maxPI = findMax(fp);
+                    if (fp[maxPI] > maxVs[procI])
+                    {
+                        maxVs[procI] = fp[maxPI];
+                        maxCs[procI] = Cfp[maxPI];
+                    }
+                }
+
+                Pstream::gatherList(minVs);
+                Pstream::gatherList(minCs);
+
                 Pstream::gatherList(maxVs);
                 Pstream::gatherList(maxCs);
 
@@ -163,28 +206,24 @@ void Foam::fieldMinMax::calcMinMaxFields
                     Type maxValue = maxVs[maxI];
                     const vector& maxC = maxCs[maxI];
 
-                    if (write_)
+                    file()
+                        << obr_.time().value() << token::TAB
+                        << fieldName << token::TAB
+                        << minValue << token::TAB << minC;
+
+                    if (Pstream::parRun())
                     {
-                        fieldMinMaxFilePtr_()
-                            << obr_.time().value() << token::TAB
-                            << fieldName << token::TAB
-                            << minValue << token::TAB << minC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << minI;
-                        }
-
-                        fieldMinMaxFilePtr_()
-                             << token::TAB << maxValue << token::TAB << maxC;
-
-                        if (Pstream::parRun())
-                        {
-                            fieldMinMaxFilePtr_() << token::TAB << maxI;
-                        }
-
-                        fieldMinMaxFilePtr_() << endl;
+                        file() << token::TAB << minI;
                     }
+
+                    file() << token::TAB << maxValue << token::TAB << maxC;
+
+                    if (Pstream::parRun())
+                    {
+                        file() << token::TAB << maxI;
+                    }
+
+                    file() << endl;
 
                     if (log_)
                     {

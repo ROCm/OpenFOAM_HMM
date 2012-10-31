@@ -35,49 +35,13 @@ License
 defineTypeNameAndDebug(Foam::DESModelRegions, 0);
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::DESModelRegions::makeFile()
+void Foam::DESModelRegions::writeFileHeader(const label i)
 {
-    // Create the output file if not already created
-    if (outputFilePtr_.empty())
-    {
-        if (debug)
-        {
-            Info<< "Creating output file." << endl;
-        }
-
-        // File update
-        if (Pstream::master())
-        {
-            fileName outputDir;
-            word startTimeName =
-                obr_.time().timeName(obr_.time().startTime().value());
-
-            if (Pstream::parRun())
-            {
-                // Put in undecomposed case (Note: gives problems for
-                // distributed data running)
-                outputDir =
-                    obr_.time().path()/".."/name_/startTimeName;
-            }
-            else
-            {
-                outputDir = obr_.time().path()/name_/startTimeName;
-            }
-
-            // Create directory if does not exist
-            mkDir(outputDir);
-
-            // Open new file at start up
-            outputFilePtr_.reset(new OFstream(outputDir/(type() + ".dat")));
-
-            // Add headers to output data
-            outputFilePtr_() << "# DES model region coverage (% volume)" << nl
-                << "# time " << token::TAB << "LES" << token::TAB << "RAS"
-                << endl;
-        }
-    }
+    file() << "# DES model region coverage (% volume)" << nl
+        << "# time " << token::TAB << "LES" << token::TAB << "RAS"
+        << endl;
 }
 
 
@@ -91,11 +55,11 @@ Foam::DESModelRegions::DESModelRegions
     const bool loadFromFiles
 )
 :
+    functionObjectFile(obr, name, typeName),
     name_(name),
     obr_(obr),
     active_(true),
-    log_(false),
-    outputFilePtr_(NULL)
+    log_(false)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -113,8 +77,6 @@ Foam::DESModelRegions::DESModelRegions
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
-
-    makeFile();
 
     read(dict);
 }
@@ -159,6 +121,8 @@ void Foam::DESModelRegions::write()
 
     if (active_)
     {
+        functionObjectFile::write();
+
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
         if (log_)
@@ -203,7 +167,7 @@ void Foam::DESModelRegions::write()
 
             if (Pstream::master())
             {
-                outputFilePtr_() << obr_.time().timeName() << token::TAB
+                file() << obr_.time().timeName() << token::TAB
                     << prc << token::TAB << 100.0 - prc << endl;
             }
     

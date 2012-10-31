@@ -68,6 +68,8 @@ class snapParameters
 
         const Switch implicitFeatureSnap_;
 
+        const Switch multiRegionFeatureSnap_;
+
 
     // Private Member Functions
 
@@ -132,6 +134,11 @@ public:
             Switch implicitFeatureSnap() const
             {
                 return implicitFeatureSnap_;
+            }
+
+            Switch multiRegionFeatureSnap() const
+            {
+                return multiRegionFeatureSnap_;
             }
 
 };

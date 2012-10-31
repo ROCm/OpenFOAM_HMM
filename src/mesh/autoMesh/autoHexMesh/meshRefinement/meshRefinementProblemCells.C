@@ -198,7 +198,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
         << " faces on edge-connected cells of differing level."
         << endl;
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         faceSet fSet(mesh_, "edgeConnectedFaces", candidateFaces);
         fSet.instance() = timeName();
@@ -262,7 +262,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
         }
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         perpFaces.instance() = timeName();
         Pout<< "Writing " << perpFaces.size()
@@ -484,7 +484,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             << returnReduce(problemCells.size(), sumOp<label>())
             << " cells edge-connected to lower level cells." << endl;
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             cellSet problemCellSet(mesh_, "problemCells", problemCells.toc());
             problemCellSet.instance() = timeName();
@@ -582,7 +582,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             }
         }
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             const_cast<Time&>(mesh_.time())++;
             pointField oldPoints(mesh_.points());

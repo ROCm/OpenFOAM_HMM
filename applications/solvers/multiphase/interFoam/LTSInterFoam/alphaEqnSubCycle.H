@@ -1,8 +1,5 @@
-const dictionary& pimpleDict = pimple.dict();
-
-label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
-
-label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
+label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
+label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
 
 if (nAlphaSubCycles > 1)
 {
@@ -25,7 +22,5 @@ else
 {
     #include "alphaEqn.H"
 }
-
-interface.correct();
 
 rho == alpha1*rho1 + (scalar(1) - alpha1)*rho2;

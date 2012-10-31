@@ -1,5 +1,5 @@
     MRFZones mrfZones(mesh);
     mrfZones.correctBoundaryVelocity(U);
 
-    porousZones pZones(mesh);
+    IOporosityModelList pZones(mesh);
     Switch pressureImplicitPorosity(false);

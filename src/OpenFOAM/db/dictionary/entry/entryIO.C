@@ -28,6 +28,7 @@ License
 #include "functionEntry.H"
 #include "includeEntry.H"
 #include "inputModeEntry.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,8 +111,19 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
         else if
         (
            !disableFunctionEntries
-         && keyword[0] == '$')      // ... Substitution entry
+         && keyword[0] == '$'
+        )                           // ... Substitution entry
         {
+            if (keyword.size() > 2 && keyword[1] == token::BEGIN_BLOCK)
+            {
+                // Recursive substitution mode. Replace between {} with
+                // expansion.
+                string s(keyword(2, keyword.size()-3));
+                // Substitute dictionary and environment variables. Allow
+                // empty substitutions.
+                stringOps::inplaceExpand(s, parentDict, true, true);
+                keyword.std::string::replace(1, keyword.size()-1, s);
+            }
             parentDict.substituteScopedKeyword(keyword);
             return true;
         }

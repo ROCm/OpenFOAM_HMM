@@ -203,7 +203,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
     }
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "getChangedFaces : Detected "
             << " local:" << changedFaces.size()
@@ -290,7 +290,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
         forAll(features_, featI)
         {
             const featureEdgeMesh& featureMesh = features_[featI];
-            const label featureLevel = features_.levels()[featI];
+            const label featureLevel = features_.levels()[featI][0];
             const labelListList& pointEdges = featureMesh.pointEdges();
 
             // Find regions on edgeMesh
@@ -308,7 +308,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
             {
                 if (pointEdges[pointI].size() != 2)
                 {
-                    if (debug)
+                    if (debug&meshRefinement::FEATURESEEDS)
                     {
                         Pout<< "Adding particle from point:" << pointI
                             << " coord:" << featureMesh.points()[pointI]
@@ -353,7 +353,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
                 {
                     const edge& e = featureMesh.edges()[edgeI];
                     label pointI = e.start();
-                    if (debug)
+                    if (debug&meshRefinement::FEATURESEEDS)
                     {
                         Pout<< "Adding particle from point:" << pointI
                             << " coord:" << featureMesh.points()[pointI]
@@ -508,6 +508,90 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     }
 
     return returnReduce(nRefine-oldNRefine,  sumOp<label>());
+}
+
+
+// Mark cells for distance-to-feature based refinement.
+Foam::label Foam::meshRefinement::markInternalDistanceToFeatureRefinement
+(
+    const label nAllowRefine,
+
+    labelList& refineCell,
+    label& nRefine
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const pointField& cellCentres = mesh_.cellCentres();
+
+    // Detect if there are any distance shells
+    if (features_.maxDistance() <= 0.0)
+    {
+        return 0;
+    }
+
+    label oldNRefine = nRefine;
+
+    // Collect cells to test
+    pointField testCc(cellLevel.size()-nRefine);
+    labelList testLevels(cellLevel.size()-nRefine);
+    label testI = 0;
+
+    forAll(cellLevel, cellI)
+    {
+        if (refineCell[cellI] == -1)
+        {
+            testCc[testI] = cellCentres[cellI];
+            testLevels[testI] = cellLevel[cellI];
+            testI++;
+        }
+    }
+
+    // Do test to see whether cells is inside/outside shell with higher level
+    labelList maxLevel;
+    features_.findHigherLevel(testCc, testLevels, maxLevel);
+
+    // Mark for refinement. Note that we didn't store the original cellID so
+    // now just reloop in same order.
+    testI = 0;
+    forAll(cellLevel, cellI)
+    {
+        if (refineCell[cellI] == -1)
+        {
+            if (maxLevel[testI] > testLevels[testI])
+            {
+                bool reachedLimit = !markForRefine
+                (
+                    maxLevel[testI],    // mark with any positive value
+                    nAllowRefine,
+                    refineCell[cellI],
+                    nRefine
+                );
+
+                if (reachedLimit)
+                {
+                    if (debug)
+                    {
+                        Pout<< "Stopped refining internal cells"
+                            << " since reaching my cell limit of "
+                            << mesh_.nCells()+7*nRefine << endl;
+                    }
+                    break;
+                }
+            }
+            testI++;
+        }
+    }
+
+    if
+    (
+        returnReduce(nRefine, sumOp<label>())
+      > returnReduce(nAllowRefine, sumOp<label>())
+    )
+    {
+        Info<< "Reached refinement limit." << endl;
+    }
+
+    return returnReduce(nRefine-oldNRefine, sumOp<label>());
 }
 
 
@@ -1128,6 +1212,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
     const scalar curvature,
 
     const bool featureRefinement,
+    const bool featureDistanceRefinement,
     const bool internalRefinement,
     const bool surfaceRefinement,
     const bool curvatureRefinement,
@@ -1196,8 +1281,24 @@ Foam::labelList Foam::meshRefinement::refineCandidates
                 nRefine
             );
 
-            Info<< "Marked for refinement due to explicit features    : "
-                << nFeatures << " cells."  << endl;
+            Info<< "Marked for refinement due to explicit features             "
+                << ": " << nFeatures << " cells."  << endl;
+        }
+
+        // Inside distance-to-feature shells
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        if (featureDistanceRefinement)
+        {
+            label nShell = markInternalDistanceToFeatureRefinement
+            (
+                nAllowRefine,
+
+                refineCell,
+                nRefine
+            );
+            Info<< "Marked for refinement due to distance to explicit features "
+                ": " << nShell << " cells."  << endl;
         }
 
         // Inside refinement shells
@@ -1212,8 +1313,8 @@ Foam::labelList Foam::meshRefinement::refineCandidates
                 refineCell,
                 nRefine
             );
-            Info<< "Marked for refinement due to refinement shells    : "
-                << nShell << " cells."  << endl;
+            Info<< "Marked for refinement due to refinement shells             "
+                << ": " << nShell << " cells."  << endl;
         }
 
         // Refinement based on intersection of surface
@@ -1230,8 +1331,8 @@ Foam::labelList Foam::meshRefinement::refineCandidates
                 refineCell,
                 nRefine
             );
-            Info<< "Marked for refinement due to surface intersection : "
-                << nSurf << " cells."  << endl;
+            Info<< "Marked for refinement due to surface intersection          "
+                << ": " << nSurf << " cells."  << endl;
         }
 
         // Refinement based on curvature of surface
@@ -1254,8 +1355,8 @@ Foam::labelList Foam::meshRefinement::refineCandidates
                 refineCell,
                 nRefine
             );
-            Info<< "Marked for refinement due to curvature/regions    : "
-                << nCurv << " cells."  << endl;
+            Info<< "Marked for refinement due to curvature/regions             "
+                << ": " << nCurv << " cells."  << endl;
         }
 
         // Pack cells-to-refine
@@ -1330,7 +1431,7 @@ Foam::meshRefinement::refineAndBalance
     // Do all refinement
     refine(cellsToRefine);
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing refined but unbalanced " << msg
             << " mesh to time " << timeName() << endl;
@@ -1394,7 +1495,7 @@ Foam::meshRefinement::refineAndBalance
             printMeshInfo(debug, "After balancing " + msg);
 
 
-            if (debug)
+            if (debug&meshRefinement::MESH)
             {
                 Pout<< "Writing balanced " << msg
                     << " mesh to time " << timeName() << endl;
@@ -1516,7 +1617,7 @@ Foam::meshRefinement::balanceAndRefine
 
         printMeshInfo(debug, "After balancing " + msg);
 
-        if (debug)
+        if (debug&meshRefinement::MESH)
         {
             Pout<< "Writing balanced " << msg
                 << " mesh to time " << timeName() << endl;
@@ -1539,7 +1640,7 @@ Foam::meshRefinement::balanceAndRefine
 
     refine(cellsToRefine);
 
-    if (debug)
+    if (debug&meshRefinement::MESH)
     {
         Pout<< "Writing refined " << msg
             << " mesh to time " << timeName() << endl;

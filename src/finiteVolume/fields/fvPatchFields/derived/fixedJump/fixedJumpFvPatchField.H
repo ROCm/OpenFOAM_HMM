@@ -28,14 +28,37 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-    Base class for "jump" of a field<type>
+    This boundary condition provides a jump condition, using the \c cyclic
+    condition as a base.
+
+    The jump is specified as a fixed value field, applied as an offset to the
+    'owner' patch.
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        patchType    | underlying patch type should be \c cyclic| yes |
+        jump         | current jump value      | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedJump;
+        patchType       cyclic;
+        jump            uniform 10;
+    }
+    \endverbatim
+
+    The above example shows the use of a fixed jump of '10'.
 
 Note
-    not used directly
+     The underlying \c patchType should be set to \c cyclic
 
 SeeAlso
-    Foam::fanFvPatchScalarField
-    Foam::fanPressureFvPatchScalarField
+    Foam::jumpCyclicFvPatchField
 
 SourceFiles
     fixedJumpFvPatchField.C
@@ -71,6 +94,9 @@ protected:
 
 
 public:
+
+    //- Runtime type information
+    TypeName("fixedJump");
 
     // Constructors
 
@@ -138,21 +164,8 @@ public:
 
         // Access
 
-            //- Return the "jump" across the patch.
-            virtual tmp<Field<Type> > jump() const
-            {
-                if (this->cyclicPatch().owner())
-                {
-                    return jump_;
-                }
-                else
-                {
-                    return refCast<const fixedJumpFvPatchField<Type> >
-                    (
-                        this->neighbourPatchField()
-                    ).jump();
-                }
-            }
+            //- Return the "jump" across the patch
+            virtual tmp<Field<Type> > jump() const;
 
 
         // Mapping functions

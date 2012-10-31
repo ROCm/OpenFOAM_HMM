@@ -96,19 +96,28 @@ castellatedMeshControls
     // refinement.
     nCellsBetweenLevels 1;
 
+
     // Explicit feature edge refinement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Specifies a level for any cell intersected by explicitly provided
     // edges.
     // This is a featureEdgeMesh, read from constant/triSurface for now.
+    // Specify 'levels' in the same way as the 'distance' mode in the
+    // refinementRegions (see below). The old specification
+    //      level   2;
+    // is equivalent to
+    //      levels  ((0 2));
+
     features
     (
         //{
         //    file "someLine.eMesh";
-        //    level 2;
+        //    //level 2;
+        //    levels ((0.0 2) (1.0 3));
         //}
     );
+
 
     // Surface based refinement
     // ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,7 +187,7 @@ castellatedMeshControls
     // three modes
     // - distance. 'levels' specifies per distance to the surface the
     //   wanted refinement level. The distances need to be specified in
-    //   descending order.
+    //   increasing order.
     // - inside. 'levels' is only one entry and only the level is used. All
     //   cells inside the surface get refined up to the level. The surface
     //   needs to be closed for this to be possible.
@@ -245,6 +254,10 @@ snapControls
 
         //- Use castellatedMeshControls::features (default = true)
         explicitFeatureSnap true;
+
+        //- Detect features between multiple surfaces
+        //  (only for explicitFeatureSnap, default = false)
+        multiRegionFeatureSnap false;
 }
 
 // Settings for the layer addition.

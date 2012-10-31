@@ -39,7 +39,6 @@ Description
     \table
         Property     | Description             | Required    | Default value
         patchType    | underlying patch type should be \c cyclic| yes |
-        jump         | current jump value      | yes         |
         jumpTable    | jump data, e.g. \c csvFile | yes      |
     \endtable
 
@@ -49,7 +48,6 @@ Description
     {
         type            fan;
         patchType       cyclic;
-        jump            uniform 0;
         jumpTable       csvFile;
         csvFileCoeffs
         {
@@ -83,7 +81,7 @@ SourceFiles
 #ifndef fanFvPatchField_H
 #define fanFvPatchField_H
 
-#include "fixedJumpFvPatchField.H"
+#include "uniformJumpFvPatchField.H"
 #include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,12 +96,13 @@ namespace Foam
 template<class Type>
 class fanFvPatchField
 :
-    public fixedJumpFvPatchField<Type>
+    public uniformJumpFvPatchField<Type>
 {
-    // Private data
 
-        //- Interpolation table
-        autoPtr<DataEntry<Type> > jumpTable_;
+    // Private Member Functions
+
+        //- Calculate the fan pressure jump
+        void calcFanJump();
 
 
 public:
@@ -175,18 +174,15 @@ public:
 
     // Member functions
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
-
-        //- Write
-        virtual void write(Ostream&) const;
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 };
 
 
 //- Specialisation of the jump-condition for the pressure
+template<>
+void fanFvPatchField<scalar>::calcFanJump();
+
 template<>
 fanFvPatchField<scalar>::fanFvPatchField
 (
@@ -194,8 +190,6 @@ fanFvPatchField<scalar>::fanFvPatchField
     const DimensionedField<scalar, volMesh>&,
     const dictionary&
 );
-template<>
-void fanFvPatchField<scalar>::updateCoeffs();
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

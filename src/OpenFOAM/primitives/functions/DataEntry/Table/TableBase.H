@@ -97,7 +97,7 @@ protected:
         dimensionSet dimensions_;
 
         //- Extracted values
-        mutable scalarField tableSamples_;
+        mutable autoPtr<scalarField> tableSamplesPtr_;
 
         //- Interpolator method
         mutable autoPtr<interpolationWeights> interpolatorPtr_;
@@ -125,7 +125,7 @@ public:
         //- Construct from dictionary - note table is not populated
         TableBase(const word& name, const dictionary& dict);
 
-        //- Copy constructor
+        //- Copy constructor. Note: steals interpolator, tableSamples
         TableBase(const TableBase<Type>& tbl);
 
 

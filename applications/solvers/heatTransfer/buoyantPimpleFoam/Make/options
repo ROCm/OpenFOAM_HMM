@@ -2,7 +2,10 @@ EXE_INC = \
     -I../../compressible/rhoPimpleFoam \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
-    -I$(LIB_SRC)/finiteVolume/lnInclude
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/fieldSources/lnInclude \
 
 EXE_LIBS = \
     -lmeshTools \
@@ -11,4 +14,8 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lsampling \
+    -lmeshTools \
+    -lfieldSources
+

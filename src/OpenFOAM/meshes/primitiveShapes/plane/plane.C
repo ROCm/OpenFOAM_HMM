@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -208,7 +208,7 @@ Foam::plane::plane(const dictionary& dict)
     }
     else if (planeType == "embeddedPoints")
     {
-        const dictionary& subDict = dict.subDict("embeddedPoints");
+        const dictionary& subDict = dict.subDict("embeddedPointsDict");
 
         point point1(subDict.lookup("point1"));
         point point2(subDict.lookup("point2"));
@@ -226,11 +226,10 @@ Foam::plane::plane(const dictionary& dict)
     }
     else
     {
-        FatalIOErrorIn
-        (
-            "plane::plane(const dictionary&)",
-            dict
-        )   << "Invalid plane type: " << planeType
+        FatalIOErrorIn("plane::plane(const dictionary&)", dict)
+            << "Invalid plane type: " << planeType << nl
+            << "Valid options include: planeEquation, embeddedPoints and "
+            << "pointAndNormal"
             << abort(FatalIOError);
     }
 }
