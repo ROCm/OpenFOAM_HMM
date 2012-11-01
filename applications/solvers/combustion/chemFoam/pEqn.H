@@ -1,5 +1,4 @@
 {
-    thermo.correct();
     rho = thermo.rho();
     if (constProp == "volume")
     {
