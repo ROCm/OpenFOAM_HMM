@@ -318,7 +318,6 @@ void Foam::autoLayerDriver::handleNonManifolds
         }
     }
 
-
     Info<< "Set displacement to zero for all " << nNonManif
         << " non-manifold points" << endl;
 }
@@ -441,86 +440,6 @@ void Foam::autoLayerDriver::handleFeatureAngle
             << " feature edges" << endl;
     }
 }
-
-
-//Foam::tmp<Foam::scalarField> Foam::autoLayerDriver::undistortedEdgeLength
-//(
-//    const indirectPrimitivePatch& pp,
-//    const bool relativeSizes,
-//    const bool faceSize
-//)
-//{
-//    const fvMesh& mesh = meshRefiner_.mesh();
-//
-//    tmp<scalarField> tfld(new scalarField());
-//    scalarField& fld = tfld();
-//
-//    if (faceSize)
-//    {
-//        fld.setSize(pp.size());
-//    }
-//    else
-//    {
-//        fld.setSize(pp.nPoints());
-//    }
-//
-//
-//    if (relativeSizes)
-//    {
-//        const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
-//        const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
-//
-//        if (faceSize)
-//        {
-//            forAll(pp, i)
-//            {
-//                label faceI = pp.addressing()[i];
-//                label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
-//                fld[i] = edge0Len/(1<<ownLevel);
-//            }
-//        }
-//        else
-//        {
-//            // Determine per point the max cell level of connected cells
-//            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//            labelList maxPointLevel(pp.nPoints(), labelMin);
-//
-//            forAll(pp, i)
-//            {
-//                label faceI = pp.addressing()[i];
-//                label ownLevel = cellLevel[mesh.faceOwner()[faceI]];
-//
-//                const face& f = pp.localFaces()[i];
-//                forAll(f, fp)
-//                {
-//                    maxPointLevel[f[fp]] =
-//                        max(maxPointLevel[f[fp]], ownLevel);
-//                }
-//            }
-//
-//            syncTools::syncPointList
-//            (
-//                mesh,
-//                pp.meshPoints(),
-//                maxPointLevel,
-//                maxEqOp<label>(),
-//                labelMin            // null value
-//            );
-//
-//
-//            forAll(maxPointLevel, pointI)
-//            {
-//                // Find undistorted edge size for this level.
-//                fld[i] = edge0Len/(1<<maxPointLevel[pointI]);
-//            }
-//        }
-//    }
-//    else
-//    {
-//        // Use actual cell size
-//    }
-//}
 
 
 // No extrusion on cells with warped faces. Calculates the thickness of the
@@ -702,7 +621,6 @@ void Foam::autoLayerDriver::handleWarpedFaces
 //}
 
 
-// No extrusion on faces with differing number of layers for points
 void Foam::autoLayerDriver::setNumLayers
 (
     const labelList& patchToNLayers,
@@ -864,15 +782,6 @@ Foam::autoLayerDriver::makeLayerDisplacementField
         }
     }
 
-
-//Pout<< "*** makeLayerDisplacementField : boundary conditions:" << endl;
-//forAll(patchFieldTypes, patchI)
-//{
-//    Pout<< "\t" << patchI << " name:" << pointPatches[patchI].name()
-//        << " type:" << patchFieldTypes[patchI]
-//        << " nLayers:" << numLayers[patchI]
-//        << endl;
-//}
 
     const polyMesh& mesh = pMesh();
 
@@ -1053,11 +962,10 @@ void Foam::autoLayerDriver::determineSidePatches
             patchDict.add("nFaces", 0);
             patchDict.add("startFace", mesh.nFaces());
 
-            Pout<< "Adding patch " << patchI
-                << " name:" << name
-                << " between " << Pstream::myProcNo()
-                << " and " << nbrProcI
-                << endl;
+            //Pout<< "Adding patch " << patchI
+            //    << " name:" << name
+            //    << " between " << Pstream::myProcNo()
+            //    << " and " << nbrProcI << endl;
 
             label procPatchI = meshRefiner_.appendPatch
             (
@@ -1090,12 +998,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
 (
     const indirectPrimitivePatch& pp,
     const labelList& patchIDs,
-    const scalarField& patchExpansionRatio,
-
-    const bool relativeSizes,
-    const scalarField& patchFinalLayerThickness,
-    const scalarField& patchMinThickness,
-
+    const layerParameters& layerParams,
     const labelList& cellLevel,
     const labelList& patchNLayers,
     const scalar edge0Len,
@@ -1111,12 +1014,13 @@ void Foam::autoLayerDriver::calculateLayerThickness
 
     // Rework patch-wise layer parameters into minimum per point
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Note: only layer parameters consistent with layer specification
+    // method (see layerParameters) will be correct.
+    scalarField firstLayerThickness(pp.nPoints(), GREAT);
+    scalarField finalLayerThickness(pp.nPoints(), GREAT);
+    scalarField totalThickness(pp.nPoints(), GREAT);
+    scalarField expRatio(pp.nPoints(), GREAT);
 
-    // Reuse input fields
-    expansionRatio.setSize(pp.nPoints());
-    expansionRatio = GREAT;
-    thickness.setSize(pp.nPoints());
-    thickness = GREAT;
     minThickness.setSize(pp.nPoints());
     minThickness = GREAT;
 
@@ -1130,20 +1034,30 @@ void Foam::autoLayerDriver::calculateLayerThickness
         {
             label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
 
-            expansionRatio[ppPointI] = min
+            firstLayerThickness[ppPointI] = min
             (
-                expansionRatio[ppPointI],
-                patchExpansionRatio[patchI]
+                firstLayerThickness[ppPointI],
+                layerParams.firstLayerThickness()[patchI]
             );
-            thickness[ppPointI] = min
+            finalLayerThickness[ppPointI] = min
             (
-                thickness[ppPointI],
-                patchFinalLayerThickness[patchI]
+                finalLayerThickness[ppPointI],
+                layerParams.finalLayerThickness()[patchI]
+            );
+            totalThickness[ppPointI] = min
+            (
+                totalThickness[ppPointI],
+                layerParams.thickness()[patchI]
+            );
+            expRatio[ppPointI] = min
+            (
+                expRatio[ppPointI],
+                layerParams.expansionRatio()[patchI]
             );
             minThickness[ppPointI] = min
             (
                 minThickness[ppPointI],
-                patchMinThickness[patchI]
+                layerParams.minThickness()[patchI]
             );
         }
     }
@@ -1152,7 +1066,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
     (
         mesh,
         pp.meshPoints(),
-        expansionRatio,
+        firstLayerThickness,
         minEqOp<scalar>(),
         GREAT               // null value
     );
@@ -1160,7 +1074,23 @@ void Foam::autoLayerDriver::calculateLayerThickness
     (
         mesh,
         pp.meshPoints(),
-        thickness,
+        finalLayerThickness,
+        minEqOp<scalar>(),
+        GREAT               // null value
+    );
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        totalThickness,
+        minEqOp<scalar>(),
+        GREAT               // null value
+    );
+    syncTools::syncPointList
+    (
+        mesh,
+        pp.meshPoints(),
+        expRatio,
         minEqOp<scalar>(),
         GREAT               // null value
     );
@@ -1182,14 +1112,18 @@ void Foam::autoLayerDriver::calculateLayerThickness
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // by multiplying with the internal cell size.
 
-    if (relativeSizes)
+    if (layerParams.relativeSizes())
     {
-        if (min(patchMinThickness) < 0 || max(patchMinThickness) > 2)
+        if
+        (
+            min(layerParams.minThickness()) < 0
+         || max(layerParams.minThickness()) > 2
+        )
         {
             FatalErrorIn("calculateLayerThickness(..)")
                 << "Thickness should be factor of local undistorted cell size."
                 << " Valid values are [0..2]." << nl
-                << " minThickness:" << patchMinThickness
+                << " minThickness:" << layerParams.minThickness()
                 << exit(FatalError);
         }
 
@@ -1225,38 +1159,114 @@ void Foam::autoLayerDriver::calculateLayerThickness
         {
             // Find undistorted edge size for this level.
             scalar edgeLen = edge0Len/(1<<maxPointLevel[pointI]);
-            thickness[pointI] *= edgeLen;
+            firstLayerThickness[pointI] *= edgeLen;
+            finalLayerThickness[pointI] *= edgeLen;
+            totalThickness[pointI] *= edgeLen;
             minThickness[pointI] *= edgeLen;
         }
     }
 
 
 
-    // Rework thickness (of final layer) into overall thickness of all layers
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Rework thickness parameters into overall thickness
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(thickness, pointI)
+    forAll(firstLayerThickness, pointI)
     {
-        // Calculate layer thickness based on expansion ratio
-        // and final layer height
-        if (expansionRatio[pointI] == 1)
-        {
-            thickness[pointI] *= patchNLayers[pointI];
-        }
-        else
-        {
+        thickness[pointI] = layerParams.layerThickness
+        (
+            patchNLayers[pointI],
+            firstLayerThickness[pointI],
+            finalLayerThickness[pointI],
+            totalThickness[pointI],
+            expRatio[pointI]
+        );
 
-            scalar invExpansion = 1.0 / expansionRatio[pointI];
-            label nLay = patchNLayers[pointI];
-            thickness[pointI] *=
-                (1.0 - pow(invExpansion, nLay))
-              / (1.0 - invExpansion);
-        }
+        expansionRatio[pointI] = layerParams.layerExpansionRatio
+        (
+            patchNLayers[pointI],
+            firstLayerThickness[pointI],
+            finalLayerThickness[pointI],
+            totalThickness[pointI],
+            expRatio[pointI]
+        );
     }
-
 
     //Info<< "calculateLayerThickness : min:" << gMin(thickness)
     //    << " max:" << gMax(thickness) << endl;
+
+    // Print a bit
+    {
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+        // Find maximum length of a patch name, for a nicer output
+        label maxPatchNameLen = 0;
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+            word patchName = patches[patchI].name();
+            maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
+        }
+
+        Info<< nl
+            << setf(ios_base::left) << setw(maxPatchNameLen) << "patch"
+            << setw(0) << " faces    layers avg thickness[m]" << nl
+            << setf(ios_base::left) << setw(maxPatchNameLen) << " "
+            << setw(0) << "                 near-wall overall" << nl
+            << setf(ios_base::left) << setw(maxPatchNameLen) << "-----"
+            << setw(0) << " -----    ------ --------- -------" << endl;
+
+        forAll(patchIDs, i)
+        {
+            label patchI = patchIDs[i];
+
+            const labelList& meshPoints = patches[patchI].meshPoints();
+
+            scalar sumThickness = 0;
+            scalar sumNearWallThickness = 0;
+
+            forAll(meshPoints, patchPointI)
+            {
+                label ppPointI = pp.meshPointMap()[meshPoints[patchPointI]];
+
+                sumThickness += thickness[ppPointI];
+                sumNearWallThickness += layerParams.firstLayerThickness
+                (
+                    patchNLayers[ppPointI],
+                    firstLayerThickness[ppPointI],
+                    finalLayerThickness[ppPointI],
+                    thickness[ppPointI],
+                    expansionRatio[ppPointI]
+                );
+            }
+
+            label totNPoints = returnReduce(meshPoints.size(), sumOp<label>());
+
+            // For empty patches, totNPoints is 0.
+            scalar avgThickness = 0;
+            scalar avgNearWallThickness = 0;
+
+            if (totNPoints > 0)
+            {
+                avgThickness =
+                    returnReduce(sumThickness, sumOp<scalar>())
+                  / totNPoints;
+                avgNearWallThickness =
+                    returnReduce(sumNearWallThickness, sumOp<scalar>())
+                  / totNPoints;
+            }
+
+            Info<< setf(ios_base::left) << setw(maxPatchNameLen)
+                << patches[patchI].name() << setprecision(3)
+                << " " << setw(8)
+                << returnReduce(patches[patchI].size(), sumOp<scalar>())
+                << " " << setw(6) << layerParams.numLayers()[patchI]
+                << " " << setw(8) << avgNearWallThickness
+                << "  " << setw(8) << avgThickness
+                << endl;
+        }
+        Info<< endl;
+    }
 }
 
 
@@ -2618,7 +2628,8 @@ void Foam::autoLayerDriver::addLayers
     const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
     const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
 
-    // Determine (wanted) point-wise layer thickness and expansion ratio
+    // Determine (wanted) point-wise overall layer thickness and expansion
+    // ratio
     scalarField thickness(pp().nPoints());
     scalarField minThickness(pp().nPoints());
     scalarField expansionRatio(pp().nPoints());
@@ -2626,12 +2637,7 @@ void Foam::autoLayerDriver::addLayers
     (
         pp,
         meshMover().adaptPatchIDs(),
-        layerParams.expansionRatio(),
-
-        layerParams.relativeSizes(),        // thickness relative to cellsize?
-        layerParams.finalLayerThickness(),  // wanted thicknes
-        layerParams.minThickness(),         // minimum thickness
-
+        layerParams,
         cellLevel,
         patchNLayers,
         edge0Len,
@@ -2641,87 +2647,6 @@ void Foam::autoLayerDriver::addLayers
         expansionRatio
     );
 
-
-    // Print a bit
-    {
-        const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        // Find maximum length of a patch name, for a nicer output
-        label maxPatchNameLen = 0;
-        forAll(meshMover().adaptPatchIDs(), i)
-        {
-            label patchI = meshMover().adaptPatchIDs()[i];
-            word patchName = patches[patchI].name();
-            maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
-        }
-
-        Info<< nl
-            << setf(ios_base::left) << setw(maxPatchNameLen) << "patch"
-            << setw(0) << " faces    layers avg thickness[m]" << nl
-            << setf(ios_base::left) << setw(maxPatchNameLen) << " "
-            << setw(0) << "                 near-wall overall" << nl
-            << setf(ios_base::left) << setw(maxPatchNameLen) << "-----"
-            << setw(0) << " -----    ------ --------- -------" << endl;
-
-        forAll(meshMover().adaptPatchIDs(), i)
-        {
-            label patchI = meshMover().adaptPatchIDs()[i];
-
-            const labelList& meshPoints = patches[patchI].meshPoints();
-
-            scalar sumThickness = 0;
-            scalar sumNearWallThickness = 0;
-
-            forAll(meshPoints, patchPointI)
-            {
-                label ppPointI = pp().meshPointMap()[meshPoints[patchPointI]];
-
-                sumThickness += thickness[ppPointI];
-
-                label nLay = patchNLayers[ppPointI];
-                if (nLay > 0)
-                {
-                    if (expansionRatio[ppPointI] == 1)
-                    {
-                        sumNearWallThickness += thickness[ppPointI]/nLay;
-                    }
-                    else
-                    {
-                        scalar s =
-                            (1.0-pow(expansionRatio[ppPointI], nLay))
-                          / (1.0-expansionRatio[ppPointI]);
-                        sumNearWallThickness += thickness[ppPointI]/s;
-                    }
-                }
-            }
-
-            label totNPoints = returnReduce(meshPoints.size(), sumOp<label>());
-
-            // For empty patches, totNPoints is 0.
-            scalar avgThickness = 0;
-            scalar avgNearWallThickness = 0;
-
-            if (totNPoints > 0)
-            {
-                avgThickness =
-                    returnReduce(sumThickness, sumOp<scalar>())
-                  / totNPoints;
-                avgNearWallThickness =
-                    returnReduce(sumNearWallThickness, sumOp<scalar>())
-                  / totNPoints;
-            }
-
-            Info<< setf(ios_base::left) << setw(maxPatchNameLen)
-                << patches[patchI].name() << setprecision(3)
-                << " " << setw(8)
-                << returnReduce(patches[patchI].size(), sumOp<scalar>())
-                << " " << setw(6) << layerParams.numLayers()[patchI]
-                << " " << setw(8) << avgNearWallThickness
-                << "  " << setw(8) << avgThickness
-                << endl;
-        }
-        Info<< endl;
-    }
 
 
     // Calculate wall to medial axis distance for smoothing displacement
@@ -2958,8 +2883,8 @@ void Foam::autoLayerDriver::addLayers
         // Determine per point/per face number of layers to extrude. Also
         // handles the slow termination of layers when going switching layers
 
-        labelList nPatchPointLayers(pp().nPoints(),-1);
-        labelList nPatchFaceLayers(pp().localFaces().size(),-1);
+        labelList nPatchPointLayers(pp().nPoints(), -1);
+        labelList nPatchFaceLayers(pp().size(), -1);
         setupLayerInfoTruncation
         (
             meshMover(),
@@ -2970,31 +2895,22 @@ void Foam::autoLayerDriver::addLayers
             nPatchFaceLayers
         );
 
-        // Calculate displacement for first layer for addPatchLayer.
-        // (first layer = layer of cells next to the original mesh)
-        vectorField firstDisp(patchNLayers.size(), vector::zero);
+        // Calculate displacement for final layer for addPatchLayer.
+        // (layer of cells next to the original mesh)
+        vectorField finalDisp(patchNLayers.size(), vector::zero);
 
         forAll(nPatchPointLayers, i)
         {
-            if (nPatchPointLayers[i] > 0)
-            {
-                if (expansionRatio[i] == 1.0)
-                {
-                    firstDisp[i] = patchDisp[i]/nPatchPointLayers[i];
-                }
-                else
-                {
-                    label nLay = nPatchPointLayers[i];
-                    scalar h =
-                        pow(expansionRatio[i], nLay - 1)
-                      * (1.0 - expansionRatio[i])
-                      / (1.0 - pow(expansionRatio[i], nLay));
-                    firstDisp[i] = h*patchDisp[i];
-                }
-            }
+            scalar ratio = layerParams.finalLayerThicknessRatio
+            (
+                nPatchPointLayers[i],
+                expansionRatio[i]
+            );
+            finalDisp[i] = ratio*patchDisp[i];
         }
 
-        const scalarField invExpansionRatio(1.0 / expansionRatio);
+
+        const scalarField invExpansionRatio(1.0/expansionRatio);
 
         // Add topo regardless of whether extrudeStatus is extruderemove.
         // Not add layer if patchDisp is zero.
@@ -3009,7 +2925,7 @@ void Foam::autoLayerDriver::addLayers
             labelList(0),       // exposed patchIDs, not used for adding layers
             nPatchFaceLayers,   // layers per face
             nPatchPointLayers,  // layers per point
-            firstDisp,          // thickness of layer nearest internal mesh
+            finalDisp,          // thickness of layer nearest internal mesh
             meshMod
         );
 
