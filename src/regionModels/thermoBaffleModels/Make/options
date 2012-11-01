@@ -17,5 +17,4 @@ LIB_LIBS = \
     -lfiniteVolume \
     -lmeshTools \
     -lOpenFOAM \
-    -lsolidSpecie \
     -lradiationModels

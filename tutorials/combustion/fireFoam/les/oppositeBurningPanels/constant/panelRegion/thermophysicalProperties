@@ -21,7 +21,7 @@ thermoType
     transport       constIso;
     thermo          hConst;
     equationOfState rhoConst;
-    specie          solidSpecie;
+    specie          specie;
     energy          sensibleEnthalpy;
 }
 

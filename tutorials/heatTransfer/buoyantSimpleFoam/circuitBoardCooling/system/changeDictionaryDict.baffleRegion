@@ -111,7 +111,7 @@ dictionaryReplacement
                 thermoType
                 {
                     type            heSolidThermo;
-                    mixture         pureSolidMixture;
+                    mixture         pureMixture;
                     transport       constIso;
                     thermo          hConst;
                     equationOfState rhoConst;

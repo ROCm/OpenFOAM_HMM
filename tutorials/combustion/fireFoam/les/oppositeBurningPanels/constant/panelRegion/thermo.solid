@@ -15,11 +15,12 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-v
+wood
 {
-    solidSpecie
+    specie
     {
         nMoles      1;
+        molWeight   100;
     }
     transport
     {
@@ -38,9 +39,10 @@ v
 
 char
 {
-    solidSpecie
+    specie
     {
         nMoles      1;
+        molWeight   50;
     }
     transport
     {

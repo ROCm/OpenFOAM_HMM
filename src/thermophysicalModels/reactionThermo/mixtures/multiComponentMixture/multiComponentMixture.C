@@ -165,20 +165,12 @@ const ThermoType& Foam::multiComponentMixture<ThermoType>::cellVolMixture
     }
 
     mixtureVol_ =
-        Y_[0][celli]
-      / speciesData_[0].rho(p, T)
-      / rhoInv
-      / speciesData_[0].W()
-      * speciesData_[0];
+        Y_[0][celli]/speciesData_[0].rho(p, T)/rhoInv*speciesData_[0];
 
     for (label n=1; n<Y_.size(); n++)
     {
         mixtureVol_ +=
-            Y_[n][celli]
-          / speciesData_[n].rho(p, T)
-          / rhoInv
-          / speciesData_[n].W()
-          * speciesData_[n];
+            Y_[n][celli]/speciesData_[n].rho(p, T)/rhoInv*speciesData_[n];
     }
 
     return mixtureVol_;
@@ -198,24 +190,19 @@ patchFaceVolMixture
     scalar rhoInv = 0.0;
     forAll(speciesData_, i)
     {
-        rhoInv += Y_[i].boundaryField()[patchi][facei]/speciesData_[i].rho(p, T);
+        rhoInv +=
+            Y_[i].boundaryField()[patchi][facei]/speciesData_[i].rho(p, T);
     }
 
     mixtureVol_ =
-        Y_[0].boundaryField()[patchi][facei]
-      / speciesData_[0].rho(p, T)
-      / rhoInv
-      / speciesData_[0].W()
+        Y_[0].boundaryField()[patchi][facei]/speciesData_[0].rho(p, T)/rhoInv
       * speciesData_[0];
 
     for (label n=1; n<Y_.size(); n++)
     {
         mixtureVol_ +=
-            Y_[n].boundaryField()[patchi][facei]
-          / speciesData_[n].rho(p,T)
-          / rhoInv
-          / speciesData_[n].W()
-          * speciesData_[n];
+            Y_[n].boundaryField()[patchi][facei]/speciesData_[n].rho(p,T)
+          / rhoInv*speciesData_[n];
     }
 
     return mixtureVol_;

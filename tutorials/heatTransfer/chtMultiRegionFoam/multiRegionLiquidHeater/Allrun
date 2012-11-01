@@ -15,11 +15,6 @@ do
    rm -f 0*/$i/{mut,alphat,epsilon,k,U,p_rgh}
 done
 
-## remove solid fields from fluid regions (important for post-processing)
-for i in bottomWater topAir
-do
-   rm -f 0*/$i/{Ypmma,Ychar}
-done
 
 for i in bottomWater topAir heater leftSolid rightSolid
 do

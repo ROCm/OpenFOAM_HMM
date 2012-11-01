@@ -27,7 +27,7 @@ License
 #include "solidReactionThermo.H"
 #include "heSolidThermo.H"
 
-#include "solidSpecie.H"
+#include "specie.H"
 #include "rhoConst.H"
 #include "hConstThermo.H"
 #include "hExponentialThermo.H"
@@ -58,7 +58,7 @@ makeReactingSolidThermo
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
-    solidSpecie
+    specie
 );
 
 
@@ -71,7 +71,7 @@ makeReactingSolidThermo
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
-    solidSpecie
+    specie
 );
 
 

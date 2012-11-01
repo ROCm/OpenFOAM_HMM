@@ -75,7 +75,7 @@ Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
         {
             reaction << glhs()[i].stoichCoeff;
         }
-        reaction << species_[glhs()[i].index];
+        reaction << gasSpecies()[glhs()[i].index];
         if (mag(glhs()[i].exponent - glhs()[i].stoichCoeff) > SMALL)
         {
             reaction << "^" << glhs()[i].exponent;
@@ -113,7 +113,7 @@ Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
         {
             reaction << grhs()[i].stoichCoeff;
         }
-        reaction << species_[grhs()[i].index];
+        reaction << gasSpecies()[grhs()[i].index];
         if (mag(grhs()[i].exponent - grhs()[i].stoichCoeff) > SMALL)
         {
             reaction << "^" << grhs()[i].exponent;

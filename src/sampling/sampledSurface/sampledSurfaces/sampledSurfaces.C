@@ -164,17 +164,19 @@ void Foam::sampledSurfaces::write()
             writeGeometry();
         }
 
-        sampleAndWrite<volScalarField>(mesh_);
-        sampleAndWrite<volVectorField>(mesh_);
-        sampleAndWrite<volSphericalTensorField>(mesh_);
-        sampleAndWrite<volSymmTensorField>(mesh_);
-        sampleAndWrite<volTensorField>(mesh_);
+        const IOobjectList objects(mesh_, mesh_.time().timeName());
 
-        sampleAndWrite<surfaceScalarField>(mesh_);
-        sampleAndWrite<surfaceVectorField>(mesh_);
-        sampleAndWrite<surfaceSphericalTensorField>(mesh_);
-        sampleAndWrite<surfaceSymmTensorField>(mesh_);
-        sampleAndWrite<surfaceTensorField>(mesh_);
+        sampleAndWrite<volScalarField>(objects);
+        sampleAndWrite<volVectorField>(objects);
+        sampleAndWrite<volSphericalTensorField>(objects);
+        sampleAndWrite<volSymmTensorField>(objects);
+        sampleAndWrite<volTensorField>(objects);
+
+        sampleAndWrite<surfaceScalarField>(objects);
+        sampleAndWrite<surfaceVectorField>(objects);
+        sampleAndWrite<surfaceSphericalTensorField>(objects);
+        sampleAndWrite<surfaceSymmTensorField>(objects);
+        sampleAndWrite<surfaceTensorField>(objects);
     }
 }
 

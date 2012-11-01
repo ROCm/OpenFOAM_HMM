@@ -181,11 +181,7 @@ ODESolidChemistryModel
             mesh.lookupObject<dictionary>
             (
                 "thermophysicalProperties"
-<<<<<<< HEAD
             ).subDict(pyrolisisGases_[gasI]);
-=======
-            ).subDict(pyrolisisGases_[gasI] + "Coeffs");
->>>>>>> 6389bd9649619832d64fcbf6a12a0ec6b8aab09a
 
         gasThermo_.set
         (
