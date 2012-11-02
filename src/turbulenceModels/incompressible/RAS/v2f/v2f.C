@@ -37,6 +37,11 @@ namespace incompressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(v2f, 0);
+addToRunTimeSelectionTable(RASModel, v2f, dictionary);
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 wordList v2f::RBoundaryTypes() const
@@ -81,11 +86,6 @@ tmp<volScalarField> v2f::Ls() const
     return CL_*max(pow(k_, 1.5)/epsilon_, Ceta_*pow025(pow3(nu())/epsilon_));
 }
 
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(v2f, 0);
-addToRunTimeSelectionTable(RASModel, v2f, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -158,7 +158,7 @@ v2f::v2f
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Ceps1",
+            "Ceps2",
             coeffDict_,
             1.9
         )
