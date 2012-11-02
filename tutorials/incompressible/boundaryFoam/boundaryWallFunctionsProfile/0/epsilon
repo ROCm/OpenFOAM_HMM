@@ -24,12 +24,12 @@ boundaryField
     lowerWall
     {
         type            epsilonWallFunction;
-        value           uniform 1e-08;
+        value           $internalField;
     }
     upperWall
     {
         type            epsilonWallFunction;
-        value           uniform 1e-08;
+        value           $internalField;
     }
     front
     {

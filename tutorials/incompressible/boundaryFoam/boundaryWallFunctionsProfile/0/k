@@ -24,12 +24,12 @@ boundaryField
     lowerWall
     {
         type            kqRWallFunction;
-        internalField   uniform 0.1;
+        value           $internalField;
     }
     upperWall
     {
         type            kqRWallFunction;
-        internalField   uniform 0.1;
+        value           $internalField;
     }
     front
     {

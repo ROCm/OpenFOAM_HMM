@@ -24,12 +24,12 @@ boundaryField
     lowerWall
     {
         type            nutUSpaldingWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
     upperWall
     {
         type            nutUSpaldingWallFunction;
-        value           uniform 0;
+        value           $internalField;
     }
     front
     {

@@ -24,12 +24,12 @@ boundaryField
     lowerWall
     {
         type            omegaWallFunction;
-        value           uniform 1111.11;
+        value           $internalField;
     }
     upperWall
     {
         type            omegaWallFunction;
-        value           uniform 1111.11;
+        value           $internalField;
     }
     front
     {
