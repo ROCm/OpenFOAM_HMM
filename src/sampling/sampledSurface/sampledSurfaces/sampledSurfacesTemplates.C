@@ -204,7 +204,7 @@ void Foam::sampledSurfaces::sampleAndWrite(const IOobjectList& allObjects)
             {
                 sampleAndWrite
                 (
-                    mesh.thisDb().lookupObject<GeoField>(field)
+                    mesh_.thisDb().lookupObject<GeoField>(field)
                 );
             }
         }
