@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,48 +21,59 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    ThermoMixture
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "pureSolidMixture.H"
-#include "fvMesh.H"
+#include "dictionary.H"
+#include "IFstream.H"
+#include "specie.H"
+#include "perfectGas.H"
+#include "hConstThermo.H"
+#include "sensibleEnthalpy.H"
+#include "thermo.H"
+#include "constTransport.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    typedef constTransport
+    <
+        species::thermo
+        <
+            hConstThermo<perfectGas<specie> >,
+            sensibleEnthalpy
+        >
+    > ThermoType;
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+    dictionary dict(IFstream("thermoDict")());
 
-template<class ThermoType>
-pureSolidMixture<ThermoType>::pureSolidMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
-:
-    basicMixture(thermoDict, mesh),
-    mixture_(thermoDict.subDict("mixture"))
-{}
+    ThermoType t1(dict.subDict("specie1"));
+    ThermoType t2(dict.subDict("specie2"));
 
+    Info<< "Checking Cp of mixture of hConstThermo" << endl;
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    Info<< "W 1, 2, (1 + 2) = " << t1.W() << " " << t2.W() << " "
+        << (t1 + t2).W() << endl;
 
-template<class ThermoType>
-pureSolidMixture<ThermoType>::~pureSolidMixture()
-{}
+    Info<< "Cp 1, 2, 1 + 2 = " << t1.cp(1, 1) << " " << t2.cp(1, 1) << " "
+        << (t1 + t2).cp(1, 1) << endl;
 
+    ThermoType t3(t1);
+    t3 += t2;
+    Info<< "Cp (1 += 2) = " << t3.cp(1, 1) << endl;
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+    Info<< "\nEnd\n" << endl;
 
-template<class ThermoType>
-void pureSolidMixture<ThermoType>::read(const dictionary& thermoDict)
-{
-    mixture_ = ThermoType(thermoDict.subDict("mixture"));
+    return 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

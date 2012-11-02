@@ -30,6 +30,7 @@ inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
     const scalar A,
     const scalar Ta,
     const scalar Tcrit
+    //const scalar nReact
 )
 :
     A_(A),
@@ -47,6 +48,18 @@ inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
     A_(readScalar(is.readBegin("solidArrheniusReaction(Istream&)"))),
     Ta_(readScalar(is)),
     Tcrit_(readScalar(is))
+{}
+
+
+inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
+(
+    const speciesTable&,
+    const dictionary& dict
+)
+:
+    A_(readScalar(dict.lookup("A"))),
+    Ta_(readScalar(dict.lookup("Ta"))),
+    Tcrit_(readScalar(dict.lookup("Tcrit")))
 {}
 
 
@@ -71,6 +84,14 @@ inline Foam::scalar Foam::solidArrheniusReactionRate::operator()
     }
 
     return ak;
+}
+
+
+inline void Foam::solidArrheniusReactionRate::write(Ostream& os) const
+{
+    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Tcrit") << Tcrit_ << token::END_STATEMENT << nl;
 }
 
 

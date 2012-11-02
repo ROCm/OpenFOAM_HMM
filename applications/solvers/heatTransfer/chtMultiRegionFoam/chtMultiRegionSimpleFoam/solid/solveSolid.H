@@ -3,7 +3,8 @@
     {
         fvScalarMatrix hEqn
         (
-            -fvm::laplacian(alpha, h)
+           - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
+           + sources(rho, h)
         );
         hEqn.relax();
         hEqn.solve();

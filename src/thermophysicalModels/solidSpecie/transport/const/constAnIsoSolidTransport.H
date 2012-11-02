@@ -26,7 +26,7 @@ Class
 
 Description
     Constant properties Transport package.
-    Templated into a given thermodynamics package (needed for thermal
+    Templated into a given Thermodynamics package (needed for thermal
     conductivity).
 
 SourceFiles
@@ -44,20 +44,20 @@ SourceFiles
 namespace Foam
 {
 
-template<class thermo> class constAnIsoSolidTransport;
+template<class Thermo> class constAnIsoSolidTransport;
 
-template<class thermo>
-inline constAnIsoSolidTransport<thermo> operator*
+template<class Thermo>
+inline constAnIsoSolidTransport<Thermo> operator*
 (
     const scalar,
-    const constAnIsoSolidTransport<thermo>&
+    const constAnIsoSolidTransport<Thermo>&
 );
 
-template<class thermo>
+template<class Thermo>
 Ostream& operator<<
 (
     Ostream&,
-    const constAnIsoSolidTransport<thermo>&
+    const constAnIsoSolidTransport<Thermo>&
 );
 
 
@@ -65,10 +65,10 @@ Ostream& operator<<
                    Class constAnIsoSolidTransport Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class thermo>
+template<class Thermo>
 class constAnIsoSolidTransport
 :
-    public thermo
+    public Thermo
 {
     // Private data
 
@@ -79,7 +79,7 @@ class constAnIsoSolidTransport
     // Private Member Functions
 
         //- Construct from components
-        inline constAnIsoSolidTransport(const thermo& t, const vector kappa);
+        inline constAnIsoSolidTransport(const Thermo& t, const vector kappa);
 
 
 public:
@@ -93,18 +93,36 @@ public:
             const constAnIsoSolidTransport&
         );
 
-        //- Construct from Istream
-        //constAnIsoSolidTransport(Istream&);
+        //- Construct from dictionary
         constAnIsoSolidTransport(const dictionary&);
+
+        // Selector from dictionary
+        inline static autoPtr<constAnIsoSolidTransport> New
+        (
+            const dictionary& dict
+        );
 
 
     // Member functions
 
+        //- Return the instantiated type name
+        static word typeName()
+        {
+            return "constAnIso<" + Thermo::typeName() + '>';
+        }
+
         //- Isotropic thermal conductivity [W/mK]
-        inline scalar kappa(const scalar T) const;
+        inline scalar kappa(const scalar p, const scalar T) const;
 
         //- Un-isotropic thermal conductivity [W/mK]
-        inline vector Kappa(const scalar T) const;
+        inline vector Kappa(const scalar p, const scalar T) const;
+
+        //- Dynamic viscosity [kg/ms]
+        inline scalar mu(const scalar p, const scalar T) const;
+
+        //- Thermal diffusivity of enthalpy [kg/ms]
+        inline vector alphah(const scalar p, const scalar T) const;
+
 
         //- Write to Ostream
         void write(Ostream& os) const;
@@ -121,7 +139,7 @@ public:
 
          // Friend operators
 
-        friend constAnIsoSolidTransport operator* <thermo>
+        friend constAnIsoSolidTransport operator* <Thermo>
         (
             const scalar,
             const constAnIsoSolidTransport&
@@ -130,7 +148,7 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<< <thermo>
+        friend Ostream& operator<< <Thermo>
         (
             Ostream&,
             const constAnIsoSolidTransport&

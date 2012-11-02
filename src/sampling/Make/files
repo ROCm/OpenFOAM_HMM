@@ -18,6 +18,7 @@ sampledSet/sampledSets/sampledSetsGrouping.C
 sampledSet/sampledSetsFunctionObject/sampledSetsFunctionObject.C
 sampledSet/triSurfaceMeshPointSet/triSurfaceMeshPointSet.C
 sampledSet/uniform/uniformSet.C
+sampledSet/array/arraySet.C
 
 setWriters = sampledSet/writers
 

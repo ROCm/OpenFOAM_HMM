@@ -25,6 +25,7 @@ License
 
 #include "makeReactionThermo.H"
 #include "thermoPhysicsTypes.H"
+#include "solidThermoPhysicsTypes.H"
 
 #include "chemistryReader.H"
 #include "foamChemistryReader.H"
@@ -41,6 +42,8 @@ makeChemistryReader(gasThermoPhysics);
 makeChemistryReader(constIncompressibleGasThermoPhysics);
 makeChemistryReader(incompressibleGasThermoPhysics);
 makeChemistryReader(icoPoly8ThermoPhysics);
+makeChemistryReader(hConstSolidThermoPhysics);
+makeChemistryReader(hExponentialSolidThermoPhysics);
 
 makeChemistryReaderType(foamChemistryReader, constGasThermoPhysics);
 makeChemistryReaderType(foamChemistryReader, gasThermoPhysics);
@@ -51,6 +54,8 @@ makeChemistryReaderType
 );
 makeChemistryReaderType(foamChemistryReader, incompressibleGasThermoPhysics);
 makeChemistryReaderType(foamChemistryReader, icoPoly8ThermoPhysics);
+makeChemistryReaderType(foamChemistryReader, hConstSolidThermoPhysics);
+makeChemistryReaderType(foamChemistryReader, hExponentialSolidThermoPhysics);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

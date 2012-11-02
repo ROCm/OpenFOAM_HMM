@@ -49,22 +49,57 @@ inline Foam::constIsoSolidTransport<thermo>::constIsoSolidTransport
 {}
 
 
+template<class Thermo>
+inline Foam::autoPtr<Foam::constIsoSolidTransport<Thermo> >
+Foam::constIsoSolidTransport<Thermo>::New
+(
+    const dictionary& dict
+)
+{
+    return autoPtr<constIsoSolidTransport<Thermo> >
+    (
+        new constIsoSolidTransport<Thermo>(dict)
+    );
+}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class thermo>
 inline Foam::scalar Foam::constIsoSolidTransport<thermo>::
-kappa(const scalar T) const
+kappa(const scalar p, const scalar T) const
 {
     return kappa_;
 }
 
 template<class thermo>
 inline Foam::vector Foam::constIsoSolidTransport<thermo>::
-Kappa(const scalar T) const
+Kappa(const scalar p, const scalar T) const
 {
     return vector(kappa_, kappa_, kappa_);
 }
 
+
+template<class thermo>
+inline Foam::scalar Foam::constIsoSolidTransport<thermo>::
+mu(const scalar p, const scalar T) const
+{
+    notImplemented
+    (
+        "Foam::scalar Foam::constIsoSolidTransport<thermo>mu::"
+        "("
+        "    const scalar p, const scalar T"
+        ") const"
+    );
+    return scalar(0);
+}
+
+
+template<class thermo>
+inline Foam::scalar Foam::constIsoSolidTransport<thermo>::
+alphah(const scalar p, const scalar T) const
+{
+    return kappa_/this->Cpv(p, T);
+}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

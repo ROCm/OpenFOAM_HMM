@@ -32,30 +32,54 @@ Description
 #ifndef makeSolidThermo_H
 #define makesolidThermo_H
 
-#include "makeThermo.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #define makeSolidThermo(BaseThermo,Cthermo,Mixture,Transport,Type,Thermo,EqnOfState,Specie)\
                                                                               \
-makeThermoTypedefs                                                            \
-(                                                                             \
-    BaseThermo,                                                               \
-    Cthermo,                                                                  \
-    Mixture,                                                                  \
-    Transport,                                                                \
-    Type,                                                                     \
-    Thermo,                                                                   \
-    EqnOfState,                                                               \
-    Specie                                                                    \
-)                                                                             \
                                                                               \
-addToRunTimeSelectionTable                                                    \
+typedef                                                                       \
+    Transport                                                                 \
+    <                                                                         \
+        species::thermo                                                       \
+        <                                                                     \
+            Thermo                                                            \
+            <                                                                 \
+                EqnOfState                                                    \
+                <                                                             \
+                    Specie                                                    \
+                >                                                             \
+            >,                                                                \
+            Type                                                              \
+        >                                                                     \
+    > Transport##Type##Thermo##EqnOfState##Specie;                            \
+                                                                              \
+typedef                                                                       \
+    heThermo                                                                  \
+    <                                                                         \
+        BaseThermo,                                                           \
+        Mixture<Transport##Type##Thermo##EqnOfState##Specie>                  \
+    > heThermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie;         \
+                                                                              \
+typedef                                                                       \
+    Cthermo                                                                   \
+    <                                                                         \
+        BaseThermo,                                                           \
+        Mixture<Transport##Type##Thermo##EqnOfState##Specie>                  \
+    > Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie;          \
+                                                                              \
+                                                                              \
+defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    basicThermo,                                                              \
     Cthermo##Mixture##Transport##Type##Thermo##EqnOfState##Specie,            \
-    fvMesh                                                                    \
+    (                                                                         \
+        #Cthermo"<"#Mixture"<"                                                \
+      + Transport##Type##Thermo##EqnOfState##Specie::typeName()               \
+      + ">>"                                                                  \
+    ).c_str(),                                                                \
+    0                                                                         \
 );                                                                            \
+                                                                              \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \

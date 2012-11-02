@@ -106,7 +106,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::cp
     const scalar T
 ) const
 {
-    return Cv_*this->W() + this->cpMcv(p, T);
+    return Cv_ + this->cpMcv(p, T);
 }
 
 
@@ -117,7 +117,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::ha
     const scalar T
 ) const
 {
-    return cp(p, T)*T + Hf_*this->W();
+    return cp(p, T)*T + Hf_;
 }
 
 
@@ -135,7 +135,7 @@ inline Foam::scalar Foam::eConstThermo<EquationOfState>::hs
 template<class EquationOfState>
 inline Foam::scalar Foam::eConstThermo<EquationOfState>::hc() const
 {
-    return Hf_*this->W();
+    return Hf_;
 }
 
 

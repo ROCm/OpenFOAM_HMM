@@ -90,6 +90,8 @@ fields
 //      uniform: extra number of sampling points
 //      polyLine, cloud: list of coordinates
 //      patchCloud: list of coordinates and set of patches to look for nearest
+//      patchSeed: random sampling on set of patches. Points slightly off
+//                 face centre.
 sets
 (
     lineX1
@@ -135,6 +137,15 @@ sets
         maxDistance 0.1;    // maximum distance to search
         patches     (".*Wall.*");
     }
+
+    patchSeed
+    {
+        patches     (".*Wall.*");
+        // Number of points to seed. Divided amongst all processors according
+        // to fraction of patches they hold.
+        maxPoints   100;
+    }
+
 );
 
 

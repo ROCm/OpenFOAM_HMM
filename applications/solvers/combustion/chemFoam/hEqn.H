@@ -9,4 +9,6 @@
     {
         h[0] = h0 + integratedHeat;
     }
+
+    thermo.correct();
 }

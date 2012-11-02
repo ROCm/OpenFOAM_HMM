@@ -47,10 +47,15 @@ namespace Foam
              Class NonEquilibriumReversibleReaction Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ReactionThermo, class ReactionRate>
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
 class NonEquilibriumReversibleReaction
 :
-    public Reaction<ReactionThermo>
+    public ReactionType<ReactionThermo>
 {
     // Private data
 
@@ -64,7 +69,7 @@ class NonEquilibriumReversibleReaction
         void operator=
         (
             const NonEquilibriumReversibleReaction
-                <ReactionThermo, ReactionRate>&
+                <ReactionType, ReactionThermo, ReactionRate>&
         );
 
 
@@ -79,7 +84,7 @@ public:
         //- Construct from components
         NonEquilibriumReversibleReaction
         (
-            const Reaction<ReactionThermo>& reaction,
+            const ReactionType<ReactionThermo>& reaction,
             const ReactionRate& forwardReactionRate,
             const ReactionRate& reverseReactionRate
         );
@@ -88,7 +93,7 @@ public:
         NonEquilibriumReversibleReaction
         (
             const NonEquilibriumReversibleReaction
-                <ReactionThermo, ReactionRate>&,
+                <ReactionType, ReactionThermo, ReactionRate>&,
             const speciesTable& species
         );
 
@@ -109,25 +114,25 @@ public:
         );
 
         //- Construct and return a clone
-        virtual autoPtr<Reaction<ReactionThermo> > clone() const
+        virtual autoPtr<ReactionType<ReactionThermo> > clone() const
         {
-            return autoPtr<Reaction<ReactionThermo> >
+            return autoPtr<ReactionType<ReactionThermo> >
             (
                 new NonEquilibriumReversibleReaction
-                    <ReactionThermo, ReactionRate>(*this)
+                    <ReactionType, ReactionThermo, ReactionRate>(*this)
             );
         }
 
         //- Construct and return a clone with new speciesTable
-        virtual autoPtr<Reaction<ReactionThermo> > clone
+        virtual autoPtr<ReactionType<ReactionThermo> > clone
         (
             const speciesTable& species
         ) const
         {
-            return autoPtr<Reaction<ReactionThermo> >
+            return autoPtr<ReactionType<ReactionThermo> >
             (
                 new NonEquilibriumReversibleReaction
-                    <ReactionThermo, ReactionRate>
+                    <ReactionType, ReactionThermo, ReactionRate>
                     (*this, species)
             );
         }

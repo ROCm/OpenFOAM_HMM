@@ -27,60 +27,94 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ReactionThermo, class ReactionRate>
-Foam::ReversibleReaction<ReactionThermo, ReactionRate>::ReversibleReaction
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::ReversibleReaction<ReactionType, ReactionThermo, ReactionRate>::
+ReversibleReaction
 (
-    const Reaction<ReactionThermo>& reaction,
+    const ReactionType<ReactionThermo>& reaction,
     const ReactionRate& k
 )
 :
-    Reaction<ReactionThermo>(reaction),
+    ReactionType<ReactionThermo>(reaction),
     k_(k)
 {}
 
 
-template<class ReactionThermo, class ReactionRate>
-Foam::ReversibleReaction<ReactionThermo, ReactionRate>::ReversibleReaction
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::ReversibleReaction<ReactionType, ReactionThermo, ReactionRate>::
+ReversibleReaction
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
     Istream& is
 )
 :
-    Reaction<ReactionThermo>(species, thermoDatabase, is),
+    ReactionType<ReactionThermo>(species, thermoDatabase, is),
     k_(species, is)
 {}
 
 
-template<class ReactionThermo, class ReactionRate>
-Foam::ReversibleReaction<ReactionThermo, ReactionRate>::ReversibleReaction
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::ReversibleReaction<ReactionType, ReactionThermo, ReactionRate>::
+ReversibleReaction
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
     const dictionary& dict
 )
 :
-    Reaction<ReactionThermo>(species, thermoDatabase, dict),
+    ReactionType<ReactionThermo>(species, thermoDatabase, dict),
     k_(species, dict)
 {}
 
 
-template<class ReactionThermo, class ReactionRate>
-Foam::ReversibleReaction<ReactionThermo, ReactionRate>::ReversibleReaction
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::ReversibleReaction<ReactionType, ReactionThermo, ReactionRate>::
+ReversibleReaction
 (
-    const ReversibleReaction<ReactionThermo, ReactionRate>& rr,
+    const ReversibleReaction<ReactionType, ReactionThermo, ReactionRate>& rr,
     const speciesTable& species
 )
 :
-    Reaction<ReactionThermo>(rr, species),
+    ReactionType<ReactionThermo>(rr, species),
     k_(rr.k_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ReactionThermo, class ReactionRate>
-Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kf
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::scalar Foam::ReversibleReaction
+<
+    ReactionType,
+    ReactionThermo,
+    ReactionRate
+>::kf
 (
     const scalar p,
     const scalar T,
@@ -91,8 +125,18 @@ Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kf
 }
 
 
-template<class ReactionThermo, class ReactionRate>
-Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::scalar Foam::ReversibleReaction
+<
+    ReactionType,
+    ReactionThermo,
+    ReactionRate
+>::kr
 (
     const scalar kfwd,
     const scalar p,
@@ -104,8 +148,18 @@ Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
 }
 
 
-template<class ReactionThermo, class ReactionRate>
-Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+Foam::scalar Foam::ReversibleReaction
+<
+    ReactionType,
+    ReactionThermo,
+    ReactionRate
+>::kr
 (
     const scalar p,
     const scalar T,
@@ -116,8 +170,18 @@ Foam::scalar Foam::ReversibleReaction<ReactionThermo, ReactionRate>::kr
 }
 
 
-template<class ReactionThermo, class ReactionRate>
-void Foam::ReversibleReaction<ReactionThermo, ReactionRate>::write
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
+void Foam::ReversibleReaction
+<
+    ReactionType,
+    ReactionThermo,
+    ReactionRate
+>::write
 (
     Ostream& os
 ) const

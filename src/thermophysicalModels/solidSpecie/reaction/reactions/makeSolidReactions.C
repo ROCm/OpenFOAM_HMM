@@ -25,6 +25,7 @@ License
 
 #include "makeSolidReaction.H"
 #include "solidArrheniusReactionRate.H"
+#include "solidThermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -33,7 +34,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * Make Solid reactions  * * * * * * * * * * * * //
 
-makeIRReactions(solidArrheniusReactionRate)
+makeSolidIRReactions(hConstSolidThermoPhysics, solidArrheniusReactionRate)
+
+makeSolidIRReactions
+(
+    hExponentialSolidThermoPhysics,
+    solidArrheniusReactionRate
+)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

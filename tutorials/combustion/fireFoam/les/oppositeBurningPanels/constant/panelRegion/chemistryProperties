@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "constant";
     object      chemistryProperties;
@@ -30,13 +30,6 @@ odeCoeffs
     solver          SIBS;
     eps             0.05;
 }
-
-reactions
-(
-    irreversibleSolidArrheniusReaction
-    v  = gas + char
-    (7.83e10 15274.57 400 4.86)
-);
 
 
 // ************************************************************************* //

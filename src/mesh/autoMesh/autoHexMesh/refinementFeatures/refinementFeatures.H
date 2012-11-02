@@ -57,8 +57,11 @@ private:
 
     // Private data
 
-        //- Refinement levels
-        labelList levels_;
+        //- Per shell the list of ranges
+        List<scalarField> distances_;
+
+        //- Per shell per distance the refinement level
+        labelListList levels_;
 
         //- Edge
         PtrList<indexedOctree<treeDataEdge> > edgeTrees_;
@@ -75,6 +78,13 @@ private:
         //- Build edge tree and feature point tree
         void buildTrees(const label, const labelList&);
 
+        //- Find shell level higher than ptLevel
+        void findHigherLevel
+        (
+            const pointField& pt,
+            const label featI,
+            labelList& maxLevel
+        ) const;
 
 public:
 
@@ -101,9 +111,16 @@ public:
 
         // Access
 
-            const labelList& levels() const
+            //- Per featureEdgeMesh the list of level
+            const labelListList& levels() const
             {
                 return levels_;
+            }
+
+            //- Per featureEdgeMesh the list of ranges
+            const List<scalarField>& distances() const
+            {
+                return distances_;
             }
 
             const PtrList<indexedOctree<treeDataEdge> >& edgeTrees() const
@@ -118,6 +135,9 @@ public:
 
 
         // Query
+
+            //- Highest distance of all features
+            scalar maxDistance() const;
 
             //- Find nearest point on nearest feature edge
             void findNearestEdge
@@ -139,6 +159,14 @@ public:
                 const scalarField& nearestDistSqr,
                 labelList& nearFeature,
                 labelList& nearIndex
+            ) const;
+
+            //- Find shell level higher than ptLevel
+            void findHigherLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,
+                labelList& maxLevel
             ) const;
 
 };
