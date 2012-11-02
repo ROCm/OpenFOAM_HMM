@@ -101,7 +101,7 @@ dictionaryReplacement
                 // Thermo baffle model
                 thermoBaffleModel   thermoBaffle2D;
                 regionName          baffleRegion;
-                infoOutput          yes;
+                infoOutput          no;
                 active              yes;
                 thermoBaffle2DCoeffs
                 {
@@ -111,7 +111,7 @@ dictionaryReplacement
                 thermoType
                 {
                     type            heSolidThermo;
-                    mixture         pureSolidMixture;
+                    mixture         pureMixture;
                     transport       constIso;
                     thermo          hConst;
                     equationOfState rhoConst;

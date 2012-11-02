@@ -47,10 +47,15 @@ namespace Foam
                     Class IrreversibleReaction Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ReactionThermo, class ReactionRate>
+template
+<
+    template<class> class ReactionType,
+    class ReactionThermo,
+    class ReactionRate
+>
 class IrreversibleReaction
 :
-    public Reaction<ReactionThermo>
+    public ReactionType<ReactionThermo>
 {
     // Private data
 
@@ -62,7 +67,12 @@ class IrreversibleReaction
         //- Disallow default bitwise assignment
         void operator=
         (
-            const IrreversibleReaction<ReactionThermo, ReactionRate>&
+            const IrreversibleReaction
+            <
+                ReactionType,
+                ReactionThermo,
+                ReactionRate
+            >&
         );
 
 
@@ -77,14 +87,19 @@ public:
         //- Construct from components
         IrreversibleReaction
         (
-            const Reaction<ReactionThermo>& reaction,
+            const ReactionType<ReactionThermo>& reaction,
             const ReactionRate& reactionRate
         );
 
         //- Construct as copy given new speciesTable
         IrreversibleReaction
         (
-            const IrreversibleReaction<ReactionThermo, ReactionRate>&,
+            const IrreversibleReaction
+            <
+                ReactionType,
+                ReactionThermo,
+                ReactionRate
+            >&,
             const speciesTable& species
         );
 
@@ -109,7 +124,12 @@ public:
         {
             return autoPtr<Reaction<ReactionThermo> >
             (
-                new IrreversibleReaction<ReactionThermo, ReactionRate>(*this)
+                new IrreversibleReaction
+                <
+                    ReactionType,
+                    ReactionThermo,
+                    ReactionRate
+                >(*this)
             );
         }
 
@@ -121,7 +141,12 @@ public:
         {
             return autoPtr<Reaction<ReactionThermo> >
             (
-                new IrreversibleReaction<ReactionThermo, ReactionRate>
+                new IrreversibleReaction
+                <
+                    ReactionType,
+                    ReactionThermo,
+                    ReactionRate
+                >
                 (
                     *this,
                     species

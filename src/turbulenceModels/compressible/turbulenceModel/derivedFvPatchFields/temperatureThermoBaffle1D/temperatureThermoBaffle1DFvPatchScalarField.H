@@ -74,14 +74,6 @@ class temperatureThermoBaffle1DFvPatchScalarField
         autoPtr<solidType> solidPtr_;
 
 
-    // Private Member Functions
-
-        scalar kappa(const scalar T) const
-        {
-            return solidPtr_().kappa(T);
-        }
-
-
 public:
 
     //- Runtime type information

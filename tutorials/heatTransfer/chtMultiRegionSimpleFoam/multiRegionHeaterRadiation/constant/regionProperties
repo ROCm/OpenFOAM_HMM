@@ -19,8 +19,6 @@ regions
 (
     fluid       (bottomAir topAir)
     solid       (heater leftSolid rightSolid)
-    porousFluid ()
-    porousSolid ()
 );
 
 // ************************************************************************* //

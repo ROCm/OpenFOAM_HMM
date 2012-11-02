@@ -38,7 +38,7 @@ SourceFiles
 #ifndef ODESolidChemistryModel_H
 #define ODESolidChemistryModel_H
 
-#include "solidReaction.H"
+#include "Reaction.H"
 #include "ODE.H"
 #include "volFieldsFwd.H"
 #include "DimensionedField.H"
@@ -72,11 +72,11 @@ protected:
         //- Reference to solid mass fractions
         PtrList<volScalarField>& Ys_;
 
+        //- Reactions
+        const PtrList<Reaction<SolidThermo> >& reactions_;
+
         //- List of gas species present in reaction system
         speciesTable pyrolisisGases_;
-
-        //- Reactions
-        const PtrList<solidReaction>& reactions_;
 
         //- Thermodynamic data of solids
         const PtrList<SolidThermo>& solidThermo_;
@@ -149,7 +149,7 @@ public:
     // Member Functions
 
         //- The reactions
-        inline const PtrList<solidReaction>& reactions() const;
+        inline const PtrList<Reaction<SolidThermo> >& reactions() const;
 
         //- Thermodynamic data of gases
         inline const PtrList<GasThermo>& gasThermo() const;
@@ -180,7 +180,7 @@ public:
         //  species and charateristic times
         virtual scalar omega
         (
-            const solidReaction& r,
+            const Reaction<SolidThermo>& r,
             const scalarField& c,
             const scalar T,
             const scalar p,

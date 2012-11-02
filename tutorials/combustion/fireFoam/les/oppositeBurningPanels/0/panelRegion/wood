@@ -10,7 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      Ychar;
+    location    "0";
+    object      wood;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -22,9 +23,24 @@ boundaryField
 {
     ".*"
     {
-        type            calculated;
-        value           uniform 0.5;
+        type            zeroGradient;
+    }
+
+    fRight_zone_side
+    {
+        type            wedge;
+    }
+
+    fLeft_zone_side
+    {
+        type            wedge;
+    }
+
+    "(region0_to.*)"
+    {
+        type            zeroGradient;
     }
 }
+
 
 // ************************************************************************* //

@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "unitConversion.H"
 #include "zeroGradientFvPatchFields.H"
-#include "basicSolidMixture.H"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,7 +71,7 @@ greyMeanSolidAbsorptionEmission::X(const word specie) const
         }
     }
     const scalarField& Yj = mixture_.Y(specie);
-    const label mySpecieI = mixture_.components()[specie];
+    const label mySpecieI = mixture_.species()[specie];
     forAll(Xj, iCell)
     {
         Xj[iCell] = Yj[iCell]/mixture_.rho(mySpecieI, p[iCell], T[iCell]);
@@ -93,10 +93,10 @@ greyMeanSolidAbsorptionEmission
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
     thermo_(mesh.lookupObject<solidThermo>("thermophysicalProperties")),
     speciesNames_(0),
-    mixture_(dynamic_cast<const basicSolidMixture&>(thermo_)),
+    mixture_(dynamic_cast<const basicMultiComponentMixture&>(thermo_)),
     solidData_(mixture_.Y().size())
 {
-    if (!isA<basicSolidMixture>(thermo_))
+    if (!isA<basicMultiComponentMixture>(thermo_))
     {
         FatalErrorIn
         (

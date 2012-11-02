@@ -38,9 +38,7 @@ SourceFiles
 #define solidReaction_H
 
 #include "speciesTable.H"
-#include "scalarField.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
+#include "Reaction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,44 +46,40 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
+template<class ReactionThermo>
 class solidReaction;
 
-inline Ostream& operator<<(Ostream&, const solidReaction&);
+template<class ReactionThermo>
+inline Ostream& operator<<(Ostream&, const solidReaction<ReactionThermo>&);
 
 /*---------------------------------------------------------------------------*\
                         Class solidReaction Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ReactionThermo>
 class solidReaction
+:
+    public  Reaction<ReactionThermo>
 {
 
 private:
 
     // Private data
 
-        //- List of solid names present in reaction system
-        const speciesTable& components_;
+        typedef typename Reaction<ReactionThermo>::specieCoeffs specieCoeffs;
 
         //- List of gas species present in reaction system
         speciesTable pyrolisisGases_;
 
-        //- Solid components index for the left-hand-side of the reaction
-        List<label> slhs_;
+        //- Gas specie index for the left-hand-side of the reaction
+        List<specieCoeffs> glhs_;
 
-        //- Solid components index for the right-hand-side of the reaction
-        List<label> srhs_;
-
-        //- Specie index for the right-hand-side of the reaction
-        List<label> grhs_;
+        //- Gas specie index for the right-hand-side of the reaction
+        List<specieCoeffs> grhs_;
 
 
     // Private Member Functions
 
-        //- Set rhs and lhs of the reaction
-        void setLRhs(Istream&);
-
-        //- Look for the component index in the reaction
-        label componentIndex(bool& isGas, Istream& is);
 
         //- Disallow default bitwise assignment
         void operator=(const solidReaction&);
@@ -94,58 +88,7 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("Reaction");
-
-
-    // Declare run-time constructor selection tables
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            solidReaction,
-            Istream,
-            (
-                const speciesTable& components,
-                Istream& is,
-                const speciesTable& pyrolysisGases
-            ),
-            (components, is, pyrolysisGases)
-        );
-
-
-    // Public classes
-
-        //- Class used for the read-construction of PtrLists of reaction
-        class iNew
-        {
-            const speciesTable& components_;
-            speciesTable pyrolisisGases_;
-
-        public:
-
-            iNew
-            (
-                const speciesTable& components,
-                Istream& pyrolisisGases
-            )
-            :
-                components_(components),
-                pyrolisisGases_(pyrolisisGases)
-            {}
-
-            autoPtr<solidReaction> operator()(Istream& is) const
-            {
-                return autoPtr<solidReaction>
-                (
-                    solidReaction::New
-                    (
-                        components_,
-                        is,
-                        pyrolisisGases_
-                    )
-                );
-            }
-        };
+    TypeName("SolidReaction");
 
 
     // Constructors
@@ -153,48 +96,59 @@ public:
         //- Construct from components
         solidReaction
         (
-            const speciesTable& components,
+            const Reaction<ReactionThermo>& reaction,
             const speciesTable& pyrolisisGases,
-            const List<label>& slhs,
-            const List<label>& srhs,
-            const List<label>& grhs
+            const List<specieCoeffs>& glhs,
+            const List<specieCoeffs>& grhs
         );
+
 
         //- Construct as copy given new speciesTable
         solidReaction
         (
-            const solidReaction&,
-            const speciesTable& components,
+            const solidReaction<ReactionThermo>&,
             const speciesTable& pyrolisisGases
         );
+
 
         //- Construct from Istream
         solidReaction
         (
-            const speciesTable& components,
-            Istream& is,
-            const speciesTable& pyrolisisGases
+            const speciesTable& pyrolisisGases,
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            Istream& is
         );
 
+
+        //- Construct from dictionary
+        solidReaction
+        (
+            const speciesTable& species,
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            const dictionary& dict
+        );
+
+
         //- Construct and return a clone
-        virtual autoPtr<solidReaction > clone() const
+        virtual autoPtr<Reaction<ReactionThermo> > clone() const
         {
-            return autoPtr<solidReaction >
+            return autoPtr<Reaction<ReactionThermo> >
             (
-                new solidReaction(*this)
+                new solidReaction<ReactionThermo>(*this)
             );
         }
 
-
-    // Selectors
-
-        //- Return a pointer to a new patchField created on freestore from input
-        static autoPtr<solidReaction > New
+        //- Construct and return a clone with new speciesTable
+        virtual autoPtr<Reaction<ReactionThermo> > clone
         (
-            const speciesTable& components,
-            Istream&,
-            const speciesTable& pyrolisisGases
-        );
+            const speciesTable& species
+        ) const
+        {
+            return autoPtr<Reaction<ReactionThermo> >
+            (
+                new solidReaction<ReactionThermo>(*this, species)
+            );
+        }
 
 
     //- Destructor
@@ -206,23 +160,13 @@ public:
 
         // Access
 
-            inline const List<label>& slhs() const;
-            inline const List<label>& srhs() const;
-            inline const List<label>& grhs() const;
 
-            inline const speciesTable& pyrolisisGases() const;
+            // - Acces to gas components of the reaction
+            virtual const List<specieCoeffs>& grhs() const;
+            virtual const List<specieCoeffs>& glhs() const;
 
-
-        // solidReaction rate coefficients
-
-            virtual scalar kf
-            (
-                const scalar p,
-                const scalar T,
-                const scalarField& c
-            ) const;
-
-            virtual scalar nReact() const;
+            // - Access to gas specie list
+            virtual const speciesTable& gasSpecies() const;
 
 
         //- Write
@@ -231,10 +175,10 @@ public:
 
     // Ostream Operator
 
-        friend Ostream& operator<<
+        friend Ostream& operator<< <ReactionThermo>
         (
             Ostream&,
-            const solidReaction&
+            const solidReaction<ReactionThermo>&
         );
 };
 
@@ -246,6 +190,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "solidReactionI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "solidReaction.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

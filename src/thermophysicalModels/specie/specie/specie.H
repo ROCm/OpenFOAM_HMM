@@ -66,12 +66,6 @@ class specie
         scalar molWeight_;
 
 
-    // Private Member Functions
-
-        //- Construct from components without name
-        inline specie(const scalar nMoles, const scalar molWeight);
-
-
 public:
 
     //- Runtime type information
@@ -93,6 +87,10 @@ public:
 
 
     // Constructors
+
+
+        //- Construct from components without name
+        inline specie(const scalar nMoles, const scalar molWeight);
 
         //- Construct from components with name
         inline specie

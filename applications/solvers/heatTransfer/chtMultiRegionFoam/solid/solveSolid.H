@@ -8,8 +8,9 @@ if (finalIter)
     {
         tmp<fvScalarMatrix> hEqn
         (
-            fvm::ddt(rho, h)
-          - fvm::laplacian(alpha, h)
+            fvm::ddt(betav*rho, h)
+          - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
+          + sources(rho, h)
         );
         hEqn().relax();
         hEqn().solve(mesh.solver(h.select(finalIter)));

@@ -33,7 +33,9 @@ Description
 #define makeSolidReactionThermo_H
 
 #include "solidReaction.H"
-#include "IrreversibleSolidReaction.H"
+#include "IrreversibleReaction.H"
+#include "Reaction.H"
+
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,32 +45,46 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReaction(ReactionType, ReactionRate)                              \
+#define makeSolidReaction(ReactionType, Thermo, ReactionRate)                 \
                                                                               \
-    typedef solidReaction Reaction;                                           \
+    typedef solidReaction<Thermo> solidReaction##Thermo;                      \
                                                                               \
-    typedef ReactionType<ReactionRate>                                        \
-        ReactionType##ReactionRate;                                           \
+    typedef Reaction<Thermo> Reaction##Thermo;                                \
+                                                                              \
+    typedef ReactionType<solidReaction, Thermo, ReactionRate>                 \
+        ReactionType##Thermo##ReactionRate;                                   \
+                                                                              \
+    defineTemplateRunTimeSelectionTable(Reaction##Thermo, Istream);           \
+    defineTemplateRunTimeSelectionTable(Reaction##Thermo, dictionary);        \
+                                                                              \
+    defineTemplateTypeNameAndDebug(solidReaction##Thermo, 0);                 \
+    defineTemplateTypeNameAndDebug(Reaction##Thermo, 0);                      \
                                                                               \
     template<>                                                                \
-    const word ReactionType##ReactionRate::typeName                           \
+    const word ReactionType##Thermo##ReactionRate::typeName                   \
     (                                                                         \
         ReactionType::typeName_()                                             \
       + ReactionRate::type()                                                  \
-      + Reaction::typeName_()                                                 \
+      + solidReaction##Thermo::typeName_()                                    \
     );                                                                        \
                                                                               \
     addToRunTimeSelectionTable                                                \
     (                                                                         \
-        Reaction,                                                             \
-        ReactionType##ReactionRate,                                           \
+        Reaction##Thermo,                                                     \
+        ReactionType##Thermo##ReactionRate,                                   \
         Istream                                                               \
+    );                                                                        \
+                                                                              \
+    addToRunTimeSelectionTable                                                \
+    (                                                                         \
+        Reaction##Thermo,                                                     \
+        ReactionType##Thermo##ReactionRate,                                   \
+        dictionary                                                            \
     );
 
-
-#define makeIRReactions(ReactionRate)                                         \
+#define makeSolidIRReactions(Thermo, ReactionRate)                            \
                                                                               \
-    makeReaction(IrreversibleSolidReaction, ReactionRate)
+    makeSolidReaction(IrreversibleReaction, Thermo, ReactionRate)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

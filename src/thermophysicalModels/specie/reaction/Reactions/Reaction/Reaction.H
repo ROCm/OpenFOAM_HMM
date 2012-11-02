@@ -136,9 +136,6 @@ private:
         //- Return string representation of reaction
         string reactionStr() const;
 
-        //- Construct the left- and right-hand-side reaction coefficients
-        void setLRhs(Istream&);
-
         //- Construct reaction thermo
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
 
@@ -245,7 +242,7 @@ public:
         );
 
         //- Construct and return a clone
-        virtual autoPtr<Reaction<ReactionThermo> > clone() const
+        virtual autoPtr<Reaction<ReactionThermo> > clone() const //
         {
             return autoPtr<Reaction<ReactionThermo> >
             (
@@ -297,8 +294,28 @@ public:
             inline word& name();
             inline const word& name() const;
 
+            // - Access to basic components of the reaction
             inline const List<specieCoeffs>& lhs() const;
             inline const List<specieCoeffs>& rhs() const;
+
+            // - Access to gas components of the reaction
+            virtual const List<specieCoeffs>& grhs() const;
+            virtual const List<specieCoeffs>& glhs() const;
+
+            // - Access to specie list
+            const speciesTable& species() const;
+
+            // - Access to gas specie list
+            virtual const speciesTable& gasSpecies() const;
+
+            //- Construct the left- and right-hand-side reaction coefficients
+            void setLRhs
+            (
+                Istream&,
+                const speciesTable&,
+                List<specieCoeffs>& lhs,
+                List<specieCoeffs>& rhs
+            );
 
 
         // Reaction rate coefficients

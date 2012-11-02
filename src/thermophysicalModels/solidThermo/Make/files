@@ -1,7 +1,6 @@
 solidThermo/solidThermo.C
 solidThermo/solidThermos.C
 
-mixtures/basicSolidMixture/basicSolidMixture.C
 solidReactionThermo/solidReactionThermo.C
 solidReactionThermo/solidReactionThermos.C
 

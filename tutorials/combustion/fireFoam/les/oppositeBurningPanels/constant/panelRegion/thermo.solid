@@ -8,23 +8,55 @@
 FoamFile
 {
     version     2.0;
-    format      ascii;
-    class       volScalarField;
-    object      Ychar;
+    format      binary;
+    class       dictionary;
+    location    "constant";
+    object      thermo.solid;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
-
-internalField   uniform 0.5;
-
-boundaryField
+wood
 {
-    ".*"
+    specie
     {
-        type            calculated;
-        value           uniform 0.5;
+        nMoles      1;
+        molWeight   100;
     }
-}
+    transport
+    {
+        kappa       0.135;
+    }
+    thermodynamics
+    {
+        Cp          696;
+        Hf          -1.41e6;
+    }
+    equationOfState
+    {
+        rho         114.7;
+    }
+};
+
+char
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   50;
+    }
+    transport
+    {
+        kappa       0.4;
+    }
+    thermodynamics
+    {
+        Cp          611;
+        Hf          0;
+    }
+    equationOfState
+    {
+        rho         11.5;
+    }
+};
 
 // ************************************************************************* //

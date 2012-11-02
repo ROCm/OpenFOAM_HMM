@@ -17,13 +17,20 @@ FoamFile
 thermoType
 {
     type            heSolidThermo;
-    mixture         reactingSolidMixture;
+    mixture         reactingMixture;
     transport       constIso;
     thermo          hConst;
     equationOfState rhoConst;
     specie          specie;
     energy          sensibleEnthalpy;
 }
+
+
+chemistryReader foamChemistryReader;
+
+foamChemistryFile "$FOAM_CASE/constant/panelRegion/reactions";
+
+foamChemistryThermoFile "$FOAM_CASE/constant/panelRegion/thermo.solid";
 
 gasThermoType
 {
@@ -34,61 +41,8 @@ gasThermoType
     energy          sensibleEnthalpy;
 }
 
-solidComponents
-(
-    v char
-);
 
-gaseousSpecies
-(
-    gas
-);
-
-vCoeffs
-{
-    specie
-    {
-        nMoles      1;
-        molWeight   100;
-    }
-    transport
-    {
-        kappa       0.135;
-    }
-    thermodynamics
-    {
-        Cp          696;
-        Hf          -1.41e6;
-    }
-    equationOfState
-    {
-        rho         114.7;
-    }
-};
-
-charCoeffs
-{
-    specie
-    {
-        nMoles      1;
-        molWeight   50;
-    }
-    transport
-    {
-        kappa       0.4;
-    }
-    thermodynamics
-    {
-        Cp          611;
-        Hf          0;
-    }
-    equationOfState
-    {
-        rho         11.5;
-    }
-};
-
-gasCoeffs
+gas
 {
     specie
     {

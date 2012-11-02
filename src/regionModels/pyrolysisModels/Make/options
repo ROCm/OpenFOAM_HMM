@@ -3,10 +3,10 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/solid/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/solidThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/solidChemistryModel/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiationModels/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel/lnInclude \
@@ -20,12 +20,13 @@ LIB_LIBS = \
     -lmeshTools \
     -lchemistryModel \
     -lspecie \
-    -lsolidSpecie \
     -lfluidThermophysicalModels \
     -lsolidChemistryModel \
+    -lsolidThermo \
     -lcompressibleTurbulenceModel \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lLESdeltas \
     -lregionModels \
-    -lradiationModels
+    -lradiationModels \
+    -lreactionThermophysicalModels

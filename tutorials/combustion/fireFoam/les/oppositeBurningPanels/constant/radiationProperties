@@ -16,6 +16,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+radiation       on;
+
 radiationModel  fvDOM;
 
 fvDOMCoeffs
@@ -50,7 +52,7 @@ greyMeanAbsorptionEmissionCoeffs
         Tcommon         300;   //Common Temp
         invTemp         true;   //Is the polynomio using inverse temperature.
         Tlow            200;   //Low Temp
-        Thigh           2000;  //High Temp
+        Thigh           2500;  //High Temp
 
         loTcoeffs       //coefss for T < Tcommon
         (
@@ -78,7 +80,7 @@ greyMeanAbsorptionEmissionCoeffs
         Tcommon         300;
         invTemp         true;
         Tlow            200;
-        Thigh           2000;
+        Thigh           2500;
 
         loTcoeffs
         (
