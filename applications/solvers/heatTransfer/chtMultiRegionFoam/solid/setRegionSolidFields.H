@@ -14,3 +14,7 @@
     const volScalarField& kappa = tkappa();
 
     volScalarField& h = thermo.he();
+
+    const volScalarField& betav = betavSolid[i];
+
+    IObasicSourceList& sources = solidHeatSources[i];
