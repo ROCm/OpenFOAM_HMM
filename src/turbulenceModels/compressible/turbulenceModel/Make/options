@@ -15,4 +15,3 @@ LIB_LIBS = \
     -lmeshTools \
     -lsolidSpecie \
     -lradiationModels
-

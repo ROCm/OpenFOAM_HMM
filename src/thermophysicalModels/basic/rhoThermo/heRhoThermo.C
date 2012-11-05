@@ -107,9 +107,13 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicPsiThermo, class MixtureType>
-Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo(const fvMesh& mesh)
+Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    heThermo<BasicPsiThermo, MixtureType>(mesh)
+    heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName)
 {
     calculate();
 }

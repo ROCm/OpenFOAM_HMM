@@ -89,10 +89,19 @@ public:
     // Constructors
 
         //- Construct from mesh
-        heThermo(const fvMesh&);
+        heThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
         //- Construct from mesh and dictionary
-        heThermo(const fvMesh&, const dictionary&);
+        heThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     //- Destructor
@@ -284,7 +293,7 @@ public:
             ) const;
 
 
-        //- Read thermophysicalProperties dictionary
+        //- Read thermophysical properties dictionary
         virtual bool read();
 };
 

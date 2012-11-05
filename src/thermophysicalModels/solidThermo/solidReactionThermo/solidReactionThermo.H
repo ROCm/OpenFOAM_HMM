@@ -67,8 +67,8 @@ public:
         autoPtr,
         solidReactionThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
      // Declare run-time constructor selection tables
@@ -77,30 +77,45 @@ public:
         autoPtr,
         solidReactionThermo,
         dictionary,
-        (const fvMesh& mesh, const dictionary& dict),
-        (mesh, dict)
+        (const fvMesh& mesh, const dictionary& dict, const word& phaseName),
+        (mesh, dict, phaseName)
     );
 
     // Constructors
 
-        //- Construct from mesh
-        solidReactionThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        solidReactionThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
-        //- Construct from dictionary and mesh
-        solidReactionThermo(const fvMesh&, const dictionary&);
+        //- Construct from mesh, dictionary and phase name
+        solidReactionThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     // Selectors
 
         //- Standard selection based on fvMesh
-        static autoPtr<solidReactionThermo> New(const fvMesh&);
+        static autoPtr<solidReactionThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
          //- Standard selection based on fvMesh amd dictionary
         static autoPtr<solidReactionThermo> New
         (
             const fvMesh&,
-            const dictionary&
+            const dictionary&,
+            const word& phaseName=word::null
         );
+
 
     //- Destructor
     virtual ~solidReactionThermo();
