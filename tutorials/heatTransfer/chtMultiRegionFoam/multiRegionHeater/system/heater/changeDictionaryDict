@@ -59,7 +59,7 @@ dictionaryReplacement
         }
     }
 
-    Ypmma
+    pmma
     {
         internalField   uniform 0.5;
 
@@ -75,7 +75,7 @@ dictionaryReplacement
 
     }
 
-    Ychar
+    char
     {
         internalField   uniform 0.5;
 

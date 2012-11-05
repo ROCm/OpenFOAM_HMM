@@ -1,4 +1,4 @@
-    MRFZones mrfZones(mesh);
+    IOMRFZoneList mrfZones(mesh);
 
     forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     {

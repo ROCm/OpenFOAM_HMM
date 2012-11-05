@@ -67,12 +67,22 @@ class MRFZone
 {
     // Private data
 
+        //- Reference to the mesh database
         const fvMesh& mesh_;
 
+        //- Name of the MRF region
         const word name_;
 
-        const dictionary dict_;
+        //- Coefficients dictionary
+        dictionary coeffs_;
 
+        //- MRF region active flag
+        bool active_;
+
+        //- Name of cell zone
+        word cellZoneName_;
+
+        //- Cell zone ID
         label cellZoneID_;
 
         const wordList excludedPatchNames_;
@@ -133,8 +143,8 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh and Istream
-        MRFZone(const fvMesh& mesh, Istream& is);
+        //- Construct from fvMesh
+        MRFZone(const word& name, const fvMesh& mesh, const dictionary& dict);
 
         //- Return clone
         autoPtr<MRFZone> clone() const
@@ -143,79 +153,81 @@ public:
             return autoPtr<MRFZone>(NULL);
         }
 
-        //- Return a pointer to a new MRFZone created on freestore
-        //  from Istream
-        class iNew
-        {
-            const fvMesh& mesh_;
-
-        public:
-
-            iNew(const fvMesh& mesh)
-            :
-                mesh_(mesh)
-            {}
-
-            autoPtr<MRFZone> operator()(Istream& is) const
-            {
-                return autoPtr<MRFZone>(new MRFZone(mesh_, is));
-            }
-        };
-
 
     // Member Functions
 
-        //- Update the mesh corresponding to given map
-        void updateMesh(const mapPolyMesh& mpm)
-        {
-            // Only updates face addressing
-            setMRFFaces();
-        }
+        // Access
 
-        //- Add the Coriolis force contribution to the acceleration field
-        void addCoriolis(const volVectorField& U, volVectorField& ddtU) const;
+            //- Return const access to the MRF region name
+            inline const word& name() const;
 
-        //- Add the Coriolis force contribution to the momentum equation
-        void addCoriolis(fvVectorMatrix& UEqn) const;
-
-        //- Add the Coriolis force contribution to the momentum equation
-        void addCoriolis(const volScalarField& rho, fvVectorMatrix& UEqn) const;
-
-        //- Make the given absolute velocity relative within the MRF region
-        void relativeVelocity(volVectorField& U) const;
-
-        //- Make the given relative velocity absolute within the MRF region
-        void absoluteVelocity(volVectorField& U) const;
-
-        //- Make the given absolute flux relative within the MRF region
-        void relativeFlux(surfaceScalarField& phi) const;
-
-        //- Make the given absolute mass-flux relative within the MRF region
-        void relativeFlux
-        (
-            const surfaceScalarField& rho,
-            surfaceScalarField& phi
-        ) const;
-
-        //- Make the given relative flux absolute within the MRF region
-        void absoluteFlux(surfaceScalarField& phi) const;
-
-        //- Make the given relative mass-flux absolute within the MRF region
-        void absoluteFlux
-        (
-            const surfaceScalarField& rho,
-            surfaceScalarField& phi
-        ) const;
-
-        //- Correct the boundary velocity for the roation of the MRF region
-        void correctBoundaryVelocity(volVectorField& U) const;
+            //- Return const access to the MRF active flag
+            inline bool active() const;
 
 
-    // IOstream operator
+        // Evaluation
 
-        friend Ostream& operator<<(Ostream& os, const MRFZone& MRF);
+            //- Update the mesh corresponding to given map
+            void updateMesh(const mapPolyMesh& mpm)
+            {
+                // Only updates face addressing
+                setMRFFaces();
+            }
+
+            //- Add the Coriolis force contribution to the acceleration field
+            void addCoriolis
+            (
+                const volVectorField& U,
+                volVectorField& ddtU
+            ) const;
+
+            //- Add the Coriolis force contribution to the momentum equation
+            void addCoriolis(fvVectorMatrix& UEqn) const;
+
+            //- Add the Coriolis force contribution to the momentum equation
+            void addCoriolis
+            (
+                const volScalarField& rho,
+                fvVectorMatrix& UEqn
+            ) const;
+
+            //- Make the given absolute velocity relative within the MRF region
+            void relativeVelocity(volVectorField& U) const;
+
+            //- Make the given relative velocity absolute within the MRF region
+            void absoluteVelocity(volVectorField& U) const;
+
+            //- Make the given absolute flux relative within the MRF region
+            void relativeFlux(surfaceScalarField& phi) const;
+
+            //- Make the given absolute mass-flux relative within the MRF region
+            void relativeFlux
+            (
+                const surfaceScalarField& rho,
+                surfaceScalarField& phi
+            ) const;
+
+            //- Make the given relative flux absolute within the MRF region
+            void absoluteFlux(surfaceScalarField& phi) const;
+
+            //- Make the given relative mass-flux absolute within the MRF region
+            void absoluteFlux
+            (
+                const surfaceScalarField& rho,
+                surfaceScalarField& phi
+            ) const;
+
+            //- Correct the boundary velocity for the roation of the MRF region
+            void correctBoundaryVelocity(volVectorField& U) const;
 
 
+    // I-O
+
+        //- Write
+        void writeData(Ostream& os) const;
+
+        //- Read MRF dictionary
+        bool read(const dictionary& dict);
 };
 
 
@@ -228,6 +240,10 @@ public:
 #ifdef NoRepository
 #   include "MRFZoneTemplates.C"
 #endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "MRFZoneI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

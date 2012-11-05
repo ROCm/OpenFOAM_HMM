@@ -103,9 +103,14 @@ public:
             const exponentialSolidTransport&
         );
 
-
         //- Construct from dictionary
         exponentialSolidTransport(const dictionary&);
+
+        // Selector from dictionary
+        inline static autoPtr<exponentialSolidTransport> New
+        (
+            const dictionary& dict
+        );
 
 
     // Member functions
@@ -117,10 +122,16 @@ public:
         }
 
         //- Thermal conductivity [W/mK]
-        inline scalar kappa(const scalar T) const;
+        inline scalar kappa(const scalar p, const scalar T) const;
 
         //- Thermal conductivity [W/mK]
-        inline vector Kappa(const scalar T) const;
+        inline vector Kappa(const scalar p, const scalar T) const;
+
+         //- Dynamic viscosity [kg/ms]
+        inline scalar mu(const scalar p, const scalar T) const;
+
+        //- Thermal diffusivity of enthalpy [kg/ms]
+        inline scalar alphah(const scalar p, const scalar T) const;
 
         //- Write to Ostream
         void write(Ostream& os) const;

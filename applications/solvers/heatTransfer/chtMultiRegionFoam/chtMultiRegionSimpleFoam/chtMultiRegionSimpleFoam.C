@@ -50,13 +50,9 @@ int main(int argc, char *argv[])
 
     #include "createFluidMeshes.H"
     #include "createSolidMeshes.H"
-    #include "createPorousFluidRegions.H"
-    #include "createPorousSolidMeshes.H"
 
     #include "createFluidFields.H"
     #include "createSolidFields.H"
-    #include "createPorousFluidFields.H"
-    #include "createPorousSolidFields.H"
 
     #include "initContinuityErrs.H"
 
@@ -72,24 +68,6 @@ int main(int argc, char *argv[])
             #include "setRegionFluidFields.H"
             #include "readFluidMultiRegionSIMPLEControls.H"
             #include "solveFluid.H"
-        }
-
-        forAll(porousFluidRegions, i)
-        {
-            Info<< "\nSolving for fluid porous region "
-                << porousFluidRegions[i].name() << endl;
-            #include "setPorousFluidFields.H"
-            #include "readPorousFluidRegionSIMPLEControls.H"
-            #include "solvePorousFluid.H"
-        }
-
-        forAll(porousSolidRegions, i)
-        {
-            Info<< "\nSolving for porous solid region "
-                << porousSolidRegions[i].name() << endl;
-            #include "setPorousRegionSolidFields.H"
-            #include "readPorousSolidMultiRegionSIMPLEControls.H"
-            #include "solvePorousSolid.H"
         }
 
         forAll(solidRegions, i)

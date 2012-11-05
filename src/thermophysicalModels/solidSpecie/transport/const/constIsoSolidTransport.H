@@ -97,6 +97,12 @@ public:
         //- Construct from Istream
         constIsoSolidTransport(const dictionary& dict);
 
+        // Selector from dictionary
+        inline static autoPtr<constIsoSolidTransport> New
+        (
+            const dictionary& dict
+        );
+
 
     // Member functions
 
@@ -107,10 +113,17 @@ public:
         }
 
         //- Isotropic thermal conductivity [W/mK]
-        inline scalar kappa(const scalar T) const;
+        inline scalar kappa(const scalar p, const scalar T) const;
 
         //- Un-isotropic thermal conductivity [W/mK]
-        inline vector Kappa(const scalar T) const;
+        inline vector Kappa(const scalar p, const scalar T) const;
+
+         //- Dynamic viscosity [kg/ms]
+        inline scalar mu(const scalar p, const scalar T) const;
+
+        //- Thermal diffusivity of enthalpy [kg/ms]
+        inline scalar alphah(const scalar p, const scalar T) const;
+
 
         //- Write to Ostream
         void write(Ostream& os) const;

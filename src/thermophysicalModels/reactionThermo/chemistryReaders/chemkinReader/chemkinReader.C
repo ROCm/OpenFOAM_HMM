@@ -41,6 +41,7 @@ License
 #include "powerSeriesReactionRate.H"
 #include "addToRunTimeSelectionTable.H"
 
+
 /* * * * * * * * * * * * * * * * * Static data * * * * * * * * * * * * * * * */
 
 namespace Foam
@@ -178,7 +179,8 @@ void Foam::chemkinReader::addReactionType
         {
             reactions_.append
             (
-                new IrreversibleReaction<gasThermoPhysics, ReactionRateType>
+                new IrreversibleReaction
+                <Reaction, gasThermoPhysics, ReactionRateType>
                 (
                     Reaction<gasThermoPhysics>
                     (
@@ -197,7 +199,8 @@ void Foam::chemkinReader::addReactionType
         {
             reactions_.append
             (
-                new ReversibleReaction<gasThermoPhysics, ReactionRateType>
+                new ReversibleReaction
+                <Reaction, gasThermoPhysics, ReactionRateType>
                 (
                     Reaction<gasThermoPhysics>
                     (
@@ -496,7 +499,7 @@ void Foam::chemkinReader::addReaction
                 reactions_.append
                 (
                     new NonEquilibriumReversibleReaction
-                        <gasThermoPhysics, ArrheniusReactionRate>
+                        <Reaction, gasThermoPhysics, ArrheniusReactionRate>
                     (
                         Reaction<gasThermoPhysics>
                         (
@@ -549,7 +552,11 @@ void Foam::chemkinReader::addReaction
                 reactions_.append
                 (
                     new NonEquilibriumReversibleReaction
-                        <gasThermoPhysics, thirdBodyArrheniusReactionRate>
+                    <
+                        Reaction,
+                        gasThermoPhysics,
+                        thirdBodyArrheniusReactionRate
+                    >
                     (
                         Reaction<gasThermoPhysics>
                         (
@@ -654,7 +661,7 @@ void Foam::chemkinReader::addReaction
                 reactions_.append
                 (
                     new NonEquilibriumReversibleReaction
-                        <gasThermoPhysics, LandauTellerReactionRate>
+                        <Reaction, gasThermoPhysics, LandauTellerReactionRate>
                     (
                         Reaction<gasThermoPhysics>
                         (

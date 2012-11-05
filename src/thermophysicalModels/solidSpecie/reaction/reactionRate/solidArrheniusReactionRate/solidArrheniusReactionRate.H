@@ -75,13 +75,25 @@ public:
             Istream& is
         );
 
+        //- Construct from dictionary
+        inline solidArrheniusReactionRate
+        (
+            const speciesTable& species,
+            const dictionary& dict
+        );
+
+
+    //- Destructor
+    virtual ~solidArrheniusReactionRate()
+    {}
+
 
     // Member Functions
 
         //- Return the type name
         static word type()
         {
-            return "SolidArrhenius";
+            return "Arrhenius";
         }
 
         inline scalar operator()
@@ -90,6 +102,10 @@ public:
             const scalar T,
             const scalarField& c
         ) const;
+
+
+         //- Write to stream
+        inline void write(Ostream& os) const;
 
 
     // Ostream Operator

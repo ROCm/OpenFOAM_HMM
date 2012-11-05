@@ -14,7 +14,7 @@
             CoNum
         );
     }
-
+/*
     forAll (porousFluidRegions, porousI)
     {
         CoNum = max
@@ -29,3 +29,4 @@
             CoNum
         );
     }
+*/

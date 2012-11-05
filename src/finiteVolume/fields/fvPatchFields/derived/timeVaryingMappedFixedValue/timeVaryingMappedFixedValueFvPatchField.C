@@ -52,7 +52,8 @@ timeVaryingMappedFixedValueFvPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
+    endAverage_(pTraits<Type>::zero),
+    offSet_()
 {}
 
 
@@ -77,7 +78,8 @@ timeVaryingMappedFixedValueFvPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
+    endAverage_(pTraits<Type>::zero),
+    offSet_()
 {}
 
 
@@ -101,7 +103,8 @@ timeVaryingMappedFixedValueFvPatchField
     startAverage_(pTraits<Type>::zero),
     endSampleTime_(-1),
     endSampledValues_(0),
-    endAverage_(pTraits<Type>::zero)
+    endAverage_(pTraits<Type>::zero),
+    offSet_(DataEntry<Type>::New("offSet", dict))
 {
     dict.readIfPresent("fieldTableName", fieldTableName_);
 
@@ -134,7 +137,8 @@ timeVaryingMappedFixedValueFvPatchField
     startAverage_(ptf.startAverage_),
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
-    endAverage_(ptf.endAverage_)
+    endAverage_(ptf.endAverage_),
+    offSet_(ptf.offSet_().clone().ptr())
 {}
 
 
@@ -158,7 +162,8 @@ timeVaryingMappedFixedValueFvPatchField
     startAverage_(ptf.startAverage_),
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
-    endAverage_(ptf.endAverage_)
+    endAverage_(ptf.endAverage_),
+    offSet_(ptf.offSet_().clone().ptr())
 {}
 
 
@@ -276,7 +281,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
     {
         FatalErrorIn
         (
-            "timeVaryingMappedFixedValueFvPatchField<Type>::checkTable"
+            "timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()"
         )   << "Cannot find starting sampling values for current time "
             << this->db().time().value() << nl
             << "Have sampling values for times "
@@ -366,6 +371,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
                         /sampleTimes_[endSampleTime_].name()
                     << endl;
             }
+
             // Reread values and interpolate
             AverageIOField<Type> vals
             (
@@ -392,7 +398,6 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
 template<class Type>
 void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
 {
-
     if (this->updated())
     {
         return;
@@ -423,7 +428,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
         scalar start = sampleTimes_[startSampleTime_].value();
         scalar end = sampleTimes_[endSampleTime_].value();
 
-        scalar s = (this->db().time().value()-start)/(end-start);
+        scalar s = (this->db().time().value() - start)/(end - start);
 
         if (debug)
         {
@@ -434,8 +439,8 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 << " with weight:" << s << endl;
         }
 
-        this->operator==((1-s)*startSampledValues_ + s*endSampledValues_);
-        wantedAverage = (1-s)*startAverage_ + s*endAverage_;
+        this->operator==((1 - s)*startSampledValues_ + s*endSampledValues_);
+        wantedAverage = (1 - s)*startAverage_ + s*endAverage_;
     }
 
     // Enforce average. Either by scaling (if scaling factor > 0.5) or by
@@ -465,7 +470,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
                 Pout<< "updateCoeffs :"
                     << " offsetting with:" << offset << endl;
             }
-            this->operator==(fld+offset);
+            this->operator==(fld + offset);
         }
         else
         {
@@ -479,6 +484,10 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
             this->operator==(scale*fld);
         }
     }
+
+    // apply offset to mapped values
+    const scalar t = this->db().time().timeOutputValue();
+    this->operator==(*this + offSet_->value(t));
 
     if (debug)
     {
@@ -502,6 +511,8 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::write(Ostream& os) const
         os.writeKeyword("fieldTableName") << fieldTableName_
             << token::END_STATEMENT << nl;
     }
+
+    offSet_->writeData(os);
 
     this->writeEntry("value", os);
 }

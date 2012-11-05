@@ -37,7 +37,7 @@ Description
 #include "fvCFD.H"
 #include "psiThermo.H"
 #include "turbulenceModel.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 #include "fvcSmooth.H"

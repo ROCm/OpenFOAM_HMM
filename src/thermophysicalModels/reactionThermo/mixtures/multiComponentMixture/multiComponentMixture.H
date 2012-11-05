@@ -60,6 +60,10 @@ class multiComponentMixture
         //- Temporary storage for the cell/face mixture thermo data
         mutable ThermoType mixture_;
 
+        //- Temporary storage for the volume weighted
+        //  cell/face mixture thermo data
+        mutable ThermoType mixtureVol_;
+
 
     // Private Member Functions
 
@@ -106,6 +110,21 @@ public:
 
         const ThermoType& patchFaceMixture
         (
+            const label patchi,
+            const label facei
+        ) const;
+
+        const ThermoType& cellVolMixture
+        (
+            const scalar p,
+            const scalar T,
+            const label celli
+        ) const;
+
+        const ThermoType& patchFaceVolMixture
+        (
+            const scalar p,
+            const scalar T,
             const label patchi,
             const label facei
         ) const;

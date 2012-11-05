@@ -45,7 +45,7 @@ Foam::ODESolidChemistryModel<CompType, SolidThermo, GasThermo>::RRg()
 
 
 template<class CompType, class SolidThermo, class GasThermo>
-inline const Foam::PtrList<Foam::solidReaction>&
+inline const Foam::PtrList<Foam::Reaction<SolidThermo> >&
 Foam::ODESolidChemistryModel<CompType, SolidThermo,GasThermo>::reactions() const
 {
     return reactions_;

@@ -35,7 +35,7 @@ SourceFiles
 #ifndef solidReactionThermo_H
 #define solidReactionThermo_H
 
-#include "basicSolidMixture.H"
+#include "basicMultiComponentMixture.H"
 #include "solidThermo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
@@ -124,10 +124,11 @@ public:
     // Member functions
 
         //- Return the composition of the multi-component mixture
-        virtual basicSolidMixture& composition() = 0;
+        virtual basicMultiComponentMixture& composition() = 0;
 
         //- Return the composition of the multi-component mixture
-        virtual const basicSolidMixture& composition() const = 0;
+        virtual const basicMultiComponentMixture& composition() const = 0;
+
 };
 
 
