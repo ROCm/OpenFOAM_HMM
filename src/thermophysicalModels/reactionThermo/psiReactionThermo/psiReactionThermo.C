@@ -36,9 +36,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::psiReactionThermo::psiReactionThermo(const fvMesh& mesh)
+Foam::psiReactionThermo::psiReactionThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    psiThermo(mesh)
+    psiThermo(mesh, phaseName)
 {}
 
 
@@ -46,10 +50,11 @@ Foam::psiReactionThermo::psiReactionThermo(const fvMesh& mesh)
 
 Foam::autoPtr<Foam::psiReactionThermo> Foam::psiReactionThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<psiReactionThermo>(mesh);
+    return basicThermo::New<psiReactionThermo>(mesh, phaseName);
 }
 
 

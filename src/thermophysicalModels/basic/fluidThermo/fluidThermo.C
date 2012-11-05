@@ -36,16 +36,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fluidThermo::fluidThermo(const fvMesh& mesh)
+Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const word& phaseName)
 :
-    basicThermo(mesh)
+    basicThermo(mesh, phaseName)
 {}
 
 
 
-Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const dictionary& dict)
+Foam::fluidThermo::fluidThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& phaseName
+)
 :
-    basicThermo(mesh, dict)
+    basicThermo(mesh, dict, phaseName)
 {}
 
 
@@ -53,10 +58,11 @@ Foam::fluidThermo::fluidThermo(const fvMesh& mesh, const dictionary& dict)
 
 Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<fluidThermo>(mesh);
+    return basicThermo::New<fluidThermo>(mesh, phaseName);
 }
 
 

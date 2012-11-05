@@ -81,19 +81,27 @@ public:
         autoPtr,
         psiThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
 
     // Constructors
 
-        //- Construct from mesh
-        psiThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        psiThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     //- Selector
-    static autoPtr<psiThermo> New(const fvMesh&);
+    static autoPtr<psiThermo> New
+    (
+        const fvMesh& mesh,
+        const word& phaseName=word::null
+    );
 
 
     //- Destructor

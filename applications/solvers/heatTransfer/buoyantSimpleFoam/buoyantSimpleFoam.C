@@ -34,6 +34,7 @@ Description
 #include "RASModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "simpleControl.H"
+#include "IOMRFZoneList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     simpleControl simple(mesh);

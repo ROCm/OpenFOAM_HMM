@@ -101,9 +101,7 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 
     if (this->cyclicPatch().owner())
     {
-        const basicThermo& thermo =
-            db().lookupObject<basicThermo>("thermophysicalProperties");
-
+        const basicThermo& thermo = basicThermo::lookupThermo(*this);
         label patchID = patch().index();
 
         const scalarField& pp = thermo.p().boundaryField()[patchID];

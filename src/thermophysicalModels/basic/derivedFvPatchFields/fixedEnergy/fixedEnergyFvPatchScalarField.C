@@ -97,12 +97,7 @@ void Foam::fixedEnergyFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const basicThermo& thermo = db().lookupObject<basicThermo>
-    (
-        "thermophysicalProperties"
-    );
-
-
+    const basicThermo& thermo = basicThermo::lookupThermo(*this);
     const label patchi = patch().index();
 
     const scalarField& pw = thermo.p().boundaryField()[patchi];

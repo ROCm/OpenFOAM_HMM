@@ -38,19 +38,24 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidReactionThermo::solidReactionThermo(const fvMesh& mesh)
+Foam::solidReactionThermo::solidReactionThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    solidThermo(mesh)
+    solidThermo(mesh, phaseName)
 {}
 
 
 Foam::solidReactionThermo::solidReactionThermo
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 :
-    solidThermo(mesh, dict)
+    solidThermo(mesh, dict, phaseName)
 {}
 
 
@@ -58,20 +63,22 @@ Foam::solidReactionThermo::solidReactionThermo
 
 Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<solidReactionThermo>(mesh);
+    return basicThermo::New<solidReactionThermo>(mesh, phaseName);
 }
 
 
 Foam::autoPtr<Foam::solidReactionThermo> Foam::solidReactionThermo::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 {
-    return basicThermo::New<solidReactionThermo>(mesh, dict);
+    return basicThermo::New<solidReactionThermo>(mesh, dict, phaseName);
 }
 
 

@@ -36,15 +36,15 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::psiThermo::psiThermo(const fvMesh& mesh)
+Foam::psiThermo::psiThermo(const fvMesh& mesh, const word& phaseName)
 :
-    fluidThermo(mesh),
+    fluidThermo(mesh, phaseName),
 
     psi_
     (
         IOobject
         (
-            "psi",
+            phasePropertyName("psi"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -58,7 +58,7 @@ Foam::psiThermo::psiThermo(const fvMesh& mesh)
     (
         IOobject
         (
-            "mu",
+            phasePropertyName("mu"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -74,10 +74,11 @@ Foam::psiThermo::psiThermo(const fvMesh& mesh)
 
 Foam::autoPtr<Foam::psiThermo> Foam::psiThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<psiThermo>(mesh);
+    return basicThermo::New<psiThermo>(mesh, phaseName);
 }
 
 

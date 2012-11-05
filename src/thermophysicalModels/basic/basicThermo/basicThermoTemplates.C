@@ -136,14 +136,15 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 template<class Thermo>
 Foam::autoPtr<Thermo> Foam::basicThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
     IOdictionary thermoDict
     (
         IOobject
         (
-            "thermophysicalProperties",
+            phasePropertyName(dictName, phaseName),
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -159,7 +160,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             Thermo::fvMeshConstructorTablePtr_
         );
 
-    return autoPtr<Thermo>(cstrIter()(mesh));
+    return autoPtr<Thermo>(cstrIter()(mesh, phaseName));
 }
 
 
@@ -167,7 +168,8 @@ template<class Thermo>
 Foam::autoPtr<Thermo> Foam::basicThermo::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 {
     typename Thermo::dictionaryConstructorTable::iterator cstrIter =
@@ -177,7 +179,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             Thermo::dictionaryConstructorTablePtr_
         );
 
-    return autoPtr<Thermo>(cstrIter()(mesh, dict));
+    return autoPtr<Thermo>(cstrIter()(mesh, dict, phaseName));
 }
 
 

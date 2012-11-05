@@ -48,7 +48,6 @@ laplacianSchemes
 interpolationSchemes
 {
     default         linear;
-    UD              upwind phid;
 }
 
 snGradSchemes

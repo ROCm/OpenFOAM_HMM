@@ -105,32 +105,38 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatch& p = patch();
-    const polyPatch& pp = p.patch();
     const fvMesh& mesh = dimensionedInternalField().mesh();
-    const pointField& oldPoints = mesh.oldPoints();
 
-    vectorField oldFc(pp.size());
-
-    forAll(oldFc, i)
+    if (mesh.changing())
     {
-        oldFc[i] = pp[i].centre(oldPoints);
+        const fvPatch& p = patch();
+        const polyPatch& pp = p.patch();
+        const pointField& oldPoints = mesh.oldPoints();
+
+        vectorField oldFc(pp.size());
+
+        forAll(oldFc, i)
+        {
+            oldFc[i] = pp[i].centre(oldPoints);
+        }
+
+        const scalar deltaT = mesh.time().deltaTValue();
+
+        const vectorField Up((pp.faceCentres() - oldFc)/deltaT);
+
+        const volVectorField& U = db().lookupObject<volVectorField>(UName_);
+        scalarField phip
+        (
+            p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+        );
+
+        const vectorField n(p.nf());
+        const scalarField& magSf = p.magSf();
+        tmp<scalarField> Un = phip/(magSf + VSMALL);
+
+
+        vectorField::operator=(Up + n*(Un - (n & Up)));
     }
-
-    const vectorField Up((pp.faceCentres() - oldFc)/mesh.time().deltaTValue());
-
-    const volVectorField& U = db().lookupObject<volVectorField>(UName_);
-    scalarField phip
-    (
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
-    );
-
-    const vectorField n(p.nf());
-    const scalarField& magSf = p.magSf();
-    tmp<scalarField> Un = phip/(magSf + VSMALL);
-
-
-    vectorField::operator=(Up + n*(Un - (n & Up)));
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }

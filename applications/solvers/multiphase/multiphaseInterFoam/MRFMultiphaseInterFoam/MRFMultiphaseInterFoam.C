@@ -35,7 +35,7 @@ Description
 #include "fvCFD.H"
 #include "multiphaseMixture.H"
 #include "turbulenceModel.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
