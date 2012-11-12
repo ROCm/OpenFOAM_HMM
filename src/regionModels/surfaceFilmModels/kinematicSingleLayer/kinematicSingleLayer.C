@@ -61,7 +61,7 @@ bool kinematicSingleLayer::read()
     {
         const dictionary& solution = this->solution().subDict("PISO");
         solution.lookup("momentumPredictor") >> momentumPredictor_;
-        solution.lookup("nOuterCorr") >> nOuterCorr_;
+        solution.readIfPresent("nOuterCorr", nOuterCorr_);
         solution.lookup("nCorr") >> nCorr_;
         solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
 
