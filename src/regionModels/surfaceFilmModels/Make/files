@@ -39,6 +39,7 @@ $(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModel.C
 $(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModelNew.C
 $(THERMOMODELS)/filmRadiationModel/noRadiation/noRadiation.C
 $(THERMOMODELS)/filmRadiationModel/constantRadiation/constantRadiation.C
+$(THERMOMODELS)/filmRadiationModel/primaryRadiation/primaryRadiation.C
 $(THERMOMODELS)/filmRadiationModel/standardRadiation/standardRadiation.C
 
 
