@@ -445,7 +445,7 @@ kinematicSingleLayer::kinematicSingleLayer
     surfaceFilmModel(modelType, mesh, g),
 
     momentumPredictor_(solution().subDict("PISO").lookup("momentumPredictor")),
-    nOuterCorr_(readLabel(solution().subDict("PISO").lookup("nOuterCorr"))),
+    nOuterCorr_(solution().subDict("PISO").lookupOrDefault("nOuterCorr", 1)),
     nCorr_(readLabel(solution().subDict("PISO").lookup("nCorr"))),
     nNonOrthCorr_
     (
