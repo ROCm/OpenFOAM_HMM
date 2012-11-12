@@ -370,6 +370,15 @@ public:
             inline const filmRadiationModel& radiation() const;
 
 
+        // Derived fields (calculated on-the-fly)
+
+            //- Return the convective heat energy from film to wall
+            inline tmp<scalarField> Qconvw(const label patchI) const;
+
+            //- Return the convective heat energy from primary region to film
+            inline tmp<scalarField> Qconvp(const label patchI) const;
+
+
         // Evolution
 
             //- Pre-evolve film hook

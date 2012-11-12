@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "thermoSingleLayer.H"
+#include "heatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -157,6 +158,26 @@ inline const phaseChangeModel& thermoSingleLayer::phaseChange() const
 inline const filmRadiationModel& thermoSingleLayer::radiation() const
 {
     return radiation_();
+}
+
+
+inline tmp<scalarField> thermoSingleLayer::Qconvw(const label patchI) const
+{
+    const scalarField htc(htcw_->h()().boundaryField()[patchI]);
+    const scalarField& Tp = T_.boundaryField()[patchI];
+    const scalarField& Twp = Tw_.boundaryField()[patchI];
+
+    return htc*(Tp - Twp);
+}
+
+
+inline tmp<scalarField> thermoSingleLayer::Qconvp(const label patchI) const
+{
+    const scalarField htc(htcs_->h()().boundaryField()[patchI]);
+    const scalarField& Tp = T_.boundaryField()[patchI];
+    const scalarField& Tpp = TPrimary_.boundaryField()[patchI];
+
+    return htc*(Tp - Tpp);
 }
 
 
