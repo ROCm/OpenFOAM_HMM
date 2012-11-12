@@ -197,6 +197,12 @@ tmp<volScalarField> kinematicSingleLayer::pp()
 }
 
 
+void kinematicSingleLayer::correctAlpha()
+{
+    alpha_ == pos(delta_ - dimensionedScalar("SMALL", dimless, SMALL));
+}
+
+
 void kinematicSingleLayer::updateSubmodels()
 {
     if (debug)
@@ -502,6 +508,19 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::AUTO_WRITE
         ),
         regionMesh()
+    ),
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
+            time().timeName(),
+            regionMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimless, 0.0)
     ),
     U_
     (
@@ -838,6 +857,8 @@ void kinematicSingleLayer::evolveRegion()
         Info<< "kinematicSingleLayer::evolveRegion()" << endl;
     }
 
+    correctAlpha();
+
     updateSubmodels();
 
     // Solve continuity for deltaRho_
@@ -1032,7 +1053,9 @@ void kinematicSingleLayer::info() const
         << indent << "min/max(mag(U))    = " << min(mag(U_)).value() << ", "
         << max(mag(U_)).value() << nl
         << indent << "min/max(delta)     = " << min(delta_).value() << ", "
-        << max(delta_).value() << nl;
+        << max(delta_).value() << nl
+        << indent << "coverage           = "
+        << gSum(alpha_.internalField()*magSf())/gSum(magSf()) <<  nl;
 
     injection_.info(Info);
 }
