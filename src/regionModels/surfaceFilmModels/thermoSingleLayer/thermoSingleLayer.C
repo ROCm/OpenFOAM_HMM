@@ -642,7 +642,7 @@ void thermoSingleLayer::evolveRegion()
     // Solve continuity for deltaRho_
     solveContinuity();
 
-    for (int oCorr=0; oCorr<nOuterCorr_; oCorr++)
+    for (int oCorr=1; oCorr<=nOuterCorr_; oCorr++)
     {
         // Explicit pressure source contribution
         tmp<volScalarField> tpu(this->pu());

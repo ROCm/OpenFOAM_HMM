@@ -869,7 +869,7 @@ void kinematicSingleLayer::evolveRegion()
     // Implicit pressure source coefficient - constant
     tmp<volScalarField> tpp(this->pp());
 
-    for (int oCorr=0; oCorr<nOuterCorr_; oCorr++)
+    for (int oCorr=1; oCorr<=nOuterCorr_; oCorr++)
     {
         // Explicit pressure source contribution - varies with delta_
         tmp<volScalarField> tpu(this->pu());
