@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
     // linear coeffs to apply to velocity
     const volScalarField& Cs = tCs();
     volScalarField Cw("Cw", mu/(0.3333*(delta + d0)));
-    Cw.min(1.0e+06);
+    Cw.min(5000.0);
 
     return
     (
