@@ -836,6 +836,8 @@ void kinematicSingleLayer::preEvolveRegion()
         Info<< "kinematicSingleLayer::preEvolveRegion()" << endl;
     }
 
+    surfaceFilmModel::preEvolveRegion();
+
     transferPrimaryRegionThermoFields();
 
     correctThermoFields();
