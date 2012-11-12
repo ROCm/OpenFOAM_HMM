@@ -282,8 +282,8 @@ void kinematicSingleLayer::updateSurfaceVelocities()
     Uw_ -= nHat()*(Uw_ & nHat());
     Uw_.correctBoundaryConditions();
 
-    // TODO: apply quadratic profile to determine surface velocity
-    Us_ = U_;
+    // apply quadratic profile to surface velocity
+    Us_ = 2.0*U_;
     Us_.correctBoundaryConditions();
 }
 
