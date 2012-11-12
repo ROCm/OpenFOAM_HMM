@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,14 +113,10 @@ void standardPhaseChange::correctModel
     const scalarField& YInf = film.YPrimary()[vapId];
     const scalarField& pInf = film.pPrimary();
     const scalarField& T = film.T();
-    const scalarField& Tw = film.Tw();
     const scalarField& rho = film.rho();
-    const scalarField& TInf = film.TPrimary();
     const scalarField& rhoInf = film.rhoPrimary();
     const scalarField& muInf = film.muPrimary();
     const scalarField& magSf = film.magSf();
-    const scalarField hInf(film.htcs().h());
-    const scalarField hFilm(film.htcw().h());
     const vectorField dU(film.UPrimary() - film.Us());
     const scalarField limMass
     (
@@ -147,15 +143,10 @@ void standardPhaseChange::correctModel
             if (pSat >= 0.95*pc)
             {
                 // boiling
-                const scalar qDotInf = hInf[cellI]*(TInf[cellI] - T[cellI]);
-                const scalar qDotFilm = hFilm[cellI]*(T[cellI] - Tw[cellI]);
-
                 const scalar Cp = liq.Cp(pc, Tloc);
-                const scalar Tcorr = max(0.0, T[cellI] - Tb_);
+                const scalar Tcorr = max(0.0, T[cellI] - Tb);
                 const scalar qCorr = limMass[cellI]*Cp*(Tcorr);
-                dMass[cellI] =
-                    dt*magSf[cellI]/hVap*(qDotInf + qDotFilm)
-                  + qCorr/hVap;
+                dMass[cellI] = qCorr/hVap;
             }
             else
             {
