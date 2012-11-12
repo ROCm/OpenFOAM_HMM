@@ -684,36 +684,6 @@ void reactingOneDim::preEvolveRegion()
     {
         solidChemistry_->setCellReacting(cellI, true);
     }
-
-    // De-activate reactions if pyrolysis region coupled to (valid) film
-    if (filmCoupled_)
-    {
-        const volScalarField& filmDelta = filmDeltaPtr_();
-
-        forAll(intCoupledPatchIDs_, i)
-        {
-            const label patchI = intCoupledPatchIDs_[i];
-            const scalarField& filmDeltap = filmDelta.boundaryField()[patchI];
-
-            forAll(filmDeltap, faceI)
-            {
-                const scalar filmDelta0 = filmDeltap[faceI];
-                if (filmDelta0 > reactionDeltaMin_)
-                {
-                    const labelList& cells = boundaryFaceCells_[faceI];
-
-                    // TODO: only limit cell adjacent to film?
-                    //solidChemistry_->setCellNoReacting(cells[0])
-
-                    // Propagate flag through 1-D region
-                    forAll(cells, k)
-                    {
-                        solidChemistry_->setCellReacting(cells[k], false);
-                    }
-                }
-            }
-        }
-    }
 }
 
 
