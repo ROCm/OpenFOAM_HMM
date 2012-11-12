@@ -41,15 +41,12 @@ SourceFiles
 #include "labelList.H"
 #include "volFields.H"
 #include "mappedPatchBase.H"
+#include "regionModelFunctionObjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declaration of classes
-//class fvMesh;
-//class Time;
 
 namespace regionModels
 {
@@ -120,6 +117,9 @@ protected:
 
         //- Region name
         word regionName_;
+
+        //- Region model function objects
+        regionModelFunctionObjectList functions_;
 
 
     // Protected member functions

@@ -214,7 +214,8 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
     coeffs_(dictionary::null),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_("none")
+    regionName_("none"),
+    functions_(*this)
 {}
 
 
@@ -246,7 +247,8 @@ Foam::regionModels::regionModel::regionModel
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(lookup("regionName"))
+    regionName_(lookup("regionName")),
+    functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)
     {
@@ -274,7 +276,7 @@ Foam::regionModels::regionModel::regionModel
     (
         IOobject
         (
-            regionType,
+            regionType + "Properties",
             mesh.time().constant(),
             mesh,
             IOobject::NO_READ,
@@ -292,7 +294,8 @@ Foam::regionModels::regionModel::regionModel
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(dict.lookup("regionName"))
+    regionName_(dict.lookup("regionName")),
+    functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)
     {
@@ -343,7 +346,7 @@ void Foam::regionModels::regionModel::evolve()
 
 void Foam::regionModels::regionModel::preEvolveRegion()
 {
-    // do nothing
+    functions_.preEvolveRegion();
 }
 
 
@@ -355,7 +358,7 @@ void Foam::regionModels::regionModel::evolveRegion()
 
 void Foam::regionModels::regionModel::postEvolveRegion()
 {
-    // do nothing
+    functions_.postEvolveRegion();
 }
 
 
