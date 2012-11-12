@@ -166,6 +166,15 @@ protected:
             PtrList<volScalarField> YPrimary_;
 
 
+        // Limits
+
+            //- Minimum temperature limit (optional)
+            scalar Tmin_;
+
+            //- Maximum temperature limit (optional)
+            scalar Tmax_;
+
+
         // Sub-models
 
             //- Heat transfer coefficient bewteen film surface and primary

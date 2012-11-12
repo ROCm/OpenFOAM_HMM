@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ inline tmp<volScalarField> thermoSingleLayer::T
     const volScalarField& hs
 ) const
 {
-    return tmp<volScalarField>
+    tmp<volScalarField> tT
     (
         new volScalarField
         (
@@ -104,6 +104,11 @@ inline tmp<volScalarField> thermoSingleLayer::T
             zeroGradientFvPatchScalarField::typeName
         )
     );
+
+    tT().min(Tmax_);
+    tT().max(Tmin_);
+
+    return tT;
 }
 
 

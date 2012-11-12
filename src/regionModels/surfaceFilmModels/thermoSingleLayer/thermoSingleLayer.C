@@ -514,8 +514,20 @@ thermoSingleLayer::thermoSingleLayer
         heatTransferModel::New(*this, coeffs().subDict("lowerSurfaceModels"))
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs())),
-    radiation_(filmRadiationModel::New(*this, coeffs()))
+    radiation_(filmRadiationModel::New(*this, coeffs())),
+    Tmin_(-VGREAT),
+    Tmax_(VGREAT)
 {
+    if (coeffs().readIfPresent("Tmin", Tmin_))
+    {
+        Info<< "    limiting minimum temperature to " << Tmin_ << endl;
+    }
+
+    if (coeffs().readIfPresent("Tmax", Tmax_))
+    {
+        Info<< "    limiting maximum temperature to " << Tmax_ << endl;
+    }
+
     if (thermo_.hasMultiComponentCarrier())
     {
         YPrimary_.setSize(thermo_.carrier().species().size());
