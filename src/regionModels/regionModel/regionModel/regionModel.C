@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -315,6 +315,32 @@ Foam::regionModels::regionModel::~regionModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
+void Foam::regionModels::regionModel::evolve()
+{
+    if (active_)
+    {
+        Info<< "\nEvolving " << modelName_ << " for region "
+            << regionMesh().name() << endl;
+
+        //read();
+
+        preEvolveRegion();
+
+        evolveRegion();
+
+        postEvolveRegion();
+
+        // Provide some feedback
+        if (infoOutput_)
+        {
+            Info<< incrIndent;
+            info();
+            Info<< endl << decrIndent;
+        }
+    }
+}
+
+
 void Foam::regionModels::regionModel::preEvolveRegion()
 {
     // do nothing
@@ -327,30 +353,9 @@ void Foam::regionModels::regionModel::evolveRegion()
 }
 
 
-void Foam::regionModels::regionModel::evolve()
+void Foam::regionModels::regionModel::postEvolveRegion()
 {
-    if (active_)
-    {
-        Info<< "\nEvolving " << modelName_ << " for region "
-            << regionMesh().name() << endl;
-
-        // Update any input information
-        //read();
-
-        // Pre-evolve
-        preEvolveRegion();
-
-        // Increment the region equations up to the new time level
-        evolveRegion();
-
-        // Provide some feedback
-        if (infoOutput_)
-        {
-            Info<< incrIndent;
-            info();
-            Info<< endl << decrIndent;
-        }
-    }
+    // do nothing
 }
 
 
