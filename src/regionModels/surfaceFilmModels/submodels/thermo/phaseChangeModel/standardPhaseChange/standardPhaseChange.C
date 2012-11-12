@@ -77,7 +77,6 @@ standardPhaseChange::standardPhaseChange
 )
 :
     phaseChangeModel(typeName, owner, dict),
-    Tb_(readScalar(coeffs_.lookup("Tb"))),
     deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
     L_(readScalar(coeffs_.lookup("L"))),
     TbFactor_(coeffs_.lookupOrDefault<scalar>("TbFactor", 1.1))
@@ -130,8 +129,11 @@ void standardPhaseChange::correctModel
             // cell pressure [Pa]
             const scalar pc = pInf[cellI];
 
+            // calculate the boiling temperature
+            const scalar Tb = liq.pvInvert(pc);
+
             // local temperature - impose lower limit of 200 K for stability
-            const scalar Tloc = min(TbFactor_*Tb_, max(200.0, T[cellI]));
+            const scalar Tloc = min(TbFactor_*Tb, max(200.0, T[cellI]));
 
             // saturation pressure [Pa]
             const scalar pSat = liq.pv(pc, Tloc);
