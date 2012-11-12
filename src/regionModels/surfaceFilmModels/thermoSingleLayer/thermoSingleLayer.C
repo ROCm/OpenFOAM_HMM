@@ -227,6 +227,33 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
 }
 
 
+void thermoSingleLayer::correctAlpha()
+{
+    if (hydrophilic_)
+    {
+        const scalar hydrophilicDry = hydrophilicDryScale_*deltaWet_;
+        const scalar hydrophilicWet = hydrophilicWetScale_*deltaWet_;
+
+        forAll(alpha_, i)
+        {
+            if ((alpha_[i] < 0.5) && (delta_[i] > hydrophilicDry))
+            {
+                alpha_[i] = 1.0;
+            }
+            else if ((alpha_[i] > 0.5) && (delta_[i] < hydrophilicWet))
+            {
+                alpha_[i] = 0.0;
+            }
+        }
+    }
+    else
+    {
+        alpha_ ==
+            pos(delta_ - dimensionedScalar("deltaWet", dimLength, deltaWet_));
+    }
+}
+
+
 void thermoSingleLayer::updateSubmodels()
 {
     if (debug)
@@ -426,6 +453,11 @@ thermoSingleLayer::thermoSingleLayer
         zeroGradientFvPatchScalarField::typeName
     ),
 
+    deltaWet_(readScalar(coeffs_.lookup("deltaWet"))),
+    hydrophilic_(readBool(coeffs_.lookup("hydrophilic"))),
+    hydrophilicDryScale_(0.0),
+    hydrophilicWetScale_(0.0),
+
     hsSp_
     (
         IOobject
@@ -510,6 +542,12 @@ thermoSingleLayer::thermoSingleLayer
         }
     }
 
+    if (hydrophilic_)
+    {
+        coeffs_.lookup("hydrophilicDryScale") >> hydrophilicDryScale_;
+        coeffs_.lookup("hydrophilicWetScale") >> hydrophilicWetScale_;
+    }
+
     if (readFields)
     {
         transferPrimaryRegionThermoFields();
@@ -583,6 +621,8 @@ void thermoSingleLayer::evolveRegion()
     {
         Info<< "thermoSingleLayer::evolveRegion()" << endl;
     }
+
+    correctAlpha();
 
     updateSubmodels();
 
