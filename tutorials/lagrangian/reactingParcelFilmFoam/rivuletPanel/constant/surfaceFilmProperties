@@ -43,7 +43,6 @@ kinematicSingleLayerCoeffs
 
     contactAngleCoeffs
     {
-        deltaWet        1e-4;
         Ccf             1;
         contactAngleDistribution
         {
