@@ -224,10 +224,10 @@ protected:
         //- Transfer source fields from the primary region to the film region
         virtual void transferPrimaryRegionSourceFields();
 
-        // Explicit pressure source contribution
+        //- Explicit pressure source contribution
         virtual tmp<volScalarField> pu();
 
-        // Implicit pressure source coefficient
+        //- Implicit pressure source coefficient
         virtual tmp<volScalarField> pp();
 
         //- Correct film coverage field
