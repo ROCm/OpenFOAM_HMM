@@ -219,6 +219,46 @@ public:
 
         // Helper
 
+            //- Return the coupled patch ID paired with coupled patch
+            //  regionPatchI
+            label nbrCoupledPatchID
+            (
+                const regionModel& nbrRegion,
+                const label regionPatchI
+            ) const;
+
+            //- Map patch field from another region model to local patch
+            template<class Type>
+            tmp<Foam::Field<Type> > mapRegionPatchField
+            (
+                const regionModel& nbrRegion,
+                const label regionPatchI,
+                const label nbrPatchI,
+                const Field<Type>& nbrField,
+                const bool flip = false
+            ) const;
+
+            //- Map patch field from another region model to local patch
+            template<class Type>
+            tmp<Field<Type> > mapRegionPatchField
+            (
+                const word& regionModelName,
+                const word& fieldName,
+                const label regionPatchI,
+                const bool flip = false
+            ) const;
+
+            //- Map patch internal field from another region model to local
+            //  patch
+            template<class Type>
+            tmp<Field<Type> > mapRegionPatchInternalField
+            (
+                const word& regionModelName,
+                const word& fieldName,
+                const label regionPatchI,
+                const bool flip = false
+            ) const;
+
             //- Convert a local region field to the primary region
             template<class Type>
             void toPrimary

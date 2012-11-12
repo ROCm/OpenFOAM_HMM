@@ -190,6 +190,66 @@ bool Foam::regionModels::regionModel::read(const dictionary& dict)
 }
 
 
+Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
+(
+    const regionModel& nbrRegion,
+    const label regionPatchI
+) const
+{
+    label nbrPatchI = -1;
+
+    // region
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    // boundary mesh
+    const polyBoundaryMesh& nbrPbm = nbrRegionMesh.boundaryMesh();
+
+    const mappedPatchBase& mpb =
+        refCast<const mappedPatchBase>
+        (
+            regionMesh().boundaryMesh()[regionPatchI]
+        );
+
+    // sample patch name on the primary region
+    const word& primaryPatchName = mpb.samplePatch();
+
+    // find patch on nbr region that has the same sample patch name
+    forAll(nbrRegion.intCoupledPatchIDs(), j)
+    {
+        const label nbrRegionPatchI = nbrRegion.intCoupledPatchIDs()[j];
+
+        const mappedPatchBase& mpb =
+            refCast<const mappedPatchBase>(nbrPbm[nbrRegionPatchI]);
+
+        if (mpb.samplePatch() == primaryPatchName)
+        {
+            nbrPatchI = nbrRegionPatchI;
+            break;
+        }
+    }
+
+    if (nbrPatchI == -1)
+    {
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
+        FatalErrorIn
+        (
+            "Foam::tmp<Foam::Field<Type> > "
+            "Foam::regionModels::regionModel::nbrCoupledPatchID"
+            "("
+                "const regionModel& , "
+                "const label"
+            ") const"
+        )
+            << "Unable to find patch pair for local patch "
+            << p.name() << " and region " << nbrRegion.name()
+            << abort(FatalError);
+    }
+
+    return nbrPatchI;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
