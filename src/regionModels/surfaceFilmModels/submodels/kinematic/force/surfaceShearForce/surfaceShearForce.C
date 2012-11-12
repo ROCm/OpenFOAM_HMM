@@ -80,11 +80,11 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
     tmp<volScalarField> tCs;
 
     typedef compressible::turbulenceModel turbModel;
-    if (film.primaryMesh().foundObject<turbModel>("turbulenceProperties"))
+    if (film.primaryMesh().foundObject<turbModel>("turbulenceModel"))
     {
         // local reference to turbulence model
         const turbModel& turb =
-            film.primaryMesh().lookupObject<turbModel>("turbulenceProperties");
+            film.primaryMesh().lookupObject<turbModel>("turbulenceModel");
 
         // calculate and store the stress on the primary region
         const volSymmTensorField primaryReff(turb.devRhoReff());
@@ -117,13 +117,23 @@ tmp<fvVectorMatrix> surfaceShearForce::correct(volVectorField& U)
         Reff.correctBoundaryConditions();
 
         dimensionedScalar U0("SMALL", U.dimensions(), SMALL);
-        tCs = Cf_*mag(-film.nHat() & Reff)/(mag(Up - U) + U0);
+        volVectorField UHat("UHat", (Up - U)/(mag(Up - U) + U0));
+
+        // shear stress tangential to the film
+        volVectorField tauTan
+        (
+            "tauTan",
+            UHat & (Reff + film.nHat()*(-film.nHat() & Reff))
+        );
+
+        // note: Cf_ 'should' be 1 in this case
+        tCs = Cf_*mag(tauTan)/(mag(Up - U) + U0);
     }
     else
     {
         // laminar case - employ simple coeff-based model
-        const volScalarField& rho = film.rho();
-        tCs = Cf_*rho*mag(Up - U);
+        const volScalarField& rhop = film.rhoPrimary();
+        tCs = Cf_*rhop*mag(Up - U);
     }
 
     dimensionedScalar d0("SMALL", delta.dimensions(), SMALL);
