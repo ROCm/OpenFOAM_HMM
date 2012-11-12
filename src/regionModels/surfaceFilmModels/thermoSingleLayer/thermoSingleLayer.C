@@ -317,7 +317,8 @@ void thermoSingleLayer::solveEnergy()
       - hsSp_
       + q(hs_)
       + radiation_->Shs()
-      - fvm::SuSp(rhoSp_, hs_)
+//      - fvm::SuSp(rhoSp_, hs_)
+      - rhoSp_*hs_
     );
 
     correctThermoFields();
