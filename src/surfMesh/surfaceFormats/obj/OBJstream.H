@@ -39,12 +39,13 @@ SourceFiles
 #include "point.H"
 #include "edge.H"
 #include "face.H"
+#include "triPointRef.H"
+#include "linePointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                           Class OBJstream Declaration
@@ -133,6 +134,9 @@ public:
 
             //- Write line
             Ostream& write(const linePointRef&);
+
+            //- Write triangle as points with lines or filled polygon
+            Ostream& write(const triPointRef&, const bool lines = true);
 
             //- Write face as points with lines or filled polygon
             Ostream& write

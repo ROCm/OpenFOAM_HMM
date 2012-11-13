@@ -240,6 +240,38 @@ Foam::Ostream& Foam::OBJstream::write(const linePointRef& ln)
 
 Foam::Ostream& Foam::OBJstream::write
 (
+    const triPointRef& f,
+    const bool lines
+)
+{
+    label start = nVertices_;
+    write(f.a());
+    write(f.b());
+    write(f.c());
+    if (lines)
+    {
+        write('l');
+        for (int i = 0; i < 3; i++)
+        {
+            write(' ') << start+1+i;
+        }
+        write(' ') << start+1 << '\n';
+    }
+    else
+    {
+        write('f');
+        for (int i = 0; i < 3; i++)
+        {
+            write(' ') << start+1+i;
+        }
+        write('\n');
+    }
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OBJstream::write
+(
     const face& f,
     const pointField& points,
     const bool lines
