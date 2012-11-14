@@ -40,6 +40,9 @@ SourceFiles
 
 #include "CloudFunctionObject.H"
 #include "cylindricalCS.H"
+#include "face.H"
+#include "Switch.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,6 +82,9 @@ private:
 
         //- Index of parcel types to collect (-1 by default = all particles)
         const label parcelType_;
+
+        //- Flag to remove collected particles
+        Switch removeCollected_;
 
         //- List of points
         Field<point> points_;
@@ -226,7 +232,8 @@ public:
             (
                 const parcelType& p,
                 const label cellI,
-                const scalar dt
+                const scalar dt,
+                bool& keepParticle
             );
 };
 

@@ -27,6 +27,9 @@ License
 #include "Pstream.H"
 #include "surfaceWriter.H"
 #include "unitConversion.H"
+#include "Random.H"
+#include "triangle.H"
+#include "cloud.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -496,6 +499,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     CloudFunctionObject<CloudType>(dict, owner, typeName),
     mode_(mtUnknown),
     parcelType_(this->coeffDict().lookupOrDefault("parcelType", -1)),
+    removeCollected_(this->coeffDict().lookup("removeCollected")),
     points_(),
     faces_(),
     faceTris_(),
@@ -573,10 +577,14 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
 )
 :
     CloudFunctionObject<CloudType>(pc),
+    mode_(pc.mode_),
     parcelType_(pc.parcelType_),
     points_(pc.points_),
     faces_(pc.faces_),
     faceTris_(pc.faceTris_),
+    nSector_(pc.nSector_),
+    radius_(pc.radius_),
+    coordSys_(pc.coordSys_),
     normal_(pc.normal_),
     negateParcelsOppositeNormal_(pc.negateParcelsOppositeNormal_),
     surfaceFormat_(pc.surfaceFormat_),
@@ -606,8 +614,8 @@ void Foam::ParticleCollector<CloudType>::postMove
 (
     const parcelType& p,
     const label cellI,
-    const scalar dt
-//    bool& keepParticle
+    const scalar dt,
+    bool& keepParticle
 )
 {
     if ((parcelType_ != -1) && (parcelType_ != p.typeId()))
@@ -658,9 +666,10 @@ void Foam::ParticleCollector<CloudType>::postMove
             mass_[faceI + 3] += m;
         }
 
-        // remove particle
-//      keepParticle = false;
-
+        if (removeCollected_)
+        {
+            keepParticle = false;
+        }
     }
 }
 

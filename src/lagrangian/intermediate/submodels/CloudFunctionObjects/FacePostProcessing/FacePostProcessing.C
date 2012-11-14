@@ -376,7 +376,8 @@ template<class CloudType>
 void Foam::FacePostProcessing<CloudType>::postFace
 (
     const parcelType& p,
-    const label faceI
+    const label faceI,
+    bool&
 )
 {
     if

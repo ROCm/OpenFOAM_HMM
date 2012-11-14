@@ -112,7 +112,8 @@ template<class CloudType>
 void Foam::ParticleTracks<CloudType>::postFace
 (
     const parcelType& p,
-    const label
+    const label,
+    bool&
 )
 {
     if
