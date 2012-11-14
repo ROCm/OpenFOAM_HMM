@@ -121,10 +121,11 @@ void Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::calculate()
 template<class BasicPsiThermo, class MixtureType>
 Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::heheuPsiThermo
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 :
-    heThermo<psiuReactionThermo, MixtureType>(mesh),
+    heThermo<psiuReactionThermo, MixtureType>(mesh, phaseName),
     Tu_
     (
         IOobject

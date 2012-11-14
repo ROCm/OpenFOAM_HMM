@@ -68,8 +68,12 @@ public:
 
     // Constructors
 
-        //- Construct from mesh
-        hePsiThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        hePsiThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     //- Destructor

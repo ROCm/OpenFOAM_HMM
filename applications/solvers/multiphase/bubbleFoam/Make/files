@@ -1,3 +1,0 @@
-bubbleFoam.C
-
-EXE = $(FOAM_APPBIN)/bubbleFoam

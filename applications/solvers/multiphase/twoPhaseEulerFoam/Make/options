@@ -1,5 +1,4 @@
 EXE_INC = \
-    -I../bubbleFoam \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -IturbulenceModel \

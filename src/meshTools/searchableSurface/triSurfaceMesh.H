@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,6 +182,7 @@ public:
         //- Demand driven contruction of octree for boundary edges
         const indexedOctree<treeDataEdge>& edgeTree() const;
 
+        scalar tolerance() const;
 
         // searchableSurface implementation
 

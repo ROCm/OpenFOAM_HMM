@@ -77,8 +77,8 @@ public:
         autoPtr,
         solidThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
      // Declare run-time constructor selection tables
@@ -87,26 +87,44 @@ public:
         autoPtr,
         solidThermo,
         dictionary,
-        (const fvMesh& mesh, const dictionary& dict),
-        (mesh, dict)
+        (const fvMesh& mesh, const dictionary& dict, const word& phaseName),
+        (mesh, dict, phaseName)
     );
 
 
     // Constructors
 
-        //- Construct from mesh
-        solidThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        solidThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
-        //- Construct from mesh and dict
-        solidThermo(const fvMesh&, const dictionary& dict);
+        //- Construct from mesh, dictionary and phase name
+        solidThermo
+        (
+            const fvMesh&,
+            const dictionary& dict,
+            const word& phaseName
+        );
 
         //- Return a pointer to a new solidThermo created from
         //  the solidThermophysicalProperties dictionary
-        static autoPtr<solidThermo> New(const fvMesh&);
+        static autoPtr<solidThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
         //- Return a pointer to a new solidThermo created from
         //  local dictionary
-        static autoPtr<solidThermo> New(const fvMesh&, const dictionary&);
+        static autoPtr<solidThermo> New
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName=word::null
+        );
 
 
     //- Destructor

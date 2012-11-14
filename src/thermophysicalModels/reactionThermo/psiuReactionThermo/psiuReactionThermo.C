@@ -100,9 +100,13 @@ void psiuReactionThermo::heuBoundaryCorrection(volScalarField& heu)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-psiuReactionThermo::psiuReactionThermo(const fvMesh& mesh)
+psiuReactionThermo::psiuReactionThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    psiReactionThermo(mesh)
+    psiReactionThermo(mesh, phaseName)
 {}
 
 
@@ -110,10 +114,11 @@ psiuReactionThermo::psiuReactionThermo(const fvMesh& mesh)
 
 Foam::autoPtr<Foam::psiuReactionThermo> Foam::psiuReactionThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<psiuReactionThermo>(mesh);
+    return basicThermo::New<psiuReactionThermo>(mesh, phaseName);
 }
 
 

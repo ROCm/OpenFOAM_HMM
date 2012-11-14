@@ -128,16 +128,20 @@ void Foam::heThermo<BasicThermo, MixtureType>::init()
 
 
 template<class BasicThermo, class MixtureType>
-Foam::heThermo<BasicThermo, MixtureType>::heThermo(const fvMesh& mesh)
+Foam::heThermo<BasicThermo, MixtureType>::heThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    BasicThermo(mesh),
+    BasicThermo(mesh, phaseName),
     MixtureType(*this, mesh),
 
     he_
     (
         IOobject
         (
-            MixtureType::thermoType::heName(),
+            BasicThermo::phasePropertyName(MixtureType::thermoType::heName()),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -156,17 +160,18 @@ template<class BasicThermo, class MixtureType>
 Foam::heThermo<BasicThermo, MixtureType>::heThermo
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 :
-    BasicThermo(mesh, dict),
+    BasicThermo(mesh, dict, phaseName),
     MixtureType(*this, mesh),
 
     he_
     (
         IOobject
         (
-            MixtureType::thermoType::heName(),
+            BasicThermo::phasePropertyName(MixtureType::thermoType::heName()),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,

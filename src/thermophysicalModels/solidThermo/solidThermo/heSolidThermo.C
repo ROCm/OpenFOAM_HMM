@@ -127,9 +127,13 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
 
 template<class BasicSolidThermo, class MixtureType>
 Foam::heSolidThermo<BasicSolidThermo, MixtureType>::
-heSolidThermo(const fvMesh& mesh)
+heSolidThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    heThermo<BasicSolidThermo, MixtureType>(mesh)
+    heThermo<BasicSolidThermo, MixtureType>(mesh, phaseName)
 {
     calculate();
 }
@@ -137,9 +141,14 @@ heSolidThermo(const fvMesh& mesh)
 
 template<class BasicSolidThermo, class MixtureType>
 Foam::heSolidThermo<BasicSolidThermo, MixtureType>::
-heSolidThermo(const fvMesh& mesh, const dictionary& dict)
+heSolidThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& phaseName
+)
 :
-    heThermo<BasicSolidThermo, MixtureType>(mesh, dict)
+    heThermo<BasicSolidThermo, MixtureType>(mesh, dict, phaseName)
 {
     calculate();
 }

@@ -66,21 +66,29 @@ public:
         autoPtr,
         rhoReactionThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
 
     // Constructors
 
-        //- Construct from dictionary and mesh
-        rhoReactionThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        rhoReactionThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     // Selectors
 
         //- Standard selection based on fvMesh
-        static autoPtr<rhoReactionThermo> New(const fvMesh&);
+        static autoPtr<rhoReactionThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
 
     //- Destructor

@@ -68,11 +68,20 @@ public:
 
     // Constructors
 
-        //- Construct from mesh
-        heSolidThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        heSolidThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
-        //- Construct from mesh and dictionary
-        heSolidThermo(const fvMesh&, const dictionary&);
+        //- Construct from mesh, dictionary and phase name
+        heSolidThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     //- Destructor

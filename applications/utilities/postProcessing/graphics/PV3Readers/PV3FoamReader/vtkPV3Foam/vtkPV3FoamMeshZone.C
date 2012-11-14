@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,78 +34,6 @@ License
 #include "vtkCellArray.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
-(
-    const fvMesh& mesh,
-    const labelList& faceLabels
-)
-{
-    vtkPolyData* vtkmesh = vtkPolyData::New();
-
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3Foam::faceZoneVTKMesh" << endl;
-        printMemory();
-    }
-
-    // Construct primitivePatch of faces in faceZone
-
-    const faceList& meshFaces = mesh.faces();
-    faceList patchFaces(faceLabels.size());
-    forAll(faceLabels, faceI)
-    {
-        patchFaces[faceI] = meshFaces[faceLabels[faceI]];
-    }
-    primitiveFacePatch p(patchFaces, mesh.points());
-
-
-    // The balance of this routine should be identical to patchVTKMesh
-
-    // Convert OpenFOAM mesh vertices to VTK
-    const pointField& points = p.localPoints();
-
-    vtkPoints* vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(points.size());
-    forAll(points, i)
-    {
-        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
-    }
-
-    vtkmesh->SetPoints(vtkpoints);
-    vtkpoints->Delete();
-
-
-    // Add faces as polygons
-    const faceList& faces = p.localFaces();
-
-    vtkCellArray* vtkcells = vtkCellArray::New();
-    vtkcells->Allocate(faces.size());
-
-    forAll(faces, faceI)
-    {
-        const face& f = faces[faceI];
-        vtkIdType nodeIds[f.size()];
-
-        forAll(f, fp)
-        {
-            nodeIds[fp] = f[fp];
-        }
-        vtkcells->InsertNextCell(f.size(), nodeIds);
-    }
-
-    vtkmesh->SetPolys(vtkcells);
-    vtkcells->Delete();
-
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPV3Foam::faceZoneVTKMesh" << endl;
-        printMemory();
-    }
-
-    return vtkmesh;
-}
-
 
 vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 (

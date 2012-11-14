@@ -167,7 +167,7 @@ class autoSnapDriver
                 void correctAttraction
                 (
                     const DynamicList<point>& surfacePoints,
-                    const DynamicList<label>& surfaceCount,
+                    const DynamicList<label>& surfaceCounts,
                     const point& edgePt,
                     const vector& edgeNormal,   // normalised normal
                     const point& pt,
@@ -213,7 +213,7 @@ class autoSnapDriver
 
                     DynamicList<point>& surfacePoints,
                     DynamicList<vector>& surfaceNormals,
-                    DynamicList<label>& surfaceCount
+                    DynamicList<label>& surfaceCounts
                 ) const;
                 void binFeatureFaces
                 (
@@ -224,13 +224,13 @@ class autoSnapDriver
                     const scalarField& snapDist,
                     const label pointI,
 
-                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceSurfNormals,
                     const List<List<point> >& pointFaceDisp,
                     const List<List<point> >& pointFaceCentres,
 
                     DynamicList<point>& surfacePoints,
                     DynamicList<vector>& surfaceNormals,
-                    DynamicList<label>& surfaceCount
+                    DynamicList<label>& surfaceCounts
                 ) const;
 
 
@@ -259,7 +259,7 @@ class autoSnapDriver
                     const indirectPrimitivePatch& pp,
                     const scalarField& snapDist,
 
-                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceSurfNormals,
                     const List<List<point> >& pointFaceDisp,
                     const List<List<point> >& pointFaceCentres,
                     const labelListList& pointFacePatchID,
@@ -277,7 +277,7 @@ class autoSnapDriver
                     const indirectPrimitivePatch&,
                     const scalarField&,
 
-                    const List<List<point> >& pointFaceNormals,
+                    const List<List<point> >& pointFaceSurfNormals,
                     const List<List<point> >& pointFaceDisp,
                     const List<List<point> >& pointFaceCentres,
                     const labelListList& pointFacePatchID,
