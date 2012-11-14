@@ -446,13 +446,6 @@ class vtkPV3Foam
             template<class PatchType>
             vtkPolyData* patchVTKMesh(const word& name, const PatchType&);
 
-            //- Add face zone mesh
-            vtkPolyData* faceZoneVTKMesh
-            (
-                const fvMesh&,
-                const labelList& faceLabels
-            );
-
             //- Add point zone
             vtkPolyData* pointZoneVTKMesh
             (
