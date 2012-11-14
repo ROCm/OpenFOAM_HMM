@@ -47,7 +47,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "fvMatricesFwd.H"
-#include "fvMatrices.H"
+#include "mapPolyMesh.H"
 #include "DataEntry.H"
 #include "autoPtr.H"
 
@@ -163,6 +163,9 @@ public:
 
             //- Return const access to the MRF active flag
             inline bool active() const;
+
+            //- Return the current Omega vector
+            vector Omega() const;
 
 
         // Evaluation
