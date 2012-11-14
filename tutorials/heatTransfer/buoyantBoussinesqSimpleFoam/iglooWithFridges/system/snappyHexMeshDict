@@ -42,38 +42,6 @@ geometry
         max (1 1 1);
     }
 
-    fridgeFreezer
-    {
-        type searchableSurfaceCollection;
-
-        mergeSubRegions true;
-
-        freezer
-        {
-            surface box1;
-            scale (1 1 1);
-            transform
-            {
-                type    cartesian;
-                origin  (0 0 0);
-                e1      (1 0 0);
-                e3      (0 0 1);
-            }
-        }
-        fridge
-        {
-            surface box1;
-            scale (1 1 1.1);
-            transform
-            {
-                type    cartesian;
-                origin  (0 0 1);
-                e1      (1 0 0);
-                e3      (0 0 1);
-            }
-        }
-    }
-
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
@@ -150,7 +118,7 @@ castellatedMeshControls
     (
         {
             file "fridgeA.eMesh";
-            level 3;
+            levels ((0.01 3));
         }
     );
 

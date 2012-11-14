@@ -6,6 +6,7 @@ cd ${0%/*} || exit 1    # run from this directory
 
 # copy motorbike surface from resources folder
 cp $FOAM_TUTORIALS/resources/geometry/motorBike.obj.gz constant/triSurface/
+runApplication surfaceFeatureExtract
 
 runApplication blockMesh
 
@@ -19,6 +20,7 @@ runParallel snappyHexMesh 6 -overwrite
 ls -d processor* | xargs -i rm -rf ./{}/0 $1
 ls -d processor* | xargs -i cp -r 0.org ./{}/0 $1
 
+runParallel patchSummary 6
 runParallel potentialFoam 6 -noFunctionObjects -writep
 runParallel `getApplication` 6
 

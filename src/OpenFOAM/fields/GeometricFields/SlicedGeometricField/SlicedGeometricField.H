@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,7 +83,8 @@ private:
         (
             const Mesh& mesh,
             const Field<Type>& completeField,
-            const bool preserveCouples
+            const bool preserveCouples,
+            const bool preserveProcessorOnly = false
         );
 
         //- Slice the given field and a create a PtrList of SlicedPatchField
@@ -133,7 +134,8 @@ public:
             const dimensionSet&,
             const Field<Type>& completeIField,
             const Field<Type>& completeBField,
-            const bool preserveCouples=true
+            const bool preserveCouples=true,
+            const bool preserveProcessorOnly = false
         );
 
         //- Construct from GeometricField. Reuses full internal and

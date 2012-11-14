@@ -526,7 +526,7 @@ $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
 $(Fields)/complexFields/complexFields.C
 
-$(Fields)/labelField/labelIOField.
+$(Fields)/labelField/labelIOField.C
 $(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarIOField.C
 $(Fields)/scalarField/scalarFieldIOField.C

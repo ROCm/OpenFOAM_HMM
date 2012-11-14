@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,6 +126,42 @@ void Foam::vtkPV3Foam::convertPointFields
                 ptf.boundaryField()[patchId].patchInternalField()(),
                 output,
                 arrayRangePatches_,
+                datasetNo
+            );
+        }
+
+        //
+        // Convert faceZones - if activated
+        //
+        for
+        (
+            int partId = arrayRangeFaceZones_.start();
+            partId < arrayRangeFaceZones_.end();
+            ++partId
+        )
+        {
+            const word zoneName = getPartName(partId);
+            const label datasetNo = partDataset_[partId];
+            const label zoneId = mesh.faceZones().findZoneID(zoneName);
+
+            if (!partStatus_[partId] || datasetNo < 0 || zoneId < 0)
+            {
+                continue;
+            }
+
+            // Extract the field on the zone
+            Field<Type> fld
+            (
+                ptf.internalField(),
+                mesh.faceZones()[zoneId]().meshPoints()
+            );
+
+            convertPatchPointField
+            (
+                fieldName,
+                fld,
+                output,
+                arrayRangeFaceZones_,
                 datasetNo
             );
         }
