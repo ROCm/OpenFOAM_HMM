@@ -132,7 +132,7 @@ class timeVaryingMappedFixedValueFvPatchField
         Type endAverage_;
 
         //- Time varying offset values to interpolated data
-        autoPtr<DataEntry<Type> > offSet_;
+        autoPtr<DataEntry<Type> > offset_;
 
 
 public:
