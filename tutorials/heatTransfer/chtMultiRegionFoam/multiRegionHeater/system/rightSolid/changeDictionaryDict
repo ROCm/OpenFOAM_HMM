@@ -49,36 +49,6 @@ dictionaryReplacement
             }
         }
     }
-
-    pmma
-    {
-        internalField   uniform 0.5;
-
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            calculated;
-                value           uniform 0.5;
-            }
-        }
-
-    }
-
-    char
-    {
-        internalField   uniform 0.5;
-
-        boundaryField
-        {
-            ".*"
-            {
-                type            calculated;
-                value           uniform 0.5;
-            }
-        }
-    }
 }
 
 // ************************************************************************* //
