@@ -47,7 +47,7 @@ GeometricBoundaryField
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
                "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const word&)"
+               "const DimensionedField<Type>&, const word&)"
             << endl;
     }
 
@@ -84,8 +84,13 @@ GeometricBoundaryField
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const wordList&, const wordList&)"
+               "GeometricBoundaryField"
+               "("
+                    "const BoundaryMesh&, "
+                    "const DimensionedField<Type>&, "
+                    "const wordList&, "
+                    "const wordList&"
+                ")"
             << endl;
     }
 
@@ -99,8 +104,13 @@ GeometricBoundaryField
         (
             "GeometricField<Type, PatchField, GeoMesh>::"
             "GeometricBoundaryField::"
-            "GeometricBoundaryField(const BoundaryMesh&, "
-            "const Field<Type>&, const wordList&, const wordList&)"
+            "GeometricBoundaryField"
+            "("
+                "const BoundaryMesh&, "
+                "const DimensionedField<Type>&, "
+                "const wordList&, "
+                "const wordList&"
+            ")"
         )   << "Incorrect number of patch type specifications given" << nl
             << "    Number of patches in mesh = " << bmesh.size()
             << " number of patch type specifications = "
@@ -160,8 +170,12 @@ GeometricBoundaryField
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const PatchField<Type>List&)"
+               "GeometricBoundaryField"
+               "("
+                    "const BoundaryMesh&, "
+                    "const DimensionedField<Type, GeoMesh>&, "
+                    "const PtrLIst<PatchField<Type> >&"
+               ")"
             << endl;
     }
 
@@ -188,8 +202,12 @@ GeometricBoundaryField
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
-               "GeometricBoundaryField(const GeometricBoundaryField<Type, "
-               "PatchField, BoundaryMesh>&)"
+               "GeometricBoundaryField"
+               "("
+                   "const DimensionedField<Type, GeoMesh>&, "
+                   "const typename GeometricField<Type, PatchField, GeoMesh>::"
+                   "GeometricBoundaryField&"
+               ")"
             << endl;
     }
 
@@ -220,8 +238,11 @@ GeometricBoundaryField
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
-               "GeometricBoundaryField(const GeometricBoundaryField<Type, "
-               "PatchField, BoundaryMesh>&)"
+               "GeometricBoundaryField"
+               "("
+                   "const GeometricField<Type, PatchField, GeoMesh>::"
+                   "GeometricBoundaryField&"
+               ")"
             << endl;
     }
 }
@@ -244,7 +265,11 @@ GeometricBoundaryField
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
                "GeometricBoundaryField::"
                "GeometricBoundaryField"
-               "(const BoundaryMesh&, const Field<Type>&, const dictionary&)"
+               "("
+                   "const BoundaryMesh&, "
+                   "const DimensionedField<Type, GeoMesh>&, "
+                   "const dictionary&"
+                ")"
             << endl;
     }
 
@@ -326,12 +351,13 @@ GeometricBoundaryField
             {
                 FatalIOErrorIn
                 (
-                    "GeometricField<Type, PatchField, GeoMesh>::\n"
-                    "GeometricBoundaryField::GeometricBoundaryField\n"
-                    "(\n"
-                    "    const BoundaryMesh&,\n"
-                    "    const DimensionedField<Type, GeoMesh>&,\n"
-                    "    const dictionary&\n"
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::"
+                    "GeometricBoundaryField"
+                    "("
+                        "const BoundaryMesh&, "
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
                     ")",
                     dict
                 )   << "Cannot find patchField entry for cyclic "
@@ -344,12 +370,13 @@ GeometricBoundaryField
             {
                 FatalIOErrorIn
                 (
-                    "GeometricField<Type, PatchField, GeoMesh>::\n"
-                    "GeometricBoundaryField::GeometricBoundaryField\n"
-                    "(\n"
-                    "    const BoundaryMesh&,\n"
-                    "    const DimensionedField<Type, GeoMesh>&,\n"
-                    "    const dictionary&\n"
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::"
+                    "GeometricBoundaryField"
+                    "("
+                        "const BoundaryMesh&, "
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
                     ")",
                     dict
                 )   << "Cannot find patchField entry for "
