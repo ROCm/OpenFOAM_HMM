@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,6 +105,7 @@ UNARY_FUNCTION(scalar, scalar, pow5)
 UNARY_FUNCTION(scalar, scalar, pow6)
 UNARY_FUNCTION(scalar, scalar, pow025)
 UNARY_FUNCTION(scalar, scalar, sqrt)
+UNARY_FUNCTION(scalar, scalar, cbrt)
 UNARY_FUNCTION(scalar, scalar, sign)
 UNARY_FUNCTION(scalar, scalar, pos)
 UNARY_FUNCTION(scalar, scalar, neg)
