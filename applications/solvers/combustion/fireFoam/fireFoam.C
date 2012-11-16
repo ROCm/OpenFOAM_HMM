@@ -30,7 +30,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "mapDistribute.H"
 #include "fvCFD.H"
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
