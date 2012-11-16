@@ -2295,13 +2295,6 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
         }
     }
 
-    // Convert to vtk format
-    string cmd
-    (
-        "objToVTK " + prefix + "_edges.obj " + prefix + "_edges.vtk > /dev/null"
-    );
-    system(cmd.c_str());
-
     Pout<< endl;
 }
 
