@@ -59,7 +59,15 @@ Foam::regionModels::regionModelFunctionObject::New
             << exit(FatalError);
     }
 
-    return autoPtr<regionModelFunctionObject>(cstrIter()(dict.subDict(modelName), owner));
+    return
+        autoPtr<regionModelFunctionObject>
+        (
+            cstrIter()
+            (
+                dict.subDict(modelName),
+                owner
+            )
+        );
 }
 
 
