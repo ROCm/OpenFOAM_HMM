@@ -45,7 +45,7 @@ namespace Foam
     template<>
     const char* NamedEnum<fixedTemperatureSource::temperatureMode, 2>::names[] =
     {
-        "constantTemperature",
+        "constant",
         "lookup"
     };
 }
