@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,9 +138,14 @@ protected:
 
             scalar secondaryWriteInterval_;
 
-
         label  purgeWrite_;
         mutable FIFOStack<word> previousOutputTimes_;
+
+        // Additional purging
+
+            label  secondaryPurgeWrite_;
+            mutable FIFOStack<word> previousSecondaryOutputTimes_;
+
 
         // One-shot writing
         bool writeOnce_;
