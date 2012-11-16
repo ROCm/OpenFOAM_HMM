@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,6 +76,12 @@ inline const volScalarField& kinematicSingleLayer::sigma() const
 inline const volScalarField& kinematicSingleLayer::delta() const
 {
     return delta_;
+}
+
+
+inline const volScalarField& kinematicSingleLayer::alpha() const
+{
+    return alpha_;
 }
 
 
@@ -173,7 +179,8 @@ inline tmp<volScalarField> kinematicSingleLayer::netMass() const
 {
     dimensionedScalar d0("SMALL", dimLength, ROOTVSMALL);
     return
-        fvc::surfaceSum(phi_/(fvc::interpolate(delta_) + d0))*time().deltaT()
+        fvc::surfaceSum(pos(phi_)*phi_/(fvc::interpolate(delta_) + d0))
+       *time().deltaT()
       + rho_*delta_*magSf();
 }
 

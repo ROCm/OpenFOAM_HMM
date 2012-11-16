@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,7 +133,7 @@ void Foam::FacePostProcessing<CloudType>::write()
         {
             OFstream& os = outputFilePtr_[zoneI];
             os  << time.timeName() << token::TAB << sumMassTotal << token::TAB
-                <<  sumMassFlowRate<< endl;
+                << sumMassFlowRate<< endl;
         }
     }
 
@@ -376,7 +376,8 @@ template<class CloudType>
 void Foam::FacePostProcessing<CloudType>::postFace
 (
     const parcelType& p,
-    const label faceI
+    const label faceI,
+    bool&
 )
 {
     if

@@ -326,7 +326,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         p.age() += dt;
 
-        td.cloud().functions().postMove(p, cellI, dt);
+        td.cloud().functions().postMove(p, cellI, dt, td.keepParticle);
     }
 
     return td.keepParticle;
@@ -340,7 +340,7 @@ void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
     typename TrackData::cloudType::parcelType& p =
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
-    td.cloud().functions().postFace(p, p.face());
+    td.cloud().functions().postFace(p, p.face(), td.keepParticle);
 }
 
 
@@ -364,7 +364,14 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     // Invoke post-processing model
-    td.cloud().functions().postPatch(p, pp, trackFraction, tetIs);
+    td.cloud().functions().postPatch
+    (
+        p,
+        pp,
+        trackFraction,
+        tetIs,
+        td.keepParticle
+    );
 
     // Invoke surface film model
     if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))

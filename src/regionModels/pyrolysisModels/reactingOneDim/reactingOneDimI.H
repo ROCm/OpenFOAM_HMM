@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,13 +31,6 @@ inline Foam::label
 Foam::regionModels::pyrolysisModels::reactingOneDim::nNonOrthCorr() const
 {
     return nNonOrthCorr_;
-}
-
-
-inline const Foam::volScalarField&
-Foam::regionModels::pyrolysisModels::reactingOneDim::Qr() const
-{
-    return Qr_;
 }
 
 

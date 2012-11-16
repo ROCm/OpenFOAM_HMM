@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,8 +115,8 @@ public:
             //- Return the film thickness [m]
             virtual const volScalarField& delta() const;
 
-            //- Return const access to the surface tension / [m/s2]
-            inline const volScalarField& sigma() const;
+            //- Return the film coverage, 1 = covered, 0 = uncovered / []
+            virtual const volScalarField& alpha() const;
 
             //- Return the film velocity [m/s]
             virtual const volVectorField& U() const;
@@ -144,6 +144,9 @@ public:
 
             //- Return the film thermal conductivity [W/m/K]
             virtual const volScalarField& kappa() const;
+
+            //- Return const access to the surface tension / [m/s2]
+            inline const volScalarField& sigma() const;
 
 
             // Transfer fields - to the primary region

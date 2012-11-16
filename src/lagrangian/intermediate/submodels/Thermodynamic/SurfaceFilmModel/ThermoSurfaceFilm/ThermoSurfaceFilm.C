@@ -398,13 +398,15 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     // surface energy of secondary parcels [J]
     scalar ESigmaSec = 0;
 
-    // sample splash distribution to detrmine secondary parcel diameters
+    // sample splash distribution to determine secondary parcel diameters
     scalarList dNew(parcelsPerSplash_);
+    scalarList npNew(parcelsPerSplash_);
     forAll(dNew, i)
     {
         const scalar y = rndGen_.sample01<scalar>();
         dNew[i] = -dBarSplash*log(exp(-dMin/dBarSplash) - y*K);
-        ESigmaSec += sigma*p.areaS(dNew[i]);
+        npNew[i] = mRatio*np*pow3(d)/pow3(dNew[i])/parcelsPerSplash_;
+        ESigmaSec += npNew[i]*sigma*p.areaS(dNew[i]);
     }
 
     // incident kinetic energy [J]
@@ -459,7 +461,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
         // perturb new parcels towards the owner cell centre
         pPtr->position() += 0.5*rndGen_.sample01<scalar>()*(posC - posCf);
 
-        pPtr->nParticle() = mRatio*np*pow3(d)/pow3(dNew[i])/parcelsPerSplash_;
+        pPtr->nParticle() = npNew[i];
 
         pPtr->d() = dNew[i];
 

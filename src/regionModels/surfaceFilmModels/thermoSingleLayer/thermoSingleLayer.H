@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,6 +123,22 @@ protected:
                 volScalarField primaryEnergyPCTrans_;
 
 
+        //- Threshold film thickness beyond which the film is considered 'wet'
+        scalar deltaWet_;
+
+
+        // Hyprophilic/phobic properties
+
+            //- Activation flag
+            bool hydrophilic_;
+
+            //- Length scale applied to deltaWet_ for dry faces, typically 0.5
+            scalar hydrophilicDryScale_;
+
+            //- Length scale applied to deltaWet_ for wet faces, typically 0.001
+            scalar hydrophilicWetScale_;
+
+
         // Source term fields
 
             // Film region - registered to the film region mesh
@@ -166,6 +182,14 @@ protected:
             autoPtr<filmRadiationModel> radiation_;
 
 
+        // Limits
+
+            //- Minimum temperature limit (optional)
+            scalar Tmin_;
+
+            //- Maximum temperature limit (optional)
+            scalar Tmax_;
+
 
     // Protected member functions
 
@@ -189,6 +213,9 @@ protected:
 
         //- Transfer source fields from the primary region to the film region
         virtual void transferPrimaryRegionSourceFields();
+
+        //- Correct film coverage field
+        virtual void correctAlpha();
 
         //- Update the film sub-models
         virtual void updateSubmodels();
@@ -340,6 +367,15 @@ public:
 
             //- Return const access to the radiation model
             inline const filmRadiationModel& radiation() const;
+
+
+        // Derived fields (calculated on-the-fly)
+
+            //- Return the convective heat energy from film to wall
+            inline tmp<scalarField> Qconvw(const label patchI) const;
+
+            //- Return the convective heat energy from primary region to film
+            inline tmp<scalarField> Qconvp(const label patchI) const;
 
 
         // Evolution

@@ -96,7 +96,8 @@ void Foam::CloudFunctionObject<CloudType>::postMove
 (
     const typename CloudType::parcelType&,
     const label,
-    const scalar
+    const scalar,
+    bool&
 )
 {
     // do nothing
@@ -109,7 +110,8 @@ void Foam::CloudFunctionObject<CloudType>::postPatch
     const typename CloudType::parcelType&,
     const polyPatch&,
     const scalar,
-    const tetIndices&
+    const tetIndices&,
+    bool&
 )
 {
     // do nothing
@@ -120,7 +122,8 @@ template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postFace
 (
     const typename CloudType::parcelType&,
-    const label
+    const label,
+    bool&
 )
 {
     // do nothing

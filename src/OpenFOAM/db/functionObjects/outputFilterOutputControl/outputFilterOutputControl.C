@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,11 +30,8 @@ License
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::outputFilterOutputControl::outputControls,
-        2
-    >::names[] =
+    const char* NamedEnum<outputFilterOutputControl::outputControls, 2>::
+    names[] =
     {
         "timeStep",
         "outputTime"

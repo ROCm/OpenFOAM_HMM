@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,9 +68,6 @@ private:
 protected:
 
     // Protected data
-
-        //- Boiling temperature / [K]
-        const scalar Tb_;
 
         //- Minimum film height for model to be active
         const scalar deltaMin_;
