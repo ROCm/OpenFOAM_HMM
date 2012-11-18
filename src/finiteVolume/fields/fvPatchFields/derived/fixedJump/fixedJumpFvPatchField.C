@@ -63,7 +63,19 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 :
     jumpCyclicFvPatchField<Type>(p, iF),
     jump_("jump", dict, p.size())
-{}
+{
+    if (dict.found("value"))
+    {
+        fvPatchField<Type>::operator=
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate(Pstream::blocking);
+    }
+}
 
 
 template<class Type>

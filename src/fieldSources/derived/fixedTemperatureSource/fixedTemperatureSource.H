@@ -33,7 +33,13 @@ Description
         fixedTemperatureSourceCoeffs
         {
             fieldNames      (h e hs);   // names of fields to apply source
+            mode            constant;   // constant or lookup
+
+            // constant option
             temperature     500;        // fixed temperature [K]
+
+            // loolup option
+            // TName        T;          // optional temperature field name
         }
 
 
@@ -46,6 +52,7 @@ SourceFiles
 #define fixedTemperatureSource_H
 
 #include "basicSource.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,12 +68,32 @@ class fixedTemperatureSource
     public basicSource
 {
 
+public:
+
+    //- Temperature mode
+    enum temperatureMode
+    {
+        tmConstant,
+        tmLookup
+    };
+
+
+    //- String representation of temperatureMode enums
+    static const NamedEnum<temperatureMode, 2> temperatureModeNames_;
+
+
 protected:
 
     // Protected data
 
-        //- Fixed temperature [K]
-        scalar T_;
+        //- Operation mode
+        temperatureMode mode_;
+
+        //- Constant temperature [K]
+        scalar Tconstant_;
+
+        //- Temperature field name
+        word TName_;
 
 
 private:

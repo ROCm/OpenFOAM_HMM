@@ -61,7 +61,7 @@ bool kinematicSingleLayer::read()
     {
         const dictionary& solution = this->solution().subDict("PISO");
         solution.lookup("momentumPredictor") >> momentumPredictor_;
-        solution.lookup("nOuterCorr") >> nOuterCorr_;
+        solution.readIfPresent("nOuterCorr", nOuterCorr_);
         solution.lookup("nCorr") >> nCorr_;
         solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
 
@@ -197,6 +197,12 @@ tmp<volScalarField> kinematicSingleLayer::pp()
 }
 
 
+void kinematicSingleLayer::correctAlpha()
+{
+    alpha_ == pos(delta_ - dimensionedScalar("SMALL", dimLength, SMALL));
+}
+
+
 void kinematicSingleLayer::updateSubmodels()
 {
     if (debug)
@@ -276,8 +282,8 @@ void kinematicSingleLayer::updateSurfaceVelocities()
     Uw_ -= nHat()*(Uw_ & nHat());
     Uw_.correctBoundaryConditions();
 
-    // TODO: apply quadratic profile to determine surface velocity
-    Us_ = U_;
+    // apply quadratic profile to surface velocity
+    Us_ = 2.0*U_;
     Us_.correctBoundaryConditions();
 }
 
@@ -439,7 +445,7 @@ kinematicSingleLayer::kinematicSingleLayer
     surfaceFilmModel(modelType, mesh, g),
 
     momentumPredictor_(solution().subDict("PISO").lookup("momentumPredictor")),
-    nOuterCorr_(readLabel(solution().subDict("PISO").lookup("nOuterCorr"))),
+    nOuterCorr_(solution().subDict("PISO").lookupOrDefault("nOuterCorr", 1)),
     nCorr_(readLabel(solution().subDict("PISO").lookup("nCorr"))),
     nNonOrthCorr_
     (
@@ -502,6 +508,19 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::AUTO_WRITE
         ),
         regionMesh()
+    ),
+    alpha_
+    (
+        IOobject
+        (
+            "alpha",
+            time().timeName(),
+            regionMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        regionMesh(),
+        dimensionedScalar("zero", dimless, 0.0)
     ),
     U_
     (
@@ -817,6 +836,8 @@ void kinematicSingleLayer::preEvolveRegion()
         Info<< "kinematicSingleLayer::preEvolveRegion()" << endl;
     }
 
+    surfaceFilmModel::preEvolveRegion();
+
     transferPrimaryRegionThermoFields();
 
     correctThermoFields();
@@ -838,6 +859,8 @@ void kinematicSingleLayer::evolveRegion()
         Info<< "kinematicSingleLayer::evolveRegion()" << endl;
     }
 
+    correctAlpha();
+
     updateSubmodels();
 
     // Solve continuity for deltaRho_
@@ -846,7 +869,7 @@ void kinematicSingleLayer::evolveRegion()
     // Implicit pressure source coefficient - constant
     tmp<volScalarField> tpp(this->pp());
 
-    for (int oCorr=0; oCorr<nOuterCorr_; oCorr++)
+    for (int oCorr=1; oCorr<=nOuterCorr_; oCorr++)
     {
         // Explicit pressure source contribution - varies with delta_
         tmp<volScalarField> tpu(this->pu());
@@ -1032,7 +1055,9 @@ void kinematicSingleLayer::info() const
         << indent << "min/max(mag(U))    = " << min(mag(U_)).value() << ", "
         << max(mag(U_)).value() << nl
         << indent << "min/max(delta)     = " << min(delta_).value() << ", "
-        << max(delta_).value() << nl;
+        << max(delta_).value() << nl
+        << indent << "coverage           = "
+        << gSum(alpha_.internalField()*magSf())/gSum(magSf()) <<  nl;
 
     injection_.info(Info);
 }

@@ -133,6 +133,8 @@ void fvMesh::makeC() const
             << abort(FatalError);
     }
 
+    // Construct as slices. Only preserve processor (not e.g. cyclic)
+
     CPtr_ = new slicedVolVectorField
     (
         IOobject
@@ -148,33 +150,10 @@ void fvMesh::makeC() const
         *this,
         dimLength,
         cellCentres(),
-        faceCentres()
+        faceCentres(),
+        true,               //preserveCouples
+        true                //preserveProcOnly
     );
-
-
-    // Need to correct for cyclics transformation since absolute quantity.
-    // Ok on processor patches since hold opposite cell centre (no
-    // transformation)
-    slicedVolVectorField& C = *CPtr_;
-
-    forAll(C.boundaryField(), patchi)
-    {
-        if
-        (
-            isA<cyclicFvPatchVectorField>(C.boundaryField()[patchi])
-         || isA<cyclicAMIFvPatchVectorField>(C.boundaryField()[patchi])
-        )
-        {
-            // Note: cyclic is not slice but proper field
-            C.boundaryField()[patchi] == static_cast<const vectorField&>
-            (
-                static_cast<const List<vector>&>
-                (
-                    boundary_[patchi].patchSlice(faceCentres())
-                )
-            );
-        }
-    }
 }
 
 

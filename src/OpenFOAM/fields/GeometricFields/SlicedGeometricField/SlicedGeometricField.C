@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SlicedGeometricField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * * //
 
@@ -40,7 +41,8 @@ slicedBoundaryField
 (
     const Mesh& mesh,
     const Field<Type>& completeField,
-    const bool preserveCouples
+    const bool preserveCouples,
+    const bool preserveProcessorOnly
 )
 {
     tmp<FieldField<PatchField, Type> > tbf
@@ -52,7 +54,15 @@ slicedBoundaryField
 
     forAll(mesh.boundary(), patchi)
     {
-        if (preserveCouples && mesh.boundary()[patchi].coupled())
+        if
+        (
+            preserveCouples
+         && mesh.boundary()[patchi].coupled()
+         && (
+               !preserveProcessorOnly
+            || isA<processorFvPatch>(mesh.boundary()[patchi])
+            )
+        )
         {
             // For coupled patched construct the correct patch field type
             bf.set
@@ -243,7 +253,8 @@ SlicedGeometricField
     const dimensionSet& ds,
     const Field<Type>& completeIField,
     const Field<Type>& completeBField,
-    const bool preserveCouples
+    const bool preserveCouples,
+    const bool preserveProcessorOnly
 )
 :
     GeometricField<Type, PatchField, GeoMesh>
@@ -252,7 +263,13 @@ SlicedGeometricField
         mesh,
         ds,
         Field<Type>(),
-        slicedBoundaryField(mesh, completeBField, preserveCouples)
+        slicedBoundaryField
+        (
+            mesh,
+            completeBField,
+            preserveCouples,
+            preserveProcessorOnly
+        )
     )
 {
     // Set the internalField to the slice of the complete field

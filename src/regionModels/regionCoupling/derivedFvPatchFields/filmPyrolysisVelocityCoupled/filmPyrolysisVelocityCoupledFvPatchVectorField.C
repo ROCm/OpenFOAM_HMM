@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,8 +40,7 @@ filmPyrolysisVelocityCoupledFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF),
     phiName_("phi"),
-    rhoName_("rho"),
-    deltaWet_(1e-6)
+    rhoName_("rho")
 {}
 
 
@@ -56,8 +55,7 @@ filmPyrolysisVelocityCoupledFvPatchVectorField
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    deltaWet_(ptf.deltaWet_)
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -71,8 +69,7 @@ filmPyrolysisVelocityCoupledFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    deltaWet_(dict.lookupOrDefault<scalar>("deltaWet", 1e-6))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
 }
@@ -86,8 +83,7 @@ filmPyrolysisVelocityCoupledFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fpvpvf),
     phiName_(fpvpvf.phiName_),
-    rhoName_(fpvpvf.rhoName_),
-    deltaWet_(fpvpvf.deltaWet_)
+    rhoName_(fpvpvf.rhoName_)
 {}
 
 
@@ -100,8 +96,7 @@ filmPyrolysisVelocityCoupledFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fpvpvf, iF),
     phiName_(fpvpvf.phiName_),
-    rhoName_(fpvpvf.rhoName_),
-    deltaWet_(fpvpvf.deltaWet_)
+    rhoName_(fpvpvf.rhoName_)
 {}
 
 
@@ -154,12 +149,11 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    scalarField deltaFilm = filmModel.delta().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, deltaFilm);
+    scalarField alphaFilm = filmModel.alpha().boundaryField()[filmPatchI];
+    filmModel.toPrimary(filmPatchI, alphaFilm);
 
     vectorField UFilm = filmModel.Us().boundaryField()[filmPatchI];
     filmModel.toPrimary(filmPatchI, UFilm);
-
 
     // Retrieve pyrolysis model
     const pyrModelType& pyrModel =
@@ -203,19 +197,9 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
     const scalarField UAvePyr(-phiPyr/patch().magSf());
     const vectorField& nf = patch().nf();
 
-    forAll(deltaFilm, i)
-    {
-        if (deltaFilm[i] > deltaWet_)
-        {
-            // velocity set by film
-            Up[i] = UFilm[i];
-        }
-        else
-        {
-            // velocity set by pyrolysis model
-            Up[i] = UAvePyr[i]*nf[i];
-        }
-    }
+
+    // Evaluate velocity
+    Up = alphaFilm*UFilm + (1.0 - alphaFilm)*UAvePyr*nf;
 
     // Restore tag
     UPstream::msgType() = oldTag;
@@ -232,7 +216,6 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::write
     fvPatchVectorField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("deltaWet") << deltaWet_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

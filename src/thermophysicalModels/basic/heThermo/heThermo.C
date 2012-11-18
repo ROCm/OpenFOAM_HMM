@@ -36,6 +36,39 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class BasicThermo, class MixtureType>
+Foam::wordList Foam::heThermo<BasicThermo, MixtureType>::heBoundaryBaseTypes()
+{
+    const volScalarField::GeometricBoundaryField& tbf =
+        this->T_.boundaryField();
+
+    wordList hbt(tbf.size(), word::null);
+
+    forAll(tbf, patchi)
+    {
+        if (isA<fixedJumpFvPatchScalarField>(tbf[patchi]))
+        {
+            const fixedJumpFvPatchScalarField& pf =
+                dynamic_cast<const fixedJumpFvPatchScalarField&>(tbf[patchi]);
+
+            hbt[patchi] = pf.interfaceFieldType();
+        }
+        else if (isA<fixedJumpAMIFvPatchScalarField>(tbf[patchi]))
+        {
+            const fixedJumpAMIFvPatchScalarField& pf =
+                dynamic_cast<const fixedJumpAMIFvPatchScalarField&>
+                (
+                    tbf[patchi]
+                );
+
+            hbt[patchi] = pf.interfaceFieldType();
+        }
+    }
+
+    return hbt;
+}
+
+
+template<class BasicThermo, class MixtureType>
 Foam::wordList Foam::heThermo<BasicThermo, MixtureType>::heBoundaryTypes()
 {
     const volScalarField::GeometricBoundaryField& tbf =
@@ -149,7 +182,8 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         ),
         mesh,
         dimEnergy/dimMass,
-        this->heBoundaryTypes()
+        this->heBoundaryTypes(),
+        this->heBoundaryBaseTypes()
     )
 {
     init();
@@ -179,7 +213,8 @@ Foam::heThermo<BasicThermo, MixtureType>::heThermo
         ),
         mesh,
         dimEnergy/dimMass,
-        this->heBoundaryTypes()
+        this->heBoundaryTypes(),
+        this->heBoundaryBaseTypes()
     )
 {
     init();

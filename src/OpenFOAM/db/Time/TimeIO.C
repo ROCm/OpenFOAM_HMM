@@ -160,6 +160,20 @@ void Foam::Time::readDict()
         }
     }
 
+    if (controlDict_.readIfPresent("secondaryPurgeWrite", secondaryPurgeWrite_))
+    {
+        if (secondaryPurgeWrite_ < 0)
+        {
+            WarningIn("Time::readDict()")
+                << "invalid value for secondaryPurgeWrite "
+                << secondaryPurgeWrite_
+                << ", should be >= 0, setting to 0"
+                << endl;
+
+            secondaryPurgeWrite_ = 0;
+        }
+    }
+
     if (controlDict_.found("timeFormat"))
     {
         const word formatName(controlDict_.lookup("timeFormat"));
@@ -347,13 +361,45 @@ bool Foam::Time::writeObject
         timeDict.regIOobject::writeObject(fmt, ver, cmp);
         bool writeOK = objectRegistry::writeObject(fmt, ver, cmp);
 
-        if (writeOK && purgeWrite_)
+        if (writeOK)
         {
-            previousOutputTimes_.push(tmName);
-
-            while (previousOutputTimes_.size() > purgeWrite_)
+            // Does primary or secondary time trigger purging?
+            // Note that primary times can only be purged by primary
+            // purging. Secondary times can be purged by either primary
+            // or secondary purging.
+            if (primaryOutputTime_ && purgeWrite_)
             {
-                rmDir(objectRegistry::path(previousOutputTimes_.pop()));
+                previousOutputTimes_.push(tmName);
+
+                while (previousOutputTimes_.size() > purgeWrite_)
+                {
+                    rmDir(objectRegistry::path(previousOutputTimes_.pop()));
+                }
+            }
+            if
+            (
+               !primaryOutputTime_
+             && secondaryOutputTime_
+             && secondaryPurgeWrite_
+            )
+            {
+                // Writing due to secondary
+                previousSecondaryOutputTimes_.push(tmName);
+
+                while
+                (
+                    previousSecondaryOutputTimes_.size()
+                  > secondaryPurgeWrite_
+                )
+                {
+                    rmDir
+                    (
+                        objectRegistry::path
+                        (
+                            previousSecondaryOutputTimes_.pop()
+                        )
+                    );
+                }
             }
         }
 
@@ -368,6 +414,7 @@ bool Foam::Time::writeObject
 
 bool Foam::Time::writeNow()
 {
+    primaryOutputTime_ = true;
     outputTime_ = true;
     return write();
 }

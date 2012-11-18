@@ -28,6 +28,9 @@ thermoSingleLayerCoeffs
 
     liquid      H2O;
 
+    deltaWet    1e-4;
+    hydrophilic no;
+
     radiationModel  none;
 
     upperSurfaceModels
@@ -65,7 +68,6 @@ thermoSingleLayerCoeffs
 
     contactAngleCoeffs
     {
-        deltaWet        1e-4;
         Ccf             0.085;
         contactAngleDistribution
         {

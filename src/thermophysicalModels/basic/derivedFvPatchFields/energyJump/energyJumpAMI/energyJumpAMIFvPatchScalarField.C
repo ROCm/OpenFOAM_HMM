@@ -68,6 +68,10 @@ Foam::energyJumpAMIFvPatchScalarField::energyJumpAMIFvPatchScalarField
             scalarField("value", dict, p.size())
         );
     }
+    else
+    {
+        evaluate(Pstream::blocking);
+    }
 }
 
 

@@ -220,7 +220,8 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     const parcelType& p,
     const polyPatch& pp,
     const scalar,
-    const tetIndices& tetIs
+    const tetIndices& tetIs,
+    bool&
 )
 {
     const label patchI = pp.index();

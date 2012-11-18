@@ -24,6 +24,164 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::regionModels::regionModel::mapRegionPatchField
+(
+    const regionModel& nbrRegion,
+    const label regionPatchI,
+    const label nbrPatchI,
+    const Field<Type>& nbrField,
+    const bool flip
+) const
+{
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
+    const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+    int oldTag = UPstream::msgType();
+    UPstream::msgType() = oldTag + 1;
+
+    AMIPatchToPatchInterpolation ami(p, nbrP, faceAreaIntersect::tmMesh, flip);
+
+    tmp<Field<Type> > tresult(ami.interpolateToSource(nbrField));
+
+    UPstream::msgType() = oldTag;
+
+    return tresult;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::regionModels::regionModel::mapRegionPatchField
+(
+    const word& regionModelName,
+    const word& fieldName,
+    const label regionPatchI,
+    const bool flip
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    const regionModel& nbrRegion =
+        this->primaryMesh_.lookupObject<regionModel>(regionModelName);
+
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
+    if (nbrRegionMesh.foundObject<fieldType>(fieldName))
+    {
+        const fieldType& nbrField =
+            nbrRegionMesh.lookupObject<fieldType>(fieldName);
+
+        const label nbrPatchI = nbrCoupledPatchID(nbrRegion, regionPatchI);
+
+        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+        int oldTag = UPstream::msgType();
+        UPstream::msgType() = oldTag + 1;
+
+        AMIPatchToPatchInterpolation ami
+        (
+            p,
+            nbrP,
+            faceAreaIntersect::tmMesh,
+            flip
+        );
+
+        const Field<Type>& nbrFieldp = nbrField.boundaryField()[nbrPatchI];
+
+        tmp<Field<Type> > tresult(ami.interpolateToSource(nbrFieldp));
+
+        UPstream::msgType() = oldTag;
+
+        return tresult;
+    }
+    else
+    {
+        return
+            tmp<Field<Type> >
+            (
+                new Field<Type>
+                (
+                    p.size(),
+                    pTraits<Type>::zero
+                )
+            );
+    }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::regionModels::regionModel::mapRegionPatchInternalField
+(
+    const word& regionModelName,
+    const word& fieldName,
+    const label regionPatchI,
+    const bool flip
+) const
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    const regionModel& nbrRegion =
+        this->primaryMesh_.lookupObject<regionModel>(regionModelName);
+
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
+    if (nbrRegionMesh.foundObject<fieldType>(fieldName))
+    {
+        const fieldType& nbrField =
+            nbrRegionMesh.lookupObject<fieldType>(fieldName);
+
+        const label nbrPatchI = nbrCoupledPatchID(nbrRegion, regionPatchI);
+
+        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+        int oldTag = UPstream::msgType();
+        UPstream::msgType() = oldTag + 1;
+
+        AMIPatchToPatchInterpolation ami
+        (
+            p,
+            nbrP,
+            faceAreaIntersect::tmMesh,
+            flip
+        );
+
+        const fvPatchField<Type>& nbrFieldp =
+            nbrField.boundaryField()[nbrPatchI];
+
+        tmp<Field<Type> > tresult
+        (
+            ami.interpolateToSource(nbrFieldp.patchInternalField())
+        );
+
+        UPstream::msgType() = oldTag;
+
+        return tresult;
+    }
+    else
+    {
+        return
+            tmp<Field<Type> >
+            (
+                new Field<Type>
+                (
+                    p.size(),
+                    pTraits<Type>::zero
+                )
+            );
+    }
+}
+
+
+template<class Type>
 void Foam::regionModels::regionModel::toPrimary
 (
     const label regionPatchI,

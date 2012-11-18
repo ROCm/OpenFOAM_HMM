@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,6 @@ contactAngleForce::contactAngleForce
 )
 :
     force(typeName, owner, dict),
-    deltaWet_(readScalar(coeffs_.lookup("deltaWet"))),
     Ccf_(readScalar(coeffs_.lookup("Ccf"))),
     rndGen_(label(0), -1),
     distribution_
@@ -82,7 +81,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         (
             IOobject
             (
-                "contactForce",
+                typeName + ".contactForce",
                 owner_.time().timeName(),
                 owner_.regionMesh(),
                 IOobject::NO_READ,
@@ -100,16 +99,10 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
 
     const scalarField& magSf = owner_.magSf();
 
-    const volScalarField& delta = owner_.delta();
+    const volScalarField& alpha = owner_.alpha();
     const volScalarField& sigma = owner_.sigma();
 
-    volScalarField alpha
-    (
-        "alpha",
-        pos(delta - dimensionedScalar("deltaWet", dimLength, deltaWet_))
-    );
     volVectorField gradAlpha(fvc::grad(alpha));
-
 
     scalarField nHits(owner_.regionMesh().nCells(), 0.0);
 
@@ -119,19 +112,17 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         const label cellN = nbr[faceI];
 
         label cellI = -1;
-        if ((delta[cellO] > deltaWet_) && (delta[cellN] < deltaWet_))
+        if ((alpha[cellO] > 0.5) && (alpha[cellN] < 0.5))
         {
             cellI = cellO;
         }
-        else if ((delta[cellO] < deltaWet_) && (delta[cellN] > deltaWet_))
+        else if ((alpha[cellO] < 0.5) && (alpha[cellN] > 0.5))
         {
             cellI = cellN;
         }
 
         if (cellI != -1)
         {
-//            const scalar dx = Foam::sqrt(magSf[cellI]);
-            // bit of a cheat, but ok for regular meshes
             const scalar dx = owner_.regionMesh().deltaCoeffs()[faceI];
             const vector n =
                 gradAlpha[cellI]/(mag(gradAlpha[cellI]) + ROOTVSMALL);
@@ -141,17 +132,17 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         }
     }
 
-    forAll(delta.boundaryField(), patchI)
+    forAll(alpha.boundaryField(), patchI)
     {
-        const fvPatchField<scalar>& df = delta.boundaryField()[patchI];
-        const scalarField& dx = df.patch().deltaCoeffs();
-        const labelUList& faceCells = df.patch().faceCells();
+        const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
+        const scalarField& dx = alphaf.patch().deltaCoeffs();
+        const labelUList& faceCells = alphaf.patch().faceCells();
 
-        forAll(df, faceI)
+        forAll(alphaf, faceI)
         {
             label cellO = faceCells[faceI];
 
-            if ((delta[cellO] > deltaWet_) && (df[faceI] < deltaWet_))
+            if ((alpha[cellO] > 0.5) && (alphaf[faceI] < 0.5))
             {
                 const vector n =
                     gradAlpha[cellO]/(mag(gradAlpha[cellO]) + ROOTVSMALL);

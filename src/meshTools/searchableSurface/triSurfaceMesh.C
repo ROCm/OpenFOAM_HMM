@@ -625,6 +625,12 @@ Foam::triSurfaceMesh::edgeTree() const
 }
 
 
+Foam::scalar Foam::triSurfaceMesh::tolerance() const
+{
+    return tolerance_;
+}
+
+
 const Foam::wordList& Foam::triSurfaceMesh::regions() const
 {
     if (regions_.empty())

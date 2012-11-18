@@ -68,6 +68,10 @@ protected:
             //  by interrogating the temperature field boundary types
             wordList heBoundaryTypes();
 
+            //- Return the enthalpy/internal energy field boundary base types
+            //  by interrogating the temperature field boundary types
+            wordList heBoundaryBaseTypes();
+
             //- Correct the enthalpy/internal energy field boundaries
             void heBoundaryCorrection(volScalarField& he);
 

@@ -9,6 +9,7 @@ EXE_INC = \
     -I$(FASTDUALOCTREE_SRC_PATH) \
     -I../conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude
 
@@ -21,6 +22,7 @@ EXE_LIBS = \
     -lconformalVoronoiMesh \
     -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
     -ledgeMesh \
+    -lfileFormats \
     -ltriSurface \
     -lmeshTools \
     -ldynamicMesh

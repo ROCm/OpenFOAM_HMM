@@ -8,7 +8,15 @@ cd ${0%/*} || exit 1    # run from this directory
 application=`getApplication`
 
 runApplication blockMesh
-runApplication $application
+
+#- Run serial
+#runApplication $application
+
+#- Run parallel
+runApplication decomposePar -cellDist
+runParallel $application 5
+runApplication reconstructPar
+
 runApplication postChannel
 
 # ----------------------------------------------------------------- end-of-file
