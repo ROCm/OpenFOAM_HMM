@@ -103,7 +103,7 @@ public:
         enum timeSchemeType
         {
             tsEuler,
-            tsCrankNicholson,
+            tsCrankNicolson,
             tsBackward
         };
 

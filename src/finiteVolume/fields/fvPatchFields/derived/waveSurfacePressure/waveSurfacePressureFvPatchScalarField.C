@@ -30,7 +30,7 @@ License
 #include "surfaceFields.H"
 #include "uniformDimensionedFields.H"
 #include "EulerDdtScheme.H"
-#include "CrankNicholsonDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "backwardDdtScheme.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,7 +45,7 @@ namespace Foam
     >::names[] =
     {
         fv::EulerDdtScheme<scalar>::typeName_(),
-        fv::CrankNicholsonDdtScheme<scalar>::typeName_(),
+        fv::CrankNicolsonDdtScheme<scalar>::typeName_(),
         fv::backwardDdtScheme<scalar>::typeName_()
     };
 }
@@ -183,7 +183,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     switch (timeScheme)
     {
         case tsEuler:
-        case tsCrankNicholson:
+        case tsCrankNicolson:
         {
             zetap = zeta.oldTime().boundaryField()[patchI] + dZetap;
 
