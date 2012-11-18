@@ -1,0 +1,4 @@
+
+ThermoMixture.C
+
+EXE = $(FOAM_APPBIN)/ThermoMixture
