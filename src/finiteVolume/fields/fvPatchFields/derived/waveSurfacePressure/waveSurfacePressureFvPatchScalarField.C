@@ -197,7 +197,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
             scalar c00 = dt*dt/(dt0*(dt + dt0));
             scalar c0 = c + c00;
 
-            zetap =         
+            zetap =
                 (
                     c0*zeta.oldTime().boundaryField()[patchI]
                   - c00*zeta.oldTime().oldTime().boundaryField()[patchI]

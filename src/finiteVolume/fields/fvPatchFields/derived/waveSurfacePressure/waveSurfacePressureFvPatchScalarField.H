@@ -45,7 +45,7 @@ Description
     local volumetric flux.
 
     \heading Patch usage
-    
+
     \table
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
