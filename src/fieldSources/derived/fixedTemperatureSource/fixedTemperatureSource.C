@@ -45,7 +45,7 @@ namespace Foam
     template<>
     const char* NamedEnum<fixedTemperatureSource::temperatureMode, 2>::names[] =
     {
-        "constant",
+        "uniform",
         "lookup"
     };
 }
@@ -66,14 +66,17 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
 :
     basicSource(name, modelType, dict, mesh),
     mode_(temperatureModeNames_.read(coeffs_.lookup("mode"))),
-    Tconstant_(0.0),
+    Tuniform_(NULL),
     TName_("T")
 {
     switch (mode_)
     {
-        case tmConstant:
+        case tmUniform:
         {
-            coeffs_.lookup("temperature") >> Tconstant_;
+            Tuniform_.reset
+            (
+                DataEntry<scalar>::New("temperature", coeffs_).ptr()
+            );
             break;
         }
         case tmLookup:
@@ -114,10 +117,11 @@ void Foam::fixedTemperatureSource::setValue
     {
         switch (mode_)
         {
-            case tmConstant:
+            case tmUniform:
             {
-                scalarField Tconst(cells_.size(), Tconstant_);
-                eqn.setValues(cells_, thermo.he(thermo.p(), Tconst, cells_));
+                const scalar t = mesh_.time().value();
+                scalarField Tuni(cells_.size(), Tuniform_->value(t));
+                eqn.setValues(cells_, thermo.he(thermo.p(), Tuni, cells_));
 
                 break;
             }
@@ -126,8 +130,8 @@ void Foam::fixedTemperatureSource::setValue
                 const volScalarField& T =
                     mesh().lookupObject<volScalarField>(TName_);
 
-                scalarField Tlookup(T, cells_);
-                eqn.setValues(cells_, thermo.he(thermo.p(), Tlookup, cells_));
+                scalarField Tlkp(T, cells_);
+                eqn.setValues(cells_, thermo.he(thermo.p(), Tlkp, cells_));
 
                 break;
             }
@@ -152,7 +156,14 @@ bool Foam::fixedTemperatureSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        coeffs_.readIfPresent("temperature", Tconstant_);
+        if (coeffs_.found(Tuniform_->name()))
+        {
+            Tuniform_.reset
+            (
+                DataEntry<scalar>::New(Tuniform_->name(), dict).ptr()
+            );
+        }
+
         coeffs_.readIfPresent("TName", TName_);
 
         return true;
