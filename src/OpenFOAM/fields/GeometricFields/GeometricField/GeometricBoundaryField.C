@@ -28,7 +28,150 @@ License
 #include "globalMeshData.H"
 #include "cyclicPolyPatch.H"
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+readField
+(
+    const DimensionedField<Type, GeoMesh>& field,
+    const dictionary& dict
+)
+{
+    this->setSize(bmesh_.size());
+
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::readField"
+               "("
+                   "const DimensionedField<Type, GeoMesh>&, "
+                   "const dictionary&"
+                ")"
+            << endl;
+    }
+
+    // Patch or patch-groups. (using non-wild card entries of dictionaries)
+    forAllConstIter(dictionary, dict, iter)
+    {
+        if (iter().isDict() && !iter().keyword().isPattern())
+        {
+            const labelList patchIDs = bmesh_.findIndices
+            (
+                iter().keyword(),
+                true
+            );
+
+            forAll(patchIDs, i)
+            {
+                label patchi = patchIDs[i];
+
+                this->set
+                (
+                    patchi,
+                    PatchField<Type>::New
+                    (
+                        bmesh_[patchi],
+                        field,
+                        iter().dict()
+                    )
+                );
+            }
+        }
+    }
+
+    // Check for wildcard patch overrides
+    forAll(bmesh_, patchi)
+    {
+        if (!this->set(patchi))
+        {
+            if (bmesh_[patchi].type() == emptyPolyPatch::typeName)
+            {
+                this->set
+                (
+                    patchi,
+                    PatchField<Type>::New
+                    (
+                        emptyPolyPatch::typeName,
+                        bmesh_[patchi],
+                        field
+                    )
+                );
+            }
+            else
+            {
+                bool found = dict.found(bmesh_[patchi].name());
+
+                if (found)
+                {
+                    this->set
+                    (
+                        patchi,
+                        PatchField<Type>::New
+                        (
+                            bmesh_[patchi],
+                            field,
+                            dict.subDict(bmesh_[patchi].name())
+                        )
+                    );
+                }
+            }
+        }
+    }
+
+
+    // Check for any unset patches
+    forAll(bmesh_, patchi)
+    {
+        if (!this->set(patchi))
+        {
+            if (bmesh_[patchi].type() == cyclicPolyPatch::typeName)
+            {
+                FatalIOErrorIn
+                (
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::readField"
+                    "("
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
+                    ")",
+                    dict
+                )   << "Cannot find patchField entry for cyclic "
+                    << bmesh_[patchi].name() << endl
+                    << "Is your field uptodate with split cyclics?" << endl
+                    << "Run foamUpgradeCyclics to convert mesh and fields"
+                    << " to split cyclics." << exit(FatalIOError);
+            }
+            else
+            {
+                FatalIOErrorIn
+                (
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::readField"
+                    "("
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
+                    ")",
+                    dict
+                )   << "Cannot find patchField entry for "
+                    << bmesh_[patchi].name() << exit(FatalIOError);
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{}
+
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
@@ -260,130 +403,7 @@ GeometricBoundaryField
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "("
-                   "const BoundaryMesh&, "
-                   "const DimensionedField<Type, GeoMesh>&, "
-                   "const dictionary&"
-                ")"
-            << endl;
-    }
-
-
-    // Patch or patch-groups. (using non-wild card entries of dictionaries)
-    forAllConstIter(dictionary, dict, iter)
-    {
-        if (iter().isDict() && !iter().keyword().isPattern())
-        {
-            const labelList patchIDs = bmesh_.findIndices
-            (
-                iter().keyword(),
-                true
-            );
-
-            forAll(patchIDs, i)
-            {
-                label patchi = patchIDs[i];
-                this->set
-                (
-                    patchi,
-                    PatchField<Type>::New
-                    (
-                        bmesh_[patchi],
-                        field,
-                        iter().dict()
-                    )
-                );
-            }
-        }
-    }
-
-    // Check for wildcard patch overrides
-    forAll(bmesh_, patchi)
-    {
-        if (!this->set(patchi))
-        {
-            if (bmesh_[patchi].type() == emptyPolyPatch::typeName)
-            {
-                this->set
-                (
-                    patchi,
-                    PatchField<Type>::New
-                    (
-                        emptyPolyPatch::typeName,
-                        bmesh_[patchi],
-                        field
-                    )
-                );
-            }
-            else
-            {
-                bool found = dict.found(bmesh_[patchi].name());
-
-                if (found)
-                {
-                    this->set
-                    (
-                        patchi,
-                        PatchField<Type>::New
-                        (
-                            bmesh_[patchi],
-                            field,
-                            dict.subDict(bmesh_[patchi].name())
-                        )
-                    );
-                }
-            }
-        }
-    }
-
-
-    // Check for any unset patches
-    forAll(bmesh_, patchi)
-    {
-        if (!this->set(patchi))
-        {
-            if (bmesh_[patchi].type() == cyclicPolyPatch::typeName)
-            {
-                FatalIOErrorIn
-                (
-                    "GeometricField<Type, PatchField, GeoMesh>::"
-                    "GeometricBoundaryField::"
-                    "GeometricBoundaryField"
-                    "("
-                        "const BoundaryMesh&, "
-                        "const DimensionedField<Type, GeoMesh>&, "
-                        "const dictionary&"
-                    ")",
-                    dict
-                )   << "Cannot find patchField entry for cyclic "
-                    << bmesh_[patchi].name() << endl
-                    << "Is your field uptodate with split cyclics?" << endl
-                    << "Run foamUpgradeCyclics to convert mesh and fields"
-                    << " to split cyclics." << exit(FatalIOError);
-            }
-            else
-            {
-                FatalIOErrorIn
-                (
-                    "GeometricField<Type, PatchField, GeoMesh>::"
-                    "GeometricBoundaryField::"
-                    "GeometricBoundaryField"
-                    "("
-                        "const BoundaryMesh&, "
-                        "const DimensionedField<Type, GeoMesh>&, "
-                        "const dictionary&"
-                    ")",
-                    dict
-                )   << "Cannot find patchField entry for "
-                    << bmesh_[patchi].name() << exit(FatalIOError);
-            }
-        }
-    }
+    readField(field, dict);
 }
 
 
