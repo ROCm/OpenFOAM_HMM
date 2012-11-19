@@ -337,7 +337,7 @@ addLayersControls
     // Advanced settings
 
     // When not to extrude surface. 0 is flat surface, 90 is when two faces
-    // make straight angle.
+    // are perpendicular
     featureAngle 60;
 
     // At non-patched sides allow mesh to slip if extrusion direction makes
