@@ -28,226 +28,26 @@ License
 #include "globalMeshData.H"
 #include "cyclicPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
+void Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+readField
 (
-    const BoundaryMesh& bmesh,
-    const DimensionedField<Type, GeoMesh>& field,
-    const word& patchFieldType
-)
-:
-    FieldField<PatchField, Type>(bmesh.size()),
-    bmesh_(bmesh)
-{
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const word&)"
-            << endl;
-    }
-
-    forAll(bmesh_, patchi)
-    {
-        this->set
-        (
-            patchi,
-            PatchField<Type>::New
-            (
-                patchFieldType,
-                bmesh_[patchi],
-                field
-            )
-        );
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
-(
-    const BoundaryMesh& bmesh,
-    const DimensionedField<Type, GeoMesh>& field,
-    const wordList& patchFieldTypes,
-    const wordList& constraintTypes
-)
-:
-    FieldField<PatchField, Type>(bmesh.size()),
-    bmesh_(bmesh)
-{
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const wordList&, const wordList&)"
-            << endl;
-    }
-
-    if
-    (
-        patchFieldTypes.size() != this->size()
-     || (constraintTypes.size() && (constraintTypes.size() != this->size()))
-    )
-    {
-        FatalErrorIn
-        (
-            "GeometricField<Type, PatchField, GeoMesh>::"
-            "GeometricBoundaryField::"
-            "GeometricBoundaryField(const BoundaryMesh&, "
-            "const Field<Type>&, const wordList&, const wordList&)"
-        )   << "Incorrect number of patch type specifications given" << nl
-            << "    Number of patches in mesh = " << bmesh.size()
-            << " number of patch type specifications = "
-            << patchFieldTypes.size()
-            << abort(FatalError);
-    }
-
-    if (constraintTypes.size())
-    {
-        forAll(bmesh_, patchi)
-        {
-            this->set
-            (
-                patchi,
-                PatchField<Type>::New
-                (
-                    patchFieldTypes[patchi],
-                    constraintTypes[patchi],
-                    bmesh_[patchi],
-                    field
-                )
-            );
-        }
-    }
-    else
-    {
-        forAll(bmesh_, patchi)
-        {
-            this->set
-            (
-                patchi,
-                PatchField<Type>::New
-                (
-                    patchFieldTypes[patchi],
-                    bmesh_[patchi],
-                    field
-                )
-            );
-        }
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
-(
-    const BoundaryMesh& bmesh,
-    const DimensionedField<Type, GeoMesh>& field,
-    const PtrList<PatchField<Type> >& ptfl
-)
-:
-    FieldField<PatchField, Type>(bmesh.size()),
-    bmesh_(bmesh)
-{
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const BoundaryMesh&, "
-               "const Field<Type>&, const PatchField<Type>List&)"
-            << endl;
-    }
-
-    forAll(bmesh_, patchi)
-    {
-        this->set(patchi, ptfl[patchi].clone(field));
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
-(
-    const DimensionedField<Type, GeoMesh>& field,
-    const typename GeometricField<Type, PatchField, GeoMesh>::
-    GeometricBoundaryField& btf
-)
-:
-    FieldField<PatchField, Type>(btf.size()),
-    bmesh_(btf.bmesh_)
-{
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const GeometricBoundaryField<Type, "
-               "PatchField, BoundaryMesh>&)"
-            << endl;
-    }
-
-    forAll(bmesh_, patchi)
-    {
-        this->set(patchi, btf[patchi].clone(field));
-    }
-}
-
-
-// Construct as copy
-// Dangerous because Field may be set to a field which gets deleted.
-// Need new type of GeometricBoundaryField, one which IS part of a geometric
-// field for which snGrad etc. may be called and a free standing
-// GeometricBoundaryField for which such operations are unavailable.
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
-(
-    const typename GeometricField<Type, PatchField, GeoMesh>::
-    GeometricBoundaryField& btf
-)
-:
-    FieldField<PatchField, Type>(btf),
-    bmesh_(btf.bmesh_)
-{
-    if (debug)
-    {
-        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField(const GeometricBoundaryField<Type, "
-               "PatchField, BoundaryMesh>&)"
-            << endl;
-    }
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
-GeometricBoundaryField
-(
-    const BoundaryMesh& bmesh,
     const DimensionedField<Type, GeoMesh>& field,
     const dictionary& dict
 )
-:
-    FieldField<PatchField, Type>(bmesh.size()),
-    bmesh_(bmesh)
 {
+    this->setSize(bmesh_.size());
+
     if (debug)
     {
         Info<< "GeometricField<Type, PatchField, GeoMesh>::"
-               "GeometricBoundaryField::"
-               "GeometricBoundaryField"
-               "(const BoundaryMesh&, const Field<Type>&, const dictionary&)"
+               "GeometricBoundaryField::readField"
+               "("
+                   "const DimensionedField<Type, GeoMesh>&, "
+                   "const dictionary&"
+                ")"
             << endl;
     }
-
 
     // Patch or patch-groups. (using non-wild card entries of dictionaries)
     forAllConstIter(dictionary, dict, iter)
@@ -263,6 +63,7 @@ GeometricBoundaryField
             forAll(patchIDs, i)
             {
                 label patchi = patchIDs[i];
+
                 this->set
                 (
                     patchi,
@@ -326,12 +127,11 @@ GeometricBoundaryField
             {
                 FatalIOErrorIn
                 (
-                    "GeometricField<Type, PatchField, GeoMesh>::\n"
-                    "GeometricBoundaryField::GeometricBoundaryField\n"
-                    "(\n"
-                    "    const BoundaryMesh&,\n"
-                    "    const DimensionedField<Type, GeoMesh>&,\n"
-                    "    const dictionary&\n"
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::readField"
+                    "("
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
                     ")",
                     dict
                 )   << "Cannot find patchField entry for cyclic "
@@ -344,12 +144,11 @@ GeometricBoundaryField
             {
                 FatalIOErrorIn
                 (
-                    "GeometricField<Type, PatchField, GeoMesh>::\n"
-                    "GeometricBoundaryField::GeometricBoundaryField\n"
-                    "(\n"
-                    "    const BoundaryMesh&,\n"
-                    "    const DimensionedField<Type, GeoMesh>&,\n"
-                    "    const dictionary&\n"
+                    "GeometricField<Type, PatchField, GeoMesh>::"
+                    "GeometricBoundaryField::readField"
+                    "("
+                        "const DimensionedField<Type, GeoMesh>&, "
+                        "const dictionary&"
                     ")",
                     dict
                 )   << "Cannot find patchField entry for "
@@ -357,6 +156,254 @@ GeometricBoundaryField
             }
         }
     }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh,
+    const DimensionedField<Type, GeoMesh>& field,
+    const word& patchFieldType
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::"
+               "GeometricBoundaryField(const BoundaryMesh&, "
+               "const DimensionedField<Type>&, const word&)"
+            << endl;
+    }
+
+    forAll(bmesh_, patchi)
+    {
+        this->set
+        (
+            patchi,
+            PatchField<Type>::New
+            (
+                patchFieldType,
+                bmesh_[patchi],
+                field
+            )
+        );
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh,
+    const DimensionedField<Type, GeoMesh>& field,
+    const wordList& patchFieldTypes,
+    const wordList& constraintTypes
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::"
+               "GeometricBoundaryField"
+               "("
+                    "const BoundaryMesh&, "
+                    "const DimensionedField<Type>&, "
+                    "const wordList&, "
+                    "const wordList&"
+                ")"
+            << endl;
+    }
+
+    if
+    (
+        patchFieldTypes.size() != this->size()
+     || (constraintTypes.size() && (constraintTypes.size() != this->size()))
+    )
+    {
+        FatalErrorIn
+        (
+            "GeometricField<Type, PatchField, GeoMesh>::"
+            "GeometricBoundaryField::"
+            "GeometricBoundaryField"
+            "("
+                "const BoundaryMesh&, "
+                "const DimensionedField<Type>&, "
+                "const wordList&, "
+                "const wordList&"
+            ")"
+        )   << "Incorrect number of patch type specifications given" << nl
+            << "    Number of patches in mesh = " << bmesh.size()
+            << " number of patch type specifications = "
+            << patchFieldTypes.size()
+            << abort(FatalError);
+    }
+
+    if (constraintTypes.size())
+    {
+        forAll(bmesh_, patchi)
+        {
+            this->set
+            (
+                patchi,
+                PatchField<Type>::New
+                (
+                    patchFieldTypes[patchi],
+                    constraintTypes[patchi],
+                    bmesh_[patchi],
+                    field
+                )
+            );
+        }
+    }
+    else
+    {
+        forAll(bmesh_, patchi)
+        {
+            this->set
+            (
+                patchi,
+                PatchField<Type>::New
+                (
+                    patchFieldTypes[patchi],
+                    bmesh_[patchi],
+                    field
+                )
+            );
+        }
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh,
+    const DimensionedField<Type, GeoMesh>& field,
+    const PtrList<PatchField<Type> >& ptfl
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::"
+               "GeometricBoundaryField"
+               "("
+                    "const BoundaryMesh&, "
+                    "const DimensionedField<Type, GeoMesh>&, "
+                    "const PtrLIst<PatchField<Type> >&"
+               ")"
+            << endl;
+    }
+
+    forAll(bmesh_, patchi)
+    {
+        this->set(patchi, ptfl[patchi].clone(field));
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const DimensionedField<Type, GeoMesh>& field,
+    const typename GeometricField<Type, PatchField, GeoMesh>::
+    GeometricBoundaryField& btf
+)
+:
+    FieldField<PatchField, Type>(btf.size()),
+    bmesh_(btf.bmesh_)
+{
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::"
+               "GeometricBoundaryField"
+               "("
+                   "const DimensionedField<Type, GeoMesh>&, "
+                   "const typename GeometricField<Type, PatchField, GeoMesh>::"
+                   "GeometricBoundaryField&"
+               ")"
+            << endl;
+    }
+
+    forAll(bmesh_, patchi)
+    {
+        this->set(patchi, btf[patchi].clone(field));
+    }
+}
+
+
+// Construct as copy
+// Dangerous because Field may be set to a field which gets deleted.
+// Need new type of GeometricBoundaryField, one which IS part of a geometric
+// field for which snGrad etc. may be called and a free standing
+// GeometricBoundaryField for which such operations are unavailable.
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const typename GeometricField<Type, PatchField, GeoMesh>::
+    GeometricBoundaryField& btf
+)
+:
+    FieldField<PatchField, Type>(btf),
+    bmesh_(btf.bmesh_)
+{
+    if (debug)
+    {
+        Info<< "GeometricField<Type, PatchField, GeoMesh>::"
+               "GeometricBoundaryField::"
+               "GeometricBoundaryField"
+               "("
+                   "const GeometricField<Type, PatchField, GeoMesh>::"
+                   "GeometricBoundaryField&"
+               ")"
+            << endl;
+    }
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField::
+GeometricBoundaryField
+(
+    const BoundaryMesh& bmesh,
+    const DimensionedField<Type, GeoMesh>& field,
+    const dictionary& dict
+)
+:
+    FieldField<PatchField, Type>(bmesh.size()),
+    bmesh_(bmesh)
+{
+    readField(field, dict);
 }
 
 

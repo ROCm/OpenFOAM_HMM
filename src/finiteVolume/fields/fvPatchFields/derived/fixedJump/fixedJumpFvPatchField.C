@@ -62,8 +62,13 @@ Foam::fixedJumpFvPatchField<Type>::fixedJumpFvPatchField
 )
 :
     jumpCyclicFvPatchField<Type>(p, iF),
-    jump_("jump", dict, p.size())
+    jump_(p.size(), pTraits<Type>::zero)
 {
+    if (this->cyclicPatch().owner())
+    {
+        jump_ = Field<Type>("jump", dict, p.size());
+    }
+
     if (dict.found("value"))
     {
         fvPatchField<Type>::operator=
@@ -152,7 +157,12 @@ void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeKeyword("patchType") << this->interfaceFieldType()
         << token::END_STATEMENT << nl;
-    jump_.writeEntry("jump", os);
+
+    if (this->cyclicPatch().owner())
+    {
+        jump_.writeEntry("jump", os);
+    }
+
     this->writeEntry("value", os);
 }
 

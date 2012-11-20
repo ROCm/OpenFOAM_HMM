@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_("phi"),
-    rhoName_("rho")
+    rhoName_("rho"),
+    UName_("U")
 {
     refValue() = *this;
     refGrad() = vector::zero;
@@ -60,7 +61,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_)
+    rhoName_(ptf.rhoName_),
+    UName_(ptf.UName_)
 {}
 
 
@@ -74,7 +76,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    UName_(dict.lookupOrDefault<word>("U", "U"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
     refValue() = *this;
@@ -91,7 +94,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(pivpvf),
     phiName_(pivpvf.phiName_),
-    rhoName_(pivpvf.rhoName_)
+    rhoName_(pivpvf.rhoName_),
+    UName_(pivpvf.UName_)
 {}
 
 
@@ -104,7 +108,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(pivpvf, iF),
     phiName_(pivpvf.phiName_),
-    rhoName_(pivpvf.rhoName_)
+    rhoName_(pivpvf.rhoName_),
+    UName_(pivpvf.UName_)
 {}
 
 
@@ -128,7 +133,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
     tmp<vectorField> n = patch().nf();
     const Field<scalar>& magS = patch().magSf();
 
-    const volVectorField& U = db().lookupObject<volVectorField>("U");
+    const volVectorField& U = db().lookupObject<volVectorField>(UName_);
 
     vectorField Uc(U.boundaryField()[patchI].patchInternalField());
     Uc -= n()*(Uc & n());
@@ -169,8 +174,9 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntry("value", os);
 }
 

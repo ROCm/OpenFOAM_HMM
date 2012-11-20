@@ -117,6 +117,9 @@ public:
 
         // Constructors
 
+            //- Construct from a BoundaryMesh
+            GeometricBoundaryField(const BoundaryMesh&);
+
             //- Construct from a BoundaryMesh,
             //  reference to the internal field
             //  and a patch type
@@ -176,6 +179,13 @@ public:
 
 
         // Member functions
+
+            //- Read the boundary field
+            void readField
+            (
+                const DimensionedField<Type, GeoMesh>& field,
+                const dictionary& dict
+            );
 
             //- Update the boundary condition coefficients
             void updateCoeffs();
@@ -247,10 +257,10 @@ private:
     // Private Member Functions
 
         //- Read the field from the dictionary
-        tmp<GeometricBoundaryField> readField(const dictionary&);
+        void readFields(const dictionary&);
 
-        //- Read the field from the given stream
-        tmp<GeometricBoundaryField> readField(Istream& is);
+        //- Read the field - create the field dictionary on-the-fly
+        void readFields();
 
 
 public:
