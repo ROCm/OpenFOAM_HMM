@@ -14,6 +14,8 @@ fieldValues/faceSource/faceSource.C
 fieldValues/faceSource/faceSourceFunctionObject.C
 fieldValues/cellSource/cellSource.C
 fieldValues/cellSource/cellSourceFunctionObject.C
+fieldValues/faceSourceDelta/faceSourceDelta.C
+fieldValues/faceSourceDelta/faceSourceDeltaFunctionObject.C
 
 nearWallFields/nearWallFields.C
 nearWallFields/nearWallFieldsFunctionObject.C
