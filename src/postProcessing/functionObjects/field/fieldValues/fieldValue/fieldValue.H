@@ -42,6 +42,7 @@ SourceFiles
 #include "Switch.H"
 #include "pointFieldFwd.H"
 #include "OFstream.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +50,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class dictionary;
 class objectRegistry;
 class fvMesh;
 class mapPolyMesh;
@@ -87,6 +87,9 @@ protected:
 
         //- Output field values flag
         Switch valueOutput_;
+
+        //- Results dictionary for external access of results
+        dictionary resultDict_;
 
 
         // Functions to be over-ridden from IOoutputFilter class
@@ -146,6 +149,9 @@ public:
 
             //- Helper function to return the reference to the mesh
             inline const fvMesh& mesh() const;
+
+            //- Return access to the latest set of results
+            inline const dictionary& resultDict() const;
 
 
         // Function object functions

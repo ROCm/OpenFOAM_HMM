@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,6 +72,12 @@ inline const Foam::Switch& Foam::fieldValue::valueOutput() const
 inline const Foam::fvMesh& Foam::fieldValue::mesh() const
 {
     return refCast<const fvMesh>(obr_);
+}
+
+
+inline const Foam::dictionary& Foam::fieldValue::resultDict() const
+{
+    return resultDict_;
 }
 
 
