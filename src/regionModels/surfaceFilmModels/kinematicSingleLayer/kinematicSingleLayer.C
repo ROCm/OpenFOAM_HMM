@@ -1048,12 +1048,14 @@ void kinematicSingleLayer::info() const
 {
     Info<< "\nSurface film: " << type() << endl;
 
+    const vectorField& Uinternal = U_.internalField();
+
     Info<< indent << "added mass         = "
         << returnReduce<scalar>(addedMassTotal_, sumOp<scalar>()) << nl
         << indent << "current mass       = "
         << gSum((deltaRho_*magSf())()) << nl
-        << indent << "min/max(mag(U))    = " << min(mag(U_)).value() << ", "
-        << max(mag(U_)).value() << nl
+        << indent << "min/max(mag(U))    = " << gMin(mag(Uinternal)) << ", "
+        << gMax(mag(Uinternal)) << nl
         << indent << "min/max(delta)     = " << min(delta_).value() << ", "
         << max(delta_).value() << nl
         << indent << "coverage           = "
