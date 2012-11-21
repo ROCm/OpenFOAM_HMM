@@ -22,26 +22,26 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fieldValues::faceSourceDelta
+    Foam::fieldValues::fieldValueDelta
 
 Group
     grpFieldFunctionObjects
 
 Description
-    This function object provides a differencing option between two 'face
-    source' function objects.
+    This function object provides a differencing option between two 'field
+    value' function objects.
 
     Example of function object specification:
     \verbatim
-    faceSourceDelta1
+    fieldValueDelta1
     {
-        type            faceSourceDelta;
+        type            fieldValueDelta;
         functionObjectLibs ("libfieldFunctionObjects.so");
-        faceSource1
+        fieldValue1
         {
             ...
         }
-        faceSource2
+        fieldValue2
         {
             ...
         }
@@ -51,22 +51,23 @@ Description
     \heading Function object usage
     \table
         Property     | Description             | Required    | Default value
-        type         | type name: faceSourceDelta   | yes    |
+        type         | type name: fieldValueDelta   | yes    |
     \endtable
 
 SeeAlso
-    Foam::faceSource
+    Foam::fieldValue
 
 SourceFiles
-    faceSourceDelta.C
+    fieldValueDelta.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceSourceDelta_H
-#define faceSourceDelta_H
+#ifndef fieldValueDelta_H
+#define fieldValueDelta_H
 
 #include "functionObjectFile.H"
-#include "faceSource.H"
+#include "fieldValue.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,10 +78,10 @@ namespace fieldValues
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class faceSourceDelta Declaration
+                       Class fieldValueDelta Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceSourceDelta
+class fieldValueDelta
 :
     public functionObjectFile
 {
@@ -89,17 +90,23 @@ private:
 
     // Private data
 
+        //- Name of this fieldValue object
+        word name_;
+
         //- Database this class is registered to
         const objectRegistry& obr_;
+
+        //- Flag to indicate to load from files
+        bool loadFromFiles_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Face source 1
-        faceSource faceSource1_;
+        //- Field value source object 1
+        autoPtr<fieldValue> source1Ptr_;
 
-        //- Face source 2
-        faceSource faceSource2_;
+        //- Field value source object 2
+        autoPtr<fieldValue> source2Ptr_;
 
 
     // Private Member Functions
@@ -126,11 +133,11 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("faceSourceDelta");
+    TypeName("fieldValueDelta");
 
 
     //- Construct from components
-    faceSourceDelta
+    fieldValueDelta
     (
         const word& name,
         const objectRegistry& obr,
@@ -140,7 +147,7 @@ public:
 
 
     //- Destructor
-    virtual ~faceSourceDelta();
+    virtual ~fieldValueDelta();
 
 
     // Public Member Functions
@@ -169,7 +176,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "faceSourceDeltaTemplates.C"
+    #include "fieldValueDeltaTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

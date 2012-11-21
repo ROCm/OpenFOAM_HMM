@@ -22,25 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::IOfaceSourceDelta
+    Foam::IOfieldValueDelta
 
 
 Description
-    Instance of the generic IOOutputFilter for faceSourceDelta.
+    Instance of the generic IOOutputFilter for fieldValueDelta.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOfaceSourceDelta_H
-#define IOfaceSourceDelta_H
+#ifndef IOfieldValueDelta_H
+#define IOfieldValueDelta_H
 
-#include "faceSourceDelta.H"
+#include "fieldValueDelta.H"
 #include "IOOutputFilter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOOutputFilter<faceSourceDelta> IOfaceSourceDelta;
+    typedef IOOutputFilter<fieldValueDelta> IOfieldValueDelta;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

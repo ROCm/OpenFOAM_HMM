@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "faceSourceDeltaFunctionObject.H"
+#include "fieldValueDeltaFunctionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -31,14 +31,14 @@ namespace Foam
 {
     defineNamedTemplateTypeNameAndDebug
     (
-        faceSourceDeltaFunctionObject,
+        fieldValueDeltaFunctionObject,
         0
     );
 
     addToRunTimeSelectionTable
     (
         functionObject,
-        faceSourceDeltaFunctionObject,
+        fieldValueDeltaFunctionObject,
         dictionary
     );
 }

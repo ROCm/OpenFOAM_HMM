@@ -21,46 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::fieldValueDeltaFunctionObject
+
+Description
+    FunctionObject wrapper around fieldValueDelta to allow it to be
+    created via the functions entry within controlDict.
+
+SourceFiles
+    fieldValueDeltaFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef fieldValueDeltaFunctionObject_H
+#define fieldValueDeltaFunctionObject_H
 
-template<class Type>
-void Foam::fieldValues::faceSourceDelta::processFields(bool& found)
+#include "fieldValueDelta.H"
+#include "OutputFilterFunctionObject.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> vf;
-
-    const wordList& fields1 = faceSource1_.fields();
-
-    const dictionary& results1 = faceSource1_.resultDict();
-    const dictionary& results2 = faceSource2_.resultDict();
-
-    Type r1(pTraits<Type>::zero);
-    Type r2(pTraits<Type>::zero);
-
-    forAll(fields1, i)
-    {
-        const word& fieldName = fields1[i];
-        if (obr_.foundObject<vf>(fieldName) && results2.found(fieldName))
-        {
-            results1.lookup(fieldName) >> r1;
-            results2.lookup(fieldName) >> r2;
-
-            if (log_)
-            {
-                Info<< "    field: " << fieldName << ", delta: " << r2 - r1
-                    << endl;
-            }
-
-            if (Pstream::master())
-            {
-                file()<< tab << r2 - r1;
-            }
-
-            found = true;
-        }
-    }
+    typedef OutputFilterFunctionObject<fieldValues::fieldValueDelta>
+        fieldValueDeltaFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

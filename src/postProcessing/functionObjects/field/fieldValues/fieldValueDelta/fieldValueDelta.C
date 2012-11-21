@@ -23,22 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "faceSourceDelta.H"
+#include "fieldValueDelta.H"
 #include "ListOps.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fieldValues::faceSourceDelta, 0);
+defineTypeNameAndDebug(Foam::fieldValues::fieldValueDelta, 0);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::fieldValues::faceSourceDelta::updateMesh(const mapPolyMesh&)
+void Foam::fieldValues::fieldValueDelta::updateMesh(const mapPolyMesh&)
 {
     // Do nothing
 }
 
 
-void Foam::fieldValues::faceSourceDelta::movePoints(const Field<point>&)
+void Foam::fieldValues::fieldValueDelta::movePoints(const Field<point>&)
 {
     // Do nothing
 }
@@ -46,7 +47,7 @@ void Foam::fieldValues::faceSourceDelta::movePoints(const Field<point>&)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fieldValues::faceSourceDelta::faceSourceDelta
+Foam::fieldValues::fieldValueDelta::fieldValueDelta
 (
     const word& name,
     const objectRegistry& obr,
@@ -55,31 +56,21 @@ Foam::fieldValues::faceSourceDelta::faceSourceDelta
 )
 :
     functionObjectFile(obr, name, typeName),
+    name_(name),
     obr_(obr),
+    loadFromFiles_(loadFromFiles),
     log_(false),
-    faceSource1_
-    (
-        name + ".faceSource1",
-        obr,
-        dict.subDict("faceSource1"),
-        loadFromFiles
-    ),
-    faceSource2_
-    (
-        name + ".faceSource2",
-        obr,
-        dict.subDict("faceSource2"),
-        loadFromFiles
-    )
+    source1Ptr_(NULL),
+    source2Ptr_(NULL)
 {
     read(dict);
 }
 
 
-void Foam::fieldValues::faceSourceDelta::writeFileHeader(const label i)
+void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
 {
-    const wordList& fields1 = faceSource1_.fields();
-    const wordList& fields2 = faceSource2_.fields();
+    const wordList& fields1 = source1Ptr_->fields();
+    const wordList& fields2 = source2Ptr_->fields();
 
     DynamicList<word> commonFields(fields1.size());
     forAll(fields1, i)
@@ -104,26 +95,46 @@ void Foam::fieldValues::faceSourceDelta::writeFileHeader(const label i)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fieldValues::faceSourceDelta::~faceSourceDelta()
+Foam::fieldValues::fieldValueDelta::~fieldValueDelta()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fieldValues::faceSourceDelta::read(const dictionary& dict)
+void Foam::fieldValues::fieldValueDelta::read(const dictionary& dict)
 {
     log_ = dict.lookupOrDefault<Switch>("log", false);
-    faceSource1_.read(dict.subDict("faceSource1"));
-    faceSource2_.read(dict.subDict("faceSource2"));
+    source1Ptr_.reset
+    (
+        fieldValue::New
+        (
+            name_ + ".source1",
+            obr_,
+            dict.subDict("source1"),
+            loadFromFiles_,
+            false
+        ).ptr()
+    );
+    source2Ptr_.reset
+    (
+        fieldValue::New
+        (
+            name_ + ".source2",
+            obr_,
+            dict.subDict("source2"),
+            loadFromFiles_,
+            false
+        ).ptr()
+    );
 }
 
 
-void Foam::fieldValues::faceSourceDelta::write()
+void Foam::fieldValues::fieldValueDelta::write()
 {
     functionObjectFile::write();
 
-    faceSource1_.write();
-    faceSource2_.write();
+    source1Ptr_->write();
+    source2Ptr_->write();
 
     if (Pstream::master())
     {
@@ -161,13 +172,13 @@ void Foam::fieldValues::faceSourceDelta::write()
 }
 
 
-void Foam::fieldValues::faceSourceDelta::execute()
+void Foam::fieldValues::fieldValueDelta::execute()
 {
     // Do nothing
 }
 
 
-void Foam::fieldValues::faceSourceDelta::end()
+void Foam::fieldValues::fieldValueDelta::end()
 {
     // Do nothing
 }

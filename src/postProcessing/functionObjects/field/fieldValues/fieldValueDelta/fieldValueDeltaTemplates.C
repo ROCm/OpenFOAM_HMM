@@ -21,34 +21,49 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::faceSourceDeltaFunctionObject
-
-Description
-    FunctionObject wrapper around faceSourceDelta to allow it to be
-    created via the functions entry within controlDict.
-
-SourceFiles
-    faceSourceDeltaFunctionObject.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceSourceDeltaFunctionObject_H
-#define faceSourceDeltaFunctionObject_H
+#include "GeometricField.H"
+#include "volMesh.H"
 
-#include "faceSourceDelta.H"
-#include "OutputFilterFunctionObject.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+void Foam::fieldValues::fieldValueDelta::processFields(bool& found)
 {
-    typedef OutputFilterFunctionObject<fieldValues::faceSourceDelta>
-        faceSourceDeltaFunctionObject;
+    typedef GeometricField<Type, fvPatchField, volMesh> vf;
+
+    const wordList& fields1 = source1Ptr_->fields();
+
+    const dictionary& results1 = source1Ptr_->resultDict();
+    const dictionary& results2 = source2Ptr_->resultDict();
+
+    Type r1(pTraits<Type>::zero);
+    Type r2(pTraits<Type>::zero);
+
+    forAll(fields1, i)
+    {
+        const word& fieldName = fields1[i];
+        if (obr_.foundObject<vf>(fieldName) && results2.found(fieldName))
+        {
+            results1.lookup(fieldName) >> r1;
+            results2.lookup(fieldName) >> r2;
+
+            if (log_)
+            {
+                Info<< "    field: " << fieldName << ", delta: " << r2 - r1
+                    << endl;
+            }
+
+            if (Pstream::master())
+            {
+                file()<< tab << r2 - r1;
+            }
+
+            found = true;
+        }
+    }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
