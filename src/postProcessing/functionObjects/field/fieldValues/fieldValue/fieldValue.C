@@ -26,12 +26,14 @@ License
 #include "fieldValue.H"
 #include "fvMesh.H"
 #include "Time.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(fieldValue, 0);
+    defineRunTimeSelectionTable(fieldValue, dictionary);
 }
 
 

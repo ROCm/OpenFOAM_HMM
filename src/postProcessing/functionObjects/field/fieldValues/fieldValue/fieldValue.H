@@ -43,6 +43,7 @@ SourceFiles
 #include "pointFieldFwd.H"
 #include "OFstream.H"
 #include "dictionary.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,6 +107,21 @@ public:
     //- Run-time type information
     TypeName("fieldValue");
 
+    // Declare runtime constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            fieldValue,
+            dictionary,
+            (
+                const word& name,
+                const objectRegistry& obr,
+                const dictionary& dict,
+                const bool loadFromFiles
+            ),
+            (name, obr, dict, loadFromFiles)
+        );
 
     //- Construct from components
     fieldValue
@@ -117,6 +133,15 @@ public:
         const bool loadFromFiles = false
     );
 
+    //- Return a reference to the selected fieldValue
+    static autoPtr<fieldValue> New
+    (
+        const word& name,
+        const objectRegistry& obr,
+        const dictionary& dict,
+        const bool loadFromFiles = false,
+        const bool output = true
+    );
 
     //- Destructor
     virtual ~fieldValue();
