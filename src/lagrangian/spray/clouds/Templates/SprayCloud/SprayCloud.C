@@ -344,11 +344,13 @@ void Foam::SprayCloud<CloudType>::motion(TrackData& td)
             i++;
         }
 
-        // remove coalesced particles (diameter set to 0)
+        // remove coalesced parcels that fall below minimum mass threshold
         forAllIter(typename SprayCloud<CloudType>, *this, iter)
         {
             parcelType& p = iter();
-            if (p.mass() < VSMALL)
+            scalar mass = p.nParticle()*p.mass();
+
+            if (mass < td.cloud().constProps().minParticleMass())
             {
                 this->deleteParticle(p);
             }
