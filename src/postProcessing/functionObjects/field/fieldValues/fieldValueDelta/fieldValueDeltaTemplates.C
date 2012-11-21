@@ -29,6 +29,57 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+Type Foam::fieldValues::fieldValueDelta::applyOperation
+(
+    const Type& value1,
+    const Type& value2
+) const
+{
+    Type result = pTraits<Type>::zero;
+
+    switch (operation_)
+    {
+        case opAdd:
+        {
+            result = value1 + value2;
+            break;
+        }
+        case opSubtract:
+        {
+            result = value1 - value2;
+            break;
+        }
+        case opMin:
+        {
+            result = min(value1, value2);
+            break;
+        }
+        case opMax:
+        {
+            result = max(value1, value2);
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Type Foam::fieldValues::fieldValueDelta::applyOperation"
+                "("
+                    "const Type&, "
+                    "const Type&"
+                ") const"
+            )
+                << "Unable to process operation "
+                << operationTypeNames_[operation_]
+                << abort(FatalError);
+        }
+    }
+
+    return result;
+}
+
+
+template<class Type>
 void Foam::fieldValues::fieldValueDelta::processFields(bool& found)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
@@ -49,15 +100,18 @@ void Foam::fieldValues::fieldValueDelta::processFields(bool& found)
             results1.lookup(fieldName) >> r1;
             results2.lookup(fieldName) >> r2;
 
+            Type result = applyOperation(r1, r2);
+
             if (log_)
             {
-                Info<< "    field: " << fieldName << ", delta: " << r2 - r1
+                Info<< "    " << operationTypeNames_[operation_]
+                    << "(" << fieldName << ") = " << result
                     << endl;
             }
 
             if (Pstream::master())
             {
-                file()<< tab << r2 - r1;
+                file()<< tab << result;
             }
 
             found = true;

@@ -85,6 +85,19 @@ class fieldValueDelta
 :
     public functionObjectFile
 {
+public:
+        //- Operation type enumeration
+        enum operationType
+        {
+            opAdd,
+            opSubtract,
+            opMin,
+            opMax
+        };
+
+        //- Operation type names
+        static const NamedEnum<operationType, 4> operationTypeNames_;
+
 
 private:
 
@@ -102,6 +115,9 @@ private:
         //- Switch to send output to Info as well as to file
         Switch log_;
 
+        //- Operation to apply to values
+        operationType operation_;
+
         //- Field value source object 1
         autoPtr<fieldValue> source1Ptr_;
 
@@ -114,6 +130,10 @@ private:
         //- Templated function to process common fields
         template<class Type>
         void processFields(bool& found);
+
+        //- Templated function to apply the operation
+        template<class Type>
+        Type applyOperation(const Type& value1, const Type& value2) const;
 
 
 protected:

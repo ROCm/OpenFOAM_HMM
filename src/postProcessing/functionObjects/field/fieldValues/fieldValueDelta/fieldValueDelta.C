@@ -29,7 +29,24 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fieldValues::fieldValueDelta, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(Foam::fieldValues::fieldValueDelta, 0);
+
+    template<>
+    const char*
+    NamedEnum<fieldValues::fieldValueDelta::operationType, 4>::names[] =
+    {
+        "add",
+        "subtract",
+        "min",
+        "max"
+    };
+
+    const Foam::NamedEnum<Foam::fieldValues::fieldValueDelta::operationType, 4>
+        Foam::fieldValues::fieldValueDelta::operationTypeNames_;
+}
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -60,6 +77,7 @@ Foam::fieldValues::fieldValueDelta::fieldValueDelta
     obr_(obr),
     loadFromFiles_(loadFromFiles),
     log_(false),
+    operation_(opSubtract),
     source1Ptr_(NULL),
     source2Ptr_(NULL)
 {
@@ -82,14 +100,20 @@ void Foam::fieldValues::fieldValueDelta::writeFileHeader(const label i)
         }
     }
 
-    file() << "# Time";
+    Ostream& os = file();
+
+    os  << "# Source1   : " << source1Ptr_->name() << nl
+        << "# Source2   : " << source2Ptr_->name() << nl
+        << "# Operation : " << operationTypeNames_[operation_] << nl;
+
+    os  << "# Time";
 
     forAll(commonFields, i)
     {
-        file()<< tab << commonFields[i];
+        os  << tab << commonFields[i];
     }
 
-    file() << endl;
+    os  << endl;
 }
 
 
@@ -126,6 +150,8 @@ void Foam::fieldValues::fieldValueDelta::read(const dictionary& dict)
             false
         ).ptr()
     );
+
+    operation_ = operationTypeNames_.read(dict.lookup("operation"));
 }
 
 
