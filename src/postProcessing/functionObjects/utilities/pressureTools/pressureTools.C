@@ -191,7 +191,7 @@ void Foam::pressureTools::read(const dictionary& dict)
 
         const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
-        if (p.dimensions() != p.dimensions())
+        if (p.dimensions() != dimPressure)
         {
             dict.lookup("rhoRef") >> rhoRef_;
         } 
