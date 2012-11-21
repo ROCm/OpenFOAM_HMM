@@ -67,7 +67,6 @@ namespace Foam
     {
         defineTypeNameAndDebug(faceSource, 0);
         addToRunTimeSelectionTable(fieldValue, faceSource, dictionary);
-
     }
 }
 
