@@ -24,28 +24,54 @@ License
 Class
     Foam::pressureTools
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     This function object includes tools to manipulate the pressure into
     different forms.  These currently include:
 
     - static pressure
-
-        p_s = rho*p_k
-
+        \f[
+            p_s = \rho p_k
+        \f]
     - total pressure
-
-        p_T = pRef + p_s + 0.5 rho |U|^2
-
+        \f[
+            p_T = p_{ref} + p_s + 0.5 \rho |U|^2
+        \f]
     - static pressure coefficient
-
-        Cp_s = p_s / (0.5 rho |U|^2)
-
+        \f[
+            Cp_s = \frac{p_s}{0.5 \rho |U|^2}
+        \f]
     - total pressure coefficient
-
-        Cp_T = p_T / (0.5 rho |U|^2)
+        \f[
+            Cp_T = \frac{p_T}{0.5 \rho |U|^2}
+        \f]
 
     The function object will operate on both kinematic (p_k) and static
     pressure (p_s) fields, and the result is written as a volScalarField.
+
+    Example of function object specification to calculate pressure coefficient:
+    \verbatim
+    pressureTools1
+    {
+        type        pressureTools;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+        calcTotal   no;
+        calcCoeff   yes;
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property     | Description             | Required    | Default value
+        type         | type name: pressureTools| yes         |
+        calcCoeff    | Calculate pressure coefficient | yes  |
+        calcTotal    | Calculate total coefficient | yes     |
+        rhoRef       | Reference density for incompressible cases | no | 1
+        pRef         | Reference pressure for total pressure |no| 0.0
+    \endtable
 
 SourceFiles
     pressureTools.C
