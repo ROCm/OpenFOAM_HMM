@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,65 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::IOfieldValueDelta
+
+
+Description
+    Instance of the generic IOOutputFilter for fieldValueDelta.
+
 \*---------------------------------------------------------------------------*/
 
-#include "fieldValue.H"
-#include "fvMesh.H"
+#ifndef IOfieldValueDelta_H
+#define IOfieldValueDelta_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "fieldValueDelta.H"
+#include "IOOutputFilter.H"
 
-inline const Foam::word& Foam::fieldValue::name() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return name_;
+    typedef IOOutputFilter<fieldValueDelta> IOfieldValueDelta;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline const Foam::objectRegistry& Foam::fieldValue::obr() const
-{
-    return obr_;
-}
-
-
-inline bool Foam::fieldValue::active() const
-{
-    return active_;
-}
-
-
-inline const Foam::Switch& Foam::fieldValue::log() const
-{
-    return log_;
-}
-
-
-inline const Foam::word& Foam::fieldValue::sourceName() const
-{
-    return sourceName_;
-}
-
-
-inline const Foam::wordList& Foam::fieldValue::fields() const
-{
-    return fields_;
-}
-
-
-inline const Foam::Switch& Foam::fieldValue::valueOutput() const
-{
-    return valueOutput_;
-}
-
-
-inline const Foam::fvMesh& Foam::fieldValue::mesh() const
-{
-    return refCast<const fvMesh>(obr_);
-}
-
-
-inline const Foam::dictionary& Foam::fieldValue::resultDict() const
-{
-    return resultDict_;
-}
-
+#endif
 
 // ************************************************************************* //

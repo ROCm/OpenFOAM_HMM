@@ -26,20 +26,14 @@ License
 #include "cellSource.H"
 #include "fvMesh.H"
 #include "volFields.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fieldValues::cellSource, 0);
-
 namespace Foam
 {
-
     template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fieldValues::cellSource::sourceType,
-        2
-    >::names[] =
+    const char* NamedEnum<fieldValues::cellSource::sourceType, 2>::names[] =
     {
         "cellZone",
         "all"
@@ -47,11 +41,7 @@ namespace Foam
 
 
     template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fieldValues::cellSource::operationType,
-        9
-    >::names[] =
+    const char* NamedEnum<fieldValues::cellSource::operationType, 9>::names[] =
     {
         "none",
         "sum",
@@ -63,6 +53,12 @@ namespace Foam
         "max",
         "CoV"
     };
+
+    namespace fieldValues
+    {
+        defineTypeNameAndDebug(cellSource, 0);
+        addToRunTimeSelectionTable(fieldValue, cellSource, dictionary);
+    }
 }
 
 
