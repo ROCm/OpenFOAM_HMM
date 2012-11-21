@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,15 +132,30 @@ Foam::word Foam::Time::findInstance
              || rOpt == IOobject::MUST_READ_IF_MODIFIED
             )
             {
-                FatalErrorIn
-                (
-                    "Time::findInstance"
-                    "(const fileName&, const word&"
-                    ", const IOobject::readOption, const word&)"
-                )   << "Cannot find file \"" << name << "\" in directory "
-                    << dir << " in times " << timeName()
-                    << " down to " << stopInstance
-                    << exit(FatalError);
+                if (name.empty())
+                {
+                    FatalErrorIn
+                    (
+                        "Time::findInstance"
+                        "(const fileName&, const word&"
+                        ", const IOobject::readOption, const word&)"
+                    )   << "Cannot find directory "
+                        << dir << " in times " << timeName()
+                        << " down to " << stopInstance
+                        << exit(FatalError);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "Time::findInstance"
+                        "(const fileName&, const word&"
+                        ", const IOobject::readOption, const word&)"
+                    )   << "Cannot find file \"" << name << "\" in directory "
+                        << dir << " in times " << timeName()
+                        << " down to " << stopInstance
+                        << exit(FatalError);
+                }
             }
 
             return ts[instanceI].name();
