@@ -53,7 +53,7 @@ void SpalartAllmaras::updateSubGridScaleFields()
 
 tmp<volScalarField> SpalartAllmaras::fv1() const
 {
-    const volScalarField chi3(pow3(nuTilda_/nu()));
+    const volScalarField chi3("chi3", pow3(nuTilda_/nu()));
     return chi3/(chi3 + pow3(Cv1_));
 }
 
@@ -66,8 +66,8 @@ tmp<volScalarField> SpalartAllmaras::fv2() const
 
 tmp<volScalarField> SpalartAllmaras::fv3() const
 {
-    const volScalarField chi(nuTilda_/nu());
-    const volScalarField chiByCv2((1/Cv2_)*chi);
+    const volScalarField chi("chi", nuTilda_/nu());
+    const volScalarField chiByCv2(chi/Cv2_);
 
     return
         (scalar(1) + chi*fv1())
