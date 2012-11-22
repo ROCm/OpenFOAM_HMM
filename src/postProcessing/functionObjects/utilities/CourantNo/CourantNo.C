@@ -189,7 +189,7 @@ void Foam::CourantNo::write()
         CourantNo.write();
 
         Info<< type() << " output:" << nl
-            << "    writing " << CourantNo.name() << "field" << nl << endl;
+            << "    writing " << CourantNo.name() << " field" << nl << endl;
     }
 }
 
