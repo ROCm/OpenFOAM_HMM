@@ -53,34 +53,32 @@ void Foam::wallShearStress::calcShearStress
     volVectorField& shearStress
 )
 {
-    forAll(shearStress.boundaryField(), patchI)
+    forAllConstIter(labelHashSet, patchSet_, iter)
     {
+        label patchI = iter.key();
         const polyPatch& pp = mesh.boundaryMesh()[patchI];
 
-        if (isA<wallPolyPatch>(pp))
+        vectorField& ssp = shearStress.boundaryField()[patchI];
+        const vectorField& Sfp = mesh.Sf().boundaryField()[patchI];
+        const scalarField& magSfp = mesh.magSf().boundaryField()[patchI];
+        const symmTensorField& Reffp = Reff.boundaryField()[patchI];
+
+        ssp = (-Sfp/magSfp) & Reffp;
+
+        vector minSsp = gMin(ssp);
+        vector maxSsp = gMax(ssp);
+
+        if (Pstream::master())
         {
-            vectorField& ssp = shearStress.boundaryField()[patchI];
-            const vectorField& Sfp = mesh.Sf().boundaryField()[patchI];
-            const scalarField& magSfp = mesh.magSf().boundaryField()[patchI];
-            const symmTensorField& Reffp = Reff.boundaryField()[patchI];
+            file() << mesh.time().timeName() << token::TAB
+                << pp.name() << token::TAB << minSsp
+                << token::TAB << maxSsp << endl;
+        }
 
-            ssp = (-Sfp/magSfp) & Reffp;
-
-            vector minSsp = gMin(ssp);
-            vector maxSsp = gMax(ssp);
-
-            if (Pstream::master())
-            {
-                file() << mesh.time().timeName() << token::TAB
-                    << pp.name() << token::TAB << minSsp
-                    << token::TAB << maxSsp << endl;
-            }
-
-            if (log_)
-            {
-                Info<< "    min/max(" << pp.name() << ") = "
-                    << minSsp << ", " << maxSsp << endl;
-            }
+        if (log_)
+        {
+            Info<< "    min/max(" << pp.name() << ") = "
+                << minSsp << ", " << maxSsp << endl;
         }
     }
 }
@@ -101,7 +99,8 @@ Foam::wallShearStress::wallShearStress
     obr_(obr),
     active_(true),
     log_(false),
-    phiName_("phi")
+    phiName_("phi"),
+    patchSet_()
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -138,6 +137,54 @@ void Foam::wallShearStress::read(const dictionary& dict)
     {
         log_ = dict.lookupOrDefault<Switch>("log", false);
         phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
+
+        const fvMesh& mesh = refCast<const fvMesh>(obr_);
+        const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+        patchSet_ =
+            mesh.boundaryMesh().patchSet
+            (
+                wordReList(dict.lookupOrDefault("patches", wordReList()))
+            );
+
+        Info<< type() << " output:" << nl;
+
+        if (patchSet_.empty())
+        {
+            forAll(pbm, patchI)
+            {
+                if (isA<wallPolyPatch>(pbm[patchI]))
+                {
+                    patchSet_.insert(patchI);
+                }
+            }
+
+            Info<< "    processing all wall patches" << nl << endl;
+        }
+        else
+        {
+            Info<< "    processing wall patches: " << nl;
+            labelHashSet filteredPatchSet;
+            forAllConstIter(labelHashSet, patchSet_, iter)
+            {
+                label patchI = iter.key();
+                if (isA<wallPolyPatch>(pbm[patchI]))
+                {
+                    filteredPatchSet.insert(patchI);
+                    Info<< "        " << pbm[patchI].name() << endl;
+                }
+                else
+                {
+                    WarningIn("void wallShearStress::read(const dictionary&)")
+                        << "Requested wall shear stress on non-wall boundary "
+                        << "type patch: " << pbm[patchI].name() << endl;
+                }
+            }
+
+            Info<< endl;
+
+            patchSet_ = filteredPatchSet;
+        }
     }
 }
 
