@@ -46,7 +46,9 @@ bool Foam::writeDictionary::tryFolder
         dictNames_[dictI],
         location,
         obr_,
-        IOobject::MUST_READ
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
     );
 
     if (dictIO.headerOk())
