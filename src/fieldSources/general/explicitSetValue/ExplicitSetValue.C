@@ -81,9 +81,7 @@ void Foam::ExplicitSetValue<Type>::setValue
             << ">::setValue for source " << name_ << endl;
     }
 
-    List<Type> values(cells_.size());
-
-    UIndirectList<Type>(values, cells_) = injectionRate_[fieldI];
+    List<Type> values(cells_.size(), injectionRate_[fieldI]);
 
     eqn.setValues(cells_, values);
 }
