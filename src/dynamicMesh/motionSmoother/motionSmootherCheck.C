@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,6 +104,8 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minTriangleTwist", true))
     );
+    scalar minFaceFlatness = -1.0;
+    dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
     const scalar minDet
     (
         readScalar(dict.lookup("minDeterminant", true))
@@ -356,6 +358,30 @@ bool Foam::motionSmoother::checkMesh
         nWrongFaces = nNewWrongFaces;
     }
 
+    if (minFaceFlatness > -SMALL)
+    {
+        polyMeshGeometry::checkFaceFlatness
+        (
+            report,
+            minFaceFlatness,
+            mesh,
+            mesh.faceAreas(),
+            mesh.faceCentres(),
+            mesh.points(),
+            checkFaces,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with flatness < "
+            << setw(5) << minFaceFlatness
+            << "                      : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
     if (minDet > -1)
     {
         polyMeshGeometry::checkCellDeterminant
@@ -479,6 +505,8 @@ bool Foam::motionSmoother::checkMesh
     (
         readScalar(dict.lookup("minTriangleTwist", true))
     );
+    scalar minFaceFlatness = -1.0;
+    dict.readIfPresent("minFaceFlatness", minFaceFlatness, true);
     const scalar minDet
     (
         readScalar(dict.lookup("minDeterminant", true))
@@ -691,6 +719,27 @@ bool Foam::motionSmoother::checkMesh
 
         Info<< "    faces with triangle twist < "
             << setw(5) << minTriangleTwist
+            << "                      : "
+            << nNewWrongFaces-nWrongFaces << endl;
+
+        nWrongFaces = nNewWrongFaces;
+    }
+
+    if (minFaceFlatness > -1)
+    {
+        meshGeom.checkFaceFlatness
+        (
+            report,
+            minFaceFlatness,
+            meshGeom.mesh().points(),
+            checkFaces,
+            &wrongFaces
+        );
+
+        label nNewWrongFaces = returnReduce(wrongFaces.size(), sumOp<label>());
+
+        Info<< "    faces with flatness < "
+            << setw(5) << minFaceFlatness
             << "                      : "
             << nNewWrongFaces-nWrongFaces << endl;
 
