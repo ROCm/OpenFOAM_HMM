@@ -125,6 +125,9 @@ class pressureTools
         //- Name of velocity field, default is "U"
         word UName_;
 
+        //- Name of density field, default is "rho"
+        word rhoName_;
+
         //- Reference pressure level (used for total pressure)
         scalar pRef_;
 
@@ -138,16 +141,23 @@ class pressureTools
         word pName() const;
 
         //- Return the density scaling if supplied with kinematic pressure
-        dimensionedScalar rho(const volScalarField& p) const;
+        dimensionedScalar rhoScale(const volScalarField& p) const;
+
+        //- Return the density field
+        tmp<volScalarField> rho(const volScalarField& p) const;
 
         //- Return the reference pressure
         dimensionedScalar pRef() const;
 
-        //- Calculate and return the (kinematic) dynamic pressure
-        tmp<volScalarField> pDyn() const;
+        //- Calculate and return the dynamic pressure
+        tmp<volScalarField> pDyn(const volScalarField& p) const;
 
         //- Convert to coeff data by applying the pDyn scaling
-        tmp<volScalarField> convertToCoeff(const volScalarField& p) const;
+        tmp<volScalarField> convertToCoeff
+        (
+            const volScalarField& pCalculated,
+            const volScalarField& pIn
+        ) const;
 
         //- Disallow default bitwise copy construct
         pressureTools(const pressureTools&);
