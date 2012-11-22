@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -480,6 +480,15 @@ public:
                     mapDistribute::transform()
                 );
             }
+
+            //- Swap to obtain neighbour cell values for all boundary faces
+            template <class T>
+            static void swapBoundaryCellList
+            (
+                const polyMesh& mesh,
+                const UList<T>& cellData,
+                List<T>& neighbourCellData
+            );
 
         // Sparse versions
 
