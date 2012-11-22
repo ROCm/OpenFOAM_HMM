@@ -130,7 +130,7 @@ void Foam::DESModelRegions::write()
             Info<< type() << " output:" << nl;
         }
 
-        tmp<volScalarField> result;
+        tmp<volScalarField> tresult;
 
         label DESpresent = false;
         if (mesh.foundObject<icoModel>("turbulenceModel"))
@@ -142,7 +142,7 @@ void Foam::DESModelRegions::write()
             {
                 const icoDESModel& des =
                     dynamic_cast<const icoDESModel&>(model);
-                result = des.LESRegion();
+                tresult = des.LESRegion();
                 DESpresent = true;
             }
         }
@@ -155,15 +155,17 @@ void Foam::DESModelRegions::write()
             {
                 const cmpDESModel& des =
                     dynamic_cast<const cmpDESModel&>(model);
-                result = des.LESRegion();
+                tresult = des.LESRegion();
                 DESpresent = true;
             }
         }
 
         if (DESpresent)
         {
+            const volScalarField& result = tresult();
+
             scalar prc =
-                gSum(result().internalField()*mesh.V())/gSum(mesh.V())*100.0;
+                gSum(result.internalField()*mesh.V())/gSum(mesh.V())*100.0;
 
             if (Pstream::master())
             {
@@ -174,9 +176,11 @@ void Foam::DESModelRegions::write()
             if (log_)
             {
                 Info<< "    LES = " << prc << " % (volume)" << nl
-                    << "    RES = " << 100.0 - prc << " % (volume)" << nl
+                    << "    RAS = " << 100.0 - prc << " % (volume)" << nl
                     << endl;
             }
+
+            result.write();
         }
         else
         {
