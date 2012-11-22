@@ -153,7 +153,11 @@ class pressureTools
         tmp<volScalarField> pDyn(const volScalarField& p) const;
 
         //- Convert to coeff data by applying the pDyn scaling
-        tmp<volScalarField> convertToCoeff(const volScalarField& p) const;
+        tmp<volScalarField> convertToCoeff
+        (
+            const volScalarField& pCalculated,
+            const volScalarField& pIn
+        ) const;
 
         //- Disallow default bitwise copy construct
         pressureTools(const pressureTools&);

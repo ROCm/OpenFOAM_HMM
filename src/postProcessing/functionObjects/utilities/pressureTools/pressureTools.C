@@ -154,14 +154,15 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn
 
 Foam::tmp<Foam::volScalarField> Foam::pressureTools::convertToCoeff
 (
-    const volScalarField& p
+    const volScalarField& pCalculated,
+    const volScalarField& pIn
 ) const
 {
-    tmp<volScalarField> tCoeff(p);
+    tmp<volScalarField> tCoeff(pCalculated);
 
     if (calcCoeff_)
     {
-        tCoeff() /= pDyn(p);
+        tCoeff() /= pDyn(pIn) + dimensionedScalar("p0", dimPressure, SMALL);
     }
 
     return tCoeff;
@@ -271,7 +272,7 @@ void Foam::pressureTools::write()
                 obr_,
                 IOobject::NO_READ
             ),
-            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef())
+            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef(), p)
         );
 
         pResult.write();
