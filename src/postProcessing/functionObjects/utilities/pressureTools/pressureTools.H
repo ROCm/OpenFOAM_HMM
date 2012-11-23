@@ -41,15 +41,39 @@ Description
         \f]
     - static pressure coefficient
         \f[
-            Cp_s = \frac{p_s}{0.5 \rho |U|^2}
+            Cp_s = \frac{p_s}{0.5 \rho_{\inf} |U_{\inf}|^2}
         \f]
     - total pressure coefficient
         \f[
-            Cp_T = \frac{p_T}{0.5 \rho |U|^2}
+            Cp_T = \frac{p_T}{0.5 \rho_{\inf} |U_{\inf}|^2}
         \f]
 
-    The function object will operate on both kinematic (p_k) and static
-    pressure (p_s) fields, and the result is written as a volScalarField.
+    where
+    \vartable
+        \rho        | density [kg/m3]
+        U           | velocity [m/s]
+        \rho_{\inf} | freestream density [kg/m3]
+        U_{\inf}    | freestream velocity [m/s]
+        p_k         | kinematic pressure (p/rho)[m2/s2]
+        p_s         | pressure [Pa]
+        p_T         | total pressure [Pa]
+        p_{ref}     | reference pressure level [Pa]
+        Cp_{s}      | pressure coefficient
+        Cp_{T}      | total pressure coefficient
+    \endvartable
+
+    The function object will operate on both kinematic (\f$ p_k \f$) and static
+    pressure (\f$ p_s \f$) fields, and the result is written as a
+    volScalarField.
+
+    The modes of operation are:
+    \table
+        Mode                        | calcTotal | calcCoeff  
+        static pressure             | no        | no
+        total pressure              | yes       | no
+        pressure coefficient        | no        | yes
+        total pressure coefficient  | yes       | yes
+    \endtable
 
     Example of function object specification to calculate pressure coefficient:
     \verbatim
@@ -67,10 +91,12 @@ Description
     \table
         Property     | Description             | Required    | Default value
         type         | type name: pressureTools| yes         |
-        calcCoeff    | Calculate pressure coefficient | yes  |
-        calcTotal    | Calculate total coefficient | yes     |
         rhoRef       | Reference density for incompressible cases | no | 1
-        pRef         | Reference pressure for total pressure |no| 0.0
+        calcTotal    | Calculate total coefficient | yes     |
+        pRef         | Reference pressure for total pressure | no | 0.0
+        calcCoeff    | Calculate pressure coefficient | yes  |
+        UInf         | Freestream velocity for coefficient calculation | no |
+        rhoInf       | Freestream density for coefficient calculation | no |
     \endtable
 
 SourceFiles
@@ -113,12 +139,6 @@ class pressureTools
         //- On/off switch
         bool active_;
 
-        //- Flag to calculate total pressure
-        bool calcTotal_;
-
-        //- Flag to calculate pressure coefficient
-        bool calcCoeff_;
-
         //- Name of pressure field, default is "p"
         word pName_;
 
@@ -128,11 +148,29 @@ class pressureTools
         //- Name of density field, default is "rho"
         word rhoName_;
 
-        //- Reference pressure level (used for total pressure)
-        scalar pRef_;
-
-        //- Reference density value
+        //- Reference density employed for incompressible cases
         scalar rhoRef_;
+
+
+        // Total pressure calculation
+
+            //- Flag to calculate total pressure
+            bool calcTotal_;
+
+            //- Reference pressure level
+            scalar pRef_;
+
+
+        // Pressure coefficient calculation
+
+            //- Flag to calculate pressure coefficient
+            bool calcCoeff_;
+
+            //- Freestream velocity
+            vector UInf_;
+
+            //- Freestream density
+            scalar rhoInf_;
 
 
     // Private Member Functions
@@ -152,12 +190,8 @@ class pressureTools
         //- Calculate and return the dynamic pressure
         tmp<volScalarField> pDyn(const volScalarField& p) const;
 
-        //- Convert to coeff data by applying the pDyn scaling
-        tmp<volScalarField> convertToCoeff
-        (
-            const volScalarField& pCalculated,
-            const volScalarField& pIn
-        ) const;
+        //- Convert to coeff by applying the freestream dynamic pressure scaling
+        tmp<volScalarField> convertToCoeff(const volScalarField& p) const;
 
         //- Disallow default bitwise copy construct
         pressureTools(const pressureTools&);
