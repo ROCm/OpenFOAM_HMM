@@ -154,15 +154,20 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn
 
 Foam::tmp<Foam::volScalarField> Foam::pressureTools::convertToCoeff
 (
-    const volScalarField& pCalculated,
-    const volScalarField& pIn
+    const volScalarField& p
 ) const
 {
-    tmp<volScalarField> tCoeff(pCalculated);
+    tmp<volScalarField> tCoeff(p);
 
     if (calcCoeff_)
     {
-        tCoeff() /= pDyn(pIn) + dimensionedScalar("p0", dimPressure, SMALL);
+        tCoeff() -= dimensionedScalar("pInf", dimPressure, pInf_);
+
+        const dimensionedScalar p0("p0", dimPressure, SMALL);
+        const dimensionedVector U("U", dimVelocity, UInf_);
+        const dimensionedScalar rho("rho", dimDensity, rhoInf_);
+
+        tCoeff() /= 0.5*rho*magSqr(U) + p0;
     }
 
     return tCoeff;
@@ -182,13 +187,16 @@ Foam::pressureTools::pressureTools
     name_(name),
     obr_(obr),
     active_(true),
-    calcTotal_(false),
-    calcCoeff_(false),
     pName_("p"),
     UName_("U"),
     rhoName_("rho"),
+    rhoRef_(1.0),
+    calcTotal_(false),
     pRef_(0.0),
-    rhoRef_(1.0)
+    calcCoeff_(false),
+    pInf_(0.0),
+    UInf_(vector::zero),
+    rhoInf_(0.0)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -241,6 +249,12 @@ void Foam::pressureTools::read(const dictionary& dict)
         }
 
         dict.lookup("calcCoeff") >> calcCoeff_;
+        if (calcCoeff_)
+        {
+            dict.lookup("pInf") >> pInf_;
+            dict.lookup("UInf") >> UInf_;
+            dict.lookup("rhoInf") >> rhoInf_;
+        }
     }
 }
 
@@ -272,7 +286,7 @@ void Foam::pressureTools::write()
                 obr_,
                 IOobject::NO_READ
             ),
-            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef(), p)
+            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef())
         );
 
         pResult.write();
