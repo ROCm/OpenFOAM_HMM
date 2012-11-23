@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,8 +66,8 @@ Description
 
 
     - added faces get same patchID as face they are extruded from
-    - 'side' faces (i.e. on the edge of pp) get the patchID of the
-    other patch they are connected to.
+    - 'side' faces (i.e. on the edge of pp) get the patchID/zoneID of the
+    other patch/zone they are connected to (hopefully only 1)
 
 
     E.g. 3 boundary faces on patches a,b. b gets extruded, a doesn't.
