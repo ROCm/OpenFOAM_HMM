@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "epsilonLowReWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -34,8 +34,6 @@ License
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -132,11 +130,18 @@ void epsilonLowReWallFunctionFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField& y = turbulence.y()[patchI];
 
     volScalarField& G =
-        const_cast<volScalarField&>(db().lookupObject<volScalarField>(GName_));
+        const_cast<volScalarField&>
+        (
+            db().lookupObject<volScalarField>
+            (
+                turbulence.type() + ".G"
+            )
+        );
 
     DimensionedField<scalar, volMesh>& epsilon =
         const_cast<DimensionedField<scalar, volMesh>&>
@@ -144,19 +149,19 @@ void epsilonLowReWallFunctionFvPatchScalarField::updateCoeffs()
             dimensionedInternalField()
         );
 
-    const tmp<volScalarField> tk = rasModel.k();
+    const tmp<volScalarField> tk = turbulence.k();
     const volScalarField& k = tk();
 
-    const tmp<volScalarField> tmu = rasModel.mu();
+    const tmp<volScalarField> tmu = turbulence.mu();
     const scalarField& muw = tmu().boundaryField()[patchI];
 
-    const tmp<volScalarField> tmut = rasModel.mut();
+    const tmp<volScalarField> tmut = turbulence.mut();
     const volScalarField& mut = tmut();
     const scalarField& mutw = mut.boundaryField()[patchI];
 
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
 
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
     const scalarField magGradUw(mag(Uw.snGrad()));
 
     const scalar Cmu25 = pow025(Cmu_);
@@ -201,7 +206,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 
