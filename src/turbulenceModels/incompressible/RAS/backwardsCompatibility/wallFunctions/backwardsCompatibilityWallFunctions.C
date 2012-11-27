@@ -75,7 +75,7 @@ tmp<volScalarField> autoCreateNut
             if (isA<wallFvPatch>(bm[patchI]))
             {
                 nutBoundaryTypes[patchI] =
-                    RASModels::nutkWallFunctionFvPatchScalarField::typeName;
+                    nutkWallFunctionFvPatchScalarField::typeName;
             }
             else
             {
@@ -145,7 +145,7 @@ tmp<volScalarField> autoCreateLowReNut
             if (isA<wallFvPatch>(bm[patchI]))
             {
                 nutBoundaryTypes[patchI] =
-                    RASModels::nutLowReWallFunctionFvPatchScalarField::typeName;
+                    nutLowReWallFunctionFvPatchScalarField::typeName;
             }
             else
             {
@@ -191,7 +191,7 @@ tmp<volScalarField> autoCreateEpsilon
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::epsilonWallFunctionFvPatchScalarField
+            epsilonWallFunctionFvPatchScalarField
         >
         (
             fieldName,
@@ -210,7 +210,7 @@ tmp<volScalarField> autoCreateOmega
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::omegaWallFunctionFvPatchScalarField
+            omegaWallFunctionFvPatchScalarField
         >
         (
             fieldName,
@@ -229,7 +229,7 @@ tmp<volScalarField> autoCreateK
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kqRWallFunctionFvPatchField<scalar>
+            kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -248,7 +248,7 @@ tmp<volScalarField> autoCreateQ
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kqRWallFunctionFvPatchField<scalar>
+            kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -267,7 +267,7 @@ tmp<volSymmTensorField> autoCreateR
         autoCreateWallFunctionField
         <
             symmTensor,
-            RASModels::kqRWallFunctionFvPatchField<symmTensor>
+            kqRWallFunctionFvPatchField<symmTensor>
         >
         (
             fieldName,
