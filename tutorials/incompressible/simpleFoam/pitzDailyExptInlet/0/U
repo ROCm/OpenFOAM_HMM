@@ -23,6 +23,7 @@ boundaryField
     inlet
     {
         type            timeVaryingMappedFixedValue;
+        offset          (0 0 0);
         setAverage      off;
     }
 
