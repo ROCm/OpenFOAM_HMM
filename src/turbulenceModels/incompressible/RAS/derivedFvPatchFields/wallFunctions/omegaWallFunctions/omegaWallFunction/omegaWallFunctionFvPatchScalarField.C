@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "omegaWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -37,8 +37,6 @@ License
 namespace Foam
 {
 namespace incompressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -59,7 +57,6 @@ void omegaWallFunctionFvPatchScalarField::checkType()
 
 void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    writeEntryIfDifferent<word>(os, "G", "RASModel.G", GName_);
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
@@ -76,7 +73,6 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF),
-    GName_("RASModel.G"),
     Cmu_(0.09),
     kappa_(0.41),
     E_(9.8),
@@ -96,7 +92,6 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    GName_(ptf.GName_),
     Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
     E_(ptf.E_),
@@ -115,7 +110,6 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF, dict),
-    GName_(dict.lookupOrDefault<word>("G", "RASModel.G")),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
@@ -132,7 +126,6 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(owfpsf),
-    GName_(owfpsf.GName_),
     Cmu_(owfpsf.Cmu_),
     kappa_(owfpsf.kappa_),
     E_(owfpsf.E_),
@@ -150,7 +143,6 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(owfpsf, iF),
-    GName_(owfpsf.GName_),
     Cmu_(owfpsf.Cmu_),
     kappa_(owfpsf.kappa_),
     E_(owfpsf.E_),
@@ -172,13 +164,20 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField& y = turbulence.y()[patchI];
 
     const scalar Cmu25 = pow025(Cmu_);
 
     volScalarField& G =
-        const_cast<volScalarField&>(db().lookupObject<volScalarField>(GName_));
+        const_cast<volScalarField&>
+        (
+            db().lookupObject<volScalarField>
+            (
+                turbulence.type() + ".G"
+            )
+        );
 
     DimensionedField<scalar, volMesh>& omega =
         const_cast<DimensionedField<scalar, volMesh>&>
@@ -186,17 +185,17 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
             dimensionedInternalField()
         );
 
-    const tmp<volScalarField> tk = rasModel.k();
+    const tmp<volScalarField> tk = turbulence.k();
     const volScalarField& k = tk();
 
-    const tmp<volScalarField> tnu = rasModel.nu();
+    const tmp<volScalarField> tnu = turbulence.nu();
     const scalarField& nuw = tnu().boundaryField()[patchI];
 
-    const tmp<volScalarField> tnut = rasModel.nut();
+    const tmp<volScalarField> tnut = turbulence.nut();
     const volScalarField& nut = tnut();
     const scalarField& nutw = nut.boundaryField()[patchI];
 
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const fvPatchVectorField& Uw = turbulence.U().boundaryField()[patchI];
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
@@ -242,7 +241,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

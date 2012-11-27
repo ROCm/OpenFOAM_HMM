@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutkAtmRoughWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -35,8 +35,6 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RASModels
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -44,11 +42,12 @@ tmp<scalarField> nutkAtmRoughWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
-    const tmp<volScalarField> tk = rasModel.k();
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField& y = turbulence.y()[patchI];
+    const tmp<volScalarField> tk = turbulence.k();
     const volScalarField& k = tk();
-    const tmp<volScalarField> tnu = rasModel.nu();
+    const tmp<volScalarField> tnu = turbulence.nu();
     const volScalarField& nu = tnu();
     const scalarField& nuw = nu.boundaryField()[patchI];
 
@@ -192,7 +191,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 
