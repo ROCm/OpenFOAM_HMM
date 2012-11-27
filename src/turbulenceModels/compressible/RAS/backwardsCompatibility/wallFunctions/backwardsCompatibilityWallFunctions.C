@@ -76,7 +76,7 @@ tmp<volScalarField> autoCreateAlphat
             if (isA<wallFvPatch>(bm[patchI]))
             {
                 alphatBoundaryTypes[patchI] =
-                    RASModels::alphatWallFunctionFvPatchScalarField::typeName;
+                    alphatWallFunctionFvPatchScalarField::typeName;
             }
             else
             {
@@ -146,7 +146,7 @@ tmp<volScalarField> autoCreateMut
             if (isA<wallFvPatch>(bm[patchI]))
             {
                 mutBoundaryTypes[patchI] =
-                    RASModels::mutkWallFunctionFvPatchScalarField::typeName;
+                    mutkWallFunctionFvPatchScalarField::typeName;
             }
             else
             {
@@ -216,7 +216,7 @@ tmp<volScalarField> autoCreateLowReMut
             if (isA<wallFvPatch>(bm[patchI]))
             {
                 mutBoundaryTypes[patchI] =
-                    RASModels::mutLowReWallFunctionFvPatchScalarField::typeName;
+                    mutLowReWallFunctionFvPatchScalarField::typeName;
             }
             else
             {
@@ -262,7 +262,7 @@ tmp<volScalarField> autoCreateEpsilon
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::epsilonWallFunctionFvPatchScalarField
+            epsilonWallFunctionFvPatchScalarField
         >
         (
             fieldName,
@@ -281,7 +281,7 @@ tmp<volScalarField> autoCreateOmega
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::omegaWallFunctionFvPatchScalarField
+            omegaWallFunctionFvPatchScalarField
         >
         (
             fieldName,
@@ -300,7 +300,7 @@ tmp<volScalarField> autoCreateK
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kqRWallFunctionFvPatchField<scalar>
+            kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -319,7 +319,7 @@ tmp<volScalarField> autoCreateQ
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kqRWallFunctionFvPatchField<scalar>
+            kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -338,7 +338,7 @@ tmp<volSymmTensorField> autoCreateR
         autoCreateWallFunctionField
         <
             symmTensor,
-            RASModels::kqRWallFunctionFvPatchField<symmTensor>
+            kqRWallFunctionFvPatchField<symmTensor>
         >
         (
             fieldName,
