@@ -6,6 +6,9 @@ CourantNo/CourantNoFunctionObject.C
 Lambda2/Lambda2.C
 Lambda2/Lambda2FunctionObject.C
 
+Peclet/Peclet.C
+Peclet/PecletFunctionObject.C
+
 DESModelRegions/DESModelRegions.C
 DESModelRegions/DESModelRegionsFunctionObject.C
 
