@@ -88,7 +88,7 @@ class calcMag
         template<class FieldType>
         FieldType& magField(const word& magName, const dimensionSet& dims);
 
-        //- Helper function to calculate the gradient of different field types
+        //- Helper function to calculate the magnitude of different field types
         template<class Type>
         void calc
         (
