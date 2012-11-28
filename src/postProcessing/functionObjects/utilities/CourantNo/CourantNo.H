@@ -24,6 +24,9 @@ License
 Class
     Foam::CourantNo
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     This function object calculates and outputs the Courant number as a
     volScalarField.  The field is stored on the mesh database so that it can

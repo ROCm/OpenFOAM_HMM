@@ -24,6 +24,9 @@ License
 Class
     Foam::scalarTransport
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     This function object evolves a passive scalar transport equation.  The
     field in ininitially zero, to which sources are added.  The field name
