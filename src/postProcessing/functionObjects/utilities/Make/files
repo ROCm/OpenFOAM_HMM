@@ -9,6 +9,9 @@ Lambda2/Lambda2FunctionObject.C
 Peclet/Peclet.C
 Peclet/PecletFunctionObject.C
 
+Q/Q.C
+Q/QFunctionObject.C
+
 DESModelRegions/DESModelRegions.C
 DESModelRegions/DESModelRegionsFunctionObject.C
 
