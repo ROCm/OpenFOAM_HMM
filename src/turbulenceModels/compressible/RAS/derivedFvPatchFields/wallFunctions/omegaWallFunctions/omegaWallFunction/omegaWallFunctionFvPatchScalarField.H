@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::RASModels::omegaWallFunctionFvPatchScalarField
+    Foam::compressible::omegaWallFunctionFvPatchScalarField
 
 Group
     grpCmpWallFunctions
@@ -54,7 +54,6 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        G            | turbulence generation field name | no | G
         Cmu          | model coefficient       | no          | 0.09
         kappa        | Von Karman constant     | no          | 0.41
         E            | model coefficient       | no          | 9.8
@@ -85,8 +84,6 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RASModels
-{
 
 /*---------------------------------------------------------------------------*\
            Class omegaWallFunctionFvPatchScalarField Declaration
@@ -99,9 +96,6 @@ class omegaWallFunctionFvPatchScalarField
 protected:
 
     // Protected data
-
-        //- Name of turbulence generation field
-        word GName_;
 
         //- Cmu coefficient
         scalar Cmu_;
@@ -214,7 +208,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

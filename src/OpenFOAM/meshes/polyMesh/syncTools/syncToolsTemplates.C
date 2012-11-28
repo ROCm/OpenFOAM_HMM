@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1550,6 +1550,45 @@ void Foam::syncTools::syncFaceList
             }
         }
     }
+}
+
+
+template <class T>
+void Foam::syncTools::swapBoundaryCellList
+(
+    const polyMesh& mesh,
+    const UList<T>& cellData,
+    List<T>& neighbourCellData
+)
+{
+    if (cellData.size() != mesh.nCells())
+    {
+        FatalErrorIn
+        (
+            "syncTools<class T>::swapBoundaryCellList"
+            "(const polyMesh&, const UList<T>&, List<T>&)"
+        )   << "Number of cell values " << cellData.size()
+            << " is not equal to the number of cells in the mesh "
+            << mesh.nCells() << abort(FatalError);
+    }
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+
+    neighbourCellData.setSize(nBnd);
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+        const labelUList& faceCells = pp.faceCells();
+        forAll(faceCells, i)
+        {
+            label bFaceI = pp.start()+i-mesh.nInternalFaces();
+            neighbourCellData[bFaceI] = cellData[faceCells[i]];
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh, neighbourCellData);
 }
 
 

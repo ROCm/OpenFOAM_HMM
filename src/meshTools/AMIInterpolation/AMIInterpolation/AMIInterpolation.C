@@ -27,63 +27,6 @@ License
 #include "meshTools.H"
 #include "mapDistribute.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    //- Helper class for list
-    template<class T>
-    class ListPlusEqOp
-    {
-        public:
-        void operator()(List<T>& x, const List<T> y) const
-        {
-            if (y.size())
-            {
-                if (x.size())
-                {
-                    label sz = x.size();
-                    x.setSize(sz + y.size());
-                    forAll(y, i)
-                    {
-                        x[sz++] = y[i];
-                    }
-                }
-                else
-                {
-                    x = y;
-                }
-            }
-        }
-    };
-
-    //- Combine operator for interpolateToSource/Target
-    template<class Type, class CombineOp>
-    class combineBinaryOp
-    {
-        const CombineOp& cop_;
-
-        public:
-
-            combineBinaryOp(const CombineOp& cop)
-            :
-                cop_(cop)
-            {}
-
-            void operator()
-            (
-                Type& x,
-                const label faceI,
-                const Type& y,
-                const scalar weight
-            ) const
-            {
-                cop_(x, weight*y);
-            }
-    };
-}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -1550,7 +1493,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         }
 
         // send data back to originating procs. Note that contributions
-        // from different processors get added (ListPlusEqOp)
+        // from different processors get added (ListAppendEqOp)
 
         mapDistribute::distribute
         (
@@ -1560,7 +1503,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.constructMap(),
             map.subMap(),
             tgtAddress_,
-            ListPlusEqOp<label>(),
+            ListAppendEqOp<label>(),
             labelList()
         );
 
@@ -1572,7 +1515,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.constructMap(),
             map.subMap(),
             tgtWeights_,
-            ListPlusEqOp<scalar>(),
+            ListAppendEqOp<scalar>(),
             scalarList()
         );
 
@@ -1787,7 +1730,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToSource
         )
     );
 
-    interpolateToSource(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
+    interpolateToSource
+    (
+        fld,
+        multiplyWeightedOp<Type, CombineOp>(cop),
+        tresult()
+    );
 
     return tresult;
 }
@@ -1824,7 +1772,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolateToTarget
         )
     );
 
-    interpolateToTarget(fld, combineBinaryOp<Type, CombineOp>(cop), tresult());
+    interpolateToTarget
+    (
+        fld,
+        multiplyWeightedOp<Type, CombineOp>(cop),
+        tresult()
+    );
 
     return tresult;
 }

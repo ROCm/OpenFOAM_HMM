@@ -39,7 +39,7 @@ Foam::MRFZoneList::MRFZoneList
 {
     reset(dict);
 
-    active();
+    active(true);
 }
 
 
@@ -51,7 +51,7 @@ Foam::MRFZoneList::~MRFZoneList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::MRFZoneList::active() const
+bool Foam::MRFZoneList::active(const bool warn) const
 {
     bool a = false;
     forAll(*this, i)
@@ -59,7 +59,7 @@ bool Foam::MRFZoneList::active() const
         a = a || this->operator[](i).active();
     }
 
-    if (!a)
+    if (warn && this->size() && !a)
     {
         Info<< "    No MRF zones active" << endl;
     }

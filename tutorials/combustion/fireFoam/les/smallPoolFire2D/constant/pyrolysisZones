@@ -28,8 +28,6 @@ FoamFile
 
         reactingOneDimCoeffs
         {
-            filmCoupled     false;
-
             radFluxName     Qr;
 
             minimumDelta    1e-8;

@@ -166,7 +166,7 @@ public:
             //- Const access to the coefficients dictionary,
             //  which provides info. about choice of models,
             //  and all related data (particularly model coefficients).
-            inline const dictionary& coeffDict() const
+            virtual const dictionary& coeffDict() const
             {
                 return coeffDict_;
             }

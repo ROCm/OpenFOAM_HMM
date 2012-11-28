@@ -42,6 +42,8 @@ SourceFiles
 #include "Switch.H"
 #include "pointFieldFwd.H"
 #include "OFstream.H"
+#include "dictionary.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +51,6 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class dictionary;
 class objectRegistry;
 class fvMesh;
 class mapPolyMesh;
@@ -88,6 +89,9 @@ protected:
         //- Output field values flag
         Switch valueOutput_;
 
+        //- Results dictionary for external access of results
+        dictionary resultDict_;
+
 
         // Functions to be over-ridden from IOoutputFilter class
 
@@ -103,6 +107,21 @@ public:
     //- Run-time type information
     TypeName("fieldValue");
 
+    // Declare runtime constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            fieldValue,
+            dictionary,
+            (
+                const word& name,
+                const objectRegistry& obr,
+                const dictionary& dict,
+                const bool loadFromFiles
+            ),
+            (name, obr, dict, loadFromFiles)
+        );
 
     //- Construct from components
     fieldValue
@@ -114,6 +133,15 @@ public:
         const bool loadFromFiles = false
     );
 
+    //- Return a reference to the selected fieldValue
+    static autoPtr<fieldValue> New
+    (
+        const word& name,
+        const objectRegistry& obr,
+        const dictionary& dict,
+        const bool loadFromFiles = false,
+        const bool output = true
+    );
 
     //- Destructor
     virtual ~fieldValue();
@@ -146,6 +174,9 @@ public:
 
             //- Helper function to return the reference to the mesh
             inline const fvMesh& mesh() const;
+
+            //- Return access to the latest set of results
+            inline const dictionary& resultDict() const;
 
 
         // Function object functions

@@ -684,4 +684,26 @@ Foam::List<Container> Foam::initListList(const T elems[nRows][nColumns])
 }
 
 
+template<class T>
+void Foam::ListAppendEqOp<T>::operator()(List<T>& x, const List<T>& y) const
+{
+    if (y.size())
+    {
+        if (x.size())
+        {
+            label sz = x.size();
+            x.setSize(sz + y.size());
+            forAll(y, i)
+            {
+                x[sz++] = y[i];
+            }
+        }
+        else
+        {
+            x = y;
+        }
+    }
+}
+
+
 // ************************************************************************* //

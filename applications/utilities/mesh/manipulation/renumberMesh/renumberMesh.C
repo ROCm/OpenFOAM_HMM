@@ -471,6 +471,47 @@ autoPtr<mapPolyMesh> reorderMesh
         true
     );
 
+
+    // Re-do the faceZones
+    {
+        faceZoneMesh& faceZones = mesh.faceZones();
+        faceZones.clearAddressing();
+        forAll(faceZones, zoneI)
+        {
+            faceZone& fZone = faceZones[zoneI];
+            labelList newAddressing(fZone.size());
+            boolList newFlipMap(fZone.size());
+            forAll(fZone, i)
+            {
+                label oldFaceI = fZone[i];
+                newAddressing[i] = reverseFaceOrder[oldFaceI];
+                if (flipFaceFlux.found(newAddressing[i]))
+                {
+                    newFlipMap[i] = !fZone.flipMap()[i];
+                }
+                else
+                {
+                    newFlipMap[i] = fZone.flipMap()[i];
+                }
+            }
+            fZone.resetAddressing(newAddressing, newFlipMap);
+        }
+    }
+    // Re-do the cellZones
+    {
+        cellZoneMesh& cellZones = mesh.cellZones();
+        cellZones.clearAddressing();
+        forAll(cellZones, zoneI)
+        {
+            cellZones[zoneI] = UIndirectList<label>
+            (
+                reverseCellOrder,
+                cellZones[zoneI]
+            )();
+        }
+    }
+
+
     return autoPtr<mapPolyMesh>
     (
         new mapPolyMesh

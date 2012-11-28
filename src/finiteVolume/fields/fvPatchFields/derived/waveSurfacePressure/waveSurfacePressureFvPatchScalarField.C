@@ -239,7 +239,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::write(Ostream& os) const
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "zeta", "zeta", zetaName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", zetaName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntry("value", os);
 }
 

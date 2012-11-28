@@ -80,8 +80,7 @@ constantRadiation::constantRadiation
             IOobject::AUTO_WRITE
         ),
         owner.regionMesh(),
-        dimensionedScalar("one", dimless, 1.0),
-        zeroGradientFvPatchScalarField::typeName
+        dimensionedScalar("one", dimless, 1.0)
     ),
     timeStart_(readScalar(coeffs_.lookup("timeStart"))),
     duration_(readScalar(coeffs_.lookup("duration")))

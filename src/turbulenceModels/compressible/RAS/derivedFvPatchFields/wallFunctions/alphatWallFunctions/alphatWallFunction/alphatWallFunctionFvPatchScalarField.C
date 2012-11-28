@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,13 +34,10 @@ namespace Foam
 {
 namespace compressible
 {
-namespace RASModels
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-alphatWallFunctionFvPatchScalarField::
-alphatWallFunctionFvPatchScalarField
+alphatWallFunctionFvPatchScalarField::alphatWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -52,8 +49,7 @@ alphatWallFunctionFvPatchScalarField
 {}
 
 
-alphatWallFunctionFvPatchScalarField::
-alphatWallFunctionFvPatchScalarField
+alphatWallFunctionFvPatchScalarField::alphatWallFunctionFvPatchScalarField
 (
     const alphatWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -67,8 +63,7 @@ alphatWallFunctionFvPatchScalarField
 {}
 
 
-alphatWallFunctionFvPatchScalarField::
-alphatWallFunctionFvPatchScalarField
+alphatWallFunctionFvPatchScalarField::alphatWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -81,8 +76,7 @@ alphatWallFunctionFvPatchScalarField
 {}
 
 
-alphatWallFunctionFvPatchScalarField::
-alphatWallFunctionFvPatchScalarField
+alphatWallFunctionFvPatchScalarField::alphatWallFunctionFvPatchScalarField
 (
     const alphatWallFunctionFvPatchScalarField& awfpsf
 )
@@ -93,8 +87,7 @@ alphatWallFunctionFvPatchScalarField
 {}
 
 
-alphatWallFunctionFvPatchScalarField::
-alphatWallFunctionFvPatchScalarField
+alphatWallFunctionFvPatchScalarField::alphatWallFunctionFvPatchScalarField
 (
     const alphatWallFunctionFvPatchScalarField& awfpsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -143,7 +136,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

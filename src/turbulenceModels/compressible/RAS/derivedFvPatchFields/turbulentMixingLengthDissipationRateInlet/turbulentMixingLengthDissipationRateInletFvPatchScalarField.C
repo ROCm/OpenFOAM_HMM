@@ -28,7 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
 #include "volFields.H"
-#include "RASModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,10 +131,11 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     }
 
     // Lookup Cmu corresponding to the turbulence model selected
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
 
     const scalar Cmu =
-        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+        turbulence.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
 
     const scalar Cmu75 = pow(Cmu, 0.75);
 

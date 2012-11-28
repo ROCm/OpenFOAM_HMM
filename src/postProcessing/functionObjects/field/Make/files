@@ -10,6 +10,9 @@ fieldMinMax/fieldMinMax.C
 fieldMinMax/fieldMinMaxFunctionObject.C
 
 fieldValues/fieldValue/fieldValue.C
+fieldValues/fieldValue/fieldValueNew.C
+fieldValues/fieldValueDelta/fieldValueDelta.C
+fieldValues/fieldValueDelta/fieldValueDeltaFunctionObject.C
 fieldValues/faceSource/faceSource.C
 fieldValues/faceSource/faceSourceFunctionObject.C
 fieldValues/cellSource/cellSource.C

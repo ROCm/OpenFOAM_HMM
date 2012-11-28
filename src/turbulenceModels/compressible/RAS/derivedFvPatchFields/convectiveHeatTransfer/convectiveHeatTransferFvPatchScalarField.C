@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "convectiveHeatTransferFvPatchScalarField.H"
-#include "RASModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -33,8 +33,6 @@ License
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -167,7 +165,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

@@ -26,7 +26,7 @@ source1
 
     fixedTemperatureSourceCoeffs
     {
-        mode            constant;
+        mode            uniform;
         temperature     2000;
     }
 }

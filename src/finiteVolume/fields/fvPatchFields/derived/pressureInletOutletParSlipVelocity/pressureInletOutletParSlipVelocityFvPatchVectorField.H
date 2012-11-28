@@ -41,6 +41,7 @@ Description
         Property     | Description             | Required    | Default value
         phi          | flux field name         | no          | phi
         rho          | density field name      | no          | rho
+        U            | velocity field name     | no          | U
     \endtable
 
     Example of the boundary condition specification:
@@ -48,8 +49,6 @@ Description
     myPatch
     {
         type            pressureInletOutletParSlipVelocity;
-        phi             phi;
-        rho             rho;
         value           uniform 0;
     }
     \endverbatim
@@ -95,6 +94,9 @@ class pressureInletOutletParSlipVelocityFvPatchVectorField
 
         //- Density field name
         word rhoName_;
+
+        //- Velocity field name
+        word UName_;
 
 
 public:

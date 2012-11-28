@@ -14,7 +14,7 @@ runApplication surfaceFeatureExtract
 runApplication blockMesh
 runApplication topoSet -dict system/topoSetDict-background
 mv log.topoSet log.topoSet.background
-runApplication subsetMesh background -patch walls -overwrite
+runApplication subsetMesh -cellSet background -patch walls -overwrite
 
 runApplication decomposePar
 

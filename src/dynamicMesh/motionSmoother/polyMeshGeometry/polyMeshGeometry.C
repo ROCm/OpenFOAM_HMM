@@ -341,8 +341,8 @@ bool Foam::polyMeshGeometry::checkFaceTet
             {
                 Pout<< "bool polyMeshGeometry::checkFaceTets("
                     << "const bool, const scalar, const pointField&"
-                    << ", const pointField&, const labelList&,"
-                    << " labelHashSet*): "
+                    << ", const pointField&"
+                    << ", const labelList&, labelHashSet*) : "
                     << "face " << faceI
                     << " has a triangle that points the wrong way."
                      << endl
@@ -371,9 +371,6 @@ Foam::polyMeshGeometry::polyMeshGeometry(const polyMesh& mesh)
 {
     correct();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -2014,6 +2011,113 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
 }
 
 
+bool Foam::polyMeshGeometry::checkFaceFlatness
+(
+    const bool report,
+    const scalar minFlatness,
+    const polyMesh& mesh,
+    const vectorField& faceAreas,
+    const vectorField& faceCentres,
+    const pointField& p,
+    const labelList& checkFaces,
+    labelHashSet* setPtr
+)
+{
+    if (minFlatness < -SMALL || minFlatness > 1+SMALL)
+    {
+        FatalErrorIn
+        (
+            "polyMeshGeometry::checkFaceFlatness"
+            "(const bool, const scalar, const polyMesh&, const pointField&"
+            ", const pointField&, const labelList&, labelHashSet*)"
+        )   << "minFlatness should be [0..1] but is now " << minFlatness
+            << abort(FatalError);
+    }
+
+    const faceList& fcs = mesh.faces();
+
+    label nWarped = 0;
+
+    forAll(checkFaces, i)
+    {
+        label faceI = checkFaces[i];
+
+        const face& f = fcs[faceI];
+
+        if (f.size() > 3)
+        {
+            const point& fc = faceCentres[faceI];
+
+            // Sum triangle areas
+            scalar sumArea = 0.0;
+
+            forAll(f, fp)
+            {
+                sumArea += triPointRef
+                (
+                    p[f[fp]],
+                    p[f.nextLabel(fp)],
+                    fc
+                ).mag();
+            }
+
+            if (sumArea/mag(faceAreas[faceI]) < minFlatness)
+            {
+                nWarped++;
+
+                if (setPtr)
+                {
+                    setPtr->insert(faceI);
+                }
+            }
+        }
+    }
+
+    reduce(nWarped, sumOp<label>());
+
+    if (report)
+    {
+        if (nWarped> 0)
+        {
+            Info<< "There are " << nWarped
+                << " faces with area of invidual triangles"
+                << " compared to overall area less than "
+                << minFlatness << nl << endl;
+        }
+        else
+        {
+            Info<< "All faces are flat in that the area of invidual triangles"
+                << " compared to overall area is less than "
+                << minFlatness << nl << endl;
+        }
+    }
+
+    if (nWarped > 0)
+    {
+        if (report)
+        {
+            WarningIn
+            (
+                "polyMeshGeometry::checkFaceFlatness"
+                "(const bool, const scalar, const polyMesh&"
+                ", const pointField&, const pointField&, const labelList&"
+                ", labelHashSet*)"
+            )   << nWarped  << " non-flat faces "
+                << "(area of invidual triangles"
+                << " compared to overall area"
+                << " < " << minFlatness << ") found.\n"
+                << endl;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
 bool Foam::polyMeshGeometry::checkFaceArea
 (
     const bool report,
@@ -2388,6 +2492,29 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
     (
         report,
         minTwist,
+        mesh_,
+        faceAreas_,
+        faceCentres_,
+        p,
+        checkFaces,
+        setPtr
+    );
+}
+
+
+bool Foam::polyMeshGeometry::checkFaceFlatness
+(
+    const bool report,
+    const scalar minFlatness,
+    const pointField& p,
+    const labelList& checkFaces,
+    labelHashSet* setPtr
+) const
+{
+    return checkFaceFlatness
+    (
+        report,
+        minFlatness,
         mesh_,
         faceAreas_,
         faceCentres_,

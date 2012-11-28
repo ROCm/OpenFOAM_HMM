@@ -727,8 +727,10 @@ void thermoSingleLayer::info() const
 {
     kinematicSingleLayer::info();
 
-    Info<< indent << "min/max(T)         = " << min(T_).value() << ", "
-        << max(T_).value() << nl;
+    const scalarField& Tinternal = T_.internalField();
+
+    Info<< indent << "min/max(T)         = " << gMin(Tinternal) << ", "
+        << gMax(Tinternal) << nl;
 
     phaseChange_->info(Info);
 }

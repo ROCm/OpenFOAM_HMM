@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::RASModels::kLowReWallFunctionFvPatchScalarField
+    Foam::compressible::kLowReWallFunctionFvPatchScalarField
 
 Group
     grpCmpWallFunctions
@@ -70,8 +70,6 @@ SourceFiles
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -199,7 +197,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

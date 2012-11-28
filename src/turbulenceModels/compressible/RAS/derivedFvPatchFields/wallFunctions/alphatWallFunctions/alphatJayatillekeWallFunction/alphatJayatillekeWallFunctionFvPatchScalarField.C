@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "alphatJayatillekeWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -35,8 +35,6 @@ License
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -312,7 +310,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

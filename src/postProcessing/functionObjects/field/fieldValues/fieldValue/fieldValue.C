@@ -26,12 +26,14 @@ License
 #include "fieldValue.H"
 #include "fvMesh.H"
 #include "Time.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(fieldValue, 0);
+    defineRunTimeSelectionTable(fieldValue, dictionary);
 }
 
 
@@ -92,7 +94,8 @@ Foam::fieldValue::fieldValue
     log_(false),
     sourceName_(dict.lookupOrDefault<word>("sourceName", "sampledSurface")),
     fields_(dict.lookup("fields")),
-    valueOutput_(dict.lookup("valueOutput"))
+    valueOutput_(dict.lookup("valueOutput")),
+    resultDict_(fileName("name"), dictionary::null)
 {
     // Only active if obr is an fvMesh
     if (isA<fvMesh>(obr_))
