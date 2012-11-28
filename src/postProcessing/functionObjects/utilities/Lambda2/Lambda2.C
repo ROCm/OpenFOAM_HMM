@@ -85,8 +85,7 @@ Foam::Lambda2::Lambda2
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("0", dimless, 0.0),
-                zeroGradientFvPatchScalarField::typeName
+                dimensionedScalar("0", dimless/sqr(dimTime), 0.0)
             )
         );
 
@@ -147,11 +146,7 @@ void Foam::Lambda2::write()
                 mesh.lookupObject<volScalarField>(type())
             );
 
-        scalarField& iField = Lambda2.internalField();
-
-        iField = -eigenValues(SSplusWW)().component(vector::Y);
-
-        Lambda2.correctBoundaryConditions();
+        Lambda2 = -eigenValues(SSplusWW)().component(vector::Y);
 
         Lambda2.write();
 

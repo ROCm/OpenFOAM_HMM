@@ -84,7 +84,7 @@ Foam::Q::Q
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("0", dimless, 0.0)
+                dimensionedScalar("0", dimless/sqr(dimTime), 0.0)
             )
         );
 
@@ -140,8 +140,6 @@ void Foam::Q::write()
             );
 
         Q = 0.5*(sqr(tr(gradU)) - tr(((gradU) & (gradU))));
-
-        Q.correctBoundaryConditions();
 
         Q.write();
 
