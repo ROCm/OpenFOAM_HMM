@@ -113,9 +113,6 @@ protected:
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Name of mass/volume flux field (optional, default = phi)
-        word phiName_;
-
         //- Optional list of patches to process
         labelHashSet patchSet_;
 
