@@ -1,3 +1,6 @@
+calcFvcDiv/calcFvcDiv.C
+calcFvcDiv/calcFvcDivFunctionObject.C
+
 calcFvcGrad/calcFvcGrad.C
 calcFvcGrad/calcFvcGradFunctionObject.C
 
