@@ -180,7 +180,8 @@ void epsilonLowReWallFunctionFvPatchScalarField::updateCoeffs()
         }
         else
         {
-            epsilon[faceCellI] = 2.0*k[faceCellI]*muw[faceI]/rhow[faceI]/sqr(y[faceI]);
+            epsilon[faceCellI] =
+                2.0*k[faceCellI]*muw[faceI]/rhow[faceI]/sqr(y[faceI]);
         }
 
         G[faceCellI] =
