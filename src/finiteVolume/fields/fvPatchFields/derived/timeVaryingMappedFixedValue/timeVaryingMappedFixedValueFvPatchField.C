@@ -79,7 +79,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(pTraits<Type>::zero),
-    offset_()
+    offset_(ptf.offset_().clone().ptr())
 {}
 
 
