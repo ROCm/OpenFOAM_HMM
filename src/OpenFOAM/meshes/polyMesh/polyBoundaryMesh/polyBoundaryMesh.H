@@ -219,9 +219,10 @@ public:
 
         //- Reorders patches. Ordering does not have to be done in
         //  ascending or descending order. Reordering has to be unique.
-        //  (is shuffle) Calls updateMesh() after reordering to recalculate
-        //  data.
-        void reorder(const labelUList&);
+        //  (is shuffle) If validBoundary calls updateMesh()
+        //  after reordering to recalculate data (so call needs to be parallel
+        //  sync in that case)
+        void reorder(const labelUList&, const bool validBoundary);
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;
