@@ -106,8 +106,6 @@ void Foam::calcMag::write()
     {
         bool processed = false;
 
-        
-        
         calc<scalar>(fieldName_, resultName_, processed);
         calc<vector>(fieldName_, resultName_, processed);
         calc<sphericalTensor>(fieldName_, resultName_, processed);
