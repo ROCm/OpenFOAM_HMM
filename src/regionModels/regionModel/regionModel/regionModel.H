@@ -52,7 +52,7 @@ namespace regionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class regionModel Declaration
+                         Class regionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionModel
@@ -160,7 +160,6 @@ public:
             const dictionary& dict,
             bool readFields = true
         );
-
 
 
     //- Destructor
