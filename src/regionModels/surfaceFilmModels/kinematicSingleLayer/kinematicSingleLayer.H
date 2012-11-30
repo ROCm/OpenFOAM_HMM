@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -113,6 +113,9 @@ protected:
             //- Film thickness / [m]
             volScalarField delta_;
 
+            //- Film coverage indicator, 1 = covered, 0 = uncovered / []
+            volScalarField alpha_;
+
             //- Velocity - mean / [m/s]
             volVectorField U_;
 
@@ -221,11 +224,14 @@ protected:
         //- Transfer source fields from the primary region to the film region
         virtual void transferPrimaryRegionSourceFields();
 
-        // Explicit pressure source contribution
+        //- Explicit pressure source contribution
         virtual tmp<volScalarField> pu();
 
-        // Implicit pressure source coefficient
+        //- Implicit pressure source coefficient
         virtual tmp<volScalarField> pp();
+
+        //- Correct film coverage field
+        virtual void correctAlpha();
 
         //- Update the film sub-models
         virtual void updateSubmodels();
@@ -322,6 +328,9 @@ public:
 
             //- Return const access to the film thickness / [m]
             inline const volScalarField& delta() const;
+
+            //- Return the film coverage, 1 = covered, 0 = uncovered / []
+            inline const volScalarField& alpha() const;
 
             //- Return the film velocity [m/s]
             virtual const volVectorField& U() const;

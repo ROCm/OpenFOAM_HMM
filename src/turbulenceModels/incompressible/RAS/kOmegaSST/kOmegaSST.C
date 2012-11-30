@@ -69,6 +69,7 @@ tmp<volScalarField> kOmegaSST::F1(const volScalarField& CDkOmega) const
     return tanh(pow4(arg1));
 }
 
+
 tmp<volScalarField> kOmegaSST::F2() const
 {
     tmp<volScalarField> arg2 = min
@@ -359,6 +360,7 @@ bool kOmegaSST::read()
         beta2_.readIfPresent(coeffDict());
         betaStar_.readIfPresent(coeffDict());
         a1_.readIfPresent(coeffDict());
+        b1_.readIfPresent(coeffDict());
         c1_.readIfPresent(coeffDict());
 
         return true;
@@ -385,7 +387,7 @@ void kOmegaSST::correct()
     }
 
     const volScalarField S2(2*magSqr(symm(fvc::grad(U_))));
-    volScalarField G("RASModel.G", nut_*S2);
+    volScalarField G(type() + ".G", nut_*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();

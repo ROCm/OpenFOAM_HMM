@@ -89,6 +89,9 @@ public:
 
     // Member Functions
 
+        //- Const access to the coefficients dictionary
+        virtual const dictionary& coeffDict() const;
+
         //- Return the turbulence viscosity, i.e. 0 for laminar flow
         virtual tmp<volScalarField> nut() const;
 

@@ -53,7 +53,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(pTraits<Type>::zero),
-    offSet_()
+    offset_()
 {}
 
 
@@ -79,7 +79,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(pTraits<Type>::zero),
-    offSet_()
+    offset_(ptf.offset_().clone().ptr())
 {}
 
 
@@ -104,7 +104,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(pTraits<Type>::zero),
-    offSet_(DataEntry<Type>::New("offSet", dict))
+    offset_(DataEntry<Type>::New("offset", dict))
 {
     dict.readIfPresent("fieldTableName", fieldTableName_);
 
@@ -138,7 +138,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offSet_(ptf.offSet_().clone().ptr())
+    offset_(ptf.offset_().clone().ptr())
 {}
 
 
@@ -163,7 +163,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offSet_(ptf.offSet_().clone().ptr())
+    offset_(ptf.offset_().clone().ptr())
 {}
 
 
@@ -487,7 +487,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     // apply offset to mapped values
     const scalar t = this->db().time().timeOutputValue();
-    this->operator==(*this + offSet_->value(t));
+    this->operator==(*this + offset_->value(t));
 
     if (debug)
     {
@@ -512,7 +512,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::write(Ostream& os) const
             << token::END_STATEMENT << nl;
     }
 
-    offSet_->writeData(os);
+    offset_->writeData(os);
 
     this->writeEntry("value", os);
 }

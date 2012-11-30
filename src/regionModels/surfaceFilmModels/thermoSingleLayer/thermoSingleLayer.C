@@ -227,6 +227,33 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
 }
 
 
+void thermoSingleLayer::correctAlpha()
+{
+    if (hydrophilic_)
+    {
+        const scalar hydrophilicDry = hydrophilicDryScale_*deltaWet_;
+        const scalar hydrophilicWet = hydrophilicWetScale_*deltaWet_;
+
+        forAll(alpha_, i)
+        {
+            if ((alpha_[i] < 0.5) && (delta_[i] > hydrophilicDry))
+            {
+                alpha_[i] = 1.0;
+            }
+            else if ((alpha_[i] > 0.5) && (delta_[i] < hydrophilicWet))
+            {
+                alpha_[i] = 0.0;
+            }
+        }
+    }
+    else
+    {
+        alpha_ ==
+            pos(delta_ - dimensionedScalar("deltaWet", dimLength, deltaWet_));
+    }
+}
+
+
 void thermoSingleLayer::updateSubmodels()
 {
     if (debug)
@@ -290,7 +317,8 @@ void thermoSingleLayer::solveEnergy()
       - hsSp_
       + q(hs_)
       + radiation_->Shs()
-      - fvm::SuSp(rhoSp_, hs_)
+//      - fvm::SuSp(rhoSp_, hs_)
+      - rhoSp_*hs_
     );
 
     correctThermoFields();
@@ -426,6 +454,11 @@ thermoSingleLayer::thermoSingleLayer
         zeroGradientFvPatchScalarField::typeName
     ),
 
+    deltaWet_(readScalar(coeffs_.lookup("deltaWet"))),
+    hydrophilic_(readBool(coeffs_.lookup("hydrophilic"))),
+    hydrophilicDryScale_(0.0),
+    hydrophilicWetScale_(0.0),
+
     hsSp_
     (
         IOobject
@@ -481,8 +514,20 @@ thermoSingleLayer::thermoSingleLayer
         heatTransferModel::New(*this, coeffs().subDict("lowerSurfaceModels"))
     ),
     phaseChange_(phaseChangeModel::New(*this, coeffs())),
-    radiation_(filmRadiationModel::New(*this, coeffs()))
+    radiation_(filmRadiationModel::New(*this, coeffs())),
+    Tmin_(-VGREAT),
+    Tmax_(VGREAT)
 {
+    if (coeffs().readIfPresent("Tmin", Tmin_))
+    {
+        Info<< "    limiting minimum temperature to " << Tmin_ << endl;
+    }
+
+    if (coeffs().readIfPresent("Tmax", Tmax_))
+    {
+        Info<< "    limiting maximum temperature to " << Tmax_ << endl;
+    }
+
     if (thermo_.hasMultiComponentCarrier())
     {
         YPrimary_.setSize(thermo_.carrier().species().size());
@@ -508,6 +553,12 @@ thermoSingleLayer::thermoSingleLayer
                 )
             );
         }
+    }
+
+    if (hydrophilic_)
+    {
+        coeffs_.lookup("hydrophilicDryScale") >> hydrophilicDryScale_;
+        coeffs_.lookup("hydrophilicWetScale") >> hydrophilicWetScale_;
     }
 
     if (readFields)
@@ -584,12 +635,14 @@ void thermoSingleLayer::evolveRegion()
         Info<< "thermoSingleLayer::evolveRegion()" << endl;
     }
 
+    correctAlpha();
+
     updateSubmodels();
 
     // Solve continuity for deltaRho_
     solveContinuity();
 
-    for (int oCorr=0; oCorr<nOuterCorr_; oCorr++)
+    for (int oCorr=1; oCorr<=nOuterCorr_; oCorr++)
     {
         // Explicit pressure source contribution
         tmp<volScalarField> tpu(this->pu());
@@ -674,8 +727,10 @@ void thermoSingleLayer::info() const
 {
     kinematicSingleLayer::info();
 
-    Info<< indent << "min/max(T)         = " << min(T_).value() << ", "
-        << max(T_).value() << nl;
+    const scalarField& Tinternal = T_.internalField();
+
+    Info<< indent << "min/max(T)         = " << gMin(Tinternal) << ", "
+        << gMax(Tinternal) << nl;
 
     phaseChange_->info(Info);
 }

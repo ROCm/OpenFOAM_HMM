@@ -245,6 +245,15 @@ template<class Container, class T, int nRows, int nColumns>
 List<Container> initListList(const T[nRows][nColumns]);
 
 
+//- Helper class for list to append y onto the end of x
+template<class T>
+class ListAppendEqOp
+{
+public:
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

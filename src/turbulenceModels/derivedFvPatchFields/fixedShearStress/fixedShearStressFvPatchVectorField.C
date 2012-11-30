@@ -28,8 +28,9 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "incompressible/RAS/RASModel/RASModel.H"
-#include "compressible/RAS/RASModel/RASModel.H"
+#include "surfaceFields.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
+#include "compressible/turbulenceModel/turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

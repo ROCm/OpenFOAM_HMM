@@ -75,20 +75,23 @@ void Foam::fieldMinMax::calcMinMaxFields
                 forAll(magFieldBoundary, patchI)
                 {
                     const scalarField& mfp = magFieldBoundary[patchI];
-                    const vectorField& Cfp = CfBoundary[patchI];
-
-                    label minPI = findMin(mfp);
-                    if (mfp[minPI] < minVs[procI])
+                    if (mfp.size())
                     {
-                        minVs[procI] = mfp[minPI];
-                        minCs[procI] = Cfp[minPI];
-                    }
+                        const vectorField& Cfp = CfBoundary[patchI];
 
-                    label maxPI = findMax(mfp);
-                    if (mfp[maxPI] > maxVs[procI])
-                    {
-                        maxVs[procI] = mfp[maxPI];
-                        maxCs[procI] = Cfp[maxPI];
+                        label minPI = findMin(mfp);
+                        if (mfp[minPI] < minVs[procI])
+                        {
+                            minVs[procI] = mfp[minPI];
+                            minCs[procI] = Cfp[minPI];
+                        }
+
+                        label maxPI = findMax(mfp);
+                        if (mfp[maxPI] > maxVs[procI])
+                        {
+                            maxVs[procI] = mfp[maxPI];
+                            maxCs[procI] = Cfp[maxPI];
+                        }
                     }
                 }
 
@@ -173,20 +176,23 @@ void Foam::fieldMinMax::calcMinMaxFields
                 forAll(fieldBoundary, patchI)
                 {
                     const Field<Type>& fp = fieldBoundary[patchI];
-                    const vectorField& Cfp = CfBoundary[patchI];
-
-                    label minPI = findMin(fp);
-                    if (fp[minPI] < minVs[procI])
+                    if (fp.size())
                     {
-                        minVs[procI] = fp[minPI];
-                        minCs[procI] = Cfp[minPI];
-                    }
+                        const vectorField& Cfp = CfBoundary[patchI];
 
-                    label maxPI = findMax(fp);
-                    if (fp[maxPI] > maxVs[procI])
-                    {
-                        maxVs[procI] = fp[maxPI];
-                        maxCs[procI] = Cfp[maxPI];
+                        label minPI = findMin(fp);
+                        if (fp[minPI] < minVs[procI])
+                        {
+                            minVs[procI] = fp[minPI];
+                            minCs[procI] = Cfp[minPI];
+                        }
+
+                        label maxPI = findMax(fp);
+                        if (fp[maxPI] > maxVs[procI])
+                        {
+                            maxVs[procI] = fp[maxPI];
+                            maxCs[procI] = Cfp[maxPI];
+                        }
                     }
                 }
 
@@ -250,7 +256,14 @@ void Foam::fieldMinMax::calcMinMaxFields
             }
             default:
             {
-                FatalErrorIn("Foam::fieldMinMax::calcMinMaxFields(const word&)")
+                FatalErrorIn
+                (
+                    "Foam::fieldMinMax::calcMinMaxFields"
+                    "("
+                        "const word&, "
+                        "const modeType&"
+                    ")"
+                )
                     << "Unknown min/max mode: " << modeTypeNames_[mode_]
                     << exit(FatalError);
             }

@@ -85,8 +85,6 @@ standardRadiation::standardRadiation
         dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0),
         zeroGradientFvPatchScalarField::typeName
     ),
-    delta_(owner.delta()),
-    deltaMin_(readScalar(coeffs_.lookup("deltaMin"))),
     beta_(readScalar(coeffs_.lookup("beta"))),
     kappaBar_(readScalar(coeffs_.lookup("kappaBar")))
 {}
@@ -129,9 +127,10 @@ tmp<volScalarField> standardRadiation::Shs()
 
     scalarField& Shs = tShs();
     const scalarField& QinP = QinPrimary_.internalField();
-    const scalarField& delta = delta_.internalField();
+    const scalarField& delta = owner_.delta().internalField();
+    const scalarField& alpha = owner_.alpha().internalField();
 
-    Shs = beta_*(QinP*pos(delta - deltaMin_))*(1.0 - exp(-kappaBar_*delta));
+    Shs = beta_*QinP*alpha*(1.0 - exp(-kappaBar_*delta));
 
     // Update net Qr on local region
     QrNet_.internalField() = QinP - Shs;

@@ -364,9 +364,9 @@ void v2f::correct()
     const volTensorField gradU(fvc::grad(U_));
     const volScalarField S2(2*magSqr(dev(symm(gradU))));
 
-    const volScalarField G("RASModel.G", nut_*S2);
+    const volScalarField G(type() + ".G", nut_*S2);
     const volScalarField T(Ts());
-    const volScalarField L2("v2f.L2", sqr(Ls()));
+    const volScalarField L2(type() + ".L2", sqr(Ls()));
     const volScalarField alpha
     (
         "v2f::alpha",

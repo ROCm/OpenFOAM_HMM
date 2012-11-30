@@ -177,6 +177,9 @@ bool Foam::fieldValues::cellSource::writeValues(const word& fieldName)
         {
             Type result = processValues(values, V, weightField);
 
+            // add to result dictionary, over-writing any previous entry
+            resultDict_.add(fieldName, result, true);
+
             if (valueOutput_)
             {
                 IOField<Type>

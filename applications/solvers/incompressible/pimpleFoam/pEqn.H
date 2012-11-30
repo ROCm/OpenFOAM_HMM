@@ -15,6 +15,8 @@ surfaceScalarField phiHbyA
 
 adjustPhi(phiHbyA, U, p);
 
+mrfZones.relativeFlux(phiHbyA);
+
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())
 {

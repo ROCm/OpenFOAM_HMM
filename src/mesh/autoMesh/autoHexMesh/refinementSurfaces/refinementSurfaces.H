@@ -168,7 +168,8 @@ public:
                 return names_;
             }
 
-            //- Per 'interface' surface : name of faceZone to put faces into
+            //- Per 'interface' surface : empty or name of faceZone to put
+            //  faces into
             const wordList& faceZoneNames() const
             {
                 return faceZoneNames_;

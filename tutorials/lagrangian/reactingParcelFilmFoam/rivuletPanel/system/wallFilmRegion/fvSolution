@@ -37,8 +37,7 @@ solvers
 PISO
 {
     momentumPredictor  true;
-    nOuterCorr      1;
-    nCorr           2;
+    nCorr           1;
     nNonOrthCorr    0;
 }
 

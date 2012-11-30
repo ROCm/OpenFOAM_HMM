@@ -38,12 +38,16 @@ $(THERMOMODELS)/heatTransferModel/mappedConvectiveHeatTransfer/mappedConvectiveH
 $(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModel.C
 $(THERMOMODELS)/filmRadiationModel/filmRadiationModel/filmRadiationModelNew.C
 $(THERMOMODELS)/filmRadiationModel/noRadiation/noRadiation.C
+$(THERMOMODELS)/filmRadiationModel/constantRadiation/constantRadiation.C
+$(THERMOMODELS)/filmRadiationModel/primaryRadiation/primaryRadiation.C
 $(THERMOMODELS)/filmRadiationModel/standardRadiation/standardRadiation.C
 
 
 /* Boundary conditions */
 PATCHFIELDS=derivedFvPatchFields
 $(PATCHFIELDS)/filmHeightInletVelocity/filmHeightInletVelocityFvPatchVectorField.C
+$(PATCHFIELDS)/inclinedFilmNusseltHeight/inclinedFilmNusseltHeightFvPatchScalarField.C
+$(PATCHFIELDS)/inclinedFilmNusseltInletVelocity/inclinedFilmNusseltInletVelocityFvPatchVectorField.C
 
 /* Wall functions for primary region */
 WALLFUNCS=$(PATCHFIELDS)/wallFunctions

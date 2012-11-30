@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "RASModel.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -184,8 +184,9 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
 
     // retrieve (constant) specific heat capacity from transport dictionary
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar Cp0(readScalar(rasModel.transport().lookup("Cp0")));
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalar Cp0(readScalar(turbulence.transport().lookup("Cp0")));
 
     switch (heatSource_)
     {

@@ -88,7 +88,7 @@ public:
     // Member Functions
 
         //- Return active status
-        bool active() const;
+        bool active(const bool warn = false) const;
 
         //- Reset the source list
         void reset(const dictionary& dict);

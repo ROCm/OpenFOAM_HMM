@@ -7,6 +7,10 @@ tmp<fvVectorMatrix> UEqn
   + turbulence->divDevReff(U)
 );
 
+mrfZones.addCoriolis(UEqn());
+
+pZones.addResistance(UEqn());
+
 UEqn().relax();
 
 sources.constrain(UEqn());

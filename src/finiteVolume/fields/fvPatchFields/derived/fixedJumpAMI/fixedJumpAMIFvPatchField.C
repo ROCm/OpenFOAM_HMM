@@ -62,8 +62,25 @@ Foam::fixedJumpAMIFvPatchField<Type>::fixedJumpAMIFvPatchField
 )
 :
     jumpCyclicAMIFvPatchField<Type>(p, iF),
-    jump_("jump", dict, p.size())
-{}
+    jump_(p.size(), pTraits<Type>::zero)
+{
+    if (this->cyclicAMIPatch().owner())
+    {
+        jump_ = Field<Type>("jump", dict, p.size());
+    }
+
+    if (dict.found("value"))
+    {
+        fvPatchField<Type>::operator=
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate(Pstream::blocking);
+    }
+}
 
 
 template<class Type>
@@ -143,7 +160,12 @@ void Foam::fixedJumpAMIFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeKeyword("patchType") << this->interfaceFieldType()
         << token::END_STATEMENT << nl;
-    jump_.writeEntry("jump", os);
+
+    if (this->cyclicAMIPatch().owner())
+    {
+        jump_.writeEntry("jump", os);
+    }
+
     this->writeEntry("value", os);
 }
 

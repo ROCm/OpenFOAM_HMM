@@ -26,6 +26,9 @@ thermoSingleLayerCoeffs
     thermoModel singleComponent;
     liquid      H2O;
 
+    deltaWet    1e-4;
+    hydrophilic no;
+
     forces
     (
         surfaceShear

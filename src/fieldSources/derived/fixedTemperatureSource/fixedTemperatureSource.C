@@ -41,7 +41,17 @@ namespace Foam
         fixedTemperatureSource,
         dictionary
     );
+
+    template<>
+    const char* NamedEnum<fixedTemperatureSource::temperatureMode, 2>::names[] =
+    {
+        "uniform",
+        "lookup"
+    };
 }
+
+const Foam::NamedEnum<Foam::fixedTemperatureSource::temperatureMode, 2>
+    Foam::fixedTemperatureSource::temperatureModeNames_;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -55,8 +65,32 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    T_(readScalar(coeffs_.lookup("temperature")))
+    mode_(temperatureModeNames_.read(coeffs_.lookup("mode"))),
+    Tuniform_(NULL),
+    TName_("T")
 {
+    switch (mode_)
+    {
+        case tmUniform:
+        {
+            Tuniform_.reset
+            (
+                DataEntry<scalar>::New("temperature", coeffs_).ptr()
+            );
+            break;
+        }
+        case tmLookup:
+        {
+            TName_ = coeffs_.lookupOrDefault<word>("TName", "T");
+            break;
+        }
+        default:
+        {
+            // error handling done by NamedEnum
+        }
+    }
+
+
     fieldNames_.setSize(1, "energy");
     applied_.setSize(1, false);
 }
@@ -81,8 +115,32 @@ void Foam::fixedTemperatureSource::setValue
 
     if (eqn.psi().name() == thermo.he().name())
     {
-        const scalarField Tfield(cells_.size(), T_);
-        eqn.setValues(cells_, thermo.he(thermo.p(), Tfield, cells_));
+        switch (mode_)
+        {
+            case tmUniform:
+            {
+                const scalar t = mesh_.time().value();
+                scalarField Tuni(cells_.size(), Tuniform_->value(t));
+                eqn.setValues(cells_, thermo.he(thermo.p(), Tuni, cells_));
+
+                break;
+            }
+            case tmLookup:
+            {
+                const volScalarField& T =
+                    mesh().lookupObject<volScalarField>(TName_);
+
+                scalarField Tlkp(T, cells_);
+                eqn.setValues(cells_, thermo.he(thermo.p(), Tlkp, cells_));
+
+                break;
+            }
+            default:
+            {
+                // error handling done by NamedEnum
+            }
+        }
+
     }
 }
 
@@ -98,7 +156,15 @@ bool Foam::fixedTemperatureSource::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        coeffs_.readIfPresent("T", T_);
+        if (coeffs_.found(Tuniform_->name()))
+        {
+            Tuniform_.reset
+            (
+                DataEntry<scalar>::New(Tuniform_->name(), dict).ptr()
+            );
+        }
+
+        coeffs_.readIfPresent("TName", TName_);
 
         return true;
     }

@@ -129,7 +129,8 @@ public:
                 const parcelType& p,
                 const polyPatch& pp,
                 const scalar trackFraction,
-                const tetIndices& tetIs
+                const tetIndices& tetIs,
+                bool& keepParticle
             );
 };
 

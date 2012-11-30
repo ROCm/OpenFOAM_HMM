@@ -291,6 +291,9 @@ bool Foam::fieldValues::faceSource::writeValues(const word& fieldName)
         {
             Type result = processValues(values, Sf, weightField);
 
+            // add to result dictionary, over-writing any previous entry
+            resultDict_.add(fieldName, result, true);
+
             file()<< tab << result;
 
             if (log_)

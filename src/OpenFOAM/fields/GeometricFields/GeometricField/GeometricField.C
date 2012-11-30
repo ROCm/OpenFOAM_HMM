@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,70 +47,49 @@ if ((gf1).mesh() != (gf2).mesh())                                   \
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::tmp
-<
-    typename Foam::GeometricField<Type, PatchField, GeoMesh>::
-    GeometricBoundaryField
->
-Foam::GeometricField<Type, PatchField, GeoMesh>::readField
+void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields
 (
-    const dictionary& fieldDict
+    const dictionary& dict
 )
 {
-    DimensionedField<Type, GeoMesh>::readField(fieldDict, "internalField");
+    DimensionedField<Type, GeoMesh>::readField(dict, "internalField");
 
-    tmp<GeometricBoundaryField> tboundaryField
-    (
-        new GeometricBoundaryField
-        (
-            this->mesh().boundary(),
-            *this,
-            fieldDict.subDict("boundaryField")
-        )
-    );
+    boundaryField_.readField(*this, dict.subDict("boundaryField"));
 
-    if (fieldDict.found("referenceLevel"))
+    if (dict.found("referenceLevel"))
     {
-        Type fieldAverage(pTraits<Type>(fieldDict.lookup("referenceLevel")));
+        Type fieldAverage(pTraits<Type>(dict.lookup("referenceLevel")));
 
         Field<Type>::operator+=(fieldAverage);
 
-        GeometricBoundaryField& boundaryField = tboundaryField();
-
-        forAll(boundaryField, patchi)
+        forAll(boundaryField_, patchi)
         {
-            boundaryField[patchi] == boundaryField[patchi] + fieldAverage;
+            boundaryField_[patchi] == boundaryField_[patchi] + fieldAverage;
         }
     }
-
-    return tboundaryField;
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::tmp
-<
-    typename Foam::GeometricField<Type, PatchField, GeoMesh>::
-    GeometricBoundaryField
->
-Foam::GeometricField<Type, PatchField, GeoMesh>::readField(Istream& is)
+void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
 {
-    return readField
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                this->name(),
-                this->time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            is
-        )
+            this->name(),
+            this->time().timeName(),
+            this->db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->readStream(typeName)
     );
+
+    this->close();
+
+    readFields(dict);
 }
 
 
@@ -132,8 +111,7 @@ bool Foam::GeometricField<Type, PatchField, GeoMesh>::readIfPresent()
     }
     else if (this->readOpt() == IOobject::READ_IF_PRESENT && this->headerOk())
     {
-        boundaryField_.transfer(readField(this->readStream(typeName))());
-        this->close();
+        readFields();
 
         // Check compatibility between field and mesh
         if (this->size() != GeoMesh::size(this->mesh()))
@@ -360,9 +338,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
-    boundaryField_(*this, readField(this->readStream(typeName)))
+    boundaryField_(mesh.boundary())
 {
-    this->close();
+    readFields();
 
     // Check compatibility between field and mesh
 
@@ -401,8 +379,10 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(NULL),
     fieldPrevIterPtr_(NULL),
-    boundaryField_(*this, readField(dict))
+    boundaryField_(mesh.boundary())
 {
+    readFields(dict);
+
     // Check compatibility between field and mesh
 
     if (this->size() != GeoMesh::size(this->mesh()))

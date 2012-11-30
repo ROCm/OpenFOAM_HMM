@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "wallFvPatch.H"
@@ -35,8 +34,6 @@ License
 namespace Foam
 {
 namespace incompressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -194,7 +191,6 @@ void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

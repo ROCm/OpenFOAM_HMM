@@ -39,6 +39,13 @@ writeInterval   100;
 
 purgeWrite      0;
 
+
+//- Have regular restart files
+secondaryWriteControl    cpuTime;
+secondaryWriteInterval   120;
+secondaryPurgeWrite      1;
+
+
 writeFormat     ascii;
 
 writePrecision  6;

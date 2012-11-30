@@ -8,7 +8,7 @@ cp -r 0.org 0 > /dev/null 2>&1
 runApplication blockMesh
 #runApplication setSet -batch createObstacle.setSet
 runApplication topoSet
-runApplication subsetMesh -overwrite c0 -patch walls
+runApplication subsetMesh -overwrite -cellSet c0 -patch walls
 runApplication setFields
 runApplication `getApplication`
 

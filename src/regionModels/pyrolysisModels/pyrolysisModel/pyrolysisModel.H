@@ -80,18 +80,6 @@ private:
 
 protected:
 
-    // Protected Data
-
-        //- Flag to indicate whether pyrolysis region coupled to a film region
-        bool filmCoupled_;
-
-        //- Pointer to film thickness field
-        autoPtr<volScalarField> filmDeltaPtr_;
-
-        //- Film height below which reactions can occur [m]
-        scalar reactionDeltaMin_;
-
-
     // Protected Member Functions
 
         //- Read control parameters
@@ -115,8 +103,8 @@ public:
             pyrolysisModel,
             mesh,
             (
-            const word& modelType,
-            const fvMesh& mesh
+                const word& modelType,
+                const fvMesh& mesh
             ),
             (modelType, mesh)
         );
@@ -127,9 +115,9 @@ public:
             pyrolysisModel,
             dictionary,
             (
-            const word& modelType,
-            const fvMesh& mesh,
-            const dictionary& dict
+                const word& modelType,
+                const fvMesh& mesh,
+                const dictionary& dict
             ),
             (modelType, mesh, dict)
         );
@@ -232,12 +220,6 @@ public:
                     const label patchI,
                     const label faceI
                 );
-
-
-        // Evolution
-
-            //- Pre-evolve region
-            virtual void preEvolveRegion();
 
 
         // Helper function

@@ -3,6 +3,15 @@ codedFunctionObject/codedFunctionObject.C
 CourantNo/CourantNo.C
 CourantNo/CourantNoFunctionObject.C
 
+Lambda2/Lambda2.C
+Lambda2/Lambda2FunctionObject.C
+
+Peclet/Peclet.C
+Peclet/PecletFunctionObject.C
+
+Q/Q.C
+Q/QFunctionObject.C
+
 DESModelRegions/DESModelRegions.C
 DESModelRegions/DESModelRegionsFunctionObject.C
 

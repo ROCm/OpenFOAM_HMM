@@ -33,9 +33,18 @@ Description
         fixedTemperatureSourceCoeffs
         {
             fieldNames      (h e hs);   // names of fields to apply source
-            temperature     500;        // fixed temperature [K]
+            mode            uniform;    // constant or lookup
+
+            // uniform option
+            temperature     constant 500; // fixed temperature [K]
+
+            // loolup option
+            // TName        T;          // optional temperature field name
         }
 
+Note:
+    The 'uniform' option allows the use of a time-varying uniform temperature
+    by means of the DataEntry type.
 
 SourceFiles
     basicSource.C
@@ -46,6 +55,8 @@ SourceFiles
 #define fixedTemperatureSource_H
 
 #include "basicSource.H"
+#include "NamedEnum.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,12 +72,32 @@ class fixedTemperatureSource
     public basicSource
 {
 
+public:
+
+    //- Temperature mode
+    enum temperatureMode
+    {
+        tmUniform,
+        tmLookup
+    };
+
+
+    //- String representation of temperatureMode enums
+    static const NamedEnum<temperatureMode, 2> temperatureModeNames_;
+
+
 protected:
 
     // Protected data
 
-        //- Fixed temperature [K]
-        scalar T_;
+        //- Operation mode
+        temperatureMode mode_;
+
+        //- Uniform temperature [K]
+        autoPtr<DataEntry<scalar> > Tuniform_;
+
+        //- Temperature field name
+        word TName_;
 
 
 private:
