@@ -181,7 +181,8 @@ Foam::fieldValues::cellSource::cellSource
     source_(sourceTypeNames_.read(dict.lookup("source"))),
     operation_(operationTypeNames_.read(dict.lookup("operation"))),
     nCells_(0),
-    cellId_()
+    cellId_(),
+    weightFieldName_("none")
 {
     read(dict);
 }
