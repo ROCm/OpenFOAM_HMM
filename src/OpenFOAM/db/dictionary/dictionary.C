@@ -424,38 +424,87 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
     bool patternMatch
 ) const
 {
-    string::size_type dotPos = keyword.find('.');
-
-    if (dotPos == string::npos)
+    if (keyword[0] == ':')
     {
-        return lookupEntryPtr(keyword, recursive, patternMatch);
+        // Go up to top level
+        const dictionary* dictPtr = this;
+        while (&dictPtr->parent_ != &dictionary::null)
+        {
+            dictPtr = &dictPtr->parent_;
+        }
+
+        // At top. Recurse to find entries
+        return dictPtr->lookupScopedEntryPtr
+        (
+            keyword.substr(1, keyword.size()-1),
+            false,
+            patternMatch
+        );
     }
     else
     {
-        if (dotPos == 0)
-        {
-            const dictionary* dictPtr = this;
-            while (&dictPtr->parent_ != &dictionary::null)
-            {
-                dictPtr = &dictPtr->parent_;
-            }
+        string::size_type dotPos = keyword.find('.');
 
-            // At top
-            return dictPtr->lookupScopedEntryPtr
-            (
-                keyword.substr(1, keyword.size()-1),
-                false,
-                patternMatch
-            );
+        if (dotPos == string::npos)
+        {
+            // Non-scoped lookup
+            return lookupEntryPtr(keyword, recursive, patternMatch);
         }
         else
         {
-            wordList entryNames(fileName(keyword).components('.'));
-
-            const entry* entPtr = lookupEntryPtr(entryNames[0], false, true);
-
-            for (int i=1; i<entryNames.size(); ++i)
+            if (dotPos == 0)
             {
+                // Starting with a '.'. Go up for every 2nd '.' found
+
+                const dictionary* dictPtr = this;
+
+                string::size_type begVar = dotPos + 1;
+                string::const_iterator iter = keyword.begin() + begVar;
+                string::size_type endVar = begVar;
+                while
+                (
+                    iter != keyword.end()
+                 && *iter == '.'
+                )
+                {
+                    ++iter;
+                    ++endVar;
+
+                    // Go to parent
+                    if (&dictPtr->parent_ == &dictionary::null)
+                    {
+                        FatalIOErrorIn
+                        (
+                            "dictionary::lookupScopedEntryPtr"
+                            "(const word&, bool, bool)",
+                            *this
+                        )   << "No parent of current dictionary"
+                            << " when searching for "
+                            << keyword.substr(begVar, keyword.size()-begVar)
+                            << exit(FatalIOError);
+                    }
+                    dictPtr = &dictPtr->parent_;
+                }
+
+                return dictPtr->lookupScopedEntryPtr
+                (
+                    keyword.substr(endVar),
+                    false,
+                    patternMatch
+                );
+            }
+            else
+            {
+                // Extract the first word
+                word firstWord = keyword.substr(0, dotPos);
+
+                const entry* entPtr = lookupScopedEntryPtr
+                (
+                    firstWord,
+                    false,          //recursive
+                    patternMatch
+                );
+
                 if (!entPtr)
                 {
                     FatalIOErrorIn
@@ -463,46 +512,27 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
                         "dictionary::lookupScopedEntryPtr"
                         "(const word&, bool, bool)",
                         *this
-                    )   << "keyword " << keyword
+                    )   << "keyword " << firstWord
                         << " is undefined in dictionary "
                         << name() << endl
                         << "Valid keywords are " << keys()
                         << exit(FatalIOError);
                 }
-                if (!entPtr->isDict())
+
+                if (entPtr->isDict())
                 {
-                    FatalIOErrorIn
+                    return entPtr->dict().lookupScopedEntryPtr
                     (
-                        "dictionary::lookupScopedEntryPtr"
-                        "(const word&, bool, bool)",
-                        *this
-                    )   << "Entry " << entPtr->name()
-                        << " is not a dictionary so cannot lookup sub entry "
-                        << entryNames[i]
-                        << exit(FatalIOError);
+                        keyword.substr(dotPos, keyword.size()-dotPos),
+                        false,
+                        patternMatch
+                    );
                 }
-
-                entPtr = entPtr->dict().lookupEntryPtr
-                (
-                    entryNames[i],
-                    false,
-                    true
-                );
+                else
+                {
+                    return NULL;
+                }
             }
-
-            if (!entPtr)
-            {
-                FatalIOErrorIn
-                (
-                    "dictionary::lookupScopedEntryPtr"
-                    "(const word&, bool, bool)",
-                    *this
-                )   << "keyword " << keyword
-                    << " is not a valid scoped entry in dictionary "
-                    << name()
-                    << exit(FatalIOError);
-            }
-            return entPtr;
         }
     }
 }
