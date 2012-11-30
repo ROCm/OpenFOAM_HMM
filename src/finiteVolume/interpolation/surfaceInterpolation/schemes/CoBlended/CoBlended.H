@@ -168,7 +168,7 @@ public:
                 max
                 (
                     scalar(1)
-                  - mesh.time().deltaT()*mesh.deltaCoeffs()*faceFlux_
+                  - mesh.time().deltaT()*mesh.deltaCoeffs()*mag(faceFlux_)
                    /(mesh.magSf()*alpha_),
                     scalar(0)
                 )
