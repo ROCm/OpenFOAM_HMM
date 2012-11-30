@@ -209,7 +209,7 @@ public:
             }
 
             //- Const access to the coefficients dictionary
-            const dictionary& coeffDict() const
+            virtual const dictionary& coeffDict() const
             {
                 return coeffDict_;
             }

@@ -99,7 +99,6 @@ Foam::wallShearStress::wallShearStress
     obr_(obr),
     active_(true),
     log_(false),
-    phiName_("phi"),
     patchSet_()
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -136,7 +135,6 @@ void Foam::wallShearStress::read(const dictionary& dict)
     if (active_)
     {
         log_ = dict.lookupOrDefault<Switch>("log", false);
-        phiName_ = dict.lookupOrDefault<word>("phiName", "phi");
 
         const fvMesh& mesh = refCast<const fvMesh>(obr_);
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
@@ -231,37 +229,26 @@ void Foam::wallShearStress::write()
         }
 
 
-        const surfaceScalarField& phi =
-            obr_.lookupObject<surfaceScalarField>(phiName_);
-
         tmp<volSymmTensorField> Reff;
-        if (phi.dimensions() == dimMass/dimTime)
+        if (mesh.foundObject<cmpModel>("turbulenceModel"))
         {
-            if (!mesh.foundObject<cmpModel>("turbulenceModel"))
-            {
-                FatalErrorIn("void Foam::wallShearStress::write()")
-                    << "Unable to find compressible turbulence model in the "
-                    << "database" << exit(FatalError);
-            }
-
             const cmpModel& model =
                 mesh.lookupObject<cmpModel>("turbulenceModel");
 
             Reff = model.devRhoReff();
         }
-        else
+        else if (mesh.foundObject<icoModel>("turbulenceModel"))
         {
-            if (!mesh.foundObject<icoModel>("turbulenceModel"))
-            {
-                FatalErrorIn("void Foam::wallShearStress::write()")
-                    << "Unable to find incompressible turbulence model in the "
-                    << "database" << exit(FatalError);
-            }
-
             const icoModel& model =
                 mesh.lookupObject<icoModel>("turbulenceModel");
 
             Reff = model.devReff();
+        }
+        else
+        {
+            FatalErrorIn("void Foam::wallShearStress::write()")
+                << "Unable to find incompressible turbulence model in the "
+                << "database" << exit(FatalError);
         }
 
     

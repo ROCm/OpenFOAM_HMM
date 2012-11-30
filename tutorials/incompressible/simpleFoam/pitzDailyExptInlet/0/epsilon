@@ -25,6 +25,7 @@ boundaryField
     {
         type            timeVaryingMappedFixedValue;
         setAverage      0;
+        offset          0;
         value           nonuniform List<scalar>
 30
 (

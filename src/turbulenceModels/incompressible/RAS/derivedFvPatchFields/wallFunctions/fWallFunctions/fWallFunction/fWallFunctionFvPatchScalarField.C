@@ -168,8 +168,9 @@ void fWallFunctionFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const v2f& v2fModel = refCast<const v2f>(rasModel);
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const v2f& v2fModel = refCast<const v2f>(turbulence);
 
     const scalarField& y = v2fModel.y()[patchI];
 

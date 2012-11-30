@@ -22,8 +22,7 @@ License
     OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::incompressible::RASModels::
-    kappatJayatillekeWallFunctionFvPatchScalarField
+    Foam::incompressible::kappatJayatillekeWallFunctionFvPatchScalarField
 
 Group
     grpIcoWallFunctions
@@ -71,8 +70,6 @@ SourceFiles
 namespace Foam
 {
 namespace incompressible
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -208,7 +205,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

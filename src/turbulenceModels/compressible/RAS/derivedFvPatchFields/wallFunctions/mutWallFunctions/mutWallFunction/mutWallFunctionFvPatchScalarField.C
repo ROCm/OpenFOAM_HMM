@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "mutWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "wallFvPatch.H"
@@ -35,8 +34,6 @@ License
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -184,7 +181,6 @@ void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

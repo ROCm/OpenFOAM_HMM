@@ -167,16 +167,17 @@ void v2WallFunctionFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patchI];
+    const turbulenceModel& turbulence =
+        db().lookupObject<turbulenceModel>("turbulenceModel");
+    const scalarField& y = turbulence.y()[patchI];
 
-    const tmp<volScalarField> tk = rasModel.k();
+    const tmp<volScalarField> tk = turbulence.k();
     const volScalarField& k = tk();
 
-    const tmp<volScalarField> tmu = rasModel.mu();
+    const tmp<volScalarField> tmu = turbulence.mu();
     const scalarField& muw = tmu().boundaryField()[patchI];
 
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const scalarField& rhow = turbulence.rho().boundaryField()[patchI];
 
     const scalar Cmu25 = pow025(Cmu_);
 

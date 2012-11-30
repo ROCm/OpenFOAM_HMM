@@ -311,7 +311,7 @@ void qZeta::correct()
 
     tmp<volScalarField> S2 = 2*magSqr(symm(fvc::grad(U_)));
 
-    volScalarField G("RASModel.G", nut_/(2.0*q_)*S2);
+    volScalarField G(type() + ".G", nut_/(2.0*q_)*S2);
     const volScalarField E(nu()*nut_/q_*fvc::magSqrGradGrad(U_));
 
 

@@ -58,7 +58,9 @@ Foam::tmp<Foam::volScalarField> Foam::CourantNo::rho
                 (
                     "rho",
                     mesh.time().timeName(),
-                    mesh
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 mesh,
                 dimensionedScalar("rho", dimless, 1.0)
@@ -116,7 +118,8 @@ Foam::CourantNo::CourantNo
                     type(),
                     mesh.time().timeName(),
                     mesh,
-                    IOobject::NO_READ
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 mesh,
                 dimensionedScalar("0", dimless, 0.0),

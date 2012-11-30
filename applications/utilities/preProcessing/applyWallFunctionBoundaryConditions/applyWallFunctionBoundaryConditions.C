@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -232,43 +232,42 @@ void updateCompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "mut",
-        compressible::RASModels::mutkWallFunctionFvPatchScalarField::typeName,
+        compressible::mutkWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "epsilon",
-        compressible::RASModels::epsilonWallFunctionFvPatchScalarField::
-            typeName,
+        compressible::epsilonWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "omega",
-        compressible::RASModels::omegaWallFunctionFvPatchScalarField::typeName,
+        compressible::omegaWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "k",
-        compressible::RASModels::kqRWallFunctionFvPatchField<scalar>::typeName,
+        compressible::kqRWallFunctionFvPatchField<scalar>::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "q",
-        compressible::RASModels::kqRWallFunctionFvPatchField<scalar>::typeName,
+        compressible::kqRWallFunctionFvPatchField<scalar>::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "R",
-        compressible::RASModels::kqRWallFunctionFvPatchField<symmTensor>::
+        compressible::kqRWallFunctionFvPatchField<symmTensor>::
             typeName,
         "(0 0 0 0 0 0)"
     );
@@ -284,14 +283,14 @@ void updateIncompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "nut",
-        incompressible::RASModels::nutkWallFunctionFvPatchScalarField::typeName,
+        incompressible::nutkWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "epsilon",
-        incompressible::RASModels::epsilonWallFunctionFvPatchScalarField::
+        incompressible::epsilonWallFunctionFvPatchScalarField::
             typeName,
         "0"
     );
@@ -299,7 +298,7 @@ void updateIncompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "omega",
-        incompressible::RASModels::omegaWallFunctionFvPatchScalarField::
+        incompressible::omegaWallFunctionFvPatchScalarField::
             typeName,
         "0"
     );
@@ -307,24 +306,21 @@ void updateIncompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "k",
-        incompressible::RASModels::kqRWallFunctionFvPatchField<scalar>::
-            typeName,
+        incompressible::kqRWallFunctionFvPatchField<scalar>::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "q",
-        incompressible::RASModels::kqRWallFunctionFvPatchField<scalar>::
-            typeName,
+        incompressible::kqRWallFunctionFvPatchField<scalar>::typeName,
         "0"
     );
     replaceBoundaryType
     (
         mesh,
         "R",
-        incompressible::RASModels::kqRWallFunctionFvPatchField<symmTensor>::
-            typeName,
+        incompressible::kqRWallFunctionFvPatchField<symmTensor>::typeName,
         "(0 0 0 0 0 0)"
     );
 }
