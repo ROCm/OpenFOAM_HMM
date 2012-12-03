@@ -278,7 +278,7 @@ void Foam::perfectInterface::setRefinement
     {
         affectedFaces.erase(pp1.addressing()[i]);
     }
-    // Remove patch0 from renumbered faces. Should not be nessecary since
+    // Remove patch0 from renumbered faces. Should not be necessary since
     // patch0 and 1 should not share any point (if created by mergeMeshing)
     // so affectedFaces should not contain any patch0 faces but you can
     // never be sure what the user is doing.
@@ -373,7 +373,7 @@ void Foam::perfectInterface::setRefinement
     }
 
 
-    // 5. Modify patch0 faces for new points (not really nessecary; see
+    // 5. Modify patch0 faces for new points (not really necessary; see
     // comment above about patch1 and patch0 never sharing points) and
     // becoming internal.
     const boolList& mfFlip =

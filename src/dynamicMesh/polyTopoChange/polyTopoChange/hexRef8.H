@@ -114,7 +114,7 @@ class hexRef8
             label& zoneFlip
         ) const;
 
-        //- Adds a face on top of existing faceI. Reverses if nessecary.
+        //- Adds a face on top of existing faceI. Reverses if necessary.
         label addFace
         (
             polyTopoChange& meshMod,
@@ -136,7 +136,7 @@ class hexRef8
         ) const;
 
         //- Modifies existing faceI for either new owner/neighbour or new face
-        //  points. Reverses if nessecary.
+        //  points. Reverses if necessary.
         void modFace
         (
             polyTopoChange& meshMod,

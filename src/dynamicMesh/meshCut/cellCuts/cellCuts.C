@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -2720,7 +2720,7 @@ Foam::cellCuts::cellCuts
 
     calcLoopsAndAddressing(cutCells);
 
-    // Calculate planes and flip cellLoops if nessecary
+    // Calculate planes and flip cellLoops if necessary
     orientPlanesAndLoops();
 
     if (debug)
@@ -2765,7 +2765,7 @@ Foam::cellCuts::cellCuts
 
     calcLoopsAndAddressing(identity(mesh.nCells()));
 
-    // Calculate planes and flip cellLoops if nessecary
+    // Calculate planes and flip cellLoops if necessary
     orientPlanesAndLoops();
 
     if (debug)
@@ -2811,7 +2811,7 @@ Foam::cellCuts::cellCuts
     // Makes sure cuts are consistent
     setFromCellLoops(cellLabels, cellLoops, cellEdgeWeights);
 
-    // Calculate planes and flip cellLoops if nessecary
+    // Calculate planes and flip cellLoops if necessary
     orientPlanesAndLoops();
 
     if (debug)
@@ -2855,7 +2855,7 @@ Foam::cellCuts::cellCuts
     // Makes sure cuts are consistent
     setFromCellCutter(cellCutter, refCells);
 
-    // Calculate planes and flip cellLoops if nessecary
+    // Calculate planes and flip cellLoops if necessary
     orientPlanesAndLoops();
 
     if (debug)
@@ -2901,7 +2901,7 @@ Foam::cellCuts::cellCuts
     // Makes sure cuts are consistent
     setFromCellCutter(cellCutter, cellLabels, cutPlanes);
 
-    // Calculate planes and flip cellLoops if nessecary
+    // Calculate planes and flip cellLoops if necessary
     orientPlanesAndLoops();
 
     if (debug)

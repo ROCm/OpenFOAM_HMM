@@ -1022,7 +1022,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
     }
 
     // Check if this call of storeMidPointInfo is the one that completed all
-    // the nessecary information.
+    // the necessary information.
 
     if (changed && haveTwoAnchors && haveTwoFaceMids)
     {

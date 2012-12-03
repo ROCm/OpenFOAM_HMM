@@ -673,7 +673,7 @@ void Foam::syncTools::syncEdgeMap
 
 
     // Now sharedEdgeValues will contain per potential sharedEdge the value.
-    // (potential since an edge having two shared points is not nessecary a
+    // (potential since an edge having two shared points is not necessary a
     //  shared edge).
     // Reduce this on the master.
 

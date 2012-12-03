@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -424,7 +424,7 @@ void Foam::polyDualMesh::collectPatchInternalFace
         {
             featEdgeIndices2[i] = dualFace2.size() -1 - featEdgeIndices2[i];
         }
-        // Reverse indices (might not be nessecary but do anyway)
+        // Reverse indices (might not be necessary but do anyway)
         reverse(featEdgeIndices2);
     }
 }

@@ -1108,7 +1108,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     mesh_.setInstance(timeName());
 
     // Update intersections. Recalculate intersections on merged faces since
-    // this seems to give problems? Note: should not be nessecary since
+    // this seems to give problems? Note: should not be necessary since
     // baffles preserve intersections from when they were created.
     labelList newExposedFaces(2*couples.size());
     label newI = 0;
