@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,11 +96,11 @@ Foam::basicSymmetryFvPatchField<Type>::snGrad() const
 {
     tmp<vectorField> nHat = this->patch().nf();
 
+    const Field<Type> iF(this->patchInternalField());
+
     return
-    (
-        transform(I - 2.0*sqr(nHat), this->patchInternalField())
-      - this->patchInternalField()
-    )*(this->patch().deltaCoeffs()/2.0);
+        (transform(I - 2.0*sqr(nHat), iF) - iF)
+       *(this->patch().deltaCoeffs()/2.0);
 }
 
 
@@ -114,12 +114,11 @@ void Foam::basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     tmp<vectorField> nHat = this->patch().nf();
 
+    const Field<Type> iF(this->patchInternalField());
+
     Field<Type>::operator=
     (
-        (
-            this->patchInternalField()
-          + transform(I - 2.0*sqr(nHat), this->patchInternalField())
-        )/2.0
+        (iF + transform(I - 2.0*sqr(nHat), iF))/2.0
     );
 
     transformFvPatchField<Type>::evaluate();
