@@ -36,9 +36,6 @@ namespace Foam
 namespace compressible
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::
