@@ -43,7 +43,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const word& phaseName)
     (
         IOobject
         (
-            phasePropertyName("rhoThermo"),
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -57,7 +57,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const word& phaseName)
     (
         IOobject
         (
-            phasePropertyName("psi"),
+            phasePropertyName("thermo:psi"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -71,7 +71,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const word& phaseName)
     (
         IOobject
         (
-            phasePropertyName("mu"),
+            phasePropertyName("thermo:mu"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -95,7 +95,7 @@ Foam::rhoThermo::rhoThermo
     (
         IOobject
         (
-            phasePropertyName("rhoThermo"),
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -109,7 +109,7 @@ Foam::rhoThermo::rhoThermo
     (
         IOobject
         (
-            phasePropertyName("psi"),
+            phasePropertyName("thermo:psi"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -123,7 +123,7 @@ Foam::rhoThermo::rhoThermo
     (
         IOobject
         (
-            phasePropertyName("mu"),
+            phasePropertyName("thermo:mu"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,

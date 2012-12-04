@@ -185,7 +185,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&
         ) const;
 
@@ -193,7 +193,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&
         ) const;
@@ -202,7 +202,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&,
             const word&
@@ -212,7 +212,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&,
             const word&,
@@ -262,6 +262,14 @@ public:
 
             //- Enthalpy/Internal energy [J/kg]
             virtual const volScalarField& he() const = 0;
+
+            //- Enthalpy/Internal energy
+            //  for given pressure and temperature [J/kg]
+            virtual tmp<volScalarField> he
+            (
+                const volScalarField& p,
+                const volScalarField& T
+            ) const = 0;
 
             //- Enthalpy/Internal energy for cell-set [J/kg]
             virtual tmp<scalarField> he
