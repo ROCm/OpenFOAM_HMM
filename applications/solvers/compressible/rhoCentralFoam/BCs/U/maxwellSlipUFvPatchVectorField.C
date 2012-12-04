@@ -94,7 +94,7 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
             dict
         )   << "unphysical accommodationCoeff_ specified"
             << "(0 < accommodationCoeff_ <= 1)" << endl
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     if (dict.found("value"))
