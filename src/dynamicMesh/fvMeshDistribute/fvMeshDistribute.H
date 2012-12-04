@@ -102,20 +102,6 @@ class fvMeshDistribute
             //- Find patch to put exposed faces into.
             label findNonEmptyPatch() const;
 
-            //- Appends polyPatch. Returns patchID.
-            label addPatch(polyPatch*);
-
-            //- Add patch field
-            template<class GeoField>
-            void addPatchFields(const word& patchFieldType);
-
-            //- Deletes last patch.
-            void deleteTrailingPatch();
-
-            // Delete trailing patch fields
-            template<class GeoField>
-            void deleteTrailingPatchFields();
-
             //- Save boundary fields
             template <class T, class Mesh>
             void saveBoundaryFields
