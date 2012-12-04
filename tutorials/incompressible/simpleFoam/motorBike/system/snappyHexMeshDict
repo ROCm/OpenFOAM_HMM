@@ -193,17 +193,17 @@ snapControls
 
         //- Number of feature edge snapping iterations.
         //  Leave out altogether to disable.
-        nFeatureSnapIter 10;
+        nFeatureSnapIter 0;
 
         //- Detect (geometric only) features by sampling the surface
         //  (default=false).
         implicitFeatureSnap false;
 
         //- Use castellatedMeshControls::features (default = true)
-        explicitFeatureSnap true;
+        explicitFeatureSnap false;
 
         //- Detect points on multiple surfaces (only for explicitFeatureSnap)
-        multiRegionFeatureSnap true;
+        multiRegionFeatureSnap false;
 }
 
 
