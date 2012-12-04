@@ -1078,7 +1078,11 @@ void Foam::polyBoundaryMesh::updateMesh()
 }
 
 
-void Foam::polyBoundaryMesh::reorder(const labelUList& oldToNew)
+void Foam::polyBoundaryMesh::reorder
+(
+    const labelUList& oldToNew,
+    const bool validBoundary
+)
 {
     // Change order of patches
     polyPatchList::reorder(oldToNew);
@@ -1091,7 +1095,10 @@ void Foam::polyBoundaryMesh::reorder(const labelUList& oldToNew)
         patches[patchI].index() = patchI;
     }
 
-    updateMesh();
+    if (validBoundary)
+    {
+        updateMesh();
+    }
 }
 
 

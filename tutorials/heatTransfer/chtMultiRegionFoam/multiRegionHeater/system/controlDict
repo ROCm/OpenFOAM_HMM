@@ -15,6 +15,12 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+libs
+(
+    "libcompressibleTurbulenceModel.so"
+    "libcompressibleRASModels.so"
+);
+
 application     chtMultiRegionFoam;
 
 startFrom       latestTime;

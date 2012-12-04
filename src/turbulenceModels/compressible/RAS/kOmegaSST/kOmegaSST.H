@@ -38,7 +38,7 @@ Description
         Nov. 2001
     \endverbatim
 
-    with the addition of the F3 term for rough walls from
+    with the addition of the optional F3 term for rough walls from
     \verbatim
         Hellsten, A.
         "Some Improvements in Menter’s k-omega-SST turbulence model"
@@ -80,6 +80,7 @@ Description
             a1          0.31;
             b1          1.0;
             c1          10.0;
+            F3          no;
         }
     \endverbatim
 
@@ -138,6 +139,8 @@ protected:
             dimensionedScalar b1_;
             dimensionedScalar c1_;
 
+            Switch F3_;
+
 
         //- Wall distance
         //  Note: different to wall distance in parent RASModel
@@ -156,6 +159,7 @@ protected:
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;
         tmp<volScalarField> F3() const;
+        tmp<volScalarField> F23() const;
 
         tmp<volScalarField> blend
         (

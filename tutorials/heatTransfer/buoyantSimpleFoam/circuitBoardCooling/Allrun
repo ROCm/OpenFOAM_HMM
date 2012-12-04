@@ -13,14 +13,10 @@ unset FOAM_SETNAN
 unset FOAM_SIGFPE
 
 # Create first baffle
-runApplication createBaffles baffleFaces '(baffle1Wall_0 baffle1Wall_1)' -overwrite
+runApplication createBaffles -overwrite
 
 # Create region
 runApplication extrudeToRegionMesh -overwrite
-
-# Set the BC's for the baffle
-runApplication changeDictionary -dict system/changeDictionaryDict.baffle
-rm log.changeDictionary
 
 # Set Bc's for the region baffle
 runApplication changeDictionary -dict system/changeDictionaryDict.baffleRegion -literalRE

@@ -226,6 +226,12 @@ FoamFile
 //                            // (regular expressions allowed)
 //    }
 //
+//    // All boundary faces
+//    source boundaryToFace;
+//    sourceInfo
+//    {
+//    }
+//
 //    // All faces of faceZone
 //    source zoneToFace;
 //    sourceInfo
@@ -358,6 +364,21 @@ FoamFile
 //        faceSet f0;       // name of faceSet
 //        cellSet c0;       // name of cellSet of slave side
 //    }
+//
+//    // Select based on surface. Orientation from normals on surface
+//    {
+//        name    fz0;
+//        type    faceZoneSet;
+//        action  new;
+//        source  searchableSurfaceToFaceZone;
+//        sourceInfo
+//        {
+//            surface searchableSphere;
+//            centre  (0.05 0.05 0.005);
+//            radius  0.025;
+//        }
+//    }
+//
 //
 //
 // pointZoneSet

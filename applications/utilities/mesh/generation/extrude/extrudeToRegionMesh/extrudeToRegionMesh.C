@@ -132,455 +132,11 @@ Notes:
 #include "surfaceFields.H"
 #include "pointFields.H"
 //#include "ReadFields.H"
-
+#include "fvMeshTools.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//template<class GeoField>
-//void addPatchFields(const fvMesh& mesh, const word& patchFieldType)
-//{
-//    HashTable<const GeoField*> flds
-//    (
-//        mesh.objectRegistry::lookupClass<GeoField>()
-//    );
-//
-//    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
-//    {
-//        const GeoField& fld = *iter();
-//
-//        typename GeoField::GeometricBoundaryField& bfld =
-//            const_cast<typename GeoField::GeometricBoundaryField&>
-//            (
-//                fld.boundaryField()
-//            );
-//
-//        label sz = bfld.size();
-//
-//        for (label i = 0; i < sz; i++)
-//        {
-//            bfld.set
-//            (
-//                i,
-//                bfld.clone(GeoField::PatchFieldType::New
-//                (
-//                    patchFieldType,
-//                    fld.mesh().boundary()[sz],
-//                    fld.dimensionedInternalField()
-//                )
-//            );
-//
-//
-//
-//        Pout<< "fld:" << fld.name() << " had " << sz << " patches." << endl;
-//        Pout<< "fld before:" << fld << endl;
-//        Pout<< "adding on patch:" << fld.mesh().boundary()[sz].name() << endl;
-//
-//        bfld.setSize(sz+1);
-//        bfld.set
-//        (
-//            sz,
-//            GeoField::PatchFieldType::New
-//            (
-//                patchFieldType,
-//                fld.mesh().boundary()[sz],
-//                fld.dimensionedInternalField()
-//            )
-//        );
-//
-//        bfld[sz].operator=(pTraits<typename GeoField::value_type>::zero);
-//
-//        Pout<< "fld:" << fld.name() << " now " << bfld.size() << " patches."
-//            << endl;
-//
-//        const typename GeoField::PatchFieldType& pfld = bfld[sz];
-//        Pout<< "pfld:" << pfld << endl;
-//
-//
-//        Pout<< "fld value:" << fld << endl;
-//    }
-//}
-
-
-// Remove last patch field
-template<class GeoField>
-void trimPatchFields(fvMesh& mesh, const label nPatches)
-{
-    HashTable<const GeoField*> flds
-    (
-        mesh.objectRegistry::lookupClass<GeoField>()
-    );
-
-    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
-    {
-        const GeoField& fld = *iter();
-
-        const_cast<typename GeoField::GeometricBoundaryField&>
-        (
-            fld.boundaryField()
-        ).setSize(nPatches);
-    }
-}
-
-
-// Reorder patch field
-template<class GeoField>
-void reorderPatchFields(fvMesh& mesh, const labelList& oldToNew)
-{
-    HashTable<const GeoField*> flds
-    (
-        mesh.objectRegistry::lookupClass<GeoField>()
-    );
-
-    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
-    {
-        const GeoField& fld = *iter();
-
-        typename GeoField::GeometricBoundaryField& bfld =
-            const_cast<typename GeoField::GeometricBoundaryField&>
-            (
-                fld.boundaryField()
-            );
-
-        bfld.reorder(oldToNew);
-    }
-}
-
-
-//void addCalculatedPatchFields(const fvMesh& mesh)
-//{
-//    addPatchFields<volScalarField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<scalar>::typeName
-//    );
-//    addPatchFields<volVectorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<vector>::typeName
-//    );
-//    addPatchFields<volSphericalTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<sphericalTensor>::typeName
-//    );
-//    addPatchFields<volSymmTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<symmTensor>::typeName
-//    );
-//    addPatchFields<volTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<tensor>::typeName
-//    );
-//
-//    // Surface fields
-//
-//    addPatchFields<surfaceScalarField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<scalar>::typeName
-//    );
-//    addPatchFields<surfaceVectorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<vector>::typeName
-//    );
-//    addPatchFields<surfaceSphericalTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<sphericalTensor>::typeName
-//    );
-//    addPatchFields<surfaceSymmTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<symmTensor>::typeName
-//    );
-//    addPatchFields<surfaceTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<tensor>::typeName
-//    );
-//
-//    // Point fields
-//
-//    addPatchFields<pointScalarField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<scalar>::typeName
-//    );
-//    addPatchFields<pointVectorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<vector>::typeName
-//    );
-//}
-//
-//
-//void addAllPatchFields(fvMesh& mesh, const label insertPatchI)
-//{
-//    polyBoundaryMesh& polyPatches =
-//        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
-//    fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
-//
-//    label sz = polyPatches.size();
-//
-//    addPatchFields<volScalarField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<scalar>::typeName
-//    );
-//    addPatchFields<volVectorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<vector>::typeName
-//    );
-//    addPatchFields<volSphericalTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<sphericalTensor>::typeName
-//    );
-//    addPatchFields<volSymmTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<symmTensor>::typeName
-//    );
-//    addPatchFields<volTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<tensor>::typeName
-//    );
-//
-//    // Surface fields
-//
-//    addPatchFields<surfaceScalarField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<scalar>::typeName
-//    );
-//    addPatchFields<surfaceVectorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<vector>::typeName
-//    );
-//    addPatchFields<surfaceSphericalTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<sphericalTensor>::typeName
-//    );
-//    addPatchFields<surfaceSymmTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<symmTensor>::typeName
-//    );
-//    addPatchFields<surfaceTensorField>
-//    (
-//        mesh,
-//        calculatedFvPatchField<tensor>::typeName
-//    );
-//
-//    // Create reordering list
-//    // patches before insert position stay as is
-//    labelList oldToNew(sz);
-//    for (label i = 0; i < insertPatchI; i++)
-//    {
-//        oldToNew[i] = i;
-//    }
-//    // patches after insert position move one up
-//    for (label i = insertPatchI; i < sz-1; i++)
-//    {
-//        oldToNew[i] = i+1;
-//    }
-//    // appended patch gets moved to insert position
-//    oldToNew[sz-1] = insertPatchI;
-//
-//    // Shuffle into place
-//    polyPatches.reorder(oldToNew);
-//    fvPatches.reorder(oldToNew);
-//
-//    reorderPatchFields<volScalarField>(mesh, oldToNew);
-//    reorderPatchFields<volVectorField>(mesh, oldToNew);
-//    reorderPatchFields<volSphericalTensorField>(mesh, oldToNew);
-//    reorderPatchFields<volSymmTensorField>(mesh, oldToNew);
-//    reorderPatchFields<volTensorField>(mesh, oldToNew);
-//    reorderPatchFields<surfaceScalarField>(mesh, oldToNew);
-//    reorderPatchFields<surfaceVectorField>(mesh, oldToNew);
-//    reorderPatchFields<surfaceSphericalTensorField>(mesh, oldToNew);
-//    reorderPatchFields<surfaceSymmTensorField>(mesh, oldToNew);
-//    reorderPatchFields<surfaceTensorField>(mesh, oldToNew);
-//}
-
-
-//// Adds patch if not yet there. Returns patchID.
-//template<class PatchType>
-//label addPatch(fvMesh& mesh, const word& patchName, const dictionary& dict)
-//{
-//    polyBoundaryMesh& polyPatches =
-//        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
-//
-//    label patchI = polyPatches.findPatchID(patchName);
-//    if (patchI != -1)
-//    {
-//        if (isA<PatchType>(polyPatches[patchI]))
-//        {
-//            // Already there
-//            return patchI;
-//        }
-//        else
-//        {
-//            FatalErrorIn("addPatch<PatchType>(fvMesh&, const word&)")
-//                << "Already have patch " << patchName
-//                << " but of type " << PatchType::typeName
-//                << exit(FatalError);
-//        }
-//    }
-//
-//
-//    label insertPatchI = polyPatches.size();
-//    label startFaceI = mesh.nFaces();
-//
-//    forAll(polyPatches, patchI)
-//    {
-//        const polyPatch& pp = polyPatches[patchI];
-//
-//        if (isA<processorPolyPatch>(pp))
-//        {
-//            insertPatchI = patchI;
-//            startFaceI = pp.start();
-//            break;
-//        }
-//    }
-//
-//    dictionary patchDict(dict);
-//    patchDict.set("type", PatchType::typeName);
-//    patchDict.set("nFaces", 0);
-//    patchDict.set("startFace", startFaceI);
-//
-//
-//    // Below is all quite a hack. Feel free to change once there is a better
-//    // mechanism to insert and reorder patches.
-//
-//    // Clear local fields and e.g. polyMesh parallelInfo.
-//    mesh.clearOut();
-//
-//    label sz = polyPatches.size();
-//
-//    fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
-//
-//    // Add polyPatch at the end
-//    polyPatches.setSize(sz+1);
-//    polyPatches.set
-//    (
-//        sz,
-//        polyPatch::New
-//        (
-//            patchName,
-//            patchDict,
-//            insertPatchI,
-//            polyPatches
-//        )
-//    );
-//    fvPatches.setSize(sz+1);
-//    fvPatches.set
-//    (
-//        sz,
-//        fvPatch::New
-//        (
-//            polyPatches[sz],  // point to newly added polyPatch
-//            mesh.boundary()
-//        )
-//    );
-//
-//    addAllPatchFields(mesh, insertPatchI);
-//
-//    return insertPatchI;
-//}
-//
-//
-//template<class PatchType>
-//label addPatch(fvMesh& mesh, const word& patchName)
-//{
-//Pout<< "addPatch:" << patchName << endl;
-//
-//    polyBoundaryMesh& polyPatches =
-//        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
-//
-//    label patchI = polyPatches.findPatchID(patchName);
-//    if (patchI != -1)
-//    {
-//        if (isA<PatchType>(polyPatches[patchI]))
-//        {
-//            // Already there
-//            return patchI;
-//        }
-//        else
-//        {
-//            FatalErrorIn("addPatch<PatchType>(fvMesh&, const word&)")
-//                << "Already have patch " << patchName
-//                << " but of type " << PatchType::typeName
-//                << exit(FatalError);
-//        }
-//    }
-//
-//
-//    label insertPatchI = polyPatches.size();
-//    label startFaceI = mesh.nFaces();
-//
-//    forAll(polyPatches, patchI)
-//    {
-//        const polyPatch& pp = polyPatches[patchI];
-//
-//        if (isA<processorPolyPatch>(pp))
-//        {
-//            insertPatchI = patchI;
-//            startFaceI = pp.start();
-//            break;
-//        }
-//    }
-//
-//    // Below is all quite a hack. Feel free to change once there is a better
-//    // mechanism to insert and reorder patches.
-//
-//    // Clear local fields and e.g. polyMesh parallelInfo.
-//    mesh.clearOut();
-//
-//    label sz = polyPatches.size();
-//
-//    fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
-//
-//    // Add polyPatch at the end
-//    polyPatches.setSize(sz+1);
-//    polyPatches.set
-//    (
-//        sz,
-//        polyPatch::New
-//        (
-//            PatchType::typeName,
-//            patchName,
-//            0,              // size
-//            startFaceI,
-//            insertPatchI,
-//            polyPatches
-//        )
-//    );
-//    fvPatches.setSize(sz+1);
-//    fvPatches.set
-//    (
-//        sz,
-//        fvPatch::New
-//        (
-//            polyPatches[sz],  // point to newly added polyPatch
-//            mesh.boundary()
-//        )
-//    );
-//
-//    addAllPatchFields(mesh, insertPatchI);
-//
-//    return insertPatchI;
-//}
-
 
 label findPatchID(const List<polyPatch*>& newPatches, const word& name)
 {
@@ -712,53 +268,6 @@ label addPatch
 }
 
 
-// Reorder and delete patches.
-void reorderPatches
-(
-    fvMesh& mesh,
-    const labelList& oldToNew,
-    const label nNewPatches
-)
-{
-    polyBoundaryMesh& polyPatches =
-        const_cast<polyBoundaryMesh&>(mesh.boundaryMesh());
-    fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh.boundary());
-
-    // Shuffle into place
-    polyPatches.reorder(oldToNew);
-    fvPatches.reorder(oldToNew);
-
-    reorderPatchFields<volScalarField>(mesh, oldToNew);
-    reorderPatchFields<volVectorField>(mesh, oldToNew);
-    reorderPatchFields<volSphericalTensorField>(mesh, oldToNew);
-    reorderPatchFields<volSymmTensorField>(mesh, oldToNew);
-    reorderPatchFields<volTensorField>(mesh, oldToNew);
-    reorderPatchFields<surfaceScalarField>(mesh, oldToNew);
-    reorderPatchFields<surfaceVectorField>(mesh, oldToNew);
-    reorderPatchFields<surfaceSphericalTensorField>(mesh, oldToNew);
-    reorderPatchFields<surfaceSymmTensorField>(mesh, oldToNew);
-    reorderPatchFields<surfaceTensorField>(mesh, oldToNew);
-    reorderPatchFields<pointScalarField>(mesh, oldToNew);
-    reorderPatchFields<pointVectorField>(mesh, oldToNew);
-
-    // Remove last.
-    polyPatches.setSize(nNewPatches);
-    fvPatches.setSize(nNewPatches);
-    trimPatchFields<volScalarField>(mesh, nNewPatches);
-    trimPatchFields<volVectorField>(mesh, nNewPatches);
-    trimPatchFields<volSphericalTensorField>(mesh, nNewPatches);
-    trimPatchFields<volSymmTensorField>(mesh, nNewPatches);
-    trimPatchFields<volTensorField>(mesh, nNewPatches);
-    trimPatchFields<surfaceScalarField>(mesh, nNewPatches);
-    trimPatchFields<surfaceVectorField>(mesh, nNewPatches);
-    trimPatchFields<surfaceSphericalTensorField>(mesh, nNewPatches);
-    trimPatchFields<surfaceSymmTensorField>(mesh, nNewPatches);
-    trimPatchFields<surfaceTensorField>(mesh, nNewPatches);
-    trimPatchFields<pointScalarField>(mesh, nNewPatches);
-    trimPatchFields<pointVectorField>(mesh, nNewPatches);
-}
-
-
 // Remove zero-sized patches
 void deleteEmptyPatches(fvMesh& mesh)
 {
@@ -837,7 +346,7 @@ void deleteEmptyPatches(fvMesh& mesh)
         }
     }
 
-    reorderPatches(mesh, oldToNew, usedI);
+    fvMeshTools::reorderPatches(mesh, oldToNew, usedI, true);
 }
 
 
@@ -1805,18 +1314,26 @@ int main(int argc, char *argv[])
         mappedPatchBase::sampleModeNames_[dict.lookup("sampleMode")];
 
     const Switch oneD(dict.lookup("oneD"));
+    Switch oneDNonManifoldEdges(false);
+    word oneDPatchType(emptyPolyPatch::typeName);
+    if (oneD)
+    {
+        oneDNonManifoldEdges = dict.lookupOrDefault("nonManifold", false);
+        dict.lookup("oneDPolyPatchType") >> oneDPatchType;
+    }
+
     const Switch adaptMesh(dict.lookup("adaptMesh"));
 
     if (hasZones)
     {
-        Pout<< "Extruding zones " << zoneNames
+        Info<< "Extruding zones " << zoneNames
             << " on mesh " << regionName
             << " into shell mesh " << shellRegionName
             << endl;
     }
     else
     {
-        Pout<< "Extruding faceSets " << zoneNames
+        Info<< "Extruding faceSets " << zoneNames
             << " on mesh " << regionName
             << " into shell mesh " << shellRegionName
             << endl;
@@ -1830,6 +1347,26 @@ int main(int argc, char *argv[])
             << "Shell region : " << shellRegionName
             << exit(FatalIOError);
     }
+
+
+    if (oneD)
+    {
+        if (oneDNonManifoldEdges)
+        {
+            Info<< "Extruding as 1D columns with sides in patch type "
+                << oneDPatchType
+                << " and connected points (except on non-manifold areas)."
+                << endl;
+        }
+        else
+        {
+            Info<< "Extruding as 1D columns with sides in patch type "
+                << oneDPatchType
+                << " and duplicated points (overlapping volumes)."
+                << endl;
+        }
+    }
+
 
 
 
@@ -1894,7 +1431,7 @@ int main(int argc, char *argv[])
     {
         meshInstance = oldInstance;
     }
-    Pout<< "Writing meshes to " << meshInstance << nl << endl;
+    Info<< "Writing meshes to " << meshInstance << nl << endl;
 
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
@@ -2130,7 +1667,7 @@ int main(int argc, char *argv[])
     const labelListList& edgeFaces = extrudePatch.edgeFaces();
 
 
-    Pout<< "extrudePatch :"
+    Info<< "extrudePatch :"
         << " faces:" << extrudePatch.size()
         << " points:" << extrudePatch.nPoints()
         << " edges:" << extrudePatch.nEdges()
@@ -2325,7 +1862,7 @@ int main(int argc, char *argv[])
     (
         mesh,
         zoneNames,
-        (oneD ? dict.lookup("oneDPolyPatchType") : word::null),
+        (oneD ? oneDPatchType : word::null),
 
         regionPatches,
         zoneSidePatch
@@ -2416,10 +1953,18 @@ int main(int argc, char *argv[])
             {
                 ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
             }
-            //- Set nonManifoldEdge[edgeI] for non-manifold edges only
-            //  The other option is to have non-manifold edges everywhere
-            //  and generate space overlapping columns of cells.
-            if (eFaces.size() != 2)
+
+            if (oneDNonManifoldEdges)
+            {
+                //- Set nonManifoldEdge[edgeI] for non-manifold edges only
+                //  The other option is to have non-manifold edges everywhere
+                //  and generate space overlapping columns of cells.
+                if (eFaces.size() != 2)
+                {
+                    nonManifoldEdge[edgeI] = 1;
+                }
+            }
+            else
             {
                 nonManifoldEdge[edgeI] = 1;
             }
@@ -2834,7 +2379,7 @@ int main(int argc, char *argv[])
         "point to patch point addressing";
 
 
-    Pout<< "Writing mesh " << regionMesh.name()
+    Info<< "Writing mesh " << regionMesh.name()
         << " to " << regionMesh.facesInstance() << nl
         << endl;
 
@@ -3013,7 +2558,7 @@ int main(int argc, char *argv[])
         // Remove any unused patches
         deleteEmptyPatches(mesh);
 
-        Pout<< "Writing mesh " << mesh.name()
+        Info<< "Writing mesh " << mesh.name()
             << " to " << mesh.facesInstance() << nl
             << endl;
 

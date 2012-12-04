@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SetPatchFields.H"
+#include "faceCorrectedSnGrad.H"
+#include "fvMesh.H"
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class GeoField>
-void Foam::SetPatchFields
-(
-    PtrList<GeoField>& fields,
-    const label patchI,
-    const typename GeoField::value_type& initVal
-)
+namespace Foam
 {
-    forAll(fields, i)
-    {
-        typename GeoField::PatchFieldType& pfld =
-            fields[i].boundaryField()[patchI];
-        pfld == initVal;
-    }
+namespace fv
+{
+    makeSnGradScheme(faceCorrectedSnGrad)
+}
+}
+
+
+template<>
+Foam::tmp<Foam::surfaceScalarField>
+Foam::fv::faceCorrectedSnGrad<Foam::scalar>::correction
+(
+    const volScalarField& vsf
+) const
+{
+    return fullGradCorrection(vsf);
+}
+
+
+template<>
+Foam::tmp<Foam::surfaceVectorField>
+Foam::fv::faceCorrectedSnGrad<Foam::vector>::correction
+(
+    const volVectorField& vvf
+) const
+{
+    return fullGradCorrection(vvf);
 }
 
 

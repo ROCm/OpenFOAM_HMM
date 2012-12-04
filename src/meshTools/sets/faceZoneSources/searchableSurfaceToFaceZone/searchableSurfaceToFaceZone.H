@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,43 +21,84 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    Foam::SetPatchFields
+Class
+    Foam::searchableSurfaceToFaceZone
 
 Description
-    Helper routine to initialise a patch field to a constant value
+    A topoSetSource to select faces based on intersection (of cell-cell
+    vector) with a surface.
 
 SourceFiles
-    SetPatchFields.C
+    searchableSurfaceToFaceZone.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SetPatchFields_H
-#define SetPatchFields_H
+#ifndef searchableSurfaceToFaceZone_H
+#define searchableSurfaceToFaceZone_H
 
-#include "PtrList.H"
+#include "topoSetSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-//- Helper routine to read fields
-template<class GeoField>
-void SetPatchFields
-(
-    PtrList<GeoField>& fields,
-    const label patchI,
-    const typename GeoField::value_type& initVal
-);
+class searchableSurface;
 
-} // End namespace Foam
+/*---------------------------------------------------------------------------*\
+                   Class searchableSurfaceToFaceZone Declaration
+\*---------------------------------------------------------------------------*/
+
+class searchableSurfaceToFaceZone
+:
+    public topoSetSource
+{
+    // Private data
+
+        //- Add usage string
+        static addToUsageTable usage_;
+
+        //- Surface
+        autoPtr<searchableSurface> surfacePtr_;
+
+public:
+
+    //- Runtime type information
+    TypeName("searchableSurfaceToFaceZone");
+
+    // Constructors
+
+        //- Construct from dictionary
+        searchableSurfaceToFaceZone
+        (
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
+
+    //- Destructor
+    virtual ~searchableSurfaceToFaceZone();
+
+
+    // Member Functions
+
+        virtual sourceType setType() const
+        {
+            return FACEZONESOURCE;
+        }
+
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
+
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "SetPatchFields.C"
-#endif
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
