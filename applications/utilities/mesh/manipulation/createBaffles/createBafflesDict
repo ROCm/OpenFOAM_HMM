@@ -44,6 +44,8 @@ baffles
                 name            baffles;
                 type            wall;
 
+                //- Optional override of added patchfields. If not specified
+                //  any added patchfields are of type calculated.
                 patchFields
                 {
                     epsilon
@@ -149,8 +151,6 @@ baffles
                 type            cyclic;
                 neighbourPatch  fan_half1;
 
-                //- Optional override of added patchfields. If not specified
-                //  any added patchfields are of type calculated.
                 patchFields
                 {
                     p
