@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,6 @@ Foam::scalar Foam::noiseFFT::p0 = 2e-5;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from pressure field
 Foam::noiseFFT::noiseFFT
 (
     const scalar deltat,
@@ -49,7 +48,6 @@ Foam::noiseFFT::noiseFFT
 {}
 
 
-// Construct from pressure field file name
 Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
 :
     scalarField(),
@@ -103,7 +101,7 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
 
     deltat_ = T/pData.size();
 
-    scalarField::operator=(pData.shrink());
+    this->transfer(pData);
 }
 
 
