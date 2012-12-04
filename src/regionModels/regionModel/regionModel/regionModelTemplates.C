@@ -32,18 +32,13 @@ Foam::regionModels::regionModel::mapRegionPatchField
     const label nbrPatchI,
     const Field<Type>& nbrField,
     const bool flip
-) const
+)
 {
-    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
-
-    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
-
-    const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
-
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag + 1;
 
-    AMIPatchToPatchInterpolation ami(p, nbrP, faceAreaIntersect::tmMesh, flip);
+    const AMIPatchToPatchInterpolation& ami =
+        interRegionAMI(nbrRegion, regionPatchI, nbrPatchI, flip);
 
     tmp<Field<Type> > tresult(ami.interpolateToSource(nbrField));
 
@@ -57,40 +52,28 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::regionModels::regionModel::mapRegionPatchField
 (
-    const word& regionModelName,
+    const regionModel& nbrRegion,
     const word& fieldName,
     const label regionPatchI,
     const bool flip
-) const
+)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const regionModel& nbrRegion =
-        this->primaryMesh_.lookupObject<regionModel>(regionModelName);
-
     const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
-
-    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
 
     if (nbrRegionMesh.foundObject<fieldType>(fieldName))
     {
-        const fieldType& nbrField =
-            nbrRegionMesh.lookupObject<fieldType>(fieldName);
-
         const label nbrPatchI = nbrCoupledPatchID(nbrRegion, regionPatchI);
-
-        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
 
         int oldTag = UPstream::msgType();
         UPstream::msgType() = oldTag + 1;
 
-        AMIPatchToPatchInterpolation ami
-        (
-            p,
-            nbrP,
-            faceAreaIntersect::tmMesh,
-            flip
-        );
+        const AMIPatchToPatchInterpolation& ami =
+            interRegionAMI(nbrRegion, regionPatchI, nbrPatchI, flip);
+
+        const fieldType& nbrField =
+            nbrRegionMesh.lookupObject<fieldType>(fieldName);
 
         const Field<Type>& nbrFieldp = nbrField.boundaryField()[nbrPatchI];
 
@@ -102,6 +85,8 @@ Foam::regionModels::regionModel::mapRegionPatchField
     }
     else
     {
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
         return
             tmp<Field<Type> >
             (
@@ -119,40 +104,28 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::regionModels::regionModel::mapRegionPatchInternalField
 (
-    const word& regionModelName,
+    const regionModel& nbrRegion,
     const word& fieldName,
     const label regionPatchI,
     const bool flip
-) const
+)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const regionModel& nbrRegion =
-        this->primaryMesh_.lookupObject<regionModel>(regionModelName);
-
     const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
-
-    const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
 
     if (nbrRegionMesh.foundObject<fieldType>(fieldName))
     {
-        const fieldType& nbrField =
-            nbrRegionMesh.lookupObject<fieldType>(fieldName);
-
         const label nbrPatchI = nbrCoupledPatchID(nbrRegion, regionPatchI);
-
-        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
 
         int oldTag = UPstream::msgType();
         UPstream::msgType() = oldTag + 1;
 
-        AMIPatchToPatchInterpolation ami
-        (
-            p,
-            nbrP,
-            faceAreaIntersect::tmMesh,
-            flip
-        );
+        const AMIPatchToPatchInterpolation& ami =
+            interRegionAMI(nbrRegion, regionPatchI, nbrPatchI, flip);
+
+        const fieldType& nbrField =
+            nbrRegionMesh.lookupObject<fieldType>(fieldName);
 
         const fvPatchField<Type>& nbrFieldp =
             nbrField.boundaryField()[nbrPatchI];
@@ -168,6 +141,8 @@ Foam::regionModels::regionModel::mapRegionPatchInternalField
     }
     else
     {
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
         return
             tmp<Field<Type> >
             (

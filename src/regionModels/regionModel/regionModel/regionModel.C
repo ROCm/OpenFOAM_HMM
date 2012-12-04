@@ -190,6 +190,88 @@ bool Foam::regionModels::regionModel::read(const dictionary& dict)
 }
 
 
+const Foam::AMIPatchToPatchInterpolation&
+Foam::regionModels::regionModel::interRegionAMI
+(
+    const regionModel& nbrRegion,
+    const label regionPatchI,
+    const label nbrPatchI,
+    const bool flip
+)
+{
+    label nbrRegionID = findIndex(interRegionAMINames_, nbrRegion.name());
+
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    if (nbrRegionID != -1)
+    {
+        if (!interRegionAMI_[nbrRegionID].set(regionPatchI))
+        {
+            const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+            const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+            int oldTag = UPstream::msgType();
+            UPstream::msgType() = oldTag + 1;
+
+            interRegionAMI_[nbrRegionID].set
+            (
+                regionPatchI,
+                new AMIPatchToPatchInterpolation
+                (
+                    p,
+                    nbrP,
+                    faceAreaIntersect::tmMesh,
+                    flip
+                )
+            );
+
+            UPstream::msgType() = oldTag;
+        }
+
+        return interRegionAMI_[nbrRegionID][regionPatchI];
+    }
+    else
+    {
+        label nbrRegionID = interRegionAMINames_.size();
+
+        interRegionAMINames_.append(nbrRegion.name());
+
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+        label nPatch = regionMesh().boundaryMesh().size();
+
+
+        interRegionAMI_.resize(nbrRegionID + 1);
+
+        interRegionAMI_.set
+        (
+            nbrRegionID,
+            new PtrList<AMIPatchToPatchInterpolation>(nPatch)
+        );
+
+        int oldTag = UPstream::msgType();
+        UPstream::msgType() = oldTag + 1;
+
+        interRegionAMI_[nbrRegionID].set
+        (
+            regionPatchI,
+            new AMIPatchToPatchInterpolation
+            (
+                p,
+                nbrP,
+                faceAreaIntersect::tmMesh,
+                flip
+            )
+        );
+
+        UPstream::msgType() = oldTag;
+
+        return interRegionAMI_[nbrRegionID][regionPatchI];
+    }
+}
+
+
 Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
 (
     const regionModel& nbrRegion,
@@ -234,8 +316,7 @@ Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
 
         FatalErrorIn
         (
-            "Foam::tmp<Foam::Field<Type> > "
-            "Foam::regionModels::regionModel::nbrCoupledPatchID"
+            "Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID"
             "("
                 "const regionModel& , "
                 "const label"
@@ -275,7 +356,9 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
     regionName_("none"),
-    functions_(*this)
+    functions_(*this),
+    interRegionAMINames_(),
+    interRegionAMI_()
 {}
 
 
