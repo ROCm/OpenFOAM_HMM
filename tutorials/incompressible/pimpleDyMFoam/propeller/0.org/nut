@@ -44,18 +44,6 @@ boundaryField
         type            nutkWallFunction;
         value           uniform 0;
     }
-
-    AMI1
-    {
-        type            cyclicAMI;
-        value           uniform 0;
-    }
-
-    AMI2
-    {
-        type            cyclicAMI;
-        value           uniform 0;
-    }
 }
 
 
