@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [m^2 s^-2];
 
 internalField   uniform 0.375;
 
@@ -25,8 +25,6 @@ boundaryField
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.05;
-        U               U;
-        phi             phi;
         value           uniform 0.375;
     }
     outlet1
@@ -40,19 +38,6 @@ boundaryField
         type            inletOutlet;
         inletValue      uniform 0.375;
         value           uniform 0.375;
-    }
-    baffles
-    {
-        type            kqRWallFunction;
-        value           uniform 0;
-    }
-    fan_half0
-    {
-        type            cyclic;
-    }
-    fan_half1
-    {
-        type            cyclic;
     }
     defaultFaces
     {
