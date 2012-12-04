@@ -82,6 +82,7 @@ constantRadiation::constantRadiation
         owner.regionMesh(),
         dimensionedScalar("one", dimless, 1.0)
     ),
+    absorptivity_(readScalar(coeffs_.lookup("absorptivity"))),
     timeStart_(readScalar(coeffs_.lookup("timeStart"))),
     duration_(readScalar(coeffs_.lookup("duration")))
 {
@@ -129,7 +130,7 @@ tmp<volScalarField> constantRadiation::Shs()
         const scalarField& Qr = QrConst_.internalField();
         const scalarField& alpha = owner_.alpha().internalField();
 
-        Shs = mask_*Qr*alpha;
+        Shs = mask_*Qr*alpha*absorptivity_;
     }
 
     return tShs;

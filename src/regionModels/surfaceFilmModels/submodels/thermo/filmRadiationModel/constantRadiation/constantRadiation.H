@@ -68,6 +68,9 @@ private:
         //- Radiation mask
         volScalarField mask_;
 
+        //- Absorptivity
+        scalar absorptivity_;
+
         //- Time start [s]
         const scalar timeStart_;
 
