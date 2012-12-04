@@ -945,6 +945,7 @@ void Foam::fvMeshDistribute::addProcPatches
                         Pstream::myProcNo(),
                         nbrProc[bFaceI]
                     );
+
                     procPatchID[procI].insert
                     (
                         referPatchID[bFaceI],
@@ -952,9 +953,9 @@ void Foam::fvMeshDistribute::addProcPatches
                         (
                             mesh_,
                             pp,
-                            dictionary(),
+                            dictionary(),   // optional per field patchField
                             processorFvPatchField<scalar>::typeName,
-                            false       // not parallel sync
+                            false           // not parallel sync
                         )
                     );
                 }
@@ -985,6 +986,7 @@ void Foam::fvMeshDistribute::addProcPatches
                         nbrProc[bFaceI],
                         cycName
                     );
+
                     procPatchID[procI].insert
                     (
                         referPatchID[bFaceI],

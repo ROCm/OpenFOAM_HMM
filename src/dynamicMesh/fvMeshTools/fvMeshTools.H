@@ -36,7 +36,6 @@ SourceFiles
 #define fvMeshTools_H
 
 #include "fvMesh.H"
-//#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,9 +88,10 @@ class fvMeshTools
 
 public:
 
-    //- Add patch. Supply per field the new patchField per field as a
+    //- Add patch. Inserts patch before all processor patches.
+    //  Supply per field the new patchField per field as a
     //  subdictionary or a default type. If validBoundary call is parallel
-    //  synced and all add the same patch with same settings
+    //  synced and all add the same patch with same settings.
     static label addPatch
     (
         fvMesh& mesh,

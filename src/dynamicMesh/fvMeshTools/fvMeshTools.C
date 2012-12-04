@@ -48,18 +48,22 @@ Foam::label Foam::fvMeshTools::addPatch
     }
 
 
+    // Append at end unless there are processor patches
     label insertPatchI = polyPatches.size();
     label startFaceI = mesh.nFaces();
 
-    forAll(polyPatches, patchI)
+    if (!isA<processorPolyPatch>(patch))
     {
-        const polyPatch& pp = polyPatches[patchI];
-
-        if (isA<processorPolyPatch>(pp))
+        forAll(polyPatches, patchI)
         {
-            insertPatchI = patchI;
-            startFaceI = pp.start();
-            break;
+            const polyPatch& pp = polyPatches[patchI];
+
+            if (isA<processorPolyPatch>(pp))
+            {
+                insertPatchI = patchI;
+                startFaceI = pp.start();
+                break;
+            }
         }
     }
 
