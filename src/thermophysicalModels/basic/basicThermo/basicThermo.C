@@ -112,7 +112,7 @@ Foam::basicThermo::basicThermo
     (
         IOobject
         (
-            phasePropertyName("alpha"),
+            phasePropertyName("thermo:alpha"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -167,7 +167,7 @@ Foam::basicThermo::basicThermo
     (
         IOobject
         (
-            phasePropertyName("alpha"),
+            phasePropertyName("thermo:alpha"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -237,7 +237,7 @@ const Foam::basicThermo& Foam::basicThermo::lookupThermo
 
 void Foam::basicThermo::validate
 (
-    const word& app,
+    const string& app,
     const word& a
 ) const
 {
@@ -252,7 +252,7 @@ void Foam::basicThermo::validate
 
 void Foam::basicThermo::validate
 (
-    const word& app,
+    const string& app,
     const word& a,
     const word& b
 ) const
@@ -275,7 +275,7 @@ void Foam::basicThermo::validate
 
 void Foam::basicThermo::validate
 (
-    const word& app,
+    const string& app,
     const word& a,
     const word& b,
     const word& c
@@ -301,7 +301,7 @@ void Foam::basicThermo::validate
 
 void Foam::basicThermo::validate
 (
-    const word& app,
+    const string& app,
     const word& a,
     const word& b,
     const word& c,
