@@ -46,5 +46,6 @@ EXE_LIBS = \
     -lradiationModels \
     -lsurfaceFilmModels \
     -lpyrolysisModels \
+    -lregionCoupling \
     -llagrangianIntermediate \
     -lODE
