@@ -251,15 +251,12 @@ void reactingOneDim::solveEnergy()
 
     tmp<volScalarField> alpha(solidThermo_.alpha());
 
-    const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
-
     fvScalarMatrix hEqn
     (
         fvm::ddt(rho_, h_)
       - fvm::laplacian(alpha, h_)
      ==
         chemistrySh_
-      + fvc::div(phiGas)
     );
 
     if (regionMesh().moving())
@@ -334,7 +331,7 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
             "phiGas",
             time().timeName(),
             regionMesh(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
