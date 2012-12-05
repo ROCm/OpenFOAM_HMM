@@ -50,7 +50,7 @@ Note:
     The porous region must be selected as a cellZone.
 
 SourceFiles
-    basicSource.C
+    explicitPorositySource.C
 
 \*---------------------------------------------------------------------------*/
 
