@@ -237,7 +237,7 @@ Foam::MRFZone::MRFZone
     mesh_(mesh),
     name_(name),
     coeffs_(dict),
-    active_(readBool(coeffs_.lookup("active"))),
+    active_(true),
     cellZoneName_(cellZoneName),
     cellZoneID_(),
     excludedPatchNames_
@@ -248,17 +248,18 @@ Foam::MRFZone::MRFZone
     axis_(coeffs_.lookup("axis")),
     omega_(DataEntry<scalar>::New("omega", coeffs_))
 {
+    if (cellZoneName_ == word::null)
+    {
+        coeffs_.lookup("active") >> active_;
+        coeffs_.lookup("cellZone") >> cellZoneName_;
+    }
+
     if (!active_)
     {
         cellZoneID_ = -1;
     }
     else
     {
-        if (cellZoneName == word::null)
-        {
-            coeffs_.lookup("cellZone") >> cellZoneName_;
-        }
-        
         cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
 
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
