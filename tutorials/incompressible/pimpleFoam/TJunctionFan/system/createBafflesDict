@@ -85,10 +85,7 @@ baffles
                 name            baffles;
                 type            wall;
 
-                patchFields
-                {
-                    ${...master.patchFields}
-                }
+                ${..master.patchFields}
             }
         }
     }
