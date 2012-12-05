@@ -152,6 +152,29 @@ public:
             void constrain(fvMatrix<Type>& eqn, const word& fieldName);
 
 
+        // Flux manipulations
+
+            //- Make the given absolute flux relative
+            void relativeFlux(surfaceScalarField& phi) const;
+
+            //- Make the given absolute mass-flux relative
+            void relativeFlux
+            (
+                const surfaceScalarField& rho,
+                surfaceScalarField& phi
+            ) const;
+
+            //- Make the given relative flux absolute
+            void absoluteFlux(surfaceScalarField& phi) const;
+
+            //- Make the given relative mass-flux absolute
+            void absoluteFlux
+            (
+                const surfaceScalarField& rho,
+                surfaceScalarField& phi
+            ) const;
+
+
         // I-O
 
             //- Read dictionary
