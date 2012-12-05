@@ -9,29 +9,52 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      porosityProperties;
+    class       volScalarField;
+    location    "0";
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-porosity1
+dimensions      [ 1 -1 -1 0 0 0 0 ];
+
+internalField   uniform 0;
+
+boundaryField
 {
-    type            fixedCoeff;
-    active          yes;
-    cellZone        porosity;
-
-    fixedCoeffCoeffs
+    front
     {
-        alpha       alpha [0 0 -1 0 0 0 0] (500 -1000 -1000);
-        beta        beta  [0 -1 0 0 0 0 0] (0 0 0);
-        rhoRef      1;
+        type            mutkWallFunction;
+        value           uniform 0;
+    }
 
-        coordinateSystem
-        {
-            e1  (0.70710678 0.70710678 0);
-            e2  (0 0 1);
-        }
+    back
+    {
+        type            mutkWallFunction;
+        value           uniform 0;
+    }
+
+    wall
+    {
+        type            mutkWallFunction;
+        value           uniform 0;
+    }
+
+    porosityWall
+    {
+        type            mutkWallFunction;
+        value           uniform 0;
+    }
+
+    inlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        type            calculated;
+        value           uniform 0;
     }
 }
 
