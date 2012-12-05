@@ -4,6 +4,8 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
+     ==
+        sources(rho, U)
     );
 
     UEqn().relax();
