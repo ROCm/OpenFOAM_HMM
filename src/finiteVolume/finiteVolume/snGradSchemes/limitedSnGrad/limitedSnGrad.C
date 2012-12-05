@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,23 +21,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    snGrad scheme with limited non-orthogonal correction.
-
-    The limiter is controlled by a coefficient with a value between 0 and 1
-    which when 0 switches the correction off and the scheme behaves as
-    uncorrectedSnGrad, when set to 1 the full correction is applied and the
-    scheme behaves as correctedSnGrad and when set to 0.5 the limiter is
-    calculated such that the non-orthogonal contribution does not exceed the
-    orthogonal part.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fv.H"
 #include "limitedSnGrad.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "correctedSnGrad.H"
 #include "localMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,7 +57,7 @@ limitedSnGrad<Type>::correction
 {
     const GeometricField<Type, fvsPatchField, surfaceMesh> corr
     (
-        correctedSnGrad<Type>(this->mesh()).correction(vf)
+        correctedScheme_().correction(vf)
     );
 
     const surfaceScalarField limiter
@@ -76,7 +65,7 @@ limitedSnGrad<Type>::correction
         min
         (
             limitCoeff_
-           *mag(snGradScheme<Type>::snGrad(vf, deltaCoeffs(vf), "orthSnGrad"))
+           *mag(snGradScheme<Type>::snGrad(vf, deltaCoeffs(vf), "SndGrad"))
            /(
                 (1 - limitCoeff_)*mag(corr)
               + dimensionedScalar("small", corr.dimensions(), SMALL)
