@@ -24,6 +24,8 @@ if (pimple.transonic())
         )
     );
 
+    sources.relatoiveFlux(fvc::interpolate(psi), phid);
+
     volScalarField Dp("Dp", rho*rAU);
 
     while (pimple.correctNonOrthogonal())
@@ -58,6 +60,8 @@ else
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
+
+    sources.relatoiveFlux(fvc::interpolate(rho), phiHbyA);
 
     volScalarField Dp("Dp", rho*rAU);
 
