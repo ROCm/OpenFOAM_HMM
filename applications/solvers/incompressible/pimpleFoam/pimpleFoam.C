@@ -30,8 +30,7 @@ Description
 
     Sub-models include:
     - turbulence modelling, i.e. laminar, RAS or LES
-    - porosity (explicit treatment)
-    - Multiple Reference Frame (MRF)
+    - run-time selectable sources, e.g. MRF, explicit porosity
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +50,6 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
-    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);
