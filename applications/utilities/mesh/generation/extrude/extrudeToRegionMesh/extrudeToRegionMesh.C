@@ -1241,8 +1241,7 @@ int main(int argc, char *argv[])
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    argList::addOption("dict", "name", "specify alternative dictionary");
-
+    #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -1263,19 +1262,14 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
     bool overwrite = args.optionFound("overwrite");
-    const word dictName
-        (args.optionLookupOrDefault<word>("dict", "extrudeToRegionMeshDict"));
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            dictName,
-            runTime.system(),
-            runTime,
-            IOobject::MUST_READ_IF_MODIFIED
-        )
-    );
+
+    const word dictName("extrudeToRegionMeshDict");
+
+    #include "setSystemMeshDictionaryIO.H"
+
+    IOdictionary dict(dictIO);
+
 
     // Point generator
     autoPtr<extrudeModel> model(extrudeModel::New(dict));

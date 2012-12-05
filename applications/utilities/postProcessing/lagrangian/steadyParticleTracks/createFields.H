@@ -1,15 +1,8 @@
-word dictName(args.optionLookupOrDefault<word>("dict", "particleTrackDict"));
+const word dictName("particleTrackDict");
 
-IOdictionary propsDict
-(
-    IOobject
-    (
-        dictName,
-        runTime.constant(),
-        mesh,
-        IOobject::MUST_READ_IF_MODIFIED
-    )
-);
+#include "setConstantMeshDictionaryIO.H"
+
+IOdictionary propsDict(dictIO);
 
 word cloudName(propsDict.lookup("cloudName"));
 

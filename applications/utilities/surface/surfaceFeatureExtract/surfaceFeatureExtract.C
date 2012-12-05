@@ -680,35 +680,17 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
 
-    argList::addOption
-    (
-        "dict",
-        "word",
-        "specify alternative dictionary for the feature extraction information"
-    );
+#   include "addDictOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    word dictName
-    (
-        args.optionLookupOrDefault<word>("dict", "surfaceFeatureExtractDict")
-    );
+    const word dictName("surfaceFeatureExtractDict");
+#   include "setSystemRunTimeDictionaryIO.H"
 
     Info<< "Reading " << dictName << nl << endl;
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            dictName,
-            runTime.system(),
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
+    const IOdictionary dict(dictIO);
 
     forAllConstIter(dictionary, dict, iter)
     {

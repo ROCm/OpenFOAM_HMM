@@ -573,11 +573,13 @@ bool Foam::autoSnapDriver::outwardsDisplacement
 Foam::autoSnapDriver::autoSnapDriver
 (
     meshRefinement& meshRefiner,
-    const labelList& globalToPatch
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch
 )
 :
     meshRefiner_(meshRefiner),
-    globalToPatch_(globalToPatch)
+    globalToMasterPatch_(globalToMasterPatch),
+    globalToSlavePatch_(globalToSlavePatch)
 {}
 
 
@@ -1191,7 +1193,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
 
             if (hitSurface[i] != -1 && !isZonedFace.get(faceI))
             {
-                closestPatch[i] = globalToPatch_
+                closestPatch[i] = globalToMasterPatch_
                 [
                     surfaces.globalRegion
                     (
@@ -1265,7 +1267,12 @@ void Foam::autoSnapDriver::doSnap
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
-    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
+    meshRefiner_.createZoneBaffles
+    (
+        globalToMasterPatch_,
+        globalToSlavePatch_,
+        baffles
+    );
 
 
     // Selectively 'forget' about the baffles, i.e. not check across them

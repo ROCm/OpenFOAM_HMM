@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,37 +97,82 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
     #include "addRegionOption.H"
-    argList::addOption
-    (
-        "dict",
-        "word",
-        "name of dictionary to provide sample information"
-    );
-
+    #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
-    word sampleDict(args.optionLookupOrDefault<word>("dict", "sampleDict"));
+    const word dictName("sampleDict");
 
-    IOsampledSets sSets
-    (
-        sampledSets::typeName,
-        mesh,
-        sampleDict,
-        IOobject::MUST_READ_IF_MODIFIED,
-        true
-    );
+    autoPtr<IOsampledSets> sSetsPtr;
+    autoPtr<IOsampledSurfaces> sSurfsPtr;
 
-    IOsampledSurfaces sSurfs
-    (
-        sampledSurfaces::typeName,
-        mesh,
-        sampleDict,
-        IOobject::MUST_READ_IF_MODIFIED,
-        true
-    );
+    if (args.optionFound("dict"))
+    {
+        // Construct from fileName
+
+        fileName dictPath = args["dict"];
+        if (isDir(dictPath))
+        {
+            dictPath = dictPath / dictName;
+        }
+
+        sSetsPtr.reset
+        (
+            new IOsampledSets
+            (
+                sampledSets::typeName,
+                mesh,
+                dictPath,
+                IOobject::MUST_READ_IF_MODIFIED,
+                true
+            )
+        );
+
+        sSurfsPtr.reset
+        (
+            new IOsampledSurfaces
+            (
+                sampledSurfaces::typeName,
+                mesh,
+                dictPath,
+                IOobject::MUST_READ_IF_MODIFIED,
+                true
+            )
+        );
+    }
+    else
+    {
+        // Construct from name in system() directory
+
+        sSetsPtr.reset
+        (
+            new IOsampledSets
+            (
+                sampledSets::typeName,
+                mesh,
+                dictName,
+                IOobject::MUST_READ_IF_MODIFIED,
+                true
+            )
+        );
+
+        sSurfsPtr.reset
+        (
+            new IOsampledSurfaces
+            (
+                sampledSurfaces::typeName,
+                mesh,
+                dictName,
+                IOobject::MUST_READ_IF_MODIFIED,
+                true
+            )
+        );
+    }
+
+    IOsampledSets& sSets = sSetsPtr();
+    IOsampledSurfaces& sSurfs = sSurfsPtr();
 
     forAll(timeDirs, timeI)
     {

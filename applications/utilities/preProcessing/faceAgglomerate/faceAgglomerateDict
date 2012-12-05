@@ -10,58 +10,19 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      fvSchemes;
+    object      viewFactorsDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
+// Write agglomeration as a volScalarField with calculated boundary values
+writeFacesAgglomeration   true;
+
+// Per patch (wildcard possible) the coarsening level
+bottomAir_to_heater
 {
-    default backward;
+    nFacesInCoarsestLevel     30;
+    featureAngle              10;
 }
 
-d2dt2Schemes
-{
-}
-
-gradSchemes
-{
-    default         Gauss linear;
-
-    grad(nuTilda)   cellLimited Gauss linear 1;
-    grad(U)         cellLimited Gauss linear 1;
-}
-
-divSchemes
-{
-    default         none;
-
-    div(phi,U)      Gauss LUST unlimitedGrad(U);
-    //div(phi,U)      Gauss linearUpwind unlimitedGrad(U);
-    div(phi,k)      Gauss limitedLinear 1;
-    div(phi,nuTilda) Gauss limitedLinear 1;
-
-    div((nuEff*dev(T(grad(U))))) Gauss linear;
-}
-
-laplacianSchemes
-{
-    default         Gauss linear limited corrected 0.33;
-}
-
-interpolationSchemes
-{
-    default         linear;
-}
-
-snGradSchemes
-{
-    default         limited corrected 0.33;
-}
-
-fluxRequired
-{
-    default         no;
-    p;
-}
 
 // ************************************************************************* //

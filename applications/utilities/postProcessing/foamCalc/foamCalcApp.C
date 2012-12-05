@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,12 +49,7 @@ int main(int argc, char *argv[])
         "noWrite",
         "suppress writing results"
     );
-    Foam::argList::addOption
-    (
-        "dict",
-        "name",
-        "dictionary to use"
-    );
+#   include "addDictOption.H"
 
     if (argc < 2)
     {

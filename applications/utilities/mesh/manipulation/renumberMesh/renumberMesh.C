@@ -614,11 +614,7 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
-    argList::addBoolOption
-    (
-        "dict",
-        "renumber according to system/renumberMeshDict"
-    );
+#   include "addDictOption.H"
     argList::addBoolOption
     (
         "frontWidth",
@@ -700,23 +696,13 @@ int main(int argc, char *argv[])
 
     if (readDict)
     {
-        Info<< "Renumber according to renumberMeshDict." << nl << endl;
+        const word dictName("renumberMeshDict");
+        #include "setSystemMeshDictionaryIO.H"
 
-        renumberDictPtr.reset
-        (
-            new IOdictionary
-            (
-                IOobject
-                (
-                    "renumberMeshDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
-        const IOdictionary renumberDict = renumberDictPtr();
+        Info<< "Renumber according to " << dictName << nl << endl;
+
+        renumberDictPtr.reset(new IOdictionary(dictIO));
+        const IOdictionary& renumberDict = renumberDictPtr();
 
         renumberPtr = renumberMethod::New(renumberDict);
 

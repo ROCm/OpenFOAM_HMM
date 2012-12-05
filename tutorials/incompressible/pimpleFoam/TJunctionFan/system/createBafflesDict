@@ -85,43 +85,7 @@ baffles
                 name            baffles;
                 type            wall;
 
-                patchFields
-                {
-                    epsilon
-                    {
-                        type            epsilonWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    k
-                    {
-                        type            kqRWallFunction;
-                        value           uniform 0;
-                    }
-                    nut
-                    {
-                        type            nutkWallFunction;
-                        Cmu             0.09;
-                        kappa           0.41;
-                        E               9.8;
-                        value           uniform 0;
-                    }
-                    nuTilda
-                    {
-                        type            zeroGradient;
-                    }
-                    p
-                    {
-                        type            zeroGradient;
-                    }
-                    U
-                    {
-                        type            fixedValue;
-                        value           uniform (0 0 0);
-                    }
-                }
+                ${..master.patchFields}
             }
         }
     }

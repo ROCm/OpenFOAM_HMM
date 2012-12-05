@@ -385,12 +385,7 @@ bool merge
 
 int main(int argc, char *argv[])
 {
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "specify an alternative to system/changeDictionaryDict"
-    );
+    #include "addDictOption.H"
     argList::addOption
     (
         "instance",
@@ -432,20 +427,7 @@ int main(int argc, char *argv[])
     runTime.setTime(times[0], 0);
     word instance = args.optionLookupOrDefault("instance", runTime.timeName());
 
-
     #include "createNamedMesh.H"
-
-    const word dictName("changeDictionaryDict");
-
-    fileName dictPath = dictName;
-    if (args.optionFound("dict"))
-    {
-        dictPath = args["dict"];
-        if (isDir(dictPath))
-        {
-            dictPath = dictPath / dictName;
-        }
-    }
 
     const bool literalRE = args.optionFound("literalRE");
     if (literalRE)
@@ -493,27 +475,10 @@ int main(int argc, char *argv[])
 
 
     // Get the replacement rules from a dictionary
-    IOdictionary dict
-    (
-        (
-            args.optionFound("dict")
-          ? IOobject
-            (
-                dictPath,
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-          : IOobject
-            (
-                dictName,
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        )
-    );
+
+    const word dictName("changeDictionaryDict");
+    #include "setSystemMeshDictionaryIO.H"
+    IOdictionary dict(dictIO);
 
     const dictionary& replaceDicts = dict.subDict("dictionaryReplacement");
     Info<< "Read dictionary " << dict.name()
