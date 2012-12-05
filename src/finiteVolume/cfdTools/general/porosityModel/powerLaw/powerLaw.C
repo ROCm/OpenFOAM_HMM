@@ -47,10 +47,11 @@ Foam::porosityModels::powerLaw::powerLaw
     const word& name,
     const word& modelType,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 :
-    porosityModel(name, modelType, mesh, dict),
+    porosityModel(name, modelType, mesh, dict, cellZoneName),
     C0_(readScalar(coeffs_.lookup("C0"))),
     C1_(readScalar(coeffs_.lookup("C1"))),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))

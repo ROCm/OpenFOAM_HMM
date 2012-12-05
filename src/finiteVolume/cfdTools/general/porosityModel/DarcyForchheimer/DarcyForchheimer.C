@@ -47,10 +47,11 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
     const word& name,
     const word& modelType,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 :
-    porosityModel(name, modelType, mesh, dict),
+    porosityModel(name, modelType, mesh, dict, cellZoneName),
     coordSys_(coeffs_, mesh),
     D_("D", dimless/sqr(dimLength), tensor::zero),
     F_("F", dimless/dimLength, tensor::zero),

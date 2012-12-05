@@ -73,17 +73,30 @@ Foam::porosityModel::porosityModel
     const word& name,
     const word& modelType,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 :
     name_(name),
     mesh_(mesh),
     dict_(dict),
     coeffs_(dict.subDict(modelType + "Coeffs")),
-    active_(readBool(dict_.lookup("active"))),
-    zoneName_(dict_.lookup("cellZone")),
-    cellZoneIds_(mesh_.cellZones().findIndices(zoneName_))
+    active_(true),
+    zoneName_(),
+    cellZoneIds_()
 {
+    if (cellZoneName == "unknown")
+    {
+        dict.lookup("actuve") >> active_;
+        dict_.lookup("cellZone") >> zoneName_;
+    }
+    else
+    {
+        zoneName_ = cellZoneName;
+    }
+
+    cellZoneIds_ = mesh_.cellZones().findIndices(zoneName_);
+
     Info<< "    creating porous zone: " << zoneName_ << endl;
 
     bool foundZone = !cellZoneIds_.empty();
@@ -99,6 +112,7 @@ Foam::porosityModel::porosityModel
                 "const word&, "
                 "const fvMesh&, "
                 "const dictionary&"
+                "const word&, "
             ")"
         )   << "cannot find porous cellZone " << zoneName_
             << exit(FatalError);

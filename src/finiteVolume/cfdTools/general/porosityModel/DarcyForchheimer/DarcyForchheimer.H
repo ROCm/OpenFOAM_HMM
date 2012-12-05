@@ -136,7 +136,8 @@ public:
         const word& name,
         const word& modelType,
         const fvMesh& mesh,
-        const dictionary& dict
+        const dictionary& dict,
+        const word& cellZoneName
     );
 
     //- Destructor
