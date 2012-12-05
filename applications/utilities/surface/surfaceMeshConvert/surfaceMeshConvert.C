@@ -96,12 +96,8 @@ int main(int argc, char *argv[])
         "factor",
         "geometry scaling factor on output"
     );
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "specify alternative dictionary for the coordinateSystems descriptions"
-    );
+    #include "addDictOption.H"
+
     argList::addOption
     (
         "from",
@@ -154,19 +150,28 @@ int main(int argc, char *argv[])
     {
         autoPtr<IOobject> csDictIoPtr;
 
+        const word dictName("coordinateSystems::typeName");
+
+        // Note: cannot use setSystemRunTimeDictionaryIO.H since dictionary
+        //       is in constant
+
+        fileName dictPath = "";
         if (args.optionFound("dict"))
         {
-            const fileName dictPath = args["dict"];
+            dictPath = args["dict"];
+            if (isDir(dictPath))
+            {
+                dictPath = dictPath / dictName;
+            }
+        }
 
+        if (dictPath.size())
+        {
             csDictIoPtr.set
             (
                 new IOobject
                 (
-                    (
-                        isDir(dictPath)
-                      ? dictPath/coordinateSystems::typeName
-                      : dictPath
-                    ),
+                    dictPath,
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
@@ -180,7 +185,7 @@ int main(int argc, char *argv[])
             (
                 new IOobject
                 (
-                    coordinateSystems::typeName,
+                    dictName,
                     runTime.constant(),
                     runTime,
                     IOobject::MUST_READ,
