@@ -23,7 +23,7 @@ done
 
 for i in bottomAir topAir
 do
-    faceAgglomerate -region $i -dict viewFactorsDict > log.faceAgglomerate.$i 2>&1
+    faceAgglomerate -region $i -dict constant/viewFactorsDict > log.faceAgglomerate.$i 2>&1
 done
 
 for i in bottomAir topAir
@@ -42,7 +42,7 @@ runApplication `getApplication`
 #
 #for i in bottomAir topAir
 #do
-#    mpirun -np 4 faceAgglomerate -region $i -dict viewFactorsDict -parallel>   log.faceAgglomerate.$i 2>&1
+#    mpirun -np 4 faceAgglomerate -region $i -dict constant/viewFactorsDict -parallel>   log.faceAgglomerate.$i 2>&1
 #done
 
 #for i in bottomAir topAir

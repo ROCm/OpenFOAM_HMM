@@ -10,7 +10,7 @@ application=`getApplication`
 runRefineMesh ()
 {
     echo "Running refineMesh on $PWD"
-    refineMesh -dict > log.refineMesh 2>&1
+    refineMesh -dict system/refineMeshDict > log.refineMesh 2>&1
 }
 
 runApplication blockMesh
