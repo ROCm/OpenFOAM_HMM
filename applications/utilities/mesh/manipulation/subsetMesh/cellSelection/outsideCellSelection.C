@@ -156,10 +156,21 @@ Foam::boolList Foam::cellSelections::outsideCellSelection::findRegions
         reduce(keepRegionI, maxOp<label>());
         keepRegion[keepRegionI] = true;
 
+        reduce(keepProcI, maxOp<label>());
+
+        if (keepProcI == -1)
+        {
+            FatalErrorIn
+            (
+                "outsideCellSelection::findRegions"
+                "(const bool, const regionSplit&)"
+            )   << "Did not find " << locationsInMesh_[i]
+                << " in mesh." << " Mesh bounds are " << mesh_.bounds()
+                << exit(FatalError);
+        }
+
         if (verbose)
         {
-            reduce(keepProcI, maxOp<label>());
-
             Info<< "Found location " << locationsInMesh_[i]
                 << " in cell " << cellI << " on processor " << keepProcI
                 << " in global region " << keepRegionI

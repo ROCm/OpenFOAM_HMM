@@ -27,7 +27,7 @@ selections
         // used by snappyHexMesh, cvMesh.
         type    badQuality;
         // Use the quality criteria from the snappyHexMeshDict
-        ${.meshQualityControls}
+        ${:meshQualityControls}
     }
 
     outside
@@ -42,7 +42,7 @@ selections
         //- Define mesh location for keeping.
         //  In this case use the one from snappyHexMeshDict. This can
         //  optionally be a list of locations.
-        locationsInMesh (${.castellatedMeshControls.locationInMesh});
+        locationsInMesh (${:castellatedMeshControls.locationInMesh});
     }
 }
 
