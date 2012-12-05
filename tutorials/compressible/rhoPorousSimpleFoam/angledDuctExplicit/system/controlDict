@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     rhoPorousMRFSimpleFoam;
+application     rhoPorousSimpleFoam;
 
 startFrom       startTime;
 
@@ -23,17 +23,17 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         100;
+endTime         1000;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   10;
+writeInterval   100;
 
 purgeWrite      0;
 
-writeFormat     binary;
+writeFormat     ascii;
 
 writePrecision  6;
 
