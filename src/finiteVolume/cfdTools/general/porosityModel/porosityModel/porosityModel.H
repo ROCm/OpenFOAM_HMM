@@ -140,7 +140,7 @@ public:
         const word& modelType,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName
+        const word& cellZoneName = word::null
     );
 
     //- Return pointer to new porosityModel object created on the freestore
@@ -185,7 +185,7 @@ public:
         const word& name,
         const fvMesh& mesh,
         const dictionary& dict,
-        const word& cellZoneName = "unknown"
+        const word& cellZoneName = word::null
     );
 
     //- Destructor

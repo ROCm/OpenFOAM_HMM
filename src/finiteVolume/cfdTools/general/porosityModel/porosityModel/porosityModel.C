@@ -82,17 +82,13 @@ Foam::porosityModel::porosityModel
     dict_(dict),
     coeffs_(dict.subDict(modelType + "Coeffs")),
     active_(true),
-    zoneName_(),
+    zoneName_(cellZoneName),
     cellZoneIds_()
 {
-    if (cellZoneName == "unknown")
+    if (zoneName_ == word::null)
     {
         dict.lookup("actuve") >> active_;
         dict_.lookup("cellZone") >> zoneName_;
-    }
-    else
-    {
-        zoneName_ = cellZoneName;
     }
 
     cellZoneIds_ = mesh_.cellZones().findIndices(zoneName_);
