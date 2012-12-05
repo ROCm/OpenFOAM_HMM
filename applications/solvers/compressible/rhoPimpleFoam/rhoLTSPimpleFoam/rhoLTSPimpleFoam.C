@@ -26,7 +26,7 @@ Application
 
 Description
     Transient solver for laminar or turbulent flow of compressible fluids
-    with support for porous media and MRF for HVAC and similar applications.
+    with support for run-time selectable sources, e.g. MRF, explicit porosity.
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations with support for local time-stepping for
@@ -37,8 +37,6 @@ Description
 #include "fvCFD.H"
 #include "psiThermo.H"
 #include "turbulenceModel.H"
-#include "IOMRFZoneList.H"
-#include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 #include "fvcSmooth.H"
 #include "pimpleControl.H"
@@ -56,7 +54,6 @@ int main(int argc, char *argv[])
 
     #include "setInitialrDeltaT.H"
     #include "createFields.H"
-    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

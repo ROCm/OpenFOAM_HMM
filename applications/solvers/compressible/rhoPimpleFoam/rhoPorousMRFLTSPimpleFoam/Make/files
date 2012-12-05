@@ -1,3 +1,0 @@
-rhoPorousMRFLTSPimpleFoam.C
-
-EXE = $(FOAM_APPBIN)/rhoPorousMRFLTSPimpleFoam
