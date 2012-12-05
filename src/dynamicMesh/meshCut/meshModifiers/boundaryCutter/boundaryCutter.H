@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ Description
 
     Does
     - move boundary points
-    - split boundary edges (multiple per edge if nessecary)
+    - split boundary edges (multiple per edge if necessary)
     - face-centre decomposes boundary faces
     - diagonal split of boundary faces
 
@@ -60,7 +60,7 @@ class polyMesh;
 class face;
 
 /*---------------------------------------------------------------------------*\
-                           Class boundaryCutter Declaration
+                        Class boundaryCutter Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryCutter

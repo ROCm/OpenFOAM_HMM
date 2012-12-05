@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -589,7 +589,7 @@ Foam::label Foam::edgeIntersections::removeDegenerates
             // If edge not already marked for retesting
             if (!affectedEdges[edgeI])
             {
-                // 1. Check edges close to endpoint and perturb if nessecary.
+                // 1. Check edges close to endpoint and perturb if necessary.
 
                 bool shiftedEdgeEndPoints =
                     inlinePerturb

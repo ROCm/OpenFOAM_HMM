@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ Description
         cell out of face, edge or point.
     - can be appended: added 'out of nothing'.
 
-    All this information is nessecary to correctly map fields.
+    All this information is necessary to correctly map fields.
 
     \par points
 
@@ -153,7 +153,7 @@ namespace Foam
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class mapPolyMesh Declaration
+                         Class mapPolyMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class mapPolyMesh

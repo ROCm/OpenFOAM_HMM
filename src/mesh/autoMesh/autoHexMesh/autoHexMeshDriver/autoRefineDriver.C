@@ -237,7 +237,7 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
             << ')' << endl;
 
-        // Stop when no cells to refine or have done minimum nessecary
+        // Stop when no cells to refine or have done minimum necessary
         // iterations and not enough cells to refine.
         if
         (
@@ -441,7 +441,7 @@ Foam::label Foam::autoRefineDriver::shellRefine
             << " cells (out of " << mesh.globalData().nTotalCells()
             << ')' << endl;
 
-        // Stop when no cells to refine or have done minimum nessecary
+        // Stop when no cells to refine or have done minimum necessary
         // iterations and not enough cells to refine.
         if
         (

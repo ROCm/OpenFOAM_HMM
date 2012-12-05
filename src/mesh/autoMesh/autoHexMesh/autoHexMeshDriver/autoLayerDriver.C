@@ -637,7 +637,7 @@ void Foam::autoLayerDriver::setNumLayers
     Info<< nl << "Handling points with inconsistent layer specification ..."
         << endl;
 
-    // Get for every point (really only nessecary on patch external points)
+    // Get for every point (really only necessary on patch external points)
     // the max and min of any patch faces using it.
     labelList maxLayers(patchNLayers.size(), labelMin);
     labelList minLayers(patchNLayers.size(), labelMax);

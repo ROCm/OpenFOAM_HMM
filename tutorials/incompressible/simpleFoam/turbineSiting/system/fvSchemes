@@ -35,7 +35,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default             Gauss linear limited 0.333;
+    default             Gauss linear limited corrected 0.333;
 }
 
 interpolationSchemes
@@ -45,7 +45,7 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default             limited 0.333;
+    default             limited corrected 0.333;
 }
 
 fluxRequired

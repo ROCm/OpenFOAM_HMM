@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ class refineCell;
 class splitCell;
 
 /*---------------------------------------------------------------------------*\
-                           Class undoableMeshCutter Declaration
+                     Class undoableMeshCutter Declaration
 \*---------------------------------------------------------------------------*/
 
 class undoableMeshCutter
@@ -192,7 +192,7 @@ public:
             //- Remove some refinement. Needs to be supplied subset of
             //  getSplitFaces() output. Returns list of faces removed
             //  (can be more or equal but never less than splitFaces - since
-            //  removeFaces might decide to take down unnessecary faces)
+            //  removeFaces might decide to take down unnecessary faces)
             //  Only call if undoable set.
             labelList removeSplitFaces
             (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,7 +151,7 @@ static void handler(void)
 
             // Save the pointer (that gamma knows about) so we can safely
             // gamma_switch_to_buffer with a valid pointer.
-            // Not sure if nessecary but do anyway.
+            // Not sure if necessary but do anyway.
             savedBuf.transfer(buf);
 
             // Resize all the buffers

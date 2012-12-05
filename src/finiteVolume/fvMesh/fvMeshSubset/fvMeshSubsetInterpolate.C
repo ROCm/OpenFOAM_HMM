@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -233,7 +233,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > fvMeshSubset::interpolate
     }
 
 
-    // Map exposed internal faces. Note: Only nessecary if exposed faces added
+    // Map exposed internal faces. Note: Only necessary if exposed faces added
     // into existing patch but since we don't know that at this point...
     forAll(patchFields, patchI)
     {

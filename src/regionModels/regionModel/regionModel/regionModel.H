@@ -52,7 +52,7 @@ namespace regionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class regionModel Declaration
+                         Class regionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionModel
@@ -122,6 +122,15 @@ protected:
         regionModelFunctionObjectList functions_;
 
 
+        // Inter-region AMI interpolation caching
+
+            //- List of region names this region is coupled to
+            wordList interRegionAMINames_;
+
+            //- List of AMI objects per coupled region
+            PtrList<PtrList<AMIPatchToPatchInterpolation> > interRegionAMI_;
+
+
     // Protected member functions
 
         //- Read control parameters from dictionary
@@ -130,6 +139,14 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read(const dictionary& dict);
 
+        //- Create or return a new inter-region AMI object
+        virtual const Foam::AMIPatchToPatchInterpolation& interRegionAMI
+        (
+            const regionModel& nbrRegion,
+            const label regionPatchI,
+            const label nbrPatchI,
+            const bool flip
+        );
 
 public:
 
@@ -160,7 +177,6 @@ public:
             const dictionary& dict,
             bool readFields = true
         );
-
 
 
     //- Destructor
@@ -236,28 +252,28 @@ public:
                 const label nbrPatchI,
                 const Field<Type>& nbrField,
                 const bool flip = false
-            ) const;
+            );
 
             //- Map patch field from another region model to local patch
             template<class Type>
             tmp<Field<Type> > mapRegionPatchField
             (
-                const word& regionModelName,
+                const regionModel& nbrRegion,
                 const word& fieldName,
                 const label regionPatchI,
                 const bool flip = false
-            ) const;
+            );
 
             //- Map patch internal field from another region model to local
             //  patch
             template<class Type>
             tmp<Field<Type> > mapRegionPatchInternalField
             (
-                const word& regionModelName,
+                const regionModel& nbrRegion,
                 const word& fieldName,
                 const label regionPatchI,
                 const bool flip = false
-            ) const;
+            );
 
             //- Convert a local region field to the primary region
             template<class Type>

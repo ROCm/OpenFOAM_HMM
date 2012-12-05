@@ -65,7 +65,7 @@ class mapAddedPolyMesh;
 class mapDistributePolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class fvMeshDistribute Declaration
+                      Class fvMeshDistribute Declaration
 \*---------------------------------------------------------------------------*/
 
 class fvMeshDistribute
@@ -132,7 +132,7 @@ class fvMeshDistribute
             //  patchI.
             autoPtr<mapPolyMesh> deleteProcPatches(const label patchI);
 
-            //- Repatch the mesh. This is only nessecary for the proc
+            //- Repatch the mesh. This is only necessary for the proc
             //  boundary faces. newPatchID is over all boundary faces: -1 or
             //  new patchID. constructFaceMap is being adapted for the
             //  possible new face position (since proc faces get automatically
