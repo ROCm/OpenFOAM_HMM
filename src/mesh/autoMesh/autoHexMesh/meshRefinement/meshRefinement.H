@@ -330,10 +330,11 @@ private:
         // Baffle handling
 
             //- Get faces to repatch. Returns map from face to patch.
-            Map<label> getZoneBafflePatches
+            Map<labelPair> getZoneBafflePatches
             (
                 const bool allowBoundary,
-                const labelList& globalToPatch
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch
             ) const;
 
             //- Geometric test on see whether face needs to be baffled:
@@ -349,7 +350,7 @@ private:
             //- Determine patches for baffles
             void getBafflePatches
             (
-                const labelList& globalToPatch,
+                const labelList& globalToMasterPatch,
                 const labelList& neiLevel,
                 const pointField& neiCc,
                 labelList& ownPatch,
@@ -426,7 +427,7 @@ private:
                 const dictionary& motionDict,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
-                const labelList& globalToPatch
+                const labelList& globalToMasterPatch
             ) const;
 
 
@@ -707,7 +708,8 @@ public:
                 const bool mergeFreeStanding,
                 const dictionary& motionDict,
                 Time& runTime,
-                const labelList& globalToPatch,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
                 const point& keepPoint
             );
 
@@ -716,7 +718,8 @@ public:
             autoPtr<mapPolyMesh> splitMesh
             (
                 const label nBufferLayers,
-                const labelList& globalToPatch,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
                 const point& keepPoint
             );
 
@@ -741,7 +744,8 @@ public:
             //  baffles.
             autoPtr<mapPolyMesh> createZoneBaffles
             (
-                const labelList& globalToPatch,
+                const labelList& globalToMasterPatch,
+                const labelList& globalToSlavePatch,
                 List<labelPair>&
             );
 

@@ -369,7 +369,10 @@ int main(int argc, char *argv[])
     // Add all the surface regions as patches
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList globalToPatch;
+    //- Global surface region to patch (non faceZone surface) or patches
+    //  (faceZone surfaces)
+    labelList globalToMasterPatch;
+    labelList globalToSlavePatch;
     {
         Info<< nl
             << "Adding patches for surface regions" << nl
@@ -377,7 +380,8 @@ int main(int argc, char *argv[])
             << endl;
 
         // From global region number to mesh patch.
-        globalToPatch.setSize(surfaces.nRegions(), -1);
+        globalToMasterPatch.setSize(surfaces.nRegions(), -1);
+        globalToSlavePatch.setSize(surfaces.nRegions(), -1);
 
         Info<< "Patch\tType\tRegion" << nl
             << "-----\t----\t------"
@@ -394,36 +398,111 @@ int main(int argc, char *argv[])
 
             Info<< surfaces.names()[surfI] << ':' << nl << nl;
 
-            forAll(regNames, i)
+            if (surfaces.faceZoneNames()[surfI].empty())
             {
-                label globalRegionI = surfaces.globalRegion(surfI, i);
-
-                label patchI;
-
-                if (surfacePatchInfo.set(globalRegionI))
+                // 'Normal' surface
+                forAll(regNames, i)
                 {
-                    patchI = meshRefiner.addMeshedPatch
-                    (
-                        regNames[i],
-                        surfacePatchInfo[globalRegionI]
-                    );
+                    label globalRegionI = surfaces.globalRegion(surfI, i);
+
+                    label patchI;
+
+                    if (surfacePatchInfo.set(globalRegionI))
+                    {
+                        patchI = meshRefiner.addMeshedPatch
+                        (
+                            regNames[i],
+                            surfacePatchInfo[globalRegionI]
+                        );
+                    }
+                    else
+                    {
+                        dictionary patchInfo;
+                        patchInfo.set("type", wallPolyPatch::typeName);
+
+                        patchI = meshRefiner.addMeshedPatch
+                        (
+                            regNames[i],
+                            patchInfo
+                        );
+                    }
+
+                    Info<< patchI << '\t' << mesh.boundaryMesh()[patchI].type()
+                        << '\t' << regNames[i] << nl;
+
+                    globalToMasterPatch[globalRegionI] = patchI;
+                    globalToSlavePatch[globalRegionI] = patchI;
                 }
-                else
+            }
+            else
+            {
+                // Zoned surface
+                forAll(regNames, i)
                 {
-                    dictionary patchInfo;
-                    patchInfo.set("type", wallPolyPatch::typeName);
+                    label globalRegionI = surfaces.globalRegion(surfI, i);
 
-                    patchI = meshRefiner.addMeshedPatch
-                    (
-                        regNames[i],
-                        patchInfo
-                    );
+                    // Add master side patch
+                    {
+                        label patchI;
+
+                        if (surfacePatchInfo.set(globalRegionI))
+                        {
+                            patchI = meshRefiner.addMeshedPatch
+                            (
+                                regNames[i],
+                                surfacePatchInfo[globalRegionI]
+                            );
+                        }
+                        else
+                        {
+                            dictionary patchInfo;
+                            patchInfo.set("type", wallPolyPatch::typeName);
+
+                            patchI = meshRefiner.addMeshedPatch
+                            (
+                                regNames[i],
+                                patchInfo
+                            );
+                        }
+
+                        Info<< patchI << '\t'
+                            << mesh.boundaryMesh()[patchI].type()
+                            << '\t' << regNames[i] << nl;
+
+                        globalToMasterPatch[globalRegionI] = patchI;
+                    }
+                    // Add slave side patch
+                    {
+                        const word slaveName = regNames[i] + "_slave";
+                        label patchI;
+
+                        if (surfacePatchInfo.set(globalRegionI))
+                        {
+                            patchI = meshRefiner.addMeshedPatch
+                            (
+                                slaveName,
+                                surfacePatchInfo[globalRegionI]
+                            );
+                        }
+                        else
+                        {
+                            dictionary patchInfo;
+                            patchInfo.set("type", wallPolyPatch::typeName);
+
+                            patchI = meshRefiner.addMeshedPatch
+                            (
+                                slaveName,
+                                patchInfo
+                            );
+                        }
+
+                        Info<< patchI << '\t'
+                            << mesh.boundaryMesh()[patchI].type()
+                            << '\t' << slaveName << nl;
+
+                        globalToSlavePatch[globalRegionI] = patchI;
+                    }
                 }
-
-                Info<< patchI << '\t' << mesh.boundaryMesh()[patchI].type()
-                    << '\t' << regNames[i] << nl;
-
-                globalToPatch[globalRegionI] = patchI;
             }
 
             Info<< nl;
@@ -479,7 +558,8 @@ int main(int argc, char *argv[])
             meshRefiner,
             decomposer,
             distributor,
-            globalToPatch
+            globalToMasterPatch,
+            globalToSlavePatch
         );
 
         // Refinement parameters
@@ -510,7 +590,8 @@ int main(int argc, char *argv[])
         autoSnapDriver snapDriver
         (
             meshRefiner,
-            globalToPatch
+            globalToMasterPatch,
+            globalToSlavePatch
         );
 
         // Snap parameters
@@ -544,7 +625,12 @@ int main(int argc, char *argv[])
     {
         cpuTime timer;
 
-        autoLayerDriver layerDriver(meshRefiner, globalToPatch);
+        autoLayerDriver layerDriver
+        (
+            meshRefiner,
+            globalToMasterPatch,
+            globalToSlavePatch
+        );
 
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());

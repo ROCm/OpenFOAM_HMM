@@ -573,7 +573,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
             pFc[i] = pp.faceCentres()[faceI];
             //label meshFaceI = pp.addressing()[faceI];
             //pFid[i] = mesh.boundaryMesh().whichPatch(meshFaceI);
-            pFid[i] = globalToPatch_[faceSurfaceGlobalRegion[faceI]];
+            pFid[i] = globalToMasterPatch_[faceSurfaceGlobalRegion[faceI]];
         }
     }
 

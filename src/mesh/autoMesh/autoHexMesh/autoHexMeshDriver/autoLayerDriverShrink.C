@@ -1135,6 +1135,12 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             << "    " << medialRatio.name()
             << " : ratio of medial distance to wall distance" << nl
             << endl;
+        meshRefiner_.mesh().setInstance(meshRefiner_.timeName());
+        meshRefiner_.write
+        (
+            debug,
+            mesh.time().path()/meshRefiner_.timeName()
+        );
         dispVec.write();
         medialDist.write();
         medialVec.write();
@@ -1408,6 +1414,94 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             *pointWallDist[pointI].s()
             *dispVec[pointI];
     }
+
+
+
+//XXXXX
+//    // Smear displacement away from fixed values (medialRatio=0 or 1)
+//    {
+//        const edgeList& edges = mesh.edges();
+//        scalarField edgeWeight(edges.size(), 0.0);
+//        forAll(edges, edgeI)
+//        {
+//            if (isMasterEdge[edgeI])
+//            {
+//                scalar eMag = edges[edgeI].mag(mesh.points());
+//                if (eMag > VSMALL)
+//                {
+//                    edgeWeight[edgeI] = 1.0/eMag;
+//                }
+//                else
+//                {
+//                    edgeWeight[edgeI] = GREAT;
+//                }
+//            }
+//        }
+//        scalarField invSumWeight(mesh.nPoints());
+//        sumWeights(isMasterEdge, edgeWeight, invSumWeight);
+//
+//
+//        // Get smoothly varying patch field.
+//        Info<< "shrinkMeshDistance : Smoothing displacement ..." << endl;
+//
+//        const scalar lambda = 0.33;
+//        const scalar mu = -0.34;
+//
+//        pointField average(mesh.nPoints());
+//        for (label iter = 0; iter < 90; iter++)
+//        {
+//            // Calculate average of field
+//            averageNeighbours
+//            (
+//                mesh,
+//                edgeWeight,
+//                invSumWeight,
+//                displacement,
+//                average
+//            );
+//
+//            forAll(displacement, i)
+//            {
+//                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
+//                {
+//                    displacement[i] =
+//                        (1-lambda)*displacement[i]
+//                       +lambda*average[i];
+//                }
+//            }
+//
+//
+//            // Calculate average of field
+//            averageNeighbours
+//            (
+//                mesh,
+//                edgeWeight,
+//                invSumWeight,
+//                displacement,
+//                average
+//            );
+//
+//            forAll(displacement, i)
+//            {
+//                if (medialRatio[i] > SMALL && medialRatio[i] < 1-SMALL)
+//                {
+//                    displacement[i] = (1-mu)*displacement[i]+mu*average[i];
+//                }
+//            }
+//
+//
+//            // Do residual calculation every so often.
+//            if ((iter % 10) == 0)
+//            {
+//                Info<< "    Iteration " << iter << "   residual "
+//                    <<  gSum(mag(displacement-average))
+//                       /returnReduce(average.size(), sumOp<label>())
+//                    << endl;
+//            }
+//        }
+//    }
+//XXXXX
+
 
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {

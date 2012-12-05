@@ -57,13 +57,15 @@ Foam::autoRefineDriver::autoRefineDriver
     meshRefinement& meshRefiner,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor,
-    const labelList& globalToPatch
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch
 )
 :
     meshRefiner_(meshRefiner),
     decomposer_(decomposer),
     distributor_(distributor),
-    globalToPatch_(globalToPatch)
+    globalToMasterPatch_(globalToMasterPatch),
+    globalToSlavePatch_(globalToSlavePatch)
 {}
 
 
@@ -313,7 +315,8 @@ void Foam::autoRefineDriver::removeInsideCells
     meshRefiner_.splitMesh
     (
         nBufferLayers,                  // nBufferLayers
-        globalToPatch_,
+        globalToMasterPatch_,
+        globalToSlavePatch_,
         refineParams.keepPoints()[0]
     );
 
@@ -521,7 +524,8 @@ void Foam::autoRefineDriver::baffleAndSplitMesh
         !handleSnapProblems,            // merge free standing baffles?
         motionDict,
         const_cast<Time&>(mesh.time()),
-        globalToPatch_,
+        globalToMasterPatch_,
+        globalToSlavePatch_,
         refineParams.keepPoints()[0]
     );
 }
@@ -606,7 +610,8 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
         //true,                               // merge free standing baffles?
         motionDict,
         const_cast<Time&>(mesh.time()),
-        globalToPatch_,
+        globalToMasterPatch_,
+        globalToSlavePatch_,
         refineParams.keepPoints()[0]
     );
 

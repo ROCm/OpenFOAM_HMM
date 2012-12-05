@@ -59,8 +59,11 @@ class autoSnapDriver
         //- Mesh+surface
         meshRefinement& meshRefiner_;
 
-        //- From surface region to patch
-        const labelList globalToPatch_;
+        //- From global surface region to master side patch
+        const labelList globalToMasterPatch_;
+
+        //- From global surface region to slave side patch
+        const labelList globalToSlavePatch_;
 
 
     // Private Member Functions
@@ -390,7 +393,8 @@ public:
         autoSnapDriver
         (
             meshRefinement& meshRefiner,
-            const labelList& globalToPatch
+            const labelList& globalToMasterPatch,
+            const labelList& globalToSlavePatch
         );
 
 
