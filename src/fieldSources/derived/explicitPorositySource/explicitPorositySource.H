@@ -88,7 +88,8 @@ protected:
         //- Density field name (compressible case only), default = rho
         word rhoName_;
 
-        //- Dynamic viscosity field name (compressible case only), default = mu
+        //- Dynamic viscosity field name (compressible case only)
+        //  default = thermo:mu
         word muName_;
 
 

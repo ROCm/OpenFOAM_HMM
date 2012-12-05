@@ -85,7 +85,7 @@ Foam::explicitPorositySource::explicitPorositySource
     porosityPtr_(NULL),
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
     rhoName_(coeffs_.lookupOrDefault<word>("rhoName", "rho")),
-    muName_(coeffs_.lookupOrDefault<word>("muName", "mu"))
+    muName_(coeffs_.lookupOrDefault<word>("muName", "thermo:mu"))
 {
     initialise();
 }
