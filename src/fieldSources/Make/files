@@ -10,6 +10,7 @@ general/semiImplicitSource/semiImplicitSource.C
 derived/actuationDiskSource/actuationDiskSource.C
 derived/explicitPorositySource/explicitPorositySource.C
 derived/fixedTemperatureSource/fixedTemperatureSource.C
+derived/MRFSource/MRFSource.C
 derived/pressureGradientExplicitSource/pressureGradientExplicitSource.C
 derived/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
 derived/radialActuationDiskSource/radialActuationDiskSource.C
