@@ -11,17 +11,25 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      MRFProperties;
+    object      sourcesProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-zone1
+MRF1
 {
-    cellZone    rotor;
-    active      yes;
-    origin      (0 0 0);
-    axis        (0 0 1);
-    omega       104.72;
+    type            MRFSource;
+    active          true;
+    timeStart       0;
+    duration        1e100;
+    selectionMode   cellZone;
+    cellZone        rotor;
+
+    MRFSourceCoeffs
+    {
+        origin      (0 0 0);
+        axis        (0 0 1);
+        omega       104.72;
+    }
 }
 
 
