@@ -5,7 +5,7 @@ rho.relax();
 
 volScalarField rAU(1.0/UEqn().A());
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == sources(rho, U))().H();
+HbyA = rAU*UEqn().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -24,7 +24,7 @@ if (pimple.transonic())
         )
     );
 
-    sources.relatoiveFlux(fvc::interpolate(psi), phid);
+    sources.relativeFlux(fvc::interpolate(psi), phid);
 
     volScalarField Dp("Dp", rho*rAU);
 
@@ -61,7 +61,7 @@ else
         )
     );
 
-    sources.relatoiveFlux(fvc::interpolate(rho), phiHbyA);
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     volScalarField Dp("Dp", rho*rAU);
 
