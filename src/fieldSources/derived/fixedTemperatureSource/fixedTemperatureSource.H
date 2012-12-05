@@ -32,13 +32,12 @@ Description
 
         fixedTemperatureSourceCoeffs
         {
-            fieldNames      (h e hs);   // names of fields to apply source
-            mode            uniform;    // constant or lookup
+            mode            uniform;    // uniform or lookup
 
             // uniform option
-            temperature     constant 500; // fixed temperature [K]
+            temperature     constant 500; // fixed temperature with time [K]
 
-            // loolup option
+            // lookup option
             // TName        T;          // optional temperature field name
         }
 
