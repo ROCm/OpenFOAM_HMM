@@ -155,12 +155,7 @@ int main(int argc, char *argv[])
         "select a mesh subset based on a provided cellSet and/or"
         " selection criteria"
     );
-    argList::addBoolOption
-    (
-        "dict",
-        "read mesh subset selection criteria"
-        " from system/subsetMeshDict"
-    );
+    #include "addDictOption.H"
     argList::addOption
     (
         "cellSet",
@@ -210,18 +205,10 @@ int main(int argc, char *argv[])
     PtrList<cellSelection> selectors;
     if (useDict)
     {
-        Info<< "Reading selection criteria from subsetMeshDict" << nl << endl;
-        IOdictionary dict
-        (
-            IOobject
-            (
-                "subsetMeshDict",
-                mesh.time().system(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        );
+        const word dictName("subsetMeshDict");
+        #include "setSystemMeshDictionaryIO.H"
+        Info<< "Reading selection criteria from " << dictName << nl << endl;
+        IOdictionary dict(dictIO);
 
         const dictionary& selectionsDict = dict.subDict("selections");
 

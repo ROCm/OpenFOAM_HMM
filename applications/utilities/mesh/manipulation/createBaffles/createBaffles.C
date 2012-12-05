@@ -117,14 +117,9 @@ int main(int argc, char *argv[])
         "Makes internal faces into boundary faces.\n"
         "Does not duplicate points."
     );
-
+    #include "addDictOption.H"
     #include "addOverwriteOption.H"
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "specify alternative dictionary for the createBaffles description"
-    );
+    #include "addDictOption.H"
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
@@ -136,14 +131,8 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
 
-    const word dictName
-    (
-        args.optionLookupOrDefault<word>
-        (
-            "dict",
-            "createBafflesDict"
-        )
-    );
+    const word dictName("createBafflesDict");
+    #include "setSystemMeshDictionaryIO.H"
 
     Switch internalFacesOnly(false);
 
@@ -152,17 +141,7 @@ int main(int argc, char *argv[])
     PtrList<faceSelection> selectors;
     {
         Info<< "Reading baffle criteria from " << dictName << nl << endl;
-        IOdictionary dict
-        (
-            IOobject
-            (
-                dictName,
-                mesh.time().system(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE
-            )
-        );
+        IOdictionary dict(dictIO);
 
         dict.lookup("internalFacesOnly") >> internalFacesOnly;
         noFields = dict.lookupOrDefault("noFields", false);

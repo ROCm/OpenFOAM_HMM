@@ -97,7 +97,6 @@ int main(int argc, char *argv[])
         "geometry scaling factor on output"
     );
     #include "addDictOption.H"
-
     argList::addOption
     (
         "from",

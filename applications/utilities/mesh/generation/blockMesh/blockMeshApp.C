@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,60 +104,50 @@ int main(int argc, char *argv[])
         polyMeshDir = polyMesh::meshSubDir;
     }
 
-    autoPtr<IOobject> meshDictIoPtr;
+    IOobject meshDictIO
+    (
+        dictName,
+        runTime.constant(),
+        polyMeshDir,
+        runTime,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
 
     if (args.optionFound("dict"))
     {
         const fileName dictPath = args["dict"];
 
-        meshDictIoPtr.set
+        meshDictIO = IOobject
         (
-            new IOobject
             (
-                (
-                    isDir(dictPath)
-                  ? dictPath/dictName
-                  : dictPath
-                ),
-                runTime,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        );
-    }
-    else
-    {
-        meshDictIoPtr.set
-        (
-            new IOobject
-            (
-                dictName,
-                runTime.constant(),
-                polyMeshDir,
-                runTime,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
+                isDir(dictPath)
+              ? dictPath/dictName
+              : dictPath
+            ),
+            runTime,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
         );
     }
 
-    if (!meshDictIoPtr->headerOk())
+    if (!meshDictIO.headerOk())
     {
         FatalErrorIn(args.executable())
             << "Cannot open mesh description file\n    "
-            << meshDictIoPtr->objectPath()
+            << meshDictIO.objectPath()
             << nl
             << exit(FatalError);
     }
 
     Info<< "Creating block mesh from\n    "
-        << meshDictIoPtr->objectPath() << endl;
+        << meshDictIO.objectPath() << endl;
 
     blockMesh::verbose(true);
 
-    IOdictionary meshDict(meshDictIoPtr());
+    IOdictionary meshDict(meshDictIO);
     blockMesh blocks(meshDict, regionName);
 
 
