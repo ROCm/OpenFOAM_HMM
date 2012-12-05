@@ -42,15 +42,15 @@ gradSchemes
 
 laplacianSchemes
 {
-    default              Gauss linear limited 0.5;
+    default              Gauss linear limited corrected 0.5;
 }
 
 snGradSchemes
 {
     default              none;
-    snGrad(pd)           limited 0.5;
-    snGrad(rho)          limited 0.5;
-    snGrad(alpha1)       limited 0.5;
+    snGrad(pd)           limited corrected 0.5;
+    snGrad(rho)          limited corrected 0.5;
+    snGrad(alpha1)       limited corrected 0.5;
 }
 
 fluxRequired
