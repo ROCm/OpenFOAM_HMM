@@ -9,7 +9,7 @@
     surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*(UEqn == sources(rho, U))().H();
+    HbyA = rAU*UEqn.H();
 
     surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
@@ -23,6 +23,8 @@
         )
       + phig
     );
+
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     fvScalarMatrix p_rghDDtEqn
     (
