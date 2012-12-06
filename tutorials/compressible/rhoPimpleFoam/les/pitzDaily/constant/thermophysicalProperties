@@ -42,7 +42,7 @@ gasThermoTypes
 
 thermoType
 {
-    $.gasThermoTypes.constant;
+    ${:gasThermoTypes.constant};
 }
 
 mixture

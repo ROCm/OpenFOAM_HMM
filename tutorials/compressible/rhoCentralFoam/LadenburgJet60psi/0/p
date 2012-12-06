@@ -1235,7 +1235,7 @@ boundaryField
         field           p;
         phi             phi;
         rho             rho;
-        psi             psi;
+        psi             thermo:psi;
         gamma           1.4;
         fieldInf        101325;
         lInf            0.025;
@@ -1275,7 +1275,7 @@ boundaryField
         U               U;
         phi             phi;
         rho             none;
-        psi             psi;
+        psi             thermo:psi;
         gamma           1.4;
         p0              uniform 101325;
         value           nonuniform List<scalar>
