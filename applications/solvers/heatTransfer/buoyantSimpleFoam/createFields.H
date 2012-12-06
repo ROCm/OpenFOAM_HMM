@@ -87,3 +87,5 @@
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
     dimensionedScalar totalVolume = sum(mesh.V());
+
+    IObasicSourceList sources(mesh);

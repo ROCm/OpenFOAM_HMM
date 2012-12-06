@@ -36,7 +36,7 @@ Description
 #include "fixedGradientFvPatchFields.H"
 #include "radiationModel.H"
 #include "simpleControl.H"
-#include "IOMRFZoneList.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "createZones.H"
     #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
 

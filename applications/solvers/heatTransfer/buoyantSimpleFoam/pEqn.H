@@ -17,7 +17,7 @@
         fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
     );
 
-    mrfZones.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     bool closedVolume = adjustPhi(phiHbyA, U, p_rgh);
 
@@ -45,6 +45,7 @@
             // calculated from the relaxed pressure
             U = HbyA + rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
+            sources.correct(U);
         }
     }
 
