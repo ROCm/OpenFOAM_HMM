@@ -138,3 +138,5 @@
     fields.add(b);
     fields.add(thermo.he());
     fields.add(thermo.heu());
+
+    IObasicSourceList sources(mesh);

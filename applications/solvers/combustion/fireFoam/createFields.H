@@ -146,3 +146,6 @@
     (
         additionalControlsDict.lookup("solvePrimaryRegion")
     );
+
+    IObasicSourceList sources(mesh);
+

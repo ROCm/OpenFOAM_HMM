@@ -13,10 +13,16 @@ if (composition.contains("ft"))
 {
     volScalarField& ft = composition.Y("ft");
 
-    solve
+    fvScalarMatrix ftEqn
     (
         fvm::ddt(rho, ft)
       + mvConvection->fvmDiv(phi, ft)
       - fvm::laplacian(turbulence->alphaEff(), ft)
+     ==
+        sources(rho, ft)
     );
+
+    sources.constrain(ftEqn);
+
+    ftEqn.solve();
 }

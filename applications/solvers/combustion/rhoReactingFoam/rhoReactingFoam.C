@@ -35,6 +35,7 @@ Description
 #include "turbulenceModel.H"
 #include "multivariateScheme.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
