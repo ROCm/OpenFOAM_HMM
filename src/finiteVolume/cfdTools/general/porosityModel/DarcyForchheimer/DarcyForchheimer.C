@@ -56,7 +56,7 @@ Foam::porosityModels::DarcyForchheimer::DarcyForchheimer
     D_("D", dimless/sqr(dimLength), tensor::zero),
     F_("F", dimless/dimLength, tensor::zero),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho")),
-    muName_(coeffs_.lookupOrDefault<word>("mu", "mu")),
+    muName_(coeffs_.lookupOrDefault<word>("mu", "thermo:mu")),
     nuName_(coeffs_.lookupOrDefault<word>("nu", "nu"))
 {
     // local-to-global transformation tensor

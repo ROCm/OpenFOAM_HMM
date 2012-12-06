@@ -765,7 +765,7 @@ kinematicSingleLayer::kinematicSingleLayer
     (
         IOobject
         (
-            "mu", // must have same name as mu to enable mapping
+            "thermo:mu", // must have same name as mu to enable mapping
             time().timeName(),
             regionMesh(),
             IOobject::NO_READ,
