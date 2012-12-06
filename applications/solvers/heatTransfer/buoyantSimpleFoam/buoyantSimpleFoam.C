@@ -33,7 +33,6 @@ Description
 #include "fvCFD.H"
 #include "psiThermo.H"
 #include "RASModel.H"
-#include "fixedGradientFvPatchFields.H"
 #include "radiationModel.H"
 #include "simpleControl.H"
 #include "IObasicSourceList.H"
