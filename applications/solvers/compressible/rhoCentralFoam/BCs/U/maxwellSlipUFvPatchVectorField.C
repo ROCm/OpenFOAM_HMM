@@ -30,20 +30,20 @@ License
 #include "volFields.H"
 #include "fvcGrad.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
+Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     mixedFixedValueSlipFvPatchVectorField(p, iF),
+    TName_("T"),
+    rhoName_("rho"),
+    psiName_("thermo:psi"),
+    muName_("thermo:mu"),
+    tauMCName_("tauMC"),
     accommodationCoeff_(1.0),
     Uwall_(p.size(), vector(0.0, 0.0, 0.0)),
     thermalCreep_(true),
@@ -51,23 +51,28 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 {}
 
 
-maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
+Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 (
-    const maxwellSlipUFvPatchVectorField& tdpvf,
+    const maxwellSlipUFvPatchVectorField& mspvf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(tdpvf, p, iF, mapper),
-    accommodationCoeff_(tdpvf.accommodationCoeff_),
-    Uwall_(tdpvf.Uwall_),
-    thermalCreep_(tdpvf.thermalCreep_),
-    curvature_(tdpvf.curvature_)
+    mixedFixedValueSlipFvPatchVectorField(mspvf, p, iF, mapper),
+    TName_(mspvf.TName_),
+    rhoName_(mspvf.rhoName_),
+    psiName_(mspvf.psiName_),
+    muName_(mspvf.muName_),
+    tauMCName_(mspvf.tauMCName_),
+    accommodationCoeff_(mspvf.accommodationCoeff_),
+    Uwall_(mspvf.Uwall_),
+    thermalCreep_(mspvf.thermalCreep_),
+    curvature_(mspvf.curvature_)
 {}
 
 
-maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
+Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -75,6 +80,11 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 )
 :
     mixedFixedValueSlipFvPatchVectorField(p, iF),
+    TName_(dict.lookupOrDefault<word>("T", "T")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
+    muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
+    tauMCName_(dict.lookupOrDefault<word>("tauMC", "tauMC")),
     accommodationCoeff_(readScalar(dict.lookup("accommodationCoeff"))),
     Uwall_("Uwall", dict, p.size()),
     thermalCreep_(dict.lookupOrDefault("thermalCreep", true)),
@@ -88,9 +98,12 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
     {
         FatalIOErrorIn
         (
-            "maxwellSlipUFvPatchScalarField::"
-            "maxwellSlipUFvPatchScalarField"
-            "(const fvPatch&, const scalarField&, const dictionary&)",
+            "maxwellSlipUFvPatchScalarField::maxwellSlipUFvPatchScalarField"
+            "("
+                "const fvPatch&, "
+                "const DimensionedField<vector, volMesh>&, "
+                "const dictionary&"
+            ")",
             dict
         )   << "unphysical accommodationCoeff_ specified"
             << "(0 < accommodationCoeff_ <= 1)" << endl
@@ -119,23 +132,28 @@ maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 }
 
 
-maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
+Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
 (
-    const maxwellSlipUFvPatchVectorField& tdpvf,
+    const maxwellSlipUFvPatchVectorField& mspvf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
-    mixedFixedValueSlipFvPatchVectorField(tdpvf, iF),
-    accommodationCoeff_(tdpvf.accommodationCoeff_),
-    Uwall_(tdpvf.Uwall_),
-    thermalCreep_(tdpvf.thermalCreep_),
-    curvature_(tdpvf.curvature_)
+    mixedFixedValueSlipFvPatchVectorField(mspvf, iF),
+    TName_(mspvf.TName_),
+    rhoName_(mspvf.rhoName_),
+    psiName_(mspvf.psiName_),
+    muName_(mspvf.muName_),
+    tauMCName_(mspvf.tauMCName_),
+    accommodationCoeff_(mspvf.accommodationCoeff_),
+    Uwall_(mspvf.Uwall_),
+    thermalCreep_(mspvf.thermalCreep_),
+    curvature_(mspvf.curvature_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void maxwellSlipUFvPatchVectorField::updateCoeffs()
+void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -143,11 +161,11 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     }
 
     const fvPatchScalarField& pmu =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
     const fvPatchScalarField& prho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
     const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>("psi");
+        patch().lookupPatchField<volScalarField, scalar>(psiName_);
 
     Field<scalar> C1
     (
@@ -163,7 +181,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     if (thermalCreep_)
     {
         const volScalarField& vsfT =
-            this->db().objectRegistry::lookupObject<volScalarField>("T");
+            this->db().objectRegistry::lookupObject<volScalarField>(TName_);
         label patchi = this->patch().index();
         const fvPatchScalarField& pT = vsfT.boundaryField()[patchi];
         Field<vector> gradpT(fvc::grad(vsfT)().boundaryField()[patchi]);
@@ -175,7 +193,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     if (curvature_)
     {
         const fvPatchTensorField& ptauMC =
-            patch().lookupPatchField<volTensorField, tensor>("tauMC");
+            patch().lookupPatchField<volTensorField, tensor>(tauMCName_);
         vectorField n(patch().nf());
 
         refValue() -= C1/prho*transform(I - n*n, (n & ptauMC));
@@ -185,9 +203,15 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
 }
 
 
-void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
+void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    writeEntryIfDifferent<word>(os, "T", "T", TName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
+    writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
+    writeEntryIfDifferent<word>(os, "tauMC", "tauMC", tauMCName_);
+
     os.writeKeyword("accommodationCoeff")
         << accommodationCoeff_ << token::END_STATEMENT << nl;
     Uwall_.writeEntry("Uwall", os);
@@ -204,14 +228,13 @@ void maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchVectorField,
-    maxwellSlipUFvPatchVectorField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchVectorField,
+        maxwellSlipUFvPatchVectorField
+    );
+}
 
 // ************************************************************************* //
