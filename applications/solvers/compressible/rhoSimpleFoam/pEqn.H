@@ -6,7 +6,7 @@
 
     volScalarField rAU(1.0/UEqn().A());
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*(UEqn() == sources(rho, U))().H();
+    HbyA = rAU*UEqn().H();
 
     UEqn.clear();
 
@@ -19,6 +19,8 @@
             "phid",
             fvc::interpolate(psi)*(fvc::interpolate(HbyA) & mesh.Sf())
         );
+
+        sources.relativeFlux(fvc::interpolate(psi), phid);
 
         while (simple.correctNonOrthogonal())
         {
@@ -52,6 +54,8 @@
             "phiHbyA",
             fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
         );
+
+        sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
         closedVolume = adjustPhi(phiHbyA, U, p);
 

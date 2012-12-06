@@ -8,6 +8,8 @@
         sources(U)
     );
 
+    mrfZones.addCoriolis(UEqn());
+
     UEqn().relax();
 
     sources.constrain(UEqn());

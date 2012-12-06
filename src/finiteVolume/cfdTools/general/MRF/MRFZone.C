@@ -230,15 +230,16 @@ Foam::MRFZone::MRFZone
 (
     const word& name,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 :
     mesh_(mesh),
     name_(name),
     coeffs_(dict),
-    active_(readBool(coeffs_.lookup("active"))),
-    cellZoneName_(coeffs_.lookup("cellZone")),
-    cellZoneID_(mesh_.cellZones().findZoneID(cellZoneName_)),
+    active_(true),
+    cellZoneName_(cellZoneName),
+    cellZoneID_(),
     excludedPatchNames_
     (
         coeffs_.lookupOrDefault("nonRotatingPatches", wordList(0))
@@ -247,12 +248,20 @@ Foam::MRFZone::MRFZone
     axis_(coeffs_.lookup("axis")),
     omega_(DataEntry<scalar>::New("omega", coeffs_))
 {
+    if (cellZoneName_ == word::null)
+    {
+        coeffs_.lookup("active") >> active_;
+        coeffs_.lookup("cellZone") >> cellZoneName_;
+    }
+
     if (!active_)
     {
         cellZoneID_ = -1;
     }
     else
     {
+        cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
+
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
         axis_ = axis_/mag(axis_);
@@ -268,7 +277,13 @@ Foam::MRFZone::MRFZone
             {
                 FatalErrorIn
                 (
-                    "MRFZone(const word&, const fvMesh&, const dictionary&)"
+                    "MRFZone"
+                    "("
+                        "const word&, "
+                        "const fvMesh&, "
+                        "const dictionary&, "
+                        "const word&"
+                    ")"
                 )
                     << "cannot find MRF patch " << excludedPatchNames_[i]
                     << exit(FatalError);
@@ -283,7 +298,13 @@ Foam::MRFZone::MRFZone
         {
             FatalErrorIn
             (
-                "MRFZone(const word&, const fvMesh&, const dictionary&)"
+                "MRFZone"
+                "("
+                    "const word&, "
+                    "const fvMesh&, "
+                    "const dictionary&, "
+                    "const word&"
+                ")"
             )
                 << "cannot find MRF cellZone " << cellZoneName_
                 << exit(FatalError);
@@ -328,7 +349,7 @@ void Foam::MRFZone::addCoriolis
 }
 
 
-void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
+void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn, const bool rhs) const
 {
     if (cellZoneID_ == -1)
     {
@@ -342,10 +363,21 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 
     const vector Omega = this->Omega();
 
-    forAll(cells, i)
+    if (rhs)
     {
-        label celli = cells[i];
-        Usource[celli] -= V[celli]*(Omega ^ U[celli]);
+        forAll(cells, i)
+        {
+            label celli = cells[i];
+            Usource[celli] += V[celli]*(Omega ^ U[celli]);
+        }
+    }
+    else
+    {
+        forAll(cells, i)
+        {
+            label celli = cells[i];
+            Usource[celli] -= V[celli]*(Omega ^ U[celli]);
+        }
     }
 }
 
@@ -353,7 +385,8 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 void Foam::MRFZone::addCoriolis
 (
     const volScalarField& rho,
-    fvVectorMatrix& UEqn
+    fvVectorMatrix& UEqn,
+    const bool rhs
 ) const
 {
     if (cellZoneID_ == -1)
@@ -368,10 +401,21 @@ void Foam::MRFZone::addCoriolis
 
     const vector Omega = this->Omega();
 
-    forAll(cells, i)
+    if (rhs)
     {
-        label celli = cells[i];
-        Usource[celli] -= V[celli]*rho[celli]*(Omega ^ U[celli]);
+        forAll(cells, i)
+        {
+            label celli = cells[i];
+            Usource[celli] += V[celli]*rho[celli]*(Omega ^ U[celli]);
+        }
+    }
+    else
+    {
+        forAll(cells, i)
+        {
+            label celli = cells[i];
+            Usource[celli] -= V[celli]*rho[celli]*(Omega ^ U[celli]);
+        }
     }
 }
 

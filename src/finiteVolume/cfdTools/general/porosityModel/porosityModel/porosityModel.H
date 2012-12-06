@@ -127,9 +127,10 @@ public:
             const word& modelName,
             const word& name,
             const fvMesh& mesh,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& cellZoneName
         ),
-        (modelName, name, mesh, dict)
+        (modelName, name, mesh, dict, cellZoneName)
     );
 
     //- Constructor
@@ -138,7 +139,8 @@ public:
         const word& name,
         const word& modelType,
         const fvMesh& mesh,
-        const dictionary& dict
+        const dictionary& dict,
+        const word& cellZoneName = word::null
     );
 
     //- Return pointer to new porosityModel object created on the freestore
@@ -182,7 +184,8 @@ public:
     (
         const word& name,
         const fvMesh& mesh,
-        const dictionary& dict
+        const dictionary& dict,
+        const word& cellZoneName = word::null
     );
 
     //- Destructor

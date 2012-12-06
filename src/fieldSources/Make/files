@@ -3,13 +3,17 @@ basicSource/basicSourceIO.C
 basicSource/basicSourceList.C
 basicSource/IObasicSourceList.C
 
-general/semiImplicitSource/semiImplicitSource.C
-general/explicitSetValue/explicitSetValue.C
 general/codedSource/codedSource.C
+general/explicitSetValue/explicitSetValue.C
+general/semiImplicitSource/semiImplicitSource.C
 
+derived/actuationDiskSource/actuationDiskSource.C
+derived/explicitPorositySource/explicitPorositySource.C
+derived/fixedTemperatureSource/fixedTemperatureSource.C
+derived/MRFSource/MRFSource.C
 derived/pressureGradientExplicitSource/pressureGradientExplicitSource.C
 derived/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
-
+derived/radialActuationDiskSource/radialActuationDiskSource.C
 derived/rotorDiskSource/rotorDiskSource.C
 derived/rotorDiskSource/bladeModel/bladeModel.C
 derived/rotorDiskSource/profileModel/profileModel.C
@@ -21,15 +25,11 @@ derived/rotorDiskSource/trimModel/trimModel/trimModelNew.C
 derived/rotorDiskSource/trimModel/fixed/fixedTrim.C
 derived/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
 
-derived/actuationDiskSource/actuationDiskSource.C
-derived/radialActuationDiskSource/radialActuationDiskSource.C
-
 interRegion = derived/interRegionHeatTransferModel
-$(interRegion)/interRegionHeatTransferModel/interRegionHeatTransferModel.C
 $(interRegion)/constantHeatTransfer/constantHeatTransfer.C
+$(interRegion)/interRegionHeatTransferModel/interRegionHeatTransferModel.C
 $(interRegion)/tabulatedHeatTransfer/tabulatedHeatTransfer.C
 $(interRegion)/variableHeatTransfer/variableHeatTransfer.C
 
-derived/fixedTemperatureSource/fixedTemperatureSource.C
 
 LIB = $(FOAM_LIBBIN)/libfieldSources

@@ -1,5 +1,5 @@
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == sources(U))().H();
+HbyA = rAU*UEqn().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -15,7 +15,7 @@ surfaceScalarField phiHbyA
 
 adjustPhi(phiHbyA, U, p);
 
-mrfZones.relativeFlux(phiHbyA);
+sources.relativeFlux(phiHbyA);
 
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())
