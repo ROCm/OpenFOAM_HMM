@@ -9,4 +9,4 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
-    -L$(SCOTCH_ROOT)/lib -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) -lptscotch -lptscotcherrexit -lrt
+    -L$(SCOTCH_ROOT)/lib -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) -lptscotch -lptscotcherrexit -lscotch -lrt
