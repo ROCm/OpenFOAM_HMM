@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 #include "meshReader.H"
 #include "IOMap.H"
 #include "OFstream.H"
-
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * //
 
@@ -80,7 +80,7 @@ void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
         IOobject
         (
             "interfaces",
-            "constant",
+            registry.time().constant(),
             polyMesh::meshSubDir,
             registry,
             IOobject::NO_READ,
@@ -115,7 +115,7 @@ void Foam::meshReader::writeMeshLabelList
         IOobject
         (
             propertyName,
-            "constant",
+            registry.time().constant(),
             polyMesh::meshSubDir,
             registry,
             IOobject::NO_READ,

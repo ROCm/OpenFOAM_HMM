@@ -155,7 +155,8 @@ void Foam::timeSelector::addOptions
 Foam::List<Foam::instant> Foam::timeSelector::select
 (
     const instantList& timeDirs,
-    const argList& args
+    const argList& args,
+    const word& constantName
 )
 {
     if (timeDirs.size())
@@ -168,7 +169,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select
 
         forAll(timeDirs, timeI)
         {
-            if (timeDirs[timeI].name() == "constant")
+            if (timeDirs[timeI].name() == constantName)
             {
                 constantIdx = timeI;
             }
@@ -250,7 +251,12 @@ Foam::List<Foam::instant> Foam::timeSelector::select0
     const argList& args
 )
 {
-    instantList timeDirs = timeSelector::select(runTime.times(), args);
+    instantList timeDirs = timeSelector::select
+    (
+        runTime.times(),
+        args,
+        runTime.constant()
+    );
 
     if (timeDirs.empty())
     {

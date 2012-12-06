@@ -374,7 +374,12 @@ public:
             instant findClosestTime(const scalar) const;
 
             //- Search instantList for the time index closest to the given time
-            static label findClosestTimeIndex(const instantList&, const scalar);
+            static label findClosestTimeIndex
+            (
+                const instantList&,
+                const scalar,
+                const word& constantName = "constant"
+            );
 
             //- Write using given format, version and compression
             virtual bool writeObject
@@ -404,7 +409,11 @@ public:
             virtual word timeName() const;
 
             //- Search a given directory for valid time directories
-            static instantList findTimes(const fileName&);
+            static instantList findTimes
+            (
+                const fileName&,
+                const word& constantName = "constant"
+            );
 
             //- Return start time index
             virtual label startTimeIndex() const;

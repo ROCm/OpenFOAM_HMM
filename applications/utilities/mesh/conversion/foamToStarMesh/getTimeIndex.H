@@ -4,7 +4,7 @@
 
     if
     (
-        runTime.timeName() != "constant"
+        runTime.timeName() != runTime.constant()
      && runTime.timeName() != "0"
     )
     {

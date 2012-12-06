@@ -105,7 +105,7 @@ Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::findMeshInstance
         }
     }
 
-    return "constant";
+    return t.constant();
 }
 
 
@@ -148,7 +148,7 @@ Foam::fileName Foam::fileFormats::edgeMeshFormatsCore::findMeshFile
     }
 
     // fallback to "constant"
-    return t.path()/"constant"/localName;
+    return t.path()/t.constant()/localName;
 }
 #endif
 

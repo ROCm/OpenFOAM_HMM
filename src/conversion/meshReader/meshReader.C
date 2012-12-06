@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,7 +138,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
             IOobject
             (
                 polyMesh::defaultRegion,
-                "constant",
+                registry.time().constant(),
                 registry
             ),
             xferMove(points_),
