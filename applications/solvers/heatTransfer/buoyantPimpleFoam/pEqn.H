@@ -42,7 +42,7 @@
           - fvm::laplacian(rhorAUf, p_rgh)
         );
 
-        sources.constrain(p_rghEqn, rho.name());
+        sources.constrain(p_rghEqn);
 
         p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 

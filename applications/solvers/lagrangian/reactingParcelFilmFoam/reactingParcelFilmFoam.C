@@ -37,6 +37,7 @@ Description
 #include "psiCombustionModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
+#include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

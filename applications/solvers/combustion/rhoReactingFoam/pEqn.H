@@ -40,7 +40,7 @@
                 sources(psi, p, rho.name())
             );
 
-            sources.constrain(pEqn, rho.name());
+            sources.constrain(pEqn);
 
             pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -80,7 +80,7 @@
               - fvm::laplacian(rho*rAU, p)
             );
 
-            sources.constrain(pEqn, rho.name());
+            sources.constrain(pEqn);
 
             pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
