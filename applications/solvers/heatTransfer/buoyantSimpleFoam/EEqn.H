@@ -10,10 +10,13 @@
           : fvc::div(phi, volScalarField("K", 0.5*magSqr(U)))
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
+     ==
+        radiation->Sh(thermo)
     );
 
     EEqn.relax();
     EEqn.solve();
 
     thermo.correct();
+    radiation->correct();
 }

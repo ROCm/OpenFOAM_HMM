@@ -22,10 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    buoyantSimpleFoam
+    buoyantSimpleRadiationFoam
 
 Description
-    Steady-state solver for buoyant, turbulent flow of compressible fluids
+    Steady-state solver for buoyant, turbulent flow of compressible fluids,
+    including radiation, for ventilation and heat-transfer.
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,6 +34,7 @@ Description
 #include "psiThermo.H"
 #include "RASModel.H"
 #include "fixedGradientFvPatchFields.H"
+#include "radiationModel.H"
 #include "simpleControl.H"
 #include "IOMRFZoneList.H"
 
@@ -46,6 +48,7 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createZones.H"
+    #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
 
     simpleControl simple(mesh);
