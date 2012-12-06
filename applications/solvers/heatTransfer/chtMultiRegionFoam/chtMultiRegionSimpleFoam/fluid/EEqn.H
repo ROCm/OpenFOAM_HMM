@@ -16,6 +16,9 @@
     );
 
     EEqn.relax();
+
+    sources.constrain(EEqn);
+
     EEqn.solve();
 
     thermo.correct();
