@@ -36,6 +36,7 @@ Description
 #include "fvCFD.H"
 #include "rhoThermo.H"
 #include "turbulenceModel.H"
+#include "radiationModel.H"
 #include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createRadiationModel.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"
