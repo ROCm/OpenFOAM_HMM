@@ -83,7 +83,7 @@ Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
             << "reading " << foamName
             << " from constant/" << endl;
     }
-    return "constant";
+    return d.constant();
 }
 
 

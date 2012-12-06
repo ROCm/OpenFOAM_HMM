@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,7 +105,7 @@ Foam::fileName Foam::fileFormats::surfaceFormatsCore::findMeshInstance
         }
     }
 
-    return "constant";
+    return t.constant();
 }
 
 
@@ -148,7 +148,7 @@ Foam::fileName Foam::fileFormats::surfaceFormatsCore::findMeshFile
     }
 
     // fallback to "constant"
-    return t.path()/"constant"/localName;
+    return t.path()/t.constant()/localName;
 }
 #endif
 

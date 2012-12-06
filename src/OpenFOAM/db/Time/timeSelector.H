@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,7 +138,8 @@ public:
         static instantList select
         (
             const instantList&,
-            const argList& args
+            const argList& args,
+            const word& constantName = "constant"
         );
 
         //- Return the set of times selected based on the argList options

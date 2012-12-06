@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         IOobject
         (
             dictName,
-            "system",
+            runTime.system(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
@@ -128,9 +128,9 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    if (optRewrite && solutionDict.instance() != "system")
+    if (optRewrite && solutionDict.instance() != runTime.system())
     {
-        Info<<"instance is not 'system' "
+        Info<<"instance is not " << runTime.system()
             "- disabling rewrite for this file" << nl;
         optRewrite = false;
     }
