@@ -108,6 +108,50 @@ void Foam::basicSourceList::reset(const dictionary& dict)
 }
 
 
+void Foam::basicSourceList::relativeFlux(surfaceScalarField& phi) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).relativeFlux(phi);
+    }
+}
+
+
+void Foam::basicSourceList::relativeFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).relativeFlux(rho, phi);
+    }
+}
+
+
+void Foam::basicSourceList::absoluteFlux(surfaceScalarField& phi) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).absoluteFlux(phi);
+    }
+}
+
+
+void Foam::basicSourceList::absoluteFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).absoluteFlux(rho, phi);
+    }
+}
+
+
 bool Foam::basicSourceList::read(const dictionary& dict)
 {
     checkTimeIndex_ = mesh_.time().timeIndex() + 2;

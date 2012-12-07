@@ -505,13 +505,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addOption
-    (
-        "dict",
-        "word",
-        "name of dictionary to provide patch information"
-    );
-
+    #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
@@ -521,38 +515,20 @@ int main(int argc, char *argv[])
 
     const bool overwrite = args.optionFound("overwrite");
 
-    word dictName
-    (
-        args.optionLookupOrDefault<word>("dict", "createPatchDict")
-    );
+    #include "createNamedPolyMesh.H"
+
+    const word oldInstance = mesh.pointsInstance();
+
+    const word dictName("createPatchDict");
+    #include "setSystemMeshDictionaryIO.H"
 
     Info<< "Reading " << dictName << nl << endl;
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            dictName,
-            runTime.system(),
-            (
-                meshRegionName != polyMesh::defaultRegion
-              ? meshRegionName
-              : word::null
-            ),
-            runTime,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
+    IOdictionary dict(dictIO);
 
     // Whether to synchronise points
     const Switch pointSync(dict.lookup("pointSync"));
 
-    #include "createNamedPolyMesh.H"
-
-    const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

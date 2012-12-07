@@ -40,6 +40,9 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
+        TName        | Temperature field name  | no          | T
+        pName        | Pressure field name     | no          | p
+        psiName      | Compressibility field name | no       | thermo:psi
         UInf         | free-stream velocity    | yes         |
         pInf         | free-stream pressure    | yes         |
         TInf         | free-stream temperature | yes         |
@@ -87,6 +90,15 @@ class supersonicFreestreamFvPatchVectorField
     public mixedFvPatchVectorField
 {
     // Private data
+
+        //- Name of temperature field, default = "T"
+        word TName_;
+
+        //- Name of pressure field, default = "p"
+        word pName_;
+
+        //- Name of compressibility field field, default = "thermo:psi"
+        word psiName_;
 
         //- Velocity of the free stream
         vector UInf_;

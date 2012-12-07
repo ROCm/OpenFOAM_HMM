@@ -148,12 +148,28 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional specification of patch type (default is wall). No
+            // constraint types (cyclic, symmetry) etc. are allowed.
+            patchInfo
+            {
+                type        wall;
+                inGroups    (wall);
+            }
         }
 
         "iglo.*"
         {
             // Surface-wise min and max refinement level
             level (1 1);
+
+            // Optional specification of patch type (default is wall). No
+            // constraint types (cyclic, symmetry) etc. are allowed.
+            patchInfo
+            {
+                type        wall;
+                inGroups    (wall);
+            }
         }
     }
 

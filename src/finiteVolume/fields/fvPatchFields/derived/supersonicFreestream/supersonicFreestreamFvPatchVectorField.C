@@ -38,6 +38,9 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    TName_("T"),
+    pName_("p"),
+    psiName_("thermo:psi"),
     UInf_(vector::zero),
     pInf_(0),
     TInf_(0),
@@ -59,6 +62,9 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(ptf, p, iF, mapper),
+    TName_(ptf.TName_),
+    pName_(ptf.pName_),
+    psiName_(ptf.psiName_),
     UInf_(ptf.UInf_),
     pInf_(ptf.pInf_),
     TInf_(ptf.TInf_),
@@ -75,6 +81,9 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(p, iF),
+    TName_(dict.lookupOrDefault<word>("T", "T")),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
     UInf_(dict.lookup("UInf")),
     pInf_(readScalar(dict.lookup("pInf"))),
     TInf_(readScalar(dict.lookup("TInf"))),
@@ -120,6 +129,9 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(sfspvf),
+    TName_(sfspvf.TName_),
+    pName_(sfspvf.pName_),
+    psiName_(sfspvf.psiName_),
     UInf_(sfspvf.UInf_),
     pInf_(sfspvf.pInf_),
     TInf_(sfspvf.TInf_),
@@ -135,6 +147,9 @@ supersonicFreestreamFvPatchVectorField
 )
 :
     mixedFvPatchVectorField(sfspvf, iF),
+    TName_(sfspvf.TName_),
+    pName_(sfspvf.pName_),
+    psiName_(sfspvf.psiName_),
     UInf_(sfspvf.UInf_),
     pInf_(sfspvf.pInf_),
     TInf_(sfspvf.TInf_),
@@ -152,13 +167,13 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
     }
 
     const fvPatchField<scalar>& pT =
-        patch().lookupPatchField<volScalarField, scalar>("T");
+        patch().lookupPatchField<volScalarField, scalar>(TName_);
 
     const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>("p");
+        patch().lookupPatchField<volScalarField, scalar>(pName_);
 
     const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>("thermo:psi");
+        patch().lookupPatchField<volScalarField, scalar>(psiName_);
 
     // Need R of the free-stream flow.  Assume R is independent of location
     // along patch so use face 0
@@ -288,6 +303,9 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
 void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    writeEntryIfDifferent<word>(os, "T", "T", TName_);
+    writeEntryIfDifferent<word>(os, "p", "p", pName_);
+    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
     os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
     os.writeKeyword("pInf") << pInf_ << token::END_STATEMENT << nl;
     os.writeKeyword("TInf") << TInf_ << token::END_STATEMENT << nl;

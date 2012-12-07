@@ -30,14 +30,19 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    solve
+    fvScalarMatrix rhoEqn
     (
         fvm::ddt(rho)
       + fvc::div(phi)
       ==
         parcels.Srho(rho)
       + surfaceFilm.Srho()
+      + sources(rho)
     );
+
+    sources.constrain(rhoEqn);
+
+    rhoEqn.solve();
 }
 
 // ************************************************************************* //

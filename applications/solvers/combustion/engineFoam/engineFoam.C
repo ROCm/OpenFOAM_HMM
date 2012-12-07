@@ -59,6 +59,7 @@ Description
 #include "OFstream.H"
 #include "mathematicalConstants.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

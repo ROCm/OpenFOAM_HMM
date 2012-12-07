@@ -144,7 +144,13 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        MRFZone(const word& name, const fvMesh& mesh, const dictionary& dict);
+        MRFZone
+        (
+            const word& name,
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& cellZoneName = word::null
+        );
 
         //- Return clone
         autoPtr<MRFZone> clone() const
@@ -185,13 +191,20 @@ public:
             ) const;
 
             //- Add the Coriolis force contribution to the momentum equation
-            void addCoriolis(fvVectorMatrix& UEqn) const;
+            //  Adds to the lhs of the equation; optionally add to rhs
+            void addCoriolis
+            (
+                fvVectorMatrix& UEqn,
+                const bool rhs = false
+            ) const;
 
             //- Add the Coriolis force contribution to the momentum equation
+            //  Adds to the lhs of the equation; optionally add to rhs
             void addCoriolis
             (
                 const volScalarField& rho,
-                fvVectorMatrix& UEqn
+                fvVectorMatrix& UEqn,
+                const bool rhs = false
             ) const;
 
             //- Make the given absolute velocity relative within the MRF region

@@ -148,7 +148,7 @@ void Foam::Time::setControls()
     else
     {
         // Search directory for valid time directories
-        instantList timeDirs = findTimes(path());
+        instantList timeDirs = findTimes(path(), constant());
 
         if (startFrom == "firstTime")
         {
@@ -694,13 +694,13 @@ Foam::word Foam::Time::timeName() const
 // Search the construction path for times
 Foam::instantList Foam::Time::times() const
 {
-    return findTimes(path());
+    return findTimes(path(), constant());
 }
 
 
 Foam::word Foam::Time::findInstancePath(const instant& t) const
 {
-    instantList timeDirs = findTimes(path());
+    instantList timeDirs = findTimes(path(), constant());
 
     forAllReverse(timeDirs, timeI)
     {
@@ -716,7 +716,7 @@ Foam::word Foam::Time::findInstancePath(const instant& t) const
 
 Foam::instant Foam::Time::findClosestTime(const scalar t) const
 {
-    instantList timeDirs = findTimes(path());
+    instantList timeDirs = findTimes(path(), constant());
 
     // there is only one time (likely "constant") so return it
     if (timeDirs.size() == 1)
@@ -755,15 +755,16 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
 //
 // Foam::instant Foam::Time::findClosestTime(const scalar t) const
 // {
-//     instantList timeDirs = findTimes(path());
-//     label timeIndex = min(findClosestTimeIndex(timeDirs, t), 0);
+//     instantList timeDirs = findTimes(path(), constant());
+//     label timeIndex = min(findClosestTimeIndex(timeDirs, t), 0, constant());
 //     return timeDirs[timeIndex];
 // }
 
 Foam::label Foam::Time::findClosestTimeIndex
 (
     const instantList& timeDirs,
-    const scalar t
+    const scalar t,
+    const word& constantName
 )
 {
     label nearestIndex = -1;
@@ -771,7 +772,7 @@ Foam::label Foam::Time::findClosestTimeIndex
 
     forAll(timeDirs, timeI)
     {
-        if (timeDirs[timeI].name() == "constant") continue;
+        if (timeDirs[timeI].name() == constantName) continue;
 
         scalar diff = mag(timeDirs[timeI].value() - t);
         if (diff < deltaT)

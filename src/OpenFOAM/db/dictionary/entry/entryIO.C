@@ -117,11 +117,12 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             if (keyword.size() > 2 && keyword[1] == token::BEGIN_BLOCK)
             {
                 // Recursive substitution mode. Replace between {} with
-                // expansion.
+                // expansion and then let standard variable expansion deal
+                // with rest.
                 string s(keyword(2, keyword.size()-3));
-                // Substitute dictionary and environment variables. Allow
+                // Substitute dictionary and environment variables. Do not allow
                 // empty substitutions.
-                stringOps::inplaceExpand(s, parentDict, true, true);
+                stringOps::inplaceExpand(s, parentDict, true, false);
                 keyword.std::string::replace(1, keyword.size()-1, s);
             }
             parentDict.substituteScopedKeyword(keyword);

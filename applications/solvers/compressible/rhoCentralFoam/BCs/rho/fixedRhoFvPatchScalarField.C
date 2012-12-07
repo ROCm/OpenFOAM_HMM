@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,27 +27,22 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "fvCFD.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
+Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    pName_("p"),
+    psiName_("thermo:psi")
 {}
 
 
-fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
+Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 (
     const fixedRhoFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -55,43 +50,51 @@ fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    pName_(ptf.pName_),
+    psiName_(ptf.psiName_)
 {}
 
 
-fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
+Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi"))
 {}
 
 
-fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
+Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 (
-    const fixedRhoFvPatchScalarField& tppsf
+    const fixedRhoFvPatchScalarField& frpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(frpsf),
+    pName_(frpsf.pName_),
+    psiName_(frpsf.psiName_)
 {}
 
 
-fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
+Foam::fixedRhoFvPatchScalarField::fixedRhoFvPatchScalarField
 (
-    const fixedRhoFvPatchScalarField& tppsf,
+    const fixedRhoFvPatchScalarField& frpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(frpsf, iF),
+    pName_(frpsf.pName_),
+    psiName_(frpsf.psiName_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fixedRhoFvPatchScalarField::updateCoeffs()
+void Foam::fixedRhoFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -99,10 +102,10 @@ void fixedRhoFvPatchScalarField::updateCoeffs()
     }
 
     const fvPatchField<scalar>& psip =
-        patch().lookupPatchField<volScalarField, scalar>("psi");
+        patch().lookupPatchField<volScalarField, scalar>(psiName_);
 
     const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>("p");
+        patch().lookupPatchField<volScalarField, scalar>(pName_);
 
     operator==(psip*pp);
 
@@ -110,16 +113,24 @@ void fixedRhoFvPatchScalarField::updateCoeffs()
 }
 
 
+void Foam::fixedRhoFvPatchScalarField::write(Ostream& os) const
+{
+    fvPatchScalarField::write(os);
+
+    writeEntryIfDifferent<word>(os, "p", "p", this->pName_);
+    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
+    writeEntry("value", os);
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField
-(
-    fvPatchScalarField,
-    fixedRhoFvPatchScalarField
-);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeField
+    (
+        fvPatchScalarField,
+        fixedRhoFvPatchScalarField
+    );
+}
 
 // ************************************************************************* //

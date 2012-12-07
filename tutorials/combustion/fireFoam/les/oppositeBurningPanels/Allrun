@@ -10,7 +10,7 @@ application=`getApplication`
 runApplication blockMesh
 
 runApplication topoSet -dict cRefine.topoSetDict
-runApplication refineMesh -overwrite -dict
+runApplication refineMesh -overwrite -dict system/refineMeshDict
 
 rm log.topoSet
 runApplication topoSet -dict f.topoSetDict

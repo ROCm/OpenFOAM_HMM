@@ -5,7 +5,6 @@ set -x
 wmake
 
 wmake SRFSimpleFoam
-wmake MRFSimpleFoam
 wmake porousSimpleFoam
 
 # ----------------------------------------------------------------- end-of-file

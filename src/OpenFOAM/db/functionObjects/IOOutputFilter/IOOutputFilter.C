@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
 (
     const word& outputFilterName,
     const objectRegistry& obr,
-    const fileName& dictName,
+    const word& dictName,
     const IOobject::readOption rOpt,
     const bool readFromFiles
 )
@@ -57,6 +57,30 @@ Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
         (
             dictName,
             obr.time().system(),
+            obr,
+            rOpt,
+            IOobject::NO_WRITE
+        )
+    ),
+    OutputFilter(outputFilterName, obr, *this, readFromFiles)
+{}
+
+
+template<class OutputFilter>
+Foam::IOOutputFilter<OutputFilter>::IOOutputFilter
+(
+    const word& outputFilterName,
+    const objectRegistry& obr,
+    const fileName& dictName,
+    const IOobject::readOption rOpt,
+    const bool readFromFiles
+)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            dictName,
             obr,
             rOpt,
             IOobject::NO_WRITE

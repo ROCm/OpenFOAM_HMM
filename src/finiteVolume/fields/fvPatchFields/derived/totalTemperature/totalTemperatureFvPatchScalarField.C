@@ -40,7 +40,7 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
     phiName_("phi"),
-    psiName_("psi"),
+    psiName_("thermo:psi"),
     gamma_(0.0),
     T0_(p.size(), 0.0)
 {}
@@ -73,7 +73,7 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    psiName_(dict.lookupOrDefault<word>("psi", "psi")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
     gamma_(readScalar(dict.lookup("gamma"))),
     T0_("T0", dict, p.size())
 {
@@ -179,7 +179,7 @@ void Foam::totalTemperatureFvPatchScalarField::write(Ostream& os) const
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "psi", "psi", psiName_);
+    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
     T0_.writeEntry("T0", os);
     writeEntry("value", os);

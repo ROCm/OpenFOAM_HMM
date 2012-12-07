@@ -23,13 +23,7 @@ boundaryField
     //- Set patchGroups for constraint patches
     #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
 
-    ground
-    {
-        type            fixedValue;
-        value           uniform 265;
-    }
-
-    igloo_region0
+    wall
     {
         type            fixedValue;
         value           uniform 265;
@@ -43,8 +37,7 @@ boundaryField
 
     twoFridgeFreezers_herring_1
     {
-        type            fixedValue;
-        value           uniform 303;
+        $twoFridgeFreezers_seal_0;
     }
 }
 

@@ -140,6 +140,7 @@ sets
 
     patchSeed
     {
+        type        patchSeed;
         patches     (".*Wall.*");
         // Number of points to seed. Divided amongst all processors according
         // to fraction of patches they hold.

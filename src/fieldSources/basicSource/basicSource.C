@@ -481,4 +481,36 @@ void Foam::basicSource::setValue(fvMatrix<tensor>& eqn, const label fieldI)
 }
 
 
+void Foam::basicSource::relativeFlux(surfaceScalarField& phi) const
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::relativeFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::absoluteFlux(surfaceScalarField& phi) const
+{
+    // do nothing
+}
+
+
+void Foam::basicSource::absoluteFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    // do nothing
+}
+
+
 // ************************************************************************* //

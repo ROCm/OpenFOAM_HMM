@@ -99,7 +99,10 @@ class autoLayerDriver
         meshRefinement& meshRefiner_;
 
         //- From surface region to patch
-        const labelList globalToPatch_;
+        const labelList globalToMasterPatch_;
+
+        //- From surface region to patch
+        const labelList globalToSlavePatch_;
 
 
 
@@ -518,7 +521,8 @@ public:
         autoLayerDriver
         (
             meshRefinement& meshRefiner,
-            const labelList& globalToPatch
+            const labelList& globalToMasterPatch,
+            const labelList& globalToSlavePatch
         );
 
 

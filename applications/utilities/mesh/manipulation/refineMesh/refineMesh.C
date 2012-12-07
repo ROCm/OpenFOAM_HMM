@@ -298,12 +298,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addBoolOption
-    (
-        "dict",
-        "refine according to system/refineMeshDict"
-    );
-
+    #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
@@ -327,19 +322,12 @@ int main(int argc, char *argv[])
 
     if (readDict)
     {
-        Info<< "Refining according to refineMeshDict" << nl << endl;
+        const word dictName("refineMeshDict");
+        #include "setSystemMeshDictionaryIO.H"
 
-        refineDict = IOdictionary
-        (
-            IOobject
-            (
-                "refineMeshDict",
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        );
+        Info<< "Refining according to " << dictName << nl << endl;
+
+        refineDict = IOdictionary(dictIO);
 
         const word setName(refineDict.lookup("set"));
 

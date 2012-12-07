@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,11 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::instantList Foam::Time::findTimes(const fileName& directory)
+Foam::instantList Foam::Time::findTimes
+(
+    const fileName& directory,
+    const word& constantName
+)
 {
     if (debug)
     {
@@ -53,7 +57,7 @@ Foam::instantList Foam::Time::findTimes(const fileName& directory)
     bool haveConstant = false;
     forAll(dirEntries, i)
     {
-        if (dirEntries[i] == "constant")
+        if (dirEntries[i] == constantName)
         {
             Times[nTimes].value() = 0;
             Times[nTimes].name() = dirEntries[i];

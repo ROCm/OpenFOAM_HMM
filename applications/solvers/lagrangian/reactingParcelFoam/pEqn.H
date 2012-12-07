@@ -7,17 +7,19 @@
 
     volScalarField rAU(1.0/UEqn.A());
     volVectorField HbyA("HbyA", U);
-    HbyA = rAU*(UEqn == sources(rho, U))().H();
+    HbyA = rAU*UEqn.H();
 
-    surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
-    if (!pZones.active())
-    {
-        // ddtPhiCorr only used without porosity
-        phiHbyA += fvc::ddtPhiCorr(rAU, rho, U, phi);
-    }
+    surfaceScalarField phiHbyA
+    (
+        "phiHbyA",
+        fvc::interpolate(rho)
+       *(
+            (fvc::interpolate(HbyA) & mesh.Sf())
+          + fvc::ddtPhiCorr(rAU, rho, U, phi)
+        )
+    );
 
-    phiHbyA *= fvc::interpolate(rho);
-
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     fvScalarMatrix pDDtEqn
     (
@@ -36,7 +38,7 @@
           - fvm::laplacian(rho*rAU, p)
         );
 
-        sources.constrain(pDDtEqn, rho.name());
+        sources.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

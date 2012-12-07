@@ -54,6 +54,21 @@ class maxwellSlipUFvPatchVectorField
 {
     // Private data
 
+        //- Temperature field name, default = "T"
+        word TName_;
+
+        //- Density field name, default = "rho"
+        word rhoName_;
+
+        //- Compressibility field name, default = "thermo:psi"
+        word psiName_;
+
+        //- Dynamic viscosity field name, default = "thermo:mu"
+        word muName_;
+
+        //- tauMC field name, default = "tauMC"
+        word tauMCName_;
+
         // Accommodation coefficient
         scalar accommodationCoeff_;
 
