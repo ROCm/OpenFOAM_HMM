@@ -87,7 +87,7 @@ Foam::porosityModel::porosityModel
 {
     if (zoneName_ == word::null)
     {
-        dict.lookup("actuve") >> active_;
+        dict.lookup("active") >> active_;
         dict_.lookup("cellZone") >> zoneName_;
     }
 

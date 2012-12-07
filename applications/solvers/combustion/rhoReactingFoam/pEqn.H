@@ -18,6 +18,8 @@
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         );
 
+        sources.relativeFlux(phiHbyA);
+
         surfaceScalarField phid("phid", fvc::interpolate(thermo.psi())*phiHbyA);
 
         phiHbyA *= fvc::interpolate(rho);
@@ -34,7 +36,11 @@
             (
                 pDDtEqn
               - fvm::laplacian(rho*rAU, p)
+             ==
+                sources(psi, p, rho.name())
             );
+
+            sources.constrain(pEqn);
 
             pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -56,10 +62,14 @@
             )
         );
 
+        sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+
         fvScalarMatrix pDDtEqn
         (
             fvc::ddt(rho) + psi*correction(fvm::ddt(p))
           + fvc::div(phiHbyA)
+         ==
+            sources(psi, p, rho.name())
         );
 
         while (pimple.correctNonOrthogonal())
@@ -69,6 +79,8 @@
                 pDDtEqn
               - fvm::laplacian(rho*rAU, p)
             );
+
+            sources.constrain(pEqn);
 
             pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -87,6 +99,7 @@
 
     U = HbyA - rAU*fvc::grad(p);
     U.correctBoundaryConditions();
+    sources.correct(U);
     K = 0.5*magSqr(U);
 
     if (thermo.dpdt())

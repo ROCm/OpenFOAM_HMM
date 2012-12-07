@@ -7,6 +7,7 @@
      ==
         rho.dimensionedInternalField()*g
       + parcels.SU(U)
+      + sources(rho, U)
     );
 
     UEqn.relax();
@@ -17,6 +18,6 @@
 
     if (pimple.momentumPredictor())
     {
-        solve(UEqn == -fvc::grad(p) + sources(rho, U));
+        solve(UEqn == -fvc::grad(p));
         K = 0.5*magSqr(U);
     }

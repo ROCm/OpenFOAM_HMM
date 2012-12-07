@@ -56,6 +56,7 @@ Description
 #include "ignition.H"
 #include "Switch.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

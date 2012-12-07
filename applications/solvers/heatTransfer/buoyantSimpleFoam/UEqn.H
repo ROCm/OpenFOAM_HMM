@@ -4,11 +4,13 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
+     ==
+        sources(rho, U)
     );
 
     UEqn().relax();
 
-    mrfZones.addCoriolis(rho, UEqn());
+    sources.constrain(UEqn());
 
     if (simple.momentumPredictor())
     {

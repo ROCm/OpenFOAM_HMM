@@ -14,8 +14,6 @@
 
     IObasicSourceList& sources = heatSources[i];
 
-    const IOporosityModelList& pZones = porousZonesFluid[i];
-
     const dimensionedScalar initialMass
     (
         "initialMass",

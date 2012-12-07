@@ -13,6 +13,8 @@ if (pimple.transonic())
        *((fvc::interpolate(HbyA) & mesh.Sf()) - fvc::meshPhi(rho, U))
     );
 
+    sources.relativeFlux(fvc::interpolate(psi), phid);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
@@ -20,7 +22,11 @@ if (pimple.transonic())
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
           - fvm::laplacian(rho*rAU, p)
+         ==
+            sources(psi, p, rho.name())
         );
+
+        sources.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -39,6 +45,8 @@ else
        *((fvc::interpolate(HbyA) & mesh.Sf()) - fvc::meshPhi(rho, U))
     );
 
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
@@ -46,7 +54,11 @@ else
             fvm::ddt(psi, p)
           + fvc::div(phiHbyA)
           - fvm::laplacian(rho*rAU, p)
+         ==
+            sources(psi, p, rho.name())
         );
+
+        sources.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -62,6 +74,7 @@ else
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
+sources.correct(U);
 K = 0.5*magSqr(U);
 
 if (thermo.dpdt())

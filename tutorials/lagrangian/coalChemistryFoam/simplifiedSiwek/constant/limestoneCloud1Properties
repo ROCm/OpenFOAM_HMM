@@ -35,7 +35,7 @@ solution
     interpolationSchemes
     {
         rho             cell;
-        mu              cell;
+        thermo:mu       cell;
         U               cellPoint;
         Cp              cell;
         T               cell;

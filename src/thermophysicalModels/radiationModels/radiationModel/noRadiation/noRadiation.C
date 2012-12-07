@@ -52,7 +52,7 @@ Foam::radiation::noRadiation::noRadiation
     const volScalarField& T
 )
 :
-    radiationModel(dict, T)
+    radiationModel(T)
 {}
 
 

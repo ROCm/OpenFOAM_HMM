@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ Description
         Property     | Description             | Required    | Default value
         U            | Velocity field name     | no          | U
         phi          | Flux field name         | no          | phi
-        psi          | Compressibility field name | no       | psi
+        psi          | Compressibility field name | no       | thermo:psi
         gamma        | ratio of specific heats (Cp/Cv) | yes |
         T0           | reference temperature   | yes         |
     \endtable
