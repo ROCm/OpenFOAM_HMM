@@ -27,7 +27,6 @@ momentumSource
     {
         fieldNames  (U);
         Ubar        ( 0.1335 0 0 );
-        gradP       0;
     }
 }
 

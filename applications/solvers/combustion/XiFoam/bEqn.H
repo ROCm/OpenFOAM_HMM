@@ -71,6 +71,8 @@ if (ign.ignited())
 
     bEqn.solve();
 
+    sources.correct(b);
+
     Info<< "min(b) = " << min(b).value() << endl;
 
 
@@ -167,6 +169,8 @@ if (ign.ignited())
 
         SuEqn.solve();
 
+        sources.correct(Su);
+
         // Limit the maximum Su
         // ~~~~~~~~~~~~~~~~~~~~
         Su.min(SuMax);
@@ -251,6 +255,8 @@ if (ign.ignited())
         sources.constrain(XiEqn);
 
         XiEqn.solve();
+
+        sources.correct(Xi);
 
         // Correct boundedness of Xi
         // ~~~~~~~~~~~~~~~~~~~~~~~~~
