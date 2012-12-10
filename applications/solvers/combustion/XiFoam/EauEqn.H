@@ -25,7 +25,7 @@ if (ign.ignited())
         //+ fvm::Sp(fvc::div(muEff*fvc::grad(b)/(b + 0.001)), heau)
 
      ==
-        sources(heau)
+        sources(rho, heau)
     );
 
     sources.constrain(heauEqn);
