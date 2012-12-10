@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
 
     #include "setInitialrDeltaT.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -56,6 +56,3 @@
         runTime.deltaT(),
         zeroGradientFvPatchScalarField::typeName
     );
-
-
-    IObasicSourceList sources(mesh);

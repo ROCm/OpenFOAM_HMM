@@ -52,9 +52,4 @@
     );
 
     Info<< "Creating SRF model\n" << endl;
-    autoPtr<SRF::SRFModel> SRF
-    (
-        SRF::SRFModel::New(Urel)
-    );
-
-    IObasicSourceList sources(mesh);
+    autoPtr<SRF::SRFModel> SRF(SRF::SRFModel::New(Urel));

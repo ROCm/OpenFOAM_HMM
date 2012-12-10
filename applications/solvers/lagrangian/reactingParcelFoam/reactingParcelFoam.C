@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
-    #include "createExplicitSources.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"
