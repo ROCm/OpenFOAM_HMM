@@ -24,6 +24,7 @@ derived/rotorDiskSource/trimModel/trimModel/trimModel.C
 derived/rotorDiskSource/trimModel/trimModel/trimModelNew.C
 derived/rotorDiskSource/trimModel/fixed/fixedTrim.C
 derived/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
+derived/temperatureLimits/temperatureLimits.C
 
 interRegion = derived/interRegionHeatTransferModel
 $(interRegion)/constantHeatTransfer/constantHeatTransfer.C
