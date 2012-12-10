@@ -73,11 +73,11 @@ class pressureGradientExplicitSource
         //- Average velocity
         vector Ubar_;
 
-        //- Initial pressure gradient
-        dimensionedScalar gradPini_;
+        //- Pressure gradient before correction
+        scalar gradP0_;
 
-        //- Pressure gradient
-        dimensionedScalar gradP_;
+        //- Change in pressure gradient
+        scalar dGradP_;
 
         //- Flow direction
         vector flowDir_;
@@ -89,7 +89,7 @@ class pressureGradientExplicitSource
     // Private Member Functions
 
         //- Write the pressure gradient to file (for restarts etc)
-        void writeGradP() const;
+        void writeProps(const scalar gradP) const;
 
         //- Correct driving force for a constant mass flow rate
         void update(fvMatrix<vector>& eqn);

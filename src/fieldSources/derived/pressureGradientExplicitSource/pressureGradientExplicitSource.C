@@ -46,7 +46,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSource::writeGradP() const
+void Foam::pressureGradientExplicitSource::writeProps(const scalar gradP) const
 {
     // Only write on output time
     if (mesh_.time().outputTime())
@@ -63,7 +63,7 @@ void Foam::pressureGradientExplicitSource::writeGradP() const
                 IOobject::NO_WRITE
             )
         );
-        propsDict.add("gradient", gradP_);
+        propsDict.add("gradient", gradP);
         propsDict.regIOobject::write();
     }
 }
@@ -81,8 +81,8 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 :
     basicSource(sourceName, modelType, dict, mesh),
     Ubar_(coeffs_.lookup("Ubar")),
-    gradPini_(coeffs_.lookup("gradPini")),
-    gradP_(gradPini_),
+    gradP0_(0.0),
+    dGradP_(0.0),
     flowDir_(Ubar_/mag(Ubar_)),
     invAPtr_(NULL)
 {
@@ -95,7 +95,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
             "Foam::pressureGradientExplicitSource::"
             "pressureGradientExplicitSource"
             "("
-                "onst word&, "
+                "const word&, "
                 "const word&, "
                 "const dictionary&, "
                 "const fvMesh&"
@@ -116,10 +116,10 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
     {
         Info<< "    Reading pressure gradient from file" << endl;
         dictionary propsDict(dictionary::null, propsFile);
-        propsDict.lookup("gradient") >> gradP_;
+        propsDict.lookup("gradient") >> gradP0_;
     }
 
-    Info<< "    Initial pressure gradient = " << gradP_ << nl << endl;
+    Info<< "    Initial pressure gradient = " << gradP0_ << nl << endl;
 }
 
 
@@ -151,22 +151,21 @@ void Foam::pressureGradientExplicitSource::correct(volVectorField& U)
 
     // Calculate the pressure gradient increment needed to adjust the average
     // flow-rate to the desired value
-    scalar gradPplus = (mag(Ubar_) - magUbarAve)/rAUave;
+    dGradP_ = (mag(Ubar_) - magUbarAve)/rAUave;
 
     // Apply correction to velocity field
     forAll(cells_, i)
     {
         label cellI = cells_[i];
-        U[cellI] += flowDir_*rAU[cellI]*gradPplus;
+        U[cellI] += flowDir_*rAU[cellI]*dGradP_;
     }
 
-    // Update pressure gradient
-    gradP_.value() += gradPplus;
+    scalar gradP = gradP0_ + dGradP_;
 
     Info<< "Pressure gradient source: uncorrected Ubar = " << magUbarAve
-        << ", pressure gradient = " << gradP_.value() << endl;
+        << ", pressure gradient = " << gradP << endl;
 
-    writeGradP();
+    writeProps(gradP);
 }
 
 
@@ -187,10 +186,12 @@ void Foam::pressureGradientExplicitSource::addSup
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedVector("zero", gradP_.dimensions(), vector::zero)
+        dimensionedVector("zero", eqn.dimensions()/dimVolume, vector::zero)
     );
 
-    UIndirectList<vector>(Su, cells_) = flowDir_*gradP_.value();
+    scalar gradP = gradP0_ + dGradP_;
+
+    UIndirectList<vector>(Su, cells_) = flowDir_*gradP;
 
     eqn += Su;
 }
@@ -224,6 +225,9 @@ void Foam::pressureGradientExplicitSource::setValue
     {
         invAPtr_() = 1.0/eqn.A();
     }
+
+    gradP0_ += dGradP_;
+    dGradP_ = 0.0;
 }
 
 
