@@ -11,9 +11,6 @@
 
     sources.constrain(UEqn());
 
-    // Add porous resistance
-    pZones.addResistance(UEqn());
-
     if (momentumPredictor)
     {
         solve
