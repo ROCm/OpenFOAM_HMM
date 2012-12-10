@@ -132,10 +132,12 @@ protected:
             //- Activation flag
             bool hydrophilic_;
 
-            //- Length scale applied to deltaWet_ for dry faces, typically 0.5
+            //- Length scale applied to deltaWet_ to determine when a wet
+            //  surface becomes dry, typically 0.5
             scalar hydrophilicDryScale_;
 
-            //- Length scale applied to deltaWet_ for wet faces, typically 0.001
+            //- Length scale applied to deltaWet_ to determine when a dry
+            //  surface becomes wet, typically 0.001
             scalar hydrophilicWetScale_;
 
 

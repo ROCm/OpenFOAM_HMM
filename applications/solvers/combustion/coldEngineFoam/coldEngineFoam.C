@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
     #include "readEngineTimeControls.H"
     #include "compressibleCourantNo.H"

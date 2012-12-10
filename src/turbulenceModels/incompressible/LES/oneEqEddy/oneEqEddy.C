@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,7 +101,7 @@ void oneEqEddy::correct(const tmp<volTensorField>& gradU)
 {
     GenEddyVisc::correct(gradU);
 
-    tmp<volScalarField> G = 2.0*nuSgs_*magSqr(symm(gradU));
+    volScalarField G(type() + ".G", 2.0*nuSgs_*magSqr(symm(gradU)));
 
     tmp<fvScalarMatrix> kEqn
     (

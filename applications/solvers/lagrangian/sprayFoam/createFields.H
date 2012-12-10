@@ -107,6 +107,3 @@
         mesh,
         dimensionedScalar("dQ", dimEnergy/dimTime, 0.0)
     );
-
-    Info<< "Creating sources\n" << endl;
-    IObasicSourceList sources(mesh);

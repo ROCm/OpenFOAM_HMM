@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"

@@ -236,11 +236,11 @@ void thermoSingleLayer::correctAlpha()
 
         forAll(alpha_, i)
         {
-            if ((alpha_[i] < 0.5) && (delta_[i] > hydrophilicDry))
+            if ((alpha_[i] < 0.5) && (delta_[i] > hydrophilicWet))
             {
                 alpha_[i] = 1.0;
             }
-            else if ((alpha_[i] > 0.5) && (delta_[i] < hydrophilicWet))
+            else if ((alpha_[i] > 0.5) && (delta_[i] < hydrophilicDry))
             {
                 alpha_[i] = 0.0;
             }

@@ -22,7 +22,12 @@
     );
 
     EEqn.relax();
+
+    sources.constrain(EEqn);
+
     EEqn.solve(mesh.solver(he.select(finalIter)));
+
+    sources.correct(he);
 
     thermo.correct();
     rad.correct();

@@ -12,3 +12,5 @@
     sources.constrain(UrelEqn());
 
     solve(UrelEqn() == -fvc::grad(p) + sources(Urel));
+
+    sources.correct(Urel);

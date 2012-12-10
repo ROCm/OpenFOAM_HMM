@@ -19,6 +19,8 @@ if (finalIter)
         sources.constrain(hEqn());
 
         hEqn().solve(mesh.solver(h.select(finalIter)));
+
+        sources.correct(h);
     }
 }
 

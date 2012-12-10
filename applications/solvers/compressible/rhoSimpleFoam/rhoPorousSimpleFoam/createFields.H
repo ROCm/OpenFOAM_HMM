@@ -59,6 +59,3 @@
     );
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
-
-    Info<< "Creating sources\n" << endl;
-    IObasicSourceList sources(mesh);
