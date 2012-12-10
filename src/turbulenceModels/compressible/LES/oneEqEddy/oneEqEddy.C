@@ -105,7 +105,7 @@ void oneEqEddy::correct(const tmp<volTensorField>& tgradU)
     GenEddyVisc::correct(gradU);
 
     volScalarField divU(fvc::div(phi()/fvc::interpolate(rho())));
-    volScalarField G(2*muSgs_*(gradU && dev(symm(gradU))));
+    volScalarField G(type() + ".G", 2*muSgs_*(gradU && dev(symm(gradU))));
 
     tmp<fvScalarMatrix> kEqn
     (
