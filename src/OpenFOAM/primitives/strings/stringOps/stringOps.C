@@ -312,7 +312,7 @@ Foam::string Foam::stringOps::getVariable
             "    const bool\n"
             ")\n",
             dict
-        )   << "Cannot find environment variable "
+        )   << "Cannot find dictionary variable "
             << name << exit(FatalIOError);
     }
 

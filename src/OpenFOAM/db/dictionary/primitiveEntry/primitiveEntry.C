@@ -47,13 +47,11 @@ bool Foam::primitiveEntry::expandVariable
 {
     if (w.size() > 2 && w[0] == '$' && w[1] == token::BEGIN_BLOCK)
     {
-        // Recursive substitution mode. Replace between {} with
-        // expansion.
+        // Recursive substitution mode. Replace between {} with expansion.
         string s(w(2, w.size()-3));
-        // Substitute dictionary and environment variables. Allow
+        // Substitute dictionary and environment variables. Do not allow
         // empty substitutions.
-        stringOps::inplaceExpand(s, dict, true, true);
-
+        stringOps::inplaceExpand(s, dict, true, false);
         string newW(w);
         newW.std::string::replace(1, newW.size()-1, s);
 
@@ -83,6 +81,15 @@ bool Foam::primitiveEntry::expandVariable
 
             if (envStr.empty())
             {
+                FatalIOErrorIn
+                (
+                    "primitiveEntry::expandVariable"
+                    "(const string&, const dictionary&",
+                    dict
+                )   << "Illegal dictionary entry or environment variable name "
+                    << varName << endl << "Valid dictionary entries are "
+                    << dict.toc() << exit(FatalIOError);
+
                 return false;
             }
             append(tokenList(IStringStream('(' + envStr + ')')()));

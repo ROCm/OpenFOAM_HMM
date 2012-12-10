@@ -78,7 +78,8 @@ boundary
 
     ground
     {
-        type wall;
+        type        wall;
+        inGroups    (wall);
         faces
         (
             (0 3 2 1)
