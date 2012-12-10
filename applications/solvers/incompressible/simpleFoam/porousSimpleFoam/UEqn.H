@@ -12,8 +12,6 @@
 
     UEqn().relax();
 
-    sources.constrain(UEqn());
-
     // Include the porous media resistance and solve the momentum equation
     // either implicit in the tensorial resistance or transport using by
     // including the spherical part of the resistance in the momentum diagonal
@@ -28,6 +26,8 @@
         trTU = inv(tTU());
         trTU().rename("rAU");
 
+        sources.constrain(UEqn());
+
         volVectorField gradp(fvc::grad(p));
 
         for (int UCorr=0; UCorr<nUCorr; UCorr++)
@@ -35,12 +35,18 @@
             U = trTU() & (UEqn().H() - gradp);
         }
         U.correctBoundaryConditions();
+
+        sources.correct(U);
     }
     else
     {
         pZones.addResistance(UEqn());
 
+        sources.constrain(UEqn());
+
         solve(UEqn() == -fvc::grad(p));
+
+        sources.correct(U);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

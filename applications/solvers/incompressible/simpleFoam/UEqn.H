@@ -13,3 +13,5 @@
     sources.constrain(UEqn());
 
     solve(UEqn() == -fvc::grad(p));
+
+    sources.correct(U);
