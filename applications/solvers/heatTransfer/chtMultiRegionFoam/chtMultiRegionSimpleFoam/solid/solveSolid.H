@@ -6,8 +6,14 @@
            - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
            + sources(rho, h)
         );
+
         hEqn.relax();
+
+        sources.constrain(hEqn);
+
         hEqn.solve();
+
+        sources.correct(h);
     }
 }
 

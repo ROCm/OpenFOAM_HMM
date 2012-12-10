@@ -9,6 +9,8 @@
 
     UEqn().relax();
 
+    sources.constrain(UEqn());
+
     // Add porous resistance
     pZones.addResistance(UEqn());
 
@@ -21,11 +23,13 @@
             fvc::reconstruct
             (
                 (
-                    - ghf*fvc::snGrad(rho)
-                    - fvc::snGrad(p_rgh)
+                  - ghf*fvc::snGrad(rho)
+                  - fvc::snGrad(p_rgh)
                 )*mesh.magSf()
             ),
             mesh.solver(U.select(finalIter))
         );
+
+        sources.correct(U);
         K = 0.5*magSqr(U);
     }
