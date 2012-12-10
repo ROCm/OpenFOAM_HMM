@@ -24,9 +24,8 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "fixedTemperatureSource.H"
+#include "temperatureLimitsConstraint.H"
 #include "fvMesh.H"
-#include "fvMatrices.H"
 #include "basicThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -34,29 +33,18 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(fixedTemperatureSource, 0);
+    defineTypeNameAndDebug(temperatureLimitsConstraint, 0);
     addToRunTimeSelectionTable
     (
         basicSource,
-        fixedTemperatureSource,
+        temperatureLimitsConstraint,
         dictionary
     );
-
-    template<>
-    const char* NamedEnum<fixedTemperatureSource::temperatureMode, 2>::names[] =
-    {
-        "uniform",
-        "lookup"
-    };
 }
-
-const Foam::NamedEnum<Foam::fixedTemperatureSource::temperatureMode, 2>
-    Foam::fixedTemperatureSource::temperatureModeNames_;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fixedTemperatureSource::fixedTemperatureSource
+Foam::temperatureLimitsConstraint::temperatureLimitsConstraint
 (
     const word& name,
     const word& modelType,
@@ -65,32 +53,9 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
 )
 :
     basicSource(name, modelType, dict, mesh),
-    mode_(temperatureModeNames_.read(coeffs_.lookup("mode"))),
-    Tuniform_(NULL),
-    TName_("T")
+    Tmin_(readScalar(coeffs_.lookup("Tmin"))),
+    Tmax_(readScalar(coeffs_.lookup("Tmax")))
 {
-    switch (mode_)
-    {
-        case tmUniform:
-        {
-            Tuniform_.reset
-            (
-                DataEntry<scalar>::New("temperature", coeffs_).ptr()
-            );
-            break;
-        }
-        case tmLookup:
-        {
-            TName_ = coeffs_.lookupOrDefault<word>("TName", "T");
-            break;
-        }
-        default:
-        {
-            // error handling done by NamedEnum
-        }
-    }
-
-
     fieldNames_.setSize(1, "energy");
     applied_.setSize(1, false);
 }
@@ -98,73 +63,79 @@ Foam::fixedTemperatureSource::fixedTemperatureSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::fixedTemperatureSource::alwaysApply() const
+bool Foam::temperatureLimitsConstraint::alwaysApply() const
 {
     return true;
 }
 
 
-void Foam::fixedTemperatureSource::setValue
-(
-    fvMatrix<scalar>& eqn,
-    const label
-)
+void Foam::temperatureLimitsConstraint::correct(volScalarField& he)
 {
     const basicThermo& thermo =
         mesh_.lookupObject<basicThermo>("thermophysicalProperties");
 
-    if (eqn.psi().name() == thermo.he().name())
+    if (he.name() == thermo.he().name())
     {
-        switch (mode_)
+        scalarField Tmin(cells_.size(), Tmin_);
+        scalarField Tmax(cells_.size(), Tmax_);
+
+        scalarField heMin(thermo.he(thermo.p(), Tmin, cells_));
+        scalarField heMax(thermo.he(thermo.p(), Tmax, cells_));
+
+        scalarField& hec = he.internalField();
+
+        forAll(cells_, i)
         {
-            case tmUniform:
-            {
-                const scalar t = mesh_.time().value();
-                scalarField Tuni(cells_.size(), Tuniform_->value(t));
-                eqn.setValues(cells_, thermo.he(thermo.p(), Tuni, cells_));
-
-                break;
-            }
-            case tmLookup:
-            {
-                const volScalarField& T =
-                    mesh().lookupObject<volScalarField>(TName_);
-
-                scalarField Tlkp(T, cells_);
-                eqn.setValues(cells_, thermo.he(thermo.p(), Tlkp, cells_));
-
-                break;
-            }
-            default:
-            {
-                // error handling done by NamedEnum
-            }
+            label cellI = cells_[i];
+            hec[cellI]= max(min(hec[cellI], heMax[i]), heMin[i]);
         }
 
+        // handle boundaries in the case of 'all'
+        if (selectionMode_ == smAll)
+        {
+            volScalarField::GeometricBoundaryField& bf = he.boundaryField();
+
+            forAll(bf, patchI)
+            {
+                fvPatchScalarField& hep = bf[patchI];
+                if (hep.fixesValue())
+                {
+                    // not over-riding fixed conditions
+                    continue;
+                }
+
+                const scalarField& pp = thermo.p().boundaryField()[patchI];
+
+                scalarField Tminp(pp.size(), Tmin_);
+                scalarField Tmaxp(pp.size(), Tmax_);
+
+                scalarField heMinp(thermo.he(pp, Tminp, patchI));
+                scalarField heMaxp(thermo.he(pp, Tmaxp, patchI));
+
+                forAll(hep, faceI)
+                {
+                    hep[faceI] =
+                        max(min(hep[faceI], heMaxp[faceI]), heMinp[faceI]);
+                }
+            }
+        }
     }
 }
 
 
-void Foam::fixedTemperatureSource::writeData(Ostream& os) const
+void Foam::temperatureLimitsConstraint::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::fixedTemperatureSource::read(const dictionary& dict)
+bool Foam::temperatureLimitsConstraint::read(const dictionary& dict)
 {
     if (basicSource::read(dict))
     {
-        if (coeffs_.found(Tuniform_->name()))
-        {
-            Tuniform_.reset
-            (
-                DataEntry<scalar>::New(Tuniform_->name(), dict).ptr()
-            );
-        }
-
-        coeffs_.readIfPresent("TName", TName_);
+        coeffs_.readIfPresent("Tmin", Tmin_);
+        coeffs_.readIfPresent("Tmax", Tmax_);
 
         return true;
     }

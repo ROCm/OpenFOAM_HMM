@@ -23,14 +23,14 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fixedTemperatureSource
+    Foam::fixedTemperatureConstraint
 
 Description
     Fixed temperature equation constraint
 
     Sources described by:
 
-        fixedTemperatureSourceCoeffs
+        fixedTemperatureConstraintCoeffs
         {
             mode            uniform;    // uniform or lookup
 
@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedTemperatureSource_H
-#define fixedTemperatureSource_H
+#ifndef fixedTemperatureConstraint_H
+#define fixedTemperatureConstraint_H
 
 #include "basicSource.H"
 #include "NamedEnum.H"
@@ -63,10 +63,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class fixedTemperatureSource Declaration
+                 Class fixedTemperatureConstraint Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedTemperatureSource
+class fixedTemperatureConstraint
 :
     public basicSource
 {
@@ -104,22 +104,22 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        fixedTemperatureSource(const fixedTemperatureSource&);
+        fixedTemperatureConstraint(const fixedTemperatureConstraint&);
 
         //- Disallow default bitwise assignment
-        void operator=(const fixedTemperatureSource&);
+        void operator=(const fixedTemperatureConstraint&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("fixedTemperatureSource");
+    TypeName("fixedTemperatureConstraint");
 
 
     // Constructors
 
         //- Construct from components
-        fixedTemperatureSource
+        fixedTemperatureConstraint
         (
             const word& name,
             const word& modelType,
@@ -129,7 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~fixedTemperatureSource()
+    virtual ~fixedTemperatureConstraint()
     {}
 
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::temperatureLimits
+    Foam::temperatureLimitsConstraint
 
 Description
     Constraint for temperature to apply limits between minimum and maximum
@@ -31,7 +31,7 @@ Description
 
     Constraint described by:
 
-        temperatureLimitsCoeffs
+        temperatureLimitsConstraintCoeffs
         {
             minimum     200;
             maximum     500;
@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureLimits_H
-#define temperatureLimits_H
+#ifndef temperatureLimitsConstraint_H
+#define temperatureLimitsConstraint_H
 
 #include "basicSource.H"
 
@@ -54,10 +54,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class temperatureLimits Declaration
+                 Class temperatureLimitsConstraint Declaration
 \*---------------------------------------------------------------------------*/
 
-class temperatureLimits
+class temperatureLimitsConstraint
 :
     public basicSource
 {
@@ -78,22 +78,22 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        temperatureLimits(const temperatureLimits&);
+        temperatureLimitsConstraint(const temperatureLimitsConstraint&);
 
         //- Disallow default bitwise assignment
-        void operator=(const temperatureLimits&);
+        void operator=(const temperatureLimitsConstraint&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("temperatureLimits");
+    TypeName("temperatureLimitsConstraint");
 
 
     // Constructors
 
         //- Construct from components
-        temperatureLimits
+        temperatureLimitsConstraint
         (
             const word& name,
             const word& modelType,
@@ -103,7 +103,7 @@ public:
 
 
     //- Destructor
-    virtual ~temperatureLimits()
+    virtual ~temperatureLimitsConstraint()
     {}
 
 

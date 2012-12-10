@@ -41,8 +41,8 @@ generalConstraints=constraints/general
 $(generalConstraints)/explicitSetValue/explicitSetValue.C
 
 derivedConstraints=constraints/derived
-$(derivedConstraints)/fixedTemperatureSource/fixedTemperatureSource.C
-$(derivedConstraints)/temperatureLimits/temperatureLimits.C
+$(derivedConstraints)/fixedTemperatureConstraint/fixedTemperatureConstraint.C
+$(derivedConstraints)/temperatureLimitsConstraint/temperatureLimitsConstraint.C
 
 
 LIB = $(FOAM_LIBBIN)/libfieldSources
