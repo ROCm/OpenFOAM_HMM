@@ -3,34 +3,46 @@ basicSource/basicSourceIO.C
 basicSource/basicSourceList.C
 basicSource/IObasicSourceList.C
 
-general/codedSource/codedSource.C
-general/explicitSetValue/explicitSetValue.C
-general/semiImplicitSource/semiImplicitSource.C
 
-derived/actuationDiskSource/actuationDiskSource.C
-derived/explicitPorositySource/explicitPorositySource.C
-derived/fixedTemperatureSource/fixedTemperatureSource.C
-derived/MRFSource/MRFSource.C
-derived/pressureGradientExplicitSource/pressureGradientExplicitSource.C
-derived/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
-derived/radialActuationDiskSource/radialActuationDiskSource.C
-derived/rotorDiskSource/rotorDiskSource.C
-derived/rotorDiskSource/bladeModel/bladeModel.C
-derived/rotorDiskSource/profileModel/profileModel.C
-derived/rotorDiskSource/profileModel/profileModelList.C
-derived/rotorDiskSource/profileModel/lookup/lookupProfile.C
-derived/rotorDiskSource/profileModel/series/seriesProfile.C
-derived/rotorDiskSource/trimModel/trimModel/trimModel.C
-derived/rotorDiskSource/trimModel/trimModel/trimModelNew.C
-derived/rotorDiskSource/trimModel/fixed/fixedTrim.C
-derived/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
-derived/temperatureLimits/temperatureLimits.C
+/* sources */
 
-interRegion = derived/interRegionHeatTransferModel
+generalSources=sources/general
+$(generalSources)/codedSource/codedSource.C
+$(generalSources)/semiImplicitSource/semiImplicitSource.C
+
+derivedSources=sources/derived
+$(derivedSources)/actuationDiskSource/actuationDiskSource.C
+$(derivedSources)/explicitPorositySource/explicitPorositySource.C
+$(derivedSources)/MRFSource/MRFSource.C
+$(derivedSources)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
+$(derivedSources)/pressureGradientExplicitSource/pressureGradientExplicitSourceIO.C
+$(derivedSources)/radialActuationDiskSource/radialActuationDiskSource.C
+$(derivedSources)/rotorDiskSource/rotorDiskSource.C
+$(derivedSources)/rotorDiskSource/bladeModel/bladeModel.C
+$(derivedSources)/rotorDiskSource/profileModel/profileModel.C
+$(derivedSources)/rotorDiskSource/profileModel/profileModelList.C
+$(derivedSources)/rotorDiskSource/profileModel/lookup/lookupProfile.C
+$(derivedSources)/rotorDiskSource/profileModel/series/seriesProfile.C
+$(derivedSources)/rotorDiskSource/trimModel/trimModel/trimModel.C
+$(derivedSources)/rotorDiskSource/trimModel/trimModel/trimModelNew.C
+$(derivedSources)/rotorDiskSource/trimModel/fixed/fixedTrim.C
+$(derivedSources)/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
+
+interRegion = $(derivedSources)/interRegionHeatTransferModel
 $(interRegion)/constantHeatTransfer/constantHeatTransfer.C
 $(interRegion)/interRegionHeatTransferModel/interRegionHeatTransferModel.C
 $(interRegion)/tabulatedHeatTransfer/tabulatedHeatTransfer.C
 $(interRegion)/variableHeatTransfer/variableHeatTransfer.C
+
+
+/* constraints */
+
+generalConstraints=constraints/general
+$(generalConstraints)/explicitSetValue/explicitSetValue.C
+
+derivedConstraints=constraints/derived
+$(derivedConstraints)/fixedTemperatureSource/fixedTemperatureSource.C
+$(derivedConstraints)/temperatureLimits/temperatureLimits.C
 
 
 LIB = $(FOAM_LIBBIN)/libfieldSources
