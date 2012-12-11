@@ -155,11 +155,11 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
         Info<< "    Breakdown of polyhedra by number of faces:" << nl
             << "        faces" << "   number of cells" << endl;
 
-        labelList sortedKeys = polyhedralFaces.sortedToc();
+        const labelList sortedKeys = polyhedralFaces.sortedToc();
 
         forAll(sortedKeys, keyI)
         {
-            label nFaces = sortedKeys[keyI];
+            const label nFaces = sortedKeys[keyI];
 
             Info<< setf(std::ios::right) << setw(13)
                 << nFaces << "   " << polyhedralFaces[nFaces] << nl;
