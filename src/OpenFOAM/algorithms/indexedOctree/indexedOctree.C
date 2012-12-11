@@ -47,36 +47,9 @@ bool Foam::indexedOctree<Type>::overlaps
     const point& sample
 )
 {
-    // Find out where sample is in relation to bb.
-    // Find nearest point on bb.
-    scalar distSqr = 0;
+    boundBox bb(p0, p1);
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
-    {
-        scalar d0 = p0[dir] - sample[dir];
-        scalar d1 = p1[dir] - sample[dir];
-
-        if ((d0 > 0) != (d1 > 0))
-        {
-            // sample inside both extrema. This component does not add any
-            // distance.
-        }
-        else if (mag(d0) < mag(d1))
-        {
-            distSqr += d0*d0;
-        }
-        else
-        {
-            distSqr += d1*d1;
-        }
-
-        if (distSqr > nearestDistSqr)
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return bb.overlaps(sample, nearestDistSqr);
 }
 
 
