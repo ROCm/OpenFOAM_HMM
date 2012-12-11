@@ -69,7 +69,7 @@ Description
 
     The modes of operation are:
     \table
-        Mode                        | calcTotal | calcCoeff  
+        Mode                        | calcTotal | calcCoeff
         static pressure             | no        | no
         total pressure              | yes       | no
         pressure coefficient        | no        | yes

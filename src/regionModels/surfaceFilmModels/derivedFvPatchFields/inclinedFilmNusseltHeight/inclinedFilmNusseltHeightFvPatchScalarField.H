@@ -89,7 +89,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given 
+        //- Construct by mapping given
         // inclinedFilmNusseltHeightFvPatchScalarField onto a new patch
         inclinedFilmNusseltHeightFvPatchScalarField
         (

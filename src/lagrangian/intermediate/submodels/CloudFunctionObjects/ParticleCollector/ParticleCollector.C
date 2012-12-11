@@ -138,7 +138,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
 
     radius_ = this->coeffDict().lookup("radius");
     nSector_ = readLabel(this->coeffDict().lookup("nSector"));
- 
+
     label nS = nSector_;
 
     vector refDir;
@@ -406,7 +406,7 @@ void Foam::ParticleCollector<CloudType>::write()
 
     Field<scalar> faceMassTotal(mass_.size());
     Field<scalar> faceMassFlowRate(massFlowRate_.size());
-    
+
     forAll(faces_, faceI)
     {
         scalarList allProcMass(Pstream::nProcs());
