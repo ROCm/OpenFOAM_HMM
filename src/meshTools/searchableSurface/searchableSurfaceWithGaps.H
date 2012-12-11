@@ -54,7 +54,7 @@ namespace Foam
 // Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
-                           Class searchableSurfaceWithGaps Declaration
+                 Class searchableSurfaceWithGaps Declaration
 \*---------------------------------------------------------------------------*/
 
 class searchableSurfaceWithGaps
@@ -151,9 +151,15 @@ public:
 
         //- Get representative set of element coordinates
         //  Usually the element centres (should be of length size()).
-        virtual pointField coordinates() const
+        virtual tmp<pointField> coordinates() const
         {
             return surface().coordinates();
+        }
+
+        //- Get the points that define the surface.
+        virtual tmp<pointField> points() const
+        {
+            return surface().points();
         }
 
         //- Does any part of the surface overlap the supplied bound box?
