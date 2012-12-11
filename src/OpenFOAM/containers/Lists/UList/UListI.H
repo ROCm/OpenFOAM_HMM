@@ -25,6 +25,7 @@ License
 
 #include "error.H"
 #include "pTraits.H"
+#include "ListOps.H"
 #include "Swap.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -319,18 +320,9 @@ inline bool Foam::UList<T>::empty() const
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::reverse(UList<T>& ul, const label n)
-{
-    for (int i=0; i<n/2; i++)
-    {
-        Swap(ul[i], ul[n-1-i]);
-    }
-}
-
-template<class T>
 inline void Foam::reverse(UList<T>& ul)
 {
-    reverse(ul, ul.size());
+    inplaceReverseList(ul);
 }
 
 

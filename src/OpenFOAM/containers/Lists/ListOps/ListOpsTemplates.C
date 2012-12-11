@@ -706,4 +706,83 @@ void Foam::ListAppendEqOp<T>::operator()(List<T>& x, const List<T>& y) const
 }
 
 
+template <class ListType>
+ListType Foam::reverseList(const ListType& list)
+{
+    const label listSize = list.size();
+    const label lastIndex = listSize - 1;
+
+    ListType tmpList(listSize);
+
+    forAll(tmpList, elemI)
+    {
+        tmpList[elemI] = list[lastIndex - elemI];
+    }
+
+    return tmpList;
+}
+
+
+template <class ListType>
+void Foam::inplaceReverseList(ListType& list)
+{
+    const label listSize = list.size();
+    const label lastIndex = listSize - 1;
+    const label nIterations = listSize >> 1;
+
+    label elemI = 0;
+    while (elemI < nIterations)
+    {
+        Swap(list[elemI], list[lastIndex - elemI]);
+
+        elemI++;
+    }
+}
+
+
+template <class ListType>
+ListType Foam::rotateList(const ListType& list, const label n)
+{
+    const label listSize = list.size();
+
+    ListType tmpList(listSize);
+
+    forAll(tmpList, elemI)
+    {
+        label index = (elemI - n) % listSize;
+
+        if (index < 0)
+        {
+            index += listSize;
+        }
+
+        tmpList[elemI] = list[index];
+    }
+
+    return tmpList;
+}
+
+
+template <template <typename> class ListType, class DataType>
+void Foam::inplaceRotateList(ListType<DataType>& list, label n)
+{
+    const label listSize = list.size();
+
+    n = (listSize - n) % listSize;
+
+    if (n < 0)
+    {
+        n += listSize;
+    }
+
+    SubList<DataType> firstHalf(list, n, 0);
+    SubList<DataType> secondHalf(list, listSize - n, n);
+
+    inplaceReverseList(firstHalf);
+    inplaceReverseList(secondHalf);
+
+    inplaceReverseList(list);
+}
+
+
 // ************************************************************************* //
