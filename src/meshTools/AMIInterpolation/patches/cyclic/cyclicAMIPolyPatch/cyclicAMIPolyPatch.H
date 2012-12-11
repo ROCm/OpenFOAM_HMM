@@ -66,10 +66,6 @@ private:
 
         // Transformations
 
-            //- Type of transformation - rotational or translational
-            transformType transform_;
-
-
             // For rotation
 
                 //- Axis of rotation for rotational cyclics
@@ -161,7 +157,8 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const transformType transform = UNKNOWN
         );
 
         //- Construct from dictionary
@@ -289,9 +286,6 @@ public:
 
 
             // Transformations
-
-                //- Type of transform
-                inline transformType transform() const;
 
                 //- Axis of rotation for rotational cyclic AMI
                 inline const vector& rotationAxis() const;

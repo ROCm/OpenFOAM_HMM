@@ -123,7 +123,8 @@ public:
             const polyBoundaryMesh& bm,
             const int myProcNo,
             const int neighbProcNo,
-            const word& referPatchName
+            const word& referPatchName,
+            const transformType transform = UNKNOWN
         );
 
         //- Construct from dictionary

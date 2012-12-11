@@ -120,21 +120,21 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
     const vectorField& half1Areas
 )
 {
-    if (transform_ != neighbPatch().transform_)
+    if (transform() != neighbPatch().transform())
     {
         FatalErrorIn("cyclicAMIPolyPatch::calcTransforms()")
             << "Patch " << name()
-            << " has transform type " << transformTypeNames[transform_]
+            << " has transform type " << transformTypeNames[transform()]
             << ", neighbour patch " << nbrPatchName_
             << " has transform type "
-            << neighbPatch().transformTypeNames[neighbPatch().transform_]
+            << neighbPatch().transformTypeNames[neighbPatch().transform()]
             << exit(FatalError);
     }
 
 
     // Calculate transformation tensors
 
-    switch (transform_)
+    switch (transform())
     {
         case ROTATIONAL:
         {
@@ -371,13 +371,13 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const word& patchType
+    const word& patchType,
+    const transformType transform
 )
 :
-    coupledPolyPatch(name, size, start, index, bm, patchType),
+    coupledPolyPatch(name, size, start, index, bm, patchType, transform),
     nbrPatchName_(word::null),
     nbrPatchID_(-1),
-    transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
@@ -403,7 +403,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(name, dict, index, bm, patchType),
     nbrPatchName_(dict.lookup("neighbourPatch")),
     nbrPatchID_(-1),
-    transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero),
@@ -429,46 +428,42 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             << exit(FatalIOError);
     }
 
-    if (dict.found("transform"))
+    switch (transform())
     {
-        transform_ = transformTypeNames.read(dict.lookup("transform"));
-        switch (transform_)
+        case ROTATIONAL:
         {
-            case ROTATIONAL:
-            {
-                dict.lookup("rotationAxis") >> rotationAxis_;
-                dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.lookup("rotationAxis") >> rotationAxis_;
+            dict.lookup("rotationCentre") >> rotationCentre_;
 
-                scalar magRot = mag(rotationAxis_);
-                if (magRot < SMALL)
-                {
-                    FatalIOErrorIn
-                    (
-                        "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
-                        "("
-                            "const word&, "
-                            "const dictionary&, "
-                            "const label, "
-                            "const polyBoundaryMesh&"
-                        ")",
-                        dict
-                    )   << "Illegal rotationAxis " << rotationAxis_ << endl
-                        << "Please supply a non-zero vector."
-                        << exit(FatalIOError);
-                }
-                rotationAxis_ /= magRot;
+            scalar magRot = mag(rotationAxis_);
+            if (magRot < SMALL)
+            {
+                FatalIOErrorIn
+                (
+                    "cyclicAMIPolyPatch::cyclicAMIPolyPatch"
+                    "("
+                        "const word&, "
+                        "const dictionary&, "
+                        "const label, "
+                        "const polyBoundaryMesh&"
+                    ")",
+                    dict
+                )   << "Illegal rotationAxis " << rotationAxis_ << endl
+                    << "Please supply a non-zero vector."
+                    << exit(FatalIOError);
+            }
+            rotationAxis_ /= magRot;
 
-                break;
-            }
-            case TRANSLATIONAL:
-            {
-                dict.lookup("separationVector") >> separationVector_;
-                break;
-            }
-            default:
-            {
-                // no additional info required
-            }
+            break;
+        }
+        case TRANSLATIONAL:
+        {
+            dict.lookup("separationVector") >> separationVector_;
+            break;
+        }
+        default:
+        {
+            // no additional info required
         }
     }
 
@@ -486,7 +481,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(pp, bm),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
-    transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
@@ -513,7 +507,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     nbrPatchName_(nbrPatchName),
     nbrPatchID_(-1),
-    transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
@@ -554,7 +547,6 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
     nbrPatchName_(pp.nbrPatchName_),
     nbrPatchID_(-1),
-    transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_),
@@ -672,7 +664,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition(pointField& l) const
 {
     if (!parallel())
     {
-        if (transform_ == ROTATIONAL)
+        if (transform() == ROTATIONAL)
         {
             l = Foam::transform(forwardT(), l - rotationCentre_)
               + rotationCentre_;
@@ -718,7 +710,7 @@ void Foam::cyclicAMIPolyPatch::transformPosition
           : forwardT()[faceI]
         );
 
-        if (transform_ == ROTATIONAL)
+        if (transform() == ROTATIONAL)
         {
             l = Foam::transform(T, l - rotationCentre_) + rotationCentre_;
         }
@@ -796,12 +788,10 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     os.writeKeyword("neighbourPatch") << nbrPatchName_
         << token::END_STATEMENT << nl;
 
-    switch (transform_)
+    switch (transform())
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[transform_]
-                << token::END_STATEMENT << nl;
             os.writeKeyword("rotationAxis") << rotationAxis_
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationCentre") << rotationCentre_
@@ -810,16 +800,12 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[transform_]
-                << token::END_STATEMENT << nl;
             os.writeKeyword("separationVector") << separationVector_
                 << token::END_STATEMENT << nl;
             break;
         }
         case NOORDERING:
         {
-            os.writeKeyword("transform") << transformTypeNames[transform_]
-                << token::END_STATEMENT << nl;
             break;
         }
         default:

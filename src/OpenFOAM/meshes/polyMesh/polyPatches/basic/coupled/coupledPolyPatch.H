@@ -60,9 +60,12 @@ public:
         UNKNOWN,            // unspecified; automatic ordering
         ROTATIONAL,         // rotation along coordinate axis
         TRANSLATIONAL,      // translation
+        COINCIDENTFULLMATCH,// assume no transforms
+                            // and check the points in faces match
         NOORDERING          // unspecified, no automatic ordering
     };
-    static const NamedEnum<transformType, 4> transformTypeNames;
+
+    static const NamedEnum<transformType, 5> transformTypeNames;
 
 
 private:
@@ -74,6 +77,9 @@ private:
 
         //- local matching tolerance
         const scalar matchTolerance_;
+
+        //- Type of transformation
+        transformType transform_;
 
         //- offset (distance) vector from one side of the couple to the other
         mutable vectorField separation_;
@@ -150,11 +156,12 @@ protected:
             label& vertI
         );
 
-        //- Get f[0] for all faces
+        //- Get a unique anchor point for all faces
         static pointField getAnchorPoints
         (
             const UList<face>&,
-            const pointField&
+            const pointField&,
+            const transformType
         );
 
         //- Get the number of vertices face f needs to be rotated such that
@@ -184,7 +191,8 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const transformType transform
         );
 
         //- Construct from dictionary
@@ -243,6 +251,20 @@ public:
             virtual bool neighbour() const
             {
                 return !owner();
+            }
+
+            //- Type of transform
+            transformType transform() const
+            {
+                return transform_;
+            }
+
+            //- Type of transform
+            //  This is currently only for use when collapsing generated
+            //  meshes that can have zero area faces.
+            transformType& transform()
+            {
+                return transform_;
             }
 
             //- Transform a patch-based position from other side to this side

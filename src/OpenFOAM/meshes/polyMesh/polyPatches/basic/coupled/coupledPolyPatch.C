@@ -37,15 +37,16 @@ namespace Foam
     const scalar coupledPolyPatch::defaultMatchTol_ = 1e-4;
 
     template<>
-    const char* NamedEnum<coupledPolyPatch::transformType, 4>::names[] =
+    const char* NamedEnum<coupledPolyPatch::transformType, 5>::names[] =
     {
         "unknown",
         "rotational",
         "translational",
+        "coincidentFullMatch",
         "noOrdering"
     };
 
-    const NamedEnum<coupledPolyPatch::transformType, 4>
+    const NamedEnum<coupledPolyPatch::transformType, 5>
         coupledPolyPatch::transformTypeNames;
 }
 
@@ -129,14 +130,65 @@ void Foam::coupledPolyPatch::writeOBJ
 Foam::pointField Foam::coupledPolyPatch::getAnchorPoints
 (
     const UList<face>& faces,
-    const pointField& points
+    const pointField& points,
+    const transformType transform
 )
 {
     pointField anchors(faces.size());
 
-    forAll(faces, faceI)
+    if (transform == COINCIDENTFULLMATCH)
     {
-        anchors[faceI] = points[faces[faceI][0]];
+        // Return the first point
+        forAll(faces, faceI)
+        {
+            anchors[faceI] = points[faces[faceI][0]];
+        }
+    }
+    else
+    {
+        // Make anchor point unique
+        forAll(faces, faceI)
+        {
+            const face& f = faces[faceI];
+
+            bool unique = true;
+
+            forAll(f, fp1)
+            {
+                const point& p1 = points[f[fp1]];
+
+                unique = true;
+
+                for (label fp2 = 0; fp2 < f.size(); ++fp2)
+                {
+                    if (f[fp1] == f[fp2])
+                    {
+                        continue;
+                    }
+
+                    const point& p2 = points[f[fp2]];
+
+                    // @todo Change to a tolerance and possibly select closest
+                    // point to the origin
+                    if (p1 == p2)
+                    {
+                        unique = false;
+                        break;
+                    }
+                }
+
+                if (unique)
+                {
+                    anchors[faceI] = p1;
+                    break;
+                }
+            }
+
+            if (!unique)
+            {
+                anchors[faceI] = points[faces[faceI][0]];
+            }
+        }
     }
 
     return anchors;
@@ -172,7 +224,12 @@ Foam::scalarField Foam::coupledPolyPatch::calcFaceTol
             maxLenSqr = max(maxLenSqr, magSqr(pt - cc));
             maxCmpt = max(maxCmpt, cmptMax(cmptMag(pt)));
         }
-        tols[faceI] = max(SMALL, max(SMALL*maxCmpt, Foam::sqrt(maxLenSqr)));
+
+        tols[faceI] = max
+        (
+            SMALL,
+            max(SMALL*maxCmpt, Foam::sqrt(maxLenSqr))
+        );
     }
     return tols;
 }
@@ -230,7 +287,7 @@ Foam::label Foam::coupledPolyPatch::getRotation
                     << Foam::sqrt(minDistSqr)
                     << " to the anchor " << anchor
                     << ". Continuing but results might be wrong."
-                    << endl;
+                    << nl << endl;
             }
         }
 
@@ -292,7 +349,8 @@ void Foam::coupledPolyPatch::calcTransformTensors
             transform == ROTATIONAL
          || (
                 transform != TRANSLATIONAL
-             && (sum(mag(nf & nr)) < Cf.size()-error)
+             && transform != COINCIDENTFULLMATCH
+             && (sum(mag(nf & nr)) < Cf.size() - error)
             )
         )
         {
@@ -427,11 +485,13 @@ Foam::coupledPolyPatch::coupledPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const word& patchType
+    const word& patchType,
+    const transformType transform
 )
 :
     polyPatch(name, size, start, index, bm, patchType),
-    matchTolerance_(defaultMatchTol_)
+    matchTolerance_(defaultMatchTol_),
+    transform_(transform)
 {}
 
 
@@ -445,7 +505,11 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_))
+    matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_)),
+    transform_
+    (
+        transformTypeNames.read(dict.lookupOrDefault("transform", "UNKNOWN"))
+    )
 {}
 
 
@@ -456,7 +520,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(pp, bm),
-    matchTolerance_(pp.matchTolerance_)
+    matchTolerance_(pp.matchTolerance_),
+    transform_(pp.transform_)
 {}
 
 
@@ -470,7 +535,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(pp, bm, index, newSize, newStart),
-    matchTolerance_(pp.matchTolerance_)
+    matchTolerance_(pp.matchTolerance_),
+    transform_(pp.transform_)
 {}
 
 
@@ -484,7 +550,8 @@ Foam::coupledPolyPatch::coupledPolyPatch
 )
 :
     polyPatch(pp, bm, index, mapAddressing, newStart),
-    matchTolerance_(pp.matchTolerance_)
+    matchTolerance_(pp.matchTolerance_),
+    transform_(pp.transform_)
 {}
 
 
@@ -502,6 +569,8 @@ void Foam::coupledPolyPatch::write(Ostream& os) const
     //if (matchTolerance_ != defaultMatchTol_)
     {
         os.writeKeyword("matchTolerance") << matchTolerance_
+            << token::END_STATEMENT << nl;
+        os.writeKeyword("transform") << transformTypeNames[transform_]
             << token::END_STATEMENT << nl;
     }
 }
