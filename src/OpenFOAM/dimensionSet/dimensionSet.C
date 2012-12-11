@@ -29,8 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::dimensionSet, 1);
-const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
+namespace Foam
+{
+defineTypeNameAndDebug(dimensionSet, 1);
+const scalar dimensionSet::smallExponent = SMALL;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

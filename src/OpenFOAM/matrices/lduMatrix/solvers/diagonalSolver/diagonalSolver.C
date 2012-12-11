@@ -27,7 +27,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::diagonalSolver, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(diagonalSolver, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

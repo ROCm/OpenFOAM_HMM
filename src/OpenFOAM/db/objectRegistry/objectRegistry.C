@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::objectRegistry, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(objectRegistry, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

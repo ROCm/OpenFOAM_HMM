@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineRunTimeSelectionTable(Foam::functionObject, dictionary);
-int Foam::functionObject::debug(Foam::debug::debugSwitch("functionObject", 0));
+namespace Foam
+{
+defineDebugSwitchWithName(functionObject, "functionObject", 0);
+defineRunTimeSelectionTable(functionObject, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
