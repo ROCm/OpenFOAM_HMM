@@ -21,22 +21,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::triadField
+
 Description
-    Include the header files for all the primitive types that Fields are
-    instantiated for.
+    Specialisation of Field\<T\> for triad.
+
+SourceFiles
+    triadField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldTypes_H
-#define fieldTypes_H
+#ifndef triadField_H
+#define triadField_H
 
-#include "label.H"
-#include "scalar.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
-#include "tensor.H"
+#include "Field.H"
 #include "triad.H"
+
+#define TEMPLATE
+#include "FieldFunctionsM.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+typedef Field<triad> triadField;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "undefFieldFunctionsM.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

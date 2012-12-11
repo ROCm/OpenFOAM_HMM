@@ -21,22 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedef
+    Foam::triadIOField
+
 Description
-    Include the header files for all the primitive types that Fields are
-    instantiated for.
+    triadField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldTypes_H
-#define fieldTypes_H
+#ifndef triadIOField_H
+#define triadIOField_H
 
-#include "label.H"
-#include "scalar.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
-#include "tensor.H"
-#include "triad.H"
+#include "triadField.H"
+#include "IOField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    typedef IOField<triad> triadIOField;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

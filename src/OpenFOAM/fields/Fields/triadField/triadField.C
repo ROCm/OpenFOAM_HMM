@@ -21,25 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Include the header files for all the primitive types that Fields are
-    instantiated for.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldTypes_H
-#define fieldTypes_H
+#include "triadField.H"
+#include "transformField.H"
 
-#include "label.H"
-#include "scalar.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
-#include "tensor.H"
-#include "triad.H"
+#define TEMPLATE
+#include "FieldFunctionsM.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+namespace Foam
+{
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "undefFieldFunctionsM.H"
 
 // ************************************************************************* //

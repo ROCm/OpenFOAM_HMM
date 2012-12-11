@@ -22,24 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Include the header files for all the primitive types that Fields are
-    instantiated for.
+    triadField with IO.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fieldTypes_H
-#define fieldTypes_H
-
-#include "label.H"
-#include "scalar.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
-#include "tensor.H"
-#include "triad.H"
+#include "triadIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+namespace Foam
+{
+    defineTemplateTypeNameAndDebugWithName(triadIOField, "triadField", 0);
+}
 
 // ************************************************************************* //
