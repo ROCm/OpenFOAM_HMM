@@ -21,8 +21,12 @@
     );
 
     EEqn.relax();
+
     sources.constrain(EEqn);
+
     EEqn.solve();
+
+    sources.correct(he);
 
     thermo.correct();
 }

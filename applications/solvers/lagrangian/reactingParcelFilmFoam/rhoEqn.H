@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    solve
+    fvScalarMatrix rhoEqn
     (
         fvm::ddt(rho)
       + fvc::div(phi)
@@ -39,6 +39,12 @@ Description
       + surfaceFilm.Srho()
       + sources(rho)
     );
+
+    sources.constrain(rhoEqn);
+
+    rhoEqn.solve();
+
+    sources.correct(rho);
 }
 
 // ************************************************************************* //

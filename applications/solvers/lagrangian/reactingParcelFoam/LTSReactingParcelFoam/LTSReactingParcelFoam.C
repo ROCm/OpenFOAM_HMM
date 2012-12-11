@@ -60,11 +60,10 @@ int main(int argc, char *argv[])
 
     #include "readTimeControls.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "createRDeltaT.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
-    #include "createExplicitSources.H"
-    #include "createPorousZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

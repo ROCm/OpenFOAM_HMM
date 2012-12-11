@@ -27,8 +27,8 @@ License
 #include "IFstream.H"
 #include "DynamicList.H"
 #include "fft.H"
-#include "mathematicalConstants.H"
 #include "SubField.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * //
 
@@ -61,7 +61,7 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
     {
         FatalErrorIn
         (
-            "noiseFFT::noiseFFT(const fileName& pFileName, const label skip)"
+            "noiseFFT::noiseFFT(const fileName&, const label)"
         )   << "Cannot read file " << pFileName
             << exit(FatalError);
     }
@@ -76,11 +76,8 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
 
             if (!pFile.good() || pFile.eof())
             {
-                FatalErrorIn
-                (
-                    "noiseFFT::noiseFFT(const fileName& pFileName, "
-                    "const label skip)"
-                )   << "Number of points in file " << pFileName
+                FatalErrorIn("noiseFFT::noiseFFT(const fileName&, const label)")
+                    << "Number of points in file " << pFileName
                     << " is less than the number to be skipped = " << skip
                     << exit(FatalError);
             }
@@ -136,7 +133,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::window
 
     if ((N + ni*windowOffset) > size())
     {
-        FatalErrorIn("noiseFFT::window(const label N, const label n) const")
+        FatalErrorIn("noiseFFT::window(const label, const label) const")
             << "Requested window is outside set of data" << endl
             << "number of data = " << size() << endl
             << "size of window = " << N << endl
@@ -215,10 +212,10 @@ Foam::graph Foam::noiseFFT::meanPf
 {
     if (N > size())
     {
-        FatalErrorIn("noiseFFT::meanPf(const label N, const label nw) const")
-            << "Requested window is outside set of data" << endl
-            << "number of data = " << size() << endl
-            << "size of window = " << N << endl
+        FatalErrorIn("noiseFFT::meanPf(const label, const label) const")
+            << "Requested window is outside set of data" << nl
+            << "number of data = " << size() << nl
+            << "size of window = " << N << nl
             << "window  = " << nw
             << exit(FatalError);
     }
@@ -261,7 +258,7 @@ Foam::graph Foam::noiseFFT::RMSmeanPf
 {
     if (N > size())
     {
-        FatalErrorIn("noiseFFT::RMSmeanPf(const label N, const label nw) const")
+        FatalErrorIn("noiseFFT::RMSmeanPf(const label, const label) const")
             << "Requested window is outside set of data" << endl
             << "number of data = " << size() << endl
             << "size of window = " << N << endl

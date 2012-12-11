@@ -42,6 +42,8 @@ Description
     sources.constrain(rhoEqn);
 
     rhoEqn.solve();
+
+    sources.correct(rho);
 }
 
 // ************************************************************************* //
