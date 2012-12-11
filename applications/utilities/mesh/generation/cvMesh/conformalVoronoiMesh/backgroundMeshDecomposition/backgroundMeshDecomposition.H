@@ -53,7 +53,6 @@ SourceFiles
 #ifndef backgroundMeshDecomposition_H
 #define backgroundMeshDecomposition_H
 
-#include "conformalVoronoiMesh.H"
 #include "fvMesh.H"
 #include "hexRef8.H"
 #include "cellSet.H"
@@ -81,6 +80,10 @@ namespace Foam
 typedef PrimitivePatch<face, List, const pointField, point> bPatch;
 typedef treeDataPrimitivePatch<bPatch> treeDataBPatch;
 
+class Time;
+class Random;
+class conformationSurfaces;
+
 /*---------------------------------------------------------------------------*\
                   Class backgroundMeshDecomposition Declaration
 \*---------------------------------------------------------------------------*/
@@ -98,14 +101,8 @@ class backgroundMeshDecomposition
         //- Reference to surface
         const conformationSurfaces& geometryToConformTo_;
 
-        //- The cell size control object
-        const cellSizeControlSurfaces& cellSizeControl_;
-
         //- Random number generator
         Random& rndGen_;
-
-        //- Controls
-        const cvControls& cvMeshControls_;
 
         //- Mesh stored on for this processor, specifiying the domain that it
         //  is responsible for.
@@ -120,8 +117,6 @@ class backgroundMeshDecomposition
 
         //- Search tree for the boundaryFaces_ patch
         autoPtr<indexedOctree<treeDataBPatch> > bFTreePtr_;
-
-        List<scalar> octreeNearestDistances_;
 
         //- The bounds of all background meshes on all processors
         treeBoundBoxList allBackgroundMeshBounds_;
@@ -204,24 +199,10 @@ public:
         //- Construct from components in cvMesh operation
         backgroundMeshDecomposition
         (
-            const dictionary& coeffsDict,
-            const conformalVoronoiMesh& cvMesh
-        );
-
-        //- Construct from components for standalone operation
-        backgroundMeshDecomposition
-        (
-            const scalar spanScale,
-            const scalar minCellSizeLimit,
-            const label minLevels,
-            const label volRes,
-            const scalar maxCellWeightCoeff,
-
             const Time& runTime,
-            const conformationSurfaces& geometryToConformTo,
-            const cellSizeControlSurfaces& cellSizeControl,
             Random& rndGen,
-            const cvControls& cvMeshControls
+            const conformationSurfaces& geometryToConformTo,
+            const dictionary& coeffsDict
         );
 
 
@@ -238,10 +219,7 @@ public:
         //  returning a map to use to redistribute vertices.
         autoPtr<mapDistributePolyMesh> distribute
         (
-            volScalarField& cellWeights,
-            List<DynamicList<point> >& cellVertices,
-            List<DynamicList<label> >& cellVertexIndices,
-            List<DynamicList<label> >& cellVertexTypes
+            volScalarField& cellWeights
         );
 
         //- Distribute supplied the points to the appropriate processor
@@ -300,17 +278,30 @@ public:
             bool includeOwnProcessor = false
         ) const;
 
-        //- Which processors overlap the given sphere, returns all processors
-        //  whose boundary patch is touched by the sphere or whom the sphere is
-        //  inside.  By default this does not return the processor that the
-        //  query is launched from, it is assumed that the point is on that
-        //  processor.
-        labelListList overlapsProcessors
+        bool overlapsOtherProcessors
         (
-            const List<point>& centres,
-            const List<scalar>& radiusSqrs,
-            bool includeOwnProcessor = false
+            const point& centre,
+            const scalar& radiusSqr
         ) const;
+
+        labelList overlapProcessors
+        (
+            const point& centre,
+            const scalar radiusSqr
+        ) const;
+
+//        //- Which processors overlap the given sphere, returns all processors
+//        //  whose boundary patch is touched by the sphere or whom the sphere is
+//        //  inside.  By default this does not return the processor that the
+//        //  query is launched from, it is assumed that the point is on that
+//        //  processor.
+//        labelListList overlapsProcessors
+//        (
+//            const List<point>& centres,
+//            const List<scalar>& radiusSqrs,
+//            const Delaunay& T,
+//            bool includeOwnProcessor
+//        ) const;
 
         // Access
 
@@ -319,9 +310,6 @@ public:
 
             //- Return access to the underlying tree
             inline const indexedOctree<treeDataBPatch>& tree() const;
-
-            //- Return access to the nearest distance of the octree nodes
-            inline const List<scalar>& octreeNearestDistances() const;
 
             //- Return the boundBox of this processor
             inline const treeBoundBox& procBounds() const;

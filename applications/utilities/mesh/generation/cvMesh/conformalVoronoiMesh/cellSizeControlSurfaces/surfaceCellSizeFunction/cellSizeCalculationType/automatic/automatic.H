@@ -85,6 +85,11 @@ private:
         const scalar maximumCellSize_;
 
 
+    // Private Member Functions
+
+        void smoothField(triSurfaceScalarField& surf);
+
+
 public:
 
     //- Runtime type information

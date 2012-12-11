@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Class
     indexedVertex
 
@@ -43,9 +38,11 @@ SourceFiles
 #define indexedVertex_H
 
 #include <CGAL/Triangulation_3.h>
+#include "CGALTriangulation3DKernel.H"
 #include "tensor.H"
 #include "InfoProxy.H"
 #include "point.H"
+#include "indexedVertexEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,13 +53,41 @@ template<class Gt, class Vb> class indexedVertex;
 
 namespace Foam
 {
+
 class Ostream;
+class Istream;
+
 template<class Gt, class Vb> Ostream& operator<<
 (
     Ostream&,
     const Foam::InfoProxy<CGAL::indexedVertex<Gt, Vb> >&
 );
-}
+
+template<class Gt, class Vb> Ostream& operator<<
+(
+    Ostream&,
+    const CGAL::indexedVertex<Gt, Vb>&
+);
+
+template<class Gt, class Vb> Istream& operator>>
+(
+    Istream&,
+    CGAL::indexedVertex<Gt, Vb>&
+);
+
+inline Istream& operator>>
+(
+    Istream& is,
+    CGAL::Point_3<baseK>& p
+);
+
+inline Ostream& operator<<
+(
+    Ostream& os,
+    const CGAL::Point_3<baseK>& p
+);
+
+} // End namespace Foam
 
 
 namespace CGAL
@@ -72,26 +97,24 @@ namespace CGAL
                          Class indexedVertex Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Gt, class Vb=CGAL::Triangulation_vertex_base_3<Gt> >
+template<class Gt, class Vb = CGAL::Triangulation_vertex_base_3<Gt> >
 class indexedVertex
 :
+    public Foam::indexedVertexEnum,
     public Vb
 {
     // Private data
+
+        //- Type of pair-point
+        vertexType type_;
 
         //- The index for this Delaunay vertex.  For referred vertices, the
         //  index is negative for vertices that are the outer (slave) of point
         //  pairs
         int index_;
 
-        //- type of pair-point   :
-        //  vtNearBoundary       : internal near boundary point.
-        //  vtInternal           : internal point.
-        //  vtFar                : far-point.
-        //  > vtFar, < 0         : referred point from processor -(type_ + 1)
-        //  >= 0                 : part of point-pair. Index of other point.
-        //                         Lowest numbered is inside one (master).
-        int type_;
+        //- Number of the processor that owns this vertex
+        int processor_;
 
         //- Required alignment of the dual cell of this vertex
         Foam::tensor alignment_;
@@ -100,29 +123,15 @@ class indexedVertex
         Foam::scalar targetCellSize_;
 
         //- Specify whether the vertex is fixed or movable.
-        bool vertexFixed_;
-
-        bool nearProcBoundary_;
+//        bool vertexFixed_;
 
 
 public:
 
-    enum vertexTypes
-    {
-        vtNearBoundary  = INT_MIN,
-        vtInternal      = INT_MIN + 1,
-        vtFar           = INT_MIN + 2
-    };
-
-    enum vertexMotion
-    {
-        fixed   = 0,
-        movable = 1
-    };
-
-    typedef typename Vb::Vertex_handle      Vertex_handle;
-    typedef typename Vb::Cell_handle        Cell_handle;
-    typedef typename Vb::Point              Point;
+    typedef typename Vb::Triangulation_data_structure   Tds;
+    typedef typename Vb::Point                          Point;
+    typedef typename Tds::Vertex_handle                 Vertex_handle;
+    typedef typename Tds::Cell_handle                   Cell_handle;
 
     template<typename TDS2>
     struct Rebind_TDS
@@ -131,14 +140,23 @@ public:
         typedef indexedVertex<Gt,Vb2>                           Other;
     };
 
-
     // Constructors
 
         inline indexedVertex();
 
         inline indexedVertex(const Point& p);
 
-        inline indexedVertex(const Point& p, int index, int type);
+        inline indexedVertex(const Point& p, vertexType type);
+
+        inline indexedVertex(const Foam::point& p, vertexType type);
+
+        inline indexedVertex
+        (
+            const Point& p,
+            int index,
+            vertexType type,
+            int processor
+        );
 
         inline indexedVertex(const Point& p, Cell_handle f);
 
@@ -151,9 +169,9 @@ public:
 
         inline int index() const;
 
-        inline int& type();
+        inline vertexType& type();
 
-        inline int type() const;
+        inline vertexType type() const;
 
         inline Foam::tensor& alignment();
 
@@ -171,26 +189,18 @@ public:
         //- Is point internal, i.e. not on boundary
         inline bool internalPoint() const;
 
-        //- Is point internal, i.e. not on boundary, external query.
-        inline static bool internalPoint(int type);
-
-        // is this a referred vertex
+        //- Is this a referred vertex
         inline bool referred() const;
 
-        // is this a referred internal or boundary vertex
-        inline bool referredInternalOrBoundaryPoint() const;
-
-        // is this a referred external (pair slave) vertex
-        inline bool referredExternal() const;
-
-        // Is this a "real" point on this processor, i.e. is it internal or part
-        // of the boundary description, and not a "far" or "referred" point
+        //- Is this a "real" point on this processor, i.e. is internal or part
+        //  of the boundary description, and not a "far" or "referred" point
         inline bool real() const;
 
         // For referred vertices, what is the original processor index
         inline int procIndex() const;
 
-        inline static int encodeProcIndex(int procI);
+        // For referred vertices, set the original processor index
+        inline int& procIndex();
 
         //- Set the point to be internal
         inline void setInternal();
@@ -208,45 +218,61 @@ public:
         inline void setNearProcBoundary();
 
         //- Either master or slave of pointPair.
-        inline bool pairPoint() const;
-
-        //- Master of a pointPair is the lowest numbered one.
-        inline bool ppMaster() const;
-
-        //- Master of a pointPair is the lowest numbered one, external query.
-        inline static bool ppMaster(int index, int type);
-
-        //- Slave of a pointPair is the highest numbered one.
-        inline bool ppSlave() const;
+        inline bool boundaryPoint() const;
 
         //- Either original internal point or master of pointPair.
         inline bool internalOrBoundaryPoint() const;
 
-        //- Either original internal point or master of pointPair.
-        //  External query.
-        inline static bool internalOrBoundaryPoint(int index, int type);
-
         //- Is point near the boundary or part of the boundary definition
         inline bool nearOrOnBoundary() const;
 
-        //- Either a real or referred internal or boundary point
-        inline bool anyInternalOrBoundaryPoint() const;
+        //- Part of a feature point
+        inline bool featurePoint() const;
 
-        //- Is the vertex fixed or movable
-        inline bool isVertexFixed() const;
+        //- Part of a feature edge
+        inline bool featureEdgePoint() const;
 
-        //- Fix the vertex so that it can't be moved
-        inline void setVertexFixed();
+        //- Part of a surface point pair
+        inline bool surfacePoint() const;
 
-    // inline void operator=(const Delaunay::Finite_vertices_iterator vit)
-    // {
-    //     Vb::operator=indexedVertex(vit->point());
+        inline bool internalBoundaryPoint() const;
 
-    //     this->index_ = vit->index();
+        inline bool externalBoundaryPoint() const;
 
-    //     this->type_ = vit->type();
-    // }
+//        //- Is the vertex fixed or movable
+//        inline bool isVertexFixed() const;
+//
+//        //- Fix the vertex so that it can't be moved
+//        inline void setVertexFixed();
 
+        inline indexedVertex& operator=(const indexedVertex& rhs)
+        {
+            Vb::operator=(rhs);
+
+            this->type_ = rhs.type();
+            this->index_ = rhs.index();
+            this->processor_ = rhs.procIndex();
+            this->alignment_ = rhs.alignment();
+            this->targetCellSize_ = rhs.targetCellSize();
+
+            return *this;
+        }
+
+        inline bool operator==(const indexedVertex& rhs) const
+        {
+            return
+            (
+                //this->point() == rhs.point()
+                this->type_ == rhs.type()
+             && this->index_ == rhs.index()
+             && this->processor_ == rhs.procIndex()
+            );
+        }
+
+        inline bool operator!=(const indexedVertex& rhs) const
+        {
+            return !(*this == rhs);
+        }
 
 
     // Info
@@ -264,12 +290,54 @@ public:
             const Foam::InfoProxy<indexedVertex<Gt, Vb> >&
         );
 
+        friend Foam::Ostream& Foam::operator<< <Gt, Vb>
+        (
+            Foam::Ostream&,
+            const indexedVertex<Gt, Vb>&
+        );
+
+        friend Foam::Istream& Foam::operator>> <Gt, Vb>
+        (
+            Foam::Istream&,
+            indexedVertex<Gt, Vb>&
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace CGAL
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+#ifdef CGAL_INEXACT
+namespace Foam
+{
+    // For inexact representations where the storage type is a double, the data
+    // is contiguous. This may not be true for exact number types.
+    template<>
+    inline bool contiguous
+    <
+        CGAL::indexedVertex
+        <
+            K,
+            CGAL::Triangulation_vertex_base_3<K>
+        >
+    >()
+    {
+        return true;
+    }
+
+
+    template<>
+    inline bool contiguous<CGAL::Triangulation_vertex_base_3<K>::Point>()
+    {
+        return true;
+    }
+
+} // End namespace Foam
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

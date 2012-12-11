@@ -21,34 +21,47 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 \*---------------------------------------------------------------------------*/
 
-#include "indexedCell.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
-
-template<class Gt, class Cb>
-Foam::Ostream& Foam::operator<<
+Foam::cellShapeControlMesh::Vertex_handle Foam::cellShapeControlMesh::insert
 (
-    Ostream& os,
-    const InfoProxy<CGAL::indexedCell<Gt, Cb> >& p
+    const Foam::point& pt,
+    const scalar& size,
+    const triad& alignment,
+    const Foam::indexedVertexEnum::vertexType type
 )
 {
-    const CGAL::indexedCell<Gt, Cb>& iv = p.t_;
+    Vertex_handle v = CellSizeDelaunay::insert
+    (
+        Point(pt.x(), pt.y(), pt.z())
+    );
+    v->type() = type;
+    v->index() = getNewVertexIndex();
+    v->procIndex() = Pstream::myProcNo();
+    v->targetCellSize() = size;
+    v->alignment() = tensor(alignment.x(), alignment.y(), alignment.z());
 
-    os  << "Cell : index:" << iv.index_ << " filterCount:" << iv.filterCount_
-        << nl;
-    os  << "    " << iv.vertex(0)->info();
-    os  << "    " << iv.vertex(1)->info();
-    os  << "    " << iv.vertex(2)->info();
-    os  << "    " << iv.vertex(3)->info();
+    return v;
+}
 
-    return os;
+
+Foam::cellShapeControlMesh::Vertex_handle Foam::cellShapeControlMesh::insertFar
+(
+    const Foam::point& pt
+)
+{
+    Vertex_handle v = CellSizeDelaunay::insert
+    (
+        Point(pt.x(), pt.y(), pt.z())
+    );
+    v->type() = Vb::vtFar;
+//    v->type() = Vb::vtExternalFeaturePoint;
+    v->index() = getNewVertexIndex();
+    v->procIndex() = Pstream::myProcNo();
+
+    return v;
 }
 
 

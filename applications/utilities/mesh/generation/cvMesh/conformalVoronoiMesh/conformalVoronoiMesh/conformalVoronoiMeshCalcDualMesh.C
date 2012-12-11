@@ -27,12 +27,489 @@ License
 #include "motionSmoother.H"
 #include "backgroundMeshDecomposition.H"
 #include "polyMeshGeometry.H"
+#include "indexedCellChecks.H"
+
+#include "CGAL/Exact_predicates_exact_constructions_kernel.h"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::conformalVoronoiMesh::checkCells()
+{
+    List<List<FixedList<Foam::point, 4> > > cellListList(Pstream::nProcs());
+
+    List<FixedList<Foam::point, 4> > cells(number_of_finite_cells());
+
+    globalIndex gIndex(number_of_vertices());
+
+    label count = 0;
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (tetrahedron(cit).volume() == 0)
+        {
+            Pout<< "ZERO VOLUME TET" << endl;
+            Pout<< cit->info();
+            Pout<< cit->dual();
+        }
+
+        if (cit->hasFarPoint())
+        {
+            continue;
+        }
+
+        List<labelPair> cellVerticesPair(4);
+        List<Foam::point> cellVertices(4);
+
+        for (label vI = 0; vI < 4; ++vI)
+        {
+            cellVerticesPair[vI] = labelPair
+            (
+                cit->vertex(vI)->procIndex(),
+                cit->vertex(vI)->index()
+            );
+            cellVertices[vI] = topoint(cit->vertex(vI)->point());
+        }
+
+        List<Foam::point> cellVerticesOld(cellVertices);
+        labelList oldToNew;
+        sortedOrder(cellVerticesPair, oldToNew);
+        oldToNew = invert(oldToNew.size(), oldToNew);
+        inplaceReorder(oldToNew, cellVerticesPair);
+        inplaceReorder(oldToNew, cellVertices);
+
+//        Pout<< "old " << cellVerticesOld << nl << "new " << cellVertices << endl;
+
+//
+//        FixedList<label, 4> globalTetCell(cit->globallyOrderedCellVertices(gIndex));
+//
+//        FixedList<Point, 4> cellVertices(Point(0,0,0));
+//
+//        forAll(globalTetCell, gvI)
+//        {
+//            label gI = globalTetCell[gvI];
+//
+//            cellVertices[gvI] = cit->vertex(gI)->point();
+//        }
+
+//        if (cit->hasFarPoint())
+//        {
+//            continue;
+//        }
+
+        for (label i = 0; i < 4; ++i)
+        {
+            //cells[count][i] = topoint(cit->vertex(i)->point());
+            cells[count][i] = cellVertices[i];
+        }
+
+        count++;
+    }
+
+    cells.setSize(count);
+
+    cellListList[Pstream::myProcNo()] = cells;
+
+    Pstream::gatherList(cellListList);
+
+    if (Pstream::master())
+    {
+        Info<< "Checking on master processor the cells of each " << nl
+            << "processor point list against the master cell list." << nl
+            << "There are " << cellListList.size() << " processors" << nl
+            << "The size of each processor's cell list is:" << endl;
+
+        forAll(cellListList, cfI)
+        {
+            Info<< "    Proc " << cfI << " has " << cellListList[cfI].size()
+                << " cells" << endl;
+        }
+
+        label nMatches = 0, nMatchFoundDiffOrder = 0;
+
+        forAll(cellListList[0], cmI)
+        {
+            const FixedList<Foam::point, 4>& masterCell = cellListList[0][cmI];
+
+            bool matchFound = false;
+            bool matchFoundDiffOrder = false;
+
+            forAll(cellListList, cpI)
+            {
+                if (cpI == 0)
+                {
+                    continue;
+                }
+
+                forAll(cellListList[cpI], csI)
+                {
+                    const FixedList<Foam::point, 4>& slaveCell
+                        = cellListList[cpI][csI];
+
+                    if (masterCell == slaveCell)
+                    {
+                        matchFound = true;
+                        break;
+                    }
+                    else
+                    {
+                        label samePt = 0;
+
+                        forAll(masterCell, mI)
+                        {
+                            const Foam::point& mPt = masterCell[mI];
+
+                            forAll(slaveCell, sI)
+                            {
+                                const Foam::point& sPt = slaveCell[sI];
+
+                                if (mPt == sPt)
+                                {
+                                    samePt++;
+                                }
+                            }
+                        }
+
+                        if (samePt == 4)
+                        {
+                            matchFoundDiffOrder = true;
+
+                            Pout<< masterCell << nl << slaveCell << endl;
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (matchFound)
+            {
+                nMatches++;
+            }
+
+            if (matchFoundDiffOrder)
+            {
+                nMatchFoundDiffOrder++;
+            }
+        }
+
+        Info<< "Found " << nMatches << " matching cells and "
+            << nMatchFoundDiffOrder << " matching cells with different "
+            << "vertex ordering"<< endl;
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::checkDuals()
+{
+    List<List<Point> > pointFieldList(Pstream::nProcs());
+
+    List<Point> duals(number_of_finite_cells());
+
+    typedef CGAL::Exact_predicates_exact_constructions_kernel   EK2;
+    typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2> EK;
+    typedef CGAL::Cartesian_converter<typename baseK::Kernel, EK2>  To_exact;
+    typedef CGAL::Cartesian_converter<EK2, typename baseK::Kernel>  Back_from_exact;
+
+//    PackedBoolList bPoints(number_of_finite_cells());
+
+//    indexDualVertices(duals, bPoints);
+
+    label count = 0;//duals.size();
+
+    duals.setSize(number_of_finite_cells());
+
+    globalIndex gIndex(number_of_vertices());
+
+    for
+    (
+        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if (cit->hasFarPoint())
+        {
+            continue;
+        }
+
+        duals[count++] = cit->circumcenter();
+
+//        List<labelPair> cellVerticesPair(4);
+//        List<Point> cellVertices(4);
+//
+//        for (label vI = 0; vI < 4; ++vI)
+//        {
+//            cellVerticesPair[vI] = labelPair
+//            (
+//                cit->vertex(vI)->procIndex(),
+//                cit->vertex(vI)->index()
+//            );
+//            cellVertices[vI] = cit->vertex(vI)->point();
+//        }
+//
+//        labelList oldToNew;
+//        sortedOrder(cellVerticesPair, oldToNew);
+//        oldToNew = invert(oldToNew.size(), oldToNew);
+//        inplaceReorder(oldToNew, cellVerticesPair);
+//        inplaceReorder(oldToNew, cellVertices);
+//
+//        duals[count++] = CGAL::circumcenter
+//        (
+//            cellVertices[0],
+//            cellVertices[1],
+//            cellVertices[2],
+//            cellVertices[3]
+//        );
+
+//        To_exact to_exact;
+//        Back_from_exact back_from_exact;
+//        EK::Construct_circumcenter_3 exact_circumcenter =
+//            EK().construct_circumcenter_3_object();
+//
+//        duals[count++] = topoint
+//        (
+//            back_from_exact
+//            (
+//                exact_circumcenter
+//                (
+//                    to_exact(cit->vertex(0)->point()),
+//                    to_exact(cit->vertex(1)->point()),
+//                    to_exact(cit->vertex(2)->point()),
+//                    to_exact(cit->vertex(3)->point())
+//                )
+//            )
+//        );
+    }
+
+    Pout<< "Duals Calculated " << count << endl;
+
+    duals.setSize(count);
+
+    pointFieldList[Pstream::myProcNo()] = duals;
+
+    Pstream::gatherList(pointFieldList);
+
+    if (Pstream::master())
+    {
+        Info<< "Checking on master processor the dual locations of each " << nl
+            << "processor point list against the master dual list." << nl
+            << "There are " << pointFieldList.size() << " processors" << nl
+            << "The size of each processor's dual list is:" << endl;
+
+        forAll(pointFieldList, pfI)
+        {
+            Info<< "    Proc " << pfI << " has " << pointFieldList[pfI].size()
+                << " duals" << endl;
+        }
+
+        label nNonMatches = 0;
+        label nNearMatches = 0;
+        label nExactMatches = 0;
+
+        forAll(pointFieldList[0], pI)
+        {
+            const Point& masterPoint = pointFieldList[0][pI];
+
+            bool foundMatch = false;
+            bool foundNearMatch = false;
+
+            scalar minCloseness = GREAT;
+            Point closestPoint(0, 0, 0);
+
+            forAll(pointFieldList, pfI)
+            {
+                if (pfI == 0)
+                {
+                    continue;
+                }
+
+//                label pfI = 1;
+
+                forAll(pointFieldList[pfI], pISlave)
+                {
+                    const Point& slavePoint
+                        = pointFieldList[pfI][pISlave];
+
+                    if (masterPoint == slavePoint)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+
+                    const scalar closeness = mag
+                    (
+                        topoint(masterPoint) - topoint(slavePoint)
+                    );
+
+                    if (closeness < 1e-12)
+                    {
+                        foundNearMatch = true;
+                    }
+                    else
+                    {
+                        if (closeness < minCloseness)
+                        {
+                            minCloseness = closeness;
+                            closestPoint = slavePoint;
+                        }
+                    }
+                }
+
+                if (!foundMatch)
+                {
+                    if (foundNearMatch)
+                    {
+                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
+                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
+                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
+
+                        std::cout<< "master = " << x << " " << y << " " << z
+                            << std::endl;
+
+
+                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
+                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
+                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
+                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+                            << std::endl;
+
+                        nNearMatches++;
+                    }
+                    else
+                    {
+                        nNonMatches++;
+                        Info<< "    Closest point to " << masterPoint << " is "
+                            << closestPoint << nl
+                            << "    Separation is " << minCloseness << endl;
+
+                        CGAL::Gmpq x(CGAL::to_double(masterPoint.x()));
+                        CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
+                        CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
+
+                        std::cout<< "master = " << x << " " << y << " " << z << endl;
+
+
+                        CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
+                        CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
+                        CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
+                        std::cout<< "slave  = " << xs << " " << ys << " " << zs << endl;
+
+                    }
+                }
+                else
+                {
+                    nExactMatches++;
+                }
+            }
+        }
+
+        Info<< "Found " << nNonMatches << " non-matching duals" << nl
+            << " and " << nNearMatches << " near matches"
+            << " and " << nExactMatches << " exact matches" << endl;
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::checkVertices()
+{
+    List<pointField> pointFieldList(Pstream::nProcs());
+
+    pointField points(number_of_vertices());
+
+    labelPairHashSet duplicateVertices;
+
+    label count = 0;
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (duplicateVertices.found(labelPair(vit->procIndex(), vit->index())))
+        {
+            Pout<< "DUPLICATE " << vit->procIndex() << vit->index() << endl;
+        }
+        else
+        {
+            duplicateVertices.insert(labelPair(vit->procIndex(), vit->index()));
+        }
+
+        points[count++] = topoint(vit->point());
+    }
+
+    pointFieldList[Pstream::myProcNo()] = points;
+
+    Pstream::gatherList(pointFieldList);
+
+    OFstream str("missingPoints.obj");
+
+    if (Pstream::master())
+    {
+        Info<< "Checking on master processor the point locations of each " << nl
+            << "processor point list against the master point list." << nl
+            << "There are " << pointFieldList.size() << " processors" << nl
+            << "The size of each processor's point list is:" << endl;
+
+        forAll(pointFieldList, pfI)
+        {
+            Info<< "    Proc " << pfI << " has " << pointFieldList[pfI].size()
+                << " points" << endl;
+        }
+
+        label nNonMatches = 0;
+
+        forAll(pointFieldList[0], pI)
+        {
+            const Foam::point& masterPoint = pointFieldList[0][pI];
+
+            forAll(pointFieldList, pfI)
+            {
+                if (pI == 0)
+                {
+                    continue;
+                }
+
+                bool foundMatch = false;
+
+                forAll(pointFieldList[pfI], pISlave)
+                {
+                    const Foam::point& slavePoint
+                        = pointFieldList[pfI][pISlave];
+
+                    if (masterPoint == slavePoint)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+
+                if (!foundMatch)
+                {
+                    Info<< "    Proc " << pfI << " Master != Slave -> "
+                        << masterPoint << endl;
+
+                    meshTools::writeOBJ(str, masterPoint);
+
+                    nNonMatches++;
+                }
+            }
+        }
+
+        Info<< "Found a total of " << nNonMatches << " non-matching points"
+            << endl;
+    }
+}
+
 
 void Foam::conformalVoronoiMesh::calcDualMesh
 (
     pointField& points,
+    labelList& boundaryPts,
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
@@ -44,233 +521,35 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     pointField& cellCentres,
     labelList& cellToDelaunayVertex,
     labelListList& patchToDelaunayVertex,
-    bool filterFaces
+    PackedBoolList& boundaryFacesToRemove
 )
 {
     timeCheck("Start calcDualMesh");
+
+//    if (debug)
+//    {
+//        Pout<< nl << "Perfoming some checks . . ." << nl << nl
+//            << "Total number of vertices = " << number_of_vertices() << nl
+//            << "Total number of cells    = " << number_of_finite_cells() << endl;
+//
+//        checkVertices();
+//        checkCells();
+//        checkDuals();
+//
+//        Info<< nl << "Finished checks" << nl << endl;
+//    }
 
     setVertexSizeAndAlignment();
 
     timeCheck("After setVertexSizeAndAlignment");
 
-    // Make all filterCount values zero except on cells that are attached
-    // points that are on the parallel interface.  These will not be moved.
-
-    for
-    (
-        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
-    {
-        if
-        (
-               !cit->vertex(0)->real()
-            || !cit->vertex(1)->real()
-            || !cit->vertex(2)->real()
-            || !cit->vertex(3)->real()
-        )
-        {
-            cit->filterCount() =
-                 cvMeshControls().filterCountSkipThreshold() + 1;
-        }
-        else
-        {
-            cit->filterCount() = 0;
-        }
-    }
-
-    // THIS CODE STOPS ALL FACES NEAR ANY PROCESSOR BOUNDARY BEING FILTERED.
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        std::list<Cell_handle> cells;
-        incident_cells(vit, std::back_inserter(cells));
-
-        bool hasProcPt = false;
-
-        for
-        (
-            std::list<Cell_handle>::iterator cit = cells.begin();
-            cit != cells.end();
-            ++cit
-        )
-        {
-            // Allow filtering if any vertices are far points. Otherwise faces
-            // with boundary points attached to a cell with a far point will
-            // not be filtered.
-            if
-            (
-                (!(*cit)->vertex(0)->real() && !(*cit)->vertex(0)->farPoint())
-             || (!(*cit)->vertex(1)->real() && !(*cit)->vertex(1)->farPoint())
-             || (!(*cit)->vertex(2)->real() && !(*cit)->vertex(2)->farPoint())
-             || (!(*cit)->vertex(3)->real() && !(*cit)->vertex(3)->farPoint())
-            )
-            {
-                hasProcPt = true;
-
-                break;
-            }
-        }
-
-        if (hasProcPt)
-        {
-            for
-            (
-                std::list<Cell_handle>::iterator cit = cells.begin();
-                cit != cells.end();
-                ++cit
-            )
-            {
-                (*cit)->filterCount() =
-                     cvMeshControls().filterCountSkipThreshold() + 1;
-            }
-        }
-    }
-
-    PackedBoolList boundaryPts(number_of_cells(), false);
-
     indexDualVertices(points, boundaryPts);
 
     {
-        // Ideally requires a no-risk face filtering to get rid of zero area
-        // faces and establish if the mesh can be produced at all to the
-        // specified criteria
-
-        Info<< nl << "Merging close points" << endl;
+        Info<< nl << "Merging identical points" << endl;
 
         // There is no guarantee that a merge of close points is no-risk
-        mergeCloseDualVertices(points, boundaryPts);
-    }
-
-    timeCheck("After initial close point merge");
-
-    if (filterFaces)
-    {
-        label nInitialBadQualityFaces = checkPolyMeshQuality(points).size();
-
-        reduce(nInitialBadQualityFaces, sumOp<label>());
-
-        Info<< nl << "Initial check before face collapse, found "
-            << nInitialBadQualityFaces << " bad quality faces"
-            << endl;
-
-        HashSet<labelPair, labelPair::Hash<> > deferredCollapseFaces;
-
-        if (nInitialBadQualityFaces > 0)
-        {
-            Info<< nl
-                << "A mesh could not be produced to satisfy the specified "
-                << "quality criteria." << nl
-                << "The quality and the surface conformation controls "
-                << "can be altered and the " << nl
-                << "internalDelaunayVertices read in to try again, or more "
-                << "cell size resolution " << nl
-                << "and motion iterations can be applied in areas where "
-                << "problems are occurring."
-                << endl;
-        }
-
-        if
-        (
-            nInitialBadQualityFaces == 0
-         || cvMeshControls().continueFilteringOnBadInitialPolyMesh()
-        )
-        {
-            label nBadQualityFaces = 0;
-
-            labelHashSet lastWrongFaces;
-
-            label nConsecutiveEqualFaceSets = 0;
-
-            do
-            {
-                // Reindexing the Delaunay cells and regenerating the
-                // points resets the mesh to the starting condition.
-
-                indexDualVertices(points, boundaryPts);
-
-                {
-                    Info<< nl << "Merging close points" << endl;
-
-                    mergeCloseDualVertices(points, boundaryPts);
-                }
-
-                {
-                    // Risky and undo-able face filtering to reduce
-                    // the face count as much as possible, staying
-                    // within the specified criteria
-
-                    Info<< nl << "Smoothing surface" << endl;
-
-                    smoothSurface(points, boundaryPts);
-
-                    Info<< nl << "Collapsing unnecessary faces" << endl;
-
-                    collapseFaces(points, boundaryPts, deferredCollapseFaces);
-
-                    const scalar maxCosAngle
-                        = cos(degToRad(cvMeshControls().edgeMergeAngle()));
-
-                    Info<< nl << "Merging adjacent edges which have an angle "
-                        << "of greater than "
-                        << cvMeshControls().edgeMergeAngle() << ": " << endl;
-
-                    label nRemovedEdges =
-                        mergeNearlyParallelEdges(points, maxCosAngle);
-
-                    reduce(nRemovedEdges, sumOp<label>());
-
-                    Info<< "    Merged " << nRemovedEdges << " edges" << endl;
-                }
-
-                labelHashSet wrongFaces = checkPolyMeshQuality(points);
-
-                nBadQualityFaces = wrongFaces.size();
-
-                reduce(nBadQualityFaces, sumOp<label>());
-
-                Info<< nl << "Found " << nBadQualityFaces
-                    << " bad quality faces" << endl;
-
-                bool sameFacesAsLastTime(lastWrongFaces == wrongFaces);
-
-                reduce(sameFacesAsLastTime, andOp<bool>());
-
-                if (sameFacesAsLastTime)
-                {
-                    Info<< nl << "Consecutive iterations found the same set "
-                        << "of bad quality faces." << endl;
-
-                    if
-                    (
-                        ++nConsecutiveEqualFaceSets
-                     >= cvMeshControls().maxConsecutiveEqualFaceSets()
-                    )
-                    {
-                        Info<< nl << nConsecutiveEqualFaceSets
-                            << " consecutive iterations produced the same "
-                            << "bad quality faceSet, stopping filtering"
-                            << endl;
-
-                        break;
-                    }
-                }
-                else
-                {
-                    nConsecutiveEqualFaceSets = 0;
-
-                    lastWrongFaces = wrongFaces;
-                }
-
-                timeCheck("End of filtering iteration");
-
-            } while (nBadQualityFaces > 0); //nInitialBadQualityFaces);
-        }
+        mergeIdenticalDualVertices(points, boundaryPts);
     }
 
     // Final dual face and owner neighbour construction
@@ -288,6 +567,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         patchStarts,
         procNeighbours,
         patchToDelaunayVertex,  // from patch face to Delaunay vertex (slavePp)
+        boundaryFacesToRemove,
         false
     );
 
@@ -299,7 +579,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     cellCentres = pointField(cellCentres, cellToDelaunayVertex);
 
-    removeUnusedPoints(faces, points);
+    removeUnusedPoints(faces, points, boundaryPts);
 
     timeCheck("End of calcDualMesh");
 }
@@ -332,7 +612,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         ++vit
     )
     {
-        if (vit->internalPoint() || vit->pairPoint())
+        if (vit->internalPoint() || vit->boundaryPoint())
         {
             vertexMap[vit->index()] = vertI;
             points[vertI] = topoint(vit->point());
@@ -376,11 +656,11 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
 
-    faces.setSize(number_of_facets());
+    faces.setSize(number_of_finite_facets());
 
-    owner.setSize(number_of_facets());
+    owner.setSize(number_of_finite_facets());
 
-    neighbour.setSize(number_of_facets());
+    neighbour.setSize(number_of_finite_facets());
 
     label faceI = 0;
 
@@ -399,7 +679,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-        if (c1->farCell() && c2->farCell())
+        if (c1->hasFarPoint() && c2->hasFarPoint())
         {
             // Both tets are outside, skip
             continue;
@@ -421,10 +701,10 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
         newFace = face(verticesOnTriFace);
 
-        if (c1->farCell() || c2->farCell())
+        if (c1->hasFarPoint() || c2->hasFarPoint())
         {
             // Boundary face...
-            if (c1->farCell())
+            if (c1->hasFarPoint())
             {
                 //... with c1 outside
                 ownerCell = c2I;
@@ -490,23 +770,23 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     sortFaces(faces, owner, neighbour);
 
-    addPatches
-    (
-        nInternalFaces,
-        faces,
-        owner,
-        patchSizes,
-        patchStarts,
-        patchFaces,
-        patchOwners
-    );
+//    addPatches
+//    (
+//        nInternalFaces,
+//        faces,
+//        owner,
+//        patchSizes,
+//        patchStarts,
+//        patchFaces,
+//        patchOwners
+//    );
 }
 
 
-void Foam::conformalVoronoiMesh::mergeCloseDualVertices
+void Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 (
     const pointField& pts,
-    const PackedBoolList& boundaryPts
+    const labelList& boundaryPts
 )
 {
     // Assess close points to be merged
@@ -518,17 +798,12 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
     {
         Map<label> dualPtIndexMap;
 
-        nPtsMerged = mergeCloseDualVertices
+        nPtsMerged = mergeIdenticalDualVertices
         (
             pts,
             boundaryPts,
             dualPtIndexMap
         );
-
-        // if (nPtsMerged > 0)
-        // {
-        //     Pout<< "    Merged " << nPtsMerged << " points " << endl;
-        // }
 
         reindexDualVertices(dualPtIndexMap);
 
@@ -545,29 +820,14 @@ void Foam::conformalVoronoiMesh::mergeCloseDualVertices
 }
 
 
-Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
+Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 (
     const pointField& pts,
-    const PackedBoolList& boundaryPts,
+    const labelList& boundaryPts,
     Map<label>& dualPtIndexMap
 ) const
 {
     label nPtsMerged = 0;
-
-    label nIdentical = 0;
-    label nProcEdge = 0;
-
-    // Relative distance for points to be merged
-    scalar closenessTolerance = cvMeshControls().mergeClosenessCoeff();
-
-    // Absolute distance for points to be considered coincident. Bit adhoc
-    // but points were seen with distSqr ~ 1e-30 which is SMALL^2. Add a few
-    // digits to account for truncation errors.
-    scalar coincidentDistanceSqr = sqr
-    (
-        SMALL*1E2*geometryToConformTo_.globalBounds().mag()
-    );
-
 
     for
     (
@@ -580,84 +840,41 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
 
-        label& c1I = c1->cellIndex();
-        label& c2I = c2->cellIndex();
-
-        if (dualPtIndexMap.found(c1I) || dualPtIndexMap.found(c2I))
+        if (is_infinite(c1) || is_infinite(c2))
         {
-            // One of the points of this edge has already been
-            // merged this sweep, leave for next sweep
-
             continue;
         }
 
-        if ((c1I != c2I) && !c1->farCell() && !c2->farCell())
+        label& c1I = c1->cellIndex();
+        label& c2I = c2->cellIndex();
+
+        if ((c1I != c2I) && !c1->hasFarPoint() && !c2->hasFarPoint())
         {
-            scalar distSqr = magSqr(pts[c1I] - pts[c2I]);
+            const Foam::point& p1 = pts[c1I];
+            const Foam::point& p2 = pts[c2I];
 
-            if (pts[c1I] == pts[c2I] || distSqr < coincidentDistanceSqr)
+            if (p1 == p2)
             {
-                nIdentical++;
-
-                if (boundaryPts[c2I] == true)
-                {
-                    // If c2I is a boundary point, then it is kept.
-                    // If both are boundary points then c2I is chosen
-                    // arbitrarily to be kept.
-
-                    dualPtIndexMap.insert(c1I, c2I);
-                    dualPtIndexMap.insert(c2I, c2I);
-                    nPtsMerged++;
-                }
-                else
+                if (c1I < c2I)
                 {
                     dualPtIndexMap.insert(c1I, c1I);
                     dualPtIndexMap.insert(c2I, c1I);
-                    nPtsMerged++;
-                }
-
-            }
-            else if (distSqr < sqr(averageAnyCellSize(fit)*closenessTolerance))
-            {
-                if (c1->parallelDualVertex() || c2->parallelDualVertex())
-                //if (isParallelDualEdge(fit))
-                {
-                    // Skip if face uses any edge that becomes a processor
-                    // dual face.
-                    // Note: the real test should be whether the Delaunay edge
-                    //  will form a processor patch.
-                    nProcEdge++;
-                }
-                else if (boundaryPts[c2I] == true)
-                {
-                    // If c2I is a boundary point, then it is kept.
-                    // If both are boundary points then c2I is chosen
-                    // arbitrarily to be kept.
-
-                    dualPtIndexMap.insert(c1I, c2I);
-                    dualPtIndexMap.insert(c2I, c2I);
-                    nPtsMerged++;
                 }
                 else
                 {
-                    dualPtIndexMap.insert(c1I, c1I);
-                    dualPtIndexMap.insert(c2I, c1I);
-                    nPtsMerged++;
+                    dualPtIndexMap.insert(c1I, c2I);
+                    dualPtIndexMap.insert(c2I, c2I);
                 }
+
+                nPtsMerged++;
             }
         }
     }
 
     if (debug)
     {
-        Info<< "mergeCloseDualVertices:"
-            << " coincident distance:" << coincidentDistanceSqr
-            << " closenessTolerance:" << closenessTolerance << endl
-            << "    zero-length edges         : "
-            << returnReduce(nIdentical, sumOp<label>()) << endl
-            << "    protected processor edges : "
-            << returnReduce(nProcEdge, sumOp<label>()) << endl
-            << "    collapsed edges           : "
+        Info<< "mergeIdenticalDualVertices:" << endl
+            << "    zero-length edges     : "
             << returnReduce(nPtsMerged, sumOp<label>()) << endl
             << endl;
     }
@@ -666,1172 +883,264 @@ Foam::label Foam::conformalVoronoiMesh::mergeCloseDualVertices
 }
 
 
-Foam::label Foam::conformalVoronoiMesh::mergeNearlyParallelEdges
-(
-    const pointField& pts,
-    const scalar maxCosAngle
-)
-{
-    List<HashSet<label> > pointFaceCount(number_of_cells());
-    labelList pointNeighbour(number_of_cells(), -1);
-
-    Map<label> dualPtIndexMap;
-
-    for
-    (
-        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
-
-        if (isBoundaryDualFace(eit))
-        {
-            const face f = buildDualFace(eit);
-
-            forAll(f, pI)
-            {
-                const label pIndex = f[pI];
-
-                const label prevPointI = f.prevLabel(pI);
-                const label nextPointI = f.nextLabel(pI);
-
-                pointFaceCount[pIndex].insert(prevPointI);
-                pointFaceCount[pIndex].insert(nextPointI);
-                pointNeighbour[pIndex] = nextPointI;
-            }
-        }
-        else if
-        (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
-        )
-        {
-            const face f = buildDualFace(eit);
-            const boolList faceBoundaryPoints = dualFaceBoundaryPoints(eit);
-
-            forAll(f, pI)
-            {
-                const label pIndex = f[pI];
-
-                const label prevPointI = f.prevLabel(pI);
-                const label nextPointI = f.nextLabel(pI);
-
-                pointFaceCount[pIndex].insert(prevPointI);
-                pointFaceCount[pIndex].insert(nextPointI);
-
-                if (faceBoundaryPoints[pI] == false)
-                {
-                    pointNeighbour[pIndex] = nextPointI;
-                }
-                else
-                {
-                    if (faceBoundaryPoints[prevPointI] == true)
-                    {
-                        pointNeighbour[pIndex] = prevPointI;
-                    }
-                    else if (faceBoundaryPoints[nextPointI] == true)
-                    {
-                        pointNeighbour[pIndex] = nextPointI;
-                    }
-                    else
-                    {
-                        pointNeighbour[pIndex] = pIndex;
-                    }
-                }
-            }
-        }
-    }
-
-    forAll(pointFaceCount, pI)
-    {
-        if (pointFaceCount[pI].size() == 2)
-        {
-            List<vector> edges(2, vector(0, 0, 0));
-
-            label count = 0;
-            forAllConstIter(HashSet<label>, pointFaceCount[pI], iter)
-            {
-                edges[count] = pts[pI] - pts[iter.key()];
-                edges[count] /= mag(edges[count]) + VSMALL;
-                count++;
-            }
-
-            if (mag(edges[0] & edges[1]) > maxCosAngle)
-            {
-                dualPtIndexMap.insert(pI, pointNeighbour[pI]);
-            }
-        }
-    }
-
-    reindexDualVertices(dualPtIndexMap);
-
-    return dualPtIndexMap.size();
-}
-
-
-void Foam::conformalVoronoiMesh::smoothSurface
-(
-    pointField& pts,
-    const PackedBoolList& boundaryPts
-)
-{
-    label nCollapsedFaces = 0;
-
-    label iterI = 0;
-
-    do
-    {
-        Map<label> dualPtIndexMap;
-
-        nCollapsedFaces = smoothSurfaceDualFaces
-        (
-            pts,
-            boundaryPts,
-            dualPtIndexMap
-        );
-
-        reduce(nCollapsedFaces, sumOp<label>());
-
-        reindexDualVertices(dualPtIndexMap);
-
-        mergeCloseDualVertices(pts, boundaryPts);
-
-        if (nCollapsedFaces > 0)
-        {
-            Info<< "    Collapsed " << nCollapsedFaces << " boundary faces"
-                << endl;
-        }
-
-        if (++iterI > cvMeshControls().maxCollapseIterations())
-        {
-            Info<< "    maxCollapseIterations reached, stopping collapse"
-                << endl;
-
-            break;
-        }
-
-    } while (nCollapsedFaces > 0);
-
-    // Force all points of boundary faces to be on the surface
-    for
-    (
-        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
-        cit != finite_cells_end();
-        ++cit
-    )
-    {
-        label ptI = cit->cellIndex();
-
-        label fC = cit->filterCount();
-
-        if (fC > cvMeshControls().filterCountSkipThreshold())
-        {
-            // This vertex has been limited too many times, skip
-            continue;
-        }
-
-        // Only cells with indices > -1 are valid
-        if (ptI > -1)
-        {
-            if (boundaryPts[ptI] == true)
-            {
-                Foam::point& pt = pts[ptI];
-
-                pointIndexHit surfHit;
-                label hitSurface;
-
-                geometryToConformTo_.findSurfaceNearest
-                (
-                    pt,
-                    sqr(GREAT),
-                    surfHit,
-                    hitSurface
-                );
-
-                if (surfHit.hit())
-                {
-                    pt +=
-                        (surfHit.hitPoint() - pt)
-                       *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
-                }
-            }
-        }
-    }
-
-    mergeCloseDualVertices(pts, boundaryPts);
-}
-
-
-Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
-(
-    pointField& pts,
-    const PackedBoolList& boundaryPts,
-    Map<label>& dualPtIndexMap
-) const
-{
-    label nCollapsedFaces = 0;
-
-    const scalar cosPerpendicularToleranceAngle = cos
-    (
-        degToRad(cvMeshControls().surfaceStepFaceAngle())
-    );
-
-    for
-    (
-        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_circulator ccStart = incident_cells(*eit);
-        Cell_circulator cc = ccStart;
-
-        bool skipFace = false;
-
-        do
-        {
-            if (dualPtIndexMap.found(cc->cellIndex()))
-            {
-                // One of the points of this face has already been
-                // collapsed this sweep, leave for next sweep
-
-                skipFace = true;
-
-                break;
-            }
-
-        } while (++cc != ccStart);
-
-        if (skipFace)
-        {
-            continue;
-        }
-
-        if (isBoundaryDualFace(eit))
-        {
-            face dualFace = buildDualFace(eit);
-
-            if (dualFace.size() < 3)
-            {
-                // This face has been collapsed already
-                continue;
-            }
-
-            label maxFC = maxFilterCount(eit);
-
-            if (maxFC > cvMeshControls().filterCountSkipThreshold())
-            {
-                // A vertex on this face has been limited too many
-                // times, skip
-                continue;
-            }
-
-            pointIndexHit surfHit;
-            label hitSurface;
-
-            geometryToConformTo_.findSurfaceNearest
-            (
-                dualFace.centre(pts),
-                sqr(GREAT),
-                surfHit,
-                hitSurface
-            );
-
-            vectorField norm(1);
-
-            allGeometry_[hitSurface].getNormal
-            (
-                List<pointIndexHit>(1, surfHit),
-                norm
-            );
-
-            const vector& surfaceNormal = norm[0];
-
-            // Orient the face correctly before calculating the normal
-
-            Cell_handle c = eit->first;
-            Vertex_handle vA = c->vertex(eit->second);
-            Vertex_handle vB = c->vertex(eit->third);
-
-            if (!vA->internalOrBoundaryPoint())
-            {
-                reverse(dualFace);
-            }
-
-            vector faceNormal = dualFace.normal(pts);
-
-            if (mag(faceNormal) < VSMALL)
-            {
-                // If the face is essentially zero area, then force it
-                // to be collapsed by making the dot product result -1
-                faceNormal = -surfaceNormal;
-            }
-            else
-            {
-                faceNormal /= mag(faceNormal);
-            }
-
-            if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
-            {
-                scalar targetFaceSize = averageAnyCellSize(vA, vB);
-
-                // Selecting faces to collapse based on angle to
-                // surface, so set collapseSizeLimitCoeff to GREAT to
-                // allow collapse of all faces
-
-                faceCollapseMode mode = collapseFace
-                (
-                    dualFace,
-                    pts,
-                    boundaryPts,
-                    dualPtIndexMap,
-                    targetFaceSize,
-                    GREAT,
-                    maxFC
-                );
-
-                if (mode == fcmPoint || mode == fcmEdge)
-                {
-                    nCollapsedFaces++;
-                }
-            }
-        }
-    }
-
-    return nCollapsedFaces;
-}
-
-
-void Foam::conformalVoronoiMesh::collapseFaces
-(
-    pointField& pts,
-    const PackedBoolList& boundaryPts,
-    HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
-)
-{
-    label nCollapsedFaces = 0;
-
-    label iterI = 0;
-
-    do
-    {
-        Map<label> dualPtIndexMap;
-
-        deferredCollapseFaces.clear();
-
-        nCollapsedFaces = collapseFaces
-        (
-            pts,
-            boundaryPts,
-            dualPtIndexMap,
-            deferredCollapseFaces
-        );
-
-        reduce(nCollapsedFaces, sumOp<label>());
-
-        reindexDualVertices(dualPtIndexMap);
-
-        mergeCloseDualVertices(pts, boundaryPts);
-
-
-        if (nCollapsedFaces > 0)
-        {
-            Info<< "    Collapsed " << nCollapsedFaces << " faces" << endl;
-            // Info<< "dualPtIndexMap" << nl << dualPtIndexMap << endl;
-        }
-
-        if (++iterI > cvMeshControls().maxCollapseIterations())
-        {
-            Info<< nl << "maxCollapseIterations reached, stopping collapse"
-                << endl;
-
-            break;
-        }
-
-    } while (nCollapsedFaces > 0);
-
-}
-
-
-Foam::label Foam::conformalVoronoiMesh::collapseFaces
-(
-    pointField& pts,
-    const PackedBoolList& boundaryPts,
-    Map<label>& dualPtIndexMap,
-    HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
-) const
-{
-    label nCollapsedFaces = 0;
-
-    scalar collapseSizeLimitCoeff = cvMeshControls().filterSizeCoeff();
-
-    for
-    (
-        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
-        eit != finite_edges_end();
-        ++eit
-    )
-    {
-        Cell_circulator ccStart = incident_cells(*eit);
-        Cell_circulator cc = ccStart;
-
-        bool skipFace = false;
-
-        do
-        {
-            if (dualPtIndexMap.found(cc->cellIndex()))
-            {
-                // One of the points of this face has already been
-                // collapsed this sweep, leave for next sweep
-
-                skipFace = true;
-
-                break;
-            }
-
-        } while (++cc != ccStart);
-
-        if (skipFace)
-        {
-            continue;
-        }
-
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
-
-        if
-        (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
-        )
-        {
-            face dualFace = buildDualFace(eit);
-
-            if (dualFace.size() < 3)
-            {
-                continue;
-            }
-
-            label maxFC = maxFilterCount(eit);
-
-            if (maxFC > cvMeshControls().filterCountSkipThreshold())
-            {
-                continue;
-            }
-
-            scalar targetFaceSize = averageAnyCellSize(vA, vB);
-
-            faceCollapseMode mode = collapseFace
-            (
-                dualFace,
-                pts,
-                boundaryPts,
-                dualPtIndexMap,
-                targetFaceSize,
-                collapseSizeLimitCoeff,
-                maxFC
-            );
-
-            if (mode != fcmNone)
-            {
-                if (mode == fcmDeferredMultiEdge)
-                {
-                    // Determine the owner and neighbour labels
-
-                    Pair<label> ownAndNei(-1, -1);
-
-                    ownerAndNeighbour
-                    (
-                        vA,
-                        vB,
-                        ownAndNei.first(),
-                        ownAndNei.second()
-                    );
-
-                    // Record the owner and neighbour of this face for a
-                    // deferredMultiEdge collapse
-
-                    deferredCollapseFaces.insert(ownAndNei);
-                }
-                else
-                {
-                    nCollapsedFaces++;
-                }
-            }
-        }
-    }
-
-    return nCollapsedFaces;
-}
-
-
-Foam::conformalVoronoiMesh::faceCollapseMode
-Foam::conformalVoronoiMesh::collapseFace
-(
-    const face& f,
-    pointField& pts,
-    const PackedBoolList& boundaryPts,
-    Map<label>& dualPtIndexMap,
-    scalar targetFaceSize,
-    scalar collapseSizeLimitCoeff,
-    label maxFC
-) const
-{
-    bool limitToQuadsOrTris = false;
-
-    bool allowEarlyCollapseToPoint = true;
-
-
-//    // Quick exit
-//    label smallEdges = 0;
-//    const edgeList& fEdges = f.edges();
-//    forAll(fEdges, eI)
-//    {
-//        const edge& e = fEdges[eI];
+//void Foam::conformalVoronoiMesh::smoothSurface
+//(
+//    pointField& pts,
+//    const labelList& boundaryPts
+//)
+//{
+//    label nCollapsedFaces = 0;
 //
-//        if (e.mag(pts) < 0.2*targetFaceSize)
+//    label iterI = 0;
+//
+//    do
+//    {
+//        Map<label> dualPtIndexMap;
+//
+//        nCollapsedFaces = smoothSurfaceDualFaces
+//        (
+//            pts,
+//            boundaryPts,
+//            dualPtIndexMap
+//        );
+//
+//        reduce(nCollapsedFaces, sumOp<label>());
+//
+//        reindexDualVertices(dualPtIndexMap);
+//
+//        mergeIdenticalDualVertices(pts, boundaryPts);
+//
+//        if (nCollapsedFaces > 0)
 //        {
-//            smallEdges++;
+//            Info<< "    Collapsed " << nCollapsedFaces << " boundary faces"
+//                << endl;
 //        }
-//    }
-//    if (smallEdges == 0)
-//    {
-//        return fcmNone;
-//    }
-
-
-    // if (maxFC > cvMeshControls().filterCountSkipThreshold() - 3)
-    // {
-    //     limitToQuadsOrTris = true;
-
-    //     allowEarlyCollapseToPoint = false;
-    // }
-
-
-    collapseSizeLimitCoeff *= pow
-    (
-        cvMeshControls().filterErrorReductionCoeff(),
-        maxFC
-    );
-
-    labelList facePts(f);
-
-    const Foam::point fC = f.centre(pts);
-
-    vector fN = f.normal(pts);
-
-    const scalar fA = mag(fN);
-
-    tensor J = f.inertia(pts, fC);
-
-    // Find the dominant collapse direction by finding the eigenvector
-    // that corresponds to the normal direction, discarding it.  The
-    // eigenvector corresponding to the smaller of the two remaining
-    // eigenvalues is the dominant axis in a high aspect ratio face.
-
-    scalar magJ = mag(J);
-
-    scalar detJ = SMALL;
-
-    if (magJ > VSMALL)
-    {
-        // Normalise inertia tensor to remove problems with small values
-
-        J /= mag(J);
-        // J /= cmptMax(J);
-        // J /= max(eigenValues(J).x(), SMALL);
-
-        // Calculating determinant, including stabilisation for zero or
-        // small negative values
-
-        detJ = max(det(J), SMALL);
-    }
-
-    vector collapseAxis = vector::zero;
-
-    scalar aspectRatio = 1.0;
-
-    if (detJ < 1e-5)
-    {
-        collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
-
-        collapseAxis /= mag(collapseAxis);
-
-        // Empirical correlation for high aspect ratio faces
-
-        aspectRatio = sqrt(0.35/detJ);
-    }
-    else
-    {
-        vector eVals = eigenValues(J);
-
-        if (mag(eVals.y() - eVals.x()) < 100*SMALL)
-        {
-            // First two eigenvalues are the same: i.e. a square face
-
-            // Cannot necessarily determine linearly independent
-            // eigenvectors, or any at all, use longest edge direction.
-
-            collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
-
-            collapseAxis /= mag(collapseAxis);
-
-            aspectRatio = 1.0;
-        }
-        else
-        {
-            // The maximum eigenvalue (z()) must be the direction of the
-            // normal, as it has the greatest value.  The minimum eigenvalue
-            // is the dominant collapse axis for high aspect ratio faces.
-
-            collapseAxis = eigenVector(J, eVals.x());
-
-            // The inertia calculation describes the mass distribution as a
-            // function of distance squared to the axis, so the square root of
-            // the ratio of face-plane moments gives a good indication of the
-            // aspect ratio.
-
-            aspectRatio = sqrt(eVals.y()/max(eVals.x(), SMALL));
-        }
-    }
-
-
-    scalar maxDist = 0;
-    scalar minDist = GREAT;
 //
-//    if (f.size() <= 3)
-//    {
-//        const edgeList& fEdges = f.edges();
-//
-//        forAll(fEdges, eI)
+//        if (++iterI > cvMeshControls().maxCollapseIterations())
 //        {
-//            const edge& e = fEdges[eI];
-//            const scalar d = e.mag(pts);
+//            Info<< "    maxCollapseIterations reached, stopping collapse"
+//                << endl;
 //
-//            if (d > maxDist)
-//            {
-//                maxDist = d;
-//                collapseAxis = e.vec(pts);
-//            }
-//            else if (d < minDist && d != 0)
-//            {
-//                minDist = d;
-//            }
+//            break;
 //        }
-//    }
-//    else
+//
+//    } while (nCollapsedFaces > 0);
+//
+//    // Force all points of boundary faces to be on the surface
+////    for
+////    (
+////        Delaunay::Finite_cells_iterator cit = finite_cells_begin();
+////        cit != finite_cells_end();
+////        ++cit
+////    )
+////    {
+////        label ptI = cit->cellIndex();
+////
+////        label fC = cit->filterCount();
+////
+////        if (fC > cvMeshControls().filterCountSkipThreshold())
+////        {
+////            // This vertex has been limited too many times, skip
+////            continue;
+////        }
+////
+////        // Only cells with indices > -1 are valid
+////        if (ptI > -1)
+////        {
+////            if (boundaryPts[ptI] != -1)
+////            {
+////                Foam::point& pt = pts[ptI];
+////
+////                pointIndexHit surfHit;
+////                label hitSurface;
+////
+////                geometryToConformTo_.findSurfaceNearest
+////                (
+////                    pt,
+////                    sqr(GREAT),
+////                    surfHit,
+////                    hitSurface
+////                );
+////
+////                if (surfHit.hit())
+////                {
+////                    pt +=
+////                        (surfHit.hitPoint() - pt)
+////                       *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
+////                }
+////            }
+////        }
+////    }
+////
+////    mergeCloseDualVertices(pts, boundaryPts);
+//}
+//
+//
+//Foam::label Foam::conformalVoronoiMesh::smoothSurfaceDualFaces
+//(
+//    pointField& pts,
+//    const labelList& boundaryPts,
+//    Map<label>& dualPtIndexMap
+//) const
+//{
+//    label nCollapsedFaces = 0;
+//
+//    const scalar cosPerpendicularToleranceAngle = cos
+//    (
+//        degToRad(cvMeshControls().surfaceStepFaceAngle())
+//    );
+//
+//    for
+//    (
+//        Delaunay::Finite_edges_iterator eit = finite_edges_begin();
+//        eit != finite_edges_end();
+//        ++eit
+//    )
 //    {
-//        forAll(f, pI)
+//        Cell_circulator ccStart = incident_cells(*eit);
+//        Cell_circulator cc = ccStart;
+//
+//        bool skipFace = false;
+//
+//        do
 //        {
-//            for (label i = pI + 1; i < f.size(); ++i)
+//            if (dualPtIndexMap.found(cc->cellIndex()))
 //            {
-//                if
+//                // One of the points of this face has already been
+//                // collapsed this sweep, leave for next sweep
+//
+//                skipFace = true;
+//
+//                break;
+//            }
+//
+//        } while (++cc != ccStart);
+//
+//        if (skipFace)
+//        {
+//            continue;
+//        }
+//
+//        if (isBoundaryDualFace(eit))
+//        {
+//            face dualFace = buildDualFace(eit);
+//
+//            if (dualFace.size() < 3)
+//            {
+//                // This face has been collapsed already
+//                continue;
+//            }
+//
+//            label maxFC = maxFilterCount(eit);
+//
+//            if (maxFC > cvMeshControls().filterCountSkipThreshold())
+//            {
+//                // A vertex on this face has been limited too many
+//                // times, skip
+//                continue;
+//            }
+//
+//            Cell_handle c = eit->first;
+//            Vertex_handle vA = c->vertex(eit->second);
+//            Vertex_handle vB = c->vertex(eit->third);
+//
+//            if
+//            (
+//                vA->internalBoundaryPoint() && vA->surfacePoint()
+//             && vB->externalBoundaryPoint() && vB->surfacePoint()
+//            )
+//            {
+//                if (vA->index() == vB->index() - 1)
+//                {
+//                    continue;
+//                }
+//            }
+//            else if
+//            (
+//                vA->externalBoundaryPoint() && vA->surfacePoint()
+//             && vB->internalBoundaryPoint() && vB->surfacePoint()
+//            )
+//            {
+//                if (vA->index() == vB->index() + 1)
+//                {
+//                    continue;
+//                }
+//            }
+////            else if
+////            (
+////                vA->internalBoundaryPoint() && vA->featureEdgePoint()
+////             && vB->externalBoundaryPoint() && vB->featureEdgePoint()
+////            )
+////            {
+////                if (vA->index() == vB->index() - 1)
+////                {
+////                    continue;
+////                }
+////            }
+////            else if
+////            (
+////                vA->externalBoundaryPoint() && vA->featureEdgePoint()
+////             && vB->internalBoundaryPoint() && vB->featureEdgePoint()
+////            )
+////            {
+////                if (vA->index() == vB->index() + 1)
+////                {
+////                    continue;
+////                }
+////            }
+////            else if
+////            (
+////                vA->internalBoundaryPoint() && vA->featurePoint()
+////             && vB->externalBoundaryPoint() && vB->featurePoint()
+////            )
+////            {
+////                if (vA->index() == vB->index() - 1)
+////                {
+////                    continue;
+////                }
+////            }
+////            else if
+////            (
+////                vA->externalBoundaryPoint() && vA->featurePoint()
+////             && vB->internalBoundaryPoint() && vB->featurePoint()
+////            )
+////            {
+////                if (vA->index() == vB->index() + 1)
+////                {
+////                    continue;
+////                }
+////            }
+//
+//
+////            if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
+////            {
+//                scalar targetFaceSize = averageAnyCellSize(vA, vB);
+//
+//                // Selecting faces to collapse based on angle to
+//                // surface, so set collapseSizeLimitCoeff to GREAT to
+//                // allow collapse of all faces
+//
+//                faceCollapseMode mode = collapseFace
 //                (
-//                    f[i] != f.nextLabel(pI)
-//                 && f[i] != f.prevLabel(pI)
-//                )
-//                {
-//                    scalar d = mag(pts[f[pI]] - pts[f[i]]);
+//                    dualFace,
+//                    pts,
+//                    boundaryPts,
+//                    dualPtIndexMap,
+//                    targetFaceSize,
+//                    GREAT,
+//                    maxFC
+//                );
 //
-//                    if (d > maxDist)
-//                    {
-//                        maxDist = d;
-//                        collapseAxis = pts[f[pI]] - pts[f[i]];
-//                    }
-//                    else if (d < minDist && d != 0)
-//                    {
-//                        minDist = d;
-//                    }
+//                if (mode == fcmPoint || mode == fcmEdge)
+//                {
+//                    nCollapsedFaces++;
 //                }
-//            }
+////            }
 //        }
 //    }
 //
-//    const edgeList& fEdges = f.edges();
-//
-//    scalar perimeter = 0;
-//
-//    forAll(fEdges, eI)
-//    {
-//        const edge& e = fEdges[eI];
-//        const scalar d = e.mag(pts);
-//
-//        perimeter += d;
-//
-////        collapseAxis += e.vec(pts);
-//
-//        if (d > maxDist)
-//        {
-//            collapseAxis = e.vec(pts);
-//            maxDist = d;
-//        }
-//        else if (d < minDist && d != 0)
-//        {
-//            minDist = d;
-//        }
-//    }
-//
-//    collapseAxis /= mag(collapseAxis);
-//
-////    Info<< f.size() << " " << minDist << " " << maxDist << " | "
-////        << collapseAxis << endl;
-//
-//    aspectRatio = maxDist/minDist;
-//
-//    aspectRatio = min(aspectRatio, sqr(perimeter)/(16.0*fA));
-
-    if (magSqr(collapseAxis) < VSMALL)
-    {
-        WarningIn
-        (
-            "Foam::conformalVoronoiMesh::collapseFace"
-        )
-            << "No collapse axis found for face, not collapsing."
-            << endl;
-
-        // Output face and collapse axis for visualisation
-
-        Pout<< "# Aspect ratio = " << aspectRatio << nl
-//            << "# inertia = " << J << nl
-//            << "# determinant = " << detJ << nl
-//            << "# eigenvalues = " << eigenValues(J) << nl
-            << "# collapseAxis = " << collapseAxis << nl
-            << "# facePts = " << facePts << nl
-            << endl;
-
-        forAll(f, fPtI)
-        {
-            meshTools::writeOBJ(Pout, pts[f[fPtI]]);
-        }
-
-        Pout<< "f";
-
-        forAll(f, fPtI)
-        {
-            Pout << " " << fPtI + 1;
-        }
-
-        Pout<< endl;
-
-        return fcmNone;
-    }
-
-    // The signed distance along the collapse axis passing through the
-    // face centre that each vertex projects to.
-
-    Field<scalar> d(f.size());
-
-    forAll(f, fPtI)
-    {
-        const Foam::point& pt = pts[f[fPtI]];
-
-        d[fPtI] = (collapseAxis & (pt - fC));
-    }
-
-    // Sort the projected distances and the corresponding vertex
-    // indices along the collapse axis
-
-    labelList oldToNew;
-
-    sortedOrder(d, oldToNew);
-
-    oldToNew = invert(oldToNew.size(), oldToNew);
-
-    inplaceReorder(oldToNew, d);
-
-    inplaceReorder(oldToNew, facePts);
-
-    // Shift the points so that they are relative to the centre of the
-    // collapse line.
-
-    scalar dShift = -0.5*(d.first() + d.last());
-
-    d += dShift;
-
-    // Form two lists, one for each half of the set of points
-    // projected along the collapse axis.
-
-    // Middle value, index of first entry in the second half
-    label middle = -1;
-
-    forAll(d, dI)
-    {
-        if (d[dI] > 0)
-        {
-            middle = dI;
-
-            break;
-        }
-    }
-
-    // Negative half
-    SubList<scalar> dNeg(d, middle, 0);
-    SubList<label> facePtsNeg(facePts, middle, 0);
-
-    // Positive half
-    SubList<scalar> dPos(d, d.size() - middle, middle);
-    SubList<label> facePtsPos(facePts, d.size() - middle, middle);
-
-    // Defining how close to the midpoint (M) of the projected
-    // vertices line a projected vertex (X) can be before making this
-    // an invalid edge collapse
-    //
-    // X---X-g----------------M----X-----------g----X--X
-    //
-    // Only allow a collapse if all projected vertices are outwith
-    // guardFraction (g) of the distance form the face centre to the
-    // furthest vertex in the considered direction
-
-    if (dNeg.size() == 0 || dPos.size() == 0)
-    {
-        WarningIn
-        (
-            "Foam::conformalVoronoiMesh::collapseFace"
-        )
-            << "All points on one side of face centre, not collapsing."
-            << endl;
-    }
-
-    faceCollapseMode mode = fcmNone;
-
-    if
-    (
-        (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
-     && (!limitToQuadsOrTris || f.size() <= 4)
-    )
-    {
-        scalar guardFraction = cvMeshControls().edgeCollapseGuardFraction();
-
-        if
-        (
-            allowEarlyCollapseToPoint
-         && (d.last() - d.first())
-          < targetFaceSize
-           *0.2*cvMeshControls().maxCollapseFaceToPointSideLengthCoeff()
-        )
-        {
-            mode = fcmPoint;
-        }
-        else if
-        (
-            (dNeg.last() < guardFraction*dNeg.first())
-         && (dPos.first() > guardFraction*dPos.last())
-        )
-        {
-            mode = fcmEdge;
-        }
-        else if
-        (
-            (d.last() - d.first())
-          < targetFaceSize
-           *cvMeshControls().maxCollapseFaceToPointSideLengthCoeff()
-        )
-        {
-            // If the face can't be collapsed to an edge, and it has a
-            // small enough span, collapse it to a point.
-
-            mode = fcmPoint;
-        }
-        else
-        {
-            // Alternatively, do not topologically collapse face here,
-            // but push all points onto a line, so that the face area
-            // is zero and then collapse to a string of edges later.
-            // The fcmDeferredMultiEdge collapse must be performed at
-            // the polyMesh stage as this type of collapse can't be
-            // performed and still maintain topological dual
-            // consistency with the Delaunay structure
-
-            mode = fcmDeferredMultiEdge;
-        }
-    }
-
-    switch (mode)
-    {
-        case fcmEdge:
-        {
-            // Negative half
-
-            label collapseToPtI = facePtsNeg.first();
-
-            Foam::point collapseToPt =
-                collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
-
-//            DynamicList<label> faceBoundaryPts(f.size());
-
-            forAll(facePtsNeg, fPtI)
-            {
-                if (boundaryPts[facePtsNeg[fPtI]] == true)
-                {
-                    // If there is a point which is on the boundary,
-                    // use it as the point to collapse others to, will
-                    // use the first boundary point encountered if
-                    // there are multiple boundary points.
-
-                    collapseToPtI = facePtsNeg[fPtI];
-
-                    collapseToPt = pts[collapseToPtI];
-
-                    break;
-
-//                    faceBoundaryPts.append(facePtsNeg[fPtI]);
-                }
-            }
-
-//            if (!faceBoundaryPts.empty())
-//            {
-//                if (faceBoundaryPts.size() == 2)
-//                {
-//                    collapseToPtI = faceBoundaryPts[0];
-//
-//                    collapseToPt =
-//                        0.5
-//                       *(
-//                            pts[faceBoundaryPts[0]]
-//                          + pts[faceBoundaryPts[1]]
-//                        );
-//                }
-//                else if (faceBoundaryPts.size() < f.size())
-//                {
-//                    face bFace(faceBoundaryPts);
-//
-//                    collapseToPtI = faceBoundaryPts.first();
-//
-//                    collapseToPt = bFace.centre(pts);
-//                }
-//            }
-//
-//            faceBoundaryPts.clear();
-
-            // ...otherwise arbitrarily choosing the most distant
-            // point as the index to collapse to.
-
-            forAll(facePtsNeg, fPtI)
-            {
-                dualPtIndexMap.insert(facePtsNeg[fPtI], collapseToPtI);
-            }
-
-            pts[collapseToPtI] = collapseToPt;
-
-            // Positive half
-
-            collapseToPtI = facePtsPos.last();
-
-            collapseToPt = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
-
-            forAll(facePtsPos, fPtI)
-            {
-                if (boundaryPts[facePtsPos[fPtI]] == true)
-                {
-                    // If there is a point which is on the boundary,
-                    // use it as the point to collapse others to, will
-                    // use the first boundary point encountered if
-                    // there are multiple boundary points.
-
-                    collapseToPtI = facePtsPos[fPtI];
-
-                    collapseToPt = pts[collapseToPtI];
-
-                    break;
-
-//                    faceBoundaryPts.append(facePtsNeg[fPtI]);
-                }
-            }
-
-//            if (!faceBoundaryPts.empty())
-//            {
-//                if (faceBoundaryPts.size() == 2)
-//                {
-//                    collapseToPtI = faceBoundaryPts[0];
-//
-//                    collapseToPt =
-//                        0.5
-//                       *(
-//                            pts[faceBoundaryPts[0]]
-//                          + pts[faceBoundaryPts[1]]
-//                        );
-//                }
-//                else if (faceBoundaryPts.size() < f.size())
-//                {
-//                    face bFace(faceBoundaryPts);
-//
-//                    collapseToPtI = faceBoundaryPts.first();
-//
-//                    collapseToPt = bFace.centre(pts);
-//                }
-//            }
-
-            // ...otherwise arbitrarily choosing the most distant
-            // point as the index to collapse to.
-
-            forAll(facePtsPos, fPtI)
-            {
-                dualPtIndexMap.insert(facePtsPos[fPtI], collapseToPtI);
-            }
-
-            pts[collapseToPtI] = collapseToPt;
-
-            break;
-        }
-
-        case fcmPoint:
-        {
-            label collapseToPtI = facePts.first();
-
-            Foam::point collapseToPt = fC;
-
-            DynamicList<label> faceBoundaryPts(f.size());
-
-            forAll(facePts, fPtI)
-            {
-                if (boundaryPts[facePts[fPtI]] == true)
-                {
-                    // If there is a point which is on the boundary,
-                    // use it as the point to collapse others to, will
-                    // use the first boundary point encountered if
-                    // there are multiple boundary points.
-
-//                    collapseToPtI = facePts[fPtI];
-//
-//                    collapseToPt = pts[collapseToPtI];
-//
-//                    break;
-
-                    faceBoundaryPts.append(facePts[fPtI]);
-                }
-            }
-
-            if (!faceBoundaryPts.empty())
-            {
-                if (faceBoundaryPts.size() == 2)
-                {
-                    collapseToPtI = faceBoundaryPts[0];
-
-                    collapseToPt =
-                        0.5*(pts[faceBoundaryPts[0]] + pts[faceBoundaryPts[1]]);
-                }
-                else if (faceBoundaryPts.size() < f.size())
-                {
-                    face bFace(faceBoundaryPts);
-
-                    collapseToPtI = faceBoundaryPts.first();
-
-                    collapseToPt = bFace.centre(pts);
-                }
-            }
-
-            // ...otherwise arbitrarily choosing the first point as
-            // the index to collapse to.  Collapse to the face centre.
-
-            forAll(facePts, fPtI)
-            {
-                dualPtIndexMap.insert(facePts[fPtI], collapseToPtI);
-            }
-
-            pts[collapseToPtI] = collapseToPt;
-
-            break;
-        }
-
-        case fcmDeferredMultiEdge:
-        {
-            // forAll(facePts, fPtI)
-            // {
-            //     label ptI = facePts[fPtI];
-
-            //     pts[ptI] = collapseAxis*(d[fPtI] - dShift) + fC;
-
-            //     dualPtIndexMap.insert(ptI, ptI);
-            // }
-
-            break;
-        }
-
-        case fcmNone:
-        {
-            break;
-        }
-    }
-
-    // if (mode == fcmDeferredMultiEdge)
-    // if (mode != fcmNone)
-    // {
-    //     // Output face and collapse axis for visualisation
-
-    //     Pout<< "# Aspect ratio = " << aspectRatio << nl
-    //         << "# determinant = " << detJ << nl
-    //         << "# collapseAxis = " << collapseAxis << nl
-    //         << "# mode = " << mode << nl
-    //         << "# facePts = " << facePts << nl
-    //     //        << "# eigenvalues = " << eVals
-    //         << endl;
-
-    //     scalar scale = 2.0*mag(fC - pts[f[0]]);
-
-    //     meshTools::writeOBJ(Pout, fC);
-    //     meshTools::writeOBJ(Pout, fC + scale*collapseAxis);
-
-    //     Pout<< "f 1 2" << endl;
-
-    //     forAll(f, fPtI)
-    //     {
-    //         meshTools::writeOBJ(Pout, pts[f[fPtI]]);
-    //     }
-
-    //     Pout<< "f";
-
-    //     forAll(f, fPtI)
-    //     {
-    //         Pout << " " << fPtI + 3;
-    //     }
-
-    //     Pout<< nl << "# " << d << endl;
-
-    //     Pout<< "# " << d.first() << " " << d.last() << endl;
-
-    //     forAll(d, dI)
-    //     {
-    //         meshTools::writeOBJ(Pout, fC + (d[dI] - dShift)*collapseAxis);
-    //     }
-
-    //     Pout<< endl;
-    // }
-
-    return mode;
-}
-
-
-Foam::label Foam::conformalVoronoiMesh::longestEdge
-(
-    const face& f,
-    const pointField& pts
-) const
-{
-    const edgeList& eds = f.edges();
-
-    label longestEdgeI = -1;
-
-    scalar longestEdgeLength = -SMALL;
-
-    forAll(eds, edI)
-    {
-        scalar edgeLength = eds[edI].mag(pts);
-
-        if (edgeLength > longestEdgeLength)
-        {
-            longestEdgeI = edI;
-
-            longestEdgeLength = edgeLength;
-        }
-    }
-
-    return longestEdgeI;
-}
+//    return nCollapsedFaces;
+//}
 
 
 void Foam::conformalVoronoiMesh::deferredCollapseFaceSet
@@ -1871,6 +1180,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     labelList procNeighbours;
     pointField cellCentres;
     labelListList patchToDelaunayVertex;
+    PackedBoolList boundaryFacesToRemove;
 
     timeCheck("Start of checkPolyMeshQuality");
 
@@ -1887,6 +1197,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
         patchStarts,
         procNeighbours,
         patchToDelaunayVertex,
+        boundaryFacesToRemove,
         false
     );
 
@@ -1926,7 +1237,6 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
        if (patchTypes[p] == processorPolyPatch::typeName)
        {
            // Do not create empty processor patches
-
            if (patchSizes[p] > 0)
            {
                patches[nValidPatches] = new processorPolyPatch
@@ -1937,7 +1247,8 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
                    nValidPatches,
                    pMesh.boundaryMesh(),
                    Pstream::myProcNo(),
-                   procNeighbours[p]
+                   procNeighbours[p],
+                   coupledPolyPatch::COINCIDENTFULLMATCH
                );
 
                nValidPatches++;
@@ -1991,13 +1302,13 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
 
     timeCheck("Start of Cell Sizing");
 
-    PackedBoolList boundaryPts(number_of_cells(), false);
+    labelList boundaryPts(number_of_finite_cells(), -1);
     pointField ptsField;
 
     indexDualVertices(ptsField, boundaryPts);
 
     // Merge close dual vertices.
-    mergeCloseDualVertices(ptsField, boundaryPts);
+    mergeIdenticalDualVertices(ptsField, boundaryPts);
 
     autoPtr<polyMesh> meshPtr = createPolyMeshFromPoints(ptsField);
     const polyMesh& pMesh = meshPtr();
@@ -2092,10 +1403,10 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
             }
         }
 
-        Info<< "    Automatically re-sizing " << cellsToResize.size()
+        Info<< "    DISABLED: Automatically re-sizing " << cellsToResize.size()
             << " cells that are attached to the bad faces: " << endl;
 
-        cellSizeControl_.setCellSizes(cellsToResize);
+        //cellSizeControl_.setCellSizes(cellsToResize);
     }
 
     timeCheck("End of Cell Sizing");
@@ -2181,8 +1492,6 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     labelHashSet wrongFaces(pMesh.nFaces()/100);
 
-    Info << endl;
-
     DynamicList<label> checkFaces(pMesh.nFaces());
 
     const vectorField& fAreas = pMesh.faceAreas();
@@ -2197,7 +1506,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
         }
     }
 
-    Info<< "Excluding "
+    Info<< nl << "Excluding "
         << returnReduce(fAreas.size() - checkFaces.size(), sumOp<label>())
         << " faces from check, < " << faceAreaLimit << " area" << endl;
 
@@ -2371,18 +1680,16 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 void Foam::conformalVoronoiMesh::indexDualVertices
 (
     pointField& pts,
-    PackedBoolList& boundaryPts
+    labelList& boundaryPts
 )
 {
     // Indexing Delaunay cells, which are the dual vertices
 
-    label dualVertI = 0;
+    this->resetCellCount();
 
-    pts.setSize(number_of_cells());
+    pts.setSize(number_of_finite_cells());
 
-    boundaryPts.setSize(number_of_cells(), false);
-
-    boundaryPts = false;
+    boundaryPts.setSize(number_of_finite_cells(), -1);
 
     for
     (
@@ -2391,19 +1698,83 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         ++cit
     )
     {
-        if (cit->internalOrBoundaryDualVertex())
-        {
-            cit->cellIndex() = dualVertI;
+//        if (tetrahedron(cit).volume() == 0)
+//        {
+//            Pout<< "ZERO VOLUME TET" << endl;
+//            Pout<< cit->info();
+//            Pout<< "Dual = " << cit->dual();
+//        }
 
-            pts[dualVertI] = cit->dual();
+        if (!cit->hasFarPoint())
+        {
+            cit->cellIndex() = getNewCellIndex();
+
+            // For nearly coplanar Delaunay cells that are present on different
+            // processors the result of the circumcentre calculation depends on
+            // the ordering of the vertices, so synchronise it across processors
+
+            if (Pstream::parRun() && cit->parallelDualVertex())
+            {
+                typedef CGAL::Exact_predicates_exact_constructions_kernel Exact;
+                typedef CGAL::Point_3<Exact> ExactPoint;
+
+                List<labelPair> cellVerticesPair(4);
+                List<ExactPoint> cellVertices(4);
+
+                for (label vI = 0; vI < 4; ++vI)
+                {
+                    cellVerticesPair[vI] = labelPair
+                    (
+                        cit->vertex(vI)->procIndex(),
+                        cit->vertex(vI)->index()
+                    );
+
+                    cellVertices[vI] = ExactPoint
+                    (
+                        cit->vertex(vI)->point().x(),
+                        cit->vertex(vI)->point().y(),
+                        cit->vertex(vI)->point().z()
+                    );
+                }
+
+                // Sort the vertices so that they will be in the same order on
+                // each processor
+                labelList oldToNew;
+                sortedOrder(cellVerticesPair, oldToNew);
+                oldToNew = invert(oldToNew.size(), oldToNew);
+                inplaceReorder(oldToNew, cellVertices);
+
+                ExactPoint synchronisedDual = CGAL::circumcenter
+                (
+                    cellVertices[0],
+                    cellVertices[1],
+                    cellVertices[2],
+                    cellVertices[3]
+                );
+
+                pts[cit->cellIndex()] = Foam::point
+                (
+                    CGAL::to_double(synchronisedDual.x()),
+                    CGAL::to_double(synchronisedDual.y()),
+                    CGAL::to_double(synchronisedDual.z())
+                );
+            }
+            else
+            {
+                pts[cit->cellIndex()] = cit->dual();
+            }
 
             if (cit->boundaryDualVertex())
             {
-                // This is a boundary dual vertex
-                boundaryPts[dualVertI] = true;
+                if (cit->featureEdgeDualVertex())
+                {
+                    boundaryPts[cit->cellIndex()] = 1;
+                }
+                else
+                {
+                    boundaryPts[cit->cellIndex()] = 0;
+                }
             }
-
-            dualVertI++;
         }
         else
         {
@@ -2411,9 +1782,9 @@ void Foam::conformalVoronoiMesh::indexDualVertices
         }
     }
 
-    pts.setSize(dualVertI);
+    pts.setSize(this->cellCount());
 
-    boundaryPts.setSize(dualVertI);
+    boundaryPts.setSize(this->cellCount());
 }
 
 
@@ -2437,18 +1808,11 @@ void Foam::conformalVoronoiMesh::reindexDualVertices
 }
 
 
-void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
+Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 (
-    faceList& faces,
-    labelList& owner,
-    labelList& neighbour,
-    wordList& patchTypes,
     wordList& patchNames,
-    labelList& patchSizes,
-    labelList& patchStarts,
-    labelList& procNeighbours,
-    labelListList& patchPointPairSlaves,
-    bool includeEmptyPatches
+    wordList& patchTypes,
+    labelList& procNeighbours
 ) const
 {
     patchNames = geometryToConformTo_.patchNames();
@@ -2467,7 +1831,13 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     if (Pstream::parRun())
     {
-        boolList procUsed(Pstream::nProcs(), false);
+        List<boolList> procUsedList
+        (
+            Pstream::nProcs(),
+            boolList(Pstream::nProcs(), false)
+        );
+
+        boolList& procUsed = procUsedList[Pstream::myProcNo()];
 
         // Determine which processor patches are required
         for
@@ -2477,9 +1847,27 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             vit++
         )
         {
+            // This test is not sufficient if one of the processors does
+            // not receive a referred vertex from another processor, but does
+            // send one to the other processor.
             if (vit->referred())
             {
                 procUsed[vit->procIndex()] = true;
+            }
+        }
+
+        // Because the previous test was insufficient, combine the lists.
+        Pstream::gatherList(procUsedList);
+        Pstream::scatterList(procUsedList);
+
+        forAll(procUsedList, procI)
+        {
+            if (procI != Pstream::myProcNo())
+            {
+                if (procUsedList[procI][Pstream::myProcNo()])
+                {
+                    procUsed[procI] = true;
+                }
             }
         }
 
@@ -2493,9 +1881,9 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
         label nNonProcPatches = patchNames.size();
 
+        patchNames.setSize(nNonProcPatches + nProcPatches);
         patchTypes.setSize(nNonProcPatches + nProcPatches);
         procNeighbours.setSize(nNonProcPatches + nProcPatches, -1);
-        patchNames.setSize(nNonProcPatches + nProcPatches);
 
         label procAddI = 0;
 
@@ -2519,25 +1907,46 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         }
     }
 
-    // Pout<< patchTypes << " " << patchNames << endl;
+    return defaultPatchIndex;
+}
 
-    label nPatches = patchNames.size();
+
+void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
+(
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour,
+    wordList& patchTypes,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts,
+    labelList& procNeighbours,
+    labelListList& patchPointPairSlaves,
+    PackedBoolList& boundaryFacesToRemove,
+    bool includeEmptyPatches
+) const
+{
+    const label defaultPatchIndex = createPatchInfo
+    (
+        patchNames,
+        patchTypes,
+        procNeighbours
+    );
+
+    const label nPatches = patchNames.size();
 
     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
-
     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
-
     // Per patch face the index of the slave node of the point pair
     List<DynamicList<label> > patchPPSlaves(nPatches, DynamicList<label>(0));
 
+    List<DynamicList<bool> > indirectPatchFace(nPatches, DynamicList<bool>(0));
 
-    faces.setSize(number_of_edges());
+    faces.setSize(number_of_finite_edges());
+    owner.setSize(number_of_finite_edges());
+    neighbour.setSize(number_of_finite_edges());
 
-    owner.setSize(number_of_edges());
-
-    neighbour.setSize(number_of_edges());
-
-    List<Pair<DynamicList<label> > > procPatchSortingIndex(nPatches);
+    labelPairPairDynListList procPatchSortingIndex(nPatches);
 
     label dualFaceI = 0;
 
@@ -2554,8 +1963,8 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
         if
         (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
+            (vA->internalOrBoundaryPoint() && !vA->referred())
+         || (vB->internalOrBoundaryPoint() && !vB->referred())
         )
         {
             face newDualFace = buildDualFace(eit);
@@ -2574,44 +1983,56 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 {
                     // boundary face
 
-                    Foam::point ptA = topoint(vA->point());
-                    Foam::point ptB = topoint(vB->point());
+                    pointFromPoint ptA = topoint(vA->point());
+                    pointFromPoint ptB = topoint(vB->point());
 
                     label patchIndex = -1;
 
-                    if
-                    (
-                        vA->referredInternalOrBoundaryPoint()
-                     || vB->referredInternalOrBoundaryPoint()
-                    )
+                    if (isProcBoundaryEdge(eit))
                     {
                         // One (and only one) of the points is an internal
                         // point from another processor
 
                         label procIndex = max(vA->procIndex(), vB->procIndex());
 
-                        patchIndex = findIndex(procNeighbours, procIndex);
+                        patchIndex = max
+                        (
+                            findIndex(procNeighbours, vA->procIndex()),
+                            findIndex(procNeighbours, vB->procIndex())
+                        );
 
                         // The lower processor index is the owner of the
-                        // two for the purposed of sorting the patch faces.
+                        // two for the purpose of sorting the patch faces.
 
                         if (Pstream::myProcNo() < procIndex)
                         {
                             // Use this processor's vertex index as the master
                             // for sorting
 
-                           Pair<DynamicList<label> >& sortingIndex =
-                               procPatchSortingIndex[patchIndex];
+                            DynamicList<Pair<labelPair> >& sortingIndex =
+                                procPatchSortingIndex[patchIndex];
 
-                            if (vB->referredInternalOrBoundaryPoint())
+                            if (vB->internalOrBoundaryPoint() && vB->referred())
                             {
-                                sortingIndex.first().append(vA->index());
-                                sortingIndex.second().append(vB->index());
+                                sortingIndex.append
+                                (
+                                    Pair<labelPair>
+                                    (
+                                        labelPair(vA->index(), vA->procIndex()),
+                                        labelPair(vB->index(), vB->procIndex())
+                                    )
+                                );
                             }
                             else
                             {
-                                sortingIndex.first().append(vB->index());
-                                sortingIndex.second().append(vA->index());
+                                sortingIndex.append
+                                (
+                                    Pair<labelPair>
+                                    (
+                                        labelPair(vB->index(), vB->procIndex()),
+                                        labelPair(vA->index(), vA->procIndex())
+                                    )
+                                );
                             }
                         }
                         else
@@ -2619,30 +2040,42 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             // Use the other processor's vertex index as the
                             // master for sorting
 
-                            Pair<DynamicList<label> >& sortingIndex =
+                            DynamicList<Pair<labelPair> >& sortingIndex =
                                 procPatchSortingIndex[patchIndex];
 
-                            if (vA->referredInternalOrBoundaryPoint())
+                            if (vA->internalOrBoundaryPoint() && vA->referred())
                             {
-                                sortingIndex.first().append(vA->index());
-                                sortingIndex.second().append(vB->index());
+                                sortingIndex.append
+                                (
+                                    Pair<labelPair>
+                                    (
+                                        labelPair(vA->index(), vA->procIndex()),
+                                        labelPair(vB->index(), vB->procIndex())
+                                    )
+                                );
                             }
                             else
                             {
-                                sortingIndex.first().append(vB->index());
-                                sortingIndex.second().append(vA->index());
+                                sortingIndex.append
+                                (
+                                    Pair<labelPair>
+                                    (
+                                        labelPair(vB->index(), vB->procIndex()),
+                                        labelPair(vA->index(), vA->procIndex())
+                                    )
+                                );
                             }
                         }
 
-                        // Pout<< ptA << " " << ptB
-                        //     << " proc indices "
-                        //     << vA->procIndex() << " " << vB->procIndex()
-                        //     << " indices " << vA->index()
-                        //     << " " << vB->index()
-                        //     << " my proc " << Pstream::myProcNo()
-                        //     << " addedIndex "
-                        //     << procPatchSortingIndex[patchIndex].last()
-                        //     << endl;
+//                        Pout<< ptA << " " << ptB
+//                            << " proc indices "
+//                            << vA->procIndex() << " " << vB->procIndex()
+//                            << " indices " << vA->index()
+//                            << " " << vB->index()
+//                            << " my proc " << Pstream::myProcNo()
+//                            << " addedIndex "
+//                            << procPatchSortingIndex[patchIndex].last()
+//                            << endl;
                     }
                     else
                     {
@@ -2667,6 +2100,17 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                     patchFaces[patchIndex].append(newDualFace);
                     patchOwners[patchIndex].append(own);
 
+                    // If the two vertices are a pair, then the patch face is
+                    // a desired one.
+                    if (vA->type() == vB->index())
+                    {
+                        indirectPatchFace[patchIndex].append(true);
+                    }
+                    else
+                    {
+                        indirectPatchFace[patchIndex].append(false);
+                    }
+
                     // Store the non-internal or boundary point
                     if (vA->internalOrBoundaryPoint())
                     {
@@ -2680,7 +2124,6 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                 else
                 {
                     // internal face
-
                     faces[dualFaceI] = newDualFace;
                     owner[dualFaceI] = own;
                     neighbour[dualFaceI] = nei;
@@ -2727,8 +2170,10 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         owner,
         patchSizes,
         patchStarts,
+        boundaryFacesToRemove,
         patchFaces,
-        patchOwners
+        patchOwners,
+        indirectPatchFace
     );
 
     // Return     patchPointPairSlaves.setSize(nPatches);
@@ -2738,13 +2183,27 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         patchPointPairSlaves[patchI].transfer(patchPPSlaves[patchI]);
     }
 
-    if (cvMeshControls().objOutput())
+//    if (cvMeshControls().objOutput())
     {
+        Info<< "Writing processor interfaces" << endl;
+
         forAll(procNeighbours, nbI)
         {
             if (patchFaces[nbI].size() > 0)
             {
                 const label neighbour = procNeighbours[nbI];
+
+                faceList procPatchFaces = patchFaces[nbI];
+
+                // Reverse faces as it makes it easier to analyse the output
+                // using a diff
+                if (neighbour < Pstream::myProcNo())
+                {
+                    forAll(procPatchFaces, fI)
+                    {
+                        procPatchFaces[fI] = procPatchFaces[fI].reverseFace();
+                    }
+                }
 
                 if (neighbour != -1)
                 {
@@ -2755,11 +2214,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                       + name(neighbour)
                       + "_interface.obj";
 
-                    writeProcessorInterface
-                    (
-                        fName,
-                        patchFaces[nbI]
-                    );
+                    writeProcessorInterface(fName, procPatchFaces);
                 }
             }
         }
@@ -2785,9 +2240,7 @@ void Foam::conformalVoronoiMesh::createCellCentres
     {
         if (vit->internalOrBoundaryPoint())
         {
-            cellCentres[vit->index()] = topoint(vit->point());
-
-            vertI++;
+            cellCentres[vertI++] = topoint(vit->point());
         }
     }
 
@@ -2800,6 +2253,8 @@ Foam::tmp<Foam::pointField> Foam::conformalVoronoiMesh::allPoints() const
     tmp<pointField> tpts(new pointField(number_of_vertices(), point::max));
     pointField& pts = tpts();
 
+    label nVert = 0;
+
     for
     (
         Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -2809,7 +2264,7 @@ Foam::tmp<Foam::pointField> Foam::conformalVoronoiMesh::allPoints() const
     {
         if (vit->internalOrBoundaryPoint())
         {
-            pts[vit->index()] = topoint(vit->point());
+            pts[nVert++] = topoint(vit->point());
         }
     }
 
@@ -2838,8 +2293,12 @@ void Foam::conformalVoronoiMesh::sortFaces
     // 1     | 24
     // 1     | 91
 
-    // Two stage sort:
-    // 1) sort by owner
+    List<labelPair> ownerNeighbourPair(owner.size());
+
+    forAll(ownerNeighbourPair, oNI)
+    {
+        ownerNeighbourPair[oNI] = labelPair(owner[oNI], neighbour[oNI]);
+    }
 
     Info<< nl
         << "Sorting faces, owner and neighbour into upper triangular order"
@@ -2847,70 +2306,12 @@ void Foam::conformalVoronoiMesh::sortFaces
 
     labelList oldToNew;
 
-    sortedOrder(owner, oldToNew);
+    sortedOrder(ownerNeighbourPair, oldToNew);
 
     oldToNew = invert(oldToNew.size(), oldToNew);
 
     inplaceReorder(oldToNew, faces);
     inplaceReorder(oldToNew, owner);
-    inplaceReorder(oldToNew, neighbour);
-
-    // 2) in each block of owners sort by neighbour
-
-    // Reset map.  Elements that are not sorted will retain their -1
-    // value, which will mean that they are ignored by inplaceReorder
-
-    oldToNew = -1;
-
-    label blockStart = 0;
-
-    for (label i = 1; i < owner.size(); i++)
-    {
-        label blockLength = -1;
-
-        if (owner[i] > owner[i - 1])
-        {
-            blockLength = i - blockStart;
-        }
-        else if (i == owner.size() - 1)
-        {
-            // If the last element is not a jump in owner, then it
-            // needs to trigger a sort of the last block, but with a
-            // block length that is one element longer so that it
-            // sorts itself.
-
-            // If it is a jump in owner, then it will form a block of
-            // length one, and so will not need sorted.
-
-            blockLength = i - blockStart + 1;
-        }
-
-        if (blockLength >= 1)
-        {
-            labelList blockIndices = identity(blockLength) + blockStart;
-
-            SubList<label> neighbourBlock
-            (
-                neighbour,
-                blockLength,
-                blockStart
-            );
-
-            sortedOrder(neighbourBlock, blockIndices);
-
-            blockIndices = invert(blockIndices.size(), blockIndices);
-
-            forAll(blockIndices, b)
-            {
-                oldToNew[blockStart + b] = blockIndices[b] + blockStart;
-            }
-
-            blockStart = i;
-        }
-    }
-
-    // owner does not need re-sorted
-    inplaceReorder(oldToNew, faces);
     inplaceReorder(oldToNew, neighbour);
 }
 
@@ -2920,7 +2321,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
     List<DynamicList<face> >& patchFaces,
     List<DynamicList<label> >& patchOwners,
     List<DynamicList<label> >& patchPointPairSlaves,
-    List<Pair<DynamicList<label> > >& patchSortingIndices
+    labelPairPairDynListList& patchSortingIndices
 ) const
 {
     if (!Pstream::parRun())
@@ -2934,18 +2335,16 @@ void Foam::conformalVoronoiMesh::sortProcPatches
         labelList& owner = patchOwners[patchI];
         DynamicList<label>& slaves = patchPointPairSlaves[patchI];
 
-        Pair<DynamicList<label> >& sortingIndices = patchSortingIndices[patchI];
+        DynamicList<Pair<labelPair> >& sortingIndices
+            = patchSortingIndices[patchI];
 
-        List<label>& primary = sortingIndices.first();
-        List<label>& secondary = sortingIndices.second();
-
-        if (!primary.empty())
+        if (!sortingIndices.empty())
         {
             if
             (
-                faces.size() != primary.size()
-             || owner.size() != primary.size()
-             || slaves.size() != primary.size()
+                faces.size() != sortingIndices.size()
+             || owner.size() != sortingIndices.size()
+             || slaves.size() != sortingIndices.size()
             )
             {
                 FatalErrorIn
@@ -2962,80 +2361,18 @@ void Foam::conformalVoronoiMesh::sortProcPatches
                     << " faces.size() " << faces.size() << nl
                     << " owner.size() " << owner.size() << nl
                     << " slaves.size() " << slaves.size() << nl
-                    << " sortingIndices.first().size() "
-                    << sortingIndices.first().size()
+                    << " sortingIndices.size() "
+                    << sortingIndices.size()
                     << exit(FatalError) << endl;
             }
 
-            // Two stage sort:
-            // 1) sort by primary
-
             labelList oldToNew;
 
-            sortedOrder(primary, oldToNew);
+            sortedOrder(sortingIndices, oldToNew);
 
             oldToNew = invert(oldToNew.size(), oldToNew);
 
-            inplaceReorder(oldToNew, primary);
-            inplaceReorder(oldToNew, secondary);
-            inplaceReorder(oldToNew, faces);
-            inplaceReorder(oldToNew, owner);
-            inplaceReorder(oldToNew, slaves);
-
-            // 2) in each block of primary sort by secondary
-
-            // Reset map.  Elements that are not sorted will retain their -1
-            // value, which will mean that they are ignored by inplaceReorder
-
-            oldToNew = -1;
-
-            label blockStart = 0;
-
-            for (label i = 1; i < primary.size(); i++)
-            {
-                label blockLength = -1;
-
-                if (primary[i] > primary[i - 1])
-                {
-                    blockLength = i - blockStart;
-                }
-                else if (i == primary.size() - 1)
-                {
-                    // If the last element is not a jump in index, then it
-                    // needs to trigger a sort of the last block, but with a
-                    // block length that is one element longer so that it
-                    // sorts itself.
-
-                    // If it is a jump in index, then it will form a block of
-                    // length one, and so will not need sorted.
-
-                    blockLength = i - blockStart + 1;
-                }
-
-                if (blockLength >= 1)
-                {
-                    labelList blockIndices = identity(blockLength) + blockStart;
-
-                    SubList<label> secondaryBlock
-                    (
-                        secondary,
-                        blockLength,
-                        blockStart
-                    );
-
-                    sortedOrder(secondaryBlock, blockIndices);
-
-                    blockIndices = invert(blockIndices.size(), blockIndices);
-
-                    forAll(blockIndices, b)
-                    {
-                        oldToNew[blockStart + b] = blockIndices[b] + blockStart;
-                    }
-
-                    blockStart = i;
-                }
-            }
-
+            inplaceReorder(oldToNew, sortingIndices);
             inplaceReorder(oldToNew, faces);
             inplaceReorder(oldToNew, owner);
             inplaceReorder(oldToNew, slaves);
@@ -3051,8 +2388,10 @@ void Foam::conformalVoronoiMesh::addPatches
     labelList& owner,
     labelList& patchSizes,
     labelList& patchStarts,
+    PackedBoolList& boundaryFacesToRemove,
     const List<DynamicList<face> >& patchFaces,
-    const List<DynamicList<label> >& patchOwners
+    const List<DynamicList<label> >& patchOwners,
+    const List<DynamicList<bool> >& indirectPatchFace
 ) const
 {
     label nPatches = patchFaces.size();
@@ -3081,6 +2420,7 @@ void Foam::conformalVoronoiMesh::addPatches
         {
             faces[faceI] = patchFaces[p][f];
             owner[faceI] = patchOwners[p][f];
+            boundaryFacesToRemove[faceI] = indirectPatchFace[p][f];
 
             faceI++;
         }
@@ -3091,7 +2431,8 @@ void Foam::conformalVoronoiMesh::addPatches
 void Foam::conformalVoronoiMesh::removeUnusedPoints
 (
     faceList& faces,
-    pointField& pts
+    pointField& pts,
+    labelList& boundaryPts
 ) const
 {
     Info<< nl << "Removing unused points" << endl;
@@ -3126,6 +2467,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     }
 
     inplaceReorder(oldToNew, pts);
+    inplaceReorder(oldToNew, boundaryPts);
 
     Info<< "    Removing "
         << returnReduce(pts.size() - pointI, sumOp<label>())
@@ -3133,6 +2475,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
         << endl;
 
     pts.setSize(pointI);
+    boundaryPts.setSize(pointI);
 
     // Renumber the faces to use the new point numbers
 
@@ -3198,8 +2541,9 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 
     if (unusedCells.size() > 0)
     {
-        // Pout<< "Removing " << unusedCells.size() <<  " unused cell labels"
-        //     << endl;
+        Info<< "    Removing "
+            << returnReduce(unusedCells.size(), sumOp<label>())
+            <<  " unused cell labels" << endl;
 
         forAll(owner, oI)
         {

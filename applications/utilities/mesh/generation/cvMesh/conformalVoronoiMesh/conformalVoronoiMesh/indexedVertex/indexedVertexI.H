@@ -21,12 +21,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 \*---------------------------------------------------------------------------*/
+
+#include "Pstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -34,12 +31,11 @@ template<class Gt, class Vb>
 inline CGAL::indexedVertex<Gt, Vb>::indexedVertex()
 :
     Vb(),
-    index_(vtInternal),
-    type_(vtInternal),
-    alignment_(),
-    targetCellSize_(0.0),
-    vertexFixed_(false),
-    nearProcBoundary_(false)
+    type_(vtUnassigned),
+    index_(vtUnassigned),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
 {}
 
 
@@ -47,12 +43,43 @@ template<class Gt, class Vb>
 inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p)
 :
     Vb(p),
-    index_(vtInternal),
-    type_(vtInternal),
-    alignment_(),
-    targetCellSize_(0.0),
-    vertexFixed_(false),
-    nearProcBoundary_(false)
+    type_(vtUnassigned),
+    index_(vtUnassigned),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
+{}
+
+
+template<class Gt, class Vb>
+inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
+(
+    const Point& p,
+    vertexType type
+)
+:
+    Vb(p),
+    type_(type),
+    index_(-1),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
+{}
+
+
+template<class Gt, class Vb>
+inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
+(
+    const Foam::point& p,
+    vertexType type
+)
+:
+    Vb(Point(p.x(), p.y(), p.z())),
+    type_(type),
+    index_(-1),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
 {}
 
 
@@ -61,16 +88,16 @@ inline CGAL::indexedVertex<Gt, Vb>::indexedVertex
 (
     const Point& p,
     int index,
-    int type
+    vertexType type,
+    int processor
 )
 :
     Vb(p),
-    index_(index),
     type_(type),
-    alignment_(),
-    targetCellSize_(0.0),
-    vertexFixed_(false),
-    nearProcBoundary_(false)
+    index_(index),
+    processor_(processor),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
 {}
 
 
@@ -78,12 +105,11 @@ template<class Gt, class Vb>
 inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(const Point& p, Cell_handle f)
 :
     Vb(f, p),
-    index_(vtInternal),
-    type_(vtInternal),
-    alignment_(),
-    targetCellSize_(0.0),
-    vertexFixed_(false),
-    nearProcBoundary_(false)
+    type_(vtUnassigned),
+    index_(vtUnassigned),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
 {}
 
 
@@ -91,12 +117,11 @@ template<class Gt, class Vb>
 inline CGAL::indexedVertex<Gt, Vb>::indexedVertex(Cell_handle f)
 :
     Vb(f),
-    index_(vtInternal),
-    type_(vtInternal),
-    alignment_(),
-    targetCellSize_(0.0),
-    vertexFixed_(false),
-    nearProcBoundary_(false)
+    type_(vtUnassigned),
+    index_(vtUnassigned),
+    processor_(Foam::Pstream::myProcNo()),
+    alignment_(Foam::tensor::zero),
+    targetCellSize_(0.0)
 {}
 
 
@@ -117,14 +142,16 @@ inline int CGAL::indexedVertex<Gt, Vb>::index() const
 
 
 template<class Gt, class Vb>
-inline int& CGAL::indexedVertex<Gt, Vb>::type()
+inline typename CGAL::indexedVertex<Gt, Vb>::vertexType&
+CGAL::indexedVertex<Gt, Vb>::type()
 {
     return type_;
 }
 
 
 template<class Gt, class Vb>
-inline int CGAL::indexedVertex<Gt, Vb>::type() const
+inline typename CGAL::indexedVertex<Gt, Vb>::vertexType
+CGAL::indexedVertex<Gt, Vb>::type() const
 {
     return type_;
 }
@@ -161,7 +188,7 @@ inline Foam::scalar CGAL::indexedVertex<Gt, Vb>::targetCellSize() const
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::uninitialised() const
 {
-    return type_ == vtInternal && index_ == vtInternal;
+    return type_ == vtUnassigned;
 }
 
 
@@ -175,63 +202,41 @@ inline bool CGAL::indexedVertex<Gt, Vb>::farPoint() const
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::internalPoint() const
 {
-    return internalPoint(type_);
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::internalPoint(int type)
-{
-    return type <= vtInternal;
+    return type_ == vtInternal || type_ == vtInternalNearBoundary;
 }
 
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::referred() const
 {
-    return (type_ < 0 && type_ > vtFar);
-}
+    // Can't be zero as the first few points are far points which won't be
+    // referred
+    //return index_ < 0;
 
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::referredInternalOrBoundaryPoint() const
-{
-    return referred() && index_ >= 0;
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::referredExternal() const
-{
-    return referred() && index_ < 0;
+    // processor_ will be take the value of the processor that this vertex is
+    // from, so it cannot be on this processor.
+    return processor_ != Foam::Pstream::myProcNo();
 }
 
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::real() const
 {
-    return internalPoint() || pairPoint();
+    return (internalPoint() || boundaryPoint()) && !referred();
 }
 
 
 template<class Gt, class Vb>
 inline int CGAL::indexedVertex<Gt, Vb>::procIndex() const
 {
-    if (referred())
-    {
-        return -(type_ + 1);
-    }
-    else
-    {
-        return -1;
-    }
+    return processor_;
 }
 
 
 template<class Gt, class Vb>
-inline int CGAL::indexedVertex<Gt, Vb>::encodeProcIndex(int procI)
+inline int& CGAL::indexedVertex<Gt, Vb>::procIndex()
 {
-    return -(procI + 1);
+    return processor_;
 }
 
 
@@ -245,115 +250,85 @@ inline void CGAL::indexedVertex<Gt, Vb>::setInternal()
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::nearBoundary() const
 {
-    return type_ == vtNearBoundary;
+    return type_ == vtInternalNearBoundary;
 }
 
 
 template<class Gt, class Vb>
 inline void CGAL::indexedVertex<Gt, Vb>::setNearBoundary()
 {
-    type_ = vtNearBoundary;
+    type_ = vtInternalNearBoundary;
 }
 
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::nearProcBoundary() const
+inline bool CGAL::indexedVertex<Gt, Vb>::boundaryPoint() const
 {
-    return nearProcBoundary_;
-}
-
-
-template<class Gt, class Vb>
-inline void CGAL::indexedVertex<Gt, Vb>::setNearProcBoundary()
-{
-    nearProcBoundary_ = true;
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::pairPoint() const
-{
-    return type_ >= 0;
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::ppMaster() const
-{
-    return ppMaster(index_, type_);
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::ppMaster(int index, int type)
-{
-    if (index >= 0 && type > index)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::ppSlave() const
-{
-    if (type_ >= 0 && type_ < index_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return type_ >= vtInternalSurface && !farPoint();
 }
 
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::internalOrBoundaryPoint() const
 {
-    return internalOrBoundaryPoint(index_, type_);
-}
-
-
-template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::internalOrBoundaryPoint
-(
-    int index,
-    int type
-)
-{
-    return internalPoint(type) || ppMaster(index, type);
+    return internalPoint() || internalBoundaryPoint();
 }
 
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::nearOrOnBoundary() const
 {
-    return pairPoint() || nearBoundary();
+    return boundaryPoint() || nearBoundary();
 }
 
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::anyInternalOrBoundaryPoint() const
+inline bool CGAL::indexedVertex<Gt, Vb>::internalBoundaryPoint() const
 {
-    return internalOrBoundaryPoint() || referredInternalOrBoundaryPoint();
+    return type_ >= vtInternalSurface && type_ <= vtInternalFeaturePoint;
 }
 
 
 template<class Gt, class Vb>
-inline bool CGAL::indexedVertex<Gt, Vb>::isVertexFixed() const
+inline bool CGAL::indexedVertex<Gt, Vb>::externalBoundaryPoint() const
 {
-    return vertexFixed_;
+    return type_ >= vtExternalSurface && type_ <= vtExternalFeaturePoint;
 }
 
 
 template<class Gt, class Vb>
-inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed()
+inline bool CGAL::indexedVertex<Gt, Vb>::featurePoint() const
 {
-    vertexFixed_ = true;
+    return type_ == vtInternalFeaturePoint || type_ == vtExternalFeaturePoint;
 }
+
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::featureEdgePoint() const
+{
+    return type_ == vtInternalFeatureEdge || type_ == vtExternalFeatureEdge;
+}
+
+
+template<class Gt, class Vb>
+inline bool CGAL::indexedVertex<Gt, Vb>::surfacePoint() const
+{
+    return type_ == vtInternalSurface || type_ == vtExternalSurface;
+}
+
+
+//template<class Gt, class Vb>
+//inline bool CGAL::indexedVertex<Gt, Vb>::isVertexFixed() const
+//{
+//    return vertexFixed_;
+//}
+//
+//
+//template<class Gt, class Vb>
+//inline void CGAL::indexedVertex<Gt, Vb>::setVertexFixed()
+//{
+//    vertexFixed_ = true;
+//}
 
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //

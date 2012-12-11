@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Class
     indexedCell
 
@@ -52,6 +47,8 @@ SourceFiles
 #include "InfoProxy.H"
 #include "tetCell.H"
 #include "typeInfo.H"
+#include "vectorTools.H"
+#include "indexedCellEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -85,6 +82,7 @@ template
 >
 class indexedCell
 :
+    public Foam::indexedCellEnum,
     public Cb
 {
     // Private data
@@ -98,6 +96,7 @@ class indexedCell
         //           not on a processor face
         //  < 0 && > ctFar : the (global) index of a dual point on a processor
         //                   face
+
         int index_;
 
         //- The number of times that this Delaunay cell has been limited
@@ -105,13 +104,16 @@ class indexedCell
         int filterCount_;
 
 
+    // Private member functions
+
+        //- Same as globallyOrderedCellVertices but without sorting
+        Foam::tetCell unsortedVertexGlobalIndices
+        (
+            const Foam::globalIndex& globalDelaunayVertexIndices
+        ) const;
+
+
 public:
-
-    enum cellTypes
-    {
-        ctFar = INT_MIN
-    };
-
 
     typedef typename Cb::Vertex_handle                   Vertex_handle;
     typedef typename Cb::Cell_handle                     Cell_handle;
@@ -155,9 +157,13 @@ public:
 
         inline int cellIndex() const;
 
+#ifdef CGAL_INEXACT
         inline const Foam::point& dual();
+#else
+        inline const Foam::point dual();
+#endif
 
-        inline bool farCell() const;
+        inline bool unassigned() const;
 
         inline int& filterCount();
 
@@ -168,6 +174,12 @@ public:
 
         //- Does the Delaunay cell have a far point
         inline bool hasFarPoint() const;
+
+        //- Does the Delaunay cell have a feature point
+        inline bool hasFeaturePoint() const;
+
+        //- Does the Delaunay cell have a seed point
+        inline bool hasSeedPoint() const;
 
         inline bool hasInternalPoint() const;
 
@@ -186,6 +198,13 @@ public:
             const Foam::globalIndex& globalDelaunayVertexIndices
         ) const;
 
+        //- Using the globalIndex object, return a list of four vertices with
+        //  so that the cell has a consistent orientation in parallel.
+        inline Foam::FixedList<Foam::label, 4> globallyOrderedCellVertices
+        (
+            const Foam::globalIndex& globalDelaunayVertexIndices
+        ) const;
+
         //- Is the Delaunay cell part of the final dual mesh, i.e. any vertex
         //  form part of the internal or boundary definition
         inline bool internalOrBoundaryDualVertex() const;
@@ -198,7 +217,12 @@ public:
         //  least one Delaunay vertex outside and at least one inside
         inline bool boundaryDualVertex() const;
 
+        //- A dual vertex on a feature edge will result from this Delaunay cell
+        inline bool featureEdgeDualVertex() const;
+
         inline bool nearProcBoundary() const;
+
+        inline bool potentialCoplanarCell() const;
 
 
     // Info

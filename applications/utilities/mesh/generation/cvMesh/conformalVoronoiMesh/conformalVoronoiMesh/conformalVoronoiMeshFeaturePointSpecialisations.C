@@ -48,39 +48,7 @@ Foam::conformalVoronoiMesh::calcPointFeatureEdgesTypes
 
         eS = feMesh.getEdgeStatus(edgeI);
 
-        switch (eS)
-        {
-            case extendedFeatureEdgeMesh::EXTERNAL:
-            {
-                pFEdgeTypes.nExternal++;
-                break;
-            }
-            case extendedFeatureEdgeMesh::INTERNAL:
-            {
-                pFEdgeTypes.nInternal++;
-                break;
-            }
-            case extendedFeatureEdgeMesh::FLAT:
-            {
-                pFEdgeTypes.nFlat++;
-                break;
-            }
-            case extendedFeatureEdgeMesh::OPEN:
-            {
-                pFEdgeTypes.nOpen++;
-                break;
-            }
-            case extendedFeatureEdgeMesh::MULTIPLE:
-            {
-                pFEdgeTypes.nMultiple++;
-                break;
-            }
-            case extendedFeatureEdgeMesh::NONE:
-            {
-                pFEdgeTypes.nNonFeature++;
-                break;
-            }
-        }
+        pFEdgeTypes(eS)++;
     }
 
     if (debug)
@@ -99,15 +67,22 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
     const pointFeatureEdgesTypes& pFEdgesTypes,
     const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
     const label ptI,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
+    DynamicList<Vb>& pts
 )
 {
     if
     (
-        pFEdgesTypes.nExternal == 2
-     && pFEdgesTypes.nInternal == 1
+        !pFEdgesTypes.found(extendedFeatureEdgeMesh::EXTERNAL)
+     || !pFEdgesTypes.found(extendedFeatureEdgeMesh::INTERNAL)
+    )
+    {
+        return false;
+    }
+
+    if
+    (
+        pFEdgesTypes[extendedFeatureEdgeMesh::EXTERNAL] == 2
+     && pFEdgesTypes[extendedFeatureEdgeMesh::INTERNAL] == 1
      && pEds.size() == 3
     )
     {
@@ -119,6 +94,8 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
         {
             return false;
         }
+
+        label nVert = number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
@@ -212,18 +189,20 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
           - 2.0*planeA.distance(concaveEdgeExternalPt)
             *concaveEdgePlaneANormal;
 
-        pts.append(internalPtA);
-        indices.append(0);
-        types.append(4);
+        pts.append
+        (
+            Vb(internalPtA, Vb::vtInternalFeaturePoint)
+        );
 
         const Foam::point internalPtB =
             concaveEdgeExternalPt
           - 2.0*planeB.distance(concaveEdgeExternalPt)
             *concaveEdgePlaneBNormal;
 
-        pts.append(internalPtB);
-        indices.append(0);
-        types.append(3);
+        pts.append
+        (
+            Vb(internalPtB, Vb::vtInternalFeaturePoint)
+        );
 
         // Add the external points
 
@@ -295,8 +274,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                 for (label i = 0; i < 2; ++i)
                 {
                     pts.remove();
-                    indices.remove();
-                    types.remove();
+                    nVert--;
                 }
 
                 return false;
@@ -325,9 +303,10 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                           + 2.0*planeC.distance(internalPtA)
                            *convexEdgePlaneCNormal;
 
-                        pts.append(externalPtD);
-                        indices.append(0);
-                        types.append(-2);
+                        pts.append
+                        (
+                            Vb(externalPtD, Vb::vtExternalFeaturePoint)
+                        );
                     }
                 }
             }
@@ -355,17 +334,19 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
                           + 2.0*planeD.distance(internalPtB)
                            *convexEdgePlaneDNormal;
 
-                        pts.append(externalPtE);
-                        indices.append(0);
-                        types.append(-2);
+                        pts.append
+                        (
+                            Vb(externalPtE, Vb::vtExternalFeaturePoint)
+                        );
                     }
                 }
             }
         }
 
-        pts.append(concaveEdgeExternalPt);
-        indices.append(0);
-        types.append(-4);
+        pts.append
+        (
+            Vb(concaveEdgeExternalPt, Vb::vtExternalFeaturePoint)
+        );
 
         const scalar totalAngle = radToDeg
         (
@@ -375,12 +356,13 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         if (totalAngle > cvMeshControls().maxQuadAngle())
         {
-            // Add additional mitering points
+            // Add additional mitreing points
             //scalar angleSign = 1.0;
 
 
             vector convexEdgesPlaneNormal =
                 0.5*(convexEdgePlaneCNormal + convexEdgePlaneDNormal);
+
             plane planeM(featPt, convexEdgesPlaneNormal);
 
 //            if
@@ -410,17 +392,19 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             //+ (2.0 + guard)*(concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
               + 2.0*(concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
 
-            pts.append(internalPtF);
-            indices.append(0);
-            types.append(1);
+            pts.append
+            (
+                Vb(internalPtF, Vb::vtInternalFeaturePoint)
+            );
 
             const Foam::point externalPtG =
                 internalPtF
               + 2.0*planeM.distance(internalPtF)*convexEdgesPlaneNormal;
 
-            pts.append(externalPtG);
-            indices.append(0);
-            types.append(-1);
+            pts.append
+            (
+                Vb(externalPtG, Vb::vtExternalFeaturePoint)
+            );
         }
 
         if (debug)
@@ -428,13 +412,17 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
             for (label ptI = initialNumOfPoints; ptI < pts.size(); ++ptI)
             {
                 Info<< "Point " << ptI << " : ";
-                meshTools::writeOBJ(Info, pts[ptI]);
+                meshTools::writeOBJ(Info, topoint(pts[ptI].point()));
             }
         }
 
         return true;
     }
-    else if (pFEdgesTypes.nExternal == 1 && pFEdgesTypes.nInternal == 2)
+    else if
+    (
+        pFEdgesTypes[extendedFeatureEdgeMesh::EXTERNAL] == 1
+     && pFEdgesTypes[extendedFeatureEdgeMesh::INTERNAL] == 2
+    )
     {
         // Info<< "nExternal == 1 && nInternal == 2" << endl;
 
