@@ -118,13 +118,12 @@ void Foam::primitiveMesh::makeFaceCentresAndAreas
                 sumAc += a*c;
             }
 
-
+            // This is to deal with zero-area faces. Mark very small faces
+            // to be detected in e.g., processorPolyPatch.
             if (sumA < ROOTVSMALL)
             {
-                // Sum of area too small. No chance of reliably calculating
-                // centroid so fallback to average.
                 fCtrs[facei] = fCentre;
-                fAreas[facei] = 0.5*sumN;
+                fAreas[facei] = vector::zero;
             }
             else
             {
