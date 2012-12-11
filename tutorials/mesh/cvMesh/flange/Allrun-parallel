@@ -4,16 +4,22 @@ cd ${0%/*} || exit 1    # run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
+# Get the number of processors to run on from system/decomposeParDict
+nProc=$(getNumberOfProcessors)
+
 runApplication surfaceFeatureExtract
 
 # Create tight-fitting background mesh
 runApplication blockMesh
 runApplication topoSet -dict system/topoSetDict-background
 mv log.topoSet log.topoSet.background
-runApplication subsetMesh -cellSet background -patch walls -overwrite
+runApplication subsetMesh background -patch walls -overwrite
 
-runApplication cvMesh
-#runApplication collapseEdges -time 100 -collapseFaces
-runApplication checkMesh -latestTime -allGeometry -allTopology
+runApplication decomposePar
+
+runParallel cvMesh $nProc
+runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
+
+runApplication reconstructParMesh -constant
 
 # ----------------------------------------------------------------- end-of-file

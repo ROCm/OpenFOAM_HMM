@@ -5,30 +5,15 @@ cd ${0%/*} || exit 1    # run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get the number of processors to run on from system/decomposeParDict
-nProc=`grep numberOfSubdomains system/decomposeParDict \
-     | sed s/"numberOfSubdomains *\(.*\);"/"\1"/`
+nProc=$(getNumberOfProcessors)
 
 runApplication blockMesh
 runApplication decomposePar
 
-for dir in processor*
-do
-    if [[ -d $dir ]]
-    then
-        cp -r $dir/constant/polyMesh $dir/constant/polyMesh_background
-    fi
-done
-
 runParallel cvMesh $nProc
+runParallel collapseEdges $nProc -latestTime -collapseFaces
+runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
 
-runApplication reconstructParMesh -constant -mergeTol 1e-10
-runParallel checkMesh $nProc -constant -allGeometry -allTopology
-
-# To run from the same background mesh as before
-# for dir in processor*;
-# do
-#     rm -r $dir/constant/polyMesh
-#     cp -r $dir/constant/polyMesh_background $dir/constant/polyMesh
-# done
+runApplication reconstructParMesh -latestTime
 
 # ----------------------------------------------------------------- end-of-file

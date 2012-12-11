@@ -86,7 +86,9 @@ surfaceConformation
 
     surfaceSearchDistanceCoeff  5;
 
-    maxSurfaceProtrusionCoeff   0.1;
+    nearBoundaryDistanceCoeff   5;
+
+    maxSurfaceProtrusionCoeff   0.001;
 
     maxQuadAngle 125;
 
@@ -96,32 +98,13 @@ surfaceConformation
 
     conformationControls
     {
-        initial
-        {
-            edgeSearchDistCoeff             5;
-            surfacePtReplaceDistCoeff       0.5;
-            surfacePtExclusionDistanceCoeff 0.5;
-        }
-
-        iteration
-        {
-            edgeSearchDistCoeff         1.5;
-            surfacePtReplaceDistCoeff   0.7;
-        }
+        edgeSearchDistCoeff             5;
+        surfacePtReplaceDistCoeff       0.5;
+        surfacePtExclusionDistanceCoeff 0.5;
 
         maxIterations 15;
 
         iterationToInitialHitRatioLimit 0.0001;
-    }
-
-    coarseConformationControls
-    {
-        $conformationControls;
-    }
-
-    fineConformationControls
-    {
-        $conformationControls;
     }
 
     geometryToConformTo
@@ -140,12 +123,26 @@ surfaceConformation
 
 motionControl
 {
-    defaultCellSize     0.04;
+    defaultCellSize     0.1;
 
-    // Assign a priority to all requests for cell sizes, the highest overrules.
-    defaultPriority     0;
+    //cellShapeControl    constantControl;
+    //cellShapeControl    fileControl;
+    cellShapeControl    surfaceControl;
 
-    cellSizeControlGeometry
+    constantControlCoeffs
+    {
+        cellSize      $defaultCellSize;
+        cellAlignment (1 1 0 0 1 0 0 1 1);
+    }
+
+    fileControlCoeffs
+    {
+        pointFile       "alignmentPoints";
+        sizesFile       "alignmentSizes";
+        alignmentsFile  "alignmentTensors";
+    }
+
+    surfaceControlCoeffs
     {
         blob.stl
         {
@@ -155,20 +152,21 @@ motionControl
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize 0.04;
+                surfaceCellSize 0.1;
             }
 
-            cellSizeFunction        uniformDistance;
-            uniformDistanceCoeffs
-            {
-                distance        0.1;
-            }
-            linearDistanceCoeffs
-            {
-                distanceCellSize        $defaultCellSize;
-                distance                0.1;
-            }
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
         }
+    }
+
+    maxRefinementIterations 1;
+
+    cellAspectRatioControl
+    {
+        aspectRatio                 1.0;
+        aspectRatioDirection        (1 0 0);
     }
 
     relaxationModel     adaptiveLinear;
@@ -183,7 +181,7 @@ motionControl
 
     timeChecks                  no;
 
-    maxLoadUnbalance            0.05;
+    maxLoadUnbalance            0.5;
 
     alignmentSearchSpokes       24;
 
@@ -215,18 +213,9 @@ motionControl
 
 polyMeshFiltering
 {
-    writeTetDualMesh                        false;
-    filterSizeCoeff                         0.2;
-    mergeClosenessCoeff                     1e-3;
-    edgeMergeAngle                          45;
-    continueFilteringOnBadInitialPolyMesh   true;
-    filterErrorReductionCoeff               0.5;
-    filterCountSkipThreshold                4;
-    surfaceStepFaceAngle                    80;
-    maxCollapseIterations                   25;
-    maxConsecutiveEqualFaceSets             5;
-    edgeCollapseGuardFraction               0.1;
-    maxCollapseFaceToPointSideLengthCoeff   0.35;
+    filterEdges                 on;
+    filterFaces                 off;
+    writeTetDualMesh            false;
 }
 
 

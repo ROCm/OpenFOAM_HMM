@@ -96,12 +96,12 @@ surfaceConformation
     // Distance to a feature point within which surface and edge
     // conformation points are excluded - fraction of the local target
     // cell size
-    featurePointExclusionDistanceCoeff  0.4;
+    featurePointExclusionDistanceCoeff  0.6;
 
     // Distance to an existing feature edge conformation location
     // within which other edge conformation location are excluded -
     // fraction of the local target cell size
-    featureEdgeExclusionDistanceCoeff   0.2;
+    featureEdgeExclusionDistanceCoeff   0.6;
 
     // Optimisation: do not check for surface intersection (of dual edges)
     // for points near to surface.
@@ -120,6 +120,9 @@ surfaceConformation
     // Frequency to redo surface conformation (expensive).
     surfaceConformationRebuildFrequency 10;
 
+    // Specialised feature point handling
+    specialiseFeaturePoints on;
+
     // Initial and intermediate controls
     conformationControls
     {
@@ -131,7 +134,7 @@ surfaceConformation
             // conformation should have priority)
 
             // distance to search for near feature edges
-            edgeSearchDistCoeff         1.1;
+            edgeSearchDistCoeff         2;
 
             // Proximity to a feature edge where a surface hit is
             //  not created, only the edge conformation is created
@@ -255,13 +258,49 @@ initialPoints
 motionControl
 {
     // Absolute cell size of back ground mesh. This is the maximum cell size.
-    defaultCellSize     0.1;
+    defaultCellSize     0.05;
 
-    // Assign a priority to all requests for cell sizes, the highest overrules.
-    defaultPriority     0;
+    cellShapeControl    surfaceControl;
 
-    cellSizeControlGeometry
+    surfaceControlCoeffs
     {
+        coneAndSphere
+        {
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize $defaultCellSize;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+
+        domain
+        {
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize $defaultCellSize;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+    }
+
+    cellAspectRatioControl
+    {
+        aspectRatio                 1.0;
+        aspectRatioDirection        (0 0 0);
     }
 
     // Underrelaxation for point motion. Simulated annealing: starts off at 1
@@ -343,11 +382,13 @@ polyMeshFiltering
 {
     // Upper limit on the size of faces to be filtered.
     // fraction of the local target cell size
-    filterSizeCoeff                         0.2;
+    filterSizeCoeff                         0.5;
 
     // Upper limit on how close two dual vertices can be before
     // being merged, fraction of the local target cell size
     mergeClosenessCoeff                     1e-9;
+
+    edgeMergeAngle                          30;
 
     // To not filter: set maxNonOrtho to 1 (so check fails) and then
     // set continueFilteringOnBadInitialPolyMesh to false.
@@ -384,58 +425,7 @@ polyMeshFiltering
 }
 
 
-// Generic mesh quality settings. At any undoable phase these determine
-// where to undo. Same as in snappyHexMeshDict
-meshQualityControls
-{
-    //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho 65;
-
-    //- Max skewness allowed. Set to <0 to disable.
-    maxBoundarySkewness 50;
-    maxInternalSkewness 10;
-
-    //- Max concaveness allowed. Is angle (in degrees) below which concavity
-    //  is allowed. 0 is straight face, <0 would be convex face.
-    //  Set to 180 to disable.
-    maxConcave 80;
-
-    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
-    //  Set to a sensible fraction of the smallest cell volume expected.
-    //  Set to very negative number (e.g. -1E30) to disable.
-    minVol -1E30;
-
-    //- Minimum quality of the tet formed by the
-    //  variable base point minimum decomposition triangles and
-    //  the cell centre (so not face-centre decomposition).
-    //  This has to be a positive number for tracking
-    //  to work. Set to very negative number (e.g. -1E30) to
-    //  disable.
-    //     <0 = inside out tet,
-    //      0 = flat tet
-    //      1 = regular tet
-    minTetQuality 1e-30;
-
-    //- Minimum absolute face area. Set to <0 to disable.
-    minArea -1;
-
-    //- Minimum face twist. Set to <-1 to disable. dot product of face normal
-    //- and face centre triangles normal
-    minTwist 0.001;
-
-    //- minimum normalised cell determinant
-    //- 1 = hex, <= 0 = folded or flattened illegal cell
-    minDeterminant 0.001;
-
-    //- minFaceWeight (0 -> 0.5)
-    minFaceWeight 0.02;
-
-    //- minVolRatio (0 -> 1)
-    minVolRatio 0.01;
-
-    //must be >0 for Fluent compatibility
-    minTriangleTwist -1;
-}
+#include "meshQualityDict";
 
 
 // ************************************************************************* //
