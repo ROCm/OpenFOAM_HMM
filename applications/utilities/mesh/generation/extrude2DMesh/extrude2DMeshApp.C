@@ -43,6 +43,7 @@ Note
 #include "edgeCollapser.H"
 #include "addPatchCellLayer.H"
 #include "patchToPoly2DMesh.H"
+#include "globalIndex.H"
 
 using namespace Foam;
 
@@ -260,6 +261,9 @@ int main(int argc, char *argv[])
         const boundBox& bb = mesh().bounds();
         const scalar mergeDim = 1e-4 * bb.minDim();
 
+        PackedBoolList collapseEdge(mesh().nEdges());
+        Map<point> collapsePointToLocation(mesh().nPoints());
+
         forAll(edges, edgeI)
         {
             const edge& e = edges[edgeI];
@@ -271,14 +275,27 @@ int main(int argc, char *argv[])
                 Info<< "Merging edge " << e << " since length " << d
                     << " << " << mergeDim << nl;
 
-                // Collapse edge to e[0]
-                collapser.collapseEdge(edgeI, e[0]);
+                collapseEdge[edgeI] = true;
+                collapsePointToLocation.set(e[1], points[e[0]]);
             }
         }
 
+        List<pointEdgeCollapse> allPointInfo;
+        const globalIndex globalPoints(mesh().nPoints());
+        labelList pointPriority(mesh().nPoints(), 0);
+
+        collapser.consistentCollapse
+        (
+            globalPoints,
+            pointPriority,
+            collapsePointToLocation,
+            collapseEdge,
+            allPointInfo
+        );
+
         polyTopoChange meshModCollapse(mesh());
 
-        collapser.setRefinement(meshModCollapse);
+        collapser.setRefinement(allPointInfo, meshModCollapse);
 
         // Create a mesh from topo changes.
         autoPtr<mapPolyMesh> morphMap

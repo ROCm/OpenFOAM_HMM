@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,10 +37,15 @@ SourceFiles
 #ifndef edgeCollapser_H
 #define edgeCollapser_H
 
-#include "labelList.H"
+#include "pointEdgeCollapse.H"
 #include "DynamicList.H"
-#include "point.H"
+#include "Field.H"
+#include "pointFieldFwd.H"
+#include "Map.H"
+#include "labelPair.H"
+#include "HashSet.H"
 #include "typeInfo.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,9 +54,11 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
+class PackedBoolList;
 class polyTopoChange;
+class globalIndex;
 class face;
-class mapPolyMesh;
+class edge;
 
 /*---------------------------------------------------------------------------*\
                            Class edgeCollapser Declaration
@@ -59,59 +66,169 @@ class mapPolyMesh;
 
 class edgeCollapser
 {
+public:
+
+    // The type of collapse of a face
+    enum collapseType
+    {
+        noCollapse = 0,
+        toPoint    = 1,
+        toEdge     = 2
+    };
+
+
+private:
+
     // Private data
 
         //- Reference to mesh
         const polyMesh& mesh_;
 
-        //- For every point -1 or region number
-        labelList pointRegion_;
+        const scalar guardFraction_;
 
-        //- Actual location of the point to collapse to for every region master
-        //  point. This will be forced to be consistent across processors
-        DynamicList<point> pointRegionMasterLocation_;
+        const scalar maxCollapseFaceToPointSideLengthCoeff_;
 
-        //- -1 or master vertex for region number
-        DynamicList<label> pointRegionMaster_;
+        const Switch allowEarlyCollapseToPoint_;
 
-        //- Stack of free region numbers. Corresponds to -1 in pointRegionMaster
-        SLList<label> freeRegions_;
-
-
-    // Static Functions
-
-        //- Find val in list. Search starts at start, continues to size-1.
-        static label findIndex
-        (
-            const labelList&,
-            const label start,
-            const label size,
-            const label val
-        );
+        const scalar allowEarlyCollapseCoeff_;
 
 
     // Private Member Functions
 
-        //- Determine points connected through edgesToRemove_.
-        //  Note: Only routine that uses edgesToRemove!
-        label changePointRegion
+        //- Create an edgeList of edges in faceI which have both their points
+        //  in pointLabels
+        labelList edgesFromPoints
+        (
+            const label& faceI,
+            const labelList& pointLabels
+        ) const;
+
+        //- Collapse a face to an edge, marking the collapsed edges and new
+        //  locations for points that will move as a result of the collapse
+        void collapseToEdge
+        (
+            const label faceI,
+            const pointField& pts,
+            const labelList& pointPriority,
+            const vector& collapseAxis,
+            const point& fC,
+            const labelList& facePtsNeg,
+            const labelList& facePtsPos,
+            const scalarList& dNeg,
+            const scalarList& dPos,
+            const scalar dShift,
+            PackedBoolList& collapseEdge,
+            Map<point>& collapsePointToLocation
+        ) const;
+
+        //- Collapse a face to a point, marking the collapsed edges and new
+        //  locations for points that will move as a result of the collapse
+        void collapseToPoint
+        (
+            const label& faceI,
+            const pointField& pts,
+            const labelList& pointPriority,
+            const point& fC,
+            const labelList& facePts,
+            PackedBoolList& collapseEdge,
+            Map<point>& collapsePointToLocation
+        ) const;
+
+        //- Do an eigenvector analysis of the face to get its collapse axis
+        //  and aspect ratio
+        void faceCollapseAxisAndAspectRatio
+        (
+            const face& f,
+            const point& fC,
+            vector& collapseAxis,
+            scalar& aspectRatio
+        ) const;
+
+        //- Return the target length scale for each face
+        scalarField calcTargetFaceSizes() const;
+
+        //- Decides whether a face should be collapsed (and if so it it is to a
+        //  point or an edge)
+        collapseType collapseFace
+        (
+            const labelList& pointPriority,
+            const face& f,
+            const label faceI,
+            const scalar targetFaceSize,
+            PackedBoolList& collapseEdge,
+            Map<point>& collapsePointToLocation,
+            const scalarField& faceFilterFactor
+        ) const;
+
+        //- Return label of point that has the highest priority. This will be
+        //  the point on the edge that will be collapsed to.
+        label edgeMaster(const labelList& pointPriority, const edge& e) const;
+
+        //- Decides which points in an edge to collapse, based on their priority
+        void checkBoundaryPointMergeEdges
         (
             const label pointI,
-            const label oldRegion,
-            const label newRegion
-        );
+            const label otherPointI,
+            const labelList& pointPriority,
+            Map<point>& collapsePointToLocation
+        ) const;
 
-        //- Whether point is master of region or has been removed
-        bool pointRemoved(const label) const;
+        //- Helper function that breaks strings of collapses if an edge is not
+        //  labelled to collapse, but its points both collapse to the same
+        //  location
+        label breakStringsAtEdges
+        (
+            const PackedBoolList& markedEdges,
+            PackedBoolList& collapseEdge,
+            List<pointEdgeCollapse>& allPointInfo
+        ) const;
 
-        //- Renumber f with new vertices. Removes duplicates.
-        void filterFace(const label faceI, face&) const;
+        //- Prevent face pinching by finding points in a face that will be
+        //  collapsed to the same location, but that are not ordered
+        //  consecutively in the face
+        void determineDuplicatePointsOnFace
+        (
+            const face& f,
+            PackedBoolList& markedPoints,
+            labelHashSet& uniqueCollapses,
+            labelHashSet& duplicateCollapses,
+            List<pointEdgeCollapse>& allPointInfo
+        ) const;
 
-        //- Some debugging printing
-        void printRegions() const;
+        //- Count the number of edges on the face that will exist as a result
+        //  of the collapse
+        label countEdgesOnFace
+        (
+            const face& f,
+            List<pointEdgeCollapse>& allPointInfo
+        ) const;
 
-        //- Collapse list of edges. Tries to find master to collapse to.
-        void collapseEdges(const labelList& edgeLabels);
+        //- Does the face have fewer than 3 edges as a result of the potential
+        //  collapse
+        bool isFaceCollapsed
+        (
+            const face& f,
+            List<pointEdgeCollapse>& allPointInfo
+        ) const;
+
+        //- Given the collapse information, propagates the information using
+        //  PointEdgeWave. Result is a list of new point locations and indices
+        label syncCollapse
+        (
+            const globalIndex& globalPoints,
+            const labelList& boundaryPoint,
+            const PackedBoolList& collapseEdge,
+            const Map<point>& collapsePointToLocation,
+            List<pointEdgeCollapse>& allPointInfo
+        ) const;
+
+        //- Renumber f with new vertices. Removes consecutive duplicates
+        void filterFace
+        (
+            const Map<DynamicList<label> >& collapseStrings,
+            const List<pointEdgeCollapse>& allPointInfo,
+            face& f
+        ) const;
 
         //- Disallow default bitwise copy construct
         edgeCollapser(const edgeCollapser&);
@@ -128,43 +245,92 @@ public:
 
     // Constructors
 
-        //- Construct from mesh.
+        //- Construct from mesh
         edgeCollapser(const polyMesh& mesh);
+
+        //- Construct from mesh and dict
+        edgeCollapser(const polyMesh& mesh, const dictionary& dict);
 
 
     // Member Functions
 
-        // Access
+        // Check
 
-            //- For every point the region it belongs to or -1.
-            const labelList& pointRegion() const
-            {
-                return pointRegion_;
-            }
+            //- Find the longest edge in a face
+            static label longestEdge(const face& f, const pointField& pts);
 
-            //- For every region the master (i.e. the point the region will
-            //  be replaced by)
-            const DynamicList<label>& pointRegionMaster() const
-            {
-                return pointRegionMaster_;
-            }
+            //- Calls motionSmoother::checkMesh and returns a set of bad faces
+            static HashSet<label> checkBadFaces
+            (
+                const polyMesh& mesh,
+                const dictionary& meshQualityDict
+            );
 
-            //- Check that edge is not marked for anything
-            bool unaffectedEdge(const label edgeI) const;
+            // Check mesh and mark points on faces in error
+            // Returns boolList with points in error set
+            static label checkMeshQuality
+            (
+                const polyMesh& mesh,
+                const dictionary& meshQualityDict,
+                PackedBoolList& isErrorPoint
+            );
+
+            //- Ensure that the collapse is parallel consistent and update
+            //  allPointInfo.
+            //  Returns a list of edge collapses that is consistent across
+            //  coupled boundaries and a list of pointEdgeCollapses.
+            void consistentCollapse
+            (
+                const globalIndex& globalPoints,
+                const labelList& pointPriority,
+                const Map<point>& collapsePointToLocation,
+                PackedBoolList& collapseEdge,
+                List<pointEdgeCollapse>& allPointInfo,
+                const bool allowCellCollapse = false
+            ) const;
 
 
-        // Edit
+        // Query
 
-            //- Set edge to collapse and point to collapse it to.
-            //  Return true if collapse is valid.
-            //  (always true at the moment)
-            bool collapseEdge(const label edgeI, const label master);
+            //- Play commands into polyTopoChange to create mesh.
+            //  Return true if anything changed.
+            bool setRefinement
+            (
+                const List<pointEdgeCollapse>& allPointInfo,
+                polyTopoChange& meshMod
+            ) const;
 
-            //- Play commands into polyTopoChange to create mesh. Return true
-            //  if anything changed.
-            bool setRefinement(polyTopoChange&);
+            // Mark (in collapseEdge) any edges to collapse
+            label markSmallEdges
+            (
+                const scalarField& minEdgeLen,
+                const labelList& pointPriority,
+                PackedBoolList& collapseEdge,
+                Map<point>& collapsePointToLocation
+            ) const;
 
-            void updateMesh(const mapPolyMesh&);
+            // Mark (in collapseEdge) any edges to merge
+            label markMergeEdges
+            (
+                const scalar maxCos,
+                const labelList& pointPriority,
+                PackedBoolList& collapseEdge,
+                Map<point>& collapsePointToLocation
+            ) const;
+
+            //- Find small faces and sliver faces in the mesh and mark the
+            //  edges that need to be collapsed in order to remove these faces.
+            //  Also returns a map of new locations for points that will move
+            //  as a result of the collapse.
+            //  Use in conjuctions with edgeCollapser to synchronise the
+            //  collapses and modify the mesh
+            labelPair markSmallSliverFaces
+            (
+                const scalarField& faceFilterFactor,
+                const labelList& pointPriority,
+                PackedBoolList& collapseEdge,
+                Map<point>& collapsePointToLocation
+            ) const;
 };
 
 

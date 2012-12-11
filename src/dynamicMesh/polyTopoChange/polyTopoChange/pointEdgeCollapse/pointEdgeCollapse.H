@@ -62,6 +62,9 @@ class pointEdgeCollapse
         //- Collapse string index
         label collapseIndex_;
 
+        //- Priority of the collapse
+        label collapsePriority_;
+
 
     // Private Member Functions
 
@@ -89,7 +92,8 @@ public:
         inline pointEdgeCollapse
         (
             const point& collapsePoint,
-            const label collapseIndex
+            const label collapseIndex,
+            const label collapsePriority
         );
 
 
@@ -100,6 +104,8 @@ public:
             inline const point& collapsePoint() const;
 
             inline label collapseIndex() const;
+
+            inline label collapsePriority() const;
 
 
         // Needed by meshWave

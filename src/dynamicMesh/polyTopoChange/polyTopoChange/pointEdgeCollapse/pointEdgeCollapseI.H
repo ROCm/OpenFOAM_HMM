@@ -43,48 +43,58 @@ inline bool Foam::pointEdgeCollapse::update
             << "problem." << abort(FatalError);
     }
 
+    if (!valid(td))
+    {
+        operator=(w2);
+        return true;
+    }
+
     if (w2.collapseIndex_ == -1 || collapseIndex_ == -1)
     {
         // Not marked for collapse; only happens on edges.
         return false;
     }
 
-    if (!valid(td))
+    if (w2.collapsePriority_ < collapsePriority_)
+    {
+        return false;
+    }
+    else if (w2.collapsePriority_ > collapsePriority_)
     {
         operator=(w2);
         return true;
     }
-    else
-    {
-        // Take over w2 if it is 'better'
 
-        if (w2.collapseIndex_ < collapseIndex_)
+    // Get overwritten by w2 if it has a higher priority
+    if (w2.collapseIndex_ < collapseIndex_)
+    {
+        operator=(w2);
+        return true;
+    }
+    else if (w2.collapseIndex_ == collapseIndex_)
+    {
+        bool identicalPoint = samePoint(w2.collapsePoint_);
+
+        bool nearer = magSqr(w2.collapsePoint_)
+                    < magSqr(collapsePoint_);
+
+        if (nearer)
         {
-            // Take over string index and coordinate from w2
             operator=(w2);
-            return true;
         }
-        else if (w2.collapseIndex_ == collapseIndex_)
-        {
-            bool identicalPoint = samePoint(w2.collapsePoint_);
-            bool nearer = magSqr(w2.collapsePoint_) < magSqr(collapsePoint_);
-            if (nearer)
-            {
-                operator=(w2);
-            }
-            if (identicalPoint)
-            {
-                return false;
-            }
-            else
-            {
-                return nearer;
-            }
-        }
-        else
+
+        if (identicalPoint)
         {
             return false;
         }
+        else
+        {
+            return nearer;
+        }
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -95,7 +105,8 @@ inline bool Foam::pointEdgeCollapse::update
 inline Foam::pointEdgeCollapse::pointEdgeCollapse()
 :
     collapsePoint_(GREAT, GREAT, GREAT),
-    collapseIndex_(-2)
+    collapseIndex_(-2),
+    collapsePriority_(-2)
 {}
 
 
@@ -103,11 +114,13 @@ inline Foam::pointEdgeCollapse::pointEdgeCollapse()
 inline Foam::pointEdgeCollapse::pointEdgeCollapse
 (
     const point& collapsePoint,
-    const label collapseIndex
+    const label collapseIndex,
+    const label collapsePriority
 )
 :
     collapsePoint_(collapsePoint),
-    collapseIndex_(collapseIndex)
+    collapseIndex_(collapseIndex),
+    collapsePriority_(collapsePriority)
 {}
 
 
@@ -122,6 +135,12 @@ inline const Foam::point& Foam::pointEdgeCollapse::collapsePoint() const
 inline Foam::label Foam::pointEdgeCollapse::collapseIndex() const
 {
     return collapseIndex_;
+}
+
+
+inline Foam::label Foam::pointEdgeCollapse::collapsePriority() const
+{
+    return collapsePriority_;
 }
 
 
@@ -268,6 +287,7 @@ inline bool Foam::pointEdgeCollapse::operator==
 {
     return
         collapseIndex_ == rhs.collapseIndex_
+     && collapsePriority_ == rhs.collapsePriority_
      && samePoint(rhs.collapsePoint_);
 }
 

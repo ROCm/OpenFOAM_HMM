@@ -34,7 +34,9 @@ Foam::Ostream& Foam::operator<<
 )
 {
     return os
-        << wDist.collapsePoint_ << wDist.collapseIndex_;
+        << wDist.collapsePoint_
+        << wDist.collapseIndex_
+        << wDist.collapsePriority_;
 }
 
 Foam::Istream& Foam::operator>>
@@ -44,7 +46,9 @@ Foam::Istream& Foam::operator>>
 )
 {
     return is
-        >> wDist.collapsePoint_ >> wDist.collapseIndex_;
+        >> wDist.collapsePoint_
+        >> wDist.collapseIndex_
+        >> wDist.collapsePriority_;
 }
 
 
