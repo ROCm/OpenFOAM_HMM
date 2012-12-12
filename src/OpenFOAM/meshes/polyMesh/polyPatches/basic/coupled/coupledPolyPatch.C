@@ -508,7 +508,9 @@ Foam::coupledPolyPatch::coupledPolyPatch
     matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_)),
     transform_
     (
-        transformTypeNames.read(dict.lookupOrDefault("transform", "UNKNOWN"))
+        dict.found("transform")
+      ? transformTypeNames.read(dict.lookup("transform"))
+      : UNKNOWN
     )
 {}
 
