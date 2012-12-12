@@ -791,19 +791,21 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
     label count = 0;
     for (PointIterator it = begin; it != end; ++it)
     {
-        const pointFromPoint samplePoint = topoint(it->point());
+        const Foam::point samplePoint(topoint(it->point()));
+
+        scalar distFromBbSqr = 0;
 
         if (!bb.contains(samplePoint))
         {
             const Foam::point nearestPoint = bb.nearest(samplePoint);
 
-            const scalar distFromBbSqr = magSqr(nearestPoint - samplePoint);
-
-            pointsBbDistSqr.append
-            (
-                std::make_pair(distFromBbSqr, count++)
-            );
+            distFromBbSqr = magSqr(nearestPoint - samplePoint);
         }
+
+        pointsBbDistSqr.append
+        (
+            std::make_pair(distFromBbSqr, count++)
+        );
     }
 
     std::random_shuffle(pointsBbDistSqr.begin(), pointsBbDistSqr.end());

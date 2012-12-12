@@ -572,7 +572,9 @@ void Foam::cellShapeControl::initialMeshPopulation
             );
         }
 
-        Info<< "    Inserted " << (pts.size() - nRejected) << "/" << pts.size()
+        Info<< "    Inserted "
+            << returnReduce(pts.size() - nRejected, sumOp<label>())
+            << "/" << pts.size()
             << endl;
     }
 }
