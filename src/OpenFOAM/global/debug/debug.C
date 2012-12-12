@@ -31,7 +31,6 @@ Description
 #include "IFstream.H"
 #include "OSspecific.H"
 #include "Ostream.H"
-//#include "HashTable.H"
 #include "demandDrivenData.H"
 #include "simpleObjectRegistry.H"
 
@@ -69,6 +68,7 @@ deleteControlDictPtr deleteControlDictPtr_;
 simpleObjectRegistry* debugObjectsPtr_(NULL);
 simpleObjectRegistry* infoObjectsPtr_(NULL);
 simpleObjectRegistry* optimisationObjectsPtr_(NULL);
+simpleObjectRegistry* dimensionSetObjectsPtr_(NULL);
 class deleteDebugSwitchPtr
 {
 public:
@@ -81,7 +81,7 @@ public:
         deleteDemandDrivenData(debugObjectsPtr_);
         deleteDemandDrivenData(infoObjectsPtr_);
         deleteDemandDrivenData(optimisationObjectsPtr_);
-
+        deleteDemandDrivenData(dimensionSetObjectsPtr_);
     }
 };
 
@@ -210,6 +210,16 @@ void Foam::debug::addOptimisationObject
 }
 
 
+void Foam::debug::addDimensionSetObject
+(
+    const char* name,
+    simpleRegIOobject* obj
+)
+{
+    dimensionSetObjects().insert(name, obj);
+}
+
+
 Foam::simpleObjectRegistry& Foam::debug::debugObjects()
 {
     if (!debugObjectsPtr_)
@@ -240,6 +250,17 @@ Foam::simpleObjectRegistry& Foam::debug::optimisationObjects()
     }
 
     return *optimisationObjectsPtr_;
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::dimensionSetObjects()
+{
+    if (!dimensionSetObjectsPtr_)
+    {
+        dimensionSetObjectsPtr_ = new simpleObjectRegistry(1000);
+    }
+
+    return *dimensionSetObjectsPtr_;
 }
 
 

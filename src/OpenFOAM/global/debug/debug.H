@@ -84,21 +84,27 @@ namespace debug
         //- Register debug switch read/write object
         void addDebugObject(const char* name, simpleRegIOobject* obj);
 
-        //- Register debug switch read/write object
+        //- Register info switch read/write object
         void addInfoObject(const char* name, simpleRegIOobject* obj);
 
-        //- Register debug switch read/write object
+        //- Register optimisation switch read/write object
         void addOptimisationObject(const char* name, simpleRegIOobject* obj);
+
+        //- Register DimensionSets read/write object
+        void addDimensionSetObject(const char* name, simpleRegIOobject* obj);
 
 
         //- Get access to registered debug switch objects
         simpleObjectRegistry& debugObjects();
 
-        //- Get access to registered debug switch objects
+        //- Get access to registered info switch objects
         simpleObjectRegistry& infoObjects();
 
-        //- Get access to registered debug switch objects
+        //- Get access to registered optimisation switch objects
         simpleObjectRegistry& optimisationObjects();
+
+        //- Get access to registered dimensionSets switch objects
+        simpleObjectRegistry& dimensionSetObjects();
 
 
 } // End namespace debug
