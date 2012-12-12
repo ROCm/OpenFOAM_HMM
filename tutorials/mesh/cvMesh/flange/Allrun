@@ -13,7 +13,7 @@ mv log.topoSet log.topoSet.background
 runApplication subsetMesh -cellSet background -patch walls -overwrite
 
 runApplication cvMesh
-#runApplication collapseEdges -time 100 -collapseFaces
+runApplication collapseEdges -latestTime -collapseFaces
 runApplication checkMesh -latestTime -allGeometry -allTopology
 
 # ----------------------------------------------------------------- end-of-file

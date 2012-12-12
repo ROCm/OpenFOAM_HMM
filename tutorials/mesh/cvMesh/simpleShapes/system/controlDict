@@ -34,7 +34,7 @@ deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   1000;   //10 to see the meshing steps
+writeInterval   80;   // 10 to see the meshing steps
 
 purgeWrite      0;
 

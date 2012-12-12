@@ -126,32 +126,21 @@ surfaceConformation
     // Initial and intermediate controls
     conformationControls
     {
-        // Initial conformation
-        initial
-        {
-            // We've got a point poking through the surface. Don't do any
-            // surface conformation if near feature edge (since feature edge
-            // conformation should have priority)
+        // We've got a point poking through the surface. Don't do any
+        // surface conformation if near feature edge (since feature edge
+        // conformation should have priority)
 
-            // distance to search for near feature edges
-            edgeSearchDistCoeff         2;
+        // distance to search for near feature edges
+        edgeSearchDistCoeff         2;
 
-            // Proximity to a feature edge where a surface hit is
-            //  not created, only the edge conformation is created
-            // - fraction of the local target cell size. Coarse
-            // conformation, initial protrusion tests.
-            surfacePtReplaceDistCoeff   0.5;
+        // Proximity to a feature edge where a surface hit is
+        //  not created, only the edge conformation is created
+        // - fraction of the local target cell size. Coarse
+        // conformation, initial protrusion tests.
+        surfacePtReplaceDistCoeff   0.5;
 
 
-            surfacePtExclusionDistanceCoeff 0.5;
-        }
-
-        // Same for iterations
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
+        surfacePtExclusionDistanceCoeff 0.5;
 
         // Stop either at maxIterations or if the number of surface pokes
         // is very small (iterationToInitialHitRatioLimit * initial number)
@@ -160,16 +149,6 @@ surfaceConformation
         maxIterations 15;
 
         iterationToInitialHitRatioLimit 0.001;
-    }
-
-    coarseConformationControls
-    {
-        $conformationControls;
-    }
-
-    fineConformationControls
-    {
-        $conformationControls;
     }
 
     // Geometry to mesh to
@@ -258,21 +237,20 @@ initialPoints
 motionControl
 {
     // Absolute cell size of back ground mesh. This is the maximum cell size.
-    defaultCellSize     0.05;
+    defaultCellSize     0.1;
 
-    cellShapeControl    surfaceControl;
-
-    surfaceControlCoeffs
+    shapeControlFunctions
     {
         coneAndSphere
         {
+            type                searchableSurfaceControl;
             priority            1;
             mode                bothSides;
 
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize $defaultCellSize;
+                surfaceCellSize 0.075;
             }
 
             cellSizeFunction        uniform;
@@ -282,6 +260,7 @@ motionControl
 
         domain
         {
+            type                searchableSurfaceControl;
             priority            1;
             mode                bothSides;
 
@@ -319,7 +298,7 @@ motionControl
     objOutput                   no;
 
     // Timing and memory usage.
-    timeChecks                  yes;
+    timeChecks                  no;
 
     // Number of rays in plane parallel to nearest surface. Used to detect
     // next closest surfaces. Used to work out alignment (three vectors)
@@ -380,48 +359,9 @@ motionControl
 // Do not change. See cvControls.H
 polyMeshFiltering
 {
-    // Upper limit on the size of faces to be filtered.
-    // fraction of the local target cell size
-    filterSizeCoeff                         0.5;
-
-    // Upper limit on how close two dual vertices can be before
-    // being merged, fraction of the local target cell size
-    mergeClosenessCoeff                     1e-9;
-
-    edgeMergeAngle                          30;
-
-    // To not filter: set maxNonOrtho to 1 (so check fails) and then
-    // set continueFilteringOnBadInitialPolyMesh to false.
-    continueFilteringOnBadInitialPolyMesh   true;
-
-    // When a face is "bad", what fraction should the filterSizeCoeff be
-    // reduced by.  Recursive, so for a filterCount value of fC, the
-    // filterSizeCoeff is reduced by pow(filterErrorReductionCoeff, fC)
-    filterErrorReductionCoeff               0.5;
-
-    // Maximum number of filterCount applications before a face
-    // is not attempted to be filtered
-    filterCountSkipThreshold                4;
-
-    // Maximum number of permissible iterations of the face collapse
-    // algorithm.  The value to choose will be related the maximum number
-    // of points on a face that is to be collapsed and how many faces
-    // around it need to be collapsed.
-    maxCollapseIterations                   25;
-
-    // Maximum number of times an to allow an equal faceSet to be
-    // returned from the face quality assessment before stopping iterations
-    // to break an infinitie loop.
-    maxConsecutiveEqualFaceSets             5;
-    // Remove little steps (almost perp to surface) by collapsing face.
-    surfaceStepFaceAngle                    80;
-    // Do not collapse face to edge if should become edges
-    edgeCollapseGuardFraction               0.3;
-    // Only collapse face to point if high aspect ratio
-    maxCollapseFaceToPointSideLengthCoeff   0.35;
-
-    // Write the tet-dual mesh for post-processing
-    writeTetDualMesh                        yes;
+    filterEdges                 on;
+    filterFaces                 on;
+    writeTetDualMesh            false;
 }
 
 

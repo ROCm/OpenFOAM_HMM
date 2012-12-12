@@ -20,8 +20,8 @@ FoamFile
     walls
     {
         type            wall;
-        nFaces          116;
-        startFace       155;
+        nFaces          126;
+        startFace       207;
     }
 )
 

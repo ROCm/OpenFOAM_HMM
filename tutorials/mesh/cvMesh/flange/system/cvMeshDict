@@ -117,37 +117,20 @@ motionControl
 {
     defaultCellSize     0.001;
 
-    //cellShapeControl    constantControl;
-    //cellShapeControl    fileControl;
-    cellShapeControl    surfaceControl;
-
-    constantControlCoeffs
-    {
-        cellSize      0.05;
-        cellAlignment (1 1 0 0 1 0 0 1 1);
-    }
-
-    fileControlCoeffs
-    {
-        pointFile       "";
-        sizesFile       "";
-        alignmentsFile  "";
-    }
-
-    surfaceControlCoeffs
-    //cellSizeControlGeometry
+    shapeControlFunctions
     {
         flange.obj
         {
-            priority            1;
-            mode                inside;
+            type                    searchableSurfaceControl;
+            priority                1;
+            mode                    inside;
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     0.001;
+                surfaceCellSize     $defaultCellSize;
             }
 
-            cellSizeFunction    uniform;
+            cellSizeFunction        uniform;
             uniformCoeffs{}
         }
     }
@@ -170,7 +153,7 @@ motionControl
 
     timeChecks                  no;
 
-    maxLoadUnbalance            0.05;
+    maxLoadUnbalance            0.2;
 
     alignmentSearchSpokes       36;
 
@@ -203,7 +186,7 @@ motionControl
 polyMeshFiltering
 {
     filterEdges                 on;
-    filterFaces                 on;
+    filterFaces                 off;
     writeTetDualMesh            false;
 }
 

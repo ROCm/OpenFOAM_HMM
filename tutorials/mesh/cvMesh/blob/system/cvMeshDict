@@ -125,34 +125,18 @@ motionControl
 {
     defaultCellSize     0.1;
 
-    //cellShapeControl    constantControl;
-    //cellShapeControl    fileControl;
-    cellShapeControl    surfaceControl;
-
-    constantControlCoeffs
-    {
-        cellSize      $defaultCellSize;
-        cellAlignment (1 1 0 0 1 0 0 1 1);
-    }
-
-    fileControlCoeffs
-    {
-        pointFile       "alignmentPoints";
-        sizesFile       "alignmentSizes";
-        alignmentsFile  "alignmentTensors";
-    }
-
-    surfaceControlCoeffs
+    shapeControlFunctions
     {
         blob.stl
         {
-            priority            1;
-            mode                bothSides;
+            type                    searchableSurfaceControl;
+            priority                1;
+            mode                    bothSides;
 
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize 0.1;
+                surfaceCellSize     $defaultCellSize;
             }
 
             cellSizeFunction        uniform;

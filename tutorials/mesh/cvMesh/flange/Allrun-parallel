@@ -18,8 +18,9 @@ runApplication subsetMesh background -patch walls -overwrite
 runApplication decomposePar
 
 runParallel cvMesh $nProc
+runParallel collapseEdges $nProc -latestTime -collapseFaces
 runParallel checkMesh $nProc -latestTime -allTopology -allGeometry
 
-runApplication reconstructParMesh -constant
+runApplication reconstructParMesh -latestTime
 
 # ----------------------------------------------------------------- end-of-file

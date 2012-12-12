@@ -17,42 +17,36 @@ FoamFile
     local           "";
 
     class           dictionary;
-    object          controlDict;
+    object          collapseDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     cvMesh;
+collapseEdgesCoeffs
+{
+    minimumEdgeLength   1e-6;
+    maximumMergeAngle   180;
+    reductionFactor     0.5;
+}
 
-startFrom       startTime;
+collapseFacesCoeffs
+{
+    initialFaceLengthFactor                 0.5;
+    reductionFactor                         0.5;
 
-startTime       0;
+    allowEarlyCollapseToPoint               on;
+    allowEarlyCollapseCoeff                 0.2;
+    guardFraction                           0.1;
+    maxCollapseFaceToPointSideLengthCoeff   0.3;
+}
 
-stopAt          endTime;
-
-endTime         100;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   10;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  10;
-
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable yes;
-
-libs ("libdistributed.so");
+meshQualityCoeffs
+{
+    #include                    "meshQualityDict";
+    maximumIterations           30;
+    maximumSmoothingIterations  1;
+    maxPointErrorCount          5;
+}
 
 
 // ************************************************************************* //
