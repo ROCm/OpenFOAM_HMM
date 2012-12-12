@@ -1638,8 +1638,8 @@ Foam::labelList Foam::backgroundMeshDecomposition::overlapProcessors
 //////
 //////            if (distSqr <= rSqr)
 //////            {
-//////                // If the sphere finds a nearest element of the patch, then it
-//////                // overlaps
+//////                // If the sphere finds a nearest element of the patch,
+//////                // then it overlaps
 ////                sphereOverlapsCandidate[sI] = true;
 //////            }
 ////        }
@@ -1755,8 +1755,8 @@ Foam::labelList Foam::backgroundMeshDecomposition::overlapProcessors
 ////
 ////            if (distSqr <= rSqr)
 ////            {
-////                // If the sphere finds a nearest element of the patch, then it
-////                // overlaps
+////                // If the sphere finds a nearest element of the patch, then
+////                // it overlaps
 //                sphereOverlapsCandidate[sI] = true;
 ////            }
 //        }

@@ -61,7 +61,13 @@ Foam::fileControl::fileControl
     const conformationSurfaces& allGeometry
 )
 :
-    cellSizeAndAlignmentControl(runTime, name, controlFunctionDict, allGeometry),
+    cellSizeAndAlignmentControl
+    (
+        runTime,
+        name,
+        controlFunctionDict,
+        allGeometry
+    ),
     pointsFile_(controlFunctionDict.lookup("pointsFile")),
     sizesFile_(controlFunctionDict.lookup("sizesFile")),
     alignmentsFile_(controlFunctionDict.lookup("alignmentsFile"))

@@ -161,7 +161,13 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     const conformationSurfaces& allGeometry
 )
 :
-    cellSizeAndAlignmentControl(runTime, name, controlFunctionDict, allGeometry),
+    cellSizeAndAlignmentControl
+    (
+        runTime,
+        name,
+        controlFunctionDict,
+        allGeometry
+    ),
     searchableSurface_(allGeometry.geometry()[name]),
     allGeometry_(allGeometry),
     cellSizeFunction_
@@ -194,7 +200,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
 //            surfacesDict.subDict(iter().keyword())
 //        );
 //
-//        // If the "surface" keyword is not found in the dictionary, assume that
+//        // If the "surface" keyword is not found in the dictionary, assume
 //        // the name of the dictionary is the surface. Distinction required to
 //        // allow the same surface to be used multiple times to supply multiple
 //        // cellSizeFunctions
@@ -370,8 +376,8 @@ Foam::searchableSurfaceControl::~searchableSurfaceControl()
 ////    cartesianDirections[2] = vector(1,0,0);
 ////
 ////    // Rearrange each alignment tensor so that the x/y/z components are
-////    // in order of whichever makes the smallest angle with the global coordinate
-////    // system
+////    // in order of whichever makes the smallest angle with the global
+////    // coordinate system
 ////    FixedList<tensor, 4> alignments;
 ////
 ////    forAll(alignments, aI)
@@ -402,51 +408,69 @@ Foam::searchableSurfaceControl::~searchableSurfaceControl()
 ////
 ////        if (mag(axx) >= minAngle)
 ////        {
-////            tmpA.xx() = mag(a.xx()); tmpA.xy() = mag(a.xy()); tmpA.xz() = mag(a.xz());
+////            tmpA.xx() = mag(a.xx());
+////            tmpA.xy() = mag(a.xy());
+////            tmpA.xz() = mag(a.xz());
 ////            minAngle = mag(axx);
 ////        }
 ////        if (mag(axy) >= minAngle)
 ////        {
-////            tmpA.xx() = mag(a.yx()); tmpA.xy() = mag(a.yy()); tmpA.xz() = mag(a.yz());
+////            tmpA.xx() = mag(a.yx());
+////            tmpA.xy() = mag(a.yy());
+////            tmpA.xz() = mag(a.yz());
 ////            minAngle = mag(axy);
 ////        }
 ////        if (mag(axz) >= minAngle)
 ////        {
-////            tmpA.xx() = mag(a.zx()); tmpA.xy() = mag(a.zy()); tmpA.xz() = mag(a.zz());
+////            tmpA.xx() = mag(a.zx());
+////            tmpA.xy() = mag(a.zy());
+////            tmpA.xz() = mag(a.zz());
 ////        }
 ////
 ////        minAngle = 0;
 ////
 ////        if (mag(ayx) >= minAngle)
 ////        {
-////            tmpA.yx() = mag(a.xx()); tmpA.yy() = mag(a.xy()); tmpA.yz() = mag(a.xz());
+////            tmpA.yx() = mag(a.xx());
+////            tmpA.yy() = mag(a.xy());
+////            tmpA.yz() = mag(a.xz());
 ////            minAngle = mag(ayx);
 ////        }
 ////        if (mag(ayy) >= minAngle)
 ////        {
-////            tmpA.yx() = mag(a.yx()); tmpA.yy() = mag(a.yy()); tmpA.yz() = mag(a.yz());
+////            tmpA.yx() = mag(a.yx());
+////            tmpA.yy() = mag(a.yy());
+////            tmpA.yz() = mag(a.yz());
 ////            minAngle = mag(ayy);
 ////        }
 ////        if (mag(ayz) >= minAngle)
 ////        {
-////            tmpA.yx() = mag(a.zx()); tmpA.yy() = mag(a.zy()); tmpA.yz() = mag(a.zz());
+////            tmpA.yx() = mag(a.zx());
+////            tmpA.yy() = mag(a.zy());
+////            tmpA.yz() = mag(a.zz());
 ////        }
 ////
 ////        minAngle = 0;
 ////
 ////        if (mag(azx) >= minAngle)
 ////        {
-////            tmpA.zx() = mag(a.xx()); tmpA.zy() = mag(a.xy()); tmpA.zz() = mag(a.xz());
+////            tmpA.zx() = mag(a.xx());
+////            tmpA.zy() = mag(a.xy());
+////            tmpA.zz() = mag(a.xz());
 ////            minAngle = mag(azx);
 ////        }
 ////        if (mag(azy) >= minAngle)
 ////        {
-////            tmpA.zx() = mag(a.yx()); tmpA.zy() = mag(a.yy()); tmpA.zz() = mag(a.yz());
+////            tmpA.zx() = mag(a.yx());
+////            tmpA.zy() = mag(a.yy());
+////            tmpA.zz() = mag(a.yz());
 ////            minAngle = mag(azy);
 ////        }
 ////        if (mag(azz) >= minAngle)
 ////        {
-////            tmpA.zx() = mag(a.zx()); tmpA.zy() = mag(a.zy()); tmpA.zz() = mag(a.zz());
+////            tmpA.zx() = mag(a.zx());
+////            tmpA.zy() = mag(a.zy());
+////            tmpA.zz() = mag(a.zz());
 ////        }
 ////
 ////        alignments[aI] = tmpA;
@@ -464,7 +488,8 @@ Foam::searchableSurfaceControl::~searchableSurfaceControl()
 ////        qAlignments[aI] = quaternion(alignments[aI]);
 ////        qAlignments[aI].normalize();
 //////        Info<< "        Quaternion: " << qAlignments[aI] << endl;
-//////        Info<< "        Rot tensor from quat: " << qAlignments[aI].R() << endl;
+//////        Info<< "        Rot tensor from quat: " << qAlignments[aI].R()
+//////            << endl;
 ////    }
 //
 //    tensor alignment = Foam::tensor::zero;
@@ -491,10 +516,12 @@ Foam::searchableSurfaceControl::~searchableSurfaceControl()
 ////              + qAlignments[2]*bary[2]
 ////              + qAlignments[3]*bary[3];
 //
-////    alignment = slerp(qAlignments[0], qAlignments[1], bary[0]+bary[1]+bary[2]);
+////    alignment =
+////        slerp(qAlignments[0], qAlignments[1], bary[0]+bary[1]+bary[2]);
 ////    alignment = slerp(alignment, qAlignments[2], bary[0]+bary[1]+bary[2]);
 ////    alignment = slerp(alignment, qAlignments[3], bary[0]+bary[1]+bary[2]);
-////    alignment = slerp(alignment, qAlignments[0], bary[0]/(bary[0]+bary[1]+bary[2]));
+////    alignment =
+////        slerp(alignment, qAlignments[0], bary[0]/(bary[0]+bary[1]+bary[2]));
 //
 ////    Info<< "    Interp alignment : " << alignment << endl;
 ////    Info<< "    Interp rot tensor: " << alignment.R() << endl;

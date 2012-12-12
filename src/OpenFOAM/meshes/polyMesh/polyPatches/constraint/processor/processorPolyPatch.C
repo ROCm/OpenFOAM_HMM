@@ -543,9 +543,9 @@ void Foam::processorPolyPatch::initOrder
 
             pointField anchors(getAnchorPoints(pp, ppPoints, transform()));
 
-            // Get the average of the points of each face. This is needed in case
-            // the face centroid calculation is incorrect due tothe  face having a
-            // very high aspect ratio.
+            // Get the average of the points of each face. This is needed in
+            // case the face centroid calculation is incorrect due to the face
+            // having a very high aspect ratio.
             pointField facePointAverages(pp.size(), point::zero);
             forAll(pp, fI)
             {
@@ -986,7 +986,8 @@ bool Foam::processorPolyPatch::order
 
                 Pout<< "processorPolyPatch::order :"
                     << " Dumping newly found match as lines between"
-                    << " corresponding face centres to OBJ file " << ccStr.name()
+                    << " corresponding face centres to OBJ file "
+                    << ccStr.name()
                     << endl;
 
                 label vertI = 0;
@@ -1015,10 +1016,10 @@ bool Foam::processorPolyPatch::order
                     << endl
                     << "    masterCtrs[0]:" << masterCtrs[0] << endl
                     << "    ctrs[0]:" << pp.faceCentres()[0] << endl
-                    << "    Please check your topology changes or maybe you have"
+                    << "    Check your topology changes or maybe you have"
                     << " multiple separated (from cyclics) processor patches"
                     << endl
-                    << "    Continuing with incorrect face ordering from now on!"
+                    << "    Continuing with incorrect face ordering from now on"
                     << endl;
 
                 return false;
@@ -1027,9 +1028,9 @@ bool Foam::processorPolyPatch::order
             // Set rotation.
             forAll(faceMap, oldFaceI)
             {
-                // The face f will be at newFaceI (after morphing) and we want its
-                // anchorPoint (= f[0]) to align with the anchorpoint for the
-                // corresponding face on the other side.
+                // The face f will be at newFaceI (after morphing) and we want
+                // its anchorPoint (= f[0]) to align with the anchorpoint for
+                // the corresponding face on the other side.
 
                 label newFaceI = faceMap[oldFaceI];
 
@@ -1055,8 +1056,9 @@ bool Foam::processorPolyPatch::order
                         << " with vertices "
                         << UIndirectList<point>(pp.points(), pp[oldFaceI])()
                         << " that matches point " << wantedAnchor
-                        << " when matching the halves of processor patch " << name()
-                        << "Continuing with incorrect face ordering from now on!"
+                        << " when matching the halves of processor patch "
+                        << name()
+                        << "Continuing with incorrect face ordering from now on"
                         << endl;
 
                     return false;

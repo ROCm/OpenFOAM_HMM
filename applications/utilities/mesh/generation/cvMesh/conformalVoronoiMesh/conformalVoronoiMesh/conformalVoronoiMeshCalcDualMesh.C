@@ -81,10 +81,10 @@ void Foam::conformalVoronoiMesh::checkCells()
         inplaceReorder(oldToNew, cellVerticesPair);
         inplaceReorder(oldToNew, cellVertices);
 
-//        Pout<< "old " << cellVerticesOld << nl << "new " << cellVertices << endl;
-
-//
-//        FixedList<label, 4> globalTetCell(cit->globallyOrderedCellVertices(gIndex));
+//        FixedList<label, 4> globalTetCell
+//        (
+//            cit->globallyOrderedCellVertices(gIndex)
+//        );
 //
 //        FixedList<Point, 4> cellVertices(Point(0,0,0));
 //
@@ -209,10 +209,11 @@ void Foam::conformalVoronoiMesh::checkDuals()
 
     List<Point> duals(number_of_finite_cells());
 
-    typedef CGAL::Exact_predicates_exact_constructions_kernel   EK2;
-    typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2> EK;
+    typedef CGAL::Exact_predicates_exact_constructions_kernel       EK2;
+    typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2>     EK;
     typedef CGAL::Cartesian_converter<typename baseK::Kernel, EK2>  To_exact;
-    typedef CGAL::Cartesian_converter<EK2, typename baseK::Kernel>  Back_from_exact;
+    typedef CGAL::Cartesian_converter<EK2, typename baseK::Kernel>
+        Back_from_exact;
 
 //    PackedBoolList bPoints(number_of_finite_cells());
 
@@ -370,7 +371,6 @@ void Foam::conformalVoronoiMesh::checkDuals()
                         std::cout<< "master = " << x << " " << y << " " << z
                             << std::endl;
 
-
                         CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
                         CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
                         CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
@@ -390,14 +390,14 @@ void Foam::conformalVoronoiMesh::checkDuals()
                         CGAL::Gmpq y(CGAL::to_double(masterPoint.y()));
                         CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
 
-                        std::cout<< "master = " << x << " " << y << " " << z << endl;
-
+                        std::cout<< "master = " << x << " " << y << " " << z
+                                 << endl;
 
                         CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
                         CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
                         CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
-                        std::cout<< "slave  = " << xs << " " << ys << " " << zs << endl;
-
+                        std::cout<< "slave  = " << xs << " " << ys << " " << zs
+                                 << endl;
                     }
                 }
                 else
@@ -530,7 +530,8 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 //    {
 //        Pout<< nl << "Perfoming some checks . . ." << nl << nl
 //            << "Total number of vertices = " << number_of_vertices() << nl
-//            << "Total number of cells    = " << number_of_finite_cells() << endl;
+//            << "Total number of cells    = " << number_of_finite_cells()
+//            << endl;
 //
 //        checkVertices();
 //        checkCells();
@@ -964,9 +965,12 @@ Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 ////
 ////                if (surfHit.hit())
 ////                {
-////                    pt +=
-////                        (surfHit.hitPoint() - pt)
-////                       *pow(cvMeshControls().filterErrorReductionCoeff(), fC);
+////                    pt += (surfHit.hitPoint() - pt)
+////                         *pow
+////                          (
+////                              cvMeshControls().filterErrorReductionCoeff(),
+////                              fC
+////                          );
 ////                }
 ////            }
 ////        }
@@ -1112,8 +1116,8 @@ Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 ////            }
 //
 //
-////            if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
-////            {
+//            if ((faceNormal & surfaceNormal) < cosPerpendicularToleranceAngle)
+//            {
 //                scalar targetFaceSize = averageAnyCellSize(vA, vB);
 //
 //                // Selecting faces to collapse based on angle to
@@ -1135,7 +1139,7 @@ Foam::label Foam::conformalVoronoiMesh::mergeIdenticalDualVertices
 //                {
 //                    nCollapsedFaces++;
 //                }
-////            }
+//            }
 //        }
 //    }
 //

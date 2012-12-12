@@ -574,9 +574,17 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
                     Info<< indent
                         << "Collapsing " << nCollapsed << " faces"
                         << " (to point = "
-                        << returnReduce(nCollapsedPtEdge.first(), sumOp<label>())
+                        << returnReduce
+                           (
+                               nCollapsedPtEdge.first(),
+                               sumOp<label>()
+                           )
                         << ", to edge = "
-                        << returnReduce(nCollapsedPtEdge.second(), sumOp<label>())
+                        << returnReduce
+                           (
+                               nCollapsedPtEdge.second(),
+                               sumOp<label>()
+                           )
                         << ")" << endl;
 
                     if (nCollapsed == 0)

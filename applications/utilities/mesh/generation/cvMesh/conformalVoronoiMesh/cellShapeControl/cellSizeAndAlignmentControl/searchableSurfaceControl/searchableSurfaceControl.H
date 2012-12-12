@@ -54,7 +54,8 @@ class searchableSurfaceControl
 {
     // Private data
 
-//        //- Reference to the searchableSurfaces object holding all geometry data
+          //- Reference to the searchableSurface object holding the geometry
+          //  data
           const searchableSurface& searchableSurface_;
 
           const conformationSurfaces& allGeometry_;
@@ -115,8 +116,8 @@ public:
 
         // Access
 
-//            //- Return reference to the searchableSurfaces object containing all
-//            //  of the geometry
+//            //- Return reference to the searchableSurfaces object containing
+//            //  all of the geometry
 //            inline const searchableSurfaces& geometry() const;
 //
 //            //- Return the surface indices

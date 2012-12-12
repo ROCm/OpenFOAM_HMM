@@ -121,21 +121,6 @@ void Foam::DelaunayMesh<Triangulation>::addPatches
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-//template<class Triangulation>
-//Foam::DelaunayMesh<Triangulation>::DelaunayMesh(Istream& is)
-//:
-//    base1(is),
-//    base2(is),
-//    member1(is),
-//    member2(is)
-//{
-//    // Check state of Istream
-//    is.check("Foam::DelaunayMesh<Triangulation>::DelaunayMesh(Foam::Istream&)");
-//}
-
-
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 template<class Triangulation>

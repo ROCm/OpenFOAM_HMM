@@ -291,8 +291,8 @@ public:
         ) const;
 
 //        //- Which processors overlap the given sphere, returns all processors
-//        //  whose boundary patch is touched by the sphere or whom the sphere is
-//        //  inside.  By default this does not return the processor that the
+//        //  whose boundary patch is touched by the sphere or whom the sphere
+//        //  is inside.  By default this does not return the processor that the
 //        //  query is launched from, it is assumed that the point is on that
 //        //  processor.
 //        labelListList overlapsProcessors
