@@ -47,6 +47,52 @@ const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+void Foam::conformalVoronoiMesh::cellSizeMeshOverlapsBackground() const
+{
+    const cellShapeControlMesh& cellSizeMesh =
+        cellShapeControl_.shapeControlMesh();
+
+    DynamicList<Foam::point> pts(number_of_vertices());
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            pts.append(topoint(vit->point()));
+        }
+    }
+
+    boundBox bb(pts);
+
+    boundBox cellSizeMeshBb = cellSizeMesh.bounds();
+
+    bool fullyContained = true;
+
+    if (!cellSizeMeshBb.contains(bb))
+    {
+        Pout<< "Triangulation not fully contained in cell size mesh."
+            << endl;
+
+        Pout<< "Cell Size Mesh Bounds = " << cellSizeMesh.bounds() << endl;
+        Pout<< "cvMesh Bounds         = " << bb << endl;
+
+        fullyContained = false;
+    }
+
+    reduce(fullyContained, andOp<unsigned int>());
+
+    Info<< "Triangulation is "
+        << (fullyContained ? "fully" : "not fully")
+        << " contained in the cell size mesh"
+        << endl;
+}
+
+
 Foam::scalar Foam::conformalVoronoiMesh::requiredSize
 (
     const Foam::point& pt
@@ -841,8 +887,6 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         label nAdded = cellShapeControl_.refineMesh(decomposition_);
         reduce(nAdded, sumOp<label>());
 
-//        label nRemoved = cellShapeControl_.shapeControlMesh().removePoints();
-
         if (Pstream::parRun())
         {
             cellSizeMesh.distribute(decomposition_);
@@ -1040,7 +1084,7 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
                 vit->alignment()
             );
 
-//            vit->alignment() = tensor(1,0,0,0,1,0,0,0,1);
+            //vit->alignment() = tensor(1,0,0,0,1,0,0,0,1);
             //vit->alignment() = requiredAlignment(pt);
 
             //vit->targetCellSize() = cellShapeControls().cellSize(pt);
@@ -1068,7 +1112,11 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
     do
     {
-        if (cc1->hasFarPoint() || cc2->hasFarPoint())
+        if
+        (
+            cc1->hasFarPoint() || cc2->hasFarPoint()
+         || is_infinite(cc1) || is_infinite(cc2)
+        )
         {
             Cell_handle c = eit->first;
             Vertex_handle vA = c->vertex(eit->second);
@@ -1352,51 +1400,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     setVertexSizeAndAlignment();
 
-    // Test for full containment
-    {
-        cellShapeControlMesh& cellSizeMesh =
-            cellShapeControl_.shapeControlMesh();
-
-        DynamicList<Foam::point> pts(number_of_vertices());
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            ++vit
-        )
-        {
-            if (vit->internalOrBoundaryPoint())
-            {
-                pts.append(topoint(vit->point()));
-            }
-        }
-
-        boundBox bb(pts);
-
-        boundBox cellSizeMeshBb = cellSizeMesh.bounds();
-
-        bool fullyContained = true;
-
-        if (!cellSizeMeshBb.contains(bb))
-        {
-            Pout<< "Triangulation not fully contained in cell size mesh."
-                << endl;
-
-            Pout<< "Cell Size Mesh Bounds = " << cellSizeMesh.bounds() << endl;
-            Pout<< "cvMesh Bounds         = " << bb << endl;
-
-            fullyContained = false;
-        }
-
-        reduce(fullyContained, andOp<unsigned int>());
-
-        Info<< "Triangulation is "
-            << (fullyContained ? "fully" : "not fully")
-            << " contained in the cell size mesh"
-            << endl;
-    }
-
+    cellSizeMeshOverlapsBackground();
 
     // Improve the guess that the backgroundMeshDecomposition makes with the
     // initial positions.  Use before building the surface conformation to
@@ -1409,6 +1413,11 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     // balance of vertices, distribute if necessary.
     distributeBackground();
 
+    if (Pstream::parRun())
+    {
+        sync(decomposition_().procBounds());
+    }
+
     // Do not store the surface conformation until after it has been
     // (potentially) redistributed.
     storeSurfaceConformation();
@@ -1420,6 +1429,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     // Report any Delaunay vertices that do not think that they are in the
     // domain the processor they are on.
     // reportProcessorOccupancy();
+
+    cellSizeMeshOverlapsBackground();
 
     printVertexInfo();
 
@@ -1655,6 +1666,10 @@ void Foam::conformalVoronoiMesh::move()
                     vector delta = alignmentDir - 0.5*rAB;
 
                     face dualFace = buildDualFace(eit);
+
+//                    Pout<< dualFace << endl;
+//                    Pout<< "    " << vA->info() << endl;
+//                    Pout<< "    " << vB->info() << endl;
 
                     const scalar faceArea = dualFace.mag(dualVertices);
 
@@ -1892,7 +1907,7 @@ void Foam::conformalVoronoiMesh::move()
 
     insertInternalPoints(pointsToInsert, true);
 
-    reinsertFeaturePoints(false);
+    reinsertFeaturePoints(true);
 
     // Remove internal points that have been inserted outside the surface.
 //    label internalPtIsOutside = 0;

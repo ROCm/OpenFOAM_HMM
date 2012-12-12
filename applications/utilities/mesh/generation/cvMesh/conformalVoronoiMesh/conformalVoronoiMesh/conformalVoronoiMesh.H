@@ -504,6 +504,9 @@ private:
         //  referred vertices, so the parallel interface may need rebuilt.
         bool distributeBackground();
 
+        // Test for full containment
+        void cellSizeMeshOverlapsBackground() const;
+
         //-
         void distribute();
 

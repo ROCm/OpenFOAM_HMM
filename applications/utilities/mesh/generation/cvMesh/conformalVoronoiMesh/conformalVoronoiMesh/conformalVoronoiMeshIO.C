@@ -414,7 +414,7 @@ void Foam::conformalVoronoiMesh::writeProcessorInterface
         ++cit
     )
     {
-        if (!cit->hasFarPoint())
+        if (!cit->hasFarPoint() && !is_infinite(cit))
         {
             points[cit->cellIndex()] = cit->dual();
         }
