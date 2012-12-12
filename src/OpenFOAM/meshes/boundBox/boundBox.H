@@ -225,9 +225,10 @@ public:
                 const FixedList<label, Size>& indices
             ) const;
 
-            //- Distance of a point from the box.
-            //   Return 0 if inside.
-            scalar distanceFromBoxSqr(const point&) const;
+            //- Return the nearest point on the boundBox to the supplied point.
+            //  If point is inside the boundBox then the point is returned
+            //  unchanged.
+            point nearest(const point&) const;
 
 
     // Friend Operators

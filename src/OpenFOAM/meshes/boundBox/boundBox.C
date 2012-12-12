@@ -300,21 +300,14 @@ bool Foam::boundBox::containsAny
 }
 
 
-Foam::scalar Foam::boundBox::distanceFromBoxSqr(const point& pt) const
+Foam::point Foam::boundBox::nearest(const point& pt) const
 {
-    if (contains(pt))
-    {
-        return 0;
-    }
-
     // Clip the point to the range of the bounding box
     const scalar surfPtx = Foam::max(Foam::min(pt.x(), max_.x()), min_.x());
     const scalar surfPty = Foam::max(Foam::min(pt.y(), max_.y()), min_.y());
     const scalar surfPtz = Foam::max(Foam::min(pt.z(), max_.z()), min_.z());
 
-    const point surfacePt(surfPtx, surfPty, surfPtz);
-
-    return magSqr(pt - surfacePt);
+    return point(surfPtx, surfPty, surfPtz);
 }
 
 
