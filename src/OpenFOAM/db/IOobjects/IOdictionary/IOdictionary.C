@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,12 +29,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::IOdictionary, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(IOdictionary, 0);
 
-bool Foam::IOdictionary::writeDictionaries
+bool IOdictionary::writeDictionaries
 (
-    Foam::debug::infoSwitch("writeDictionaries", 0)
+    debug::infoSwitch("writeDictionaries", 0)
 );
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

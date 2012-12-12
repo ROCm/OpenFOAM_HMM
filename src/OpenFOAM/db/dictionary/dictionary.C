@@ -31,9 +31,11 @@ License
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
-defineTypeNameAndDebug(Foam::dictionary, 0);
-
-const Foam::dictionary Foam::dictionary::null;
+namespace Foam
+{
+defineTypeNameAndDebug(dictionary, 0);
+const dictionary dictionary::null;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

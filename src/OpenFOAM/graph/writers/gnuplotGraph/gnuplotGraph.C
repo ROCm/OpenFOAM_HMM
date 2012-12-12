@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::gnuplotGraph, 0);
-const Foam::word Foam::gnuplotGraph::ext_("gplt");
-
 namespace Foam
 {
+    defineTypeNameAndDebug(gnuplotGraph, 0);
+    const word gnuplotGraph::ext_("gplt");
+
     typedef graph::writer graphWriter;
     addToRunTimeSelectionTable(graphWriter, gnuplotGraph, word);
 }

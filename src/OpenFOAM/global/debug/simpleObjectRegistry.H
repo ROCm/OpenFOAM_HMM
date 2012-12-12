@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,40 +21,54 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::simpleObjectRegistry
+
+Description
+    Object registry for simpleRegIOobject
+
+SourceFiles
+
 \*---------------------------------------------------------------------------*/
 
-#include "jplotGraph.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef simpleObjectRegistry_H
+#define simpleObjectRegistry_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "HashTable.H"
+#include "simpleRegIOobject.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(jplotGraph, 0);
-    const word jplotGraph::ext_("dat");
 
-    typedef graph::writer graphWriter;
-    addToRunTimeSelectionTable(graphWriter, jplotGraph, word);
-}
+/*---------------------------------------------------------------------------*\
+                         Class simpleObjectRegistry Declaration
+\*---------------------------------------------------------------------------*/
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::jplotGraph::write(const graph& g, Ostream& os) const
+class simpleObjectRegistry
+:
+    public HashTable<simpleRegIOobject*>
 {
-    os  << "# JPlot file" << nl
-        << "# column 1: " << g.xName() << endl;
+public:
 
-    label fieldI = 0;
+    // Constructors
 
-    forAllConstIter(graph, g, iter)
-    {
-        os  << "# column " << fieldI + 2 << ": " << (*iter()).name() << endl;
-        fieldI++;
-    }
+        //- Construct from initial estimate
+        simpleObjectRegistry(const label nIoObjects = 128)
+        :
+            HashTable<simpleRegIOobject*>(nIoObjects)
+        {}
 
-    g.writeTable(os);
-}
+};
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

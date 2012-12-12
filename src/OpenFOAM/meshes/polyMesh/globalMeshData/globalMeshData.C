@@ -41,13 +41,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::globalMeshData, 0);
-
-// Geometric matching tolerance. Factor of mesh bounding box.
-const Foam::scalar Foam::globalMeshData::matchTol_ = 1e-8;
-
 namespace Foam
 {
+defineTypeNameAndDebug(globalMeshData, 0);
+
+// Geometric matching tolerance. Factor of mesh bounding box.
+const scalar globalMeshData::matchTol_ = 1e-8;
+
 template<>
 class minEqOp<labelPair>
 {

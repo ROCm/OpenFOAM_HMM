@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::lduMatrix, 1);
+namespace Foam
+{
+defineTypeNameAndDebug(lduMatrix, 1);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
