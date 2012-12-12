@@ -217,9 +217,13 @@ public:
 
             // Addressing
 
+                //- Return true if patchI on the local region is a coupled
+                //  patch to the primary region
+                inline bool isCoupledPatch(const label regionPatchI) const;
+
                 //- Return true if patchI on the primary region is a coupled
                 //  patch to the local region
-                inline bool isRegionPatch(const label patchI) const;
+                inline bool isRegionPatch(const label primaryPatchI) const;
 
                 //- Return the list of patch IDs on the primary region coupled
                 //  to this region
