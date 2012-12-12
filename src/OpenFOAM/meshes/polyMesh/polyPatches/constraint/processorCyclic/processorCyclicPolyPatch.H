@@ -275,6 +275,20 @@ public:
             return referPatch().owner();
         }
 
+        //- Type of transform
+        virtual transformType transform() const
+        {
+            return referPatch().transform();
+        }
+
+        //- Type of transform
+        //  This is currently only for use when collapsing generated
+        //  meshes that can have zero area faces.
+        virtual transformType& transform()
+        {
+            return const_cast<coupledPolyPatch&>(referPatch()).transform();
+        }
+
         //- Transform a patch-based position from other side to this side
         virtual void transformPosition(pointField& l) const
         {

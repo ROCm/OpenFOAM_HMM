@@ -254,7 +254,7 @@ public:
             }
 
             //- Type of transform
-            transformType transform() const
+            virtual transformType transform() const
             {
                 return transform_;
             }
@@ -262,7 +262,7 @@ public:
             //- Type of transform
             //  This is currently only for use when collapsing generated
             //  meshes that can have zero area faces.
-            transformType& transform()
+            virtual transformType& transform()
             {
                 return transform_;
             }
