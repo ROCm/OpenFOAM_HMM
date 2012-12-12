@@ -25,13 +25,15 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
+#include "simpleRegIOobject.H"
+#include "demandDrivenData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
 dictionary* dimensionSystemsPtr_(NULL);
 
@@ -45,10 +47,34 @@ dictionary& dimensionSystems()
 }
 
 
-/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
-
 autoPtr<HashTable<dimensionedScalar> > unitSetPtr_;
 autoPtr<dimensionSets> writeUnitSetPtr_;
+
+class addDimensionSetsToDebug
+:
+    public ::Foam::simpleRegIOobject
+{
+public:
+    addDimensionSetsToDebug(const char* name)
+    :
+        ::Foam::simpleRegIOobject(Foam::debug::addDimensionSetObject, name)
+    {}
+    virtual ~addDimensionSetsToDebug()
+    {}
+    virtual void readData(Foam::Istream& is)
+    {
+        deleteDemandDrivenData(dimensionSystemsPtr_);
+        unitSetPtr_.clear();
+        writeUnitSetPtr_.clear();
+        dimensionSystemsPtr_ = new dictionary(is);
+    }
+    virtual void writeData(Foam::Ostream& os) const
+    {
+        os << dimensionSystems();
+    }
+};
+addDimensionSetsToDebug addDimensionSetsToDebug_("DimensionSets");
+
 
 
 const HashTable<dimensionedScalar>& unitSet()
