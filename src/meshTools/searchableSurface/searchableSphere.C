@@ -167,6 +167,12 @@ Foam::searchableSphere::~searchableSphere()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::searchableSphere::overlaps(const boundBox& bb) const
+{
+    return bb.overlaps(centre_, sqr(radius_));
+}
+
+
 const Foam::wordList& Foam::searchableSphere::regions() const
 {
     if (regions_.empty())

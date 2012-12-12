@@ -30,16 +30,11 @@ const Foam::fvMesh& Foam::backgroundMeshDecomposition::mesh() const
     return mesh_;
 }
 
+
 const Foam::indexedOctree<Foam::treeDataBPatch>&
 Foam::backgroundMeshDecomposition::tree() const
 {
     return bFTreePtr_();
-}
-
-const Foam::List<Foam::scalar>&
-Foam::backgroundMeshDecomposition::octreeNearestDistances() const
-{
-    return octreeNearestDistances_;
 }
 
 

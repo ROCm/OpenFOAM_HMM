@@ -53,7 +53,7 @@ Foam::radiation::radiationModel::New
         Info<< "Radiation model not active: radiationProperties not found"
             << endl;
     }
-    
+
     Info<< "Selecting radiationModel " << modelType << endl;
 
     TConstructorTable::iterator cstrIter =

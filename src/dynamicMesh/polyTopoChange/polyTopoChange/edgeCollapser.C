@@ -26,102 +26,1121 @@ License
 #include "edgeCollapser.H"
 #include "polyMesh.H"
 #include "polyTopoChange.H"
-#include "ListOps.H"
 #include "globalMeshData.H"
-#include "OFstream.H"
-#include "meshTools.H"
 #include "syncTools.H"
+#include "PointEdgeWave.H"
+#include "globalIndex.H"
+#include "removePoints.H"
+#include "motionSmoother.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::label Foam::edgeCollapser::findIndex
+Foam::label Foam::edgeCollapser::longestEdge
 (
-    const labelList& elems,
-    const label start,
-    const label size,
-    const label val
+    const face& f,
+    const pointField& pts
 )
 {
-    for (label i = start; i < size; i++)
+    const edgeList& eds = f.edges();
+
+    label longestEdgeI = -1;
+    scalar longestEdgeLength = -SMALL;
+
+    forAll(eds, edI)
     {
-        if (elems[i] == val)
+        scalar edgeLength = eds[edI].mag(pts);
+
+        if (edgeLength > longestEdgeLength)
         {
-            return i;
+            longestEdgeI = edI;
+            longestEdgeLength = edgeLength;
         }
     }
-    return -1;
+
+    return longestEdgeI;
+}
+
+
+Foam::HashSet<Foam::label> Foam::edgeCollapser::checkBadFaces
+(
+    const polyMesh& mesh,
+    const dictionary& meshQualityDict
+)
+{
+    labelHashSet badFaces(mesh.nFaces()/100);
+    DynamicList<label> checkFaces(mesh.nFaces());
+
+    const vectorField& fAreas = mesh.faceAreas();
+
+    scalar faceAreaLimit = SMALL;
+
+    forAll(fAreas, fI)
+    {
+        if (mag(fAreas[fI]) > faceAreaLimit)
+        {
+            checkFaces.append(fI);
+        }
+    }
+
+    Info<< endl;
+
+    motionSmoother::checkMesh
+    (
+        false,
+        mesh,
+        meshQualityDict,
+        checkFaces,
+        badFaces
+    );
+
+    return badFaces;
+}
+
+
+Foam::label Foam::edgeCollapser::checkMeshQuality
+(
+    const polyMesh& mesh,
+    const dictionary& meshQualityDict,
+    PackedBoolList& isErrorPoint
+)
+{
+    labelHashSet badFaces = edgeCollapser::checkBadFaces
+    (
+        mesh,
+        meshQualityDict
+    );
+
+    label nBadFaces = returnReduce(badFaces.size(), sumOp<label>());
+
+    forAllConstIter(labelHashSet, badFaces, iter)
+    {
+        const face& f = mesh.faces()[iter.key()];
+
+        forAll(f, pI)
+        {
+            isErrorPoint[f[pI]] = true;
+        }
+    }
+
+    syncTools::syncPointList
+    (
+        mesh,
+        isErrorPoint,
+        orEqOp<unsigned int>(),
+        0
+    );
+
+    return nBadFaces;
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Changes region of connected set of points
-Foam::label Foam::edgeCollapser::changePointRegion
+Foam::labelList Foam::edgeCollapser::edgesFromPoints
 (
-    const label pointI,
-    const label oldRegion,
-    const label newRegion
-)
+    const label& faceI,
+    const labelList& pointLabels
+) const
 {
-    label nChanged = 0;
+    labelList edgeLabels(pointLabels.size() - 1, -1);
 
-    if (pointRegion_[pointI] == oldRegion)
+    const labelList& faceEdges = mesh_.faceEdges()[faceI];
+    const edgeList& edges = mesh_.edges();
+
+    label count = 0;
+
+    forAll(faceEdges, eI)
     {
-        pointRegion_[pointI] = newRegion;
-        nChanged++;
+        const label edgeI = faceEdges[eI];
+        const edge& e = edges[edgeI];
 
-        // Step to neighbouring point across edges with same region number
+        label match = 0;
 
-        const labelList& pEdges = mesh_.pointEdges()[pointI];
-
-        forAll(pEdges, i)
+        forAll(pointLabels, pI)
         {
-            label otherPointI = mesh_.edges()[pEdges[i]].otherVertex(pointI);
+            if (e[0] == pointLabels[pI])
+            {
+                match++;
+            }
 
-            nChanged += changePointRegion(otherPointI, oldRegion, newRegion);
+            if (e[1] == pointLabels[pI])
+            {
+                match++;
+            }
+        }
+
+        if (match == 2)
+        {
+            // Edge found
+            edgeLabels[count++] = edgeI;
         }
     }
-    return nChanged;
+
+    if (count != edgeLabels.size())
+    {
+        edgeLabels.setSize(count);
+    }
+
+    return edgeLabels;
 }
 
 
-bool Foam::edgeCollapser::pointRemoved(const label pointI) const
+void Foam::edgeCollapser::collapseToEdge
+(
+    const label faceI,
+    const pointField& pts,
+    const labelList& pointPriority,
+    const vector& collapseAxis,
+    const point& fC,
+    const labelList& facePtsNeg,
+    const labelList& facePtsPos,
+    const scalarList& dNeg,
+    const scalarList& dPos,
+    const scalar dShift,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation
+) const
 {
-    label region = pointRegion_[pointI];
+    const face& f = mesh_.faces()[faceI];
 
-    if (region == -1 || pointRegionMaster_[region] == pointI)
+    // Negative half
+
+    Foam::point collapseToPtA =
+        collapseAxis*(sum(dNeg)/dNeg.size() - dShift) + fC;
+
+    DynamicList<label> faceBoundaryPts(f.size());
+    DynamicList<label> faceFeaturePts(f.size());
+
+    forAll(facePtsNeg, fPtI)
     {
-        return false;
+        if (pointPriority[facePtsNeg[fPtI]] == 1)
+        {
+            faceFeaturePts.append(facePtsNeg[fPtI]);
+        }
+        else if (pointPriority[facePtsNeg[fPtI]] == 0)
+        {
+            faceBoundaryPts.append(facePtsNeg[fPtI]);
+        }
+    }
+
+    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    {
+        if (!faceFeaturePts.empty())
+        {
+            collapseToPtA = pts[faceFeaturePts.first()];
+        }
+        else if (faceBoundaryPts.size() == 2)
+        {
+            collapseToPtA =
+                0.5
+               *(
+                    pts[faceBoundaryPts[0]]
+                  + pts[faceBoundaryPts[1]]
+                );
+        }
+        else if (faceBoundaryPts.size() <= f.size())
+        {
+            face bFace(faceBoundaryPts);
+
+            collapseToPtA = bFace.centre(pts);
+        }
+    }
+
+    faceFeaturePts.clear();
+    faceBoundaryPts.clear();
+
+    labelList faceEdgesNeg = edgesFromPoints(faceI, facePtsNeg);
+
+    forAll(faceEdgesNeg, edgeI)
+    {
+        collapseEdge[faceEdgesNeg[edgeI]] = true;
+    }
+
+    forAll(facePtsNeg, pI)
+    {
+        collapsePointToLocation.set(facePtsNeg[pI], collapseToPtA);
+    }
+
+
+    // Positive half
+
+    Foam::point collapseToPtB
+        = collapseAxis*(sum(dPos)/dPos.size() - dShift) + fC;
+
+    forAll(facePtsPos, fPtI)
+    {
+        if (pointPriority[facePtsPos[fPtI]] == 1)
+        {
+            faceFeaturePts.append(facePtsPos[fPtI]);
+        }
+        else if (pointPriority[facePtsPos[fPtI]] == 0)
+        {
+            // If there is a point which is on the boundary,
+            // use it as the point to collapse others to, will
+            // use the first boundary point encountered if
+            // there are multiple boundary points.
+            faceBoundaryPts.append(facePtsPos[fPtI]);
+        }
+    }
+
+    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    {
+        if (!faceFeaturePts.empty())
+        {
+            collapseToPtB = pts[faceFeaturePts.first()];
+        }
+        else if (faceBoundaryPts.size() == 2)
+        {
+            collapseToPtB =
+                0.5
+               *(
+                    pts[faceBoundaryPts[0]]
+                  + pts[faceBoundaryPts[1]]
+                );
+        }
+        else if (faceBoundaryPts.size() <= f.size())
+        {
+            face bFace(faceBoundaryPts);
+
+            collapseToPtB = bFace.centre(pts);
+        }
+    }
+
+    labelList faceEdgesPos = edgesFromPoints(faceI, facePtsPos);
+
+    forAll(faceEdgesPos, edgeI)
+    {
+        collapseEdge[faceEdgesPos[edgeI]] = true;
+    }
+
+    forAll(facePtsPos, pI)
+    {
+        collapsePointToLocation.set(facePtsPos[pI], collapseToPtB);
+    }
+}
+
+
+void Foam::edgeCollapser::collapseToPoint
+(
+    const label& faceI,
+    const pointField& pts,
+    const labelList& pointPriority,
+    const point& fC,
+    const labelList& facePts,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation
+) const
+{
+    const face& f = mesh_.faces()[faceI];
+
+    Foam::point collapseToPt = fC;
+
+    DynamicList<label> faceBoundaryPts(f.size());
+    DynamicList<label> faceFeaturePts(f.size());
+
+    forAll(facePts, fPtI)
+    {
+        if (pointPriority[facePts[fPtI]] == 1)
+        {
+            faceFeaturePts.append(facePts[fPtI]);
+        }
+        else if (pointPriority[facePts[fPtI]] == 0)
+        {
+            faceBoundaryPts.append(facePts[fPtI]);
+        }
+    }
+
+    if (!faceBoundaryPts.empty() || !faceFeaturePts.empty())
+    {
+        if (!faceFeaturePts.empty())
+        {
+            collapseToPt = pts[faceFeaturePts.first()];
+        }
+        else if (faceBoundaryPts.size() == 2)
+        {
+            collapseToPt =
+                0.5
+               *(
+                    pts[faceBoundaryPts[0]]
+                  + pts[faceBoundaryPts[1]]
+                );
+        }
+        else if (faceBoundaryPts.size() <= f.size())
+        {
+            face bFace(faceBoundaryPts);
+
+            collapseToPt = bFace.centre(pts);
+        }
+    }
+
+    const labelList faceEdges = mesh_.faceEdges()[faceI];
+
+    forAll(faceEdges, eI)
+    {
+        const label edgeI = faceEdges[eI];
+        collapseEdge[edgeI] = true;
+    }
+
+    forAll(f, pI)
+    {
+        collapsePointToLocation.set(f[pI], collapseToPt);
+    }
+}
+
+
+void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
+(
+    const face& f,
+    const point& fC,
+    vector& collapseAxis,
+    scalar& aspectRatio
+) const
+{
+    const pointField& pts = mesh_.points();
+
+    tensor J = f.inertia(pts, fC);
+
+    // Find the dominant collapse direction by finding the eigenvector
+    // that corresponds to the normal direction, discarding it.  The
+    // eigenvector corresponding to the smaller of the two remaining
+    // eigenvalues is the dominant axis in a high aspect ratio face.
+
+    scalar magJ = mag(J);
+
+    scalar detJ = SMALL;
+
+    if (magJ > VSMALL)
+    {
+        // Normalise inertia tensor to remove problems with small values
+
+        J /= mag(J);
+        // J /= cmptMax(J);
+        // J /= max(eigenValues(J).x(), SMALL);
+
+        // Calculating determinant, including stabilisation for zero or
+        // small negative values
+
+        detJ = max(det(J), SMALL);
+    }
+
+    if (detJ < 1e-5)
+    {
+        collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
+
+        // It is possible that all the points of a face are the same
+        if (magSqr(collapseAxis) > VSMALL)
+        {
+            collapseAxis /= mag(collapseAxis);
+        }
+
+        // Empirical correlation for high aspect ratio faces
+
+        aspectRatio = Foam::sqrt(0.35/detJ);
     }
     else
     {
-        return true;
+        vector eVals = eigenValues(J);
+
+        if (mag(eVals.y() - eVals.x()) < 100*SMALL)
+        {
+            // First two eigenvalues are the same: i.e. a square face
+
+            // Cannot necessarily determine linearly independent
+            // eigenvectors, or any at all, use longest edge direction.
+
+            collapseAxis = f.edges()[longestEdge(f, pts)].vec(pts);
+
+            collapseAxis /= mag(collapseAxis);
+
+            aspectRatio = 1.0;
+        }
+        else
+        {
+            // The maximum eigenvalue (z()) must be the direction of the
+            // normal, as it has the greatest value.  The minimum eigenvalue
+            // is the dominant collapse axis for high aspect ratio faces.
+
+            collapseAxis = eigenVector(J, eVals.x());
+
+            // The inertia calculation describes the mass distribution as a
+            // function of distance squared to the axis, so the square root of
+            // the ratio of face-plane moments gives a good indication of the
+            // aspect ratio.
+
+            aspectRatio = Foam::sqrt(eVals.y()/max(eVals.x(), SMALL));
+        }
     }
 }
 
 
-void Foam::edgeCollapser::filterFace(const label faceI, face& f) const
+Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
+{
+    scalarField targetFaceSizes(mesh_.nFaces(), -1);
+
+    const scalarField& cellVolumes = mesh_.cellVolumes();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    const labelList& cellOwner = mesh_.faceOwner();
+    const labelList& cellNeighbour = mesh_.faceNeighbour();
+
+    const label nBoundaryFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+
+    // Calculate face size from cell volumes for internal faces
+    for (label intFaceI = 0; intFaceI < mesh_.nInternalFaces(); ++intFaceI)
+    {
+        const scalar cellOwnerVol = cellVolumes[cellOwner[intFaceI]];
+        const scalar cellNeighbourVol = cellVolumes[cellNeighbour[intFaceI]];
+
+        scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
+        scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+
+        targetFaceSizes[intFaceI] = 0.5*(targetFaceSizeA + targetFaceSizeB);
+    }
+
+    scalarField neiCellVolumes(nBoundaryFaces, -1);
+
+    // Now do boundary faces
+    forAll(patches, patchI)
+    {
+        const polyPatch& patch = patches[patchI];
+
+        label bFaceI = patch.start() - mesh_.nInternalFaces();
+
+        if (patch.coupled())
+        {
+            // Processor boundary face: Need to get the cell volume on the other
+            // processor
+            const labelUList& faceCells = patch.faceCells();
+
+            forAll(faceCells, facei)
+            {
+                neiCellVolumes[bFaceI++] = cellVolumes[faceCells[facei]];
+            }
+        }
+        else
+        {
+            // Normal boundary face: Just use owner cell volume to calculate
+            // the target face size
+            forAll(patch, patchFaceI)
+            {
+                const label extFaceI = patchFaceI + patch.start();
+                const scalar cellOwnerVol = cellVolumes[cellOwner[extFaceI]];
+
+                targetFaceSizes[extFaceI] = Foam::pow(cellOwnerVol, 1.0/3.0);
+            }
+        }
+    }
+
+    syncTools::swapBoundaryFaceList(mesh_, neiCellVolumes);
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& patch = patches[patchI];
+
+        label bFaceI = patch.start() - mesh_.nInternalFaces();
+
+        if (patch.coupled())
+        {
+            forAll(patch, patchFaceI)
+            {
+                const label localFaceI = patchFaceI + patch.start();
+                const scalar cellOwnerVol = cellVolumes[cellOwner[localFaceI]];
+                const scalar cellNeighbourVol = neiCellVolumes[bFaceI++];
+
+                scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
+                scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+
+                targetFaceSizes[localFaceI]
+                    = 0.5*(targetFaceSizeA + targetFaceSizeB);
+            }
+        }
+    }
+
+    // Returns a characteristic length, not an area
+    return targetFaceSizes;
+}
+
+
+Foam::edgeCollapser::collapseType Foam::edgeCollapser::collapseFace
+(
+    const labelList& pointPriority,
+    const face& f,
+    const label faceI,
+    const scalar targetFaceSize,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation,
+    const scalarField& faceFilterFactor
+) const
+{
+    const scalar collapseSizeLimitCoeff = faceFilterFactor[faceI];
+
+    const pointField& pts = mesh_.points();
+
+    labelList facePts(f);
+
+    const Foam::point fC = f.centre(pts);
+
+    const scalar fA = f.mag(pts);
+
+    vector collapseAxis = vector::zero;
+    scalar aspectRatio = 1.0;
+
+    faceCollapseAxisAndAspectRatio(f, fC, collapseAxis, aspectRatio);
+
+    // The signed distance along the collapse axis passing through the
+    // face centre that each vertex projects to.
+
+    scalarField d(f.size());
+
+    forAll(f, fPtI)
+    {
+        const Foam::point& pt = pts[f[fPtI]];
+
+        d[fPtI] = (collapseAxis & (pt - fC));
+    }
+
+    // Sort the projected distances and the corresponding vertex
+    // indices along the collapse axis
+
+    labelList oldToNew;
+
+    sortedOrder(d, oldToNew);
+
+    oldToNew = invert(oldToNew.size(), oldToNew);
+
+    inplaceReorder(oldToNew, d);
+
+    inplaceReorder(oldToNew, facePts);
+
+    // Shift the points so that they are relative to the centre of the
+    // collapse line.
+
+    scalar dShift = -0.5*(d.first() + d.last());
+
+    d += dShift;
+
+    // Form two lists, one for each half of the set of points
+    // projected along the collapse axis.
+
+    // Middle value, index of first entry in the second half
+    label middle = -1;
+
+    forAll(d, dI)
+    {
+        if (d[dI] > 0)
+        {
+            middle = dI;
+
+            break;
+        }
+    }
+
+    if (middle == -1)
+    {
+//        SeriousErrorIn("collapseFace")
+//            << "middle == -1, " << f << " " << d
+//            << endl;//abort(FatalError);
+
+        return noCollapse;
+    }
+
+    // Negative half
+    SubList<scalar> dNeg(d, middle, 0);
+    SubList<label> facePtsNeg(facePts, middle, 0);
+
+    // Positive half
+    SubList<scalar> dPos(d, d.size() - middle, middle);
+    SubList<label> facePtsPos(facePts, d.size() - middle, middle);
+
+    // Defining how close to the midpoint (M) of the projected
+    // vertices line a projected vertex (X) can be before making this
+    // an invalid edge collapse
+    //
+    // X---X-g----------------M----X-----------g----X--X
+    //
+    // Only allow a collapse if all projected vertices are outwith
+    // guardFraction (g) of the distance form the face centre to the
+    // furthest vertex in the considered direction
+
+    if (dNeg.size() == 0 || dPos.size() == 0)
+    {
+        WarningIn
+        (
+            "Foam::conformalVoronoiMesh::collapseFace"
+        )
+            << "All points on one side of face centre, not collapsing."
+            << endl;
+    }
+
+//    Info<< "Face : " << f << nl
+//        << "    Collapse Axis: " << collapseAxis << nl
+//        << "    Aspect Ratio : " << aspectRatio << endl;
+
+    collapseType typeOfCollapse = noCollapse;
+
+    if (magSqr(collapseAxis) < VSMALL)
+    {
+        typeOfCollapse = toPoint;
+    }
+    else if (fA < aspectRatio*sqr(targetFaceSize*collapseSizeLimitCoeff))
+    {
+        if
+        (
+            allowEarlyCollapseToPoint_
+         && (d.last() - d.first())
+          < targetFaceSize
+           *allowEarlyCollapseCoeff_*maxCollapseFaceToPointSideLengthCoeff_
+        )
+        {
+            typeOfCollapse = toPoint;
+        }
+        else if
+        (
+            (dNeg.last() < guardFraction_*dNeg.first())
+         && (dPos.first() > guardFraction_*dPos.last())
+        )
+        {
+            typeOfCollapse = toEdge;
+        }
+        else if
+        (
+            (d.last() - d.first())
+          < targetFaceSize
+           *maxCollapseFaceToPointSideLengthCoeff_
+        )
+        {
+            // If the face can't be collapsed to an edge, and it has a
+            // small enough span, collapse it to a point.
+            typeOfCollapse = toPoint;
+        }
+    }
+
+    if (typeOfCollapse == toPoint)
+    {
+        collapseToPoint
+        (
+            faceI,
+            pts,
+            pointPriority,
+            fC,
+            facePts,
+            collapseEdge,
+            collapsePointToLocation
+        );
+    }
+    else if (typeOfCollapse == toEdge)
+    {
+        collapseToEdge
+        (
+            faceI,
+            pts,
+            pointPriority,
+            collapseAxis,
+            fC,
+            facePtsNeg,
+            facePtsPos,
+            dNeg,
+            dPos,
+            dShift,
+            collapseEdge,
+            collapsePointToLocation
+        );
+    }
+
+    return typeOfCollapse;
+}
+
+
+Foam::label Foam::edgeCollapser::edgeMaster
+(
+    const labelList& pointPriority,
+    const edge& e
+) const
+{
+    label masterPoint = -1;
+
+    label e0 = e.start();
+    label e1 = e.end();
+
+    // Collapse edge to point with higher priority.
+    if (pointPriority[e0] >= 0)
+    {
+        if (pointPriority[e1] >= 0)
+        {
+            // Both points have high priority. Choose one to collapse to.
+            // Note: should look at feature edges/points!
+            masterPoint = e0;
+        }
+        else
+        {
+            masterPoint = e0;
+        }
+    }
+    else
+    {
+        if (pointPriority[e1] >= 0)
+        {
+            masterPoint = e1;
+        }
+        else
+        {
+            // None on boundary. Neither is a master.
+            return -1;
+        }
+    }
+
+    return masterPoint;
+}
+
+
+void Foam::edgeCollapser::checkBoundaryPointMergeEdges
+(
+    const label pointI,
+    const label otherPointI,
+    const labelList& pointPriority,
+    Map<point>& collapsePointToLocation
+) const
+{
+   const pointField& points = mesh_.points();
+
+   if
+   (
+       pointPriority[pointI] == 0
+    && pointPriority[otherPointI] < 0
+   )
+   {
+       collapsePointToLocation.set
+       (
+           otherPointI,
+           points[pointI]
+       );
+   }
+   else
+   {
+       collapsePointToLocation.set
+       (
+           pointI,
+           points[otherPointI]
+       );
+   }
+}
+
+
+Foam::label Foam::edgeCollapser::breakStringsAtEdges
+(
+    const PackedBoolList& markedEdges,
+    PackedBoolList& collapseEdge,
+    List<pointEdgeCollapse>& allPointInfo
+) const
+{
+    const edgeList& edges = mesh_.edges();
+    const labelListList& pointEdges = mesh_.pointEdges();
+
+    label nUncollapsed = 0;
+
+    forAll(edges, eI)
+    {
+        if (markedEdges[eI])
+        {
+            const edge& e = edges[eI];
+
+            const label startCollapseIndex
+                = allPointInfo[e.start()].collapseIndex();
+
+            if (startCollapseIndex != -1 && startCollapseIndex != -2)
+            {
+                const label endCollapseIndex
+                    = allPointInfo[e.end()].collapseIndex();
+
+                if
+                (
+                    !collapseEdge[eI]
+                 && startCollapseIndex == endCollapseIndex
+                )
+                {
+                    const labelList& ptEdgesStart = pointEdges[e.start()];
+
+                    forAll(ptEdgesStart, ptEdgeI)
+                    {
+                        const label edgeI = ptEdgesStart[ptEdgeI];
+
+                        const label nbrPointI
+                            = edges[edgeI].otherVertex(e.start());
+                        const label nbrIndex
+                            = allPointInfo[nbrPointI].collapseIndex();
+
+                        if
+                        (
+                            collapseEdge[edgeI]
+                         && nbrIndex == startCollapseIndex
+                        )
+                        {
+                            collapseEdge[edgeI] = false;
+                            nUncollapsed++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return nUncollapsed;
+}
+
+
+void Foam::edgeCollapser::determineDuplicatePointsOnFace
+(
+    const face& f,
+    PackedBoolList& markedPoints,
+    labelHashSet& uniqueCollapses,
+    labelHashSet& duplicateCollapses,
+    List<pointEdgeCollapse>& allPointInfo
+) const
+{
+    uniqueCollapses.clear();
+    duplicateCollapses.clear();
+
+    forAll(f, fpI)
+    {
+        label index = allPointInfo[f[fpI]].collapseIndex();
+
+        // Check for consecutive duplicate
+        if (index != allPointInfo[f.prevLabel(fpI)].collapseIndex())
+        {
+            if (!uniqueCollapses.insert(index))
+            {
+                // Failed inserting so duplicate
+                duplicateCollapses.insert(index);
+            }
+        }
+    }
+
+    // Now duplicateCollapses contains duplicate collapse indices.
+    // Convert to points.
+    forAll(f, fpI)
+    {
+        label index = allPointInfo[f[fpI]].collapseIndex();
+        if (duplicateCollapses.found(index))
+        {
+            markedPoints[f[fpI]] = true;
+        }
+    }
+}
+
+
+Foam::label Foam::edgeCollapser::countEdgesOnFace
+(
+    const face& f,
+    List<pointEdgeCollapse>& allPointInfo
+) const
+{
+    label nEdges = 0;
+
+    forAll(f, fpI)
+    {
+        const label pointI = f[fpI];
+        const label newPointI = allPointInfo[pointI].collapseIndex();
+
+        if (newPointI == -2)
+        {
+            nEdges++;
+        }
+        else
+        {
+            const label prevPointI = f[f.fcIndex(fpI)];
+            const label prevNewPointI
+                = allPointInfo[prevPointI].collapseIndex();
+
+            if (newPointI != prevNewPointI)
+            {
+                nEdges++;
+            }
+        }
+    }
+
+    return nEdges;
+}
+
+
+bool Foam::edgeCollapser::isFaceCollapsed
+(
+    const face& f,
+    List<pointEdgeCollapse>& allPointInfo
+) const
+{
+    label nEdges = countEdgesOnFace(f, allPointInfo);
+
+    // Polygons must have 3 or more edges to be valid
+    if (nEdges < 3)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+// Create consistent set of collapses.
+//  collapseEdge : per edge:
+//      -1 : do not collapse
+//       0 : collapse to start
+//       1 : collapse to end
+//  Note: collapseEdge has to be parallel consistent (in orientation)
+Foam::label Foam::edgeCollapser::syncCollapse
+(
+    const globalIndex& globalPoints,
+    const labelList& pointPriority,
+    const PackedBoolList& collapseEdge,
+    const Map<point>& collapsePointToLocation,
+    List<pointEdgeCollapse>& allPointInfo
+) const
+{
+    const edgeList& edges = mesh_.edges();
+
+    label nCollapsed = 0;
+
+    DynamicList<label> initPoints(mesh_.nPoints());
+    DynamicList<pointEdgeCollapse> initPointInfo(mesh_.nPoints());
+
+    allPointInfo.clear();
+    allPointInfo.setSize(mesh_.nPoints());
+
+    // Initialise edges to no collapse
+    List<pointEdgeCollapse> allEdgeInfo
+    (
+        mesh_.nEdges(),
+        pointEdgeCollapse(vector::zero, -1, -1)
+    );
+
+    // Mark selected edges for collapse
+    forAll(edges, edgeI)
+    {
+        if (collapseEdge[edgeI])
+        {
+            const edge& e = edges[edgeI];
+
+            label masterPointI = e.start();
+
+            // Choose the point on the edge with the highest priority.
+            if (pointPriority[e.end()] > pointPriority[e.start()])
+            {
+                masterPointI = e.end();
+            }
+
+            label masterPointPriority = pointPriority[masterPointI];
+
+            label index = globalPoints.toGlobal(masterPointI);
+
+            if (!collapsePointToLocation.found(masterPointI))
+            {
+                const label otherVertex = e.otherVertex(masterPointI);
+
+                if (!collapsePointToLocation.found(otherVertex))
+                {
+                    FatalErrorIn
+                    (
+                        "syncCollapse\n"
+                        "(\n"
+                        "   const polyMesh&,\n"
+                        "   const globalIndex&,\n"
+                        "   const labelList&,\n"
+                        "   const PackedBoolList&,\n"
+                        "   Map<point>&,\n"
+                        "   List<pointEdgeCollapse>&\n"
+                        ")\n"
+                    )   << masterPointI << " on edge " << edgeI << " " << e
+                        << " is not marked for collapse."
+                        << abort(FatalError);
+                }
+                else
+                {
+                    masterPointI = otherVertex;
+                    masterPointPriority = pointPriority[masterPointI];
+                    index = globalPoints.toGlobal(masterPointI);
+                }
+            }
+
+            const point& collapsePoint = collapsePointToLocation[masterPointI];
+
+            const pointEdgeCollapse pec
+            (
+                collapsePoint,
+                index,
+                masterPointPriority
+            );
+
+            // Mark as collapsable but with nonsense master so it gets
+            // overwritten and starts an update wave
+            allEdgeInfo[edgeI] = pointEdgeCollapse
+            (
+                collapsePoint,
+                labelMax,
+                labelMin
+            );
+
+            initPointInfo.append(pec);
+            initPoints.append(e.start());
+
+            initPointInfo.append(pec);
+            initPoints.append(e.end());
+
+            nCollapsed++;
+        }
+    }
+
+    PointEdgeWave<pointEdgeCollapse> collapsePropagator
+    (
+        mesh_,
+        initPoints,
+        initPointInfo,
+        allPointInfo,
+        allEdgeInfo,
+        mesh_.globalData().nTotalPoints()  // Maximum number of iterations
+    );
+
+    return nCollapsed;
+}
+
+
+void Foam::edgeCollapser::filterFace
+(
+    const Map<DynamicList<label> >& collapseStrings,
+    const List<pointEdgeCollapse>& allPointInfo,
+    face& f
+) const
 {
     label newFp = 0;
+
+    face oldFace = f;
 
     forAll(f, fp)
     {
         label pointI = f[fp];
 
-        label region = pointRegion_[pointI];
+        label collapseIndex = allPointInfo[pointI].collapseIndex();
 
-        if (region == -1)
+        // Do we have a local point for this index?
+        if (collapseStrings.found(collapseIndex))
         {
-            f[newFp++] = pointI;
+            label localPointI = collapseStrings[collapseIndex][0];
+
+            if (findIndex(SubList<label>(f, newFp), localPointI) == -1)
+            {
+                f[newFp++] = localPointI;
+            }
+        }
+        else if (collapseIndex == -1)
+        {
+            WarningIn
+            (
+                "filterFace"
+                "(const label, const Map<DynamicList<label> >&, face&)"
+            )   << "Point " << pointI << " was not visited by PointEdgeWave"
+                << endl;
         }
         else
         {
-            label master = pointRegionMaster_[region];
-
-            if (findIndex(f, 0, newFp, master) == -1)
-            {
-                f[newFp++] = master;
-            }
+            f[newFp++] = pointI;
         }
     }
 
@@ -144,7 +1163,7 @@ void Foam::edgeCollapser::filterFace(const label faceI, face& f) const
         label pointI = f[fp];
 
         // Search for previous occurrence.
-        label index = findIndex(f, 0, fp, pointI);
+        label index = findIndex(SubList<label>(f, fp), pointI);
 
         if (index == fp1)
         {
@@ -186,281 +1205,99 @@ void Foam::edgeCollapser::filterFace(const label faceI, face& f) const
 }
 
 
-// Debugging.
-void Foam::edgeCollapser::printRegions() const
-{
-    forAll(pointRegionMaster_, regionI)
-    {
-        label master = pointRegionMaster_[regionI];
-
-        if (master != -1)
-        {
-            Pout<< "Region:" << regionI << nl
-                << "    master:" << master
-                << ' ' << pointRegionMasterLocation_[regionI] << nl;
-
-            forAll(pointRegion_, pointI)
-            {
-                if (pointRegion_[pointI] == regionI && pointI != master)
-                {
-                    Pout<< "    slave:" << pointI
-                        << ' ' <<  mesh_.points()[pointI] << nl;
-                }
-            }
-        }
-    }
-}
-
-
-
-// Collapse list of edges
-void Foam::edgeCollapser::collapseEdges(const labelList& edgeLabels)
-{
-    const edgeList& edges = mesh_.edges();
-
-    forAll(edgeLabels, i)
-    {
-        label edgeI = edgeLabels[i];
-        const edge& e = edges[edgeI];
-
-        label region0 = pointRegion_[e[0]];
-        label region1 = pointRegion_[e[1]];
-
-        if (region0 == -1)
-        {
-            if (region1 == -1)
-            {
-                // Both unaffected. Choose ad lib.
-                collapseEdge(edgeI, e[0]);
-            }
-            else
-            {
-                // Collapse to whatever e[1] collapses
-                collapseEdge(edgeI, e[1]);
-            }
-        }
-        else
-        {
-            if (region1 == -1)
-            {
-                // Collapse to whatever e[0] collapses
-                collapseEdge(edgeI, e[0]);
-            }
-            else
-            {
-                // Both collapsed.
-                if (pointRegionMaster_[region0] == e[0])
-                {
-                    // e[0] is a master
-                    collapseEdge(edgeI, e[0]);
-                }
-                else if (pointRegionMaster_[region1] == e[1])
-                {
-                    // e[1] is a master
-                    collapseEdge(edgeI, e[1]);
-                }
-                else
-                {
-                    // Dont know
-                    collapseEdge(edgeI, e[0]);
-                }
-            }
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::edgeCollapser::edgeCollapser(const polyMesh& mesh)
 :
     mesh_(mesh),
-    pointRegion_(mesh.nPoints(), -1),
-    pointRegionMasterLocation_(mesh.nPoints() / 100),
-    pointRegionMaster_(mesh.nPoints() / 100),
-    freeRegions_()
+    guardFraction_(0),
+    maxCollapseFaceToPointSideLengthCoeff_(0),
+    allowEarlyCollapseToPoint_(false),
+    allowEarlyCollapseCoeff_(0)
+{}
+
+
+Foam::edgeCollapser::edgeCollapser
+(
+    const polyMesh& mesh,
+    const dictionary& dict
+)
+:
+    mesh_(mesh),
+    guardFraction_(readScalar(dict.lookup("guardFraction"))),
+    maxCollapseFaceToPointSideLengthCoeff_
+    (
+        readScalar(dict.lookup("maxCollapseFaceToPointSideLengthCoeff"))
+    ),
+    allowEarlyCollapseToPoint_
+    (
+        dict.lookupOrDefault<Switch>("allowEarlyCollapseToPoint", true)
+    ),
+    allowEarlyCollapseCoeff_
+    (
+        readScalar(dict.lookup("allowEarlyCollapseCoeff"))
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::edgeCollapser::unaffectedEdge(const label edgeI) const
-{
-    const edge& e = mesh_.edges()[edgeI];
-
-    return (pointRegion_[e[0]] == -1) && (pointRegion_[e[1]] == -1);
-}
-
-
-bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
-{
-    const pointField& points = mesh_.points();
-
-    const edge& e = mesh_.edges()[edgeI];
-
-    label pointRegion0 = pointRegion_[e[0]];
-    label pointRegion1 = pointRegion_[e[1]];
-
-    if (pointRegion0 == -1)
-    {
-        if (pointRegion1 == -1)
-        {
-            // Both endpoints not collapsed. Create new region.
-
-            label freeRegion = -1;
-
-            if (freeRegions_.size())
-            {
-                freeRegion = freeRegions_.removeHead();
-
-                if (pointRegionMaster_[freeRegion] != -1)
-                {
-                    FatalErrorIn
-                    ("edgeCollapser::collapseEdge(const label, const label)")
-                        << "Problem : freed region :" << freeRegion
-                        << " has already master "
-                        << pointRegionMaster_[freeRegion]
-                        << abort(FatalError);
-                }
-            }
-            else
-            {
-                // If no region found create one. This is the only place where
-                // new regions are created.
-                freeRegion = pointRegionMaster_.size();
-            }
-
-            pointRegion_[e[0]] = freeRegion;
-            pointRegion_[e[1]] = freeRegion;
-
-            pointRegionMaster_(freeRegion) = master;
-            pointRegionMasterLocation_(freeRegion) = points[master];
-        }
-        else
-        {
-            // e[1] is part of collapse network, e[0] not. Add e0 to e1 region.
-            pointRegion_[e[0]] = pointRegion1;
-
-            if
-            (
-                pointRegionMaster_[pointRegion1] == e[0]
-             || pointRegionMaster_[pointRegion1] == e[1]
-            )
-            {
-                pointRegionMaster_[pointRegion1] = master;
-                pointRegionMasterLocation_[pointRegion1] = points[master];
-            }
-        }
-    }
-    else
-    {
-        if (pointRegion1 == -1)
-        {
-            // e[0] is part of collapse network. Add e1 to e0 region
-            pointRegion_[e[1]] = pointRegion0;
-
-            if
-            (
-                pointRegionMaster_[pointRegion0] == e[0]
-             || pointRegionMaster_[pointRegion0] == e[1]
-            )
-            {
-                pointRegionMaster_[pointRegion0] = master;
-                pointRegionMasterLocation_[pointRegion0] = points[master];
-            }
-        }
-        else if (pointRegion0 != pointRegion1)
-        {
-            // Both part of collapse network. Merge the two regions.
-
-            // Use the smaller region number for the whole network.
-            label minRegion = min(pointRegion0, pointRegion1);
-            label maxRegion = max(pointRegion0, pointRegion1);
-
-            // Use minRegion as region for combined net, free maxRegion.
-            pointRegionMaster_[minRegion] = master;
-            pointRegionMaster_[maxRegion] = -1;
-            pointRegionMasterLocation_[minRegion] = points[master];
-            pointRegionMasterLocation_[maxRegion] = point(0, 0, 0);
-
-            freeRegions_.insert(maxRegion);
-
-            if (minRegion != pointRegion0)
-            {
-                changePointRegion(e[0], pointRegion0, minRegion);
-            }
-            if (minRegion != pointRegion1)
-            {
-                changePointRegion(e[1], pointRegion1, minRegion);
-            }
-        }
-    }
-
-    return true;
-}
-
-
-bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
+bool Foam::edgeCollapser::setRefinement
+(
+    const List<pointEdgeCollapse>& allPointInfo,
+    polyTopoChange& meshMod
+) const
 {
     const cellList& cells = mesh_.cells();
     const labelList& faceOwner = mesh_.faceOwner();
     const labelList& faceNeighbour = mesh_.faceNeighbour();
     const labelListList& pointFaces = mesh_.pointFaces();
-    const labelListList& cellEdges = mesh_.cellEdges();
     const pointZoneMesh& pointZones = mesh_.pointZones();
-
-
 
     bool meshChanged = false;
 
-    // Synchronise pointRegionMasterLocation_
-    const globalMeshData& globalData = mesh_.globalData();
-    const mapDistribute& map = globalData.globalPointSlavesMap();
-    const indirectPrimitivePatch& coupledPatch = globalData.coupledPatch();
-    const labelList& meshPoints = coupledPatch.meshPoints();
-    const Map<label>& meshPointMap = coupledPatch.meshPointMap();
+    PackedBoolList removedPoints(mesh_.nPoints());
 
-
-    List<point> newPoints = coupledPatch.localPoints();
-
-    for (label pI = 0; pI < coupledPatch.nPoints(); ++pI)
+    // Create strings of edges.
+    // Map from collapseIndex(=global master point) to set of points
+    Map<DynamicList<label> > collapseStrings;
     {
-        const label pointRegionMaster = pointRegion_[meshPoints[pI]];
-
-        if (pointRegionMaster != -1)
+        // 1. Count elements per collapseIndex
+        Map<label> nPerIndex(mesh_.nPoints()/10);
+        forAll(allPointInfo, pointI)
         {
-            newPoints[pI]
-                = pointRegionMasterLocation_[pointRegionMaster];
-        }
-    }
+            label collapseIndex = allPointInfo[pointI].collapseIndex();
 
-    globalData.syncData
-    (
-        newPoints,
-        globalData.globalPointSlaves(),
-        globalData.globalPointTransformedSlaves(),
-        map,
-        minMagSqrEqOp<point>()
-    );
-
-        OFstream str1("newPoints_" + name(Pstream::myProcNo()) + ".obj");
-        forAll(pointRegion_, pI)
-        {
-            if (meshPointMap.found(pI))
+            if (collapseIndex != -1 && collapseIndex != -2)
             {
-                meshTools::writeOBJ(str1, newPoints[meshPointMap[pI]]);
+                Map<label>::iterator fnd = nPerIndex.find(collapseIndex);
+                if (fnd != nPerIndex.end())
+                {
+                    fnd()++;
+                }
+                else
+                {
+                    nPerIndex.insert(collapseIndex, 1);
+                }
             }
         }
 
-    for (label pI = 0; pI < coupledPatch.nPoints(); ++pI)
-    {
-        const label pointRegionMaster = pointRegion_[meshPoints[pI]];
-
-        if (pointRegionMaster != -1)
+        // 2. Size
+        collapseStrings.resize(2*nPerIndex.size());
+        forAllConstIter(Map<label>, nPerIndex, iter)
         {
-            pointRegionMasterLocation_[pointRegionMaster]
-                = newPoints[pI];
+            collapseStrings.insert(iter.key(), DynamicList<label>(iter()));
+        }
+
+        // 3. Fill
+        forAll(allPointInfo, pointI)
+        {
+            const label collapseIndex = allPointInfo[pointI].collapseIndex();
+
+            if (collapseIndex != -1 && collapseIndex != -2)
+            {
+                collapseStrings[collapseIndex].append(pointI);
+            }
         }
     }
 
@@ -470,12 +1307,49 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
     // Current cellCollapse status
     boolList cellRemoved(mesh_.nCells(), false);
 
+    label nUnvisited = 0;
+    label nUncollapsed = 0;
+    label nCollapsed = 0;
+
+    forAll(allPointInfo, pI)
+    {
+        const pointEdgeCollapse& pec = allPointInfo[pI];
+
+        if (pec.collapseIndex() == -1)
+        {
+            nUnvisited++;
+        }
+        else if (pec.collapseIndex() == -2)
+        {
+            nUncollapsed++;
+        }
+        else
+        {
+            nCollapsed++;
+        }
+    }
+
+    label nPoints = allPointInfo.size();
+
+    reduce(nPoints, sumOp<label>());
+    reduce(nUnvisited, sumOp<label>());
+    reduce(nUncollapsed, sumOp<label>());
+    reduce(nCollapsed, sumOp<label>());
+
+    Info<< incrIndent;
+    Info<< indent << "Number of points : " << nPoints << nl
+        << indent << "Not visited      : " << nUnvisited << nl
+        << indent << "Not collapsed    : " << nUncollapsed << nl
+        << indent << "Collapsed        : " << nCollapsed << nl
+        << endl;
+    Info<< decrIndent;
+
     do
     {
         // Update face collapse from edge collapses
         forAll(newFaces, faceI)
         {
-            filterFace(faceI, newFaces[faceI]);
+            filterFace(collapseStrings, allPointInfo, newFaces[faceI]);
         }
 
         // Check if faces to be collapsed cause cells to become collapsed.
@@ -504,6 +1378,8 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                                 << " of which too many are marked for removal:"
                                 << endl
                                 << "   ";
+
+
                             forAll(cFaces, j)
                             {
                                 if (newFaces[cFaces[j]].size() < 3)
@@ -516,7 +1392,7 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                             cellRemoved[cellI] = true;
 
                             // Collapse all edges of cell to nothing
-                            collapseEdges(cellEdges[cellI]);
+//                            collapseEdges(cellEdges[cellI]);
 
                             nCellCollapsed++;
 
@@ -527,10 +1403,14 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
             }
         }
 
+        reduce(nCellCollapsed, sumOp<label>());
+        Info<< indent << "Collapsing " << nCellCollapsed << " cells" << endl;
+
         if (nCellCollapsed == 0)
         {
             break;
         }
+
     } while (true);
 
 
@@ -541,7 +1421,6 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         // Mark points used.
         boolList usedPoint(mesh_.nPoints(), false);
 
-
         forAll(cellRemoved, cellI)
         {
             if (cellRemoved[cellI])
@@ -549,7 +1428,6 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                 meshMod.removeCell(cellI, -1);
             }
         }
-
 
         // Remove faces
         forAll(newFaces, faceI)
@@ -577,55 +1455,28 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
         // Remove unused vertices that have not been marked for removal already
         forAll(usedPoint, pointI)
         {
-            if (!usedPoint[pointI] && !pointRemoved(pointI))
+            if (!usedPoint[pointI])
             {
+                removedPoints[pointI] = true;
                 meshMod.removePoint(pointI, -1);
                 meshChanged = true;
             }
         }
     }
 
-
-
-    // Remove points.
-    forAll(pointRegion_, pointI)
-    {
-        if (pointRemoved(pointI))
-        {
-            meshMod.removePoint(pointI, -1);
-            meshChanged = true;
-        }
-    }
-
     // Modify the point location of the remaining points
-    forAll(pointRegion_, pointI)
+    forAll(allPointInfo, pointI)
     {
-        const label pointRegion = pointRegion_[pointI];
+        const label collapseIndex = allPointInfo[pointI].collapseIndex();
+        const point& collapsePoint = allPointInfo[pointI].collapsePoint();
 
         if
         (
-            !pointRemoved(pointI)
-         && meshPointMap.found(pointI)
+            removedPoints[pointI] == false
+         && collapseIndex != -1
+         && collapseIndex != -2
         )
         {
-            meshMod.modifyPoint
-            (
-                pointI,
-                newPoints[meshPointMap[pointI]],
-                pointZones.whichZone(pointI),
-                false
-            );
-        }
-        else if
-        (
-            pointRegion != -1
-         && !pointRemoved(pointI)
-         && !meshPointMap.found(pointI)
-        )
-        {
-            const point& collapsePoint
-                = pointRegionMasterLocation_[pointRegion];
-
             meshMod.modifyPoint
             (
                 pointI,
@@ -641,9 +1492,9 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
     const faceZoneMesh& faceZones = mesh_.faceZones();
 
     // Renumber faces that use points
-    forAll(pointRegion_, pointI)
+    forAll(allPointInfo, pointI)
     {
-        if (pointRemoved(pointI))
+        if (removedPoints[pointI] == true)
         {
             const labelList& changedFaces = pointFaces[pointI];
 
@@ -692,28 +1543,451 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                         zoneID,
                         zoneFlip
                     );
+
                     meshChanged = true;
                 }
             }
         }
     }
 
-    // Print regions:
-//    printRegions();
-
     return meshChanged;
 }
 
 
-void Foam::edgeCollapser::updateMesh(const mapPolyMesh& map)
+void Foam::edgeCollapser::consistentCollapse
+(
+    const globalIndex& globalPoints,
+    const labelList& pointPriority,
+    const Map<point>& collapsePointToLocation,
+    PackedBoolList& collapseEdge,
+    List<pointEdgeCollapse>& allPointInfo,
+    const bool allowCellCollapse
+) const
 {
-    pointRegion_.setSize(mesh_.nPoints());
-    pointRegion_ = -1;
+    // Make sure we don't collapse cells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const faceList faces = mesh_.faces();
+    const edgeList& edges = mesh_.edges();
+    const labelListList& faceEdges = mesh_.faceEdges();
+    const labelListList& pointEdges = mesh_.pointEdges();
+    const cellList& cells = mesh_.cells();
 
-    // Reset count, do not remove underlying storage
-    pointRegionMaster_.clear();
-    pointRegionMasterLocation_.clear();
-    freeRegions_.clear();
+    labelHashSet uniqueCollapses;
+    labelHashSet duplicateCollapses;
+
+    while (true)
+    {
+        label nUncollapsed = 0;
+
+        syncTools::syncEdgeList
+        (
+            mesh_,
+            collapseEdge,
+            minEqOp<unsigned int>(),
+            0
+        );
+
+        // Create consistent set of collapses
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Note: requires collapseEdge to be synchronised.
+        syncCollapse
+        (
+            globalPoints,
+            pointPriority,
+            collapseEdge,
+            collapsePointToLocation,
+            allPointInfo
+        );
+
+        // Get collapsed faces
+
+        PackedBoolList isCollapsedFace(mesh_.nFaces());
+        PackedBoolList markedPoints(mesh_.nPoints());
+
+        forAll(faces, faceI)
+        {
+            const face& f = faces[faceI];
+
+            isCollapsedFace[faceI] = isFaceCollapsed(f, allPointInfo);
+
+            if (isCollapsedFace[faceI] < 1)
+            {
+                determineDuplicatePointsOnFace
+                (
+                    f,
+                    markedPoints,
+                    uniqueCollapses,
+                    duplicateCollapses,
+                    allPointInfo
+                );
+            }
+        }
+
+        // Synchronise the marked points
+        syncTools::syncPointList
+        (
+            mesh_,
+            markedPoints,
+            orEqOp<unsigned int>(),
+            0
+        );
+
+        // Mark all edges attached to the point for collapse
+        forAll(markedPoints, pointI)
+        {
+            if (markedPoints[pointI])
+            {
+                const label index = allPointInfo[pointI].collapseIndex();
+
+                const labelList& ptEdges = pointEdges[pointI];
+
+                forAll(ptEdges, ptEdgeI)
+                {
+                    const label edgeI = ptEdges[ptEdgeI];
+                    const label nbrPointI = edges[edgeI].otherVertex(pointI);
+                    const label nbrIndex
+                        = allPointInfo[nbrPointI].collapseIndex();
+
+                    if (collapseEdge[edgeI] && nbrIndex == index)
+                    {
+                        collapseEdge[edgeI] = false;
+                        nUncollapsed++;
+                    }
+                }
+            }
+        }
+
+        PackedBoolList markedEdges(mesh_.nEdges());
+
+        if (!allowCellCollapse)
+        {
+            // Check collapsed cells
+            forAll(cells, cellI)
+            {
+                const cell& cFaces = cells[cellI];
+
+                label nFaces = cFaces.size();
+
+                forAll(cFaces, fI)
+                {
+                    label faceI = cFaces[fI];
+
+                    if (isCollapsedFace[faceI])
+                    {
+                        nFaces--;
+                    }
+                }
+
+                if (nFaces < 4)
+                {
+                    forAll(cFaces, fI)
+                    {
+                        label faceI = cFaces[fI];
+
+                        const labelList& fEdges = faceEdges[faceI];
+
+                        // Unmark this face for collapse
+                        forAll(fEdges, fEdgeI)
+                        {
+                            label edgeI = fEdges[fEdgeI];
+
+                            if (collapseEdge[edgeI])
+                            {
+                                collapseEdge[edgeI] = false;
+                                nUncollapsed++;
+                            }
+
+                            markedEdges[edgeI] = true;
+                        }
+
+                        // Uncollapsed this face.
+                        isCollapsedFace[faceI] = false;
+                        nFaces++;
+                    }
+                }
+
+                if (nFaces < 4)
+                {
+                    FatalErrorIn
+                    (
+                        "consistentCollapse\n"
+                        "(\n"
+                        "   labelList&,\n"
+                        "   Map<point>&,\n"
+                        "   bool&,\n"
+                        ")"
+                    )   << "Cell " << cellI << " " << cFaces << nl
+                        << "is " << nFaces << ", "
+                        << "but cell collapse has been disabled."
+                        << abort(FatalError);
+                }
+            }
+        }
+
+        syncTools::syncEdgeList
+        (
+            mesh_,
+            markedEdges,
+            orEqOp<unsigned int>(),
+            0
+        );
+
+        nUncollapsed += breakStringsAtEdges
+        (
+            markedEdges,
+            collapseEdge,
+            allPointInfo
+        );
+
+        reduce(nUncollapsed, sumOp<label>());
+
+        Info<< "            Uncollapsed edges = " << nUncollapsed << " / "
+            << returnReduce(mesh_.nEdges(), sumOp<label>()) << endl;
+
+        if (nUncollapsed == 0)
+        {
+            break;
+        }
+    }
+}
+
+
+Foam::label Foam::edgeCollapser::markSmallEdges
+(
+    const scalarField& minEdgeLen,
+    const labelList& pointPriority,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation
+) const
+{
+    // Work out which edges to collapse
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    const pointField& points = mesh_.points();
+    const edgeList& edges = mesh_.edges();
+
+    label nCollapsed = 0;
+
+    forAll(edges, edgeI)
+    {
+        const edge& e = edges[edgeI];
+
+        if (!collapseEdge[edgeI])
+        {
+            if (e.mag(points) < minEdgeLen[edgeI])
+            {
+                collapseEdge[edgeI] = true;
+
+                label masterPointI = edgeMaster(pointPriority, e);
+
+                if (masterPointI == -1)
+                {
+                    const point average
+                        = 0.5*(points[e.start()] + points[e.end()]);
+
+                    collapsePointToLocation.set(e.start(), average);
+                }
+                else
+                {
+                    const point& collapsePt = points[masterPointI];
+
+                    collapsePointToLocation.set(masterPointI, collapsePt);
+                }
+
+
+                nCollapsed++;
+            }
+        }
+    }
+
+    return nCollapsed;
+}
+
+
+Foam::label Foam::edgeCollapser::markMergeEdges
+(
+    const scalar maxCos,
+    const labelList& pointPriority,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation
+) const
+{
+    const edgeList& edges = mesh_.edges();
+    const pointField& points = mesh_.points();
+    const labelListList& pointEdges = mesh_.pointEdges();
+
+    // Point removal engine
+    removePoints pointRemover(mesh_, false);
+
+    // Find out points that can be deleted
+    boolList pointCanBeDeleted;
+    label nTotRemove = pointRemover.countPointUsage(maxCos, pointCanBeDeleted);
+
+    // Rework point-to-remove into edge-to-collapse.
+
+    label nCollapsed = 0;
+
+    if (nTotRemove > 0)
+    {
+        forAll(pointEdges, pointI)
+        {
+            if (pointCanBeDeleted[pointI])
+            {
+                const labelList& pEdges = pointEdges[pointI];
+
+                if (pEdges.size() == 2)
+                {
+                    // Always the case?
+
+                    label e0 = pEdges[0];
+                    label e1 = pEdges[1];
+
+                    if (!collapseEdge[e0] && !collapseEdge[e1])
+                    {
+                        // Get lengths of both edges and choose the smallest
+                        scalar e0length = mag
+                        (
+                            points[edges[e0][0]] - points[edges[e0][1]]
+                        );
+
+                        scalar e1length = mag
+                        (
+                            points[edges[e1][0]] - points[edges[e1][1]]
+                        );
+
+                        if (e0length <= e1length)
+                        {
+                            if (edges[e0].start() == pointI)
+                            {
+                                collapseEdge[e0] = true;
+
+                                checkBoundaryPointMergeEdges
+                                (
+                                    pointI,
+                                    edges[e0].end(),
+                                    pointPriority,
+                                    collapsePointToLocation
+                                );
+                            }
+                            else
+                            {
+                                collapseEdge[e0] = true;
+
+                                checkBoundaryPointMergeEdges
+                                (
+                                    pointI,
+                                    edges[e0].start(),
+                                    pointPriority,
+                                    collapsePointToLocation
+                                );
+                            }
+                        }
+                        else
+                        {
+                            if (edges[e1].start() == pointI)
+                            {
+                                collapseEdge[e1] = true;
+
+                                checkBoundaryPointMergeEdges
+                                (
+                                    pointI,
+                                    edges[e1].end(),
+                                    pointPriority,
+                                    collapsePointToLocation
+                                );
+                            }
+                            else
+                            {
+                                collapseEdge[e1] = true;
+
+                                checkBoundaryPointMergeEdges
+                                (
+                                    pointI,
+                                    edges[e1].start(),
+                                    pointPriority,
+                                    collapsePointToLocation
+                                );
+                            }
+                        }
+
+//                        if (boundaryPoint[leftV] == -1)
+//                        {
+//                            collapseEdge[e0] = findIndex(edges[e0], leftV);
+//                        }
+//                        else
+//                        {
+//                            collapseEdge[e1] = findIndex(edges[e1], rightV);
+//                        }
+
+                        nCollapsed++;
+                    }
+                }
+            }
+        }
+    }
+
+    return nCollapsed;
+}
+
+
+Foam::labelPair Foam::edgeCollapser::markSmallSliverFaces
+(
+    const scalarField& faceFilterFactor,
+    const labelList& pointPriority,
+    PackedBoolList& collapseEdge,
+    Map<point>& collapsePointToLocation
+) const
+{
+    const faceList& faces = mesh_.faces();
+
+    const scalarField targetFaceSizes = calcTargetFaceSizes();
+
+    // Calculate number of faces that will be collapsed to a point or an edge
+    label nCollapseToPoint = 0;
+    label nCollapseToEdge = 0;
+
+    forAll(faces, fI)
+    {
+        const face& f = faces[fI];
+
+        if (faceFilterFactor[fI] == 0)
+        {
+            continue;
+        }
+
+        collapseType flagCollapseFace = collapseFace
+        (
+            pointPriority,
+            f,
+            fI,
+            targetFaceSizes[fI],
+            collapseEdge,
+            collapsePointToLocation,
+            faceFilterFactor
+        );
+
+        if (flagCollapseFace == noCollapse)
+        {
+            continue;
+        }
+        else if (flagCollapseFace == toPoint)
+        {
+            nCollapseToPoint++;
+        }
+        else if (flagCollapseFace == toEdge)
+        {
+            nCollapseToEdge++;
+        }
+        else
+        {
+            FatalErrorIn("collapseFaces(const polyMesh&, List<labelPair>&)")
+                << "Face is marked to be collapsed to " << flagCollapseFace
+                << ". Currently can only collapse to point/edge."
+                << abort(FatalError);
+        }
+    }
+
+    return labelPair(nCollapseToPoint, nCollapseToEdge);
 }
 
 

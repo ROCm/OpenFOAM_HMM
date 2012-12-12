@@ -45,9 +45,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class conformalVoronoiMesh;
-
 /*---------------------------------------------------------------------------*\
                      Class conformationSurfaces Declaration
 \*---------------------------------------------------------------------------*/

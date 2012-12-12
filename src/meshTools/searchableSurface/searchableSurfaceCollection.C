@@ -325,10 +325,11 @@ Foam::label Foam::searchableSurfaceCollection::size() const
 }
 
 
-Foam::pointField Foam::searchableSurfaceCollection::coordinates() const
+Foam::tmp<Foam::pointField>
+Foam::searchableSurfaceCollection::coordinates() const
 {
-    // Get overall size
-    pointField coords(size());
+    tmp<pointField> tCtrs = tmp<pointField>(new pointField(size()));
+    pointField& ctrs = tCtrs();
 
     // Append individual coordinates
     label coordI = 0;
@@ -339,7 +340,7 @@ Foam::pointField Foam::searchableSurfaceCollection::coordinates() const
 
         forAll(subCoords, i)
         {
-            coords[coordI++] = transform_[surfI].globalPosition
+            ctrs[coordI++] = transform_[surfI].globalPosition
             (
                 cmptMultiply
                 (
@@ -350,7 +351,45 @@ Foam::pointField Foam::searchableSurfaceCollection::coordinates() const
         }
     }
 
-    return coords;
+    return tCtrs;
+}
+
+
+Foam::tmp<Foam::pointField>
+Foam::searchableSurfaceCollection::points() const
+{
+    // Get overall size
+    label nPoints = 0;
+
+    forAll(subGeom_, surfI)
+    {
+        nPoints += subGeom_[surfI].points()().size();
+    }
+
+    tmp<pointField> tPts(new pointField(nPoints));
+    pointField& pts = tPts();
+
+    // Append individual coordinates
+    nPoints = 0;
+
+    forAll(subGeom_, surfI)
+    {
+        const pointField subCoords = subGeom_[surfI].points();
+
+        forAll(subCoords, i)
+        {
+            pts[nPoints++] = transform_[surfI].globalPosition
+            (
+                cmptMultiply
+                (
+                    subCoords[i],
+                    scale_[surfI]
+                )
+            );
+        }
+    }
+
+    return tPts;
 }
 
 

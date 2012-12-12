@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
     (
         dynamicTreeDataPoint(pointList),
         overallBb,  // overall search domain
-        20,         // max levels; n/a
-        100,          // maximum ratio of cubes v.s. cells
+        20,         // max levels
+        100,        // maximum ratio of cubes v.s. cells
         100.0       // max. duplicity; n/a since no bounding boxes.
     );
 

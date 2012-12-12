@@ -167,6 +167,19 @@ public:
         {
             return !(a == b);
         }
+
+        friend bool operator<(const Pair<Type>& a, const Pair<Type>& b)
+        {
+            return
+            (
+                a.first() < b.first()
+             ||
+                (
+                    !(b.first() < a.first())
+                 && a.second() < b.second()
+                )
+            );
+        }
 };
 
 

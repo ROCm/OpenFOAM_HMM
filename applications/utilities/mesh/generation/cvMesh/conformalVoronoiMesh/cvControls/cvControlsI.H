@@ -88,6 +88,30 @@ inline Foam::label Foam::cvControls::surfaceConformationRebuildFrequency() const
 }
 
 
+inline Foam::scalar Foam::cvControls::edgeSearchDistCoeffSqr() const
+{
+    return edgeSearchDistCoeffSqr_;
+}
+
+
+inline Foam::scalar Foam::cvControls::surfacePtReplaceDistCoeffSqr() const
+{
+    return surfacePtReplaceDistCoeffSqr_;
+}
+
+
+inline Foam::label Foam::cvControls::maxConformationIterations() const
+{
+    return maxConformationIterations_;
+}
+
+
+inline Foam::scalar Foam::cvControls::iterationToInitialHitRatioLimit() const
+{
+    return iterationToInitialHitRatioLimit_;
+}
+
+
 inline Foam::Switch Foam::cvControls::objOutput() const
 {
     return objOutput_;
@@ -148,77 +172,19 @@ inline Foam::scalar Foam::cvControls::removalDistCoeff() const
 }
 
 
+inline Foam::Switch Foam::cvControls::filterEdges() const
+{
+    return filterEdges_;
+}
+
+inline Foam::Switch Foam::cvControls::filterFaces() const
+{
+    return filterFaces_;
+}
+
 inline Foam::Switch Foam::cvControls::writeTetDualMesh() const
 {
     return writeTetDualMesh_;
-}
-
-
-inline Foam::scalar Foam::cvControls::filterSizeCoeff() const
-{
-    return filterSizeCoeff_;
-}
-
-
-inline Foam::scalar Foam::cvControls::mergeClosenessCoeff() const
-{
-    return mergeClosenessCoeff_;
-}
-
-
-inline Foam::scalar Foam::cvControls::edgeMergeAngle() const
-{
-    return edgeMergeAngle_;
-}
-
-
-inline Foam::Switch
-Foam::cvControls::continueFilteringOnBadInitialPolyMesh() const
-{
-    return continueFilteringOnBadInitialPolyMesh_;
-}
-
-
-inline Foam::scalar Foam::cvControls::filterErrorReductionCoeff() const
-{
-    return filterErrorReductionCoeff_;
-}
-
-
-inline Foam::label Foam::cvControls::filterCountSkipThreshold() const
-{
-    return filterCountSkipThreshold_;
-}
-
-
-inline Foam::label Foam::cvControls::maxCollapseIterations() const
-{
-    return maxCollapseIterations_;
-}
-
-
-inline Foam::label Foam::cvControls::maxConsecutiveEqualFaceSets() const
-{
-    return maxConsecutiveEqualFaceSets_;
-}
-
-
-inline Foam::scalar Foam::cvControls::surfaceStepFaceAngle() const
-{
-    return surfaceStepFaceAngle_;
-}
-
-
-inline Foam::scalar Foam::cvControls::edgeCollapseGuardFraction() const
-{
-    return edgeCollapseGuardFraction_;
-}
-
-
-inline Foam::scalar
-Foam::cvControls::maxCollapseFaceToPointSideLengthCoeff() const
-{
-    return maxCollapseFaceToPointSideLengthCoeff_;
 }
 
 

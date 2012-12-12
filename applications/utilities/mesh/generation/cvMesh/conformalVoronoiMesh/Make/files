@@ -1,5 +1,8 @@
 #include CGAL_FILES
 
+conformalVoronoiMesh/indexedVertex/indexedVertexEnum.C
+conformalVoronoiMesh/indexedCell/indexedCellEnum.C
+
 conformalVoronoiMesh/conformalVoronoiMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshCalcDualMesh.C
 conformalVoronoiMesh/conformalVoronoiMeshConformToSurface.C
@@ -13,7 +16,20 @@ conformationSurfaces/conformationSurfaces.C
 
 backgroundMeshDecomposition/backgroundMeshDecomposition.C
 
-cellSizeControlSurfaces/cellSizeControlSurfaces.C
+cellShapeControl/cellShapeControl/cellShapeControl.C
+
+cellShapeControl/cellShapeControlMesh/cellShapeControlMesh.C
+
+cellSizeAndAlignmentControl = cellShapeControl/cellSizeAndAlignmentControl
+$(cellSizeAndAlignmentControl)/cellSizeAndAlignmentControls.C
+$(cellSizeAndAlignmentControl)/cellSizeAndAlignmentControl/cellSizeAndAlignmentControl.C
+$(cellSizeAndAlignmentControl)/fileControl/fileControl.C
+$(cellSizeAndAlignmentControl)/searchableSurfaceControl/searchableSurfaceControl.C
+/*cellShapeControl/pQuadCoorControl/pQuadCoorControl.C*/
+
+cellShapeControl/cellAspectRatioControl/cellAspectRatioControl.C
+
+/*cellSizeControlSurfaces/cellSizeControlSurfaces.C*/
 
 cellSizeFunctions = cellSizeControlSurfaces/cellSizeFunction
 $(cellSizeFunctions)/cellSizeFunction/cellSizeFunction.C

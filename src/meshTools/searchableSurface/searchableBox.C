@@ -232,9 +232,10 @@ const Foam::wordList& Foam::searchableBox::regions() const
 }
 
 
-Foam::pointField Foam::searchableBox::coordinates() const
+Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
 {
-    pointField ctrs(6);
+    tmp<pointField> tCtrs = tmp<pointField>(new pointField(6));
+    pointField& ctrs = tCtrs();
 
     const pointField pts(treeBoundBox::points());
     const faceList& fcs = treeBoundBox::faces;
@@ -243,7 +244,14 @@ Foam::pointField Foam::searchableBox::coordinates() const
     {
         ctrs[i] = fcs[i].centre(pts);
     }
-    return ctrs;
+
+    return tCtrs;
+}
+
+
+Foam::tmp<Foam::pointField> Foam::searchableBox::points() const
+{
+    return treeBoundBox::points();
 }
 
 

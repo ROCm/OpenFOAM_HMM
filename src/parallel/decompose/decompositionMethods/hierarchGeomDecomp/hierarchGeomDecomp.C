@@ -230,7 +230,7 @@ void Foam::hierarchGeomDecomp::findBinary
         if (returnReduce(hasNotChanged, andOp<bool>()))
         {
             WarningIn("hierarchGeomDecomp::findBinary(..)")
-                << "unable to find desired deomposition split, making do!"
+                << "unable to find desired decomposition split, making do!"
                 << endl;
             break;
         }

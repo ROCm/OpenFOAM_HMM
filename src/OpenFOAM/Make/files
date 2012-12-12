@@ -63,6 +63,7 @@ primitives/globalIndexAndTransform/globalIndexAndTransform.C
 primitives/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
+primitives/triad/triad.C
 
 /* functions, data entries */
 primitives/functions/DataEntry/makeDataEntries.C
@@ -524,6 +525,7 @@ $(Fields)/sphericalTensorField/sphericalTensorField.C
 $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
+$(Fields)/triadField/triadField.C
 $(Fields)/complexFields/complexFields.C
 
 $(Fields)/labelField/labelIOField.C
@@ -542,6 +544,7 @@ $(Fields)/symmTensorField/symmTensorIOField.C
 $(Fields)/symmTensorField/symmTensorFieldIOField.C
 $(Fields)/tensorField/tensorIOField.C
 $(Fields)/tensorField/tensorFieldIOField.C
+$(Fields)/triadField/triadIOField.C
 $(Fields)/transformField/transformField.C
 
 pointPatchFields = fields/pointPatchFields

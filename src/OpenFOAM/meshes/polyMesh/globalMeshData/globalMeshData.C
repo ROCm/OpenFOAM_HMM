@@ -881,7 +881,7 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
     // the transformations.
 
 
-    // 1. collect point connectivity - basically recreating globalPoints ouput.
+    // 1. collect point connectivity - basically recreating globalPoints output.
     // All points will now have a string of points. The transforms are
     // in respect to the master.
     List<labelPairList> allPointConnectivity;

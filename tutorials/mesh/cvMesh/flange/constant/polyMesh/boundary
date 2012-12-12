@@ -8,44 +8,20 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       polyBoundaryMesh;
     location    "constant/polyMesh";
     object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-5
+1
 (
-    flange.obj_patch1
+    walls
     {
         type            wall;
-        nFaces          24684;
-        startFace       193547;
-    }
-    flange.obj_patch2
-    {
-        type            wall;
-        nFaces          1674;
-        startFace       218231;
-    }
-    flange.obj_patch3
-    {
-        type            wall;
-        nFaces          438;
-        startFace       219905;
-    }
-    flange.obj_patch4
-    {
-        type            wall;
-        nFaces          3595;
-        startFace       220343;
-    }
-    cvMesh_defaultPatch
-    {
-        type            wall;
-        nFaces          0;
-        startFace       223938;
+        nFaces          116;
+        startFace       155;
     }
 )
 

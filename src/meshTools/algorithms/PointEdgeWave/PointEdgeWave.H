@@ -26,10 +26,10 @@ Class
 
 Description
     Wave propagation of information through grid. Every iteration
-    information goes through one layer of edges. Templated on information
-    that is transferred.
+    information goes through one layer of edges.
 
     Templated on information that is transferred.
+
     Handles parallel and cyclics. Only parallel reasonably tested. Cyclics
     hardly tested.
 

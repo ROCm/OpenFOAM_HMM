@@ -84,126 +84,42 @@ Foam::cvControls::cvControls
 
     // Controls for coarse surface conformation
 
-    const dictionary& coarseDict
+    const dictionary& conformationControlsDict
     (
-        surfDict.subDict("coarseConformationControls")
-    );
-
-    const dictionary& coarseInitialDict
-    (
-        coarseDict.subDict("initial")
-    );
-
-    const dictionary& coarseIterationDict
-    (
-        coarseDict.subDict("iteration")
+        surfDict.subDict("conformationControls")
     );
 
     surfacePtExclusionDistanceCoeff_ = readScalar
     (
-        coarseInitialDict.lookup("surfacePtExclusionDistanceCoeff")
+        conformationControlsDict.lookup("surfacePtExclusionDistanceCoeff")
     );
 
-    edgeSearchDistCoeffSqr_coarse_initial_ = sqr
+    edgeSearchDistCoeffSqr_ = sqr
     (
         readScalar
         (
-            coarseInitialDict.lookup("edgeSearchDistCoeff")
+            conformationControlsDict.lookup("edgeSearchDistCoeff")
         )
     );
 
-    edgeSearchDistCoeffSqr_coarse_iteration_ = sqr
+    surfacePtReplaceDistCoeffSqr_ = sqr
     (
         readScalar
         (
-            coarseIterationDict.lookup("edgeSearchDistCoeff")
+            conformationControlsDict.lookup("surfacePtReplaceDistCoeff")
         )
     );
 
-    surfacePtReplaceDistCoeffSqr_coarse_initial_ = sqr
+    maxConformationIterations_ = readLabel
     (
-        readScalar
-        (
-            coarseInitialDict.lookup("surfacePtReplaceDistCoeff")
-        )
+        conformationControlsDict.lookup("maxIterations")
     );
 
-    surfacePtReplaceDistCoeffSqr_coarse_iteration_ = sqr
+    iterationToInitialHitRatioLimit_ = readScalar
     (
-        readScalar
-        (
-            coarseIterationDict.lookup("surfacePtReplaceDistCoeff")
-        )
+        conformationControlsDict.lookup("iterationToInitialHitRatioLimit")
     );
 
-    maxConformationIterations_coarse_ = readLabel
-    (
-        coarseDict.lookup("maxIterations")
-    );
-
-    iterationToInitialHitRatioLimit_coarse_ = readScalar
-    (
-        coarseDict.lookup("iterationToInitialHitRatioLimit")
-    );
-
-    // Controls for fine surface conformation
-
-    const dictionary& fineDict
-    (
-        surfDict.subDict("fineConformationControls")
-    );
-
-    const dictionary& fineInitialDict
-    (
-        fineDict.subDict("initial")
-    );
-
-    const dictionary& fineIterationDict
-    (
-        fineDict.subDict("iteration")
-    );
-
-    edgeSearchDistCoeffSqr_fine_initial_ = sqr
-    (
-        readScalar
-        (
-            fineInitialDict.lookup("edgeSearchDistCoeff")
-        )
-    );
-
-    edgeSearchDistCoeffSqr_fine_iteration_ = sqr
-    (
-        readScalar
-        (
-            fineIterationDict.lookup("edgeSearchDistCoeff")
-        )
-    );
-
-    surfacePtReplaceDistCoeffSqr_fine_initial_ = sqr
-    (
-        readScalar
-        (
-            fineInitialDict.lookup("surfacePtReplaceDistCoeff")
-        )
-    );
-
-    surfacePtReplaceDistCoeffSqr_fine_iteration_ = sqr
-    (
-        readScalar
-        (
-            fineIterationDict.lookup("surfacePtReplaceDistCoeff")
-        )
-    );
-
-    maxConformationIterations_fine_ = readLabel
-    (
-        fineDict.lookup("maxIterations")
-    );
-
-    iterationToInitialHitRatioLimit_fine_ = readScalar
-    (
-        fineDict.lookup("iterationToInitialHitRatioLimit")
-    );
 
     // Motion control controls
 
@@ -279,248 +195,22 @@ Foam::cvControls::cvControls
 
     const dictionary& filteringDict(cvMeshDict_.subDict("polyMeshFiltering"));
 
+    filterEdges_ = Switch
+    (
+        filteringDict.lookupOrDefault<Switch>("filterEdges", true)
+    );
+
+    filterFaces_ = Switch
+    (
+        filteringDict.lookupOrDefault<Switch>("filterFaces", false)
+    );
+
+    if (filterFaces_)
+    {
+        filterEdges_ = Switch::ON;
+    }
+
     writeTetDualMesh_ = Switch(filteringDict.lookup("writeTetDualMesh"));
-
-    filterSizeCoeff_ = readScalar
-    (
-        filteringDict.lookup("filterSizeCoeff")
-    );
-
-    mergeClosenessCoeff_ = readScalar
-    (
-        filteringDict.lookup("mergeClosenessCoeff")
-    );
-
-    edgeMergeAngle_ = readScalar
-    (
-        filteringDict.lookup("edgeMergeAngle")
-    );
-
-    continueFilteringOnBadInitialPolyMesh_ = Switch
-    (
-        filteringDict.lookupOrDefault<Switch>
-        (
-            "continueFilteringOnBadInitialPolyMesh",
-            false
-        )
-    );
-
-    filterErrorReductionCoeff_ = readScalar
-    (
-        filteringDict.lookup("filterErrorReductionCoeff")
-    );
-
-    filterCountSkipThreshold_ = readLabel
-    (
-        filteringDict.lookup("filterCountSkipThreshold")
-    );
-
-    maxCollapseIterations_ = readLabel
-    (
-        filteringDict.lookup("maxCollapseIterations")
-    );
-
-    maxConsecutiveEqualFaceSets_ = readLabel
-    (
-        filteringDict.lookup("maxConsecutiveEqualFaceSets")
-    );
-
-    surfaceStepFaceAngle_ = readScalar
-    (
-        filteringDict.lookup("surfaceStepFaceAngle")
-    );
-
-    edgeCollapseGuardFraction_ = readScalar
-    (
-        filteringDict.lookup("edgeCollapseGuardFraction")
-    );
-
-    maxCollapseFaceToPointSideLengthCoeff_ = readScalar
-    (
-        filteringDict.lookup("maxCollapseFaceToPointSideLengthCoeff")
-    );
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::scalar Foam::cvControls::edgeSearchDistCoeffSqrInitial
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return edgeSearchDistCoeffSqr_coarse_initial_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return edgeSearchDistCoeffSqr_fine_initial_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::edgeSearchDistCoeffSqrInitial"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
-}
-
-
-Foam::scalar Foam::cvControls::edgeSearchDistCoeffSqrIteration
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return edgeSearchDistCoeffSqr_coarse_iteration_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return edgeSearchDistCoeffSqr_fine_iteration_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::edgeSearchDistCoeffSqrIteration"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
-}
-
-
-Foam::scalar Foam::cvControls::surfacePtReplaceDistCoeffSqrInitial
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return surfacePtReplaceDistCoeffSqr_coarse_initial_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return surfacePtReplaceDistCoeffSqr_fine_initial_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::surfacePtReplaceDistCoeffSqrInitial"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
-}
-
-
-Foam::scalar Foam::cvControls::surfacePtReplaceDistCoeffSqrIteration
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return surfacePtReplaceDistCoeffSqr_coarse_iteration_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return surfacePtReplaceDistCoeffSqr_fine_iteration_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::surfacePtReplaceDistCoeffSqrIteration"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
-}
-
-
-Foam::label Foam::cvControls::maxConformationIterations
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return maxConformationIterations_coarse_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return maxConformationIterations_fine_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::maxConformationIterations"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
-}
-
-
-Foam::scalar Foam::cvControls::iterationToInitialHitRatioLimit
-(
-    int reconfMode
-) const
-{
-    if (reconfMode == conformalVoronoiMesh::rmCoarse)
-    {
-        return iterationToInitialHitRatioLimit_coarse_;
-    }
-
-    else if (reconfMode == conformalVoronoiMesh::rmFine)
-    {
-        return iterationToInitialHitRatioLimit_fine_;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "Foam::cvControls::iterationToInitialHitRatioLimit"
-            "("
-                "int reconfMode"
-            ") const"
-        )   << "Unknown reconformationMode " << reconfMode
-            << exit(FatalError);
-    }
-
-    return 0;
 }
 
 
