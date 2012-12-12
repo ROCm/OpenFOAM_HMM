@@ -158,7 +158,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     const volScalarField& rho = film.rho();
     const scalarField rhop(rho.boundaryField()[patchI].patchInternalField());
 
-    const scalarField Re(max(G, 0.0)/mup);
+    const scalarField Re(max(G, scalar(0.0))/mup);
 
     // TODO: currently re-evaluating the entire gTan field to return this patch
     const scalarField gTan(film.gTan()().boundaryField()[patchI] & n);

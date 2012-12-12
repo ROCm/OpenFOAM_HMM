@@ -123,7 +123,7 @@ void Foam::polyMeshFilter::checkMeshEdgesAndRelaxEdges
         }
     }
 
-    syncTools::syncEdgeList(mesh_, minEdgeLen_, minEqOp<scalar>(), 0.0);
+    syncTools::syncEdgeList(mesh_, minEdgeLen_, minEqOp<scalar>(), scalar(0.0));
 
     for (label smoothIter = 0; smoothIter < maxSmoothIters_; ++smoothIter)
     {
@@ -154,7 +154,13 @@ void Foam::polyMeshFilter::checkMeshEdgesAndRelaxEdges
             );
         }
 
-        syncTools::syncEdgeList(mesh_, minEdgeLen_, minEqOp<scalar>(), 0.0);
+        syncTools::syncEdgeList
+        (
+            mesh_,
+            minEdgeLen_,
+            minEqOp<scalar>(),
+            scalar(0.0)
+        );
     }
 }
 
@@ -343,7 +349,7 @@ void Foam::polyMeshFilter::mapOldMeshEdgeFieldToNewMesh
         newMesh,
         newMeshMinEdgeLen,
         maxEqOp<scalar>(),
-        0.0
+        scalar(0.0)
     );
 }
 
