@@ -6,4 +6,9 @@ cd ${0%/*} || exit 1    # run from this directory
 
 cleanCase
 
+rm -rf constant/cellAlignments > /dev/null 2>&1
+rm -rf constant/targetCellSize > /dev/null 2>&1
+rm -rf constant/internalDelaunayVertices > /dev/null 2>&1
+
+
 # ----------------------------------------------------------------- end-of-file

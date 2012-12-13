@@ -144,20 +144,52 @@ public:
 
         //- Get representative set of element coordinates
         //  Usually the element centres (should be of length size()).
-        virtual pointField coordinates() const
+        virtual tmp<pointField> coordinates() const
         {
-            return pointField(1, origin_);
+            tmp<pointField> tCtrs(new pointField(1, origin_ + 0.5*span_));
+            return tCtrs;
+        }
+
+        //- Get the points that define the surface.
+        virtual tmp<pointField> points() const
+        {
+            tmp<pointField> tPts(new pointField(4));
+            pointField& pts = tPts();
+
+            pts[0] = origin_;
+            pts[2] = origin_ + span_;
+
+            if (span_.x() < span_.y() && span_.x() < span_.z())
+            {
+                pts[1] = origin_ + point(0, span_.y(), 0);
+                pts[3] = origin_ + point(0, 0, span_.z());
+            }
+            else if (span_.y() < span_.z())
+            {
+                pts[1] = origin_ + point(span_.x(), 0, 0);
+                pts[3] = origin_ + point(0, 0, span_.z());
+            }
+            else
+            {
+                pts[1] = origin_ + point(span_.x(), 0, 0);
+                pts[3] = origin_ + point(0, span_.y(), 0);
+            }
+
+            return tPts;
         }
 
         //- Does any part of the surface overlap the supplied bound box?
         virtual bool overlaps(const boundBox& bb) const
         {
-            notImplemented
+            return
             (
-                "searchablePlate::overlaps(const boundBox&) const"
+                (origin_.x() + span_.x()) >= bb.min().x()
+             && origin_.x() <= bb.max().x()
+             && (origin_.y() + span_.y()) >= bb.min().y()
+             && origin_.y() <= bb.max().y()
+             && (origin_.z() + span_.z()) >= bb.min().z()
+             && origin_.z() <= bb.max().z()
             );
-
-            return false;
         }
 
 

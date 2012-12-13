@@ -263,7 +263,7 @@ initialPoints
 // It determines the cell size given a location. It then uses all
 // the rules
 // - defaultCellSize
-// - cellSizeControlGeometry
+// - cellShapeControl
 // to determine target cell size. Rule with highest priority wins. If same
 // priority smallest cell size wins.
 motionControl
@@ -271,10 +271,28 @@ motionControl
     // Absolute cell size of back ground mesh. This is the maximum cell size.
     defaultCellSize     0.00075;
 
-    // Assign a priority to all requests for cell sizes, the highest overrules.
-    defaultPriority     0;
+    //cellShapeControl    constantControl;
+    //cellShapeControl    fileControl;
+    cellShapeControl    surfaceControl;
 
-    cellSizeControlGeometry
+    // Provide constant values for cell size and alignment
+    constantControlCoeffs
+    {
+        cellSize      0.00075;
+        cellAlignment (1 0 0 0 1 0 0 0 1);
+    }
+
+    // Read in the points of the background grid used for cell shape control
+    // from a file, with corresponding files for alignment and size
+    fileControlCoeffs
+    {
+        pointFile       "";
+        sizesFile       "";
+        alignmentsFile  "";
+    }
+
+    // Calculate the sizes and alignments from surfaces
+    surfaceControlCoeffs
     {
         ref7_outside
         {
@@ -317,6 +335,16 @@ motionControl
                 totalDistance       1.0;
             }
         }
+    }
+
+    // Provide an aspect ratio and the direction in which it acts on the mesh.
+    // Default is 1.0 if this section is not present in the dictionary
+    cellAspectRatioControl
+    {
+        // Aspect ratio.
+        aspectRatio                 2.0;
+        // Direction of action of the aspect ratio
+        aspectRatioDirection        (1 0 0);
     }
 
     // Underrelaxation for point motion. Simulated annealing: starts off at 1
@@ -396,6 +424,12 @@ motionControl
 // Do not change. See cvControls.H
 polyMeshFiltering
 {
+    // Filter small edges
+    filterEdges                             on;
+
+    // Filter small and sliver faces
+    filterFaces                             off;
+
     // Write the underlying Delaunay tet mesh at output time
     writeTetDualMesh                        false;  //true;
 

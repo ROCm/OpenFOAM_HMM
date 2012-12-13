@@ -26,6 +26,7 @@ License
 #include "automatic.H"
 #include "addToRunTimeSelectionTable.H"
 #include "triSurfaceMesh.H"
+#include "vtkSurfaceWriter.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -35,6 +36,59 @@ namespace Foam
     defineTypeNameAndDebug(automatic, 0);
     addToRunTimeSelectionTable(cellSizeCalculationType, automatic, dictionary);
 }
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::automatic::smoothField(triSurfaceScalarField& surf)
+{
+    label nSmoothingIterations = 10;
+
+    for (label iter = 0; iter < nSmoothingIterations; ++iter)
+    {
+        const pointField& faceCentres = surface_.faceCentres();
+
+        forAll(surf, sI)
+        {
+            const labelList& faceFaces = surface_.faceFaces()[sI];
+
+            const point& fC = faceCentres[sI];
+            const scalar value = surf[sI];
+
+            scalar newValue = 0;
+            scalar totalDist = 0;
+
+            label nFaces = 0;
+
+            forAll(faceFaces, fI)
+            {
+                const label faceLabel = faceFaces[fI];
+                const point& faceCentre = faceCentres[faceLabel];
+
+                const scalar faceValue = surf[faceLabel];
+                const scalar distance = mag(faceCentre - fC);
+
+                newValue += faceValue/distance;
+
+                totalDist += 1.0/distance;
+
+                if (value < faceValue)
+                {
+                    nFaces++;
+                }
+            }
+
+            // Do not smooth out the peak values
+            if (nFaces == faceFaces.size())
+            {
+                //continue;
+            }
+
+            surf[sI] = newValue/totalDist;
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -90,7 +144,8 @@ Foam::triSurfaceScalarField Foam::automatic::load()
 
     if (readCurvature_)
     {
-        Info<< indent << "Reading curvature: " << curvatureFile_ << endl;
+        Info<< indent << "Reading curvature         : "
+            << curvatureFile_ << endl;
 
         triSurfacePointScalarField curvature
         (
@@ -174,7 +229,7 @@ Foam::triSurfaceScalarField Foam::automatic::load()
 
     if (readFeatureProximity_)
     {
-        Info<< indent << "Reading feature proximity: "
+        Info<< indent << "Reading feature proximity : "
             << featureProximityFile_ << endl;
 
         triSurfaceScalarField featureProximity
@@ -204,7 +259,33 @@ Foam::triSurfaceScalarField Foam::automatic::load()
         }
     }
 
+    smoothField(surfaceCellSize);
+
     surfaceCellSize.write();
+
+    debug = 1;
+
+    if (debug)
+    {
+        faceList faces(surface_.size());
+
+        forAll(surface_, fI)
+        {
+            faces[fI] = surface_.triSurface::operator[](fI).triFaceFace();
+        }
+
+        vtkSurfaceWriter().write
+        (
+            surface_.searchableSurface::time().constant()/"triSurface",
+            surfaceName_,
+            surface_.points(),
+            faces,
+            "cellSize",
+            surfaceCellSize,
+            false,
+            true
+        );
+    }
 
     return surfaceCellSize;
 }

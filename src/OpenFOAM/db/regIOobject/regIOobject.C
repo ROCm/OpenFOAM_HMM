@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,19 +29,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::regIOobject, 0);
-
-int Foam::regIOobject::fileModificationSkew
-(
-    Foam::debug::optimisationSwitch("fileModificationSkew", 30)
-);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(regIOobject, 0);
+
+    int regIOobject::fileModificationSkew
+    (
+        debug::optimisationSwitch("fileModificationSkew", 30)
+    );
+
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::regIOobject::fileCheckTypes,
+        regIOobject::fileCheckTypes,
         4
     >::names[] =
     {

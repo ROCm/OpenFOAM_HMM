@@ -144,7 +144,7 @@ List<Vb::Point> uniformGrid::initialPoints() const
                 minimumSurfaceDistanceCoeffSqr_
                *sqr
                 (
-                    cvMesh_.cellSizeControl().cellSize(points)
+                    cvMesh_.cellShapeControls().cellSize(points)
                 )
             );
 

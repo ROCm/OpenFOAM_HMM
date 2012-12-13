@@ -47,36 +47,9 @@ bool Foam::indexedOctree<Type>::overlaps
     const point& sample
 )
 {
-    // Find out where sample is in relation to bb.
-    // Find nearest point on bb.
-    scalar distSqr = 0;
+    boundBox bb(p0, p1);
 
-    for (direction dir = 0; dir < vector::nComponents; dir++)
-    {
-        scalar d0 = p0[dir] - sample[dir];
-        scalar d1 = p1[dir] - sample[dir];
-
-        if ((d0 > 0) != (d1 > 0))
-        {
-            // sample inside both extrema. This component does not add any
-            // distance.
-        }
-        else if (mag(d0) < mag(d1))
-        {
-            distSqr += d0*d0;
-        }
-        else
-        {
-            distSqr += d1*d1;
-        }
-
-        if (distSqr > nearestDistSqr)
-        {
-            return false;
-        }
-    }
-
-    return true;
+    return bb.overlaps(sample, nearestDistSqr);
 }
 
 
@@ -376,124 +349,6 @@ Foam::label Foam::indexedOctree<Type>::compactContents
         }
     }
     return nNodes;
-}
-
-
-template <class Type>
-bool Foam::indexedOctree<Type>::quickCircumsphereRejection
-(
-    const label nodeI,
-    const point& cc,
-    const scalar crSqr,
-    const List<scalar>& nearestDistances
-) const
-{
-    const node& nod = nodes_[nodeI];
-
-    volumeType nodeType = volumeType(nodeTypes_.get(nodeI<<3));
-
-    //scalar boxDist = nearestDistances[nodeI] + 0.5*nod.bb_.mag();
-    scalar boxDist = crSqr + magSqr(cc - nod.bb_.midpoint());
-
-    if
-    (
-         nodeType == INSIDE
-      //&& (crSqr < sqr(boxDist))
-      && (boxDist < sqr(nearestDistances[nodeI]))
-    )
-    {
-        return true;
-    }
-    else
-    {
-        direction octant = nod.bb_.subOctant(cc);
-
-        labelBits index = nod.subNodes_[octant];
-
-        if (isNode(index))
-        {
-            return quickCircumsphereRejection
-            (
-                getNode(index),
-                cc,
-                crSqr,
-                nearestDistances
-            );
-        }
-        else
-        {
-            return false;
-        }
-    }
-}
-
-
-template <class Type>
-bool Foam::indexedOctree<Type>::quickCircumsphereRejection
-(
-    const point& cc,
-    const scalar crSqr,
-    const List<scalar>& nearestDistances
-) const
-{
-    if (nodes_.size())
-    {
-        return quickCircumsphereRejection
-        (
-            0,
-            cc,
-            crSqr,
-            nearestDistances
-        );
-    }
-
-    return false;
-}
-
-
-template <class Type>
-Foam::scalar
-Foam::indexedOctree<Type>::calcNearestDistance
-(
-    const label nodeI
-) const
-{
-    const node& nod = nodes_[nodeI];
-
-    const point& nodeCentre = nod.bb_.midpoint();
-
-    scalar nearestDistance = 0.0;
-
-    pointIndexHit pHit = findNearest(nodeCentre, sqr(GREAT));
-
-    if (pHit.hit())
-    {
-        nearestDistance = mag(pHit.hitPoint() - nodeCentre);
-    }
-    else
-    {
-        WarningIn("Foam::indexedOctree<Type>::calcNearestDistance(const label)")
-            << "Cannot calculate distance of nearest point on surface from "
-            << "the midpoint of the octree node. Returning distance of zero."
-            << endl;
-    }
-
-    return nearestDistance;
-}
-
-
-template <class Type>
-Foam::List<Foam::scalar>
-Foam::indexedOctree<Type>::calcNearestDistance() const
-{
-    List<scalar> nearestDistances(nodes_.size());
-
-    forAll(nearestDistances, nodeI)
-    {
-        nearestDistances[nodeI] = calcNearestDistance(nodeI);
-    }
-
-    return nearestDistances;
 }
 
 

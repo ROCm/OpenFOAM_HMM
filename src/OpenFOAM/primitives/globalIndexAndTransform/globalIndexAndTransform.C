@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,11 @@ License
 
 // * * * * * * * * * * * * Private Static Data Members * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::globalIndexAndTransform, 0);
-
-const Foam::label Foam::globalIndexAndTransform::base_ = 32;
+namespace Foam
+{
+defineTypeNameAndDebug(globalIndexAndTransform, 0);
+const label globalIndexAndTransform::base_ = 32;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

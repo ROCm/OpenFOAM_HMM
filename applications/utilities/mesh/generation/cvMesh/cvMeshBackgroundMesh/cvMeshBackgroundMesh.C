@@ -36,7 +36,7 @@ Description
 #include "triSurface.H"
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
-#include "cellSizeControlSurfaces.H"
+#include "cellShapeControl.H"
 #include "backgroundMeshDecomposition.H"
 #include "cellShape.H"
 #include "cellModeller.H"
@@ -450,10 +450,15 @@ int main(int argc, char *argv[])
         cvMeshDict.subDict("surfaceConformation")
     );
 
-    cellSizeControlSurfaces cellSizeControl
+    autoPtr<cellShapeControl> cellShapeControls
     (
-        allGeometry,
-        cvMeshDict.subDict("motionControl")
+        cellShapeControl::New
+        (
+            runTime,
+            cvMeshDict.subDict("motionControl"),
+            allGeometry,
+            geometryToConformTo
+        )
     );
 
 
@@ -464,7 +469,7 @@ int main(int argc, char *argv[])
 
         // Determine the number of cells in each direction.
         const vector span = bb.span();
-        vector nScalarCells = span/cellSizeControl.defaultCellSize();
+        vector nScalarCells = span/cellShapeControls().defaultCellSize();
 
         // Calculate initial cell size to be a little bit smaller than the
         // defaultCellSize to avoid initial refinement triggering.
@@ -580,7 +585,7 @@ int main(int argc, char *argv[])
         20.0,   //maxCellWeightCoeff
         runTime,
         geometryToConformTo,
-        cellSizeControl,
+        cellShapeControls(),
         rndGen,
         cvMeshDict
     );

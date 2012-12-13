@@ -37,8 +37,91 @@ SourceFiles
 
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
+#include "conformationSurfaces.H"
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template < class GT, class Vb = CGAL::Triangulation_vertex_base_3<GT> >
+class vertexWithInfo
+:
+    public Vb
+{
+public:
+
+    Foam::scalar value_;
+
+    Foam::tensor alignment_;
+
+    typedef typename Vb::Vertex_handle  Vertex_handle;
+    typedef typename Vb::Cell_handle    Cell_handle;
+    typedef typename Vb::Point          Point;
+
+    template < class TDS2 >
+    struct Rebind_TDS
+    {
+        typedef typename Vb::template Rebind_TDS<TDS2>::Other   Vb2;
+        typedef vertexWithInfo<GT, Vb2>                         Other;
+    };
+
+    vertexWithInfo()
+    :
+        Vb(),
+        value_(0.0),
+        alignment_(Foam::tensor::zero)
+    {}
+
+    explicit vertexWithInfo(const Point& p)
+    :
+        Vb(p),
+        value_(0.0),
+        alignment_(Foam::tensor::zero)
+    {}
+
+    vertexWithInfo(const Point& p, const Foam::scalar& value)
+    :
+        Vb(p),
+        value_(value),
+        alignment_(Foam::tensor::zero)
+    {}
+
+    vertexWithInfo
+    (
+        const Point& p,
+        const Foam::scalar& value,
+        const Foam::tensor& alignment
+    )
+    :
+        Vb(p),
+        value_(value),
+        alignment_(alignment)
+    {}
+
+
+    const Foam::scalar& value() const
+    {
+        return value_;
+    }
+
+    void value(const Foam::scalar& value)
+    {
+        value_ = value;
+    }
+
+    const Foam::tensor& alignment() const
+    {
+        return alignment_;
+    }
+
+    void alignment(const Foam::tensor& alignment)
+    {
+        alignment_ = alignment;
+    }
+};
+
 
 namespace Foam
 {
@@ -55,10 +138,28 @@ class cellSizeFunction;
 
 class cellSizeControlSurfaces
 {
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel             K;
+    typedef CGAL::Triangulation_data_structure_3<vertexWithInfo<K> >        Tds;
+
+    typedef CGAL::Delaunay_triangulation_3<K, Tds, CGAL::Fast_location>
+        Delaunay;
+
+    typedef Delaunay::Cell_handle    Cell_handle;
+    typedef Delaunay::Vertex_handle  Vertex_handle;
+    typedef Delaunay::Locate_type    Locate_type;
+    typedef Delaunay::Point          Point;
+
+    Delaunay T_;
+
+    mutable Cell_handle oldCellHandle_;
+
+
     // Private data
 
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;
+
+        const conformationSurfaces& geometryToConformTo_;
 
         //- Indices of surfaces in allGeometry that are to be conformed to
         labelList surfaces_;
@@ -84,6 +185,14 @@ class cellSizeControlSurfaces
             scalar& minSize
         ) const;
 
+        bool checkCoplanarTet(Cell_handle c, const scalar tol) const;
+
+        bool checkClosePoints(Cell_handle c, const scalar tol) const;
+
+        label refineTriangulation(const scalar factor);
+
+        void writeRefinementTriangulation();
+
         //- Disallow default bitwise copy construct
         cellSizeControlSurfaces(const cellSizeControlSurfaces&);
 
@@ -104,6 +213,7 @@ public:
         cellSizeControlSurfaces
         (
             const searchableSurfaces& allGeometry,
+            const conformationSurfaces& geometryToConformTo,
             const dictionary& motionControlDict
         );
 

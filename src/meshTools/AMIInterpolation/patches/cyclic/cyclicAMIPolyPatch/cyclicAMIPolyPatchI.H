@@ -39,13 +39,6 @@ Foam::cyclicAMIPolyPatch::neighbPatch() const
 }
 
 
-inline Foam::coupledPolyPatch::transformType
-Foam::cyclicAMIPolyPatch::transform() const
-{
-    return transform_;
-}
-
-
 inline const Foam::vector& Foam::cyclicAMIPolyPatch::rotationAxis() const
 {
     return rotationAxis_;

@@ -39,6 +39,7 @@ License
 #include "processorPolyPatch.H"
 #include "fvMesh.H"
 #include "CompactListList.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -2051,17 +2052,17 @@ void Foam::polyTopoChange::reorderCoupledFaces
 
     if (anyChanged)
     {
-        // Reorder faces according to oldToNew.
-        reorderCompactFaces(oldToNew.size(), oldToNew);
-
         // Rotate faces (rotation is already in new face indices).
         forAll(rotation, faceI)
         {
             if (rotation[faceI] != 0)
             {
-                faces_[faceI] = faces_[faceI].rotateFace(rotation[faceI]);
+                inplaceRotateList<List, label>(faces_[faceI], rotation[faceI]);
             }
         }
+
+        // Reorder faces according to oldToNew.
+        reorderCompactFaces(oldToNew.size(), oldToNew);
     }
 }
 

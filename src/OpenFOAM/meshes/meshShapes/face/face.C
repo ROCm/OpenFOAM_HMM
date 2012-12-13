@@ -28,6 +28,7 @@ License
 #include "triPointRef.H"
 #include "mathematicalConstants.H"
 #include "Swap.H"
+#include "const_circulator.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -299,7 +300,6 @@ Foam::face::face(const triFace& f)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-
 // return
 //   0: no match
 //  +1: identical
@@ -314,143 +314,88 @@ int Foam::face::compare(const face& a, const face& b)
     label sizeA = a.size();
     label sizeB = b.size();
 
-    if (sizeA != sizeB)
+    if (sizeA != sizeB || sizeA == 0)
     {
         return 0;
     }
 
+    const_circulator<face> aCirc(a);
+    const_circulator<face> bCirc(b);
 
-    // Full list comparison
-    const label firstA = a[0];
-    label Bptr = -1;
-
-    forAll(b, i)
+    // Rotate face b until its element matches the starting element of face a.
+    do
     {
-        if (b[i] == firstA)
+        if (aCirc() == bCirc())
         {
-            Bptr = i;        // 'found match' at element 'i'
+            // Set bCirc fulcrum to its iterator and increment the iterators
+            bCirc.setFulcrumToIterator();
+            ++aCirc;
+            ++bCirc;
+
+            break;
+        }
+    } while (bCirc.circulate(CirculatorBase::CLOCKWISE));
+
+    // If the circulator has stopped then faces a and b do not share a matching
+    // point
+    if (!bCirc.circulate())
+    {
+        return 0;
+    }
+
+    // Look forwards around the faces for a match
+    do
+    {
+        if (aCirc() != bCirc())
+        {
             break;
         }
     }
+    while
+    (
+        aCirc.circulate(CirculatorBase::CLOCKWISE),
+        bCirc.circulate(CirculatorBase::CLOCKWISE)
+    );
 
-    // If no match was found, return 0
-    if (Bptr < 0)
+    // If the circulator has stopped then faces a and b matched.
+    if (!aCirc.circulate())
     {
-        return 0;
-    }
-
-    // Now we must look for the direction, if any
-    label secondA = a[1];
-
-    if (sizeA > 1 && (secondA == firstA || firstA == a[sizeA - 1]))
-    {
-        face ca = a;
-        ca.collapse();
-
-        face cb = b;
-        cb.collapse();
-
-        return face::compare(ca, cb);
-    }
-
-    int dir = 0;
-
-    // Check whether at top of list
-    Bptr++;
-    if (Bptr == b.size())
-    {
-        Bptr = 0;
-    }
-
-    // Test whether upward label matches second A label
-    if (b[Bptr] == secondA)
-    {
-        // Yes - direction is 'up'
-        dir = 1;
+        return 1;
     }
     else
     {
-        // No - so look downwards, checking whether at bottom of list
-        Bptr -= 2;
-
-        if (Bptr < 0)
-        {
-            // wraparound
-            Bptr += b.size();
-        }
-
-        // Test whether downward label matches second A label
-        if (b[Bptr] == secondA)
-        {
-            // Yes - direction is 'down'
-            dir = -1;
-        }
+        // Reset the circulators back to their fulcrum
+        aCirc.setIteratorToFulcrum();
+        bCirc.setIteratorToFulcrum();
+        ++aCirc;
+        --bCirc;
     }
 
-    // Check whether a match was made at all, and exit 0 if not
-    if (dir == 0)
+    // Look backwards around the faces for a match
+    do
     {
-        return 0;
-    }
-
-    // Decrement size by 2 to account for first searches
-    sizeA -= 2;
-
-    // We now have both direction of search and next element
-    // to search, so we can continue search until no more points.
-    label Aptr = 1;
-    if (dir > 0)
-    {
-        while (sizeA--)
+        if (aCirc() != bCirc())
         {
-            Aptr++;
-            if (Aptr >= a.size())
-            {
-                Aptr = 0;
-            }
-
-            Bptr++;
-            if (Bptr >= b.size())
-            {
-                Bptr = 0;
-            }
-
-            if (a[Aptr] != b[Bptr])
-            {
-                return 0;
-            }
+            break;
         }
     }
-    else
+    while
+    (
+        aCirc.circulate(CirculatorBase::CLOCKWISE),
+        bCirc.circulate(CirculatorBase::ANTICLOCKWISE)
+    );
+
+    // If the circulator has stopped then faces a and b matched.
+    if (!aCirc.circulate())
     {
-        while (sizeA--)
-        {
-            Aptr++;
-            if (Aptr >= a.size())
-            {
-                Aptr = 0;
-            }
-
-            Bptr--;
-            if (Bptr < 0)
-            {
-                Bptr = b.size() - 1;
-            }
-
-            if (a[Aptr] != b[Bptr])
-            {
-                return 0;
-            }
-        }
+        return -1;
     }
 
-    // They must be equal - return direction
-    return dir;
+    return 0;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 Foam::label Foam::face::collapse()
 {
@@ -627,27 +572,6 @@ Foam::face Foam::face::reverseFace() const
     for (label pointI = 1; pointI < newList.size(); pointI++)
     {
         newList[pointI] = f[size() - pointI];
-    }
-
-    return face(xferMove(newList));
-}
-
-
-Foam::face Foam::face::rotateFace(const label nPos) const
-{
-    const labelList& f = *this;
-    labelList newList(size());
-
-    forAll(f, fp)
-    {
-        label fp1 = (fp + nPos) % f.size();
-
-        if (fp1 < 0)
-        {
-            fp1 += f.size();
-        }
-
-        newList[fp1] = f[fp];
     }
 
     return face(xferMove(newList));

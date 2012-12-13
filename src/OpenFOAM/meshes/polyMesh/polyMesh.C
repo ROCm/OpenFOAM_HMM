@@ -38,14 +38,25 @@ License
 #include "SubField.H"
 
 #include "pointMesh.H"
+#include "Istream.H"
+#include "Ostream.H"
+#include "simpleRegIOobject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::polyMesh, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(polyMesh, 0);
+registerDebugSwitchWithName
+(
+    polyMesh,
+    polyMesh,
+    polyMesh::typeName_()
+);
 
-
-Foam::word Foam::polyMesh::defaultRegion = "region0";
-Foam::word Foam::polyMesh::meshSubDir = "polyMesh";
+word polyMesh::defaultRegion = "region0";
+word polyMesh::meshSubDir = "polyMesh";
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

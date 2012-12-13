@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::pointMVCWeight::debug
-(
-    debug::debugSwitch("pointMVCWeight", 0)
-);
+defineDebugSwitchWithName(Foam::pointMVCWeight, "pointMVCWeight", 0);
 
 Foam::scalar Foam::pointMVCWeight::tol(SMALL);
 

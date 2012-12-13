@@ -25,6 +25,7 @@ polyTopoChange/polyTopoChange/topoAction/topoActions.C
 polyTopoChange/polyTopoChanger/polyTopoChanger.C
 polyTopoChange/polyTopoChange/polyTopoChange.C
 polyTopoChange/polyTopoChange/addPatchCellLayer.C
+polyTopoChange/polyTopoChange/pointEdgeCollapse/pointEdgeCollapse.C
 polyTopoChange/polyTopoChange/edgeCollapser.C
 polyTopoChange/polyTopoChange/faceCollapser.C
 polyTopoChange/polyTopoChange/hexRef8.C
@@ -97,5 +98,6 @@ createShellMesh/createShellMesh.C
 
 extrudePatchMesh/extrudePatchMesh.C
 
+polyMeshFilter/polyMeshFilter.C
 
 LIB = $(FOAM_LIBBIN)/libdynamicMesh

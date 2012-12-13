@@ -28,6 +28,11 @@
 #     Miscellaneous functions for running tutorial cases
 #------------------------------------------------------------------------------
 
+getNumberOfProcessors()
+{
+    sed -ne 's/^numberOfSubdomains *\(.*\);/\1/p' system/decomposeParDict
+}
+
 getApplication()
 {
     sed -ne 's/^ *application *\([a-zA-Z]*\) *;.*$/\1/p' system/controlDict

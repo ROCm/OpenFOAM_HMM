@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::xmgrGraph, 0);
-const Foam::word Foam::xmgrGraph::ext_("agr");
-
 namespace Foam
 {
+    defineTypeNameAndDebug(xmgrGraph, 0);
+    const word xmgrGraph::ext_("agr");
+
     typedef graph::writer graphWriter;
     addToRunTimeSelectionTable(graphWriter, xmgrGraph, word);
 }

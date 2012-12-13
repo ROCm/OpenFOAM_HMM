@@ -176,6 +176,9 @@ public:
             //- Overlaps/touches boundingBox?
             inline bool overlaps(const boundBox&) const;
 
+            //- Overlaps boundingSphere (centre + sqr(radius))?
+            inline bool overlaps(const point&, const scalar radiusSqr) const;
+
             //- Contains point? (inside or on edge)
             inline bool contains(const point&) const;
 
@@ -221,6 +224,11 @@ public:
                 const UList<point>&,
                 const FixedList<label, Size>& indices
             ) const;
+
+            //- Return the nearest point on the boundBox to the supplied point.
+            //  If point is inside the boundBox then the point is returned
+            //  unchanged.
+            point nearest(const point&) const;
 
 
     // Friend Operators

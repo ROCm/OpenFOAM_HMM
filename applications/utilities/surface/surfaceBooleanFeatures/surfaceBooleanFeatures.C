@@ -446,6 +446,7 @@ int main(int argc, char *argv[])
         edgeDirections,
         edgeNormals,
         labelListList(0),   // featurePointNormals,
+        labelListList(0),   // featurePointEdges,
         labelList(0)        // regionEdges
     );
 

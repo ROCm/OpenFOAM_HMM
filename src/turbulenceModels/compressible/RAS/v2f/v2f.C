@@ -407,7 +407,8 @@ void v2f::correct()
         1.0/T*((C1_ - N)*v2_ - 2.0/3.0*k_*(C1_ - 1.0))
     );
 
-    tmp<volScalarField> Ceps1 = 1.4*(1.0 + 0.05*min(sqrt(k_/v2_), 100.0));
+    tmp<volScalarField> Ceps1 =
+        1.4*(1.0 + 0.05*min(sqrt(k_/v2_), scalar(100.0)));
 
     // Update epsilon (and possibly G) at the wall
     epsilon_.boundaryField().updateCoeffs();

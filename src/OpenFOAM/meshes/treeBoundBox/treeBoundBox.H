@@ -272,9 +272,6 @@ public:
             //- Overlaps other bounding box?
             using boundBox::overlaps;
 
-            //- Overlaps boundingSphere (centre + sqr(radius))?
-            bool overlaps(const point&, const scalar radiusSqr) const;
-
             //- Intersects segment; set point to intersection position and face,
             //  return true if intersection found.
             //  (pt argument used during calculation even if not intersecting).

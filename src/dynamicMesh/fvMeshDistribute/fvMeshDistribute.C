@@ -961,11 +961,14 @@ void Foam::fvMeshDistribute::addProcPatches
                 }
                 else
                 {
+                    const coupledPolyPatch& pcPatch
+                        = refCast<const coupledPolyPatch>
+                          (
+                              mesh_.boundaryMesh()[referPatchID[bFaceI]]
+                          );
+
                     // Processor boundary originating from cyclic
-                    const word& cycName = mesh_.boundaryMesh()
-                    [
-                        referPatchID[bFaceI]
-                    ].name();
+                    const word& cycName = pcPatch.name();
 
                     const word patchName =
                         "procBoundary"
@@ -984,7 +987,8 @@ void Foam::fvMeshDistribute::addProcPatches
                         mesh_.boundaryMesh(),
                         Pstream::myProcNo(),
                         nbrProc[bFaceI],
-                        cycName
+                        cycName,
+                        pcPatch.transform()
                     );
 
                     procPatchID[procI].insert

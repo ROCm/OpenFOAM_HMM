@@ -56,8 +56,7 @@ Foam::cellSizeFunction::cellSizeFunction
         )
     ),
     coeffsDict_(subDict(type + "Coeffs")),
-    sideMode_(),
-    priority_(readLabel(cellSizeFunctionDict.lookup("priority")))
+    sideMode_()
 {
     word mode = cellSizeFunctionDict.lookup("mode");
 
@@ -77,7 +76,7 @@ Foam::cellSizeFunction::cellSizeFunction
         }
         else
         {
-            FatalErrorIn("cellSizeFunction::cellSizeFunction")
+            FatalErrorIn("searchableSurfaceControl::searchableSurfaceControl")
                 << "Unknown mode, expected: inside, outside or bothSides" << nl
                 << exit(FatalError);
         }
@@ -86,7 +85,7 @@ Foam::cellSizeFunction::cellSizeFunction
     {
         if (mode != "bothSides")
         {
-            WarningIn("cellSizeFunction::cellSizeFunction")
+            WarningIn("searchableSurfaceControl::searchableSurfaceControl")
                 << "surface does not support volumeType, defaulting mode to "
                 << "bothSides."
                 << endl;

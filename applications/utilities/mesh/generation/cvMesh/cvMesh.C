@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Application
     cvMesh
 
@@ -44,11 +39,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption
-    (
-        "noFilter",
-        "Do not filter the mesh"
-    );
     Foam::argList::addBoolOption
     (
         "checkGeometry",
@@ -60,10 +50,7 @@ int main(int argc, char *argv[])
 
     runTime.functionObjects().off();
 
-    const bool noFilter = !args.optionFound("noFilter");
     const bool checkGeometry = args.optionFound("checkGeometry");
-
-    Info<< "Mesh filtering is " << (noFilter ? "on" : "off") << endl;
 
     IOdictionary cvMeshDict
     (
@@ -112,14 +99,8 @@ int main(int argc, char *argv[])
 
         Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+            << endl;
     }
-
-    mesh.writeMesh(runTime.constant(), noFilter);
-
-    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
 
     Info<< nl << "End" << nl << endl;
 

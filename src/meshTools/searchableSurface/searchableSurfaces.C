@@ -846,7 +846,7 @@ void Foam::searchableSurfaces::writeStats
         {
             const triSurfaceMesh& ts = dynamic_cast<const triSurfaceMesh&>(s);
             Info<< "        edges     : " << ts.nEdges() << nl
-                << "        points    : " << ts.points().size() << nl;
+                << "        points    : " << ts.points()().size() << nl;
         }
         Info<< "        bounds    : " << s.bounds() << nl
             << "        closed    : " << Switch(s.hasVolumeType()) << endl;

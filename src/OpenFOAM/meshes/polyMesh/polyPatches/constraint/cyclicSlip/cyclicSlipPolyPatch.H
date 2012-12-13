@@ -68,10 +68,11 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const transformType transform = UNKNOWN
         )
         :
-            cyclicPolyPatch(name, size, start, index, bm, patchType)
+            cyclicPolyPatch(name, size, start, index, bm, patchType, transform)
         {}
 
         //- Construct from dictionary
