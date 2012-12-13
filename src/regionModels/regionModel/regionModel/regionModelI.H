@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,14 +112,31 @@ Foam::regionModels::regionModel::solution() const
 }
 
 
+inline bool Foam::regionModels::regionModel::isCoupledPatch
+(
+    const label regionPatchI
+) const
+{
+    forAll(intCoupledPatchIDs_, i)
+    {
+        if (intCoupledPatchIDs_[i] == regionPatchI)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 inline bool Foam::regionModels::regionModel::isRegionPatch
 (
-    const label patchI
+    const label primaryPatchI
 ) const
 {
     forAll(primaryPatchIDs_, i)
     {
-        if (primaryPatchIDs_[i] == patchI)
+        if (primaryPatchIDs_[i] == primaryPatchI)
         {
             return true;
         }

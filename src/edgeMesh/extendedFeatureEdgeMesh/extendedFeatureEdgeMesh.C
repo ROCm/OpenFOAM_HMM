@@ -39,41 +39,42 @@ License
 
 defineTypeNameAndDebug(Foam::extendedFeatureEdgeMesh, 0);
 
-
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::extendedFeatureEdgeMesh::pointStatus,
-    4
->::names[] =
+namespace Foam
 {
-    "convex",
-    "concave",
-    "mixed",
-    "nonFeature"
-};
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::extendedFeatureEdgeMesh::pointStatus,
+        4
+    >::names[] =
+    {
+        "convex",
+        "concave",
+        "mixed",
+        "nonFeature"
+    };
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::extendedFeatureEdgeMesh::edgeStatus,
+        6
+    >::names[] =
+    {
+        "external",
+        "internal",
+        "flat",
+        "open",
+        "multiple",
+        "none"
+    };
+}
 
 const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::pointStatus, 4>
     Foam::extendedFeatureEdgeMesh::pointStatusNames_;
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::extendedFeatureEdgeMesh::edgeStatus,
-    6
->::names[] =
-{
-    "external",
-    "internal",
-    "flat",
-    "open",
-    "multiple",
-    "none"
-};
-
 const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::edgeStatus, 6>
     Foam::extendedFeatureEdgeMesh::edgeStatusNames_;
-
 
 Foam::scalar Foam::extendedFeatureEdgeMesh::cosNormalAngleTol_ =
     Foam::cos(degToRad(0.1));

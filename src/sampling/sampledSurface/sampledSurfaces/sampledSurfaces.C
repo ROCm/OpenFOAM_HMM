@@ -248,7 +248,7 @@ void Foam::sampledSurfaces::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::sampledSurfaces::movePoints(const pointField&)
+void Foam::sampledSurfaces::movePoints(const polyMesh&)
 {
     expire();
 }

@@ -78,7 +78,6 @@ SourceFiles
 #define fieldCoordinateSystemTransform_H
 
 #include "OFstream.H"
-#include "pointFieldFwd.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "coordinateSystem.H"
@@ -91,6 +90,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -181,7 +181,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

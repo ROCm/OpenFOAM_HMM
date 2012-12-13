@@ -48,20 +48,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::fieldValues::fieldValueDelta::updateMesh(const mapPolyMesh&)
-{
-    // Do nothing
-}
-
-
-void Foam::fieldValues::fieldValueDelta::movePoints(const Field<point>&)
-{
-    // Do nothing
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fieldValues::fieldValueDelta::fieldValueDelta
@@ -205,6 +191,18 @@ void Foam::fieldValues::fieldValueDelta::execute()
 
 
 void Foam::fieldValues::fieldValueDelta::end()
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValues::fieldValueDelta::updateMesh(const mapPolyMesh&)
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValues::fieldValueDelta::movePoints(const polyMesh&)
 {
     // Do nothing
 }

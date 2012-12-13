@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -336,7 +336,7 @@ Foam::searchableSurfaceCollection::coordinates() const
 
     forAll(subGeom_, surfI)
     {
-        const pointField subCoords = subGeom_[surfI].coordinates();
+        const pointField subCoords(subGeom_[surfI].coordinates());
 
         forAll(subCoords, i)
         {
@@ -374,7 +374,7 @@ Foam::searchableSurfaceCollection::points() const
 
     forAll(subGeom_, surfI)
     {
-        const pointField subCoords = subGeom_[surfI].points();
+        const pointField subCoords(subGeom_[surfI].points());
 
         forAll(subCoords, i)
         {

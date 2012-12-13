@@ -273,7 +273,7 @@ public:
         virtual void updateMesh(const mapPolyMesh&);
 
         //- Update for mesh point-motion
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(const polyMesh&);
 
         ////- Update for changes of mesh due to readUpdate
         //virtual void readUpdate(const polyMesh::readUpdateState state);
