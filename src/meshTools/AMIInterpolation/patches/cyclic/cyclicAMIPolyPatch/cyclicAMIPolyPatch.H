@@ -321,11 +321,11 @@ public:
                 ) const;
 
                 //- Low-level interpolate List
-                template<class Type, class BinaryOp>
+                template<class Type, class CombineOp>
                 void interpolate
                 (
                     const UList<Type>& fld,
-                    const BinaryOp& bop,
+                    const CombineOp& cop,
                     List<Type>& result
                 ) const;
 

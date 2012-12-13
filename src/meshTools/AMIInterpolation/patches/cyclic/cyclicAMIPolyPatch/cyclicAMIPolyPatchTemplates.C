@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,21 +59,21 @@ Foam::tmp<Foam::Field<Type> > Foam::cyclicAMIPolyPatch::interpolate
 }
 
 
-template<class Type, class BinaryOp>
+template<class Type, class CombineOp>
 void Foam::cyclicAMIPolyPatch::interpolate
 (
     const UList<Type>& fld,
-    const BinaryOp& bop,
+    const CombineOp& cop,
     List<Type>& result
 ) const
 {
     if (owner())
     {
-        AMI().interpolateToSource(fld, bop, result);
+        AMI().interpolateToSource(fld, cop, result);
     }
     else
     {
-        neighbPatch().AMI().interpolateToTarget(fld, bop, result);
+        neighbPatch().AMI().interpolateToTarget(fld, cop, result);
     }
 }
 
