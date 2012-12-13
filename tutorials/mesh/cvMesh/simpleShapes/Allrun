@@ -38,6 +38,6 @@ runApplication surfaceFeatureExtract
 runApplication cvMesh
 
 # Generate some sets for a bit of mesh inspection
-runApplication topoSet -constant -time 0:100
+runApplication topoSet -time 0:100
 
 # ----------------------------------------------------------------- end-of-file
