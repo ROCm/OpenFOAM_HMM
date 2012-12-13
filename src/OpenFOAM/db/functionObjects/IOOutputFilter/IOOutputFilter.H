@@ -133,10 +133,10 @@ public:
         }
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
+        virtual void movePoints(const polyMesh& mesh)
         {
             read();
-            OutputFilter::movePoints(points);
+            OutputFilter::movePoints(mesh);
         }
 };
 

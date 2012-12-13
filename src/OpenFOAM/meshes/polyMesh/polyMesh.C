@@ -1173,6 +1173,8 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
         ).movePoints(points_);
     }
 
+    const_cast<Time&>(time()).functionObjects().movePoints(*this);
+
     return sweptVols;
 }
 
