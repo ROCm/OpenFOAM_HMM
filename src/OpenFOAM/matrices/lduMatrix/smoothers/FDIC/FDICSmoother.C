@@ -23,23 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DICSmoother.H"
-#include "DICPreconditioner.H"
+#include "FDICSmoother.H"
+#include "FDICPreconditioner.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(DICSmoother, 0);
+    defineTypeNameAndDebug(FDICSmoother, 0);
 
-    lduMatrix::smoother::addsymMatrixConstructorToTable<DICSmoother>
-        addDICSmootherSymMatrixConstructorToTable_;
+    lduMatrix::smoother::addsymMatrixConstructorToTable<FDICSmoother>
+        addFDICSmootherSymMatrixConstructorToTable_;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::DICSmoother::DICSmoother
+Foam::FDICSmoother::FDICSmoother
 (
     const word& fieldName,
     const lduMatrix& matrix,
@@ -56,15 +56,46 @@ Foam::DICSmoother::DICSmoother
         interfaceIntCoeffs,
         interfaces
     ),
-    rD_(matrix_.diag())
+    rD_(matrix_.diag()),
+    rDuUpper_(matrix_.upper().size()),
+    rDlUpper_(matrix_.upper().size())
 {
-    DICPreconditioner::calcReciprocalD(rD_, matrix_);
+    scalar* __restrict__ rDPtr = rD_.begin();
+    scalar* __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    scalar* __restrict__ rDlUpperPtr = rDlUpper_.begin();
+
+    const label* const __restrict__ uPtr =
+        matrix_.lduAddr().upperAddr().begin();
+    const label* const __restrict__ lPtr =
+        matrix_.lduAddr().lowerAddr().begin();
+    const scalar* const __restrict__ upperPtr =
+        matrix_.upper().begin();
+
+    register label nCells = rD_.size();
+    register label nFaces = matrix_.upper().size();
+
+    for (register label face=0; face<nFaces; face++)
+    {
+        rDPtr[uPtr[face]] -= sqr(upperPtr[face])/rDPtr[lPtr[face]];
+    }
+
+    // Generate reciprocal FDIC
+    for (register label cell=0; cell<nCells; cell++)
+    {
+        rDPtr[cell] = 1.0/rDPtr[cell];
+    }
+
+    for (register label face=0; face<nFaces; face++)
+    {
+        rDuUpperPtr[face] = rDPtr[uPtr[face]]*upperPtr[face];
+        rDlUpperPtr[face] = rDPtr[lPtr[face]]*upperPtr[face];
+    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::DICSmoother::smooth
+void Foam::FDICSmoother::smooth
 (
     scalarField& psi,
     const scalarField& source,
@@ -72,8 +103,9 @@ void Foam::DICSmoother::smooth
     const label nSweeps
 ) const
 {
-    const scalar* const __restrict__ rDPtr = rD_.begin();
-    const scalar* const __restrict__ upperPtr = matrix_.upper().begin();
+    const scalar* const __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    const scalar* const __restrict__ rDlUpperPtr = rDlUpper_.begin();
+
     const label* const __restrict__ uPtr =
         matrix_.lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr =
@@ -98,17 +130,15 @@ void Foam::DICSmoother::smooth
         rA *= rD_;
 
         register label nFaces = matrix_.upper().size();
-        for (register label facei=0; facei<nFaces; facei++)
+        for (register label face=0; face<nFaces; face++)
         {
-            register label u = uPtr[facei];
-            rAPtr[u] -= rDPtr[u]*upperPtr[facei]*rAPtr[lPtr[facei]];
+            rAPtr[uPtr[face]] -= rDuUpperPtr[face]*rAPtr[lPtr[face]];
         }
 
         register label nFacesM1 = nFaces - 1;
-        for (register label facei=nFacesM1; facei>=0; facei--)
+        for (register label face=nFacesM1; face>=0; face--)
         {
-            register label l = lPtr[facei];
-            rAPtr[l] -= rDPtr[l]*upperPtr[facei]*rAPtr[uPtr[facei]];
+            rAPtr[lPtr[face]] -= rDlUpperPtr[face]*rAPtr[uPtr[face]];
         }
 
         psi += rA;
