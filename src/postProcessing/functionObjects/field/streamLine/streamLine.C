@@ -749,7 +749,7 @@ void Foam::streamLine::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::streamLine::movePoints(const pointField&)
+void Foam::streamLine::movePoints(const polyMesh&)
 {
     // Moving mesh affects the search tree
     read(dict_);

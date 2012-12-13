@@ -39,7 +39,6 @@ SourceFiles
 #ifndef writeDictionary_H
 #define writeDictionary_H
 
-#include "pointFieldFwd.H"
 #include "wordList.H"
 #include "runTimeSelectionTables.H"
 #include "SHA1Digest.H"
@@ -52,6 +51,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -142,7 +142,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

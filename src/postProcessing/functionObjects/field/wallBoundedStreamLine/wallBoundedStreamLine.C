@@ -876,7 +876,7 @@ void Foam::wallBoundedStreamLine::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::wallBoundedStreamLine::movePoints(const pointField&)
+void Foam::wallBoundedStreamLine::movePoints(const polyMesh&)
 {
     // Moving mesh affects the search tree
     read(dict_);
