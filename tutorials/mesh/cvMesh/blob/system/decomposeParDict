@@ -15,10 +15,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 8;
+numberOfSubdomains 2;
 
-//method          scotch;
- method          ptscotch;
+method          scotch;
+//method          ptscotch;
 // method          hierarchical;
 
 simpleCoeffs
@@ -29,7 +29,7 @@ simpleCoeffs
 
 hierarchicalCoeffs
 {
-    n               ( 2 2 2 );
+    n               ( 2 1 1 );
     delta           0.001;
     order           xyz;
 }

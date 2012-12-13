@@ -44,7 +44,7 @@ SourceFiles
 #ifndef dsmcFields_H
 #define dsmcFields_H
 
-#include "pointFieldFwd.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,10 +54,11 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class dsmcFields Declaration
+                         Class dsmcFields Declaration
 \*---------------------------------------------------------------------------*/
 
 class dsmcFields
@@ -130,7 +131,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

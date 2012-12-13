@@ -51,10 +51,21 @@ Foam::processorCyclicPolyPatch::processorCyclicPolyPatch
     const polyBoundaryMesh& bm,
     const int myProcNo,
     const int neighbProcNo,
-    const word& referPatchName
+    const word& referPatchName,
+    const transformType transform
 )
 :
-    processorPolyPatch(name, size, start, index, bm, myProcNo, neighbProcNo),
+    processorPolyPatch
+    (
+        name,
+        size,
+        start,
+        index,
+        bm,
+        myProcNo,
+        neighbProcNo,
+        transform
+    ),
     tag_
     (
         Pstream::nProcs()*max(myProcNo, neighbProcNo)

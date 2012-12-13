@@ -201,16 +201,6 @@ private:
                 label& compactI
             );
 
-            scalar calcNearestDistance(const label nodeI) const;
-
-            bool quickCircumsphereRejection
-            (
-                const label nodeI,
-                const point& cc,
-                const scalar crSqr,
-                const List<scalar>& nearestDistances
-            ) const;
-
             //- Determine inside/outside per node (mixed if cannot be
             //  determined). Only valid for closed shapes.
             volumeType calcVolumeType(const label nodeI) const;
@@ -658,16 +648,6 @@ public:
                 CompareOp& cop
             ) const;
 
-            //- Return a list containing the nearest distance of nodes to any
-            //  shapes
-            List<scalar> calcNearestDistance() const;
-
-            bool quickCircumsphereRejection
-            (
-                const point& cc,
-                const scalar crSqr,
-                const List<scalar>& nearestDistances
-            ) const;
 
         // Write
 

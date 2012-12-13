@@ -145,7 +145,7 @@ void homogeneousDynOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     volSymmTensorField D(dev(symm(gradU)));
     volScalarField divU(fvc::div(phi()/fvc::interpolate(rho())));
-    volScalarField G(2*muSgs_*(gradU && D));
+    volScalarField G(type() + ".G", 2*muSgs_*(gradU && D));
 
     tmp<fvScalarMatrix> kEqn
     (

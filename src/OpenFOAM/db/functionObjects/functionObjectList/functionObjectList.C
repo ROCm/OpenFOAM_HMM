@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,11 +25,15 @@ License
 
 #include "functionObjectList.H"
 #include "Time.H"
+#include "mapPolyMesh.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::functionObject*
-Foam::functionObjectList::remove(const word& key, label& oldIndex)
+Foam::functionObject* Foam::functionObjectList::remove
+(
+    const word& key,
+    label& oldIndex
+)
 {
     functionObject* ptr = 0;
 
@@ -316,6 +320,30 @@ bool Foam::functionObjectList::read()
     }
 
     return ok;
+}
+
+
+void Foam::functionObjectList::updateMesh(const mapPolyMesh& mpm)
+{
+    if (execution_)
+    {
+        forAll(*this, objectI)
+        {
+            operator[](objectI).updateMesh(mpm);
+        }
+    }
+}
+
+
+void Foam::functionObjectList::movePoints(const polyMesh& mesh)
+{
+    if (execution_)
+    {
+        forAll(*this, objectI)
+        {
+            operator[](objectI).movePoints(mesh);
+        }
+    }
 }
 
 

@@ -109,6 +109,8 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
             )
         ).updateMesh(mpm);
     }
+
+    const_cast<Time&>(time()).functionObjects().updateMesh(mpm);
 }
 
 

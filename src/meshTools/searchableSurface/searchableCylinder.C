@@ -39,11 +39,23 @@ addToRunTimeSelectionTable(searchableSurface, searchableCylinder, dict);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::pointField Foam::searchableCylinder::coordinates() const
+Foam::tmp<Foam::pointField> Foam::searchableCylinder::coordinates() const
 {
-    pointField ctrs(1, 0.5*(point1_ + point2_));
+    tmp<pointField> tCtrs(new pointField(1, 0.5*(point1_ + point2_)));
 
-    return ctrs;
+    return tCtrs;
+}
+
+
+Foam::tmp<Foam::pointField> Foam::searchableCylinder::points() const
+{
+    tmp<pointField> tPts(new pointField(2));
+    pointField& pts = tPts();
+
+    pts[0] = point1_;
+    pts[1] = point2_;
+
+    return tPts;
 }
 
 

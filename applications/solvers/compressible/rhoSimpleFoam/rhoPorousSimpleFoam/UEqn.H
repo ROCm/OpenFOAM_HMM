@@ -33,6 +33,8 @@
             U = trTU() & ((UEqn() == sources(rho, U))().H() - gradp);
         }
         U.correctBoundaryConditions();
+
+        sources.correct(U);
     }
     else
     {
@@ -41,6 +43,8 @@
         sources.constrain(UEqn());
 
         solve(UEqn() == -fvc::grad(p) + sources(rho, U));
+
+        sources.correct(U);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

@@ -13,4 +13,6 @@ sources.constrain(UEqn());
 if (pimple.momentumPredictor())
 {
     solve(UEqn() == -fvc::grad(p_gh) + sources(U));
+
+    sources.correct(U);
 }

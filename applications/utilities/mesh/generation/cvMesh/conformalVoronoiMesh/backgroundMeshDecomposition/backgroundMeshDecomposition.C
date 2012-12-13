@@ -25,6 +25,10 @@ License
 
 #include "backgroundMeshDecomposition.H"
 #include "meshSearch.H"
+#include "conformationSurfaces.H"
+#include "zeroGradientFvPatchFields.H"
+#include "Time.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -377,7 +381,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                         if (oldCellI == -1)
                         {
                             newVolumeStatus[newCellI] =
-                                searchableSurface::UNKNOWN;;
+                                searchableSurface::UNKNOWN;
                         }
                         else
                         {
@@ -413,8 +417,10 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
 
             fvMeshDistribute distributor(mesh_, mergeDist_);
 
-            autoPtr<mapDistributePolyMesh> mapDist =
-                distributor.distribute(newDecomp);
+            autoPtr<mapDistributePolyMesh> mapDist = distributor.distribute
+            (
+                newDecomp
+            );
 
             meshCutter_.distribute(mapDist);
 
@@ -527,87 +533,87 @@ bool Foam::backgroundMeshDecomposition::refineCell
 
     if (volType == searchableSurface::MIXED)
     {
-        // Assess the cell size at the nearest point on the surface for the
-        // MIXED cells, if the cell is large with respect to the cell size,
-        // then refine it.
-
-        pointField samplePoints
-        (
-            volRes_*volRes_*volRes_,
-            vector::zero
-        );
-
-        // scalar sampleVol = cellBb.volume()/samplePoints.size();
-
-        vector delta = cellBb.span()/volRes_;
-
-        label pI = 0;
-
-        for (label i = 0; i < volRes_; i++)
-        {
-            for (label j = 0; j < volRes_; j++)
-            {
-                for (label k = 0; k < volRes_; k++)
-                {
-                    samplePoints[pI++] =
-                        cellBb.min()
-                      + vector
-                        (
-                            delta.x()*(i + 0.5),
-                            delta.y()*(j + 0.5),
-                            delta.z()*(k + 0.5)
-                        );
-                }
-            }
-        }
-
-        List<pointIndexHit> hitInfo;
-        labelList hitSurfaces;
-
-        geometry.findSurfaceNearest
-        (
-            samplePoints,
-            scalarField(samplePoints.size(), sqr(GREAT)),
-            hitInfo,
-            hitSurfaces
-        );
-
-        // weightEstimate = 0.0;
-
-        scalar minCellSize = GREAT;
-
-        forAll(samplePoints, i)
-        {
-            scalar s = cellSizeControl_.cellSize
-            (
-                hitInfo[i].hitPoint()
-            );
-
-            // Info<< "cellBb.midpoint() " << cellBb.midpoint() << nl
-            //     << samplePoints[i] << nl
-            //     << hitInfo[i] << nl
-            //     << "cellBb.span() " << cellBb.span() << nl
-            //     << "cellBb.mag() " << cellBb.mag() << nl
-            //     << s << endl;
-
-            if (s < minCellSize)
-            {
-                minCellSize = max(s, minCellSizeLimit_);
-            }
-
-            // Estimate the number of points in the cell by the surface size,
-            // this is likely to be too small, so reduce.
-            // weightEstimate += sampleVol/pow3(s);
-        }
-
-        if (sqr(spanScale_)*sqr(minCellSize) < magSqr(cellBb.span()))
-        {
-            return true;
-        }
+//        // Assess the cell size at the nearest point on the surface for the
+//        // MIXED cells, if the cell is large with respect to the cell size,
+//        // then refine it.
+//
+//        pointField samplePoints
+//        (
+//            volRes_*volRes_*volRes_,
+//            vector::zero
+//        );
+//
+//        // scalar sampleVol = cellBb.volume()/samplePoints.size();
+//
+//        vector delta = cellBb.span()/volRes_;
+//
+//        label pI = 0;
+//
+//        for (label i = 0; i < volRes_; i++)
+//        {
+//            for (label j = 0; j < volRes_; j++)
+//            {
+//                for (label k = 0; k < volRes_; k++)
+//                {
+//                    samplePoints[pI++] =
+//                        cellBb.min()
+//                      + vector
+//                        (
+//                            delta.x()*(i + 0.5),
+//                            delta.y()*(j + 0.5),
+//                            delta.z()*(k + 0.5)
+//                        );
+//                }
+//            }
+//        }
+//
+//        List<pointIndexHit> hitInfo;
+//        labelList hitSurfaces;
+//
+//        geometry.findSurfaceNearest
+//        (
+//            samplePoints,
+//            scalarField(samplePoints.size(), sqr(GREAT)),
+//            hitInfo,
+//            hitSurfaces
+//        );
+//
+//        // weightEstimate = 0.0;
+//
+//        scalar minCellSize = GREAT;
+//
+//        forAll(samplePoints, i)
+//        {
+//            scalar s = cellShapeControl_.cellSize
+//            (
+//                hitInfo[i].hitPoint()
+//            );
+//
+//            // Info<< "cellBb.midpoint() " << cellBb.midpoint() << nl
+//            //     << samplePoints[i] << nl
+//            //     << hitInfo[i] << nl
+//            //     << "cellBb.span() " << cellBb.span() << nl
+//            //     << "cellBb.mag() " << cellBb.mag() << nl
+//            //     << s << endl;
+//
+//            if (s < minCellSize)
+//            {
+//                minCellSize = max(s, minCellSizeLimit_);
+//            }
+//
+//            // Estimate the number of points in the cell by the surface size,
+//            // this is likely to be too small, so reduce.
+//            // weightEstimate += sampleVol/pow3(s);
+//        }
+//
+//        if (sqr(spanScale_)*sqr(minCellSize) < magSqr(cellBb.span()))
+//        {
+//            return true;
+//        }
     }
     else if (volType == searchableSurface::INSIDE)
     {
-        // scalar s = cvMesh_.cellSizeControl().cellSize(cellBb.midpoint());
+        // scalar s = cvMesh_.cellShapeControl_.cellSize(cellBb.midpoint());
 
         // Estimate the number of points in the cell by the size at the cell
         // midpoint
@@ -724,9 +730,7 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 
     globalBackgroundBounds_ = treeBoundBox(bbMin, bbMax);
 
-    octreeNearestDistances_ = bFTreePtr_().calcNearestDistance();
-
-    if (cvMeshControls_.objOutput())
+    if (false)
     {
         OFstream fStr
         (
@@ -773,15 +777,15 @@ void Foam::backgroundMeshDecomposition::buildPatchAndTree()
 
 Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
 (
-    const dictionary& coeffsDict,
-    const conformalVoronoiMesh& cvMesh
+    const Time& runTime,
+    Random& rndGen,
+    const conformationSurfaces& geometryToConformTo,
+    const dictionary& coeffsDict
 )
 :
-    runTime_(cvMesh.time()),
-    geometryToConformTo_(cvMesh.geometryToConformTo()),
-    cellSizeControl_(cvMesh.cellSizeControl()),
-    rndGen_(cvMesh.rndGen()),
-    cvMeshControls_(cvMesh.cvMeshControls()),
+    runTime_(runTime),
+    geometryToConformTo_(geometryToConformTo),
+    rndGen_(rndGen),
     mesh_
     (
         IOobject
@@ -800,7 +804,6 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     ),
     boundaryFacesPtr_(),
     bFTreePtr_(),
-    octreeNearestDistances_(),
     allBackgroundMeshBounds_(Pstream::nProcs()),
     globalBackgroundBounds_(),
     decomposeDict_
@@ -857,74 +860,6 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
 }
 
 
-Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
-(
-    const scalar spanScale,
-    const scalar minCellSizeLimit,
-    const label minLevels,
-    const label volRes,
-    const scalar maxCellWeightCoeff,
-
-    const Time& runTime,
-    const conformationSurfaces& geometryToConformTo,
-    const cellSizeControlSurfaces& cellSizeControl,
-    Random& rndGen,
-    const cvControls& cvMeshControls
-)
-:
-    runTime_(runTime),
-    geometryToConformTo_(geometryToConformTo),
-    cellSizeControl_(cellSizeControl),
-    rndGen_(rndGen),
-    cvMeshControls_(cvMeshControls),
-    mesh_
-    (
-        IOobject
-        (
-            fvMesh::defaultRegion,
-            runTime_.timeName(),
-            runTime_,
-            IOobject::MUST_READ
-        )
-    ),
-    meshCutter_
-    (
-        mesh_,
-        labelList(mesh_.nCells(), 0),
-        labelList(mesh_.nPoints(), 0)
-    ),
-    boundaryFacesPtr_(),
-    bFTreePtr_(),
-    octreeNearestDistances_(),
-    allBackgroundMeshBounds_(Pstream::nProcs()),
-    globalBackgroundBounds_(),
-    decomposeDict_
-    (
-        IOobject
-        (
-            "decomposeParDict",
-            runTime_.system(),
-            runTime_,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    ),
-    decomposerPtr_(decompositionMethod::New(decomposeDict_)),
-    mergeDist_(1e-6*mesh_.bounds().mag()),
-    spanScale_(spanScale),
-    minCellSizeLimit_(minCellSizeLimit),
-    minLevels_(minLevels),
-    volRes_(volRes),
-    maxCellWeightCoeff_(maxCellWeightCoeff)
-{
-    // Stand-alone operation
-
-    Info<< nl << "Building initial background mesh decomposition" << endl;
-
-    initialRefinement();
-}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::backgroundMeshDecomposition::~backgroundMeshDecomposition()
@@ -936,10 +871,7 @@ Foam::backgroundMeshDecomposition::~backgroundMeshDecomposition()
 Foam::autoPtr<Foam::mapDistributePolyMesh>
 Foam::backgroundMeshDecomposition::distribute
 (
-    volScalarField& cellWeights,
-    List<DynamicList<point> >& cellVertices,
-    List<DynamicList<label> >& cellVertexIndices,
-    List<DynamicList<label> >& cellVertexTypes
+    volScalarField& cellWeights
 )
 {
     if (debug)
@@ -982,10 +914,8 @@ Foam::backgroundMeshDecomposition::distribute
         {
             Info<< "    cellWeightLimit " << cellWeightLimit << endl;
 
-            Pout<< "    sum(cellWeights) "
-                << sum(cellWeights.internalField())
-                << " max(cellWeights) "
-                << max(cellWeights.internalField())
+            Pout<< "    sum(cellWeights) " << sum(cellWeights.internalField())
+                << " max(cellWeights) " << max(cellWeights.internalField())
                 << endl;
         }
 
@@ -1049,94 +979,6 @@ Foam::backgroundMeshDecomposition::distribute
         // Update numbering of cells/vertices.
         meshCutter_.updateMesh(map);
 
-        {
-            // Map cellVertices, cellVertexIndices and cellVertexTypes
-
-            meshSearch cellSearch(mesh_, polyMesh::FACEPLANES);
-
-            const labelList& reverseCellMap = map().reverseCellMap();
-
-            List<DynamicList<point> > newCellVertices(mesh_.nCells());
-            List<DynamicList<label> > newCellVertexIndices(mesh_.nCells());
-            List<DynamicList<label> > newCellVertexTypes(mesh_.nCells());
-
-            forAll(cellVertices, oldCellI)
-            {
-                DynamicList<point>& oldCellVertices =
-                    cellVertices[oldCellI];
-
-                DynamicList<label>& oldCellVertexIndices =
-                    cellVertexIndices[oldCellI];
-
-                DynamicList<label>& oldCellVertexTypes =
-                    cellVertexTypes[oldCellI];
-
-                if (findIndex(newCellsToRefine, oldCellI) >= 0)
-                {
-                    // This old cell was refined so the cell for the vertices
-                    // in the new mesh needs to be searched for.
-
-                    forAll(oldCellVertices, oPI)
-                    {
-                        const point& v = oldCellVertices[oPI];
-
-                        label newCellI = cellSearch.findCell(v);
-
-                        if (newCellI == -1)
-                        {
-                            // Pout<< "findCell backgroundMeshDecomposition "
-                            //     << v << " "
-                            //     << oldCellI
-                            //     << newCellI
-                            //     << " find nearest cellI ";
-
-                            newCellI = cellSearch.findNearestCell(v);
-
-                            // Pout<< newCellI << endl;
-                        }
-
-                        newCellVertices[newCellI].append(v);
-
-                        newCellVertexIndices[newCellI].append
-                        (
-                            oldCellVertexIndices[oPI]
-                        );
-
-                        newCellVertexTypes[newCellI].append
-                        (
-                            oldCellVertexTypes[oPI]
-                        );
-                    }
-                }
-                else
-                {
-                    label newCellI = reverseCellMap[oldCellI];
-
-                    forAll(oldCellVertices, oPI)
-                    {
-                        newCellVertices[newCellI].append
-                        (
-                            oldCellVertices[oPI]
-                        );
-
-                        newCellVertexIndices[newCellI].append
-                        (
-                            oldCellVertexIndices[oPI]
-                        );
-
-                        newCellVertexTypes[newCellI].append
-                        (
-                            oldCellVertexTypes[oPI]
-                        );
-                    }
-                }
-            }
-
-            cellVertices.transfer(newCellVertices);
-            cellVertexIndices.transfer(newCellVertexIndices);
-            cellVertexTypes.transfer(newCellVertexTypes);
-        }
-
         Info<< "    Background mesh refined from "
             << returnReduce(map().nOldCells(), sumOp<label>())
             << " to " << mesh_.globalData().nTotalCells()
@@ -1193,10 +1035,6 @@ Foam::backgroundMeshDecomposition::distribute
         cellWeights.write();
     }
 
-    mapDist().distributeCellData(cellVertices);
-    mapDist().distributeCellData(cellVertexIndices);
-    mapDist().distributeCellData(cellVertexTypes);
-
     buildPatchAndTree();
 
     return mapDist;
@@ -1227,8 +1065,10 @@ bool Foam::backgroundMeshDecomposition::positionOnThisProcessor
 //    return bFTreePtr_().findAnyOverlap(pt, 0.0);
 
     return
+    (
         bFTreePtr_().getVolumeType(pt)
-     == indexedOctree<treeDataBPatch>::INSIDE;
+     == indexedOctree<treeDataBPatch>::INSIDE
+    );
 }
 
 
@@ -1246,6 +1086,7 @@ Foam::boolList Foam::backgroundMeshDecomposition::positionOnThisProcessor
 
     return posProc;
 }
+
 
 bool Foam::backgroundMeshDecomposition::overlapsThisProcessor
 (
@@ -1660,110 +1501,304 @@ Foam::backgroundMeshDecomposition::intersectsProcessors
 }
 
 
-Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
+bool Foam::backgroundMeshDecomposition::overlapsOtherProcessors
 (
-    const List<point>& centres,
-    const List<scalar>& radiusSqrs,
-    bool includeOwnProcessor
+    const point& centre,
+    const scalar& radiusSqr
 ) const
 {
-    DynamicList<label> toCandidateProc;
-    DynamicList<point> testCentres;
-    DynamicList<scalar> testRadiusSqrs;
-    labelList sphereBlockStart(centres.size(), -1);
-    labelList sphereBlockSize(centres.size(), -1);
-
-    label nTotalCandidates = 0;
-
-    forAll(centres, sI)
+    forAll(allBackgroundMeshBounds_, procI)
     {
-        const point& c = centres[sI];
-        scalar rSqr = radiusSqrs[sI];
-
-        label nCandidates = 0;
-
-        forAll(allBackgroundMeshBounds_, procI)
+        if (bFTreePtr_().findNearest(centre, radiusSqr).hit())
         {
-            // It is assumed that the sphere in question overlaps the source
-            // processor, so don't test it, unless includeOwnProcessor is true
-            if
-            (
-                (includeOwnProcessor || procI != Pstream::myProcNo())
-             && allBackgroundMeshBounds_[procI].overlaps(c, rSqr)
-            )
-            {
-                toCandidateProc.append(procI);
-                testCentres.append(c);
-                testRadiusSqrs.append(rSqr);
-
-                nCandidates++;
-            }
+            return true;
         }
-
-        sphereBlockStart[sI] = nTotalCandidates;
-        sphereBlockSize[sI] = nCandidates;
-
-        nTotalCandidates += nCandidates;
     }
 
-    // Needed for reverseDistribute
-    label preDistributionToCandidateProcSize = toCandidateProc.size();
-
-    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
-
-    map().distribute(testCentres);
-    map().distribute(testRadiusSqrs);
-
-    List<bool> sphereOverlapsCandidate(testCentres.size(), false);
-
-    // Test candidate spheres on candidate processors
-    forAll(testCentres, sI)
-    {
-        const point& c = testCentres[sI];
-        scalar rSqr = testRadiusSqrs[sI];
-
-        // If the sphere finds a nearest element of the patch, then it overlaps
-        sphereOverlapsCandidate[sI] = bFTreePtr_().findNearest(c, rSqr).hit();
-        //sphereOverlapsCandidate[sI] = bFTreePtr_().findAnyOverlap(c, rSqr);
-    }
-
-    map().reverseDistribute
-    (
-        preDistributionToCandidateProcSize,
-        sphereOverlapsCandidate
-    );
-
-    labelListList sphereProcs(centres.size());
-
-    // Working storage for assessing processors
-    DynamicList<label> tmpProcs;
-
-    forAll(centres, sI)
-    {
-        tmpProcs.clear();
-
-        // Extract the sub list of results for this point
-
-        SubList<bool> sphereProcResults
-        (
-            sphereOverlapsCandidate,
-            sphereBlockSize[sI],
-            sphereBlockStart[sI]
-        );
-
-        forAll(sphereProcResults, sPRI)
-        {
-            if (sphereProcResults[sPRI])
-            {
-                tmpProcs.append(toCandidateProc[sphereBlockStart[sI] + sPRI]);
-            }
-        }
-
-        sphereProcs[sI] = tmpProcs;
-    }
-
-    return sphereProcs;
+    return false;
 }
+
+
+Foam::labelList Foam::backgroundMeshDecomposition::overlapProcessors
+(
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    DynamicList<label> toProc(Pstream::nProcs());
+
+    forAll(allBackgroundMeshBounds_, procI)
+    {
+        // Test against the bounding box of the processor
+        if
+        (
+            procI != Pstream::myProcNo()
+         && allBackgroundMeshBounds_[procI].overlaps(centre, radiusSqr)
+        )
+        {
+            // Expensive test
+//            if (bFTreePtr_().findNearest(centre, radiusSqr).hit())
+            {
+                toProc.append(procI);
+            }
+        }
+    }
+
+    return toProc;
+}
+
+
+//Foam::labelListList Foam::backgroundMeshDecomposition::overlapsProcessors
+//(
+//    const List<point>& centres,
+//    const List<scalar>& radiusSqrs,
+//    const Delaunay& T,
+//    bool includeOwnProcessor
+//) const
+//{
+//    DynamicList<label> toCandidateProc;
+//    DynamicList<point> testCentres;
+//    DynamicList<scalar> testRadiusSqrs;
+//    labelList sphereBlockStart(centres.size(), -1);
+//    labelList sphereBlockSize(centres.size(), -1);
+//
+//    label nTotalCandidates = 0;
+//
+//    forAll(centres, sI)
+//    {
+//        const point& c = centres[sI];
+//        scalar rSqr = radiusSqrs[sI];
+//
+//        label nCandidates = 0;
+//
+//        forAll(allBackgroundMeshBounds_, procI)
+//        {
+//            // It is assumed that the sphere in question overlaps the source
+//            // processor, so don't test it, unless includeOwnProcessor is true
+//            if
+//            (
+//                (includeOwnProcessor || procI != Pstream::myProcNo())
+//             && allBackgroundMeshBounds_[procI].overlaps(c, rSqr)
+//            )
+//            {
+//                if (bFTreePtr_().findNearest(c, rSqr).hit())
+//                {
+//                    toCandidateProc.append(procI);
+//                    testCentres.append(c);
+//                    testRadiusSqrs.append(rSqr);
+//
+//                    nCandidates++;
+//                }
+//            }
+//        }
+//
+//        sphereBlockStart[sI] = nTotalCandidates;
+//        sphereBlockSize[sI] = nCandidates;
+//
+//        nTotalCandidates += nCandidates;
+//    }
+//
+//    // Needed for reverseDistribute
+////    label preDistributionToCandidateProcSize = toCandidateProc.size();
+////
+////    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+////
+////    map().distribute(testCentres);
+////    map().distribute(testRadiusSqrs);
+//
+//    // @todo This is faster, but results in more vertices being referred
+//    boolList sphereOverlapsCandidate(testCentres.size(), true);
+////    boolList sphereOverlapsCandidate(testCentres.size(), false);
+////
+////    // Test candidate spheres on candidate processors
+////    forAll(testCentres, sI)
+////    {
+////        const point& c = testCentres[sI];
+////        const scalar rSqr = testRadiusSqrs[sI];
+////
+////        const bool flagOverlap = bFTreePtr_().findNearest(c, rSqr).hit();
+////
+////        if (flagOverlap)
+////        {
+////            //if (vertexOctree.findAnyOverlap(c, rSqr))
+//////            if (vertexOctree.findNearest(c, rSqr*1.001).hit())
+//////            {
+//////                sphereOverlapsCandidate[sI] = true;
+//////            }
+////
+//////            Vertex_handle nearestVertex = T.nearest_vertex
+//////            (
+//////                toPoint<Point>(c)
+//////            );
+//////
+//////            const scalar distSqr = magSqr
+//////            (
+//////                topoint(nearestVertex->point()) - c
+//////            );
+//////
+//////            if (distSqr <= rSqr)
+//////            {
+//////                // If the sphere finds a nearest element of the patch,
+//////                // then it overlaps
+////                sphereOverlapsCandidate[sI] = true;
+//////            }
+////        }
+////    }
+//
+////    map().reverseDistribute
+////    (
+////        preDistributionToCandidateProcSize,
+////        sphereOverlapsCandidate
+////    );
+//
+//    labelListList sphereProcs(centres.size());
+//
+//    // Working storage for assessing processors
+//    DynamicList<label> tmpProcs;
+//
+//    forAll(centres, sI)
+//    {
+//        tmpProcs.clear();
+//
+//        // Extract the sub list of results for this point
+//
+//        SubList<bool> sphereProcResults
+//        (
+//            sphereOverlapsCandidate,
+//            sphereBlockSize[sI],
+//            sphereBlockStart[sI]
+//        );
+//
+//        forAll(sphereProcResults, sPRI)
+//        {
+//            if (sphereProcResults[sPRI])
+//            {
+//                tmpProcs.append(toCandidateProc[sphereBlockStart[sI] + sPRI]);
+//            }
+//        }
+//
+//        sphereProcs[sI] = tmpProcs;
+//    }
+//
+//    return sphereProcs;
+//}
+
+
+//Foam::labelListList Foam::backgroundMeshDecomposition::overlapProcessors
+//(
+//    const point& cc,
+//    const scalar rSqr
+//) const
+//{
+//    DynamicList<label> toCandidateProc;
+//    label sphereBlockStart(-1);
+//    label sphereBlockSize(-1);
+//
+//    label nCandidates = 0;
+//
+//    forAll(allBackgroundMeshBounds_, procI)
+//    {
+//        // It is assumed that the sphere in question overlaps the source
+//        // processor, so don't test it, unless includeOwnProcessor is true
+//        if
+//        (
+//            (includeOwnProcessor || procI != Pstream::myProcNo())
+//         && allBackgroundMeshBounds_[procI].overlaps(cc, rSqr)
+//        )
+//        {
+//            toCandidateProc.append(procI);
+//
+//            nCandidates++;
+//        }
+//    }
+//
+//    sphereBlockSize = nCandidates;
+//    nTotalCandidates += nCandidates;
+//
+//    // Needed for reverseDistribute
+//    label preDistributionToCandidateProcSize = toCandidateProc.size();
+//
+//    autoPtr<mapDistribute> map(buildMap(toCandidateProc));
+//
+//    map().distribute(testCentres);
+//    map().distribute(testRadiusSqrs);
+//
+//    // @todo This is faster, but results in more vertices being referred
+////    boolList sphereOverlapsCandidate(testCentres.size(), true);
+//    boolList sphereOverlapsCandidate(testCentres.size(), false);
+//
+//    // Test candidate spheres on candidate processors
+//    forAll(testCentres, sI)
+//    {
+//        const point& c = testCentres[sI];
+//        const scalar rSqr = testRadiusSqrs[sI];
+//
+//        const bool flagOverlap = bFTreePtr_().findNearest(c, rSqr).hit();
+//
+//        if (flagOverlap)
+//        {
+//            //if (vertexOctree.findAnyOverlap(c, rSqr))
+////            if (vertexOctree.findNearest(c, rSqr*1.001).hit())
+////            {
+////                sphereOverlapsCandidate[sI] = true;
+////            }
+//
+////            Vertex_handle nearestVertex = T.nearest_vertex
+////            (
+////                toPoint<Point>(c)
+////            );
+////
+////            const scalar distSqr = magSqr
+////            (
+////                topoint(nearestVertex->point()) - c
+////            );
+////
+////            if (distSqr <= rSqr)
+////            {
+////                // If the sphere finds a nearest element of the patch, then
+////                // it overlaps
+//                sphereOverlapsCandidate[sI] = true;
+////            }
+//        }
+//    }
+//
+//    map().reverseDistribute
+//    (
+//        preDistributionToCandidateProcSize,
+//        sphereOverlapsCandidate
+//    );
+//
+//    labelListList sphereProcs(centres.size());
+//
+//    // Working storage for assessing processors
+//    DynamicList<label> tmpProcs;
+//
+//    forAll(centres, sI)
+//    {
+//        tmpProcs.clear();
+//
+//        // Extract the sub list of results for this point
+//
+//        SubList<bool> sphereProcResults
+//        (
+//            sphereOverlapsCandidate,
+//            sphereBlockSize[sI],
+//            sphereBlockStart[sI]
+//        );
+//
+//        forAll(sphereProcResults, sPRI)
+//        {
+//            if (sphereProcResults[sPRI])
+//            {
+//                tmpProcs.append(toCandidateProc[sphereBlockStart[sI] + sPRI]);
+//            }
+//        }
+//
+//        sphereProcs[sI] = tmpProcs;
+//    }
+//
+//    return sphereProcs;
+//}
 
 
 // ************************************************************************* //

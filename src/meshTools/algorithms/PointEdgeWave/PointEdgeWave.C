@@ -115,6 +115,7 @@ void Foam::PointEdgeWave<Type, TrackingData>::transform
             "PointEdgeWave<Type, TrackingData>::transform"
             "(const tensorField&, List<Type>&)"
         )   << "Non-uniform transformation on patch " << patch.name()
+            << " of type " << patch.type()
             << " not supported for point fields"
             << abort(FatalError);
 

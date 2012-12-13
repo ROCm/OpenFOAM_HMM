@@ -1,6 +1,5 @@
     fvVectorMatrix UEqn
     (
-        //pZones.ddt(rho, U)
         fvm::ddt(rho, U)
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
@@ -14,10 +13,10 @@
 
     sources.constrain(UEqn);
 
-    pZones.addResistance(UEqn);
-
     if (pimple.momentumPredictor())
     {
         solve(UEqn == -fvc::grad(p));
+
+        sources.correct(U);
         K = 0.5*magSqr(U);
     }

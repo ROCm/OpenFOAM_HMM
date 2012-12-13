@@ -59,9 +59,6 @@ class cellSizeFunction
 
 public:
 
-    //- Runtime type information
-    TypeName("cellSizeFunction");
-
     //- Surface side mode
     enum sideMode
     {
@@ -69,6 +66,9 @@ public:
         smOutside,        // Control outside the surface
         rmBothsides       // Control on both sides of a surface
     };
+
+    //- Runtime type information
+    TypeName("cellSizeFunction");
 
 
 protected:
@@ -96,9 +96,6 @@ protected:
 
         //- Mode of size specification, i.e. inside, outside or bothSides
         sideMode sideMode_;
-
-        //- Priority of this cellSizeFunction
-        label priority_;
 
 
 private:
@@ -160,11 +157,6 @@ public:
         inline const dictionary& coeffsDict() const
         {
             return coeffsDict_;
-        }
-
-        inline label priority() const
-        {
-            return priority_;
         }
 
         //- Modify scalar argument to the cell size specified by function.

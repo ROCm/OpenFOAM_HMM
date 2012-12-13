@@ -37,6 +37,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "Switch.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,74 +107,21 @@ class cvControls
 
                 //- Distance to search for feature edges near to
                 //  surface protrusions - fraction of the local target
-                //  cell size. Coarse conformation, initial protrusion
-                //  tests.
-                scalar edgeSearchDistCoeffSqr_coarse_initial_;
-
-                //- Distance to search for feature edges near to
-                //  surface protrusions - fraction of the local target
-                //  cell size. Coarse conformation, iteration
-                //  protrusion tests.
-                scalar edgeSearchDistCoeffSqr_coarse_iteration_;
+                //  cell size.
+                scalar edgeSearchDistCoeffSqr_;
 
                 //- Proximity to a feature edge where a surface hit is
                 //  not created, only the edge conformation is created
-                //  - fraction of the local target cell size. Coarse
-                //  conformation, initial protrusion tests.
-                scalar surfacePtReplaceDistCoeffSqr_coarse_initial_;
+                //  - fraction of the local target cell size.
+                scalar surfacePtReplaceDistCoeffSqr_;
 
-                //- Proximity to a feature edge where a surface hit is
-                //  not created, only the edge conformation is created
-                //  - fraction of the local target cell size. Coarse
-                //  conformation, iteration protrusion tests.
-                scalar surfacePtReplaceDistCoeffSqr_coarse_iteration_;
+                //- Maximum allowed number surface conformation iterations.
+                label maxConformationIterations_;
 
-                //- Maximum allowed number coarse surface conformation
-                //  iterations.
-                label maxConformationIterations_coarse_;
-
-                //- Termination criterion for coarse surface
-                //  conformation iterations.  When the number of
-                //  surface protrusions drops below this ratio of the
-                //  initial number of protrusions.
-                scalar iterationToInitialHitRatioLimit_coarse_;
-
-
-            // Controls for fine surface conformation
-
-                //- Distance to search for feature edges near to
-                //  surface protrusions - fraction of the local target
-                //  cell size. Fine conformation, initial protrusion
-                //  tests.
-                scalar edgeSearchDistCoeffSqr_fine_initial_;
-
-                //- Distance to search for feature edges near to
-                //  surface protrusions - fraction of the local target
-                //  cell size. Fine conformation, iteration protrusion
-                //  tests.
-                scalar edgeSearchDistCoeffSqr_fine_iteration_;
-
-                //- Proximity to a feature edge where a surface hit is
-                //  not created, only the edge conformation is created
-                //  - fraction of the local target cell size. Fine
-                //  conformation, initial protrusion tests.
-                scalar surfacePtReplaceDistCoeffSqr_fine_initial_;
-
-                //- Proximity to a feature edge where a surface hit is
-                //  not created, only the edge conformation is created
-                //  - fraction of the local target cell size. Fine
-                //  conformation, iteration protrusion tests.
-                scalar surfacePtReplaceDistCoeffSqr_fine_iteration_;
-
-                //- Maximum allowed number fine surface conformation
-                //  iterations.
-                label maxConformationIterations_fine_;
-
-                //- Termination criterion for fine surface conformation
-                //  iterations.  When the number of surface protrusions
-                //  drops below this ratio of the initial number of
-                //  protrusions.
-                scalar iterationToInitialHitRatioLimit_fine_;
+                //- Termination criterion for conformation iterations.
+                //  When the number of surface protrusions drops below this
+                //  ratio of the initial number of protrusions.
+                scalar iterationToInitialHitRatioLimit_;
 
 
     // Motion control controls
@@ -197,6 +145,7 @@ class cvControls
 
         //- Now often to re-store the size and alignment data
         label sizeAndAlignmentRebuildFrequency_;
+
 
         // Point insertion criteria
 
@@ -223,66 +172,14 @@ class cvControls
 
     // polyMesh filtering controls
 
+        //- Activates the mesh edge filtering. On by default.
+        Switch filterEdges_;
+
+        //- Activates the mesh face filtering. Off by default.
+        Switch filterFaces_;
+
         //- Write tet mesh at output time (it always writes the Voronoi)
         Switch writeTetDualMesh_;
-
-        //- Upper limit on the size of faces to be filtered from,
-        //  fraction of the local target cell size
-        scalar filterSizeCoeff_;
-
-        //- Upper limit on how close two dual vertices can be before
-        //  being merged, fraction of the local target cell size
-        scalar mergeClosenessCoeff_;
-
-        //- If the angle between two dual edges that are connected by a single
-        //  point is less than this angle, then the edges will be merged into a
-        //  single edge.
-        scalar edgeMergeAngle_;
-
-        //- If the mesh quality criteria cannot be satisfied, continue
-        //  with filtering anyway?
-        Switch continueFilteringOnBadInitialPolyMesh_;
-
-        //- When a face is "bad", what fraction should the filterSizeCoeff_ be
-        //  reduced by.  Recursive, so for a filterCount value of fC, the
-        //  filterSizeCoeff is reduced by pow(filterErrorReductionCoeff_, fC)
-        scalar filterErrorReductionCoeff_;
-
-        //- Maximum number of filterCount applications before a face
-        //  is not attempted to be filtered
-        label filterCountSkipThreshold_;
-
-        //- Maximum number of permissible iterations of the face collapse
-        //  algorithm.  The value to choose will be related the maximum number
-        //  of points on a face that is to be collapsed and how many faces
-        //  around it need to be collapsed.
-        label maxCollapseIterations_;
-
-        //- Maximum number of times an to allow an equal faceSet to be
-        //  returned from the face quality assessment before stopping iterations
-        //  to break an infinitie loop.
-        label maxConsecutiveEqualFaceSets_;
-
-        //- The maximum allowed angle between a boundary face normal and the
-        //  local surface normal before face will be aggressively collapsed
-        scalar surfaceStepFaceAngle_;
-
-        //- Defining how close to the midpoint (M) of the projected
-        //  vertices line a projected vertex (X) can be before making
-        //  an edge collapse invalid
-        //
-        //  X---X-g----------------M----X-----------g----X--X
-        //
-        //  Only allow a collapse if all projected vertices are
-        //  outwith edgeCollapseGuardFraction (g) of the distance form
-        //  the face centre to the furthest vertex in the considered
-        //  direction
-        scalar edgeCollapseGuardFraction_;
-
-        //- The maximum allowed length of the longest edge of a face
-        //  to enable a face to be collapsed to a point, fraction of
-        //  the local target cell size
-        scalar maxCollapseFaceToPointSideLengthCoeff_;
 
 
     // Private Member Functions
@@ -346,30 +243,17 @@ public:
             //- Return the surfaceConformationRebuildFrequency
             inline label surfaceConformationRebuildFrequency() const;
 
-            //- Return the edgeSearchDistCoeffSqr for initial
-            //  conformation for the given reconformationMode.
-            scalar edgeSearchDistCoeffSqrInitial(int reconfMode) const;
+            //- Return the edgeSearchDistCoeffSqr for conformation.
+            scalar edgeSearchDistCoeffSqr() const;
 
-            //- Return the edgeSearchDistCoeffSqr for conformation
-            //  iterations for the given reconformationMode.
-            scalar edgeSearchDistCoeffSqrIteration(int reconfMode) const;
+            //- Return the surfacePtReplaceDistCoeffSqr for conformation.
+            scalar surfacePtReplaceDistCoeffSqr() const;
 
-            //- Return the surfacePtReplaceDistCoeffSqr for initial
-            //  conformation for the given reconformationMode.
-            scalar surfacePtReplaceDistCoeffSqrInitial(int reconfMode) const;
+            //- Return the maxConformationIterations
+            label maxConformationIterations() const;
 
-            //- Return the surfacePtReplaceDistCoeffSqr for
-            //  conformation iterations for the given
-            //  reconformationMode.
-            scalar surfacePtReplaceDistCoeffSqrIteration(int reconfMode) const;
-
-            //- Return the maxConformationIterations for the given
-            //  reconformationMode.
-            label maxConformationIterations(int reconfMode) const;
-
-            //- Return the iterationToInitialHitRatioLimit for the
-            //  given reconformationMode.
-            scalar iterationToInitialHitRatioLimit(int reconfMode) const;
+            //- Return the iterationToInitialHitRatioLimit
+            scalar iterationToInitialHitRatioLimit() const;
 
             //- Return the objOutput Switch
             inline Switch objOutput() const;
@@ -389,6 +273,12 @@ public:
             //- Return the sizeAndAlignmentRebuildFrequency
             inline label sizeAndAlignmentRebuildFrequency() const;
 
+            //- Return the aspectRatio
+            inline scalar aspectRatio() const;
+
+            //- Return the aspectRatioDirection
+            inline const vector& aspectRatioDirection() const;
+
             //- Return the insertionDistCoeff
             inline scalar insertionDistCoeff() const;
 
@@ -401,44 +291,14 @@ public:
             //- Return removalDistCoeff
             inline scalar removalDistCoeff() const;
 
+            //- Filter edges at output time
+            inline Switch filterEdges() const;
+
+            //- Filter faces at output time
+            inline Switch filterFaces() const;
+
             //- Write tetMesh at output time
             inline Switch writeTetDualMesh() const;
-
-            //- Return the filterSizeCoeff
-            inline scalar filterSizeCoeff() const;
-
-            //- Return the mergeClosenessCoeff
-            inline scalar mergeClosenessCoeff() const;
-
-            //- Return the edgeMergeAngle
-            inline scalar edgeMergeAngle() const;
-
-            //- Return the continueFilteringOnBadInitialPolyMesh Switch
-            inline Switch continueFilteringOnBadInitialPolyMesh() const;
-
-            //- Return the filterErrorReductionCoeff
-            inline scalar filterErrorReductionCoeff() const;
-
-            //- Return the maxCollapseIterations
-            inline label maxCollapseIterations() const;
-
-            //- Return the maxConsecutiveEqualFaceSets
-            inline label maxConsecutiveEqualFaceSets() const;
-
-            //- Return the filterCountSkipThreshold
-            inline label filterCountSkipThreshold() const;
-
-            //- Return the maxCollapseIterations
-            inline label minCollapseFaces() const;
-
-            //- Return the surfaceStepFaceAngle
-            inline scalar surfaceStepFaceAngle() const;
-
-            //- Return the edgeCollapseGuardFraction
-            inline scalar edgeCollapseGuardFraction() const;
-
-            //- Return the maxCollapseFaceToPointSideLengthCoeff
-            inline scalar maxCollapseFaceToPointSideLengthCoeff() const;
 };
 
 

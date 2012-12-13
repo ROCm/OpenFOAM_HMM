@@ -25,5 +25,7 @@
 
     EaEqn.solve();
 
+    sources.correct(hea);
+
     thermo.correct();
 }

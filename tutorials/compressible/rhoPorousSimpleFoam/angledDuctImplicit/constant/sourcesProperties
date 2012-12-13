@@ -17,14 +17,14 @@ FoamFile
 
 source1
 {
-    type            fixedTemperatureSource;
+    type            fixedTemperatureConstraint;
     active          true;
     timeStart       0;
     duration        1000000;
     selectionMode   cellZone;
     cellZone        porosity;
 
-    fixedTemperatureSourceCoeffs
+    fixedTemperatureConstraintCoeffs
     {
         mode            uniform;
         temperature     350;

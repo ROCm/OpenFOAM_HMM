@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -308,8 +308,6 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
         }
         case mappedPatchBase::NEARESTFACE:
         {
-            const mapDistribute& distMap = mpp.map();
-
             Field<Type> allValues(nbrMesh.nFaces(), pTraits<Type>::zero);
 
             const fieldType& nbrField = sampleField();
@@ -326,7 +324,7 @@ void mappedFixedValueFvPatchField<Type>::updateCoeffs()
                 }
             }
 
-            distMap.distribute(allValues);
+            mpp.distribute(allValues);
             newValues.transfer(allValues);
 
             break;

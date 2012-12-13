@@ -149,6 +149,7 @@ castellatedMeshControls
             patchInfo
             {
                 type patch;
+                inGroups (meshedPatches);
             }
 
             //- Optional angle to detect small-large cell situation

@@ -428,12 +428,12 @@ bool Foam::domainDecomposition::writeDecomposition()
                   : curProcessorPatchSizes[procPatchI] - subStarts[i]
                 );
 
-                //Info<< "From processor:" << procI << endl
-                //    << "  to processor:" << curNeighbourProcessors[procPatchI]
-                //    << endl
-                //    << "    via patch:" << subPatchID[i] << endl
-                //    << "    start    :" << curStart << endl
-                //    << "    size     :" << size << endl;
+//                Info<< "From processor:" << procI << endl
+//                    << "  to processor:" << curNeighbourProcessors[procPatchI]
+//                    << endl
+//                    << "    via patch:" << subPatchID[i] << endl
+//                    << "    start    :" << curStart << endl
+//                    << "    size     :" << size << endl;
 
                 if (subPatchID[i] == -1)
                 {
@@ -454,9 +454,14 @@ bool Foam::domainDecomposition::writeDecomposition()
                 }
                 else
                 {
+                    const coupledPolyPatch& pcPatch
+                        = refCast<const coupledPolyPatch>
+                          (
+                              boundaryMesh()[subPatchID[i]]
+                          );
+
                     // From cyclic
-                    const word& referPatch =
-                        boundaryMesh()[subPatchID[i]].name();
+                    const word& referPatch = pcPatch.name();
 
                     procPatches[nPatches] =
                         new processorCyclicPolyPatch
@@ -472,7 +477,8 @@ bool Foam::domainDecomposition::writeDecomposition()
                             procMesh.boundaryMesh(),
                             procI,
                             curNeighbourProcessors[procPatchI],
-                            referPatch
+                            referPatch,
+                            pcPatch.transform()
                         );
                 }
 

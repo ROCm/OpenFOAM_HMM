@@ -96,12 +96,12 @@ surfaceConformation
     // Distance to a feature point within which surface and edge
     // conformation points are excluded - fraction of the local target
     // cell size
-    featurePointExclusionDistanceCoeff  0.4;
+    featurePointExclusionDistanceCoeff  0.6;
 
     // Distance to an existing feature edge conformation location
     // within which other edge conformation location are excluded -
     // fraction of the local target cell size
-    featureEdgeExclusionDistanceCoeff   0.2;
+    featureEdgeExclusionDistanceCoeff   0.6;
 
     // Optimisation: do not check for surface intersection (of dual edges)
     // for points near to surface.
@@ -120,35 +120,27 @@ surfaceConformation
     // Frequency to redo surface conformation (expensive).
     surfaceConformationRebuildFrequency 10;
 
+    // Specialised feature point handling
+    specialiseFeaturePoints on;
+
     // Initial and intermediate controls
     conformationControls
     {
-        // Initial conformation
-        initial
-        {
-            // We've got a point poking through the surface. Don't do any
-            // surface conformation if near feature edge (since feature edge
-            // conformation should have priority)
+        // We've got a point poking through the surface. Don't do any
+        // surface conformation if near feature edge (since feature edge
+        // conformation should have priority)
 
-            // distance to search for near feature edges
-            edgeSearchDistCoeff         1.1;
+        // distance to search for near feature edges
+        edgeSearchDistCoeff         2;
 
-            // Proximity to a feature edge where a surface hit is
-            //  not created, only the edge conformation is created
-            // - fraction of the local target cell size. Coarse
-            // conformation, initial protrusion tests.
-            surfacePtReplaceDistCoeff   0.5;
+        // Proximity to a feature edge where a surface hit is
+        //  not created, only the edge conformation is created
+        // - fraction of the local target cell size. Coarse
+        // conformation, initial protrusion tests.
+        surfacePtReplaceDistCoeff   0.5;
 
 
-            surfacePtExclusionDistanceCoeff 0.5;
-        }
-
-        // Same for iterations
-        iteration
-        {
-            edgeSearchDistCoeff         1.25;
-            surfacePtReplaceDistCoeff   0.7;
-        }
+        surfacePtExclusionDistanceCoeff 0.5;
 
         // Stop either at maxIterations or if the number of surface pokes
         // is very small (iterationToInitialHitRatioLimit * initial number)
@@ -157,16 +149,6 @@ surfaceConformation
         maxIterations 15;
 
         iterationToInitialHitRatioLimit 0.001;
-    }
-
-    coarseConformationControls
-    {
-        $conformationControls;
-    }
-
-    fineConformationControls
-    {
-        $conformationControls;
     }
 
     // Geometry to mesh to
@@ -257,11 +239,47 @@ motionControl
     // Absolute cell size of back ground mesh. This is the maximum cell size.
     defaultCellSize     0.1;
 
-    // Assign a priority to all requests for cell sizes, the highest overrules.
-    defaultPriority     0;
-
-    cellSizeControlGeometry
+    shapeControlFunctions
     {
+        coneAndSphere
+        {
+            type                searchableSurfaceControl;
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize 0.075;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+
+        domain
+        {
+            type                searchableSurfaceControl;
+            priority            1;
+            mode                bothSides;
+
+            surfaceCellSizeFunction uniformValue;
+            uniformValueCoeffs
+            {
+                surfaceCellSize $defaultCellSize;
+            }
+
+            cellSizeFunction        uniform;
+            uniformCoeffs
+            {}
+        }
+    }
+
+    cellAspectRatioControl
+    {
+        aspectRatio                 1.0;
+        aspectRatioDirection        (0 0 0);
     }
 
     // Underrelaxation for point motion. Simulated annealing: starts off at 1
@@ -280,7 +298,7 @@ motionControl
     objOutput                   no;
 
     // Timing and memory usage.
-    timeChecks                  yes;
+    timeChecks                  no;
 
     // Number of rays in plane parallel to nearest surface. Used to detect
     // next closest surfaces. Used to work out alignment (three vectors)
@@ -341,101 +359,13 @@ motionControl
 // Do not change. See cvControls.H
 polyMeshFiltering
 {
-    // Upper limit on the size of faces to be filtered.
-    // fraction of the local target cell size
-    filterSizeCoeff                         0.2;
-
-    // Upper limit on how close two dual vertices can be before
-    // being merged, fraction of the local target cell size
-    mergeClosenessCoeff                     1e-9;
-
-    // To not filter: set maxNonOrtho to 1 (so check fails) and then
-    // set continueFilteringOnBadInitialPolyMesh to false.
-    continueFilteringOnBadInitialPolyMesh   true;
-
-    // When a face is "bad", what fraction should the filterSizeCoeff be
-    // reduced by.  Recursive, so for a filterCount value of fC, the
-    // filterSizeCoeff is reduced by pow(filterErrorReductionCoeff, fC)
-    filterErrorReductionCoeff               0.5;
-
-    // Maximum number of filterCount applications before a face
-    // is not attempted to be filtered
-    filterCountSkipThreshold                4;
-
-    // Maximum number of permissible iterations of the face collapse
-    // algorithm.  The value to choose will be related the maximum number
-    // of points on a face that is to be collapsed and how many faces
-    // around it need to be collapsed.
-    maxCollapseIterations                   25;
-
-    // Maximum number of times an to allow an equal faceSet to be
-    // returned from the face quality assessment before stopping iterations
-    // to break an infinitie loop.
-    maxConsecutiveEqualFaceSets             5;
-    // Remove little steps (almost perp to surface) by collapsing face.
-    surfaceStepFaceAngle                    80;
-    // Do not collapse face to edge if should become edges
-    edgeCollapseGuardFraction               0.3;
-    // Only collapse face to point if high aspect ratio
-    maxCollapseFaceToPointSideLengthCoeff   0.35;
-
-    // Write the tet-dual mesh for post-processing
-    writeTetDualMesh                        yes;
+    filterEdges                 on;
+    filterFaces                 on;
+    writeTetDualMesh            false;
 }
 
 
-// Generic mesh quality settings. At any undoable phase these determine
-// where to undo. Same as in snappyHexMeshDict
-meshQualityControls
-{
-    //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho 65;
-
-    //- Max skewness allowed. Set to <0 to disable.
-    maxBoundarySkewness 50;
-    maxInternalSkewness 10;
-
-    //- Max concaveness allowed. Is angle (in degrees) below which concavity
-    //  is allowed. 0 is straight face, <0 would be convex face.
-    //  Set to 180 to disable.
-    maxConcave 80;
-
-    //- Minimum pyramid volume. Is absolute volume of cell pyramid.
-    //  Set to a sensible fraction of the smallest cell volume expected.
-    //  Set to very negative number (e.g. -1E30) to disable.
-    minVol -1E30;
-
-    //- Minimum quality of the tet formed by the
-    //  variable base point minimum decomposition triangles and
-    //  the cell centre (so not face-centre decomposition).
-    //  This has to be a positive number for tracking
-    //  to work. Set to very negative number (e.g. -1E30) to
-    //  disable.
-    //     <0 = inside out tet,
-    //      0 = flat tet
-    //      1 = regular tet
-    minTetQuality 1e-30;
-
-    //- Minimum absolute face area. Set to <0 to disable.
-    minArea -1;
-
-    //- Minimum face twist. Set to <-1 to disable. dot product of face normal
-    //- and face centre triangles normal
-    minTwist 0.001;
-
-    //- minimum normalised cell determinant
-    //- 1 = hex, <= 0 = folded or flattened illegal cell
-    minDeterminant 0.001;
-
-    //- minFaceWeight (0 -> 0.5)
-    minFaceWeight 0.02;
-
-    //- minVolRatio (0 -> 1)
-    minVolRatio 0.01;
-
-    //must be >0 for Fluent compatibility
-    minTriangleTwist -1;
-}
+#include "meshQualityDict";
 
 
 // ************************************************************************* //

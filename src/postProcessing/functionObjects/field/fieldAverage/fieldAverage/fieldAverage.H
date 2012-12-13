@@ -116,7 +116,6 @@ SourceFiles
 #define fieldAverage_H
 
 #include "volFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -130,10 +129,11 @@ class dictionary;
 class fieldAverageItem;
 template<class Type>
 class List;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                         Class fieldAverage Declaration
+                        Class fieldAverage Declaration
 \*---------------------------------------------------------------------------*/
 
 class fieldAverage
@@ -266,15 +266,6 @@ protected:
             void readAveragingProperties();
 
 
-        // Functions to be over-ridden from IOoutputFilter class
-
-            //- Update mesh
-            virtual void updateMesh(const mapPolyMesh&);
-
-            //- Move points
-            virtual void movePoints(const Field<point>&);
-
-
         //- Disallow default bitwise copy construct
         fieldAverage(const fieldAverage&);
 
@@ -324,6 +315,12 @@ public:
 
         //- Calculate the field average data and write
         virtual void write();
+
+        //- Update mesh
+        virtual void updateMesh(const mapPolyMesh&);
+
+        //- Move points
+        virtual void movePoints(const polyMesh&);
 };
 
 

@@ -134,21 +134,24 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
 
     forAll(alpha.boundaryField(), patchI)
     {
-        const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
-        const scalarField& dx = alphaf.patch().deltaCoeffs();
-        const labelUList& faceCells = alphaf.patch().faceCells();
-
-        forAll(alphaf, faceI)
+        if (!owner().isCoupledPatch(patchI))
         {
-            label cellO = faceCells[faceI];
+            const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
+            const scalarField& dx = alphaf.patch().deltaCoeffs();
+            const labelUList& faceCells = alphaf.patch().faceCells();
 
-            if ((alpha[cellO] > 0.5) && (alphaf[faceI] < 0.5))
+            forAll(alphaf, faceI)
             {
-                const vector n =
-                    gradAlpha[cellO]/(mag(gradAlpha[cellO]) + ROOTVSMALL);
-                scalar theta = cos(degToRad(distribution_->sample()));
-                force[cellO] += Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
-                nHits[cellO]++;
+                label cellO = faceCells[faceI];
+
+                if ((alpha[cellO] > 0.5) && (alphaf[faceI] < 0.5))
+                {
+                    const vector n =
+                        gradAlpha[cellO]/(mag(gradAlpha[cellO]) + ROOTVSMALL);
+                    scalar theta = cos(degToRad(distribution_->sample()));
+                    force[cellO] += Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
+                    nHits[cellO]++;
+                }
             }
         }
     }

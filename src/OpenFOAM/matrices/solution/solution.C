@@ -33,7 +33,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::solution::debug(::Foam::debug::debugSwitch("solution", 0));
+namespace Foam
+{
+defineDebugSwitchWithName(solution, "solution", 0);
+}
 
 // List of sub-dictionaries to rewrite
 //! \cond localScope

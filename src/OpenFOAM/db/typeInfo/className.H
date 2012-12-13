@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,6 +136,30 @@ public:                                                                       \
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // definitions (debug information only)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+//- Define the debug information, lookup as \a Name
+#define registerDebugSwitchWithName(Type,Tag,Name)\
+    class add##Tag##ToDebug\
+    :\
+        public ::Foam::simpleRegIOobject\
+    {\
+    public:\
+        add##Tag##ToDebug(const char* name)\
+        :\
+            ::Foam::simpleRegIOobject(Foam::debug::addDebugObject, name)\
+        {}\
+        virtual ~add##Tag##ToDebug()\
+        {}\
+        virtual void readData(Foam::Istream& is)\
+        {\
+            Type::debug = readLabel(is);\
+        }\
+        virtual void writeData(Foam::Ostream& os) const\
+        {\
+            os << Type::debug;\
+        }\
+    };\
+    add##Tag##ToDebug add##Tag##ToDebug_(Name)
 
 
 //- Define the debug information, lookup as \a Name

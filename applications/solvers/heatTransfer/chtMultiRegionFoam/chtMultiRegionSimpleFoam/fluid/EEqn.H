@@ -21,6 +21,8 @@
 
     EEqn.solve();
 
+    sources.correct(he);
+
     thermo.correct();
     rad.correct();
 

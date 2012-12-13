@@ -140,12 +140,6 @@ protected:
 
     // Functions to be over-ridden from IOoutputFilter class
 
-        //- Update mesh
-        virtual void updateMesh(const mapPolyMesh&);
-
-        //- Move points
-        virtual void movePoints(const Field<point>&);
-
         //- Output file header information
         virtual void writeFileHeader(const label i);
 
@@ -185,6 +179,12 @@ public:
 
             //- Execute the at the final time-loop, currently does nothing
             virtual void end();
+
+            //- Update mesh
+            virtual void updateMesh(const mapPolyMesh&);
+
+            //- Move points
+            virtual void movePoints(const polyMesh&);
 };
 
 

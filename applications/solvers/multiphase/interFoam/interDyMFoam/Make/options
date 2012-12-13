@@ -12,6 +12,7 @@ EXE_INC = \
     -I$(LIB_SRC)/sampling/lnInclude
 
 EXE_LIBS = \
+    -linterfaceProperties \
     -ltwoPhaseInterfaceProperties \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModel \

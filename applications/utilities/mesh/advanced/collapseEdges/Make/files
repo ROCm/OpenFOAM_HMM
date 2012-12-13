@@ -1,4 +1,3 @@
 collapseEdges.C
-pointEdgeCollapse/pointEdgeCollapse.C
 
 EXE = $(FOAM_APPBIN)/collapseEdges

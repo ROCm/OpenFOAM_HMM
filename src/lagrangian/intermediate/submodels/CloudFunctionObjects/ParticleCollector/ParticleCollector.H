@@ -169,14 +169,14 @@ private:
         //- Collect parcels in polygon collectors
         label collectParcelPolygon
         (
-            const point& position,  
+            const point& position,
             const vector& U
         ) const;
 
         //- Collect parcels in concentric circle collectors
         label collectParcelConcentricCircles
         (
-            const point& position,  
+            const point& position,
             const vector& U
         ) const;
 

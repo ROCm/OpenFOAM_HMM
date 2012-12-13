@@ -69,7 +69,7 @@ Description
 
     The modes of operation are:
     \table
-        Mode                        | calcTotal | calcCoeff  
+        Mode                        | calcTotal | calcCoeff
         static pressure             | no        | no
         total pressure              | yes       | no
         pressure coefficient        | no        | yes
@@ -111,7 +111,6 @@ SourceFiles
 #define pressureTools_H
 
 #include "volFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -122,6 +121,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -253,7 +253,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

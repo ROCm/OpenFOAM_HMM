@@ -30,10 +30,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::UPstream, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(UPstream, 0);
+
     template<>
     const char* Foam::NamedEnum
     <

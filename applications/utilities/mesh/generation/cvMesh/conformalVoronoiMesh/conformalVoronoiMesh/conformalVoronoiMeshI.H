@@ -21,21 +21,28 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline Foam::scalar Foam::conformalVoronoiMesh::defaultCellSize() const
+{
+    return readScalar
+    (
+        cvMeshControls().cvMeshDict().subDict("motionControl").lookup
+        (
+            "defaultCellSize"
+        )
+    );
+}
+
 
 inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 (
     const Foam::point& pt
 ) const
 {
-    return cellSizeControl().cellSize(pt);
+    return cellShapeControls().cellSize(pt);
 }
 
 
@@ -66,8 +73,8 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
 {
     if
     (
-        !vA->internalOrBoundaryPoint()
-     && !vB->internalOrBoundaryPoint()
+        (!vA->internalOrBoundaryPoint() || vA->referred())
+     && (!vB->internalOrBoundaryPoint() || vB->referred())
     )
     {
         // There are no internalOrBoundaryPoints available, determine
@@ -80,11 +87,11 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
            *targetCellSize(topoint(vB->point()))
         );
     }
-    else if (!vB->internalOrBoundaryPoint())
+    else if (!vB->internalOrBoundaryPoint() || vB->referred())
     {
         return vA->targetCellSize();
     }
-    else if (!vA->internalOrBoundaryPoint())
+    else if (!vA->internalOrBoundaryPoint() || vA->referred())
     {
         return vB->targetCellSize();
     }
@@ -98,9 +105,10 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
     const Delaunay::Finite_facets_iterator& fit
 ) const
 {
-    // Geometric mean
+    // Arithmetic mean
 
-    scalar sizeProduct = 1;
+    scalar sizeSum = 0;
+
     label nProducts = 0;
 
     const Cell_handle c(fit->first);
@@ -110,10 +118,10 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
     {
         Vertex_handle v = c->vertex(vertex_triple_index(oppositeVertex, i));
 
-        if (v->internalOrBoundaryPoint())
+        if (v->internalOrBoundaryPoint() && !v->referred())
         {
 
-            sizeProduct *= v->targetCellSize();
+            sizeSum += v->targetCellSize();
 
             nProducts++;
         }
@@ -128,13 +136,22 @@ inline Foam::scalar Foam::conformalVoronoiMesh::averageAnyCellSize
         {
             Vertex_handle v = c->vertex(vertex_triple_index(oppositeVertex, i));
 
-            sizeProduct *= targetCellSize(topoint(v->point()));
+            sizeSum += targetCellSize(topoint(v->point()));
         }
 
         nProducts = 3;
     }
 
-    return pow(sizeProduct, (1.0/nProducts));
+    if (sizeSum < 0)
+    {
+        WarningIn("averageAnyCellSize(const Delaunay::Finite_facets_iterator&)")
+            << "sizeSum = " << sizeSum
+            << endl;
+
+        return 0;
+    }
+
+    return pow(sizeSum, (1.0/nProducts));
 }
 
 
@@ -219,93 +236,91 @@ inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
 }
 
 
-inline Foam::label Foam::conformalVoronoiMesh::insertPoint
+inline bool Foam::conformalVoronoiMesh::insertPoint
 (
     const Foam::point& p,
-    const label type
+    const indexedVertexEnum::vertexType type
 )
 {
-    return insertPoint(toPoint(p), type);
+    return insertPoint(toPoint<Point>(p), type);
 }
 
 
-inline Foam::label Foam::conformalVoronoiMesh::insertPoint
+inline bool Foam::conformalVoronoiMesh::insertPoint
 (
     const Point& P,
-    const label type
+    const indexedVertexEnum::vertexType type
 )
 {
     uint nVert = number_of_vertices();
 
     Vertex_handle vh = insert(P);
 
+    bool pointInserted = true;
+
     if (nVert == number_of_vertices())
     {
-        Pout << "Failed to insert point " << topoint(P) << endl;
+        Pout<< "Failed to insert point : " << topoint(P)
+            << " of type " << type << endl;
+        pointInserted = false;
     }
     else
     {
-        vh->index() = nVert;
+        vh->index() = getNewVertexIndex();
         vh->type() = type;
     }
 
-    return vh->index();
+    return pointInserted;
 }
 
 
-inline void Foam::conformalVoronoiMesh::insertPoint
+inline bool Foam::conformalVoronoiMesh::insertReferredPoint(const Vb& P)
+{
+    return insertReferredPoint(P.point(), P.index(), P.type(), P.procIndex());
+}
+
+
+inline bool Foam::conformalVoronoiMesh::insertReferredPoint
 (
     const Foam::point& p,
     const label index,
-    const label type
+    const indexedVertexEnum::vertexType type,
+    const label processor
 )
 {
-    insertPoint(toPoint(p), index, type);
+    return insertReferredPoint(toPoint<Point>(p), index, type, processor);
 }
 
 
-inline void Foam::conformalVoronoiMesh::insertPoint
+inline bool Foam::conformalVoronoiMesh::insertReferredPoint
 (
     const Point& P,
     const label index,
-    const label type
+    const indexedVertexEnum::vertexType type,
+    const label processor
 )
 {
     uint nVert = number_of_vertices();
 
     Vertex_handle vh = insert(P);
 
+    bool pointInserted = true;
+
     if (nVert == number_of_vertices())
     {
-        Pout << "Failed to insert point " << topoint(P) << endl;
+        Pout<< "Failed to insert point " << topoint(P)
+            << " type: " << type << " index: " << index
+            << " proc: " << processor << endl;
+        pointInserted = false;
     }
     else
     {
         vh->index() = index;
         vh->type() = type;
+        vh->procIndex() = processor;
     }
-}
 
-
-inline void Foam::conformalVoronoiMesh::insertPointPair
-(
-    const scalar ppDist,
-    const Foam::point& surfPt,
-    const vector& n
-)
-{
-    Pout<< "insertPointPair is depricated, "
-        << " it does not check parallel insertion." << endl;
-
-    vector ppDistn = ppDist*n;
-
-    label master = insertPoint
-    (
-        surfPt - ppDistn,
-        number_of_vertices() + 1
-    );
-
-    insertPoint(surfPt + ppDistn, master);
+    return pointInserted;
 }
 
 
@@ -314,30 +329,62 @@ inline void Foam::conformalVoronoiMesh::createPointPair
     const scalar ppDist,
     const Foam::point& surfPt,
     const vector& n,
-    DynamicList<Foam::point>& pts,
-    DynamicList<label>& indices,
-    DynamicList<label>& types
+    DynamicList<Vb>& pts
 )
 {
     vector ppDistn = ppDist*n;
 
-    // Result when the points are eventually inserted.
-    // Add number_of_vertices() at insertion of first vertex to all numbers:
-    // pt               index type
-    // surfPt - ppDistn 0     1
-    // surfPt + ppDistn 1     0
+    pts.append
+    (
+        Vb(surfPt - ppDistn, Vb::vtInternalSurface)
+    );
 
-    // Master, index = number_of_vertices(), type = number_of_vertices() + 1
-    pts.append(surfPt - ppDistn);
-    indices.append(0);
-    types.append(1);
+    pts.append
+    (
+        Vb(surfPt + ppDistn, Vb::vtExternalSurface)
+    );
+}
 
-    // Slave, index = number_of_vertices()(new) + 1, type = index of master.
-    // This will be inserted after the master, so number_of_vertices() will
-    // have increased
-    pts.append(surfPt + ppDistn);
-    indices.append(0);
-    types.append(-1);
+
+inline Foam::point Foam::conformalVoronoiMesh::perturbPoint
+(
+    const Foam::point& pt
+) const
+{
+    Foam::point perturbedPt(pt);
+
+//    vector delta(xR/ni, yR/nj, zR/nk);
+//    scalar pert = randomPerturbationCoeff*cmptMin(delta);
+
+    scalar pert = 1e-12*defaultCellSize();
+
+    perturbedPt.x() += pert*(rndGen_.scalar01() - 0.5);
+    perturbedPt.y() += pert*(rndGen_.scalar01() - 0.5);
+    perturbedPt.z() += pert*(rndGen_.scalar01() - 0.5);
+
+    return perturbedPt;
+}
+
+
+inline void Foam::conformalVoronoiMesh::createBafflePointPair
+(
+    const scalar ppDist,
+    const Foam::point& surfPt,
+    const vector& n,
+    DynamicList<Vb>& pts
+)
+{
+    vector ppDistn = ppDist*n;
+
+    pts.append
+    (
+        Vb(surfPt - ppDistn, Vb::vtInternalSurface)
+    );
+
+    pts.append
+    (
+        Vb(surfPt + ppDistn, Vb::vtInternalSurface)
+    );
 }
 
 
@@ -350,13 +397,30 @@ inline bool Foam::conformalVoronoiMesh::isBoundaryDualFace
     Vertex_handle vA = c->vertex(eit->second);
     Vertex_handle vB = c->vertex(eit->third);
 
+//    if (vA->internalBoundaryPoint() && vB->externalBoundaryPoint())
+//    {
+//        if (vA->index() == vB->index() - 1)
+//        {
+//            return true;
+//        }
+//    }
+//    else if (vA->externalBoundaryPoint() && vB->internalBoundaryPoint())
+//    {
+//        if (vA->index() == vB->index() + 1)
+//        {
+//            return true;
+//        }
+//    }
+//
+//    return false;
+
     // A dual face on the boundary will result from one Dv inside and
     // one outside
     return
     (
         (
-            vA->internalOrBoundaryPoint()
-         || vB->internalOrBoundaryPoint()
+            (vA->internalOrBoundaryPoint() && !vA->referred())
+         || (vB->internalOrBoundaryPoint() && !vB->referred())
         )
      && (
             !vA->internalOrBoundaryPoint()
@@ -458,58 +522,35 @@ inline bool Foam::conformalVoronoiMesh::isParallelDualEdge
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-#ifdef CGAL_INEXACT
-
-inline Foam::conformalVoronoiMesh::pointFromPoint
-Foam::conformalVoronoiMesh::topoint
+inline bool Foam::conformalVoronoiMesh::isProcBoundaryEdge
 (
-    const Point& P
+    const Delaunay::Finite_edges_iterator& eit
 ) const
 {
-    return reinterpret_cast<pointFromPoint>(P);
-}
+    bool isProcBoundaryEdge = false;
 
+    Cell_handle c = eit->first;
+    Vertex_handle vA = c->vertex(eit->second);
+    Vertex_handle vB = c->vertex(eit->third);
 
-inline Foam::conformalVoronoiMesh::PointFrompoint
-Foam::conformalVoronoiMesh::toPoint
-(
-    const Foam::point& p
-) const
-{
-    return reinterpret_cast<PointFrompoint>(p);
-}
-
-#else
-
-
-inline Foam::conformalVoronoiMesh::pointFromPoint
-Foam::conformalVoronoiMesh::topoint
-(
-    const Point& P
-) const
-{
-    return Foam::point
+    if
     (
-        CGAL::to_double(P.x()),
-        CGAL::to_double(P.y()),
-        CGAL::to_double(P.z())
-    );
+        (
+            (vA->referred() && !vB->referred())
+         || (vB->referred() && !vA->referred())
+        )
+     && vA->internalOrBoundaryPoint()
+     && vB->internalOrBoundaryPoint()
+    )
+    {
+        isProcBoundaryEdge = true;
+    }
+
+    return isProcBoundaryEdge;
 }
 
 
-inline Foam::conformalVoronoiMesh::PointFrompoint
-Foam::conformalVoronoiMesh::toPoint
-(
-    const Foam::point& p
-) const
-{
-    return Point(p.x(), p.y(), p.z());
-}
-
-#endif
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::conformalVoronoiMesh::CGALVector
 Foam::conformalVoronoiMesh::toCGALVector(const Foam::vector& v) const
@@ -562,10 +603,10 @@ Foam::conformalVoronoiMesh::decomposition() const
 }
 
 
-inline const Foam::cellSizeControlSurfaces&
-Foam::conformalVoronoiMesh::cellSizeControl() const
+inline const Foam::cellShapeControl&
+Foam::conformalVoronoiMesh::cellShapeControls() const
 {
-    return cellSizeControl_;
+    return cellShapeControl_;
 }
 
 

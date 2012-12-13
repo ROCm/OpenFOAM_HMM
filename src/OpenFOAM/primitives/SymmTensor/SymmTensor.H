@@ -79,6 +79,7 @@ public:
         static const SymmTensor one;
         static const SymmTensor max;
         static const SymmTensor min;
+        static const SymmTensor I;
 
 
     //- Component labeling enumeration

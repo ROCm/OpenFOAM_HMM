@@ -408,7 +408,7 @@ void Foam::fieldAverage::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::fieldAverage::movePoints(const pointField&)
+void Foam::fieldAverage::movePoints(const polyMesh&)
 {
     // Do nothing
 }

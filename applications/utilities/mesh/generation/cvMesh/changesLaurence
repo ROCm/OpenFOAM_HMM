@@ -1,5 +1,0 @@
-wmake/rules/General/CGAL
-
-    -lboost_thread
-    -lboost_thread-mt
-

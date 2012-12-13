@@ -26,4 +26,6 @@
                 )*mesh.magSf()
             )
         );
+
+        sources.correct(U);
     }

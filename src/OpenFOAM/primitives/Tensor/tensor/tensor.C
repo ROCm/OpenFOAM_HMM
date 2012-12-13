@@ -76,6 +76,14 @@ const tensor tensor::min
     -VGREAT, -VGREAT, -VGREAT
 );
 
+template<>
+const tensor tensor::I
+(
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

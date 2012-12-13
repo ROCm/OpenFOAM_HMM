@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::HashTableCore, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(HashTableCore, 0);
+}
 
 const Foam::label Foam::HashTableCore::maxTableSize
 (
@@ -37,6 +40,7 @@ const Foam::label Foam::HashTableCore::maxTableSize
         Foam::labelMax/2
     )
 );
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 

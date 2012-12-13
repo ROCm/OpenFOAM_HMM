@@ -40,6 +40,3 @@ autoPtr<incompressible::turbulenceModel> turbulence
 (
     incompressible::turbulenceModel::New(U, phi, laminarTransport)
 );
-
-
-IObasicSourceList sources(mesh);

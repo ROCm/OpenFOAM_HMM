@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,18 +38,6 @@ namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::fieldValue::updateMesh(const mapPolyMesh&)
-{
-    // Do nothing
-}
-
-
-void Foam::fieldValue::movePoints(const Field<point>&)
-{
-    // Do nothing
-}
-
 
 void Foam::fieldValue::read(const dictionary& dict)
 {
@@ -135,6 +123,18 @@ void Foam::fieldValue::execute()
 
 
 void Foam::fieldValue::end()
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValue::updateMesh(const mapPolyMesh&)
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValue::movePoints(const polyMesh&)
 {
     // Do nothing
 }

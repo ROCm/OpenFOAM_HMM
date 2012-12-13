@@ -93,6 +93,8 @@ public:
         NONFEATURE  // Not a feature point
     };
 
+    static const Foam::NamedEnum<pointStatus, 4> pointStatusNames_;
+
     enum edgeStatus
     {
         EXTERNAL,   // "Convex" edge
@@ -103,6 +105,9 @@ public:
         NONE        // Not a classified feature edge (consistency with
                     // surfaceFeatures)
     };
+
+    static const Foam::NamedEnum<edgeStatus, 6> edgeStatusNames_;
+
 
 private:
 
@@ -155,6 +160,10 @@ private:
         //  (only valid for 0..nonFeatureStart_-1)
         labelListList featurePointNormals_;
 
+        //- Indices of feature edges attached to feature points. The edges are
+        //  ordered so that they can be circulated.
+        labelListList featurePointEdges_;
+
         //- Feature edges which are on the boundary between regions
         labelList regionEdges_;
 
@@ -201,6 +210,7 @@ public:
 
         //- Number of possible feature edge types (i.e. number of slices)
         static label nEdgeTypes;
+
 
     // Constructors
 
@@ -260,6 +270,7 @@ public:
             const vectorField& edgeDirections,
             const labelListList& edgeNormals,
             const labelListList& featurePointNormals,
+            const labelListList& featurePointEdges,
             const labelList& regionEdges
         );
 
@@ -380,6 +391,11 @@ public:
 
             //- Return the normal vectors for a given feature point
             inline vectorField featurePointNormals(label ptI) const;
+
+            //- Return the edge labels for a given feature point. Edges are
+            //  ordered by the faces that they share. The edge labels
+            //  correspond to the entry in edges().
+            inline const labelListList& featurePointEdges() const;
 
             //- Return the feature edges which are on the boundary between
             //  regions

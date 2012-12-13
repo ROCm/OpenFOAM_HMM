@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,10 @@ namespace Foam
 
 // Forward declaration of classes
 class dictionary;
+class Istream;
+class Ostream;
+class simpleRegIOobject;
+class simpleObjectRegistry;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,6 +76,36 @@ namespace debug
 
     //- Internal function to lookup a sub-dictionary from controlDict.
     dictionary& switchSet(const char* subDictName, dictionary*& subDictPtr);
+
+
+
+    // Registered debug switches
+
+        //- Register debug switch read/write object
+        void addDebugObject(const char* name, simpleRegIOobject* obj);
+
+        //- Register info switch read/write object
+        void addInfoObject(const char* name, simpleRegIOobject* obj);
+
+        //- Register optimisation switch read/write object
+        void addOptimisationObject(const char* name, simpleRegIOobject* obj);
+
+        //- Register DimensionSets read/write object
+        void addDimensionSetObject(const char* name, simpleRegIOobject* obj);
+
+
+        //- Get access to registered debug switch objects
+        simpleObjectRegistry& debugObjects();
+
+        //- Get access to registered info switch objects
+        simpleObjectRegistry& infoObjects();
+
+        //- Get access to registered optimisation switch objects
+        simpleObjectRegistry& optimisationObjects();
+
+        //- Get access to registered dimensionSets switch objects
+        simpleObjectRegistry& dimensionSetObjects();
+
 
 } // End namespace debug
 

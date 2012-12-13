@@ -45,52 +45,35 @@ backgroundMeshDecomposition
 
 surfaceConformation
 {
-    locationInMesh (0 0 0);
+    locationInMesh                      (0 0 0);
 
-    pointPairDistanceCoeff      0.1;
+    pointPairDistanceCoeff              0.1;
 
     mixedFeaturePointPPDistanceCoeff    5.0;
 
-    featurePointExclusionDistanceCoeff  0.65;
+    featurePointExclusionDistanceCoeff  0.7;
 
-    featureEdgeExclusionDistanceCoeff   0.8;
+    featureEdgeExclusionDistanceCoeff   0.7;
 
-    surfaceSearchDistanceCoeff  3;
+    surfaceSearchDistanceCoeff          5;
 
-    maxSurfaceProtrusionCoeff   0.1;
+    maxSurfaceProtrusionCoeff           0.1;
 
-    maxQuadAngle 125;
+    maxQuadAngle                        125;
 
     surfaceConformationRebuildFrequency 10;
 
+    specialiseFeaturePoints             on;
+
     conformationControls
     {
-        initial
-        {
-            edgeSearchDistCoeff         5;
-            surfacePtReplaceDistCoeff   0.5;
-            surfacePtExclusionDistanceCoeff 0.5;
-        }
+        edgeSearchDistCoeff             5;
+        surfacePtReplaceDistCoeff       0.5;
+        surfacePtExclusionDistanceCoeff 0.5;
 
-        iteration
-        {
-            edgeSearchDistCoeff         2;
-            surfacePtReplaceDistCoeff   0.5;
-        }
+        maxIterations                   15;
 
-        maxIterations 15;
-
-        iterationToInitialHitRatioLimit 0.001;
-    }
-
-    coarseConformationControls
-    {
-        $conformationControls;
-    }
-
-    fineConformationControls
-    {
-        $conformationControls;
+        iterationToInitialHitRatioLimit 0.0001;
     }
 
     geometryToConformTo
@@ -134,28 +117,28 @@ motionControl
 {
     defaultCellSize     0.001;
 
-    // Assign a priority to all requests for cell sizes, the highest overrules.
-    defaultPriority     0;
-
-    cellSizeControlGeometry
+    shapeControlFunctions
     {
         flange.obj
         {
-            priority            1;
-            mode                inside;
+            type                    searchableSurfaceControl;
+            priority                1;
+            mode                    inside;
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     0.0005;
+                surfaceCellSize     $defaultCellSize;
             }
 
-            cellSizeFunction    linearDistance;
-            linearDistanceCoeffs
-            {
-                distanceCellSize    $defaultCellSize;
-                distance            0.004;
-            }
+            cellSizeFunction        uniform;
+            uniformCoeffs{}
         }
+    }
+
+    cellAspectRatioControl
+    {
+        aspectRatio                 1.0;
+        aspectRatioDirection        (0 0 0);
     }
 
     relaxationModel     adaptiveLinear;
@@ -170,7 +153,7 @@ motionControl
 
     timeChecks                  no;
 
-    maxLoadUnbalance            0.05;
+    maxLoadUnbalance            0.2;
 
     alignmentSearchSpokes       36;
 
@@ -202,18 +185,9 @@ motionControl
 
 polyMeshFiltering
 {
-    writeTetDualMesh                        false;
-    filterSizeCoeff                         0.2;
-    mergeClosenessCoeff                     1e-9;
-    continueFilteringOnBadInitialPolyMesh   true;
-    filterErrorReductionCoeff               0.5;
-    filterCountSkipThreshold                4;
-    maxCollapseIterations                   25;
-    maxConsecutiveEqualFaceSets             5;
-    surfaceStepFaceAngle                    90;
-    edgeCollapseGuardFraction               0.0;    //0.3;
-    maxCollapseFaceToPointSideLengthCoeff   0.35;
-    edgeMergeAngle                          30;
+    filterEdges                 on;
+    filterFaces                 off;
+    writeTetDualMesh            false;
 }
 
 
@@ -221,5 +195,6 @@ meshQualityControls
 {
     #include "meshQualityDict"
 }
+
 
 // ************************************************************************* //

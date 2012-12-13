@@ -40,9 +40,9 @@ SourceFiles
 
 #include "functionObjectFile.H"
 #include "Switch.H"
-#include "pointFieldFwd.H"
 #include "OFstream.H"
 #include "dictionary.H"
+#include "Field.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -53,6 +53,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class fvMesh;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -91,15 +92,6 @@ protected:
 
         //- Results dictionary for external access of results
         dictionary resultDict_;
-
-
-        // Functions to be over-ridden from IOoutputFilter class
-
-            //- Update mesh
-            virtual void updateMesh(const mapPolyMesh&);
-
-            //- Move points
-            virtual void movePoints(const Field<point>&);
 
 
 public:
@@ -192,6 +184,12 @@ public:
 
             //- Execute the at the final time-loop, currently does nothing
             virtual void end();
+
+            //- Update mesh
+            virtual void updateMesh(const mapPolyMesh&);
+
+            //- Move points
+            virtual void movePoints(const polyMesh&);
 
             //- Combine fields from all processor domains into single field
             template<class Type>

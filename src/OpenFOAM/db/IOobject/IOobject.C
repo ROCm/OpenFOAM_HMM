@@ -29,7 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::IOobject, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(IOobject, 0);
+}
+
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 

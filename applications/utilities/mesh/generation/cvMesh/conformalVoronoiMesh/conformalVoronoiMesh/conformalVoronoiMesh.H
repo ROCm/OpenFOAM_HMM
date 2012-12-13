@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Class
     Foam::conformalVoronoiMesh
 
@@ -50,7 +45,7 @@ SourceFiles
 #include "ulong.H"
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
-#include "cellSizeControlSurfaces.H"
+#include "cellShapeControl.H"
 #include "cvControls.H"
 #include "DynamicList.H"
 #include "PackedBoolList.H"
@@ -77,6 +72,11 @@ SourceFiles
 #include "zeroGradientFvPatchFields.H"
 #include "globalIndex.H"
 #include "pointFeatureEdgesTypes.H"
+#include "pointConversion.H"
+#include "Tuple2.H"
+#include "DistributedDelaunayMesh.H"
+#include "tensorIOField.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,24 +98,25 @@ class backgroundMeshDecomposition;
 
 class conformalVoronoiMesh
 :
-    public Delaunay
+    public DistributedDelaunayMesh<Delaunay>
 {
 public:
 
     enum reconformationMode
     {
-        rmNone,   // Do not rebuild the surface conformation
-        rmCoarse, // Rebuild the conformation with coarse tolerances (faster)
-        rmFine    // Rebuild the conformation with fine tolerances (slower)
+        rmOff,   // Do not rebuild the surface conformation
+        rmOn
     };
 
-    enum faceCollapseMode
-    {
-        fcmNone,             // Do not collapse face
-        fcmEdge,             // Collapse face to a single edge
-        fcmPoint,            // Collapse face to a point
-        fcmDeferredMultiEdge // Collapse face to several edges
-    };
+    typedef Delaunay::Vertex_handle    Vertex_handle;
+    typedef Delaunay::Cell_handle      Cell_handle;
+    typedef Delaunay::Point            Point;
+
+    typedef List<DynamicList<Pair<labelPair> > > labelPairPairDynListList;
+
+    typedef Tuple2<pointIndexHit, label>         pointIndexHitAndFeature;
+    typedef List<pointIndexHitAndFeature>        pointIndexHitAndFeatureList;
+    typedef DynamicList<pointIndexHitAndFeature> pointIndexHitAndFeatureDynList;
 
 
 private:
@@ -147,12 +148,8 @@ private:
         //- The surfaces to conform to
         conformationSurfaces geometryToConformTo_;
 
-        //- The cell size control object
-        cellSizeControlSurfaces cellSizeControl_;
-
-        //- Keep track of the start index of the internal points.  Needs
-        //  careful bookkeeping within several functions.
-        label startOfInternalPoints_;
+        //- The cell shape control object
+        cellShapeControl cellShapeControl_;
 
         //- Limiting bound box before infinity begins
         treeBoundBox limitBounds_;
@@ -167,11 +164,15 @@ private:
 
         //- Search tree for edge point locations
         mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
-        edgeLocationTreePtr_;
+            edgeLocationTreePtr_;
+
+        mutable DynamicList<Foam::point> existingEdgeLocations_;
 
         //- Search tree for surface point locations
         mutable autoPtr<dynamicIndexedOctree<dynamicTreeDataPoint> >
-        surfacePtLocationTreePtr_;
+            surfacePtLocationTreePtr_;
+
+        mutable DynamicList<Foam::point> existingSurfacePtLocations_;
 
         //- Store locations where the cell size and alignments will be
         //  pre-calculated and looked up
@@ -204,6 +205,8 @@ private:
 
 
     // Private Member Functions
+
+        inline scalar defaultCellSize() const;
 
         //- Return the local target cell size at the given location.  Takes
         //  boolean argument to allow speed-up of queries if the point is going
@@ -271,62 +274,53 @@ private:
         //- Return the required alignment directions at the given location
         tensor requiredAlignment(const Foam::point& pt) const;
 
-        //- Insert Foam::point and return its auto-generated index
-        inline label insertPoint
-        (
-            const Foam::point& p,
-            const label type
-        );
-
         //- Insert Point and return its auto-generated index
-        inline label insertPoint
+        inline bool insertPoint
         (
             const Point& P,
-            const label type
+            const indexedVertexEnum::vertexType type
         );
 
         //- Insert Foam::point with specified index and type
-        inline void insertPoint
+        inline bool insertPoint
         (
             const Foam::point& p,
-            const label index,
-            const label type
+            const indexedVertexEnum::vertexType type
         );
 
-        //- Insert Point with specified index and type
-        inline void insertPoint
+        //- Insert Point with specified index, type and original processor
+        inline bool insertReferredPoint
         (
             const Point& P,
             const label index,
-            const label type
+            const indexedVertexEnum::vertexType type,
+            const label processor
+        );
+
+        inline bool insertReferredPoint(const Vb& P);
+
+        //- Insert Foam::point with specified index, type and original processor
+        inline bool insertReferredPoint
+        (
+            const Foam::point& p,
+            const label index,
+            const indexedVertexEnum::vertexType type,
+            const label processor
         );
 
         //- Insert Delaunay vertices using the CGAL range insertion method,
         //  optionally check processor occupancy and distribute to other
         //  processors
-        void insertPoints
+        void insertInternalPoints
         (
             List<Point>& points,
-            bool distribute = true
+            const bool distribute = false
         );
 
-        //- Insert indexed and typed Delaunay vertices, optionally check
-        //  processor occupancy and distribute to other processors
         void insertPoints
         (
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types,
+            List<Vb>& vertices,
             bool distribute = true
-        );
-
-        //- Insert a point-pair at a ppDist distance either side of
-        //  surface point surfPt, in the direction n
-        inline void insertPointPair
-        (
-            const scalar ppDist,
-            const Foam::point& surfPt,
-            const vector& n
         );
 
         //- Create a point-pair at a ppDist distance either side of
@@ -336,17 +330,26 @@ private:
             const scalar ppDist,
             const Foam::point& surfPt,
             const vector& n,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
+        );
+
+        inline Foam::point perturbPoint(const Foam::point& pt) const;
+
+        //- Create a point-pair at a ppDist distance either side of
+        //  surface point surfPt, in the direction n
+        inline void createBafflePointPair
+        (
+            const scalar ppDist,
+            const Foam::point& surfPt,
+            const vector& n,
+            DynamicList<Vb>& pts
         );
 
         //- Insert pairs of points on the surface with the given normals, at the
         //  specified spacing
         void insertSurfacePointPairs
         (
-            const List<pointIndexHit>& surfaceHits,
-            const List<label>& hitSurfaces,
+            const pointIndexHitAndFeatureList& surfaceHits,
             const fileName fName = fileName::null
         );
 
@@ -355,8 +358,7 @@ private:
         //  to be conformed to on the corresponding entry in featureHit
         void insertEdgePointGroups
         (
-            const List<pointIndexHit>& edgeHits,
-            const labelList& featuresHit,
+            const pointIndexHitAndFeatureList& edgeHits,
             const fileName fName = fileName::null
         );
 
@@ -365,9 +367,7 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Create points to conform to an external edge
@@ -375,9 +375,7 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Create points to conform to an internal edge
@@ -385,9 +383,7 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Create points to conform to a flat edge
@@ -395,9 +391,7 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Create points to conform to an open edge
@@ -405,9 +399,7 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Create points to conform to multiply connected edge
@@ -415,39 +407,54 @@ private:
         (
             const extendedFeatureEdgeMesh& feMesh,
             const pointIndexHit& edHit,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Determine and insert point groups at the feature points
         void insertFeaturePoints();
 
-        bool edgesShareNormal(const label e1, const label e2) const;
-
-        //- Create point groups at convex feature points
-        void createConvexFeaturePoints
-        (
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
-        );
-
-        //- Create point groups at concave feature points
-        void createConcaveFeaturePoints
-        (
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
-        );
-
         //- Create point groups at mixed feature points
-        void createMixedFeaturePoints
+        void createMixedFeaturePoints(DynamicList<Vb>& pts);
+
+        void addMasterAndSlavePoints
         (
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
-        );
+            const DynamicList<Foam::point>& masterPoints,
+            const DynamicList<indexedVertexEnum::vertexType>&masterPointsTypes,
+            const Map<DynamicList<autoPtr<plane> > >& masterPointReflections,
+            DynamicList<Vb>& pts,
+            const label ptI
+        ) const;
+
+        label getSign(const extendedFeatureEdgeMesh::edgeStatus eStatus) const;
+
+        void createMasterAndSlavePoints
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const label ptI,
+            DynamicList<Vb>& pts
+        ) const;
+
+        void createFeaturePoints(DynamicList<Vb>& pts);
+
+        vector sharedFaceNormal
+        (
+            const extendedFeatureEdgeMesh& feMesh,
+            const label edgeI,
+            const label nextEdgeI
+        ) const;
+
+        List<Foam::point> reflectPointInPlanes
+        (
+            const Foam::point p,
+            const DynamicList<autoPtr<plane> >& planes
+        ) const;
+
+        Foam::point reflectPointInPlane
+        (
+            const Foam::point p,
+            const plane& planeN
+        ) const;
+
 
         //- Fill the pointFeatureEdgesType struct with the types of feature
         //  edges that are attached to the point.
@@ -467,9 +474,7 @@ private:
             const pointFeatureEdgesTypes& pFEdgeTypes,
             const List<extendedFeatureEdgeMesh::edgeStatus>& allEdStat,
             const label ptI,
-            DynamicList<Foam::point>& pts,
-            DynamicList<label>& indices,
-            DynamicList<label>& types
+            DynamicList<Vb>& pts
         );
 
         //- Store the locations of all of the features to be conformed to
@@ -486,27 +491,26 @@ private:
         //- Check if a location is in exclusion range around a feature point
         bool nearFeaturePt(const Foam::point& pt) const;
 
-        //- Clear the entire tesselation
-        //  Reinsert bounding points, feature points and recalculate
-        //  startOfInternalPoints_
-        void reset(const bool distribute = false);
-
-        //- Insert far points in a large bounding box to avoid dual edges
-        //  spanning huge distances
-        void insertBoundingPoints();
-
-        //- Reinsert the bounding points
-        void reinsertBoundingPoints();
-
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
         void insertInitialPoints();
+
+        //- Calculate the worst load balance
+        scalar calculateLoadUnbalance() const;
 
         //- In parallel redistribute the backgroundMeshDecomposition and
         //  vertices to balance the number of vertices on each processor.
         //  Returns true if the background mesh changes as this removes all
         //  referred vertices, so the parallel interface may need rebuilt.
         bool distributeBackground();
+
+        // Test for full containment
+        void cellSizeMeshOverlapsBackground() const;
+
+        //-
+        void distribute();
+
+        void buildCellSizeAndAlignmentMesh();
 
         //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
         //  storedAlignments_ and initialise the sizeAndAlignmentTreePtr_,
@@ -568,9 +572,28 @@ private:
         //  conformation
         reconformationMode reconformationControl() const;
 
+        //- Determines geometrically whether a vertex is close to a surface
+        //  This is an optimisation
+        label findVerticesNearBoundaries();
+
         //- Create and insert the necessary point pairs to conform to the
         //  surface, then store the result
-        void buildSurfaceConformation(reconformationMode reconfMode);
+        void buildSurfaceConformation();
+
+        label synchroniseEdgeTrees
+        (
+            pointIndexHitAndFeatureList& featureEdgeHits
+        );
+
+        label synchroniseSurfaceTrees
+        (
+            pointIndexHitAndFeatureList& surfaceHits
+        );
+
+        bool locationConformsToInside
+        (
+            const pointIndexHitAndFeature& info
+        ) const;
 
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the boundary and hence reqires a point-pair
@@ -583,8 +606,7 @@ private:
         bool dualCellSurfaceAllIntersections
         (
             const Delaunay::Finite_vertices_iterator& vit,
-            DynamicList<pointIndexHit>& info,
-            DynamicList<label>& hitSurface
+            pointIndexHitAndFeatureDynList& info
         ) const;
 
         //- Return false if the line is entirely outside the current processor
@@ -598,64 +620,6 @@ private:
             Foam::point& a,
             Foam::point& b
         ) const;
-
-        label removeProcessorBoundarySeeds(bool reinsertBoundPts);
-
-        void seedProcessorBoundarySurfaces(bool seedProcessors);
-
-        label numberOfUnusedReferredPoints() const;
-
-        //- Build the parallelInterfaces of the mesh
-        void buildParallelInterface
-        (
-            const word& outputName
-        );
-
-        //- Build the parallelInterfaces of the mesh, supply hash sets
-        //  externally to allow updates
-        void buildParallelInterface
-        (
-            List<labelHashSet>& referralVertices,
-            List<labelHashSet>& receivedVertices,
-            bool initialEdgeReferral,
-            const word& outputName
-        );
-
-        //- Refer all vertices to all processors
-        void buildParallelInterfaceAll
-        (
-            List<labelHashSet>& referralVertices,
-            List<labelHashSet>& receivedVertices,
-            const word& outputName
-        );
-
-        //- Refer vertices where there dual edge pierces other processors
-        void buildParallelInterfaceIntersection
-        (
-            List<labelHashSet>& referralVertices,
-            List<labelHashSet>& receivedVertices,
-            const word& outputName
-        );
-
-        //- Refer vertices that are attached to Delaunay tets whose
-        //  circumspheres touch other processors
-        void buildParallelInterfaceInfluence
-        (
-            List<labelHashSet>& referralVertices,
-            List<labelHashSet>& receivedVertices,
-            const word& outputName
-        );
-
-        //- Refer vertices to their required processors
-        void referVertices
-        (
-            const DynamicList<label>& targetProcessor,
-            DynamicList<Foam::point>& parallelPoints,
-            DynamicList<label>& parallelIndices,
-            List<labelHashSet>& receivedVertices,
-            const word& stageName,
-            const word& outputName
-        );
 
         //- Find the "worst" protrusion of a dual cell through the surface,
         //  subject to the maxSurfaceProtrusion tolerance
@@ -681,7 +645,7 @@ private:
 
         //- Write out debugging information about the surface conformation
         //  quality
-        void reportSurfaceConformationQuality();
+//        void reportSurfaceConformationQuality();
 
         //- Limit the displacement of a point so that it doesn't penetrate the
         //  surface to be meshed or come too close to it
@@ -698,23 +662,19 @@ private:
         //- Check if a surface point is near another.
         bool nearSurfacePoint
         (
-            pointIndexHit& pHit,
-            label& surfaceHit,
-            DynamicList<Foam::point>& existingSurfacePtLocations
+            pointIndexHitAndFeature& pHit
         ) const;
 
         //- Append a point to the surface point tree and the existing list
         bool appendToSurfacePtTree
         (
-            const Foam::point& pt,
-            DynamicList<Foam::point>& existingSurfacePtLocations
+            const Foam::point& pt
         ) const;
 
         //- Append a point to the edge location tree and the existing list
         bool appendToEdgeLocationTree
         (
-            const Foam::point& pt,
-            DynamicList<Foam::point>& existingEdgeLocations
+            const Foam::point& pt
         ) const;
 
         //- Return a list of the nearest feature edge locations
@@ -745,8 +705,7 @@ private:
         //- edge conformation location
         bool nearFeatureEdgeLocation
         (
-            pointIndexHit& pHit,
-            DynamicList<Foam::point>& existingEdgeLocations
+            pointIndexHit& pHit
         ) const;
 
         //- Build or rebuild the edge location tree
@@ -769,18 +728,11 @@ private:
         void addSurfaceAndEdgeHits
         (
             const Delaunay::Finite_vertices_iterator& vit,
-            const Foam::point& vert,
-            const DynamicList<pointIndexHit>& surfHit,
-            const DynamicList<label>& hitSurface,
+            const pointIndexHitAndFeatureDynList& surfaceIntersections,
             scalar surfacePtReplaceDistCoeffSqr,
             scalar edgeSearchDistCoeffSqr,
-            DynamicList<pointIndexHit>& surfaceHits,
-            DynamicList<label>& hitSurfaces,
-            DynamicList<pointIndexHit>& featureEdgeHits,
-            DynamicList<label>& featureEdgeFeaturesHit,
-            DynamicList<Foam::point>& newEdgeLocations,
-            DynamicList<Foam::point>& existingEdgeLocations,
-            DynamicList<Foam::point>& existingSurfacePtLocations
+            pointIndexHitAndFeatureDynList& surfaceHits,
+            pointIndexHitAndFeatureDynList& featureEdgeHits
         ) const;
 
         //- Store the surface conformation with the indices offset to be
@@ -791,10 +743,19 @@ private:
         //  relative to new number of internal vertices
         void reinsertSurfaceConformation();
 
+        void checkCells();
+
+        void checkDuals();
+
+        void checkVertices();
+
+        void checkCoPlanarCells() const;
+
         //- Dual calculation
         void calcDualMesh
         (
             pointField& points,
+            labelList& boundaryPts,
             faceList& faces,
             labelList& owner,
             labelList& neighbour,
@@ -806,7 +767,7 @@ private:
             pointField& cellCentres,
             labelList& cellToDelaunayVertex,
             labelListList& patchToDelaunayVertex,
-            bool filterFaces
+            PackedBoolList& boundaryFacesToRemove
         );
 
         //- Tet mesh calculation
@@ -844,76 +805,26 @@ private:
             const Delaunay::Finite_facets_iterator& fit
         ) const;
 
-        //- Merge adjacent edges that are not attached to other faces
-        label mergeNearlyParallelEdges
+        //- Determines if the dual face constructed by the Delaunay
+        //  edge is a processor boundary face
+        inline bool isProcBoundaryEdge
+        (
+            const Delaunay::Finite_edges_iterator& eit
+        ) const;
+
+        //- Merge vertices that are identical
+        void mergeIdenticalDualVertices
         (
             const pointField& pts,
-            const scalar maxCosAngle
+            const labelList& boundaryPts
         );
 
-        //- Merge vertices that are very close together
-        void mergeCloseDualVertices
+        label mergeIdenticalDualVertices
         (
             const pointField& pts,
-            const PackedBoolList& boundaryPts
-        );
-
-        label mergeCloseDualVertices
-        (
-            const pointField& pts,
-            const PackedBoolList& boundaryPts,
+            const labelList& boundaryPts,
             Map<label>& dualPtIndexMap
         ) const;
-
-        //- Smooth the dual vertices of the dual faces on the boundary
-        //  so that they conform to the surface and remove any
-        //  small, normal oriented faces
-        void smoothSurface
-        (
-            pointField& pts,
-            const PackedBoolList& boundaryPts
-        );
-
-        label smoothSurfaceDualFaces
-        (
-            pointField& pts,
-            const PackedBoolList& boundaryPts,
-            Map<label>& dualPtIndexMap
-        ) const;
-
-        //- Collapse a face to a point or an edge, modifying and
-        //  mapping the points, returns the true if the face was
-        //  collapsed in this operation
-        void collapseFaces
-        (
-            pointField& pts,
-            const PackedBoolList& boundaryPts,
-            HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
-        );
-
-        label collapseFaces
-        (
-            pointField& pts,
-            const PackedBoolList& boundaryPts,
-            Map<label>& dualPtIndexMap,
-            HashSet<labelPair, labelPair::Hash<> >& deferredCollapseFaces
-        ) const;
-
-        //- Collapse a face to an edge, updating the point and point
-        //  map. Returns the collapse mode that was applied.
-        faceCollapseMode collapseFace
-        (
-            const face& f,
-            pointField& pts,
-            const PackedBoolList& boundaryPts,
-            Map<label>& dualPtIndexMap,
-            scalar targetFaceSize,
-            scalar collapseSizeLimitCoeff,
-            label maxFC
-        ) const;
-
-        //- Identify the index of the longest edge on the face
-        label longestEdge(const face& f, const pointField& pts) const;
 
         //- Identify the face labels of the deferred collapse faces
         void deferredCollapseFaceSet
@@ -943,11 +854,18 @@ private:
         void indexDualVertices
         (
             pointField& pts,
-            PackedBoolList& boundaryPts
+            labelList& boundaryPts
         );
 
-        //- Re-index all of the the Delaunay cells
+        //- Re-index all of the Delaunay cells
         void reindexDualVertices(const Map<label>& dualPtIndexMap);
+
+        label createPatchInfo
+        (
+            wordList& patchNames,
+            wordList& patchTypes,
+            labelList& procNeighbours
+        ) const;
 
         //- Create all of the internal and boundary faces
         void createFacesOwnerNeighbourAndPatches
@@ -961,6 +879,7 @@ private:
             labelList& patchStarts,
             labelList& procNeighbours,
             labelListList& patchPointPairSlaves,
+            PackedBoolList& boundaryFacesToRemove,
             bool includeEmptyPatches = false
         ) const;
 
@@ -987,7 +906,7 @@ private:
             List<DynamicList<face> >& patchFaces,
             List<DynamicList<label> >& patchOwners,
             List<DynamicList<label> >& patchPointPairSlaves,
-            List<Pair<DynamicList<label> > >& patchSortingIndices
+            labelPairPairDynListList& patchSortingIndices
         ) const;
 
         //- Add the faces and owner information for the patches
@@ -998,15 +917,18 @@ private:
             labelList& owner,
             labelList& patchSizes,
             labelList& patchStarts,
+            PackedBoolList& boundaryFacesToRemove,
             const List<DynamicList<face> >& patchFaces,
-            const List<DynamicList<label> >& patchOwners
+            const List<DynamicList<label> >& patchOwners,
+            const List<DynamicList<bool> >& indirectPatchFace
         ) const;
 
         //- Remove points that are no longer used by any faces
         void removeUnusedPoints
         (
             faceList& faces,
-            pointField& pts
+            pointField& pts,
+            labelList& boundaryPts
         ) const;
 
         //- Remove dual cells that are not used by any faces. Return compaction
@@ -1030,6 +952,21 @@ private:
 
         //- Create a polyMesh from points.
         autoPtr<polyMesh> createPolyMeshFromPoints(const pointField& pts) const;
+
+        void checkProcessorPatchesMatch
+        (
+            const wordList& patchTypes,
+            const labelList& patchSizes,
+            const labelList& procNeighbours
+        ) const;
+
+        void reorderPoints
+        (
+            pointField& points,
+            labelList& boundaryPts,
+            faceList& faces,
+            const label nInternalFaces
+        ) const;
 
         //- Rotate the faces on processor patches if necessary
         void reorderProcessorPatches
@@ -1078,6 +1015,8 @@ public:
         //  surface as required
         void move();
 
+        void printVertexInfo() const;
+
         //- Check if the point is in the domain handled by this processor
         bool positionOnThisProc(const Foam::point& pt) const;
 
@@ -1094,29 +1033,17 @@ public:
             const List<Foam::point>& ends
         ) const;
 
-        //- Which other processors does each sphere overlap
-        labelListList overlapsProc
-        (
-            const List<Foam::point>& centres,
-            const List<scalar>& radiusSqrs
-        ) const;
-
-        //- Conversion functions between point (FOAM::) and Point (CGAL)
-
-#       ifdef CGAL_INEXACT
-            typedef const Foam::point& pointFromPoint;
-            typedef const Point& PointFrompoint;
-#       else
-            typedef Foam::point pointFromPoint;
-            typedef Point PointFrompoint;
-#       endif
-
-        inline pointFromPoint topoint(const Point&) const;
-        inline PointFrompoint toPoint(const Foam::point&) const;
+//        //- Which other processors does each sphere overlap
+//        labelListList overlapsProc
+//        (
+//            const List<Foam::point>& centres,
+//            const List<scalar>& radiusSqrs
+//        ) const;
 
         typedef K::Vector_3 CGALVector;
 
         inline CGALVector toCGALVector(const Foam::vector& v) const;
+
 
         // Access
 
@@ -1135,8 +1062,8 @@ public:
             //- Return the backgroundMeshDecomposition
             inline const backgroundMeshDecomposition& decomposition() const;
 
-            //- Return the cellSizeControlSurfaces object
-            inline const cellSizeControlSurfaces& cellSizeControl() const;
+            //- Return the cellShapeControl object
+            inline const cellShapeControl& cellShapeControls() const;
 
             //- Return the cvMeshControls object
             inline const cvControls& cvMeshControls() const;
@@ -1159,8 +1086,21 @@ public:
                 label offset = 0
             ) const;
 
-            //- Write Delaunay points to .obj file
-            void writePoints(const fileName& fName, bool internalOnly) const;
+            //- Write Delaunay points in the range between (and including)
+            //  type startPointType and endPointType to .obj file
+            void writePoints
+            (
+                const fileName& fName,
+                const Foam::indexedVertexEnum::vertexType startPointType,
+                const Foam::indexedVertexEnum::vertexType endPointType
+            ) const;
+
+            //- Write Delaunay points of type pointType to .obj file
+            void writePoints
+            (
+                const fileName& fName,
+                const Foam::indexedVertexEnum::vertexType pointType
+            ) const;
 
             //- Write the boundary Delaunay points to .obj file
             void writeBoundaryPoints(const fileName& fName) const;
@@ -1172,17 +1112,20 @@ public:
                 const List<Foam::point>& points
             ) const;
 
+            //- Write list of points to file
+            void writePoints
+            (
+                const fileName& fName,
+                const List<Vb>& points
+            ) const;
+
             //- Write the internal Delaunay vertices of the tessellation as a
             //  pointField that may be used to restart the meshing process
             void writeInternalDelaunayVertices(const fileName& instance) const;
 
             //- Prepare data and call writeMesh for polyMesh and
             //  tetDualMesh
-            void writeMesh
-            (
-                const fileName& instance,
-                bool filterFaces = true
-            );
+            void writeMesh(const fileName& instance);
 
             //- Write mesh to disk
             void writeMesh
@@ -1190,6 +1133,7 @@ public:
                 const word& meshName,
                 const fileName& instance,
                 pointField& points,
+                labelList& boundaryPts,
                 faceList& faces,
                 labelList& owner,
                 labelList& neighbour,
@@ -1198,7 +1142,8 @@ public:
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const labelList& procNeighbours,
-                const pointField& cellCentres
+                const pointField& cellCentres,
+                const PackedBoolList& boundaryFacesToRemove
             ) const;
 
             //- Write points and faces as .obj file
@@ -1214,6 +1159,8 @@ public:
             //  actual cell size (cbrt(actual cell volume)).
             void writeCellSizes(const fvMesh& mesh) const;
 
+            void writeCellAlignments(const fvMesh& mesh) const;
+
             //- Calculate and write the cell centres.
             void writeCellCentres(const fvMesh& mesh) const;
 
@@ -1226,90 +1173,6 @@ public:
                 const fileName& fName,
                 const faceList& faces
             ) const;
-
-            //- Function inserting points into a triangulation and setting the
-            //  index and type data of the point in the correct order. This is
-            //  faster than inserting points individually.
-            //
-            //  Adapted from a post on the CGAL lists: 2010-01/msg00004.html by
-            //  Sebastien Loriot (Geometry Factory).
-            //
-            //  @todo problems putting declaration in the .C file. Function
-            //        prototype is not recognised.
-            template<class Triangulation, class Point_iterator>
-            void rangeInsertWithInfo
-            (
-                Point_iterator begin,
-                Point_iterator end,
-                Triangulation& T,
-                DynamicList<label>& indices,
-                DynamicList<label>& types
-            )
-            {
-                typedef std::vector
-                <
-                    std::pair<const typename Triangulation::Point*, label>
-                > vectorPairPointIndex;
-
-                vectorPairPointIndex points;
-                label index = 0;
-
-                for (Point_iterator it = begin; it != end; ++it)
-                {
-                    points.push_back
-                    (
-                        std::make_pair(&(toPoint(*it)), index++)
-                    );
-                }
-
-                std::random_shuffle(points.begin(), points.end());
-
-                spatial_sort
-                (
-                    points.begin(),
-                    points.end(),
-                    Traits_for_spatial_sort<Triangulation>()
-                );
-
-                typename Triangulation::Vertex_handle hint;
-
-                for
-                (
-                    typename vectorPairPointIndex::const_iterator
-                    p = points.begin();
-                    p != points.end();
-                    ++p
-                )
-                {
-                    const size_t checkInsertion = T.number_of_vertices();
-
-                    hint = T.insert(*(p->first), hint);
-
-                    if (checkInsertion != T.number_of_vertices() - 1)
-                    {
-                        Pout<< "Failed to insert point "
-                            << topoint(*(p->first)) << endl;
-                    }
-                    else
-                    {
-                        label oldIndex = p->second;
-
-                        label type = types[oldIndex];
-
-                        if (type > Vb::vtFar)
-                        {
-                            // This is a member of a point pair, don't use the
-                            // type directly (note that this routine never gets
-                            // called for referredPoints so type will never be
-                            // -procI
-                            type += checkInsertion;
-                        }
-
-                        hint->index() = indices[oldIndex] + checkInsertion;
-                        hint->type() = type;
-                    }
-                }
-            }
 };
 
 
@@ -1320,10 +1183,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "conformalVoronoiMeshI.H"
-
-//#ifdef NoRepository
-//#   include "conformalVoronoiMeshTemplates.C"
-//#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

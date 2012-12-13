@@ -55,6 +55,7 @@ Description
 #include "edgeCollapser.H"
 #include "meshTools.H"
 #include "Pair.H"
+#include "globalIndex.H"
 
 using namespace Foam;
 
@@ -569,26 +570,47 @@ int main(int argc, char *argv[])
         // Mesh change engine
         edgeCollapser cutter(mesh);
 
-        pointField newPoints(mesh.points());
+        const edgeList& edges = mesh.edges();
+        const pointField& points = mesh.points();
+
+        pointField newPoints(points);
+
+        PackedBoolList collapseEdge(mesh.nEdges());
+        Map<point> collapsePointToLocation(mesh.nPoints());
 
         // Get new positions and construct collapse network
         forAllConstIter(Map<point>, edgeToPos, iter)
         {
             label edgeI = iter.key();
-            const edge& e = mesh.edges()[edgeI];
+            const edge& e = edges[edgeI];
 
-            cutter.collapseEdge(edgeI, e[0]);
+            collapseEdge[edgeI] = true;
+            collapsePointToLocation.set(e[1], points[e[0]]);
+
             newPoints[e[0]] = iter();
         }
 
         // Move master point to destination.
         mesh.movePoints(newPoints);
 
+        List<pointEdgeCollapse> allPointInfo;
+        const globalIndex globalPoints(mesh.nPoints());
+        labelList pointPriority(mesh.nPoints(), 0);
+
+        cutter.consistentCollapse
+        (
+            globalPoints,
+            pointPriority,
+            collapsePointToLocation,
+            collapseEdge,
+            allPointInfo
+        );
+
         // Topo change container
         polyTopoChange meshMod(mesh);
 
         // Insert
-        cutter.setRefinement(meshMod);
+        cutter.setRefinement(allPointInfo, meshMod);
 
         // Do changes
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);

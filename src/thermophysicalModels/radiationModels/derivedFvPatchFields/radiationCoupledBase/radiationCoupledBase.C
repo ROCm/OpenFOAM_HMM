@@ -146,9 +146,6 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
                 );
 
 
-            // Force recalculation of mapping and schedule
-            const mapDistribute& distMap = mpp.map();
-
             const fvMesh& nbrFvMesh = refCast<const fvMesh>(nbrMesh);
 
             const fvPatch& nbrPatch =
@@ -162,7 +159,7 @@ Foam::scalarField Foam::radiationCoupledBase::emissivity() const
                     nbrPatch.index()
                 ]
             );
-            distMap.distribute(emissivity);
+            mpp.distribute(emissivity);
 
             return emissivity;
 

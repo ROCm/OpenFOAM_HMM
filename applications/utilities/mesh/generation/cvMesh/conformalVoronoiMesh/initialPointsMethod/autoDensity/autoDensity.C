@@ -339,7 +339,7 @@ bool Foam::autoDensity::fillBox
 
         pointField corners(bb.points());
 
-        scalarField cornerSizes = cvMesh_.cellSizeControl().cellSize(corners);
+        scalarField cornerSizes = cvMesh_.cellShapeControls().cellSize(corners);
 
         Field<bool> insideCorners = combinedWellInside(corners, cornerSizes);
 
@@ -448,7 +448,7 @@ bool Foam::autoDensity::fillBox
                         );
                 }
 
-                lineSizes = cvMesh_.cellSizeControl().cellSize(linePoints);
+                lineSizes = cvMesh_.cellShapeControls().cellSize(linePoints);
 
                 Field<bool> insideLines = combinedWellInside
                 (
@@ -547,7 +547,7 @@ bool Foam::autoDensity::fillBox
         // corner when only some these points are required.
         shuffle(samplePoints);
 
-        scalarField sampleSizes = cvMesh_.cellSizeControl().cellSize
+        scalarField sampleSizes = cvMesh_.cellShapeControls().cellSize
         (
             samplePoints
         );
@@ -713,7 +713,7 @@ bool Foam::autoDensity::fillBox
 
             point p = min + cmptMultiply(span, rnd.vector01());
 
-            scalar localSize = cvMesh_.cellSizeControl().cellSize(p);
+            scalar localSize = cvMesh_.cellShapeControls().cellSize(p);
 
             bool insidePoint = false;
 

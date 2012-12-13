@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "OutputFilterFunctionObject.H"
 #include "IOOutputFilter.H"
 #include "polyMesh.H"
+#include "mapPolyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * Private Members * * * * * * * * * * * * * * //
@@ -217,6 +218,32 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::read
     else
     {
         return false;
+    }
+}
+
+
+template<class OutputFilter>
+void Foam::OutputFilterFunctionObject<OutputFilter>::updateMesh
+(
+    const mapPolyMesh& mpm
+)
+{
+    if (active() && mpm.mesh().name() == regionName_)
+    {
+        ptr_->updateMesh(mpm);
+    }
+}
+
+
+template<class OutputFilter>
+void Foam::OutputFilterFunctionObject<OutputFilter>::movePoints
+(
+    const polyMesh& mesh
+)
+{
+    if (active() && mesh.name() == regionName_)
+    {
+        ptr_->movePoints(mesh);
     }
 }
 

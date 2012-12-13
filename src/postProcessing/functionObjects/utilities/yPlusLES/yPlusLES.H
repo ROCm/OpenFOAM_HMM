@@ -42,7 +42,6 @@ SourceFiles
 
 #include "functionObjectFile.H"
 #include "volFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "Switch.H"
 #include "OFstream.H"
 
@@ -54,6 +53,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 class fvMesh;
 
@@ -161,7 +161,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

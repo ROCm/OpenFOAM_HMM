@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "createClouds.H"
     #include "createSurfaceFilmModel.H"
     #include "createPyrolysisModel.H"

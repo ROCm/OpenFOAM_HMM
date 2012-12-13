@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,22 +43,7 @@ namespace Foam
 
     addToRunTimeSelectionTable(polyPatch, oldCyclicPolyPatch, word);
     addToRunTimeSelectionTable(polyPatch, oldCyclicPolyPatch, dictionary);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::oldCyclicPolyPatch::transformType,
-        3
-    >::names[] =
-    {
-        "unknown",
-        "rotational",
-        "translational"
-    };
 }
-
-const Foam::NamedEnum<Foam::oldCyclicPolyPatch::transformType, 3>
-    Foam::oldCyclicPolyPatch::transformTypeNames;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -321,7 +306,7 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
     anchors0 = getAnchorPoints(half0Faces, pp.points());
     half1Ctrs = calcFaceCentres(half1Faces, pp.points());
 
-    switch (transform_)
+    switch (transform())
     {
         case ROTATIONAL:
         {
@@ -588,12 +573,12 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
-    const word& patchType
+    const word& patchType,
+    const transformType transform
 )
 :
-    coupledPolyPatch(name, size, start, index, bm, patchType),
+    coupledPolyPatch(name, size, start, index, bm, patchType, transform),
     featureCos_(0.9),
-    transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero)
@@ -611,7 +596,6 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
     featureCos_(0.9),
-    transform_(UNKNOWN),
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero)
@@ -638,26 +622,22 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 
     dict.readIfPresent("featureCos", featureCos_);
 
-    if (dict.found("transform"))
+    switch (transform())
     {
-        transform_ = transformTypeNames.read(dict.lookup("transform"));
-        switch (transform_)
+        case ROTATIONAL:
         {
-            case ROTATIONAL:
-            {
-                dict.lookup("rotationAxis") >> rotationAxis_;
-                dict.lookup("rotationCentre") >> rotationCentre_;
-                break;
-            }
-            case TRANSLATIONAL:
-            {
-                dict.lookup("separationVector") >> separationVector_;
-                break;
-            }
-            default:
-            {
-                // no additional info required
-            }
+            dict.lookup("rotationAxis") >> rotationAxis_;
+            dict.lookup("rotationCentre") >> rotationCentre_;
+            break;
+        }
+        case TRANSLATIONAL:
+        {
+            dict.lookup("separationVector") >> separationVector_;
+            break;
+        }
+        default:
+        {
+            // no additional info required
         }
     }
 }
@@ -671,7 +651,6 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 :
     coupledPolyPatch(pp, bm),
     featureCos_(pp.featureCos_),
-    transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_)
@@ -689,7 +668,6 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
     featureCos_(pp.featureCos_),
-    transform_(pp.transform_),
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_)
@@ -1269,12 +1247,10 @@ void Foam::oldCyclicPolyPatch::write(Ostream& os) const
 
 
     os.writeKeyword("featureCos") << featureCos_ << token::END_STATEMENT << nl;
-    switch (transform_)
+    switch (transform())
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[transform_]
-                << token::END_STATEMENT << nl;
             os.writeKeyword("rotationAxis") << rotationAxis_
                 << token::END_STATEMENT << nl;
             os.writeKeyword("rotationCentre") << rotationCentre_
@@ -1283,8 +1259,6 @@ void Foam::oldCyclicPolyPatch::write(Ostream& os) const
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("transform") << transformTypeNames[transform_]
-                << token::END_STATEMENT << nl;
             os.writeKeyword("separationVector") << separationVector_
                 << token::END_STATEMENT << nl;
             break;

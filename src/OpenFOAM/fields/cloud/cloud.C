@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,14 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::cloud, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(cloud, 0);
 
-const Foam::word Foam::cloud::prefix("lagrangian");
-Foam::word Foam::cloud::defaultName("defaultCloud");
+const word cloud::prefix("lagrangian");
+word cloud::defaultName("defaultCloud");
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

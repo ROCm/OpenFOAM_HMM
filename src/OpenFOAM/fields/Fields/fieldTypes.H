@@ -36,6 +36,7 @@ Description
 #include "sphericalTensor.H"
 #include "symmTensor.H"
 #include "tensor.H"
+#include "triad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

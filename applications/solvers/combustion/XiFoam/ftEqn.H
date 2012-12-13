@@ -25,4 +25,6 @@ if (composition.contains("ft"))
     sources.constrain(ftEqn);
 
     ftEqn.solve();
+
+    sources.correct(ft);
 }
