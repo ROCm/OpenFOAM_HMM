@@ -46,13 +46,10 @@ tmp<fvMatrix<Type> >
 gaussLaplacianScheme<Type, GType>::fvmLaplacianUncorrected
 (
     const surfaceScalarField& gammaMagSf,
+    const surfaceScalarField& deltaCoeffs,
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    tmp<surfaceScalarField> tdeltaCoeffs =
-        this->tsnGradScheme_().deltaCoeffs(vf);
-    const surfaceScalarField& deltaCoeffs = tdeltaCoeffs();
-
     tmp<fvMatrix<Type> > tfvm
     (
         new fvMatrix<Type>
@@ -66,14 +63,14 @@ gaussLaplacianScheme<Type, GType>::fvmLaplacianUncorrected
     fvm.upper() = deltaCoeffs.internalField()*gammaMagSf.internalField();
     fvm.negSumDiag();
 
-    forAll(vf.boundaryField(), patchI)
+    forAll(vf.boundaryField(), patchi)
     {
-        const fvPatchField<Type>& psf = vf.boundaryField()[patchI];
+        const fvPatchField<Type>& psf = vf.boundaryField()[patchi];
         const fvsPatchScalarField& patchGamma =
-            gammaMagSf.boundaryField()[patchI];
+            gammaMagSf.boundaryField()[patchi];
 
-        fvm.internalCoeffs()[patchI] = patchGamma*psf.gradientInternalCoeffs();
-        fvm.boundaryCoeffs()[patchI] = -patchGamma*psf.gradientBoundaryCoeffs();
+        fvm.internalCoeffs()[patchi] = patchGamma*psf.gradientInternalCoeffs();
+        fvm.boundaryCoeffs()[patchi] = -patchGamma*psf.gradientBoundaryCoeffs();
     }
 
     return tfvm;
@@ -162,7 +159,12 @@ gaussLaplacianScheme<Type, GType>::fvmLaplacian
     );
     const surfaceVectorField SfGammaCorr(SfGamma - SfGammaSn*Sn);
 
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(SfGammaSn, vf);
+    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected
+    (
+        SfGammaSn,
+        this->tsnGradScheme_().deltaCoeffs(vf),
+        vf
+    );
     fvMatrix<Type>& fvm = tfvm();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tfaceFluxCorrection
