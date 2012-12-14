@@ -111,7 +111,7 @@ snGradScheme<Type>::snGrad
     const fvMesh& mesh = vf.mesh();
 
     // construct GeometricField<Type, fvsPatchField, surfaceMesh>
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tssf
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
     (
         new GeometricField<Type, fvsPatchField, surfaceMesh>
         (
@@ -127,7 +127,7 @@ snGradScheme<Type>::snGrad
             vf.dimensions()*tdeltaCoeffs().dimensions()
         )
     );
-    GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tssf();
+    GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tsf();
 
     // set reference to difference factors array
     const scalarField& deltaCoeffs = tdeltaCoeffs().internalField();
@@ -136,18 +136,30 @@ snGradScheme<Type>::snGrad
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
-    forAll(owner, faceI)
+    forAll(owner, facei)
     {
-        ssf[faceI] =
-            deltaCoeffs[faceI]*(vf[neighbour[faceI]] - vf[owner[faceI]]);
+        ssf[facei] =
+            deltaCoeffs[facei]*(vf[neighbour[facei]] - vf[owner[facei]]);
     }
 
-    forAll(vf.boundaryField(), patchI)
+    forAll(vf.boundaryField(), patchi)
     {
-        ssf.boundaryField()[patchI] = vf.boundaryField()[patchI].snGrad();
+        ssf.boundaryField()[patchi] = vf.boundaryField()[patchi].snGrad();
     }
 
-    return tssf;
+    return tsf;
+}
+
+
+template<class Type>
+tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+snGradScheme<Type>::sndGrad
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const word& sndGradName
+)
+{
+    return snGrad(vf, vf.mesh().nonOrthDeltaCoeffs(), sndGradName);
 }
 
 
@@ -161,7 +173,9 @@ snGradScheme<Type>::snGrad
 ) const
 {
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
-        = snGrad(vf, deltaCoeffs(vf));
+    (
+        snGrad(vf, deltaCoeffs(vf))
+    );
 
     if (corrected())
     {
@@ -181,10 +195,13 @@ snGradScheme<Type>::snGrad
     const tmp<GeometricField<Type, fvPatchField, volMesh> >& tvf
 ) const
 {
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tinterpVf
-        = snGrad(tvf());
-    tvf.clear();
-    return tinterpVf;
+    tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsf
+    (
+        snGrad(tvf())
+    );
+
+    tsf.clear();
+    return tsf;
 }
 
 

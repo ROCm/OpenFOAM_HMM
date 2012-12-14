@@ -133,6 +133,14 @@ public:
             const word& snGradName = "snGrad"
         );
 
+        //- Return the sndGrad of the given cell field
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        sndGrad
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const word& snGradName = "sndGrad"
+        );
+
         //- Return the interpolation weighting factors for the given field
         virtual tmp<surfaceScalarField> deltaCoeffs
         (
