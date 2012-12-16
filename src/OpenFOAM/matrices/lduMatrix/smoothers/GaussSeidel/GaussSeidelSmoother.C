@@ -107,20 +107,12 @@ void Foam::GaussSeidelSmoother::smooth
     // To compensate for this, it is necessary to turn the
     // sign of the contribution.
 
-    //FieldField<Field, scalar> mBouCoeffs(interfaceBouCoeffs_.size());
-    //
-    //forAll(mBouCoeffs, patchi)
-    //{
-    //    if (interfaces_.set(patchi))
-    //    {
-    //        mBouCoeffs.set(patchi, -interfaceBouCoeffs_[patchi]);
-    //    }
-    //}
     FieldField<Field, scalar>& mBouCoeffs =
         const_cast<FieldField<Field, scalar>&>
         (
             interfaceBouCoeffs_
         );
+
     forAll(mBouCoeffs, patchi)
     {
         if (interfaces_.set(patchi))
@@ -152,35 +144,35 @@ void Foam::GaussSeidelSmoother::smooth
             cmpt
         );
 
-        register scalar curPsi;
+        register scalar psii;
         register label fStart;
         register label fEnd = ownStartPtr[0];
 
-        for (register label cellI=0; cellI<nCells; cellI++)
+        for (register label celli=0; celli<nCells; celli++)
         {
             // Start and end of this row
             fStart = fEnd;
-            fEnd = ownStartPtr[cellI + 1];
+            fEnd = ownStartPtr[celli + 1];
 
             // Get the accumulated neighbour side
-            curPsi = bPrimePtr[cellI];
+            psii = bPrimePtr[celli];
 
             // Accumulate the owner product side
-            for (register label curFace=fStart; curFace<fEnd; curFace++)
+            for (register label facei=fStart; facei<fEnd; facei++)
             {
-                curPsi -= upperPtr[curFace]*psiPtr[uPtr[curFace]];
+                psii -= upperPtr[facei]*psiPtr[uPtr[facei]];
             }
 
-            // Finish current psi
-            curPsi /= diagPtr[cellI];
+            // Finish psi for this cell
+            psii /= diagPtr[celli];
 
-            // Distribute the neighbour side using current psi
-            for (register label curFace=fStart; curFace<fEnd; curFace++)
+            // Distribute the neighbour side using psi for this cell
+            for (register label facei=fStart; facei<fEnd; facei++)
             {
-                bPrimePtr[uPtr[curFace]] -= lowerPtr[curFace]*curPsi;
+                bPrimePtr[uPtr[facei]] -= lowerPtr[facei]*psii;
             }
 
-            psiPtr[cellI] = curPsi;
+            psiPtr[celli] = psii;
         }
     }
 
