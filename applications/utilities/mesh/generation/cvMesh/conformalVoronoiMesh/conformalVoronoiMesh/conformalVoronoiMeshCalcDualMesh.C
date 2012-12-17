@@ -30,6 +30,7 @@ License
 #include "indexedCellChecks.H"
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
+#include "CGAL/Gmpq.h"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
