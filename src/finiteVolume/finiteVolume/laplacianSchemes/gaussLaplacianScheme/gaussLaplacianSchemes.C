@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,12 @@ Foam::fv::gaussLaplacianScheme<Foam::Type, Foam::scalar>::fvmLaplacian       \
         gamma*mesh.magSf()                                                   \
     );                                                                       \
                                                                              \
-    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected(gammaMagSf, vf);     \
+    tmp<fvMatrix<Type> > tfvm = fvmLaplacianUncorrected                      \
+    (                                                                        \
+        gammaMagSf,                                                          \
+        this->tsnGradScheme_().deltaCoeffs(vf),                              \
+        vf                                                                   \
+    );                                                                       \
     fvMatrix<Type>& fvm = tfvm();                                            \
                                                                              \
     if (this->tsnGradScheme_().corrected())                                  \

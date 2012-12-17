@@ -32,22 +32,24 @@ FoamFile
     side1
     {
         type            cyclicAMI;
+        inGroups        1(cyclicAMI);
         nFaces          400;
         startFace       4478;
         matchTolerance  0.0001;
-        neighbourPatch  side2;
         transform       rotational;
+        neighbourPatch  side2;
         rotationAxis    (1 0 0);
         rotationCentre  (0 0 0);
     }
     side2
     {
         type            cyclicAMI;
+        inGroups        1(cyclicAMI);
         nFaces          250;
         startFace       4878;
         matchTolerance  0.0001;
-        neighbourPatch  side1;
         transform       rotational;
+        neighbourPatch  side1;
         rotationAxis    (1 0 0);
         rotationCentre  (0 0 0);
     }

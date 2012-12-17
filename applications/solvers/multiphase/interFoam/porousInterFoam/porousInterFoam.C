@@ -46,6 +46,7 @@ Description
 #include "turbulenceModel.H"
 #include "IOporosityModelList.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
