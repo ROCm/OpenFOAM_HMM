@@ -33,10 +33,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::tetDecomposer, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(tetDecomposer, 0);
+
     template<>
     const char* NamedEnum<tetDecomposer::decompositionType, 2>::names[] =
     {

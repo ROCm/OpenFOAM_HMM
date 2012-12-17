@@ -31,7 +31,10 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Foam::fieldValues::fieldValueDelta, 0);
+    namespace fieldValues
+    {
+        defineTypeNameAndDebug(fieldValueDelta, 0);
+    }
 
     template<>
     const char*
@@ -43,8 +46,8 @@ namespace Foam
         "max"
     };
 
-    const Foam::NamedEnum<Foam::fieldValues::fieldValueDelta::operationType, 4>
-        Foam::fieldValues::fieldValueDelta::operationTypeNames_;
+    const NamedEnum<fieldValues::fieldValueDelta::operationType, 4>
+        fieldValues::fieldValueDelta::operationTypeNames_;
 }
 
 

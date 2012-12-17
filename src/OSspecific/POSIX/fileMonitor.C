@@ -45,13 +45,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fileMonitor, 0);
-
 const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
     Foam::fileMonitor::fileStateNames_;
 
 namespace Foam
 {
+    defineTypeNameAndDebug(fileMonitor, 0);
+
     template<>
     const char* Foam::NamedEnum
     <

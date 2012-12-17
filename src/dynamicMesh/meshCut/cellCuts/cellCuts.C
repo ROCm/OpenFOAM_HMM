@@ -36,7 +36,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::cellCuts, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(cellCuts, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //

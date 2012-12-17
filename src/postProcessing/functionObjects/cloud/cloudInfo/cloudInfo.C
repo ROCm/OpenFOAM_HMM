@@ -29,7 +29,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::cloudInfo, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(cloudInfo, 0);
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

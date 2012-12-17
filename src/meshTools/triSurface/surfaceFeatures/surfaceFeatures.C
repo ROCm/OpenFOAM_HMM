@@ -37,10 +37,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfaceFeatures, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(surfaceFeatures, 0);
 
-const Foam::scalar Foam::surfaceFeatures::parallelTolerance =
-    sin(degToRad(1.0));
+const scalar surfaceFeatures::parallelTolerance = sin(degToRad(1.0));
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -34,7 +34,10 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfaceInterpolation, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(surfaceInterpolation, 0);
+}
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //

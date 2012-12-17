@@ -35,7 +35,10 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::searchableSurfaces, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(searchableSurfaces, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

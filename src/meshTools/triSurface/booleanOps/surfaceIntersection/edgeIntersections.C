@@ -40,9 +40,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::edgeIntersections, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(edgeIntersections, 0);
 
-Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
+scalar edgeIntersections::alignedCos_ = cos(degToRad(89.0));
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

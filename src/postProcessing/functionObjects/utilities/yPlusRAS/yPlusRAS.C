@@ -36,7 +36,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::yPlusRAS, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(yPlusRAS, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
