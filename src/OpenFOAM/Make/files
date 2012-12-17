@@ -255,6 +255,7 @@ $(lduMatrix)/solvers/ICCG/ICCG.C
 $(lduMatrix)/solvers/BICCG/BICCG.C
 
 $(lduMatrix)/smoothers/GaussSeidel/GaussSeidelSmoother.C
+$(lduMatrix)/smoothers/symGaussSeidel/symGaussSeidelSmoother.C
 $(lduMatrix)/smoothers/nonBlockingGaussSeidel/nonBlockingGaussSeidelSmoother.C
 $(lduMatrix)/smoothers/DIC/DICSmoother.C
 $(lduMatrix)/smoothers/FDIC/FDICSmoother.C
