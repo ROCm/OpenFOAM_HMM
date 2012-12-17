@@ -803,7 +803,7 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     if (allGeometry)
     {
         cellSet cells(mesh, "underdeterminedCells", mesh.nCells()/100);
-        if (mesh.checkCellDeterminant(true, &cells, mesh.geometricD()))
+        if (mesh.checkCellDeterminant(true, &cells))
         {
             noFailedChecks++;
 
