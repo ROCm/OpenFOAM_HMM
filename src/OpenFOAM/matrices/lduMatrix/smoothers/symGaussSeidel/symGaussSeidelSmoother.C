@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,25 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "GaussSeidelSmoother.H"
+#include "symGaussSeidelSmoother.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(GaussSeidelSmoother, 0);
+    defineTypeNameAndDebug(symGaussSeidelSmoother, 0);
 
-    lduMatrix::smoother::addsymMatrixConstructorToTable<GaussSeidelSmoother>
-        addGaussSeidelSmootherSymMatrixConstructorToTable_;
+    lduMatrix::smoother::addsymMatrixConstructorToTable<symGaussSeidelSmoother>
+        addsymGaussSeidelSmootherSymMatrixConstructorToTable_;
 
-    lduMatrix::smoother::addasymMatrixConstructorToTable<GaussSeidelSmoother>
-        addGaussSeidelSmootherAsymMatrixConstructorToTable_;
+    lduMatrix::smoother::addasymMatrixConstructorToTable<symGaussSeidelSmoother>
+        addsymGaussSeidelSmootherAsymMatrixConstructorToTable_;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::GaussSeidelSmoother::GaussSeidelSmoother
+Foam::symGaussSeidelSmoother::symGaussSeidelSmoother
 (
     const word& fieldName,
     const lduMatrix& matrix,
@@ -63,7 +63,7 @@ Foam::GaussSeidelSmoother::GaussSeidelSmoother
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::GaussSeidelSmoother::smooth
+void Foam::symGaussSeidelSmoother::smooth
 (
     const word& fieldName_,
     scalarField& psi,
@@ -163,6 +163,35 @@ void Foam::GaussSeidelSmoother::smooth
                 psii -= upperPtr[facei]*psiPtr[uPtr[facei]];
             }
 
+            // Finish current psi
+            psii /= diagPtr[celli];
+
+            // Distribute the neighbour side using current psi
+            for (register label facei=fStart; facei<fEnd; facei++)
+            {
+                bPrimePtr[uPtr[facei]] -= lowerPtr[facei]*psii;
+            }
+
+            psiPtr[celli] = psii;
+        }
+
+        fStart = ownStartPtr[nCells];
+
+        for (register label celli=nCells-1; celli>=0; celli--)
+        {
+            // Start and end of this row
+            fEnd = fStart;
+            fStart = ownStartPtr[celli];
+
+            // Get the accumulated neighbour side
+            psii = bPrimePtr[celli];
+
+            // Accumulate the owner product side
+            for (register label facei=fStart; facei<fEnd; facei++)
+            {
+                psii -= upperPtr[facei]*psiPtr[uPtr[facei]];
+            }
+
             // Finish psi for this cell
             psii /= diagPtr[celli];
 
@@ -187,7 +216,7 @@ void Foam::GaussSeidelSmoother::smooth
 }
 
 
-void Foam::GaussSeidelSmoother::smooth
+void Foam::symGaussSeidelSmoother::smooth
 (
     scalarField& psi,
     const scalarField& source,

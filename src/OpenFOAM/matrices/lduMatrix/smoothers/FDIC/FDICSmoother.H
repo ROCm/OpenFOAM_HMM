@@ -21,40 +21,82 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::triadField
+Class
+    Foam::FDICSmoother
 
 Description
-    Specialisation of Field\<T\> for triad.
+    Simplified diagonal-based incomplete Cholesky smoother for symmetric
+    matrices.
+
+    To improve efficiency, the residual is evaluated after every nSweeps
+    sweeps.
 
 SourceFiles
-    triadField.C
+    FDICSmoother.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triadField_H
-#define triadField_H
+#ifndef FDICSmoother_H
+#define FDICSmoother_H
 
-#include "Field.H"
-#include "triad.H"
-
-#define TEMPLATE
-#include "FieldFunctionsM.H"
+#include "lduMatrix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-typedef Field<triad> triadField;
+/*---------------------------------------------------------------------------*\
+                           Class FDICSmoother Declaration
+\*---------------------------------------------------------------------------*/
+
+class FDICSmoother
+:
+    public lduMatrix::smoother
+{
+    // Private data
+
+        //- The reciprocal preconditioned diagonal
+        scalarField rD_;
+        scalarField rDuUpper_;
+        scalarField rDlUpper_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("FDIC");
+
+
+    // Constructors
+
+        //- Construct from matrix components
+        FDICSmoother
+        (
+            const word& fieldName,
+            const lduMatrix& matrix,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const FieldField<Field, scalar>& interfaceIntCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces
+        );
+
+
+    // Member Functions
+
+        //- Smooth the solution for a given number of sweeps
+        void smooth
+        (
+            scalarField& psi,
+            const scalarField& source,
+            const direction cmpt,
+            const label nSweeps
+        ) const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "undefFieldFunctionsM.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

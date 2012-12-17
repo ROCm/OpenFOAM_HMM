@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,12 +58,6 @@ class gaussLaplacianScheme
 {
     // Private Member Functions
 
-        tmp<fvMatrix<Type> > fvmLaplacianUncorrected
-        (
-            const surfaceScalarField& gammaMagSf,
-            const GeometricField<Type, fvPatchField, volMesh>&
-        );
-
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > gammaSnGradCorr
         (
             const surfaceVectorField& SfGammaCorr,
@@ -115,6 +109,13 @@ public:
 
 
     // Member Functions
+
+        static tmp<fvMatrix<Type> > fvmLaplacianUncorrected
+        (
+            const surfaceScalarField& gammaMagSf,
+            const surfaceScalarField& deltaCoeffs,
+            const GeometricField<Type, fvPatchField, volMesh>&
+        );
 
         tmp<GeometricField<Type, fvPatchField, volMesh> > fvcLaplacian
         (

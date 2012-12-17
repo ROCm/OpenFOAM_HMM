@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,14 @@ public:
             const GeometricField<Type, fvPatchField, volMesh>&,
             const tmp<surfaceScalarField>&,
             const word& snGradName = "snGrad"
+        );
+
+        //- Return the sndGrad of the given cell field
+        static tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        sndGrad
+        (
+            const GeometricField<Type, fvPatchField, volMesh>&,
+            const word& snGradName = "sndGrad"
         );
 
         //- Return the interpolation weighting factors for the given field

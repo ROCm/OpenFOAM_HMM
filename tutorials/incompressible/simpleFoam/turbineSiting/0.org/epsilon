@@ -33,10 +33,14 @@ boundaryField
         E               9.8;
         value           $internalField;
     }
+
     outlet
     {
-        type            zeroGradient;
+        type            inletOutlet;
+        inletValue      uniform $turbulentEpsilon;
+        value           $internalField;
     }
+
     inlet
     {
         type            atmBoundaryLayerInletEpsilon;

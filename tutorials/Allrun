@@ -68,7 +68,7 @@ logReport()
 
 
 # Recursively run all tutorials
-foamRunTutorials cases
+foamRunTutorials -test -skipFirst
 
 
 # Analyse all log files

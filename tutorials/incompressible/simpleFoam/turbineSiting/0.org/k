@@ -27,14 +27,16 @@ boundaryField
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 0.0;
+        inletValue      uniform $turbulentKE;
         value           $internalField;
     }
+
     inlet
     {
         type            uniformFixedValue;
         uniformValue    constant $turbulentKE;
     }
+
     "terrain_.*"
     {
         type            kqRWallFunction;
