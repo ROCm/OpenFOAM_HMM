@@ -24,7 +24,7 @@ EXE_INC = \
     -IPrintTable \
     -I../vectorTools
 
-EXE_LIBS = \
+LIB_LIBS = \
     -lmeshTools \
     -ledgeMesh \
     -lfileFormats \
