@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,8 +82,10 @@ void vanDriestDelta::calcDelta()
         }
     }
 
+    scalar cutOff = wallPointYPlus::yPlusCutOff;
     wallPointYPlus::yPlusCutOff = 500;
     wallDistData<wallPointYPlus> y(mesh_, ystar);
+    wallPointYPlus::yPlusCutOff = cutOff;
 
     delta_ = min
     (

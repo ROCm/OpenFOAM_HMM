@@ -266,4 +266,12 @@ bool Foam::codedFunctionObject::read(const dictionary& dict)
 }
 
 
+void Foam::codedFunctionObject::updateMesh(const mapPolyMesh&)
+{}
+
+
+void Foam::codedFunctionObject::movePoints(const polyMesh&)
+{}
+
+
 // ************************************************************************* //
