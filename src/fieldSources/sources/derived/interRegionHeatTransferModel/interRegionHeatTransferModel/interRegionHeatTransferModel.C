@@ -127,7 +127,6 @@ Foam::interRegionHeatTransferModel::~interRegionHeatTransferModel()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::interRegionHeatTransferModel::addSup
 (
     fvMatrix<scalar>& eEqn,

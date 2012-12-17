@@ -453,7 +453,7 @@ public:
                 void interpolateToSource
                 (
                     const UList<Type>& fld,
-                    const CombineOp& bop,
+                    const CombineOp& cop,
                     List<Type>& result
                 ) const;
 
@@ -463,7 +463,7 @@ public:
                 void interpolateToTarget
                 (
                     const UList<Type>& fld,
-                    const CombineOp& bop,
+                    const CombineOp& cop,
                     List<Type>& result
                 ) const;
 
