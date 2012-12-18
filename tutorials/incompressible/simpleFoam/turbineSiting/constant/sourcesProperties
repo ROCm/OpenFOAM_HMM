@@ -19,8 +19,6 @@ disk1
 {
     type            actuationDiskSource;
     active          on;            //on/off switch
-    timeStart       0.0;           //start time
-    duration        1000.0;        //duration
     selectionMode   cellSet;       //cellSet // points //cellZone
     cellSet         actuationDisk1;//cellSet name when selectionMode = cellSet
 
@@ -39,8 +37,6 @@ disk2
 {
     type            actuationDiskSource;
     active          on;
-    timeStart       0.0;
-    duration        1000.0;
     selectionMode   cellSet;
     cellSet         actuationDisk2;
 

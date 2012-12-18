@@ -19,8 +19,6 @@ porosity1
 {
     type            explicitPorositySource;
     active          true;
-    timeStart       0;
-    duration        1000000;
     selectionMode   cellZone;
     cellZone        porosity;
 
