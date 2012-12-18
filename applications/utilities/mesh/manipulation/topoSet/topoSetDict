@@ -167,8 +167,10 @@ FoamFile
 //    source regionToCell;
 //    sourceInfo
 //    {
-//        set         c0;         // name of cellSet giving mesh subset
-//        insidePoint (1 2 3);    // point inside region to select
+//        set         c0;         // optional name of cellSet giving mesh subset
+//        insidePoints ((1 2 3)); // points inside region to select
+//        nErode      0;          // optional number of layers to erode
+//                                // selection
 //    }
 //
 //    // Cells underneath plane such that volume is reached. E.g. for use

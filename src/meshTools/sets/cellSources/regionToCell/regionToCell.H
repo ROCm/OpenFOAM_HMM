@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,20 @@ Class
 
 Description
     TopoSetSource. Select cells belonging to topological connected region
-    (that contains given point)
+    (that contains given points)
+
+    In dictionary input:
+
+        // optional name of cellSet delimiting search
+        set         c0;
+
+        //- Number of cell layers to erode mesh to detect holes in the mesh
+        //  Set to 0 if not used.
+        nErode 3;
+
+        // points inside region to select
+        insidePoints ((1 2 3));
+
 
 SourceFiles
     regionToCell.C
@@ -37,11 +50,14 @@ SourceFiles
 #define regionToCell_H
 
 #include "topoSetSource.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class regionSplit;
 
 /*---------------------------------------------------------------------------*\
                            Class regionToCell Declaration
@@ -58,13 +74,37 @@ class regionToCell
         static addToUsageTable usage_;
 
         //- Name of cellSet to keep to
-        word setName_;
+        const word setName_;
 
-        //- Coordinate that is inside connected region
-        point insidePoint_;
+        //- Coordinate(s) that is inside connected region
+        const pointField insidePoints_;
+
+        //- Number of layers to erode
+        const label nErode_;
 
 
     // Private Member Functions
+
+        //- Mark faces inbetween selected and unselected elements
+        void markRegionFaces
+        (
+            const boolList& selectedCell,
+            boolList& regionFace
+        ) const;
+
+        //- Determine for every disconnected region in the mesh whether
+        //  it contains a locationInMesh
+        boolList findRegions(const bool verbose, const regionSplit&) const;
+
+        //- Unselect regions not containing a locationInMesh
+        void unselectOutsideRegions(boolList& selectedCell) const;
+
+        //- Unselect one layer of cells from selectedCell
+        void shrinkRegions(boolList& selectedCell) const;
+
+        //- Erode a given number of layers from selectedCell. Remove any
+        //  region that gets disconnected that way.
+        void erode(boolList& selectedCell) const;
 
         void combine(topoSet& set, const bool add) const;
 
@@ -81,7 +121,8 @@ public:
         (
             const polyMesh& mesh,
             const word& setName,
-            const point& insidePoint
+            const pointField& insidePoints,
+            const label nErode
         );
 
         //- Construct from dictionary
