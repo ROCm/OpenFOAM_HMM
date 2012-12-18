@@ -51,7 +51,7 @@ void Foam::Time::readDict()
             if (fnd != objects.end())
             {
                 Info<< controlDict_.name() << " : overriding debug switch "
-                    << name << endl;
+                    << name << " to " << fnd() << endl;
 
                 if (iter().isDict())
                 {
@@ -99,7 +99,7 @@ void Foam::Time::readDict()
             {
                 Info<< controlDict_.name()
                     << " : overriding optimisation switch "
-                    << name << endl;
+                    << name << " to " << fnd() << endl;
 
                 if (iter().isDict())
                 {
