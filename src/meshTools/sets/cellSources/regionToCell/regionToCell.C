@@ -142,7 +142,7 @@ Foam::boolList Foam::regionToCell::findRegions
 
         if (verbose)
         {
-            Info<< "Found location " << insidePoints_[i]
+            Info<< "    Found location " << insidePoints_[i]
                 << " in cell " << cellI << " on processor " << keepProcI
                 << " in global region " << keepRegionI
                 << " out of " << cellRegion.nRegions() << " regions." << endl;
@@ -243,6 +243,8 @@ void Foam::regionToCell::shrinkRegions
             }
         }
     }
+    Info<< "    Eroded " << returnReduce(nChanged, sumOp<label>())
+        << " cells." << endl;
 }
 
 
@@ -354,7 +356,7 @@ void Foam::regionToCell::combine(topoSet& set, const bool add) const
 
     if (setName_.size() && setName_ != "none")
     {
-        Info<< "Loading subset " << setName_ << " to delimit search region."
+        Info<< "    Loading subset " << setName_ << " to delimit search region."
             << endl;
         cellSet subSet(mesh_, setName_);
 
