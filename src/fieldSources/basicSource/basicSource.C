@@ -108,7 +108,6 @@ void Foam::basicSource::setSelection(const dictionary& dict)
 
 void Foam::basicSource::setCellSet()
 {
-    Info<< incrIndent << indent << "Source: " << name_ << endl;
     switch (selectionMode_)
     {
         case smPoints:
@@ -237,7 +236,7 @@ void Foam::basicSource::setCellSet()
 
         Info<< indent << "- selected "
             << returnReduce(cells_.size(), sumOp<label>())
-            << " cell(s) with volume " << V_ << nl << decrIndent << endl;
+            << " cell(s) with volume " << V_ << nl << endl;
     }
 }
 
@@ -257,8 +256,8 @@ Foam::basicSource::basicSource
     dict_(dict),
     coeffs_(dict.subDict(modelType + "Coeffs")),
     active_(readBool(dict_.lookup("active"))),
-    timeStart_(readScalar(dict_.lookup("timeStart"))),
-    duration_(readScalar(dict_.lookup("duration"))),
+    timeStart_(-1.0),
+    duration_(0.0),
     selectionMode_
     (
         selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
@@ -273,9 +272,24 @@ Foam::basicSource::basicSource
     fieldNames_(),
     applied_()
 {
+    Info<< incrIndent << indent << "Source: " << name_ << endl;
+
+    if (dict_.readIfPresent("timeStart", timeStart_))
+    {
+        dict_.lookup("duration") >> duration_;
+        Info<< indent << "- applying source at time " << timeStart_
+            << " for duration " << duration_ << endl;
+    }
+    else
+    {
+        Info<< indent<< "-applying source for all time" << endl;
+    }
+
     setSelection(dict_);
 
     setCellSet();
+
+    Info<< decrIndent;
 }
 
 
@@ -325,12 +339,7 @@ Foam::basicSource::~basicSource()
 
 bool Foam::basicSource::isActive()
 {
-    if
-    (
-        active_
-     && (mesh_.time().value() >= timeStart_)
-     && (mesh_.time().value() <= timeEnd())
-    )
+    if (active_ && inTimeLimits(mesh_.time().value()))
     {
         // Update the cell set if the mesh is changing
         if (mesh_.changing())
