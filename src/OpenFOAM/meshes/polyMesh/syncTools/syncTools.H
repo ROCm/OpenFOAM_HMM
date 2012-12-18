@@ -579,14 +579,24 @@ public:
 
         // Other
 
-            //- Get per point whether is it master (of a coupled set of points)
+            //- Get per point whether it is uncoupled or a master of a
+            //  coupled set of points
             static PackedBoolList getMasterPoints(const polyMesh&);
 
-            //- Get per edge whether is it master (of a coupled set of edges)
+            //- Get per edge whether it is uncoupled or a master of a
+            //  coupled set of edges
             static PackedBoolList getMasterEdges(const polyMesh&);
 
-            //- Get per face whether is it master (of a coupled set of faces)
+            //- Get per face whether it is uncoupled or a master of a
+            //  coupled set of faces
             static PackedBoolList getMasterFaces(const polyMesh&);
+
+            //- Get per face whether it is internal or a master of a
+            //  coupled set of faces
+            static PackedBoolList getInternalOrMasterFaces(const polyMesh&);
+
+            //- Get per face whether it is internal or coupled
+            static PackedBoolList getInternalOrCoupledFaces(const polyMesh&);
 
 };
 
