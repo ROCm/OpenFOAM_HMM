@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -168,8 +168,14 @@ fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    caseFile="$caseName{$regionName}.$extension"
-    fvControls="$fvControls/$regionName"
+    if [ ! -d constant/$regionName ]
+    then
+        echo "FATAL ERROR: Region $regionName does not exist"
+        exit 1
+    else
+        caseFile="$caseName{$regionName}.$extension"
+        fvControls="$fvControls/$regionName"
+    fi
 fi
 
 case "${optTouch:-false}" in
