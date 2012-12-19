@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -263,6 +263,16 @@ extern messageStream Info;
 */
 #define IOInfoIn(fn, ios) \
     ::Foam::Info((fn), __FILE__, __LINE__, (ios))
+
+/**
+ * \def Debug(variable)
+ * Report a variable name and value using Foam::Pout in
+ * file __FILE__ at line __LINE__
+*/
+#define Debug(var) \
+    ::Foam::Pout<< "["<< __FILE__ << ":" << __LINE__ << "] " \
+        << #var " = " << var << ::Foam::endl
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
