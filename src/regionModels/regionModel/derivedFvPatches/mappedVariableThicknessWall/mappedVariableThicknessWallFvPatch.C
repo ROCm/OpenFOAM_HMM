@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,14 +49,10 @@ makeDeltaCoeffs(scalarField& dc) const
     const mappedVariableThicknessWallPolyPatch& pp =
         refCast<const mappedVariableThicknessWallPolyPatch>(patch());
 
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>(patch());
-
-    const polyMesh& nbrMesh = mpp.sampleMesh();
-
     typedef regionModels::regionModel1D modelType;
 
     const modelType& region1D =
-        nbrMesh.objectRegistry::lookupObject<modelType>
+        patch().boundaryMesh().mesh().time().lookupObject<modelType>
         (
             "thermoBaffleProperties"
         );

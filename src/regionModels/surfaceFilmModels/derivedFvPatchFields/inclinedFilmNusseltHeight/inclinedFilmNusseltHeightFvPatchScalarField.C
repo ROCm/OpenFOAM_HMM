@@ -120,7 +120,10 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     // retrieve the film region from the database
 
     const regionModels::regionModel& region =
-        db().lookupObject<regionModels::regionModel>("surfaceFilmProperties");
+        db().time().lookupObject<regionModels::regionModel>
+        (
+            "surfaceFilmProperties"
+        );
 
     const regionModels::surfaceFilmModels::kinematicSingleLayer& film =
         dynamic_cast

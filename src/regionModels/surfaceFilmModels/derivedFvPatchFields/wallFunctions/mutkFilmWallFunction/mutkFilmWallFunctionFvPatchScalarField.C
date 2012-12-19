@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,10 +53,10 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     typedef regionModels::surfaceFilmModels::surfaceFilmModel modelType;
 
-    bool ok =
-        db().objectRegistry::foundObject<modelType>("surfaceFilmProperties");
+    bool foundFilm =
+        db().time().foundObject<modelType>("surfaceFilmProperties");
 
-    if (!ok)
+    if (!foundFilm)
     {
         // do nothing on construction - film model doesn't exist yet
         return tuTau;
@@ -66,7 +66,7 @@ tmp<scalarField> mutkFilmWallFunctionFvPatchScalarField::calcUTau
 
     // Retrieve phase change mass from surface film model
     const modelType& filmModel =
-        db().objectRegistry::lookupObject<modelType>("surfaceFilmProperties");
+        db().time().lookupObject<modelType>("surfaceFilmProperties");
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 

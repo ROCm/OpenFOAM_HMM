@@ -118,17 +118,10 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
     UPstream::msgType() = oldTag+1;
 
     bool filmOk =
-        db().objectRegistry::foundObject<filmModelType>
-        (
-            "surfaceFilmProperties"
-        );
+        db().time().foundObject<filmModelType>("surfaceFilmProperties");
 
 
-    bool pyrOk =
-        db().objectRegistry::foundObject<pyrModelType>
-        (
-            "pyrolysisProperties"
-        );
+    bool pyrOk = db().time().foundObject<pyrModelType>("pyrolysisProperties");
 
     if (!filmOk || !pyrOk)
     {
@@ -142,7 +135,7 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     // Retrieve film model
     const filmModelType& filmModel =
-        db().lookupObject<filmModelType>("surfaceFilmProperties");
+        db().time().lookupObject<filmModelType>("surfaceFilmProperties");
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
@@ -154,7 +147,7 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     // Retrieve pyrolysis model
     const pyrModelType& pyrModel =
-        db().lookupObject<pyrModelType>("pyrolysisProperties");
+        db().time().lookupObject<pyrModelType>("pyrolysisProperties");
 
     const label pyrPatchI = pyrModel.regionPatchID(patchI);
 
