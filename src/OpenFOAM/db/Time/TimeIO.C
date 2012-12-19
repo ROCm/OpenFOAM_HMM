@@ -40,6 +40,9 @@ void Foam::Time::readDict()
 
 
     // Check for local switches and settings
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Debug switches
     if (controlDict_.found("DebugSwitches"))
     {
         simpleObjectRegistry& objects = debug::debugObjects();
@@ -50,8 +53,8 @@ void Foam::Time::readDict()
             simpleObjectRegistry::iterator fnd = objects.find(name);
             if (fnd != objects.end())
             {
-                Info<< controlDict_.name() << " : overriding debug switch "
-                    << name << " to " << fnd() << endl;
+                Info<< controlDict_.name() << " : overriding debug switch : "
+                    << iter() << endl;
 
                 if (iter().isDict())
                 {
@@ -67,6 +70,8 @@ void Foam::Time::readDict()
             }
         }
     }
+
+    // Dimension sets
     if (controlDict_.found("DimensionSets"))
     {
         dictionary dict(Foam::dimensionSystems());
@@ -84,6 +89,8 @@ void Foam::Time::readDict()
             fnd()->readData(is);
         }
     }
+
+    // Optimisation Switches
     if (controlDict_.found("OptimisationSwitches"))
     {
         simpleObjectRegistry& objects = debug::optimisationObjects();
@@ -98,8 +105,7 @@ void Foam::Time::readDict()
             if (fnd != objects.end())
             {
                 Info<< controlDict_.name()
-                    << " : overriding optimisation switch "
-                    << name << " to " << fnd() << endl;
+                    << " : overriding optimisation switch : " << iter() << endl;
 
                 if (iter().isDict())
                 {

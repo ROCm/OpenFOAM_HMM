@@ -89,6 +89,7 @@ Description
     };                                                                        \
     add##Tag##ToInfo add##Tag##ToInfo_(Name)
 
+
 //- Register optimisation switch (if int), lookup as \a Name
 #define registerOptSwitchWithName(Switch,Tag,Name)                            \
     class add##Tag##ToOpt                                                     \
