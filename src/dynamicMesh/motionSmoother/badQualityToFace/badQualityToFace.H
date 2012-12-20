@@ -22,76 +22,94 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSelections::badQualityCellSelection
+    Foam::badQualityToFace
 
 Description
-    Deselect bad quality cells
+    Selects bad quality faces (using snappyHexMesh/cvMesh mesh quality selector)
 
 SourceFiles
-    badQualityCellSelection.C
+    badQualityToFace.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef badQualityCellSelection_H
-#define badQualityCellSelection_H
+#ifndef badQualityToFace_H
+#define badQualityToFace_H
 
-#include "cellSelection.H"
+#include "topoSetSource.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-namespace cellSelections
-{
-
 /*---------------------------------------------------------------------------*\
-                     Class badQualityCellSelection Declaration
+                         Class badQualityToFace Declaration
 \*---------------------------------------------------------------------------*/
 
-class badQualityCellSelection
+class badQualityToFace
 :
-    public cellSelection
+    public topoSetSource
 {
+
+    // Private data
+
+        //- Add usage string
+        static addToUsageTable usage_;
+
+        //- Mesh quality dictionary
+        const dictionary dict_;
+
+
+    // Private Member Functions
+
+        void combine(topoSet& set, const bool add) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("badQuality");
-
+    TypeName("badQualityToFace");
 
     // Constructors
 
         //- Construct from dictionary
-        badQualityCellSelection
+        badQualityToFace
         (
-            const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
-        //- Clone
-        autoPtr<cellSelection> clone() const
-        {
-            notImplemented("autoPtr<cellSelection> clone() const");
-            return autoPtr<cellSelection>(NULL);
-        }
+        //- Construct from Istream
+        badQualityToFace
+        (
+            const polyMesh& mesh,
+            Istream&
+        );
 
 
     //- Destructor
-    virtual ~badQualityCellSelection();
+    virtual ~badQualityToFace();
 
 
     // Member Functions
 
-        virtual void select(boolList&) const;
+        virtual sourceType setType() const
+        {
+            return CELLSETSOURCE;
+        }
+
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace cellSelections
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

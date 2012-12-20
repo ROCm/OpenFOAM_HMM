@@ -33,9 +33,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sampledSurfaces, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(sampledSurfaces, 0);
+}
+
+
 bool Foam::sampledSurfaces::verbose_ = false;
+
 Foam::scalar Foam::sampledSurfaces::mergeTol_ = 1e-10;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

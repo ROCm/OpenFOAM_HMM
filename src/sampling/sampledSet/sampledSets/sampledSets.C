@@ -33,8 +33,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sampledSets, 0);
-bool Foam::sampledSets::verbose_ = false;
+namespace Foam
+{
+defineTypeNameAndDebug(sampledSets, 0);
+bool sampledSets::verbose_ = false;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

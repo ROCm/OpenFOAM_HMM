@@ -190,13 +190,25 @@ int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
 
 void Foam::debug::addDebugObject(const char* name, simpleRegIOobject* obj)
 {
-    debugObjects().insert(name, obj);
+    if (!debugObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addDebugObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
 }
 
 
 void Foam::debug::addInfoObject(const char* name, simpleRegIOobject* obj)
 {
-    infoObjects().insert(name, obj);
+    if (!infoObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addInfoObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
 }
 
 
@@ -206,7 +218,13 @@ void Foam::debug::addOptimisationObject
     simpleRegIOobject* obj
 )
 {
-    optimisationObjects().insert(name, obj);
+    if (!optimisationObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addOptimisationObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
 }
 
 
@@ -216,7 +234,13 @@ void Foam::debug::addDimensionSetObject
     simpleRegIOobject* obj
 )
 {
-    dimensionSetObjects().insert(name, obj);
+    if (!dimensionSetObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addDimensionSetObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
 }
 
 

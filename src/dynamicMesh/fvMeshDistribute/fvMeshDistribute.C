@@ -43,7 +43,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fvMeshDistribute, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(fvMeshDistribute, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

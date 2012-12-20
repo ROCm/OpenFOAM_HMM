@@ -32,8 +32,9 @@ namespace Foam
 const char* const token::typeName = "token";
 token token::undefinedToken;
 
-defineTypeNameAndDebug(token::compound, 0);
-defineRunTimeSelectionTable(token::compound, Istream);
+typedef token::compound tokenCompound;
+defineTypeNameAndDebug(tokenCompound, 0);
+defineRunTimeSelectionTable(tokenCompound, Istream);
 }
 
 

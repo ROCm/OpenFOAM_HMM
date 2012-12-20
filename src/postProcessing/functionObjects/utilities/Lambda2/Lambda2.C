@@ -31,7 +31,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::Lambda2, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(Lambda2, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -40,7 +40,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::wallBoundedStreamLine, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(wallBoundedStreamLine, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

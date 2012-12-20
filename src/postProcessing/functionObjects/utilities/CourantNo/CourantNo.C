@@ -32,7 +32,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::CourantNo, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(CourantNo, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -47,12 +47,6 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(polyMesh, 0);
-registerDebugSwitchWithName
-(
-    polyMesh,
-    polyMesh,
-    polyMesh::typeName_()
-);
 
 word polyMesh::defaultRegion = "region0";
 word polyMesh::meshSubDir = "polyMesh";

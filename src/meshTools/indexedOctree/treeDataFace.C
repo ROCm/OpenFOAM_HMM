@@ -29,9 +29,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::treeDataFace, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(treeDataFace, 0);
 
-Foam::scalar Foam::treeDataFace::tolSqr = sqr(1e-6);
+scalar treeDataFace::tolSqr = sqr(1e-6);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,11 +31,39 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+namespace Foam
+{
 // Signal number to catch
-int Foam::sigWriteNow::signal_
+int sigWriteNow::signal_
 (
     debug::optimisationSwitch("writeNowSignal", -1)
 );
+// Register re-reader
+class addwriteNowSignalToOpt
+:
+    public ::Foam::simpleRegIOobject
+{
+public:
+    addwriteNowSignalToOpt(const char* name)
+    :
+        ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
+    {}
+    virtual ~addwriteNowSignalToOpt()
+    {}
+    virtual void readData(Foam::Istream& is)
+    {
+        sigWriteNow::signal_ = readLabel(is);
+        sigWriteNow::set(true);
+    }
+    virtual void writeData(Foam::Ostream& os) const
+    {
+        os << sigWriteNow::signal_;
+    }
+};
+addwriteNowSignalToOpt addwriteNowSignalToOpt_("writeNowSignal");
+
+}
+
 
 static Foam::Time* runTimePtr_ = NULL;
 
@@ -64,31 +92,10 @@ Foam::sigWriteNow::sigWriteNow()
 
 Foam::sigWriteNow::sigWriteNow(const bool verbose, Time& runTime)
 {
-    if (signal_ >= 0)
-    {
-        // Store runTime
-        runTimePtr_ = &runTime;
+    // Store runTime
+    runTimePtr_ = &runTime;
 
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-        if (sigaction(signal_, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorIn
-            (
-                "Foam::sigWriteNow::sigWriteNow(const bool, const Time&)"
-            )   << "Cannot set " << signal_ << " trapping"
-                << abort(FatalError);
-        }
-
-        if (verbose)
-        {
-            Info<< "sigWriteNow :"
-                << " Enabling writing upon signal " << signal_
-                << endl;
-        }
-    }
+    set(verbose);
 }
 
 
@@ -112,6 +119,33 @@ Foam::sigWriteNow::~sigWriteNow()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::sigWriteNow::set(const bool verbose)
+{
+    if (signal_ >= 0)
+    {
+        struct sigaction newAction;
+        newAction.sa_handler = sigHandler;
+        newAction.sa_flags = SA_NODEFER;
+        sigemptyset(&newAction.sa_mask);
+        if (sigaction(signal_, &newAction, &oldAction_) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigWriteNow::sigWriteNow(const bool, const Time&)"
+            )   << "Cannot set " << signal_ << " trapping"
+                << abort(FatalError);
+        }
+
+        if (verbose)
+        {
+            Info<< "sigWriteNow :"
+                << " Enabling writing upon signal " << signal_
+                << endl;
+        }
+    }
+}
+
 
 bool Foam::sigWriteNow::active() const
 {

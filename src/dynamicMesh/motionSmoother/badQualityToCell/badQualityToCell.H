@@ -22,118 +22,88 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSelection
+    Foam::badQualityToCell
 
 Description
-    Cell selection methods in subsetMesh
+    Selects bad quality cells (using snappyHexMesh/cvMesh mesh quality selector)
 
 SourceFiles
-    cellSelection.C
+    badQualityToCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSelection_H
-#define cellSelection_H
+#ifndef badQualityToCell_H
+#define badQualityToCell_H
 
-#include "dictionary.H"
-#include "typeInfo.H"
-#include "runTimeSelectionTables.H"
-#include "autoPtr.H"
-#include "boolList.H"
+#include "topoSetSource.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class polyMesh;
-
 /*---------------------------------------------------------------------------*\
-                         Class cellSelection Declaration
+                         Class badQualityToCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellSelection
+class badQualityToCell
+:
+    public topoSetSource
 {
-protected:
 
-    // Protected data
+    // Private data
 
-        //- Name
-        const word name_;
+        //- Add usage string
+        static addToUsageTable usage_;
 
-        //- Reference to mesh
-        const polyMesh& mesh_;
-
-        //- Input dictionary
+        //- Mesh quality dictionary
         const dictionary dict_;
+
+
+    // Private Member Functions
+
+        void combine(topoSet& set, const bool add) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("cellSelection");
-
-
-    // Declare run-time constructor selection table
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            cellSelection,
-            dictionary,
-            (
-                const word& name,
-                const polyMesh& mesh,
-                const dictionary& dict
-            ),
-            (name, mesh, dict)
-        );
-
+    TypeName("badQualityToCell");
 
     // Constructors
 
         //- Construct from dictionary
-        cellSelection
+        badQualityToCell
         (
-            const word& name,
             const polyMesh& mesh,
             const dictionary& dict
         );
 
-        //- Clone
-        autoPtr<cellSelection> clone() const
-        {
-            notImplemented("autoPtr<cellSelection> clone() const");
-            return autoPtr<cellSelection>(NULL);
-        }
-
-
-    // Selectors
-
-        //- Return a reference to the selected cellSelection
-        static autoPtr<cellSelection> New
+        //- Construct from Istream
+        badQualityToCell
         (
-            const word& name,
             const polyMesh& mesh,
-            const dictionary& dict
+            Istream&
         );
 
 
     //- Destructor
-    virtual ~cellSelection();
+    virtual ~badQualityToCell();
 
 
     // Member Functions
 
-        //- Count global number of selected elements
-        static label count(const boolList&);
-
-        const word& name() const
+        virtual sourceType setType() const
         {
-            return name_;
+            return CELLSETSOURCE;
         }
 
-        virtual void select(boolList&) const = 0;
+        virtual void applyToSet
+        (
+            const topoSetSource::setAction action,
+            topoSet&
+        ) const;
 
 };
 

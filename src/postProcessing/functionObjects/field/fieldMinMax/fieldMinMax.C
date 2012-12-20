@@ -28,17 +28,16 @@ License
 #include "dictionary.H"
 #include "Time.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Foam::fieldMinMax, 0);
 
 namespace Foam
 {
+    defineTypeNameAndDebug(fieldMinMax, 0);
+
     template<>
-    const char* Foam::NamedEnum
+    const char* NamedEnum
     <
-        Foam::fieldMinMax::modeType,
+        fieldMinMax::modeType,
         2
     >::names[] =
     {

@@ -23,81 +23,100 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cellSelection.H"
+#include "badQualityToFace.H"
 #include "polyMesh.H"
+#include "motionSmoother.H"
+#include "addToRunTimeSelectionTable.H"
+#include "faceSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(cellSelection, 0);
-    defineRunTimeSelectionTable(cellSelection, dictionary);
+
+defineTypeNameAndDebug(badQualityToFace, 0);
+
+addToRunTimeSelectionTable(topoSetSource, badQualityToFace, word);
+
+addToRunTimeSelectionTable(topoSetSource, badQualityToFace, istream);
+
+}
+
+
+Foam::topoSetSource::addToUsageTable Foam::badQualityToFace::usage_
+(
+    badQualityToFace::typeName,
+    "\n    Usage: badQualityToFace mesh-quality-dictionary\n\n"
+    "    Select all faces that do not satisfy the selection criterion\n\n"
+);
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::badQualityToFace::combine(topoSet& set, const bool add) const
+{
+    faceSet faces(mesh_, "meshQualityFaces", mesh_.nFaces()/100+1);
+    motionSmoother::checkMesh(false, mesh_, dict_, faces);
+    faces.sync(mesh_);
+
+    forAllConstIter(faceSet, faces, iter)
+    {
+        label faceI = iter.key();
+        addOrDelete(set, faceI, add);
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cellSelection::cellSelection
+// Construct from dictionary
+Foam::badQualityToFace::badQualityToFace
 (
-    const word& name,
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    name_(name),
-    mesh_(mesh),
+    topoSetSource(mesh),
     dict_(dict)
+{}
+
+
+// Construct from Istream
+Foam::badQualityToFace::badQualityToFace
+(
+    const polyMesh& mesh,
+    Istream& is
+)
+:
+    topoSetSource(mesh),
+    dict_(is)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::cellSelection::~cellSelection()
+Foam::badQualityToFace::~badQualityToFace()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::cellSelection> Foam::cellSelection::New
+void Foam::badQualityToFace::applyToSet
 (
-    const word& name,
-    const polyMesh& mesh,
-    const dictionary& dict
-)
+    const topoSetSource::setAction action,
+    topoSet& set
+) const
 {
-    const word sampleType(dict.lookup("type"));
-
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(sampleType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        FatalErrorIn
-        (
-            "cellSelection::New"
-            "(const word&, const polyMesh&, const dictionary&)"
-        )   << "Unknown cellSelection type "
-            << sampleType << nl << nl
-            << "Valid cellSelection types : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        Info<< "    Adding bad-quality faces" << endl;
+        combine(set, true);
     }
-
-    return autoPtr<cellSelection>(cstrIter()(name, mesh, dict));
-}
-
-
-Foam::label Foam::cellSelection::count(const boolList& lst)
-{
-    label n = 0;
-    forAll(lst, i)
+    else if (action == topoSetSource::DELETE)
     {
-        if (lst[i])
-        {
-            n++;
-        }
+        Info<< "    Removing bad-quality faces" << endl;
+        combine(set, false);
     }
-    return returnReduce(n, sumOp<label>());
 }
 
 

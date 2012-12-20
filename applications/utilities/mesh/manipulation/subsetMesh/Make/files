@@ -1,6 +1,3 @@
-cellSelection/cellSelection.C
-cellSelection/badQualityCellSelection.C
-cellSelection/outsideCellSelection.C
 subsetMesh.C
 
 EXE = $(FOAM_APPBIN)/subsetMesh

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,12 +37,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::intersectedSurface, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(intersectedSurface, 0);
+}
+
 
 const Foam::label Foam::intersectedSurface::UNVISITED = 0;
 const Foam::label Foam::intersectedSurface::STARTTOEND = 1;
 const Foam::label Foam::intersectedSurface::ENDTOSTART = 2;
 const Foam::label Foam::intersectedSurface::BOTH = STARTTOEND | ENDTOSTART;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

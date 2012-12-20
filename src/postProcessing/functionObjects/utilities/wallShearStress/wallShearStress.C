@@ -32,7 +32,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::wallShearStress, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(wallShearStress, 0);
+}
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //

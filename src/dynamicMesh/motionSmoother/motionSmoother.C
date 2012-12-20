@@ -35,7 +35,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::motionSmoother, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(motionSmoother, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

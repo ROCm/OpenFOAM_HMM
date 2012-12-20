@@ -87,6 +87,8 @@ fvMeshTools/fvMeshTools.C
 motionSmoother/motionSmoother.C
 motionSmoother/motionSmootherCheck.C
 motionSmoother/polyMeshGeometry/polyMeshGeometry.C
+motionSmoother/badQualityToCell/badQualityToCell.C
+motionSmoother/badQualityToFace/badQualityToFace.C
 
 motionSolver/motionSolver/motionSolver.C
 motionSolver/displacement/displacementMotionSolver.C

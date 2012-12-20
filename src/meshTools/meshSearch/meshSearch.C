@@ -33,9 +33,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::meshSearch, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(meshSearch, 0);
 
-Foam::scalar Foam::meshSearch::tol_ = 1e-3;
+scalar meshSearch::tol_ = 1e-3;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,13 +30,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::timer, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(timer, 0);
 
-jmp_buf Foam::timer::envAlarm;
+jmp_buf timer::envAlarm;
 
-struct sigaction Foam::timer::oldAction_;
+struct sigaction timer::oldAction_;
 
-unsigned int Foam::timer::oldTimeOut_ = 0;
+unsigned int timer::oldTimeOut_ = 0;
+}
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
