@@ -28,6 +28,13 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
+inline Foam::DiagonalMatrix<Type>::DiagonalMatrix()
+:
+    List<Type>()
+{}
+
+
+template<class Type>
 template<class Form>
 Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& a)
 :
