@@ -215,6 +215,12 @@ template<class Form, class Type> Form operator*
     const Matrix<Form, Type>&
 );
 
+template<class Form, class Type> Form operator*
+(
+    const Matrix<Form, Type>&,
+    const Matrix<Form, Type>&
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -421,6 +421,40 @@ Form Foam::operator*(const scalar s, const Matrix<Form, Type>& a)
 }
 
 
+template<class Form, class Type>
+Form Foam::operator*(const Matrix<Form, Type>& a, const Matrix<Form, Type>& b)
+{
+    if (a.m() != b.n())
+    {
+        FatalErrorIn
+        (
+            "Matrix<Form, Type>::operator*"
+            "(const Matrix<Form, Type>&, const Matrix<Form, Type>&)"
+        )   << "attempted to multiply incompatible matrices:" << nl
+            << "Matrix A : " << a.n() << " rows, " << a.m() << " columns" << nl
+            << "Matrix B : " << b.n() << " rows, " << b.m() << " columns" << nl
+            << "In order to multiply matrices, columns of A must equal "
+            << "rows of B"
+            << abort(FatalError);
+    }
+
+    Form ab(a.n(), b.m(), scalar(0));
+
+    for (register label i = 0; i < ab.n(); i++)
+    {
+        for (register label j = 0; j < ab.m(); j++)
+        {
+            for (register label l = 0; l < b.n(); l++)
+            {
+                ab[i][j] += a[i][l]*b[l][j];
+            }
+        }
+    }
+
+    return ab;
+}
+
+
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
 #include "MatrixIO.C"
