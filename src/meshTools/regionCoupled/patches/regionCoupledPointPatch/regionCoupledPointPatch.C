@@ -23,52 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
+#include "regionCoupledPointPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    defineTypeNameAndDebug(regionCoupledPointPatch, 0);
     addToRunTimeSelectionTable
     (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
+        facePointPatch,
+        regionCoupledPointPatch,
+        polyPatch
     );
-}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
-(
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
-:
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
+} // End namespace Foam
 
 
 // ************************************************************************* //

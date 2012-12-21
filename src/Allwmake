@@ -61,6 +61,8 @@ wmake $makeType topoChangerFvMesh
 wmake $makeType ODE
 wmake $makeType randomProcesses
 
+# ThermophysicalModels needs regionCoupled
+wmakeLnInclude regionCoupled
 thermophysicalModels/Allwmake $*
 transportModels/Allwmake $*
 turbulenceModels/Allwmake $*
@@ -75,6 +77,8 @@ wmake $makeType fvMotionSolver
 wmake $makeType engine
 
 wmake $makeType fieldSources
+
+wmake $makeType regionCoupled
 
 postProcessing/Allwmake $*
 

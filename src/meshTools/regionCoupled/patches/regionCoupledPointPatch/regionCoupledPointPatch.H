@@ -21,54 +21,64 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::regionCoupledPointPatch
+
+Description
+    Cyclic AMI point patch - place holder only
+
+SourceFiles
+    regionCoupledPointPatch.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
-#include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+#ifndef regionCoupledPointPatch_H
+#define regionCoupledPointPatch_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "facePointPatch.H"
+#include "regionCoupledPolyPatch.H"
+#include "addToRunTimeSelectionTable.H"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
-}
 
+/*---------------------------------------------------------------------------*\
+                      Class regionCoupledPointPatch Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
-(
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
+class regionCoupledPointPatch
 :
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
+    public facePointPatch
+{
+public:
+
+    //- Runtime type information
+    TypeName(regionCoupledPolyPatch::typeName_());
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+    // Constructors
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
+        //- Construct from components
+        regionCoupledPointPatch
+        (
+            const polyPatch& patch,
+            const pointBoundaryMesh& bm
+        ):
+             facePointPatch(patch, bm)
+        {}
 
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

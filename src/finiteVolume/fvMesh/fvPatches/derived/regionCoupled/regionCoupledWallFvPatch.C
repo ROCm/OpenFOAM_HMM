@@ -23,52 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
+#include "regionCoupledWallFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
+    defineTypeNameAndDebug(regionCoupledWallFvPatch, 0);
+    addToRunTimeSelectionTable(fvPatch, regionCoupledWallFvPatch, polyPatch);
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+Foam::tmp<Foam::labelField> Foam::regionCoupledWallFvPatch::
+interfaceInternalField
 (
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
-:
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
+    const labelUList& internalData
+) const
+{
+    return patchInternalField(internalData);
+}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+Foam::tmp<Foam::labelField> Foam::regionCoupledWallFvPatch::
+internalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const labelUList& iF
+) const
+{
+    if (neighbFvPatch().sameRegion())
+    {
+        return neighbFvPatch().patchInternalField(iF);
+    }
+    else
+    {
+        return tmp<labelField>(new labelField(iF.size(), 0));
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
-
+    }
+    return tmp<labelField>(NULL);
+}
 
 // ************************************************************************* //

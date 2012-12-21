@@ -22,21 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cyclicGAMGInterface
+    Foam::regionCoupledWallGAMGInterface
 
 Description
-    GAMG agglomerated cyclic interface.
+    GAMG agglomerated coupled region interface.
 
 SourceFiles
-    cyclicGAMGInterface.C
+    regionCoupledWallGAMGInterface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicGAMGInterface_H
-#define cyclicGAMGInterface_H
+#ifndef regionCoupledWallGAMGInterface_H
+#define regionCoupledWallGAMGInterface_H
 
-#include "GAMGInterface.H"
-#include "cyclicLduInterface.H"
+#include "regionCoupledBaseGAMGInterface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,41 +43,35 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class cyclicGAMGInterface Declaration
+                  Class regionCoupledWallGAMGInterface Declaration
 \*---------------------------------------------------------------------------*/
 
-class cyclicGAMGInterface
+class regionCoupledWallGAMGInterface
 :
-    public GAMGInterface,
-    virtual public cyclicLduInterface
+    public regionCoupledBaseGAMGInterface
 {
-    // Private data
-
-        //- Reference tor the cyclicLduInterface from which this is
-        //  agglomerated
-        const cyclicLduInterface& fineCyclicInterface_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        cyclicGAMGInterface(const cyclicGAMGInterface&);
+        regionCoupledWallGAMGInterface(const regionCoupledWallGAMGInterface&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cyclicGAMGInterface&);
+        void operator=(const regionCoupledWallGAMGInterface&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("cyclic");
+    TypeName("regionCoupledWall");
 
 
     // Constructors
 
         //- Construct from fine level interface,
         //  local and neighbour restrict addressing
-        cyclicGAMGInterface
+        regionCoupledWallGAMGInterface
         (
             const label index,
             const lduInterfacePtrsList& coarseInterfaces,
@@ -90,53 +83,8 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicGAMGInterface();
+    virtual ~regionCoupledWallGAMGInterface();
 
-
-    // Member Functions
-
-        // Interface transfer functions
-
-            //- Transfer and return internal field adjacent to the interface
-            virtual tmp<labelField> internalFieldTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const labelUList& iF
-            ) const;
-
-
-        //- Cyclic interface functions
-
-            //- Return neigbour processor number
-            virtual label neighbPatchID() const
-            {
-                return fineCyclicInterface_.neighbPatchID();
-            }
-
-            virtual bool owner() const
-            {
-                return fineCyclicInterface_.owner();
-            }
-
-            virtual const cyclicGAMGInterface& neighbPatch() const
-            {
-                return dynamic_cast<const cyclicGAMGInterface&>
-                (
-                    coarseInterfaces_[neighbPatchID()]
-                );
-            }
-
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return fineCyclicInterface_.forwardT();
-            }
-
-            //- Return neighbour-cell transformation tensor
-            virtual const tensorField& reverseT() const
-            {
-                return fineCyclicInterface_.reverseT();
-            }
 };
 
 

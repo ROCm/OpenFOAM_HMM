@@ -21,54 +21,64 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::regionCoupledWallPointPatch
+
+Description
+    Cyclic AMI point patch - place holder only
+
+SourceFiles
+    regionCoupledWallPointPatch.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
-#include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+#ifndef regionCoupledWallPointPatch_H
+#define regionCoupledWallPointPatch_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "facePointPatch.H"
+#include "regionCoupledWallPolyPatch.H"
+#include "addToRunTimeSelectionTable.H"
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
-}
 
+/*---------------------------------------------------------------------------*\
+                    Class regionCoupledWallPointPatch Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
-(
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
+class regionCoupledWallPointPatch
 :
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
+    public facePointPatch
+{
+public:
+
+    //- Runtime type information
+    TypeName(regionCoupledWallPolyPatch::typeName_());
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+    // Constructors
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
+        //- Construct from components
+        regionCoupledWallPointPatch
+        (
+            const polyPatch& patch,
+            const pointBoundaryMesh& bm
+        ):
+             facePointPatch(patch, bm)
+        {}
 
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

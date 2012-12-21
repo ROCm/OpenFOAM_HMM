@@ -25,6 +25,7 @@ License
 
 #include "fvPatch.H"
 #include "HashTable.H"
+#include "cyclicAMIPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

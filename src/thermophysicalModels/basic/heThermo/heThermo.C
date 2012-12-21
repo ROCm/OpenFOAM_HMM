@@ -32,6 +32,7 @@ License
 #include "fixedJumpAMIFvPatchFields.H"
 #include "energyJumpFvPatchScalarField.H"
 #include "energyJumpAMIFvPatchScalarField.H"
+#include "energyRegionCoupledFvPatchScalarField.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -68,6 +69,10 @@ Foam::wordList Foam::heThermo<BasicThermo, MixtureType>::heBoundaryTypes()
         else if (isA<fixedJumpAMIFvPatchScalarField>(tbf[patchi]))
         {
             hbt[patchi] = energyJumpAMIFvPatchScalarField::typeName;
+        }
+        else if (isA<energyRegionCoupledFvPatchScalarField>(tbf[patchi]))
+        {
+            hbt[patchi] = energyRegionCoupledFvPatchScalarField::typeName;
         }
     }
 

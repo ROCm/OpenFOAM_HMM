@@ -40,6 +40,7 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
                "const fvPatch&, const DimensionedField<Type, volMesh>&) :"
                " patchFieldType="
             << patchFieldType
+            << " : " << p.type()
             << endl;
     }
 
@@ -50,7 +51,7 @@ Foam::tmp<Foam::fvPatchField<Type> > Foam::fvPatchField<Type>::New
     {
         FatalErrorIn
         (
-            "fvPatchField<Type>::New(const word&, const word&, const fvPatch&, "
+            "fvPatchField<Type>::New(const word&, const word&, const fvPatch&,"
             "const DimensionedField<Type, volMesh>&)"
         )   << "Unknown patchField type "
             << patchFieldType << nl << nl

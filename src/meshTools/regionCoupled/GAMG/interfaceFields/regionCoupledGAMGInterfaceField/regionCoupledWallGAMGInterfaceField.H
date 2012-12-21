@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::processorCyclicGAMGInterface
+    Foam::regionCoupledWallGAMGInterfaceField
 
 Description
-    GAMG agglomerated processor interface.
+    GAMG agglomerated region coupled interface field.
 
 SourceFiles
-    processorCyclicGAMGInterface.C
-    processorCyclicGAMGInterfaceTemplates.C
+    regionCoupledWallGAMGInterfaceField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicGAMGInterface_H
-#define processorCyclicGAMGInterface_H
+#ifndef regionCoupledWallGAMGInterfaceField_H
+#define regionCoupledWallGAMGInterfaceField_H
 
-#include "processorGAMGInterface.H"
+#include "GAMGInterfaceField.H"
+#include "regionCoupledWallGAMGInterface.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,45 +45,72 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class processorCyclicGAMGInterface Declaration
+             Class regionCoupledWallGAMGInterfaceField Declaration
 \*---------------------------------------------------------------------------*/
 
-class processorCyclicGAMGInterface
+class regionCoupledWallGAMGInterfaceField
 :
-    public processorGAMGInterface
+    public GAMGInterfaceField
 {
+    // Private data
+
+        //- Local reference cast into the region coupled interface
+        const regionCoupledWallGAMGInterface& regionCoupledGAMGInterface_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        processorCyclicGAMGInterface(const processorCyclicGAMGInterface&);
+        regionCoupledWallGAMGInterfaceField
+        (
+            const regionCoupledWallGAMGInterfaceField&
+        );
 
         //- Disallow default bitwise assignment
-        void operator=(const processorCyclicGAMGInterface&);
+        void operator=(const regionCoupledWallGAMGInterfaceField&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("processorCyclic");
+    TypeName("regionCoupledWall");
+
 
     // Constructors
 
-        //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
-        processorCyclicGAMGInterface
+        //- Construct from GAMG interface and fine level interface field
+        regionCoupledWallGAMGInterfaceField
         (
-            const label index,
-            const lduInterfacePtrsList& coarseInterfaces,
-            const lduInterface& fineInterface,
-            const labelField& restrictAddressing,
-            const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const GAMGInterface& GAMGCp,
+            const lduInterfaceField& fineInterfaceField
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~regionCoupledWallGAMGInterfaceField();
 
-        virtual ~processorCyclicGAMGInterface();
+
+    // Member Functions
+
+        // Access
+
+            //- Return size
+            label size() const
+            {
+                return regionCoupledGAMGInterface_.size();
+            }
+
+
+            //- Interface matrix update
+            virtual void updateInterfaceMatrix
+            (
+                scalarField&,
+                const scalarField&,
+                const scalarField&,
+                const direction,
+                const Pstream::commsTypes commsType
+            ) const
+            {}
 
 };
 
