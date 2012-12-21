@@ -26,9 +26,10 @@ License
 #include "regionCoupledLduInterface.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Foam::regionCoupledLduInterface, 0);
-
+namespace Foam
+{
+defineTypeNameAndDebug(regionCoupledLduInterface, 0);
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
