@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,8 @@ namespace Foam
 
 // Forward declaration of classes
 class Time;
+class polyMesh;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                        Class functionObject Declaration
@@ -157,6 +159,12 @@ public:
 
         //- Read and set the function object if its data have changed
         virtual bool read(const dictionary&) = 0;
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh& mpm) = 0;
+
+        //- Update for changes of mesh
+        virtual void movePoints(const polyMesh& mesh) = 0;
 };
 
 

@@ -30,7 +30,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "mapDistribute.H"
 #include "fvCFD.H"
 #include "turbulenceModel.H"
 #include "basicReactingCloud.H"
@@ -41,6 +40,7 @@ Description
 #include "solidChemistryModel.H"
 #include "psiCombustionModel.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "createClouds.H"
     #include "createSurfaceFilmModel.H"
     #include "createPyrolysisModel.H"

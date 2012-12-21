@@ -30,18 +30,14 @@ runApplication surfaceOrient \
     constant/triSurface/domain_clean_orient.stl
 mv log.surfaceOrient log.surfaceOrient.domain
 
-runApplication surfaceFeatureExtract
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.coneAndSphere_clean
-
 unset FOAM_SIGFPE
 runApplication surfaceFeatureExtract
-mv log.surfaceFeatureExtract log.surfaceFeatureExtract.domain
 
 # Generate aligned points (in constant/internalDelaunayVertices) and a
 # mesh from that.
 runApplication cvMesh
 
 # Generate some sets for a bit of mesh inspection
-runApplication topoSet -constant -time 0:100
+runApplication topoSet -time 0:100
 
 # ----------------------------------------------------------------- end-of-file

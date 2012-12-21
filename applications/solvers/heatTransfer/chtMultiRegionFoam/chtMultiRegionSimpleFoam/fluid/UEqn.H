@@ -3,13 +3,13 @@
     (
         fvm::div(phi, U)
       + turb.divDevRhoReff(U)
-      + sources(rho, U)
+     ==
+        sources(rho, U)
     );
 
     UEqn().relax();
 
-    // Add porous resistance
-    pZones.addResistance(UEqn());
+    sources.constrain(UEqn());
 
     solve
     (
@@ -23,3 +23,5 @@
             )*mesh.magSf()
         )
     );
+
+    sources.correct(U);

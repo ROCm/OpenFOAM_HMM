@@ -150,6 +150,12 @@ public:
 
         //- Read and set the function object if its data have changed
         virtual bool read(const dictionary&);
+
+        //- Update mesh
+        virtual void updateMesh(const mapPolyMesh&);
+
+        //- Move points
+        virtual void movePoints(const polyMesh&);
 };
 
 

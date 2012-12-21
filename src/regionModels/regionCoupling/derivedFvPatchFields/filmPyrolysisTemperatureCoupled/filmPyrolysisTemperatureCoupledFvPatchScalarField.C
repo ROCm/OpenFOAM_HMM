@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,8 +40,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     phiName_("phi"),
-    rhoName_("rho"),
-    deltaWet_(1e-6)
+    rhoName_("rho")
 {}
 
 
@@ -56,8 +55,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
-    rhoName_(ptf.rhoName_),
-    deltaWet_(ptf.deltaWet_)
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -71,8 +69,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    deltaWet_(dict.lookupOrDefault<scalar>("deltaWet", 1e-6))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 }
@@ -86,8 +83,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
 :
     fixedValueFvPatchScalarField(fptpsf),
     phiName_(fptpsf.phiName_),
-    rhoName_(fptpsf.rhoName_),
-    deltaWet_(fptpsf.deltaWet_)
+    rhoName_(fptpsf.rhoName_)
 {}
 
 
@@ -100,8 +96,7 @@ filmPyrolysisTemperatureCoupledFvPatchScalarField
 :
     fixedValueFvPatchScalarField(fptpsf, iF),
     phiName_(fptpsf.phiName_),
-    rhoName_(fptpsf.rhoName_),
-    deltaWet_(fptpsf.deltaWet_)
+    rhoName_(fptpsf.rhoName_)
 {}
 
 
@@ -151,12 +146,11 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
-    scalarField deltaFilm = filmModel.delta().boundaryField()[filmPatchI];
-    filmModel.toPrimary(filmPatchI, deltaFilm);
+    scalarField alphaFilm = filmModel.alpha().boundaryField()[filmPatchI];
+    filmModel.toPrimary(filmPatchI, alphaFilm);
 
     scalarField TFilm = filmModel.Ts().boundaryField()[filmPatchI];
     filmModel.toPrimary(filmPatchI, TFilm);
-
 
     // Retrieve pyrolysis model
     const pyrModelType& pyrModel =
@@ -168,19 +162,8 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::updateCoeffs()
     pyrModel.toPrimary(pyrPatchI, TPyr);
 
 
-    forAll(deltaFilm, i)
-    {
-        if (deltaFilm[i] > deltaWet_)
-        {
-            // temperature set by film
-            Tp[i] = TFilm[i];
-        }
-        else
-        {
-            // temperature set by pyrolysis model
-            Tp[i] = TPyr[i];
-        }
-    }
+    // Evaluate temperature
+    Tp = alphaFilm*TFilm + (1.0 - alphaFilm)*TPyr;
 
     // Restore tag
     UPstream::msgType() = oldTag;
@@ -197,7 +180,6 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::write
     fvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("deltaWet") << deltaWet_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

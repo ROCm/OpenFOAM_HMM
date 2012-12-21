@@ -60,7 +60,6 @@ SourceFiles
 #ifndef timeActivatedFileUpdate_H
 #define timeActivatedFileUpdate_H
 
-#include "pointFieldFwd.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,6 +70,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -160,7 +160,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

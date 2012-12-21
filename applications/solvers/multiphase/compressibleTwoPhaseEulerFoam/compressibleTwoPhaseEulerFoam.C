@@ -46,7 +46,7 @@ Description
 
 #include "pimpleControl.H"
 
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

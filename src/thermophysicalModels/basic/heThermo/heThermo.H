@@ -68,6 +68,10 @@ protected:
             //  by interrogating the temperature field boundary types
             wordList heBoundaryTypes();
 
+            //- Return the enthalpy/internal energy field boundary base types
+            //  by interrogating the temperature field boundary types
+            wordList heBoundaryBaseTypes();
+
             //- Correct the enthalpy/internal energy field boundaries
             void heBoundaryCorrection(volScalarField& he);
 
@@ -89,10 +93,19 @@ public:
     // Constructors
 
         //- Construct from mesh
-        heThermo(const fvMesh&);
+        heThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
         //- Construct from mesh and dictionary
-        heThermo(const fvMesh&, const dictionary&);
+        heThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     //- Destructor
@@ -147,6 +160,14 @@ public:
 
 
         // Fields derived from thermodynamic state variables
+
+            //- Enthalpy/Internal energy
+            //  for given pressure and temperature [J/kg]
+            virtual tmp<volScalarField> he
+            (
+                const volScalarField& p,
+                const volScalarField& T
+            ) const;
 
             //- Enthalpy/Internal energy for cell-set [J/kg]
             virtual tmp<scalarField> he
@@ -284,7 +305,7 @@ public:
             ) const;
 
 
-        //- Read thermophysicalProperties dictionary
+        //- Read thermophysical properties dictionary
         virtual bool read();
 };
 

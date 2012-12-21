@@ -28,6 +28,17 @@ actions
             box (1.5 -10 -10) (2 10 10);
         }
     }
+    {
+        name    filter;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set filter;
+        }
+    }
+
 
     {
         name    leftFluid;
@@ -40,6 +51,16 @@ actions
         }
     }
     {
+        name    leftFluid;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set leftFluid;
+        }
+    }
+    {
         name    rightFluid;
         type    cellSet;
         action  new;
@@ -47,6 +68,16 @@ actions
         sourceInfo
         {
             box (2 -1 -1) (10 10 10);
+        }
+    }
+    {
+        name    rightFluid;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set rightFluid;
         }
     }
 
@@ -74,6 +105,17 @@ actions
             option  all;
         }
     }
+    // Create faceZone from cycLeft
+    {
+        name    cycLeft;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        sourceInfo
+        {
+            faceSet cycLeft;    // name of faceSet
+        }
+    }
 
     // cycRight
     {
@@ -98,6 +140,18 @@ actions
             option  all;
         }
     }
+    // Create faceZone from cycRight
+    {
+        name    cycRight;
+        type    faceZoneSet;
+        action  new;
+        source  setToFaceZone;
+        sourceInfo
+        {
+            faceSet cycRight;   // name of faceSet
+        }
+    }
+
 );
 
 // ************************************************************************* //

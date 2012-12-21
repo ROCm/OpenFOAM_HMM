@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,11 +27,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::token::typeName = "token";
-Foam::token Foam::token::undefinedToken;
+namespace Foam
+{
+const char* const token::typeName = "token";
+token token::undefinedToken;
 
-defineTypeNameAndDebug(Foam::token::compound, 0);
-defineRunTimeSelectionTable(Foam::token::compound, Istream);
+typedef token::compound tokenCompound;
+defineTypeNameAndDebug(tokenCompound, 0);
+defineRunTimeSelectionTable(tokenCompound, Istream);
+}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

@@ -427,6 +427,29 @@ public:
                 );
 
 
+            // Flux manipulations
+
+                //- Make the given absolute flux relative
+                virtual void relativeFlux(surfaceScalarField& phi) const;
+
+                //- Make the given absolute mass-flux relative
+                virtual void relativeFlux
+                (
+                    const surfaceScalarField& rho,
+                    surfaceScalarField& phi
+                ) const;
+
+                //- Make the given relative flux absolute
+                virtual void absoluteFlux(surfaceScalarField& phi) const;
+
+                //- Make the given relative mass-flux absolute
+                virtual void absoluteFlux
+                (
+                    const surfaceScalarField& rho,
+                    surfaceScalarField& phi
+                ) const;
+
+
         // I-O
 
             //- Write the source header information

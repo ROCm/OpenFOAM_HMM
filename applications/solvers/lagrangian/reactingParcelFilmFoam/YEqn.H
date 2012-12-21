@@ -22,17 +22,25 @@ tmp<fv::convectionScheme<scalar> > mvConvection
         {
             volScalarField& Yi = Y[i];
 
-            solve
+            fvScalarMatrix YEqn
             (
                 fvm::ddt(rho, Yi)
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->alphaEff(), Yi)
               ==
                 parcels.SYi(i, Yi)
+              + sources(rho, Yi)
+              + combustion->R(Yi)
               + surfaceFilm.Srho(i)
-              + combustion->R(Yi),
-                mesh.solver("Yi")
             );
+
+            YEqn.relax();
+
+            sources.constrain(YEqn);
+
+            YEqn.solve(mesh.solver("Yi"));
+
+            sources.correct(Yi);
 
             Yi.max(0.0);
             Yt += Yi;

@@ -193,12 +193,7 @@ polyMesh::readUpdateState meshReadUpdate(polyMesh& mesh)
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions(true, false);
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "specify an alternative dictionary for the topoSet dictionary"
-    );
+    #include "addDictOption.H"
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -216,41 +211,11 @@ int main(int argc, char *argv[])
     const bool noSync = args.optionFound("noSync");
 
     const word dictName("topoSetDict");
-
-    fileName dictPath = dictName;
-    if (args.optionFound("dict"))
-    {
-        dictPath = args["dict"];
-        if (isDir(dictPath))
-        {
-            dictPath = dictPath / dictName;
-        }
-    }
+    #include "setSystemMeshDictionaryIO.H"
 
     Info<< "Reading " << dictName << "\n" << endl;
 
-    IOdictionary topoSetDict
-    (
-        (
-            args.optionFound("dict")
-          ? IOobject
-            (
-                dictPath,
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-          : IOobject
-            (
-                dictName,
-                runTime.system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
-            )
-        )
-    );
-
+    IOdictionary topoSetDict(dictIO);
 
     // Read set construct info from dictionary
     PtrList<dictionary> actions(topoSetDict.lookup("actions"));

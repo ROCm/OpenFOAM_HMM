@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,13 +36,6 @@ Foam::cyclicAMIPolyPatch::neighbPatch() const
 {
     const polyPatch& pp = this->boundaryMesh()[neighbPatchID()];
     return refCast<const cyclicAMIPolyPatch>(pp);
-}
-
-
-inline Foam::coupledPolyPatch::transformType
-Foam::cyclicAMIPolyPatch::transform() const
-{
-    return transform_;
 }
 
 

@@ -247,6 +247,7 @@ $(schemes)/harmonic/harmonic.C
 $(schemes)/fixedBlended/fixedBlended.C
 $(schemes)/localBlended/localBlended.C
 $(schemes)/limiterBlended/limiterBlended.C
+$(schemes)/CoBlended/CoBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
 
@@ -314,7 +315,7 @@ $(ddtSchemes)/localEulerDdtScheme/localEulerDdtSchemes.C
 $(ddtSchemes)/backwardDdtScheme/backwardDdtSchemes.C
 $(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtScheme.C
 $(ddtSchemes)/boundedBackwardDdtScheme/boundedBackwardDdtSchemes.C
-$(ddtSchemes)/CrankNicholsonDdtScheme/CrankNicholsonDdtSchemes.C
+$(ddtSchemes)/CrankNicolsonDdtScheme/CrankNicolsonDdtSchemes.C
 $(ddtSchemes)/boundedDdtScheme/boundedDdtSchemes.C
 
 d2dt2Schemes = finiteVolume/d2dt2Schemes
@@ -345,6 +346,7 @@ $(limitedGradSchemes)/cellMDLimitedGrad/cellMDLimitedGrads.C
 snGradSchemes = finiteVolume/snGradSchemes
 $(snGradSchemes)/snGradScheme/snGradSchemes.C
 $(snGradSchemes)/correctedSnGrad/correctedSnGrads.C
+$(snGradSchemes)/faceCorrectedSnGrad/faceCorrectedSnGrads.C
 $(snGradSchemes)/limitedSnGrad/limitedSnGrads.C
 $(snGradSchemes)/uncorrectedSnGrad/uncorrectedSnGrads.C
 $(snGradSchemes)/orthogonalSnGrad/orthogonalSnGrads.C
@@ -383,7 +385,8 @@ $(porosity)/fixedCoeff/fixedCoeff.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C
-$(MRF)/MRFZones.C
+$(MRF)/MRFZoneList.C
+$(MRF)/IOMRFZoneList.C
 
 SRF = $(general)/SRF
 $(SRF)/SRFModel/SRFModel/SRFModel.C

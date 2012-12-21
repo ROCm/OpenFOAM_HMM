@@ -73,20 +73,28 @@ public:
             autoPtr,
             psiuReactionThermo,
             fvMesh,
-            (const fvMesh& mesh),
-            (mesh)
+            (const fvMesh& mesh, const word& phaseName),
+            (mesh, phaseName)
         );
 
 
     // Constructors
 
-        //- Construct from dictionary and mesh
-        psiuReactionThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        psiuReactionThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     // Selectors
 
-        static autoPtr<psiuReactionThermo> New(const fvMesh&);
+        static autoPtr<psiuReactionThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
 
     //- Destructor

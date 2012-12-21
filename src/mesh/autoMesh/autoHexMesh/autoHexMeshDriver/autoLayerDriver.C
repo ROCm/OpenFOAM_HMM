@@ -637,7 +637,7 @@ void Foam::autoLayerDriver::setNumLayers
     Info<< nl << "Handling points with inconsistent layer specification ..."
         << endl;
 
-    // Get for every point (really only nessecary on patch external points)
+    // Get for every point (really only necessary on patch external points)
     // the max and min of any patch faces using it.
     labelList maxLayers(patchNLayers.size(), labelMin);
     labelList minLayers(patchNLayers.size(), labelMax);
@@ -2372,11 +2372,13 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 Foam::autoLayerDriver::autoLayerDriver
 (
     meshRefinement& meshRefiner,
-    const labelList& globalToPatch
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch
 )
 :
     meshRefiner_(meshRefiner),
-    globalToPatch_(globalToPatch)
+    globalToMasterPatch_(globalToMasterPatch),
+    globalToSlavePatch_(globalToSlavePatch)
 {}
 
 
@@ -2435,7 +2437,12 @@ void Foam::autoLayerDriver::addLayers
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.
     List<labelPair> baffles;
-    meshRefiner_.createZoneBaffles(globalToPatch_, baffles);
+    meshRefiner_.createZoneBaffles
+    (
+        globalToMasterPatch_,
+        globalToSlavePatch_,
+        baffles
+    );
 
     if (debug&meshRefinement::MESH)
     {

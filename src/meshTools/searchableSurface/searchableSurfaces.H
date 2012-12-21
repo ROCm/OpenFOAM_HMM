@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "searchableSurface.H"
 #include "labelPair.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,6 +45,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class triSurface;
 
 /*---------------------------------------------------------------------------*\
                            Class searchableSurfaces Declaration
@@ -69,6 +71,15 @@ class searchableSurfaces
 
 
     // Private Member Functions
+
+        //- Is edge on face
+        static bool connected
+        (
+            const triSurface& s,
+            const label edgeI,
+            const pointIndexHit& hit
+        );
+
 
         //- Disallow default bitwise copy construct
         searchableSurfaces(const searchableSurfaces&);
@@ -187,6 +198,49 @@ public:
                 const scalar convergenceDistSqr,
                 const point& start
             ) const;
+
+
+        // Checking
+
+            //- Are all surfaces closed and manifold
+            bool checkClosed(const bool report) const;
+
+            //- Are all (triangulated) surfaces consistent normal orientation
+            bool checkNormalOrientation(const bool report) const;
+
+            //- Are all bounding boxes of similar size
+            bool checkSizes(const scalar maxRatio, const bool report) const;
+
+            //- Do surfaces self-intersect or intersect others
+            bool checkIntersection
+            (
+                const scalar tol,
+                const autoPtr<writer<scalar> >&,
+                const bool report
+            ) const;
+
+            //- Check triangle quality
+            bool checkQuality
+            (
+                const scalar minQuality,
+                const bool report
+            ) const;
+
+            //- All topological checks. Return number of failed checks
+            label checkTopology(const bool report) const;
+
+            //- All geometric checks. Return number of failed checks
+            label checkGeometry
+            (
+                const scalar maxRatio,
+                const scalar tolerance,
+                const autoPtr<writer<scalar> >& setWriter,
+                const scalar minQuality,
+                const bool report
+            ) const;
+
+            //- Write some stats
+            void writeStats(const List<wordList>&, Ostream&) const;
 
 
     // Member Operators

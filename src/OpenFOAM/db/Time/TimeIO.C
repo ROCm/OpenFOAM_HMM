@@ -25,6 +25,7 @@ License
 
 #include "Time.H"
 #include "Pstream.H"
+#include "simpleObjectRegistry.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -36,6 +37,92 @@ void Foam::Time::readDict()
         // Do not override if already set so external application can override
         setEnv("FOAM_APPLICATION", application, false);
     }
+
+
+    // Check for local switches and settings
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Debug switches
+    if (controlDict_.found("DebugSwitches"))
+    {
+        simpleObjectRegistry& objects = debug::debugObjects();
+        const dictionary& localSettings = controlDict_.subDict("DebugSwitches");
+        forAllConstIter(dictionary, localSettings, iter)
+        {
+            const word& name = iter().keyword();
+            simpleObjectRegistry::iterator fnd = objects.find(name);
+            if (fnd != objects.end())
+            {
+                Info<< controlDict_.name() << " : overriding debug switch : "
+                    << iter() << endl;
+
+                if (iter().isDict())
+                {
+                    OStringStream os(IOstream::ASCII);
+                    os  << iter().dict();
+                    IStringStream is(os.str());
+                    fnd()->readData(is);
+                }
+                else
+                {
+                    fnd()->readData(iter().stream());
+                }
+            }
+        }
+    }
+
+    // Dimension sets
+    if (controlDict_.found("DimensionSets"))
+    {
+        dictionary dict(Foam::dimensionSystems());
+        dict.merge(controlDict_.subDict("DimensionSets"));
+
+        simpleObjectRegistry& objects = debug::dimensionSetObjects();
+        simpleObjectRegistry::iterator fnd = objects.find("DimensionSets");
+        if (fnd != objects.end())
+        {
+            Info<< controlDict_.name() << " : overriding DimensionSets" << endl;
+
+            OStringStream os(IOstream::ASCII);
+            os  << dict;
+            IStringStream is(os.str());
+            fnd()->readData(is);
+        }
+    }
+
+    // Optimisation Switches
+    if (controlDict_.found("OptimisationSwitches"))
+    {
+        simpleObjectRegistry& objects = debug::optimisationObjects();
+        const dictionary& localSettings = controlDict_.subDict
+        (
+            "OptimisationSwitches"
+        );
+        forAllConstIter(dictionary, localSettings, iter)
+        {
+            const word& name = iter().keyword();
+            simpleObjectRegistry::iterator fnd = objects.find(name);
+            if (fnd != objects.end())
+            {
+                Info<< controlDict_.name()
+                    << " : overriding optimisation switch : " << iter() << endl;
+
+                if (iter().isDict())
+                {
+                    OStringStream os(IOstream::ASCII);
+                    os  << iter().dict();
+                    IStringStream is(os.str());
+                    fnd()->readData(is);
+                }
+                else
+                {
+                    fnd()->readData(iter().stream());
+                }
+            }
+        }
+    }
+
+
 
     if (!deltaTchanged_)
     {
@@ -157,6 +244,20 @@ void Foam::Time::readDict()
                 << endl;
 
             purgeWrite_ = 0;
+        }
+    }
+
+    if (controlDict_.readIfPresent("secondaryPurgeWrite", secondaryPurgeWrite_))
+    {
+        if (secondaryPurgeWrite_ < 0)
+        {
+            WarningIn("Time::readDict()")
+                << "invalid value for secondaryPurgeWrite "
+                << secondaryPurgeWrite_
+                << ", should be >= 0, setting to 0"
+                << endl;
+
+            secondaryPurgeWrite_ = 0;
         }
     }
 
@@ -347,13 +448,45 @@ bool Foam::Time::writeObject
         timeDict.regIOobject::writeObject(fmt, ver, cmp);
         bool writeOK = objectRegistry::writeObject(fmt, ver, cmp);
 
-        if (writeOK && purgeWrite_)
+        if (writeOK)
         {
-            previousOutputTimes_.push(tmName);
-
-            while (previousOutputTimes_.size() > purgeWrite_)
+            // Does primary or secondary time trigger purging?
+            // Note that primary times can only be purged by primary
+            // purging. Secondary times can be purged by either primary
+            // or secondary purging.
+            if (primaryOutputTime_ && purgeWrite_)
             {
-                rmDir(objectRegistry::path(previousOutputTimes_.pop()));
+                previousOutputTimes_.push(tmName);
+
+                while (previousOutputTimes_.size() > purgeWrite_)
+                {
+                    rmDir(objectRegistry::path(previousOutputTimes_.pop()));
+                }
+            }
+            if
+            (
+               !primaryOutputTime_
+             && secondaryOutputTime_
+             && secondaryPurgeWrite_
+            )
+            {
+                // Writing due to secondary
+                previousSecondaryOutputTimes_.push(tmName);
+
+                while
+                (
+                    previousSecondaryOutputTimes_.size()
+                  > secondaryPurgeWrite_
+                )
+                {
+                    rmDir
+                    (
+                        objectRegistry::path
+                        (
+                            previousSecondaryOutputTimes_.pop()
+                        )
+                    );
+                }
             }
         }
 
@@ -368,6 +501,7 @@ bool Foam::Time::writeObject
 
 bool Foam::Time::writeNow()
 {
+    primaryOutputTime_ = true;
     outputTime_ = true;
     return write();
 }

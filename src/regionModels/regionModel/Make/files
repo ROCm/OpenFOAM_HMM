@@ -8,4 +8,8 @@ derivedFvPatches/mappedVariableThicknessWall/mappedVariableThicknessWallFvPatch.
 
 regionProperties/regionProperties.C
 
+regionModelFunctionObject/regionModelFunctionObject/regionModelFunctionObject.C
+regionModelFunctionObject/regionModelFunctionObject/regionModelFunctionObjectNew.C
+regionModelFunctionObject/regionModelFunctionObject/regionModelFunctionObjectList.C
+
 LIB = $(FOAM_LIBBIN)/libregionModels

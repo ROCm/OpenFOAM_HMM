@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [m^2 s^-3];
 
 internalField   uniform 200;
 
@@ -40,22 +40,6 @@ boundaryField
         type            inletOutlet;
         inletValue      uniform 200;
         value           uniform 200;
-    }
-    baffles
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
-    }
-    fan_half0
-    {
-        type            cyclic;
-    }
-    fan_half1
-    {
-        type            cyclic;
     }
     defaultFaces
     {

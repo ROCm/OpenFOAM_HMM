@@ -168,7 +168,7 @@ Foam::functionObjectFile::functionObjectFile
         names_.insert(name);
 
         filePtrs_.clear();
-        filePtrs_.setSize(names_.toc().size());
+        filePtrs_.setSize(1);
 
         // cannot create files - need to access virtual function
     }
@@ -193,7 +193,7 @@ Foam::functionObjectFile::functionObjectFile
         names_.insert(names);
 
         filePtrs_.clear();
-        filePtrs_.setSize(names_.toc().size());
+        filePtrs_.setSize(names_.size());
 
         // cannot create files - need to access virtual function
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,10 @@ class autoRefineDriver
         fvMeshDistribute& distributor_;
 
         //- From surface region to patch
-        const labelList globalToPatch_;
+        const labelList globalToMasterPatch_;
+
+        //- From surface region to patch
+        const labelList globalToSlavePatch_;
 
 
     // Private Member Functions
@@ -146,7 +149,8 @@ public:
             meshRefinement& meshRefiner,
             decompositionMethod& decomposer,
             fvMeshDistribute& distributor,
-            const labelList& globalToPatch
+            const labelList& globalToMasterPatch,
+            const labelList& globalToSlavePatch
         );
 
 

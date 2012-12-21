@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,9 +40,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::edgeIntersections, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(edgeIntersections, 0);
 
-Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
+scalar edgeIntersections::alignedCos_ = cos(degToRad(89.0));
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -589,7 +592,7 @@ Foam::label Foam::edgeIntersections::removeDegenerates
             // If edge not already marked for retesting
             if (!affectedEdges[edgeI])
             {
-                // 1. Check edges close to endpoint and perturb if nessecary.
+                // 1. Check edges close to endpoint and perturb if necessary.
 
                 bool shiftedEdgeEndPoints =
                     inlinePerturb

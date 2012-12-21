@@ -34,7 +34,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::triSurface, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(triSurface, 0);
+}
 
 
 Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
@@ -83,7 +86,7 @@ Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
             << "reading " << foamName
             << " from constant/" << endl;
     }
-    return "constant";
+    return d.constant();
 }
 
 

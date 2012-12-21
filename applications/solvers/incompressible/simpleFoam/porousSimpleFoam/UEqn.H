@@ -8,9 +8,9 @@
         sources(U)
     );
 
-    UEqn().relax();
+    mrfZones.addCoriolis(UEqn());
 
-    sources.constrain(UEqn());
+    UEqn().relax();
 
     // Include the porous media resistance and solve the momentum equation
     // either implicit in the tensorial resistance or transport using by
@@ -26,6 +26,8 @@
         trTU = inv(tTU());
         trTU().rename("rAU");
 
+        sources.constrain(UEqn());
+
         volVectorField gradp(fvc::grad(p));
 
         for (int UCorr=0; UCorr<nUCorr; UCorr++)
@@ -33,12 +35,18 @@
             U = trTU() & (UEqn().H() - gradp);
         }
         U.correctBoundaryConditions();
+
+        sources.correct(U);
     }
     else
     {
         pZones.addResistance(UEqn());
 
+        sources.constrain(UEqn());
+
         solve(UEqn() == -fvc::grad(p));
+
+        sources.correct(U);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

@@ -39,7 +39,7 @@ boundaryField
         U               U;
         phi             phi;
         rho             none;
-        psi             psi;
+        psi             thermo:psi;
         gamma           1.4;
     }
 

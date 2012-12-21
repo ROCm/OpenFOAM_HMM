@@ -29,7 +29,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::OBJstream, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(OBJstream, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -234,6 +237,38 @@ Foam::Ostream& Foam::OBJstream::write(const linePointRef& ln)
     write(ln.start());
     write(ln.end());
     write("l ") << nVertices_-1 << ' ' << nVertices_ << nl;
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OBJstream::write
+(
+    const triPointRef& f,
+    const bool lines
+)
+{
+    label start = nVertices_;
+    write(f.a());
+    write(f.b());
+    write(f.c());
+    if (lines)
+    {
+        write('l');
+        for (int i = 0; i < 3; i++)
+        {
+            write(' ') << start+1+i;
+        }
+        write(' ') << start+1 << '\n';
+    }
+    else
+    {
+        write('f');
+        for (int i = 0; i < 3; i++)
+        {
+            write(' ') << start+1+i;
+        }
+        write('\n');
+    }
     return *this;
 }
 

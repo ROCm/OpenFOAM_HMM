@@ -32,19 +32,14 @@ License
 #include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(Foam::fieldValues::faceSource, 0);
 
 namespace Foam
 {
     template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fieldValues::faceSource::sourceType,
-        3
-    >::names[] =
+    const char* NamedEnum<fieldValues::faceSource::sourceType, 3>::names[] =
     {
         "faceZone",
         "patch",
@@ -53,11 +48,7 @@ namespace Foam
 
 
     template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fieldValues::faceSource::operationType,
-        11
-    >::names[] =
+    const char* NamedEnum<fieldValues::faceSource::operationType, 11>::names[] =
     {
         "none",
         "sum",
@@ -72,6 +63,11 @@ namespace Foam
         "areaNormalIntegrate"
     };
 
+    namespace fieldValues
+    {
+        defineTypeNameAndDebug(faceSource, 0);
+        addToRunTimeSelectionTable(fieldValue, faceSource, dictionary);
+    }
 }
 
 

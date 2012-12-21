@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,10 +27,43 @@ License
 #include "searchableSurfacesQueries.H"
 #include "ListOps.H"
 #include "Time.H"
+//#include "vtkSetWriter.H"
+#include "DynamicField.H"
+//#include "OBJstream.H"
+#include "PatchTools.H"
+#include "triSurfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::searchableSurfaces, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(searchableSurfaces, 0);
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+//- Is edge connected to triangle
+bool Foam::searchableSurfaces::connected
+(
+    const triSurface& s,
+    const label edgeI,
+    const pointIndexHit& hit
+)
+{
+    const triFace& localFace = s.localFaces()[hit.index()];
+    const edge& e = s.edges()[edgeI];
+
+    forAll(localFace, i)
+    {
+        if (e.otherVertex(localFace[i]) != -1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -377,6 +410,468 @@ Foam::pointIndexHit Foam::searchableSurfaces::facesIntersection
         start
     );
 }
+
+
+bool Foam::searchableSurfaces::checkClosed(const bool report) const
+{
+    if (report)
+    {
+        Info<< "Checking for closedness." << endl;
+    }
+
+    bool hasError = false;
+
+    forAll(*this, surfI)
+    {
+        if (!operator[](surfI).hasVolumeType())
+        {
+            hasError = true;
+
+            if (report)
+            {
+                Info<< "    " << names()[surfI]
+                    << " : not closed" << endl;
+            }
+
+            if (isA<triSurface>(operator[](surfI)))
+            {
+                const triSurface& s = dynamic_cast<const triSurface&>
+                (
+                    operator[](surfI)
+                );
+                const labelListList& edgeFaces = s.edgeFaces();
+
+                label nSingleEdges = 0;
+                forAll(edgeFaces, edgeI)
+                {
+                    if (edgeFaces[edgeI].size() == 1)
+                    {
+                        nSingleEdges++;
+                    }
+                }
+
+                label nMultEdges = 0;
+                forAll(edgeFaces, edgeI)
+                {
+                    if (edgeFaces[edgeI].size() > 2)
+                    {
+                        nMultEdges++;
+                    }
+                }
+
+                if (report && (nSingleEdges != 0 || nMultEdges != 0))
+                {
+                    Info<< "        connected to one face : "
+                        << nSingleEdges << nl
+                        << "        connected to >2 faces : "
+                        << nMultEdges << endl;
+                }
+            }
+        }
+    }
+
+    if (report)
+    {
+        Info<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+}
+
+
+bool Foam::searchableSurfaces::checkNormalOrientation(const bool report) const
+{
+    if (report)
+    {
+        Info<< "Checking for normal orientation." << endl;
+    }
+
+    bool hasError = false;
+
+    forAll(*this, surfI)
+    {
+        if (isA<triSurface>(operator[](surfI)))
+        {
+            const triSurface& s = dynamic_cast<const triSurface&>
+            (
+                operator[](surfI)
+            );
+
+            labelHashSet borderEdge(s.size()/1000);
+            PatchTools::checkOrientation(s, false, &borderEdge);
+            // Colour all faces into zones using borderEdge
+            labelList normalZone;
+            label nZones = PatchTools::markZones(s, borderEdge, normalZone);
+            if (nZones > 1)
+            {
+                hasError = true;
+
+                if (report)
+                {
+                    Info<< "    " << names()[surfI]
+                        << " : has multiple orientation zones ("
+                        << nZones << ")" << endl;
+                }
+            }
+        }
+    }
+
+    if (report)
+    {
+        Info<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+}
+
+
+bool Foam::searchableSurfaces::checkSizes
+(
+    const scalar maxRatio,
+    const bool report
+) const
+{
+    if (report)
+    {
+        Info<< "Checking for size." << endl;
+    }
+
+    bool hasError = false;
+
+    forAll(*this, i)
+    {
+        const boundBox& bb = operator[](i).bounds();
+
+        for (label j = i+1; j < size(); j++)
+        {
+            scalar ratio = bb.mag()/operator[](j).bounds().mag();
+
+            if (ratio > maxRatio || ratio < 1.0/maxRatio)
+            {
+                hasError = true;
+
+                if (report)
+                {
+                    Info<< "    " << names()[i]
+                        << " bounds differ from " << names()[j]
+                        << " by more than a factor 100:" << nl
+                        << "        bounding box : " << bb << nl
+                        << "        bounding box : " << operator[](j).bounds()
+                        << endl;
+                }
+                break;
+            }
+        }
+    }
+
+    if (report)
+    {
+        Info<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+}
+
+
+bool Foam::searchableSurfaces::checkIntersection
+(
+    const scalar tolerance,
+    const autoPtr<writer<scalar> >& setWriter,
+    const bool report
+) const
+{
+    if (report)
+    {
+        Info<< "Checking for intersection." << endl;
+    }
+
+    //cpuTime timer;
+
+    bool hasError = false;
+
+    forAll(*this, i)
+    {
+        if (isA<triSurfaceMesh>(operator[](i)))
+        {
+            const triSurfaceMesh& s0 = dynamic_cast<const triSurfaceMesh&>
+            (
+                operator[](i)
+            );
+            const edgeList& edges0 = s0.edges();
+            const pointField& localPoints0 = s0.localPoints();
+
+            // Collect all the edge vectors
+            pointField start(edges0.size());
+            pointField end(edges0.size());
+            forAll(edges0, edgeI)
+            {
+                const edge& e = edges0[edgeI];
+                start[edgeI] = localPoints0[e[0]];
+                end[edgeI] = localPoints0[e[1]];
+            }
+
+            // Test all other surfaces for intersection
+            forAll(*this, j)
+            {
+                List<pointIndexHit> hits;
+
+                if (i == j)
+                {
+                    // Slightly shorten the edges to prevent finding lots of
+                    // intersections. The fast triangle intersection routine
+                    // has problems with rays passing through a point of the
+                    // triangle.
+                    vectorField d
+                    (
+                        max(tolerance, 10*s0.tolerance())
+                       *(end-start)
+                    );
+                    start += d;
+                    end -= d;
+                }
+
+                operator[](j).findLineAny(start, end, hits);
+
+                label nHits = 0;
+                DynamicField<point> intersections(edges0.size()/100);
+                DynamicField<scalar> intersectionEdge(intersections.capacity());
+
+                forAll(hits, edgeI)
+                {
+                    if
+                    (
+                        hits[edgeI].hit()
+                     && (i != j || !connected(s0, edgeI, hits[edgeI]))
+                    )
+                    {
+                        intersections.append(hits[edgeI].hitPoint());
+                        intersectionEdge.append(1.0*edgeI);
+                        nHits++;
+                    }
+                }
+
+                if (nHits > 0)
+                {
+                    if (report)
+                    {
+                        Info<< "    " << names()[i]
+                            << " intersects " << names()[j]
+                            << " at " << nHits
+                            << " locations."
+                            << endl;
+
+                        //vtkSetWriter<scalar> setWriter;
+                        if (setWriter.valid())
+                        {
+                            scalarField dist(mag(intersections));
+                            coordSet track
+                            (
+                                names()[i] + '_' + names()[j],
+                                "xyz",
+                                intersections.xfer(),
+                                dist
+                            );
+                            wordList valueSetNames(1, "edgeIndex");
+                            List<const scalarField*> valueSets
+                            (
+                                1,
+                                &intersectionEdge
+                            );
+
+                            fileName fName
+                            (
+                                setWriter().getFileName(track, valueSetNames)
+                            );
+                            Info<< "    Writing intersection locations to "
+                                << fName << endl;
+                            OFstream os
+                            (
+                                s0.searchableSurface::time().path()
+                               /fName
+                            );
+                            setWriter().write
+                            (
+                                track,
+                                valueSetNames,
+                                valueSets,
+                                os
+                            );
+                        }
+                    }
+
+                    hasError = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (report)
+    {
+        Info<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+}
+
+
+bool Foam::searchableSurfaces::checkQuality
+(
+    const scalar minQuality,
+    const bool report
+) const
+{
+    if (report)
+    {
+        Info<< "Checking for triangle quality." << endl;
+    }
+
+    bool hasError = false;
+
+    forAll(*this, surfI)
+    {
+        if (isA<triSurface>(operator[](surfI)))
+        {
+            const triSurface& s = dynamic_cast<const triSurface&>
+            (
+                operator[](surfI)
+            );
+
+            label nBadTris = 0;
+            forAll(s, faceI)
+            {
+                const labelledTri& f = s[faceI];
+
+                scalar q = triPointRef
+                (
+                    s.points()[f[0]],
+                    s.points()[f[1]],
+                    s.points()[f[2]]
+                ).quality();
+
+                if (q < minQuality)
+                {
+                    nBadTris++;
+                }
+            }
+
+            if (nBadTris > 0)
+            {
+                hasError = true;
+
+                if (report)
+                {
+                    Info<< "    " << names()[surfI]
+                        << " : has " << nBadTris << " bad quality triangles "
+                        << " (quality < " << minQuality << ")" << endl;
+                }
+            }
+        }
+    }
+
+    if (report)
+    {
+        Info<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+
+}
+
+
+// Check all surfaces. Return number of failures.
+Foam::label Foam::searchableSurfaces::checkTopology
+(
+    const bool report
+) const
+{
+    label noFailedChecks = 0;
+
+    if (checkClosed(report))
+    {
+        noFailedChecks++;
+    }
+
+    if (checkNormalOrientation(report))
+    {
+        noFailedChecks++;
+    }
+    return noFailedChecks;
+}
+
+
+Foam::label Foam::searchableSurfaces::checkGeometry
+(
+    const scalar maxRatio,
+    const scalar tol,
+    const autoPtr<writer<scalar> >& setWriter,
+    const scalar minQuality,
+    const bool report
+) const
+{
+    label noFailedChecks = 0;
+
+    if (maxRatio > 0 && checkSizes(maxRatio, report))
+    {
+        noFailedChecks++;
+    }
+
+    if (checkIntersection(tol, setWriter, report))
+    {
+        noFailedChecks++;
+    }
+
+    if (checkQuality(minQuality, report))
+    {
+        noFailedChecks++;
+    }
+
+    return noFailedChecks;
+}
+
+
+void Foam::searchableSurfaces::writeStats
+(
+    const List<wordList>& patchTypes,
+    Ostream& os
+) const
+{
+    Info<< "Statistics." << endl;
+    forAll(*this, surfI)
+    {
+        Info<< "    " << names()[surfI] << ':' << endl;
+
+        const searchableSurface& s = operator[](surfI);
+
+        Info<< "        type      : " << s.type() << nl
+            << "        size      : " << s.globalSize() << nl;
+        if (isA<triSurfaceMesh>(s))
+        {
+            const triSurfaceMesh& ts = dynamic_cast<const triSurfaceMesh&>(s);
+            Info<< "        edges     : " << ts.nEdges() << nl
+                << "        points    : " << ts.points()().size() << nl;
+        }
+        Info<< "        bounds    : " << s.bounds() << nl
+            << "        closed    : " << Switch(s.hasVolumeType()) << endl;
+
+        if (patchTypes.size() && patchTypes[surfI].size() >= 1)
+        {
+            wordList unique(HashSet<word>(patchTypes[surfI]).sortedToc());
+            Info<< "        patches   : ";
+            forAll(unique, i)
+            {
+                Info<< unique[i];
+                if (i < unique.size()-1)
+                {
+                    Info<< ',';
+                }
+            }
+            Info<< endl;
+        }
+    }
+    Info<< endl;
+}
+
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ void Foam::meshWriters::STARCD::getCellTable()
         IOobject
         (
             "cellTableId",
-            "constant",
+            mesh_.time().constant(),
             polyMesh::meshSubDir,
             mesh_,
             IOobject::READ_IF_PRESENT,
@@ -506,7 +506,7 @@ bool Foam::meshWriters::STARCD::write(const fileName& meshName) const
         if
         (
             mesh_.time().timeName() != "0"
-         && mesh_.time().timeName() != "constant"
+         && mesh_.time().timeName() != mesh_.time().constant()
         )
         {
             baseName += "_" + mesh_.time().timeName();

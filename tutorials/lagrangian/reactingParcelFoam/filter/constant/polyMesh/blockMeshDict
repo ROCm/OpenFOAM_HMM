@@ -100,32 +100,6 @@ boundary
         );
     }
 
-    cycLeft_half0
-    {
-        type cyclic;
-        faces    ();
-        neighbourPatch cycLeft_half1;
-    }
-    cycLeft_half1
-    {
-        type cyclic;
-        faces    ();
-        neighbourPatch cycLeft_half0;
-    }
-
-    cycRight_half0
-    {
-        type cyclic;
-        faces    ();
-        neighbourPatch cycRight_half1;
-    }
-    cycRight_half1
-    {
-        type cyclic;
-        faces    ();
-        neighbourPatch cycRight_half0;
-    }
-
     frontAndBack
     {
         type empty;

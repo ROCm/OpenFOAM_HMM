@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::IOobject, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(IOobject, 0);
+}
+
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -40,7 +44,7 @@ defineTypeNameAndDebug(Foam::IOobject, 0);
 //    -----               ------
 //    "foo"               ("", "", "foo")
 //    "foo/bar"           ("foo", "", "bar")
-//    "/XXX"              ERROR - no absolute path
+//    "/XXX/bar"          ("/XXX", "", "bar")
 //    "foo/bar/"          ERROR - no name
 //    "foo/xxx/bar"       ("foo", "xxx", "bar")
 //    "foo/xxx/yyy/bar"   ("foo", "xxx/yyy", "bar")
@@ -64,14 +68,6 @@ bool Foam::IOobject::IOobject::fileNameComponents
         return false;
     }
 
-    if (path.isAbsolute())
-    {
-        // called with absolute path
-        WarningIn("IOobject::fileNameComponents(const fileName&, ...)")
-            << "called with absolute path: " << path << "\n";
-        return false;
-    }
-
     string::size_type first = path.find('/');
 
     if (first == string::npos)
@@ -80,6 +76,15 @@ bool Foam::IOobject::IOobject::fileNameComponents
 
         // check afterwards
         name.string::operator=(path);
+    }
+    else if (first == 0)
+    {
+        // Leading '/'. Absolute fileName
+        string::size_type last = path.rfind('/');
+        instance = path.substr(0, last);
+
+        // check afterwards
+        name.string::operator=(path.substr(last+1));
     }
     else
     {
@@ -246,7 +251,14 @@ const Foam::fileName& Foam::IOobject::rootPath() const
 
 Foam::fileName Foam::IOobject::path() const
 {
-    return rootPath()/caseName()/instance()/db_.dbDir()/local();
+    if (instance().isAbsolute())
+    {
+        return instance();
+    }
+    else
+    {
+        return rootPath()/caseName()/instance()/db_.dbDir()/local();
+    }
 }
 
 
@@ -256,61 +268,80 @@ Foam::fileName Foam::IOobject::path
     const fileName& local
 ) const
 {
+    //Note: can only be called with relative instance since is word type
     return rootPath()/caseName()/instance/db_.dbDir()/local;
 }
 
 
 Foam::fileName Foam::IOobject::filePath() const
 {
-    fileName path = this->path();
-    fileName objectPath = path/name();
-
-    if (isFile(objectPath))
+    if (instance().isAbsolute())
     {
-        return objectPath;
+        fileName objectPath = instance()/name();
+        if (isFile(objectPath))
+        {
+            return objectPath;
+        }
+        else
+        {
+            return fileName::null;
+        }
     }
     else
     {
-        if
-        (
-            time().processorCase()
-         && (
-                instance() == time().system()
-             || instance() == time().constant()
-            )
-        )
-        {
-            fileName parentObjectPath =
-                rootPath()/caseName()
-               /".."/instance()/db_.dbDir()/local()/name();
+        fileName path = this->path();
+        fileName objectPath = path/name();
 
-            if (isFile(parentObjectPath))
-            {
-                return parentObjectPath;
-            }
+        if (isFile(objectPath))
+        {
+            return objectPath;
         }
-
-        if (!isDir(path))
+        else
         {
-            word newInstancePath = time().findInstancePath(instant(instance()));
-
-            if (newInstancePath.size())
+            if
+            (
+                time().processorCase()
+             && (
+                    instance() == time().system()
+                 || instance() == time().constant()
+                )
+            )
             {
-                fileName fName
-                (
+                fileName parentObjectPath =
                     rootPath()/caseName()
-                   /newInstancePath/db_.dbDir()/local()/name()
+                   /".."/instance()/db_.dbDir()/local()/name();
+
+                if (isFile(parentObjectPath))
+                {
+                    return parentObjectPath;
+                }
+            }
+
+            if (!isDir(path))
+            {
+                word newInstancePath = time().findInstancePath
+                (
+                    instant(instance())
                 );
 
-                if (isFile(fName))
+                if (newInstancePath.size())
                 {
-                    return fName;
+                    fileName fName
+                    (
+                        rootPath()/caseName()
+                       /newInstancePath/db_.dbDir()/local()/name()
+                    );
+
+                    if (isFile(fName))
+                    {
+                        return fName;
+                    }
                 }
             }
         }
-    }
 
-    return fileName::null;
+        return fileName::null;
+    }
 }
 
 

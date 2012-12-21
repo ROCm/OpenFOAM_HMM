@@ -28,10 +28,16 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               - fvm::laplacian(turbulence->muEff(), Yi)
              ==
                 reaction->R(Yi)
+              + sources(rho, Yi)
             );
 
             YiEqn.relax();
+
+            sources.constrain(YiEqn);
+
             YiEqn.solve(mesh.solver("Yi"));
+
+            sources.correct(Yi);
 
             Yi.max(0.0);
             Yt += Yi;

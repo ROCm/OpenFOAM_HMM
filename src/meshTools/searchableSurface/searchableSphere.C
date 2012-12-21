@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,6 +166,12 @@ Foam::searchableSphere::~searchableSphere()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::searchableSphere::overlaps(const boundBox& bb) const
+{
+    return bb.overlaps(centre_, sqr(radius_));
+}
+
 
 const Foam::wordList& Foam::searchableSphere::regions() const
 {

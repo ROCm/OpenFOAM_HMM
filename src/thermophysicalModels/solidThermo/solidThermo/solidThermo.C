@@ -39,14 +39,18 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidThermo::solidThermo(const fvMesh& mesh)
+Foam::solidThermo::solidThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName
+)
 :
-    basicThermo(mesh),
+    basicThermo(mesh, phaseName),
     rho_
     (
         IOobject
         (
-            "rhoThermo",
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -61,15 +65,16 @@ Foam::solidThermo::solidThermo(const fvMesh& mesh)
 Foam::solidThermo::solidThermo
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 :
-    basicThermo(mesh, dict),
+    basicThermo(mesh, dict, phaseName),
     rho_
     (
         IOobject
         (
-            "rhoThermo",
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -85,20 +90,22 @@ Foam::solidThermo::solidThermo
 
 Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<solidThermo>(mesh);
+    return basicThermo::New<solidThermo>(mesh, phaseName);
 }
 
 
 Foam::autoPtr<Foam::solidThermo> Foam::solidThermo::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& phaseName
 )
 {
-    return basicThermo::New<solidThermo>(mesh, dict);
+    return basicThermo::New<solidThermo>(mesh, dict, phaseName);
 }
 
 

@@ -29,8 +29,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::dimensionSet, 1);
-const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
+namespace Foam
+{
+defineTypeNameAndDebug(dimensionSet, 1);
+const scalar dimensionSet::smallExponent = SMALL;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -369,6 +372,12 @@ Foam::dimensionSet Foam::pow025(const dimensionSet& ds)
 Foam::dimensionSet Foam::sqrt(const dimensionSet& ds)
 {
     return pow(ds, 0.5);
+}
+
+
+Foam::dimensionSet Foam::cbrt(const dimensionSet& ds)
+{
+    return pow(ds, 1.0/3.0);
 }
 
 

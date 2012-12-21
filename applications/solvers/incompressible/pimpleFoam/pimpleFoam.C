@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,9 @@ Description
     Large time-step transient solver for incompressible, flow using the PIMPLE
     (merged PISO-SIMPLE) algorithm.
 
-    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+    Sub-models include:
+    - turbulence modelling, i.e. laminar, RAS or LES
+    - run-time selectable sources, e.g. MRF, explicit porosity
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,6 +39,8 @@ Description
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 #include "IObasicSourceList.H"
+#include "IOporosityModelList.H"
+#include "IOMRFZoneList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,6 +50,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);

@@ -51,7 +51,7 @@ Description
     The exchange needs
     - a field of data
     - a mapDistribute which does all parallel exchange and transformations
-      This appens remote data to the end of the field
+      This appends remote data to the end of the field.
     - a set of indices which indicate where to get untransformed data in the
       field
     - a set of indices which indicate where to get transformed data in the

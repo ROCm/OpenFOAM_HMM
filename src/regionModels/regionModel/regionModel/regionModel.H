@@ -41,21 +41,18 @@ SourceFiles
 #include "labelList.H"
 #include "volFields.H"
 #include "mappedPatchBase.H"
+#include "regionModelFunctionObjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-//class fvMesh;
-//class Time;
-
 namespace regionModels
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class regionModel Declaration
+                         Class regionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionModel
@@ -121,6 +118,18 @@ protected:
         //- Region name
         word regionName_;
 
+        //- Region model function objects
+        regionModelFunctionObjectList functions_;
+
+
+        // Inter-region AMI interpolation caching
+
+            //- List of region names this region is coupled to
+            wordList interRegionAMINames_;
+
+            //- List of AMI objects per coupled region
+            PtrList<PtrList<AMIPatchToPatchInterpolation> > interRegionAMI_;
+
 
     // Protected member functions
 
@@ -130,6 +139,14 @@ protected:
         //- Read control parameters from dictionary
         virtual bool read(const dictionary& dict);
 
+        //- Create or return a new inter-region AMI object
+        virtual const Foam::AMIPatchToPatchInterpolation& interRegionAMI
+        (
+            const regionModel& nbrRegion,
+            const label regionPatchI,
+            const label nbrPatchI,
+            const bool flip
+        );
 
 public:
 
@@ -160,7 +177,6 @@ public:
             const dictionary& dict,
             bool readFields = true
         );
-
 
 
     //- Destructor
@@ -201,9 +217,13 @@ public:
 
             // Addressing
 
+                //- Return true if patchI on the local region is a coupled
+                //  patch to the primary region
+                inline bool isCoupledPatch(const label regionPatchI) const;
+
                 //- Return true if patchI on the primary region is a coupled
                 //  patch to the local region
-                inline bool isRegionPatch(const label patchI) const;
+                inline bool isRegionPatch(const label primaryPatchI) const;
 
                 //- Return the list of patch IDs on the primary region coupled
                 //  to this region
@@ -218,6 +238,46 @@ public:
 
 
         // Helper
+
+            //- Return the coupled patch ID paired with coupled patch
+            //  regionPatchI
+            label nbrCoupledPatchID
+            (
+                const regionModel& nbrRegion,
+                const label regionPatchI
+            ) const;
+
+            //- Map patch field from another region model to local patch
+            template<class Type>
+            tmp<Foam::Field<Type> > mapRegionPatchField
+            (
+                const regionModel& nbrRegion,
+                const label regionPatchI,
+                const label nbrPatchI,
+                const Field<Type>& nbrField,
+                const bool flip = false
+            );
+
+            //- Map patch field from another region model to local patch
+            template<class Type>
+            tmp<Field<Type> > mapRegionPatchField
+            (
+                const regionModel& nbrRegion,
+                const word& fieldName,
+                const label regionPatchI,
+                const bool flip = false
+            );
+
+            //- Map patch internal field from another region model to local
+            //  patch
+            template<class Type>
+            tmp<Field<Type> > mapRegionPatchInternalField
+            (
+                const regionModel& nbrRegion,
+                const word& fieldName,
+                const label regionPatchI,
+                const bool flip = false
+            );
 
             //- Convert a local region field to the primary region
             template<class Type>
@@ -256,14 +316,17 @@ public:
 
         // Evolution
 
+            //- Main driver routing to evolve the region - calls other evolves
+            virtual void evolve();
+
             //- Pre-evolve region
             virtual void preEvolveRegion();
 
             //- Evolve the region
             virtual void evolveRegion();
 
-            //- Evolve the region
-            virtual void evolve();
+            //- Post-evolve region
+            virtual void postEvolveRegion();
 
 
         // I-O

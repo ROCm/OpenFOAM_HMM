@@ -31,7 +31,8 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
 (
     const word& name,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 {
     const word modelType(dict.lookup("type"));
@@ -48,9 +49,10 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
         (
             "porosityModel::New"
             "("
-                "const word& name,"
+                "const word&, "
                 "const fvMesh&, "
-                "const dictionary&"
+                "const dictionary&, "
+                "const word&"
             ")"
         )
             << "Unknown " << typeName << " type " << modelType << nl << nl
@@ -59,7 +61,17 @@ Foam::autoPtr<Foam::porosityModel> Foam::porosityModel::New
             << exit(FatalError);
     }
 
-    return autoPtr<porosityModel>(cstrIter()(name, modelType, mesh, dict));
+    return autoPtr<porosityModel>
+    (
+        cstrIter()
+        (
+            name,
+            modelType,
+            mesh,
+            dict,
+            cellZoneName
+        )
+    );
 }
 
 

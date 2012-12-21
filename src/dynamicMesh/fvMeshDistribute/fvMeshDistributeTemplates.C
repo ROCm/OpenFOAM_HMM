@@ -55,65 +55,6 @@ void Foam::fvMeshDistribute::printFieldInfo(const fvMesh& mesh)
 }
 
 
-template<class GeoField>
-void Foam::fvMeshDistribute::addPatchFields(const word& patchFieldType)
-{
-    HashTable<const GeoField*> flds
-    (
-        mesh_.objectRegistry::lookupClass<GeoField>()
-    );
-
-    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
-    {
-        const GeoField& fld = *iter();
-
-        typename GeoField::GeometricBoundaryField& bfld =
-            const_cast<typename GeoField::GeometricBoundaryField&>
-            (
-                fld.boundaryField()
-            );
-
-        label sz = bfld.size();
-        bfld.setSize(sz + 1);
-        bfld.set
-        (
-            sz,
-            GeoField::PatchFieldType::New
-            (
-                patchFieldType,
-                mesh_.boundary()[sz],
-                fld.dimensionedInternalField()
-            )
-        );
-    }
-}
-
-
-// Delete trailing patch fields
-template<class GeoField>
-void Foam::fvMeshDistribute::deleteTrailingPatchFields()
-{
-    HashTable<const GeoField*> flds
-    (
-        mesh_.objectRegistry::lookupClass<GeoField>()
-    );
-
-    forAllConstIter(typename HashTable<const GeoField*>, flds, iter)
-    {
-        const GeoField& fld = *iter();
-
-        typename GeoField::GeometricBoundaryField& bfld =
-            const_cast<typename GeoField::GeometricBoundaryField&>
-            (
-                fld.boundaryField()
-            );
-
-        // Shrink patchFields
-        bfld.setSize(bfld.size() - 1);
-    }
-}
-
-
 // Save whole boundary field
 template <class T, class Mesh>
 void Foam::fvMeshDistribute::saveBoundaryFields

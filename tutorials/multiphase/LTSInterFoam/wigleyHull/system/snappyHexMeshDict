@@ -228,31 +228,31 @@ addLayersControls
     expansionRatio 1.0;
 
 
-    //- Wanted thickness of final added cell layer. If multiple layers
-    //  is the thickness of the layer furthest away from the wall.
-    //  See relativeSizes parameter.
+    // Wanted thickness of final added cell layer. If multiple layers
+    // is the thickness of the layer furthest away from the wall.
+    // See relativeSizes parameter.
     finalLayerThickness 0.3;
 
-    //- Minimum thickness of cell layer. If for any reason layer
-    //  cannot be above minThickness do not add layer.
-    //  See relativeSizes parameter.
+    // Minimum thickness of cell layer. If for any reason layer
+    // cannot be above minThickness do not add layer.
+    // See relativeSizes parameter.
     minThickness 0.25;
 
-    //- If points get not extruded do nGrow layers of connected faces that are
-    //  also not grown. This helps convergence of the layer addition process
-    //  close to features.
+    // If points get not extruded do nGrow layers of connected faces that are
+    // also not grown. This helps convergence of the layer addition process
+    // close to features.
     // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
 
 
     // Advanced settings
 
-    //- When not to extrude surface. 0 is flat surface, 90 is when two faces
-    //  make straight angle.
+    // When not to extrude surface. 0 is flat surface, 90 is when two faces
+    // are perpendicular
     featureAngle 60;
 
-    //- Maximum number of snapping relaxation iterations. Should stop
-    //  before upon reaching a correct mesh.
+    // Maximum number of snapping relaxation iterations. Should stop
+    // before upon reaching a correct mesh.
     nRelaxIter 5;
 
     // Number of smoothing iterations of surface normals

@@ -1,2 +1,2 @@
-    MRFZones mrfZones(mesh);
+    IOMRFZoneList mrfZones(mesh);
     mrfZones.correctBoundaryVelocity(U);

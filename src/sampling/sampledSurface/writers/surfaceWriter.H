@@ -35,7 +35,6 @@ SourceFiles
 #ifndef surfaceWriter_H
 #define surfaceWriter_H
 
-#include "volFields.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "pointField.H"

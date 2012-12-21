@@ -60,6 +60,9 @@ public:
 
     // Constructors
 
+        //- Null constructor.
+        DiagonalMatrix<Type>();
+
         //- Construct from diagonal component of a Matrix
         template<class Form>
         DiagonalMatrix<Type>(const Matrix<Form, Type>&);

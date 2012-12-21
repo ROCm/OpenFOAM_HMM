@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -299,8 +299,7 @@ Foam::dynamicRefineFvMesh::refine
         }
         if (debug)
         {
-            Info<< "Found " << returnReduce(masterFaces.size(), sumOp<label>())
-                << " split faces " << endl;
+            Pout<< "Found " << masterFaces.size() << " split faces " << endl;
         }
 
         HashTable<const surfaceScalarField*> fluxes
@@ -332,7 +331,7 @@ Foam::dynamicRefineFvMesh::refine
 
             if (debug)
             {
-                Info<< "Mapping flux " << iter.key()
+                Pout<< "Mapping flux " << iter.key()
                     << " using interpolated flux " << UName
                     << endl;
             }

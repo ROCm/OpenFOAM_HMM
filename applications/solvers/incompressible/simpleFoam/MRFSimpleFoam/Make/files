@@ -1,3 +1,0 @@
-MRFSimpleFoam.C
-
-EXE = $(FOAM_APPBIN)/MRFSimpleFoam

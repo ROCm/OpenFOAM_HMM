@@ -20,6 +20,5 @@ EXE_LIBS = \
     -lfluidThermophysicalModels \
     -lspecie \
     -lfiniteVolume \
-    -lsampling \
     -lmeshTools \
     -lfieldSources

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sampledSets, 0);
-bool Foam::sampledSets::verbose_ = false;
+namespace Foam
+{
+defineTypeNameAndDebug(sampledSets, 0);
+bool sampledSets::verbose_ = false;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -302,7 +305,7 @@ void Foam::sampledSets::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::sampledSets::movePoints(const pointField&)
+void Foam::sampledSets::movePoints(const polyMesh&)
 {
     correct();
 }

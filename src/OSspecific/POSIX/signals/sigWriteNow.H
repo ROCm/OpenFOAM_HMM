@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,9 @@ public:
 
     friend class sigStopAtWriteNow;
 
+    //- wip. Have setter have access to signal_
+    friend class addwriteNowSignalToOpt;
+
     // Constructors
 
         //- Construct null
@@ -83,6 +86,9 @@ public:
 
 
     // Member functions
+
+        //- (re)set signal catcher
+        static void set(const bool verbose);
 
         //- Is active?
         bool active() const;

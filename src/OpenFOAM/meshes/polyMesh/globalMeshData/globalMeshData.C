@@ -41,13 +41,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::globalMeshData, 0);
-
-// Geometric matching tolerance. Factor of mesh bounding box.
-const Foam::scalar Foam::globalMeshData::matchTol_ = 1e-8;
-
 namespace Foam
 {
+defineTypeNameAndDebug(globalMeshData, 0);
+
+// Geometric matching tolerance. Factor of mesh bounding box.
+const scalar globalMeshData::matchTol_ = 1e-8;
+
 template<>
 class minEqOp<labelPair>
 {
@@ -881,7 +881,7 @@ void Foam::globalMeshData::calcGlobalEdgeSlaves() const
     // the transformations.
 
 
-    // 1. collect point connectivity - basically recreating globalPoints ouput.
+    // 1. collect point connectivity - basically recreating globalPoints output.
     // All points will now have a string of points. The transforms are
     // in respect to the master.
     List<labelPairList> allPointConnectivity;

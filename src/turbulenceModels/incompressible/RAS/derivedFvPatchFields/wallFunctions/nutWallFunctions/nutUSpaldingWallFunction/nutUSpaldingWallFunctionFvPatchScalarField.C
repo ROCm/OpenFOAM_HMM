@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutUSpaldingWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
+#include "incompressible/turbulenceModel/turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -35,22 +35,20 @@ namespace Foam
 {
 namespace incompressible
 {
-namespace RASModels
-{
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 {
-    const label patchi = patch().index();
+    const label patchI = patch().index();
 
     const turbulenceModel& turbModel =
         db().lookupObject<turbulenceModel>("turbulenceModel");
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchI];
     const scalarField magGradU(mag(Uw.snGrad()));
     const tmp<volScalarField> tnu = turbModel.nu();
     const volScalarField& nu = tnu();
-    const scalarField& nuw = nu.boundaryField()[patchi];
+    const scalarField& nuw = nu.boundaryField()[patchI];
 
     return max
     (
@@ -65,23 +63,27 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     const scalarField& magGradU
 ) const
 {
+    const label patchI = patch().index();
+
     const turbulenceModel& turbModel =
         db().lookupObject<turbulenceModel>("turbulenceModel");
-    const scalarField& y = turbModel.y()[patch().index()];
+    const scalarField& y = turbModel.y()[patchI];
 
-    const fvPatchVectorField& Uw =
-        turbModel.U().boundaryField()[patch().index()];
+    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchI];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
-    const scalarField& nuw = turbModel.nu()().boundaryField()[patch().index()];
+    const tmp<volScalarField> tnu = turbModel.nu();
+    const volScalarField& nu = tnu();
+    const scalarField& nuw = nu.boundaryField()[patchI];
+
     const scalarField& nutw = *this;
 
     tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
     scalarField& uTau = tuTau();
 
-    forAll(uTau, facei)
+    forAll(uTau, faceI)
     {
-        scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
+        scalar ut = sqrt((nutw[faceI] + nuw[faceI])*magGradU[faceI]);
 
         if (ut > ROOTVSMALL)
         {
@@ -90,17 +92,17 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
             do
             {
-                scalar kUu = min(kappa_*magUp[facei]/ut, 50);
+                scalar kUu = min(kappa_*magUp[faceI]/ut, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
-                    - ut*y[facei]/nuw[facei]
-                    + magUp[facei]/ut
+                    - ut*y[faceI]/nuw[faceI]
+                    + magUp[faceI]/ut
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
-                    y[facei]/nuw[facei]
-                  + magUp[facei]/sqr(ut)
+                    y[faceI]/nuw[faceI]
+                  + magUp[faceI]/sqr(ut)
                   + 1/E_*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
@@ -109,7 +111,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
             } while (ut > ROOTVSMALL && err > 0.01 && ++iter < 10);
 
-            uTau[facei] = max(0.0, ut);
+            uTau[faceI] = max(0.0, ut);
         }
     }
 
@@ -212,7 +214,6 @@ makePatchTypeField
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace incompressible
 } // End namespace Foam
 

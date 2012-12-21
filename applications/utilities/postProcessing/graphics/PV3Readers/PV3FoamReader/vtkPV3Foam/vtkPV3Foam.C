@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(vtkPV3Foam, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -575,7 +579,7 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
         // skip "constant" time whenever possible
         if (timeI == 0 && nTimes > 1)
         {
-            if (timeLst[timeI].name() == "constant")
+            if (timeLst[timeI].name() == runTime.constant())
             {
                 ++timeI;
                 --nTimes;

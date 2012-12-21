@@ -32,7 +32,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::CourantNo, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(CourantNo, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -58,7 +61,9 @@ Foam::tmp<Foam::volScalarField> Foam::CourantNo::rho
                 (
                     "rho",
                     mesh.time().timeName(),
-                    mesh
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 mesh,
                 dimensionedScalar("rho", dimless, 1.0)
@@ -116,7 +121,8 @@ Foam::CourantNo::CourantNo
                     type(),
                     mesh.time().timeName(),
                     mesh,
-                    IOobject::NO_READ
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
                 ),
                 mesh,
                 dimensionedScalar("0", dimless, 0.0),
@@ -189,7 +195,7 @@ void Foam::CourantNo::write()
         CourantNo.write();
 
         Info<< type() << " output:" << nl
-            << "    writing " << CourantNo.name() << "field" << nl << endl;
+            << "    writing " << CourantNo.name() << " field" << nl << endl;
     }
 }
 

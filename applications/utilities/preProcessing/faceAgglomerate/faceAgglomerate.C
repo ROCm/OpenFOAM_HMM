@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,22 +48,22 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
-    argList::addOption
-    (
-        "dict",
-        "word",
-        "name of dictionary to provide patch agglomeration controls"
-    );
+    #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
-    word agglomDictName
-    (
-        args.optionLookupOrDefault<word>("dict", "faceAgglomerateDict")
-    );
+    const word dictName("faceAgglomerateDict");
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    #include "setConstantMeshDictionaryIO.H"
+
+    // Read control dictionary
+    const IOdictionary agglomDict(dictIO);
+
+    bool writeAgglom = readBool(agglomDict.lookup("writeFacesAgglomeration"));
+
+
+    const polyBoundaryMesh& boundary = mesh.boundaryMesh();
 
     labelListIOList finalAgglom
     (
@@ -76,26 +76,8 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE,
             false
         ),
-        patches.size()
+        boundary.size()
     );
-
-
-    // Read control dictionary
-    IOdictionary agglomDict
-    (
-        IOobject
-        (
-            agglomDictName,
-            runTime.constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
-    bool writeAgglom = readBool(agglomDict.lookup("writeFacesAgglomeration"));
-
-    const polyBoundaryMesh& boundary = mesh.boundaryMesh();
 
     forAll(boundary, patchId)
     {
@@ -178,7 +160,6 @@ int main(int argc, char *argv[])
 
         forAll(boundary, patchId)
         {
-
             fvPatchScalarField& bFacesAgglomeration =
                 facesAgglomeration.boundaryField()[patchId];
 
@@ -188,7 +169,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        Info << "\nWriting  facesAgglomeration" << endl;
+        Info<< "\nWriting facesAgglomeration" << endl;
         facesAgglomeration.write();
     }
 

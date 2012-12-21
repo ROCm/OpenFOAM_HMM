@@ -33,9 +33,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::sampledSurfaces, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(sampledSurfaces, 0);
+}
+
+
 bool Foam::sampledSurfaces::verbose_ = false;
+
 Foam::scalar Foam::sampledSurfaces::mergeTol_ = 1e-10;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -248,7 +255,7 @@ void Foam::sampledSurfaces::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::sampledSurfaces::movePoints(const pointField&)
+void Foam::sampledSurfaces::movePoints(const polyMesh&)
 {
     expire();
 }

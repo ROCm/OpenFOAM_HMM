@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -303,6 +303,19 @@ public:
                 labelHashSet* setPtr
             );
 
+            //- Area of faces v.s. sum of triangle areas
+            static bool checkFaceFlatness
+            (
+                const bool report,
+                const scalar minFlatness,
+                const polyMesh&,
+                const vectorField& faceAreas,
+                const vectorField& faceCentres,
+                const pointField& p,
+                const labelList& checkFaces,
+                labelHashSet* setPtr
+            );
+
             //- Small faces
             static bool checkFaceArea
             (
@@ -314,6 +327,7 @@ public:
                 labelHashSet* setPtr
             );
 
+            //- Area of internal faces v.s. boundary faces
             static bool checkCellDeterminant
             (
                 const bool report,
@@ -408,6 +422,15 @@ public:
             (
                 const bool report,
                 const scalar minTwist,
+                const pointField& p,
+                const labelList& checkFaces,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkFaceFlatness
+            (
+                const bool report,
+                const scalar minFlatness,
                 const pointField& p,
                 const labelList& checkFaces,
                 labelHashSet* setPtr

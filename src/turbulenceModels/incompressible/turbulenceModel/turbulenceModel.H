@@ -153,6 +153,9 @@ public:
 
     // Member Functions
 
+        //- Const access to the coefficients dictionary
+        virtual const dictionary& coeffDict() const = 0;
+
         //- Access function to velocity field
         inline const volVectorField& U() const
         {

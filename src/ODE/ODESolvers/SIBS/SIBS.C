@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::SIBS, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(SIBS, 0);
+
     addToRunTimeSelectionTable(ODESolver, SIBS, ODE);
 
     const label SIBS::nSeq_[iMaxX_] = {2, 6, 10, 14, 22, 34, 50, 70};

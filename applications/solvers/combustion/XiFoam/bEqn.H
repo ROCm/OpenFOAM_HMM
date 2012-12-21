@@ -34,7 +34,7 @@ if (ign.ignited())
 
     // Calculate turbulent flame speed flux
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    surfaceScalarField phiSt(fvc::interpolate(rhou*StCorr*Su*Xi)*nf);
+    surfaceScalarField phiSt("phiSt", fvc::interpolate(rhou*StCorr*Su*Xi)*nf);
 
     scalar StCoNum = max
     (
@@ -50,9 +50,11 @@ if (ign.ignited())
     (
         fvm::ddt(rho, b)
       + mvConvection->fvmDiv(phi, b)
-      + fvm::div(phiSt, b, "div(phiSt,b)")
+      + fvm::div(phiSt, b)
       - fvm::Sp(fvc::div(phiSt), b)
       - fvm::laplacian(turbulence->alphaEff(), b)
+     ==
+        sources(rho, b)
     );
 
 
@@ -64,7 +66,12 @@ if (ign.ignited())
     // Solve for b
     // ~~~~~~~~~~~
     bEqn.relax();
+
+    sources.constrain(bEqn);
+
     bEqn.solve();
+
+    sources.correct(b);
 
     Info<< "min(b) = " << min(b).value() << endl;
 
@@ -153,10 +160,16 @@ if (ign.ignited())
           ==
           - fvm::SuSp(-rho*Rc*Su0/Su, Su)
           - fvm::SuSp(rho*(sigmas + Rc), Su)
+          + sources(rho, Su)
         );
 
         SuEqn.relax();
+
+        sources.constrain(SuEqn);
+
         SuEqn.solve();
+
+        sources.correct(Su);
 
         // Limit the maximum Su
         // ~~~~~~~~~~~~~~~~~~~~
@@ -234,10 +247,16 @@ if (ign.ignited())
                 ),
                 Xi
             )
+          + sources(rho, Xi)
         );
 
         XiEqn.relax();
+
+        sources.constrain(XiEqn);
+
         XiEqn.solve();
+
+        sources.correct(Xi);
 
         // Correct boundedness of Xi
         // ~~~~~~~~~~~~~~~~~~~~~~~~~

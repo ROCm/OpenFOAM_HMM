@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,10 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
+    UName_("U"),
+    rhoName_("rho"),
+    psiName_("thermo:psi"),
+    muName_("thermo:mu"),
     accommodationCoeff_(1.0),
     Twall_(p.size(), 0.0),
     gamma_(1.4)
@@ -57,6 +61,10 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    rhoName_(ptf.rhoName_),
+    psiName_(ptf.psiName_),
+    muName_(ptf.muName_),
     accommodationCoeff_(ptf.accommodationCoeff_),
     Twall_(ptf.Twall_),
     gamma_(ptf.gamma_)
@@ -71,6 +79,10 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
+    muName_(dict.lookupOrDefault<word>("mu", "thermo:mu")),
     accommodationCoeff_(readScalar(dict.lookup("accommodationCoeff"))),
     Twall_("Twall", dict, p.size()),
     gamma_(dict.lookupOrDefault<scalar>("gamma", 1.4))
@@ -93,7 +105,7 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
             dict
         )   << "unphysical accommodationCoeff specified"
             << "(0 < accommodationCoeff <= 1)" << endl
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     if (dict.found("value"))
@@ -159,13 +171,13 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
     }
 
     const fvPatchScalarField& pmu =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
     const fvPatchScalarField& prho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
     const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>("psi");
+        patch().lookupPatchField<volScalarField, scalar>(psiName_);
     const fvPatchVectorField& pU =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     // Prandtl number reading consistent with rhoCentralFoam
     const dictionary& thermophysicalProperties =
@@ -204,6 +216,12 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
 void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
+
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
+    writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
+
     os.writeKeyword("accommodationCoeff")
         << accommodationCoeff_ << token::END_STATEMENT << nl;
     Twall_.writeEntry("Twall", os);

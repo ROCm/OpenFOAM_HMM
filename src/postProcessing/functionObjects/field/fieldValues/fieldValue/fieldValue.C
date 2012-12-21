@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,28 +26,18 @@ License
 #include "fieldValue.H"
 #include "fvMesh.H"
 #include "Time.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
     defineTypeNameAndDebug(fieldValue, 0);
+    defineRunTimeSelectionTable(fieldValue, dictionary);
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::fieldValue::updateMesh(const mapPolyMesh&)
-{
-    // Do nothing
-}
-
-
-void Foam::fieldValue::movePoints(const Field<point>&)
-{
-    // Do nothing
-}
-
 
 void Foam::fieldValue::read(const dictionary& dict)
 {
@@ -92,7 +82,8 @@ Foam::fieldValue::fieldValue
     log_(false),
     sourceName_(dict.lookupOrDefault<word>("sourceName", "sampledSurface")),
     fields_(dict.lookup("fields")),
-    valueOutput_(dict.lookup("valueOutput"))
+    valueOutput_(dict.lookup("valueOutput")),
+    resultDict_(fileName("name"), dictionary::null)
 {
     // Only active if obr is an fvMesh
     if (isA<fvMesh>(obr_))
@@ -132,6 +123,18 @@ void Foam::fieldValue::execute()
 
 
 void Foam::fieldValue::end()
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValue::updateMesh(const mapPolyMesh&)
+{
+    // Do nothing
+}
+
+
+void Foam::fieldValue::movePoints(const polyMesh&)
 {
     // Do nothing
 }

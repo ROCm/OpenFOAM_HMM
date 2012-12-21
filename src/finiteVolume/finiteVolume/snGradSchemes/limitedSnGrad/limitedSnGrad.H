@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,14 +25,20 @@ Class
     Foam::fv::limitedSnGrad
 
 Description
-    Central-difference snGrad scheme with limited non-orthogonal correction.
+    Run-time selected snGrad scheme with limited non-orthogonal correction.
 
     The limiter is controlled by a coefficient with a value between 0 and 1
     which when 0 switches the correction off and the scheme behaves as
-    uncorrectedSnGrad, when set to 1 the full correction is applied and the
-    scheme behaves as correctedSnGrad and when set to 0.5 the limiter is
-    calculated such that the non-orthogonal contribution does not exceed the
-    orthogonal part.
+    uncorrectedSnGrad, when set to 1 the full correction of the selected scheme
+    is used and when set to 0.5 the limiter is calculated such that the
+    non-orthogonal contribution does not exceed the orthogonal part.
+
+    Format:
+        limited <corrected scheme> <coefficient>;
+
+        or
+
+        limited <coefficient>;  // Backward compatibility
 
 SourceFiles
     limitedSnGrad.C
@@ -42,7 +48,7 @@ SourceFiles
 #ifndef limitedSnGrad_H
 #define limitedSnGrad_H
 
-#include "snGradScheme.H"
+#include "correctedSnGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +71,8 @@ class limitedSnGrad
 {
     // Private data
 
+        tmp<snGradScheme<Type> > correctedScheme_;
+
         scalar limitCoeff_;
 
 
@@ -72,6 +80,34 @@ class limitedSnGrad
 
         //- Disallow default bitwise assignment
         void operator=(const limitedSnGrad&);
+
+        //- Lookup function for the corrected to support backward compatibility
+        //  of dictionary specification
+        tmp<snGradScheme<Type> > lookupCorrectedScheme(Istream& schemeData)
+        {
+            token nextToken(schemeData);
+
+            if (nextToken.isNumber())
+            {
+                limitCoeff_ = nextToken.number();
+                return tmp<snGradScheme<Type> >
+                (
+                    new correctedSnGrad<Type>(this->mesh())
+                );
+            }
+            else
+            {
+                schemeData.putBack(nextToken);
+                tmp<snGradScheme<Type> > tcorrectedScheme
+                (
+                    fv::snGradScheme<Type>::New(this->mesh(), schemeData)
+                );
+
+                schemeData >> limitCoeff_;
+
+                return tcorrectedScheme;
+            }
+        }
 
 
 public:
@@ -85,22 +121,24 @@ public:
         //- Construct from mesh
         limitedSnGrad(const fvMesh& mesh)
         :
-            snGradScheme<Type>(mesh)
+            snGradScheme<Type>(mesh),
+            correctedScheme_(new correctedSnGrad<Type>(this->mesh())),
+            limitCoeff_(1)
         {}
 
 
         //- Construct from mesh and data stream
-        limitedSnGrad(const fvMesh& mesh, Istream& is)
+        limitedSnGrad(const fvMesh& mesh, Istream& schemeData)
         :
             snGradScheme<Type>(mesh),
-            limitCoeff_(readScalar(is))
+            correctedScheme_(lookupCorrectedScheme(schemeData))
         {
             if (limitCoeff_ < 0 || limitCoeff_ > 1)
             {
                 FatalIOErrorIn
                 (
-                    "limitedSnGrad(const fvMesh& mesh, Istream& is) : ",
-                    is
+                    "limitedSnGrad(const fvMesh& mesh, Istream& schemeData) : ",
+                    schemeData
                 )   << "limitCoeff is specified as " << limitCoeff_
                     << " but should be >= 0 && <= 1"
                     << exit(FatalIOError);

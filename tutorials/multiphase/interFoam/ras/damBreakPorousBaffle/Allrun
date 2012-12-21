@@ -10,15 +10,7 @@ application=`getApplication`
 runApplication blockMesh
 runApplication setFields
 
-unset FOAM_SIGFPE
-unset FOAM_SETNAN
-
-# Create faceZones for porous baffles
-runApplication topoSet
-
-runApplication createBaffles cyclicZoneFaces '(porous_half0 porous_half1)' -overwrite
-
-runApplication changeDictionary
+runApplication createBaffles -overwrite
 
 runApplication $application
 

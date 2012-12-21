@@ -30,7 +30,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::writeDictionary, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(writeDictionary, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -46,7 +50,9 @@ bool Foam::writeDictionary::tryFolder
         dictNames_[dictI],
         location,
         obr_,
-        IOobject::MUST_READ
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
     );
 
     if (dictIO.headerOk())

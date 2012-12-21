@@ -34,6 +34,7 @@ License
 #include "Time.H"
 #include "transformList.H"
 #include "PstreamBuffers.H"
+#include "const_circulator.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,10 +55,11 @@ Foam::processorPolyPatch::processorPolyPatch
     const label index,
     const polyBoundaryMesh& bm,
     const int myProcNo,
-    const int neighbProcNo
+    const int neighbProcNo,
+    const transformType transform
 )
 :
-    coupledPolyPatch(name, size, start, index, bm, typeName),
+    coupledPolyPatch(name, size, start, index, bm, typeName, transform),
     myProcNo_(myProcNo),
     neighbProcNo_(neighbProcNo),
     neighbFaceCentres_(),
@@ -173,7 +175,6 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                 >> neighbFaceCellCentres_;
         }
 
-
         // My normals
         vectorField faceNormals(size());
 
@@ -181,8 +182,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
         vectorField nbrFaceNormals(neighbFaceAreas_.size());
 
         // Face match tolerances
-        scalarField tols =
-            calcFaceTol(*this, points(), faceCentres());
+        scalarField tols = calcFaceTol(*this, points(), faceCentres());
 
         // Calculate normals from areas and check
         forAll(faceNormals, facei)
@@ -191,13 +191,15 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             scalar nbrMagSf = mag(neighbFaceAreas_[facei]);
             scalar avSf = (magSf + nbrMagSf)/2.0;
 
-            if (magSf < ROOTVSMALL && nbrMagSf < ROOTVSMALL)
+            // For small face area calculation the results of the area
+            // calculation have been found to only be accurate to ~1e-20
+            if (magSf < SMALL && nbrMagSf < SMALL)
             {
                 // Undetermined normal. Use dummy normal to force separation
-                // check. (note use of sqrt(VSMALL) since that is how mag
-                // scales)
+                // check.
                 faceNormals[facei] = point(1, 0, 0);
-                nbrFaceNormals[facei] = faceNormals[facei];
+                nbrFaceNormals[facei] = -faceNormals[facei];
+                tols[facei] = GREAT;
             }
             else if (mag(magSf - nbrMagSf) > matchTolerance()*sqr(tols[facei]))
             {
@@ -271,7 +273,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             faceNormals,
             nbrFaceNormals,
             matchTolerance()*tols,
-            matchTolerance()
+            matchTolerance(),
+            transform()
         );
     }
 }
@@ -391,6 +394,7 @@ void Foam::processorPolyPatch::updateMesh(PstreamBuffers& pBufs)
         {
             // Find face and index in face on this side.
             const face& f = localFaces()[nbrPointFace[nbrPointI]];
+
             label index = (f.size() - nbrPointIndex[nbrPointI]) % f.size();
             label patchPointI = f[index];
 
@@ -486,7 +490,11 @@ void Foam::processorPolyPatch::initOrder
     const primitivePatch& pp
 ) const
 {
-    if (!Pstream::parRun())
+    if
+    (
+        !Pstream::parRun()
+     || transform() == NOORDERING
+    )
     {
         return;
     }
@@ -522,12 +530,151 @@ void Foam::processorPolyPatch::initOrder
 
     if (owner())
     {
-        pointField anchors(getAnchorPoints(pp, pp.points()));
+        if (transform() == COINCIDENTFULLMATCH)
+        {
+            // Pass the patch points and faces across
+            UOPstream toNeighbour(neighbProcNo(), pBufs);
+            toNeighbour << pp.localPoints()
+                        << pp.localFaces();
+        }
+        else
+        {
+            const pointField& ppPoints = pp.points();
 
-        // Now send all info over to the neighbour
-        UOPstream toNeighbour(neighbProcNo(), pBufs);
-        toNeighbour << pp.faceCentres() << anchors;
+            pointField anchors(getAnchorPoints(pp, ppPoints, transform()));
+
+            // Get the average of the points of each face. This is needed in
+            // case the face centroid calculation is incorrect due to the face
+            // having a very high aspect ratio.
+            pointField facePointAverages(pp.size(), point::zero);
+            forAll(pp, fI)
+            {
+                const labelList& facePoints = pp[fI];
+
+                forAll(facePoints, pI)
+                {
+                    facePointAverages[fI] += ppPoints[facePoints[pI]];
+                }
+
+                facePointAverages[fI] /= facePoints.size();
+            }
+
+            // Now send all info over to the neighbour
+            UOPstream toNeighbour(neighbProcNo(), pBufs);
+            toNeighbour << pp.faceCentres() << pp.faceNormals()
+                        << anchors << facePointAverages;
+        }
     }
+}
+
+
+// Returns rotation.
+// + -1 : no match
+// +  0 : match
+// + >0 : match if rotated clockwise by this amount
+Foam::label Foam::processorPolyPatch::matchFace
+(
+    const face& a,
+    const pointField& aPts,
+    const face& b,
+    const pointField& bPts,
+    const bool sameOrientation,
+    const scalar absTolSqr,
+    scalar& matchDistSqr
+)
+{
+    if (a.size() != b.size())
+    {
+        return -1;
+    }
+
+    enum CirculatorBase::direction circulateDirection
+        = CirculatorBase::CLOCKWISE;
+
+    if (!sameOrientation)
+    {
+        circulateDirection = CirculatorBase::ANTICLOCKWISE;
+    }
+
+    label matchFp = -1;
+
+    scalar closestMatchDistSqr = sqr(GREAT);
+
+    const_circulator<face> aCirc(a);
+    const_circulator<face> bCirc(b);
+
+    do
+    {
+        const scalar diffSqr = magSqr(aPts[aCirc()] - bPts[bCirc()]);
+
+        if (diffSqr < absTolSqr)
+        {
+            // Found a matching point. Set the fulcrum of b to the iterator
+            const_circulator<face> bCirc2 = bCirc;
+            ++aCirc;
+
+            bCirc2.setFulcrumToIterator();
+
+            if (!sameOrientation)
+            {
+                --bCirc2;
+            }
+            else
+            {
+                ++bCirc2;
+            }
+
+            matchDistSqr = diffSqr;
+
+            do
+            {
+                const scalar diffSqr2 = magSqr(aPts[aCirc()] - bPts[bCirc2()]);
+
+                if (diffSqr2 > absTolSqr)
+                {
+                    // No match.
+                    break;
+                }
+
+                matchDistSqr += diffSqr2;
+            }
+            while
+            (
+                aCirc.circulate(CirculatorBase::CLOCKWISE),
+                bCirc2.circulate(circulateDirection)
+            );
+
+            if (!aCirc.circulate())
+            {
+                if (matchDistSqr < closestMatchDistSqr)
+                {
+                    closestMatchDistSqr = matchDistSqr;
+
+                    if (!sameOrientation)
+                    {
+                        matchFp = a.size() - bCirc.nRotations();
+                    }
+                    else
+                    {
+                        matchFp = bCirc.nRotations();
+                    }
+
+                    if (closestMatchDistSqr == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            // Reset aCirc
+            aCirc.setIteratorToFulcrum();
+        }
+
+    } while (bCirc.circulate(circulateDirection));
+
+    matchDistSqr = closestMatchDistSqr;
+
+    return matchFp;
 }
 
 
@@ -545,7 +692,11 @@ bool Foam::processorPolyPatch::order
 {
     // Note: we only get the faces that originate from internal faces.
 
-    if (!Pstream::parRun())
+    if
+    (
+        !Pstream::parRun()
+     || transform() == NOORDERING
+    )
     {
         return false;
     }
@@ -556,6 +707,8 @@ bool Foam::processorPolyPatch::order
     rotation.setSize(pp.size());
     rotation = 0;
 
+    bool change = false;
+
     if (owner())
     {
         // Do nothing (i.e. identical mapping, zero rotation).
@@ -565,176 +718,363 @@ bool Foam::processorPolyPatch::order
             faceMap[patchFaceI] = patchFaceI;
         }
 
-        return false;
+        if (transform() != COINCIDENTFULLMATCH)
+        {
+            const pointField& ppPoints = pp.points();
+
+            pointField anchors(getAnchorPoints(pp, ppPoints, transform()));
+
+            // Calculate typical distance from face centre
+            scalarField tols
+            (
+                matchTolerance()*calcFaceTol(pp, pp.points(), pp.faceCentres())
+            );
+
+            forAll(faceMap, patchFaceI)
+            {
+                const point& wantedAnchor = anchors[patchFaceI];
+
+                rotation[patchFaceI] = getRotation
+                (
+                    ppPoints,
+                    pp[patchFaceI],
+                    wantedAnchor,
+                    tols[patchFaceI]
+                );
+
+                if (rotation[patchFaceI] > 0)
+                {
+                    change = true;
+                }
+            }
+        }
+
+        return change;
     }
     else
     {
-        vectorField masterCtrs;
-        vectorField masterAnchors;
-
-        // Receive data from neighbour
+        if (transform() == COINCIDENTFULLMATCH)
         {
-            UIPstream fromNeighbour(neighbProcNo(), pBufs);
-            fromNeighbour >> masterCtrs >> masterAnchors;
-        }
+            vectorField masterPts;
+            faceList masterFaces;
 
-        // Calculate typical distance from face centre
-        scalarField tols
-        (
-            matchTolerance()*calcFaceTol(pp, pp.points(), pp.faceCentres())
-        );
-
-        if (debug || masterCtrs.size() != pp.size())
-        {
             {
-                OFstream nbrStr
+                UIPstream fromNeighbour(neighbProcNo(), pBufs);
+                fromNeighbour >> masterPts >> masterFaces;
+            }
+
+            const pointField& localPts = pp.localPoints();
+            const faceList& localFaces = pp.localFaces();
+
+            label nMatches = 0;
+
+            forAll(pp, lFaceI)
+            {
+                const face& localFace = localFaces[lFaceI];
+                label faceRotation = -1;
+
+                const scalar absTolSqr = sqr(SMALL);
+
+                scalar closestMatchDistSqr = sqr(GREAT);
+                scalar matchDistSqr = sqr(GREAT);
+                label closestFaceMatch = -1;
+                label closestFaceRotation = -1;
+
+                forAll(masterFaces, mFaceI)
+                {
+                    const face& masterFace = masterFaces[mFaceI];
+
+                    faceRotation = matchFace
+                    (
+                        localFace,
+                        localPts,
+                        masterFace,
+                        masterPts,
+                        false,
+                        absTolSqr,
+                        matchDistSqr
+                    );
+
+                    if
+                    (
+                        faceRotation != -1
+                     && matchDistSqr < closestMatchDistSqr
+                    )
+                    {
+                        closestMatchDistSqr = matchDistSqr;
+                        closestFaceMatch = mFaceI;
+                        closestFaceRotation = faceRotation;
+                    }
+
+                    if (closestMatchDistSqr == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (closestFaceRotation != -1 && closestMatchDistSqr == 0)
+                {
+                    faceMap[lFaceI] = closestFaceMatch;
+
+                    rotation[lFaceI] = closestFaceRotation;
+
+                    if (lFaceI != closestFaceMatch || closestFaceRotation > 0)
+                    {
+                        change = true;
+                    }
+
+                    nMatches++;
+                }
+                else
+                {
+                    Pout<< "Number of matches = " << nMatches << " / "
+                        << pp.size() << endl;
+
+                    pointField pts(localFace.size());
+                    forAll(localFace, pI)
+                    {
+                        const label localPtI = localFace[pI];
+                        pts[pI] = localPts[localPtI];
+                    }
+
+                    FatalErrorIn("Foam::processorPolyPatch::order(...) const")
+                        << "No match for face " << localFace << nl << pts
+                        << abort(FatalError);
+                }
+            }
+
+            return change;
+        }
+        else
+        {
+            vectorField masterCtrs;
+            vectorField masterNormals;
+            vectorField masterAnchors;
+            vectorField masterFacePointAverages;
+
+            // Receive data from neighbour
+            {
+                UIPstream fromNeighbour(neighbProcNo(), pBufs);
+                fromNeighbour >> masterCtrs >> masterNormals
+                              >> masterAnchors >> masterFacePointAverages;
+            }
+
+            // Calculate typical distance from face centre
+            scalarField tols
+            (
+                matchTolerance()*calcFaceTol(pp, pp.points(), pp.faceCentres())
+            );
+
+            if (debug || masterCtrs.size() != pp.size())
+            {
+                {
+                    OFstream nbrStr
+                    (
+                        boundaryMesh().mesh().time().path()
+                       /name() + "_nbrFaceCentres.obj"
+                    );
+                    Pout<< "processorPolyPatch::order : "
+                        << "Dumping neighbour faceCentres to " << nbrStr.name()
+                        << endl;
+                    forAll(masterCtrs, faceI)
+                    {
+                        writeOBJ(nbrStr, masterCtrs[faceI]);
+                    }
+                }
+
+                if (masterCtrs.size() != pp.size())
+                {
+                    FatalErrorIn
+                    (
+                        "processorPolyPatch::order(const primitivePatch&"
+                        ", labelList&, labelList&) const"
+                    )   << "in patch:" << name() << " : "
+                        << "Local size of patch is " << pp.size() << " (faces)."
+                        << endl
+                        << "Received from neighbour " << masterCtrs.size()
+                        << " faceCentres!"
+                        << abort(FatalError);
+                }
+            }
+
+            // Geometric match of face centre vectors
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            // 1. Try existing ordering and transformation
+            bool matchedAll = matchPoints
+            (
+                pp.faceCentres(),
+                masterCtrs,
+                pp.faceNormals(),
+                masterNormals,
+                tols,
+                false,
+                faceMap
+            );
+
+            // Try using face point average for matching
+            if (!matchedAll)
+            {
+                const pointField& ppPoints = pp.points();
+
+                pointField facePointAverages(pp.size(), point::zero);
+                forAll(pp, fI)
+                {
+                    const labelList& facePoints = pp[fI];
+
+                    forAll(facePoints, pI)
+                    {
+                        facePointAverages[fI] += ppPoints[facePoints[pI]];
+                    }
+
+                    facePointAverages[fI] /= facePoints.size();
+                }
+
+                scalarField tols2
+                (
+                    calcFaceTol(pp, pp.points(), facePointAverages)
+                );
+
+                labelList faceMap2(faceMap.size(), -1);
+                matchedAll = matchPoints
+                (
+                    facePointAverages,
+                    masterFacePointAverages,
+                    pp.faceNormals(),
+                    masterNormals,
+                    tols2,
+                    true,
+                    faceMap2
+                );
+
+                forAll(faceMap, oldFaceI)
+                {
+                    if (faceMap[oldFaceI] == -1)
+                    {
+                        faceMap[oldFaceI] = faceMap2[oldFaceI];
+                    }
+                }
+
+                matchedAll = true;
+
+                forAll(faceMap, oldFaceI)
+                {
+                    if (faceMap[oldFaceI] == -1)
+                    {
+                        matchedAll = false;
+                    }
+                }
+            }
+
+            if (!matchedAll || debug)
+            {
+                // Dump faces
+                fileName str
                 (
                     boundaryMesh().mesh().time().path()
-                   /name() + "_nbrFaceCentres.obj"
+                   /name() + "_faces.obj"
                 );
-                Pout<< "processorPolyPatch::order : "
-                    << "Dumping neighbour faceCentres to " << nbrStr.name()
-                    << endl;
-                forAll(masterCtrs, faceI)
-                {
-                    writeOBJ(nbrStr, masterCtrs[faceI]);
-                }
-            }
+                Pout<< "processorPolyPatch::order :"
+                    << " Writing faces to OBJ file " << str.name() << endl;
+                writeOBJ(str, pp, pp.points());
 
-            if (masterCtrs.size() != pp.size())
-            {
-                FatalErrorIn
+                OFstream ccStr
                 (
-                    "processorPolyPatch::order(const primitivePatch&"
-                    ", labelList&, labelList&) const"
-                )   << "in patch:" << name() << " : "
-                    << "Local size of patch is " << pp.size() << " (faces)."
-                    << endl
-                    << "Received from neighbour " << masterCtrs.size()
-                    << " faceCentres!"
-                    << abort(FatalError);
-            }
-        }
+                    boundaryMesh().mesh().time().path()
+                   /name() + "_faceCentresConnections.obj"
+                );
 
-        // Geometric match of face centre vectors
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                Pout<< "processorPolyPatch::order :"
+                    << " Dumping newly found match as lines between"
+                    << " corresponding face centres to OBJ file "
+                    << ccStr.name()
+                    << endl;
 
-        // 1. Try existing ordering and transformation
-        bool matchedAll = matchPoints
-        (
-            pp.faceCentres(),
-            masterCtrs,
-            tols,
-            true,
-            faceMap
-        );
+                label vertI = 0;
 
-        if (!matchedAll || debug)
-        {
-            // Dump faces
-            fileName str
-            (
-                boundaryMesh().mesh().time().path()
-               /name() + "_faces.obj"
-            );
-            Pout<< "processorPolyPatch::order :"
-                << " Writing faces to OBJ file " << str.name() << endl;
-            writeOBJ(str, pp, pp.points());
-
-            OFstream ccStr
-            (
-                boundaryMesh().mesh().time().path()
-               /name() + "_faceCentresConnections.obj"
-            );
-
-            Pout<< "processorPolyPatch::order :"
-                << " Dumping newly found match as lines between"
-                << " corresponding face centres to OBJ file " << ccStr.name()
-                << endl;
-
-            label vertI = 0;
-
-            forAll(pp.faceCentres(), faceI)
-            {
-                label masterFaceI = faceMap[faceI];
-
-                if (masterFaceI != -1)
+                forAll(pp.faceCentres(), faceI)
                 {
-                    const point& c0 = masterCtrs[masterFaceI];
-                    const point& c1 = pp.faceCentres()[faceI];
-                    writeOBJ(ccStr, c0, c1, vertI);
+                    label masterFaceI = faceMap[faceI];
+
+                    if (masterFaceI != -1)
+                    {
+                        const point& c0 = masterCtrs[masterFaceI];
+                        const point& c1 = pp.faceCentres()[faceI];
+                        writeOBJ(ccStr, c0, c1, vertI);
+                    }
                 }
             }
-        }
 
-        if (!matchedAll)
-        {
-            SeriousErrorIn
-            (
-                "processorPolyPatch::order(const primitivePatch&"
-                ", labelList&, labelList&) const"
-            )   << "in patch:" << name() << " : "
-                << "Cannot match vectors to faces on both sides of patch"
-                << endl
-                << "    masterCtrs[0]:" << masterCtrs[0] << endl
-                << "    ctrs[0]:" << pp.faceCentres()[0] << endl
-                << "    Please check your topology changes or maybe you have"
-                << " multiple separated (from cyclics) processor patches"
-                << endl
-                << "    Continuing with incorrect face ordering from now on!"
-                << endl;
-
-            return false;
-        }
-
-        // Set rotation.
-        forAll(faceMap, oldFaceI)
-        {
-            // The face f will be at newFaceI (after morphing) and we want its
-            // anchorPoint (= f[0]) to align with the anchorpoint for the
-            // corresponding face on the other side.
-
-            label newFaceI = faceMap[oldFaceI];
-
-            const point& wantedAnchor = masterAnchors[newFaceI];
-
-            rotation[newFaceI] = getRotation
-            (
-                pp.points(),
-                pp[oldFaceI],
-                wantedAnchor,
-                tols[oldFaceI]
-            );
-
-            if (rotation[newFaceI] == -1)
+            if (!matchedAll)
             {
                 SeriousErrorIn
                 (
                     "processorPolyPatch::order(const primitivePatch&"
                     ", labelList&, labelList&) const"
-                )   << "in patch " << name()
-                    << " : "
-                    << "Cannot find point on face " << pp[oldFaceI]
-                    << " with vertices "
-                    << UIndirectList<point>(pp.points(), pp[oldFaceI])()
-                    << " that matches point " << wantedAnchor
-                    << " when matching the halves of processor patch " << name()
-                    << "Continuing with incorrect face ordering from now on!"
+                )   << "in patch:" << name() << " : "
+                    << "Cannot match vectors to faces on both sides of patch"
+                    << endl
+                    << "    masterCtrs[0]:" << masterCtrs[0] << endl
+                    << "    ctrs[0]:" << pp.faceCentres()[0] << endl
+                    << "    Check your topology changes or maybe you have"
+                    << " multiple separated (from cyclics) processor patches"
+                    << endl
+                    << "    Continuing with incorrect face ordering from now on"
                     << endl;
 
                 return false;
             }
-        }
 
-        forAll(faceMap, faceI)
-        {
-            if (faceMap[faceI] != faceI || rotation[faceI] != 0)
+            // Set rotation.
+            forAll(faceMap, oldFaceI)
             {
-                return true;
-            }
-        }
+                // The face f will be at newFaceI (after morphing) and we want
+                // its anchorPoint (= f[0]) to align with the anchorpoint for
+                // the corresponding face on the other side.
 
-        return false;
+                label newFaceI = faceMap[oldFaceI];
+
+                const point& wantedAnchor = masterAnchors[newFaceI];
+
+                rotation[newFaceI] = getRotation
+                (
+                    pp.points(),
+                    pp[oldFaceI],
+                    wantedAnchor,
+                    tols[oldFaceI]
+                );
+
+                if (rotation[newFaceI] == -1)
+                {
+                    SeriousErrorIn
+                    (
+                        "processorPolyPatch::order(const primitivePatch&"
+                        ", labelList&, labelList&) const"
+                    )   << "in patch " << name()
+                        << " : "
+                        << "Cannot find point on face " << pp[oldFaceI]
+                        << " with vertices "
+                        << UIndirectList<point>(pp.points(), pp[oldFaceI])()
+                        << " that matches point " << wantedAnchor
+                        << " when matching the halves of processor patch "
+                        << name()
+                        << "Continuing with incorrect face ordering from now on"
+                        << endl;
+
+                    return false;
+                }
+            }
+
+            forAll(faceMap, faceI)
+            {
+                if (faceMap[faceI] != faceI || rotation[faceI] != 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
 

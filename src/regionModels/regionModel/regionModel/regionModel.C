@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -190,6 +190,147 @@ bool Foam::regionModels::regionModel::read(const dictionary& dict)
 }
 
 
+const Foam::AMIPatchToPatchInterpolation&
+Foam::regionModels::regionModel::interRegionAMI
+(
+    const regionModel& nbrRegion,
+    const label regionPatchI,
+    const label nbrPatchI,
+    const bool flip
+)
+{
+    label nbrRegionID = findIndex(interRegionAMINames_, nbrRegion.name());
+
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    if (nbrRegionID != -1)
+    {
+        if (!interRegionAMI_[nbrRegionID].set(regionPatchI))
+        {
+            const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+            const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+            int oldTag = UPstream::msgType();
+            UPstream::msgType() = oldTag + 1;
+
+            interRegionAMI_[nbrRegionID].set
+            (
+                regionPatchI,
+                new AMIPatchToPatchInterpolation
+                (
+                    p,
+                    nbrP,
+                    faceAreaIntersect::tmMesh,
+                    flip
+                )
+            );
+
+            UPstream::msgType() = oldTag;
+        }
+
+        return interRegionAMI_[nbrRegionID][regionPatchI];
+    }
+    else
+    {
+        label nbrRegionID = interRegionAMINames_.size();
+
+        interRegionAMINames_.append(nbrRegion.name());
+
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+        const polyPatch& nbrP = nbrRegionMesh.boundaryMesh()[nbrPatchI];
+
+        label nPatch = regionMesh().boundaryMesh().size();
+
+
+        interRegionAMI_.resize(nbrRegionID + 1);
+
+        interRegionAMI_.set
+        (
+            nbrRegionID,
+            new PtrList<AMIPatchToPatchInterpolation>(nPatch)
+        );
+
+        int oldTag = UPstream::msgType();
+        UPstream::msgType() = oldTag + 1;
+
+        interRegionAMI_[nbrRegionID].set
+        (
+            regionPatchI,
+            new AMIPatchToPatchInterpolation
+            (
+                p,
+                nbrP,
+                faceAreaIntersect::tmMesh,
+                flip
+            )
+        );
+
+        UPstream::msgType() = oldTag;
+
+        return interRegionAMI_[nbrRegionID][regionPatchI];
+    }
+}
+
+
+Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID
+(
+    const regionModel& nbrRegion,
+    const label regionPatchI
+) const
+{
+    label nbrPatchI = -1;
+
+    // region
+    const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
+
+    // boundary mesh
+    const polyBoundaryMesh& nbrPbm = nbrRegionMesh.boundaryMesh();
+
+    const mappedPatchBase& mpb =
+        refCast<const mappedPatchBase>
+        (
+            regionMesh().boundaryMesh()[regionPatchI]
+        );
+
+    // sample patch name on the primary region
+    const word& primaryPatchName = mpb.samplePatch();
+
+    // find patch on nbr region that has the same sample patch name
+    forAll(nbrRegion.intCoupledPatchIDs(), j)
+    {
+        const label nbrRegionPatchI = nbrRegion.intCoupledPatchIDs()[j];
+
+        const mappedPatchBase& mpb =
+            refCast<const mappedPatchBase>(nbrPbm[nbrRegionPatchI]);
+
+        if (mpb.samplePatch() == primaryPatchName)
+        {
+            nbrPatchI = nbrRegionPatchI;
+            break;
+        }
+    }
+
+    if (nbrPatchI == -1)
+    {
+        const polyPatch& p = regionMesh().boundaryMesh()[regionPatchI];
+
+        FatalErrorIn
+        (
+            "Foam::label Foam::regionModels::regionModel::nbrCoupledPatchID"
+            "("
+                "const regionModel& , "
+                "const label"
+            ") const"
+        )
+            << "Unable to find patch pair for local patch "
+            << p.name() << " and region " << nbrRegion.name()
+            << abort(FatalError);
+    }
+
+    return nbrPatchI;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
@@ -214,7 +355,10 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
     coeffs_(dictionary::null),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_("none")
+    regionName_("none"),
+    functions_(*this),
+    interRegionAMINames_(),
+    interRegionAMI_()
 {}
 
 
@@ -246,7 +390,8 @@ Foam::regionModels::regionModel::regionModel
     coeffs_(subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(lookup("regionName"))
+    regionName_(lookup("regionName")),
+    functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)
     {
@@ -274,7 +419,7 @@ Foam::regionModels::regionModel::regionModel
     (
         IOobject
         (
-            regionType,
+            regionType + "Properties",
             mesh.time().constant(),
             mesh,
             IOobject::NO_READ,
@@ -292,7 +437,8 @@ Foam::regionModels::regionModel::regionModel
     coeffs_(dict.subOrEmptyDict(modelName + "Coeffs")),
     primaryPatchIDs_(),
     intCoupledPatchIDs_(),
-    regionName_(dict.lookup("regionName"))
+    regionName_(dict.lookup("regionName")),
+    functions_(*this, subOrEmptyDict("functions"))
 {
     if (active_)
     {
@@ -315,18 +461,6 @@ Foam::regionModels::regionModel::~regionModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::regionModels::regionModel::preEvolveRegion()
-{
-    // do nothing
-}
-
-
-void Foam::regionModels::regionModel::evolveRegion()
-{
-    // do nothing
-}
-
-
 void Foam::regionModels::regionModel::evolve()
 {
     if (active_)
@@ -334,14 +468,13 @@ void Foam::regionModels::regionModel::evolve()
         Info<< "\nEvolving " << modelName_ << " for region "
             << regionMesh().name() << endl;
 
-        // Update any input information
         //read();
 
-        // Pre-evolve
         preEvolveRegion();
 
-        // Increment the region equations up to the new time level
         evolveRegion();
+
+        postEvolveRegion();
 
         // Provide some feedback
         if (infoOutput_)
@@ -351,6 +484,24 @@ void Foam::regionModels::regionModel::evolve()
             Info<< endl << decrIndent;
         }
     }
+}
+
+
+void Foam::regionModels::regionModel::preEvolveRegion()
+{
+    functions_.preEvolveRegion();
+}
+
+
+void Foam::regionModels::regionModel::evolveRegion()
+{
+    // do nothing
+}
+
+
+void Foam::regionModels::regionModel::postEvolveRegion()
+{
+    functions_.postEvolveRegion();
 }
 
 

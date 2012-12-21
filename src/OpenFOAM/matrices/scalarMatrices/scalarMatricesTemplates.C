@@ -176,4 +176,40 @@ void Foam::LUsolve
 }
 
 
+template<class Form, class Type>
+void Foam::multiply
+(
+    Matrix<Form, Type>& ans,         // value changed in return
+    const Matrix<Form, Type>& A,
+    const Matrix<Form, Type>& B
+)
+{
+    if (A.m() != B.n())
+    {
+        FatalErrorIn
+        (
+            "multiply("
+            "Matrix<Form, Type>& answer "
+            "const Matrix<Form, Type>& A, "
+            "const Matrix<Form, Type>& B)"
+        )   << "A and B must have identical inner dimensions but A.m = "
+            << A.m() << " and B.n = " << B.n()
+            << abort(FatalError);
+    }
+
+    ans = Matrix<Form, Type>(A.n(), B.m(), scalar(0));
+
+    for (register label i = 0; i < A.n(); i++)
+    {
+        for (register label j = 0; j < B.m(); j++)
+        {
+            for (register label l = 0; l < B.n(); l++)
+            {
+                ans[i][j] += A[i][l]*B[l][j];
+            }
+        }
+    }
+}
+
+
 // ************************************************************************* //

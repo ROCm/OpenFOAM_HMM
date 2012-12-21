@@ -21,10 +21,16 @@
       + surfaceFilm.Sh()
       + radiation->Sh(thermo)
       + combustion->Sh()
+      + sources(rho, he)
     );
 
     EEqn.relax();
+
+    sources.constrain(EEqn);
+
     EEqn.solve();
+
+    sources.correct(he);
 
     thermo.correct();
     radiation->correct();

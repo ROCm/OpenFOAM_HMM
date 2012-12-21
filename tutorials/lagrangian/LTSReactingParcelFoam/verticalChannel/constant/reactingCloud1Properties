@@ -44,7 +44,7 @@ solution
     {
         rho             cell;
         U               cellPoint;
-        mu              cell;
+        thermo:mu       cell;
         T               cell;
         Cp              cell;
         p               cell;

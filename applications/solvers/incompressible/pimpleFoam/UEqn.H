@@ -5,6 +5,8 @@ tmp<fvVectorMatrix> UEqn
     fvm::ddt(U)
   + fvm::div(phi, U)
   + turbulence->divDevReff(U)
+ ==
+    sources(U)
 );
 
 UEqn().relax();
@@ -15,5 +17,7 @@ volScalarField rAU(1.0/UEqn().A());
 
 if (pimple.momentumPredictor())
 {
-    solve(UEqn() == -fvc::grad(p) + sources(U));
+    solve(UEqn() == -fvc::grad(p));
+
+    sources.correct(U);
 }

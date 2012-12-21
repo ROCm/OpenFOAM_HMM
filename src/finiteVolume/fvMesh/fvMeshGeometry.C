@@ -133,6 +133,8 @@ void fvMesh::makeC() const
             << abort(FatalError);
     }
 
+    // Construct as slices. Only preserve processor (not e.g. cyclic)
+
     CPtr_ = new slicedVolVectorField
     (
         IOobject
@@ -148,33 +150,10 @@ void fvMesh::makeC() const
         *this,
         dimLength,
         cellCentres(),
-        faceCentres()
+        faceCentres(),
+        true,               //preserveCouples
+        true                //preserveProcOnly
     );
-
-
-    // Need to correct for cyclics transformation since absolute quantity.
-    // Ok on processor patches since hold opposite cell centre (no
-    // transformation)
-    slicedVolVectorField& C = *CPtr_;
-
-    forAll(C.boundaryField(), patchi)
-    {
-        if
-        (
-            isA<cyclicFvPatchVectorField>(C.boundaryField()[patchi])
-         || isA<cyclicAMIFvPatchVectorField>(C.boundaryField()[patchi])
-        )
-        {
-            // Note: cyclic is not slice but proper field
-            C.boundaryField()[patchi] == static_cast<const vectorField&>
-            (
-                static_cast<const List<vector>&>
-                (
-                    boundary_[patchi].patchSlice(faceCentres())
-                )
-            );
-        }
-    }
 }
 
 
@@ -390,6 +369,53 @@ const surfaceVectorField& fvMesh::Cf() const
     }
 
     return *CfPtr_;
+}
+
+
+tmp<surfaceVectorField> fvMesh::delta() const
+{
+    if (debug)
+    {
+        Info<< "void fvMesh::delta() : "
+            << "calculating face deltas"
+            << endl;
+    }
+
+    tmp<surfaceVectorField> tdelta
+    (
+        new surfaceVectorField
+        (
+            IOobject
+            (
+                "delta",
+                pointsInstance(),
+                meshSubDir,
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            *this,
+            dimLength
+        )
+    );
+    surfaceVectorField& delta = tdelta();
+
+    const volVectorField& C = this->C();
+    const labelUList& owner = this->owner();
+    const labelUList& neighbour = this->neighbour();
+
+    forAll(owner, facei)
+    {
+        delta[facei] = C[neighbour[facei]] - C[owner[facei]];
+    }
+
+    forAll(delta.boundaryField(), patchi)
+    {
+        delta.boundaryField()[patchi] = boundary()[patchi].delta();
+    }
+
+    return tdelta;
 }
 
 

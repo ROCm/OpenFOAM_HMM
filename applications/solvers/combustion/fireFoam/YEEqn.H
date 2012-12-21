@@ -30,10 +30,16 @@ tmp<fv::convectionScheme<scalar> > mvConvection
                 parcels.SYi(i, Yi)
               + surfaceFilm.Srho(i)
               + combustion->R(Yi)
+              + sources(rho, Yi)
             );
 
             YiEqn.relax();
+
+            sources.constrain(YiEqn);
+
             YiEqn.solve(mesh.solver("Yi"));
+
+            sources.correct(Yi);
 
             Yi.max(0.0);
             Yt += Yi;
@@ -69,10 +75,16 @@ tmp<fv::convectionScheme<scalar> > mvConvection
       + radiation->Sh(thermo)
       + parcels.Sh(he)
       + surfaceFilm.Sh()
+      + sources(rho, he)
     );
 
     EEqn.relax();
+
+    sources.constrain(EEqn);
+
     EEqn.solve();
+
+    sources.correct(he);
 
     thermo.correct();
 

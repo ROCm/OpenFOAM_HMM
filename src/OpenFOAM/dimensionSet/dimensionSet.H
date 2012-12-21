@@ -76,6 +76,7 @@ dimensionSet pow6(const dimensionSet&);
 dimensionSet pow025(const dimensionSet&);
 
 dimensionSet sqrt(const dimensionSet&);
+dimensionSet cbrt(const dimensionSet&);
 dimensionSet magSqr(const dimensionSet&);
 dimensionSet mag(const dimensionSet&);
 dimensionSet sign(const dimensionSet&);

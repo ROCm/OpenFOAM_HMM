@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -481,6 +481,15 @@ public:
                 );
             }
 
+            //- Swap to obtain neighbour cell values for all boundary faces
+            template <class T>
+            static void swapBoundaryCellList
+            (
+                const polyMesh& mesh,
+                const UList<T>& cellData,
+                List<T>& neighbourCellData
+            );
+
         // Sparse versions
 
             //- Synchronize values on selected points.
@@ -570,14 +579,24 @@ public:
 
         // Other
 
-            //- Get per point whether is it master (of a coupled set of points)
+            //- Get per point whether it is uncoupled or a master of a
+            //  coupled set of points
             static PackedBoolList getMasterPoints(const polyMesh&);
 
-            //- Get per edge whether is it master (of a coupled set of edges)
+            //- Get per edge whether it is uncoupled or a master of a
+            //  coupled set of edges
             static PackedBoolList getMasterEdges(const polyMesh&);
 
-            //- Get per face whether is it master (of a coupled set of faces)
+            //- Get per face whether it is uncoupled or a master of a
+            //  coupled set of faces
             static PackedBoolList getMasterFaces(const polyMesh&);
+
+            //- Get per face whether it is internal or a master of a
+            //  coupled set of faces
+            static PackedBoolList getInternalOrMasterFaces(const polyMesh&);
+
+            //- Get per face whether it is internal or coupled
+            static PackedBoolList getInternalOrCoupledFaces(const polyMesh&);
 
 };
 

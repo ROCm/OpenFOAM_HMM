@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,6 +65,7 @@ void Foam::boundBox::calculate(const UList<point>& points, const bool doReduce)
     {
         min_ = points[0];
         max_ = points[0];
+
 
         for (label i = 1; i < points.size(); i++)
         {
@@ -296,6 +297,17 @@ bool Foam::boundBox::containsAny
     }
 
     return false;
+}
+
+
+Foam::point Foam::boundBox::nearest(const point& pt) const
+{
+    // Clip the point to the range of the bounding box
+    const scalar surfPtx = Foam::max(Foam::min(pt.x(), max_.x()), min_.x());
+    const scalar surfPty = Foam::max(Foam::min(pt.y(), max_.y()), min_.y());
+    const scalar surfPtz = Foam::max(Foam::min(pt.z(), max_.z()), min_.z());
+
+    return point(surfPtx, surfPty, surfPtz);
 }
 
 

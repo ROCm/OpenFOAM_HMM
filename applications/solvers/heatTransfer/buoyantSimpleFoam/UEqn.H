@@ -4,9 +4,13 @@
     (
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
+     ==
+        sources(rho, U)
     );
 
     UEqn().relax();
+
+    sources.constrain(UEqn());
 
     if (simple.momentumPredictor())
     {
@@ -22,4 +26,6 @@
                 )*mesh.magSf()
             )
         );
+
+        sources.correct(U);
     }

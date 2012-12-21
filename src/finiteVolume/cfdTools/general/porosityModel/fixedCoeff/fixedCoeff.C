@@ -102,10 +102,11 @@ Foam::porosityModels::fixedCoeff::fixedCoeff
     const word& name,
     const word& modelType,
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& cellZoneName
 )
 :
-    porosityModel(name, modelType, mesh, dict),
+    porosityModel(name, modelType, mesh, dict, cellZoneName),
     coordSys_(coeffs_, mesh),
     alpha_("alpha", dimless/dimTime, tensor::zero),
     beta_("beta", dimless/dimLength, tensor::zero)

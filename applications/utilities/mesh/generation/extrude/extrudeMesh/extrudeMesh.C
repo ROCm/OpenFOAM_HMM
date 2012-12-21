@@ -473,6 +473,7 @@ int main(int argc, char *argv[])
             )
             {
                 label nbrProcI = patchToNbrProc[patchI];
+
                 word name =
                         "procBoundary"
                       + Foam::name(Pstream::myProcNo())
@@ -755,6 +756,9 @@ int main(int argc, char *argv[])
         const edgeList& edges = mesh.edges();
         const pointField& points = mesh.points();
 
+        PackedBoolList collapseEdge(mesh.nEdges());
+        Map<point> collapsePointToLocation(mesh.nPoints());
+
         forAll(edges, edgeI)
         {
             const edge& e = edges[edgeI];
@@ -766,15 +770,29 @@ int main(int argc, char *argv[])
                 Info<< "Merging edge " << e << " since length " << d
                     << " << " << mergeDim << nl;
 
-                // Collapse edge to e[0]
-                collapser.collapseEdge(edgeI, e[0]);
+                collapseEdge[edgeI] = true;
+                collapsePointToLocation.set(e[1], points[e[0]]);
             }
         }
 
+        List<pointEdgeCollapse> allPointInfo;
+        const globalIndex globalPoints(mesh.nPoints());
+        labelList pointPriority(mesh.nPoints(), 0);
+
+        collapser.consistentCollapse
+        (
+            globalPoints,
+            pointPriority,
+            collapsePointToLocation,
+            collapseEdge,
+            allPointInfo
+        );
+
         // Topo change container
         polyTopoChange meshMod(mesh);
+
         // Put all modifications into meshMod
-        bool anyChange = collapser.setRefinement(meshMod);
+        bool anyChange = collapser.setRefinement(allPointInfo, meshMod);
 
         if (anyChange)
         {

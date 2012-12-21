@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ inline Foam::vector Foam::extendedFeatureEdgeMesh::edgeDirection
     }
     else
     {
-        FatalErrorIn("Foam::extendedFeatureEdgeMesh::edgedirection")
+        FatalErrorIn("Foam::extendedFeatureEdgeMesh::edgeDirection")
             << "Requested ptI " << ptI << " is not a point on the requested "
             << "edgeI " << edgeI << ". edgeI start and end: "
             << e.start() << " " << e.end()
@@ -188,6 +188,13 @@ inline Foam::vectorField Foam::extendedFeatureEdgeMesh::featurePointNormals
     }
 
     return norms;
+}
+
+
+inline const Foam::labelListList&
+Foam::extendedFeatureEdgeMesh::featurePointEdges() const
+{
+    return featurePointEdges_;
 }
 
 

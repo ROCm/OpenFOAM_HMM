@@ -69,8 +69,12 @@ public:
 
     // Constructors
 
-        //- Construct from mesh
-        heRhoThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        heRhoThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     //- Destructor

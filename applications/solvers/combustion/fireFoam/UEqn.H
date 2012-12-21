@@ -5,9 +5,12 @@
       + turbulence->divDevRhoReff(U)
      ==
         parcels.SU(U)
+      + sources(rho, U)
     );
 
     UEqn.relax();
+
+    sources.constrain(UEqn);
 
     if (pimple.momentumPredictor())
     {
@@ -24,5 +27,6 @@
             )
         );
 
+        sources.correct(U);
         K = 0.5*magSqr(U);
     }

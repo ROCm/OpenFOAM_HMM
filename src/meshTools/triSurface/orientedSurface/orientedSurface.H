@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace Foam
 class triSurfaceSearch;
 
 /*---------------------------------------------------------------------------*\
-                           Class orientedSurface Declaration
+                       Class orientedSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class orientedSurface
@@ -101,7 +101,7 @@ class orientedSurface
         );
 
         //- Given nearest point and face check orientation to nearest face
-        //  and flip if nessecary (only marked in flipState) and propagate.
+        //  and flip if necessary (only marked in flipState) and propagate.
         static void propagateOrientation
         (
             const triSurface&,

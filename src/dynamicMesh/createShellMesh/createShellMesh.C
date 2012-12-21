@@ -40,10 +40,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::createShellMesh, 0);
-
 namespace Foam
 {
+defineTypeNameAndDebug(createShellMesh, 0);
+
 template<>
 class minEqOp<labelPair>
 {

@@ -17,8 +17,7 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
-    -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude
+    -I$(LIB_SRC)/dynamicFvMesh/lnInclude
 
 LIB_LIBS = \
     -lfiniteVolume \
@@ -42,5 +41,4 @@ LIB_LIBS = \
     -lincompressibleTransportModels \
     -lregionModels \
     -lsurfaceFilmModels \
-    -ldynamicFvMesh \
-    -lsampling
+    -ldynamicFvMesh

@@ -37,7 +37,44 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::extendedFeatureEdgeMesh, 0);
+namespace Foam
+{
+    defineTypeNameAndDebug(extendedFeatureEdgeMesh, 0);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::extendedFeatureEdgeMesh::pointStatus,
+        4
+    >::names[] =
+    {
+        "convex",
+        "concave",
+        "mixed",
+        "nonFeature"
+    };
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::extendedFeatureEdgeMesh::edgeStatus,
+        6
+    >::names[] =
+    {
+        "external",
+        "internal",
+        "flat",
+        "open",
+        "multiple",
+        "none"
+    };
+}
+
+const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::pointStatus, 4>
+    Foam::extendedFeatureEdgeMesh::pointStatusNames_;
+
+const Foam::NamedEnum<Foam::extendedFeatureEdgeMesh::edgeStatus, 6>
+    Foam::extendedFeatureEdgeMesh::edgeStatusNames_;
 
 Foam::scalar Foam::extendedFeatureEdgeMesh::cosNormalAngleTol_ =
     Foam::cos(degToRad(0.1));
@@ -72,6 +109,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
+    featurePointEdges_(0),
     regionEdges_(0),
     pointTree_(),
     edgeTree_(),
@@ -108,6 +146,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh(const IOobject& io)
             >> normals_
             >> edgeNormals_
             >> featurePointNormals_
+            >> featurePointEdges_
             >> regionEdges_;
 
         close();
@@ -160,6 +199,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeDirections_(fem.edgeDirections()),
     edgeNormals_(fem.edgeNormals()),
     featurePointNormals_(fem.featurePointNormals()),
+    featurePointEdges_(fem.featurePointEdges()),
     regionEdges_(fem.regionEdges()),
     pointTree_(),
     edgeTree_(),
@@ -187,6 +227,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
+    featurePointEdges_(0),
     regionEdges_(0),
     pointTree_(),
     edgeTree_(),
@@ -225,15 +266,13 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
+    featurePointEdges_(0),
     regionEdges_(0),
     pointTree_(),
     edgeTree_(),
     edgeTreesByType_()
 {
     // Extract and reorder the data from surfaceFeatures
-
-
-
     const triSurface& surf = sFeat.surface();
     const labelList& featureEdges = sFeat.featureEdges();
     const labelList& featurePoints = sFeat.featurePoints();
@@ -273,6 +312,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
+    featurePointEdges_(0),
     regionEdges_(0),
     pointTree_(),
     edgeTree_(),
@@ -304,6 +344,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     const vectorField& edgeDirections,
     const labelListList& edgeNormals,
     const labelListList& featurePointNormals,
+    const labelListList& featurePointEdges,
     const labelList& regionEdges
 )
 :
@@ -320,6 +361,7 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
     edgeDirections_(edgeDirections),
     edgeNormals_(edgeNormals),
     featurePointNormals_(featurePointNormals),
+    featurePointEdges_(featurePointEdges),
     regionEdges_(regionEdges),
     pointTree_(),
     edgeTree_(),
@@ -1268,6 +1310,8 @@ bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
         << edgeNormals_ << nl
         << "// featurePointNormals" << nl
         << featurePointNormals_ << nl
+        << "// featurePointEdges" << nl
+        << featurePointEdges_ << nl
         << "// regionEdges" << nl
         << regionEdges_
         << endl;

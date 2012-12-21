@@ -90,58 +90,6 @@ bool reactingOneDim::read(const dictionary& dict)
 }
 
 
-void reactingOneDim::updateQr()
-{
-    // Retrieve field from coupled region using mapped boundary conditions
-    QrCoupled_.correctBoundaryConditions();
-
-    // Update local Qr from coupled Qr field
-    Qr_ == dimensionedScalar("zero", Qr_.dimensions(), 0.0);
-    forAll(intCoupledPatchIDs_, i)
-    {
-        const label patchI = intCoupledPatchIDs_[i];
-
-        scalarField& Qrp = Qr_.boundaryField()[patchI];
-
-        // Qr is negative going out the solid
-        // If the surface is emitting the radiative flux is set to zero
-        Qrp = max(Qrp, scalar(0.0));
-    }
-
-    const volScalarField kappaRad_(kappaRad());
-
-    // Propagate Qr through 1-D regions
-    label totalFaceId = 0;
-    forAll(intCoupledPatchIDs_, i)
-    {
-        const label patchI = intCoupledPatchIDs_[i];
-
-        const scalarField& Qrp = Qr_.boundaryField()[patchI];
-        const vectorField& Cf = regionMesh().Cf().boundaryField()[patchI];
-
-        forAll(Qrp, faceI)
-        {
-            const scalar Qr0 = Qrp[faceI];
-            point Cf0 = Cf[faceI];
-            const labelList& cells = boundaryFaceCells_[totalFaceId];
-            scalar kappaInt = 0.0;
-            forAll(cells, k)
-            {
-                const label cellI = cells[k];
-                const point& Cf1 = regionMesh().cellCentres()[cellI];
-                const scalar delta = mag(Cf1 - Cf0);
-                kappaInt += kappaRad_[cellI]*delta;
-                Qr_[cellI] = Qr0*exp(-kappaInt);
-                Cf0 = Cf1;
-            }
-            totalFaceId ++;
-        }
-    }
-
-    Qr_.correctBoundaryConditions();
-}
-
-
 void reactingOneDim::updatePhiGas()
 {
     phiHsGas_ ==  dimensionedScalar("zero", phiHsGas_.dimensions(), 0.0);
@@ -198,8 +146,6 @@ void reactingOneDim::updatePhiGas()
 
 void reactingOneDim::updateFields()
 {
-    updateQr();
-
     updatePhiGas();
 }
 
@@ -305,18 +251,12 @@ void reactingOneDim::solveEnergy()
 
     tmp<volScalarField> alpha(solidThermo_.alpha());
 
-    const surfaceScalarField phiQr(fvc::interpolate(Qr_)*nMagSf());
-
-    const surfaceScalarField phiGas(fvc::interpolate(phiHsGas_));
-
     fvScalarMatrix hEqn
     (
         fvm::ddt(rho_, h_)
       - fvm::laplacian(alpha, h_)
      ==
         chemistrySh_
-      + fvc::div(phiQr)
-      + fvc::div(phiGas)
     );
 
     if (regionMesh().moving())
@@ -380,7 +320,6 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
     ),
     Ys_(solidThermo_.composition().Y()),
     h_(solidThermo_.he()),
-    primaryRadFluxName_(coeffs().lookupOrDefault<word>("radFluxName", "Qr")),
     nNonOrthCorr_(-1),
     maxDiff_(10),
     minimumDelta_(1e-4),
@@ -392,7 +331,7 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
             "phiGas",
             time().timeName(),
             regionMesh(),
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE
         ),
         regionMesh(),
@@ -425,34 +364,6 @@ reactingOneDim::reactingOneDim(const word& modelType, const fvMesh& mesh)
         ),
         regionMesh(),
         dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
-    ),
-
-    QrCoupled_
-    (
-        IOobject
-        (
-            primaryRadFluxName_,
-            time().timeName(),
-            regionMesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        regionMesh()
-    ),
-
-    Qr_
-    (
-        IOobject
-        (
-            "QrPyr",
-            time().timeName(),
-            regionMesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimArea/dimTime, 0.0),
-        zeroGradientFvPatchVectorField::typeName
     ),
 
     lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
@@ -492,7 +403,6 @@ reactingOneDim::reactingOneDim
     ),
     Ys_(solidThermo_.composition().Y()),
     h_(solidThermo_.he()),
-    primaryRadFluxName_(dict.lookupOrDefault<word>("radFluxName", "Qr")),
     nNonOrthCorr_(-1),
     maxDiff_(10),
     minimumDelta_(1e-4),
@@ -537,34 +447,6 @@ reactingOneDim::reactingOneDim
         ),
         regionMesh(),
         dimensionedScalar("zero", dimEnergy/dimTime/dimVolume, 0.0)
-    ),
-
-    QrCoupled_
-    (
-        IOobject
-        (
-            primaryRadFluxName_,
-            time().timeName(),
-            regionMesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        regionMesh()
-    ),
-
-    Qr_
-    (
-        IOobject
-        (
-            "QrPyr",
-            time().timeName(),
-            regionMesh(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        regionMesh(),
-        dimensionedScalar("zero", dimEnergy/dimArea/dimTime, 0.0),
-        zeroGradientFvPatchVectorField::typeName
     ),
 
     lostSolidMass_(dimensionedScalar("zero", dimMass, 0.0)),
@@ -683,36 +565,6 @@ void reactingOneDim::preEvolveRegion()
     forAll(h_, cellI)
     {
         solidChemistry_->setCellReacting(cellI, true);
-    }
-
-    // De-activate reactions if pyrolysis region coupled to (valid) film
-    if (filmCoupled_)
-    {
-        const volScalarField& filmDelta = filmDeltaPtr_();
-
-        forAll(intCoupledPatchIDs_, i)
-        {
-            const label patchI = intCoupledPatchIDs_[i];
-            const scalarField& filmDeltap = filmDelta.boundaryField()[patchI];
-
-            forAll(filmDeltap, faceI)
-            {
-                const scalar filmDelta0 = filmDeltap[faceI];
-                if (filmDelta0 > reactionDeltaMin_)
-                {
-                    const labelList& cells = boundaryFaceCells_[faceI];
-
-                    // TODO: only limit cell adjacent to film?
-                    //solidChemistry_->setCellNoReacting(cells[0])
-
-                    // Propagate flag through 1-D region
-                    forAll(cells, k)
-                    {
-                        solidChemistry_->setCellReacting(cells[k], false);
-                    }
-                }
-            }
-        }
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -200,16 +200,6 @@ private:
                 List<labelList>& compactedContents,
                 label& compactI
             );
-
-            scalar calcNearestDistance(const label nodeI) const;
-
-            bool quickCircumsphereRejection
-            (
-                const label nodeI,
-                const point& cc,
-                const scalar crSqr,
-                const List<scalar>& nearestDistances
-            ) const;
 
             //- Determine inside/outside per node (mixed if cannot be
             //  determined). Only valid for closed shapes.
@@ -658,16 +648,6 @@ public:
                 CompareOp& cop
             ) const;
 
-            //- Return a list containing the nearest distance of nodes to any
-            //  shapes
-            List<scalar> calcNearestDistance() const;
-
-            bool quickCircumsphereRejection
-            (
-                const point& cc,
-                const scalar crSqr,
-                const List<scalar>& nearestDistances
-            ) const;
 
         // Write
 

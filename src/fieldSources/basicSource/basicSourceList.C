@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,6 +104,50 @@ void Foam::basicSourceList::reset(const dictionary& dict)
                 basicSource::New(name, sourceDict, mesh_)
             );
         }
+    }
+}
+
+
+void Foam::basicSourceList::relativeFlux(surfaceScalarField& phi) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).relativeFlux(phi);
+    }
+}
+
+
+void Foam::basicSourceList::relativeFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).relativeFlux(rho, phi);
+    }
+}
+
+
+void Foam::basicSourceList::absoluteFlux(surfaceScalarField& phi) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).absoluteFlux(phi);
+    }
+}
+
+
+void Foam::basicSourceList::absoluteFlux
+(
+    const surfaceScalarField& rho,
+    surfaceScalarField& phi
+) const
+{
+    forAll(*this, i)
+    {
+        this->operator[](i).absoluteFlux(rho, phi);
     }
 }
 

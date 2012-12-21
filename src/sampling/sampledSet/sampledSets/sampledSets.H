@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -301,7 +301,7 @@ public:
         virtual void updateMesh(const mapPolyMesh&);
 
         //- Update for mesh point-motion
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(const polyMesh&);
 
         //- Update for changes of mesh due to readUpdate
         virtual void readUpdate(const polyMesh::readUpdateState state);

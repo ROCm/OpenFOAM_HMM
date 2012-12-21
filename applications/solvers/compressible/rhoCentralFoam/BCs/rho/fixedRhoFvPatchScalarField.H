@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,41 @@ License
 Class
     Foam::fixedRhoFvPatchScalarField
 
+Group
+    grpInletBoundaryConditions
+
 Description
     Foam::fixedRhoFvPatchScalarField
+
+    This boundary condition provides a fixed density inlet condition for
+    compressible solvers, where the density of calculated using:
+
+    \f{
+        \rho = \psi p
+    \f]
+
+    where
+    \vartable
+        p     | pressure [Pa]
+        \rho  | density [kg/m3]
+    \endvartable
+
+
+    \heading Patch usage
+
+    \table
+        Property     | Description             | Required    | Default value
+        pName        | Pressure field name     | no          | p
+        psiName      | Compressibility field name | no       | thermo:psi
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    myPatch
+    {
+        type            fixedRho;
+    }
+    \endverbatim
 
 SourceFiles
     fixedRhoFvPatchScalarField.C
@@ -43,13 +76,24 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class fixedRhoFvPatchScalarField Declaration
+                 Class fixedRhoFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class fixedRhoFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+
+private:
+
+    // Private data
+
+        //- Pressure field name, default = "p"
+        word pName_;
+
+        //- Compressibility field name, default = "thermo:psi"
+        word psiName_;
+
 
 public:
 
@@ -125,6 +169,10 @@ public:
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
+
+
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 

@@ -76,8 +76,12 @@ public:
 
     // Constructors
 
-        //- Construct from mesh
-        heheuPsiThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        heheuPsiThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
 
     //- Destructor

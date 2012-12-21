@@ -34,7 +34,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::pointToPointPlanarInterpolation, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(pointToPointPlanarInterpolation, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

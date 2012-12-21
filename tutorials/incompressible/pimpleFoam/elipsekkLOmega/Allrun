@@ -15,7 +15,7 @@ runApplication mirrorMesh -overwrite
 rm log.mirrorMesh
 
 rm log.changeDictionary
-runApplication changeDictionary -instance system -dict  system/changeDictionaryDict.Y
+runApplication changeDictionary -instance system -dict system/changeDictionaryDict.Y
 
 runApplication mirrorMesh -overwrite
 

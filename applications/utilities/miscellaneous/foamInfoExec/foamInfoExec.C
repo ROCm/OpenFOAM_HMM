@@ -51,12 +51,7 @@ int main(int argc, char *argv[])
         "keywords",
         "report keywords for the specified dictionary"
     );
-    argList::addOption
-    (
-        "dict",
-        "file",
-        "specify a dictionary to interrogate"
-    );
+    #include "addDictOption.H"
     argList::addOption
     (
         "entry",
@@ -81,9 +76,12 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("dict"))
     {
+        fileName dictPath = args["dict"];
         const fileName dictFileName
         (
-            args.rootPath()/args.caseName()/args["dict"]
+            dictPath.isAbsolute()
+          ? dictPath
+          : args.rootPath()/args.caseName()/args["dict"]
         );
 
         IFstream dictFile(dictFileName);

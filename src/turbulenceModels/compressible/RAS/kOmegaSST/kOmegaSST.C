@@ -85,6 +85,31 @@ tmp<volScalarField> kOmegaSST::F2() const
 }
 
 
+tmp<volScalarField> kOmegaSST::F3() const
+{
+    tmp<volScalarField> arg3 = min
+    (
+        150*(mu()/rho_)/(omega_*sqr(y_)),
+        scalar(10)
+    );
+
+    return 1 - tanh(pow4(arg3));
+}
+
+
+tmp<volScalarField> kOmegaSST::F23() const
+{
+    tmp<volScalarField> f23(F2());
+
+    if (F3_)
+    {
+        f23() *= F3();
+    }
+
+    return f23;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 kOmegaSST::kOmegaSST
@@ -198,6 +223,15 @@ kOmegaSST::kOmegaSST
             0.31
         )
     ),
+    b1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "b1",
+            coeffDict_,
+            1.0
+        )
+    ),
     c1_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -205,6 +239,15 @@ kOmegaSST::kOmegaSST
             "c1",
             coeffDict_,
             10.0
+        )
+    ),
+    F3_
+    (
+        Switch::lookupOrAddToDict
+        (
+            "F3",
+            coeffDict_,
+            false
         )
     ),
 
@@ -268,7 +311,7 @@ kOmegaSST::kOmegaSST
       / max
         (
             a1_*omega_,
-            F2()*sqrt(2.0)*mag(symm(fvc::grad(U_)))
+            b1_*F23()*sqrt(2.0)*mag(symm(fvc::grad(U_)))
         )
     );
     mut_.correctBoundaryConditions();
@@ -347,7 +390,9 @@ bool kOmegaSST::read()
         beta2_.readIfPresent(coeffDict());
         betaStar_.readIfPresent(coeffDict());
         a1_.readIfPresent(coeffDict());
+        b1_.readIfPresent(coeffDict());
         c1_.readIfPresent(coeffDict());
+        F3_.readIfPresent("F3", coeffDict());
 
         return true;
     }
@@ -392,7 +437,7 @@ void kOmegaSST::correct()
     tmp<volTensorField> tgradU = fvc::grad(U_);
     volScalarField S2(2*magSqr(symm(tgradU())));
     volScalarField GbyMu((tgradU() && dev(twoSymm(tgradU()))));
-    volScalarField G("RASModel.G", mut_*GbyMu);
+    volScalarField G(type() + ".G", mut_*GbyMu);
     tgradU.clear();
 
     // Update omega and G at the wall
@@ -448,7 +493,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_ = a1_*rho_*k_/max(a1_*omega_, b1_*F23()*sqrt(S2));
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

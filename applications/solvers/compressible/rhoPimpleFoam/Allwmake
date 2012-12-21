@@ -4,7 +4,6 @@ set -x
 
 wmake
 wmake rhoPimplecFoam
-wmake rhoPorousMRFPimpleFoam
-wmake rhoPorousMRFLTSPimpleFoam
+wmake rhoLTSPimpleFoam
 
 # ----------------------------------------------------------------- end-of-file

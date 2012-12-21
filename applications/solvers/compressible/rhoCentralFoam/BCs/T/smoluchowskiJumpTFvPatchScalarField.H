@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,13 +53,25 @@ class smoluchowskiJumpTFvPatchScalarField
 
     // Private data
 
-        // Accommodation coefficient
+        //- Velocity field name, default = "U"
+        word UName_;
+
+        //- Density field name, default = "rho"
+        word rhoName_;
+
+        //- Compressibility field name, default = "thermo:psi"
+        word psiName_;
+
+        //- Dynamic viscosity field name, default = "thermo:mu"
+        word muName_;
+
+        //- Accommodation coefficient
         scalar accommodationCoeff_;
 
-        // Wall surface temperature
+        //- Wall surface temperature
         scalarField Twall_;
 
-        // Heat capacity ratio (default 1.4)
+        //- Heat capacity ratio (default 1.4)
         scalar gamma_;
 
 public:

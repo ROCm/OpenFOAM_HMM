@@ -109,6 +109,9 @@ private:
 
     // Private Member Functions
 
+        //- Create IO object if dictionary is present
+        IOobject createIOobject(const fvMesh& mesh) const;
+
         //- Initialise
         void initialise();
 
@@ -155,9 +158,6 @@ public:
 
         //- Null constructor
         radiationModel(const volScalarField& T);
-
-        //- Construct with dictionary
-        radiationModel(const dictionary& dict, const volScalarField& T);
 
         //- Construct from components
         radiationModel(const word& type, const volScalarField& T);

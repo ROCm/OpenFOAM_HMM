@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(Foam::turbulenceFields, 0);
+    defineTypeNameAndDebug(turbulenceFields, 0);
 
     template<>
     const char* NamedEnum<turbulenceFields::compressibleField, 6>::names[] =

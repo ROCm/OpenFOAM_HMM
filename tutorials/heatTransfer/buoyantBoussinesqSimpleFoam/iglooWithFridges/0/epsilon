@@ -24,25 +24,7 @@ boundaryField
     //- Set patchGroups for constraint patches
     #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
 
-    ground
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    igloo_region0
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    twoFridgeFreezers_seal_0
-    {
-        type            epsilonWallFunction;
-        value           uniform 0.01;
-    }
-
-    twoFridgeFreezers_herring_1
+    wall
     {
         type            epsilonWallFunction;
         value           uniform 0.01;

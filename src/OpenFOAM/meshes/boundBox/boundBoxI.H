@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,6 +125,45 @@ inline bool Foam::boundBox::overlaps(const boundBox& bb) const
      && bb.max_.y() >= min_.y() && bb.min_.y() <= max_.y()
      && bb.max_.z() >= min_.z() && bb.min_.z() <= max_.z()
     );
+}
+
+
+inline bool Foam::boundBox::overlaps
+(
+    const point& centre,
+    const scalar radiusSqr
+) const
+{
+    // Find out where centre is in relation to bb.
+    // Find nearest point on bb.
+    scalar distSqr = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; dir++)
+    {
+        scalar d0 = min_[dir] - centre[dir];
+        scalar d1 = max_[dir] - centre[dir];
+
+        if ((d0 > 0) != (d1 > 0))
+        {
+            // centre inside both extrema. This component does not add any
+            // distance.
+        }
+        else if (Foam::mag(d0) < Foam::mag(d1))
+        {
+            distSqr += d0*d0;
+        }
+        else
+        {
+            distSqr += d1*d1;
+        }
+
+        if (distSqr > radiusSqr)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

@@ -104,7 +104,8 @@ void Foam::ParticleTrap<CloudType>::postMove
 (
     parcelType& p,
     const label cellI,
-    const scalar
+    const scalar,
+    bool&
 )
 {
     if (alphaPtr_->internalField()[cellI] < threshold_)

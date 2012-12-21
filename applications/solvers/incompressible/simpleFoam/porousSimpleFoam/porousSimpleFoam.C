@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,15 +26,17 @@ Application
 
 Description
     Steady-state solver for incompressible, turbulent flow with
-    implicit or explicit porosity treatment
+    implicit or explicit porosity treatment and support for multiple reference
+    frames (MRF)
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "singlePhaseTransportModel.H"
 #include "RASModel.H"
-#include "IOporosityModelList.H"
 #include "simpleControl.H"
+#include "IOMRFZoneList.H"
+#include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,7 +50,8 @@ int main(int argc, char *argv[])
     simpleControl simple(mesh);
 
     #include "createFields.H"
-    #include "createPorousZones.H"
+    #include "createSources.H"
+    #include "createZones.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

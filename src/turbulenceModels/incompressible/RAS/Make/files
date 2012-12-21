@@ -17,6 +17,7 @@ NonlinearKEShih/NonlinearKEShih.C
 LienLeschzinerLowRe/LienLeschzinerLowRe.C
 LamBremhorstKE/LamBremhorstKE.C
 kkLOmega/kkLOmega.C
+v2f/v2f.C
 
 /* Wall functions */
 wallFunctions = derivedFvPatchFields/wallFunctions
@@ -36,16 +37,23 @@ $(nutWallFunctions)/nutURoughWallFunction/nutURoughWallFunctionFvPatchScalarFiel
 
 epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
 $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.C
+$(epsilonWallFunctions)/epsilonLowReWallFunction/epsilonLowReWallFunctionFvPatchScalarField.C
+
+fWallFunctions = $(wallFunctions)/fWallFunctions
+$(fWallFunctions)/fWallFunction/fWallFunctionFvPatchScalarField.C
 
 omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
 $(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
 kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
 $(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
+$(kqRWallFunctions)/kLowReWallFunction/kLowReWallFunctionFvPatchScalarField.C
 
 kappatWallFunctions = $(wallFunctions)/kappatWallFunctions
 $(kappatWallFunctions)/kappatJayatillekeWallFunction/kappatJayatillekeWallFunctionFvPatchScalarField.C
 
+v2WallFunctions = $(wallFunctions)/v2WallFunctions
+$(v2WallFunctions)/v2WallFunction/v2WallFunctionFvPatchScalarField.C
 
 /* Patch fields */
 derivedFvPatchFields/turbulentHeatFluxTemperature/turbulentHeatFluxTemperatureFvPatchScalarField.C

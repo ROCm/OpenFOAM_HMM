@@ -24,6 +24,9 @@ License
 Class
     Foam::CourantNo
 
+Group
+    grpUtilitiesFunctionObjects
+
 Description
     This function object calculates and outputs the Courant number as a
     volScalarField.  The field is stored on the mesh database so that it can
@@ -40,7 +43,6 @@ SourceFiles
 
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "OFstream.H"
 #include "Switch.H"
 
@@ -52,6 +54,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -139,7 +142,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

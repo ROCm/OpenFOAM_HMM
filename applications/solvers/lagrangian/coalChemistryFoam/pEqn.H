@@ -2,7 +2,7 @@ rho = thermo.rho();
 
 volScalarField rAU(1.0/UEqn.A());
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn == sources(rho, U))().H();
+HbyA = rAU*UEqn.H();
 
 if (pimple.transonic())
 {
@@ -16,6 +16,8 @@ if (pimple.transonic())
         )
     );
 
+    sources.relativeFlux(fvc::interpolate(psi), phid);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
@@ -28,7 +30,7 @@ if (pimple.transonic())
           + sources(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn, rho.name());
+        sources.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -50,6 +52,8 @@ else
         )
     );
 
+    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+
     while (pimple.correctNonOrthogonal())
     {
         fvScalarMatrix pEqn
@@ -62,7 +66,7 @@ else
           + sources(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn, rho.name());
+        sources.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 

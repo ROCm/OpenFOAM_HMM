@@ -38,6 +38,15 @@ Description
         Nov. 2001
     \endverbatim
 
+    with the addition of the optional F3 term for rough walls from
+    \verbatim
+        Hellsten, A.
+        "Some Improvements in Menter’s k-omega-SST turbulence model"
+        29th AIAA Fluid Dynamics Conference,
+        AIAA-98-2554,
+        June 1998.
+    \endverbatim
+
     Note that this implementation is written in terms of alpha diffusion
     coefficients rather than the more traditional sigma (alpha = 1/sigma) so
     that the blending can be applied to all coefficuients in a consistent
@@ -69,7 +78,9 @@ Description
             gamma1      0.5532;
             gamma2      0.4403;
             a1          0.31;
+            b1          1.0;
             c1          10.0;
+            F3          no;
         }
     \endverbatim
 
@@ -125,7 +136,10 @@ protected:
             dimensionedScalar betaStar_;
 
             dimensionedScalar a1_;
+            dimensionedScalar b1_;
             dimensionedScalar c1_;
+
+            Switch F3_;
 
 
         //- Wall distance
@@ -144,6 +158,8 @@ protected:
 
         tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         tmp<volScalarField> F2() const;
+        tmp<volScalarField> F3() const;
+        tmp<volScalarField> F23() const;
 
         tmp<volScalarField> blend
         (

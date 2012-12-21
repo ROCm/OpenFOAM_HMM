@@ -31,10 +31,13 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::fieldAverage, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(fieldAverage, 0);
 
-const Foam::word Foam::fieldAverage::EXT_MEAN = "Mean";
-const Foam::word Foam::fieldAverage::EXT_PRIME2MEAN = "Prime2Mean";
+const word fieldAverage::EXT_MEAN = "Mean";
+const word fieldAverage::EXT_PRIME2MEAN = "Prime2Mean";
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -408,7 +411,7 @@ void Foam::fieldAverage::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::fieldAverage::movePoints(const pointField&)
+void Foam::fieldAverage::movePoints(const polyMesh&)
 {
     // Do nothing
 }

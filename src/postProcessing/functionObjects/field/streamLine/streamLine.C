@@ -38,7 +38,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::streamLine, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(streamLine, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -749,7 +753,7 @@ void Foam::streamLine::updateMesh(const mapPolyMesh&)
 }
 
 
-void Foam::streamLine::movePoints(const pointField&)
+void Foam::streamLine::movePoints(const polyMesh&)
 {
     // Moving mesh affects the search tree
     read(dict_);

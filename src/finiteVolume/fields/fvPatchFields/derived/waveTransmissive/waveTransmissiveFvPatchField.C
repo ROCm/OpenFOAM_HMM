@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "EulerDdtScheme.H"
-#include "CrankNicholsonDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "backwardDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -41,7 +41,7 @@ Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 )
 :
     advectiveFvPatchField<Type>(p, iF),
-    psiName_("psi"),
+    psiName_("thermo:psi"),
     gamma_(0.0)
 {}
 
@@ -70,7 +70,7 @@ Foam::waveTransmissiveFvPatchField<Type>::waveTransmissiveFvPatchField
 )
 :
     advectiveFvPatchField<Type>(p, iF, dict),
-    psiName_(dict.lookupOrDefault<word>("psi", "psi")),
+    psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
     gamma_(readScalar(dict.lookup("gamma")))
 {}
 
@@ -108,27 +108,21 @@ Foam::waveTransmissiveFvPatchField<Type>::advectionSpeed() const
 {
     // Lookup the velocity and compressibility of the patch
     const fvPatchField<scalar>& psip =
-        this->patch().template lookupPatchField<volScalarField, scalar>
-        (
-            psiName_
-        );
+        this->patch().template
+            lookupPatchField<volScalarField, scalar>(psiName_);
 
     const surfaceScalarField& phi =
         this->db().template lookupObject<surfaceScalarField>(this->phiName_);
 
     fvsPatchField<scalar> phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            this->phiName_
-        );
+        this->patch().template
+            lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
     {
         const fvPatchScalarField& rhop =
-            this->patch().template lookupPatchField<volScalarField, scalar>
-            (
-                this->rhoName_
-            );
+            this->patch().template
+                lookupPatchField<volScalarField, scalar>(this->rhoName_);
 
         phip /= rhop;
     }
@@ -145,18 +139,12 @@ void Foam::waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
 
-    if (this->phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
-    }
-    if (this->rhoName_ != "rho")
-    {
-        os.writeKeyword("rho") << this->rhoName_ << token::END_STATEMENT << nl;
-    }
-    if (psiName_ != "psi")
-    {
-        os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
-    }
+    this->template
+        writeEntryIfDifferent<word>(os, "phi", "phi", this->phiName_);
+    this->template
+        writeEntryIfDifferent<word>(os, "rho", "rho", this->rhoName_);
+    this->template
+        writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
 
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
 

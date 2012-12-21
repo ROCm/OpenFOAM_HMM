@@ -63,6 +63,7 @@ primitives/globalIndexAndTransform/globalIndexAndTransform.C
 primitives/globalIndexAndTransform/vectorTensorTransform/vectorTensorTransform.C
 primitives/quaternion/quaternion.C
 primitives/septernion/septernion.C
+primitives/triad/triad.C
 
 /* functions, data entries */
 primitives/functions/DataEntry/makeDataEntries.C
@@ -254,8 +255,10 @@ $(lduMatrix)/solvers/ICCG/ICCG.C
 $(lduMatrix)/solvers/BICCG/BICCG.C
 
 $(lduMatrix)/smoothers/GaussSeidel/GaussSeidelSmoother.C
+$(lduMatrix)/smoothers/symGaussSeidel/symGaussSeidelSmoother.C
 $(lduMatrix)/smoothers/nonBlockingGaussSeidel/nonBlockingGaussSeidelSmoother.C
 $(lduMatrix)/smoothers/DIC/DICSmoother.C
+$(lduMatrix)/smoothers/FDIC/FDICSmoother.C
 $(lduMatrix)/smoothers/DICGaussSeidel/DICGaussSeidelSmoother.C
 $(lduMatrix)/smoothers/DILU/DILUSmoother.C
 $(lduMatrix)/smoothers/DILUGaussSeidel/DILUGaussSeidelSmoother.C
@@ -424,6 +427,10 @@ $(polyMesh)/polyMeshInitMesh.C
 $(polyMesh)/polyMeshClear.C
 $(polyMesh)/polyMeshUpdate.C
 
+polyMeshCheck = $(polyMesh)/polyMeshCheck
+$(polyMeshCheck)/polyMeshCheck.C
+$(polyMeshCheck)/polyMeshTools.C
+
 primitiveMesh = meshes/primitiveMesh
 $(primitiveMesh)/primitiveMesh.C
 $(primitiveMesh)/primitiveMeshCellCells.C
@@ -444,9 +451,9 @@ $(primitiveMesh)/primitiveMeshCalcCellShapes.C
 
 primitiveMeshCheck = $(primitiveMesh)/primitiveMeshCheck
 $(primitiveMeshCheck)/primitiveMeshCheck.C
-$(primitiveMeshCheck)/primitiveMeshCheckMotion.C
 $(primitiveMeshCheck)/primitiveMeshCheckPointNearness.C
 $(primitiveMeshCheck)/primitiveMeshCheckEdgeLength.C
+$(primitiveMeshCheck)/primitiveMeshTools.C
 
 primitivePatch = $(primitiveMesh)/primitivePatch
 $(primitivePatch)/patchZones.C
@@ -524,9 +531,10 @@ $(Fields)/sphericalTensorField/sphericalTensorField.C
 $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
+$(Fields)/triadField/triadField.C
 $(Fields)/complexFields/complexFields.C
 
-$(Fields)/labelField/labelIOField.
+$(Fields)/labelField/labelIOField.C
 $(Fields)/labelField/labelFieldIOField.C
 $(Fields)/scalarField/scalarIOField.C
 $(Fields)/scalarField/scalarFieldIOField.C
@@ -542,6 +550,7 @@ $(Fields)/symmTensorField/symmTensorIOField.C
 $(Fields)/symmTensorField/symmTensorFieldIOField.C
 $(Fields)/tensorField/tensorIOField.C
 $(Fields)/tensorField/tensorFieldIOField.C
+$(Fields)/triadField/triadIOField.C
 $(Fields)/transformField/transformField.C
 
 pointPatchFields = fields/pointPatchFields

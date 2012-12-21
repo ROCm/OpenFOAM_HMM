@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,19 @@ public:
         (
             const word& outputFilterName,
             const objectRegistry&,
-            const fileName& dictName = OutputFilter::typeName() + "Dict",
+            const word& dictName = OutputFilter::typeName() + "Dict",
+            const IOobject::readOption rOpt = IOobject::MUST_READ_IF_MODIFIED,
+            const bool loadFromFile = false
+        );
+
+        //- Construct for given objectRegistry and dictionary
+        //  Dictionary read from full path.
+        //  Allow the possibility to load fields from files
+        IOOutputFilter
+        (
+            const word& outputFilterName,
+            const objectRegistry&,
+            const fileName& dictName,
             const IOobject::readOption rOpt = IOobject::MUST_READ_IF_MODIFIED,
             const bool loadFromFile = false
         );
@@ -121,10 +133,10 @@ public:
         }
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField& points)
+        virtual void movePoints(const polyMesh& mesh)
         {
             read();
-            OutputFilter::movePoints(points);
+            OutputFilter::movePoints(mesh);
         }
 };
 

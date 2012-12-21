@@ -65,14 +65,8 @@ private:
         //- Remaining radiative flux after removing local contribution
         volScalarField QrNet_;
 
-        //- Reference to the film thickness field / [m]
-        const volScalarField& delta_;
-
 
         // Model coefficients
-
-            //- Minimum thickness to apply radiation model
-            scalar deltaMin_;
 
             //- Beta coefficient
             scalar beta_;

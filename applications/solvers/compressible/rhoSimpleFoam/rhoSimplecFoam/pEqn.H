@@ -45,7 +45,7 @@ if (simple.transonic())
         // Relax the pressure equation to maintain diagonal dominance
         pEqn.relax();
 
-        sources.constrain(pEqn, rho.name());
+        sources.constrain(pEqn);
 
         pEqn.setReference(pRefCell, pRefValue);
 
@@ -82,7 +82,7 @@ else
             sources(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn, rho.name());
+        sources.constrain(pEqn);
 
         pEqn.setReference(pRefCell, pRefValue);
 

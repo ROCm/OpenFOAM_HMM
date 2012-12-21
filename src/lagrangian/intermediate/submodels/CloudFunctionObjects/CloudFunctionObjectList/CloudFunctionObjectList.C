@@ -132,12 +132,18 @@ void Foam::CloudFunctionObjectList<CloudType>::postMove
 (
     const typename CloudType::parcelType& p,
     const label cellI,
-    const scalar dt
+    const scalar dt,
+    bool& keepParticle
 )
 {
     forAll(*this, i)
     {
-        this->operator[](i).postMove(p, cellI, dt);
+        this->operator[](i).postMove(p, cellI, dt, keepParticle);
+
+        if (!keepParticle)
+        {
+            return;
+        }
     }
 }
 
@@ -148,12 +154,25 @@ void Foam::CloudFunctionObjectList<CloudType>::postPatch
     const typename CloudType::parcelType& p,
     const polyPatch& pp,
     const scalar trackFraction,
-    const tetIndices& tetIs
+    const tetIndices& tetIs,
+    bool& keepParticle
 )
 {
     forAll(*this, i)
     {
-        this->operator[](i).postPatch(p, pp, trackFraction, tetIs);
+        this->operator[](i).postPatch
+        (
+            p,
+            pp,
+            trackFraction,
+            tetIs,
+            keepParticle
+        );
+
+        if (!keepParticle)
+        {
+            return;
+        }
     }
 }
 
@@ -162,12 +181,18 @@ template<class CloudType>
 void Foam::CloudFunctionObjectList<CloudType>::postFace
 (
     const typename CloudType::parcelType& p,
-    const label faceI
+    const label faceI,
+    bool& keepParticle
 )
 {
     forAll(*this, i)
     {
-        this->operator[](i).postFace(p, faceI);
+        this->operator[](i).postFace(p, faceI, keepParticle);
+
+        if (!keepParticle)
+        {
+            return;
+        }
     }
 }
 

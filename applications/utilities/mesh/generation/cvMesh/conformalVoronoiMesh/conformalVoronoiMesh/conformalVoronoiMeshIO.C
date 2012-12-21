@@ -28,6 +28,11 @@ License
 #include "OFstream.H"
 #include "pointMesh.H"
 #include "pointFields.H"
+#include "ListOps.H"
+#include "polyMeshFilter.H"
+#include "polyTopoChange.H"
+#include "PrintTable.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -57,60 +62,184 @@ void Foam::conformalVoronoiMesh::timeCheck
 
         if (m.valid())
         {
-            label mSize = m.size();
-            label mPeak = m.peak();
-            label mRss = m.rss();
+            PrintTable<word, label> memoryTable("Memory Usage (kB)");
 
-            if (Pstream::parRun())
-            {
-                labelList allMSize(Pstream::nProcs());
-                labelList allMPeak(Pstream::nProcs());
-                labelList allMRss(Pstream::nProcs());
+            memoryTable.add("mSize", m.size());
+            memoryTable.add("mPeak", m.peak());
+            memoryTable.add("mRss", m.rss());
 
-                allMSize[Pstream::myProcNo()] = mSize;
-                allMPeak[Pstream::myProcNo()] = mPeak;
-                allMRss[Pstream::myProcNo()] = mRss;
-
-                Pstream::gatherList(allMSize);
-                Pstream::gatherList(allMPeak);
-                Pstream::gatherList(allMRss);
-
-                Info<< "--- [ "
-                    << "mem (kB) " << tab
-                    << "size" << tab
-                    << "peak" << tab
-                    << "rss"
-                    << " ] --- " << endl;
-
-                forAll(allMSize, procI)
-                {
-                    Info<< "--- [ "
-                        << procI << " " << tab
-                        << allMSize[procI] << tab
-                        << allMPeak[procI] << tab
-                        << allMRss[procI]
-                        << " ] --- " << endl;
-                }
-
-                Info<< "--- [ "
-                    << "sum " << tab
-                    << sum(allMSize) << tab
-                    << sum(allMPeak) << tab
-                    << sum(allMRss)
-                    << " ] --- " << endl;
-
-            }
-            else
-            {
-                Info<< "--- [ "
-                    << "mem size " << mSize << " kB, "
-                    << "mem peak " << mPeak << " kB, "
-                    << "mem rss " << mRss << " kB"
-                    << " ] --- " << endl;
-            }
+            Info<< incrIndent;
+            memoryTable.print(Info);
+            Info<< decrIndent;
         }
     }
 }
+
+
+void Foam::conformalVoronoiMesh::printVertexInfo() const
+{
+    label nInternal = 0;
+    label nInternalRef = 0;
+    label nUnassigned = 0;
+    label nUnassignedRef = 0;
+    label nInternalNearBoundary = 0;
+    label nInternalNearBoundaryRef = 0;
+    label nInternalSurface = 0;
+    label nInternalSurfaceRef = 0;
+    label nInternalFeatureEdge = 0;
+    label nInternalFeatureEdgeRef = 0;
+    label nInternalFeaturePoint = 0;
+    label nInternalFeaturePointRef = 0;
+    label nExternalSurface = 0;
+    label nExternalSurfaceRef = 0;
+    label nExternalFeatureEdge = 0;
+    label nExternalFeatureEdgeRef = 0;
+    label nExternalFeaturePoint = 0;
+    label nExternalFeaturePointRef = 0;
+    label nFar = 0;
+    label nReferred = 0;
+
+    for
+    (
+        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->type() == Vb::vtInternal)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalRef++;
+            }
+
+            nInternal++;
+        }
+        else if (vit->type() == Vb::vtUnassigned)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nUnassignedRef++;
+            }
+
+            nUnassigned++;
+        }
+        else if (vit->type() == Vb::vtInternalNearBoundary)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalNearBoundaryRef++;
+            }
+
+            nInternalNearBoundary++;
+        }
+        else if (vit->type() == Vb::vtInternalSurface)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalSurfaceRef++;
+            }
+
+            nInternalSurface++;
+        }
+        else if (vit->type() == Vb::vtInternalFeatureEdge)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalFeatureEdgeRef++;
+            }
+
+            nInternalFeatureEdge++;
+        }
+        else if (vit->type() == Vb::vtInternalFeaturePoint)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalFeaturePointRef++;
+            }
+
+            nInternalFeaturePoint++;
+        }
+        else if (vit->type() == Vb::vtExternalSurface)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalSurfaceRef++;
+            }
+
+            nExternalSurface++;
+        }
+        else if (vit->type() == Vb::vtExternalFeatureEdge)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalFeatureEdgeRef++;
+            }
+
+            nExternalFeatureEdge++;
+        }
+        else if (vit->type() == Vb::vtExternalFeaturePoint)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalFeaturePointRef++;
+            }
+
+            nExternalFeaturePoint++;
+        }
+        else if (vit->type() == Vb::vtFar)
+        {
+            nFar++;
+        }
+    }
+
+    label nTotalVertices
+        = nUnassigned
+        + nInternal
+        + nInternalNearBoundary
+        + nInternalSurface
+        + nInternalFeatureEdge
+        + nInternalFeaturePoint
+        + nExternalSurface
+        + nExternalFeatureEdge
+        + nExternalFeaturePoint
+        + nFar;
+
+    if (nTotalVertices != label(number_of_vertices()))
+    {
+        WarningIn("Foam::conformalVoronoiMesh::printVertexInfo()")
+            << nTotalVertices << " does not equal " << number_of_vertices()
+            << endl;
+    }
+
+    PrintTable<word, label> vertexTable("Vertex Type Information");
+
+    vertexTable.add("Total", nTotalVertices);
+    vertexTable.add("Unassigned", nUnassigned);
+    vertexTable.add("nInternal", nInternal);
+    vertexTable.add("nInternalNearBoundary", nInternalNearBoundary);
+    vertexTable.add("nInternalSurface", nInternalSurface);
+    vertexTable.add("nInternalFeatureEdge", nInternalFeatureEdge);
+    vertexTable.add("nInternalFeaturePoint", nInternalFeaturePoint);
+    vertexTable.add("nExternalSurface", nExternalSurface);
+    vertexTable.add("nExternalFeatureEdge", nExternalFeatureEdge);
+    vertexTable.add("nExternalFeaturePoint", nExternalFeaturePoint);
+    vertexTable.add("nFar", nFar);
+    vertexTable.add("nReferred", nReferred);
+
+    Info<< endl;
+    vertexTable.print(Info);
+}
+
 
 void Foam::conformalVoronoiMesh::drawDelaunayCell
 (
@@ -120,7 +249,7 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
 ) const
 {
     // Supply offset as tet number
-    offset *= 5;
+    offset *= 4;
 
     os  << "# cell index: " << label(c->cellIndex()) << endl;
 
@@ -130,9 +259,10 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
 
     for (int i = 0; i < 4; i++)
     {
-        os  << "# index type: "
+        os  << "# index / type / procIndex: "
             << label(c->vertex(i)->index()) << " "
-            << label(c->vertex(i)->type()) << endl;
+            << label(c->vertex(i)->type()) << " "
+            << label(c->vertex(i)->procIndex()) << endl;
 
         meshTools::writeOBJ(os, topoint(c->vertex(i)->point()));
     }
@@ -142,23 +272,39 @@ void Foam::conformalVoronoiMesh::drawDelaunayCell
         << "f " << 1 + offset << " " << 4 + offset << " " << 3 + offset << nl
         << "f " << 1 + offset << " " << 2 + offset << " " << 4 + offset << endl;
 
-    os  << "# cicumcentre " << endl;
+//    os  << "# cicumcentre " << endl;
 
-    meshTools::writeOBJ(os, c->dual());
+//    meshTools::writeOBJ(os, c->dual());
 
-    os  << "l " << 1 + offset << " " << 5 + offset << endl;
+//    os  << "l " << 1 + offset << " " << 5 + offset << endl;
 }
 
 
 void Foam::conformalVoronoiMesh::writePoints
 (
     const fileName& fName,
-    bool internalOnly
+    const Foam::indexedVertexEnum::vertexType startPointType,
+    const Foam::indexedVertexEnum::vertexType endPointType
 ) const
 {
     OFstream str(runTime_.path()/fName);
 
-    Pout<< nl << "Writing points to " << str.name() << endl;
+    Pout<< nl << "Writing points of types:" << nl;
+
+    forAllConstIter
+    (
+        HashTable<int>,
+        Foam::indexedVertexEnum::vertexTypeNames_,
+        iter
+    )
+    {
+        if (iter() >= startPointType && iter() <= endPointType)
+        {
+            Pout<< "    " << iter.key() << nl;
+        }
+    }
+
+    Pout<< "to " << str.name() << endl;
 
     for
     (
@@ -167,11 +313,21 @@ void Foam::conformalVoronoiMesh::writePoints
         ++vit
     )
     {
-        if (!internalOnly || vit->internalPoint())
+        if (vit->type() >= startPointType && vit->type() <= endPointType)
         {
             meshTools::writeOBJ(str, topoint(vit->point()));
         }
     }
+}
+
+
+void Foam::conformalVoronoiMesh::writePoints
+(
+    const fileName& fName,
+    const Foam::indexedVertexEnum::vertexType pointType
+) const
+{
+    writePoints(fName, pointType, pointType);
 }
 
 
@@ -220,6 +376,27 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
+void Foam::conformalVoronoiMesh::writePoints
+(
+    const fileName& fName,
+    const List<Vb>& points
+) const
+{
+    if (points.size())
+    {
+        OFstream str(runTime_.path()/fName);
+
+        Pout<< nl << "Writing " << points.size() << " points from pointList to "
+            << str.name() << endl;
+
+        forAll(points, p)
+        {
+            meshTools::writeOBJ(str, topoint(points[p].point()));
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::writeProcessorInterface
 (
     const fileName& fName,
@@ -228,9 +405,7 @@ void Foam::conformalVoronoiMesh::writeProcessorInterface
 {
     OFstream str(runTime_.path()/fName);
 
-    Pout<< "Writing processor interface" << endl;
-
-    pointField points(number_of_cells(), point::max);
+    pointField points(number_of_finite_cells(), point::max);
 
     for
     (
@@ -239,15 +414,13 @@ void Foam::conformalVoronoiMesh::writeProcessorInterface
         ++cit
     )
     {
-        if (!cit->farCell())
+        if (!cit->hasFarPoint() && !is_infinite(cit))
         {
             points[cit->cellIndex()] = cit->dual();
         }
     }
 
     meshTools::writeOBJ(str, faces, points);
-
-    Pout<< "Written processor interface" << endl;
 }
 
 
@@ -297,11 +470,7 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 }
 
 
-void Foam::conformalVoronoiMesh::writeMesh
-(
-    const fileName& instance,
-    bool filterFaces
-)
+void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 {
     writeInternalDelaunayVertices(instance);
 
@@ -314,6 +483,7 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     {
         pointField points;
+        labelList boundaryPts(number_of_finite_cells(), -1);
         faceList faces;
         labelList owner;
         labelList neighbour;
@@ -323,9 +493,12 @@ void Foam::conformalVoronoiMesh::writeMesh
         labelList procNeighbours;
         pointField cellCentres;
 
+        PackedBoolList boundaryFacesToRemove;
+
         calcDualMesh
         (
             points,
+            boundaryPts,
             faces,
             owner,
             neighbour,
@@ -337,7 +510,7 @@ void Foam::conformalVoronoiMesh::writeMesh
             cellCentres,
             cellToDelaunayVertex,
             patchToDelaunayVertex,
-            filterFaces
+            boundaryFacesToRemove
         );
 
         Info<< nl << "Writing polyMesh to " << instance << endl;
@@ -347,6 +520,7 @@ void Foam::conformalVoronoiMesh::writeMesh
             Foam::polyMesh::defaultRegion,
             instance,
             points,
+            boundaryPts,
             faces,
             owner,
             neighbour,
@@ -355,11 +529,10 @@ void Foam::conformalVoronoiMesh::writeMesh
             patchSizes,
             dualPatchStarts,
             procNeighbours,
-            cellCentres
+            cellCentres,
+            boundaryFacesToRemove
         );
     }
-
-
 
     if (cvMeshControls().writeTetDualMesh())
     {
@@ -389,6 +562,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         forAll(patchToDelaunayVertex, patchI)
         {
             const labelList& patchVertices = patchToDelaunayVertex[patchI];
+
             forAll(patchVertices, i)
             {
                 label vertI = patchVertices[i];
@@ -416,6 +590,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         pointField points;
+        labelList boundaryPts(number_of_finite_cells(), -1);
         // From tet point back to Delaunay vertex index
         labelList pointToDelaunayVertex;
         faceList faces;
@@ -541,23 +716,24 @@ void Foam::conformalVoronoiMesh::writeMesh
 
         labelList procNeighbours(patchNames.size(), -1);
 
-        Info<< nl << "Writing tetDualMesh to " << instance << endl;
+//        Info<< nl << "Writing tetDualMesh to " << instance << endl;
 
-        writeMesh
-        (
-            "tetDualMesh",
-            instance,
-            points,
-            faces,
-            owner,
-            neighbour,
-            patchTypes,
-            patchNames,
-            patchSizes,
-            patchStarts,
-            procNeighbours,
-            cellCentres
-        );
+//        writeMesh
+//        (
+//            "tetDualMesh",
+//            instance,
+//            points,
+//            boundaryPts,
+//            faces,
+//            owner,
+//            neighbour,
+//            patchTypes,
+//            patchNames,
+//            patchSizes,
+//            patchStarts,
+//            procNeighbours,
+//            cellCentres
+//        );
     }
 }
 
@@ -598,7 +774,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
                 patchI,
                 mesh.boundaryMesh(),
                 Pstream::myProcNo(),
-                procNeighbours[patchI]
+                procNeighbours[patchI],
+                coupledPolyPatch::COINCIDENTFULLMATCH
             );
         }
         else
@@ -620,6 +797,122 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
 }
 
 
+void Foam::conformalVoronoiMesh::checkProcessorPatchesMatch
+(
+    const wordList& patchTypes,
+    const labelList& patchSizes,
+    const labelList& procNeighbours
+) const
+{
+    // Check patch sizes
+    labelListList procPatchSizes
+    (
+        Pstream::nProcs(),
+        labelList(Pstream::nProcs(), -1)
+    );
+
+    forAll(patchTypes, patchI)
+    {
+        if (patchTypes[patchI] == processorPolyPatch::typeName)
+        {
+            procPatchSizes[Pstream::myProcNo()][procNeighbours[patchI]]
+                = patchSizes[patchI];
+        }
+    }
+
+    Pstream::gatherList(procPatchSizes);
+
+    if (Pstream::master())
+    {
+        bool allMatch = true;
+
+        forAll(procPatchSizes, procI)
+        {
+            const labelList& patchSizes = procPatchSizes[procI];
+
+            forAll(patchSizes, patchI)
+            {
+                if (patchSizes[patchI] != procPatchSizes[patchI][procI])
+                {
+                    allMatch = false;
+
+                    Info<< indent << "Patches " << procI << " and " << patchI
+                        << " have different sizes: " << patchSizes[patchI]
+                        << " and " << procPatchSizes[patchI][procI] << endl;
+                }
+            }
+        }
+
+        if (allMatch)
+        {
+            Info<< indent << "All processor patches have matching numbers of "
+                << "faces" << endl;
+        }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::reorderPoints
+(
+    pointField& points,
+    labelList& boundaryPts,
+    faceList& faces,
+    const label nInternalFaces
+) const
+{
+    Info<< incrIndent << indent << "Reordering points into internal/external"
+        << endl;
+
+    labelList oldToNew(points.size(), 0);
+
+    // Find points that are internal
+    for (label fI = nInternalFaces; fI < faces.size(); ++fI)
+    {
+        const face& f = faces[fI];
+
+        forAll(f, fpI)
+        {
+            oldToNew[f[fpI]] = 1;
+        }
+    }
+
+    const label nInternalPoints = points.size() - sum(oldToNew);
+
+    label countInternal = 0;
+    label countExternal = nInternalPoints;
+
+    forAll(points, pI)
+    {
+        if (oldToNew[pI] == 0)
+        {
+            oldToNew[pI] = countInternal++;
+        }
+        else
+        {
+            oldToNew[pI] = countExternal++;
+        }
+    }
+
+    Info<< indent
+        << "Number of internal points: " << countInternal << nl
+        << indent << "Number of external points: " << countExternal
+        << decrIndent << endl;
+
+    inplaceReorder(oldToNew, points);
+    inplaceReorder(oldToNew, boundaryPts);
+
+    forAll(faces, fI)
+    {
+        face& f = faces[fI];
+
+        forAll(f, fpI)
+        {
+            f[fpI] = oldToNew[f[fpI]];
+        }
+    }
+}
+
+
 void Foam::conformalVoronoiMesh::reorderProcessorPatches
 (
     const word& meshName,
@@ -633,6 +926,11 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const labelList& procNeighbours
 ) const
 {
+    Info<< incrIndent << indent << "Reordering processor patches" << endl;
+
+    Info<< incrIndent;
+    checkProcessorPatchesMatch(patchTypes, patchSizes, procNeighbours);
+
     // Create dummy mesh with correct proc boundaries to do sorting
     autoPtr<fvMesh> sortMeshPtr
     (
@@ -656,8 +954,26 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     );
     const fvMesh& sortMesh = sortMeshPtr();
 
+    // Change the transform type on processors to coincident full match.
+//    forAll(sortMesh.boundaryMesh(), patchI)
+//    {
+//        const polyPatch& patch = sortMesh.boundaryMesh()[patchI];
+//
+//        if (isA<processorPolyPatch>(patch))
+//        {
+//            const processorPolyPatch& cpPatch
+//                = refCast<const processorPolyPatch>(patch);
+//
+//            processorPolyPatch& pPatch
+//                = const_cast<processorPolyPatch&>(cpPatch);
+//
+//            pPatch.transform() = coupledPolyPatch::COINCIDENTFULLMATCH;
+//        }
+//    }
+
     // Rotation on new faces.
-    labelList rotation(faces.size(), 0);
+    labelList rotation(faces.size(), -1);
+    labelList faceMap(faces.size(), -1);
 
     PstreamBuffers pBufs(Pstream::nonBlocking);
 
@@ -699,23 +1015,22 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
             labelList patchFaceMap(patchSizes[patchI], -1);
             labelList patchFaceRotation(patchSizes[patchI], 0);
 
-            bool changed =
-                refCast<const processorPolyPatch>(pp).order
+            bool changed = refCast<const processorPolyPatch>(pp).order
+            (
+                pBufs,
+                primitivePatch
                 (
-                    pBufs,
-                    primitivePatch
+                    SubList<face>
                     (
-                        SubList<face>
-                        (
-                            faces,
-                            patchSizes[patchI],
-                            patchStarts[patchI]
-                        ),
-                        points
+                        faces,
+                        patchSizes[patchI],
+                        patchStarts[patchI]
                     ),
-                    patchFaceMap,
-                    patchFaceRotation
-                );
+                    points
+                ),
+                patchFaceMap,
+                patchFaceRotation
+            );
 
             if (changed)
             {
@@ -724,8 +1039,17 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 
                 forAll(patchFaceRotation, patchFaceI)
                 {
-                    rotation[patchFaceI + start] =
-                        patchFaceRotation[patchFaceI];
+                    rotation[patchFaceI + start]
+                        = patchFaceRotation[patchFaceI];
+                }
+
+                forAll(patchFaceMap, patchFaceI)
+                {
+                    if (patchFaceMap[patchFaceI] != patchFaceI)
+                    {
+                        faceMap[patchFaceI + start]
+                            = patchFaceMap[patchFaceI] + start;
+                    }
                 }
 
                 anyChanged = true;
@@ -738,13 +1062,26 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     if (anyChanged)
     {
         // Rotate faces (rotation is already in new face indices).
+        label nRotated = 0;
+
         forAll(rotation, faceI)
         {
+            if (rotation[faceI] == -1)
+            {
+                continue;
+            }
+
             if (rotation[faceI] != 0)
             {
-                faces[faceI] = faces[faceI].rotateFace(rotation[faceI]);
+                inplaceRotateList<List, label>(faces[faceI], rotation[faceI]);
+                nRotated++;
             }
         }
+
+        inplaceReorder(faceMap, faces);
+
+        Info<< indent << returnReduce(nRotated, sumOp<label>())
+            << " faces have been rotated" << decrIndent << decrIndent << endl;
     }
 }
 
@@ -754,6 +1091,7 @@ void Foam::conformalVoronoiMesh::writeMesh
     const word& meshName,
     const fileName& instance,
     pointField& points,
+    labelList& boundaryPts,
     faceList& faces,
     labelList& owner,
     labelList& neighbour,
@@ -762,13 +1100,16 @@ void Foam::conformalVoronoiMesh::writeMesh
     const labelList& patchSizes,
     const labelList& patchStarts,
     const labelList& procNeighbours,
-    const pointField& cellCentres
+    const pointField& cellCentres,
+    const PackedBoolList& boundaryFacesToRemove
 ) const
 {
     if (cvMeshControls().objOutput())
     {
         writeObjMesh(points, faces, word(meshName + ".obj"));
     }
+
+    reorderPoints(points, boundaryPts, faces, patchStarts[0]);
 
     if (Pstream::parRun())
     {
@@ -786,6 +1127,10 @@ void Foam::conformalVoronoiMesh::writeMesh
         );
     }
 
+    Info<< "    Constructing mesh" << endl;
+
+    timeCheck("Before fvMesh construction");
+
     fvMesh mesh
     (
         IOobject
@@ -802,6 +1147,8 @@ void Foam::conformalVoronoiMesh::writeMesh
         xferMove(neighbour)
     );
 
+    Info<< "    Adding patches to mesh" << endl;
+
     List<polyPatch*> patches(patchStarts.size());
 
     label nValidPatches = 0;
@@ -811,7 +1158,6 @@ void Foam::conformalVoronoiMesh::writeMesh
         if (patchTypes[p] == processorPolyPatch::typeName)
         {
             // Do not create empty processor patches
-
             if (patchSizes[p] > 0)
             {
                 patches[nValidPatches] = new processorPolyPatch
@@ -822,7 +1168,8 @@ void Foam::conformalVoronoiMesh::writeMesh
                     nValidPatches,
                     mesh.boundaryMesh(),
                     Pstream::myProcNo(),
-                    procNeighbours[p]
+                    procNeighbours[p],
+                    coupledPolyPatch::NOORDERING
                 );
 
                 nValidPatches++;
@@ -848,18 +1195,224 @@ void Foam::conformalVoronoiMesh::writeMesh
 
     mesh.addFvPatches(patches);
 
+    timeCheck("Before fvMesh filtering");
+
+    autoPtr<polyMeshFilter> meshFilter;
+
+    label nInitialBadFaces = 0;
+
+    if (cvMeshControls().filterEdges())
+    {
+        Info<< nl << "Filtering edges on polyMesh" << nl << endl;
+
+        meshFilter.reset(new polyMeshFilter(mesh));
+
+        // Filter small edges only. This reduces the number of faces so that
+        // the face filtering is sped up.
+        nInitialBadFaces = meshFilter().filterEdges(0);
+        {
+            const autoPtr<fvMesh>& newMesh = meshFilter().filteredMesh();
+
+            polyTopoChange meshMod(newMesh);
+
+            meshMod.changeMesh(mesh, false);
+        }
+    }
+
+    if (cvMeshControls().filterFaces())
+    {
+        Info<< nl << "Filtering faces on polyMesh" << nl << endl;
+
+        meshFilter.reset(new polyMeshFilter(mesh));
+
+        meshFilter().filter(nInitialBadFaces);
+        {
+            const autoPtr<fvMesh>& newMesh = meshFilter().filteredMesh();
+
+            polyTopoChange meshMod(newMesh);
+
+            meshMod.changeMesh(mesh, false);
+        }
+    }
+
+    timeCheck("After fvMesh filtering");
+
+    mesh.setInstance(instance);
+
     if (!mesh.write())
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh(..)")
             << "Failed writing polyMesh."
             << exit(FatalError);
     }
+    else
+    {
+        Info<< nl << "Written filtered mesh to "
+            << mesh.polyMesh::instance() << nl
+            << endl;
+    }
 
-    writeCellSizes(mesh);
 
-    writeCellCentres(mesh);
+    volTensorField alignments
+    (
+        IOobject
+        (
+            "alignmentsField",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        tensor::zero
+    );
 
-    findRemainingProtrusionSet(mesh);
+    forAll(mesh.cellCentres(), pI)
+    {
+        Vertex_handle nearV =
+            nearest_vertex
+            (
+                toPoint<Point>(mesh.cellCentres()[pI])
+            );
+        alignments[pI] = nearV->alignment();
+    }
+    alignments.write();
+
+    {
+        volVectorField alignmentx
+        (
+            IOobject
+            (
+                "alignmentsx",
+                runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            vector::zero
+        );
+        forAll(alignmentx, aI)
+        {
+            alignmentx[aI] = alignments[aI].x();
+        }
+        alignmentx.write();
+    }
+    {
+        volVectorField alignmenty
+        (
+            IOobject
+            (
+                "alignmentsy",
+                runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            vector::zero
+        );
+        forAll(alignmenty, aI)
+        {
+            alignmenty[aI] = alignments[aI].y();
+        }
+        alignmenty.write();
+    }
+    {
+        volVectorField alignmentz
+        (
+            IOobject
+            (
+                "alignmentsz",
+                runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            vector::zero
+        );
+        forAll(alignmentz, aI)
+        {
+            alignmentz[aI] = alignments[aI].z();
+        }
+        alignmentz.write();
+    }
+    labelIOList boundaryIOPts
+    (
+        IOobject
+        (
+            "boundaryPoints",
+            instance,
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        boundaryPts
+    );
+
+
+
+
+    // Dump list of boundary points
+    forAll(mesh.boundaryMesh(), patchI)
+    {
+        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+
+        if (!isA<coupledPolyPatch>(pp))
+        {
+            forAll(pp, fI)
+            {
+                const face& boundaryFace = pp[fI];
+
+                forAll(boundaryFace, pI)
+                {
+                    const label boundaryPointI = boundaryFace[pI];
+
+                    boundaryIOPts[boundaryPointI] = boundaryPts[boundaryPointI];
+                }
+            }
+        }
+    }
+
+    boundaryIOPts.write();
+
+//    forAllConstIter(labelHashSet, pointsInPatch, pI)
+//    {
+//        const Foam::point& ptMaster = mesh.points()[pI.key()];
+//
+//        forAllConstIter(labelHashSet, pointsInPatch, ptI)
+//        {
+//            if (ptI.key() != pI.key())
+//            {
+//                const Foam::point& ptSlave = mesh.points()[ptI.key()];
+//
+//                const scalar dist = mag(ptMaster - ptSlave);
+//                if (ptMaster == ptSlave)
+//                {
+//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
+//                        << " == "
+//                        << "(" << ptI.key() << ") " << ptSlave
+//                        << endl;
+//                }
+//                else if (dist == 0)
+//                {
+//                    Pout<< "Point(" << pI.key() << ") " << ptMaster
+//                        << " ~= "
+//                        << "(" << ptI.key() << ") " << ptSlave
+//                        << endl;
+//                }
+//            }
+//        }
+//    }
+
+//    writeCellSizes(mesh);
+
+//    writeCellAlignments(mesh);
+
+//    writeCellCentres(mesh);
+
+//    findRemainingProtrusionSet(mesh);
 }
 
 
@@ -926,7 +1479,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 
         forAll(cellSize, i)
         {
-            cellSize[i] = cellSizeControl().cellSize(C[i]);
+            cellSize[i] = cellShapeControls().cellSize(C[i]);
         }
 
         // Info<< nl << "Create targetCellVolume volScalarField" << endl;
@@ -1036,11 +1589,66 @@ void Foam::conformalVoronoiMesh::writeCellSizes
 
     //     forAll(cellSize, i)
     //     {
-    //         cellSize[i] = cellSizeControl().cellSize(P[i]);
+    //         cellSize[i] = cellShapeControls().cellSize(P[i]);
     //     }
 
     //     ptTargetCellSize.write();
     // }
+}
+
+
+void Foam::conformalVoronoiMesh::writeCellAlignments
+(
+    const fvMesh& mesh
+) const
+{
+//    Info<< nl << "Create cellAlignments volTensorField" << endl;
+//
+//    volTensorField cellAlignments
+//    (
+//        IOobject
+//        (
+//            "cellAlignments",
+//            mesh.polyMesh::instance(),
+//            mesh,
+//            IOobject::NO_READ,
+//            IOobject::AUTO_WRITE
+//        ),
+//        mesh,
+//        tensor::I,
+//        zeroGradientFvPatchTensorField::typeName
+//    );
+//
+//    tensorField& cellAlignment = cellAlignments.internalField();
+//
+//    const vectorField& C = mesh.cellCentres();
+//
+//    vectorField xDir(cellAlignment.size());
+//    vectorField yDir(cellAlignment.size());
+//    vectorField zDir(cellAlignment.size());
+//
+//    forAll(cellAlignment, i)
+//    {
+//        cellAlignment[i] = cellShapeControls().cellAlignment(C[i]);
+//        xDir[i] = cellAlignment[i] & vector(1, 0, 0);
+//        yDir[i] = cellAlignment[i] & vector(0, 1, 0);
+//        zDir[i] = cellAlignment[i] & vector(0, 0, 1);
+//    }
+//
+//    OFstream xStr("xDir.obj");
+//    OFstream yStr("yDir.obj");
+//    OFstream zStr("zDir.obj");
+//
+//    forAll(xDir, i)
+//    {
+//        meshTools::writeOBJ(xStr, C[i], C[i] + xDir[i]);
+//        meshTools::writeOBJ(yStr, C[i], C[i] + yDir[i]);
+//        meshTools::writeOBJ(zStr, C[i], C[i] + zDir[i]);
+//    }
+//
+//    cellAlignments.correctBoundaryConditions();
+//
+//    cellAlignments.write();
 }
 
 

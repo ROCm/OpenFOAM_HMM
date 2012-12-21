@@ -112,7 +112,7 @@ DebugSwitches
     ConeInjection       0;
     Constant            0;
     ConstantRateDevolatilisation    0;
-    CrankNicholson      0;
+    CrankNicolson      0;
     CrossPowerLaw       0;
     Cs                  0;
     DIC                 0;
@@ -630,7 +630,7 @@ DebugSwitches
     muSgsSpalartAllmarasWallFunction 0;
     multiDirRefinement  0;
     multiHoleInjector   0;
-    multiLevel          1;
+    multiLevel          0;
     multivariateSelection 0;
     mutRoughWallFunction 0;
     mutSpalartAllmarasStandardRoughWallFunction  0;
@@ -994,7 +994,7 @@ DimensionSets
         acceleration acceleration  [ m s^-2 ] 1.0;
         kinematicPressure kinematicPressure [ Pa density^-1 ] 1.0;
 
-        // Scaled units. Only allowed in dymensionedType (dimensionedScalar,
+        // Scaled units. Only allowed in dimensionedType (dimensionedScalar,
         // dimensionedVector etc.) and UniformDimensionedField, not
         // in DimensionedField or GeometricField
         cm  cm  [ m ] 1e-2;

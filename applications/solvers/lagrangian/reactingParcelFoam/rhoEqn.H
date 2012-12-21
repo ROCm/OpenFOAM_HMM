@@ -43,6 +43,8 @@ Description
 
     rhoEqn.solve();
 
+    sources.correct(rho);
+
     Info<< "rho min/max = " << min(rho).value() << ", " << max(rho).value()
         << endl;
 }

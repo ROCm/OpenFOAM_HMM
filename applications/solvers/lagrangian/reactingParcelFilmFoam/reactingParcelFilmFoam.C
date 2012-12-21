@@ -37,6 +37,7 @@ Description
 #include "psiCombustionModel.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
+#include "IObasicSourceList.H"
 #include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "createClouds.H"
     #include "createRadiationModel.H"
     #include "createSurfaceFilmModel.H"

@@ -36,7 +36,6 @@ Description
 #include "regionProperties.H"
 #include "solidThermo.H"
 #include "radiationModel.H"
-#include "IOporosityModelList.H"
 #include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

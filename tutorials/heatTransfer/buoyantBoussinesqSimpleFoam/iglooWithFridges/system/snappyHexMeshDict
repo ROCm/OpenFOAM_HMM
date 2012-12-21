@@ -42,38 +42,6 @@ geometry
         max (1 1 1);
     }
 
-    fridgeFreezer
-    {
-        type searchableSurfaceCollection;
-
-        mergeSubRegions true;
-
-        freezer
-        {
-            surface box1;
-            scale (1 1 1);
-            transform
-            {
-                type    cartesian;
-                origin  (0 0 0);
-                e1      (1 0 0);
-                e3      (0 0 1);
-            }
-        }
-        fridge
-        {
-            surface box1;
-            scale (1 1 1.1);
-            transform
-            {
-                type    cartesian;
-                origin  (0 0 1);
-                e1      (1 0 0);
-                e3      (0 0 1);
-            }
-        }
-    }
-
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
@@ -150,7 +118,7 @@ castellatedMeshControls
     (
         {
             file "fridgeA.eMesh";
-            level 3;
+            levels ((0.01 3));
         }
     );
 
@@ -180,12 +148,28 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional specification of patch type (default is wall). No
+            // constraint types (cyclic, symmetry) etc. are allowed.
+            patchInfo
+            {
+                type        wall;
+                inGroups    (wall);
+            }
         }
 
         "iglo.*"
         {
             // Surface-wise min and max refinement level
             level (1 1);
+
+            // Optional specification of patch type (default is wall). No
+            // constraint types (cyclic, symmetry) etc. are allowed.
+            patchInfo
+            {
+                type        wall;
+                inGroups    (wall);
+            }
         }
     }
 
@@ -288,35 +272,34 @@ addLayersControls
     // Expansion factor for layer mesh
     expansionRatio 1.0;
 
-    //- Wanted thickness of final added cell layer. If multiple layers
-    //  is the
-    //  thickness of the layer furthest away from the wall.
-    //  Relative to undistorted size of cell outside layer.
-    //  is the thickness of the layer furthest away from the wall.
-    //  See relativeSizes parameter.
+    // Wanted thickness of final added cell layer. If multiple layers
+    // is the thickness of the layer furthest away from the wall.
+    // Relative to undistorted size of cell outside layer.
+    // is the thickness of the layer furthest away from the wall.
+    // See relativeSizes parameter.
     finalLayerThickness 0.5;
 
-    //- Minimum thickness of cell layer. If for any reason layer
-    //  cannot be above minThickness do not add layer.
-    //  Relative to undistorted size of cell outside layer.
-    //  See relativeSizes parameter.
+    // Minimum thickness of cell layer. If for any reason layer
+    // cannot be above minThickness do not add layer.
+    // Relative to undistorted size of cell outside layer.
+    // See relativeSizes parameter.
     minThickness 0.25;
 
-    //- If points get not extruded do nGrow layers of connected faces that are
-    //  also not grown. This helps convergence of the layer addition process
-    //  close to features.
+    // If points get not extruded do nGrow layers of connected faces that are
+    // also not grown. This helps convergence of the layer addition process
+    // close to features.
     // Note: changed(corrected) w.r.t 17x! (didn't do anything in 17x)
     nGrow 0;
 
 
     // Advanced settings
 
-    //- When not to extrude surface. 0 is flat surface, 90 is when two faces
-    //  make straight angle.
+    // When not to extrude surface. 0 is flat surface, 90 is when two faces
+    // are perpendicular
     featureAngle 60;
 
-    //- Maximum number of snapping relaxation iterations. Should stop
-    //  before upon reaching a correct mesh.
+    // Maximum number of snapping relaxation iterations. Should stop
+    // before upon reaching a correct mesh.
     nRelaxIter 5;
 
     // Number of smoothing iterations of surface normals

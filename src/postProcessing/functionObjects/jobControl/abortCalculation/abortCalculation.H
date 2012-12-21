@@ -45,7 +45,6 @@ SourceFiles
 #ifndef abortCalculation_H
 #define abortCalculation_H
 
-#include "pointFieldFwd.H"
 #include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,6 +55,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -154,7 +154,7 @@ public:
         {}
 
         //- Update for changes of mesh - does nothing
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

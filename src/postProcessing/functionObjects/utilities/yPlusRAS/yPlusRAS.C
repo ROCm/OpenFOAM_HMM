@@ -36,7 +36,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::yPlusRAS, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(yPlusRAS, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -56,7 +59,7 @@ void Foam::yPlusRAS::calcIncompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef incompressible::RASModels::nutWallFunctionFvPatchScalarField
+    typedef incompressible::nutWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     const incompressible::RASModel& model =
@@ -114,7 +117,7 @@ void Foam::yPlusRAS::calcCompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef compressible::RASModels::mutWallFunctionFvPatchScalarField
+    typedef compressible::mutWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     const compressible::RASModel& model =

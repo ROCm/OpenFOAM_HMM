@@ -31,7 +31,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::forceCoeffs, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(forceCoeffs, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

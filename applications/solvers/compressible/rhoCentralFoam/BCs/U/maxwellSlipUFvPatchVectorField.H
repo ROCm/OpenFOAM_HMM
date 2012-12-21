@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,21 @@ class maxwellSlipUFvPatchVectorField
     public mixedFixedValueSlipFvPatchVectorField
 {
     // Private data
+
+        //- Temperature field name, default = "T"
+        word TName_;
+
+        //- Density field name, default = "rho"
+        word rhoName_;
+
+        //- Compressibility field name, default = "thermo:psi"
+        word psiName_;
+
+        //- Dynamic viscosity field name, default = "thermo:mu"
+        word muName_;
+
+        //- tauMC field name, default = "tauMC"
+        word tauMCName_;
 
         // Accommodation coefficient
         scalar accommodationCoeff_;

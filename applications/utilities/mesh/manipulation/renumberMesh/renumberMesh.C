@@ -471,6 +471,47 @@ autoPtr<mapPolyMesh> reorderMesh
         true
     );
 
+
+    // Re-do the faceZones
+    {
+        faceZoneMesh& faceZones = mesh.faceZones();
+        faceZones.clearAddressing();
+        forAll(faceZones, zoneI)
+        {
+            faceZone& fZone = faceZones[zoneI];
+            labelList newAddressing(fZone.size());
+            boolList newFlipMap(fZone.size());
+            forAll(fZone, i)
+            {
+                label oldFaceI = fZone[i];
+                newAddressing[i] = reverseFaceOrder[oldFaceI];
+                if (flipFaceFlux.found(newAddressing[i]))
+                {
+                    newFlipMap[i] = !fZone.flipMap()[i];
+                }
+                else
+                {
+                    newFlipMap[i] = fZone.flipMap()[i];
+                }
+            }
+            fZone.resetAddressing(newAddressing, newFlipMap);
+        }
+    }
+    // Re-do the cellZones
+    {
+        cellZoneMesh& cellZones = mesh.cellZones();
+        cellZones.clearAddressing();
+        forAll(cellZones, zoneI)
+        {
+            cellZones[zoneI] = UIndirectList<label>
+            (
+                reverseCellOrder,
+                cellZones[zoneI]
+            )();
+        }
+    }
+
+
     return autoPtr<mapPolyMesh>
     (
         new mapPolyMesh
@@ -573,11 +614,7 @@ int main(int argc, char *argv[])
 #   include "addRegionOption.H"
 #   include "addOverwriteOption.H"
 #   include "addTimeOptions.H"
-    argList::addBoolOption
-    (
-        "dict",
-        "renumber according to system/renumberMeshDict"
-    );
+#   include "addDictOption.H"
     argList::addBoolOption
     (
         "frontWidth",
@@ -659,23 +696,13 @@ int main(int argc, char *argv[])
 
     if (readDict)
     {
-        Info<< "Renumber according to renumberMeshDict." << nl << endl;
+        const word dictName("renumberMeshDict");
+        #include "setSystemMeshDictionaryIO.H"
 
-        renumberDictPtr.reset
-        (
-            new IOdictionary
-            (
-                IOobject
-                (
-                    "renumberMeshDict",
-                    runTime.system(),
-                    mesh,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
-                )
-            )
-        );
-        const IOdictionary renumberDict = renumberDictPtr();
+        Info<< "Renumber according to " << dictName << nl << endl;
+
+        renumberDictPtr.reset(new IOdictionary(dictIO));
+        const IOdictionary& renumberDict = renumberDictPtr();
 
         renumberPtr = renumberMethod::New(renumberDict);
 

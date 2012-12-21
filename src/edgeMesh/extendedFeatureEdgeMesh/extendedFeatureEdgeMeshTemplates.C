@@ -43,6 +43,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     const edgeList& sFeatEds(surf.edges());
     const labelListList& edgeFaces = surf.edgeFaces();
     const vectorField& faceNormals = surf.faceNormals();
+    const labelListList& pointEdges = surf.pointEdges();
 
     // Extract and reorder the data from surfaceFeatures
 
@@ -51,6 +52,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     // Filling the extendedFeatureEdgeMesh with the raw geometrical data.
 
     label nFeatEds = featureEdges.size();
+    label nFeatPts = featurePoints.size();
 
     DynamicList<point> tmpPts;
     edgeList eds(nFeatEds);
@@ -58,6 +60,14 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     vectorField edgeDirections(nFeatEds);
     labelListList edgeNormals(nFeatEds);
     DynamicList<label> regionEdges;
+
+    // Keep track of the ordered feature point feature edges
+    labelListList featurePointFeatureEdges(nFeatPts);
+    forAll(featurePointFeatureEdges, pI)
+    {
+        featurePointFeatureEdges[pI] =
+            labelList(pointEdges[featurePoints[pI]].size(), -1);
+    }
 
     // Mapping between old and new indices, there is entry in the map for each
     // of surf.localPoints, -1 means that this point hasn't been used (yet),
@@ -81,7 +91,6 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 
     // All feature points have been added
     nonFeatureStart_ = tmpPts.size();
-
 
     PackedBoolList isRegionFeatureEdge(regionFeatureEdges);
 
@@ -147,7 +156,42 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
         {
             regionEdges.append(i);
         }
+
+        forAll(featurePointFeatureEdges, pI)
+        {
+            const labelList& fpfEdges = pointEdges[featurePoints[pI]];
+
+            labelList& fpfe = featurePointFeatureEdges[pI];
+
+            forAll(fpfEdges, eI)
+            {
+                if (sFEI == fpfEdges[eI])
+                {
+                    fpfe[eI] = i;
+                }
+            }
+        }
     }
+
+    forAll(featurePointFeatureEdges, pI)
+    {
+        const labelList& fpfe = featurePointFeatureEdges[pI];
+
+        DynamicList<label> newFeatureEdges(fpfe.size());
+
+        forAll(fpfe, eI)
+        {
+            const label edgeIndex = fpfe[eI];
+
+            if (edgeIndex != -1)
+            {
+                newFeatureEdges.append(edgeIndex);
+            }
+        }
+
+        featurePointFeatureEdges[pI] = newFeatureEdges;
+    }
+
 
     // Reorder the edges by classification
 
@@ -221,6 +265,11 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     inplaceReorder(edMap, edgeDirections);
     inplaceReorder(edMap, edgeNormals);
     inplaceRenumber(edMap, regionEdges);
+
+    forAll(featurePointFeatureEdges, pI)
+    {
+        inplaceRenumber(edMap, featurePointFeatureEdges[pI]);
+    }
 
     pointField pts(tmpPts);
 
@@ -301,6 +350,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     }
 
     inplaceReorder(ptMap, pts);
+    inplaceReorder(ptMap, featurePointFeatureEdges);
 
     forAll(eds, i)
     {
@@ -311,6 +361,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     // renumbered edges
     reset(xferMove(pts), xferMove(eds));
 
+
     // Generate the featurePointNormals
 
     labelListList featurePointNormals(nonFeatureStart_);
@@ -319,7 +370,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     {
         DynamicList<label> tmpFtPtNorms;
 
-        const labelList& ptEds = pointEdges()[i];
+        const labelList& ptEds = edgeMesh::pointEdges()[i];
 
         forAll(ptEds, j)
         {
@@ -359,6 +410,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
     }
 
     featurePointNormals_ = featurePointNormals;
+    featurePointEdges_ = featurePointFeatureEdges;
 }
 
 

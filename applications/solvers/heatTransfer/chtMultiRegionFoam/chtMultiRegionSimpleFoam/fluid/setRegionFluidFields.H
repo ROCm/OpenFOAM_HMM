@@ -12,9 +12,7 @@
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
 
-    IObasicSourceList& sources = heatSources[i];
-
-    const IOporosityModelList& pZones = porousZonesFluid[i];
+    IObasicSourceList& sources = fluidSources[i];
 
     const dimensionedScalar initialMass
     (

@@ -30,6 +30,7 @@ License
 #include "perfectGas.H"
 #include "incompressiblePerfectGas.H"
 #include "rhoConst.H"
+#include "perfectFluid.H"
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
@@ -98,6 +99,18 @@ makeThermo
     sensibleEnthalpy,
     hConstThermo,
     rhoConst,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    perfectFluid,
     specie
 );
 
@@ -197,6 +210,18 @@ makeThermo
     sensibleInternalEnergy,
     hConstThermo,
     rhoConst,
+    specie
+);
+
+makeThermo
+(
+    rhoThermo,
+    heRhoThermo,
+    pureMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    perfectFluid,
     specie
 );
 

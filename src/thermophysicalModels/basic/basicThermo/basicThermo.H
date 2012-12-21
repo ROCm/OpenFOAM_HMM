@@ -59,10 +59,14 @@ protected:
 
     // Protected data
 
+        //- Phase-name
+        const word& phaseName_;
+
+
         // Fields
 
             //- Pressure [Pa]
-            volScalarField p_;
+            volScalarField& p_;
 
             //- Temperature [K]
             volScalarField T_;
@@ -75,6 +79,12 @@ protected:
 
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
+
+        volScalarField& lookupOrConstruct
+        (
+            const fvMesh& mesh,
+            const char* name
+        ) const;
 
 
 public:
@@ -89,18 +99,27 @@ public:
         autoPtr,
         basicThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
 
     // Constructors
 
-        //- Construct from mesh
-        basicThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        basicThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
-        //- Construct from mesh
-        basicThermo(const fvMesh&, const dictionary&);
+        //- Construct from mesh, dictionary and phase name
+        basicThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     // Selectors
@@ -115,14 +134,27 @@ public:
 
         //- Generic New for each of the related thermodynamics packages
         template<class Thermo>
-        static autoPtr<Thermo> New(const fvMesh&);
+        static autoPtr<Thermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
         //- Generic New for each of the related thermodynamics packages
         template<class Thermo>
-        static autoPtr<Thermo> New(const fvMesh&, const dictionary&);
+        static autoPtr<Thermo> New
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName=word::null
+        );
 
         //- Specialisation of the Generic New for basicThermo
-        static autoPtr<basicThermo> New(const fvMesh&);
+        static autoPtr<basicThermo> New
+        (
+            const fvMesh&,
+            const word& phaseName=word::null
+        );
 
 
     //- Destructor
@@ -131,11 +163,29 @@ public:
 
     // Member functions
 
+        static const word dictName;
+
+        static word phasePropertyName
+        (
+            const word& name,
+            const word& phaseName
+        )
+        {
+            return name + phaseName;
+        }
+
+        word phasePropertyName(const word& name) const
+        {
+            return basicThermo::phasePropertyName(name, phaseName_);
+        }
+
+        static const basicThermo& lookupThermo(const fvPatchScalarField& pf);
+
         //- Check that the thermodynamics package is consistent
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&
         ) const;
 
@@ -143,7 +193,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&
         ) const;
@@ -152,7 +202,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&,
             const word&
@@ -162,7 +212,7 @@ public:
         //  with energy forms supported by the application
         void validate
         (
-            const word& app,
+            const string& app,
             const word&,
             const word&,
             const word&,
@@ -212,6 +262,14 @@ public:
 
             //- Enthalpy/Internal energy [J/kg]
             virtual const volScalarField& he() const = 0;
+
+            //- Enthalpy/Internal energy
+            //  for given pressure and temperature [J/kg]
+            virtual tmp<volScalarField> he
+            (
+                const volScalarField& p,
+                const volScalarField& T
+            ) const = 0;
 
             //- Enthalpy/Internal energy for cell-set [J/kg]
             virtual tmp<scalarField> he
@@ -356,7 +414,7 @@ public:
             ) const = 0;
 
 
-        //- Read thermophysicalProperties dictionary
+        //- Read thermophysical properties dictionary
         virtual bool read();
 };
 

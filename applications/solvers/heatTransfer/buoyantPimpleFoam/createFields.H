@@ -1,9 +1,6 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<rhoThermo> pThermo
-    (
-        rhoThermo::New(mesh)
-    );
+    autoPtr<rhoThermo> pThermo(rhoThermo::New(mesh));
     rhoThermo& thermo = pThermo();
     thermo.validate(args.executable(), "h", "e");
 
@@ -89,6 +86,3 @@
 
     Info<< "Creating field kinetic energy K\n" << endl;
     volScalarField K("K", 0.5*magSqr(U));
-
-    Info<< "Creating sources\n" << endl;
-    IObasicSourceList sources(mesh);

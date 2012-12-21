@@ -63,21 +63,34 @@ public:
         autoPtr,
         fluidThermo,
         fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
+        (const fvMesh& mesh, const word& phaseName),
+        (mesh, phaseName)
     );
 
     // Constructors
 
-        //- Construct from mesh
-        fluidThermo(const fvMesh&);
+        //- Construct from mesh and phase name
+        fluidThermo
+        (
+            const fvMesh&,
+            const word& phaseName
+        );
 
-        //- Construct from mesh
-        fluidThermo(const fvMesh&, const dictionary&);
+        //- Construct from mesh and phase name
+        fluidThermo
+        (
+            const fvMesh&,
+            const dictionary&,
+            const word& phaseName
+        );
 
 
     //- Selector
-    static autoPtr<fluidThermo> New(const fvMesh&);
+    static autoPtr<fluidThermo> New
+    (
+        const fvMesh&,
+        const word& phaseName=word::null
+    );
 
 
     //- Destructor

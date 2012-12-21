@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
                 IOobject
                 (
                     typeName,
-                    "constant",
+                    obr.time().constant(),
                     obr,
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE

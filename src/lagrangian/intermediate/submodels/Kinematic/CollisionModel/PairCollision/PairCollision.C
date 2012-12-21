@@ -302,13 +302,15 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                     if (particleHit)
                     {
-                        this->owner().functions().postFace(p, realFaceI);
+                        bool keep = true;
+                        this->owner().functions().postFace(p, realFaceI, keep);
                         this->owner().functions().postPatch
                         (
                             p,
                             mesh.boundaryMesh()[patchI],
                             1.0,
-                            p.currentTetIndices()
+                            p.currentTetIndices(),
+                            keep
                         );
                      }
                 }
@@ -662,9 +664,9 @@ void Foam::PairCollision<CloudType>::collide()
 {
     preInteraction();
 
-    wallInteraction();
-
     parcelInteraction();
+
+    wallInteraction();
 
     postInteraction();
 }

@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2011 OpenFOAM Foundation
+   \\  /     A nd            | Copyright (C) 2011-2012 OpenFOAM Foundation
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -21,11 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-    As a special exception, you have permission to link this program with the
-    CGAL library and distribute executables, as long as you follow the
-    requirements of the GNU GPL in regard to all of the software in the
-    executable aside from CGAL.
-
 Application
     cvMesh
 
@@ -36,6 +31,7 @@ Description
 
 #include "argList.H"
 #include "conformalVoronoiMesh.H"
+#include "vtkSetWriter.H"
 
 using namespace Foam;
 
@@ -43,10 +39,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addBoolOption
+    Foam::argList::addBoolOption
     (
-        "noFilter",
-        "Do not filter the mesh"
+        "checkGeometry",
+        "check all surface geometry for quality"
     );
 
     #include "setRootCase.H"
@@ -54,9 +50,7 @@ int main(int argc, char *argv[])
 
     runTime.functionObjects().off();
 
-    const bool noFilter = !args.optionFound("noFilter");
-
-    Info<< "Mesh filtering is " << (noFilter ? "on" : "off") << endl;
+    const bool checkGeometry = args.optionFound("checkGeometry");
 
     IOdictionary cvMeshDict
     (
@@ -70,9 +64,45 @@ int main(int argc, char *argv[])
         )
     );
 
+
+    if (checkGeometry)
+    {
+        const searchableSurfaces allGeometry
+        (
+            IOobject
+            (
+                "cvSearchableSurfaces",
+                runTime.constant(),
+                "triSurface",
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            cvMeshDict.subDict("geometry")
+        );
+
+        // Write some stats
+        allGeometry.writeStats(List<wordList>(0), Info);
+        // Check topology
+        allGeometry.checkTopology(true);
+        // Check geometry
+        allGeometry.checkGeometry
+        (
+            100.0,      // max size ratio
+            1e-9,       // intersection tolerance
+            autoPtr<writer<scalar> >(new vtkSetWriter<scalar>()),
+            0.01,       // min triangle quality
+            true
+        );
+
+        return 0;
+    }
+
+
     conformalVoronoiMesh::debug = true;
 
     conformalVoronoiMesh mesh(runTime, cvMeshDict);
+
 
     while (runTime.loop())
     {
@@ -82,14 +112,8 @@ int main(int argc, char *argv[])
 
         Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+            << endl;
     }
-
-    mesh.writeMesh(runTime.constant(), noFilter);
-
-    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-        << nl << endl;
 
     Info<< nl << "End" << nl << endl;
 

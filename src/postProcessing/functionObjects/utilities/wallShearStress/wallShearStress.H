@@ -36,14 +36,33 @@ Description
             Stress = R \dot n
         \f]
 
-    The shear stress (symmetrical) tensor field is retrieved from the
-    turbulence model.
-
     where
     \vartable
         R       | stress tensor
         n       | patch normal vector (into the domain)
     \endvartable
+
+    The shear stress (symmetrical) tensor field is retrieved from the
+    turbulence model.  All wall patches are included by default; to restrict
+    the calculation to certain patches, use the optional 'patches' entry.
+
+    Example of function object specification:
+    \verbatim
+    wallShearStress1
+    {
+        type        wallShearStress;
+        functionObjectLibs ("libutilityFunctionObjects.so");
+        ...
+        patches     (".*Wall");
+    }
+    \endverbatim
+
+    \heading Function object usage
+    \table
+        Property | Description               | Required    | Default value
+        type     | type name: wallShearStress | yes        |
+        patches  | list of patches to process | no         | all wall patches
+    \endtable
 
 SourceFiles
     wallShearStress.C
@@ -56,7 +75,6 @@ SourceFiles
 
 #include "functionObjectFile.H"
 #include "volFieldsFwd.H"
-#include "pointFieldFwd.H"
 #include "Switch.H"
 #include "OFstream.H"
 
@@ -68,6 +86,7 @@ namespace Foam
 // Forward declaration of classes
 class objectRegistry;
 class dictionary;
+class polyMesh;
 class mapPolyMesh;
 class fvMesh;
 
@@ -94,8 +113,8 @@ protected:
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        //- Name of mass/volume flux field (optional, default = phi)
-        word phiName_;
+        //- Optional list of patches to process
+        labelHashSet patchSet_;
 
 
     // Protected Member Functions
@@ -166,7 +185,7 @@ public:
         {}
 
         //- Update for changes of mesh
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const polyMesh&)
         {}
 };
 

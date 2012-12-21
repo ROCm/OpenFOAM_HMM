@@ -36,9 +36,6 @@ namespace Foam
 namespace compressible
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::
@@ -161,8 +158,6 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         nbrMesh
     ).boundary()[mpp.samplePolyPatch().index()];
 
-    // Force recalculation of mapping and schedule
-    const mapDistribute& distMap = mpp.map();
 
     tmp<scalarField> intFld = patchInternalField();
 
@@ -184,11 +179,11 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
     // Swap to obtain full local values of neighbour internal field
     scalarField nbrIntFld(nbrField.patchInternalField());
-    distMap.distribute(nbrIntFld);
+    mpp.distribute(nbrIntFld);
 
     // Swap to obtain full local values of neighbour kappa*delta
     scalarField nbrKDelta(nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs());
-    distMap.distribute(nbrKDelta);
+    mpp.distribute(nbrKDelta);
 
     tmp<scalarField> myKDelta = kappa(*this)*patch().deltaCoeffs();
 

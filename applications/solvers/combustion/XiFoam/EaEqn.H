@@ -16,10 +16,16 @@
           : -dpdt
         )
       - fvm::laplacian(turbulence->alphaEff(), hea)
+      + sources(rho, hea)
     );
 
     EaEqn.relax();
+
+    sources.constrain(EaEqn);
+
     EaEqn.solve();
+
+    sources.correct(hea);
 
     thermo.correct();
 }

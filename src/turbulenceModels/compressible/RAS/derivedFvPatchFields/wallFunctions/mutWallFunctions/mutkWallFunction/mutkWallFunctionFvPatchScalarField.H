@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::RASModels::mutkWallFunctionFvPatchScalarField
+    Foam::compressible::mutkWallFunctionFvPatchScalarField
 
 Group
     grpCmpWallFunctions
@@ -43,7 +43,7 @@ Description
     \endverbatim
 
 SeeAlso
-    Foam::mutWallFunctionFvPatchScalarField
+    Foam::compressible::mutWallFunctionFvPatchScalarField
 
 SourceFiles
     mutkWallFunctionFvPatchScalarField.C
@@ -60,8 +60,6 @@ SourceFiles
 namespace Foam
 {
 namespace compressible
-{
-namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -160,7 +158,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,24 @@ bool matchPoints
     labelList& from0To1,
     const point& origin = point::zero
 );
+
+
+//- Supply pts0Dir and pts1Dir. They are directions associated with the points
+//  e.g., a face normal associated with each face centre.
+//  A match between similar points is only allowed if their directions are
+//  equal and opposite
+bool matchPoints
+(
+    const UList<point>& pts0,
+    const UList<point>& pts1,
+    const UList<point>& pts0Dir,
+    const UList<point>& pts1Dir,
+    const UList<scalar>& matchDistance,
+    const bool verbose,
+    labelList& from0To1,
+    const point& origin = point::zero
+);
+
 
 } // End namespace Foam
 

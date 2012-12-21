@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,11 +31,41 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+namespace Foam
+{
 // Signal number to catch
-int Foam::sigStopAtWriteNow::signal_
+int sigStopAtWriteNow::signal_
 (
     debug::optimisationSwitch("stopAtWriteNowSignal", -1)
 );
+// Register re-reader
+class addstopAtWriteNowSignalToOpt
+:
+    public ::Foam::simpleRegIOobject
+{
+public:
+    addstopAtWriteNowSignalToOpt(const char* name)
+    :
+        ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
+    {}
+    virtual ~addstopAtWriteNowSignalToOpt()
+    {}
+    virtual void readData(Foam::Istream& is)
+    {
+        sigStopAtWriteNow::signal_ = readLabel(is);
+        sigStopAtWriteNow::set(true);
+    }
+    virtual void writeData(Foam::Ostream& os) const
+    {
+        os << sigStopAtWriteNow::signal_;
+    }
+};
+addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
+(
+    "stopAtWriteNowSignal"
+);
+}
+
 
 static Foam::Time const* runTimePtr_ = NULL;
 
@@ -81,6 +111,36 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow
     const Time& runTime
 )
 {
+    // Store runTime
+    runTimePtr_ = &runTime;
+
+    set(verbose);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::sigStopAtWriteNow::~sigStopAtWriteNow()
+{
+    // Reset old handling
+    if (signal_ > 0)
+    {
+        if (sigaction(signal_, &oldAction_, NULL) < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::sigStopAtWriteNow::~sigStopAtWriteNow()"
+            )   << "Cannot reset " << signal_ << " trapping"
+                << abort(FatalError);
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::sigStopAtWriteNow::set(const bool verbose)
+{
     if (signal_ > 0)
     {
         // Check that the signal is different from the writeNowSignal
@@ -97,9 +157,6 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow
                 << exit(FatalError);
         }
 
-
-        // Store runTime
-        runTimePtr_ = &runTime;
 
         struct sigaction newAction;
         newAction.sa_handler = sigHandler;
@@ -124,27 +181,6 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sigStopAtWriteNow::~sigStopAtWriteNow()
-{
-    // Reset old handling
-    if (signal_ > 0)
-    {
-        if (sigaction(signal_, &oldAction_, NULL) < 0)
-        {
-            FatalErrorIn
-            (
-                "Foam::sigStopAtWriteNow::~sigStopAtWriteNow()"
-            )   << "Cannot reset " << signal_ << " trapping"
-                << abort(FatalError);
-        }
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::sigStopAtWriteNow::active() const
 {

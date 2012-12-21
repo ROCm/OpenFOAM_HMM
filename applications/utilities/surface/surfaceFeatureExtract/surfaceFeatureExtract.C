@@ -680,35 +680,17 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
 
-    argList::addOption
-    (
-        "dict",
-        "word",
-        "specify alternative dictionary for the feature extraction information"
-    );
+#   include "addDictOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    word dictName
-    (
-        args.optionLookupOrDefault<word>("dict", "surfaceFeatureExtractDict")
-    );
+    const word dictName("surfaceFeatureExtractDict");
+#   include "setSystemRunTimeDictionaryIO.H"
 
     Info<< "Reading " << dictName << nl << endl;
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            dictName,
-            runTime.system(),
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
+    const IOdictionary dict(dictIO);
 
     forAllConstIter(dictionary, dict, iter)
     {
@@ -779,7 +761,7 @@ int main(int argc, char *argv[])
         // Either construct features from surface & featureAngle or read set.
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        surfaceFeatures set(surf);
+        autoPtr<surfaceFeatures> set;
 
         scalar includedAngle = -1;
 
@@ -799,7 +781,7 @@ int main(int argc, char *argv[])
             Info<< nl << "Reading existing feature edges from file "
                 << featureEdgeFile << endl;
 
-            set = surfaceFeatures(surf, eMesh.points(), eMesh.edges());
+            set.set(new surfaceFeatures(surf, eMesh.points(), eMesh.edges()));
         }
         else if (extractionMethod == "extractFromSurface")
         {
@@ -814,7 +796,7 @@ int main(int argc, char *argv[])
             Info<< nl << "Constructing feature set from included angle "
                 << includedAngle << endl;
 
-            set = surfaceFeatures(surf, includedAngle);
+            set.set(new surfaceFeatures(surf, includedAngle));
         }
         else
         {
@@ -824,16 +806,6 @@ int main(int argc, char *argv[])
                 << " or extractFromSurface (to construct new set from angle)"
                 << exit(FatalError);
         }
-
-        Info<< nl
-            << "Initial feature set:" << nl
-            << "    feature points : " << set.featurePoints().size() << nl
-            << "    feature edges  : " << set.featureEdges().size() << nl
-            << "    of which" << nl
-            << "        region edges   : " << set.nRegionEdges() << nl
-            << "        external edges : " << set.nExternalEdges() << nl
-            << "        internal edges : " << set.nInternalEdges() << nl
-            << endl;
 
 
         // Trim set
@@ -856,7 +828,7 @@ int main(int argc, char *argv[])
                 Info<< "Removing features with number of edges < "
                     << minElem << endl;
 
-                set.trimFeatures(minLen, minElem);
+                set().trimFeatures(minLen, minElem);
             }
         }
 
@@ -865,7 +837,7 @@ int main(int argc, char *argv[])
         // ~~~~~~
 
         // Convert to marked edges, points
-        List<surfaceFeatures::edgeStatus> edgeStat(set.toStatus());
+        List<surfaceFeatures::edgeStatus> edgeStat(set().toStatus());
 
         if (surfaceDict.isDict("subsetFeatures"))
         {
@@ -958,6 +930,16 @@ int main(int argc, char *argv[])
         surfaceFeatures newSet(surf);
         newSet.setFromStatus(edgeStat);
 
+        Info<< nl
+            << "Initial feature set:" << nl
+            << "    feature points : " << newSet.featurePoints().size() << nl
+            << "    feature edges  : " << newSet.featureEdges().size() << nl
+            << "    of which" << nl
+            << "        region edges   : " << newSet.nRegionEdges() << nl
+            << "        external edges : " << newSet.nExternalEdges() << nl
+            << "        internal edges : " << newSet.nInternalEdges() << nl
+            << endl;
+
         //if (writeObj)
         //{
         //    newSet.writeObj("final");
@@ -974,16 +956,9 @@ int main(int argc, char *argv[])
 
         if (surfaceDict.isDict("addFeatures"))
         {
-            const dictionary& subsetDict = surfaceDict.subDict
-            (
-                "addFeatures"
-            );
-
-            const word addFeName = subsetDict["name"];
+            const word addFeName = surfaceDict.subDict("addFeatures")["name"];
             Info<< "Adding (without merging) features from " << addFeName
                 << nl << endl;
-
-            const Switch flip = subsetDict["flip"];
 
             extendedFeatureEdgeMesh addFeMesh
             (
@@ -999,14 +974,6 @@ int main(int argc, char *argv[])
             );
             Info<< "Read " << addFeMesh.name() << nl;
             writeStats(addFeMesh, Info);
-
-            if (flip)
-            {
-                Info<< "Flipping " << addFeMesh.name() << endl;
-                addFeMesh.flipNormals();
-                Info<< "After flipping " << addFeMesh.name() << nl;
-                writeStats(addFeMesh, Info);
-            }
 
             feMesh.add(addFeMesh);
         }

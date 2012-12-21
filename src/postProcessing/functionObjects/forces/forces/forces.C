@@ -40,7 +40,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::forces, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(forces, 0);
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

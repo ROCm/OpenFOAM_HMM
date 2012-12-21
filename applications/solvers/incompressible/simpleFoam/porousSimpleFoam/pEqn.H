@@ -12,6 +12,8 @@ UEqn.clear();
 surfaceScalarField phiHbyA("phiHbyA", fvc::interpolate(HbyA) & mesh.Sf());
 adjustPhi(phiHbyA, U, p);
 
+mrfZones.relativeFlux(phiHbyA);
+
 while (simple.correctNonOrthogonal())
 {
     tmp<fvScalarMatrix> tpEqn;
@@ -50,3 +52,4 @@ else
 }
 
 U.correctBoundaryConditions();
+sources.correct(U);

@@ -65,7 +65,6 @@ namespace Foam
                 IOobject
                 (
                     args["dict"],
-                    runTime.system(),
                     runTime,
                     IOobject::MUST_READ_IF_MODIFIED
                 )

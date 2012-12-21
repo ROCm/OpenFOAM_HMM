@@ -54,27 +54,12 @@ class oldCyclicPolyPatch
 :
     public coupledPolyPatch
 {
-public:
-
-    enum transformType
-    {
-        UNKNOWN,
-        ROTATIONAL,
-        TRANSLATIONAL
-    };
-    static const NamedEnum<transformType, 3> transformTypeNames;
-
-
-private:
-
     // Private data
 
         //- Morph:angle between normals of neighbouring faces.
         //  Used to split cyclic into halves.
         scalar featureCos_;
 
-        //- Type of transformation - rotational or translational
-        transformType transform_;
 
         // For rotation
 
@@ -199,7 +184,8 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
-            const word& patchType
+            const word& patchType,
+            const transformType transform = UNKNOWN
         );
 
         //- Construct from dictionary

@@ -64,7 +64,7 @@ private:
         const objectRegistry& obr_;
 
         //- Prefix
-        const word& prefix_;
+        const word prefix_;
 
         //- File names
         wordHashSet names_;

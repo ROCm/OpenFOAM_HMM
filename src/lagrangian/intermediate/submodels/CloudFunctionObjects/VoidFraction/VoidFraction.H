@@ -115,7 +115,8 @@ public:
             (
                 const parcelType& p,
                 const label cellI,
-                const scalar dt
+                const scalar dt,
+                bool& keepParticle
             );
 };
 

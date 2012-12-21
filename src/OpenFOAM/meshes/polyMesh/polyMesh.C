@@ -38,14 +38,19 @@ License
 #include "SubField.H"
 
 #include "pointMesh.H"
+#include "Istream.H"
+#include "Ostream.H"
+#include "simpleRegIOobject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::polyMesh, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(polyMesh, 0);
 
-
-Foam::word Foam::polyMesh::defaultRegion = "region0";
-Foam::word Foam::polyMesh::meshSubDir = "polyMesh";
+word polyMesh::defaultRegion = "region0";
+word polyMesh::meshSubDir = "polyMesh";
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -1118,7 +1123,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     if (debug)
     {
         // Check mesh motion
-        if (primitiveMesh::checkMeshMotion(points_, true))
+        if (checkMeshMotion(points_, true))
         {
             Info<< "tmp<scalarField> polyMesh::movePoints"
                 << "(const pointField&) : "
@@ -1172,6 +1177,8 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
             )
         ).movePoints(points_);
     }
+
+    const_cast<Time&>(time()).functionObjects().movePoints(*this);
 
     return sweptVols;
 }

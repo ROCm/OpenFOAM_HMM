@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class smoothDelta Declaration
+                         Class smoothDelta Declaration
 \*---------------------------------------------------------------------------*/
 
 class smoothDelta
@@ -62,7 +62,7 @@ public:
         // Private Member Functions
 
             //- Update. Gets information from neighbouring face/cell and
-            //  uses this to update itself (if nessecary) and return true.
+            //  uses this to update itself (if necessary) and return true.
             template<class TrackingData>
             inline bool update
             (

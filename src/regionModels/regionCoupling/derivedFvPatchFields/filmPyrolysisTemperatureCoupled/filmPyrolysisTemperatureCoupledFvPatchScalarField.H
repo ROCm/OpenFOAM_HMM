@@ -28,15 +28,7 @@ Description
     This boundary condition is designed to be used in conjunction with surface
     film and pyrolysis modelling.  It provides a temperature boundary condition
     for patches on the primary region based on whether the patch is seen to
-    be 'wet', specified by:
-
-        \f[
-            delta > delta_wet
-        \f]
-
-    where
-        \var delta     = film height [m]
-        \var delta_wet = film height above which the surface is considered wet
+    be 'wet', retrieved from the film alpha field.
 
     \li if the patch is wet, the temperature is set using the film temperature
     \li otherwise, it is set using pyrolysis temperature
@@ -83,9 +75,6 @@ class filmPyrolysisTemperatureCoupledFvPatchScalarField
 
         //- Name of density field
         word rhoName_;
-
-        //- Film height threshold beyond which it is considered 'wet' [m]
-        scalar deltaWet_;
 
 
 public:

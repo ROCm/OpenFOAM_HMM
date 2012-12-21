@@ -77,6 +77,12 @@ autoPtr<laminar> laminar::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+const dictionary& laminar::coeffDict() const
+{
+    return dictionary::null;
+}
+
+
 tmp<volScalarField> laminar::nut() const
 {
     return tmp<volScalarField>

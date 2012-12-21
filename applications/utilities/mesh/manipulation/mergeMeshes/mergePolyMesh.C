@@ -33,7 +33,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::mergePolyMesh, 1);
+namespace Foam
+{
+defineTypeNameAndDebug(mergePolyMesh, 1);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

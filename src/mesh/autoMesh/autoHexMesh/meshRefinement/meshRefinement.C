@@ -55,6 +55,7 @@ License
 #include "searchableSurfaces.H"
 #include "treeBoundBox.H"
 #include "zeroGradientFvPatchFields.H"
+#include "fvMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1700,7 +1701,7 @@ Foam::label Foam::meshRefinement::addPatch
     oldToNew[addedPatchI] = insertPatchI;
 
     // Shuffle into place
-    polyPatches.reorder(oldToNew);
+    polyPatches.reorder(oldToNew, true);
     fvPatches.reorder(oldToNew);
 
     reorderPatchFields<volScalarField>(mesh, oldToNew);
@@ -1735,6 +1736,28 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     {
         // Add patch
         label patchI = addPatch(mesh_, name, patchInfo);
+
+//        dictionary patchDict(patchInfo);
+//        patchDict.set("nFaces", 0);
+//        patchDict.set("startFace", 0);
+//        autoPtr<polyPatch> ppPtr
+//        (
+//            polyPatch::New
+//            (
+//                name,
+//                patchDict,
+//                0,
+//                mesh_.boundaryMesh()
+//            )
+//        );
+//        label patchI = fvMeshTools::addPatch
+//        (
+//            mesh_,
+//            ppPtr(),
+//            dictionary(),       // optional field values
+//            calculatedFvPatchField<scalar>::typeName,
+//            true
+//        );
 
         // Store
         label sz = meshedPatches_.size();
@@ -2294,13 +2317,6 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
             }
         }
     }
-
-    // Convert to vtk format
-    string cmd
-    (
-        "objToVTK " + prefix + "_edges.obj " + prefix + "_edges.vtk > /dev/null"
-    );
-    system(cmd.c_str());
 
     Pout<< endl;
 }

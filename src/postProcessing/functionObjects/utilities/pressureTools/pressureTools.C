@@ -29,7 +29,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::pressureTools, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(pressureTools, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -56,7 +59,7 @@ Foam::word Foam::pressureTools::pName() const
 }
 
 
-Foam::dimensionedScalar Foam::pressureTools::rho
+Foam::dimensionedScalar Foam::pressureTools::rhoScale
 (
     const volScalarField& p
 ) const
@@ -72,6 +75,38 @@ Foam::dimensionedScalar Foam::pressureTools::rho
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::pressureTools::rho
+(
+    const volScalarField& p
+) const
+{
+    if (p.dimensions() == dimPressure)
+    {
+        return p.mesh().lookupObject<volScalarField>(rhoName_);
+    }
+    else
+    {
+        return
+            tmp<volScalarField>
+            (
+                new volScalarField
+                (
+                    IOobject
+                    (
+                        "rho",
+                        p.mesh().time().timeName(),
+                        p.mesh(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    p.mesh(),
+                    dimensionedScalar("zero", dimDensity, rhoRef_)
+                )
+            );
+    }
+}
+
+
 Foam::dimensionedScalar Foam::pressureTools::pRef() const
 {
     dimensionedScalar value("pRef", dimPressure, 0.0);
@@ -81,11 +116,14 @@ Foam::dimensionedScalar Foam::pressureTools::pRef() const
         value.value() += pRef_;
     }
 
-    return pRef();
+    return value;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn() const
+Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn
+(
+    const volScalarField& p
+) const
 {
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
 
@@ -110,7 +148,7 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::pDyn() const
     {
         const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
 
-        tpDyn() == 0.5*magSqr(U);
+        tpDyn() == rho(p)*0.5*magSqr(U);
     }
 
     return tpDyn;
@@ -126,7 +164,13 @@ Foam::tmp<Foam::volScalarField> Foam::pressureTools::convertToCoeff
 
     if (calcCoeff_)
     {
-        tCoeff() /= pDyn();
+        tCoeff() -= dimensionedScalar("pInf", dimPressure, pInf_);
+
+        const dimensionedScalar p0("p0", dimPressure, SMALL);
+        const dimensionedVector U("U", dimVelocity, UInf_);
+        const dimensionedScalar rho("rho", dimDensity, rhoInf_);
+
+        tCoeff() /= 0.5*rho*magSqr(U) + p0;
     }
 
     return tCoeff;
@@ -146,12 +190,16 @@ Foam::pressureTools::pressureTools
     name_(name),
     obr_(obr),
     active_(true),
-    calcTotal_(false),
-    calcCoeff_(false),
     pName_("p"),
     UName_("U"),
+    rhoName_("rho"),
+    rhoRef_(1.0),
+    calcTotal_(false),
     pRef_(0.0),
-    rhoRef_(1.0)
+    calcCoeff_(false),
+    pInf_(0.0),
+    UInf_(vector::zero),
+    rhoInf_(0.0)
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
     if (!isA<fvMesh>(obr_))
@@ -188,10 +236,11 @@ void Foam::pressureTools::read(const dictionary& dict)
     {
         dict.readIfPresent("pName", pName_);
         dict.readIfPresent("UName", UName_);
+        dict.readIfPresent("rhoName", rhoName_);
 
         const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
-        if (p.dimensions() != p.dimensions())
+        if (p.dimensions() != dimPressure)
         {
             dict.lookup("rhoRef") >> rhoRef_;
         } 
@@ -203,6 +252,12 @@ void Foam::pressureTools::read(const dictionary& dict)
         }
 
         dict.lookup("calcCoeff") >> calcCoeff_;
+        if (calcCoeff_)
+        {
+            dict.lookup("pInf") >> pInf_;
+            dict.lookup("UInf") >> UInf_;
+            dict.lookup("rhoInf") >> rhoInf_;
+        }
     }
 }
 
@@ -234,7 +289,7 @@ void Foam::pressureTools::write()
                 obr_,
                 IOobject::NO_READ
             ),
-            convertToCoeff(rho(p)*(p + pDyn()) + pRef())
+            convertToCoeff(rhoScale(p)*p + pDyn(p) + pRef())
         );
 
         pResult.write();

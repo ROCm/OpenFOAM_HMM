@@ -31,10 +31,10 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::Time, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(Time, 0);
+
     template<>
     const char* Foam::NamedEnum
     <
@@ -148,7 +148,7 @@ void Foam::Time::setControls()
     else
     {
         // Search directory for valid time directories
-        instantList timeDirs = findTimes(path());
+        instantList timeDirs = findTimes(path(), constant());
 
         if (startFrom == "firstTime")
         {
@@ -324,6 +324,7 @@ Foam::Time::Time
     secondaryWriteControl_(wcTimeStep),
     secondaryWriteInterval_(labelMax/10.0), // bit less to allow calculations
     purgeWrite_(0),
+    secondaryPurgeWrite_(0),
     writeOnce_(false),
     subCycling_(false),
     sigWriteNow_(true, *this),
@@ -416,6 +417,7 @@ Foam::Time::Time
     secondaryWriteControl_(wcTimeStep),
     secondaryWriteInterval_(labelMax/10.0),
     purgeWrite_(0),
+    secondaryPurgeWrite_(0),
     writeOnce_(false),
     subCycling_(false),
     sigWriteNow_(true, *this),
@@ -511,6 +513,7 @@ Foam::Time::Time
     secondaryWriteControl_(wcTimeStep),
     secondaryWriteInterval_(labelMax/10.0),
     purgeWrite_(0),
+    secondaryPurgeWrite_(0),
     writeOnce_(false),
     subCycling_(false),
     sigWriteNow_(true, *this),
@@ -608,6 +611,7 @@ Foam::Time::Time
     secondaryWriteControl_(wcTimeStep),
     secondaryWriteInterval_(labelMax/10.0),
     purgeWrite_(0),
+    secondaryPurgeWrite_(0),
     writeOnce_(false),
     subCycling_(false),
 
@@ -690,13 +694,13 @@ Foam::word Foam::Time::timeName() const
 // Search the construction path for times
 Foam::instantList Foam::Time::times() const
 {
-    return findTimes(path());
+    return findTimes(path(), constant());
 }
 
 
 Foam::word Foam::Time::findInstancePath(const instant& t) const
 {
-    instantList timeDirs = findTimes(path());
+    instantList timeDirs = findTimes(path(), constant());
 
     forAllReverse(timeDirs, timeI)
     {
@@ -712,7 +716,7 @@ Foam::word Foam::Time::findInstancePath(const instant& t) const
 
 Foam::instant Foam::Time::findClosestTime(const scalar t) const
 {
-    instantList timeDirs = findTimes(path());
+    instantList timeDirs = findTimes(path(), constant());
 
     // there is only one time (likely "constant") so return it
     if (timeDirs.size() == 1)
@@ -751,15 +755,16 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
 //
 // Foam::instant Foam::Time::findClosestTime(const scalar t) const
 // {
-//     instantList timeDirs = findTimes(path());
-//     label timeIndex = min(findClosestTimeIndex(timeDirs, t), 0);
+//     instantList timeDirs = findTimes(path(), constant());
+//     label timeIndex = min(findClosestTimeIndex(timeDirs, t), 0, constant());
 //     return timeDirs[timeIndex];
 // }
 
 Foam::label Foam::Time::findClosestTimeIndex
 (
     const instantList& timeDirs,
-    const scalar t
+    const scalar t,
+    const word& constantName
 )
 {
     label nearestIndex = -1;
@@ -767,7 +772,7 @@ Foam::label Foam::Time::findClosestTimeIndex
 
     forAll(timeDirs, timeI)
     {
-        if (timeDirs[timeI].name() == "constant") continue;
+        if (timeDirs[timeI].name() == constantName) continue;
 
         scalar diff = mag(timeDirs[timeI].value() - t);
         if (diff < deltaT)
@@ -1070,11 +1075,13 @@ Foam::Time& Foam::Time::operator++()
 
 
         outputTime_ = false;
+        primaryOutputTime_ = false;
+        secondaryOutputTime_ = false;
 
         switch (writeControl_)
         {
             case wcTimeStep:
-                outputTime_ = !(timeIndex_ % label(writeInterval_));
+                primaryOutputTime_ = !(timeIndex_ % label(writeInterval_));
             break;
 
             case wcRunTime:
@@ -1088,7 +1095,7 @@ Foam::Time& Foam::Time::operator++()
 
                 if (outputIndex > outputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    primaryOutputTime_ = true;
                     outputTimeIndex_ = outputIndex;
                 }
             }
@@ -1103,7 +1110,7 @@ Foam::Time& Foam::Time::operator++()
                 );
                 if (outputIndex > outputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    primaryOutputTime_ = true;
                     outputTimeIndex_ = outputIndex;
                 }
             }
@@ -1118,7 +1125,7 @@ Foam::Time& Foam::Time::operator++()
                 );
                 if (outputIndex > outputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    primaryOutputTime_ = true;
                     outputTimeIndex_ = outputIndex;
                 }
             }
@@ -1130,9 +1137,8 @@ Foam::Time& Foam::Time::operator++()
         switch (secondaryWriteControl_)
         {
             case wcTimeStep:
-                outputTime_ =
-                    outputTime_
-                || !(timeIndex_ % label(secondaryWriteInterval_));
+                secondaryOutputTime_ =
+                    !(timeIndex_ % label(secondaryWriteInterval_));
             break;
 
             case wcRunTime:
@@ -1146,7 +1152,7 @@ Foam::Time& Foam::Time::operator++()
 
                 if (outputIndex > secondaryOutputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    secondaryOutputTime_ = true;
                     secondaryOutputTimeIndex_ = outputIndex;
                 }
             }
@@ -1161,7 +1167,7 @@ Foam::Time& Foam::Time::operator++()
                 );
                 if (outputIndex > secondaryOutputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    secondaryOutputTime_ = true;
                     secondaryOutputTimeIndex_ = outputIndex;
                 }
             }
@@ -1176,12 +1182,15 @@ Foam::Time& Foam::Time::operator++()
                 );
                 if (outputIndex > secondaryOutputTimeIndex_)
                 {
-                    outputTime_ = true;
+                    secondaryOutputTime_ = true;
                     secondaryOutputTimeIndex_ = outputIndex;
                 }
             }
             break;
         }
+
+
+        outputTime_ = primaryOutputTime_ || secondaryOutputTime_;
 
 
         // see if endTime needs adjustment to stop at the next run()/end() check
@@ -1195,6 +1204,7 @@ Foam::Time& Foam::Time::operator++()
             {
                 endTime_ = value();
                 outputTime_ = true;
+                primaryOutputTime_ = true;
             }
             else if (stopAt_ == saNextWrite && outputTime_ == true)
             {
@@ -1205,6 +1215,7 @@ Foam::Time& Foam::Time::operator++()
         // Override outputTime if one-shot writing
         if (writeOnce_)
         {
+            primaryOutputTime_ = true;
             outputTime_ = true;
             writeOnce_ = false;
         }

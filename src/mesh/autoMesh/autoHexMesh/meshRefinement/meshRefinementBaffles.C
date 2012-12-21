@@ -259,7 +259,7 @@ bool Foam::meshRefinement::validBaffleTopology
 // Determine patches for baffles on all intersected unnamed faces
 void Foam::meshRefinement::getBafflePatches
 (
-    const labelList& globalToPatch,
+    const labelList& globalToMasterPatch,
     const labelList& neiLevel,
     const pointField& neiCc,
 
@@ -376,11 +376,11 @@ void Foam::meshRefinement::getBafflePatches
             }
 
             // Pick up the patches
-            ownPatch[faceI] = globalToPatch
+            ownPatch[faceI] = globalToMasterPatch
             [
                 surfaces_.globalRegion(surface1[i], region1[i])
             ];
-            neiPatch[faceI] = globalToPatch
+            neiPatch[faceI] = globalToMasterPatch
             [
                 surfaces_.globalRegion(surface2[i], region2[i])
             ];
@@ -406,14 +406,14 @@ void Foam::meshRefinement::getBafflePatches
 }
 
 
-// Get faces to repatch. Returns map from face to patch.
-Foam::Map<Foam::label> Foam::meshRefinement::getZoneBafflePatches
+Foam::Map<Foam::labelPair>  Foam::meshRefinement::getZoneBafflePatches
 (
     const bool allowBoundary,
-    const labelList& globalToPatch
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch
 ) const
 {
-    Map<label> bafflePatch(mesh_.nFaces()/1000);
+    Map<labelPair> bafflePatch(mesh_.nFaces()/1000);
 
     const wordList& faceZoneNames = surfaces_.faceZoneNames();
     const faceZoneMesh& fZones = mesh_.faceZones();
@@ -427,17 +427,18 @@ Foam::Map<Foam::label> Foam::meshRefinement::getZoneBafflePatches
 
             const faceZone& fZone = fZones[zoneI];
 
-            //// Get patch allocated for zone
-            //label patchI = surfaceToCyclicPatch_[surfI];
-            // Get patch of (first region) of surface
-            label patchI = globalToPatch[surfaces_.globalRegion(surfI, 0)];
+            // Get patch allocated for zone
+            label globalRegionI = surfaces_.globalRegion(surfI, 0);
+            labelPair zPatches
+            (
+                globalToMasterPatch[globalRegionI],
+                globalToSlavePatch[globalRegionI]
+            );
 
-            Info<< "For surface "
-                << surfaces_.names()[surfI]
-                << " found faceZone " << fZone.name()
-                << " and patch " << mesh_.boundaryMesh()[patchI].name()
+            Info<< "For zone " << fZone.name() << " found patches "
+                << mesh_.boundaryMesh()[zPatches[0]].name() << " and "
+                << mesh_.boundaryMesh()[zPatches[1]].name()
                 << endl;
-
 
             forAll(fZone, i)
             {
@@ -445,22 +446,20 @@ Foam::Map<Foam::label> Foam::meshRefinement::getZoneBafflePatches
 
                 if (allowBoundary || mesh_.isInternalFace(faceI))
                 {
-                    if (!bafflePatch.insert(faceI, patchI))
+                    labelPair patches = zPatches;
+                    if (fZone.flipMap()[i])
                     {
-                        label oldPatchI = bafflePatch[faceI];
+                       patches = patches.reversePair();
+                    }
 
-                        if (oldPatchI != patchI)
-                        {
-                            FatalErrorIn("getZoneBafflePatches(const bool)")
-                                << "Face " << faceI
-                                << " fc:" << mesh_.faceCentres()[faceI]
-                                << " in zone " << fZone.name()
-                                << " is in patch "
-                                << mesh_.boundaryMesh()[oldPatchI].name()
-                                << " and in patch "
-                                << mesh_.boundaryMesh()[patchI].name()
-                                << abort(FatalError);
-                        }
+                    if (!bafflePatch.insert(faceI, patches))
+                    {
+                        FatalErrorIn("getZoneBafflePatches(..)")
+                            << "Face " << faceI
+                            << " fc:" << mesh_.faceCentres()[faceI]
+                            << " in zone " << fZone.name()
+                            << " is in multiple zones!"
+                            << abort(FatalError);
                     }
                 }
             }
@@ -698,7 +697,8 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::getDuplicateFaces
 
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 (
-    const labelList& globalToPatch,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
     List<labelPair>& baffles
 )
 {
@@ -714,20 +714,30 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
 
         // Get faces (internal only) to be baffled. Map from face to patch
         // label.
-        Map<label> faceToPatch(getZoneBafflePatches(false, globalToPatch));
+        Map<labelPair> faceToPatch
+        (
+            getZoneBafflePatches
+            (
+                false,
+                globalToMasterPatch,
+                globalToSlavePatch
+            )
+        );
 
         label nZoneFaces = returnReduce(faceToPatch.size(), sumOp<label>());
         if (nZoneFaces > 0)
         {
             // Convert into labelLists
             labelList ownPatch(mesh_.nFaces(), -1);
-            forAllConstIter(Map<label>, faceToPatch, iter)
+            labelList neiPatch(mesh_.nFaces(), -1);
+            forAllConstIter(Map<labelPair>, faceToPatch, iter)
             {
-                ownPatch[iter.key()] = iter();
+                ownPatch[iter.key()] = iter().first();
+                neiPatch[iter.key()] = iter().second();
             }
 
             // Create baffles. both sides same patch.
-            map = createBaffles(ownPatch, ownPatch);
+            map = createBaffles(ownPatch, neiPatch);
 
             // Get pairs of faces created.
             // Just loop over faceMap and store baffle if we encounter a slave
@@ -744,7 +754,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createZoneBaffles
                 label oldFaceI = faceMap[faceI];
 
                 // Does face originate from face-to-patch
-                Map<label>::const_iterator iter = faceToPatch.find(oldFaceI);
+                Map<labelPair>::const_iterator iter = faceToPatch.find
+                (
+                    oldFaceI
+                );
 
                 if (iter != faceToPatch.end())
                 {
@@ -1108,7 +1121,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     mesh_.setInstance(timeName());
 
     // Update intersections. Recalculate intersections on merged faces since
-    // this seems to give problems? Note: should not be nessecary since
+    // this seems to give problems? Note: should not be necessary since
     // baffles preserve intersections from when they were created.
     labelList newExposedFaces(2*couples.size());
     label newI = 0;
@@ -1344,7 +1357,8 @@ void Foam::meshRefinement::findCellZoneGeometric
     // Sync
     syncTools::syncFaceList(mesh_, namedSurfaceIndex, maxEqOp<label>());
 }
-//XXXXXXXXX
+
+
 void Foam::meshRefinement::findCellZoneInsideWalk
 (
     const labelList& locationSurfaces,  // indices of surfaces with inside point
@@ -1446,7 +1460,6 @@ void Foam::meshRefinement::findCellZoneInsideWalk
         }
     }
 }
-//XXXXXXXXX
 
 
 bool Foam::meshRefinement::calcRegionToZone
@@ -1827,7 +1840,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
     const bool mergeFreeStanding,
     const dictionary& motionDict,
     Time& runTime,
-    const labelList& globalToPatch,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
     const point& keepPoint
 )
 {
@@ -1849,7 +1863,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     labelList ownPatch, neiPatch;
     getBafflePatches
     (
-        globalToPatch,
+        globalToMasterPatch,
         neiLevel,
         neiCc,
 
@@ -1899,7 +1913,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 motionDict,
                 removeEdgeConnectedCells,
                 perpendicularAngle,
-                globalToPatch
+                globalToMasterPatch
             )
             //markFacesOnProblemCellsGeometric(motionDict)
         );
@@ -1917,7 +1931,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                     motionDict,
                     removeEdgeConnectedCells,
                     perpendicularAngle,
-                    globalToPatch
+                    globalToMasterPatch
                 )
             );
             forAll(facePatchTopo, faceI)
@@ -2051,7 +2065,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
-    const labelList& globalToPatch,
+    const labelList& globalToMasterPatch,
+    const labelList& globalToSlavePatch,
     const point& keepPoint
 )
 {
@@ -2066,7 +2081,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     labelList ownPatch, neiPatch;
     getBafflePatches
     (
-        globalToPatch,
+        globalToMasterPatch,
         neiLevel,
         neiCc,
 
@@ -2129,9 +2144,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
     // Patch for exposed faces for lack of anything sensible.
     label defaultPatch = 0;
-    if (globalToPatch.size())
+    if (globalToMasterPatch.size())
     {
-        defaultPatch = globalToPatch[0];
+        defaultPatch = globalToMasterPatch[0];
     }
 
     for (label i = 0; i < nBufferLayers; i++)

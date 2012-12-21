@@ -573,7 +573,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
             pFc[i] = pp.faceCentres()[faceI];
             //label meshFaceI = pp.addressing()[faceI];
             //pFid[i] = mesh.boundaryMesh().whichPatch(meshFaceI);
-            pFid[i] = globalToPatch_[faceSurfaceGlobalRegion[faceI]];
+            pFid[i] = globalToMasterPatch_[faceSurfaceGlobalRegion[faceI]];
         }
     }
 
@@ -690,7 +690,7 @@ void Foam::autoSnapDriver::calcNearestFacePointProperties
 void Foam::autoSnapDriver::correctAttraction
 (
     const DynamicList<point>& surfacePoints,
-    const DynamicList<label>& surfaceCount,
+    const DynamicList<label>& surfaceCounts,
     const point& edgePt,
     const vector& edgeNormal,       // normalised normal
     const point& pt,
@@ -702,7 +702,7 @@ void Foam::autoSnapDriver::correctAttraction
     scalar tang = ((pt-edgePt)&edgeNormal);
 
     labelList order;
-    Foam::sortedOrder(surfaceCount, order);
+    Foam::sortedOrder(surfaceCounts, order);
 
     if (order[0] < order[1])
     {
@@ -763,7 +763,7 @@ void Foam::autoSnapDriver::binFeatureFace
 
     DynamicList<point>& surfacePoints,
     DynamicList<vector>& surfaceNormals,
-    DynamicList<label>& surfaceCount
+    DynamicList<label>& surfaceCounts
 ) const
 {
     // What to do with very far attraction? For now just ignore the face
@@ -783,7 +783,7 @@ void Foam::autoSnapDriver::binFeatureFace
             )
             {
                 same = true;
-                surfaceCount[j]++;
+                surfaceCounts[j]++;
                 break;
             }
         }
@@ -796,7 +796,7 @@ void Foam::autoSnapDriver::binFeatureFace
             {
                 surfacePoints.append(pt);
                 surfaceNormals.append(faceSurfaceNormal);
-                surfaceCount.append(1);
+                surfaceCounts.append(1);
             }
             else if (surfacePoints.size() == 2)
             {
@@ -810,7 +810,7 @@ void Foam::autoSnapDriver::binFeatureFace
                     // Definitely makes a feature point
                     surfacePoints.append(pt);
                     surfaceNormals.append(faceSurfaceNormal);
-                    surfaceCount.append(1);
+                    surfaceCounts.append(1);
                 }
             }
             else if (surfacePoints.size() == 3)
@@ -834,7 +834,7 @@ void Foam::autoSnapDriver::binFeatureFace
                         // Different feature point
                         surfacePoints.append(pt);
                         surfaceNormals.append(faceSurfaceNormal);
-                        surfaceCount.append(1);
+                        surfaceCounts.append(1);
                     }
                 }
             }
@@ -860,15 +860,15 @@ void Foam::autoSnapDriver::binFeatureFaces
 
     DynamicList<point>& surfacePoints,
     DynamicList<vector>& surfaceNormals,
-    DynamicList<label>& surfaceCount
+    DynamicList<label>& surfaceCounts
 ) const
 {
-    const List<point>& pfNormals = pointFaceSurfNormals[pointI];
+    const List<point>& pfSurfNormals = pointFaceSurfNormals[pointI];
     const List<point>& pfDisp = pointFaceDisp[pointI];
     const List<point>& pfCentres = pointFaceCentres[pointI];
 
     // Collect all different directions
-    forAll(pfNormals, i)
+    forAll(pfSurfNormals, i)
     {
         binFeatureFace
         (
@@ -879,12 +879,12 @@ void Foam::autoSnapDriver::binFeatureFaces
             snapDist[pointI],
 
             pfCentres[i],
-            pfNormals[i],
+            pfSurfNormals[i],
             pfDisp[i],
 
             surfacePoints,
             surfaceNormals,
-            surfaceCount
+            surfaceCounts
         );
     }
 }
@@ -914,7 +914,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
     // Collect all different directions
     DynamicList<point> surfacePoints(4);
     DynamicList<vector> surfaceNormals(4);
-    DynamicList<label> surfaceCount(4);
+    DynamicList<label> surfaceCounts(4);
 
     binFeatureFaces
     (
@@ -931,7 +931,7 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
 
         surfacePoints,
         surfaceNormals,
-        surfaceCount
+        surfaceCounts
     );
 
     const point& pt = pp.localPoints()[pointI];
@@ -966,11 +966,13 @@ void Foam::autoSnapDriver::featureAttractionUsingReconstruction
         vector d = r.refPoint()-pt;
         d -= (d&n)*n;
 
+        //- This does not help much but distorts a perfectly aligned mesh
+        //  so disabled for now.
         //// Correct for attraction to non-dominant face
         //correctAttraction
         //(
         //    surfacePoints,
-        //    surfaceCount,
+        //    surfaceCounts,
         //    r.refPoint(),
         //    n,                  // normalised normal
         //    pt,
@@ -1813,8 +1815,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     }
 
     // Reverse: from pp point to nearest feature
-    vectorField allPatchAttraction(pp.nPoints(), vector::zero);
-    List<pointConstraint> allPatchConstraints(pp.nPoints());
+    vectorField rawPatchAttraction(pp.nPoints(), vector::zero);
+    List<pointConstraint> rawPatchConstraints(pp.nPoints());
 
     determineFeatures
     (
@@ -1837,15 +1839,15 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         edgeAttractors,
         edgeConstraints,
         // pp point to nearest feature
-        allPatchAttraction,
-        allPatchConstraints
+        rawPatchAttraction,
+        rawPatchConstraints
     );
 
 
 
     // Baffle handling
     // ~~~~~~~~~~~~~~~
-    // Override pointAttractor, edgeAttractor, allPatchAttration etc. to
+    // Override pointAttractor, edgeAttractor, rawPatchAttration etc. to
     // implement 'baffle' handling.
     // Baffle: the mesh pp point originates from a loose standing
     // baffle.
@@ -1983,8 +1985,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                     featI,
                     edgeAttractors,
                     edgeConstraints,
-                    allPatchAttraction,
-                    allPatchConstraints
+                    rawPatchAttraction,
+                    rawPatchConstraints
                 );
 
                 if (!nearInfo.hit())
@@ -2033,8 +2035,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                             vector::zero;
 
                         // Store for later use
-                        allPatchAttraction[pointI] = featPt-pt;
-                        allPatchConstraints[pointI] =
+                        rawPatchAttraction[pointI] = featPt-pt;
+                        rawPatchConstraints[pointI] =
                             pointConstraints[featI][featPointI];
 
                         if (oldPointI != -1)
@@ -2053,8 +2055,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                                 edgeFeatI,
                                 edgeAttractors,
                                 edgeConstraints,
-                                allPatchAttraction,
-                                allPatchConstraints
+                                rawPatchAttraction,
+                                rawPatchConstraints
                             );
                         }
                     }
@@ -2084,8 +2086,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                         featI,
                         edgeAttractors,
                         edgeConstraints,
-                        allPatchAttraction,
-                        allPatchConstraints
+                        rawPatchAttraction,
+                        rawPatchConstraints
                     );
                 }
             }
@@ -2296,11 +2298,11 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
                 if
                 (
                     patchConstraints[pointI].first() <= 1
-                 && allPatchConstraints[pointI].first() > 1
+                 && rawPatchConstraints[pointI].first() > 1
                 )
                 {
-                    patchAttraction[pointI] = allPatchAttraction[pointI];
-                    patchConstraints[pointI] = allPatchConstraints[pointI];
+                    patchAttraction[pointI] = rawPatchAttraction[pointI];
+                    patchConstraints[pointI] = rawPatchConstraints[pointI];
 
                     if (multiPatchStr.valid())
                     {
@@ -2434,7 +2436,7 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
     // Snap edges to feature edges
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Walk existing edges and snap remaining ones (that are marked as
-    // feature edges in allPatchConstraints)
+    // feature edges in rawPatchConstraints)
 
     stringFeatureEdges
     (
@@ -2444,8 +2446,8 @@ void Foam::autoSnapDriver::featureAttractionUsingFeatureEdges
         pp,
         snapDist,
 
-        allPatchAttraction,
-        allPatchConstraints,
+        rawPatchAttraction,
+        rawPatchConstraints,
 
         patchAttraction,
         patchConstraints

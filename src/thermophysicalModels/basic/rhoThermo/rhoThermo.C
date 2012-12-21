@@ -36,14 +36,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
+Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const word& phaseName)
 :
-    fluidThermo(mesh),
+    fluidThermo(mesh, phaseName),
     rho_
     (
         IOobject
         (
-            "rhoThermo",
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -57,7 +57,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
     (
         IOobject
         (
-            "psi",
+            phasePropertyName("thermo:psi"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -71,7 +71,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
     (
         IOobject
         (
-            "mu",
+            phasePropertyName("thermo:mu"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -83,14 +83,19 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh)
 {}
 
 
-Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
+Foam::rhoThermo::rhoThermo
+(
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& phaseName
+)
 :
-    fluidThermo(mesh, dict),
+    fluidThermo(mesh, dict, phaseName),
     rho_
     (
         IOobject
         (
-            "rhoThermo",
+            phasePropertyName("thermo:rho"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -104,7 +109,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
     (
         IOobject
         (
-            "psi",
+            phasePropertyName("thermo:psi"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -118,7 +123,7 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
     (
         IOobject
         (
-            "mu",
+            phasePropertyName("thermo:mu"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -134,10 +139,11 @@ Foam::rhoThermo::rhoThermo(const fvMesh& mesh, const dictionary& dict)
 
 Foam::autoPtr<Foam::rhoThermo> Foam::rhoThermo::New
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& phaseName
 )
 {
-    return basicThermo::New<rhoThermo>(mesh);
+    return basicThermo::New<rhoThermo>(mesh, phaseName);
 }
 
 

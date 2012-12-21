@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,9 @@ Description
 #include "dictionary.H"
 #include "IFstream.H"
 #include "OSspecific.H"
+#include "Ostream.H"
+#include "demandDrivenData.H"
+#include "simpleObjectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,15 +57,35 @@ public:
 
     ~deleteControlDictPtr()
     {
-        if (controlDictPtr_)
-        {
-            delete controlDictPtr_;
-            controlDictPtr_ = 0;
-        }
+        deleteDemandDrivenData(controlDictPtr_);
     }
 };
 
 deleteControlDictPtr deleteControlDictPtr_;
+
+
+// Debug switch read and write callback tables.
+simpleObjectRegistry* debugObjectsPtr_(NULL);
+simpleObjectRegistry* infoObjectsPtr_(NULL);
+simpleObjectRegistry* optimisationObjectsPtr_(NULL);
+simpleObjectRegistry* dimensionSetObjectsPtr_(NULL);
+class deleteDebugSwitchPtr
+{
+public:
+
+    deleteDebugSwitchPtr()
+    {}
+
+    ~deleteDebugSwitchPtr()
+    {
+        deleteDemandDrivenData(debugObjectsPtr_);
+        deleteDemandDrivenData(infoObjectsPtr_);
+        deleteDemandDrivenData(optimisationObjectsPtr_);
+        deleteDemandDrivenData(dimensionSetObjectsPtr_);
+    }
+};
+
+deleteDebugSwitchPtr deleteDebugSwitchPtr_;
 //! \endcond
 
 
@@ -162,6 +185,106 @@ int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
     (
         name, defaultValue, false, false
     );
+}
+
+
+void Foam::debug::addDebugObject(const char* name, simpleRegIOobject* obj)
+{
+    if (!debugObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addDebugObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
+}
+
+
+void Foam::debug::addInfoObject(const char* name, simpleRegIOobject* obj)
+{
+    if (!infoObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addInfoObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
+}
+
+
+void Foam::debug::addOptimisationObject
+(
+    const char* name,
+    simpleRegIOobject* obj
+)
+{
+    if (!optimisationObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addOptimisationObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
+}
+
+
+void Foam::debug::addDimensionSetObject
+(
+    const char* name,
+    simpleRegIOobject* obj
+)
+{
+    if (!dimensionSetObjects().insert(name, obj))
+    {
+        //std::cerr<< "debug::addDimensionSetObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::debugObjects()
+{
+    if (!debugObjectsPtr_)
+    {
+        debugObjectsPtr_ = new simpleObjectRegistry(1000);
+    }
+
+    return *debugObjectsPtr_;
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::infoObjects()
+{
+    if (!infoObjectsPtr_)
+    {
+        infoObjectsPtr_ = new simpleObjectRegistry(1000);
+    }
+
+    return *infoObjectsPtr_;
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::optimisationObjects()
+{
+    if (!optimisationObjectsPtr_)
+    {
+        optimisationObjectsPtr_ = new simpleObjectRegistry(1000);
+    }
+
+    return *optimisationObjectsPtr_;
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::dimensionSetObjects()
+{
+    if (!dimensionSetObjectsPtr_)
+    {
+        dimensionSetObjectsPtr_ = new simpleObjectRegistry(1000);
+    }
+
+    return *dimensionSetObjectsPtr_;
 }
 
 

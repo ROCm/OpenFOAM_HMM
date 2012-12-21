@@ -59,6 +59,7 @@ Description
 #include "OFstream.H"
 #include "mathematicalConstants.H"
 #include "pimpleControl.H"
+#include "IObasicSourceList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +71,7 @@ int main(int argc, char *argv[])
     #include "createEngineMesh.H"
     #include "readCombustionProperties.H"
     #include "createFields.H"
+    #include "createSources.H"
     #include "initContinuityErrs.H"
     #include "readEngineTimeControls.H"
     #include "compressibleCourantNo.H"
