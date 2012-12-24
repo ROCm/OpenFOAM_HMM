@@ -585,7 +585,7 @@ Foam::label Foam::cellShapeControl::refineMesh
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
-    const pointField cellCentres = shapeControlMesh_.cellCentres();
+    const pointField cellCentres(shapeControlMesh_.cellCentres());
 
     Info<< "    Created cell centres" << endl;
 
@@ -682,7 +682,7 @@ Foam::label Foam::cellShapeControl::refineMesh
                 )
             );
             verts.last().targetCellSize() = lastCellSize;
-            verts.last().alignment() = tensor::I;
+            verts.last().alignment() = triad::unset;
         }
     }
 
@@ -704,8 +704,8 @@ void Foam::cellShapeControl::smoothMesh()
         pointPoints
     );
 
-    triadField alignments = buildAlignmentField(shapeControlMesh_);
-    pointField points = buildPointField(shapeControlMesh_);
+    triadField alignments(buildAlignmentField(shapeControlMesh_));
+    pointField points(buildPointField(shapeControlMesh_));
     // Setup the sizes and alignments on each point
     triadField fixedAlignments(shapeControlMesh_.vertexCount(), triad::unset);
 
@@ -721,12 +721,7 @@ void Foam::cellShapeControl::smoothMesh()
         {
             const tensor& alignment = vit->alignment();
 
-            fixedAlignments[vit->index()] = triad
-            (
-                alignment.x(),
-                alignment.y(),
-                alignment.z()
-            );
+            fixedAlignments[vit->index()] = alignment;
         }
     }
 
@@ -881,12 +876,7 @@ void Foam::cellShapeControl::smoothMesh()
     {
         if (vit->real())
         {
-            vit->alignment() = tensor
-            (
-                alignments[vit->index()].x(),
-                alignments[vit->index()].y(),
-                alignments[vit->index()].z()
-            );
+            vit->alignment() = alignments[vit->index()];
         }
     }
 
@@ -911,9 +901,7 @@ void Foam::cellShapeControl::smoothMesh()
     {
         if (vit->referred())
         {
-            const triad& t = alignments[referredPoints[referredI++]];
-
-            vit->alignment() = tensor(t.x(), t.y(), t.z());
+            vit->alignment() = alignments[referredPoints[referredI++]];
         }
     }
 }

@@ -25,7 +25,6 @@ License
 
 #include "triad.H"
 #include "transform.H"
-#include "tensor.H"
 #include "quaternion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -60,6 +59,14 @@ Foam::triad::triad(const quaternion& q)
     x() = Rt.x();
     y() = Rt.y();
     z() = Rt.z();
+}
+
+
+Foam::triad::triad(const tensor& t)
+{
+    x() = t.x();
+    y() = t.y();
+    z() = t.z();
 }
 
 
@@ -328,6 +335,16 @@ Foam::triad::operator quaternion() const
     R.zz() = z().z();
 
     return quaternion(R);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::triad::operator=(const tensor& t)
+{
+    x() = t.x();
+    y() = t.y();
+    z() = t.z();
 }
 
 

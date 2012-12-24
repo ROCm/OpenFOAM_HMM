@@ -684,7 +684,7 @@ void Foam::cellShapeControlMesh::insertBoundingPoints(const boundBox& bb)
     boundBox bbInflate = bb;
     bbInflate.inflate(10);
 
-    pointField pts = bbInflate.points();
+    pointField pts(bbInflate.points());
 
     forAll(pts, pI)
     {

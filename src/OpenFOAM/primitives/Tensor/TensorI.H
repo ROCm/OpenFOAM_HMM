@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,24 @@ inline Tensor<Cmpt>::Tensor(const SymmTensor<Cmpt>& st)
     this->v_[XX] = st.xx(); this->v_[XY] = st.xy(); this->v_[XZ] = st.xz();
     this->v_[YX] = st.xy(); this->v_[YY] = st.yy(); this->v_[YZ] = st.yz();
     this->v_[ZX] = st.xz(); this->v_[ZY] = st.yz(); this->v_[ZZ] = st.zz();
+}
+
+
+//- Construct given triad
+template <class Cmpt>
+inline Tensor<Cmpt>::Tensor(const Vector<Vector<Cmpt> >& tr)
+{
+    this->v_[XX] = tr.x().x();
+    this->v_[XY] = tr.x().y();
+    this->v_[XZ] = tr.x().z();
+
+    this->v_[YX] = tr.y().x();
+    this->v_[YY] = tr.y().y();
+    this->v_[YZ] = tr.y().z();
+
+    this->v_[ZX] = tr.z().x();
+    this->v_[ZY] = tr.z().y();
+    this->v_[ZZ] = tr.z().z();
 }
 
 
@@ -269,6 +287,23 @@ inline void Tensor<Cmpt>::operator=(const SymmTensor<Cmpt>& st)
     this->v_[XX] = st.xx(); this->v_[XY] = st.xy(); this->v_[XZ] = st.xz();
     this->v_[YX] = st.xy(); this->v_[YY] = st.yy(); this->v_[YZ] = st.yz();
     this->v_[ZX] = st.xz(); this->v_[ZY] = st.yz(); this->v_[ZZ] = st.zz();
+}
+
+
+template <class Cmpt>
+inline void Tensor<Cmpt>::operator=(const Vector<Vector<Cmpt> >& tr)
+{
+    this->v_[XX] = tr.x().x();
+    this->v_[XY] = tr.x().y();
+    this->v_[XZ] = tr.x().z();
+
+    this->v_[YX] = tr.y().x();
+    this->v_[YY] = tr.y().y();
+    this->v_[YZ] = tr.y().z();
+
+    this->v_[ZX] = tr.z().x();
+    this->v_[ZY] = tr.z().y();
+    this->v_[ZZ] = tr.z().z();
 }
 
 
