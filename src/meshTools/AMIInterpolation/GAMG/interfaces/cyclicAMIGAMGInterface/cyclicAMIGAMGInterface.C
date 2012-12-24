@@ -50,7 +50,8 @@ Foam::cyclicAMIGAMGInterface::cyclicAMIGAMGInterface
     const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing
+    const labelField& neighbourRestrictAddressing,
+    const label fineLevelIndex
 )
 :
     GAMGInterface

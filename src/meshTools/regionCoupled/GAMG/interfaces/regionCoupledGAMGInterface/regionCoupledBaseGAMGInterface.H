@@ -22,21 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cyclicGAMGInterface
+    Foam::regionCoupledBaseGAMGInterface
 
 Description
-    GAMG agglomerated cyclic interface.
+    Base class for GAMG agglomerated coupled region interface.
 
 SourceFiles
-    cyclicGAMGInterface.C
+    regionCoupledBaseGAMGInterface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicGAMGInterface_H
-#define cyclicGAMGInterface_H
+#ifndef regionCoupledBaseGAMGInterface_H
+#define regionCoupledBaseGAMGInterface_H
 
 #include "GAMGInterface.H"
-#include "cyclicLduInterface.H"
+#include "regionCoupledLduInterface.H"
+#include "GAMGAgglomeration.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,41 +45,41 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class cyclicGAMGInterface Declaration
+                  Class regionCoupledBaseGAMGInterface Declaration
 \*---------------------------------------------------------------------------*/
 
-class cyclicGAMGInterface
+class regionCoupledBaseGAMGInterface
 :
     public GAMGInterface,
-    virtual public cyclicLduInterface
+    virtual public regionCoupledLduInterface
 {
     // Private data
 
-        //- Reference tor the cyclicLduInterface from which this is
+        //- Reference for the regionCoupledBaseFvPatch from which this is
         //  agglomerated
-        const cyclicLduInterface& fineCyclicInterface_;
+        const regionCoupledLduInterface& fineRegionCoupledLduInterface_;
+
+        //- AMI interface
+        //autoPtr<AMIPatchToPatchInterpolation> amiPtr_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        cyclicGAMGInterface(const cyclicGAMGInterface&);
+        regionCoupledBaseGAMGInterface(const regionCoupledBaseGAMGInterface&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cyclicGAMGInterface&);
+        void operator=(const regionCoupledBaseGAMGInterface&);
 
 
 public:
-
-    //- Runtime type information
-    TypeName("cyclic");
 
 
     // Constructors
 
         //- Construct from fine level interface,
         //  local and neighbour restrict addressing
-        cyclicGAMGInterface
+        regionCoupledBaseGAMGInterface
         (
             const label index,
             const lduInterfacePtrsList& coarseInterfaces,
@@ -90,7 +91,7 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicGAMGInterface();
+    virtual ~regionCoupledBaseGAMGInterface();
 
 
     // Member Functions
@@ -110,33 +111,50 @@ public:
             //- Return neigbour processor number
             virtual label neighbPatchID() const
             {
-                return fineCyclicInterface_.neighbPatchID();
+                return fineRegionCoupledLduInterface_.neighbPatchID();
             }
 
             virtual bool owner() const
             {
-                return fineCyclicInterface_.owner();
+                return fineRegionCoupledLduInterface_.owner();
             }
 
-            virtual const cyclicGAMGInterface& neighbPatch() const
+            virtual const regionCoupledBaseGAMGInterface& neighbPatch() const
             {
-                return dynamic_cast<const cyclicGAMGInterface&>
+                return dynamic_cast<const regionCoupledBaseGAMGInterface&>
                 (
-                    coarseInterfaces_[neighbPatchID()]
+                    fineRegionCoupledLduInterface_.neighbPatch()
                 );
             }
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
+            //virtual const AMIPatchToPatchInterpolation& AMI() const
+            //{
+            //    return amiPtr_();
+            //}
+
+            virtual const polyMesh& nbrMesh() const
             {
-                return fineCyclicInterface_.forwardT();
+                return fineRegionCoupledLduInterface_.nbrMesh();
             }
 
-            //- Return neighbour-cell transformation tensor
-            virtual const tensorField& reverseT() const
+            const lduInterface& nbrLduInterface
+            (
+                const label fineLevelIndex,
+                const label index
+            ) const
             {
-                return fineCyclicInterface_.reverseT();
+                const GAMGAgglomeration& agg = nbrMesh().thisDb().lookupObject
+                <
+                    GAMGAgglomeration
+                >
+                (
+                    GAMGAgglomeration::typeName
+                );
+
+                const lduMesh& mesh = agg.meshLevel(fineLevelIndex);
+                return mesh.interfaces()[index];
             }
+
 };
 
 

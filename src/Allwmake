@@ -76,6 +76,8 @@ wmake $makeType engine
 
 wmake $makeType fieldSources
 
+wmake $makeType regionCoupled
+
 postProcessing/Allwmake $*
 
 # ----------------------------------------------------------------- end-of-file

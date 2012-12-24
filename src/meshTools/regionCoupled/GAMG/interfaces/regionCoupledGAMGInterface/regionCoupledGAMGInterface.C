@@ -23,19 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
+#include "regionCoupledGAMGInterface.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
+    defineTypeNameAndDebug(regionCoupledGAMGInterface, 0);
     addToRunTimeSelectionTable
     (
         GAMGInterface,
-        processorCyclicGAMGInterface,
+        regionCoupledGAMGInterface,
         lduInterface
     );
 }
@@ -43,7 +42,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+Foam::regionCoupledGAMGInterface::regionCoupledGAMGInterface
 (
     const label index,
     const lduInterfacePtrsList& coarseInterfaces,
@@ -53,7 +52,7 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
     const label fineLevelIndex
 )
 :
-    processorGAMGInterface
+    regionCoupledBaseGAMGInterface
     (
         index,
         coarseInterfaces,
@@ -67,7 +66,7 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
 
 // * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
+Foam::regionCoupledGAMGInterface::~regionCoupledGAMGInterface()
 {}
 
 

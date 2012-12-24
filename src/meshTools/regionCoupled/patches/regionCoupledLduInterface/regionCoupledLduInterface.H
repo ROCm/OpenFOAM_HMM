@@ -22,21 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::processorCyclicGAMGInterface
+    Foam::regionCoupledLduInterface
 
 Description
-    GAMG agglomerated processor interface.
+    An abstract base class for region coupled interfaces
 
 SourceFiles
-    processorCyclicGAMGInterface.C
-    processorCyclicGAMGInterfaceTemplates.C
+    regionCoupledLduInterface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicGAMGInterface_H
-#define processorCyclicGAMGInterface_H
+#ifndef regionCoupledLduInterface_H
+#define regionCoupledLduInterface_H
 
-#include "processorGAMGInterface.H"
+#include "primitiveFieldsFwd.H"
+#include "AMIPatchToPatchInterpolation.H"
+#include "polyMesh.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,45 +46,48 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class processorCyclicGAMGInterface Declaration
+                  Class regionCoupledLduInterface Declaration
 \*---------------------------------------------------------------------------*/
 
-class processorCyclicGAMGInterface
-:
-    public processorGAMGInterface
+class regionCoupledLduInterface
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        processorCyclicGAMGInterface(const processorCyclicGAMGInterface&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const processorCyclicGAMGInterface&);
-
 
 public:
 
     //- Runtime type information
-    TypeName("processorCyclic");
+    TypeName("regionCoupledLduInterface");
+
 
     // Constructors
 
-        //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
-        processorCyclicGAMGInterface
-        (
-            const label index,
-            const lduInterfacePtrsList& coarseInterfaces,
-            const lduInterface& fineInterface,
-            const labelField& restrictAddressing,
-            const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
-        );
+        //- Construct null
+        regionCoupledLduInterface()
+        {}
 
 
-    // Destructor
+    //- Destructor
+    virtual ~regionCoupledLduInterface();
 
-        virtual ~processorCyclicGAMGInterface();
+
+    // Member Functions
+
+        // Access
+
+            //- Return neighbour
+            virtual label neighbPatchID() const = 0;
+
+            //- Is it owner?
+            virtual bool owner() const = 0;
+
+            //- Return neighb regionCoupledLduInterface
+            virtual const regionCoupledLduInterface& neighbPatch() const = 0;
+
+            //- Return AMI
+            //virtual const AMIPatchToPatchInterpolation& AMI() const = 0;
+
+            //- Return nbrMesh
+            virtual const polyMesh& nbrMesh() const = 0;
+
 
 };
 

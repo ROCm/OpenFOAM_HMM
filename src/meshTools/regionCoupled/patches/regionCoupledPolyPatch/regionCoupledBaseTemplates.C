@@ -23,52 +23,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
-#include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::regionCoupledBase::interpolate
+(
+    const Field<Type>& fld
+) const
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
+    if (owner())
+    {
+        return AMI().interpolateToSource(fld);
+    }
+    else
+    {
+        return neighbPatch().AMI().interpolateToTarget(fld);
+    }
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+template<class Type>
+Foam::tmp<Foam::Field<Type> > Foam::regionCoupledBase::interpolate
 (
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
-:
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
+    const tmp<Field<Type> >& tFld
+) const
+{
+    if (owner())
+    {
+        return AMI().interpolateToSource(tFld);
+    }
+    else
+    {
+        return neighbPatch().AMI().interpolateToTarget(tFld);
+    }
+}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
+template<class Type, class BinaryOp>
+void Foam::regionCoupledBase::interpolate
+(
+    const UList<Type>& fld,
+    const BinaryOp& bop,
+    List<Type>& result
+) const
+{
+    if (owner())
+    {
+        AMI().interpolateToSource(fld, bop, result);
+    }
+    else
+    {
+        neighbPatch().AMI().interpolateToTarget(fld, bop, result);
+    }
+}
 
 
 // ************************************************************************* //

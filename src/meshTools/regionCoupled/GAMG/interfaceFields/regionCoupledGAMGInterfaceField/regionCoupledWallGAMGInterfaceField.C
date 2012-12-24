@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
+#include "regionCoupledWallGAMGInterfaceField.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+#include "lduMatrix.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
+    defineTypeNameAndDebug(regionCoupledWallGAMGInterfaceField, 0);
     addToRunTimeSelectionTable
     (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
+        GAMGInterfaceField,
+        regionCoupledWallGAMGInterfaceField,
         lduInterface
     );
 }
@@ -43,31 +43,24 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+Foam::regionCoupledWallGAMGInterfaceField::regionCoupledWallGAMGInterfaceField
 (
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const GAMGInterface& GAMGCp,
+    const lduInterfaceField& fineInterface
 )
 :
-    processorGAMGInterface
+    GAMGInterfaceField(GAMGCp, fineInterface),
+    regionCoupledGAMGInterface_
     (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
+        refCast<const regionCoupledWallGAMGInterface>(GAMGCp)
     )
 {}
 
 
 // * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
+Foam::regionCoupledWallGAMGInterfaceField::~regionCoupledWallGAMGInterfaceField
+()
 {}
 
 

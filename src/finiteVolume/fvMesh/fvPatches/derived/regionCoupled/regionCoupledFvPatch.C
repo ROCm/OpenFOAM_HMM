@@ -21,54 +21,61 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    coupledFvPatch is an abstract base class for patches that couple regions
+    of the computational domain e.g. cyclic and processor-processor links.
+
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
+#include "regionCoupledFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
-#include "Map.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
+    defineTypeNameAndDebug(regionCoupledFvPatch, 0);
+    addToRunTimeSelectionTable(fvPatch, regionCoupledFvPatch, polyPatch);
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
+Foam::tmp<Foam::labelField> Foam::regionCoupledFvPatch::interfaceInternalField
 (
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
-:
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
+    const labelUList& internalData
+) const
+{
+    return patchInternalField(internalData);
+}
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+Foam::tmp<Foam::labelField> Foam::regionCoupledFvPatch::internalFieldTransfer
+(
+    const Pstream::commsTypes commsType,
+    const labelUList& iF
+) const
+{
+    if (neighbFvPatch().sameRegion())
+    {
+        return neighbFvPatch().patchInternalField(iF);
+    }
+    else
+    {
+        /*
+        WarningIn
+        (
+            "regionCoupledFvPatch::internalFieldTransfer"
+            "( const Pstream::commsTypes, const labelUList&)"
+            " the internal field can not be transfered "
+            " as the neighbFvPatch are in different meshes "
+        );
+        */
+        return tmp<labelField>(new labelField(iF.size(), 0));
 
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
+    }
+    return tmp<labelField>(NULL);
+}
 
 
 // ************************************************************************* //

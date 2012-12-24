@@ -22,22 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::processorGAMGInterface
+    Foam::regionCoupledWallFvPatch
 
 Description
-    GAMG agglomerated processor interface.
+    Foam::regionCoupledWallFvPatch
 
 SourceFiles
-    processorGAMGInterface.C
-    processorGAMGInterfaceTemplates.C
+    regionCoupledWallFvPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorGAMGInterface_H
-#define processorGAMGInterface_H
+#ifndef regionCoupledWallFvPatch_H
+#define regionCoupledWallFvPatch_H
 
-#include "GAMGInterface.H"
-#include "processorLduInterface.H"
+#include "wallFvPatch.H"
+#include "fvMesh.H"
+#include "Time.H"
+#include "regionCoupledWallPolyPatch.H"
+#include "regionCoupledBaseFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,98 +47,109 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class processorGAMGInterface Declaration
+                     Class regionCoupledWallFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class processorGAMGInterface
+class regionCoupledWallFvPatch
 :
-    public GAMGInterface,
-    public processorLduInterface
+    public lduInterface,
+    public wallFvPatch,
+    public regionCoupledBaseFvPatch
 {
+
     // Private data
 
-        //- Reference tor the processorLduInterface from which this is
-        //  agglomerated
-        const processorLduInterface& fineProcInterface_;
+        //- Const reference to regionCoupledWallPolyPatch
+        const regionCoupledWallPolyPatch& regionCoupledPolyPatch_;
 
 
-    // Private Member Functions
+    // Private members
 
-        //- Disallow default bitwise copy construct
-        processorGAMGInterface(const processorGAMGInterface&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const processorGAMGInterface&);
+        //- Return regionCoupledBaseFvPatch nbr
+        const regionCoupledWallFvPatch& neighbFvPatch() const
+        {
+            return refCast<const regionCoupledWallFvPatch>
+            (
+                nbrFvMesh().boundary()[neighbPatchID()]
+            );
+        }
 
 
 public:
 
     //- Runtime type information
-    TypeName("processor");
+    TypeName(regionCoupledWallPolyPatch::typeName_());
+
 
     // Constructors
 
-        //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
-        processorGAMGInterface
+        //- Construct from components
+        regionCoupledWallFvPatch
         (
-            const label index,
-            const lduInterfacePtrsList& coarseInterfaces,
-            const lduInterface& fineInterface,
-            const labelField& restrictAddressing,
-            const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
-        );
+            const polyPatch& patch,
+            const fvBoundaryMesh& bm
+        )
+        :
+            wallFvPatch(patch, bm),
+            regionCoupledBaseFvPatch
+            (
+                patch,
+                *this
+            ),
+            regionCoupledPolyPatch_
+            (
+                refCast<const regionCoupledWallPolyPatch>(patch)
+            )
+        {}
 
 
     //- Destructor
-    virtual ~processorGAMGInterface();
+    ~regionCoupledWallFvPatch()
+    {}
 
 
     // Member Functions
 
+
+        // Access
+
+            //- Return faceCell addressing
+            virtual const labelUList& faceCells() const
+            {
+                return fvPatch::faceCells();
+            }
+
+            //- Return true because this patch is coupled
+            virtual bool coupled() const
+            {
+                return regionCoupledPolyPatch_.coupled();
+            }
+
+
+
         // Interface transfer functions
+
+            //- Return the values of the given internal data adjacent to
+            //  the interface as a field
+            virtual tmp<labelField> interfaceInternalField
+            (
+                const labelUList& internalData
+            ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
-                const labelUList& iF
-            ) const;
+                labelUList& iF
+            ) const
+            {}
 
-            //- Transfer and return internal field adjacent to the interface
+            //- Return neighbour field
             virtual tmp<labelField> internalFieldTransfer
             (
                 const Pstream::commsTypes commsType,
                 const labelUList& iF
             ) const;
-
-
-        //- Processor interface functions
-
-            //- Return processor number
-            virtual int myProcNo() const
-            {
-                return fineProcInterface_.myProcNo();
-            }
-
-            //- Return neigbour processor number
-            virtual int neighbProcNo() const
-            {
-                return fineProcInterface_.neighbProcNo();
-            }
-
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return fineProcInterface_.forwardT();
-            }
-
-            //- Return message tag used for sending
-            virtual int tag() const
-            {
-                return fineProcInterface_.tag();
-            }
 };
 
 

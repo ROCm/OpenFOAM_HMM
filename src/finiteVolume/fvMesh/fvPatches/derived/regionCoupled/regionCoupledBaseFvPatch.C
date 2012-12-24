@@ -21,54 +21,20 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+
+
 \*---------------------------------------------------------------------------*/
 
-#include "processorCyclicGAMGInterface.H"
-#include "addToRunTimeSelectionTable.H"
-#include "Map.H"
+#include "regionCoupledBaseFvPatch.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(processorCyclicGAMGInterface, 0);
-    addToRunTimeSelectionTable
-    (
-        GAMGInterface,
-        processorCyclicGAMGInterface,
-        lduInterface
-    );
+    defineTypeNameAndDebug(regionCoupledBaseFvPatch, 0);
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
-(
-    const label index,
-    const lduInterfacePtrsList& coarseInterfaces,
-    const lduInterface& fineInterface,
-    const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
-)
-:
-    processorGAMGInterface
-    (
-        index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing,
-        fineLevelIndex
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
-
-Foam::processorCyclicGAMGInterface::~processorCyclicGAMGInterface()
-{}
 
 
 // ************************************************************************* //
