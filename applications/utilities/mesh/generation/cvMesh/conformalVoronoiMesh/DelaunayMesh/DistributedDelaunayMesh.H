@@ -168,7 +168,8 @@ public:
         );
 
         //- Inserts points into the triangulation if the point is within
-        //  the circumsphere of another cell
+        //  the circumsphere of another cell. Returns HashSet of failed
+        //  point insertions
         template<class PointIterator>
         labelPairHashSet rangeInsertReferredWithInfo
         (

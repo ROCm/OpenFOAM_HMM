@@ -40,6 +40,7 @@ SourceFiles
 #define triad_H
 
 #include "vector.H"
+#include "tensor.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +58,6 @@ Istream& operator>>(Istream&, triad&);
 Ostream& operator<<(Ostream&, const triad&);
 
 class quaternion;
-
 
 /*---------------------------------------------------------------------------*\
                            Class triad Declaration
@@ -86,6 +86,9 @@ public:
 
         //- Construct from a quaternion
         triad(const quaternion& q);
+
+        //- Construct from a tensor
+        triad(const tensor& t);
 
         //- Construct from Istream
         inline triad(Istream&);
@@ -134,6 +137,8 @@ public:
     // Member Operators
 
         inline void operator=(const Vector<vector>&);
+
+        void operator=(const tensor& t);
 
         //- Add the triad t2 to this triad
         //  without normalizing or orthogonalizing

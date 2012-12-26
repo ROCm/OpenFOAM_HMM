@@ -263,8 +263,6 @@ Foam::triSurfaceScalarField Foam::automatic::load()
 
     surfaceCellSize.write();
 
-    debug = 1;
-
     if (debug)
     {
         faceList faces(surface_.size());

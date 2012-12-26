@@ -142,7 +142,7 @@ inline int CGAL::indexedVertex<Gt, Vb>::index() const
 
 
 template<class Gt, class Vb>
-inline typename CGAL::indexedVertex<Gt, Vb>::vertexType&
+inline Foam::indexedVertexEnum::vertexType&
 CGAL::indexedVertex<Gt, Vb>::type()
 {
     return type_;
@@ -150,7 +150,7 @@ CGAL::indexedVertex<Gt, Vb>::type()
 
 
 template<class Gt, class Vb>
-inline typename CGAL::indexedVertex<Gt, Vb>::vertexType
+inline Foam::indexedVertexEnum::vertexType
 CGAL::indexedVertex<Gt, Vb>::type() const
 {
     return type_;

@@ -466,8 +466,8 @@ int main(int argc, char *argv[])
     labelListList pointPoints;
     autoPtr<mapDistribute> meshDistributor = buildMap(mesh, pointPoints);
 
-    triadField alignments = buildAlignmentField(mesh);
-    pointField points = buildPointField(mesh);
+    triadField alignments(buildAlignmentField(mesh));
+    pointField points(buildPointField(mesh));
 
     mesh.printInfo(Info);
 

@@ -348,7 +348,7 @@ void Foam::energyRegionCoupledFvPatchScalarField::evaluate
     label patchi = patch().index();
     const scalarField& pp =  thermoPtr_->p().boundaryField()[patchi];
 
-    const scalarField lWeights = weights();
+    const scalarField lWeights(weights());
 
     scalarField::operator=
     (
@@ -416,8 +416,10 @@ patchNeighbourField() const
         nbrThermoPtr_->T().internalField(), nbrFaceCells
     );
 
-    scalarField intNbrT =
-        regionCoupledPatch_.regionCoupledPatch().interpolate(nbrIntT);
+    scalarField intNbrT
+    (
+        regionCoupledPatch_.regionCoupledPatch().interpolate(nbrIntT)
+    );
 
     label patchi = patch().index();
     const scalarField& pp =  thermoPtr_->p().boundaryField()[patchi];
