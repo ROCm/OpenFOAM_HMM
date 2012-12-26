@@ -65,7 +65,11 @@ Foam::GAMGSolver::GAMGSolver
     // which may be overridden by those in controlDict
     cacheAgglomeration_(false),
     nPreSweeps_(0),
+    preSweepsLevelMultiplier_(1),
+    maxPreSweeps_(10),
     nPostSweeps_(2),
+    postSweepsLevelMultiplier_(1),
+    maxPostSweeps_(10),
     nFinestSweeps_(2),
     scaleCorrection_(matrix.symmetric()),
     directSolveCoarsest_(false),
@@ -156,7 +160,19 @@ void Foam::GAMGSolver::readControls()
     // we could also consider supplying defaults here too
     controlDict_.readIfPresent("cacheAgglomeration", cacheAgglomeration_);
     controlDict_.readIfPresent("nPreSweeps", nPreSweeps_);
+    controlDict_.readIfPresent
+    (
+        "preSweepsLevelMultiplier",
+        preSweepsLevelMultiplier_
+    );
+    controlDict_.readIfPresent("maxPreSweeps", maxPreSweeps_);
     controlDict_.readIfPresent("nPostSweeps", nPostSweeps_);
+    controlDict_.readIfPresent
+    (
+        "postSweepsLevelMultiplier",
+        postSweepsLevelMultiplier_
+    );
+    controlDict_.readIfPresent("maxPostSweeps", maxPostSweeps_);
     controlDict_.readIfPresent("nFinestSweeps", nFinestSweeps_);
     controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
     controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
