@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,10 +66,10 @@ Foam::GAMGSolver::GAMGSolver
     cacheAgglomeration_(false),
     nPreSweeps_(0),
     preSweepsLevelMultiplier_(1),
-    maxPreSweeps_(10),
+    maxPreSweeps_(4),
     nPostSweeps_(2),
     postSweepsLevelMultiplier_(1),
-    maxPostSweeps_(10),
+    maxPostSweeps_(4),
     nFinestSweeps_(2),
     scaleCorrection_(matrix.symmetric()),
     directSolveCoarsest_(false),
