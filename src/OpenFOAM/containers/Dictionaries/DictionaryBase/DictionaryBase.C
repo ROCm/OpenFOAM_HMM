@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,9 @@ void Foam::DictionaryBase<IDLListType, T>::addEntries()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class IDLListType, class T>
-Foam::DictionaryBase<IDLListType, T>::DictionaryBase()
+Foam::DictionaryBase<IDLListType, T>::DictionaryBase(const label size)
+:
+    hashedTs_(size)
 {}
 
 
