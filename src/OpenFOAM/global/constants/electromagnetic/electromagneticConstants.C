@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,135 +32,145 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* const Foam::constant::electromagnetic::group = "electromagnetic";
+namespace Foam
+{
+namespace constant
+{
+
+const char* const electromagnetic::group = "electromagnetic";
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::mu0,
+    dimensionedScalar
     (
-        group,
         "mu0",
-        dimensionedScalar
-        (
-            "mu0",
-            dimensionSet(1, 1, -2, 0, 0, -2, 0),
-            4.0*constant::mathematical::pi*1e-07
-        )
-    )
+        dimensionSet(1, 1, -2, 0, 0, -2, 0),
+        4.0*mathematical::pi*1e-07
+    ),
+    constantelectromagneticmu0,
+    "mu0"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::epsilon0
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::epsilon0,
+
+    dimensionedScalar
     (
-        group,
         "epsilon0",
-        dimensionedScalar
-        (
-            "epsilon0",
-            dimensionedScalar("C", dimless, 1.0)
-           /(mu0*sqr(constant::universal::c))
-        )
-    )
+        dimensionedScalar("C", dimless, 1.0)
+       /(electromagnetic::mu0*sqr(universal::c))
+    ),
+    constantelectromagneticepsilon0,
+    "epsilon0"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::Z0
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::Z0,
+    dimensionedScalar
     (
-        group,
         "Z0",
-        dimensionedScalar
-        (
-            "Z0",
-            mu0*constant::universal::c
-        )
-    )
+        electromagnetic::mu0*universal::c
+    ),
+    constantelectromagneticZ0,
+    "Z0"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::kappa
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::kappa,
+
+    dimensionedScalar
     (
-        group,
         "kappa",
         dimensionedScalar
         (
-            "kappa",
-            dimensionedScalar
-            (
-                "C",
-                dimless,
-                1.0/(4.0*constant::mathematical::pi)
-            )
-           /epsilon0
+            "C",
+            Foam::dimless,
+            1.0/(4.0*mathematical::pi)
         )
-    )
+       /electromagnetic::epsilon0
+    ),
+
+    constantelectromagnetickappa,
+    "kappa"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::G0
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::G0,
+    dimensionedScalar
     (
-        group,
         "G0",
-        dimensionedScalar
-        (
-            "G0",
-            dimensionedScalar("C", dimless, 2)*sqr(e)/constant::universal::h
-        )
-    )
+        dimensionedScalar("C", dimless, 2)
+       *sqr(electromagnetic::e)
+       /universal::h
+    ),
+    constantelectromagneticG0,
+    "G0"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::KJ
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::KJ,
+    dimensionedScalar
     (
-        group,
         "KJ",
-        dimensionedScalar
-        (
-            "KJ",
-            dimensionedScalar("C", dimless, 2)*e/constant::universal::h
-        )
-    )
+        dimensionedScalar("C", dimless, 2)
+       *electromagnetic::e
+       /universal::h
+    ),
+    constantelectromagneticKJ,
+    "KJ"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::phi0
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::phi0,
+    dimensionedScalar
     (
-        group,
         "phi0",
-        dimensionedScalar
-        (
-            "phi0",
-            constant::universal::h/(dimensionedScalar("C", dimless, 2)*e)
-        )
-    )
+        universal::h
+       /(dimensionedScalar("C", dimless, 2)*electromagnetic::e)
+    ),
+    constantelectromagneticphi0,
+    "phi0"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::RK
+defineDimensionedConstantWithDefault
 (
-    dimensionedConstant
+    electromagnetic::group,
+    electromagnetic::RK,
+    dimensionedScalar
     (
-        group,
         "RK",
-        dimensionedScalar
-        (
-            "RK",
-            constant::universal::h/sqr(e)
-        )
-    )
+        universal::h/Foam::sqr(electromagnetic::e)
+    ),
+    constantelectromagneticRK,
+    "RK"
 );
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace constant
+} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::simpleObjectRegistry
 
 Description
-    Object registry for simpleRegIOobject
+    Object registry for simpleRegIOobject. Maintains ordering.
 
 SourceFiles
 
@@ -34,7 +34,7 @@ SourceFiles
 #ifndef simpleObjectRegistry_H
 #define simpleObjectRegistry_H
 
-#include "HashTable.H"
+#include "UPtrDictionary.H"
 #include "simpleRegIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,16 +48,16 @@ namespace Foam
 
 class simpleObjectRegistry
 :
-    public HashTable<simpleRegIOobject*>
+    public UPtrDictionary<simpleRegIOobject>
 {
 public:
 
     // Constructors
 
-        //- Construct from initial estimate
+        //- Construct given initial table size
         simpleObjectRegistry(const label nIoObjects = 128)
         :
-            HashTable<simpleRegIOobject*>(nIoObjects)
+            UPtrDictionary<simpleRegIOobject>(nIoObjects)
         {}
 
 };

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,7 @@ simpleObjectRegistry* debugObjectsPtr_(NULL);
 simpleObjectRegistry* infoObjectsPtr_(NULL);
 simpleObjectRegistry* optimisationObjectsPtr_(NULL);
 simpleObjectRegistry* dimensionSetObjectsPtr_(NULL);
+simpleObjectRegistry* dimensionedConstantObjectsPtr_(NULL);
 class deleteDebugSwitchPtr
 {
 public:
@@ -82,6 +83,7 @@ public:
         deleteDemandDrivenData(infoObjectsPtr_);
         deleteDemandDrivenData(optimisationObjectsPtr_);
         deleteDemandDrivenData(dimensionSetObjectsPtr_);
+        deleteDemandDrivenData(dimensionedConstantObjectsPtr_);
     }
 };
 
@@ -190,7 +192,7 @@ int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
 
 void Foam::debug::addDebugObject(const char* name, simpleRegIOobject* obj)
 {
-    if (!debugObjects().insert(name, obj))
+    debugObjects().append(name, obj);
     {
         //std::cerr<< "debug::addDebugObject : Duplicate entry " << name
         //    << " in runtime selection table"
@@ -202,7 +204,7 @@ void Foam::debug::addDebugObject(const char* name, simpleRegIOobject* obj)
 
 void Foam::debug::addInfoObject(const char* name, simpleRegIOobject* obj)
 {
-    if (!infoObjects().insert(name, obj))
+    infoObjects().append(name, obj);
     {
         //std::cerr<< "debug::addInfoObject : Duplicate entry " << name
         //    << " in runtime selection table"
@@ -218,7 +220,7 @@ void Foam::debug::addOptimisationObject
     simpleRegIOobject* obj
 )
 {
-    if (!optimisationObjects().insert(name, obj))
+    optimisationObjects().append(name, obj);
     {
         //std::cerr<< "debug::addOptimisationObject : Duplicate entry " << name
         //    << " in runtime selection table"
@@ -234,9 +236,26 @@ void Foam::debug::addDimensionSetObject
     simpleRegIOobject* obj
 )
 {
-    if (!dimensionSetObjects().insert(name, obj))
+    dimensionSetObjects().append(name, obj);
     {
         //std::cerr<< "debug::addDimensionSetObject : Duplicate entry " << name
+        //    << " in runtime selection table"
+        //    << std::endl;
+        //error::safePrintStack(std::cerr);
+    }
+}
+
+
+void Foam::debug::addDimensionedConstantObject
+(
+    const char* name,
+    simpleRegIOobject* obj
+)
+{
+    dimensionedConstantObjects().append(name, obj);
+    {
+        //std::cerr<< "debug::addDimensionedConstantObject : Duplicate entry "
+        //    << name
         //    << " in runtime selection table"
         //    << std::endl;
         //error::safePrintStack(std::cerr);
@@ -259,7 +278,7 @@ Foam::simpleObjectRegistry& Foam::debug::infoObjects()
 {
     if (!infoObjectsPtr_)
     {
-        infoObjectsPtr_ = new simpleObjectRegistry(1000);
+        infoObjectsPtr_ = new simpleObjectRegistry(100);
     }
 
     return *infoObjectsPtr_;
@@ -270,7 +289,7 @@ Foam::simpleObjectRegistry& Foam::debug::optimisationObjects()
 {
     if (!optimisationObjectsPtr_)
     {
-        optimisationObjectsPtr_ = new simpleObjectRegistry(1000);
+        optimisationObjectsPtr_ = new simpleObjectRegistry(100);
     }
 
     return *optimisationObjectsPtr_;
@@ -281,10 +300,21 @@ Foam::simpleObjectRegistry& Foam::debug::dimensionSetObjects()
 {
     if (!dimensionSetObjectsPtr_)
     {
-        dimensionSetObjectsPtr_ = new simpleObjectRegistry(1000);
+        dimensionSetObjectsPtr_ = new simpleObjectRegistry(100);
     }
 
     return *dimensionSetObjectsPtr_;
+}
+
+
+Foam::simpleObjectRegistry& Foam::debug::dimensionedConstantObjects()
+{
+    if (!dimensionedConstantObjectsPtr_)
+    {
+        dimensionedConstantObjectsPtr_ = new simpleObjectRegistry(100);
+    }
+
+    return *dimensionedConstantObjectsPtr_;
 }
 
 
