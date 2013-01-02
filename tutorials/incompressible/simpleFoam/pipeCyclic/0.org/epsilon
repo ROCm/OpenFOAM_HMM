@@ -21,6 +21,9 @@ internalField   uniform 1;
 
 boundaryField
 {
+    //- Set patchGroups for constraint patches
+    #include "${WM_PROJECT_DIR}/etc/caseDicts/setConstraintTypes"
+
     inlet
     {
         type            turbulentMixingLengthDissipationRateInlet;
@@ -38,11 +41,6 @@ boundaryField
     {
         type            epsilonWallFunction;
         value           uniform 0;
-    }
-
-    "side.*"
-    {
-        type            cyclicAMI;
     }
 }
 

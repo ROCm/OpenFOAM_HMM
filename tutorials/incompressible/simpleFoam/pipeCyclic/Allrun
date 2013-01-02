@@ -36,4 +36,6 @@ cp -r 0.org 0
 runApplication decomposePar -cellDist
 runParallel $application 5
 
+runApplication reconstructPar
+
 # ----------------------------------------------------------------- end-of-file
