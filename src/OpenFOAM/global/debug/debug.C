@@ -183,24 +183,42 @@ int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
 
 void Foam::debug::addDebugObject(const char* name, simpleRegIOobject* obj)
 {
-    debugObjects().append(name, obj);
+    simpleObjectRegistryEntry* ptr = debugObjects().lookupPtr(name);
+    if (ptr)
     {
-        //std::cerr<< "debug::addDebugObject : Duplicate entry " << name
-        //    << " in runtime selection table"
-        //    << std::endl;
-        //error::safePrintStack(std::cerr);
+        ptr->append(obj);
+    }
+    else
+    {
+        debugObjects().append
+        (
+            name,
+            new simpleObjectRegistryEntry
+            (
+                List<simpleRegIOobject*>(1, obj)
+            )
+        );
     }
 }
 
 
 void Foam::debug::addInfoObject(const char* name, simpleRegIOobject* obj)
 {
-    infoObjects().append(name, obj);
+    simpleObjectRegistryEntry* ptr = infoObjects().lookupPtr(name);
+    if (ptr)
     {
-        //std::cerr<< "debug::addInfoObject : Duplicate entry " << name
-        //    << " in runtime selection table"
-        //    << std::endl;
-        //error::safePrintStack(std::cerr);
+        ptr->append(obj);
+    }
+    else
+    {
+        infoObjects().append
+        (
+            name,
+            new simpleObjectRegistryEntry
+            (
+                List<simpleRegIOobject*>(1, obj)
+            )
+        );
     }
 }
 
@@ -211,12 +229,21 @@ void Foam::debug::addOptimisationObject
     simpleRegIOobject* obj
 )
 {
-    optimisationObjects().append(name, obj);
+    simpleObjectRegistryEntry* ptr = optimisationObjects().lookupPtr(name);
+    if (ptr)
     {
-        //std::cerr<< "debug::addOptimisationObject : Duplicate entry " << name
-        //    << " in runtime selection table"
-        //    << std::endl;
-        //error::safePrintStack(std::cerr);
+        ptr->append(obj);
+    }
+    else
+    {
+        optimisationObjects().append
+        (
+            name,
+            new simpleObjectRegistryEntry
+            (
+                List<simpleRegIOobject*>(1, obj)
+            )
+        );
     }
 }
 
@@ -227,12 +254,21 @@ void Foam::debug::addDimensionSetObject
     simpleRegIOobject* obj
 )
 {
-    dimensionSetObjects().append(name, obj);
+    simpleObjectRegistryEntry* ptr = dimensionSetObjects().lookupPtr(name);
+    if (ptr)
     {
-        //std::cerr<< "debug::addDimensionSetObject : Duplicate entry " << name
-        //    << " in runtime selection table"
-        //    << std::endl;
-        //error::safePrintStack(std::cerr);
+        ptr->append(obj);
+    }
+    else
+    {
+        dimensionSetObjects().append
+        (
+            name,
+            new simpleObjectRegistryEntry
+            (
+                List<simpleRegIOobject*>(1, obj)
+            )
+        );
     }
 }
 
@@ -243,13 +279,24 @@ void Foam::debug::addDimensionedConstantObject
     simpleRegIOobject* obj
 )
 {
-    dimensionedConstantObjects().append(name, obj);
+    simpleObjectRegistryEntry* ptr = dimensionedConstantObjects().lookupPtr
+    (
+        name
+    );
+    if (ptr)
     {
-        //std::cerr<< "debug::addDimensionedConstantObject : Duplicate entry "
-        //    << name
-        //    << " in runtime selection table"
-        //    << std::endl;
-        //error::safePrintStack(std::cerr);
+        ptr->append(obj);
+    }
+    else
+    {
+        dimensionedConstantObjects().append
+        (
+            name,
+            new simpleObjectRegistryEntry
+            (
+                List<simpleRegIOobject*>(1, obj)
+            )
+        );
     }
 }
 

@@ -55,22 +55,30 @@ void Foam::Time::readDict()
         {
             const word& name = iter().keyword();
 
-            simpleRegIOobject* objPtr = objects.lookupPtr(name);
+            simpleObjectRegistryEntry* objPtr = objects.lookupPtr(name);
 
             if (objPtr)
             {
                 Info<< "    " << iter() << endl;
 
+                const List<simpleRegIOobject*>& objects = *objPtr;
+
                 if (iter().isDict())
                 {
-                    OStringStream os(IOstream::ASCII);
-                    os  << iter().dict();
-                    IStringStream is(os.str());
-                    objPtr->readData(is);
+                    forAll(objects, i)
+                    {
+                        OStringStream os(IOstream::ASCII);
+                        os  << iter().dict();
+                        IStringStream is(os.str());
+                        objects[i]->readData(is);
+                    }
                 }
                 else
                 {
-                    objPtr->readData(iter().stream());
+                    forAll(objects, i)
+                    {
+                        objects[i]->readData(iter().stream());
+                    }
                 }
             }
         }
@@ -91,22 +99,30 @@ void Foam::Time::readDict()
         {
             const word& name = iter().keyword();
 
-            simpleRegIOobject* objPtr = objects.lookupPtr(name);
+            simpleObjectRegistryEntry* objPtr = objects.lookupPtr(name);
 
             if (objPtr)
             {
                 Info<< "    " << iter() << endl;
 
+                const List<simpleRegIOobject*>& objects = *objPtr;
+
                 if (iter().isDict())
                 {
-                    OStringStream os(IOstream::ASCII);
-                    os  << iter().dict();
-                    IStringStream is(os.str());
-                    objPtr->readData(is);
+                    forAll(objects, i)
+                    {
+                        OStringStream os(IOstream::ASCII);
+                        os  << iter().dict();
+                        IStringStream is(os.str());
+                        objects[i]->readData(is);
+                    }
                 }
                 else
                 {
-                    objPtr->readData(iter().stream());
+                    forAll(objects, i)
+                    {
+                        objects[i]->readData(iter().stream());
+                    }
                 }
             }
         }
@@ -133,11 +149,16 @@ void Foam::Time::readDict()
 
         forAllConstIter(simpleObjectRegistry, objects, iter)
         {
-            iter()->readData(dummyIs);
+            const List<simpleRegIOobject*>& objects = *iter;
 
-            Info<< "    ";
-            iter()->writeData(Info);
-            Info<< endl;
+            forAll(objects, i)
+            {
+                objects[i]->readData(dummyIs);
+
+                Info<< "    ";
+                objects[i]->writeData(Info);
+                Info<< endl;
+            }
         }
     }
 
@@ -262,16 +283,21 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objects = debug::dimensionSetObjects();
 
-        simpleRegIOobject* objPtr = objects.lookupPtr("DimensionSets");
+        simpleObjectRegistryEntry* objPtr = objects.lookupPtr("DimensionSets");
 
         if (objPtr)
         {
             Info<< controlDict_.subDict("DimensionSets") << endl;
 
-            OStringStream os(IOstream::ASCII);
-            os  << dict;
-            IStringStream is(os.str());
-            objPtr->readData(is);
+            const List<simpleRegIOobject*>& objects = *objPtr;
+
+            forAll(objects, i)
+            {
+                OStringStream os(IOstream::ASCII);
+                os  << dict;
+                IStringStream is(os.str());
+                objects[i]->readData(is);
+            }
         }
     }
 

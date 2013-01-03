@@ -34,7 +34,8 @@ SourceFiles
 #ifndef simpleObjectRegistry_H
 #define simpleObjectRegistry_H
 
-#include "UPtrDictionary.H"
+//#include "UPtrDictionary.H"
+#include "Dictionary.H"
 #include "simpleRegIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,12 +44,30 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class simpleObjectRegistry Declaration
+                   Class simpleObjectRegistryEntry Declaration
+\*---------------------------------------------------------------------------*/
+
+class simpleObjectRegistryEntry
+:
+    public Dictionary<simpleObjectRegistryEntry>::link,
+    public List<simpleRegIOobject*>
+{
+public:
+
+    simpleObjectRegistryEntry(const List<simpleRegIOobject*>& data)
+    :
+        List<simpleRegIOobject*>(data)
+    {}
+};
+
+
+/*---------------------------------------------------------------------------*\
+                      Class simpleObjectRegistry Declaration
 \*---------------------------------------------------------------------------*/
 
 class simpleObjectRegistry
 :
-    public UPtrDictionary<simpleRegIOobject>
+    public Dictionary<simpleObjectRegistryEntry>
 {
 public:
 
@@ -57,7 +76,7 @@ public:
         //- Construct given initial table size
         simpleObjectRegistry(const label nIoObjects = 128)
         :
-            UPtrDictionary<simpleRegIOobject>(nIoObjects)
+            Dictionary<simpleObjectRegistryEntry>(nIoObjects)
         {}
 
 };
