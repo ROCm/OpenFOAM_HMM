@@ -23,11 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureThermoBaffle1DFvPatchScalarFields_H
-#define temperatureThermoBaffle1DFvPatchScalarFields_H
+#include "thermoBaffle1DFvPatchScalarFields.H"
+#include "addToRunTimeSelectionTable.H"
 
-#include "temperatureThermoBaffle1DFvPatchScalarField.H"
-#include "solidThermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,26 +34,36 @@ namespace Foam
 namespace compressible
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTemplateTypeNameAndDebugWithName
+(
+    constSolid_thermoBaffle1DFvPatchScalarField,
+    "compressible::thermoBaffle1D<hConstSolidThermoPhysics>",
+    0
+);
+
+addToPatchFieldRunTimeSelection
+(
+    fvPatchScalarField,
+    constSolid_thermoBaffle1DFvPatchScalarField
+);
+
+defineTemplateTypeNameAndDebugWithName
+(
+    expoSolid_thermoBaffle1DFvPatchScalarField,
+    "compressible::thermoBaffle1D<hExponentialSolidThermoPhysics>",
+    0
+);
+
+addToPatchFieldRunTimeSelection
+(
+    fvPatchScalarField,
+    expoSolid_thermoBaffle1DFvPatchScalarField
+);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    typedef temperatureThermoBaffle1DFvPatchScalarField
-    <
-        hConstSolidThermoPhysics
-    >constSolid_temperatureThermoBaffle1DFvPatchScalarField;
-
-    typedef temperatureThermoBaffle1DFvPatchScalarField
-    <
-        hExponentialSolidThermoPhysics
-    >expoSolid_temperatureThermoBaffle1DFvPatchScalarField;
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-}
+} // End namespace compressible
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
 // ************************************************************************* //

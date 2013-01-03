@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoBaffle2D.H"
+#include "thermoBaffle.H"
 
 #include "fvm.H"
 #include "fvcDiv.H"
@@ -44,32 +44,32 @@ namespace thermoBaffleModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(thermoBaffle2D, 0);
+defineTypeNameAndDebug(thermoBaffle, 0);
 
-addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle2D, mesh);
-addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle2D, dictionary);
+addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle, mesh);
+addToRunTimeSelectionTable(thermoBaffleModel, thermoBaffle, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool thermoBaffle2D::read()
+bool thermoBaffle::read()
 {
     this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
     return regionModel1D::read();
 }
 
 
-bool thermoBaffle2D::read(const dictionary& dict)
+bool thermoBaffle::read(const dictionary& dict)
 {
     this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
     return regionModel1D::read(dict);
 }
 
 
-void thermoBaffle2D::solveEnergy()
+void thermoBaffle::solveEnergy()
 {
     if (debug)
     {
-        Info<< "thermoBaffle2D::solveEnergy()" << endl;
+        Info<< "thermoBaffle::solveEnergy()" << endl;
     }
 
     const polyBoundaryMesh& rbm = regionMesh().boundaryMesh();
@@ -157,7 +157,7 @@ void thermoBaffle2D::solveEnergy()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-thermoBaffle2D::thermoBaffle2D
+thermoBaffle::thermoBaffle
 (
     const word& modelType,
     const fvMesh& mesh,
@@ -218,7 +218,7 @@ thermoBaffle2D::thermoBaffle2D
 }
 
 
-thermoBaffle2D::thermoBaffle2D
+thermoBaffle::thermoBaffle
 (
     const word& modelType,
     const fvMesh& mesh
@@ -279,13 +279,13 @@ thermoBaffle2D::thermoBaffle2D
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-thermoBaffle2D::~thermoBaffle2D()
+thermoBaffle::~thermoBaffle()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void thermoBaffle2D::init()
+void thermoBaffle::init()
 {
     if (oneD_ && !constantThickness_)
     {
@@ -294,7 +294,7 @@ void thermoBaffle2D::init()
 
         if (Qsb!= thickness_.size())
         {
-            FatalErrorIn("thermoBaffle2D::init()")
+            FatalErrorIn("thermoBaffle::init()")
                 << "the boundary field of Qs is "
                 << Qsb << " and " << nl
                 << "the field 'thickness' is " << thickness_.size() << nl
@@ -304,11 +304,11 @@ void thermoBaffle2D::init()
 }
 
 
-void thermoBaffle2D::preEvolveRegion()
+void thermoBaffle::preEvolveRegion()
 {}
 
 
-void thermoBaffle2D::evolveRegion()
+void thermoBaffle::evolveRegion()
 {
     for (int nonOrth=0; nonOrth<=nNonOrthCorr_; nonOrth++)
     {
@@ -317,43 +317,43 @@ void thermoBaffle2D::evolveRegion()
 }
 
 
-const tmp<volScalarField> thermoBaffle2D::Cp() const
+const tmp<volScalarField> thermoBaffle::Cp() const
 {
     return thermo_->Cp();
 }
 
 
-const volScalarField& thermoBaffle2D::kappaRad() const
+const volScalarField& thermoBaffle::kappaRad() const
 {
     return radiation_->absorptionEmission().a();
 }
 
 
-const volScalarField& thermoBaffle2D::rho() const
+const volScalarField& thermoBaffle::rho() const
 {
     return thermo_->rho();
 }
 
 
-const volScalarField& thermoBaffle2D::kappa() const
+const volScalarField& thermoBaffle::kappa() const
 {
     return thermo_->kappa();
 }
 
 
-const volScalarField& thermoBaffle2D::T() const
+const volScalarField& thermoBaffle::T() const
 {
     return thermo_->T();
 }
 
 
-const solidThermo& thermoBaffle2D::thermo() const
+const solidThermo& thermoBaffle::thermo() const
 {
     return thermo_;
 }
 
 
-void thermoBaffle2D::info() const
+void thermoBaffle::info() const
 {
     const labelList& coupledPatches = intCoupledPatchIDs();
 

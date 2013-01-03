@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::temperatureThermoBaffle1DFvPatchScalarField
+    Foam::thermoBaffle1DFvPatchScalarField
 
 Description
     Boundary which solves the 1D steady state heat transfer equation
     through a baffle.
 
 SourceFiles
-    temperatureThermoBaffle1DFvPatchScalarField.C
+    thermoBaffle1DFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureThermoBaffle1DFvPatchScalarField_H
-#define temperatureThermoBaffle1DFvPatchScalarField_H
+#ifndef thermoBaffle1DFvPatchScalarField_H
+#define thermoBaffle1DFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 #include "autoPtr.H"
@@ -48,11 +48,11 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-         Class temperatureThermoBaffle1DFvPatchScalarField Declaration
+            Class thermoBaffle1DFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class solidType>
-class temperatureThermoBaffle1DFvPatchScalarField
+class thermoBaffle1DFvPatchScalarField
 :
     public mixedFvPatchScalarField
 {
@@ -77,20 +77,20 @@ class temperatureThermoBaffle1DFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("compressible::temperatureThermoBaffle1D");
+    TypeName("compressible::thermoBaffle1D");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        temperatureThermoBaffle1DFvPatchScalarField
+        thermoBaffle1DFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        temperatureThermoBaffle1DFvPatchScalarField
+        thermoBaffle1DFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -98,19 +98,19 @@ public:
         );
 
         //- Construct by mapping given
-        //  temperatureThermoBaffle1DFvPatchScalarField onto a new patch
-        temperatureThermoBaffle1DFvPatchScalarField
+        //  thermoBaffle1DFvPatchScalarField onto a new patch
+        thermoBaffle1DFvPatchScalarField
         (
-            const temperatureThermoBaffle1DFvPatchScalarField&,
+            const thermoBaffle1DFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        temperatureThermoBaffle1DFvPatchScalarField
+        thermoBaffle1DFvPatchScalarField
         (
-            const temperatureThermoBaffle1DFvPatchScalarField&
+            const thermoBaffle1DFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -118,14 +118,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new temperatureThermoBaffle1DFvPatchScalarField(*this)
+                new thermoBaffle1DFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        temperatureThermoBaffle1DFvPatchScalarField
+        thermoBaffle1DFvPatchScalarField
         (
-            const temperatureThermoBaffle1DFvPatchScalarField&,
+            const thermoBaffle1DFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -137,7 +137,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new temperatureThermoBaffle1DFvPatchScalarField(*this, iF)
+                new thermoBaffle1DFvPatchScalarField(*this, iF)
             );
         }
 
@@ -176,7 +176,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "temperatureThermoBaffle1DFvPatchScalarField.C"
+#   include "thermoBaffle1DFvPatchScalarField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

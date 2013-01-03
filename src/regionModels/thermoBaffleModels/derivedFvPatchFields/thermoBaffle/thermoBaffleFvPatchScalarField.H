@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::temperatureThermoBaffleFvPatchScalarField
+    Foam::thermoBaffleFvPatchScalarField
 
 Group
     grpThermoBoundaryConditions
@@ -56,11 +56,11 @@ Description
 
 
         // Thermo baffle model
-        thermoBaffleModel   thermoBaffle2D;
+        thermoBaffleModel   thermoBaffle;
         regionName          baffleRegion;
         infoOutput          yes;
         active              yes;
-        thermoBaffle2DCoeffs
+        thermoBaffleCoeffs
         {
         }
 
@@ -115,12 +115,12 @@ SeeAlso
     Foam::regionModels::thermoBaffleModels::thermoBaffleModel
 
 SourceFiles
-    temperatureThermoBaffleFvPatchScalarField.C
+    thermoBaffleFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef temperatureThermoBaffleFvPatchScalarField_H
-#define temperatureThermoBaffleFvPatchScalarField_H
+#ifndef thermoBaffleFvPatchScalarField_H
+#define thermoBaffleFvPatchScalarField_H
 
 
 #include "autoPtr.H"
@@ -137,10 +137,10 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-        Class temperatureThermoBaffleFvPatchScalarField Declaration
+        Class thermoBaffleFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class temperatureThermoBaffleFvPatchScalarField
+class thermoBaffleFvPatchScalarField
 :
     public turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 {
@@ -159,20 +159,20 @@ class temperatureThermoBaffleFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("compressible::temperatureThermoBaffle");
+    TypeName("compressible::thermoBaffle");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        temperatureThermoBaffleFvPatchScalarField
+        thermoBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        temperatureThermoBaffleFvPatchScalarField
+        thermoBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -180,10 +180,10 @@ public:
         );
 
         //- Construct by mapping given
-        //  temperatureThermoBaffleFvPatchScalarField onto a new patch
-        temperatureThermoBaffleFvPatchScalarField
+        //  thermoBaffleFvPatchScalarField onto a new patch
+        thermoBaffleFvPatchScalarField
         (
-            const temperatureThermoBaffleFvPatchScalarField&,
+            const thermoBaffleFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -195,14 +195,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new temperatureThermoBaffleFvPatchScalarField(*this)
+                new thermoBaffleFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        temperatureThermoBaffleFvPatchScalarField
+        thermoBaffleFvPatchScalarField
         (
-            const temperatureThermoBaffleFvPatchScalarField&,
+            const thermoBaffleFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -214,7 +214,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new temperatureThermoBaffleFvPatchScalarField(*this, iF)
+                new thermoBaffleFvPatchScalarField(*this, iF)
             );
         }
 

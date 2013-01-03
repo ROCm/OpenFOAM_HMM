@@ -39,8 +39,8 @@ namespace compressible
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class solidType>
-temperatureThermoBaffle1DFvPatchScalarField<solidType>::
-temperatureThermoBaffle1DFvPatchScalarField
+thermoBaffle1DFvPatchScalarField<solidType>::
+thermoBaffle1DFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -56,10 +56,10 @@ temperatureThermoBaffle1DFvPatchScalarField
 
 
 template<class solidType>
-temperatureThermoBaffle1DFvPatchScalarField<solidType>::
-temperatureThermoBaffle1DFvPatchScalarField
+thermoBaffle1DFvPatchScalarField<solidType>::
+thermoBaffle1DFvPatchScalarField
 (
-    const temperatureThermoBaffle1DFvPatchScalarField& ptf,
+    const thermoBaffle1DFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -75,8 +75,8 @@ temperatureThermoBaffle1DFvPatchScalarField
 
 
 template<class solidType>
-temperatureThermoBaffle1DFvPatchScalarField<solidType>::
-temperatureThermoBaffle1DFvPatchScalarField
+thermoBaffle1DFvPatchScalarField<solidType>::
+thermoBaffle1DFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -94,8 +94,8 @@ temperatureThermoBaffle1DFvPatchScalarField
     {
         FatalErrorIn
         (
-            "temperatureThermoBaffle1DFvPatchScalarField::"
-            "temperatureThermoBaffle1DFvPatchScalarField"
+            "thermoBaffle1DFvPatchScalarField::"
+            "thermoBaffle1DFvPatchScalarField"
             "("
                 "const fvPatch&,\n"
                 "const DimensionedField<scalar, volMesh>&, "
@@ -130,10 +130,10 @@ temperatureThermoBaffle1DFvPatchScalarField
 
 
 template<class solidType>
-temperatureThermoBaffle1DFvPatchScalarField<solidType>::
-temperatureThermoBaffle1DFvPatchScalarField
+thermoBaffle1DFvPatchScalarField<solidType>::
+thermoBaffle1DFvPatchScalarField
 (
-    const temperatureThermoBaffle1DFvPatchScalarField& ptf
+    const thermoBaffle1DFvPatchScalarField& ptf
 )
 :
     mixedFvPatchScalarField(ptf),
@@ -146,10 +146,10 @@ temperatureThermoBaffle1DFvPatchScalarField
 
 
 template<class solidType>
-temperatureThermoBaffle1DFvPatchScalarField<solidType>::
-temperatureThermoBaffle1DFvPatchScalarField
+thermoBaffle1DFvPatchScalarField<solidType>::
+thermoBaffle1DFvPatchScalarField
 (
-    const temperatureThermoBaffle1DFvPatchScalarField& ptf,
+    const thermoBaffle1DFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -165,7 +165,7 @@ temperatureThermoBaffle1DFvPatchScalarField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class solidType>
-void temperatureThermoBaffle1DFvPatchScalarField<solidType>::autoMap
+void thermoBaffle1DFvPatchScalarField<solidType>::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -174,7 +174,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::autoMap
 }
 
 template<class solidType>
-void temperatureThermoBaffle1DFvPatchScalarField<solidType>::rmap
+void thermoBaffle1DFvPatchScalarField<solidType>::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -185,7 +185,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::rmap
 
 
 template<class solidType>
-void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
+void thermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 {
     if (updated())
     {
@@ -242,8 +242,8 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         );
         mpp.map().distribute(nbrQDot);
 
-        const temperatureThermoBaffle1DFvPatchScalarField& nbrField =
-        refCast<const temperatureThermoBaffle1DFvPatchScalarField>
+        const thermoBaffle1DFvPatchScalarField& nbrField =
+        refCast<const thermoBaffle1DFvPatchScalarField>
         (
             nbrPatch.template lookupPatchField<volScalarField, scalar>(TName_)
         );
@@ -347,7 +347,7 @@ void temperatureThermoBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
 }
 
 template <class solidType>
-void temperatureThermoBaffle1DFvPatchScalarField<solidType>::
+void thermoBaffle1DFvPatchScalarField<solidType>::
 write(Ostream& os) const
 {
     mixedFvPatchScalarField::write(os);
