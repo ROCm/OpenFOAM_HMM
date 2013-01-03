@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -88,6 +88,7 @@ if ( -r $ParaView_DIR || -r $paraviewInstDir ) then
     setenv PATH ${ParaView_DIR}/bin:${PATH}
     setenv LD_LIBRARY_PATH "${ParaView_DIR}/lib/paraview-${ParaView_MAJOR}:${LD_LIBRARY_PATH}"
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
+    setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-${ParaView_MAJOR}
 
     # add in python libraries if required
     set paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping
