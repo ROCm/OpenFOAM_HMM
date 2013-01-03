@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,15 +35,29 @@ namespace Foam
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
-dictionary* dimensionSystemsPtr_(NULL);
+//- Since dimensionSystems() can be reread we actually store a copy of
+//  the controlDict subDict (v.s. a reference to the subDict for e.g.
+//  dimensionedConstants)
+autoPtr<dictionary> dimensionSystemsPtr_(NULL);
 
 dictionary& dimensionSystems()
 {
-    return debug::switchSet
-    (
-        "DimensionSets",
-        dimensionSystemsPtr_
-    );
+    if (!dimensionSystemsPtr_.valid())
+    {
+        dictionary* cachedPtr = NULL;
+        dimensionSystemsPtr_.reset
+        (
+            new dictionary
+            (
+                debug::switchSet
+                (
+                    "DimensionSets",
+                    cachedPtr
+                )
+            )
+        );
+    }
+    return dimensionSystemsPtr_();
 }
 
 
@@ -63,10 +77,9 @@ public:
     {}
     virtual void readData(Foam::Istream& is)
     {
-        deleteDemandDrivenData(dimensionSystemsPtr_);
         unitSetPtr_.clear();
         writeUnitSetPtr_.clear();
-        dimensionSystemsPtr_ = new dictionary(is);
+        dimensionSystemsPtr_.reset(new dictionary(is));
     }
     virtual void writeData(Foam::Ostream& os) const
     {

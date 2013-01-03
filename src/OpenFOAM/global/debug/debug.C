@@ -47,6 +47,14 @@ dictionary* debugSwitchesPtr_(NULL);
 dictionary* infoSwitchesPtr_(NULL);
 dictionary* optimisationSwitchesPtr_(NULL);
 
+// Debug switch read and write callback tables.
+simpleObjectRegistry* debugObjectsPtr_(NULL);
+simpleObjectRegistry* infoObjectsPtr_(NULL);
+simpleObjectRegistry* optimisationObjectsPtr_(NULL);
+simpleObjectRegistry* dimensionSetObjectsPtr_(NULL);
+simpleObjectRegistry* dimensionedConstantObjectsPtr_(NULL);
+
+
 // to ensure controlDictPtr_ is deleted at the end of the run
 class deleteControlDictPtr
 {
@@ -57,37 +65,20 @@ public:
 
     ~deleteControlDictPtr()
     {
-        deleteDemandDrivenData(controlDictPtr_);
-    }
-};
-
-deleteControlDictPtr deleteControlDictPtr_;
-
-
-// Debug switch read and write callback tables.
-simpleObjectRegistry* debugObjectsPtr_(NULL);
-simpleObjectRegistry* infoObjectsPtr_(NULL);
-simpleObjectRegistry* optimisationObjectsPtr_(NULL);
-simpleObjectRegistry* dimensionSetObjectsPtr_(NULL);
-simpleObjectRegistry* dimensionedConstantObjectsPtr_(NULL);
-class deleteDebugSwitchPtr
-{
-public:
-
-    deleteDebugSwitchPtr()
-    {}
-
-    ~deleteDebugSwitchPtr()
-    {
         deleteDemandDrivenData(debugObjectsPtr_);
         deleteDemandDrivenData(infoObjectsPtr_);
         deleteDemandDrivenData(optimisationObjectsPtr_);
         deleteDemandDrivenData(dimensionSetObjectsPtr_);
         deleteDemandDrivenData(dimensionedConstantObjectsPtr_);
+
+        debugSwitchesPtr_ = NULL;
+        infoSwitchesPtr_ = NULL;
+        optimisationSwitchesPtr_ = NULL;
+        deleteDemandDrivenData(controlDictPtr_);
     }
 };
 
-deleteDebugSwitchPtr deleteDebugSwitchPtr_;
+deleteControlDictPtr deleteControlDictPtr_;
 //! \endcond
 
 
