@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,26 +21,34 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Typedefs
+    CGALTriangulation2DKernel
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef CGALTriangulation2DKernel_H
+#define CGALTriangulation2DKernel_H
 
-const Foam::searchableSurfaces& Foam::cellSizeControlSurfaces::geometry() const
-{
-    return allGeometry_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "CGAL/Delaunay_triangulation_2.h"
+
+#ifdef CGAL_INEXACT
+    // Fast kernel using a double as the storage type but the triangulation
+    // may fail
+    #include "CGAL/Exact_predicates_inexact_constructions_kernel.h"
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+#else
+    // Very robust but expensive kernel
+    #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
+    typedef CGAL::Exact_predicates_exact_constructions_kernel K;
+#endif
 
 
-const Foam::labelList& Foam::cellSizeControlSurfaces::surfaces() const
-{
-    return surfaces_;
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-Foam::scalar Foam::cellSizeControlSurfaces::defaultCellSize() const
-{
-    return defaultCellSize_;
-}
-
+#endif
 
 // ************************************************************************* //

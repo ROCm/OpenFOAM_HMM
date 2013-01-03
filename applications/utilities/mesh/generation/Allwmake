@@ -12,6 +12,7 @@ wmake snappyHexMesh
 if [ -d "$CGAL_ARCH_PATH" ]
 then
     cvMesh/Allwmake
+    cv2DMesh/Allwmake
 fi
 
 # ----------------------------------------------------------------- end-of-file
