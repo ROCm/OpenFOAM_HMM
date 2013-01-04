@@ -163,20 +163,26 @@ int main(int argc, char *argv[])
 
     Info<< "Constructing patches." << endl;
     List<polyPatch*> patches(poly2DMesh.patchNames().size());
+    label countPatches = 0;
 
     forAll(patches, patchI)
     {
-        patches[patchI] = new polyPatch
-        (
-            poly2DMesh.patchNames()[patchI],
-            poly2DMesh.patchSizes()[patchI],
-            poly2DMesh.patchStarts()[patchI],
-            patchI,
-            pMesh.boundaryMesh(),
-            word::null
-        );
-    }
+        if (poly2DMesh.patchSizes()[patchI] != 0)
+        {
+            patches[countPatches] = new polyPatch
+            (
+                poly2DMesh.patchNames()[patchI],
+                poly2DMesh.patchSizes()[patchI],
+                poly2DMesh.patchStarts()[patchI],
+                countPatches,
+                pMesh.boundaryMesh(),
+                word::null
+            );
 
+            countPatches++;
+        }
+    }
+    patches.setSize(countPatches);
     pMesh.addPatches(patches);
 
     if (extrude)
