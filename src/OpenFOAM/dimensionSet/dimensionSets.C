@@ -38,32 +38,13 @@ namespace Foam
 //- Since dimensionSystems() can be reread we actually store a copy of
 //  the controlDict subDict (v.s. a reference to the subDict for e.g.
 //  dimensionedConstants)
-autoPtr<dictionary> dimensionSystemsPtr_(NULL);
+dictionary* dimensionSystemsPtr_(NULL);
+HashTable<dimensionedScalar>* unitSetPtr_(NULL);
+dimensionSets* writeUnitSetPtr_(NULL);
 
-dictionary& dimensionSystems()
-{
-    if (!dimensionSystemsPtr_.valid())
-    {
-        dictionary* cachedPtr = NULL;
-        dimensionSystemsPtr_.reset
-        (
-            new dictionary
-            (
-                debug::switchSet
-                (
-                    "DimensionSets",
-                    cachedPtr
-                )
-            )
-        );
-    }
-    return dimensionSystemsPtr_();
-}
-
-
-autoPtr<HashTable<dimensionedScalar> > unitSetPtr_;
-autoPtr<dimensionSets> writeUnitSetPtr_;
-
+//- Helper class to
+//  - register re-reader
+//  - deallocate demand-driven data
 class addDimensionSetsToDebug
 :
     public ::Foam::simpleRegIOobject
@@ -74,12 +55,18 @@ public:
         ::Foam::simpleRegIOobject(Foam::debug::addDimensionSetObject, name)
     {}
     virtual ~addDimensionSetsToDebug()
-    {}
+    {
+        deleteDemandDrivenData(dimensionSystemsPtr_);
+        deleteDemandDrivenData(unitSetPtr_);
+        deleteDemandDrivenData(writeUnitSetPtr_);
+
+    }
     virtual void readData(Foam::Istream& is)
     {
-        unitSetPtr_.clear();
-        writeUnitSetPtr_.clear();
-        dimensionSystemsPtr_.reset(new dictionary(is));
+        deleteDemandDrivenData(dimensionSystemsPtr_);
+        deleteDemandDrivenData(unitSetPtr_);
+        deleteDemandDrivenData(writeUnitSetPtr_);
+        dimensionSystemsPtr_ = new dictionary(is);
     }
     virtual void writeData(Foam::Ostream& os) const
     {
@@ -89,10 +76,27 @@ public:
 addDimensionSetsToDebug addDimensionSetsToDebug_("DimensionSets");
 
 
+dictionary& dimensionSystems()
+{
+    if (!dimensionSystemsPtr_)
+    {
+        dictionary* cachedPtr = NULL;
+        dimensionSystemsPtr_ = new dictionary
+        (
+            debug::switchSet
+            (
+                "DimensionSets",
+                cachedPtr
+            )
+        );
+    }
+    return *dimensionSystemsPtr_;
+}
+
 
 const HashTable<dimensionedScalar>& unitSet()
 {
-    if (!unitSetPtr_.valid())
+    if (!unitSetPtr_)
     {
         const dictionary& dict = dimensionSystems();
 
@@ -114,10 +118,7 @@ const HashTable<dimensionedScalar>& unitSet()
 
         const dictionary& unitDict = dict.subDict(unitSetCoeffs);
 
-        unitSetPtr_.reset
-        (
-            new HashTable<dimensionedScalar>(unitDict.size())
-        );
+        unitSetPtr_ = new HashTable<dimensionedScalar>(unitDict.size());
 
         forAllConstIter(dictionary, unitDict, iter)
         {
@@ -145,14 +146,7 @@ const HashTable<dimensionedScalar>& unitSet()
             )
         );
 
-        writeUnitSetPtr_.reset
-        (
-            new dimensionSets
-            (
-                unitSetPtr_(),
-                writeUnitNames
-            )
-        );
+        writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
 
         if (writeUnitNames.size() != 0 && writeUnitNames.size() != 7)
         {
@@ -162,17 +156,17 @@ const HashTable<dimensionedScalar>& unitSet()
                 << exit(FatalIOError);
         }
     }
-    return unitSetPtr_();
+    return *unitSetPtr_;
 }
 
 
 const dimensionSets& writeUnitSet()
 {
-    if (!writeUnitSetPtr_.valid())
+    if (!writeUnitSetPtr_)
     {
         (void)unitSet();
     }
-    return writeUnitSetPtr_();
+    return *writeUnitSetPtr_;
 }
 
 
