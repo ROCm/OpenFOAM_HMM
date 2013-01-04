@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,11 +73,7 @@ void Foam::PrintTable<KeyType, DataType>::print
 {
     HashTable<HashTable<DataType, label>, KeyType> combinedTable;
 
-    List<HashTable<DataType, KeyType> > procData
-    (
-        Pstream::nProcs(),
-        HashTable<DataType, KeyType>()
-    );
+    List<HashTableData> procData(Pstream::nProcs(), HashTableData());
 
     procData[Pstream::myProcNo()] = table_;
 
@@ -92,13 +88,11 @@ void Foam::PrintTable<KeyType, DataType>::print
 
         forAll(procData, procI)
         {
-            const HashTable<DataType, KeyType>& procIData
-                = procData[procI];
+            const HashTableData& procIData = procData[procI];
 
             for
             (
-                typename HashTable<DataType, KeyType>
-                    ::const_iterator iter = procIData.begin();
+                typename HashTableData::const_iterator iter = procIData.begin();
                 iter != procIData.end();
                 ++iter
             )
@@ -112,8 +106,7 @@ void Foam::PrintTable<KeyType, DataType>::print
                     );
                 }
 
-                HashTable<DataType, label>& key
-                    = combinedTable[iter.key()];
+                HashTable<DataType, label>& key = combinedTable[iter.key()];
 
                 key.insert(procI, iter());
 

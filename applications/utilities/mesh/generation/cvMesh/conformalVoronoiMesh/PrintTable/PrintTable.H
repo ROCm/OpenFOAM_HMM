@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,10 +68,13 @@ namespace Foam
 template<class KeyType, class DataType>
 class PrintTable
 {
+    typedef HashTable<DataType, KeyType> HashTableData;
+
+
     // Private data
 
         //- Hash table holding the data
-        HashTable<DataType, KeyType> table_;
+        HashTableData table_;
 
         //- Title of the table
         string title_;

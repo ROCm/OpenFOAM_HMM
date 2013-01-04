@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1189,6 +1189,36 @@ void Foam::conformalVoronoiMesh::writeMesh
 
             nValidPatches++;
         }
+    }
+
+    // Add indirectPatchFaces to a face zone
+    {
+        labelList addr(boundaryFacesToRemove.count());
+        label count = 0;
+
+        forAll(boundaryFacesToRemove, faceI)
+        {
+            if (boundaryFacesToRemove[faceI])
+            {
+                addr[count++] = faceI;
+            }
+        }
+
+        label sz = mesh.faceZones().size();
+        boolList flip(addr.size(), false);
+        mesh.faceZones().setSize(sz + 1);
+        mesh.faceZones().set
+        (
+            sz,
+            new faceZone
+            (
+                "indirectPatchFaces",
+                addr,
+                flip,
+                sz,
+                mesh.faceZones()
+            )
+        );
     }
 
     patches.setSize(nValidPatches);
