@@ -113,6 +113,7 @@ defineDimensionedConstant
 );
 
 
+// Note: cannot use dimless etc since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (
     physicoChemical::group,
@@ -120,7 +121,7 @@ defineDimensionedConstantWithDefault
     Foam::dimensionedScalar
     (
         "NA",
-        Foam::dimless/Foam::dimMoles,
+        dimensionSet(0, 0, 0, 0, -1), //Foam::dimless/Foam::dimMoles,
         6.0221417930e+23
     ),
     constantphysicoChemicalNA,

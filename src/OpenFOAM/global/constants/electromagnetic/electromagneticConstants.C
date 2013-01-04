@@ -55,6 +55,7 @@ defineDimensionedConstantWithDefault
 );
 
 
+// Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (
     electromagnetic::group,
@@ -63,7 +64,12 @@ defineDimensionedConstantWithDefault
     dimensionedScalar
     (
         "epsilon0",
-        dimensionedScalar("C", dimless, 1.0)
+        dimensionedScalar
+        (
+            "C",
+            dimensionSet(0, 0, 0, 0, 0),
+            1.0
+        )
        /(electromagnetic::mu0*sqr(universal::c))
     ),
     constantelectromagneticepsilon0,
@@ -96,7 +102,7 @@ defineDimensionedConstantWithDefault
         dimensionedScalar
         (
             "C",
-            Foam::dimless,
+            dimensionSet(0, 0, 0, 0, 0),
             1.0/(4.0*mathematical::pi)
         )
        /electromagnetic::epsilon0
@@ -114,7 +120,7 @@ defineDimensionedConstantWithDefault
     dimensionedScalar
     (
         "G0",
-        dimensionedScalar("C", dimless, 2)
+        dimensionedScalar("C", dimensionSet(0, 0, 0, 0, 0), 2)
        *sqr(electromagnetic::e)
        /universal::h
     ),
@@ -130,7 +136,7 @@ defineDimensionedConstantWithDefault
     dimensionedScalar
     (
         "KJ",
-        dimensionedScalar("C", dimless, 2)
+        dimensionedScalar("C", dimensionSet(0, 0, 0, 0, 0), 2)
        *electromagnetic::e
        /universal::h
     ),
@@ -147,7 +153,10 @@ defineDimensionedConstantWithDefault
     (
         "phi0",
         universal::h
-       /(dimensionedScalar("C", dimless, 2)*electromagnetic::e)
+       /(
+            dimensionedScalar("C", dimensionSet(0, 0, 0, 0, 0), 2)
+           *electromagnetic::e
+        )
     ),
     constantelectromagneticphi0,
     "phi0"
