@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "temperatureThermoBaffleFvPatchScalarField.H"
+#include "thermoBaffleFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -36,8 +36,8 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-temperatureThermoBaffleFvPatchScalarField::
-temperatureThermoBaffleFvPatchScalarField
+thermoBaffleFvPatchScalarField::
+thermoBaffleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -50,10 +50,10 @@ temperatureThermoBaffleFvPatchScalarField
 {}
 
 
-temperatureThermoBaffleFvPatchScalarField::
-temperatureThermoBaffleFvPatchScalarField
+thermoBaffleFvPatchScalarField::
+thermoBaffleFvPatchScalarField
 (
-    const temperatureThermoBaffleFvPatchScalarField& ptf,
+    const thermoBaffleFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -72,8 +72,8 @@ temperatureThermoBaffleFvPatchScalarField
 {}
 
 
-temperatureThermoBaffleFvPatchScalarField::
-temperatureThermoBaffleFvPatchScalarField
+thermoBaffleFvPatchScalarField::
+thermoBaffleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -89,8 +89,8 @@ temperatureThermoBaffleFvPatchScalarField
     {
         FatalErrorIn
         (
-            "temperatureThermoBaffleFvPatchScalarField::"
-            "temperatureThermoBaffleFvPatchScalarField\n"
+            "thermoBaffleFvPatchScalarField::"
+            "thermoBaffleFvPatchScalarField\n"
             "(\n"
             "    const fvPatch& p,\n"
             "    const DimensionedField<scalar, volMesh>& iF,\n"
@@ -128,10 +128,10 @@ temperatureThermoBaffleFvPatchScalarField
 }
 
 
-temperatureThermoBaffleFvPatchScalarField::
-temperatureThermoBaffleFvPatchScalarField
+thermoBaffleFvPatchScalarField::
+thermoBaffleFvPatchScalarField
 (
-    const temperatureThermoBaffleFvPatchScalarField& ptf,
+    const thermoBaffleFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -145,7 +145,7 @@ temperatureThermoBaffleFvPatchScalarField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-void temperatureThermoBaffleFvPatchScalarField::autoMap
+void thermoBaffleFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -154,7 +154,7 @@ void temperatureThermoBaffleFvPatchScalarField::autoMap
 }
 
 
-void temperatureThermoBaffleFvPatchScalarField::rmap
+void thermoBaffleFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -164,7 +164,7 @@ void temperatureThermoBaffleFvPatchScalarField::rmap
 }
 
 
-void temperatureThermoBaffleFvPatchScalarField::updateCoeffs()
+void thermoBaffleFvPatchScalarField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -186,7 +186,7 @@ void temperatureThermoBaffleFvPatchScalarField::updateCoeffs()
 }
 
 
-void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
+void thermoBaffleFvPatchScalarField::write(Ostream& os) const
 {
     turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write(os);
 
@@ -217,10 +217,10 @@ void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
 
         os.writeKeyword("thermoType");
         os << dict_.subDict("thermoType") << nl;
- 
+
         os.writeKeyword("mixture");
         os << dict_.subDict("mixture") << nl;
- 
+
         os.writeKeyword("radiation");
         os << dict_.subDict("radiation") << nl;
    }
@@ -232,7 +232,7 @@ void temperatureThermoBaffleFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    temperatureThermoBaffleFvPatchScalarField
+    thermoBaffleFvPatchScalarField
 );
 
 

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoBaffle2D.H"
+#include "thermoBaffle.H"
 #include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,7 +38,7 @@ namespace thermoBaffleModels
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline tmp<scalarField> thermoBaffle2D::he
+inline tmp<scalarField> thermoBaffle::he
 (
     const scalarField& p,
     const scalarField& T,
@@ -49,7 +49,7 @@ inline tmp<scalarField> thermoBaffle2D::he
 }
 
 
-inline tmp<volScalarField> thermoBaffle2D::he() const
+inline tmp<volScalarField> thermoBaffle::he() const
 {
     return thermo_->he();
 }

@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoBaffle2D
+    Foam::thermoBaffle
 
 Description
     2D thermal baffle
 
 SourceFiles
-    thermoBaffle2D.C
-    thermoBaffle2DI.H
+    thermoBaffle.C
+    thermoBaffleI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoBaffle2D_H
-#define thermoBaffle2D_H
+#ifndef thermoBaffle_H
+#define thermoBaffle_H
 
 #include "thermoBaffleModel.H"
 #include "volFieldsFwd.H"
@@ -51,10 +51,10 @@ namespace thermoBaffleModels
 
 
 /*---------------------------------------------------------------------------*\
-                        Class thermoBaffle2D Declaration
+                        Class thermoBaffle Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoBaffle2D
+class thermoBaffle
 :
     public thermoBaffleModel
 {
@@ -63,12 +63,12 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        thermoBaffle2D(const thermoBaffle2D&);
+        thermoBaffle(const thermoBaffle&);
 
         //- Disallow default bitwise assignment
-        void operator=(const thermoBaffle2D&);
+        void operator=(const thermoBaffle&);
 
-        //- Initialize thermoBaffle2D
+        //- Initialize thermoBaffle
         void init();
 
 
@@ -124,16 +124,16 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("thermoBaffle2D");
+    TypeName("thermoBaffle");
 
 
     // Constructors
 
         //- Construct from components
-        thermoBaffle2D(const word& modelType, const fvMesh& mesh);
+        thermoBaffle(const word& modelType, const fvMesh& mesh);
 
         //- Construct from components and dict
-        thermoBaffle2D
+        thermoBaffle
         (
             const word& modelType,
             const fvMesh& mesh,
@@ -142,7 +142,7 @@ public:
 
 
     //- Destructor
-    virtual ~thermoBaffle2D();
+    virtual ~thermoBaffle();
 
 
     // Member Functions
@@ -211,7 +211,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoBaffle2DI.H"
+#include "thermoBaffleI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
