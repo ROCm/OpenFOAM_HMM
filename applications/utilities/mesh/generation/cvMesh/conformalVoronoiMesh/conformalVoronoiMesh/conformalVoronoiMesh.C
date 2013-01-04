@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -880,11 +880,24 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         cellSizeMesh.distribute(decomposition_);
     }
 
-    label nMaxIter = 2;
+    label nMaxIter = readLabel
+    (
+        cvMeshControls().cvMeshDict().subDict("motionControl").lookup
+        (
+            "maxRefinementIterations"
+        )
+    );
+
+    Info<< "Maximum number of refinement iterations : " << nMaxIter << endl;
 
     for (label i = 0; i < nMaxIter; ++i)
     {
+//        label nRemoved = cellSizeMesh.removePoints();
+        label nRemoved = 0;
+        reduce(nRemoved, sumOp<label>());
+
         label nAdded = cellShapeControl_.refineMesh(decomposition_);
+//        label nAdded = 0;
         reduce(nAdded, sumOp<label>());
 
         if (Pstream::parRun())
@@ -892,12 +905,14 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
             cellSizeMesh.distribute(decomposition_);
         }
 
-        if (nAdded == 0)
+        if (nRemoved + nAdded == 0)
         {
             break;
         }
 
-        Info<< "    Iteration " << i << ": Added = " << nAdded << " points"
+        Info<< "    Iteration " << i
+            << " Added = " << nAdded << " points"
+            << ", Removed = " << nRemoved << " points"
             << endl;
     }
 
@@ -906,7 +921,11 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
     Info<< "Background cell size and alignment mesh:" << endl;
     cellSizeMesh.printInfo(Info);
 
-//    cellSizeMesh.write();
+    if (cvMeshControls().objOutput())
+    {
+        cellSizeMesh.writeTriangulation();
+        cellSizeMesh.write();
+    }
 }
 
 

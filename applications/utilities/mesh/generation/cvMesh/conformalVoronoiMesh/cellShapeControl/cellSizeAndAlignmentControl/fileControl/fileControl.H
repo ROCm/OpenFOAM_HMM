@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,8 @@ class fileControl
         const fileName sizesFile_;
 
         const fileName alignmentsFile_;
+
+        label priority_;
 
 
     // Private Member Functions
@@ -117,9 +119,13 @@ public:
         (
             pointField& pts,
             scalarField& sizes,
-            Field<triad>& alignments
+            triadField& alignments
         ) const;
 
+        virtual label priority() const
+        {
+            return priority_;
+        }
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,91 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellSizeAndAlignmentControls.H"
+#include "searchableSurfaceControl.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+defineTypeNameAndDebug(cellSizeAndAlignmentControls, 0);
+
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
+(
+    const point& pt,
+    scalar& minSize
+) const
+{
+    bool anyFunctionFound = false;
+
+    // Regions requesting with the same priority take the smallest
+
+    if (controlFunctions_.size())
+    {
+        // Maintain priority of current hit. Initialise so it always goes
+        // through at least once.
+        label previousPriority = -1;
+
+        forAll(controlFunctions_, i)
+        {
+            const cellSizeAndAlignmentControl& cSF = controlFunctions_[i];
+
+            if (isA<searchableSurfaceControl>(cSF))
+            {
+                const searchableSurfaceControl& sSC =
+                    refCast<const searchableSurfaceControl>(cSF);
+
+                if (debug)
+                {
+                    Info<< "size function "
+                        << sSC.name()
+                        << " priority " << sSC.priority()
+                        << endl;
+                }
+
+                if (sSC.priority() < previousPriority)
+                {
+                    return minSize;
+                }
+
+                scalar sizeI;
+
+                if (sSC.sizeFunction().cellSize(pt, sizeI))
+                {
+                    anyFunctionFound = true;
+
+                    if (sSC.priority() == previousPriority)
+                    {
+                        if (sizeI < minSize)
+                        {
+                            minSize = sizeI;
+                        }
+                    }
+                    else
+                    {
+                        minSize = sizeI;
+                    }
+
+                    if (debug)
+                    {
+                        Info<< "sizeI " << sizeI
+                            <<" minSize " << minSize << endl;
+                    }
+
+                    previousPriority = sSC.priority();
+                }
+            }
+        }
+    }
+
+    return anyFunctionFound;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -31,12 +116,14 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
 (
     const Time& runTime,
     const dictionary& shapeControlDict,
-    const conformationSurfaces& allGeometry
+    const conformationSurfaces& allGeometry,
+    const scalar defaultCellSize
 )
 :
     shapeControlDict_(shapeControlDict),
     allGeometry_(allGeometry),
-    controlFunctions_(shapeControlDict_.size())
+    controlFunctions_(shapeControlDict_.size()),
+    defaultCellSize_(defaultCellSize)
 {
     label functionI = 0;
 
@@ -73,6 +160,18 @@ Foam::cellSizeAndAlignmentControls::~cellSizeAndAlignmentControls()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::scalar Foam::cellSizeAndAlignmentControls::cellSize
+(
+    const point& pt
+) const
+{
+    scalar size = defaultCellSize_;
+
+    evalCellSizeFunctions(pt, size);
+
+    return size;
+}
 
 
 // ************************************************************************* //

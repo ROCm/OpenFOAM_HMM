@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,13 +27,7 @@ License
 
 inline Foam::scalar Foam::conformalVoronoiMesh::defaultCellSize() const
 {
-    return readScalar
-    (
-        cvMeshControls().cvMeshDict().subDict("motionControl").lookup
-        (
-            "defaultCellSize"
-        )
-    );
+    return cvMeshControls().defaultCellSize();
 }
 
 
@@ -336,12 +330,20 @@ inline void Foam::conformalVoronoiMesh::createPointPair
 
     pts.append
     (
-        Vb(surfPt - ppDistn, Vb::vtInternalSurface)
+        Vb
+        (
+            surfPt - ppDistn,
+            Vb::vtInternalSurface
+        )
     );
 
     pts.append
     (
-        Vb(surfPt + ppDistn, Vb::vtExternalSurface)
+        Vb
+        (
+            surfPt + ppDistn,
+            Vb::vtExternalSurface
+        )
     );
 }
 
@@ -385,6 +387,76 @@ inline void Foam::conformalVoronoiMesh::createBafflePointPair
     (
         Vb(surfPt + ppDistn, Vb::vtInternalSurface)
     );
+}
+
+
+inline bool Foam::conformalVoronoiMesh::isPointPair
+(
+    const Vertex_handle& vA,
+    const Vertex_handle& vB
+) const
+{
+    // Want to do this topologically, but problem if vertices are redistributed
+    // so that one of the point pair is one processor and the other is on
+    // another.
+
+    const Foam::point& ptA = topoint(vA->point());
+    const Foam::point& ptB = topoint(vB->point());
+
+    if
+    (
+        (
+            vA->type() == Vb::vtInternalSurface
+         && vB->type() == Vb::vtExternalSurface
+        )
+     ||
+        (
+            vB->type() == Vb::vtInternalSurface
+         && vA->type() == Vb::vtExternalSurface
+        )
+     ||
+        (
+            vA->type() == Vb::vtInternalFeatureEdge
+         && vB->type() == Vb::vtExternalFeatureEdge
+        )
+     ||
+        (
+            vB->type() == Vb::vtInternalFeatureEdge
+         && vA->type() == Vb::vtExternalFeatureEdge
+        )
+     ||
+        (
+            vA->type() == Vb::vtInternalSurface
+         && vB->type() == Vb::vtExternalFeatureEdge
+        )
+     ||
+        (
+            vB->type() == Vb::vtInternalSurface
+         && vA->type() == Vb::vtExternalFeatureEdge
+        )
+     ||
+        (
+            vA->type() == Vb::vtExternalSurface
+         && vB->type() == Vb::vtInternalFeatureEdge
+        )
+     ||
+        (
+            vB->type() == Vb::vtExternalSurface
+         && vA->type() == Vb::vtInternalFeatureEdge
+        )
+    )
+    {
+        const scalar distSqr = magSqr(ptA - ptB);
+
+        const scalar ppDistSqr = sqr(2*pointPairDistance(0.5*(ptA + ptB)));
+
+        if (distSqr > 1.001*ppDistSqr)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

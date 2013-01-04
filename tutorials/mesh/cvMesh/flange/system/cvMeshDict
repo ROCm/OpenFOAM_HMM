@@ -80,8 +80,8 @@ surfaceConformation
     {
         flange.obj
         {
-            featureMethod    extendedFeatureEdgeMesh;
-            extendedFeatureEdgeMesh  "flange.extendedFeatureEdgeMesh";
+            featureMethod           extendedFeatureEdgeMesh;
+            extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
         }
     }
 

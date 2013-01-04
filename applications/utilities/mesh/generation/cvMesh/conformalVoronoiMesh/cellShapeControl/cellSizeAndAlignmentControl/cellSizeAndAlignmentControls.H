@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,14 +35,12 @@ SourceFiles
 #define cellSizeAndAlignmentControls_H
 
 #include "dictionary.H"
-#include "cellShapeControlMesh.H"
 #include "cellSizeAndAlignmentControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                      Class cellSizeAndAlignmentControls Declaration
@@ -58,8 +56,12 @@ class cellSizeAndAlignmentControls
 
         PtrList<cellSizeAndAlignmentControl> controlFunctions_;
 
+        const scalar defaultCellSize_;
+
 
     // Private Member Functions
+
+        bool evalCellSizeFunctions(const point& pt, scalar& minSize) const;
 
         //- Disallow default bitwise copy construct
         cellSizeAndAlignmentControls(const cellSizeAndAlignmentControls&);
@@ -70,6 +72,10 @@ class cellSizeAndAlignmentControls
 
 public:
 
+        //- Runtime type information
+        ClassName("cellSizeAndAlignmentControls");
+
+
     // Constructors
 
         //- Construct from dictionary
@@ -77,7 +83,8 @@ public:
         (
             const Time& runTime,
             const dictionary& shapeControlDict,
-            const conformationSurfaces& allGeometry
+            const conformationSurfaces& allGeometry,
+            const scalar defaultCellSize
         );
 
 
@@ -96,6 +103,8 @@ public:
 
 
         // Query
+
+            scalar cellSize(const point& pt) const;
 };
 
 

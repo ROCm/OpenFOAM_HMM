@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,6 @@ SourceFiles
 #ifndef searchableSurfaceControl_H
 #define searchableSurfaceControl_H
 
-#include "cellShapeControl.H"
 #include "cellSizeFunction.H"
 #include "triad.H"
 
@@ -54,13 +53,15 @@ class searchableSurfaceControl
 {
     // Private data
 
-          //- Reference to the searchableSurface object holding the geometry
-          //  data
-          const searchableSurface& searchableSurface_;
+        //- Name of the surface
+        const word surfaceName_;
 
-          const conformationSurfaces& allGeometry_;
+        //- Reference to the searchableSurface object holding the geometry data
+        const searchableSurface& searchableSurface_;
 
-          autoPtr<cellSizeFunction> cellSizeFunction_;
+        const conformationSurfaces& allGeometry_;
+
+        autoPtr<cellSizeFunction> cellSizeFunction_;
 
 
 //        const conformationSurfaces& geometryToConformTo_;
@@ -143,12 +144,17 @@ public:
         (
             pointField& pts,
             scalarField& sizes,
-            Field<triad>& alignments
+            triadField& alignments
         ) const;
 
         const cellSizeFunction& sizeFunction() const
         {
             return cellSizeFunction_();
+        }
+
+        virtual label priority() const
+        {
+            return cellSizeFunction_().priority();
         }
 
         // Edit

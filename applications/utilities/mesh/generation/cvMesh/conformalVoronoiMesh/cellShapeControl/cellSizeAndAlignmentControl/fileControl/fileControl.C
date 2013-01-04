@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,8 @@ Foam::fileControl::fileControl
     ),
     pointsFile_(controlFunctionDict.lookup("pointsFile")),
     sizesFile_(controlFunctionDict.lookup("sizesFile")),
-    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile"))
+    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile")),
+    priority_(readLabel(controlFunctionDict.lookup("priority")))
 {
     Info<< indent << "Loading from file... " << nl
         << indent << "    points     : " << pointsFile_ << nl
@@ -160,12 +161,11 @@ Foam::fileControl::~fileControl()
 //    alignment = cellAlignment(pt);
 //}
 
-
 void Foam::fileControl::initialVertices
 (
     pointField& pts,
     scalarField& sizes,
-    Field<triad>& alignments
+    triadField& alignments
 ) const
 {
     Info<< "    Reading points from file     : " << pointsFile_ << endl;

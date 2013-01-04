@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,10 +26,10 @@ License
 #include "cellShapeControl.H"
 #include "pointField.H"
 #include "scalarField.H"
+#include "triadField.H"
 #include "cellSizeAndAlignmentControl.H"
 #include "searchableSurfaceControl.H"
 #include "cellSizeFunction.H"
-#include "triad.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -200,12 +200,7 @@ Foam::tmp<Foam::triadField> Foam::cellShapeControl::buildAlignmentField
             continue;
         }
 
-        alignments[vit->index()] = triad
-        (
-            vit->alignment().x(),
-            vit->alignment().y(),
-            vit->alignment().z()
-        );
+        alignments[vit->index()] = vit->alignment();
     }
 
     return tAlignments;
@@ -259,13 +254,15 @@ Foam::cellShapeControl::cellShapeControl
     allGeometry_(allGeometry),
     geometryToConformTo_(geometryToConformTo),
     defaultCellSize_(readScalar(lookup("defaultCellSize"))),
+    minimumCellSize_(readScalar(lookup("minimumCellSize"))),
     shapeControlMesh_(runTime),
     aspectRatio_(motionDict),
     sizeAndAlignment_
     (
         runTime,
         motionDict.subDict("shapeControlFunctions"),
-        geometryToConformTo
+        geometryToConformTo,
+        defaultCellSize_
     )
 {}
 
@@ -489,30 +486,29 @@ void Foam::cellShapeControl::cellSizeAndAlignment
         }
         else
         {
-            triad tri;
+//            triad tri;
 
             forAll(bary, pI)
             {
                 size += bary[pI]*ch->vertex(pI)->targetCellSize();
 
-                triad triTmp2
-                (
-                    ch->vertex(pI)->alignment().x(),
-                    ch->vertex(pI)->alignment().y(),
-                    ch->vertex(pI)->alignment().z()
-                );
-
-                tri += triTmp2*bary[pI];
+//                triad triTmp2 = ch->vertex(pI)->alignment();
+//                tri += triTmp2*bary[pI];
             }
 
-            tri.normalize();
-            tri.orthogonalize();
-            tri = tri.sortxyz();
+//            tri.normalize();
+//            tri.orthogonalize();
+//            tri = tri.sortxyz();
+//
+//            alignment = tri;
 
-            alignment = tensor
-            (
-                tri.x(), tri.y(), tri.z()
-            );
+            cellShapeControlMesh::Vertex_handle nearV =
+                shapeControlMesh_.nearest_vertex
+                (
+                    toPoint<cellShapeControlMesh::Point>(pt)
+                );
+
+            alignment = nearV->alignment();
         }
     }
 }
@@ -545,36 +541,59 @@ void Foam::cellShapeControl::initialMeshPopulation
         Info<< "Inserting points from " << controlFunction.name()
             << " (" << controlFunction.type() << ")" << endl;
 
-        pointField pts(1);
-        scalarField sizes(1);
-        Field<triad> alignments(1);
+        pointField pts;
+        scalarField sizes;
+        triadField alignments;
 
         controlFunction.initialVertices(pts, sizes, alignments);
 
-        label nRejected = 0;
+        List<Vb> vertices(pts.size());
 
-        forAll(pts, pI)
+        // Clip the minimum size
+        forAll(vertices, vI)
         {
-            if (Pstream::parRun())
-            {
-                if (!decomposition().positionOnThisProcessor(pts[pI]))
-                {
-                    nRejected++;
-                    continue;
-                }
-            }
-
-            shapeControlMesh_.insert
-            (
-                pts[pI],
-                sizes[pI],
-                alignments[pI]
-            );
+            vertices[vI] = Vb(pts[vI], Vb::vtInternal);
+            vertices[vI].targetCellSize() = max(sizes[vI], minimumCellSize_);
+            vertices[vI].alignment() = alignments[vI];
         }
 
+        pts.clear();
+        sizes.clear();
+        alignments.clear();
+
+        label nRejected = 0;
+
+        PackedBoolList keepVertex(vertices.size(), true);
+
+        if (Pstream::parRun())
+        {
+            forAll(vertices, vI)
+            {
+                const bool onProc = decomposition().positionOnThisProcessor
+                (
+                    topoint(vertices[vI].point())
+                );
+
+                if (!onProc)
+                {
+                    keepVertex[vI] = false;
+                }
+            }
+        }
+
+        inplaceSubset(keepVertex, vertices);
+
+        const label preInsertedSize = shapeControlMesh_.number_of_vertices();
+
+        shapeControlMesh_.rangeInsertWithInfo(vertices.begin(), vertices.end());
+
         Info<< "    Inserted "
-            << returnReduce(pts.size() - nRejected, sumOp<label>())
-            << "/" << pts.size()
+            << returnReduce
+               (
+                   shapeControlMesh_.number_of_vertices()
+                 - preInsertedSize, sumOp<label>()
+               )
+            << "/" << vertices.size()
             << endl;
     }
 }
@@ -662,7 +681,7 @@ Foam::label Foam::cellShapeControl::refineMesh
         if
         (
             lastCellSize < GREAT
-         && mag(interpolatedSize - lastCellSize)/lastCellSize > 0.2
+         //&& mag(interpolatedSize - lastCellSize)/lastCellSize > 0.2
         )
         {
             if (Pstream::parRun())
@@ -694,7 +713,7 @@ Foam::label Foam::cellShapeControl::refineMesh
 
 void Foam::cellShapeControl::smoothMesh()
 {
-    label maxSmoothingIterations = 200;
+    label maxSmoothingIterations = readLabel(lookup("maxSmoothingIterations"));
     scalar minResidual = 0;
 
     labelListList pointPoints;
@@ -719,9 +738,7 @@ void Foam::cellShapeControl::smoothMesh()
     {
         if (vit->real())
         {
-            const tensor& alignment = vit->alignment();
-
-            fixedAlignments[vit->index()] = alignment;
+            fixedAlignments[vit->index()] = vit->alignment();
         }
     }
 
@@ -755,8 +772,6 @@ void Foam::cellShapeControl::smoothMesh()
 
                 scalar dist = mag(points[pI] - points[adjPointIndex]);
 
-                dist = max(dist, SMALL);
-
                 triad tmpTriad = alignments[adjPointIndex];
 
                 for (direction dir = 0; dir < 3; dir++)
@@ -781,7 +796,7 @@ void Foam::cellShapeControl::smoothMesh()
 
             forAll(fixedAlignment, dirI)
             {
-                if (fixedAlignment[dirI] != triad::unset[dirI])
+                if (fixedAlignment.set(dirI))
                 {
                     nFixed++;
                 }
@@ -826,27 +841,32 @@ void Foam::cellShapeControl::smoothMesh()
 
             const triad& oldTriad = alignments[pI];
 
-            if (newTriad.set(vector::X) && oldTriad.set(vector::X))
+            for (direction dir = 0; dir < 3; ++dir)
             {
-                scalar dotProd = (oldTriad.x() & newTriad.x());
+                if
+                (
+                    newTriad.set(dir)
+                 && oldTriad.set(dir)
+                 //&& !fixedAlignment.set(dir)
+                )
+                {
+                    scalar dotProd = (oldTriad[dir] & newTriad[dir]);
+                    scalar diff = mag(dotProd) - 1.0;
 
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
+                    residual += mag(diff);
+                }
             }
-            if (newTriad.set(vector::Y) && oldTriad.set(vector::Y))
-            {
-                scalar dotProd = (oldTriad.y() & newTriad.y());
 
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
-            }
-            if (newTriad.set(vector::Z) && oldTriad.set(vector::Z))
-            {
-                scalar dotProd = (oldTriad.z() & newTriad.z());
-
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
-            }
+//            if (iter == 198 || iter == 199)
+//            {
+//                Info<< "Triad" << nl
+//                    << "    Fixed (" << nFixed << ") = " << fixedAlignment
+//                    << nl
+//                    << "    Old      = " << oldTriad << nl
+//                    << "    Pre-Align= " << triadAv[pI] << nl
+//                    << "    New      = " << newTriad << nl
+//                    << "    Residual = " << residual << endl;
+//            }
         }
 
         forAll(alignments, pI)
@@ -858,7 +878,7 @@ void Foam::cellShapeControl::smoothMesh()
 
         Info<< ", Residual = " << residual << endl;
 
-        if (residual <= minResidual)
+        if (iter > 0 && residual <= minResidual)
         {
             break;
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,6 +109,18 @@ inline Foam::label Foam::cvControls::maxConformationIterations() const
 inline Foam::scalar Foam::cvControls::iterationToInitialHitRatioLimit() const
 {
     return iterationToInitialHitRatioLimit_;
+}
+
+
+inline Foam::scalar Foam::cvControls::defaultCellSize() const
+{
+    return defaultCellSize_;
+}
+
+
+inline Foam::scalar Foam::cvControls::minimumCellSize() const
+{
+    return minimumCellSize_;
 }
 
 

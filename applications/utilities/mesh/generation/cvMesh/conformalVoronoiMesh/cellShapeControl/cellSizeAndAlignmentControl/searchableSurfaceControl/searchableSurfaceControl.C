@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -168,7 +168,8 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         controlFunctionDict,
         allGeometry
     ),
-    searchableSurface_(allGeometry.geometry()[name]),
+    surfaceName_(controlFunctionDict.lookupOrDefault<word>("surface", name)),
+    searchableSurface_(allGeometry.geometry()[surfaceName_]),
     allGeometry_(allGeometry),
     cellSizeFunction_
     (
@@ -557,20 +558,16 @@ Foam::searchableSurfaceControl::~searchableSurfaceControl()
 //    alignment = cellAlignment(pt);
 //}
 
-
 void Foam::searchableSurfaceControl::initialVertices
 (
     pointField& pts,
     scalarField& sizes,
-    Field<triad>& alignments
+    triadField& alignments
 ) const
 {
     pts = searchableSurface_.points();
 
     const scalar nearFeatDistSqrCoeff = 1e-8;
-
-    sizes.setSize(pts.size());
-    alignments.setSize(pts.size());
 
     forAll(pts, pI)
     {

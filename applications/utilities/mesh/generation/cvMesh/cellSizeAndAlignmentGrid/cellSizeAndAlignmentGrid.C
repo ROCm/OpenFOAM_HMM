@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -174,12 +174,7 @@ Foam::tmp<Foam::triadField> buildAlignmentField(const T& mesh)
             continue;
         }
 
-        alignments[vit->index()] = triad
-        (
-            vit->alignment().x(),
-            vit->alignment().y(),
-            vit->alignment().z()
-        );
+        alignments[vit->index()] = vit->alignment();
     }
 
     return tAlignments;
@@ -214,6 +209,61 @@ Foam::tmp<Foam::pointField> buildPointField(const T& mesh)
 }
 
 
+void refine
+(
+    cellShapeControlMesh& mesh,
+    const conformationSurfaces& geometryToConformTo,
+    const label maxRefinementIterations,
+    const scalar defaultCellSize
+)
+{
+    for (label iter = 0; iter < maxRefinementIterations; ++iter)
+    {
+        DynamicList<point> ptsToInsert;
+
+        for
+        (
+            CellSizeDelaunay::Finite_cells_iterator cit =
+                mesh.finite_cells_begin();
+            cit != mesh.finite_cells_end();
+            ++cit
+        )
+        {
+            const point newPoint =
+                topoint
+                (
+                    CGAL::centroid
+                    (
+                        cit->vertex(0)->point(),
+                        cit->vertex(1)->point(),
+                        cit->vertex(2)->point(),
+                        cit->vertex(3)->point()
+                    )
+                );
+
+            if (geometryToConformTo.inside(newPoint))
+            {
+                ptsToInsert.append(newPoint);
+            }
+        }
+
+        Info<< "    Adding " << returnReduce(ptsToInsert.size(), sumOp<label>())
+            << endl;
+
+        forAll(ptsToInsert, ptI)
+        {
+            mesh.insert
+            (
+                ptsToInsert[ptI],
+                defaultCellSize,
+                triad::unset,
+                Vb::vtInternal
+            );
+        }
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
@@ -221,10 +271,10 @@ int main(int argc, char *argv[])
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    label maxRefinementIterations = 0;
+    label maxRefinementIterations = 2;
     label maxSmoothingIterations = 200;
     scalar minResidual = 0;
-    scalar defaultCellSize = 0.0004;
+    scalar defaultCellSize = 0.001;
     scalar nearFeatDistSqrCoeff = 1e-8;
 
 
@@ -305,7 +355,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Inserting points from surface " << surface.name()
             << " (" << surface.type() << ")" << endl;
 
-        const tmp<pointField> tpoints = surface.points();
+        const tmp<pointField> tpoints(surface.points());
         const pointField& points = tpoints();
 
         Info<< "    Number of points = " << points.size() << endl;
@@ -396,7 +446,8 @@ int main(int argc, char *argv[])
                     (
                         points[pI],
                         defaultCellSize,
-                        pointAlignment()
+                        pointAlignment(),
+                        Vb::vtInternalNearBoundary
                     );
                 }
             }
@@ -406,56 +457,22 @@ int main(int argc, char *argv[])
                 (
                     points[pI],
                     defaultCellSize,
-                    pointAlignment()
+                    pointAlignment(),
+                    Vb::vtInternalNearBoundary
                 );
             }
         }
     }
 
 
-    for (label iter = 0; iter < maxRefinementIterations; ++iter)
-    {
-        DynamicList<point> ptsToInsert;
-
-        for
-        (
-            CellSizeDelaunay::Finite_cells_iterator cit =
-                mesh.finite_cells_begin();
-            cit != mesh.finite_cells_end();
-            ++cit
-        )
-        {
-            const point newPoint =
-                topoint
-                (
-                    CGAL::centroid
-                    (
-                        cit->vertex(0)->point(),
-                        cit->vertex(1)->point(),
-                        cit->vertex(2)->point(),
-                        cit->vertex(3)->point()
-                    )
-                );
-
-            if (geometryToConformTo.inside(newPoint))
-            {
-                ptsToInsert.append(newPoint);
-            }
-        }
-
-        Info<< "    Adding " << returnReduce(ptsToInsert.size(), sumOp<label>())
-            << endl;
-
-        forAll(ptsToInsert, ptI)
-        {
-            mesh.insert
-            (
-                ptsToInsert[ptI],
-                defaultCellSize,
-                triad::unset
-            );
-        }
-    }
+    // Refine the mesh
+    refine
+    (
+        mesh,
+        geometryToConformTo,
+        maxRefinementIterations,
+        defaultCellSize
+    );
 
 
     if (Pstream::parRun())
@@ -463,8 +480,10 @@ int main(int argc, char *argv[])
         mesh.distribute(bMesh);
     }
 
+
     labelListList pointPoints;
     autoPtr<mapDistribute> meshDistributor = buildMap(mesh, pointPoints);
+
 
     triadField alignments(buildAlignmentField(mesh));
     pointField points(buildPointField(mesh));
@@ -483,19 +502,11 @@ int main(int argc, char *argv[])
         ++vit
     )
     {
-        if (vit->real())
+        if (vit->nearBoundary())
         {
-            const tensor& alignment = vit->alignment();
-
-            fixedAlignments[vit->index()] = triad
-            (
-                alignment.x(),
-                alignment.y(),
-                alignment.z()
-            );
+            fixedAlignments[vit->index()] = vit->alignment();
         }
     }
-
 
     Info<< nl << "Smoothing alignments" << endl;
 
@@ -522,13 +533,16 @@ int main(int argc, char *argv[])
             const triad& oldTriad = alignments[pI];
             triad& newTriad = triadAv[pI];
 
+            // Enforce the boundary conditions
+            const triad& fixedAlignment = fixedAlignments[pI];
+
             forAll(pPoints, adjPointI)
             {
                 const label adjPointIndex = pPoints[adjPointI];
 
                 scalar dist = mag(points[pI] - points[adjPointIndex]);
 
-                dist = max(dist, SMALL);
+//                dist = max(dist, SMALL);
 
                 triad tmpTriad = alignments[adjPointIndex];
 
@@ -545,16 +559,13 @@ int main(int argc, char *argv[])
 
             newTriad.normalize();
             newTriad.orthogonalize();
-            newTriad = newTriad.sortxyz();
-
-            // Enforce the boundary conditions
-            const triad& fixedAlignment = fixedAlignments[pI];
+//            newTriad = newTriad.sortxyz();
 
             label nFixed = 0;
 
             forAll(fixedAlignment, dirI)
             {
-                if (fixedAlignment[dirI] != triad::unset[dirI])
+                if (fixedAlignment.set(dirI))
                 {
                     nFixed++;
                 }
@@ -597,26 +608,20 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (newTriad.set(vector::X) && oldTriad.set(vector::X))
+            for (direction dir = 0; dir < 3; ++dir)
             {
-                scalar dotProd = (oldTriad.x() & newTriad.x());
+                if
+                (
+                    newTriad.set(dir)
+                 && oldTriad.set(dir)
+                 //&& !fixedAlignment.set(dir)
+                )
+                {
+                    scalar dotProd = (oldTriad[dir] & newTriad[dir]);
+                    scalar diff = mag(dotProd) - 1.0;
 
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
-            }
-            if (newTriad.set(vector::Y) && oldTriad.set(vector::Y))
-            {
-                scalar dotProd = (oldTriad.y() & newTriad.y());
-
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
-            }
-            if (newTriad.set(vector::Z) && oldTriad.set(vector::Z))
-            {
-                scalar dotProd = (oldTriad.z() & newTriad.z());
-
-                scalar diff = mag(dotProd) - 1.0;
-                residual += mag(diff);
+                    residual += mag(diff);
+                }
             }
         }
 

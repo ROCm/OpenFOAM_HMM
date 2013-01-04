@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,8 @@ Foam::cellSizeFunction::cellSizeFunction
         )
     ),
     coeffsDict_(subDict(type + "Coeffs")),
-    sideMode_()
+    sideMode_(),
+    priority_(readLabel(cellSizeFunctionDict.lookup("priority")))
 {
     word mode = cellSizeFunctionDict.lookup("mode");
 

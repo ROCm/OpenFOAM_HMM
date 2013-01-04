@@ -36,7 +36,7 @@ deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   10;
+writeInterval   100;
 
 purgeWrite      0;
 

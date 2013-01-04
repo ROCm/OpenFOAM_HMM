@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,8 @@ protected:
         //- Mode of size specification, i.e. inside, outside or bothSides
         sideMode sideMode_;
 
+        label priority_;
+
 
 private:
 
@@ -179,6 +181,11 @@ public:
                 << "Not overloaded."
                 << endl;
             return false;
+        }
+
+        label priority() const
+        {
+            return priority_;
         }
 };
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -344,6 +344,12 @@ private:
             const vector& n,
             DynamicList<Vb>& pts
         );
+
+        inline bool isPointPair
+        (
+            const Vertex_handle& vA,
+            const Vertex_handle& vB
+        ) const;
 
         //- Insert pairs of points on the surface with the given normals, at the
         //  specified spacing

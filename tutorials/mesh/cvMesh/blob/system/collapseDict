@@ -45,7 +45,7 @@ collapseFacesCoeffs
 meshQualityCoeffs
 {
     #include                    "meshQualityDict";
-    maximumIterations           30;
+    maximumIterations           10;
     maximumSmoothingIterations  1;
     maxPointErrorCount          5;
 }

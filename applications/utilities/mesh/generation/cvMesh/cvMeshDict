@@ -271,6 +271,9 @@ motionControl
     // Absolute cell size of back ground mesh. This is the maximum cell size.
     defaultCellSize     0.00075;
 
+    // Absolute cell size of back ground mesh. This is the minimum cell size.
+    minimumCellSize     0;
+
     //cellShapeControl    constantControl;
     //cellShapeControl    fileControl;
     cellShapeControl    surfaceControl;

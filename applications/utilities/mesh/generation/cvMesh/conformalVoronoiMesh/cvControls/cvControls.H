@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,6 +125,16 @@ class cvControls
 
 
     // Motion control controls
+
+
+        // Cell size criteria
+
+            //- Default cell size
+            scalar defaultCellSize_;
+
+            //- Minimum cell size
+            scalar minimumCellSize_;
+
 
         //- Switch to control the output of obj files for debug
         Switch objOutput_;
@@ -254,6 +264,12 @@ public:
 
             //- Return the iterationToInitialHitRatioLimit
             scalar iterationToInitialHitRatioLimit() const;
+
+            //- Return the defaultCellSize
+            inline scalar defaultCellSize() const;
+
+            //- Return the minimumCellSize
+            inline scalar minimumCellSize() const;
 
             //- Return the objOutput Switch
             inline Switch objOutput() const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,6 @@ SourceFiles
 #include "point.H"
 #include "primitiveFieldsFwd.H"
 #include "pointFieldFwd.H"
-#include "triadField.H"
 #include "Time.H"
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
@@ -73,6 +72,8 @@ class cellShapeControl
         const conformationSurfaces& geometryToConformTo_;
 
         const scalar defaultCellSize_;
+
+        const scalar minimumCellSize_;
 
         cellShapeControlMesh shapeControlMesh_;
 

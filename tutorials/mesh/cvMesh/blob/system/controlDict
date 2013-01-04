@@ -22,7 +22,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-startFrom       latestTime;
+startFrom       startTime;
 
 startTime       0;
 

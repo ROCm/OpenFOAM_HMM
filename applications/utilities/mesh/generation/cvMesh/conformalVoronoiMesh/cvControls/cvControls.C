@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,6 +124,10 @@ Foam::cvControls::cvControls
     // Motion control controls
 
     const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
+
+    defaultCellSize_ = readScalar(motionDict.lookup("defaultCellSize"));
+
+    minimumCellSize_ = readScalar(motionDict.lookup("minimumCellSize"));
 
     objOutput_ = Switch(motionDict.lookupOrDefault<Switch>("objOutput", false));
 
