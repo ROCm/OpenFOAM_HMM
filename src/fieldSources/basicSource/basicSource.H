@@ -277,8 +277,8 @@ public:
             //- Return const access to the duration
             inline scalar duration() const;
 
-            //- Return const access to the time end
-            inline scalar timeEnd() const;
+            //- Return true if within time limits
+            inline bool inTimeLimits(const scalar time) const;
 
             //- Return const access to the cell selection mode
             inline const selectionModeType& selectionMode() const;

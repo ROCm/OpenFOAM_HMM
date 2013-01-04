@@ -19,8 +19,6 @@ MRF1
 {
     type            MRFSource;
     active          true;
-    timeStart       0;
-    duration        1e100;
     selectionMode   cellZone;
     cellZone        rotor;
 

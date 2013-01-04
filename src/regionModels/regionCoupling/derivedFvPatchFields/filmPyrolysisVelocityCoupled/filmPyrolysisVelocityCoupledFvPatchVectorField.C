@@ -117,20 +117,13 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    bool filmOk =
-        db().objectRegistry::foundObject<filmModelType>
-        (
-            "surfaceFilmProperties"
-        );
+    bool foundFilm =
+        db().time().foundObject<filmModelType>("surfaceFilmProperties");
 
+    bool foundPyrolysis =
+        db().time().foundObject<pyrModelType>("pyrolysisProperties");
 
-    bool pyrOk =
-        db().objectRegistry::foundObject<pyrModelType>
-        (
-            "pyrolysisProperties"
-        );
-
-    if (!filmOk || !pyrOk)
+    if (!foundFilm || !foundPyrolysis)
     {
         // do nothing on construction - film model doesn't exist yet
         return;
@@ -142,10 +135,7 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
 
     // Retrieve film model
     const filmModelType& filmModel =
-        db().objectRegistry::lookupObject<filmModelType>
-        (
-            "surfaceFilmProperties"
-        );
+        db().time().lookupObject<filmModelType>("surfaceFilmProperties");
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
@@ -157,10 +147,7 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
 
     // Retrieve pyrolysis model
     const pyrModelType& pyrModel =
-        db().objectRegistry::lookupObject<pyrModelType>
-        (
-            "pyrolysisProperties"
-        );
+        db().time().lookupObject<pyrModelType>("pyrolysisProperties");
 
     const label pyrPatchI = pyrModel.regionPatchID(patchI);
 

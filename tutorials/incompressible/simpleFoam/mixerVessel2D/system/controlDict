@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     MRFSimpleFoam;
+application     simpleFoam;
 
 startFrom       startTime;
 

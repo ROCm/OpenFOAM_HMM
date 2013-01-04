@@ -245,6 +245,8 @@ void thermoSingleLayer::correctAlpha()
                 alpha_[i] = 0.0;
             }
         }
+
+        alpha_.correctBoundaryConditions();
     }
     else
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,9 +63,17 @@ inline Foam::scalar Foam::basicSource::duration() const
 }
 
 
-inline Foam::scalar Foam::basicSource::timeEnd() const
+inline bool Foam::basicSource::inTimeLimits(const scalar time) const
 {
-    return timeStart_ + duration_;
+    return
+    (
+        (timeStart_ < 0)
+     ||
+        (
+            (mesh_.time().value() >= timeStart_)
+         && (mesh_.time().value() <= (timeStart_ + duration_))
+        )
+    );
 }
 
 

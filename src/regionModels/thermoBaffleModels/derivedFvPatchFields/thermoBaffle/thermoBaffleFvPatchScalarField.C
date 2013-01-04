@@ -33,7 +33,6 @@ namespace Foam
 namespace compressible
 {
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 thermoBaffleFvPatchScalarField::
@@ -173,11 +172,7 @@ void thermoBaffleFvPatchScalarField::updateCoeffs()
 
     const fvMesh& thisMesh = patch().boundaryMesh().mesh();
 
-    if
-    (
-        thisMesh.name() == polyMesh::defaultRegion
-     && owner_
-    )
+    if (owner_ && thisMesh.name() == polyMesh::defaultRegion)
     {
         baffle_->evolve();
     }
@@ -240,8 +235,6 @@ makePatchTypeField
 
 } // End namespace compressible
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

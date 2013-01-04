@@ -19,8 +19,6 @@ momentumSource
 {
     type            pressureGradientExplicitSource;
     active          on;            //on/off switch
-    timeStart       0.0;           //start time
-    duration        1000000.0;     //duration
     selectionMode   all;       //cellSet // points //cellZone
 
     pressureGradientExplicitSourceCoeffs
