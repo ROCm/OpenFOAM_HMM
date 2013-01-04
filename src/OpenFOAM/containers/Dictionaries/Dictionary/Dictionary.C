@@ -46,8 +46,9 @@ Foam::Dictionary<T>::Dictionary(const Dictionary& dict)
 template<class T>
 bool Foam::Dictionary<T>::erase(const word& keyword)
 {
-    T* tPtr;
-    if (tPtr = this->remove(keyword))
+    T* tPtr = this->remove(keyword);
+
+    if (tPtr)
     {
         delete tPtr;
         return true;
@@ -58,7 +59,5 @@ bool Foam::Dictionary<T>::erase(const word& keyword)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //
