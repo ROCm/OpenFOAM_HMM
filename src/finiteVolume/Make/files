@@ -36,6 +36,7 @@ $(derivedFvPatches)/regionCoupled/regionCoupledWallFvPatch.C
 
 
 wallDist = fvMesh/wallDist
+$(wallDist)/patchDist.C
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
 $(wallDist)/nearWallDistNoSearch.C
 $(wallDist)/nearWallDist.C
