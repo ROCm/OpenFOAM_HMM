@@ -29,7 +29,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::extendedLeastSquaresVectors, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(extendedLeastSquaresVectors, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //

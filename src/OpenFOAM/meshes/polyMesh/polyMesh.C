@@ -47,12 +47,6 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(polyMesh, 0);
-registerDebugSwitchWithName
-(
-    polyMesh,
-    polyMesh,
-    polyMesh::typeName_()
-);
 
 word polyMesh::defaultRegion = "region0";
 word polyMesh::meshSubDir = "polyMesh";
@@ -1129,7 +1123,7 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     if (debug)
     {
         // Check mesh motion
-        if (primitiveMesh::checkMeshMotion(points_, true))
+        if (checkMeshMotion(points_, true))
         {
             Info<< "tmp<scalarField> polyMesh::movePoints"
                 << "(const pointField&) : "

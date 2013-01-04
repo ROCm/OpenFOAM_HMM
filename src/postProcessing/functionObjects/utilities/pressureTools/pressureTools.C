@@ -29,7 +29,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::pressureTools, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(pressureTools, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

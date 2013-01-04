@@ -9,7 +9,7 @@ application=`getApplication`
 
 runApplication blockMesh
 runApplication topoSet
-runApplication subsetMesh -overwrite -cellSet c0 -patch floatingObject
+runApplication subsetMesh -overwrite c0 -patch floatingObject
 cp -r 0.org 0 > /dev/null 2>&1
 runApplication setFields
 runApplication $application

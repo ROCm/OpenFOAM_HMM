@@ -64,14 +64,22 @@ int main(int argc, char *argv[])
         )
     );
 
-    conformalVoronoiMesh::debug = true;
-
-    conformalVoronoiMesh mesh(runTime, cvMeshDict);
-
 
     if (checkGeometry)
     {
-        const searchableSurfaces& allGeometry = mesh.allGeometry();
+        const searchableSurfaces allGeometry
+        (
+            IOobject
+            (
+                "cvSearchableSurfaces",
+                runTime.constant(),
+                "triSurface",
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            ),
+            cvMeshDict.subDict("geometry")
+        );
 
         // Write some stats
         allGeometry.writeStats(List<wordList>(0), Info);
@@ -89,6 +97,11 @@ int main(int argc, char *argv[])
 
         return 0;
     }
+
+
+    conformalVoronoiMesh::debug = true;
+
+    conformalVoronoiMesh mesh(runTime, cvMeshDict);
 
 
     while (runTime.loop())

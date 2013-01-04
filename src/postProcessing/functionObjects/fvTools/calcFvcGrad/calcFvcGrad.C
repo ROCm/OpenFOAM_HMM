@@ -30,7 +30,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::calcFvcGrad, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(calcFvcGrad, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

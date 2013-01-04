@@ -33,7 +33,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::MRFZone, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(MRFZone, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

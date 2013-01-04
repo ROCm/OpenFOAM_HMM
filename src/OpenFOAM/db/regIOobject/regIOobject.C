@@ -37,6 +37,13 @@ namespace Foam
     (
         debug::optimisationSwitch("fileModificationSkew", 30)
     );
+    registerOptSwitchWithName
+    (
+        Foam::regIOobject::fileModificationSkew,
+        fileModificationSkew,
+        "fileModificationSkew"
+    );
+
 
     template<>
     const char* NamedEnum
@@ -66,6 +73,35 @@ Foam::regIOobject::fileCheckTypes Foam::regIOobject::fileModificationChecking
             "fileModificationChecking"
         )
     )
+);
+// Register re-reader
+class addfileModificationCheckingToOpt
+:
+    public ::Foam::simpleRegIOobject
+{
+public:
+    addfileModificationCheckingToOpt(const char* name)
+    :
+        ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
+    {}
+    virtual ~addfileModificationCheckingToOpt()
+    {}
+    virtual void readData(Foam::Istream& is)
+    {
+        Foam::regIOobject::fileModificationChecking =
+            Foam::regIOobject::fileCheckTypesNames.read(is);
+    }
+    virtual void writeData(Foam::Ostream& os) const
+    {
+        os <<   Foam::regIOobject::fileCheckTypesNames
+                [
+                    Foam::regIOobject::fileModificationChecking
+                ];
+    }
+};
+addfileModificationCheckingToOpt addfileModificationCheckingToOpt_
+(
+    "fileModificationChecking"
 );
 
 

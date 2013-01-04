@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,8 +90,8 @@ public:
 
     // Constructors
 
-        //- Null constructor
-        DictionaryBase();
+        //- Construct given initial table size
+        DictionaryBase(const label size = 128);
 
         //- Copy construct
         DictionaryBase(const DictionaryBase&);

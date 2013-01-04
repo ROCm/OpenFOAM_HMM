@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,9 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(graph::writer, 0);
-    defineRunTimeSelectionTable(graph::writer, word);
+    typedef graph::writer graphWriter;
+    defineTypeNameAndDebug(graphWriter, 0);
+    defineRunTimeSelectionTable(graphWriter, word);
 }
 
 

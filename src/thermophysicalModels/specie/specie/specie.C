@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,10 @@ const Foam::scalar Foam::specie::Pstd = constant::standard::Pstd.value();
 //- Standard temperature (default in [K])
 const Foam::scalar Foam::specie::Tstd = constant::standard::Tstd.value();
 
-defineTypeNameAndDebug(Foam::specie, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(specie, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

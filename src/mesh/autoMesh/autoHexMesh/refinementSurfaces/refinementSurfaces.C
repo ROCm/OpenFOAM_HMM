@@ -515,7 +515,7 @@ void Foam::refinementSurfaces::setMinLevelFields
         if (geom.regions().size() > 1 && geom.globalSize() > 10)
         {
             // Representative local coordinates
-            const pointField ctrs = geom.coordinates();
+            const pointField ctrs(geom.coordinates());
 
             labelList minLevelField(ctrs.size(), -1);
             {

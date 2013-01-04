@@ -22,7 +22,7 @@ dictionaryReplacement
         {
             "region0_to.*"
             {
-                type                compressible::temperatureThermoBaffle;
+                type                compressible::thermoBaffle;
                 neighbourFieldName  T;
                 kappa               solidThermo;
                 kappaName           none;

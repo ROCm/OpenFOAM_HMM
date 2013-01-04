@@ -105,7 +105,12 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_().clone().ptr())
+    uniformValue_
+    (
+        ptf.uniformValue_.valid()
+      ? ptf.uniformValue_().clone().ptr()
+      : NULL
+    )
 {}
 
 
@@ -117,11 +122,20 @@ uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_().clone().ptr())
+    uniformValue_
+    (
+        ptf.uniformValue_.valid()
+      ? ptf.uniformValue_().clone().ptr()
+      : NULL
+    )
 {
     // For safety re-evaluate
     const scalar t = this->db().time().timeOutputValue();
-    fvPatchField<Type>::operator==(uniformValue_->value(t));
+
+    if (ptf.uniformValue_.valid())
+    {
+        fvPatchField<Type>::operator==(uniformValue_->value(t));
+    }
 }
 
 

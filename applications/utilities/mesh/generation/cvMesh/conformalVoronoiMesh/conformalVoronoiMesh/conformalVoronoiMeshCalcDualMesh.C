@@ -30,6 +30,7 @@ License
 #include "indexedCellChecks.H"
 
 #include "CGAL/Exact_predicates_exact_constructions_kernel.h"
+#include "CGAL/Gmpq.h"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -211,9 +212,8 @@ void Foam::conformalVoronoiMesh::checkDuals()
 
     typedef CGAL::Exact_predicates_exact_constructions_kernel       EK2;
     typedef CGAL::Regular_triangulation_euclidean_traits_3<EK2>     EK;
-    typedef CGAL::Cartesian_converter<typename baseK::Kernel, EK2>  To_exact;
-    typedef CGAL::Cartesian_converter<EK2, typename baseK::Kernel>
-        Back_from_exact;
+    typedef CGAL::Cartesian_converter<baseK::Kernel, EK2>  To_exact;
+    typedef CGAL::Cartesian_converter<EK2, baseK::Kernel>  Back_from_exact;
 
 //    PackedBoolList bPoints(number_of_finite_cells());
 
@@ -391,13 +391,13 @@ void Foam::conformalVoronoiMesh::checkDuals()
                         CGAL::Gmpq z(CGAL::to_double(masterPoint.z()));
 
                         std::cout<< "master = " << x << " " << y << " " << z
-                                 << endl;
+                                 << std::endl;
 
                         CGAL::Gmpq xs(CGAL::to_double(closestPoint.x()));
                         CGAL::Gmpq ys(CGAL::to_double(closestPoint.y()));
                         CGAL::Gmpq zs(CGAL::to_double(closestPoint.z()));
                         std::cout<< "slave  = " << xs << " " << ys << " " << zs
-                                 << endl;
+                                 << std::endl;
                     }
                 }
                 else

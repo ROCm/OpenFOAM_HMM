@@ -88,11 +88,12 @@ void LUBacksubstitute
 template<class Type>
 void LUsolve(scalarSquareMatrix& matrix, Field<Type>& source);
 
+template<class Form, class Type>
 void multiply
 (
-    scalarRectangularMatrix& answer,         // value changed in return
-    const scalarRectangularMatrix& A,
-    const scalarRectangularMatrix& B
+    Matrix<Form, Type>& answer,         // value changed in return
+    const Matrix<Form, Type>& A,
+    const Matrix<Form, Type>& B
 );
 
 void multiply

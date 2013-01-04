@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -193,6 +193,10 @@ private:
 
         };
 
+
+        //- Reset exponents to nearest integer if close to it. Used to
+        //  handle reading with insufficient precision.
+        void round(const scalar tol);
 
         dimensionedScalar parse
         (

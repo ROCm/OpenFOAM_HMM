@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,55 +36,55 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Dump collapse region to .obj file
-static void writeRegionOBJ
-(
-    const triSurface& surf,
-    const label regionI,
-    const labelList& collapseRegion,
-    const labelList& outsideVerts
-)
-{
-    fileName dir("regions");
-
-    mkDir(dir);
-    fileName regionName(dir / "region_" + name(regionI) + ".obj");
-
-    Pout<< "Dumping region " << regionI << " to file " << regionName << endl;
-
-    boolList include(surf.size(), false);
-
-    forAll(collapseRegion, faceI)
-    {
-        if (collapseRegion[faceI] == regionI)
-        {
-            include[faceI] = true;
-        }
-    }
-
-    labelList pointMap, faceMap;
-
-    triSurface regionSurf(surf.subsetMesh(include, pointMap, faceMap));
-
-    Pout<< "Region " << regionI << " surface:" << nl;
-    regionSurf.writeStats(Pout);
-
-    regionSurf.write(regionName);
-
-
-    // Dump corresponding outside vertices.
-    fileName pointsName(dir / "regionPoints_" + name(regionI) + ".obj");
-
-    Pout<< "Dumping region " << regionI << " points to file " << pointsName
-        << endl;
-
-    OFstream str(pointsName);
-
-    forAll(outsideVerts, i)
-    {
-        meshTools::writeOBJ(str, surf.localPoints()[outsideVerts[i]]);
-    }
-}
+//// Dump collapse region to .obj file
+//static void writeRegionOBJ
+//(
+//    const triSurface& surf,
+//    const label regionI,
+//    const labelList& collapseRegion,
+//    const labelList& outsideVerts
+//)
+//{
+//    fileName dir("regions");
+//
+//    mkDir(dir);
+//    fileName regionName(dir / "region_" + name(regionI) + ".obj");
+//
+//    Pout<< "Dumping region " << regionI << " to file " << regionName << endl;
+//
+//    boolList include(surf.size(), false);
+//
+//    forAll(collapseRegion, faceI)
+//    {
+//        if (collapseRegion[faceI] == regionI)
+//        {
+//            include[faceI] = true;
+//        }
+//    }
+//
+//    labelList pointMap, faceMap;
+//
+//    triSurface regionSurf(surf.subsetMesh(include, pointMap, faceMap));
+//
+//    Pout<< "Region " << regionI << " surface:" << nl;
+//    regionSurf.writeStats(Pout);
+//
+//    regionSurf.write(regionName);
+//
+//
+//    // Dump corresponding outside vertices.
+//    fileName pointsName(dir / "regionPoints_" + name(regionI) + ".obj");
+//
+//    Pout<< "Dumping region " << regionI << " points to file " << pointsName
+//        << endl;
+//
+//    OFstream str(pointsName);
+//
+//    forAll(outsideVerts, i)
+//    {
+//        meshTools::writeOBJ(str, surf.localPoints()[outsideVerts[i]]);
+//    }
+//}
 
 
 // Split triangle into multiple triangles because edge e being split

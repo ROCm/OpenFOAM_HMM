@@ -32,10 +32,10 @@ License
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
-defineTypeNameAndDebug(Foam::vtkUnstructuredReader, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(vtkUnstructuredReader, 0);
+
     template<>
     const char*
     NamedEnum<vtkUnstructuredReader::vtkDataType, 8>::names[] =

@@ -38,6 +38,7 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "lduInterfacePtrsList.H"
+#include "GAMGAgglomeration.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -99,14 +100,16 @@ public:
                 const lduInterfacePtrsList& coarseInterfaces,
                 const lduInterface& fineInterface,
                 const labelField& localRestrictAddressing,
-                const labelField& neighbourRestrictAddressing
+                const labelField& neighbourRestrictAddressing,
+                const label fineLevelIndex
             ),
             (
                 index,
                 coarseInterfaces,
                 fineInterface,
                 localRestrictAddressing,
-                neighbourRestrictAddressing
+                neighbourRestrictAddressing,
+                fineLevelIndex
             )
         );
 
@@ -121,7 +124,8 @@ public:
             const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface& fineInterface,
             const labelField& localRestrictAddressing,
-            const labelField& neighbourRestrictAddressing
+            const labelField& neighbourRestrictAddressing,
+            const label fineLevelIndex
         );
 
 
@@ -135,7 +139,8 @@ public:
             const lduInterfacePtrsList& coarseInterfaces,
             const lduInterface&,
             const labelField&,
-            const labelField&
+            const labelField&,
+            const label fineLevelIndex = -1
         )
         :
             index_(index),

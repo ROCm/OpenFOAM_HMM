@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGInterface.H"
+#include "GAMGAgglomeration.H"
 #include "lduMatrix.H"
 
 
@@ -35,7 +36,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing
+    const labelField& neighbourRestrictAddressing,
+    const label fineLevelIndex
 )
 {
     const word coupleType(fineInterface.type());
@@ -65,7 +67,8 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
             coarseInterfaces,
             fineInterface,
             localRestrictAddressing,
-            neighbourRestrictAddressing
+            neighbourRestrictAddressing,
+            fineLevelIndex
         )
     );
 }

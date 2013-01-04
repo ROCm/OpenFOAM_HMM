@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineDebugSwitchWithName(Foam::pointMVCWeight, "pointMVCWeight", 0);
+namespace Foam
+{
+defineDebugSwitchWithName(pointMVCWeight, "pointMVCWeight", 0);
+}
 
 Foam::scalar Foam::pointMVCWeight::tol(SMALL);
 

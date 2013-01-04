@@ -39,7 +39,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::scalarTransport, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(scalarTransport, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

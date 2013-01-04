@@ -156,7 +156,11 @@ void Foam::GAMGSolver::Vcycle
                 coarseCorrFields[leveli],
                 coarseSources[leveli],
                 cmpt,
-                nPreSweeps_ + leveli
+                min
+                (
+                    nPreSweeps_ +  preSweepsLevelMultiplier_*leveli,
+                    maxPreSweeps_
+                )
             );
 
             scalarField::subField ACf
@@ -297,7 +301,11 @@ void Foam::GAMGSolver::Vcycle
             coarseCorrFields[leveli],
             coarseSources[leveli],
             cmpt,
-            nPostSweeps_ + leveli
+            min
+            (
+                nPostSweeps_ + postSweepsLevelMultiplier_*leveli,
+                maxPostSweeps_
+            )
         );
     }
 

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -39,7 +39,7 @@
 #
 
 set foamFile=`$WM_PROJECT_DIR/bin/foamEtcFile -mode o config/paraview.csh`
-if ( $status == 0 ) source $foamFile ParaView_VERSION=3.9.0
+if ( $status == 0 ) source $foamFile ParaView_VERSION=3.12.0
 
 unset foamFile
 

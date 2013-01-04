@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Determines for every point whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
     PackedBoolList isMasterPoint(mesh.nPoints());
@@ -72,7 +71,6 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 }
 
 
-// Determines for every edge whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
     PackedBoolList isMasterEdge(mesh.nEdges());
@@ -117,7 +115,6 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 }
 
 
-// Determines for every face whether it is coupled and if so sets only one.
 Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 {
     PackedBoolList isMasterFace(mesh.nFaces(), 1);
@@ -137,6 +134,68 @@ Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
                 {
                     isMasterFace.unset(pp.start()+i);
                 }
+            }
+        }
+    }
+
+    return isMasterFace;
+}
+
+
+Foam::PackedBoolList Foam::syncTools::getInternalOrMasterFaces
+(
+    const polyMesh& mesh
+)
+{
+    PackedBoolList isMasterFace(mesh.nFaces(), 1);
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            if (!refCast<const coupledPolyPatch>(pp).owner())
+            {
+                forAll(pp, i)
+                {
+                    isMasterFace.unset(pp.start()+i);
+                }
+            }
+        }
+        else
+        {
+            forAll(pp, i)
+            {
+                isMasterFace.unset(pp.start()+i);
+            }
+        }
+    }
+
+    return isMasterFace;
+}
+
+
+Foam::PackedBoolList Foam::syncTools::getInternalOrCoupledFaces
+(
+    const polyMesh& mesh
+)
+{
+    PackedBoolList isMasterFace(mesh.nFaces(), 1);
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (!pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                isMasterFace.unset(pp.start()+i);
             }
         }
     }

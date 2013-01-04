@@ -40,7 +40,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::vtkPV3Foam, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(vtkPV3Foam, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

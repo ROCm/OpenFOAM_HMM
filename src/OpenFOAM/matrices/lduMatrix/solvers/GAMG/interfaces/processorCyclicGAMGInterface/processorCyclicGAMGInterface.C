@@ -49,7 +49,8 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
     const lduInterfacePtrsList& coarseInterfaces,
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
-    const labelField& neighbourRestrictAddressing
+    const labelField& neighbourRestrictAddressing,
+    const label fineLevelIndex
 )
 :
     processorGAMGInterface
@@ -58,7 +59,8 @@ Foam::processorCyclicGAMGInterface::processorCyclicGAMGInterface
         coarseInterfaces,
         fineInterface,
         localRestrictAddressing,
-        neighbourRestrictAddressing
+        neighbourRestrictAddressing,
+        fineLevelIndex
     )
 {}
 

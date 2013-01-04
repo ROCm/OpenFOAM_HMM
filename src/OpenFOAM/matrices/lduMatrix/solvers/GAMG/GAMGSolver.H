@@ -79,8 +79,20 @@ class GAMGSolver
         //- Number of pre-smoothing sweeps
         label nPreSweeps_;
 
+        //- Lever multiplier for the number of pre-smoothing sweeps
+        label preSweepsLevelMultiplier_;
+
+        //- Maximum number of pre-smoothing sweeps
+        label maxPreSweeps_;
+
         //- Number of post-smoothing sweeps
         label nPostSweeps_;
+
+        //- Lever multiplier for the number of post-smoothing sweeps
+        label postSweepsLevelMultiplier_;
+
+        //- Maximum number of post-smoothing sweeps
+        label maxPostSweeps_;
 
         //- Number of smoothing sweeps on finest mesh
         label nFinestSweeps_;

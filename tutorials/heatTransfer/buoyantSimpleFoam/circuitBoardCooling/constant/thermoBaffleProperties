@@ -21,7 +21,7 @@ active          no;
 
 regionName      none;
 
-thermoBaffle2DCoeffs
+thermoBaffleCoeffs
 {
 }
 

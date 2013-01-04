@@ -496,7 +496,6 @@ Foam::label Foam::polyMeshFilter::filter(const label nOriginalBadFaces)
     faceFilterFactor_.resize(mesh_.nFaces(), initialFaceLengthFactor_);
 
     // Maintain the number of times a point has been part of a bad face
-    //
     labelList pointErrorCount(mesh_.nPoints(), 0);
 
     // Main loop

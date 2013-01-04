@@ -258,7 +258,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                     (
                         Pstream::nonBlocking,
                         restrictMap
-                    )
+                    ),
+                    fineLevelIndex
                 ).ptr()
             );
 

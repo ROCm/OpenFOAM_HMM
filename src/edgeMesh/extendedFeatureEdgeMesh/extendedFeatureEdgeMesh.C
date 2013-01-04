@@ -37,10 +37,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::extendedFeatureEdgeMesh, 0);
-
 namespace Foam
 {
+    defineTypeNameAndDebug(extendedFeatureEdgeMesh, 0);
+
     template<>
     const char* Foam::NamedEnum
     <
@@ -564,14 +564,14 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeaturePoints
     List<pointIndexHit>& info
 ) const
 {
-    DynamicList<pointIndexHit> dynPointHit;
-
     // Pick up all the feature points that intersect the search sphere
     labelList elems = pointTree().findSphere
     (
         sample,
         searchRadiusSqr
     );
+
+    DynamicList<pointIndexHit> dynPointHit(elems.size());
 
     forAll(elems, elemI)
     {
@@ -609,7 +609,7 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
     sliceStarts[3] = openStart_;
     sliceStarts[4] = multipleStart_;
 
-    DynamicList<pointIndexHit> dynEdgeHit;
+    DynamicList<pointIndexHit> dynEdgeHit(edgeTrees.size()*3);
 
     // Loop over all the feature edge types
     forAll(edgeTrees, i)

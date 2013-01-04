@@ -30,7 +30,11 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::writeDictionary, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(writeDictionary, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

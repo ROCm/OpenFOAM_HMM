@@ -34,6 +34,7 @@ SourceFiles
     polyMeshFromShapeMesh.C
     polyMeshIO.C
     polyMeshUpdate.C
+    polyMeshCheck.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -224,7 +225,45 @@ private:
                 cellList& cells
             );
 
+        // Geometry checks
 
+            //- Check non-orthogonality
+            bool checkFaceOrthogonality
+            (
+                const vectorField& fAreas,
+                const vectorField& cellCtrs,
+                const bool report,
+                const bool detailedReport,
+                labelHashSet* setPtr
+            ) const;
+
+            //- Check face skewness
+            bool checkFaceSkewness
+            (
+                const pointField& points,
+                const vectorField& fCtrs,
+                const vectorField& fAreas,
+                const vectorField& cellCtrs,
+                const bool report,
+                const bool detailedReport,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkEdgeAlignment
+            (
+                const pointField& p,
+                const bool report,
+                const Vector<label>& directions,
+                labelHashSet* setPtr
+            ) const;
+
+            bool checkCellDeterminant
+            (
+                const vectorField& faceAreas,
+                const bool report,
+                labelHashSet* setPtr,
+                const Vector<label>& meshD
+            ) const;
 
 public:
 
@@ -533,6 +572,48 @@ public:
 
             //- Remove all files from mesh instance()
             void removeFiles() const;
+
+
+        // Geometric checks. Selectively override primitiveMesh functionality.
+
+            //- Check boundary for closedness
+            virtual bool checkClosedBoundary(const bool report = false) const;
+
+            //- Check non-orthogonality
+            virtual bool checkFaceOrthogonality
+            (
+                const bool report = false,
+                labelHashSet* setPtr = NULL
+            ) const;
+
+            //- Check face skewness
+            virtual bool checkFaceSkewness
+            (
+                const bool report = false,
+                labelHashSet* setPtr = NULL
+            ) const;
+
+            //- Check edge alignment for 1D/2D cases
+            virtual bool checkEdgeAlignment
+            (
+                const bool report,
+                const Vector<label>& directions,
+                labelHashSet* setPtr
+            ) const;
+
+            virtual bool checkCellDeterminant
+            (
+                const bool report,
+                labelHashSet* setPtr
+            ) const;
+
+            //- Check mesh motion for correctness given motion points
+            virtual bool checkMeshMotion
+            (
+                const pointField& newPoints,
+                const bool report = false,
+                const bool detailedReport = false
+            ) const;
 
 
         // Helper functions

@@ -37,11 +37,11 @@ Description
 #include "cellSet.H"
 #include "IOobjectList.H"
 #include "volFields.H"
-#include "cellSelection.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 template<class Type>
 void subsetVolFields
@@ -152,16 +152,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "select a mesh subset based on a provided cellSet and/or"
-        " selection criteria"
+        "select a mesh subset based on a cellSet"
     );
-    #include "addDictOption.H"
-    argList::addOption
-    (
-        "cellSet",
-        "name",
-        "operates on specified cellSet name"
-    );
+
+    #include "addOverwriteOption.H"
+    #include "addRegionOption.H"
+    argList::validArgs.append("cellSet");
     argList::addOption
     (
         "patch",
@@ -169,73 +165,23 @@ int main(int argc, char *argv[])
         "add exposed internal faces to specified patch instead of to "
         "'oldInternalFaces'"
     );
-
-    #include "addOverwriteOption.H"
-    #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    word setName;
-    const bool useCellSet = args.optionReadIfPresent("cellSet", setName);
-    const bool useDict = args.optionFound("dict");
-    const bool overwrite = args.optionFound("overwrite");
-
-    if (!useCellSet && !useDict)
-    {
-        FatalErrorIn(args.executable())
-            << "No cells to operate on selected. Please supply at least one of "
-            << "'-cellSet', '-dict'"
-            << exit(FatalError);
-    }
-
+    Foam::word meshRegionName = polyMesh::defaultRegion;
+    args.optionReadIfPresent("region", meshRegionName);
 
     #include "createNamedMesh.H"
 
+
     const word oldInstance = mesh.pointsInstance();
 
-    autoPtr<cellSet> currentSet;
-    if (useCellSet)
-    {
-        // Load the cellSet
-        Info<< "Operating on cell set " << setName << nl << endl;
-        currentSet.reset(new cellSet(mesh, setName));
-    }
-
-    PtrList<cellSelection> selectors;
-    if (useDict)
-    {
-        const word dictName("subsetMeshDict");
-        #include "setSystemMeshDictionaryIO.H"
-        Info<< "Reading selection criteria from " << dictName << nl << endl;
-        IOdictionary dict(dictIO);
-
-        const dictionary& selectionsDict = dict.subDict("selections");
-
-        label n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
-        {
-            if (iter().isDict())
-            {
-                n++;
-            }
-        }
-        selectors.setSize(n);
-        n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
-        {
-            if (iter().isDict())
-            {
-                selectors.set
-                (
-                    n++,
-                    cellSelection::New(iter().keyword(), mesh, iter().dict())
-                );
-            }
-        }
-    }
+    const word setName = args[1];
+    const bool overwrite = args.optionFound("overwrite");
 
 
+    Info<< "Reading cell set from " << setName << endl << endl;
 
     // Create mesh subsetting engine
     fvMeshSubset subsetter(mesh);
@@ -266,54 +212,9 @@ int main(int argc, char *argv[])
     }
 
 
-    // Select cells to operate on
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    cellSet currentSet(mesh, setName);
 
-    boolList selectedCell(mesh.nCells(), false);
-    if (currentSet.valid())
-    {
-        const cellSet& set = currentSet();
-        forAllConstIter(cellSet, set, iter)
-        {
-            selectedCell[iter.key()] = true;
-        }
-    }
-    else
-    {
-        selectedCell = true;
-    }
-
-
-    // Manipulate selectedCell according to dictionary
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    forAll(selectors, i)
-    {
-        Info<< "Applying cellSelector " << selectors[i].name() << endl;
-        selectors[i].select(selectedCell);
-
-        Info<< "After applying cellSelector " << selectors[i].name()
-            << " have " << cellSelection::count(selectedCell)
-            << " cells" << nl << endl;
-    }
-
-
-    // Back from selectedCells to region
-    {
-        Info<< "Final selection : " << cellSelection::count(selectedCell)
-            << " cells" << nl << endl;
-
-        labelList cellRegion(mesh.nCells(), -1);
-        forAll(selectedCell, cellI)
-        {
-            if (selectedCell[cellI])
-            {
-                cellRegion[cellI] = 0;
-            }
-        }
-        subsetter.setLargeCellSubset(cellRegion, 0, patchI, true);
-    }
-
+    subsetter.setLargeCellSubset(currentSet, patchI, true);
 
     IOobjectList objects(mesh, runTime.timeName());
 

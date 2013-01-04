@@ -32,7 +32,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::DESModelRegions, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(DESModelRegions, 0);
+}
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //

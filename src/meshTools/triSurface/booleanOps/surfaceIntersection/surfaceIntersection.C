@@ -36,7 +36,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::surfaceIntersection, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(surfaceIntersection, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

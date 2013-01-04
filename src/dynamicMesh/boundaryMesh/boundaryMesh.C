@@ -37,13 +37,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::boundaryMesh, 0);
+namespace Foam
+{
+defineTypeNameAndDebug(boundaryMesh, 0);
 
 // Normal along which to divide faces into categories (used in getNearest)
-const Foam::vector Foam::boundaryMesh::splitNormal_(3, 2, 1);
+const vector boundaryMesh::splitNormal_(3, 2, 1);
 
 // Distance to face tolerance for getNearest
-const Foam::scalar Foam::boundaryMesh::distanceTol_ = 1e-2;
+const scalar boundaryMesh::distanceTol_ = 1e-2;
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
