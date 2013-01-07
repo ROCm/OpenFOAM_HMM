@@ -94,11 +94,30 @@ export ParaView_DIR=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-
 # set paths if binaries or source are present
 if [ -r $ParaView_DIR -o -r $paraviewInstDir ]
 then
+    export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$ParaView_MAJOR
+    if [ ! -d $ParaView_INCLUDE_DIR -a -d $ParaView_DIR/include/paraview ]
+    then
+        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview
+    fi
+
+    ParaView_LIB_DIR=$ParaView_DIR/lib/paraview-$ParaView_MAJOR
+    if [ ! -d $ParaView_LIB_DIR -a -d $ParaView_DIR/lib/paraview ]
+    then
+        ParaView_LIB_DIR=$ParaView_DIR/lib/paraview
+    fi
+
     export PATH=$ParaView_DIR/bin:$PATH
-    export LD_LIBRARY_PATH=$ParaView_DIR/lib/paraview-$ParaView_MAJOR:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=$ParaView_LIB_DIR:$LD_LIBRARY_PATH
     export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$ParaView_MAJOR
 
-    export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$ParaView_MAJOR
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        echo "Using paraview"
+        echo "    ParaView_DIR         : $ParaView_DIR"
+        echo "    ParaView_LIB_DIR     : $ParaView_LIB_DIR"
+        echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
+        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+    fi
 
     # add in python libraries if required
     paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping

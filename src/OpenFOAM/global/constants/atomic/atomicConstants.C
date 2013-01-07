@@ -40,6 +40,7 @@ namespace constant
 const char* const atomic::group = "atomic";
 
 
+// Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (
     atomic::group,
@@ -49,7 +50,7 @@ defineDimensionedConstantWithDefault
         "alpha",
         sqr(electromagnetic::e)
        /(
-            dimensionedScalar("C", dimless, 2.0)
+            dimensionedScalar("C", dimensionSet(0, 0, 0, 0, 0), 2.0)
            *electromagnetic::epsilon0
            *universal::h
            *universal::c
@@ -70,7 +71,15 @@ defineDimensionedConstantWithDefault
         sqr(atomic::alpha)
        *atomic::me
        *universal::c
-       /(Foam::dimensionedScalar("C", Foam::dimless, 2.0)*universal::h)
+       /(
+            Foam::dimensionedScalar
+            (
+                "C",
+                dimensionSet(0, 0, 0, 0, 0),
+                2.0
+            )
+           *universal::h
+        )
     ),
     constantatomicRinf,
     "Rinf"
@@ -86,8 +95,13 @@ defineDimensionedConstantWithDefault
         "a0",
         atomic::alpha
        /(
-           Foam::dimensionedScalar("C", Foam::dimless, 4.0*mathematical::pi)
-          *atomic::Rinf
+            Foam::dimensionedScalar
+            (
+                "C",
+                dimensionSet(0, 0, 0, 0, 0),
+                4.0*mathematical::pi
+            )
+           *atomic::Rinf
         )
     ),
     constantatomica0,
@@ -104,7 +118,12 @@ defineDimensionedConstantWithDefault
         "re",
         Foam::sqr(electromagnetic::e)
        /(
-            Foam::dimensionedScalar("C", Foam::dimless, 4.0*mathematical::pi)
+            Foam::dimensionedScalar
+            (
+                "C",
+                dimensionSet(0, 0, 0, 0, 0),
+                4.0*mathematical::pi
+            )
            *electromagnetic::epsilon0
            *atomic::me
            *Foam::sqr(universal::c)
@@ -122,7 +141,7 @@ defineDimensionedConstantWithDefault
     dimensionedScalar
     (
         "Eh",
-        Foam::dimensionedScalar("C", Foam::dimless, 2.0)
+        Foam::dimensionedScalar("C", dimensionSet(0, 0, 0, 0, 0), 2.0)
        *atomic::Rinf*universal::h*universal::c
     ),
     constantatomicEh,

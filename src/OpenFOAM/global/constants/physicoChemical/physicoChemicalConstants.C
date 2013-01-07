@@ -67,6 +67,7 @@ defineDimensionedConstantWithDefault
 );
 
 
+// Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (
     physicoChemical::group,
@@ -77,7 +78,7 @@ defineDimensionedConstantWithDefault
         Foam::dimensionedScalar
         (
             "C",
-            Foam::dimless,
+            dimensionSet(0, 0, 0, 0, 0),    //Foam::dimless,
             Foam::sqr(mathematical::pi)/60.0
         )
        *Foam::pow4(physicoChemical::k)
@@ -96,7 +97,12 @@ defineDimensionedConstantWithDefault
     (
         "b",
         (universal::h*universal::c/physicoChemical::k)
-       /Foam::dimensionedScalar("C", Foam::dimless, 4.965114231)
+       /Foam::dimensionedScalar
+        (
+            "C",
+            dimensionSet(0, 0, 0, 0, 0),    //Foam::dimless
+            4.965114231
+        )
     ),
     constantphysicoChemicalb,
     "b"
@@ -110,7 +116,12 @@ defineDimensionedConstantWithDefault
     dimensionedScalar
     (
         "c1",
-        Foam::dimensionedScalar("C", Foam::dimless, mathematical::twoPi)
+        Foam::dimensionedScalar
+        (
+            "C",
+            dimensionSet(0, 0, 0, 0, 0),    //Foam::dimless,
+            mathematical::twoPi
+        )
        *universal::h*Foam::sqr(universal::c)
     ),
     constantphysicoChemicalc1,

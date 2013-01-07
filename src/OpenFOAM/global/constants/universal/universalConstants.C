@@ -38,6 +38,7 @@ namespace constant
 const char* const universal::group = "universal";
 
 
+// Note: cannot use dimless etc. since not guaranteed to be constructed
 defineDimensionedConstantWithDefault
 (
     "universal",
@@ -46,7 +47,14 @@ defineDimensionedConstantWithDefault
     (
         "hr",
         universal::h
-       /(dimensionedScalar("C", dimless, mathematical::twoPi))
+       /(
+            dimensionedScalar
+            (
+                "C",
+                dimensionSet(0, 0, 0, 0, 0),//dimless
+                mathematical::twoPi
+            )
+        )
     ),
     constantuniversalhr,
     "hr"
