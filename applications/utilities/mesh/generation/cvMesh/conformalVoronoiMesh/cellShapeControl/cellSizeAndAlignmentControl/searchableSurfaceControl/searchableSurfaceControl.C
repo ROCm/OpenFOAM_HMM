@@ -566,6 +566,8 @@ void Foam::searchableSurfaceControl::initialVertices
 ) const
 {
     pts = searchableSurface_.points();
+    sizes.setSize(pts.size());
+    alignments.setSize(pts.size());
 
     const scalar nearFeatDistSqrCoeff = 1e-8;
 
