@@ -35,7 +35,12 @@ Foam::wallDist::wallDist
     const bool correctWalls
 )
 :
-    patchDist(mesh, getPatchIDs<wallPolyPatch>(), correctWalls)
+    patchDist
+    (
+        mesh,
+        mesh.boundaryMesh().findPatchIDs<wallPolyPatch>(),
+        correctWalls
+    )
 {}
 
 

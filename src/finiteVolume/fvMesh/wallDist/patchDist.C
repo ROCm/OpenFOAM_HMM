@@ -48,7 +48,6 @@ Foam::patchDist::patchDist
         mesh,
         dimensionedScalar("y", dimLength, GREAT)
     ),
-    cellDistFuncs(mesh),
     patchIDs_(patchIDs),
     correctWalls_(correctWalls),
     nUnset_(0)
@@ -68,7 +67,7 @@ Foam::patchDist::~patchDist()
 void Foam::patchDist::correct()
 {
     // Calculate distance starting from patch faces
-    patchWave wave(cellDistFuncs::mesh(), patchIDs_, correctWalls_);
+    patchWave wave(mesh(), patchIDs_, correctWalls_);
 
     // Transfer cell values from wave into *this
     transfer(wave.distance());

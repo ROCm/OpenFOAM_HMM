@@ -62,7 +62,6 @@ SourceFiles
 #define patchDist_H
 
 #include "volFields.H"
-#include "cellDistFuncs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,8 +76,7 @@ class fvMesh;
 
 class patchDist
 :
-    public volScalarField,
-    public cellDistFuncs
+    public volScalarField
 {
 
 
