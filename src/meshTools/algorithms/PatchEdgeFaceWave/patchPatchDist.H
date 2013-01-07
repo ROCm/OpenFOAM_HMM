@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::patchDist
+    Foam::patchPatchDist
 
 Description
-    Like wallDist but calculates on patch distance to nearest neighbouring
+    Like wallDist but calculates on a patch the distance to nearest neighbouring
     patches. Uses PatchEdgeFaceWave to do actual calculation.
 
 SourceFiles
-    patchDist.C
+    patchPatchDist.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef patchDist_H
-#define patchDist_H
+#ifndef patchPatchDist_H
+#define patchPatchDist_H
 
 #include "scalarField.H"
 #include "HashSet.H"
@@ -48,10 +48,10 @@ namespace Foam
 class polyPatch;
 
 /*---------------------------------------------------------------------------*\
-                           Class patchDist Declaration
+                         Class patchPatchDist Declaration
 \*---------------------------------------------------------------------------*/
 
-class patchDist
+class patchPatchDist
 :
     public scalarField
 {
@@ -75,7 +75,7 @@ public:
     // Constructors
 
         //- Construct from patch and neighbour patches.
-        patchDist
+        patchPatchDist
         (
             const polyPatch& pp,
             const labelHashSet& nbrPatchIDs
@@ -83,7 +83,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchDist();
+    virtual ~patchPatchDist();
 
 
     // Member Functions

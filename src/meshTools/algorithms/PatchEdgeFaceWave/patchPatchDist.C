@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "patchDist.H"
+#include "patchPatchDist.H"
 #include "PatchEdgeFaceWave.H"
 #include "syncTools.H"
 #include "polyMesh.H"
@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::patchDist::patchDist
+Foam::patchPatchDist::patchPatchDist
 (
     const polyPatch& patch,
     const labelHashSet& nbrPatchIDs
@@ -41,19 +41,19 @@ Foam::patchDist::patchDist
     nbrPatchIDs_(nbrPatchIDs),
     nUnset_(0)
 {
-    patchDist::correct();
+    patchPatchDist::correct();
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::patchDist::~patchDist()
+Foam::patchPatchDist::~patchPatchDist()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::patchDist::correct()
+void Foam::patchPatchDist::correct()
 {
     // Mark all edge connected to a nbrPatch.
     label nBnd = 0;
