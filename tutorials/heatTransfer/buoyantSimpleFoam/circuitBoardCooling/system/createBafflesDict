@@ -52,29 +52,64 @@ baffles
                 {
                     T
                     {
-                        type   compressible::temperatureThermoBaffle1D<hConstSolidThermoPhysics>;
-                        baffleActivated yes;
-                        thickness       uniform 0.005;  // thickness [m]
-                        Qs              uniform 100;    // heat flux [W/m2]
-                        specie
+                        type                compressible::thermoBaffle;
+
+                        // Coupled BC.
+                        neighbourFieldName  T;
+                        kappa               fluidThermo;
+                        kappaName           none;
+
+                        // Thermo baffle model
+                        thermoBaffleModel   thermoBaffle;
+                        regionName          baffleRegion;
+                        infoOutput          no;
+                        active              yes;
+                        thermoBaffleCoeffs
                         {
-                            nMoles          1;
-                            molWeight       20;
                         }
-                        transport
+
+                        // Solid thermo
+                        thermoType
                         {
-                            kappa           1;
+                            type            heSolidThermo;
+                            mixture         pureMixture;
+                            transport       constIso;
+                            thermo          hConst;
+                            equationOfState rhoConst;
+                            specie          specie;
+                            energy          sensibleEnthalpy;
                         }
-                        thermodynamics
+
+                        mixture
                         {
-                            Hf              0;
-                            Cp              10;
+                            specie
+                            {
+                                nMoles          1;
+                                molWeight       20;
+                            }
+                            transport
+                            {
+                                kappa           0.01;
+                            }
+                            thermodynamics
+                            {
+                                Hf              0;
+                                Cp              15;
+                            }
+                            equationOfState
+                            {
+                                rho             80;
+                            }
                         }
-                        equationOfState
+
+                        radiation
                         {
-                            rho             10;
+                            radiationModel  opaqueSolid;
+                            absorptionEmissionModel none;
+                            scatterModel    none;
                         }
-                        value           uniform 300;
+
+                        value               uniform 300;
                     }
 
                     alphat
@@ -105,10 +140,6 @@ baffles
                     p_rgh
                     {
                         type            fixedFluxPressure;
-                    }
-                    T
-                    {
-                         type           zeroGradient;
                     }
                     U
                     {
