@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "wallDist.H"
-#include "fvMesh.H"
-#include "wallPolyPatch.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+template<class Type>
+Foam::labelHashSet Foam::polyBoundaryMesh::findPatchIDs() const
+{
+    const polyBoundaryMesh& bm = *this;
 
-Foam::wallDist::wallDist
-(
-    const fvMesh& mesh,
-    const bool correctWalls
-)
-:
-    patchDist
-    (
-        mesh,
-        mesh.boundaryMesh().findPatchIDs<wallPolyPatch>(),
-        correctWalls
-    )
-{}
+    labelHashSet patchIDs(bm.size());
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::wallDist::~wallDist()
-{}
+    forAll(bm, patchI)
+    {
+        if (isA<Type>(bm[patchI]))
+        {
+            patchIDs.insert(patchI);
+        }
+    }
+    return patchIDs;
+}
 
 
 // ************************************************************************* //

@@ -23,31 +23,69 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "wallDist.H"
+#include "patchDist.H"
+#include "patchWave.H"
 #include "fvMesh.H"
-#include "wallPolyPatch.H"
+#include "emptyFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::wallDist::wallDist
+Foam::patchDist::patchDist
 (
     const fvMesh& mesh,
+    const labelHashSet& patchIDs,
     const bool correctWalls
 )
 :
-    patchDist
+    volScalarField
     (
+        IOobject
+        (
+            "y",
+            mesh.time().timeName(),
+            mesh
+        ),
         mesh,
-        mesh.boundaryMesh().findPatchIDs<wallPolyPatch>(),
-        correctWalls
-    )
-{}
+        dimensionedScalar("y", dimLength, GREAT)
+    ),
+    patchIDs_(patchIDs),
+    correctWalls_(correctWalls),
+    nUnset_(0)
+{
+    patchDist::correct();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::wallDist::~wallDist()
+Foam::patchDist::~patchDist()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::patchDist::correct()
+{
+    // Calculate distance starting from patch faces
+    patchWave wave(mesh(), patchIDs_, correctWalls_);
+
+    // Transfer cell values from wave into *this
+    transfer(wave.distance());
+
+    // Transfer values on patches into boundaryField of *this
+    forAll(boundaryField(), patchI)
+    {
+        if (!isA<emptyFvPatchScalarField>(boundaryField()[patchI]))
+        {
+            scalarField& waveFld = wave.patchDistance()[patchI];
+
+            boundaryField()[patchI].transfer(waveFld);
+        }
+    }
+
+    // Transfer number of unset values
+    nUnset_ = wave.nUnset();
+}
 
 
 // ************************************************************************* //

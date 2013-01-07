@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -176,6 +176,10 @@ public:
         //- Find patch index given a name
         label findPatchID(const word& patchName) const;
 
+        //- Find patch indices for a given polyPatch type
+        template<class Type>
+        labelHashSet findPatchIDs() const;
+
         //- Return patch index for a given face label
         label whichPatch(const label faceIndex) const;
 
@@ -235,6 +239,7 @@ public:
             IOstream::compressionType cmp
         ) const;
 
+
     // Member Operators
 
         //- Return const and non-const reference to polyPatch by index.
@@ -256,6 +261,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "polyBoundaryMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
