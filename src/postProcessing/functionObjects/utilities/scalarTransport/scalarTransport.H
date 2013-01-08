@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ SeeAlso
 #include "surfaceFieldsFwd.H"
 #include "pointFieldFwd.H"
 #include "fvMatricesFwd.H"
-#include "basicSourceList.H"
+#include "fvOptionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -105,8 +105,8 @@ class scalarTransport
         //- Flag to employ schemes for velocity for scalar transport
         bool autoSchemes_;
 
-        //- Run-time selectable sources
-        basicSourceList sources_;
+        //- Run-time selectable finite volume options, e.g. sources, constraints
+        fv::optionList fvOptions_;
 
         //- The scalar field
         volScalarField T_;
