@@ -12,7 +12,7 @@
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
 
-    IObasicSourceList& sources = fluidSources[i];
+    fv::IOoptionList& fvOptions = fluidFvOptions[i];
 
     const dimensionedScalar initialMass
     (

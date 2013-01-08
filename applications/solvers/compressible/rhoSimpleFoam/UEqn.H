@@ -5,13 +5,13 @@
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
      ==
-        sources(rho, U)
+        fvOptions(rho, U)
     );
 
     UEqn().relax();
 
-    sources.constrain(UEqn());
+    fvOptions.constrain(UEqn());
 
     solve(UEqn() == -fvc::grad(p));
 
-    sources.correct(U);
+    fvOptions.correct(U);

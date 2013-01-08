@@ -52,4 +52,4 @@ else
 }
 
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);

@@ -25,12 +25,12 @@ if (ign.ignited())
         //+ fvm::Sp(fvc::div(muEff*fvc::grad(b)/(b + 0.001)), heau)
 
      ==
-        sources(rho, heau)
+        fvOptions(rho, heau)
     );
 
-    sources.constrain(heauEqn);
+    fvOptions.constrain(heauEqn);
 
     heauEqn.solve();
 
-    sources.correct(heau);
+    fvOptions.correct(heau);
 }

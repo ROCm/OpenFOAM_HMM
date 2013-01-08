@@ -10,11 +10,11 @@
 
     if (pressureImplicitPorosity)
     {
-        HbyA = trTU() & (UEqn() == sources(rho, U))().H();
+        HbyA = trTU() & (UEqn() == fvOptions(rho, U))().H();
     }
     else
     {
-        HbyA = trAU()*(UEqn() == sources(rho, U))().H();
+        HbyA = trAU()*(UEqn() == fvOptions(rho, U))().H();
     }
 
     UEqn.clear();
@@ -40,7 +40,7 @@
             tpEqn =
             (
                 fvm::laplacian(rho*trTU(), p)
-              + sources(psi, p, rho.name())
+              + fvOptions(psi, p, rho.name())
              ==
                 fvc::div(phiHbyA)
             );
@@ -50,7 +50,7 @@
             tpEqn =
             (
                 fvm::laplacian(rho*trAU(), p)
-              + sources(psi, p, rho.name())
+              + fvOptions(psi, p, rho.name())
              ==
                 fvc::div(phiHbyA)
             );
@@ -58,7 +58,7 @@
 
         tpEqn().setReference(pRefCell, pRefValue);
 
-        sources.constrain(tpEqn(), rho.name());
+        fvOptions.constrain(tpEqn(), rho.name());
 
         tpEqn().solve();
 
@@ -83,7 +83,7 @@
     }
 
     U.correctBoundaryConditions();
-    sources.correct(U);
+    fvOptions.correct(U);
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity

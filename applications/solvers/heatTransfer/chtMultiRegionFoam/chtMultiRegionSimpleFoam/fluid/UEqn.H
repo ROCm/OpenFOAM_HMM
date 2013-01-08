@@ -4,12 +4,12 @@
         fvm::div(phi, U)
       + turb.divDevRhoReff(U)
      ==
-        sources(rho, U)
+        fvOptions(rho, U)
     );
 
     UEqn().relax();
 
-    sources.constrain(UEqn());
+    fvOptions.constrain(UEqn());
 
     solve
     (
@@ -24,4 +24,4 @@
         )
     );
 
-    sources.correct(U);
+    fvOptions.correct(U);

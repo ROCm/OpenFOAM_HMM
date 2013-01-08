@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ Description
 #include "fluidThermoCloud.H"
 #include "coalCloud.H"
 #include "psiCombustionModel.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "radiationModel.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
-    #include "createSources.H"
+    #include "createFvOptions.H"
     #include "createClouds.H"
     #include "createRadiationModel.H"
     #include "initContinuityErrs.H"

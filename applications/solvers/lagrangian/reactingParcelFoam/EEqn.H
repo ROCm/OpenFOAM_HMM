@@ -20,16 +20,16 @@
         parcels.Sh(he)
       + radiation->Sh(thermo)
       + combustion->Sh()
-      + sources(rho, he)
+      + fvOptions(rho, he)
     );
 
     EEqn.relax();
 
-    sources.constrain(EEqn);
+    fvOptions.constrain(EEqn);
 
     EEqn.solve();
 
-    sources.correct(he);
+    fvOptions.correct(he);
 
     thermo.correct();
     radiation->correct();

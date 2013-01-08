@@ -17,16 +17,16 @@
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
-        sources(rho, he)
+        fvOptions(rho, he)
     );
 
     EEqn.relax();
 
-    sources.constrain(EEqn);
+    fvOptions.constrain(EEqn);
 
     EEqn.solve();
 
-    sources.correct(he);
+    fvOptions.correct(he);
 
     thermo.correct();
 }

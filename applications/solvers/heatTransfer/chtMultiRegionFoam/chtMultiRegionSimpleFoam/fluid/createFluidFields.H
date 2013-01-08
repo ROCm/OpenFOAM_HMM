@@ -17,7 +17,7 @@
     PtrList<dimensionedScalar> rhoMax(fluidRegions.size());
     PtrList<dimensionedScalar> rhoMin(fluidRegions.size());
 
-    PtrList<IObasicSourceList> fluidSources(fluidRegions.size());
+    PtrList<fv::IOoptionList> fluidFvOptions(fluidRegions.size());
 
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
@@ -193,11 +193,11 @@
             )
         );
 
-        Info<< "    Adding sources\n" << endl;
-        fluidSources.set
+        Info<< "    Adding fvOptions\n" << endl;
+        fluidFvOptions.set
         (
             i,
-            new IObasicSourceList(fluidRegions[i])
+            new fv::IOoptionList(fluidRegions[i])
         );
     }
 

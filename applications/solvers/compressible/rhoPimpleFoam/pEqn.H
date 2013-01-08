@@ -24,7 +24,7 @@ if (pimple.transonic())
         )
     );
 
-    sources.relativeFlux(fvc::interpolate(psi), phid);
+    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
 
     volScalarField Dp("Dp", rho*rAU);
 
@@ -36,10 +36,10 @@ if (pimple.transonic())
           + fvm::div(phid, p)
           - fvm::laplacian(Dp, p)
           ==
-            sources(psi, p, rho.name())
+            fvOptions(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn);
+        fvOptions.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -61,7 +61,7 @@ else
         )
     );
 
-    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     volScalarField Dp("Dp", rho*rAU);
 
@@ -74,10 +74,10 @@ else
           + fvc::div(phiHbyA)
           - fvm::laplacian(Dp, p)
           ==
-            sources(psi, p, rho.name())
+            fvOptions(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn);
+        fvOptions.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -104,7 +104,7 @@ Info<< "rho max/min : " << max(rho).value()
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);
 K = 0.5*magSqr(U);
 
 if (thermo.dpdt())
