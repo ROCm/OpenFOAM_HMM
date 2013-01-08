@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,8 +46,8 @@ void Foam::interpolation2DTable<Type>::readTable()
             << exit(FatalError);
     }
 
-    // Check that the data are okay
-    check();
+    // Check that the data are in ascending order
+    checkOrder();
 }
 
 
@@ -127,8 +127,8 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
 {
     label n = data.size();
 
-    scalar minLimit = data[0].first();
-    scalar maxLimit = data[n-1].first();
+    scalar minLimit = data.first().first();
+    scalar maxLimit = data.last().first();
 
     if (lookupValue < minLimit)
     {
@@ -138,10 +138,13 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
             {
                 FatalErrorIn
                 (
-                    "Foam::interpolation2DTable<Type>::interpolateValue("
-                    "List<Tuple2<scalar, Type> > data,"
-                    "const scalar lookupValue)"
-                )   << "value (" << lookupValue << ") underflow" << nl
+                    "Foam::interpolation2DTable<Type>::interpolateValue"
+                    "("
+                        "List<Tuple2<scalar, Type> >&, "
+                        "const scalar"
+                    ")"
+                )   << "value (" << lookupValue << ") less than lower "
+                    << "bound (" << minLimit << ")" << nl
                     << exit(FatalError);
                 break;
             }
@@ -149,17 +152,20 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
             {
                 WarningIn
                 (
-                    "Foam::interpolation2DTable<Type>::interpolateValue("
-                    "List<Tuple2<scalar, Type> > data,"
-                    "const scalar lookupValue)"
-                )   << "value (" << lookupValue << ") underflow" << nl
+                    "Foam::interpolation2DTable<Type>::interpolateValue"
+                    "("
+                        "List<Tuple2<scalar, Type> >&, "
+                        "const scalar"
+                    ")"
+                )   << "value (" << lookupValue << ") less than lower "
+                    << "bound (" << minLimit << ")" << nl
                     << "    Continuing with the first entry"
                     << endl;
                 // fall-through to 'CLAMP'
             }
             case interpolation2DTable::CLAMP:
             {
-                return data[0].second();
+                return data.first().second();
                 break;
             }
         }
@@ -172,10 +178,13 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
             {
                 FatalErrorIn
                 (
-                    "Foam::interpolation2DTable<Type>::interpolateValue("
-                    "List<Tuple2<scalar, Type> > data,"
-                    "const scalar lookupValue)"
-                )   << "value (" << lookupValue << ") overflow" << nl
+                    "Foam::interpolation2DTable<Type>::interpolateValue"
+                    "("
+                        "List<Tuple2<scalar, Type> >&, "
+                        "const scalar"
+                    ")"
+                )   << "value (" << lookupValue << ") greater than upper "
+                    << "bound (" << maxLimit << ")" << nl
                     << exit(FatalError);
                 break;
             }
@@ -183,17 +192,20 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
             {
                 WarningIn
                 (
-                    "Foam::interpolation2DTable<Type>::interpolateValue("
-                    "List<Tuple2<scalar, Type> > data,"
-                    "const scalar lookupValue)"
-                )   << "value (" << lookupValue << ") overflow" << nl
+                    "Foam::interpolation2DTable<Type>::interpolateValue"
+                    "("
+                        "List<Tuple2<scalar, Type> >&, "
+                        "const scalar"
+                    ")"
+                )   << "value (" << lookupValue << ") greater than upper "
+                    << "bound (" << maxLimit << ")" << nl
                     << "    Continuing with the last entry"
                     << endl;
                 // fall-through to 'CLAMP'
             }
             case interpolation2DTable::CLAMP:
             {
-                return data[n-1].second();
+                return data.last().second();
                 break;
             }
         }
@@ -222,25 +234,75 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
     }
     else
     {
-        // normal interpolation
-        return
-        (
-            data[lo].second()
-          + (
-                data[hi].second()
-              - data[lo].second()
-            )
-           *(
-                lookupValue
-              - data[lo].first()
-            )
-           /(
-                data[hi].first()
-              - data[lo].first()
-            )
-        );
-    }
+        Type m =
+            (data[hi].second() - data[lo].second())
+           /(data[hi].first() - data[lo].first());
 
+        // normal interpolation
+        return data[lo].second() + m*(lookupValue - data[lo].first());
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+Type Foam::interpolation2DTable<Type>::operator()
+(
+    const scalar valueX,
+    const scalar valueY
+) const
+{
+    // Considers all of the list in Y being equal
+    label nX = this->size();
+
+    const table& t = *this;
+
+    if (nX == 0)
+    {
+        WarningIn
+        (
+            "Type Foam::interpolation2DMatrix<Type>::operator()"
+            "("
+                "const scalar, "
+                "const scalar"
+            ") const"
+        )
+            << "cannot interpolate a zero-sized table - returning zero" << endl;
+
+        return pTraits<Type>::zero;
+    }
+    else if (nX == 1)
+    {
+        // only 1 column (in X) - interpolate to find Y value
+        return interpolateValue(t.first().second(), valueY);
+    }
+    else
+    {
+        // have 2-D data, interpolate
+
+        // find low and high indices in the X range that bound valueX
+        label x0i = Xi(lessOp<scalar>(), valueX, false);
+        label x1i = Xi(greaterOp<scalar>(), valueX, true);
+
+        if (x0i == x1i)
+        {
+            return interpolateValue(t[x0i].second(), valueY);
+        }
+        else
+        {
+            Type y0(interpolateValue(t[x0i].second(), valueY));
+            Type y1(interpolateValue(t[x1i].second(), valueY));
+
+            // gradient in X
+            scalar x0 = t[x0i].first();
+            scalar x1 = t[x1i].first();
+            Type mX = (y1 - y0)/(x1 - x0);
+
+            // interpolate
+            return y0 + mX*(valueX - x0);
+        }
+    }
 }
 
 
@@ -323,22 +385,23 @@ Foam::interpolation2DTable<Type>::outOfBounds
 
 
 template<class Type>
-void Foam::interpolation2DTable<Type>::check() const
+void Foam::interpolation2DTable<Type>::checkOrder() const
 {
     label n = this->size();
-    typedef  List<Tuple2<scalar, List<Tuple2<scalar, Type> > > > matrix;
-    scalar prevValue = matrix::operator[](0).first();
+    const table& t = *this;
+
+    scalar prevValue = t[0].first();
 
     for (label i=1; i<n; ++i)
     {
-        const scalar currValue = matrix::operator[](i).first();
+        const scalar currValue = t[i].first();
 
         // avoid duplicate values (divide-by-zero error)
         if (currValue <= prevValue)
         {
             FatalErrorIn
             (
-                "Foam::interpolation2DTable<Type>::check() const"
+                "Foam::interpolation2DTable<Type>::checkOrder() const"
             )   << "out-of-order value: "
                 << currValue << " at index " << i << nl
                 << exit(FatalError);
@@ -356,348 +419,7 @@ void Foam::interpolation2DTable<Type>::write(Ostream& os) const
     os.writeKeyword("outOfBounds")
         << boundsHandlingToWord(boundsHandling_) << token::END_STATEMENT << nl;
 
-    if (reader_.valid())
-    {
-        reader_->write(os);
-    }
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::List<Foam::Tuple2<Foam::scalar, Type> >&
-Foam::interpolation2DTable<Type>::operator[](const label i) const
-{
-    label ii = i;
-    label n  = this->size();
-
-    if (n <= 1)
-    {
-        ii = 0;
-    }
-    else if (ii < 0)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label) const"
-                )   << "index (" << ii << ") underflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label) const"
-                )   << "index (" << ii << ") underflow" << nl
-                    << "    Continuing with the first entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                ii = 0;
-                break;
-            }
-        }
-    }
-    else if (ii >= n)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label) const"
-                )   << "index (" << ii << ") overflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label) const"
-                )   << "index (" << ii << ") overflow" << nl
-                    << "    Continuing with the last entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                ii = n - 1;
-                break;
-            }
-        }
-    }
-
-    return List<Tuple2<scalar, List<Tuple2<scalar, Type> > > >::operator[](ii);
-}
-
-
-template<class Type>
-Type Foam::interpolation2DTable<Type>::operator()
-(
-    const scalar valueX,
-    const scalar valueY
-) const
-{
-    typedef  List<Tuple2<scalar, List<Tuple2<scalar, Type> > > > matrix;
-    label nX = this->size();
-
-    if (nX <= 1)
-    {
-        const List<Tuple2<scalar, Type> >& dataY =
-            matrix::operator[](0).second();
-
-        return interpolateValue(dataY, valueY);
-    }
-
-
-    scalar minLimit = matrix::operator[](0).first();
-    scalar maxLimit = matrix::operator[](nX-1).first();
-    scalar lookupValue = valueX;
-
-    if (lookupValue < minLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << "    Continuing with the first entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                return interpolateValue
-                (
-                    matrix::operator[](0).second(), valueY
-                );
-                break;
-            }
-        }
-    }
-    else if (lookupValue >= maxLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const label, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << "    Continuing with the last entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                return interpolateValue
-                (
-                    matrix::operator[](nX-1).second(), valueY
-                );
-                break;
-            }
-        }
-    }
-
-    label loX = 0;
-    label hiX = 0;
-
-    // look for the correct range in X
-    for (label i = 0; i < nX; ++i)
-    {
-        if (lookupValue >= matrix::operator[](i).first())
-        {
-            loX = hiX = i;
-        }
-        else
-        {
-            hiX = i;
-            break;
-        }
-    }
-
-    // look for the correct range in y
-    lookupValue = valueY;
-    label loY1 = 0;
-    label hiY1 = 0;
-
-    label nY = matrix::operator[](loX).second().size();
-
-    minLimit = matrix::operator[](loX).second()[0].first();
-    maxLimit = matrix::operator[](loX).second()[nY-1].first();
-
-    if (lookupValue < minLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") underflow" << nl
-                    << "    Continuing with the first entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                hiY1 = 0;
-                hiY1 = 1;
-                break;
-            }
-        }
-    }
-    else if (lookupValue >= maxLimit)
-    {
-        switch (boundsHandling_)
-        {
-            case interpolation2DTable::ERROR:
-            {
-                FatalErrorIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case interpolation2DTable::WARN:
-            {
-                WarningIn
-                (
-                    "Foam::interpolation2DTable<Type>::operator[]"
-                    "(const scalar, const scalar) const"
-                )   << "value (" << lookupValue << ") overflow" << nl
-                    << "    Continuing with the last entry"
-                    << endl;
-                // fall-through to 'CLAMP'
-            }
-            case interpolation2DTable::CLAMP:
-            {
-                hiY1 = nY-1;
-                hiY1 = nY;
-                break;
-            }
-        }
-    }
-    else
-    {
-        // Finds the lo and hi of Y on the lowest x
-        for (label i = 0; i < nY; ++i)
-        {
-            if
-            (
-                lookupValue >= matrix::operator[](loX).second()[i].first()
-            )
-            {
-                loY1 = hiY1 = i;
-            }
-            else
-            {
-                hiY1 = i;
-                break;
-            }
-        }
-    }
-
-    if (loX == hiX)
-    {
-        // we are at the end of the table - or there is only a single entry
-        return (interpolateValue(matrix::operator[](hiX).second(), valueY));
-    }
-    else
-    {
-        Type loXData = matrix::operator[](loX).second()[loY1].second();
-        Type hiXData = matrix::operator[](hiX).second()[loY1].second();
-
-        Type hiYData = matrix::operator[](loX).second()[hiY1].second();
-
-        Type refValue = matrix::operator[](loX).second()[loY1].second();
-
-        // normal interpolation on x
-        refValue +=
-            (
-                hiXData
-              - loXData
-            )
-            *(
-                valueX
-              - matrix::operator[](loX).first()
-             )
-            /(
-                matrix::operator[](hiX).first()
-              - matrix::operator[](loX).first()
-            );
-
-        // normal interpolation on y
-        refValue +=
-            (
-                hiYData
-              - loXData
-            )
-            *(
-                valueY
-              - matrix::operator[](loX).second()[loY1].first()
-            )
-            /(
-                matrix::operator[](loX).second()[hiY1].first()
-              - matrix::operator[](loX).second()[loY1].first()
-            );
-
-        return refValue;
-    }
+    *this >> os;
 }
 
 
