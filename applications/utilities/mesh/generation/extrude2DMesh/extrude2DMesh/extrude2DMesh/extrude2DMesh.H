@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,9 +53,10 @@ class polyMesh;
 class polyTopoChange;
 class mapPolyMesh;
 class mapDistributePolyMesh;
+class polyBoundaryMesh;
 
 /*---------------------------------------------------------------------------*\
-                        Class extrude2DMesh Declaration
+                           Class extrude2DMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class extrude2DMesh
@@ -65,23 +66,18 @@ class extrude2DMesh
         //- Reference to 2D mesh
         polyMesh& mesh_;
 
-        //- Extrusion dictionary
         const dictionary dict_;
 
         //const dictionary patchDict_;
 
-        //- The extrusion model
         const extrudeModel& model_;
 
-        //- Type of the patches that will be created by the extrusion.
+        const word modelType_;
+
         const word patchType_;
 
-        //- Patch ID of the front patch
         label frontPatchI_;
-
-        //- Patch ID of the back patch
         label backPatchI_;
-
 
     // Private Member Functions
 
@@ -97,7 +93,6 @@ class extrude2DMesh
         //- Disallow default bitwise assignment
         void operator=(const extrude2DMesh&);
 
-
 public:
 
     //- Runtime type information
@@ -105,8 +100,6 @@ public:
 
 
     // Constructors
-
-        //- Construct from a 2D polyMesh, a dictionary and an extrusion model
         extrude2DMesh
         (
             polyMesh&,
@@ -121,36 +114,30 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Add front and back patches
+        void addFrontBackPatches();
 
-            //- Return the patch ID of the front patch
-            inline label frontPatchI() const
-            {
-                return frontPatchI_;
-            }
+        //- Play commands into polyTopoChange to extrude mesh.
+        void setRefinement(polyTopoChange&);
 
-            //- Return the patch ID of the back patch
-            inline label backPatchI() const
-            {
-                return backPatchI_;
-            }
+        //- Force recalculation of locally stored data on topological change
+        void updateMesh(const mapPolyMesh&)
+        {}
 
+        //- Force recalculation of locally stored data for mesh distribution
+        void distribute(const mapDistributePolyMesh&)
+        {}
 
-        // Edit
+        label frontPatchI() const
+        {
+            return frontPatchI_;
+        }
 
-            //- Add front and back patches
-            void addFrontBackPatches();
+        label backPatchI() const
+        {
+            return backPatchI_;
+        }
 
-            //- Play commands into polyTopoChange to extrude mesh.
-            void setRefinement(polyTopoChange&);
-
-            //- Force recalculation of locally stored data on topological change
-            void updateMesh(const mapPolyMesh&)
-            {}
-
-            //- Force recalculation of locally stored data for mesh distribution
-            void distribute(const mapDistributePolyMesh&)
-            {}
 };
 
 
