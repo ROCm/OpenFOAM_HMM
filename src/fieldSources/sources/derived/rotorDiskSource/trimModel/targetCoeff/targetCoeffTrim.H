@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,7 +139,7 @@ public:
     TypeName("targetCoeffTrim");
 
     //- Constructor
-    targetCoeffTrim(const rotorDiskSource& rotor, const dictionary& dict);
+    targetCoeffTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
 
     //- Destructor
     virtual ~targetCoeffTrim();

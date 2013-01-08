@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fixedTemperatureConstraint
+    Foam::fv::fixedTemperatureConstraint
 
 Description
     Fixed temperature equation constraint
@@ -46,20 +46,22 @@ Note:
     by means of the DataEntry type.
 
 SourceFiles
-    basicSource.C
+    fvOption.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef fixedTemperatureConstraint_H
 #define fixedTemperatureConstraint_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "NamedEnum.H"
 #include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -68,7 +70,7 @@ namespace Foam
 
 class fixedTemperatureConstraint
 :
-    public basicSource
+    public option
 {
 
 public:
@@ -156,6 +158,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

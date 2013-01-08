@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interRegionHeatTransferModel
+    Foam::fv::interRegionHeatTransferModel
 
 Description
     Base class for inter region heat exchange. The derived classes must
@@ -33,13 +33,15 @@ Description
 #ifndef interRegionHeatTransferModel_H
 #define interRegionHeatTransferModel_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "volFields.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -48,7 +50,7 @@ namespace Foam
 
 class interRegionHeatTransferModel
 :
-    public basicSource
+    public option
 {
 
 private:
@@ -129,8 +131,8 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #endif

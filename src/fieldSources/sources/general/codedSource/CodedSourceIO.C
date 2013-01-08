@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::CodedSource<Type>::writeData(Ostream& os) const
+void Foam::fv::CodedSource<Type>::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
@@ -37,9 +37,9 @@ void Foam::CodedSource<Type>::writeData(Ostream& os) const
 
 
 template<class Type>
-bool Foam::CodedSource<Type>::read(const dictionary& dict)
+bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.lookup("fieldNames") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);

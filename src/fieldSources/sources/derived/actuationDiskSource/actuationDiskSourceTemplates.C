@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,13 +26,11 @@ License
 
 #include "actuationDiskSource.H"
 #include "volFields.H"
-#include "fvMatrix.H"
-#include "fvm.H"
 
 // * * * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * //
 
 template<class RhoFieldType>
-void Foam::actuationDiskSource::addActuationDiskAxialInertialResistance
+void Foam::fv::actuationDiskSource::addActuationDiskAxialInertialResistance
 (
     vectorField& Usource,
     const labelList& cells,

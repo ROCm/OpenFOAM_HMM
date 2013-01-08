@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,16 +34,19 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(fixedTemperatureConstraint, 0);
-    addToRunTimeSelectionTable
-    (
-        basicSource,
-        fixedTemperatureConstraint,
-        dictionary
-    );
+    namespace fv
+    {
+        defineTypeNameAndDebug(fixedTemperatureConstraint, 0);
+        addToRunTimeSelectionTable
+        (
+            option,
+            fixedTemperatureConstraint,
+            dictionary
+        );
+    }
 
     template<>
-    const char* NamedEnum<fixedTemperatureConstraint::temperatureMode, 2>::
+    const char* NamedEnum<fv::fixedTemperatureConstraint::temperatureMode, 2>::
     names[] =
     {
         "uniform",
@@ -51,13 +54,13 @@ namespace Foam
     };
 }
 
-const Foam::NamedEnum<Foam::fixedTemperatureConstraint::temperatureMode, 2>
-    Foam::fixedTemperatureConstraint::temperatureModeNames_;
+const Foam::NamedEnum<Foam::fv::fixedTemperatureConstraint::temperatureMode, 2>
+    Foam::fv::fixedTemperatureConstraint::temperatureModeNames_;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fixedTemperatureConstraint::fixedTemperatureConstraint
+Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
 (
     const word& name,
     const word& modelType,
@@ -65,7 +68,7 @@ Foam::fixedTemperatureConstraint::fixedTemperatureConstraint
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     mode_(temperatureModeNames_.read(coeffs_.lookup("mode"))),
     Tuniform_(NULL),
     TName_("T")
@@ -99,13 +102,13 @@ Foam::fixedTemperatureConstraint::fixedTemperatureConstraint
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::fixedTemperatureConstraint::alwaysApply() const
+bool Foam::fv::fixedTemperatureConstraint::alwaysApply() const
 {
     return true;
 }
 
 
-void Foam::fixedTemperatureConstraint::setValue
+void Foam::fv::fixedTemperatureConstraint::setValue
 (
     fvMatrix<scalar>& eqn,
     const label
@@ -146,16 +149,16 @@ void Foam::fixedTemperatureConstraint::setValue
 }
 
 
-void Foam::fixedTemperatureConstraint::writeData(Ostream& os) const
+void Foam::fv::fixedTemperatureConstraint::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::fixedTemperatureConstraint::read(const dictionary& dict)
+bool Foam::fv::fixedTemperatureConstraint::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         if (coeffs_.found(Tuniform_->name()))
         {

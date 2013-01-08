@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 
 #include "actuationDiskSource.H"
 #include "fvMesh.H"
-#include "fvMatrices.H"
+#include "fvMatrix.H"
 #include "geometricOneField.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -34,41 +34,44 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(actuationDiskSource, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         actuationDiskSource,
         dictionary
     );
+}
 }
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::actuationDiskSource::checkData() const
+void Foam::fv::actuationDiskSource::checkData() const
 {
     if (magSqr(diskArea_) <= VSMALL)
     {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+        FatalErrorIn("Foam::fv::actuationDiskSource::checkData()")
            << "diskArea is approximately zero"
            << exit(FatalIOError);
     }
     if (Cp_ <= VSMALL || Ct_ <= VSMALL)
     {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+        FatalErrorIn("Foam::fv::actuationDiskSource::checkData()")
            << "Cp and Ct must be greater than zero"
            << exit(FatalIOError);
     }
     if (mag(diskDir_) < VSMALL)
     {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+        FatalErrorIn("Foam::fv::actuationDiskSource::checkData()")
            << "disk direction vector is approximately zero"
            << exit(FatalIOError);
     }
     if (returnReduce(upstreamCellId_, maxOp<label>()) == -1)
     {
-        FatalErrorIn("Foam::actuationDiskSource::checkData()")
+        FatalErrorIn("Foam::fv::actuationDiskSource::checkData()")
            << "upstream location " << upstreamPoint_  << " not found in mesh"
            << exit(FatalIOError);
     }
@@ -77,7 +80,7 @@ void Foam::actuationDiskSource::checkData() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::actuationDiskSource::actuationDiskSource
+Foam::fv::actuationDiskSource::actuationDiskSource
 (
     const word& name,
     const word& modelType,
@@ -85,7 +88,7 @@ Foam::actuationDiskSource::actuationDiskSource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     diskDir_(coeffs_.lookup("diskDir")),
     Cp_(readScalar(coeffs_.lookup("Cp"))),
     Ct_(readScalar(coeffs_.lookup("Ct"))),
@@ -107,7 +110,7 @@ Foam::actuationDiskSource::actuationDiskSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::actuationDiskSource::addSup
+void Foam::fv::actuationDiskSource::addSup
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -151,16 +154,16 @@ void Foam::actuationDiskSource::addSup
 }
 
 
-void Foam::actuationDiskSource::writeData(Ostream& os) const
+void Foam::fv::actuationDiskSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::actuationDiskSource::read(const dictionary& dict)
+bool Foam::fv::actuationDiskSource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.readIfPresent("diskDir", diskDir_);
         coeffs_.readIfPresent("Cp", Cp_);

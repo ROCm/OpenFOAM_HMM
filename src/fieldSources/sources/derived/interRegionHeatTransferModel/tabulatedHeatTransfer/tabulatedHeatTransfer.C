@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,19 +32,22 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(tabulatedHeatTransfer, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         tabulatedHeatTransfer,
         dictionary
     );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::tabulatedHeatTransfer::tabulatedHeatTransfer
+Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 (
     const word& name,
     const word& modelType,
@@ -86,15 +89,15 @@ Foam::tabulatedHeatTransfer::tabulatedHeatTransfer
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::tabulatedHeatTransfer::~tabulatedHeatTransfer()
+Foam::fv::tabulatedHeatTransfer::~tabulatedHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-const Foam::tmp<Foam::volScalarField>Foam::tabulatedHeatTransfer::
-calculateHtc()
+const Foam::tmp<Foam::volScalarField>
+Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
     const fvMesh& secondaryMesh =
         mesh_.time().lookupObject<fvMesh>(mapRegionName());
@@ -126,7 +129,7 @@ calculateHtc()
 }
 
 
-void Foam::tabulatedHeatTransfer::writeData(Ostream& os) const
+void Foam::fv::tabulatedHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
     interRegionHeatTransferModel::writeData(os);
@@ -139,9 +142,9 @@ void Foam::tabulatedHeatTransfer::writeData(Ostream& os) const
 }
 
 
-bool Foam::tabulatedHeatTransfer::read(const dictionary& dict)
+bool Foam::fv::tabulatedHeatTransfer::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         return true;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::pressureGradientExplicitSource
+    Foam::fv::pressureGradientExplicitSource
 
 Description
     Creates a pressure gradient source
@@ -53,11 +53,13 @@ SourceFiles
 #include "cellSet.H"
 #include "fvMesh.H"
 #include "volFields.H"
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -66,7 +68,7 @@ namespace Foam
 
 class pressureGradientExplicitSource
 :
-    public basicSource
+    public option
 {
     // Private data
 
@@ -149,6 +151,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

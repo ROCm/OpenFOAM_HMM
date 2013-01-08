@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fixedTrim::fixedTrim(const rotorDiskSource& rotor, const dictionary& dict)
+Foam::fixedTrim::fixedTrim
+(
+    const fv::rotorDiskSource& rotor,
+    const dictionary& dict
+)
 :
     trimModel(rotor, dict, typeName),
     thetag_(rotor.cells().size(), 0.0)

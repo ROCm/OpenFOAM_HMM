@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ protected:
     // Protected data
 
         //- Reference to the rotor source model
-        const rotorDiskSource& rotor_;
+        const fv::rotorDiskSource& rotor_;
 
         //- Name of model
         const word name_;
@@ -79,7 +79,7 @@ public:
             trimModel,
             dictionary,
             (
-                const rotorDiskSource& rotor,
+                const fv::rotorDiskSource& rotor,
                 const dictionary& dict
             ),
             (rotor, dict)
@@ -91,7 +91,7 @@ public:
         //- Construct from components
         trimModel
         (
-            const rotorDiskSource& rotor,
+            const fv::rotorDiskSource& rotor,
             const dictionary& dict,
             const word& name
         );
@@ -102,7 +102,7 @@ public:
         //- Return a reference to the selected trim model
         static autoPtr<trimModel> New
         (
-            const rotorDiskSource& rotor,
+            const fv::rotorDiskSource& rotor,
             const dictionary& dict
         );
 

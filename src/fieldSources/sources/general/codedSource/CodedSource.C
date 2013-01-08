@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,13 +29,10 @@ License
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::CodedSource<Type>::prepare
+void Foam::fv::CodedSource<Type>::prepare
 (
     dynamicCode& dynCode,
     const dynamicCodeContext& context
@@ -54,10 +51,10 @@ void Foam::CodedSource<Type>::prepare
     dynCode.setFilterVariable("codeSetValue", codeSetValue_);
 
     // compile filtered C template
-    dynCode.addCompileFile("codedBasicSourceTemplate.C");
+    dynCode.addCompileFile("codedFvOptionTemplate.C");
 
     // copy filtered H template
-    dynCode.addCopyFile("codedBasicSourceTemplate.H");
+    dynCode.addCopyFile("codedFvOptionTemplate.H");
 
     // debugging: make BC verbose
     //         dynCode.setFilterVariable("verbose", "true");
@@ -84,28 +81,28 @@ void Foam::CodedSource<Type>::prepare
 
 
 template<class Type>
-Foam::dlLibraryTable& Foam::CodedSource<Type>::libs() const
+Foam::dlLibraryTable& Foam::fv::CodedSource<Type>::libs() const
 {
     return const_cast<Time&>(mesh_.time()).libs();
 }
 
 
 template<class Type>
-Foam::string Foam::CodedSource<Type>::description() const
+Foam::string Foam::fv::CodedSource<Type>::description() const
 {
-    return "basicSource " + name_;
+    return "fvOption:: " + name_;
 }
 
 
 template<class Type>
-void Foam::CodedSource<Type>::clearRedirect() const
+void Foam::fv::CodedSource<Type>::clearRedirect() const
 {
-    redirectBasicSourcePtr_.clear();
+    redirectFvOptionPtr_.clear();
 }
 
 
 template<class Type>
-const Foam::dictionary& Foam::CodedSource<Type>::codeDict() const
+const Foam::dictionary& Foam::fv::CodedSource<Type>::codeDict() const
 {
     return coeffs_;
 }
@@ -114,7 +111,7 @@ const Foam::dictionary& Foam::CodedSource<Type>::codeDict() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::CodedSource<Type>::CodedSource
+Foam::fv::CodedSource<Type>::CodedSource
 (
     const word& name,
     const word& modelType,
@@ -122,7 +119,7 @@ Foam::CodedSource<Type>::CodedSource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh)
+    option(name, modelType, dict, mesh)
 {
     read(dict);
 }
@@ -131,27 +128,26 @@ Foam::CodedSource<Type>::CodedSource
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::basicSource& Foam::CodedSource<Type>::redirectBasicSource()
-const
+Foam::fv::option& Foam::fv::CodedSource<Type>::redirectFvOption() const
 {
-    if (!redirectBasicSourcePtr_.valid())
+    if (!redirectFvOptionPtr_.valid())
     {
         dictionary constructDict(dict_);
         constructDict.set("type", redirectType_);
 
-        redirectBasicSourcePtr_ = basicSource::New
+        redirectFvOptionPtr_ = option::New
         (
             redirectType_,
             constructDict,
             mesh_
         );
     }
-    return redirectBasicSourcePtr_();
+    return redirectFvOptionPtr_();
 }
 
 
 template<class Type>
-void Foam::CodedSource<Type>::correct
+void Foam::fv::CodedSource<Type>::correct
 (
     GeometricField<Type, fvPatchField, volMesh>& fld
 )
@@ -163,12 +159,12 @@ void Foam::CodedSource<Type>::correct
     }
 
     updateLibrary(redirectType_);
-    redirectBasicSource().correct(fld);
+    redirectFvOption().correct(fld);
 }
 
 
 template<class Type>
-void Foam::CodedSource<Type>::addSup
+void Foam::fv::CodedSource<Type>::addSup
 (
     fvMatrix<Type>& eqn,
     const label fieldI
@@ -181,12 +177,12 @@ void Foam::CodedSource<Type>::addSup
     }
 
     updateLibrary(redirectType_);
-    redirectBasicSource().addSup(eqn, fieldI);
+    redirectFvOption().addSup(eqn, fieldI);
 }
 
 
 template<class Type>
-void Foam::CodedSource<Type>::setValue
+void Foam::fv::CodedSource<Type>::setValue
 (
     fvMatrix<Type>& eqn,
     const label fieldI
@@ -199,7 +195,7 @@ void Foam::CodedSource<Type>::setValue
     }
 
     updateLibrary(redirectType_);
-    redirectBasicSource().setValue(eqn, fieldI);
+    redirectFvOption().setValue(eqn, fieldI);
 }
 
 

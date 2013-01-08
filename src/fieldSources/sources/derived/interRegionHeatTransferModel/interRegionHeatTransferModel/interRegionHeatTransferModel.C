@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,32 +26,32 @@ License
 #include "interRegionHeatTransferModel.H"
 #include "fluidThermo.H"
 #include "fvm.H"
-#include "IObasicSourceList.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fvcVolumeIntegrate.H"
+#include "fvOptionList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(interRegionHeatTransferModel, 0);
-};
+}
+}
 
 
 // * * * * * * * * * * * *  Private member functions * * * * * * * * * * * //
 
-void Foam::interRegionHeatTransferModel::check()
+void Foam::fv::interRegionHeatTransferModel::check()
 {
     const fvMesh& secondaryMesh =
-            mesh_.time().lookupObject<fvMesh>(mapRegionName_);
+        mesh_.time().lookupObject<fvMesh>(mapRegionName_);
 
-    const basicSourceList& IObsl =
-        secondaryMesh.lookupObject<basicSourceList>
-        (
-            "sourcesProperties"
-        );
+    const optionList& IObsl =
+        secondaryMesh.lookupObject<optionList>("sourcesProperties");
 
-    const PtrList<basicSource>& bsl = IObsl;
+    const PtrList<option>& bsl = IObsl;
 
     bool secSourceFound(false);
 
@@ -70,10 +70,8 @@ void Foam::interRegionHeatTransferModel::check()
 
     if (!secSourceFound)
     {
-        FatalErrorIn
-        (
-            "constantHeatTransfer::interRegionHeatTransferModel::check()"
-        )   << "Secondary source name not found" << secondarySourceName_
+        FatalErrorIn("interRegionHeatTransferModel::check()")
+            << "Secondary source name not found" << secondarySourceName_
             << " in region " << secondaryMesh.name()
             << nl
             << exit(FatalError);
@@ -83,7 +81,7 @@ void Foam::interRegionHeatTransferModel::check()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interRegionHeatTransferModel::interRegionHeatTransferModel
+Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 (
     const word& name,
     const word& modelType,
@@ -91,7 +89,7 @@ Foam::interRegionHeatTransferModel::interRegionHeatTransferModel
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     secIrht_(),
     firstIter_(true),
     htc_
@@ -121,13 +119,13 @@ Foam::interRegionHeatTransferModel::interRegionHeatTransferModel
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::interRegionHeatTransferModel::~interRegionHeatTransferModel()
+Foam::fv::interRegionHeatTransferModel::~interRegionHeatTransferModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::interRegionHeatTransferModel::addSup
+void Foam::fv::interRegionHeatTransferModel::addSup
 (
     fvMatrix<scalar>& eEqn,
     const label fieldI
@@ -234,7 +232,7 @@ void Foam::interRegionHeatTransferModel::addSup
 }
 
 
-void Foam::interRegionHeatTransferModel::writeData(Ostream& os) const
+void Foam::fv::interRegionHeatTransferModel::writeData(Ostream& os) const
 {
     os.writeKeyword("name") << this->name() << token::END_STATEMENT << nl;
     os.writeKeyword("mapRegionName") << mapRegionName_
@@ -254,9 +252,9 @@ void Foam::interRegionHeatTransferModel::writeData(Ostream& os) const
 }
 
 
-bool Foam::interRegionHeatTransferModel::read(const dictionary& dict)
+bool Foam::fv::interRegionHeatTransferModel::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         return true;
     }

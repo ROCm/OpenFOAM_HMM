@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::codedSource
+    Foam::fv::codedSource
 
 Description
-    Constructs on-the-fly a new basicSource.
+    Constructs on-the-fly a new fvOption.
 
     E.g. in constant/sourcesProperties
 
@@ -80,22 +80,24 @@ SourceFiles
 #ifndef CodedSource_H
 #define CodedSource_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "codedBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fv
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class codedSource Declaration
+                         Class codedSource Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
 class CodedSource
 :
-    public basicSource,
+    public option,
     public codedBase
 {
 
@@ -110,7 +112,7 @@ protected:
         string codeSetValue_;
 
         //- Underlying functionObject
-        mutable autoPtr<basicSource> redirectBasicSourcePtr_;
+        mutable autoPtr<option> redirectFvOptionPtr_;
 
 
     // Protected Member Functions
@@ -119,7 +121,7 @@ protected:
         virtual dlLibraryTable& libs() const;
 
         //- adapt the context for the current object
-        virtual void prepare(dynamicCode &,const dynamicCodeContext&) const;
+        virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
         // Return a description (type + name) for the output
         virtual string description() const;
@@ -151,8 +153,8 @@ public:
 
     // Member Functions
 
-        //- Dynamically compiled basicSource
-        basicSource& redirectBasicSource() const;
+        //- Dynamically compiled fvOption
+        option& redirectFvOption() const;
 
         // Evaluation
 
@@ -189,6 +191,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

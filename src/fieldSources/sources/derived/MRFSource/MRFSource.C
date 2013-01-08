@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,18 +34,21 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(MRFSource, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         MRFSource,
         dictionary
     );
 }
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::MRFSource::initialise()
+void Foam::fv::MRFSource::initialise()
 {
     if (selectionMode_ != smCellZone)
     {
@@ -77,7 +80,7 @@ void Foam::MRFSource::initialise()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::MRFSource::MRFSource
+Foam::fv::MRFSource::MRFSource
 (
     const word& name,
     const word& modelType,
@@ -85,7 +88,7 @@ Foam::MRFSource::MRFSource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     mrfPtr_(NULL),
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
     rhoName_(coeffs_.lookupOrDefault<word>("rhoName", "rho"))
@@ -96,7 +99,7 @@ Foam::MRFSource::MRFSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::MRFSource::addSup
+void Foam::fv::MRFSource::addSup
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -118,13 +121,13 @@ void Foam::MRFSource::addSup
 }
 
 
-void Foam::MRFSource::relativeFlux(surfaceScalarField& phi) const
+void Foam::fv::MRFSource::relativeFlux(surfaceScalarField& phi) const
 {
     mrfPtr_->relativeFlux(phi);
 }
 
 
-void Foam::MRFSource::relativeFlux
+void Foam::fv::MRFSource::relativeFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -134,13 +137,13 @@ void Foam::MRFSource::relativeFlux
 }
 
 
-void Foam::MRFSource::absoluteFlux(surfaceScalarField& phi) const
+void Foam::fv::MRFSource::absoluteFlux(surfaceScalarField& phi) const
 {
     mrfPtr_->absoluteFlux(phi);
 }
 
 
-void Foam::MRFSource::absoluteFlux
+void Foam::fv::MRFSource::absoluteFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -150,16 +153,16 @@ void Foam::MRFSource::absoluteFlux
 }
 
 
-void Foam::MRFSource::writeData(Ostream& os) const
+void Foam::fv::MRFSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::MRFSource::read(const dictionary& dict)
+bool Foam::fv::MRFSource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.readIfPresent("UName", UName_);
         coeffs_.readIfPresent("rhoName", rhoName_);

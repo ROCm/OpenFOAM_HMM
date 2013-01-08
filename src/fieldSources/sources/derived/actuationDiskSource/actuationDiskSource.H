@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::actuationDiskSource
+    Foam::fv::actuationDiskSource
 
 Description
     Actuation disk source
@@ -61,11 +61,13 @@ SourceFiles
 #ifndef actuationDiskSource_H
 #define actuationDiskSource_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -74,7 +76,7 @@ namespace Foam
 
 class actuationDiskSource
 :
-    public basicSource
+    public option
 {
 
 protected:
@@ -195,6 +197,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,18 +33,21 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(temperatureLimitsConstraint, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         temperatureLimitsConstraint,
         dictionary
     );
 }
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::temperatureLimitsConstraint::temperatureLimitsConstraint
+Foam::fv::temperatureLimitsConstraint::temperatureLimitsConstraint
 (
     const word& name,
     const word& modelType,
@@ -52,7 +55,7 @@ Foam::temperatureLimitsConstraint::temperatureLimitsConstraint
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     Tmin_(readScalar(coeffs_.lookup("Tmin"))),
     Tmax_(readScalar(coeffs_.lookup("Tmax")))
 {
@@ -63,13 +66,13 @@ Foam::temperatureLimitsConstraint::temperatureLimitsConstraint
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::temperatureLimitsConstraint::alwaysApply() const
+bool Foam::fv::temperatureLimitsConstraint::alwaysApply() const
 {
     return true;
 }
 
 
-void Foam::temperatureLimitsConstraint::correct(volScalarField& he)
+void Foam::fv::temperatureLimitsConstraint::correct(volScalarField& he)
 {
     const basicThermo& thermo =
         mesh_.lookupObject<basicThermo>("thermophysicalProperties");
@@ -123,16 +126,16 @@ void Foam::temperatureLimitsConstraint::correct(volScalarField& he)
 }
 
 
-void Foam::temperatureLimitsConstraint::writeData(Ostream& os) const
+void Foam::fv::temperatureLimitsConstraint::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::temperatureLimitsConstraint::read(const dictionary& dict)
+bool Foam::fv::temperatureLimitsConstraint::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.readIfPresent("Tmin", Tmin_);
         coeffs_.readIfPresent("Tmax", Tmax_);

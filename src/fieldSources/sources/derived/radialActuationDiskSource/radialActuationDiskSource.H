@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::radialActuationDiskSource
+    Foam::fv::radialActuationDiskSource
 
 Description
     Actuation disk zone definition.
@@ -72,6 +72,8 @@ SourceFiles
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -131,24 +133,25 @@ public:
     {}
 
 
-        // Public Functions
+    // Member Functions
 
-            //- Source term to fvMatrix<vector>
-            virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
+        //- Source term to fvMatrix<vector>
+        virtual void addSup(fvMatrix<vector>& eqn, const label fieldI);
 
 
-        // I-O
+    // I-O
 
-            //- Write data
-            virtual void writeData(Ostream&) const;
+        //- Write data
+        virtual void writeData(Ostream&) const;
 
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tabulatedHeatTransfer
+    Foam::fv::tabulatedHeatTransfer
 
 Description
     Tabulated heat transfer model. The heat exchange area must be
@@ -42,6 +42,9 @@ Description
 
 namespace Foam
 {
+namespace fv
+{
+
 /*---------------------------------------------------------------------------*\
                     Class tabulatedHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
@@ -102,6 +105,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

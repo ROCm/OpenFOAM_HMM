@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,7 @@ License
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::wordList Foam::SemiImplicitSource<Type>::
-volumeModeTypeNames_
+const Foam::wordList Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
 (
     IStringStream("(absolute specific)")()
 );
@@ -42,8 +41,8 @@ volumeModeTypeNames_
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-typename Foam::SemiImplicitSource<Type>::volumeModeType
-Foam::SemiImplicitSource<Type>::wordToVolumeModeType
+typename Foam::fv::SemiImplicitSource<Type>::volumeModeType
+Foam::fv::SemiImplicitSource<Type>::wordToVolumeModeType
 (
     const word& vmtName
 ) const
@@ -69,7 +68,7 @@ Foam::SemiImplicitSource<Type>::wordToVolumeModeType
 
 
 template<class Type>
-Foam::word Foam::SemiImplicitSource<Type>::volumeModeTypeToWord
+Foam::word Foam::fv::SemiImplicitSource<Type>::volumeModeTypeToWord
 (
     const volumeModeType& vmtType
 ) const
@@ -86,7 +85,7 @@ Foam::word Foam::SemiImplicitSource<Type>::volumeModeTypeToWord
 
 
 template<class Type>
-void Foam::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
+void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
     injectionRate_.setSize(fieldNames_.size());
@@ -112,7 +111,7 @@ void Foam::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::SemiImplicitSource<Type>::SemiImplicitSource
+Foam::fv::SemiImplicitSource<Type>::SemiImplicitSource
 (
     const word& name,
     const word& modelType,
@@ -120,7 +119,7 @@ Foam::SemiImplicitSource<Type>::SemiImplicitSource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     volumeMode_(vmAbsolute),
     VDash_(1.0),
     injectionRate_()
@@ -132,7 +131,7 @@ Foam::SemiImplicitSource<Type>::SemiImplicitSource
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::SemiImplicitSource<Type>::addSup
+void Foam::fv::SemiImplicitSource<Type>::addSup
 (
     fvMatrix<Type>& eqn,
     const label fieldI

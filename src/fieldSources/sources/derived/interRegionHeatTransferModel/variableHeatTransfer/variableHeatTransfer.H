@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::variableHeatTransfer
+    Foam::fv::variableHeatTransfer
 
 Description
     Variable heat transfer model depending on local values. The area of contact
@@ -30,13 +30,13 @@ Description
 
         Nu = a*pow(Re, b)*pow(Pr, c)
 
-        and the heat transfer coefficient as:
+    and the heat transfer coefficient as:
 
         htc = Nu*K/ds
 
-        where:
-            K is the heat conduction
-            ds is the strut diameter
+    where:
+        K is the heat conduction
+        ds is the strut diameter
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,8 +50,11 @@ Description
 
 namespace Foam
 {
+namespace fv
+{
+
 /*---------------------------------------------------------------------------*\
-                        Class variableHeatTransfer Declaration
+                    Class variableHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
 class variableHeatTransfer
@@ -80,7 +83,7 @@ private:
 public:
 
     //- Runtime type information
-        TypeName("variableHeatTransfer");
+    TypeName("variableHeatTransfer");
 
 
     // Constructors
@@ -112,16 +115,15 @@ public:
 
             //- Read dictionary
             virtual bool read(const dictionary& dict) ;
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #endif
 

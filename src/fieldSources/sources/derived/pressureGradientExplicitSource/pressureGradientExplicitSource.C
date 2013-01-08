@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,20 +33,26 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(pressureGradientExplicitSource, 0);
 
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         pressureGradientExplicitSource,
         dictionary
     );
+}
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSource::writeProps(const scalar gradP) const
+void Foam::fv::pressureGradientExplicitSource::writeProps
+(
+    const scalar gradP
+) const
 {
     // Only write on output time
     if (mesh_.time().outputTime())
@@ -71,7 +77,7 @@ void Foam::pressureGradientExplicitSource::writeProps(const scalar gradP) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
+Foam::fv::pressureGradientExplicitSource::pressureGradientExplicitSource
 (
     const word& sourceName,
     const word& modelType,
@@ -79,7 +85,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
     const fvMesh& mesh
 )
 :
-    basicSource(sourceName, modelType, dict, mesh),
+    option(sourceName, modelType, dict, mesh),
     Ubar_(coeffs_.lookup("Ubar")),
     gradP0_(0.0),
     dGradP_(0.0),
@@ -92,7 +98,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
     {
         FatalErrorIn
         (
-            "Foam::pressureGradientExplicitSource::"
+            "Foam::fv::pressureGradientExplicitSource::"
             "pressureGradientExplicitSource"
             "("
                 "const word&, "
@@ -125,7 +131,7 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::pressureGradientExplicitSource::correct(volVectorField& U)
+void Foam::fv::pressureGradientExplicitSource::correct(volVectorField& U)
 {
     const scalarField& rAU = invAPtr_().internalField();
 
@@ -169,7 +175,7 @@ void Foam::pressureGradientExplicitSource::correct(volVectorField& U)
 }
 
 
-void Foam::pressureGradientExplicitSource::addSup
+void Foam::fv::pressureGradientExplicitSource::addSup
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -197,7 +203,7 @@ void Foam::pressureGradientExplicitSource::addSup
 }
 
 
-void Foam::pressureGradientExplicitSource::setValue
+void Foam::fv::pressureGradientExplicitSource::setValue
 (
     fvMatrix<vector>& eqn,
     const label

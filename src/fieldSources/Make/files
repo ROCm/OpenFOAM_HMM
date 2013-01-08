@@ -1,7 +1,7 @@
-basicSource/basicSource.C
-basicSource/basicSourceIO.C
-basicSource/basicSourceList.C
-basicSource/IObasicSourceList.C
+fvOptions/fvOption.C
+fvOptions/fvOptionIO.C
+fvOptions/fvOptionList.C
+fvOptions/fvIOoptionList.C
 
 
 /* sources */

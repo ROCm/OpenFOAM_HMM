@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::SemiImplicitSource<Type>::writeData(Ostream& os) const
+void Foam::fv::SemiImplicitSource<Type>::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
@@ -36,9 +36,9 @@ void Foam::SemiImplicitSource<Type>::writeData(Ostream& os) const
 
 
 template<class Type>
-bool Foam::SemiImplicitSource<Type>::read(const dictionary& dict)
+bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         volumeMode_ = wordToVolumeModeType(coeffs_.lookup("volumeMode"));
         setFieldData(coeffs_.subDict("injectionRateSuSp"));

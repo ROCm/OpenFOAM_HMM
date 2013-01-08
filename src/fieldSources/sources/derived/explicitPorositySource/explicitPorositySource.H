@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::explicitPorositySource
+    Foam::fv::explicitPorositySource
 
 Description
     Explicit porosity source
@@ -57,7 +57,7 @@ SourceFiles
 #ifndef explicitPorositySource_H
 #define explicitPorositySource_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,13 +66,17 @@ namespace Foam
 
 class porosityModel;
 
+namespace fv
+{
+
+
 /*---------------------------------------------------------------------------*\
                    Class explicitPorositySource Declaration
 \*---------------------------------------------------------------------------*/
 
 class explicitPorositySource
 :
-    public basicSource
+    public option
 {
 
 protected:
@@ -157,6 +161,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

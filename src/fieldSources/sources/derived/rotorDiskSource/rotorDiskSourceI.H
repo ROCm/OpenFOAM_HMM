@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,37 +27,37 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::rotorDiskSource::rhoRef() const
+Foam::scalar Foam::fv::rotorDiskSource::rhoRef() const
 {
     return rhoRef_;
 }
 
 
-Foam::scalar Foam::rotorDiskSource::omega() const
+Foam::scalar Foam::fv::rotorDiskSource::omega() const
 {
     return omega_;
 }
 
 
-const Foam::List<Foam::point>& Foam::rotorDiskSource::x() const
+const Foam::List<Foam::point>& Foam::fv::rotorDiskSource::x() const
 {
     return x_;
 }
 
 
-const Foam::cylindricalCS& Foam::rotorDiskSource::coordSys() const
+const Foam::cylindricalCS& Foam::fv::rotorDiskSource::coordSys() const
 {
     return coordSys_;
 }
 
 
-bool Foam::rotorDiskSource::compressible() const
+bool Foam::fv::rotorDiskSource::compressible() const
 {
     return rhoName_ != "none";
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::rotorDiskSource::rho() const
+Foam::tmp<Foam::volScalarField> Foam::fv::rotorDiskSource::rho() const
 {
     if (compressible())
     {
@@ -68,5 +68,6 @@ Foam::tmp<Foam::volScalarField> Foam::rotorDiskSource::rho() const
         return volScalarField::null();
     }
 }
+
 
 // ************************************************************************* //

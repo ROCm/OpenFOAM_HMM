@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::SemiImplicitSource
+    Foam::fv::SemiImplicitSource
 
 Description
     Semi-implicit source, described using an input dictionary.  The injection
@@ -58,7 +58,7 @@ Description
     - specific: values are given as \<quantity\>/m3
 
 SeeAlso
-    Foam::basicSource
+    Foam::fvOption
 
 SourceFiles
     SemiImplicitSource.C
@@ -69,16 +69,17 @@ SourceFiles
 #define SemiImplicitSource_H
 
 #include "Tuple2.H"
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fv
+{
 
 // Forward declaration of classes
 
-class fvMesh;
 
 template<class Type>
 class SemiImplicitSource;
@@ -99,7 +100,7 @@ Ostream& operator<<
 template<class Type>
 class SemiImplicitSource
 :
-    public basicSource
+    public option
 {
 public:
 
@@ -198,6 +199,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

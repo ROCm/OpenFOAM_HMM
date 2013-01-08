@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,19 +32,21 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(radialActuationDiskSource, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         radialActuationDiskSource,
         dictionary
     );
 }
-
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radialActuationDiskSource::radialActuationDiskSource
+Foam::fv::radialActuationDiskSource::radialActuationDiskSource
 (
     const word& name,
     const word& modelType,
@@ -61,7 +63,7 @@ Foam::radialActuationDiskSource::radialActuationDiskSource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::radialActuationDiskSource::addSup
+void Foam::fv::radialActuationDiskSource::addSup
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -105,15 +107,15 @@ void Foam::radialActuationDiskSource::addSup
 }
 
 
-void Foam::radialActuationDiskSource::writeData(Ostream& os) const
+void Foam::fv::radialActuationDiskSource::writeData(Ostream& os) const
 {
     actuationDiskSource::writeData(os);
 }
 
 
-bool Foam::radialActuationDiskSource::read(const dictionary& dict)
+bool Foam::fv::radialActuationDiskSource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.readIfPresent("diskDir", diskDir_);
         coeffs_.readIfPresent("Cp", Cp_);

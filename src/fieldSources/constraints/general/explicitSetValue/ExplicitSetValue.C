@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
+void Foam::fv::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
 {
     fieldNames_.setSize(dict.toc().size());
     injectionRate_.setSize(fieldNames_.size());
@@ -51,7 +51,7 @@ void Foam::ExplicitSetValue<Type>::setFieldData(const dictionary& dict)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::ExplicitSetValue<Type>::ExplicitSetValue
+Foam::fv::ExplicitSetValue<Type>::ExplicitSetValue
 (
     const word& name,
     const word& modelType,
@@ -59,7 +59,7 @@ Foam::ExplicitSetValue<Type>::ExplicitSetValue
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     injectionRate_()
 {
     read(dict);
@@ -69,7 +69,7 @@ Foam::ExplicitSetValue<Type>::ExplicitSetValue
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::ExplicitSetValue<Type>::setValue
+void Foam::fv::ExplicitSetValue<Type>::setValue
 (
     fvMatrix<Type>& eqn,
     const label fieldI

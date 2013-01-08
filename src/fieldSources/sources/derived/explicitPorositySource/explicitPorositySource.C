@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,22 +34,25 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(explicitPorositySource, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         explicitPorositySource,
         dictionary
     );
 }
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::explicitPorositySource::initialise()
+void Foam::fv::explicitPorositySource::initialise()
 {
     if (selectionMode_ != smCellZone)
     {
-        FatalErrorIn("void Foam::explicitPorositySource::initialise()")
+        FatalErrorIn("void Foam::fv::explicitPorositySource::initialise()")
             << "The porosity region must be specified as a cellZone.  Current "
             << "selection mode is " << selectionModeTypeNames_[selectionMode_]
             << exit(FatalError);
@@ -73,7 +76,7 @@ void Foam::explicitPorositySource::initialise()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::explicitPorositySource::explicitPorositySource
+Foam::fv::explicitPorositySource::explicitPorositySource
 (
     const word& name,
     const word& modelType,
@@ -81,7 +84,7 @@ Foam::explicitPorositySource::explicitPorositySource
     const fvMesh& mesh
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     porosityPtr_(NULL),
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
     rhoName_(coeffs_.lookupOrDefault<word>("rhoName", "rho")),
@@ -93,7 +96,7 @@ Foam::explicitPorositySource::explicitPorositySource
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::explicitPorositySource::addSup
+void Foam::fv::explicitPorositySource::addSup
 (
     fvMatrix<vector>& eqn,
     const label fieldI
@@ -118,16 +121,16 @@ void Foam::explicitPorositySource::addSup
 }
 
 
-void Foam::explicitPorositySource::writeData(Ostream& os) const
+void Foam::fv::explicitPorositySource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::explicitPorositySource::read(const dictionary& dict)
+bool Foam::fv::explicitPorositySource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.readIfPresent("UName", UName_);
         coeffs_.readIfPresent("rhoName", rhoName_);

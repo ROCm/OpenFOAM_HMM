@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::explicitSetValue
+    Foam::fv::explicitSetValue
 
 Description
     Set values field values explicity.
@@ -41,7 +41,7 @@ Description
     \endverbatim
 
 SeeAlso
-    Foam::basicSource
+    Foam::fvOption
 
 SourceFiles
     explicitSetValue.C
@@ -51,12 +51,14 @@ SourceFiles
 #ifndef ExplicitSetValue_H
 #define ExplicitSetValue_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -66,7 +68,7 @@ namespace Foam
 template<class Type>
 class ExplicitSetValue
 :
-    public basicSource
+    public option
 {
 
 protected:
@@ -121,6 +123,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

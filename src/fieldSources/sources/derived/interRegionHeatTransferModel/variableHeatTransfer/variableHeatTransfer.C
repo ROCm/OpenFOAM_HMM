@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "variableHeatTransfer.H"
-#include "IObasicSourceList.H"
 #include "turbulenceModel.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -32,19 +31,22 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(variableHeatTransfer, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         variableHeatTransfer,
         dictionary
     );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::variableHeatTransfer::variableHeatTransfer
+Foam::fv::variableHeatTransfer::variableHeatTransfer
 (
     const word& name,
     const word& modelType,
@@ -88,17 +90,16 @@ Foam::variableHeatTransfer::variableHeatTransfer
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::variableHeatTransfer::~variableHeatTransfer()
+Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
-const Foam::tmp<Foam::volScalarField> Foam::variableHeatTransfer::
-calculateHtc()
+const Foam::tmp<Foam::volScalarField>
+Foam::fv::variableHeatTransfer::calculateHtc()
 {
-
     const fvMesh& secondaryMesh =
         mesh_.time().lookupObject<fvMesh>(mapRegionName());
 
@@ -140,7 +141,7 @@ calculateHtc()
 }
 
 
-void Foam::variableHeatTransfer::writeData(Ostream& os) const
+void Foam::fv::variableHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
     interRegionHeatTransferModel::writeData(os);
@@ -159,9 +160,9 @@ void Foam::variableHeatTransfer::writeData(Ostream& os) const
 }
 
 
-bool Foam::variableHeatTransfer::read(const dictionary& dict)
+bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
 
         const dictionary& sourceDict = dict.subDict(name());

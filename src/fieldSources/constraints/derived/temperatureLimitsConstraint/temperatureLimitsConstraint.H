@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::temperatureLimitsConstraint
+    Foam::fv::temperatureLimitsConstraint
 
 Description
     Constraint for temperature to apply limits between minimum and maximum
@@ -39,18 +39,20 @@ Description
 
 
 SourceFiles
-    basicSource.C
+    fvOption.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef temperatureLimitsConstraint_H
 #define temperatureLimitsConstraint_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
@@ -59,7 +61,7 @@ namespace Foam
 
 class temperatureLimitsConstraint
 :
-    public basicSource
+    public option
 {
 
 protected:
@@ -130,6 +132,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

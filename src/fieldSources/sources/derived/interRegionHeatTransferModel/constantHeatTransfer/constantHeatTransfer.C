@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,6 @@ License
 
 #include "constantHeatTransfer.H"
 #include "fvm.H"
-#include "IObasicSourceList.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvcVolumeIntegrate.H"
 
@@ -33,19 +32,22 @@ License
 
 namespace Foam
 {
+namespace fv
+{
     defineTypeNameAndDebug(constantHeatTransfer, 0);
     addToRunTimeSelectionTable
     (
-        basicSource,
+        option,
         constantHeatTransfer,
         dictionary
     );
+}
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::constantHeatTransfer::constantHeatTransfer
+Foam::fv::constantHeatTransfer::constantHeatTransfer
 (
     const word& name,
     const word& modelType,
@@ -99,20 +101,20 @@ Foam::constantHeatTransfer::constantHeatTransfer
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::constantHeatTransfer::~constantHeatTransfer()
+Foam::fv::constantHeatTransfer::~constantHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>Foam::constantHeatTransfer::
-calculateHtc()
+const Foam::tmp<Foam::volScalarField>
+Foam::fv::constantHeatTransfer::calculateHtc()
 {
     return htc_;
 }
 
 
-void Foam::constantHeatTransfer::writeData(Ostream& os) const
+void Foam::fv::constantHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
     interRegionHeatTransferModel::writeData(os);
@@ -125,9 +127,9 @@ void Foam::constantHeatTransfer::writeData(Ostream& os) const
 }
 
 
-bool Foam::constantHeatTransfer::read(const dictionary& dict)
+bool Foam::fv::constantHeatTransfer::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         return true;
     }

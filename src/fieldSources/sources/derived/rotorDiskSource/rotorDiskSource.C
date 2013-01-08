@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,20 +37,23 @@ using namespace Foam::constant;
 
 namespace Foam
 {
-    defineTypeNameAndDebug(rotorDiskSource, 0);
-    addToRunTimeSelectionTable(basicSource, rotorDiskSource, dictionary);
+    namespace fv
+    {
+        defineTypeNameAndDebug(rotorDiskSource, 0);
+        addToRunTimeSelectionTable(option, rotorDiskSource, dictionary);
+    }
 
-    template<> const char* NamedEnum<rotorDiskSource::geometryModeType, 2>::
+    template<> const char* NamedEnum<fv::rotorDiskSource::geometryModeType, 2>::
         names[] =
     {
         "auto",
         "specified"
     };
 
-    const NamedEnum<rotorDiskSource::geometryModeType, 2>
-        rotorDiskSource::geometryModeTypeNames_;
+    const NamedEnum<fv::rotorDiskSource::geometryModeType, 2>
+        fv::rotorDiskSource::geometryModeTypeNames_;
 
-    template<> const char* NamedEnum<rotorDiskSource::inletFlowType, 3>::
+    template<> const char* NamedEnum<fv::rotorDiskSource::inletFlowType, 3>::
         names[] =
     {
         "fixed",
@@ -58,14 +61,14 @@ namespace Foam
         "local"
     };
 
-    const NamedEnum<rotorDiskSource::inletFlowType, 3>
-        rotorDiskSource::inletFlowTypeNames_;
+    const NamedEnum<fv::rotorDiskSource::inletFlowType, 3>
+        fv::rotorDiskSource::inletFlowTypeNames_;
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::rotorDiskSource::checkData()
+void Foam::fv::rotorDiskSource::checkData()
 {
     // set inflow type
     switch (selectionMode())
@@ -122,7 +125,7 @@ void Foam::rotorDiskSource::checkData()
 }
 
 
-void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
+void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 {
     area_ = 0.0;
 
@@ -235,7 +238,7 @@ void Foam::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 }
 
 
-void Foam::rotorDiskSource::createCoordinateSystem()
+void Foam::fv::rotorDiskSource::createCoordinateSystem()
 {
     // construct the local rotor co-prdinate system
     vector origin(vector::zero);
@@ -348,7 +351,7 @@ void Foam::rotorDiskSource::createCoordinateSystem()
 }
 
 
-void Foam::rotorDiskSource::constructGeometry()
+void Foam::fv::rotorDiskSource::constructGeometry()
 {
     const vectorField& C = mesh_.C();
 
@@ -382,7 +385,7 @@ void Foam::rotorDiskSource::constructGeometry()
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::rotorDiskSource::inflowVelocity
+Foam::tmp<Foam::vectorField> Foam::fv::rotorDiskSource::inflowVelocity
 (
     const volVectorField& U
 ) const
@@ -410,7 +413,7 @@ Foam::tmp<Foam::vectorField> Foam::rotorDiskSource::inflowVelocity
             FatalErrorIn
             (
                 "Foam::tmp<Foam::vectorField> "
-                "Foam::rotorDiskSource::inflowVelocity"
+                "Foam::fv::rotorDiskSource::inflowVelocity"
                 "(const volVectorField&) const"
             )   << "Unknown inlet flow specification" << abort(FatalError);
         }
@@ -422,7 +425,7 @@ Foam::tmp<Foam::vectorField> Foam::rotorDiskSource::inflowVelocity
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-Foam::rotorDiskSource::rotorDiskSource
+Foam::fv::rotorDiskSource::rotorDiskSource
 (
     const word& name,
     const word& modelType,
@@ -431,7 +434,7 @@ Foam::rotorDiskSource::rotorDiskSource
 
 )
 :
-    basicSource(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh),
     rhoName_("none"),
     rhoRef_(1.0),
     omega_(0.0),
@@ -456,13 +459,13 @@ Foam::rotorDiskSource::rotorDiskSource
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::rotorDiskSource::~rotorDiskSource()
+Foam::fv::rotorDiskSource::~rotorDiskSource()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::rotorDiskSource::calculate
+void Foam::fv::rotorDiskSource::calculate
 (
     const vectorField& U,
     const scalarField& thetag,
@@ -585,7 +588,11 @@ void Foam::rotorDiskSource::calculate
 }
 
 
-void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
+void Foam::fv::rotorDiskSource::addSup
+(
+    fvMatrix<vector>& eqn,
+    const label fieldI
+)
 {
     dimensionSet dims = dimless;
     if (eqn.dimensions() == dimForce)
@@ -632,16 +639,16 @@ void Foam::rotorDiskSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
 }
 
 
-void Foam::rotorDiskSource::writeData(Ostream& os) const
+void Foam::fv::rotorDiskSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::rotorDiskSource::read(const dictionary& dict)
+bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 {
-    if (basicSource::read(dict))
+    if (option::read(dict))
     {
         coeffs_.lookup("fieldNames") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
