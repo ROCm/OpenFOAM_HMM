@@ -78,6 +78,9 @@ protected:
         // registered on the master mesh
         volScalarField htc_;
 
+        //- Flag to activate semi-implicit coupling
+        bool semiImplicit_;
+
 
 public:
 
@@ -113,7 +116,7 @@ public:
             }
 
             //-Source term to fvMatrix<scalar>
-            virtual void addSup(fvMatrix<scalar>& eEqn, const label fieldI);
+            virtual void addSup(fvMatrix<scalar>& eqn, const label fieldI);
 
             //- Calculate heat transfer coefficient
             virtual const tmp<volScalarField> calculateHtc() = 0;

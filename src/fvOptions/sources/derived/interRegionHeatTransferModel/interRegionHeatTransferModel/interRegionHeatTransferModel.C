@@ -110,10 +110,16 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
             0.0
         ),
         zeroGradientFvPatchScalarField::typeName
-    )
+    ),
+    semiImplicit_(false)
 {
-    coeffs_.lookup("fieldNames") >> fieldNames_;
-    applied_.setSize(fieldNames_.size(), false);
+    if (active())
+    {
+        coeffs_.lookup("fieldNames") >> fieldNames_;
+        applied_.setSize(fieldNames_.size(), false);
+
+        coeffs_.lookup("semiImplicit") >> semiImplicit_;
+    }
 }
 
 
@@ -127,107 +133,107 @@ Foam::fv::interRegionHeatTransferModel::~interRegionHeatTransferModel()
 
 void Foam::fv::interRegionHeatTransferModel::addSup
 (
-    fvMatrix<scalar>& eEqn,
+    fvMatrix<scalar>& eqn,
     const label fieldI
 )
 {
-    if (secondaryToPrimaryInterpPtr_.valid())
+    if (!secondaryToPrimaryInterpPtr_.valid())
     {
-        if (firstIter_)
-        {
-            check();
-            firstIter_ = false;
-        }
+        return;
 
-        const volScalarField& h = eEqn.psi();
+    }
 
-        tmp<volScalarField> tTmapped
+    if (firstIter_)
+    {
+        check();
+        firstIter_ = false;
+    }
+
+    const volScalarField& h = eqn.psi();
+
+    tmp<volScalarField> tTmapped
+    (
+        new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "Tmapped" + mesh_.name(),
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                mesh_.name() + "::Tmapped",
+                mesh_.time().timeName(),
                 mesh_,
-                dimensionedScalar("T", dimTemperature, 0.0)
-            )
-        );
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("T", dimTemperature, 0.0)
+        )
+    );
 
-        volScalarField& Tmapped = tTmapped();
+    volScalarField& Tmapped = tTmapped();
 
-        const fvMesh& secondaryMesh =
-            mesh_.time().lookupObject<fvMesh>(mapRegionName_);
+    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(mapRegionName_);
 
-        const volScalarField& Tsecondary =
-            secondaryMesh.lookupObject<volScalarField>("T");
+    const volScalarField& Tnbr = nbrMesh.lookupObject<volScalarField>("T");
 
+    secondaryToPrimaryInterpPtr_->interpolateInternalField
+    (
+        Tmapped,
+        Tnbr,
+        meshToMesh::MAP,
+        eqOp<scalar>()
+    );
+
+    if (!master_)
+    {
         secondaryToPrimaryInterpPtr_->interpolateInternalField
         (
-            Tmapped,
-            Tsecondary,
-            meshToMesh::MAP,
+            htc_,
+            secIrht_->calculateHtc(),
+            meshToMesh::CELL_VOLUME_WEIGHT,
             eqOp<scalar>()
         );
+    }
 
-        if (!master_)
-        {
-            secondaryToPrimaryInterpPtr_->interpolateInternalField
-            (
-                htc_,
-                secIrht_->calculateHtc(),
-                meshToMesh::CELL_VOLUME_WEIGHT,
-                eqOp<scalar>()
-            );
-        }
+    if (debug)
+    {
+        Info<< " Volumetric integral of htc : "
+            << fvc::domainIntegrate(htc_).value()
+            << endl;
 
-        if (debug)
-        {
-            Info<< " Volumetric integral of htc : "
-                << fvc::domainIntegrate(htc_).value()
-                << endl;
-        }
-
-        if (debug && mesh_.time().outputTime())
+        if (mesh_.time().outputTime())
         {
             Tmapped.write();
             htc_.write();
         }
+    }
 
+    if (semiImplicit_)
+    {
         if (h.dimensions() == dimEnergy/dimMass)
         {
-            const fluidThermo& primaryThermo =
+            const fluidThermo& thermo =
                 mesh_.lookupObject<fluidThermo>("thermophysicalProperties");
 
-            eEqn += htc_*Tmapped - fvm::Sp(htc_/primaryThermo.Cp(), h);
+            eqn += htc_*Tmapped - fvm::SuSp(htc_/thermo.Cp(), h);
 
             if (debug)
             {
-                Info<< " Energy exchange from region " << secondaryMesh.name()
-                    << " To " << mesh_.name() << " : "
-                    <<  fvc::domainIntegrate
-                        (
-                            htc_*(h/primaryThermo.Cp() - Tmapped)
-                        ).value()
+                const dimensionedScalar energy =
+                    fvc::domainIntegrate(htc_*(h/thermo.Cp() - Tmapped));
+
+                Info<< "Energy exchange from region " << nbrMesh.name()
+                    << " To " << mesh_.name() << " : " <<  energy.value()
                     << endl;
             }
         }
         else if (h.dimensions() == dimTemperature)
         {
-            eEqn += htc_*Tmapped - fvm::Sp(htc_, h);
-
-            if (debug)
-            {
-                Info<< " Enegy exchange from region " << secondaryMesh.name()
-                    << " To " << mesh_.name() << " : "
-                    <<  fvc::domainIntegrate(htc_*(h - Tmapped)).value()
-                    << endl;
-            }
+            eqn += htc_*Tmapped - fvm::SuSp(htc_, h);
         }
+    }
+    else
+    {
+        const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+        eqn += htc_*(Tmapped - T);
     }
 }
 
@@ -239,16 +245,15 @@ void Foam::fv::interRegionHeatTransferModel::writeData(Ostream& os) const
         << token::END_STATEMENT << nl;
     os.writeKeyword("secondarySourceName") << secondarySourceName_
         << token::END_STATEMENT << nl;
-
     os.writeKeyword("master") << master_ << token::END_STATEMENT << nl;
+    os.writeKeyword("semiImplicit") << semiImplicit_ << token::END_STATEMENT
+        << nl;
 
     if (dict_.found("note"))
     {
         os.writeKeyword("note") << string(dict_.lookup("note"))
             << token::END_STATEMENT << nl;
     }
-
-    dict_.write(os);
 }
 
 
