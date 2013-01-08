@@ -45,4 +45,4 @@ $(derivedConstraints)/fixedTemperatureConstraint/fixedTemperatureConstraint.C
 $(derivedConstraints)/temperatureLimitsConstraint/temperatureLimitsConstraint.C
 
 
-LIB = $(FOAM_LIBBIN)/libfieldSources
+LIB = $(FOAM_LIBBIN)/libfvOptions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,37 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::lookupProfile
+    Foam::bladeModel
 
 Description
-    Look-up based profile data - drag and lift coefficients are lineraly
-    interpolated based on the supplied angle of attack
-
-    Input in list format:
-
-        data
-        (
-            (AOA1 Cd1 Cl2)
-            (AOA2 Cd2 Cl2)
-            ...
-            (AOAN CdN CdN)
-        );
-
-    where:
-        AOA = angle of attack [deg] converted to [rad] internally
-        Cd  = drag coefficient
-        Cl  = lift coefficient
+    Blade model class
 
 SourceFiles
-    lookupProfile.C
+    bladeModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lookupProfile_H
-#define lookupProfile_H
+#ifndef bladeModel_H
+#define bladeModel_H
 
-#include "profileModel.H"
 #include "List.H"
+#include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,29 +44,39 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class lookupProfile Declaration
+                         Class bladeModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class lookupProfile
-:
-    public profileModel
+class bladeModel
 {
 
 protected:
 
     // Protected data
 
-        //- List of angle-of-attack values [deg] on input, converted to [rad]
-        List<scalar> AOA_;
+        //- Corresponding profile name per section
+        List<word> profileName_;
 
-        //- List of drag coefficient values
-        List<scalar> Cd_;
+        //- Corresponding profile ID per section
+        List<label> profileID_;
 
-        //- List of lift coefficient values
-        List<scalar> Cl_;
+        //- Radius [m]
+        List<scalar> radius_;
+
+        //- Twist [deg] on input, converted to [rad]
+        List<scalar> twist_;
+
+        //- Chord [m]
+        List<scalar> chord_;
+
+        //- File name (optional)
+        fileName fName_;
 
 
     // Protected Member Functions
+
+        //- Return ture if file name is set
+        bool readFromFile() const;
 
         //- Return the interpolation indices and gradient
         void interpolateWeights
@@ -97,19 +91,52 @@ protected:
 
 public:
 
-    //- Runtime type information
-    TypeName("lookup");
-
     //- Constructor
-    lookupProfile(const dictionary& dict, const word& modelName);
+    bladeModel(const dictionary& dict);
+
+
+    //- Destructor
+    virtual ~bladeModel();
 
 
     // Member functions
 
+        // Access
+
+            //- Return const access to the profile name list
+            const List<word>& profileName() const;
+
+            //- Return const access to the profile ID list
+            const List<label>& profileID() const;
+
+            //- Return const access to the radius list
+            const List<scalar>& radius() const;
+
+            //- Return const access to the twist list
+            const List<scalar>& twist() const;
+
+            //- Return const access to the chord list
+            const List<scalar>& chord() const;
+
+
+        // Edit
+
+            //- Return non-const access to the profile ID list
+            List<label>& profileID();
+
+
         // Evaluation
 
-            //- Return the Cd and Cl for a given angle-of-attack
-            virtual void Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const;
+            //- Return the twist and chord for a given radius
+            virtual void interpolate
+            (
+                const scalar radius,
+                scalar& twist,
+                scalar& chord,
+                label& i1,
+                label& i2,
+                scalar& invDr
+            ) const;
 };
 
 

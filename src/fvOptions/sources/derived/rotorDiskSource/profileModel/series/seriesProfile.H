@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,21 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::profileModelList
+    Foam::seriesProfile
 
 Description
-    Base class for profile models
+    Series-up based profile data - drag and lift coefficients computed as
+    sum of cosine series
+
+        Cd = sum_i(CdCoeff)*cos(i*AOA)
+        Cl = sum_i(ClCoeff)*sin(i*AOA)
+
+    where:
+        AOA = angle of attack [deg] converted to [rad] internally
+        Cd = drag coefficent
+        Cl = lift coefficent
+
+    Input in two (arbitrary length) lists:
+
+        CdCoeffs (coeff1 coeff2 ... coeffN);
+        ClCoeffs (coeff1 coeff2 ... coeffN);
 
 SourceFiles
-    profileModelList.C
+    seriesProfile.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef profileModelList_H
-#define profileModelList_H
+#ifndef seriesProfile_H
+#define seriesProfile_H
 
-#include "PtrList.H"
 #include "profileModel.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,39 +58,59 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class profileModelList Declaration
+                        Class seriesProfile Declaration
 \*---------------------------------------------------------------------------*/
 
-class profileModelList
+class seriesProfile
 :
-    public PtrList<profileModel>
+    public profileModel
 {
 
 protected:
 
     // Protected data
 
-        //- Dictionary
-        const dictionary dict_;
+        //- List of drag coefficient values
+        List<scalar> CdCoeffs_;
+
+        //- List of lift coefficient values
+        List<scalar> ClCoeffs_;
+
+
+    // Protected Member Functions
+
+        // Evaluate
+
+            //- Drag
+            scalar evaluateDrag
+            (
+                const scalar& xIn,
+                const List<scalar>& values
+            ) const;
+
+            //- Lift
+            scalar evaluateLift
+            (
+                const scalar& xIn,
+                const List<scalar>& values
+            ) const;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("series");
+
     //- Constructor
-    profileModelList(const dictionary& dict, const bool readFields = true);
-
-    //- Destructor
-    ~profileModelList();
+    seriesProfile(const dictionary& dict, const word& modelName);
 
 
-    // Member Functions
+    // Member functions
 
-        //- Set blade->profile addressing
-        void connectBlades
-        (
-            const List<word>& names,
-            List<label>& addr
-        ) const;
+        // Evaluation
+
+            //- Return the Cd and Cl for a given angle-of-attack
+            virtual void Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const;
 };
 
 

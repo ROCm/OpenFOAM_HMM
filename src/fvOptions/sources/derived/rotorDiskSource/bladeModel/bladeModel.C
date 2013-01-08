@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "lookupProfile.H"
-#include "addToRunTimeSelectionTable.H"
-#include "vector.H"
+#include "bladeModel.H"
 #include "unitConversion.H"
+#include "Tuple2.H"
+#include "vector.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+bool Foam::bladeModel::readFromFile() const
 {
-    defineTypeNameAndDebug(lookupProfile, 0);
-    addToRunTimeSelectionTable(profileModel, lookupProfile, dictionary);
+    return fName_ != fileName::null;
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-void Foam::lookupProfile::interpolateWeights
+void Foam::bladeModel::interpolateWeights
 (
     const scalar& xIn,
     const List<scalar>& values,
@@ -83,18 +81,16 @@ void Foam::lookupProfile::interpolateWeights
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::lookupProfile::lookupProfile
-(
-    const dictionary& dict,
-    const word& modelName
-)
+Foam::bladeModel::bladeModel(const dictionary& dict)
 :
-    profileModel(dict, modelName),
-    AOA_(),
-    Cd_(),
-    Cl_()
+    profileName_(),
+    profileID_(),
+    radius_(),
+    twist_(),
+    chord_(),
+    fName_(fileName::null)
 {
-    List<vector> data;
+    List<Tuple2<word, vector> > data;
     if (readFromFile())
     {
         IFstream is(fName_);
@@ -105,44 +101,89 @@ Foam::lookupProfile::lookupProfile
         dict.lookup("data") >> data;
     }
 
+
     if (data.size() > 0)
     {
-        AOA_.setSize(data.size());
-        Cd_.setSize(data.size());
-        Cl_.setSize(data.size());
+        profileName_.setSize(data.size());
+        profileID_.setSize(data.size());
+        radius_.setSize(data.size());
+        twist_.setSize(data.size());
+        chord_.setSize(data.size());
 
         forAll(data, i)
         {
-            AOA_[i] = degToRad(data[i][0]);
-            Cd_[i] = data[i][1];
-            Cl_[i] = data[i][2];
+            profileName_[i] = data[i].first();
+            profileID_[i] = -1;
+            radius_[i] = data[i].second()[0];
+            twist_[i] = degToRad(data[i].second()[1]);
+            chord_[i] = data[i].second()[2];
         }
     }
     else
     {
-        FatalErrorIn
-        (
-            "Foam::lookupProfile::lookupProfile"
-            "("
-                "const dictionary&, "
-                "const word&"
-            ")"
-        )   << "No profile data specified" << exit(FatalError);
+        FatalErrorIn("Foam::bladeModel::bladeModel(const dictionary&)")
+            << "No blade data specified" << exit(FatalError);
     }
 }
+
+// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+Foam::bladeModel::~bladeModel()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::lookupProfile::Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const
+const Foam::List<Foam::word>& Foam::bladeModel::profileName() const
 {
-    label i1 = -1;
-    label i2 = -1;
-    scalar invAlpha = -1.0;
-    interpolateWeights(alpha, AOA_, i1, i2, invAlpha);
+    return profileName_;
+}
 
-    Cd = invAlpha*(Cd_[i2] - Cd_[i1]) + Cd_[i1];
-    Cl = invAlpha*(Cl_[i2] - Cl_[i1]) + Cl_[i1];
+
+const Foam::List<Foam::label>& Foam::bladeModel::profileID() const
+{
+    return profileID_;
+}
+
+
+const Foam::List<Foam::scalar>& Foam::bladeModel::radius() const
+{
+    return radius_;
+}
+
+
+const Foam::List<Foam::scalar>& Foam::bladeModel::twist() const
+{
+    return twist_;
+}
+
+
+const Foam::List<Foam::scalar>& Foam::bladeModel::chord() const
+{
+    return chord_;
+}
+
+
+Foam::List<Foam::label>& Foam::bladeModel::profileID()
+{
+    return profileID_;
+}
+
+
+void Foam::bladeModel::interpolate
+(
+    const scalar radius,
+    scalar& twist,
+    scalar& chord,
+    label& i1,
+    label& i2,
+    scalar& invDr
+) const
+{
+    interpolateWeights(radius, radius_, i1, i2, invDr);
+
+    twist = invDr*(twist_[i2] - twist_[i1]) + twist_[i1];
+    chord = invDr*(chord_[i2] - chord_[i1]) + chord_[i1];
 }
 
 
