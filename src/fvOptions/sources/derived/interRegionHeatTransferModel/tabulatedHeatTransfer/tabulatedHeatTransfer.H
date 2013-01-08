@@ -60,8 +60,17 @@ private:
         //- 2D look up table
         autoPtr<interpolation2DTable<scalar> > hTable_;
 
-        //- Area of heat exchange
-        autoPtr<volScalarField> area_;
+        //- Area per unit volume of heat exchanger
+        autoPtr<volScalarField> AoV_;
+
+        //- Heat transfer coefficient table
+        const interpolation2DTable<scalar>& hTable();
+
+        //- Field of area divided by volume
+        const volScalarField& AoV();
+
+        //- Start time name
+        const word startTimeName_;
 
 
 public:
@@ -99,7 +108,6 @@ public:
 
             //- Read dictionary
             virtual bool read(const dictionary& dict) ;
-
 };
 
 
