@@ -54,7 +54,7 @@ if (ign.ignited())
       - fvm::Sp(fvc::div(phiSt), b)
       - fvm::laplacian(turbulence->alphaEff(), b)
      ==
-        sources(rho, b)
+        fvOptions(rho, b)
     );
 
 
@@ -67,11 +67,11 @@ if (ign.ignited())
     // ~~~~~~~~~~~
     bEqn.relax();
 
-    sources.constrain(bEqn);
+    fvOptions.constrain(bEqn);
 
     bEqn.solve();
 
-    sources.correct(b);
+    fvOptions.correct(b);
 
     Info<< "min(b) = " << min(b).value() << endl;
 
@@ -160,16 +160,16 @@ if (ign.ignited())
           ==
           - fvm::SuSp(-rho*Rc*Su0/Su, Su)
           - fvm::SuSp(rho*(sigmas + Rc), Su)
-          + sources(rho, Su)
+          + fvOptions(rho, Su)
         );
 
         SuEqn.relax();
 
-        sources.constrain(SuEqn);
+        fvOptions.constrain(SuEqn);
 
         SuEqn.solve();
 
-        sources.correct(Su);
+        fvOptions.correct(Su);
 
         // Limit the maximum Su
         // ~~~~~~~~~~~~~~~~~~~~
@@ -247,16 +247,16 @@ if (ign.ignited())
                 ),
                 Xi
             )
-          + sources(rho, Xi)
+          + fvOptions(rho, Xi)
         );
 
         XiEqn.relax();
 
-        sources.constrain(XiEqn);
+        fvOptions.constrain(XiEqn);
 
         XiEqn.solve();
 
-        sources.correct(Xi);
+        fvOptions.correct(Xi);
 
         // Correct boundedness of Xi
         // ~~~~~~~~~~~~~~~~~~~~~~~~~

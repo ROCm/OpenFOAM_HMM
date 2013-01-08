@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,12 @@ int main(int argc, char *argv[])
         "Collapse small and sliver faces as well as small edges"
     );
 
+    argList::addBoolOption
+    (
+        "collapseIndirectPatchFaces",
+        "Collapse faces that are in the face zone indirectPatchFaces"
+    );
+
 #   include "addOverwriteOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -84,6 +90,8 @@ int main(int argc, char *argv[])
     const bool overwrite = args.optionFound("overwrite");
 
     const bool collapseFaces = args.optionFound("collapseFaces");
+    const bool collapseIndirectPatchFaces =
+        args.optionFound("collapseIndirectPatchFaces");
 
     forAll(timeDirs, timeI)
     {
@@ -103,6 +111,18 @@ int main(int argc, char *argv[])
             polyTopoChange meshMod(newMesh);
 
             meshMod.changeMesh(mesh, false);
+        }
+
+        if (collapseIndirectPatchFaces)
+        {
+            // Filter faces. Pass in the number of bad faces that are present
+            // from the previous edge filtering to use as a stopping criterion.
+            meshFilter.filterIndirectPatchFaces();
+            {
+                polyTopoChange meshMod(newMesh);
+
+                meshMod.changeMesh(mesh, false);
+            }
         }
 
         if (collapseFaces)

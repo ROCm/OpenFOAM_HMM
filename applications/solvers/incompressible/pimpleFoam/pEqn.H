@@ -15,7 +15,7 @@ surfaceScalarField phiHbyA
 
 adjustPhi(phiHbyA, U, p);
 
-sources.relativeFlux(phiHbyA);
+fvOptions.relativeFlux(phiHbyA);
 
 // Non-orthogonal pressure corrector loop
 while (pimple.correctNonOrthogonal())
@@ -43,4 +43,4 @@ p.relax();
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);

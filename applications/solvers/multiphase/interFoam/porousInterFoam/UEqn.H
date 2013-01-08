@@ -17,12 +17,12 @@
       - (fvc::grad(U) & fvc::grad(muEff))
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
      ==
-        sources(rho, U)
+        fvOptions(rho, U)
     );
 
     UEqn.relax();
     pZones.addResistance(UEqn);
-    sources.constrain(UEqn);
+    fvOptions.constrain(UEqn);
 
     if (pimple.momentumPredictor())
     {

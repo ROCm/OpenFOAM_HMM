@@ -5,7 +5,7 @@
         fvm::div(phi, U)
       + turbulence->divDevReff(U)
       ==
-        sources(U)
+        fvOptions(U)
     );
 
     mrfZones.addCoriolis(UEqn());
@@ -26,7 +26,7 @@
         trTU = inv(tTU());
         trTU().rename("rAU");
 
-        sources.constrain(UEqn());
+        fvOptions.constrain(UEqn());
 
         volVectorField gradp(fvc::grad(p));
 
@@ -36,17 +36,17 @@
         }
         U.correctBoundaryConditions();
 
-        sources.correct(U);
+        fvOptions.correct(U);
     }
     else
     {
         pZones.addResistance(UEqn());
 
-        sources.constrain(UEqn());
+        fvOptions.constrain(UEqn());
 
         solve(UEqn() == -fvc::grad(p));
 
-        sources.correct(U);
+        fvOptions.correct(U);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

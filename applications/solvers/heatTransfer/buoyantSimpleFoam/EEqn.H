@@ -12,16 +12,16 @@
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
         radiation->Sh(thermo)
-      + sources(rho, he)
+      + fvOptions(rho, he)
     );
 
     EEqn.relax();
 
-    sources.constrain(EEqn);
+    fvOptions.constrain(EEqn);
 
     EEqn.solve();
 
-    sources.correct(he);
+    fvOptions.correct(he);
 
     thermo.correct();
     radiation->correct();

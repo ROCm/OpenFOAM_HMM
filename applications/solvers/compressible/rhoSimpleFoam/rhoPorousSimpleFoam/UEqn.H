@@ -24,27 +24,27 @@
         trTU = inv(tTU());
         trTU().rename("rAU");
 
-        sources.constrain(UEqn());
+        fvOptions.constrain(UEqn());
 
         volVectorField gradp(fvc::grad(p));
 
         for (int UCorr=0; UCorr<nUCorr; UCorr++)
         {
-            U = trTU() & ((UEqn() == sources(rho, U))().H() - gradp);
+            U = trTU() & ((UEqn() == fvOptions(rho, U))().H() - gradp);
         }
         U.correctBoundaryConditions();
 
-        sources.correct(U);
+        fvOptions.correct(U);
     }
     else
     {
         pZones.addResistance(UEqn());
 
-        sources.constrain(UEqn());
+        fvOptions.constrain(UEqn());
 
-        solve(UEqn() == -fvc::grad(p) + sources(rho, U));
+        solve(UEqn() == -fvc::grad(p) + fvOptions(rho, U));
 
-        sources.correct(U);
+        fvOptions.correct(U);
 
         trAU = 1.0/UEqn().A();
         trAU().rename("rAU");

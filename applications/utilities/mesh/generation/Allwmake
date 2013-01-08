@@ -9,9 +9,5 @@ extrude2DMesh/Allwmake
 
 wmake snappyHexMesh
 
-if [ -d "$CGAL_ARCH_PATH" ]
-then
-    cvMesh/Allwmake
-fi
 
 # ----------------------------------------------------------------- end-of-file

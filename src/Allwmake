@@ -74,7 +74,7 @@ fvAgglomerationMethods/Allwmake $*
 wmake $makeType fvMotionSolver
 wmake $makeType engine
 
-wmake $makeType fieldSources
+wmake $makeType fvOptions
 
 wmake $makeType regionCoupled
 

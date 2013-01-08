@@ -18,7 +18,7 @@ surfaceScalarField phiHbyA
   + phig
 );
 
-sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
 while (pimple.correctNonOrthogonal())
 {
@@ -31,10 +31,10 @@ while (pimple.correctNonOrthogonal())
      ==
         parcels.Srho()
       + surfaceFilm.Srho()
-      + sources(psi, p_rgh, rho.name())
+      + fvOptions(psi, p_rgh, rho.name())
     );
 
-    sources.constrain(p_rghEqn);
+    fvOptions.constrain(p_rghEqn);
 
     p_rghEqn.solve(mesh.solver(p_rgh.select(pimple.finalInnerIter())));
 
@@ -43,7 +43,7 @@ while (pimple.correctNonOrthogonal())
         phi = phiHbyA + p_rghEqn.flux();
         U = HbyA + rAU*fvc::reconstruct((p_rghEqn.flux() + phig)/rhorAUf);
         U.correctBoundaryConditions();
-        sources.correct(U);
+        fvOptions.correct(U);
     }
 }
 

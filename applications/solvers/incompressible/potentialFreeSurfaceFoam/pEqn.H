@@ -2,7 +2,7 @@ volScalarField rAU(1.0/UEqn().A());
 surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == sources(U))().H();
+HbyA = rAU*(UEqn() == fvOptions(U))().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -46,4 +46,4 @@ p = p_gh + (g & mesh.C());
 
 U = HbyA - rAU*fvc::grad(p_gh);
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);

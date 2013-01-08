@@ -2,24 +2,16 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          collapseDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      collapseDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 collapseEdgesCoeffs
@@ -78,7 +70,11 @@ meshQualityCoeffs
     meshQualityCoeffDict    meshQualityDict;
 
     // Maximum number of outer iterations is mesh quality checking is enabled
-    maximumIterations       30;
+    maximumIterations       10;
+
+    // Maximum number of iterations deletion of a point can cause a bad face
+    // to be constructed before it is forced to not be deleted
+    maxPointErrorCount      5;
 }
 
 

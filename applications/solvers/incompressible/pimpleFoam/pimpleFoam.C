@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
     Sub-models include:
     - turbulence modelling, i.e. laminar, RAS or LES
-    - run-time selectable sources, e.g. MRF, explicit porosity
+    - run-time selectable fvOptions, e.g. MRF, explicit porosity
 
 \*---------------------------------------------------------------------------*/
 
@@ -38,7 +38,7 @@ Description
 #include "singlePhaseTransportModel.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "IOporosityModelList.H"
 #include "IOMRFZoneList.H"
 
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
-    #include "createSources.H"
+    #include "createFvOptions.H"
     #include "initContinuityErrs.H"
 
     pimpleControl pimple(mesh);

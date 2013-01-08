@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,7 +151,7 @@ Foam::scalarTransport::scalarTransport
     resetOnStartUp_(false),
     nCorr_(0),
     autoSchemes_(false),
-    sources_(mesh_),
+    fvOptions_(mesh_),
     T_
     (
         IOobject
@@ -205,7 +205,7 @@ void Foam::scalarTransport::read(const dictionary& dict)
 
         dict.lookup("autoSchemes") >> autoSchemes_;
 
-        sources_.reset(dict.subDict("sources"));
+        fvOptions_.reset(dict.subDict("fvOptions"));
     }
 }
 
@@ -246,12 +246,12 @@ void Foam::scalarTransport::execute()
           + fvm::div(phi, T_, divScheme)
           - fvm::laplacian(DT, T_, laplacianScheme)
          ==
-            sources_(T_)
+            fvOptions_(T_)
         );
 
         TEqn.relax(relaxCoeff);
 
-        sources_.constrain(TEqn);
+        fvOptions_.constrain(TEqn);
 
         TEqn.solve(mesh_.solverDict(UName_));
     }

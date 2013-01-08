@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1425,14 +1425,18 @@ int main(int argc, char *argv[])
             const scalar searchDistance =
                 readScalar(surfaceDict.lookup("maxFeatureProximity"));
 
-            const scalar radiusSqr = sqr(searchDistance);
-
             scalarField featureProximity(surf.size(), searchDistance);
 
             forAll(surf, fI)
             {
                 const triPointRef& tri = surf[fI].tri(surf.points());
                 const point& triCentre = tri.circumCentre();
+
+                const scalar radiusSqr = min
+                (
+                    sqr(4*tri.circumRadius()),
+                    sqr(searchDistance)
+                );
 
                 List<pointIndexHit> hitList;
 
@@ -1492,6 +1496,10 @@ int main(int argc, char *argv[])
 
         Info<< endl;
     }
+
+    Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
 
     Info<< "End\n" << endl;
 

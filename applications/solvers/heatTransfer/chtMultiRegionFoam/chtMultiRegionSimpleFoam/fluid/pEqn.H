@@ -23,7 +23,7 @@
 
     phiHbyA += phig;
 
-    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     dimensionedScalar compressibility = fvc::domainIntegrate(psi);
     bool compressible = (compressibility.value() > SMALL);
@@ -56,7 +56,7 @@
             // calculated from the relaxed pressure
             U = HbyA + rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rhorAUf);
             U.correctBoundaryConditions();
-            sources.correct(U);
+            fvOptions.correct(U);
         }
     }
 
