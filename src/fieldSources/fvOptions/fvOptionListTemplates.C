@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::basicSourceList::correct
+void Foam::fv::optionList::correct
 (
     GeometricField<Type, fvPatchField, volMesh>& fld
 )
@@ -35,7 +35,7 @@ void Foam::basicSourceList::correct
 
     forAll(*this, i)
     {
-        basicSource& source = this->operator[](i);
+        option& source = this->operator[](i);
 
         label fieldI = source.applyToField(fieldName);
 
@@ -59,7 +59,7 @@ void Foam::basicSourceList::correct
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+Foam::tmp<Foam::fvMatrix<Type> > Foam::fv::optionList::operator()
 (
     GeometricField<Type, fvPatchField, volMesh>& fld
 )
@@ -69,7 +69,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+Foam::tmp<Foam::fvMatrix<Type> > Foam::fv::optionList::operator()
 (
     GeometricField<Type, fvPatchField, volMesh>& fld,
     const word& fieldName
@@ -86,7 +86,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
     forAll(*this, i)
     {
-        basicSource& source = this->operator[](i);
+        option& source = this->operator[](i);
 
         label fieldI = source.applyToField(fieldName);
 
@@ -112,7 +112,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
 
 template<class Type, class RhoType>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+Foam::tmp<Foam::fvMatrix<Type> > Foam::fv::optionList::operator()
 (
     const RhoType& rho,
     GeometricField<Type, fvPatchField, volMesh>& fld
@@ -123,7 +123,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
 
 template<class Type, class RhoType>
-Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
+Foam::tmp<Foam::fvMatrix<Type> > Foam::fv::optionList::operator()
 (
     const RhoType& rho,
     GeometricField<Type, fvPatchField, volMesh>& fld,
@@ -141,7 +141,7 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
     forAll(*this, i)
     {
-        basicSource& source = this->operator[](i);
+        option& source = this->operator[](i);
 
         label fieldI = source.applyToField(fieldName);
 
@@ -167,14 +167,14 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::basicSourceList::operator()
 
 
 template<class Type>
-void Foam::basicSourceList::constrain(fvMatrix<Type>& eqn)
+void Foam::fv::optionList::constrain(fvMatrix<Type>& eqn)
 {
     constrain(eqn, eqn.psi().name());
 }
 
 
 template<class Type>
-void Foam::basicSourceList::constrain
+void Foam::fv::optionList::constrain
 (
     fvMatrix<Type>& eqn,
     const word& fieldName
@@ -184,7 +184,7 @@ void Foam::basicSourceList::constrain
 
     forAll(*this, i)
     {
-        basicSource& source = this->operator[](i);
+        option& source = this->operator[](i);
 
         label fieldI = source.applyToField(fieldName);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,47 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicSource.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::word& Foam::basicSource::name() const
+inline const Foam::word& Foam::fv::option::name() const
 {
     return name_;
 }
 
 
-inline const Foam::fvMesh& Foam::basicSource::mesh() const
+inline const Foam::fvMesh& Foam::fv::option::mesh() const
 {
     return mesh_;
 }
 
 
-inline const Foam::dictionary& Foam::basicSource::coeffs() const
+inline const Foam::dictionary& Foam::fv::option::coeffs() const
 {
     return coeffs_;
 }
 
 
-inline bool Foam::basicSource::active() const
+inline bool Foam::fv::option::active() const
 {
     return active_;
 }
 
 
-inline Foam::scalar Foam::basicSource::timeStart() const
+inline Foam::scalar Foam::fv::option::timeStart() const
 {
     return timeStart_;
 }
 
 
-inline Foam::scalar Foam::basicSource::duration() const
+inline Foam::scalar Foam::fv::option::duration() const
 {
     return duration_;
 }
 
 
-inline bool Foam::basicSource::inTimeLimits(const scalar time) const
+inline bool Foam::fv::option::inTimeLimits(const scalar time) const
 {
     return
     (
@@ -77,68 +77,69 @@ inline bool Foam::basicSource::inTimeLimits(const scalar time) const
 }
 
 
-inline const Foam::basicSource::selectionModeType&
-Foam::basicSource::selectionMode() const
+inline const Foam::fv::option::selectionModeType&
+Foam::fv::option::selectionMode() const
 {
     return selectionMode_;
 }
 
 
-inline const Foam::word& Foam::basicSource::cellSetName() const
+inline const Foam::word& Foam::fv::option::cellSetName() const
 {
     return cellSetName_;
 }
 
 
-inline Foam::scalar Foam::basicSource::V() const
+inline Foam::scalar Foam::fv::option::V() const
 {
     return V_;
 }
 
 
-inline const Foam::labelList& Foam::basicSource::cells() const
+inline const Foam::labelList& Foam::fv::option::cells() const
 {
     return cells_;
 }
 
 
-inline void Foam::basicSource::setApplied(const label fieldI)
+inline void Foam::fv::option::setApplied(const label fieldI)
 {
     applied_[fieldI] = true;
 }
 
 
-inline bool& Foam::basicSource::active()
+inline bool& Foam::fv::option::active()
 {
     return active_;
 }
 
 
-inline Foam::scalar& Foam::basicSource::timeStart()
+inline Foam::scalar& Foam::fv::option::timeStart()
 {
     return timeStart_;
 }
 
 
-inline Foam::scalar& Foam::basicSource::duration()
+inline Foam::scalar& Foam::fv::option::duration()
 {
     return duration_;
 }
 
 
-inline const Foam::word Foam::basicSource::secondarySourceName() const
+inline const Foam::word Foam::fv::option::secondarySourceName() const
 {
     return secondarySourceName_;
 }
 
 
-inline const Foam::autoPtr<Foam::meshToMesh> Foam::basicSource::
-secondaryToPrimaryInterpPtr() const
+inline const Foam::autoPtr<Foam::meshToMesh>
+Foam::fv::option::secondaryToPrimaryInterpPtr() const
 {
     return secondaryToPrimaryInterpPtr_;
 }
 
-inline const Foam::word Foam::basicSource::mapRegionName() const
+
+inline const Foam::word Foam::fv::option::mapRegionName() const
 {
     return mapRegionName_;
 }

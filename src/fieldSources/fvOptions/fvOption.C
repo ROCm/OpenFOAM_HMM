@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "volFields.H"
@@ -33,12 +33,15 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(basicSource, 0);
-    defineRunTimeSelectionTable(basicSource, dictionary);
+    namespace fv
+    {
+        defineTypeNameAndDebug(option, 0);
+        defineRunTimeSelectionTable(option, dictionary);
+    }
 
     template<> const char* NamedEnum
     <
-        basicSource::selectionModeType,
+        fv::option::selectionModeType,
         5
         >::names[] =
     {
@@ -49,20 +52,20 @@ namespace Foam
         "all"
     };
 
-    const NamedEnum<basicSource::selectionModeType, 5>
-        basicSource::selectionModeTypeNames_;
+    const NamedEnum<fv::option::selectionModeType, 5>
+        fv::option::selectionModeTypeNames_;
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::basicSource::alwaysApply() const
+bool Foam::fv::option::alwaysApply() const
 {
     return false;
 }
 
 
-void Foam::basicSource::setSelection(const dictionary& dict)
+void Foam::fv::option::setSelection(const dictionary& dict)
 {
     switch (selectionMode_)
     {
@@ -94,10 +97,8 @@ void Foam::basicSource::setSelection(const dictionary& dict)
         }
         default:
         {
-            FatalErrorIn
-            (
-                "basicSource::setSelection(const dictionary&)"
-            )   << "Unknown selectionMode "
+            FatalErrorIn("option::setSelection(const dictionary&)")
+                << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
                 << ". Valid selectionMode types are" << selectionModeTypeNames_
                 << exit(FatalError);
@@ -106,7 +107,7 @@ void Foam::basicSource::setSelection(const dictionary& dict)
 }
 
 
-void Foam::basicSource::setCellSet()
+void Foam::fv::option::setCellSet()
 {
     switch (selectionMode_)
     {
@@ -127,7 +128,7 @@ void Foam::basicSource::setCellSet()
                 label globalCellI = returnReduce(cellI, maxOp<label>());
                 if (globalCellI < 0)
                 {
-                    WarningIn("basicSource::setCellIds()")
+                    WarningIn("option::setCellIds()")
                         << "Unable to find owner cell for point " << points_[i]
                         << endl;
 
@@ -156,7 +157,7 @@ void Foam::basicSource::setCellSet()
             label zoneID = mesh_.cellZones().findZoneID(cellSetName_);
             if (zoneID == -1)
             {
-                FatalErrorIn("basicSource::setCellIds()")
+                FatalErrorIn("option::setCellIds()")
                     << "Cannot find cellZone " << cellSetName_ << endl
                     << "Valid cellZones are " << mesh_.cellZones().names()
                     << exit(FatalError);
@@ -195,10 +196,8 @@ void Foam::basicSource::setCellSet()
                 }
                 else
                 {
-                    FatalErrorIn
-                    (
-                        "Foam::basicSource::setCellSet()"
-                    )   << "regions dont overlap "
+                    FatalErrorIn("option::setCellSet()")
+                        << "regions dont overlap "
                         << secondaryMesh.name()
                         << " in region " << mesh_.name()
                         << nl
@@ -216,7 +215,7 @@ void Foam::basicSource::setCellSet()
         }
         default:
         {
-            FatalErrorIn("basicSource::setCellIds()")
+            FatalErrorIn("option::setCellIds()")
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
                 << ". Valid selectionMode types are" << selectionModeTypeNames_
@@ -243,7 +242,7 @@ void Foam::basicSource::setCellSet()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicSource::basicSource
+Foam::fv::option::option
 (
     const word& name,
     const word& modelType,
@@ -282,7 +281,7 @@ Foam::basicSource::basicSource
     }
     else
     {
-        Info<< indent<< "-applying source for all time" << endl;
+        Info<< indent<< "- applying source for all time" << endl;
     }
 
     setSelection(dict_);
@@ -295,7 +294,7 @@ Foam::basicSource::basicSource
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
+Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 (
     const word& name,
     const dictionary& coeffs,
@@ -313,8 +312,7 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
     {
         FatalErrorIn
         (
-            "basicSource::New"
-            "(const name&, const dictionary&, const fvMesh&)"
+            "option::New(const name&, const dictionary&, const fvMesh&)"
         )   << "Unknown Model type " << modelType
             << nl << nl
             << "Valid model types are:" << nl
@@ -322,11 +320,11 @@ Foam::autoPtr<Foam::basicSource> Foam::basicSource::New
             << exit(FatalError);
     }
 
-    return autoPtr<basicSource>(cstrIter()(name, modelType, coeffs, mesh));
+    return autoPtr<option>(cstrIter()(name, modelType, coeffs, mesh));
 }
 
 
-Foam::basicSource::~basicSource()
+Foam::fv::option::~option()
 {
     if (!secondaryToPrimaryInterpPtr_.empty())
     {
@@ -337,7 +335,7 @@ Foam::basicSource::~basicSource()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::basicSource::isActive()
+bool Foam::fv::option::isActive()
 {
     if (active_ && inTimeLimits(mesh_.time().value()))
     {
@@ -355,7 +353,7 @@ bool Foam::basicSource::isActive()
 }
 
 
-Foam::label Foam::basicSource::applyToField(const word& fieldName) const
+Foam::label Foam::fv::option::applyToField(const word& fieldName) const
 {
     if (alwaysApply())
     {
@@ -374,13 +372,13 @@ Foam::label Foam::basicSource::applyToField(const word& fieldName) const
 }
 
 
-void Foam::basicSource::checkApplied() const
+void Foam::fv::option::checkApplied() const
 {
     forAll(applied_, i)
     {
         if (!applied_[i])
         {
-            WarningIn("void Foam::basicSource::checkApplied() const")
+            WarningIn("void option::checkApplied() const")
                 << "Source " << name_ << " defined for field "
                 << fieldNames_[i] << " but never used" << endl;
         }
@@ -388,49 +386,49 @@ void Foam::basicSource::checkApplied() const
 }
 
 
-void Foam::basicSource::correct(volScalarField& fld)
+void Foam::fv::option::correct(volScalarField& fld)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::correct(volVectorField& fld)
+void Foam::fv::option::correct(volVectorField& fld)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::correct(volSphericalTensorField& fld)
+void Foam::fv::option::correct(volSphericalTensorField& fld)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::correct(volSymmTensorField& fld)
+void Foam::fv::option::correct(volSymmTensorField& fld)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::correct(volTensorField& fld)
+void Foam::fv::option::correct(volTensorField& fld)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::addSup(fvMatrix<scalar>& eqn, const label fieldI)
+void Foam::fv::option::addSup(fvMatrix<scalar>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::addSup(fvMatrix<vector>& eqn, const label fieldI)
+void Foam::fv::option::addSup(fvMatrix<vector>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::addSup
+void Foam::fv::option::addSup
 (
     fvMatrix<sphericalTensor>& eqn,
     const label fieldI
@@ -440,31 +438,31 @@ void Foam::basicSource::addSup
 }
 
 
-void Foam::basicSource::addSup(fvMatrix<symmTensor>& eqn, const label fieldI)
+void Foam::fv::option::addSup(fvMatrix<symmTensor>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::addSup(fvMatrix<tensor>& eqn, const label fieldI)
+void Foam::fv::option::addSup(fvMatrix<tensor>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::setValue(fvMatrix<scalar>& eqn, const label fieldI)
+void Foam::fv::option::setValue(fvMatrix<scalar>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::setValue(fvMatrix<vector>& eqn, const label fieldI)
+void Foam::fv::option::setValue(fvMatrix<vector>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::setValue
+void Foam::fv::option::setValue
 (
     fvMatrix<sphericalTensor>& eqn,
     const label fieldI
@@ -474,7 +472,7 @@ void Foam::basicSource::setValue
 }
 
 
-void Foam::basicSource::setValue
+void Foam::fv::option::setValue
 (
     fvMatrix<symmTensor>& eqn,
     const label fieldI
@@ -484,19 +482,19 @@ void Foam::basicSource::setValue
 }
 
 
-void Foam::basicSource::setValue(fvMatrix<tensor>& eqn, const label fieldI)
+void Foam::fv::option::setValue(fvMatrix<tensor>& eqn, const label fieldI)
 {
     // do nothing
 }
 
 
-void Foam::basicSource::relativeFlux(surfaceScalarField& phi) const
+void Foam::fv::option::relativeFlux(surfaceScalarField& phi) const
 {
     // do nothing
 }
 
 
-void Foam::basicSource::relativeFlux
+void Foam::fv::option::relativeFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -506,13 +504,13 @@ void Foam::basicSource::relativeFlux
 }
 
 
-void Foam::basicSource::absoluteFlux(surfaceScalarField& phi) const
+void Foam::fv::option::absoluteFlux(surfaceScalarField& phi) const
 {
     // do nothing
 }
 
 
-void Foam::basicSource::absoluteFlux
+void Foam::fv::option::absoluteFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi

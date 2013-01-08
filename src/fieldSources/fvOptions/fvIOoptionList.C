@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "fvMesh.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::IOobject Foam::IObasicSourceList::createIOobject
+Foam::IOobject Foam::fv::IOoptionList::createIOobject
 (
     const fvMesh& mesh
 ) const
 {
     IOobject io
     (
-        "sourcesProperties",
-        mesh.time().constant(),
+        "fvOptions",
+        mesh.time().system(),
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE
@@ -62,21 +62,21 @@ Foam::IOobject Foam::IObasicSourceList::createIOobject
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::IObasicSourceList::IObasicSourceList
+Foam::fv::IOoptionList::IOoptionList
 (
     const fvMesh& mesh
 )
 :
     IOdictionary(createIOobject(mesh)),
-    basicSourceList(mesh, *this)
+    optionList(mesh, *this)
 {}
 
 
-bool Foam::IObasicSourceList::read()
+bool Foam::fv::IOoptionList::read()
 {
     if (regIOobject::read())
     {
-        basicSourceList::read(*this);
+        optionList::read(*this);
         return true;
     }
     else
@@ -87,4 +87,3 @@ bool Foam::IObasicSourceList::read()
 
 
 // ************************************************************************* //
-

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicSourceList.H"
+#include "fvOptionList.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "Time.H"
@@ -32,19 +32,22 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(basicSourceList, 0);
+namespace fv
+{
+    defineTypeNameAndDebug(optionList, 0);
+}
 }
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::basicSourceList::checkApplied() const
+void Foam::fv::optionList::checkApplied() const
 {
     if (mesh_.time().timeIndex() == checkTimeIndex_)
     {
         forAll(*this, i)
         {
-            const basicSource& bs = this->operator[](i);
+            const option& bs = this->operator[](i);
             bs.checkApplied();
         }
     }
@@ -53,13 +56,9 @@ void Foam::basicSourceList::checkApplied() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicSourceList::basicSourceList
-(
-    const fvMesh& mesh,
-    const dictionary& dict
-)
+Foam::fv::optionList::optionList(const fvMesh& mesh, const dictionary& dict)
 :
-    PtrList<basicSource>(),
+    PtrList<option>(),
     mesh_(mesh),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {
@@ -67,9 +66,9 @@ Foam::basicSourceList::basicSourceList
 }
 
 
-Foam::basicSourceList::basicSourceList(const fvMesh& mesh)
+Foam::fv::optionList::optionList(const fvMesh& mesh)
 :
-    PtrList<basicSource>(),
+    PtrList<option>(),
     mesh_(mesh),
     checkTimeIndex_(mesh_.time().startTimeIndex() + 2)
 {}
@@ -77,7 +76,7 @@ Foam::basicSourceList::basicSourceList(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicSourceList::reset(const dictionary& dict)
+void Foam::fv::optionList::reset(const dictionary& dict)
 {
     label count = 0;
     forAllConstIter(dictionary, dict, iter)
@@ -101,14 +100,14 @@ void Foam::basicSourceList::reset(const dictionary& dict)
             this->set
             (
                 i++,
-                basicSource::New(name, sourceDict, mesh_)
+                option::New(name, sourceDict, mesh_)
             );
         }
     }
 }
 
 
-void Foam::basicSourceList::relativeFlux(surfaceScalarField& phi) const
+void Foam::fv::optionList::relativeFlux(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
@@ -117,7 +116,7 @@ void Foam::basicSourceList::relativeFlux(surfaceScalarField& phi) const
 }
 
 
-void Foam::basicSourceList::relativeFlux
+void Foam::fv::optionList::relativeFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -130,7 +129,7 @@ void Foam::basicSourceList::relativeFlux
 }
 
 
-void Foam::basicSourceList::absoluteFlux(surfaceScalarField& phi) const
+void Foam::fv::optionList::absoluteFlux(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
@@ -139,7 +138,7 @@ void Foam::basicSourceList::absoluteFlux(surfaceScalarField& phi) const
 }
 
 
-void Foam::basicSourceList::absoluteFlux
+void Foam::fv::optionList::absoluteFlux
 (
     const surfaceScalarField& rho,
     surfaceScalarField& phi
@@ -152,14 +151,14 @@ void Foam::basicSourceList::absoluteFlux
 }
 
 
-bool Foam::basicSourceList::read(const dictionary& dict)
+bool Foam::fv::optionList::read(const dictionary& dict)
 {
     checkTimeIndex_ = mesh_.time().timeIndex() + 2;
 
     bool allOk = true;
     forAll(*this, i)
     {
-        basicSource& bs = this->operator[](i);
+        option& bs = this->operator[](i);
         bool ok = bs.read(dict.subDict(bs.name()));
         allOk = (allOk && ok);
     }
@@ -167,7 +166,7 @@ bool Foam::basicSourceList::read(const dictionary& dict)
 }
 
 
-bool Foam::basicSourceList::writeData(Ostream& os) const
+bool Foam::fv::optionList::writeData(Ostream& os) const
 {
     // Write list contents
     forAll(*this, i)
@@ -183,14 +182,17 @@ bool Foam::basicSourceList::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const basicSourceList& sources
-)
+namespace Foam
 {
-    sources.writeData(os);
-    return os;
+    Ostream& operator<<
+    (
+        Ostream& os,
+        const fv::optionList& options
+    )
+    {
+        options.writeData(os);
+        return os;
+    }
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,25 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeBasicSource_H
-#define makeBasicSource_H
+#ifndef makeFvOption_H
+#define makeFvOption_H
 
-#include "basicSource.H"
+#include "fvOption.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicSource(Source, Type)                                               \
+#define makeFvOption(Option, Type)                                            \
                                                                               \
     defineTemplateTypeNameAndDebugWithName                                    \
     (                                                                         \
-        Source<Type>,                                                         \
-        #Type#Source,                                                         \
+        Option<Type>,                                                         \
+        #Type#Option,                                                         \
         0                                                                     \
     );                                                                        \
                                                                               \
-    basicSource::adddictionaryConstructorToTable<Source<Type> >            \
-        add##Source##Type##dictionary##ConstructorTobasicSourceTable_
+    option::adddictionaryConstructorToTable<Option<Type> >                    \
+        add##Option##Type##dictionary##ConstructorTooptionTable_
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

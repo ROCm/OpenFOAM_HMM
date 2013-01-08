@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::IObasicSourceList
+    Foam::fv::IOoptionList
 
 Description
-    IObasicSourceList
+    IOoptionList
 
 SourceFiles
-    IObasicSourceList.C
+    IOoptionList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IObasicSourceList_H
-#define IObasicSourceList_H
+#ifndef IOoptionList_H
+#define IOoptionList_H
 
-#include "basicSourceList.H"
+#include "fvOptionList.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
 
@@ -43,15 +43,17 @@ SourceFiles
 
 namespace Foam
 {
+namespace fv
+{
 
 /*---------------------------------------------------------------------------*\
-                      Class IObasicSourceList Declaration
+                        Class IOoptionList Declaration
 \*---------------------------------------------------------------------------*/
 
-class IObasicSourceList
+class IOoptionList
 :
     public IOdictionary,
-    public basicSourceList
+    public optionList
 {
 private:
 
@@ -61,10 +63,10 @@ private:
         IOobject createIOobject(const fvMesh& mesh) const;
 
         //- Disallow default bitwise copy construct
-        IObasicSourceList(const IObasicSourceList&);
+        IOoptionList(const IOoptionList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const IObasicSourceList&);
+        void operator=(const IOoptionList&);
 
 
 public:
@@ -72,11 +74,11 @@ public:
     // Constructors
 
         //- Construct from components with list of field names
-        IObasicSourceList(const fvMesh& mesh);
+        IOoptionList(const fvMesh& mesh);
 
 
         //- Destructor
-        virtual ~IObasicSourceList()
+        virtual ~IOoptionList()
         {}
 
 
@@ -89,6 +91,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

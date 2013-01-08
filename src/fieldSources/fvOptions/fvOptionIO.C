@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,24 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicSource::writeHeader(Ostream& os) const
+void Foam::fv::option::writeHeader(Ostream& os) const
 {
     os  << indent << name_ << nl
         << indent << token::BEGIN_BLOCK << incrIndent << nl;
 }
 
 
-void Foam::basicSource::writeFooter(Ostream& os) const
+void Foam::fv::option::writeFooter(Ostream& os) const
 {
     os  << decrIndent << indent << token::END_BLOCK << endl;
 }
 
 
-void Foam::basicSource::writeData(Ostream& os) const
+void Foam::fv::option::writeData(Ostream& os) const
 {
     os.writeKeyword("active") << active_ << token::END_STATEMENT << nl;
     os.writeKeyword("timeStart") << timeStart_ << token::END_STATEMENT << nl;
@@ -78,7 +78,7 @@ void Foam::basicSource::writeData(Ostream& os) const
         }
         default:
         {
-            FatalErrorIn("basicSource::writeData(Ostream&) const")
+            FatalErrorIn("option::writeData(Ostream&) const")
                 << "Unknown selectionMode "
                 << selectionMode_
                 << abort(FatalError);
@@ -87,7 +87,7 @@ void Foam::basicSource::writeData(Ostream& os) const
 }
 
 
-bool Foam::basicSource::read(const dictionary& dict)
+bool Foam::fv::option::read(const dictionary& dict)
 {
     active_ = readBool(dict.lookup("active"));
     timeStart_ = readScalar(dict.lookup("timeStart"));

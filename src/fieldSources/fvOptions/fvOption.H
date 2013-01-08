@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::basicSource
+    Foam::fv::option
 
 Description
-    Field source abtract base class.  Provides a base set of controls, e.g.
+    Finite volume options abtract base class.  Provides a base set of controls,
+    e.g.
 
         type            scalarExplicitSource    // source type
         active          on;                     // on/off switch
@@ -33,18 +34,17 @@ Description
         duration        1000.0;                 // duration
         selectionMode   cellSet;                // cellSet // points //cellZone
                                                 // mapRegion
-
+Note:
     On evaluation, source expects to be added to the rhs of the equation
 
-
 SourceFiles
-    basicSource.C
-    basicSourceIO.C
+    fvOption.C
+    fvOptionIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicSource_H
-#define basicSource_H
+#ifndef fvOption_H
+#define fvOption_H
 
 #include "fvMatricesFwd.H"
 #include "volFieldsFwd.H"
@@ -61,11 +61,14 @@ namespace Foam
 
 class fvMesh;
 
+namespace fv
+{
+
 /*---------------------------------------------------------------------------*\
-                         Class basicSource Declaration
+                           Class option Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicSource
+class option
 {
 public:
 
@@ -163,7 +166,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("basicSource");
+    TypeName("option");
 
 
      // Declare run-time constructor selection table
@@ -171,7 +174,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            basicSource,
+            option,
             dictionary,
             (
                 const word& name,
@@ -186,7 +189,7 @@ public:
     // Constructors
 
         //- Construct from components
-        basicSource
+        option
         (
             const word& name,
             const word& modelType,
@@ -195,13 +198,13 @@ public:
         );
 
         //- Return clone
-        autoPtr<basicSource> clone() const
+        autoPtr<option> clone() const
         {
-            notImplemented("autoPtr<basicSource> clone() const");
-            return autoPtr<basicSource>(NULL);
+            notImplemented("autoPtr<option> clone() const");
+            return autoPtr<option>(NULL);
         }
 
-        //- Return pointer to new basicSource object created
+        //- Return pointer to new fvOption object created
         //  on the freestore from an Istream
         class iNew
         {
@@ -221,19 +224,14 @@ public:
                 name_(name)
             {}
 
-            autoPtr<basicSource> operator()(Istream& is) const
+            autoPtr<option> operator()(Istream& is) const
             {
                 //const word name(is);
                 const dictionary dict(is);
 
-                return autoPtr<basicSource>
+                return autoPtr<option>
                 (
-                    basicSource::New
-                    (
-                        name_,
-                        dict,
-                        mesh_
-                    )
+                    option::New(name_, dict, mesh_)
                 );
             }
         };
@@ -241,8 +239,8 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected basicSource model
-        static autoPtr<basicSource> New
+        //- Return a reference to the selected fvOption model
+        static autoPtr<option> New
         (
             const word& name,
             const dictionary& dict,
@@ -251,7 +249,7 @@ public:
 
 
     //- Destructor
-    virtual ~basicSource();
+    virtual ~option();
 
 
 
@@ -468,11 +466,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "basicSourceI.H"
+#include "fvOptionI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

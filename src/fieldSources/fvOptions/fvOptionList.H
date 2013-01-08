@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,36 +22,38 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::basicSourceList
+    Foam::fv::optionList
 
 Description
-    List of explict sources
+    List of finite volume options
 
 SourceFile
-    basicSourceList.C
+    optionList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicSourceList_H
-#define basicSourceList_H
+#ifndef optionList_H
+#define optionList_H
 
 #include "PtrList.H"
 #include "GeometricField.H"
 #include "fvPatchField.H"
-#include "basicSource.H"
+#include "fvOption.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace fv
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class basicSourceList Declaration
+                         Class optionList Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicSourceList
+class optionList
 :
-    public PtrList<basicSource>
+    public PtrList<option>
 {
 protected:
 
@@ -70,29 +72,29 @@ protected:
         void checkApplied() const;
 
         //- Disallow default bitwise copy construct
-        basicSourceList(const basicSourceList&);
+        optionList(const optionList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const basicSourceList&);
+        void operator=(const optionList&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("basicSourceList");
+    TypeName("optionList");
 
 
     // Constructors
 
         //- Construct null
-        basicSourceList(const fvMesh& mesh);
+        optionList(const fvMesh& mesh);
 
         //- Construct from mesh and dictionary
-        basicSourceList(const fvMesh& mesh, const dictionary& dict);
+        optionList(const fvMesh& mesh, const dictionary& dict);
 
 
     //- Destructor
-    virtual ~basicSourceList()
+    virtual ~optionList()
     {}
 
 
@@ -187,18 +189,19 @@ public:
             friend Ostream& operator<<
             (
                 Ostream& os,
-                const basicSourceList& sources
+                const optionList& options
             );
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "basicSourceListTemplates.C"
+    #include "fvOptionListTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
