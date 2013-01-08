@@ -11,11 +11,11 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      sourcesProperties;
+    object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-source1
+fixedTemperaure1
 {
     type            fixedTemperatureConstraint;
     active          true;
@@ -30,4 +30,33 @@ source1
 }
 
 
-// ************************************************************************* //
+porosity1
+{
+    type            explicitPorositySource;
+    active          true;
+    selectionMode   cellZone;
+    cellZone        porosity;
+
+    explicitPorositySourceCoeffs
+    {
+        type            fixedCoeff;
+        active          yes;
+        cellZone        porosity;
+
+        fixedCoeffCoeffs
+        {
+            alpha       alpha [0 0 -1 0 0 0 0] (500 -1000 -1000);
+            beta        beta  [0 -1 0 0 0 0 0] (0 0 0);
+            rhoRef      1;
+
+            coordinateSystem
+            {
+                e1  (0.70710678 0.70710678 0);
+                e2  (0 0 1);
+            }
+        }
+    }
+}
+
+
+************************************************************************* //
