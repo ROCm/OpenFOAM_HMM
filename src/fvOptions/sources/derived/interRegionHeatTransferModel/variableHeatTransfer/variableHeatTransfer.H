@@ -76,8 +76,8 @@ private:
         //- Fluid Prandt number
         scalar Pr_;
 
-        //- Area of heat exchange
-        autoPtr<volScalarField> area_;
+        //- Area per unit volume of heat exchanger
+        autoPtr<volScalarField> AoV_;
 
 
 public:

@@ -60,7 +60,7 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
     c_(0),
     ds_(0),
     Pr_(0),
-    area_()
+    AoV_()
 {
     if (master_)
     {
@@ -69,13 +69,13 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
         c_ = readScalar(dict_.lookup("c"));
         ds_ = readScalar(dict_.lookup("ds"));
         Pr_ = readScalar(dict_.lookup("Pr"));
-        area_.reset
+        AoV_.reset
         (
             new volScalarField
             (
                 IOobject
                 (
-                    "area",
+                    "AoV",
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -100,42 +100,33 @@ Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 const Foam::tmp<Foam::volScalarField>
 Foam::fv::variableHeatTransfer::calculateHtc()
 {
-    const fvMesh& secondaryMesh =
+    const fvMesh& nbrMesh =
         mesh_.time().lookupObject<fvMesh>(mapRegionName());
 
-    const compressible::turbulenceModel& turb =
-        secondaryMesh.lookupObject<compressible::turbulenceModel>
-        (
-            "turbulenceModel"
-        );
+    const compressible::turbulenceModel& nbrTurb =
+        nbrMesh.lookupObject<compressible::turbulenceModel>("turbulenceModel");
 
-    const fluidThermo& secondaryThermo =
-        secondaryMesh.lookupObject<fluidThermo>
-        (
-            "thermophysicalProperties"
-        );
+    const fluidThermo& nbrThermo =
+        nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
 
-    const volVectorField& U =
-        secondaryMesh.lookupObject<volVectorField>("U");
+    const volVectorField& U = nbrMesh.lookupObject<volVectorField>("U");
 
-    const volScalarField Re
-    (
-        mag(U)*ds_*secondaryThermo.rho()/turb.mut()
-    );
+    const volScalarField Re(mag(U)*ds_*nbrThermo.rho()/nbrTurb.mut());
 
     const volScalarField Nu(a_*pow(Re, b_)*pow(Pr_, c_));
 
-    scalarField htcMapped(htc_.internalField().size(), 0.0);
+    scalarField htcNbrMapped(htc_.internalField().size(), 0.0);
 
     secondaryToPrimaryInterpPtr_->interpolateInternalField
     (
-        htcMapped,
-        Nu*turb.kappaEff()/ds_,
+        htcNbrMapped,
+        Nu*nbrTurb.kappaEff()/ds_,
         meshToMesh::MAP,
         eqOp<scalar>()
     );
 
-    htc_.internalField() = htcMapped*area_/mesh_.V();
+    htc_.internalField() =
+        htcNbrMapped*AoV_*secondaryToPrimaryInterpPtr_->V()/mesh_.V();
 
     return htc_;
 }
@@ -144,17 +135,12 @@ Foam::fv::variableHeatTransfer::calculateHtc()
 void Foam::fv::variableHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+
     interRegionHeatTransferModel::writeData(os);
 
-    os.writeKeyword("a") << a_ << token::END_STATEMENT << nl;
-    os.writeKeyword("b") << b_ << token::END_STATEMENT << nl;
-    os.writeKeyword("c") << c_ << token::END_STATEMENT << nl;
-    os.writeKeyword("ds") << ds_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Pr") << Pr_ << token::END_STATEMENT << nl;
+    os << indent << type() + "Coeffs" << nl;
 
-    os << indent << "variableHeatTransfer";
-
-    dict_.write(os);
+    coeffs_.write(os);
 
     os << decrIndent << indent << token::END_BLOCK << endl;
 }
@@ -164,15 +150,11 @@ bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-
-        const dictionary& sourceDict = dict.subDict(name());
-        const dictionary& subDictCoeffs =
-            sourceDict.subDict(typeName + "Coeffs");
-        subDictCoeffs.readIfPresent("a", a_);
-        subDictCoeffs.readIfPresent("b", b_);
-        subDictCoeffs.readIfPresent("c", c_);
-        subDictCoeffs.readIfPresent("ds", ds_);
-        subDictCoeffs.readIfPresent("Pr", Pr_);
+        coeffs_.readIfPresent("a", a_);
+        coeffs_.readIfPresent("b", b_);
+        coeffs_.readIfPresent("c", c_);
+        coeffs_.readIfPresent("ds", ds_);
+        coeffs_.readIfPresent("Pr", Pr_);
 
         return true;
     }
