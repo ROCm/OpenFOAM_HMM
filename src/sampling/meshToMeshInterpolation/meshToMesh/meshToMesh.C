@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,8 @@ Foam::meshToMesh::meshToMesh
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL),
     inverseVolumeWeightsPtr_(NULL),
-    cellToCellAddressingPtr_(NULL)
+    cellToCellAddressingPtr_(NULL),
+    V_(0.0)
 {
     forAll(fromMesh_.boundaryMesh(), patchi)
     {
@@ -126,7 +127,8 @@ Foam::meshToMesh::meshToMesh
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL),
     inverseVolumeWeightsPtr_(NULL),
-    cellToCellAddressingPtr_(NULL)
+    cellToCellAddressingPtr_(NULL),
+    V_(0.0)
 {
     // check whether both meshes have got the same number
     // of boundary patches
