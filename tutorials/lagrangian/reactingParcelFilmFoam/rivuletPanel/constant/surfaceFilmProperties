@@ -55,6 +55,8 @@ kinematicSingleLayerCoeffs
                 variance        100;
             }
         }
+
+        zeroForcePatches    ();
     }
 
     surfaceShearCoeffs
