@@ -24,9 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "constantHeatTransfer.H"
-#include "fvm.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvcVolumeIntegrate.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,18 +54,18 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    htCoeffs_(),
-    area_()
+    htcConst_(),
+    AoV_()
 {
     if (master_)
     {
-        htCoeffs_.reset
+        htcConst_.reset
         (
             new volScalarField
             (
                 IOobject
                 (
-                    "htCoeffs",
+                    "htcConst",
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -77,13 +75,13 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
             )
         );
 
-        area_.reset
+        AoV_.reset
         (
             new volScalarField
             (
                 IOobject
                 (
-                    "area",
+                    "AoV",
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::MUST_READ,
@@ -93,7 +91,18 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
             )
         );
 
-        htc_.internalField() = htCoeffs_()*area_()/mesh_.V();
+        const DimensionedField<scalar, volMesh>& htcConsti =
+            htcConst_().dimensionedInternalField();
+        const DimensionedField<scalar, volMesh>& AoVi =
+            AoV_().dimensionedInternalField();
+        dimensionedScalar interVol
+        (
+            "V",
+            dimVolume,
+            secondaryToPrimaryInterpPtr_->V()
+        );
+
+        htc_.dimensionedInternalField() = htcConsti*AoVi*interVol/mesh.V();
         htc_.correctBoundaryConditions();
     }
 }
@@ -119,9 +128,9 @@ void Foam::fv::constantHeatTransfer::writeData(Ostream& os) const
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
     interRegionHeatTransferModel::writeData(os);
 
-    os << indent << "constantHeatTransfer";
+    os << indent << type() + "Coeffs" << nl;
 
-    dict_.write(os);
+    coeffs_.write(os);
 
     os << decrIndent << indent << token::END_BLOCK << endl;
 }
