@@ -59,63 +59,8 @@ inline bool Foam::pointEdgePoint::update
 
     if ((diff < SMALL) || ((distSqr_ > SMALL) && (diff/distSqr_ < tol)))
     {
-        // don't propagate small changes unless origins differ
-        scalar originDiff2 = magSqr(origin_-w2.origin());
-        if
-        (
-            originDiff2 < SMALL
-         || ((distSqr_ > SMALL) && (originDiff2/distSqr_ < tol))
-        )
-        {
-            return false;
-        }
-        else
-        {
-            // Different origin. Choose lexical ordering.
-            bool w2less = false;
-            for (direction cmp = 0; cmp < vector::nComponents; cmp++)
-            {
-                scalar d = w2.origin()[cmp]-origin_[cmp];
-                scalar magD = mag(d);
-
-                if
-                (
-                    magD < SMALL
-                 || ((distSqr_ > SMALL) && (magD/distSqr_ > tol))
-                )
-                {
-                    // Small difference. Test next component.
-                }
-                else if (d < 0)
-                {
-                    w2less = true;
-                    break;
-                }
-                else if (d > 0)
-                {
-                    break;
-                }
-            }
-
-            if (w2less)
-            {
-                // update with new values
-                distSqr_ = dist2;
-                origin_ = w2.origin();
-                return true;
-            }
-            else
-            {
-                Pout<< "** same distance. at:" << pt << nl
-                    << "    old distance:" << Foam::sqr(distSqr_) << nl
-                    << "    new distance:" << Foam::sqr(dist2) << nl
-                    << "    old origin:" << origin_ << nl
-                    << "    new origin:" << w2.origin() << nl
-                    << endl;
-                Pout<< "** w2 looses." << endl;
-                return false;
-            }
-        }
+        // don't propagate small changes
+        return false;
     }
     else
     {
