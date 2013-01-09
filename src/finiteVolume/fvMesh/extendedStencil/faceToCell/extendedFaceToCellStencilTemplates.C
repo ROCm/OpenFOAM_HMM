@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,27 +37,28 @@ void Foam::extendedFaceToCellStencil::collectData
 )
 {
     // 1. Construct face data in compact addressing
-    List<Type> compactFld(map.constructSize(), pTraits<Type>::zero);
+    List<Type> flatFld(map.constructSize(), pTraits<Type>::zero);
 
     // Insert my internal values
     forAll(fld, cellI)
     {
-        compactFld[cellI] = fld[cellI];
+        flatFld[cellI] = fld[cellI];
     }
     // Insert my boundary values
-    label nCompact = fld.size();
     forAll(fld.boundaryField(), patchI)
     {
         const fvsPatchField<Type>& pfld = fld.boundaryField()[patchI];
 
+        label nCompact = pfld.patch().start();
+
         forAll(pfld, i)
         {
-            compactFld[nCompact++] = pfld[i];
+            flatFld[nCompact++] = pfld[i];
         }
     }
 
     // Do all swapping
-    map.distribute(compactFld);
+    map.distribute(flatFld);
 
     // 2. Pull to stencil
     stencilFld.setSize(stencil.size());
@@ -70,7 +71,7 @@ void Foam::extendedFaceToCellStencil::collectData
 
         forAll(compactCells, i)
         {
-            stencilFld[faceI][i] = compactFld[compactCells[i]];
+            stencilFld[faceI][i] = flatFld[compactCells[i]];
         }
     }
 }

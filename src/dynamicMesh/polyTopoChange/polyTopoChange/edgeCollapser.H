@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -328,6 +328,12 @@ public:
             (
                 const scalarField& faceFilterFactor,
                 const labelList& pointPriority,
+                PackedBoolList& collapseEdge,
+                Map<point>& collapsePointToLocation
+            ) const;
+
+            void markIndirectPatchFaces
+            (
                 PackedBoolList& collapseEdge,
                 Map<point>& collapsePointToLocation
             ) const;

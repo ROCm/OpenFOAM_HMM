@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,9 @@ public:
             CLAMP           /*!< Clamp value to the start/end value */
         };
 
+        //- Cconvenience typedef
+        typedef List<Tuple2<scalar, List<Tuple2<scalar, Type> > > > table;
+
 
 private:
 
@@ -91,6 +94,15 @@ private:
         (
             const List<Tuple2<scalar, Type> >& data,
             const scalar
+        ) const;
+
+        //- Return an X index from the matrix
+        template<class BinaryOp>
+        label Xi
+        (
+            const BinaryOp& bop,
+            const scalar valueX,
+            const bool reverse
         ) const;
 
 
@@ -132,7 +144,7 @@ public:
 
         //- Check that list is monotonically increasing
         //  Exit with a FatalError if there is a problem
-        void check() const;
+        void checkOrder() const;
 
         //- Write
         void write(Ostream& os) const;

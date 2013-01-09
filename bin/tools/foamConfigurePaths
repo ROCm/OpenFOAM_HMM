@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -40,6 +40,7 @@ usage: ${0##*/}
   --projectVersion ver      specify project version (e.g. 1.7.x)
   --archOption  arch        specify architecture option (only 32 or 64 applicable)
   --paraviewInstall dir     specify ParaView_DIR (e.g. /opt/paraviewopenfoam380)
+  --paraviewVersion ver     specify ParaView_VERSION (e.g. 3.14.1)
 
 * hardcode paths to installation
 
@@ -143,13 +144,23 @@ do
              "Replacing ParaView_DIR setting by '$paraviewInstall'"
         shift 2
         ;;
+    -paraviewVersion | --paraviewVersion)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        paraviewVersion="$2"
+        # replace ParaView_VERSION=...
+        _inlineSed \
+            etc/config/paraview.sh \
+            '/^[^#]/s@ParaView_VERSION=.*@ParaView_VERSION='"$paraviewVersion@" \
+             "Replacing ParaView_VERSION setting by '$paraviewVersion'"
+        shift 2
+        ;;
     *)
         usage "unknown option/argument: '$*'"
         ;;
     esac
 done
 
-[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption" -o -n "$paraviewInstall" ] || usage "Please specify at least one configure option"
+[ -n "$foamInstall" -o -n "$projectName" -o -n "$projectVersion" -o -n "$archOption" -o -n "$paraviewInstall" -o -n "$paraviewVersion" ] || usage "Please specify at least one configure option"
 
 #echo "Replacing WM_PROJECT setting by '$projectName'"
 #sed -i -e 's@WM_PROJECT=.*@WM_PROJECT='"$projectName@" etc/bashrc

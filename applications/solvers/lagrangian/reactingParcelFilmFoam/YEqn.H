@@ -29,18 +29,18 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               - fvm::laplacian(turbulence->alphaEff(), Yi)
               ==
                 parcels.SYi(i, Yi)
-              + sources(rho, Yi)
+              + fvOptions(rho, Yi)
               + combustion->R(Yi)
               + surfaceFilm.Srho(i)
             );
 
             YEqn.relax();
 
-            sources.constrain(YEqn);
+            fvOptions.constrain(YEqn);
 
             YEqn.solve(mesh.solver("Yi"));
 
-            sources.correct(Yi);
+            fvOptions.correct(Yi);
 
             Yi.max(0.0);
             Yt += Yi;

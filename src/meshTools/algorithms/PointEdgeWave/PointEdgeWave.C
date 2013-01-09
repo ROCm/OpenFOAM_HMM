@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -523,6 +523,75 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleCyclicPatches()
 }
 
 
+// Propagate information from edge to point. Return number of points changed.
+template <class Type, class TrackingData>
+Foam::label Foam::PointEdgeWave<Type, TrackingData>::handleCollocatedPoints()
+{
+    // Transfer onto coupled patch
+    const globalMeshData& gmd = mesh_.globalData();
+    const indirectPrimitivePatch& cpp = gmd.coupledPatch();
+    const labelList& meshPoints = cpp.meshPoints();
+
+    const mapDistribute& slavesMap = gmd.globalPointSlavesMap();
+    const labelListList& slaves = gmd.globalPointSlaves();
+
+    List<Type> elems(slavesMap.constructSize());
+    forAll(meshPoints, pointI)
+    {
+        elems[pointI] = allPointInfo_[meshPoints[pointI]];
+    }
+
+    // Reset changed points counter.
+    nChangedPoints_ = 0;
+
+    // Pull slave data onto master. No need to update transformed slots.
+    slavesMap.distribute(elems, false);
+
+    // Combine master data with slave data
+    forAll(slaves, pointI)
+    {
+        Type& elem = elems[pointI];
+
+        const labelList& slavePoints = slaves[pointI];
+
+        label meshPointI = meshPoints[pointI];
+
+        // Combine master with untransformed slave data
+        forAll(slavePoints, j)
+        {
+            updatePoint
+            (
+                meshPointI,
+                elems[slavePoints[j]],
+                elem
+            );
+        }
+
+        // Copy result back to slave slots
+        forAll(slavePoints, j)
+        {
+            elems[slavePoints[j]] = elem;
+        }
+    }
+
+    // Push slave-slot data back to slaves
+    slavesMap.reverseDistribute(elems.size(), elems, false);
+
+    // Extract back onto mesh
+    forAll(meshPoints, pointI)
+    {
+        allPointInfo_[meshPoints[pointI]] = elems[pointI];
+    }
+
+    // Sum nChangedPoints over all procs
+    label totNChanged = nChangedPoints_;
+
+    reduce(totNChanged, sumOp<label>());
+
+    return totNChanged;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Iterate, propagating changedPointsInfo across mesh, until no change (or
@@ -863,44 +932,58 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::iterate
 
     while (iter < maxIter)
     {
-        if (debug)
+        while (iter < maxIter)
         {
-            Pout<< "Iteration " << iter << endl;
+            if (debug)
+            {
+                Pout<< "Iteration " << iter << endl;
+            }
+
+            label nEdges = pointToEdge();
+
+            if (debug)
+            {
+                Pout<< "Total changed edges       : " << nEdges << endl;
+            }
+
+            if (nEdges == 0)
+            {
+                break;
+            }
+
+            label nPoints = edgeToPoint();
+
+            if (debug)
+            {
+                Pout<< "Total changed points      : " << nPoints << nl
+                    << "Total evaluations         : " << nEvals_ << nl
+                    << "Remaining unvisited points: " << nUnvisitedPoints_ << nl
+                    << "Remaining unvisited edges : " << nUnvisitedEdges_ << nl
+                    << endl;
+            }
+
+            if (nPoints == 0)
+            {
+                break;
+            }
+
+            iter++;
         }
 
-        label nEdges = pointToEdge();
 
+        // Enforce collocated points are exactly equal. This might still mean
+        // non-collocated points are not equal though. WIP.
+        label nPoints = handleCollocatedPoints();
         if (debug)
         {
-            Pout<< "Total changed edges       : " << nEdges << endl;
-        }
-
-        if (nEdges == 0)
-        {
-            break;
-        }
-
-        label nPoints = edgeToPoint();
-
-        if (debug)
-        {
-            Pout<< "Total changed points      : " << nPoints << endl;
-
-            Pout<< "Total evaluations         : " << nEvals_ << endl;
-
-            Pout<< "Remaining unvisited points: " << nUnvisitedPoints_ << endl;
-
-            Pout<< "Remaining unvisited edges : " << nUnvisitedEdges_ << endl;
-
-            Pout<< endl;
+            Pout<< "Collocated point sync     : " << nPoints << nl
+                << endl;
         }
 
         if (nPoints == 0)
         {
             break;
         }
-
-        iter++;
     }
 
     return iter;

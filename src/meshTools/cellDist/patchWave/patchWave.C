@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "wallPoint.H"
 #include "globalMeshData.H"
-#include "SubField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -132,7 +131,6 @@ Foam::label Foam::patchWave::getValues(const MeshWave<wallPoint>& waveInfo)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::patchWave::patchWave
 (
     const polyMesh& mesh,
@@ -159,28 +157,19 @@ Foam::patchWave::~patchWave()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Correct for mesh geom/topo changes. Might be more intelligent in the
-// future (if only small topology change)
 void Foam::patchWave::correct()
 {
-    //
     // Set initial changed faces: set wallPoint for wall faces to wall centre
-    //
 
-    // Count walls
-    label nWalls = sumPatchSize(patchIDs_);
+    label nPatch = sumPatchSize(patchIDs_);
 
-    List<wallPoint> faceDist(nWalls);
-    labelList changedFaces(nWalls);
+    List<wallPoint> faceDist(nPatch);
+    labelList changedFaces(nPatch);
 
     // Set to faceDist information to facecentre on walls.
     setChangedFaces(patchIDs_, changedFaces, faceDist);
 
-
-    //
     // Do calculate wall distance by 'growing' from faces.
-    //
-
     MeshWave<wallPoint> waveInfo
     (
         mesh(),
@@ -189,20 +178,13 @@ void Foam::patchWave::correct()
         mesh().globalData().nTotalCells()+1 // max iterations
     );
 
-
-    //
     // Copy distance into return field
-    //
-
     nUnset_ = getValues(waveInfo);
 
-    //
     // Correct wall cells for true distance
-    //
-
     if (correctWalls_)
     {
-        Map<label> nearestFace(2 * nWalls);
+        Map<label> nearestFace(2*nPatch);
 
         correctBoundaryFaceCells
         (

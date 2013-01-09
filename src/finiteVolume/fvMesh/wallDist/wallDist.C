@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,71 +24,30 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "wallDist.H"
-#include "patchWave.H"
 #include "fvMesh.H"
 #include "wallPolyPatch.H"
-#include "fvPatchField.H"
-#include "Field.H"
-#include "emptyFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::wallDist::wallDist(const fvMesh& mesh, const bool correctWalls)
+Foam::wallDist::wallDist
+(
+    const fvMesh& mesh,
+    const bool correctWalls
+)
 :
-    volScalarField
+    patchDist
     (
-        IOobject
-        (
-            "y",
-            mesh.time().timeName(),
-            mesh
-        ),
         mesh,
-        dimensionedScalar("y", dimLength, GREAT)
-    ),
-    cellDistFuncs(mesh),
-    correctWalls_(correctWalls),
-    nUnset_(0)
-{
-    wallDist::correct();
-}
+        mesh.boundaryMesh().findPatchIDs<wallPolyPatch>(),
+        correctWalls
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::wallDist::~wallDist()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// Correct for mesh geom/topo changes. Might be more intelligent in the
-// future (if only small topology change)
-void Foam::wallDist::correct()
-{
-    // Get patchids of walls
-    labelHashSet wallPatchIDs(getPatchIDs<wallPolyPatch>());
-
-    // Calculate distance starting from wallPatch faces.
-    patchWave wave(cellDistFuncs::mesh(), wallPatchIDs, correctWalls_);
-
-    // Transfer cell values from wave into *this
-    transfer(wave.distance());
-
-    // Transfer values on patches into boundaryField of *this
-    forAll(boundaryField(), patchI)
-    {
-        if (!isA<emptyFvPatchScalarField>(boundaryField()[patchI]))
-        {
-            scalarField& waveFld = wave.patchDistance()[patchI];
-
-            boundaryField()[patchI].transfer(waveFld);
-        }
-    }
-
-    // Transfer number of unset values
-    nUnset_ = wave.nUnset();
-}
 
 
 // ************************************************************************* //

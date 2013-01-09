@@ -19,12 +19,12 @@ if (composition.contains("ft"))
       + mvConvection->fvmDiv(phi, ft)
       - fvm::laplacian(turbulence->alphaEff(), ft)
      ==
-        sources(rho, ft)
+        fvOptions(rho, ft)
     );
 
-    sources.constrain(ftEqn);
+    fvOptions.constrain(ftEqn);
 
     ftEqn.solve();
 
-    sources.correct(ft);
+    fvOptions.correct(ft);
 }

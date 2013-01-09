@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "fvcGrad.H"
 #include "unitConversion.H"
 #include "fvPatchField.H"
+#include "patchDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,6 +43,35 @@ namespace surfaceFilmModels
 
 defineTypeNameAndDebug(contactAngleForce, 0);
 addToRunTimeSelectionTable(force, contactAngleForce, dictionary);
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void contactAngleForce::initialise()
+{
+    const wordReList zeroForcePatches(coeffs_.lookup("zeroForcePatches"));
+
+    if (zeroForcePatches.size())
+    {
+        const polyBoundaryMesh& pbm = owner_.regionMesh().boundaryMesh();
+        scalar dLim = readScalar(coeffs_.lookup("zeroForceDistance"));
+
+        Info<< "        Assigning zero contact force within " << dLim
+            << " of patches:" << endl;
+
+        labelHashSet patchIDs = pbm.patchSet(zeroForcePatches);
+
+        forAllConstIter(labelHashSet, patchIDs, iter)
+        {
+            label patchI = iter.key();
+            Info<< "            " << pbm[patchI].name() << endl;
+        }
+
+        patchDist dist(owner_.regionMesh(), patchIDs);
+
+        mask_ = pos(dist - dimensionedScalar("dLim", dimLength, dLim));
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -61,8 +91,23 @@ contactAngleForce::contactAngleForce
             coeffs_.subDict("contactAngleDistribution"),
             rndGen_
         )
+    ),
+    mask_
+    (
+        IOobject
+        (
+            typeName + ".contactForceMask",
+            owner_.time().timeName(),
+            owner_.regionMesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        owner_.regionMesh(),
+        dimensionedScalar("mask", dimless, 0.0)
     )
-{}
+{
+    initialise();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -121,7 +166,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
             cellI = cellN;
         }
 
-        if (cellI != -1)
+        if (cellI != -1 && mask_[cellI] > 0)
         {
             const scalar dx = owner_.regionMesh().deltaCoeffs()[faceI];
             const vector n =
@@ -137,20 +182,26 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         if (!owner().isCoupledPatch(patchI))
         {
             const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
+            const fvPatchField<scalar>& maskf = mask_.boundaryField()[patchI];
             const scalarField& dx = alphaf.patch().deltaCoeffs();
             const labelUList& faceCells = alphaf.patch().faceCells();
 
             forAll(alphaf, faceI)
             {
-                label cellO = faceCells[faceI];
-
-                if ((alpha[cellO] > 0.5) && (alphaf[faceI] < 0.5))
+                if (maskf[faceI] > 0)
                 {
-                    const vector n =
-                        gradAlpha[cellO]/(mag(gradAlpha[cellO]) + ROOTVSMALL);
-                    scalar theta = cos(degToRad(distribution_->sample()));
-                    force[cellO] += Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
-                    nHits[cellO]++;
+                    label cellO = faceCells[faceI];
+
+                    if ((alpha[cellO] > 0.5) && (alphaf[faceI] < 0.5))
+                    {
+                        const vector n =
+                            gradAlpha[cellO]
+                           /(mag(gradAlpha[cellO]) + ROOTVSMALL);
+                        scalar theta = cos(degToRad(distribution_->sample()));
+                        force[cellO] +=
+                            Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
+                        nHits[cellO]++;
+                    }
                 }
             }
         }

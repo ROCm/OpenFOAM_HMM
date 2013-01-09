@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,9 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
             << exit(FatalError);
     }
 
+    //- Initialise overlap volume to zero
+    V_ = 0.0;
+
     inverseDistanceWeightsPtr_ = new scalarListList(toMesh_.nCells());
     scalarListList& invDistCoeffs = *inverseDistanceWeightsPtr_;
 
@@ -70,6 +73,7 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
             {
                 invDistCoeffs[celli].setSize(1);
                 invDistCoeffs[celli][0] = 1.0;
+                V_ += fromMesh_.V()[cellAddressing_[celli]];
             }
             else
             {
@@ -94,6 +98,16 @@ void Foam::meshToMesh::calculateInverseDistanceWeights() const
                 {
                     invDistCoeffs[celli][i] /= sumInvDist;
                 }
+
+
+                V_ +=
+                    invDistCoeffs[celli][0]
+                   *fromMesh_.V()[cellAddressing_[celli]];
+                for (label i = 1; i < invDistCoeffs[celli].size(); i++)
+                {
+                    V_ +=
+                        invDistCoeffs[celli][i]*fromMesh_.V()[neighbours[i-1]];
+                }
             }
         }
     }
@@ -114,6 +128,9 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
             << "weighting factors already calculated"
             << exit(FatalError);
     }
+
+    //- Initialise overlap volume to zero
+    V_ = 0.0;
 
     inverseVolumeWeightsPtr_ = new scalarListList(toMesh_.nCells());
     scalarListList& invVolCoeffs = *inverseVolumeWeightsPtr_;
@@ -152,6 +169,8 @@ void Foam::meshToMesh::calculateInverseVolumeWeights() const
                     bbFromMesh
                 );
                 invVolCoeffs[celli][j] = v/toMesh_.V()[celli];
+
+                V_ += v;
             }
         }
     }
@@ -173,6 +192,9 @@ void Foam::meshToMesh::calculateCellToCellAddressing() const
             << exit(FatalError);
     }
 
+    //- Initialise overlap volume to zero
+    V_ = 0.0;
+
     tetOverlapVolume overlapEngine;
 
     cellToCellAddressingPtr_ = new labelListList(toMesh_.nCells());
@@ -192,6 +214,7 @@ void Foam::meshToMesh::calculateCellToCellAddressing() const
             forAll(overLapCells, j)
             {
                 cellToCell[iTo][j] = overLapCells[j];
+                V_ += fromMesh_.V()[overLapCells[j]];
             }
         }
     }
@@ -220,6 +243,7 @@ const Foam::scalarListList& Foam::meshToMesh::inverseVolumeWeights() const
     return *inverseVolumeWeightsPtr_;
 }
 
+
 const Foam::labelListList& Foam::meshToMesh::cellToCellAddressing() const
 {
     if (!cellToCellAddressingPtr_)
@@ -229,5 +253,6 @@ const Foam::labelListList& Foam::meshToMesh::cellToCellAddressing() const
 
     return *cellToCellAddressingPtr_;
 }
+
 
 // ************************************************************************* //

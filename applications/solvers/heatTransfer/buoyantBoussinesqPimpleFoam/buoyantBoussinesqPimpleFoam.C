@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ Description
 
     Valid when:
     \f[
-        rho_{k} << 1
+        \frac{beta(T - T_{ref})}{rho_{ref}} << 1
     \f]
 
 \*---------------------------------------------------------------------------*/

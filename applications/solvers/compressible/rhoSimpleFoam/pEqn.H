@@ -20,7 +20,7 @@
             fvc::interpolate(psi)*(fvc::interpolate(HbyA) & mesh.Sf())
         );
 
-        sources.relativeFlux(fvc::interpolate(psi), phid);
+        fvOptions.relativeFlux(fvc::interpolate(psi), phid);
 
         while (simple.correctNonOrthogonal())
         {
@@ -29,13 +29,13 @@
                 fvm::div(phid, p)
               - fvm::laplacian(rho*rAU, p)
               ==
-                sources(psi, p, rho.name())
+                fvOptions(psi, p, rho.name())
             );
 
             // Relax the pressure equation to ensure diagonal-dominance
             pEqn.relax();
 
-            sources.constrain(pEqn);
+            fvOptions.constrain(pEqn);
 
             pEqn.setReference(pRefCell, pRefValue);
 
@@ -55,7 +55,7 @@
             fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
         );
 
-        sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+        fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
         closedVolume = adjustPhi(phiHbyA, U, p);
 
@@ -66,12 +66,12 @@
                 fvc::div(phiHbyA)
               - fvm::laplacian(rho*rAU, p)
               ==
-                sources(psi, p, rho.name())
+                fvOptions(psi, p, rho.name())
             );
 
             pEqn.setReference(pRefCell, pRefValue);
 
-            sources.constrain(pEqn);
+            fvOptions.constrain(pEqn);
 
             pEqn.solve();
 
@@ -90,7 +90,7 @@
 
     U = HbyA - rAU*fvc::grad(p);
     U.correctBoundaryConditions();
-    sources.correct(U);
+    fvOptions.correct(U);
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity

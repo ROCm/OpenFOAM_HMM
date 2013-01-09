@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,16 +26,8 @@ Application
 
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
-    reacting multiphase Lagrangian parcels for porous media, including explicit
-    sources for mass, momentum and energy
-
-    The solver includes:
-    - reacting multiphase parcel cloud
-    - porous media
-    - mass, momentum and energy sources
-
-    Note: ddtPhiCorr not used here when porous zones are active
-    - not well defined for porous calculations
+    reacting multiphase Lagrangian parcels, including run-time selectable
+    finite volume options, e.g. fvOptions, constraints
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +37,7 @@ Description
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
 #include "IOporosityModelList.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "SLGThermo.H"
 #include "pimpleControl.H"
 
@@ -64,7 +56,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
-    #include "createSources.H"
+    #include "createFvOptions.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,6 +204,9 @@ class PointEdgeWave
 
             //- Merge data from across cyclic boundaries
             void handleCyclicPatches();
+
+            //- Explicitly sync all collocated points
+            label handleCollocatedPoints();
 
 
         //- Disallow default bitwise copy construct

@@ -1,7 +1,7 @@
     // Initialise solid field pointer lists
     PtrList<solidThermo> thermos(solidRegions.size());
     PtrList<radiation::radiationModel> radiations(solidRegions.size());
-    PtrList<IObasicSourceList> solidHeatSources(solidRegions.size());
+    PtrList<fv::IOoptionList> solidHeatSources(solidRegions.size());
     PtrList<volScalarField> betavSolid(solidRegions.size());
 
     // Populate solid field pointer lists
@@ -16,11 +16,11 @@
         Info<< "    Adding to radiations\n" << endl;
         radiations.set(i, radiation::radiationModel::New(thermos[i].T()));
 
-        Info<< "    Adding sources\n" << endl;
+        Info<< "    Adding fvOptions\n" << endl;
         solidHeatSources.set
         (
             i,
-            new IObasicSourceList(solidRegions[i])
+            new fv::IOoptionList(solidRegions[i])
         );
 
         IOobject betavSolidIO

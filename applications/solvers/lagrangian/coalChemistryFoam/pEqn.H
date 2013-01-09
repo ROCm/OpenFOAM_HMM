@@ -16,7 +16,7 @@ if (pimple.transonic())
         )
     );
 
-    sources.relativeFlux(fvc::interpolate(psi), phid);
+    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -27,10 +27,10 @@ if (pimple.transonic())
           - fvm::laplacian(rho*rAU, p)
          ==
             coalParcels.Srho()
-          + sources(psi, p, rho.name())
+          + fvOptions(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn);
+        fvOptions.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -52,7 +52,7 @@ else
         )
     );
 
-    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     while (pimple.correctNonOrthogonal())
     {
@@ -63,10 +63,10 @@ else
           - fvm::laplacian(rho*rAU, p)
          ==
             coalParcels.Srho()
-          + sources(psi, p, rho.name())
+          + fvOptions(psi, p, rho.name())
         );
 
-        sources.constrain(pEqn);
+        fvOptions.constrain(pEqn);
 
         pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
@@ -82,7 +82,7 @@ else
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);
 
 K = 0.5*magSqr(U);
 

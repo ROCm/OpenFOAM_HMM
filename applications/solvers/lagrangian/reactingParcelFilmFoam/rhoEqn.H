@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,14 +37,14 @@ Description
       ==
         parcels.Srho(rho)
       + surfaceFilm.Srho()
-      + sources(rho)
+      + fvOptions(rho)
     );
 
-    sources.constrain(rhoEqn);
+    fvOptions.constrain(rhoEqn);
 
     rhoEqn.solve();
 
-    sources.correct(rho);
+    fvOptions.correct(rho);
 }
 
 // ************************************************************************* //

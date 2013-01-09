@@ -5,12 +5,12 @@
         fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
      ==
-        sources(rho, U)
+        fvOptions(rho, U)
     );
 
     UEqn().relax();
 
-    sources.constrain(UEqn());
+    fvOptions.constrain(UEqn());
 
     if (simple.momentumPredictor())
     {
@@ -27,5 +27,5 @@
             )
         );
 
-        sources.correct(U);
+        fvOptions.correct(U);
     }

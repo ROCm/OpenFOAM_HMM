@@ -341,7 +341,7 @@ Foam::regionModels::regionModel::regionModel(const fvMesh& mesh)
         (
             "regionModelProperties",
             mesh.time().constant(),
-            mesh,
+            mesh.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         )
@@ -376,7 +376,7 @@ Foam::regionModels::regionModel::regionModel
         (
             regionType + "Properties",
             mesh.time().constant(),
-            mesh,
+            mesh.time(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -421,7 +421,7 @@ Foam::regionModels::regionModel::regionModel
         (
             regionType + "Properties",
             mesh.time().constant(),
-            mesh,
+            mesh.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             true

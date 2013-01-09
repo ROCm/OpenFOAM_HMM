@@ -41,7 +41,7 @@ $(pWave)/pointEdgePoint.C
 patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
-$(patchWave)/patchDist.C
+$(patchWave)/patchPatchDist.C
 
 meshWave = $(algorithms)/MeshWave
 $(meshWave)/MeshWaveName.C

@@ -148,16 +148,12 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     UPstream::msgType() = oldTag+1;
 
     // Get the coupling information from the mappedPatchBase
-    const mappedPatchBase& mpp = refCast<const mappedPatchBase>
-    (
-        patch().patch()
-    );
+    const mappedPatchBase& mpp =
+        refCast<const mappedPatchBase>(patch().patch());
     const polyMesh& nbrMesh = mpp.sampleMesh();
-    const fvPatch& nbrPatch = refCast<const fvMesh>
-    (
-        nbrMesh
-    ).boundary()[mpp.samplePolyPatch().index()];
-
+    const label samplePatchI = mpp.samplePolyPatch().index();
+    const fvPatch& nbrPatch =
+        refCast<const fvMesh>(nbrMesh).boundary()[samplePatchI];
 
     tmp<scalarField> intFld = patchInternalField();
 
@@ -208,7 +204,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
 
     this->refGrad() = 0.0;
 
-    this->valueFraction() = nbrKDelta / (nbrKDelta + myKDelta());
+    this->valueFraction() = nbrKDelta/(nbrKDelta + myKDelta());
 
     mixedFvPatchScalarField::updateCoeffs();
 

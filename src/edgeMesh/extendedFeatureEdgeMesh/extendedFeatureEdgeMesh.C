@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -579,9 +579,7 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeaturePoints
         label ptI = pointTree().shapes().pointLabels()[index];
         const point& pt = points()[ptI];
 
-        pointIndexHit nearHit;
-
-        nearHit = pointIndexHit(true, pt, index);
+        pointIndexHit nearHit(true, pt, index);
 
         dynPointHit.append(nearHit);
     }
@@ -631,16 +629,12 @@ void Foam::extendedFeatureEdgeMesh::allNearestFeatureEdges
 
             label hitIndex = index + sliceStarts[i];
 
-            pointIndexHit nearHit;
-
-            if (!hitPoint.hit())
-            {
-                nearHit = pointIndexHit(false, hitPoint.missPoint(), hitIndex);
-            }
-            else
-            {
-                nearHit = pointIndexHit(true, hitPoint.hitPoint(), hitIndex);
-            }
+            pointIndexHit nearHit
+            (
+                hitPoint.hit(),
+                hitPoint.rawPoint(),
+                hitIndex
+            );
 
             dynEdgeHit.append(nearHit);
         }

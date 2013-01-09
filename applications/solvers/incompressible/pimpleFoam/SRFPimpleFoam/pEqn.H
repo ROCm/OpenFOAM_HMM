@@ -1,6 +1,6 @@
 volScalarField rAUrel(1.0/UrelEqn().A());
 volVectorField HbyA("HbyA", Urel);
-HbyA = rAUrel*(UrelEqn() == sources(Urel))().H();
+HbyA = rAUrel*(UrelEqn() == fvOptions(Urel))().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -42,4 +42,4 @@ p.relax();
 // Momentum corrector
 Urel = HbyA - rAUrel*fvc::grad(p);
 Urel.correctBoundaryConditions();
-sources.correct(Urel);
+fvOptions.correct(Urel);
