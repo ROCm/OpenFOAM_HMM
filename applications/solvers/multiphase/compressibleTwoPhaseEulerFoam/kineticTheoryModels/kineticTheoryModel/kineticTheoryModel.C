@@ -45,8 +45,8 @@ Foam::kineticTheoryModel::kineticTheoryModel
     phi1_(phase1.phi()),
     draga_(draga),
 
-    rho1_(phase1.rho()),
-    nu1_(phase1.nu()),
+    rho1_(phase1.rho()[0]), //***HGW
+    nu1_(phase1.nu()()[0]), //***HGW
 
     kineticTheoryProperties_
     (
@@ -120,7 +120,7 @@ Foam::kineticTheoryModel::kineticTheoryModel
     (
         IOobject
         (
-            "mu1",
+            "mu" + phase1.name(),
             U1_.time().timeName(),
             U1_.mesh(),
             IOobject::NO_READ,

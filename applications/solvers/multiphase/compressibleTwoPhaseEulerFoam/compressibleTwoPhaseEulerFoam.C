@@ -31,6 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+#include "rhoThermo.H"
 #include "nearWallDist.H"
 #include "wallFvPatch.H"
 #include "fixedValueFvsPatchFields.H"
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
             #include "alphaEqn.H"
             #include "kEpsilon.H"
             #include "interfacialCoeffs.H"
-            #include "TEqns.H"
+            #include "EEqns.H"
             #include "UEqns.H"
 
             // --- Pressure corrector loop

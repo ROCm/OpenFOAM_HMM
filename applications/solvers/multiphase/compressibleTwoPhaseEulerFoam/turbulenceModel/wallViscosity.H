@@ -2,13 +2,14 @@
     scalar Cmu25 = ::pow(Cmu.value(), 0.25);
     scalar kappa_ = kappa.value();
     scalar E_ = E.value();
-    scalar nu2_ = nu2.value();
 
     const fvPatchList& patches = mesh.boundary();
 
     forAll(patches, patchi)
     {
         const fvPatch& currPatch = patches[patchi];
+        const scalarField& mu2_ = thermo2.mu().boundaryField()[patchi];
+        const scalarField& rho2_ = rho2.boundaryField()[patchi];
 
         if (isA<wallFvPatch>(currPatch))
         {
@@ -20,11 +21,14 @@
 
                 // calculate yPlus
                 scalar yPlus =
-                    Cmu25*y[patchi][facei]*::sqrt(k[faceCelli])/nu2_;
+                    Cmu25*y[patchi][facei]*::sqrt(k[faceCelli])
+                   /(mu2_[facei]/rho2_[facei]);
 
                 if (yPlus > 11.6)
                 {
-                    nutw[facei] = nu2_*(yPlus*kappa_/::log(E_*yPlus) - 1);
+                    nutw[facei] =
+                        (mu2_[facei]/rho2_[facei])
+                       *(yPlus*kappa_/::log(E_*yPlus) - 1);
                 }
                 else
                 {

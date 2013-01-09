@@ -37,35 +37,22 @@ Foam::phaseModel::phaseModel
     const word& phaseName
 )
 :
-    dict_
+    volScalarField
     (
-        transportProperties.subDict("phase" + phaseName)
+        IOobject
+        (
+            "alpha" + phaseName,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("alpha", dimless, 0)
     ),
     name_(phaseName),
-    nu_
-    (
-        "nu",
-        dimensionSet(0, 2, -1, 0, 0),
-        dict_.lookup("nu")
-    ),
-    kappa_
-    (
-        "kappa",
-        dimensionSet(1, 1, -3, -1, 0),
-        dict_.lookup("kappa")
-    ),
-    Cp_
-    (
-        "Cp",
-        dimensionSet(0, 2, -2, -1, 0),
-        dict_.lookup("Cp")
-    ),
-    rho_
-    (
-        "rho",
-        dimDensity,
-        dict_.lookup("rho")
-    ),
+    phaseDict_(transportProperties.subDict(phaseName)),
+    thermo_(rhoThermo::New(mesh, phaseName)),
     U_
     (
         IOobject
@@ -79,6 +66,8 @@ Foam::phaseModel::phaseModel
         mesh
     )
 {
+    thermo_->validate("phaseModel " + phaseName, "h", "e");
+
     const word phiName = "phi" + phaseName;
 
     IOobject phiHeader
@@ -147,7 +136,7 @@ Foam::phaseModel::phaseModel
 
     dPtr_ = diameterModel::New
     (
-        dict_,
+        phaseDict_,
         *this
     );
 }

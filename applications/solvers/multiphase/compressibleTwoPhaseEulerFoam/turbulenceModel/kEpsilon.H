@@ -61,4 +61,4 @@ if (turbulence)
     #include "wallViscosity.H"
 }
 
-nuEff2 = nut2 + nu2;
+nuEff2 = nut2 + thermo2.mu()/rho2;
