@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -218,7 +218,7 @@ extern messageStream Info;
  * Report an error message using Foam::SeriousError for functionName in
  * file __FILE__ at line __LINE__
 */
-#define SeriousErrorIn(fn) \
+#define SeriousErrorIn(fn)                                                    \
     ::Foam::SeriousError((fn), __FILE__, __LINE__)
 
 /**
@@ -227,7 +227,7 @@ extern messageStream Info;
  * file __FILE__ at line __LINE__
  * for a particular IOstream
 */
-#define SeriousIOErrorIn(fn, ios) \
+#define SeriousIOErrorIn(fn, ios)                                             \
     ::Foam::SeriousError((fn), __FILE__, __LINE__, ios)
 
 /**
@@ -235,7 +235,7 @@ extern messageStream Info;
  * Report a warning using Foam::Warning for functionName in
  * file __FILE__ at line __LINE__
 */
-#define WarningIn(fn) \
+#define WarningIn(fn)                                                         \
     ::Foam::Warning((fn), __FILE__, __LINE__)
 
 /**
@@ -244,7 +244,7 @@ extern messageStream Info;
  * file __FILE__ at line __LINE__
  * for a particular IOstream
 */
-#define IOWarningIn(fn, ios) \
+#define IOWarningIn(fn, ios)                                                  \
     ::Foam::Warning((fn), __FILE__, __LINE__, (ios))
 
 /**
@@ -252,7 +252,7 @@ extern messageStream Info;
  * Report a information message using Foam::Info for functionName in
  * file __FILE__ at line __LINE__
 */
-#define InfoIn(fn) \
+#define InfoIn(fn)                                                            \
     ::Foam::Info((fn), __FILE__, __LINE__)
 
 /**
@@ -261,7 +261,7 @@ extern messageStream Info;
  * file __FILE__ at line __LINE__
  * for a particular IOstream
 */
-#define IOInfoIn(fn, ios) \
+#define IOInfoIn(fn, ios)                                                     \
     ::Foam::Info((fn), __FILE__, __LINE__, (ios))
 
 /**
@@ -269,9 +269,16 @@ extern messageStream Info;
  * Report a variable name and value using Foam::Pout in
  * file __FILE__ at line __LINE__
 */
-#define Debug(var) \
-    ::Foam::Pout<< "["<< __FILE__ << ":" << __LINE__ << "] " \
+#define Debug(var)                                                            \
+    ::Foam::Pout<< "["<< __FILE__ << ":" << __LINE__ << "] "                  \
         << #var " = " << var << ::Foam::endl
+
+/**
+ * \def IInfo
+ * Indented Info
+*/
+#define IInfo                                                                 \
+    ::Foam::Info<< indent
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
