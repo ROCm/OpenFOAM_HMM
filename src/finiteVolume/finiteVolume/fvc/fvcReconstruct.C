@@ -56,6 +56,48 @@ reconstruct
 
     const fvMesh& mesh = ssf.mesh();
 
+    surfaceVectorField faceVols
+    (
+        mesh.Sf()/(mesh.magSf()*mesh.nonOrthDeltaCoeffs())
+    );
+
+    faceVols.internalField() *= (1.0 -  mesh.weights().internalField());
+    forAll(faceVols.boundaryField(), patchi)
+    {
+        if (faceVols.boundaryField()[patchi].coupled())
+        {
+            faceVols.boundaryField()[patchi] *=
+                (1.0 -  mesh.weights().boundaryField()[patchi]);
+        }
+    }
+
+    tmp<GeometricField<GradType, fvPatchField, volMesh> > treconField
+    (
+        new GeometricField<GradType, fvPatchField, volMesh>
+        (
+            IOobject
+            (
+                "volIntegrate("+ssf.name()+')',
+                ssf.instance(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            inv(surfaceSum(mesh.Sf()*faceVols))&surfaceSum(faceVols*ssf),
+            zeroGradientFvPatchField<GradType>::typeName
+        )
+    );
+
+    treconField().correctBoundaryConditions();
+
+    return treconField;
+}
+/*
+{
+    typedef typename outerProduct<vector, Type>::type GradType;
+
+    const fvMesh& mesh = ssf.mesh();
+
     tmp<GeometricField<GradType, fvPatchField, volMesh> > treconField
     (
         new GeometricField<GradType, fvPatchField, volMesh>
@@ -78,6 +120,7 @@ reconstruct
 
     return treconField;
 }
+*/
 
 
 template<class Type>
