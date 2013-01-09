@@ -15,16 +15,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
+phases (air water);
+
+air
 {
-    rho             1;
-    rho0            0;
-    R               287;
-    Cp              1007;
-
-    nu              1.589e-05;
-    kappa           2.63e-2;
-
     diameterModel   isothermal;
     isothermalCoeffs
     {
@@ -33,15 +27,9 @@ phase1
     }
 }
 
-phase2
+water
 {
-    rho             1027;
-    rho0            1027;
-    R               1e10;
-    Cp              4195;
-
-    nu              3.55e-7;
-    kappa           0.668;
+    //R               1e10;
 
     diameterModel constant;
     constantCoeffs
