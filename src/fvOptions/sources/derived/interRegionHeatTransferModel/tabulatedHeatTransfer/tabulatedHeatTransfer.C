@@ -115,15 +115,9 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
 
     const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>(UName_);
 
-    scalarField UMagNbrMapped(htc_.internalField().size(), 0.0);
+    const scalarField UMagNbr(mag(UNbr));
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        UMagNbrMapped,
-        mag(UNbr),
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
+    const scalarField UMagNbrMapped(interpolate(UMagNbr));
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
@@ -134,7 +128,7 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
         htcc[i] = hTable()(mag(U[i]), UMagNbrMapped[i]);
     }
 
-    htcc = htcc*AoV()*secondaryToPrimaryInterpPtr_->V()/mesh_.V();
+    htcc = htcc*AoV()*meshInterp().V()/mesh_.V();
 
     return htc_;
 }

@@ -109,24 +109,17 @@ Foam::fv::variableHeatTransfer::calculateHtc()
     const fluidThermo& nbrThermo =
         nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
 
-    const volVectorField& U = nbrMesh.lookupObject<volVectorField>(UName_);
+    const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>(UName_);
 
-    const volScalarField Re(mag(U)*ds_*nbrThermo.rho()/nbrTurb.mut());
+    const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
 
-    const volScalarField Nu(a_*pow(Re, b_)*pow(Pr_, c_));
+    const volScalarField NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
 
-    scalarField htcNbrMapped(htc_.internalField().size(), 0.0);
+    const scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        htcNbrMapped,
-        Nu*nbrTurb.kappaEff()/ds_,
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
+    const scalarField htcNbrMapped(interpolate(htcNbr));
 
-    htc_.internalField() =
-        htcNbrMapped*AoV_*secondaryToPrimaryInterpPtr_->V()/mesh_.V();
+    htc_.internalField() = htcNbrMapped*AoV_*meshInterp().V()/mesh_.V();
 
     return htc_;
 }

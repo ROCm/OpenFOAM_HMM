@@ -25,7 +25,7 @@ License
 
 #include "interRegionHeatTransferModel.H"
 #include "fluidThermo.H"
-#include "fvm.H"
+#include "fvmSup.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fvcVolumeIntegrate.H"
 #include "fvOptionList.H"
@@ -43,8 +43,13 @@ namespace fv
 
 // * * * * * * * * * * * *  Private member functions * * * * * * * * * * * //
 
-void Foam::fv::interRegionHeatTransferModel::check()
+void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 {
+    if (!firstIter_)
+    {
+        return;
+    }
+
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
     const optionList& fvOptions = nbrMesh.lookupObject<optionList>("fvOptions");
@@ -67,10 +72,12 @@ void Foam::fv::interRegionHeatTransferModel::check()
     if (!nbrModelFound)
     {
         FatalErrorIn("interRegionHeatTransferModel::check()")
-            << "Neighbour model name not found" << nbrModelName_
+            << "Neighbour model not found" << nbrModelName_
             << " in region " << nbrMesh.name() << nl
             << exit(FatalError);
     }
+
+    firstIter_ = false;
 }
 
 
@@ -85,7 +92,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 )
 :
     option(name, modelType, dict, mesh),
-    nbrModel_(),
+    nbrModel_(NULL),
     firstIter_(true),
     htc_
     (
@@ -132,18 +139,11 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     const label fieldI
 )
 {
-    if (!secondaryToPrimaryInterpPtr_.valid())
-    {
-        return;
-    }
-
-    if (firstIter_)
-    {
-        check();
-        firstIter_ = false;
-    }
+    setNbrModel();
 
     const volScalarField& h = eqn.psi();
+
+    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
     tmp<volScalarField> tTmapped
     (
@@ -157,8 +157,7 @@ void Foam::fv::interRegionHeatTransferModel::addSup
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh_,
-            dimensionedScalar("T", dimTemperature, 0.0)
+            T
         )
     );
 
@@ -168,23 +167,11 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const volScalarField& Tnbr = nbrMesh.lookupObject<volScalarField>("T");
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        Tmapped,
-        Tnbr,
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
+    interpolate(Tnbr, Tmapped.internalField());
 
     if (!master_)
     {
-        secondaryToPrimaryInterpPtr_->interpolateInternalField
-        (
-            htc_,
-            nbrModel_->calculateHtc(),
-            meshToMesh::CELL_VOLUME_WEIGHT,
-            eqOp<scalar>()
-        );
+        interpolate(nbrModel().calculateHtc()(), htc_);
     }
 
     if (debug)
@@ -226,7 +213,6 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     }
     else
     {
-        const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
         eqn += htc_*(Tmapped - T);
     }
 }

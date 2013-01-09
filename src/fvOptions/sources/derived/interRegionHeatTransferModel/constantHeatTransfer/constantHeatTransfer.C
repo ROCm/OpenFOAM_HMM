@@ -57,7 +57,7 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
     htcConst_(),
     AoV_()
 {
-    if (master_)
+    if (active() && master_)
     {
         htcConst_.reset
         (
@@ -95,12 +95,7 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
             htcConst_().dimensionedInternalField();
         const DimensionedField<scalar, volMesh>& AoVi =
             AoV_().dimensionedInternalField();
-        dimensionedScalar interVol
-        (
-            "V",
-            dimVolume,
-            secondaryToPrimaryInterpPtr_->V()
-        );
+        dimensionedScalar interVol("V", dimVolume, meshInterp().V());
 
         htc_.dimensionedInternalField() = htcConsti*AoVi*interVol/mesh.V();
         htc_.correctBoundaryConditions();
