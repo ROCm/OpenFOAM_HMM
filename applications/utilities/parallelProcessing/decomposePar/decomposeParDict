@@ -119,7 +119,10 @@ structuredCoeffs
 {
     // Patches to do 2D decomposition on. Structured mesh only; cells have
     // to be in 'columns' on top of patches.
-    patches     (bottomPatch);
+    patches     (movingWall);
+
+    // Method to use on the 2D subset
+    method      scotch;
 }
 
 //// Is the case distributed? Note: command-line argument -roots takes
