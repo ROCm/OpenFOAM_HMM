@@ -126,9 +126,15 @@ inline Foam::scalar& Foam::fv::option::duration()
 }
 
 
-inline const Foam::word Foam::fv::option::secondarySourceName() const
+inline const Foam::word& Foam::fv::option::nbrModelName() const
 {
-    return secondarySourceName_;
+    return nbrModelName_;
+}
+
+
+inline const Foam::word& Foam::fv::option::nbrRegionName() const
+{
+    return nbrRegionName_;
 }
 
 
@@ -136,12 +142,6 @@ inline const Foam::autoPtr<Foam::meshToMesh>
 Foam::fv::option::secondaryToPrimaryInterpPtr() const
 {
     return secondaryToPrimaryInterpPtr_;
-}
-
-
-inline const Foam::word Foam::fv::option::mapRegionName() const
-{
-    return mapRegionName_;
 }
 
 

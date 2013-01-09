@@ -110,7 +110,7 @@ Foam::fv::tabulatedHeatTransfer::~tabulatedHeatTransfer()
 const Foam::tmp<Foam::volScalarField>
 Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
-    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(mapRegionName());
+    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
     const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>("U");
 

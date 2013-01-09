@@ -131,14 +131,14 @@ protected:
 
         // Data for smMapRegion only
 
-            //- Mesh to mesh mapping for map optiom
+            //- Mesh to mesh mapping for map option
             autoPtr<meshToMesh> secondaryToPrimaryInterpPtr_;
 
-            //- Name of the source in the secondary mesh
-            word secondarySourceName_;
+            //- Name of the model in the neighbour mesh
+            word nbrModelName_;
 
-            //- Name of the region to map
-            word mapRegionName_;
+            //- Name of the neighbour region to map
+            word nbrRegionName_;
 
             //- Master or slave region
             bool master_;
@@ -288,15 +288,15 @@ public:
             //- Return const access to the total cell volume
             inline scalar V() const;
 
-            //- Return const access to the secondarySourceName
-            inline const word secondarySourceName() const;
+            //- Return const access to the neighbour model name
+            inline const word& nbrModelName() const;
+
+            //- Return const access to the neighbour region name
+            inline const word& nbrRegionName() const;
 
             //- Return const access to the mapToMap Ptr
             inline const autoPtr<meshToMesh>
                 secondaryToPrimaryInterpPtr() const;
-
-            //- Return const referenc to the mapRegion
-            inline const word mapRegionName() const;
 
             //- Return const access to the cell set
             inline const labelList& cells() const;

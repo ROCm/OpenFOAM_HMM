@@ -86,8 +86,8 @@ void Foam::fv::option::setSelection(const dictionary& dict)
         }
         case smMapRegion:
         {
-            dict_.lookup("secondarySourceName") >> secondarySourceName_;
-            dict_.lookup("mapRegionName") >> mapRegionName_;
+            dict_.lookup("nbrModelName") >> nbrModelName_;
+            dict_.lookup("nbrRegionName") >> nbrRegionName_;
             master_  = readBool(dict_.lookup("master"));
             break;
         }
@@ -128,7 +128,7 @@ void Foam::fv::option::setCellSet()
                 label globalCellI = returnReduce(cellI, maxOp<label>());
                 if (globalCellI < 0)
                 {
-                    WarningIn("option::setCellIds()")
+                    WarningIn("option::setCellSet()")
                         << "Unable to find owner cell for point " << points_[i]
                         << endl;
 
@@ -171,13 +171,13 @@ void Foam::fv::option::setCellSet()
             if (active_)
             {
                 Info<< indent << "- selecting inter region mapping" << endl;
-                const fvMesh& secondaryMesh =
-                    mesh_.time().lookupObject<fvMesh>(mapRegionName_);
+                const fvMesh& nbrMesh =
+                    mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-                boundBox primaryBB(mesh_.points(), false);
-                boundBox secondaryBB(secondaryMesh.points(), false);
+                boundBox BB(mesh_.points(), false);
+                boundBox nbrBB(nbrMesh.points(), false);
 
-                if (secondaryBB.overlaps(primaryBB))
+                if (nbrBB.overlaps(BB))
                 {
                     // Dummy patches
                     wordList cuttingPatches;
@@ -187,7 +187,7 @@ void Foam::fv::option::setCellSet()
                     (
                         new meshToMesh
                         (
-                            secondaryMesh,
+                            nbrMesh,
                             mesh_,
                             patchMap,
                             cuttingPatches
@@ -197,10 +197,9 @@ void Foam::fv::option::setCellSet()
                 else
                 {
                     FatalErrorIn("option::setCellSet()")
-                        << "regions dont overlap "
-                        << secondaryMesh.name()
-                        << " in region " << mesh_.name()
-                        << nl
+                        << "regions do not overlap "
+                        << nbrMesh.name()
+                        << " in region " << mesh_.name() << nl
                         << exit(FatalError);
                 }
             }
@@ -215,7 +214,7 @@ void Foam::fv::option::setCellSet()
         }
         default:
         {
-            FatalErrorIn("option::setCellIds()")
+            FatalErrorIn("option::setCellSet()")
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
                 << ". Valid selectionMode types are" << selectionModeTypeNames_
@@ -264,8 +263,8 @@ Foam::fv::option::option
     cellSetName_("none"),
     V_(0.0),
     secondaryToPrimaryInterpPtr_(),
-    secondarySourceName_("none"),
-    mapRegionName_("none"),
+    nbrModelName_("none"),
+    nbrRegionName_("none"),
     master_(false),
 
     fieldNames_(),

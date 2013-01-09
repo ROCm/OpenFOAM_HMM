@@ -96,12 +96,11 @@ Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 const Foam::tmp<Foam::volScalarField>
 Foam::fv::variableHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh =
-        mesh_.time().lookupObject<fvMesh>(mapRegionName());
+        mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
     const compressible::turbulenceModel& nbrTurb =
         nbrMesh.lookupObject<compressible::turbulenceModel>("turbulenceModel");
