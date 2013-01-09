@@ -59,5 +59,8 @@ $(meshToMesh)/meshToMesh.C
 $(meshToMesh)/calculateMeshToMeshAddressing.C
 $(meshToMesh)/calculateMeshToMeshWeights.C
 
+meshToMeshNew = meshToMeshInterpolation/meshToMeshNew
+$(meshToMeshNew)/meshToMeshNew.C
+$(meshToMeshNew)/meshToMeshNewParallelOps.C
 
 LIB = $(FOAM_LIBBIN)/libsampling
