@@ -94,6 +94,7 @@ Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
     hTable_(),
     AoV_(),
     startTimeName_(mesh.time().timeName())
@@ -113,7 +114,8 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
-    const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>(UName_);
+    const volVectorField& UNbr =
+        nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
     const scalarField UMagNbr(mag(UNbr));
 

@@ -55,7 +55,7 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
     a_(0),
     b_(0),
     c_(0),
@@ -109,7 +109,8 @@ Foam::fv::variableHeatTransfer::calculateHtc()
     const fluidThermo& nbrThermo =
         nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
 
-    const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>(UName_);
+    const volVectorField& UNbr =
+        nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
     const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
 
@@ -143,7 +144,7 @@ bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        coeffs_.readIfPresent("UName", UName_);
+        coeffs_.readIfPresent("UNbrName", UNbrName_);
 
         coeffs_.readIfPresent("a", a_);
         coeffs_.readIfPresent("b", b_);

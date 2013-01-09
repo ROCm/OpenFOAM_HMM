@@ -65,8 +65,8 @@ private:
 
     // Private data
 
-        //- Name of velocity field; default = U
-        word UName_;
+        //- Name of neighbour velocity field; default = U
+        word UNbrName_;
 
         //- Model constants
         scalar a_;

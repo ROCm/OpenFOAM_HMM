@@ -113,7 +113,9 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         ),
         zeroGradientFvPatchScalarField::typeName
     ),
-    semiImplicit_(false)
+    semiImplicit_(false),
+    TName_(coeffs_.lookupOrDefault<word>("TName", "T")),
+    TNbrName_(coeffs_.lookupOrDefault<word>("TNbrName", "T"))
 {
     if (active())
     {
@@ -143,7 +145,7 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const volScalarField& h = eqn.psi();
 
-    const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
+    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
 
     tmp<volScalarField> tTmapped
     (
@@ -165,7 +167,8 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-    const volScalarField& Tnbr = nbrMesh.lookupObject<volScalarField>("T");
+    const volScalarField& Tnbr =
+        nbrMesh.lookupObject<volScalarField>(TNbrName_);
 
     interpolate(Tnbr, Tmapped.internalField());
 

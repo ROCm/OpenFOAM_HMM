@@ -86,6 +86,12 @@ protected:
         //- Flag to activate semi-implicit coupling
         bool semiImplicit_;
 
+        //- Name of temperature field; default = "T"
+        word TName_;
+
+        //- Name of neighbour temperature field; default = "T"
+        word TNbrName_;
+
 
     // Protected member functions
 
