@@ -12,55 +12,43 @@
         )
     );
 
+    word phase1Name
+    (
+        transportProperties.found("phases")
+      ? wordList(transportProperties.lookup("phases"))[0]
+      : "phase1"
+    );
+
+    word phase2Name
+    (
+        transportProperties.found("phases")
+      ? wordList(transportProperties.lookup("phases"))[1]
+      : "phase2"
+    );
+
     autoPtr<phaseModel> phase1 = phaseModel::New
     (
         mesh,
         transportProperties,
-        "1"
+        phase1Name
     );
 
     autoPtr<phaseModel> phase2 = phaseModel::New
     (
         mesh,
         transportProperties,
-        "2"
+        phase2Name
     );
+
+    volScalarField& alpha1 = phase1();
+    volScalarField& alpha2 = phase2();
+    alpha2 = scalar(1) - alpha1;
 
     volVectorField& U1 = phase1->U();
     surfaceScalarField& phi1 = phase1->phi();
-    const dimensionedScalar& nu1 = phase1->nu();
-    const dimensionedScalar& k1 = phase1->kappa();
-    const dimensionedScalar& Cp1 = phase1->Cp();
-    dimensionedScalar rho10
-    (
-        "rho0",
-        dimDensity,
-        transportProperties.subDict("phase1").lookup("rho0")
-    );
-    dimensionedScalar R1
-    (
-        "R",
-        dimensionSet(0, 2, -2, -1, 0),
-        transportProperties.subDict("phase1").lookup("R")
-    );
 
     volVectorField& U2 = phase2->U();
     surfaceScalarField& phi2 = phase2->phi();
-    const dimensionedScalar& nu2 = phase2->nu();
-    const dimensionedScalar& k2 = phase2->kappa();
-    const dimensionedScalar& Cp2 = phase2->Cp();
-    dimensionedScalar rho20
-    (
-        "rho0",
-        dimDensity,
-        transportProperties.subDict("phase2").lookup("rho0")
-    );
-    dimensionedScalar R2
-    (
-        "R",
-        dimensionSet(0, 2, -2, -1, 0),
-        transportProperties.subDict("phase2").lookup("R")
-    );
 
     dimensionedScalar pMin
     (
@@ -69,102 +57,16 @@
         transportProperties.lookup("pMin")
     );
 
+    rhoThermo& thermo1 = phase1->thermo();
+    rhoThermo& thermo2 = phase2->thermo();
 
-    Info<< "Reading field T1" << endl;
-    volScalarField T1
-    (
-        IOobject
-        (
-            "T1",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
+    volScalarField& p = thermo1.p();
 
-    Info<< "Reading field T2" << endl;
-    volScalarField T2
-    (
-        IOobject
-        (
-            "T2",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
+    volScalarField rho1("rho" + phase1Name, thermo1.rho());
+    const volScalarField& psi1 = thermo1.psi();
 
-    volScalarField psi1
-    (
-        IOobject
-        (
-            "psi1",
-            runTime.timeName(),
-            mesh
-        ),
-        1.0/(R1*T1)
-    );
-
-    volScalarField psi2
-    (
-        IOobject
-        (
-            "psi2",
-            runTime.timeName(),
-            mesh
-        ),
-        1.0/(R2*T2)
-    );
-    psi2.oldTime();
-
-    Info<< "Reading field p\n" << endl;
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    volScalarField rho1("rho1", rho10 + psi1*p);
-    volScalarField rho2("rho2", rho20 + psi2*p);
-
-
-    Info<< "Reading field alpha1\n" << endl;
-    volScalarField alpha1
-    (
-        IOobject
-        (
-            "alpha1",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    volScalarField alpha2
-    (
-        IOobject
-        (
-            "alpha2",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        scalar(1) - alpha1
-    );
+    volScalarField rho2("rho" + phase2Name, thermo2.rho());
+    const volScalarField& psi2 = thermo2.psi();
 
     volVectorField U
     (
@@ -177,27 +79,6 @@
             IOobject::AUTO_WRITE
         ),
         alpha1*U1 + alpha2*U2
-    );
-
-    dimensionedScalar Cvm
-    (
-        "Cvm",
-        dimless,
-        transportProperties.lookup("Cvm")
-    );
-
-    dimensionedScalar Cl
-    (
-        "Cl",
-        dimless,
-        transportProperties.lookup("Cl")
-    );
-
-    dimensionedScalar Ct
-    (
-        "Ct",
-        dimless,
-        transportProperties.lookup("Ct")
     );
 
     surfaceScalarField phi
@@ -226,8 +107,6 @@
         alpha1*rho1 + alpha2*rho2
     );
 
-    #include "createRASTurbulence.H"
-
     Info<< "Calculating field DDtU1 and DDtU2\n" << endl;
 
     volVectorField DDtU1
@@ -247,6 +126,29 @@
 
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
+
+    dimensionedScalar Cvm
+    (
+        "Cvm",
+        dimless,
+        transportProperties.lookup("Cvm")
+    );
+
+    dimensionedScalar Cl
+    (
+        "Cl",
+        dimless,
+        transportProperties.lookup("Cl")
+    );
+
+    dimensionedScalar Ct
+    (
+        "Ct",
+        dimless,
+        transportProperties.lookup("Ct")
+    );
+
+    #include "createRASTurbulence.H"
 
     IOdictionary interfacialProperties
     (
@@ -297,8 +199,8 @@
     if
     (
         !(
-            dispersedPhase == "1"
-         || dispersedPhase == "2"
+            dispersedPhase == phase1Name
+         || dispersedPhase == phase2Name
          || dispersedPhase == "both"
         )
     )
@@ -337,7 +239,7 @@
     (
         IOobject
         (
-            "rAU1",
+            "rAU" + phase1Name,
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -387,5 +289,5 @@
     );
 
     Info<< "Creating field kinetic energy K\n" << endl;
-    volScalarField K1("K1", 0.5*magSqr(U1));
-    volScalarField K2("K2", 0.5*magSqr(U2));
+    volScalarField K1("K" + phase1Name, 0.5*magSqr(U1));
+    volScalarField K2("K" + phase2Name, 0.5*magSqr(U2));

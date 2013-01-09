@@ -9,46 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      transportProperties;
+    class       volScalarField;
+    object      Twater;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phases (air water);
+dimensions          [0 0 0 1 0 0 0];
 
-air
+internalField       uniform 350;
+
+boundaryField
 {
-    diameterModel   isothermal;
-    isothermalCoeffs
+    walls
     {
-        d0              3e-3;
-        p0              1e5;
+        type               zeroGradient;
+    }
+    outlet
+    {
+        type               inletOutlet;
+        phi                phiwater;
+        inletValue         uniform 300;
+        value              $internalField;
+    }
+    inlet
+    {
+        type               fixedValue;
+        value              $internalField;
+    }
+    frontAndBackPlanes
+    {
+        type               empty;
     }
 }
 
-water
-{
-    //R               1e10;
-
-    diameterModel constant;
-    constantCoeffs
-    {
-        d               1e-4;
-    }
-}
-
-// Virtual-mass ceofficient
-Cvm             0.5;
-
-// Lift coefficient
-Cl              0;
-
-// Dispersed-phase turbulence coefficient
-Ct              1;
-
-// Minimum allowable pressure
-pMin            10000;
-
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

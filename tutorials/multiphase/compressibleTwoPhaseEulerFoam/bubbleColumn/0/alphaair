@@ -1908,7 +1908,7 @@ boundaryField
     outlet
     {
         type            inletOutlet;
-        phi             phi1;
+        phi             phiair;
         inletValue      uniform 1;
         value           uniform 1;
     }
