@@ -25,9 +25,9 @@ Class
     Foam::fv::tabulatedHeatTransfer
 
 Description
-    Tabulated heat transfer model. The heat exchange area must be
-    provided. The 2D table look for heat transfer coefficients uses the
-    primary and secondary region velocities
+    Tabulated heat transfer model. The heat exchange area per unit volume
+    must be provided.  The 2D table returns the heat transfer coefficient
+    by querying the local and neighbour region velocities
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,6 +56,9 @@ class tabulatedHeatTransfer
 private:
 
     // Private data
+
+        //- Name of velocity field; default = U
+        word UName_;
 
         //- 2D look up table
         autoPtr<interpolation2DTable<scalar> > hTable_;
@@ -107,7 +110,7 @@ public:
             virtual void writeData(Ostream&) const;
 
             //- Read dictionary
-            virtual bool read(const dictionary& dict) ;
+            virtual bool read(const dictionary& dict);
 };
 
 

@@ -244,6 +244,98 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
 }
 
 
+template<class Type>
+template<class BinaryOp>
+Foam::label Foam::interpolation2DTable<Type>::Xi
+(
+    const BinaryOp& bop,
+    const scalar valueX,
+    const bool reverse
+) const
+{
+    const table& t = *this;
+
+    label limitI = 0;
+    if (reverse)
+    {
+        limitI = t.size() - 1;
+    }
+
+    if (bop(valueX, t[limitI].first()))
+    {
+        switch (boundsHandling_)
+        {
+            case interpolation2DTable::ERROR:
+            {
+                FatalErrorIn
+                (
+                    "Foam::label Foam::interpolation2DTable<Type>::Xi"
+                    "("
+                        "const BinaryOp&, "
+                        "const scalar, "
+                        "const bool"
+                    ") const"
+                )   << "value (" << valueX << ") out of bounds"
+                    << exit(FatalError);
+                break;
+            }
+            case interpolation2DTable::WARN:
+            {
+                WarningIn
+                (
+                    "Foam::label Foam::interpolation2DTable<Type>::Xi"
+                    "("
+                        "const BinaryOp&, "
+                        "const scalar, "
+                        "const bool"
+                )   << "value (" << valueX << ") out of bounds"
+                    << endl;
+                // fall-through to 'CLAMP'
+            }
+            case interpolation2DTable::CLAMP:
+            {
+                return limitI;
+            }
+            default:
+            {
+                FatalErrorIn
+                (
+                    "Foam::label Foam::interpolation2DTable<Type>::Xi"
+                    "("
+                        "const BinaryOp&, "
+                        "const scalar, "
+                        "const bool"
+                    ") const"
+                )
+                    << "Un-handled enumeration " << boundsHandling_
+                    << abort(FatalError);
+            }
+        }
+    }
+
+    label i = 0;
+    if (reverse)
+    {
+        label nX = t.size();
+        i = 0;
+        while ((i < nX) && (valueX > t[i].first()))
+        {
+            i++;
+        }
+    }
+    else
+    {
+        i = t.size() - 1;
+        while ((i > 0) && (valueX < t[i].first()))
+        {
+            i--;
+        }
+    }
+
+    return i;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -262,7 +354,7 @@ Type Foam::interpolation2DTable<Type>::operator()
     {
         WarningIn
         (
-            "Type Foam::interpolation2DMatrix<Type>::operator()"
+            "Type Foam::interpolation2DTable<Type>::operator()"
             "("
                 "const scalar, "
                 "const scalar"

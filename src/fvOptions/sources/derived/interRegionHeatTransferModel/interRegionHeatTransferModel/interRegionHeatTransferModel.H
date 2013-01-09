@@ -57,8 +57,8 @@ private:
 
     // Private data
 
-        //- Pointer to secondary interRegionHeatTransferModel
-        interRegionHeatTransferModel* secIrht_;
+        //- Pointer to neighbour interRegionHeatTransferModel
+        interRegionHeatTransferModel* nbrModel_;
 
         //- First iteration
         bool firstIter_;

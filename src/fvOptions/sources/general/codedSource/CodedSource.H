@@ -27,7 +27,7 @@ Class
 Description
     Constructs on-the-fly a new fvOption.
 
-    E.g. in constant/sourcesProperties
+    E.g. in system/fvOptions
 
     momentumSource
     {
