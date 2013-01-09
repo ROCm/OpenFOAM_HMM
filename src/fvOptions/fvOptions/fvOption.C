@@ -113,7 +113,7 @@ void Foam::fv::option::setCellSet()
     {
         case smPoints:
         {
-            Info<< indent << "- selecting cells using points" << endl;
+            IInfo<< "- selecting cells using points" << endl;
 
             labelHashSet selectedCells;
 
@@ -142,8 +142,7 @@ void Foam::fv::option::setCellSet()
         }
         case smCellSet:
         {
-            Info<< indent << "- selecting cells using cellSet "
-                << cellSetName_ << endl;
+            IInfo<< "- selecting cells using cellSet " << cellSetName_ << endl;
 
             cellSet selectedCells(mesh_, cellSetName_);
             cells_ = selectedCells.toc();
@@ -152,8 +151,8 @@ void Foam::fv::option::setCellSet()
         }
         case smCellZone:
         {
-            Info<< indent << "- selecting cells using cellZone "
-                << cellSetName_ << endl;
+            IInfo<< "- selecting cells using cellZone " << cellSetName_ << endl;
+
             label zoneID = mesh_.cellZones().findZoneID(cellSetName_);
             if (zoneID == -1)
             {
@@ -170,7 +169,8 @@ void Foam::fv::option::setCellSet()
         {
             if (active_)
             {
-                Info<< indent << "- selecting inter region mapping" << endl;
+                IInfo<< "- selecting inter region mapping" << endl;
+
                 const fvMesh& nbrMesh =
                     mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
@@ -197,8 +197,7 @@ void Foam::fv::option::setCellSet()
                 else
                 {
                     FatalErrorIn("option::setCellSet()")
-                        << "regions do not overlap "
-                        << nbrMesh.name()
+                        << "regions do not overlap " << nbrMesh.name()
                         << " in region " << mesh_.name() << nl
                         << exit(FatalError);
                 }
@@ -207,7 +206,7 @@ void Foam::fv::option::setCellSet()
         }
         case smAll:
         {
-            Info<< indent << "- selecting all cells" << endl;
+            IInfo<< "- selecting all cells" << endl;
             cells_ = identity(mesh_.nCells());
 
             break;
@@ -232,8 +231,7 @@ void Foam::fv::option::setCellSet()
         }
         reduce(V_, sumOp<scalar>());
 
-        Info<< indent << "- selected "
-            << returnReduce(cells_.size(), sumOp<label>())
+        IInfo<< "- selected " << returnReduce(cells_.size(), sumOp<label>())
             << " cell(s) with volume " << V_ << nl << endl;
     }
 }
@@ -256,17 +254,13 @@ Foam::fv::option::option
     active_(readBool(dict_.lookup("active"))),
     timeStart_(-1.0),
     duration_(0.0),
-    selectionMode_
-    (
-        selectionModeTypeNames_.read(dict_.lookup("selectionMode"))
-    ),
+    selectionMode_(selectionModeTypeNames_.read(dict_.lookup("selectionMode"))),
     cellSetName_("none"),
     V_(0.0),
     secondaryToPrimaryInterpPtr_(),
     nbrModelName_("none"),
     nbrRegionName_("none"),
     master_(false),
-
     fieldNames_(),
     applied_()
 {
@@ -275,12 +269,12 @@ Foam::fv::option::option
     if (dict_.readIfPresent("timeStart", timeStart_))
     {
         dict_.lookup("duration") >> duration_;
-        Info<< indent << "- applying source at time " << timeStart_
+        IInfo<< "- applying source at time " << timeStart_
             << " for duration " << duration_ << endl;
     }
     else
     {
-        Info<< indent<< "- applying source for all time" << endl;
+        IInfo<< "- applying source for all time" << endl;
     }
 
     setSelection(dict_);
@@ -302,7 +296,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 {
     word modelType(coeffs.lookup("type"));
 
-    Info<< "Selecting source model type " << modelType << endl;
+    IInfo<< "Selecting source model type " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -311,9 +305,8 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
     {
         FatalErrorIn
         (
-            "option::New(const name&, const dictionary&, const fvMesh&)"
-        )   << "Unknown Model type " << modelType
-            << nl << nl
+            "option::New(const word&, const dictionary&, const fvMesh&)"
+        )   << "Unknown Model type " << modelType << nl << nl
             << "Valid model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
