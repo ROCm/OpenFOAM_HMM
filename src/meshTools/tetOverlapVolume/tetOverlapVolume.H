@@ -48,7 +48,7 @@ class polyMesh;
 class tetPoints;
 
 /*---------------------------------------------------------------------------*\
-                         Class tetOverlapVolume Declaration
+                      Class tetOverlapVolume Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetOverlapVolume
@@ -94,6 +94,16 @@ public:
             const label cellBI
         ) const;
 
+        //- Return true if olverlap volume is greater than threshold
+        bool cellCellOverlapMinDecomp
+        (
+            const primitiveMesh& meshA,
+            const label cellAI,
+            const primitiveMesh& meshB,
+            const label cellBI,
+            const treeBoundBox& cellBbB,
+            const scalar threshold = 0.0
+        ) const;
 
         //- Calculates the overlap volume
         scalar cellCellOverlapVolumeMinDecomp
