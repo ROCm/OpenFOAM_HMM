@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,10 @@ Description
                                    - patches need not conform
                                    - uses AMI interpolation
         // - nearestFace         : nearest boundary face on any patch
+        // - nearestPatchPoint   : nearest patch point (for coupled points
+        //                         this might be any of the points so you have
+        //                         to guarantee the point data is synchronised
+        //                         beforehand)
         sampleMode nearestCell;
 
         // If sampleMod is nearestPatchFace : patch to find faces of
@@ -99,8 +103,9 @@ public:
         enum sampleMode
         {
             NEARESTCELL,         // nearest cell
-            NEARESTPATCHFACE,    // faces on selected patch
+            NEARESTPATCHFACE,    // nearest face on selected patch
             NEARESTPATCHFACEAMI, // nearest patch face + AMI interpolation
+            NEARESTPATCHPOINT,   // nearest point on selected patch
             NEARESTFACE          // nearest face
         };
 
@@ -112,7 +117,7 @@ public:
             NORMAL              // use face normal + distance
         };
 
-        static const NamedEnum<sampleMode, 4> sampleModeNames_;
+        static const NamedEnum<sampleMode, 5> sampleModeNames_;
 
         static const NamedEnum<offsetMode, 3> offsetModeNames_;
 
@@ -145,6 +150,27 @@ public:
         }
     };
 
+    class maxProcEqOp
+    {
+
+    public:
+
+        void operator()(nearInfo& x, const nearInfo& y) const
+        {
+            if (y.first().hit())
+            {
+                if (!x.first().hit())
+                {
+                    x = y;
+                }
+                else if (y.second().second() > x.second().second())
+                {
+                    x = y;
+                }
+            }
+        }
+    };
+
 
 protected:
 
@@ -159,7 +185,7 @@ protected:
         //- What to sample
         const sampleMode mode_;
 
-        //- Patch (only if NEARESTPATCHFACE)
+        //- Patch (if in sampleMode NEARESTPATCH*)
         const word samplePatch_;
 
         //- How to obtain samples
@@ -187,7 +213,7 @@ protected:
             mutable autoPtr<mapDistribute> mapPtr_;
 
 
-        // AMI interpolator
+        // AMI interpolator (only for NEARESTPATCHFACEAMI)
 
             //- Pointer to AMI interpolator
             mutable autoPtr<AMIPatchToPatchInterpolation> AMIPtr_;

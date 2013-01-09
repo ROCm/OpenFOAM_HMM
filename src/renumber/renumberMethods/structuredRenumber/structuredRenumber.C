@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -198,7 +198,7 @@ Foam::labelList Foam::structuredRenumber::renumber
         }
         else
         {
-            label layerI = cellData[cellI].distance()-1;
+            label layerI = cellData[cellI].distance();
             if (depthFirst_)
             {
                 orderedToOld[nLayers*cellData[cellI].data()+layerI] = cellI;

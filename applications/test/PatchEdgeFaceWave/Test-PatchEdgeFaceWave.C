@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
 #include "volFields.H"
 #include "PatchEdgeFaceWave.H"
 #include "patchEdgeFaceInfo.H"
-#include "patchDist.H"
+#include "patchPatchDist.H"
 
 using namespace Foam;
 
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
             << " from edges shared with patches " << otherPatchIDs
             << endl;
 
-        patchDist pwd(patch, otherPatchIDs);
+        patchPatchDist pwd(patch, otherPatchIDs);
 
         // Extract as patchField
         volScalarField vsf
