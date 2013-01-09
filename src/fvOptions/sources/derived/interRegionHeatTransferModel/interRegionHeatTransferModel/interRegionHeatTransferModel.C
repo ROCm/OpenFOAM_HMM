@@ -67,7 +67,7 @@ void Foam::fv::interRegionHeatTransferModel::check()
     if (!nbrModelFound)
     {
         FatalErrorIn("interRegionHeatTransferModel::check()")
-            << "Secondary source name not found" << nbrModelName_
+            << "Neighbour model name not found" << nbrModelName_
             << " in region " << nbrMesh.name() << nl
             << exit(FatalError);
     }
