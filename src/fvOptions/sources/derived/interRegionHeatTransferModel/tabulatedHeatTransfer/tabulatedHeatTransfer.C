@@ -109,8 +109,7 @@ Foam::fv::tabulatedHeatTransfer::~tabulatedHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::tabulatedHeatTransfer::calculateHtc()
+void Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
@@ -131,8 +130,6 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
     }
 
     htcc = htcc*AoV();
-
-    return htc_;
 }
 
 

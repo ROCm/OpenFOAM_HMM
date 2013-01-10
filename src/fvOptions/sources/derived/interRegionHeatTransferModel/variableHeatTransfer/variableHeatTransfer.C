@@ -97,8 +97,7 @@ Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::variableHeatTransfer::calculateHtc()
+void Foam::fv::variableHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh =
         mesh_.time().lookupObject<fvMesh>(nbrRegionName());
@@ -121,8 +120,6 @@ Foam::fv::variableHeatTransfer::calculateHtc()
     const scalarField htcNbrMapped(interpolate(htcNbr));
 
     htc_.internalField() = htcNbrMapped*AoV_;
-
-    return htc_;
 }
 
 

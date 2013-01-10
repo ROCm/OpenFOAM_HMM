@@ -41,7 +41,7 @@ namespace fv
 }
 
 
-// * * * * * * * * * * * *  Private member functions * * * * * * * * * * * //
+// * * * * * * * * * * * *  Protected member functions * * * * * * * * * * * //
 
 void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 {
@@ -71,13 +71,31 @@ void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 
     if (!nbrModelFound)
     {
-        FatalErrorIn("interRegionHeatTransferModel::check()")
+        FatalErrorIn("interRegionHeatTransferModel::setNbrModel()")
             << "Neighbour model not found" << nbrModelName_
             << " in region " << nbrMesh.name() << nl
             << exit(FatalError);
     }
 
     firstIter_ = false;
+}
+
+
+void Foam::fv::interRegionHeatTransferModel::correct()
+{
+    if (master_)
+    {
+        if (mesh_.time().timeIndex() != timeIndex_)
+        {
+            calculateHtc();
+            timeIndex_ = mesh_.time().timeIndex();
+        }
+    }
+    else
+    {
+        nbrModel().correct();
+        interpolate(nbrModel().htc(), htc_);
+    }
 }
 
 
@@ -94,6 +112,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
     option(name, modelType, dict, mesh),
     nbrModel_(NULL),
     firstIter_(true),
+    timeIndex_(-1),
     htc_
     (
         IOobject
@@ -143,6 +162,8 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 {
     setNbrModel();
 
+    correct();
+
     const volScalarField& h = eqn.psi();
 
     const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
@@ -171,11 +192,6 @@ void Foam::fv::interRegionHeatTransferModel::addSup
         nbrMesh.lookupObject<volScalarField>(TNbrName_);
 
     interpolate(Tnbr, Tmapped.internalField());
-
-    if (!master_)
-    {
-        interpolate(nbrModel().calculateHtc()(), htc_);
-    }
 
     if (debug)
     {

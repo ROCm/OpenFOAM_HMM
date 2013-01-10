@@ -68,19 +68,15 @@ private:
         //- First iteration
         bool firstIter_;
 
-
-    // Private members
-
-        //- Set the neighbour interRegionHeatTransferModel
-        void setNbrModel();
+        //- Time index - used for updating htc
+        label timeIndex_;
 
 
 protected:
 
     // Protected data
 
-        //- Heat transfer coefficient [W/m2/k] by area/volume [1/m]
-        // registered on the master mesh
+        //- Heat transfer coefficient [W/m2/k] times area/volume [1/m]
         volScalarField htc_;
 
         //- Flag to activate semi-implicit coupling
@@ -94,6 +90,12 @@ protected:
 
 
     // Protected member functions
+
+        //- Set the neighbour interRegionHeatTransferModel
+        void setNbrModel();
+
+        //- Correct to calculate the inter-region heat transfer coefficient
+        void correct();
 
         //- Interpolate field with nbrModel specified
         template<class Type>
@@ -168,7 +170,7 @@ public:
             virtual void addSup(fvMatrix<scalar>& eqn, const label fieldI);
 
             //- Calculate heat transfer coefficient
-            virtual const tmp<volScalarField> calculateHtc() = 0;
+            virtual void calculateHtc() = 0;
 
 
         // I-O
