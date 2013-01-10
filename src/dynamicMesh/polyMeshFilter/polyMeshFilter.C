@@ -35,6 +35,12 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+namespace Foam
+{
+defineTypeNameAndDebug(polyMeshFilter, 0);
+}
+
+
 Foam::autoPtr<Foam::fvMesh> Foam::polyMeshFilter::copyMesh(const fvMesh& mesh)
 {
     polyTopoChange originalMeshToNewMesh(mesh);

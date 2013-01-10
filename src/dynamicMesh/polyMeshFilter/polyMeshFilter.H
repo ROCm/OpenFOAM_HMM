@@ -199,6 +199,10 @@ class polyMeshFilter
 
 public:
 
+    //- Runtime type information
+    ClassName("polyMeshFilter");
+
+
     // Constructors
 
         //- Construct from fvMesh
