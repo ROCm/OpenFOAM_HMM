@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,9 +43,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const pointData& wDist)
     }
 }
 
+
 Foam::Istream& Foam::operator>>(Istream& is, pointData& wDist)
 {
     return is >> static_cast<pointEdgePoint&>(wDist) >> wDist.s_ >> wDist.v_;
 }
+
 
 // ************************************************************************* //
