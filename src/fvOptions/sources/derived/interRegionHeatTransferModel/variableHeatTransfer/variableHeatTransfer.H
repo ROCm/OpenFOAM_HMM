@@ -65,8 +65,8 @@ private:
 
     // Private data
 
-        //- Name of velocity field; default = U
-        word UName_;
+        //- Name of neighbour velocity field; default = U
+        word UNbrName_;
 
         //- Model constants
         scalar a_;
@@ -108,7 +108,7 @@ public:
     // Public Functions
 
         //- Calculate the heat transfer coefficient
-        virtual const tmp<volScalarField> calculateHtc();
+        virtual void calculateHtc();
 
 
         // I-O

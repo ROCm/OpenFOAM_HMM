@@ -86,9 +86,9 @@ void Foam::fv::option::setSelection(const dictionary& dict)
         }
         case smMapRegion:
         {
-            dict_.lookup("nbrModelName") >> nbrModelName_;
-            dict_.lookup("nbrRegionName") >> nbrRegionName_;
-            master_  = readBool(dict_.lookup("master"));
+            dict.lookup("nbrModelName") >> nbrModelName_;
+            dict.lookup("nbrRegionName") >> nbrRegionName_;
+            master_ = readBool(dict.lookup("master"));
             break;
         }
         case smAll:
@@ -131,7 +131,6 @@ void Foam::fv::option::setCellSet()
                     WarningIn("option::setCellSet()")
                         << "Unable to find owner cell for point " << points_[i]
                         << endl;
-
                 }
 
             }
@@ -167,40 +166,47 @@ void Foam::fv::option::setCellSet()
         }
         case smMapRegion:
         {
-            if (active_)
+            if (active_ && master_)
             {
                 IInfo<< "- selecting inter region mapping" << endl;
 
                 const fvMesh& nbrMesh =
                     mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-                boundBox BB(mesh_.points(), false);
-                boundBox nbrBB(nbrMesh.points(), false);
-
-                if (nbrBB.overlaps(BB))
+                if (mesh_.name() == nbrMesh.name())
                 {
-                    // Dummy patches
-                    wordList cuttingPatches;
-                    HashTable<word> patchMap;
+                    FatalErrorIn("option::setCellIds()")
+                        << "Inter-region model selected, but local and "
+                        << "neighbour regions are the same: " << nl
+                        << "    local region: " << mesh_.name() << nl
+                        << "    secondary region: " << nbrMesh.name() << nl
+                        << exit(FatalError);
+                }
 
-                    secondaryToPrimaryInterpPtr_.reset
+                if (mesh_.bounds().overlaps(nbrMesh.bounds()))
+                {
+                    meshInterpPtr_.reset
                     (
-                        new meshToMesh
+                        new meshToMeshNew
                         (
-                            nbrMesh,
                             mesh_,
-                            patchMap,
-                            cuttingPatches
+                            nbrMesh,
+                            meshToMeshNew::interpolationMethodNames_.read
+                            (
+                                dict_.lookup("interpolationMethod")
+                            )
                         )
                     );
                 }
                 else
                 {
                     FatalErrorIn("option::setCellSet()")
-                        << "regions do not overlap " << nbrMesh.name()
-                        << " in region " << mesh_.name() << nl
+                        << "regions " << mesh_.name() << " and "
+                        << nbrMesh.name() <<  " do not intersect"
                         << exit(FatalError);
                 }
+
+                V_ = meshInterpPtr_->V();
             }
             break;
         }
@@ -257,7 +263,7 @@ Foam::fv::option::option
     selectionMode_(selectionModeTypeNames_.read(dict_.lookup("selectionMode"))),
     cellSetName_("none"),
     V_(0.0),
-    secondaryToPrimaryInterpPtr_(),
+    meshInterpPtr_(),
     nbrModelName_("none"),
     nbrRegionName_("none"),
     master_(false),
@@ -296,7 +302,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 {
     word modelType(coeffs.lookup("type"));
 
-    IInfo<< "Selecting source model type " << modelType << endl;
+    IInfo<< "Selecting finite volume options model type " << modelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
@@ -317,12 +323,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 
 
 Foam::fv::option::~option()
-{
-    if (!secondaryToPrimaryInterpPtr_.empty())
-    {
-        secondaryToPrimaryInterpPtr_.clear();
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

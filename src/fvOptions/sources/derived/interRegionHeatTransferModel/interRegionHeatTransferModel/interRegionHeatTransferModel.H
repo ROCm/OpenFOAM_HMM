@@ -26,7 +26,12 @@ Class
 
 Description
     Base class for inter region heat exchange. The derived classes must
-    provide the heat transfer coefficient (htc)
+    provide the heat transfer coeffisine (htc) which is used as follows
+    in the energy equation.
+
+     \f[
+        -htc*Tmapped + Sp(htc, T)
+     \f]
 
 \*---------------------------------------------------------------------------*/
 
@@ -63,23 +68,66 @@ private:
         //- First iteration
         bool firstIter_;
 
-
-    // Private members
-
-        //- Check coupled interRegionHeatTransferModel
-        void check();
+        //- Time index - used for updating htc
+        label timeIndex_;
 
 
 protected:
 
     // Protected data
 
-        //- Heat transfer coefficient [W/m2/k] by area/volume [1/m]
-        // registered on the master mesh
+        //- Heat transfer coefficient [W/m2/k] times area/volume [1/m]
         volScalarField htc_;
 
         //- Flag to activate semi-implicit coupling
         bool semiImplicit_;
+
+        //- Name of temperature field; default = "T"
+        word TName_;
+
+        //- Name of neighbour temperature field; default = "T"
+        word TNbrName_;
+
+
+    // Protected member functions
+
+        //- Set the neighbour interRegionHeatTransferModel
+        void setNbrModel();
+
+        //- Correct to calculate the inter-region heat transfer coefficient
+        void correct();
+
+        //- Interpolate field with nbrModel specified
+        template<class Type>
+        tmp<Field<Type> > interpolate
+        (
+            const interRegionHeatTransferModel& nbrModel,
+            const Field<Type>& field
+        ) const;
+
+        //- Interpolate field without nbrModel specified
+        template<class Type>
+        tmp<Field<Type> > interpolate
+        (
+            const Field<Type>& field
+        ) const;
+
+        //- Interpolate field with nbrModel specified
+        template<class Type>
+        void interpolate
+        (
+            const interRegionHeatTransferModel& nbrModel,
+            const Field<Type>& field,
+            Field<Type>& result
+        ) const;
+
+        //- Interpolate field without nbrModel specified
+        template<class Type>
+        void interpolate
+        (
+            const Field<Type>& field,
+            Field<Type>& result
+        ) const;
 
 
 public:
@@ -110,16 +158,19 @@ public:
         // Access
 
             //- Return the heat transfer coefficient
-            const volScalarField& htc() const
-            {
-                return  htc_;
-            }
+            inline const volScalarField& htc() const;
+
+            //- Return const access to the neighbour model
+            inline const interRegionHeatTransferModel& nbrModel() const;
+
+            //- Return access to the neighbour model
+            inline interRegionHeatTransferModel& nbrModel();
 
             //-Source term to fvMatrix<scalar>
             virtual void addSup(fvMatrix<scalar>& eqn, const label fieldI);
 
             //- Calculate heat transfer coefficient
-            virtual const tmp<volScalarField> calculateHtc() = 0;
+            virtual void calculateHtc() = 0;
 
 
         // I-O
@@ -138,6 +189,17 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "interRegionHeatTransferModelI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "interRegionHeatTransferModelTemplates.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //

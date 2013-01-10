@@ -94,6 +94,7 @@ Foam::fv::tabulatedHeatTransfer::tabulatedHeatTransfer
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
     hTable_(),
     AoV_(),
     startTimeName_(mesh.time().timeName())
@@ -108,22 +109,16 @@ Foam::fv::tabulatedHeatTransfer::~tabulatedHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::tabulatedHeatTransfer::calculateHtc()
+void Foam::fv::tabulatedHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
-    const volVectorField& UNbr = nbrMesh.lookupObject<volVectorField>(UName_);
+    const volVectorField& UNbr =
+        nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
-    scalarField UMagNbrMapped(htc_.internalField().size(), 0.0);
+    const scalarField UMagNbr(mag(UNbr));
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        UMagNbrMapped,
-        mag(UNbr),
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
+    const scalarField UMagNbrMapped(interpolate(UMagNbr));
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
@@ -134,9 +129,7 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
         htcc[i] = hTable()(mag(U[i]), UMagNbrMapped[i]);
     }
 
-    htcc = htcc*AoV()*secondaryToPrimaryInterpPtr_->V()/mesh_.V();
-
-    return htc_;
+    htcc = htcc*AoV();
 }
 
 

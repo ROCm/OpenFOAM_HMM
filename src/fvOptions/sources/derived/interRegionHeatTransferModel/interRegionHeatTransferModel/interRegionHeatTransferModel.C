@@ -25,7 +25,7 @@ License
 
 #include "interRegionHeatTransferModel.H"
 #include "fluidThermo.H"
-#include "fvm.H"
+#include "fvmSup.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fvcVolumeIntegrate.H"
 #include "fvOptionList.H"
@@ -41,10 +41,15 @@ namespace fv
 }
 
 
-// * * * * * * * * * * * *  Private member functions * * * * * * * * * * * //
+// * * * * * * * * * * * *  Protected member functions * * * * * * * * * * * //
 
-void Foam::fv::interRegionHeatTransferModel::check()
+void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 {
+    if (!firstIter_)
+    {
+        return;
+    }
+
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
     const optionList& fvOptions = nbrMesh.lookupObject<optionList>("fvOptions");
@@ -66,10 +71,30 @@ void Foam::fv::interRegionHeatTransferModel::check()
 
     if (!nbrModelFound)
     {
-        FatalErrorIn("interRegionHeatTransferModel::check()")
-            << "Secondary source name not found" << nbrModelName_
+        FatalErrorIn("interRegionHeatTransferModel::setNbrModel()")
+            << "Neighbour model not found" << nbrModelName_
             << " in region " << nbrMesh.name() << nl
             << exit(FatalError);
+    }
+
+    firstIter_ = false;
+}
+
+
+void Foam::fv::interRegionHeatTransferModel::correct()
+{
+    if (master_)
+    {
+        if (mesh_.time().timeIndex() != timeIndex_)
+        {
+            calculateHtc();
+            timeIndex_ = mesh_.time().timeIndex();
+        }
+    }
+    else
+    {
+        nbrModel().correct();
+        interpolate(nbrModel().htc(), htc_);
     }
 }
 
@@ -85,8 +110,9 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 )
 :
     option(name, modelType, dict, mesh),
-    nbrModel_(),
+    nbrModel_(NULL),
     firstIter_(true),
+    timeIndex_(-1),
     htc_
     (
         IOobject
@@ -106,7 +132,9 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         ),
         zeroGradientFvPatchScalarField::typeName
     ),
-    semiImplicit_(false)
+    semiImplicit_(false),
+    TName_(coeffs_.lookupOrDefault<word>("TName", "T")),
+    TNbrName_(coeffs_.lookupOrDefault<word>("TNbrName", "T"))
 {
     if (active())
     {
@@ -132,18 +160,13 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     const label fieldI
 )
 {
-    if (!secondaryToPrimaryInterpPtr_.valid())
-    {
-        return;
-    }
+    setNbrModel();
 
-    if (firstIter_)
-    {
-        check();
-        firstIter_ = false;
-    }
+    correct();
 
     const volScalarField& h = eqn.psi();
+
+    const volScalarField& T = mesh_.lookupObject<volScalarField>(TName_);
 
     tmp<volScalarField> tTmapped
     (
@@ -157,8 +180,7 @@ void Foam::fv::interRegionHeatTransferModel::addSup
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh_,
-            dimensionedScalar("T", dimTemperature, 0.0)
+            T
         )
     );
 
@@ -166,26 +188,10 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
 
-    const volScalarField& Tnbr = nbrMesh.lookupObject<volScalarField>("T");
+    const volScalarField& Tnbr =
+        nbrMesh.lookupObject<volScalarField>(TNbrName_);
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        Tmapped,
-        Tnbr,
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
-
-    if (!master_)
-    {
-        secondaryToPrimaryInterpPtr_->interpolateInternalField
-        (
-            htc_,
-            nbrModel_->calculateHtc(),
-            meshToMesh::CELL_VOLUME_WEIGHT,
-            eqOp<scalar>()
-        );
-    }
+    interpolate(Tnbr, Tmapped.internalField());
 
     if (debug)
     {
@@ -226,7 +232,6 @@ void Foam::fv::interRegionHeatTransferModel::addSup
     }
     else
     {
-        const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
         eqn += htc_*(Tmapped - T);
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::tetOverlapVolume
 
 Description
-    Calculates overlap volume of two tets.
+    Calculates the overlap volume of two cells using tetrahedral decomposition
 
 SourceFiles
     tetOverlapVolume.C
@@ -48,14 +48,14 @@ class polyMesh;
 class tetPoints;
 
 /*---------------------------------------------------------------------------*\
-                         Class tetOverlapVolume Declaration
+                      Class tetOverlapVolume Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetOverlapVolume
 {
     // Private member functions
 
-        //- Tet Overlap Vol
+        //- Tet overlap volume
         scalar tetTetOverlapVol
         (
             const tetPoints& tetA,
@@ -94,6 +94,16 @@ public:
             const label cellBI
         ) const;
 
+        //- Return true if olverlap volume is greater than threshold
+        bool cellCellOverlapMinDecomp
+        (
+            const primitiveMesh& meshA,
+            const label cellAI,
+            const primitiveMesh& meshB,
+            const label cellBI,
+            const treeBoundBox& cellBbB,
+            const scalar threshold = 0.0
+        ) const;
 
         //- Calculates the overlap volume
         scalar cellCellOverlapVolumeMinDecomp
@@ -111,7 +121,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

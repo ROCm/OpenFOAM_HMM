@@ -57,7 +57,7 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
     htcConst_(),
     AoV_()
 {
-    if (master_)
+    if (active() && master_)
     {
         htcConst_.reset
         (
@@ -91,19 +91,7 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
             )
         );
 
-        const DimensionedField<scalar, volMesh>& htcConsti =
-            htcConst_().dimensionedInternalField();
-        const DimensionedField<scalar, volMesh>& AoVi =
-            AoV_().dimensionedInternalField();
-        dimensionedScalar interVol
-        (
-            "V",
-            dimVolume,
-            secondaryToPrimaryInterpPtr_->V()
-        );
-
-        htc_.dimensionedInternalField() = htcConsti*AoVi*interVol/mesh.V();
-        htc_.correctBoundaryConditions();
+        htc_ = htcConst_()*AoV_();
     }
 }
 
@@ -116,10 +104,9 @@ Foam::fv::constantHeatTransfer::~constantHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::constantHeatTransfer::calculateHtc()
+void Foam::fv::constantHeatTransfer::calculateHtc()
 {
-    return htc_;
+    // do nothing
 }
 
 

@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+airToporous
+{
+    type            constantHeatTransfer;
+    active          on;
+    selectionMode   mapRegion;
+    interpolationMethod cellVolumeWeight;
+    nbrModelName    porousToair;
+    nbrRegionName   porous;
+    master          false;
+
+    constantHeatTransferCoeffs
+    {
+        fieldNames      (h);
+        semiImplicit    no;
+    }
+}
+
+MRF1
+{
+    type            MRFSource;
+    active          true;
+    selectionMode   cellZone;
+    cellZone        rotor;
+
+    MRFSourceCoeffs
+    {
+        origin    (0.25 0.25 0.25);
+        axis      (0 0 1);
+        omega     5.305; // 500 rpm
+    }
+}
+
+// ************************************************************************* //

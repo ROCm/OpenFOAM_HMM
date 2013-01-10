@@ -55,7 +55,7 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
     a_(0),
     b_(0),
     c_(0),
@@ -97,8 +97,7 @@ Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::variableHeatTransfer::calculateHtc()
+void Foam::fv::variableHeatTransfer::calculateHtc()
 {
     const fvMesh& nbrMesh =
         mesh_.time().lookupObject<fvMesh>(nbrRegionName());
@@ -109,26 +108,18 @@ Foam::fv::variableHeatTransfer::calculateHtc()
     const fluidThermo& nbrThermo =
         nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
 
-    const volVectorField& U = nbrMesh.lookupObject<volVectorField>(UName_);
+    const volVectorField& UNbr =
+        nbrMesh.lookupObject<volVectorField>(UNbrName_);
 
-    const volScalarField Re(mag(U)*ds_*nbrThermo.rho()/nbrTurb.mut());
+    const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
 
-    const volScalarField Nu(a_*pow(Re, b_)*pow(Pr_, c_));
+    const volScalarField NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
 
-    scalarField htcNbrMapped(htc_.internalField().size(), 0.0);
+    const scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
 
-    secondaryToPrimaryInterpPtr_->interpolateInternalField
-    (
-        htcNbrMapped,
-        Nu*nbrTurb.kappaEff()/ds_,
-        meshToMesh::MAP,
-        eqOp<scalar>()
-    );
+    const scalarField htcNbrMapped(interpolate(htcNbr));
 
-    htc_.internalField() =
-        htcNbrMapped*AoV_*secondaryToPrimaryInterpPtr_->V()/mesh_.V();
-
-    return htc_;
+    htc_.internalField() = htcNbrMapped*AoV_;
 }
 
 
@@ -150,7 +141,7 @@ bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        coeffs_.readIfPresent("UName", UName_);
+        coeffs_.readIfPresent("UNbrName", UNbrName_);
 
         coeffs_.readIfPresent("a", a_);
         coeffs_.readIfPresent("b", b_);

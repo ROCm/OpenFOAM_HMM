@@ -87,7 +87,7 @@ public:
     // Public Functions
 
         //- Calculate the heat transfer coefficient
-        virtual const tmp<volScalarField> calculateHtc();
+        virtual void calculateHtc();
 
 
         // I-O

@@ -60,6 +60,9 @@ private:
         //- Name of velocity field; default = U
         word UName_;
 
+        //- Name of neighbour velocity field; default = U
+        word UNbrName_;
+
         //- 2D look up table
         autoPtr<interpolation2DTable<scalar> > hTable_;
 
@@ -101,7 +104,7 @@ public:
     // Public Functions
 
         //- Calculate the heat transfer coefficient
-        virtual const tmp<volScalarField> calculateHtc();
+        virtual void calculateHtc();
 
 
         // I-O

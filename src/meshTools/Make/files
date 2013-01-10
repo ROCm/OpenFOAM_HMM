@@ -201,4 +201,6 @@ regionCoupled/GAMG/interfaces/regionCoupledGAMGInterface/regionCoupledWallGAMGIn
 regionCoupled/GAMG/interfaceFields/regionCoupledGAMGInterfaceField/regionCoupledGAMGInterfaceField.C
 regionCoupled/GAMG/interfaceFields/regionCoupledGAMGInterfaceField/regionCoupledWallGAMGInterfaceField.C
 
+tetOverlapVolume/tetOverlapVolume.C
+
 LIB = $(FOAM_LIBBIN)/libmeshTools
