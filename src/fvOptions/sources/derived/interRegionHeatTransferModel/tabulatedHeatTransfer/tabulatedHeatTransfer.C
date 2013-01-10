@@ -130,7 +130,7 @@ Foam::fv::tabulatedHeatTransfer::calculateHtc()
         htcc[i] = hTable()(mag(U[i]), UMagNbrMapped[i]);
     }
 
-    htcc = htcc*AoV()*meshInterp().V()/mesh_.V();
+    htcc = htcc*AoV();
 
     return htc_;
 }

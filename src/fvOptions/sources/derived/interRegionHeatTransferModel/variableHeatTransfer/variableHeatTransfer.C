@@ -120,7 +120,7 @@ Foam::fv::variableHeatTransfer::calculateHtc()
 
     const scalarField htcNbrMapped(interpolate(htcNbr));
 
-    htc_.internalField() = htcNbrMapped*AoV_*meshInterp().V()/mesh_.V();
+    htc_.internalField() = htcNbrMapped*AoV_;
 
     return htc_;
 }

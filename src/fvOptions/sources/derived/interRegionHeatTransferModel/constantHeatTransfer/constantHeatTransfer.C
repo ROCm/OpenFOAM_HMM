@@ -97,7 +97,7 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
             AoV_().dimensionedInternalField();
         dimensionedScalar interVol("V", dimVolume, meshInterp().V());
 
-        htc_.dimensionedInternalField() = htcConsti*AoVi*interVol/mesh.V();
+        htc_.dimensionedInternalField() = htcConsti*AoVi;
         htc_.correctBoundaryConditions();
     }
 }
