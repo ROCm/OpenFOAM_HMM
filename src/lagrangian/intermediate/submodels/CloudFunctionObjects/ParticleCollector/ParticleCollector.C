@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -404,20 +404,23 @@ void Foam::ParticleCollector<CloudType>::write()
     }
 
 
-    Field<scalar> faceMassTotal(mass_.size());
-    Field<scalar> faceMassFlowRate(massFlowRate_.size());
+    Field<scalar> faceMassTotal(mass_.size(), 0.0);
+    this->getModelProperty("massTotal", faceMassTotal);
+
+    Field<scalar> faceMassFlowRate(massFlowRate_.size(), 0.0);
+    this->getModelProperty("massFlowRate", faceMassFlowRate);
 
     forAll(faces_, faceI)
     {
         scalarList allProcMass(Pstream::nProcs());
         allProcMass[procI] = massTotal_[faceI];
         Pstream::gatherList(allProcMass);
-        faceMassTotal[faceI] = sum(allProcMass);
+        faceMassTotal[faceI] += sum(allProcMass);
 
         scalarList allProcMassFlowRate(Pstream::nProcs());
         allProcMassFlowRate[procI] = massFlowRate_[faceI];
         Pstream::gatherList(allProcMassFlowRate);
-        faceMassFlowRate[faceI] = sum(allProcMassFlowRate);
+        faceMassFlowRate[faceI] += sum(allProcMassFlowRate);
 
         Info<< "    face " << faceI
             << ": total mass = " << faceMassTotal[faceI]
@@ -470,20 +473,25 @@ void Foam::ParticleCollector<CloudType>::write()
 
     if (resetOnWrite_)
     {
-        forAll(faces_, faceI)
-        {
-            massFlowRate_[faceI] = 0.0;
-        }
+        Field<scalar> dummy(faceMassTotal.size(), 0.0);
+        this->setModelProperty("massTotal", dummy);
+        this->setModelProperty("massFlowRate", dummy);
+
         timeOld_ = timeNew;
         totalTime_ = 0.0;
+    }
+    else
+    {
+        this->setModelProperty("massTotal", faceMassTotal);
+        this->setModelProperty("massFlowRate", faceMassFlowRate);
     }
 
     forAll(faces_, faceI)
     {
         mass_[faceI] = 0.0;
+        massTotal_[faceI] = 0.0;
+        massFlowRate_[faceI] = 0.0;
     }
-
-    // writeProperties();
 }
 
 
@@ -552,8 +560,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         (
             "Foam::ParticleCollector<CloudType>::ParticleCollector"
             "("
-                "const dictionary& dict,"
-                "CloudType& owner"
+                "const dictionary&,"
+                "CloudType&"
             ")"
         )
             << "Unknown mode " << mode << ".  Available options are "
@@ -565,8 +573,6 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     massFlowRate_.setSize(faces_.size(), 0.0);
 
     makeLogFile(faces_, points_, area_);
-
-    // readProperties(); AND initialise mass... fields
 }
 
 
