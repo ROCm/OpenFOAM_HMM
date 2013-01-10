@@ -20,7 +20,7 @@ airToporous
     type            constantHeatTransfer;
     active          on;
     selectionMode   mapRegion;
-    consistentMeshes no;
+    interpolationMethod cellVolumeWeight;
     nbrModelName    porousToair;
     nbrRegionName   porous;
     master          false;
