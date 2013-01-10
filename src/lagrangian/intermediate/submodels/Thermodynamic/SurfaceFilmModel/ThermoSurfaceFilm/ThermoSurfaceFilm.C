@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -572,7 +572,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
     regionModels::surfaceFilmModels::surfaceFilmModel& filmModel =
         const_cast<regionModels::surfaceFilmModels::surfaceFilmModel&>
         (
-            this->owner().db().objectRegistry::template
+            this->owner().db().time().objectRegistry::template
                 lookupObject<regionModels::surfaceFilmModels::surfaceFilmModel>
                 (
                     "surfaceFilmProperties"
