@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,7 @@ Foam::fieldAverageItem::fieldAverageItem(Istream& is)
     entry.lookup("prime2Mean") >> prime2Mean_;
     base_ = baseTypeNames_[entry.lookup("base")];
     window_ = entry.lookupOrDefault<scalar>("window", -1.0);
+    windowName_ = entry.lookupOrDefault<word>("windowName", "");
 }
 
 
@@ -66,6 +67,7 @@ Foam::Istream& Foam::operator>>(Istream& is, fieldAverageItem& faItem)
     entry.lookup("prime2Mean") >> faItem.prime2Mean_;
     faItem.base_ = faItem.baseTypeNames_[entry.lookup("base")];
     faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
+    faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");
 
     return is;
 }
@@ -90,6 +92,12 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fieldAverageItem& faItem)
     {
         os.writeKeyword("window") << faItem.window_
             << token::END_STATEMENT << nl;
+
+        if (faItem.windowName_ != "")
+        {
+            os.writeKeyword("windowName") << faItem.windowName_
+                << token::END_STATEMENT << nl;
+        }
     }
 
     os  << token::END_BLOCK << nl;
