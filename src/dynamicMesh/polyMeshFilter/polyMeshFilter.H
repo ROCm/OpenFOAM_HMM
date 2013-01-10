@@ -25,6 +25,10 @@ Class
     Foam::polyMeshFilter
 
 Description
+    Filter the edges and faces of a polyMesh whilst satisfying the given mesh
+    quality criteria.
+
+    Works on a copy of the mesh.
 
 SourceFiles
     polyMeshFilter.C
@@ -102,9 +106,9 @@ class polyMeshFilter
         //  faces
         const scalar faceReductionFactor_;
 
-        //-
+        //- Maximum number of times a deleted point can be associated with the
+        //  creation of a bad face it is forced to be kept.
         const label maxPointErrorCount_;
-
 
         //- The minimum edge length for each edge
         scalarField minEdgeLen_;
@@ -225,6 +229,7 @@ public:
             //- Filter edges only.
             label filterEdges(const label nOriginalBadFaces);
 
+            //- Filter all faces that are in the face zone indirectPatchFaces
             label filterIndirectPatchFaces();
 };
 

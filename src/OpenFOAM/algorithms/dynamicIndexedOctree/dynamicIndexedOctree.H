@@ -25,7 +25,8 @@ Class
     Foam::dynamicIndexedOctree
 
 Description
-    Non-pointer based hierarchical recursive searching
+    Non-pointer based hierarchical recursive searching.
+    Storage is dynamic, so elements can be deleted.
 
 SourceFiles
     dynamicIndexedOctree.C
@@ -451,6 +452,7 @@ public:
             );
         }
 
+
     // Member Functions
 
         // Access
@@ -656,6 +658,7 @@ public:
 
             label removeIndex(const label nodIndex, const label index);
 
+
         // Write
 
             //- Print tree. Either print all indices (printContent = true) or
@@ -670,6 +673,7 @@ public:
             bool write(Ostream& os) const;
 
             void writeTreeInfo() const;
+
 
     // IOstream Operators
 
