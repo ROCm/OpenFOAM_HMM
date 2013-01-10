@@ -27,6 +27,9 @@ Class
 Description
     mesh to mesh interpolation class.
 
+Note
+    This class is due to be deprecated in favour of meshToMeshNew
+
 SourceFiles
     meshToMesh.C
     calculateMeshToMeshAddressing.C

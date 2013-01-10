@@ -39,6 +39,20 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(meshToMeshNew, 0);
+
+    template<>
+    const char* Foam::NamedEnum
+    <
+        Foam::meshToMeshNew::interpolationMethod,
+        2
+    >::names[] =
+    {
+        "map",
+        "cellVolumeWeight"
+    };
+
+    const NamedEnum<meshToMeshNew::interpolationMethod, 2>
+        meshToMeshNew::interpolationMethodNames_;
 }
 
 Foam::scalar Foam::meshToMeshNew::tolerance_ = 1e-6;
@@ -707,22 +721,40 @@ void Foam::meshToMeshNew::calcAddressing
     }
 
 
-    if (directMapping_)
+    switch (method_)
     {
-        calcDirect(src, tgt, srcSeedI, tgtSeedI);
-    }
-    else
-    {
-        calcIndirect
-        (
-            src,
-            tgt,
-            srcSeedI,
-            tgtSeedI,
-            srcCellIDs,
-            mapFlag,
-            startSeedI
-        );
+        case imMap:
+        {
+            calcDirect(src, tgt, srcSeedI, tgtSeedI);
+            break;
+        }
+        case imCellVolumeWeight:
+        {
+            calcIndirect
+            (
+                src,
+                tgt,
+                srcSeedI,
+                tgtSeedI,
+                srcCellIDs,
+                mapFlag,
+                startSeedI
+            );
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "void Foam::meshToMeshNew::calcAddressing"
+                "("
+                    "const polyMesh&, "
+                    "const polyMesh&"
+                ")"
+            )
+                << "Unknown interpolation method"
+                << abort(FatalError);
+        }
     }
 
 
@@ -739,7 +771,7 @@ Foam::meshToMeshNew::meshToMeshNew
 (
     const polyMesh& src,
     const polyMesh& tgt,
-    const bool directMapping
+    const interpolationMethod& method
 )
 :
     srcRegionName_(src.name()),
@@ -748,11 +780,11 @@ Foam::meshToMeshNew::meshToMeshNew
     tgtToSrcCellAddr_(),
     srcToTgtCellWght_(),
     tgtToSrcCellWght_(),
+    method_(method),
     V_(0.0),
     singleMeshProc_(-1),
     srcMapPtr_(NULL),
-    tgtMapPtr_(NULL),
-    directMapping_(directMapping)
+    tgtMapPtr_(NULL)
 {
     Info<< "Creating mesh-to-mesh addressing for " << src.name()
         << " and " << tgt.name() << " regions" << endl;

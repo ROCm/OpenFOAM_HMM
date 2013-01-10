@@ -395,27 +395,32 @@ void Foam::meshToMeshNew::interpolate
 
     if (interpPatches)
     {
-        if (directMapping_)
+        switch (method_)
         {
-            result.boundaryField() == field.boundaryField();
-        }
-        else
-        {
-            notImplemented
-            (
-                "void Foam::meshToMeshNew::interpolate"
-                "("
-                    "const GeometricField<Type, fvPatchField, volMesh>&, "
-                    "const CombineOp&, "
-                    "GeometricField<Type, fvPatchField, volMesh>&, "
-                    "const bool"
-                ") const - non-conformal patches"
-            )
+            case imMap:
+            {
+                result.boundaryField() == field.boundaryField();
+                break;
+            }
+            default:
+            {
+                notImplemented
+                (
+                    "void Foam::meshToMeshNew::interpolate"
+                    "("
+                        "const GeometricField<Type, fvPatchField, volMesh>&, "
+                        "const CombineOp&, "
+                        "GeometricField<Type, fvPatchField, volMesh>&, "
+                        "const bool"
+                    ") const - non-conformal patches"
+                )
 
-            // do something...
+                // do something...
+            }
         }
     }
 }
+
 
 template<class Type, class CombineOp>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh> >

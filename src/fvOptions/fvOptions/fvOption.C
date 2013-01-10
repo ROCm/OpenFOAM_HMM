@@ -191,7 +191,10 @@ void Foam::fv::option::setCellSet()
                         (
                             mesh_,
                             nbrMesh,
-                            readBool(dict_.lookup("consistentMeshes"))
+                            meshToMeshNew::interpolationMethodNames_.read
+                            (
+                                dict_.lookup("interpolationMethod")
+                            )
                         )
                     );
                 }
