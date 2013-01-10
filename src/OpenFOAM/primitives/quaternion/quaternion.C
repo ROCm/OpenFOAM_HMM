@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,21 +58,60 @@ Foam::quaternion Foam::slerp
     const scalar t
 )
 {
-    // Calculate angle between the quaternions
-    scalar cosHalfTheta = qa & qb;
+    return qa*pow((inv(qa)*qb), t);
+}
 
-    if (mag(cosHalfTheta) >= 1)
+
+Foam::quaternion Foam::exp(const quaternion& q)
+{
+    const scalar magV = mag(q.v());
+
+    if (magV == 0)
     {
-        return qa;
+        return quaternion(1, vector::zero);
     }
 
-    scalar halfTheta = acos(cosHalfTheta);
-    scalar sinHalfTheta = sqrt(1.0 - sqr(cosHalfTheta));
+    const scalar expW = exp(q.w());
 
-    scalar wa = sin((1 - t)*halfTheta)/sinHalfTheta;
-    scalar wb = sin(t*halfTheta)/sinHalfTheta;
+    return quaternion
+    (
+        expW*cos(magV),
+        expW*sin(magV)*q.v()/magV
+    );
+}
 
-    return wa*qa + wb*qb;
+
+Foam::quaternion Foam::pow(const quaternion& q, const label power)
+{
+    const scalar magQ = mag(q);
+    const scalar magV = mag(q.v());
+
+    quaternion powq(q.v());
+
+    if (magV != 0 && magQ != 0)
+    {
+        powq /= magV;
+        powq *= power*acos(q.w()/magQ);
+    }
+
+    return pow(magQ, power)*exp(powq);
+}
+
+
+Foam::quaternion Foam::pow(const quaternion& q, const scalar power)
+{
+    const scalar magQ = mag(q);
+    const scalar magV = mag(q.v());
+
+    quaternion powq(q.v());
+
+    if (magV != 0 && magQ != 0)
+    {
+        powq /= magV;
+        powq *= power*acos(q.w()/magQ);
+    }
+
+    return pow(magQ, power)*exp(powq);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -225,6 +225,15 @@ quaternion slerp
     const quaternion& qb,
     const scalar t
 );
+
+//- Exponent of a quaternion
+quaternion exp(const quaternion& q);
+
+//- Power of a quaternion
+quaternion pow(const quaternion& q, const label power);
+
+//- Power of a quaternion
+quaternion pow(const quaternion& q, const scalar power);
 
 //- Data associated with quaternion type are contiguous
 template<>
