@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -538,6 +538,9 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
     label cI
 )
 {
+    static label nWarnings = 0;
+    static const label maxWarnings = 100;
+
     const faceList& pFaces = mesh.faces();
     const labelList& pOwner = mesh.faceOwner();
 
@@ -553,19 +556,27 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
 
     if (tetBasePtI == -1)
     {
-        WarningIn
-        (
-            "Foam::List<Foam::tetIndices> "
-            "Foam::polyMeshTetDecomposition::faceTetIndices"
-            "("
-                "const polyMesh&, "
-                "label, "
-                "label"
-            ")"
-        )
-            << "No base point for face " << fI << ", " << f
-            << ", produces a valid tet decomposition."
-            << endl;
+        if (nWarnings < maxWarnings)
+        {
+            WarningIn
+            (
+                "Foam::List<Foam::tetIndices> "
+                "Foam::polyMeshTetDecomposition::faceTetIndices"
+                "("
+                    "const polyMesh&, "
+                    "label, "
+                    "label"
+                ")"
+            )   << "No base point for face " << fI << ", " << f
+                << ", produces a valid tet decomposition."
+                << endl;
+            nWarnings++;
+        }
+        if (nWarnings == maxWarnings)
+        {
+            Warning<< "Suppressing any further warnings." << endl;
+            nWarnings++;
+        }
 
         tetBasePtI = 0;
     }
