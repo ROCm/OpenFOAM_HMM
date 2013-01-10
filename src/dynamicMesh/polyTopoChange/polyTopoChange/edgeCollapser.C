@@ -35,6 +35,12 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+namespace Foam
+{
+defineTypeNameAndDebug(edgeCollapser, 0);
+}
+
+
 Foam::label Foam::edgeCollapser::longestEdge
 (
     const face& f,

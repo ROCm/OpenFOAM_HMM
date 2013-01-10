@@ -51,6 +51,7 @@ class patchToPoly2DMesh
 {
     // Private data
 
+        // Reference to the meshed surface
         const MeshedSurface<face>& patch_;
 
         const wordList& patchNames_;
@@ -62,11 +63,16 @@ class patchToPoly2DMesh
         const EdgeMap<label>& mapEdgesRegion_;
 
         pointField points_;
+
         faceList faces_;
+
         labelList owner_;
+
         labelList neighbour_;
 
-        //- Description of data_
+
+    // Private Member Functions
+
         void flipFaceOrder();
 
         void createNeighbours();
@@ -78,9 +84,6 @@ class patchToPoly2DMesh
         void addPatchFacesToOwner();
 
         void createPolyMeshComponents();
-
-
-    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         patchToPoly2DMesh(const patchToPoly2DMesh&);
@@ -110,47 +113,47 @@ public:
     // Member Functions
 
         // Access
-        pointField& points()
-        {
-            return points_;
-        }
 
-        faceList& faces()
-        {
-            return faces_;
-        }
+            pointField& points()
+            {
+                return points_;
+            }
 
-        labelList& owner()
-        {
-            return owner_;
-        }
+            faceList& faces()
+            {
+                return faces_;
+            }
 
-        labelList& neighbour()
-        {
-            return neighbour_;
-        }
+            labelList& owner()
+            {
+                return owner_;
+            }
 
-        const wordList& patchNames() const
-        {
-            return patchNames_;
-        }
+            labelList& neighbour()
+            {
+                return neighbour_;
+            }
 
-        const labelList& patchSizes() const
-        {
-            return patchSizes_;
-        }
+            const wordList& patchNames() const
+            {
+                return patchNames_;
+            }
 
-        const labelList& patchStarts() const
-        {
-            return patchStarts_;
-        }
-        // Check
+            const labelList& patchSizes() const
+            {
+                return patchSizes_;
+            }
+
+            const labelList& patchStarts() const
+            {
+                return patchStarts_;
+            }
+
 
         // Edit
-        void createMesh();
 
-        // Write
-
+            //- Create the mesh
+            void createMesh();
 };
 
 
