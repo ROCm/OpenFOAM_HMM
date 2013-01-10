@@ -111,6 +111,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 :
     option(name, modelType, dict, mesh),
     nbrModel_(NULL),
+    nbrModelName_(word::null),
     firstIter_(true),
     timeIndex_(-1),
     htc_
@@ -138,6 +139,8 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 {
     if (active())
     {
+        coeffs_.lookup("nbrModelName") >> nbrModelName_;
+
         coeffs_.lookup("fieldNames") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
 

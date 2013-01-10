@@ -86,7 +86,6 @@ void Foam::fv::option::setSelection(const dictionary& dict)
         }
         case smMapRegion:
         {
-            dict.lookup("nbrModelName") >> nbrModelName_;
             dict.lookup("nbrRegionName") >> nbrRegionName_;
             master_ = readBool(dict.lookup("master"));
             break;
@@ -264,7 +263,6 @@ Foam::fv::option::option
     cellSetName_("none"),
     V_(0.0),
     meshInterpPtr_(),
-    nbrModelName_("none"),
     nbrRegionName_("none"),
     master_(false),
     fieldNames_(),
