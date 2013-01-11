@@ -407,7 +407,7 @@ inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
 
     reduce(T, minOp<scalar>());
 
-    return max(0.0, T);
+    return min(0.0, T);
 }
 
 

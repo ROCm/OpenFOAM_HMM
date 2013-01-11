@@ -65,6 +65,9 @@ private:
         //- Pointer to neighbour interRegionHeatTransferModel
         interRegionHeatTransferModel* nbrModel_;
 
+        //- Name of the model in the neighbour mesh
+        word nbrModelName_;
+
         //- First iteration
         bool firstIter_;
 

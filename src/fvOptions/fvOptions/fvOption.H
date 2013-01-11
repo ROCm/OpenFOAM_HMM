@@ -134,9 +134,6 @@ protected:
             //- Mesh to mesh interpolation object
             autoPtr<meshToMeshNew> meshInterpPtr_;
 
-            //- Name of the model in the neighbour mesh
-            word nbrModelName_;
-
             //- Name of the neighbour region to map
             word nbrRegionName_;
 
@@ -194,7 +191,8 @@ public:
             const word& name,
             const word& modelType,
             const dictionary& dict,
-            const fvMesh& mesh
+            const fvMesh& mesh,
+            const bool master = false
         );
 
         //- Return clone
@@ -287,9 +285,6 @@ public:
 
             //- Return const access to the total cell volume
             inline scalar V() const;
-
-            //- Return const access to the neighbour model name
-            inline const word& nbrModelName() const;
 
             //- Return const access to the neighbour region name
             inline const word& nbrRegionName() const;

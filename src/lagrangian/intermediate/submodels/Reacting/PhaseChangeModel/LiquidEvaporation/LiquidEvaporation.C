@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -200,8 +200,8 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::dh
 (
     const label idc,
     const label idl,
-    const label p,
-    const label T
+    const scalar p,
+    const scalar T
 ) const
 {
     scalar dh = 0;
@@ -230,14 +230,31 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::dh
                 "("
                     "const label, "
                     "const label, "
-                    "const label, "
-                    "const label"
+                    "const scalar, "
+                    "const scalar"
                 ") const"
             )   << "Unknown enthalpyTransfer type" << abort(FatalError);
         }
     }
 
     return dh;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::LiquidEvaporation<CloudType>::TMax
+(
+    const scalar pIn,
+    const scalar TIn
+) const
+{
+    scalar T = -GREAT;
+    forAll(liquids_, i)
+    {
+        T = max(T, liquids_.properties()[i].pv(pIn, TIn));
+    }
+
+    return T;
 }
 
 
