@@ -105,9 +105,6 @@ void Foam::fv::interRegionExplicitPorositySource::initialise()
         ).ptr()
     ),
 
-    fieldNames_.setSize(1, UName_);
-    applied_.setSize(1, false);
-
     firstIter_ = false;
 }
 
@@ -128,7 +125,13 @@ Foam::fv::interRegionExplicitPorositySource::interRegionExplicitPorositySource
     UName_(coeffs_.lookupOrDefault<word>("UName", "U")),
     rhoName_(coeffs_.lookupOrDefault<word>("rhoName", "rho")),
     muName_(coeffs_.lookupOrDefault<word>("muName", "thermo:mu"))
-{}
+{
+    if (active_)
+    {
+        fieldNames_.setSize(1, UName_);
+        applied_.setSize(1, false);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
