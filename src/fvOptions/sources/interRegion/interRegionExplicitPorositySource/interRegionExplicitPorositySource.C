@@ -55,21 +55,21 @@ void Foam::fv::interRegionExplicitPorositySource::initialise()
         return;
     }
 
-    fvMesh& nbrMesh =
-        const_cast<fvMesh&>(mesh_.time().lookupObject<fvMesh>(nbrRegionName_));
-
-    cellZoneMesh& cellZones = nbrMesh.cellZones();
-
     const word zoneName(name_ + ".porous");
+
+    const fvMesh& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
+    const cellZoneMesh& cellZones = nbrMesh.cellZones();
     label zoneID = cellZones.findZoneID(zoneName);
 
     if (zoneID == -1)
     {
-        zoneID = cellZones.size();
+        cellZoneMesh& cz = const_cast<cellZoneMesh&>(cellZones);
 
-        cellZones.setSize(zoneID + 1);
+        zoneID = cz.size();
 
-        cellZones.set
+        cz.setSize(zoneID + 1);
+
+        cz.set
         (
             zoneID,
             new cellZone
@@ -81,7 +81,7 @@ void Foam::fv::interRegionExplicitPorositySource::initialise()
             )
         );
 
-        cellZones.clearAddressing();
+        cz.clearAddressing();
     }
     else
     {
