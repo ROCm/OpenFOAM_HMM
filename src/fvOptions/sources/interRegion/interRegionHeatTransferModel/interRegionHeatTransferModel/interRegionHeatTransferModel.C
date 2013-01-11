@@ -109,7 +109,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh, readBool(dict.lookup("master"))),
     nbrModel_(NULL),
     nbrModelName_(word::null),
     firstIter_(true),
