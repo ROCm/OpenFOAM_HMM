@@ -149,6 +149,10 @@ public:
                //- The rotation tensor corresponding the quaternion
                inline tensor R() const;
 
+               //- Return a vector of euler angles (rotations in radians about
+               //  the x, y and z axes.
+               inline vector eulerAngles(const quaternion& q) const;
+
                inline quaternion normalized() const;
 
 

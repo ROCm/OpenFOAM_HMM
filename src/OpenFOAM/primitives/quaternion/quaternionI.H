@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -232,6 +232,58 @@ inline Foam::quaternion Foam::quaternion::invTransform
 }
 
 
+inline Foam::tensor Foam::quaternion::R() const
+{
+    scalar w2 = sqr(w());
+    scalar x2 = sqr(v().x());
+    scalar y2 = sqr(v().y());
+    scalar z2 = sqr(v().z());
+
+    scalar txy = 2*v().x()*v().y();
+    scalar twz = 2*w()*v().z();
+    scalar txz = 2*v().x()*v().z();
+    scalar twy = 2*w()*v().y();
+    scalar tyz = 2*v().y()*v().z();
+    scalar twx = 2*w()*v().x();
+
+    return tensor
+    (
+        w2 + x2 - y2 - z2,  txy - twz,          txz + twy,
+        txy + twz,          w2 - x2 + y2 - z2,  tyz - twx,
+        txz - twy,          tyz + twx,          w2 - x2 - y2 + z2
+    );
+}
+
+
+inline Foam::vector Foam::quaternion::eulerAngles(const quaternion& q) const
+{
+    vector angles(vector::zero);
+
+    const scalar& w = q.w();
+    const vector& v = q.v();
+
+    angles[0] = Foam::atan2
+    (
+        2*(w*v.x() + v.y()*v.z()),
+        1 - 2*(sqr(v.x()) + sqr(v.y()))
+    );
+    angles[1] = Foam::asin(2*(w*v.y() - v.z()*v.x()));
+    angles[2] = Foam::atan2
+    (
+        2*(w*v.z() + v.x()*v.y()),
+        1 - 2*(sqr(v.y()) + sqr(v.z()))
+    );
+
+    // Convert to degrees
+//    forAll(angles, aI)
+//    {
+//        angles[aI] = Foam::radToDeg(angles[aI]);
+//    }
+
+    return angles;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::quaternion::operator=(const quaternion& q)
@@ -320,29 +372,6 @@ inline Foam::quaternion Foam::inv(const quaternion& q)
 inline Foam::quaternion Foam::normalize(const quaternion& q)
 {
     return q/mag(q);
-}
-
-
-inline Foam::tensor Foam::quaternion::R() const
-{
-    scalar w2 = sqr(w());
-    scalar x2 = sqr(v().x());
-    scalar y2 = sqr(v().y());
-    scalar z2 = sqr(v().z());
-
-    scalar txy = 2*v().x()*v().y();
-    scalar twz = 2*w()*v().z();
-    scalar txz = 2*v().x()*v().z();
-    scalar twy = 2*w()*v().y();
-    scalar tyz = 2*v().y()*v().z();
-    scalar twx = 2*w()*v().x();
-
-    return tensor
-    (
-        w2 + x2 - y2 - z2,  txy - twz,          txz + twy,
-        txy + twz,          w2 - x2 + y2 - z2,  tyz - twx,
-        txz - twy,          tyz + twx,          w2 - x2 - y2 + z2
-    );
 }
 
 
