@@ -27,6 +27,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "volFields.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -351,15 +352,7 @@ Foam::label Foam::fv::option::applyToField(const word& fieldName) const
         return 0;
     }
 
-    forAll(fieldNames_, i)
-    {
-        if (fieldNames_[i] == fieldName)
-        {
-            return i;
-        }
-    }
-
-    return -1;
+    return findIndex(fieldNames_, fieldName);
 }
 
 
