@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -255,6 +255,106 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
     // Set files to same time as mesh
     setInstance(mesh_.facesInstance());
+}
+
+
+void Foam::meshRefinement::testSyncPointList
+(
+    const string& msg,
+    const polyMesh& mesh,
+    const List<scalar>& fld
+)
+{
+    if (fld.size() != mesh.nPoints())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::testSyncPointList(const polyMesh&"
+            ", const List<scalar>&)"
+        )   << msg << endl
+            << "fld size:" << fld.size() << " mesh points:" << mesh.nPoints()
+            << abort(FatalError);
+    }
+
+    Pout<< "Checking field " << msg << endl;
+    scalarField minFld(fld);
+    syncTools::syncPointList
+    (
+        mesh,
+        minFld,
+        minEqOp<scalar>(),
+        GREAT
+    );
+    scalarField maxFld(fld);
+    syncTools::syncPointList
+    (
+        mesh,
+        maxFld,
+        maxEqOp<scalar>(),
+        -GREAT
+    );
+    forAll(minFld, pointI)
+    {
+        const scalar& minVal = minFld[pointI];
+        const scalar& maxVal = maxFld[pointI];
+        if (mag(minVal-maxVal) > SMALL)
+        {
+            Pout<< msg << " at:" << mesh.points()[pointI] << nl
+                << "    minFld:" << minVal << nl
+                << "    maxFld:" << maxVal << nl
+                << endl;
+        }
+    }
+}
+
+
+void Foam::meshRefinement::testSyncPointList
+(
+    const string& msg,
+    const polyMesh& mesh,
+    const List<point>& fld
+)
+{
+    if (fld.size() != mesh.nPoints())
+    {
+        FatalErrorIn
+        (
+            "meshRefinement::testSyncPointList(const polyMesh&"
+            ", const List<point>&)"
+        )   << msg << endl
+            << "fld size:" << fld.size() << " mesh points:" << mesh.nPoints()
+            << abort(FatalError);
+    }
+
+    Pout<< "Checking field " << msg << endl;
+    pointField minFld(fld);
+    syncTools::syncPointList
+    (
+        mesh,
+        minFld,
+        minMagSqrEqOp<point>(),
+        point(GREAT, GREAT, GREAT)
+    );
+    pointField maxFld(fld);
+    syncTools::syncPointList
+    (
+        mesh,
+        maxFld,
+        maxMagSqrEqOp<point>(),
+        vector::zero
+    );
+    forAll(minFld, pointI)
+    {
+        const point& minVal = minFld[pointI];
+        const point& maxVal = maxFld[pointI];
+        if (mag(minVal-maxVal) > SMALL)
+        {
+            Pout<< msg << " at:" << mesh.points()[pointI] << nl
+                << "    minFld:" << minVal << nl
+                << "    maxFld:" << maxVal << nl
+                << endl;
+        }
+    }
 }
 
 
