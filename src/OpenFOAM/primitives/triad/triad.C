@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,19 +149,19 @@ void Foam::triad::orthogonalize()
 
 void Foam::triad::operator+=(const triad& t2)
 {
-    if (t2.set(0) && !set(0))
-    {
-        operator[](0) = t2.operator[](0);
-    }
+    bool preset[3];
 
-    if (t2.set(1) && !set(1))
+    for (direction i=0; i<3; i++)
     {
-        operator[](1) = t2.operator[](1);
-    }
-
-    if (t2.set(2) && !set(2))
-    {
-        operator[](2) = t2.operator[](2);
+        if (t2.set(i) && !set(i))
+        {
+            operator[](i) = t2.operator[](i);
+            preset[i] = true;
+        }
+        else
+        {
+            preset[i] = false;
+        }
     }
 
     if (set() && t2.set())
@@ -171,6 +171,12 @@ void Foam::triad::operator+=(const triad& t2)
 
         for (direction i=0; i<3; i++)
         {
+            if (preset[i])
+            {
+                signd[i] = 0;
+                continue;
+            }
+
             scalar mostAligned = -1;
             for (direction j=0; j<3; j++)
             {
@@ -197,10 +203,7 @@ void Foam::triad::operator+=(const triad& t2)
                     }
                 }
             }
-        }
 
-        for (direction i=0; i<3; i++)
-        {
             operator[](i) += signd[i]*t2.operator[](correspondance[i]);
         }
     }
