@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -878,6 +878,20 @@ public:
 
             //- Debugging: check that all faces still obey start()>end()
             void checkData();
+
+            static void testSyncPointList
+            (
+                const string& msg,
+                const polyMesh& mesh,
+                const List<scalar>& fld
+            );
+
+            static void testSyncPointList
+            (
+                const string& msg,
+                const polyMesh& mesh,
+                const List<point>& fld
+            );
 
             //- Compare two lists over all boundary faces
             template<class T>
