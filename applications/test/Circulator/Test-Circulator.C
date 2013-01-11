@@ -131,6 +131,10 @@ int main(int argc, char *argv[])
     Info<< "Compare " << face1 << " and " << face1
         << " Match = " << face::compare(face1, face1) << endl;
 
+    face face2(identity(1)+1);
+    Info<< "Compare " << face1 << " and " << face2
+        << " Match = " << face::compare(face1, face2) << endl;
+
     Info<< nl << nl << "Zero face" << nl << endl;
 
     face fZero;
