@@ -383,15 +383,25 @@ template<class CloudType>
 inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmax() const
 {
     scalar T = -GREAT;
+    scalar n = 0;
     forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
         T = max(T, p.T());
+        n++;
     }
 
     reduce(T, maxOp<scalar>());
+    reduce(n, sumOp<label>());
 
-    return max(0.0, T);
+    if (n > 0)
+    {
+        return T;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
@@ -399,15 +409,25 @@ template<class CloudType>
 inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
 {
     scalar T = GREAT;
+    scalar n = 0;
     forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
     {
         const parcelType& p = iter();
         T = min(T, p.T());
+        n++;
     }
 
     reduce(T, minOp<scalar>());
+    reduce(n, sumOp<label>());
 
-    return min(0.0, T);
+    if (n > 0)
+    {
+        return T;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
