@@ -310,14 +310,14 @@ inline bool Foam::pointEdgePoint::equal
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline bool Foam::pointEdgePoint::operator==(const Foam::pointEdgePoint& rhs)
- const
+const
 {
-    return origin() == rhs.origin();
+    return (origin() == rhs.origin()) && (distSqr() == rhs.distSqr());
 }
 
 
 inline bool Foam::pointEdgePoint::operator!=(const Foam::pointEdgePoint& rhs)
- const
+const
 {
     return !(*this == rhs);
 }

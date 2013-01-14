@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -212,6 +212,25 @@ inline bool Foam::pointData::updateEdge
     {
         return false;
     }
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline bool Foam::pointData::operator==(const Foam::pointData& rhs)
+const
+{
+    return
+        pointEdgePoint::operator==(rhs)
+     && (s() == rhs.s())
+     && (v() == rhs.v());
+}
+
+
+inline bool Foam::pointData::operator!=(const Foam::pointData& rhs)
+const
+{
+    return !(*this == rhs);
 }
 
 
