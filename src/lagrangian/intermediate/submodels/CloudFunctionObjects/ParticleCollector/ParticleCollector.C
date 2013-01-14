@@ -585,6 +585,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     CloudFunctionObject<CloudType>(pc),
     mode_(pc.mode_),
     parcelType_(pc.parcelType_),
+    removeCollected_(pc.removeCollected_),
     points_(pc.points_),
     faces_(pc.faces_),
     faceTris_(pc.faceTris_),
