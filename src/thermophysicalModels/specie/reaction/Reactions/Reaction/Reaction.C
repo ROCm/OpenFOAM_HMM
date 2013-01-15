@@ -511,13 +511,11 @@ template<class ReactionThermo>
 const Foam::List<typename Foam::Reaction<ReactionThermo>::specieCoeffs>&
 Foam::Reaction<ReactionThermo>::glhs() const
 {
-    /*
     notImplemented
     (
         "inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&"
         "Reaction<ReactionThermo>::glhs()"
     );
-    */
     return *reinterpret_cast<List<specieCoeffs>*>(0);
 }
 
