@@ -317,12 +317,12 @@ int main(int argc, char *argv[])
     }
 
     // Take over refinement levels and write to new time directory.
-    Pout<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
+    Info<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
         << nl << endl;
 
     mesh().write();
 
-    Pout<< "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

@@ -38,94 +38,6 @@ Description
 using namespace Foam;
 
 
-// return
-//   0: no match
-//  +1: identical
-//  -1: same face, but different orientation
-label compare(const face& a, const face& b)
-{
-    // Basic rule: we assume that the sequence of labels in each list
-    // will be circular in the same order (but not necessarily in the
-    // same direction or from the same starting point).
-
-    // Trivial reject: faces are different size
-    label sizeA = a.size();
-    label sizeB = b.size();
-
-    if (sizeA != sizeB || sizeA == 0)
-    {
-        return 0;
-    }
-
-    const_circulator<face> aCirc(a);
-    const_circulator<face> bCirc(b);
-
-    // Rotate face b until its element matches the starting element of face a.
-    do
-    {
-        if (aCirc() == bCirc())
-        {
-            // Set bCirc fulcrum to its iterator and increment the iterators
-            bCirc.setFulcrumToIterator();
-            ++aCirc;
-            ++bCirc;
-
-            break;
-        }
-    } while (bCirc.circulate(CirculatorBase::CLOCKWISE));
-
-    // Look forwards around the faces for a match
-    do
-    {
-        if (aCirc() != bCirc())
-        {
-            break;
-        }
-    }
-    while
-    (
-        aCirc.circulate(CirculatorBase::CLOCKWISE),
-        bCirc.circulate(CirculatorBase::CLOCKWISE)
-    );
-
-    // If the circulator has stopped then faces a and b matched.
-    if (!aCirc.circulate())
-    {
-        return 1;
-    }
-    else
-    {
-        // Reset the circulators back to their fulcrum
-        aCirc.setIteratorToFulcrum();
-        bCirc.setIteratorToFulcrum();
-        ++aCirc;
-        --bCirc;
-    }
-
-    // Look backwards around the faces for a match
-    do
-    {
-        if (aCirc() != bCirc())
-        {
-            break;
-        }
-    }
-    while
-    (
-        aCirc.circulate(CirculatorBase::CLOCKWISE),
-        bCirc.circulate(CirculatorBase::ANTICLOCKWISE)
-    );
-
-    // If the circulator has stopped then faces a and b matched.
-    if (!aCirc.circulate())
-    {
-        return -1;
-    }
-
-    return 0;
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -184,40 +96,44 @@ int main(int argc, char *argv[])
 
     Info<< nl << nl << "Compare two faces: " << endl;
     face a(identity(5));
-    Info<< "Compare " << a << " and " << a << " Match = " << compare(a, a)
+    Info<< "Compare " << a << " and " << a << " Match = " << face::compare(a, a)
         << endl;
 
     face b(reverseList(a));
-    Info<< "Compare " << a << " and " << b << " Match = " << compare(a, b)
+    Info<< "Compare " << a << " and " << b << " Match = " << face::compare(a, b)
         << endl;
 
     face c(a);
     c[4] = 3;
-    Info<< "Compare " << a << " and " << c << " Match = " << compare(a, c)
+    Info<< "Compare " << a << " and " << c << " Match = " << face::compare(a, c)
         << endl;
 
     face d(rotateList(a, 2));
-    Info<< "Compare " << a << " and " << d << " Match = " << compare(a, d)
+    Info<< "Compare " << a << " and " << d << " Match = " << face::compare(a, d)
         << endl;
 
     face g(labelList(5, 1));
     face h(g);
-    Info<< "Compare " << g << " and " << h << " Match = " << compare(g, h)
+    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
         << endl;
 
     g[0] = 2;
     h[3] = 2;
-    Info<< "Compare " << g << " and " << h << " Match = " << compare(g, h)
+    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
         << endl;
 
     g[4] = 3;
     h[4] = 3;
-    Info<< "Compare " << g << " and " << h << " Match = " << compare(g, h)
+    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
         << endl;
 
     face face1(identity(1));
     Info<< "Compare " << face1 << " and " << face1
-        << " Match = " << compare(face1, face1) << endl;
+        << " Match = " << face::compare(face1, face1) << endl;
+
+    face face2(identity(1)+1);
+    Info<< "Compare " << face1 << " and " << face2
+        << " Match = " << face::compare(face1, face2) << endl;
 
     Info<< nl << nl << "Zero face" << nl << endl;
 

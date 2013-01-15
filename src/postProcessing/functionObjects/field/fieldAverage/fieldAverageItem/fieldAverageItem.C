@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,8 @@ Foam::fieldAverageItem::fieldAverageItem()
     mean_(0),
     prime2Mean_(0),
     base_(ITER),
-    window_(-1.0)
+    window_(-1.0),
+    windowName_("")
 {}
 
 
@@ -64,7 +65,8 @@ Foam::fieldAverageItem::fieldAverageItem(const fieldAverageItem& faItem)
     mean_(faItem.mean_),
     prime2Mean_(faItem.prime2Mean_),
     base_(faItem.base_),
-    window_(faItem.window_)
+    window_(faItem.window_),
+    windowName_(faItem.windowName_)
 {}
 
 
@@ -94,6 +96,7 @@ void Foam::fieldAverageItem::operator=(const fieldAverageItem& rhs)
     prime2Mean_ = rhs.prime2Mean_;
     base_ = rhs.base_;
     window_ = rhs.window_;
+    windowName_ = rhs.windowName_;
 }
 
 

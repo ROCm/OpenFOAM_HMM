@@ -1,6 +1,6 @@
 {
-    rho1 = rho10 + psi1*p;
-    rho2 = rho20 + psi2*p;
+    rho1 = thermo1.rho();
+    rho2 = thermo2.rho();
 
     surfaceScalarField alpha1f(fvc::interpolate(alpha1));
     surfaceScalarField alpha2f(scalar(1) - alpha1f);
@@ -11,10 +11,10 @@
     surfaceScalarField rAlphaAU1f(fvc::interpolate(alpha1*rAU1));
     surfaceScalarField rAlphaAU2f(fvc::interpolate(alpha2*rAU2));
 
-    volVectorField HbyA1("HbyA1", U1);
+    volVectorField HbyA1("HbyA" + phase1Name, U1);
     HbyA1 = rAU1*U1Eqn.H();
 
-    volVectorField HbyA2("HbyA2", U2);
+    volVectorField HbyA2("HbyA" + phase2Name, U2);
     HbyA2 = rAU2*U2Eqn.H();
 
     mrfZones.absoluteFlux(phi1.oldTime());
@@ -38,14 +38,14 @@
 
     surfaceScalarField phiHbyA1
     (
-        "phiHbyA1",
+        "phiHbyA" + phase1Name,
         (fvc::interpolate(HbyA1) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU1, alpha1, U1, phi1)
     );
 
     surfaceScalarField phiHbyA2
     (
-        "phiHbyA2",
+        "phiHbyA" + phase2Name,
         (fvc::interpolate(HbyA2) & mesh.Sf())
       + fvc::ddtPhiCorr(rAU2, alpha2, U2, phi2)
     );
@@ -96,8 +96,16 @@
     //}
     //else
     {
-        surfaceScalarField phid1("phid1", fvc::interpolate(psi1)*phi1);
-        surfaceScalarField phid2("phid2", fvc::interpolate(psi2)*phi2);
+        surfaceScalarField phid1
+        (
+            "phid" + phase1Name,
+            fvc::interpolate(psi1)*phi1
+        );
+        surfaceScalarField phid2
+        (
+            "phid" + phase2Name,
+            fvc::interpolate(psi2)*phi2
+        );
 
         pEqnComp1 =
             fvc::ddt(rho1) + psi1*correction(fvm::ddt(p))
@@ -174,13 +182,15 @@
 
     p = max(p, pMin);
 
-    rho1 = rho10 + psi1*p;
-    rho2 = rho20 + psi2*p;
+    thermo1.correct();
+    thermo2.correct();
+    rho1 = thermo1.rho();
+    rho2 = thermo2.rho();
 
     K1 = 0.5*magSqr(U1);
     K2 = 0.5*magSqr(U2);
 
-    //***HGW if (thermo.dpdt())
+    if (thermo1.dpdt())
     {
         dpdt = fvc::ddt(p);
     }

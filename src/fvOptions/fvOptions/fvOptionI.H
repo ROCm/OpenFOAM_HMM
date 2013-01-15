@@ -126,22 +126,22 @@ inline Foam::scalar& Foam::fv::option::duration()
 }
 
 
-inline const Foam::word& Foam::fv::option::nbrModelName() const
-{
-    return nbrModelName_;
-}
-
-
 inline const Foam::word& Foam::fv::option::nbrRegionName() const
 {
     return nbrRegionName_;
 }
 
 
-inline const Foam::autoPtr<Foam::meshToMesh>
-Foam::fv::option::secondaryToPrimaryInterpPtr() const
+inline const Foam::meshToMeshNew& Foam::fv::option::meshInterp() const
 {
-    return secondaryToPrimaryInterpPtr_;
+    if (!meshInterpPtr_.valid())
+    {
+        FatalErrorIn("const meshToMeshNew& meshInterp() const")
+            << "Interpolation object not set"
+            << abort(FatalError);
+    }
+
+    return meshInterpPtr_();
 }
 
 

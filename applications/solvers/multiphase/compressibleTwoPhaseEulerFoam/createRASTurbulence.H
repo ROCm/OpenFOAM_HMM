@@ -151,7 +151,7 @@
     (
         IOobject
         (
-            "nut2",
+            "nut" + phase2Name,
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -165,13 +165,13 @@
     (
         IOobject
         (
-            "nuEff1",
+            "nuEff" + phase1Name,
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        sqr(Ct)*nut2 + nu1
+        sqr(Ct)*nut2 + thermo1.mu()/rho1
     );
 
     Info<< "Calculating field nuEff2\n" << endl;
@@ -179,11 +179,11 @@
     (
         IOobject
         (
-            "nuEff2",
+            "nuEff" + phase2Name,
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        nut2 + nu2
+        nut2 + thermo2.mu()/rho2
     );

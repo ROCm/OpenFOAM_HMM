@@ -15,13 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModel1          SchillerNaumann;
-dragModel2          SchillerNaumann;
+dragModelair            SchillerNaumann;
+dragModelwater          SchillerNaumann;
 
-heatTransferModel1  RanzMarshall;
-heatTransferModel2  RanzMarshall;
+heatTransferModelair    RanzMarshall;
+heatTransferModelwater  RanzMarshall;
 
-dispersedPhase      both;
+dispersedPhase          both;
 
 residualPhaseFraction   1e-3;
 residualSlip            1e-2;

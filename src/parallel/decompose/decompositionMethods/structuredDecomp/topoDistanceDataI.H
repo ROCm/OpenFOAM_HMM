@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -124,8 +124,7 @@ inline bool Foam::topoDistanceData::updateCell
 {
     if (distance_ == -1)
     {
-        data_ = neighbourInfo.data_;
-        distance_ = neighbourInfo.distance_ + 1;
+        operator=(neighbourInfo);
         return true;
     }
     else
@@ -151,7 +150,8 @@ inline bool Foam::topoDistanceData::updateFace
 
     if (distance_ == -1)
     {
-        operator=(neighbourInfo);
+        data_ = neighbourInfo.data_;
+        distance_ = neighbourInfo.distance_ + 1;
         return true;
     }
     else

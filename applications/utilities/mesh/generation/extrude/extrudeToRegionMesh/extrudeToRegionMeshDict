@@ -70,6 +70,9 @@ extrudeModel    linearNormal;
 //- Extrudes into sphere around (0 0 0)
 // extrudeModel   linearRadial;
 
+//- Extrudes into sphere around (0 0 0) with specified radii
+//extrudeModel        radial;
+
 //- Extrudes into sphere with grading according to pressure (atmospherics)
 // extrudeModel   sigmaRadial;
 
@@ -98,6 +101,14 @@ linearDirectionCoeffs
 linearRadialCoeffs
 {
      R              0.1;
+    // Optional inner radius
+    Rsurface        0.01;
+}
+
+radialCoeffs
+{
+    // Radii specified through interpolation table
+    R               table ((0 0.01)(3 0.03)(10 0.1));
 }
 
 sigmaRadialCoeffs
@@ -106,5 +117,6 @@ sigmaRadialCoeffs
     pRef            1;
     pStrat          1;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

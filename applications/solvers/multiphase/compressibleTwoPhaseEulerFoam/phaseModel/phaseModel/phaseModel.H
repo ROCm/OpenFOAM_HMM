@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
 #include "dimensionedScalar.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "rhoThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,25 +51,18 @@ class diameterModel;
 \*---------------------------------------------------------------------------*/
 
 class phaseModel
+:
+    public volScalarField
 {
     // Private data
-
-        dictionary dict_;
 
         //- Name of phase
         word name_;
 
-        //- Kinematic viscosity
-        dimensionedScalar nu_;
+        dictionary phaseDict_;
 
-        //- Thermal conductivity
-        dimensionedScalar kappa_;
-
-        //- Heat capacity
-        dimensionedScalar Cp_;
-
-        //- Density
-        dimensionedScalar rho_;
+        //- Thermophysical properties
+        autoPtr<rhoThermo> thermo_;
 
         //- Velocity
         volVectorField U_;
@@ -116,24 +110,34 @@ public:
 
         tmp<volScalarField> d() const;
 
-        const dimensionedScalar& nu() const
+        tmp<volScalarField> nu() const
         {
-            return nu_;
+            return thermo_->mu()/thermo_->rho();
         }
 
-        const dimensionedScalar& kappa() const
+        tmp<volScalarField> kappa() const
         {
-            return kappa_;
+            return thermo_->kappa();
         }
 
-        const dimensionedScalar& Cp() const
+        tmp<volScalarField> Cp() const
         {
-            return Cp_;
+            return thermo_->Cp();
         }
 
-        const dimensionedScalar& rho() const
+        const volScalarField& rho() const
         {
-            return rho_;
+            return thermo_->rho();
+        }
+
+        const rhoThermo& thermo() const
+        {
+            return thermo_();
+        }
+
+        rhoThermo& thermo()
+        {
+            return thermo_();
         }
 
         const volVectorField& U() const

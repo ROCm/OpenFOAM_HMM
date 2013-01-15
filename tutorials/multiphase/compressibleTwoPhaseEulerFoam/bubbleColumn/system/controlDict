@@ -60,21 +60,21 @@ functions
         outputControl   outputTime;
         fields
         (
-            U1
+            Uair
             {
                  mean        on;
                  prime2Mean  off;
                  base        time;
             }
 
-            U2
+            Uwater
             {
                  mean        on;
                  prime2Mean  off;
                  base        time;
             }
 
-            alpha1
+            alphaair
             {
                  mean        on;
                  prime2Mean  off;

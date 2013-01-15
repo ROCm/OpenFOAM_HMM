@@ -35,7 +35,7 @@ Description
         selectionMode   cellSet;                // cellSet // points //cellZone
                                                 // mapRegion
 Note:
-    On evaluation, source expects to be added to the rhs of the equation
+    On evaluation, source/sink options are to be added to the equation rhs
 
 SourceFiles
     fvOption.C
@@ -50,7 +50,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "cellSet.H"
 #include "autoPtr.H"
-#include "meshToMesh.H"
+#include "meshToMeshNew.H"
 
 #include "runTimeSelectionTables.H"
 
@@ -131,11 +131,8 @@ protected:
 
         // Data for smMapRegion only
 
-            //- Mesh to mesh mapping for map option
-            autoPtr<meshToMesh> secondaryToPrimaryInterpPtr_;
-
-            //- Name of the model in the neighbour mesh
-            word nbrModelName_;
+            //- Mesh to mesh interpolation object
+            autoPtr<meshToMeshNew> meshInterpPtr_;
 
             //- Name of the neighbour region to map
             word nbrRegionName_;
@@ -194,7 +191,8 @@ public:
             const word& name,
             const word& modelType,
             const dictionary& dict,
-            const fvMesh& mesh
+            const fvMesh& mesh,
+            const bool master = false
         );
 
         //- Return clone
@@ -288,15 +286,11 @@ public:
             //- Return const access to the total cell volume
             inline scalar V() const;
 
-            //- Return const access to the neighbour model name
-            inline const word& nbrModelName() const;
-
             //- Return const access to the neighbour region name
             inline const word& nbrRegionName() const;
 
-            //- Return const access to the mapToMap Ptr
-            inline const autoPtr<meshToMesh>
-                secondaryToPrimaryInterpPtr() const;
+            //- Return const access to the mapToMap pointer
+            inline const meshToMeshNew& meshInterp() const;
 
             //- Return const access to the cell set
             inline const labelList& cells() const;

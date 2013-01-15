@@ -38,12 +38,12 @@ volScalarField heatTransferCoeff
     volVectorField Ur(U1 - U2);
     volScalarField magUr(mag(Ur) + residualSlip);
 
-    if (dispersedPhase == "1")
+    if (dispersedPhase == phase1Name)
     {
         dragCoeff = drag1->K(magUr);
         heatTransferCoeff = heatTransfer1->K(magUr);
     }
-    else if (dispersedPhase == "2")
+    else if (dispersedPhase == phase2Name)
     {
         dragCoeff = drag2->K(magUr);
         heatTransferCoeff = heatTransfer2->K(magUr);

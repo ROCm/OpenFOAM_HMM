@@ -69,8 +69,8 @@ structuredCoeffs
     // Renumber in columns (depthFirst) or in layers
     depthFirst true;
 
-    // Optional: reverse ordering
-    //reverse false;
+    // Reverse ordering
+    reverse false;
 }
 
 

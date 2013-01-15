@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,7 +137,7 @@ public:
             //            be in top patch
             //      < 0 : face in opposite orientation as patch face. face will
             //            be in bottom patch
-            //      = 0 : for all side and internal faces
+            //      = 0 : for all side faces
             const labelList& faceToFaceMap() const
             {
                 return faceToFaceMap_;
