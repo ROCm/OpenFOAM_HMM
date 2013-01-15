@@ -31,21 +31,14 @@ License
 template<class ReactionThermo>
 Foam::label Foam::Reaction<ReactionThermo>::nUnNamedReactions = 0;
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class ReactionThermo>
-Foam::label Foam::Reaction<ReactionThermo>::getNewReactionID()
-{
-    return nUnNamedReactions++;
-}
-
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class ReactionThermo>
-Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
+void Foam::Reaction<ReactionThermo>::reactionStrLeft
+(
+    OStringStream& reaction
+) const
 {
-    OStringStream reaction;
-
     for (label i = 0; i < lhs_.size(); ++i)
     {
         if (i > 0)
@@ -62,28 +55,15 @@ Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
             reaction << "^" << lhs_[i].exponent;
         }
     }
+}
 
-    for (label i = 0; i < glhs().size(); ++i)
-    {
-        reaction << " + ";
 
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(glhs()[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << glhs()[i].stoichCoeff;
-        }
-        reaction << gasSpecies()[glhs()[i].index];
-        if (mag(glhs()[i].exponent - glhs()[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << glhs()[i].exponent;
-        }
-    }
-
-    reaction << " = ";
-
+template<class ReactionThermo>
+void Foam::Reaction<ReactionThermo>::reactionStrRight
+(
+    OStringStream& reaction
+) const
+{
     for (label i = 0; i < rhs_.size(); ++i)
     {
         if (i > 0)
@@ -100,26 +80,27 @@ Foam::string Foam::Reaction<ReactionThermo>::reactionStr() const
             reaction << "^" << rhs_[i].exponent;
         }
     }
+}
 
-    for (label i = 0; i < grhs().size(); ++i)
-    {
-        reaction << " + ";
 
-        if (i > 0)
-        {
-            reaction << " + ";
-        }
-        if (mag(grhs()[i].stoichCoeff - 1) > SMALL)
-        {
-            reaction << grhs()[i].stoichCoeff;
-        }
-        reaction << gasSpecies()[grhs()[i].index];
-        if (mag(grhs()[i].exponent - grhs()[i].stoichCoeff) > SMALL)
-        {
-            reaction << "^" << grhs()[i].exponent;
-        }
-    }
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+template<class ReactionThermo>
+Foam::label Foam::Reaction<ReactionThermo>::getNewReactionID()
+{
+    return nUnNamedReactions++;
+}
+
+
+template<class ReactionThermo>
+Foam::string Foam::Reaction<ReactionThermo>::reactionStr
+(
+    OStringStream& reaction
+) const
+{
+    reactionStrLeft(reaction);
+    reaction << " = ";
+    reactionStrRight(reaction);
     return reaction.str();
 }
 
@@ -464,7 +445,9 @@ Foam::Reaction<ReactionThermo>::New
 template<class ReactionThermo>
 void Foam::Reaction<ReactionThermo>::write(Ostream& os) const
 {
-    os.writeKeyword("reaction") << reactionStr() << token::END_STATEMENT << nl;
+    OStringStream reaction;
+    os.writeKeyword("reaction") << reactionStr(reaction)
+        << token::END_STATEMENT << nl;
 }
 
 
@@ -528,11 +511,13 @@ template<class ReactionThermo>
 const Foam::List<typename Foam::Reaction<ReactionThermo>::specieCoeffs>&
 Foam::Reaction<ReactionThermo>::glhs() const
 {
+    /*
     notImplemented
     (
         "inline const List<typename Reaction<ReactionThermo>::specieCoeffs>&"
         "Reaction<ReactionThermo>::glhs()"
     );
+    */
     return *reinterpret_cast<List<specieCoeffs>*>(0);
 }
 
