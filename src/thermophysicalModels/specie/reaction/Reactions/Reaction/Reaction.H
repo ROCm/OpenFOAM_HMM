@@ -66,6 +66,16 @@ class Reaction
 :
     public ReactionThermo
 {
+protected:
+
+    // Protected member functions
+
+        //- Return string representation of the left of the reaction
+        void reactionStrLeft(OStringStream& reaction) const;
+
+        //- Return string representation of the right of the reaction
+        void reactionStrRight(OStringStream& reaction) const;
+
 
 public:
 
@@ -134,7 +144,7 @@ private:
     // Private Member Functions
 
         //- Return string representation of reaction
-        string reactionStr() const;
+        string reactionStr(OStringStream& reaction) const;
 
         //- Construct reaction thermo
         void setThermo(const HashPtrTable<ReactionThermo>& thermoDatabase);
