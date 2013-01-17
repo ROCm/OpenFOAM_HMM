@@ -566,7 +566,8 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::handleCollocatedPoints()
         elems[pointI] = allPointInfo_[meshPoints[pointI]];
     }
 
-    // Pull slave data onto master. No need to update transformed slots.
+    // Pull slave data onto master (which might or might not have any
+    // initialised points). No need to update transformed slots.
     slavesMap.distribute(elems, false);
 
     // Combine master data with slave data
@@ -597,26 +598,34 @@ Foam::label Foam::PointEdgeWave<Type, TrackingData>::handleCollocatedPoints()
     // Extract back onto mesh
     forAll(meshPoints, pointI)
     {
-        Type& elem = allPointInfo_[meshPoints[pointI]];
-
-        // Like updatePoint but bypass Type::updatePoint with its tolerance
-        // checking
-        if (!elem.valid(td_) || !elem.equal(elems[pointI], td_))
+        if (elems[pointI].valid(td_))
         {
-            nEvals_++;
-            elem = elems[pointI];
+            label meshPointI = meshPoints[pointI];
 
-            // See if element now valid
-            if (elem.valid(td_))
-            {
-                --nUnvisitedPoints_;
-            }
+            Type& elem = allPointInfo_[meshPointI];
 
-            // Update database of changed points
-            if (!changedPoint_[pointI])
+            bool wasValid = elem.valid(td_);
+
+            // Like updatePoint but bypass Type::updatePoint with its tolerance
+            // checking
+            //if (!elem.valid(td_) || !elem.equal(elems[pointI], td_))
+            if (!elem.equal(elems[pointI], td_))
             {
-                changedPoint_[pointI] = true;
-                changedPoints_[nChangedPoints_++] = pointI;
+                nEvals_++;
+                elem = elems[pointI];
+
+                // See if element now valid
+                if (!wasValid && elem.valid(td_))
+                {
+                    --nUnvisitedPoints_;
+                }
+
+                // Update database of changed points
+                if (!changedPoint_[meshPointI])
+                {
+                    changedPoint_[meshPointI] = true;
+                    changedPoints_[nChangedPoints_++] = meshPointI;
+                }
             }
         }
     }
