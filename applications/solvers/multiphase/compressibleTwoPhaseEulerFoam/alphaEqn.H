@@ -13,7 +13,7 @@ surfaceScalarField alphaPhi2("alphaPhi2", phi2);
         surfaceScalarField alpha1f(fvc::interpolate(alpha1));
         surfaceScalarField phipp(ppMagf*fvc::snGrad(alpha1)*mesh.magSf());
         phir += phipp;
-        phic += fvc::interpolate(alpha1)*phipp;
+        phic += alpha1f*phipp;
     }
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
