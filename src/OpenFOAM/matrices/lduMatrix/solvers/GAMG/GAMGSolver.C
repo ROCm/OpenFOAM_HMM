@@ -71,6 +71,7 @@ Foam::GAMGSolver::GAMGSolver
     postSweepsLevelMultiplier_(1),
     maxPostSweeps_(4),
     nFinestSweeps_(2),
+    interpolateCorrection_(false),
     scaleCorrection_(matrix.symmetric()),
     directSolveCoarsest_(false),
     agglomeration_(GAMGAgglomeration::New(matrix_, controlDict_)),
@@ -174,6 +175,7 @@ void Foam::GAMGSolver::readControls()
     );
     controlDict_.readIfPresent("maxPostSweeps", maxPostSweeps_);
     controlDict_.readIfPresent("nFinestSweeps", nFinestSweeps_);
+    controlDict_.readIfPresent("interpolateCorrection", interpolateCorrection_);
     controlDict_.readIfPresent("scaleCorrection", scaleCorrection_);
     controlDict_.readIfPresent("directSolveCoarsest", directSolveCoarsest_);
 }

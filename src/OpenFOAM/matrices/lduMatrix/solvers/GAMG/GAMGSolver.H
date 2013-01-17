@@ -46,6 +46,8 @@ SourceFiles
     GAMGSolverCalcAgglomeration.C
     GAMGSolverMakeCoarseMatrix.C
     GAMGSolverOperations.C
+    GAMGSolverInterpolate.C
+    GAMGSolverScale.C
     GAMGSolverSolve.C
 
 \*---------------------------------------------------------------------------*/
@@ -96,6 +98,10 @@ class GAMGSolver
 
         //- Number of smoothing sweeps on finest mesh
         label nFinestSweeps_;
+
+        //- Choose if the corrections should be interpolated after injection.
+        //  By default corrections are not interpolated.
+        bool interpolateCorrection_;
 
         //- Choose if the corrections should be scaled.
         //  By default corrections for symmetric matrices are scaled
@@ -154,31 +160,33 @@ class GAMGSolver
         //- Agglomerate coarse matrix
         void agglomerateMatrix(const label fineLevelIndex);
 
-        //- Calculate and return the scaling factor from Acf, coarseSource
+        //-  Interpolate the correction after injected prolongation
+        void interpolate
+        (
+            scalarField& psi,
+            scalarField& Apsi,
+            const lduMatrix& m,
+            const FieldField<Field, scalar>& interfaceBouCoeffs,
+            const lduInterfaceFieldPtrsList& interfaces,
+            const scalarField& source,
+            const direction cmpt
+        ) const;
+
+        //- Calculate and apply the scaling factor from Acf, coarseSource
         //  and coarseField.
         //  At the same time do a Jacobi iteration on the coarseField using
         //  the Acf provided after the coarseField values are used for the
         //  scaling factor.
-        scalar scalingFactor
+        void scale
         (
             scalarField& field,
-            const scalarField& source,
-            const scalarField& Acf,
-            const scalarField& D
-        ) const;
-
-        //- Calculate Acf and calculate and return the scaling factor.
-        scalar scalingFactor
-        (
             scalarField& Acf,
             const lduMatrix& A,
-            scalarField& field,
             const FieldField<Field, scalar>& interfaceLevelBouCoeffs,
             const lduInterfaceFieldPtrsList& interfaceLevel,
             const scalarField& source,
             const direction cmpt
         ) const;
-
 
         //- Initialise the data structures for the V-cycle
         void initVcycle
