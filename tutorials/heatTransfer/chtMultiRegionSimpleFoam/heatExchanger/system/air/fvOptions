@@ -69,7 +69,7 @@ MRF1
     {
         origin    (0.25 0.25 0.25);
         axis      (0 0 1);
-        omega     5.305; // 500 rpm
+        omega     477.5; // 500 rpm
     }
 }
 
