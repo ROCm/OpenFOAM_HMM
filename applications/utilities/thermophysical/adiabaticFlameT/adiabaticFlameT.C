@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,22 +77,22 @@ int main(int argc, char *argv[])
     scalar m(readScalar(control.lookup("m")));
 
 
-    Info<< nl << "Reading Burcat data dictionary" << endl;
+    Info<< nl << "Reading thermodynamic data dictionary" << endl;
 
-    fileName BurcatCpDataFileName(findEtcFile("thermoData/BurcatCpData"));
+    fileName thermoDataFileName(findEtcFile("thermoData/thermoData"));
 
     // Construct control dictionary
-    IFstream BurcatCpDataFile(BurcatCpDataFileName);
+    IFstream thermoDataFile(thermoDataFileName);
 
-    // Check BurcatCpData stream is OK
-    if (!BurcatCpDataFile.good())
+    // Check thermoData stream is OK
+    if (!thermoDataFile.good())
     {
         FatalErrorIn(args.executable())
-            << "Cannot read file " << BurcatCpDataFileName
+            << "Cannot read file " << thermoDataFileName
             << exit(FatalError);
     }
 
-    dictionary CpData(BurcatCpDataFile);
+    dictionary thermoData(thermoDataFile);
 
 
     scalar stoicO2 = n + m/4.0;
@@ -103,14 +103,14 @@ int main(int argc, char *argv[])
     thermo fuel
     (
         "fuel",
-        thermo(CpData.lookup(fuelName))
+        thermo(thermoData.subDict(fuelName))
     );
 
     thermo oxidant
     (
         "oxidant",
-        stoicO2*thermo(CpData.lookup("O2"))
-      + stoicN2*thermo(CpData.lookup("N2"))
+        stoicO2*thermo(thermoData.subDict("O2"))
+      + stoicN2*thermo(thermoData.subDict("N2"))
     );
 
     dimensionedScalar stoichiometricAirFuelMassRatio
@@ -140,15 +140,15 @@ int main(int argc, char *argv[])
         thermo fuel
         (
             "fuel",
-            thermo(CpData.lookup(fuelName))
+            thermo(thermoData.subDict(fuelName))
         );
         Info<< "fuel " << fuel << ';' << endl;
 
         thermo oxidant
         (
             "oxidant",
-            o2*thermo(CpData.lookup("O2"))
-          + n2*thermo(CpData.lookup("N2"))
+            o2*thermo(thermoData.subDict("O2"))
+          + n2*thermo(thermoData.subDict("N2"))
         );
         Info<< "oxidant " << (1/oxidant.nMoles())*oxidant << ';' << endl;
 
@@ -162,9 +162,9 @@ int main(int argc, char *argv[])
         thermo burntProducts
         (
             "burntProducts",
-          + (n2 - (0.79/0.21)*ores*stoicO2)*thermo(CpData.lookup("N2"))
-          + fburnt*stoicCO2*thermo(CpData.lookup("CO2"))
-          + fburnt*stoicH2O*thermo(CpData.lookup("H2O"))
+          + (n2 - (0.79/0.21)*ores*stoicO2)*thermo(thermoData.subDict("N2"))
+          + fburnt*stoicCO2*thermo(thermoData.subDict("CO2"))
+          + fburnt*stoicH2O*thermo(thermoData.subDict("H2O"))
         );
         Info<< "burntProducts "
             << (1/burntProducts.nMoles())*burntProducts << ';' << endl;
@@ -173,10 +173,10 @@ int main(int argc, char *argv[])
         (
             "products",
             fres*fuel
-          + n2*thermo(CpData.lookup("N2"))
-          + fburnt*stoicCO2*thermo(CpData.lookup("CO2"))
-          + fburnt*stoicH2O*thermo(CpData.lookup("H2O"))
-          + ores*stoicO2*thermo(CpData.lookup("O2"))
+          + n2*thermo(thermoData.subDict("N2"))
+          + fburnt*stoicCO2*thermo(thermoData.subDict("CO2"))
+          + fburnt*stoicH2O*thermo(thermoData.subDict("H2O"))
+          + ores*stoicO2*thermo(thermoData.subDict("O2"))
         );
 
         Info<< "products " << (1/products.nMoles())*products << ';' << endl;

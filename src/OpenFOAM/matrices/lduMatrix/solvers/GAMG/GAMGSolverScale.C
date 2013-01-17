@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,38 +28,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::scalar Foam::GAMGSolver::scalingFactor
+void Foam::GAMGSolver::scale
 (
     scalarField& field,
-    const scalarField& source,
-    const scalarField& Acf,
-    const scalarField& D
-) const
-{
-    scalar scalingFactorNum = 0.0;
-    scalar scalingFactorDenom = 0.0;
-
-    forAll(field, i)
-    {
-        scalingFactorNum += source[i]*field[i];
-        scalingFactorDenom += Acf[i]*field[i];
-
-        // While the matrix-multiply done for the scaling it is
-        // possible to perform a point-Jacobi smoothing operation cheaply
-        field[i] += (source[i] - Acf[i])/D[i];
-    }
-
-    vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
-    reduce(scalingVector, sumOp<vector2D>());
-    return scalingVector.x()/stabilise(scalingVector.y(), VSMALL);
-}
-
-
-Foam::scalar Foam::GAMGSolver::scalingFactor
-(
     scalarField& Acf,
     const lduMatrix& A,
-    scalarField& field,
     const FieldField<Field, scalar>& interfaceLevelBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaceLevel,
     const scalarField& source,
@@ -75,13 +48,30 @@ Foam::scalar Foam::GAMGSolver::scalingFactor
         cmpt
     );
 
-    return scalingFactor
-    (
-        field,
-        source,
-        Acf,
-        A.diag()
-    );
+    scalar scalingFactorNum = 0.0;
+    scalar scalingFactorDenom = 0.0;
+
+    forAll(field, i)
+    {
+        scalingFactorNum += source[i]*field[i];
+        scalingFactorDenom += Acf[i]*field[i];
+    }
+
+    vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
+    reduce(scalingVector, sumOp<vector2D>());
+    scalar sf = scalingVector.x()/stabilise(scalingVector.y(), VSMALL);
+
+    if (debug >= 2)
+    {
+        Pout<< sf << " ";
+    }
+
+    const scalarField& D = A.diag();
+
+    forAll(field, i)
+    {
+        field[i] = sf*field[i] + (source[i] - sf*Acf[i])/D[i];
+    }
 }
 
 
