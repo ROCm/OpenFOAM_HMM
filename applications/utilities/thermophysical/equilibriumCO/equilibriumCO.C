@@ -56,13 +56,13 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    Info<< nl << "Reading Burcat data IOdictionary" << endl;
+    Info<< nl << "Reading thermodynamic data IOdictionary" << endl;
 
-    IOdictionary CpData
+    IOdictionary thermoData
     (
         IOobject
         (
-            "BurcatCpData",
+            "thermoData",
             runTime.constant(),
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
     (
         new thermo
         (
-            thermo(CpData.lookup("CO2"))
+            thermo(thermoData.subDict("CO2"))
          ==
-            thermo(CpData.lookup("CO"))
-          + 0.5*thermo(CpData.lookup("O2"))
+            thermo(thermoData.subDict("CO"))
+          + 0.5*thermo(thermoData.subDict("O2"))
         )
     );
 
@@ -93,9 +93,9 @@ int main(int argc, char *argv[])
     (
         new thermo
         (
-            thermo(CpData.lookup("O2"))
+            thermo(thermoData.subDict("O2"))
          ==
-            2.0*thermo(CpData.lookup("O"))
+            2.0*thermo(thermoData.subDict("O"))
         )
     );
 
@@ -103,10 +103,10 @@ int main(int argc, char *argv[])
     (
         new thermo
         (
-            thermo(CpData.lookup("H2O"))
+            thermo(thermoData.subDict("H2O"))
          ==
-            thermo(CpData.lookup("H2"))
-          + 0.5*thermo(CpData.lookup("O2"))
+            thermo(thermoData.subDict("H2"))
+          + 0.5*thermo(thermoData.subDict("O2"))
         )
     );
 
@@ -114,10 +114,10 @@ int main(int argc, char *argv[])
     (
         new thermo
         (
-            thermo(CpData.lookup("H2O"))
+            thermo(thermoData.subDict("H2O"))
          ==
-            thermo(CpData.lookup("H"))
-          + thermo(CpData.lookup("OH"))
+            thermo(thermoData.subDict("H"))
+          + thermo(thermoData.subDict("OH"))
         )
     );
 

@@ -131,7 +131,7 @@ thermoTemp            .{10}
 thermoSpecieName      .{18}
 thermoDate            .{6}
 thermoFormula         .{20}
-thermoPhase           S|L|G
+thermoPhase           S|L|G|C
 thermoLowTemp         .{10}
 thermoHighTemp        .{10}
 thermoCommonTemp      .{8}
@@ -439,15 +439,9 @@ bool finishReaction = false;
 
 <readThermoSpecieName>{thermoSpecieName} {
         string specieString(foamSpecieString(YYText()));
-        size_t spacePos = specieString.find(' ');
-        if (spacePos != string::npos)
-        {
-            currentSpecieName = specieString(0, spacePos);
-        }
-        else
-        {
-            currentSpecieName = specieString;
-        }
+        specieString.replaceAll(" ", "_");
+        size_t strEnd = specieString.find_last_not_of('_');
+        currentSpecieName = specieString.substr(0, strEnd + 1);
         BEGIN(readThermoDate);
     }
 

@@ -78,38 +78,39 @@ int main(int argc, char *argv[])
     scalar m(readScalar(control.lookup("m")));
 
 
-    Info<< nl << "Reading Burcat data dictionary" << endl;
+    Info<< nl << "Reading thermodynamic data dictionary" << endl;
 
-    fileName BurcatCpDataFileName(findEtcFile("thermoData/BurcatCpData"));
+    fileName thermoDataFileName(findEtcFile("thermoData/thermoData"));
 
     // Construct control dictionary
-    IFstream BurcatCpDataFile(BurcatCpDataFileName);
+    IFstream thermoDataFile(thermoDataFileName);
 
-    // Check BurcatCpData stream is OK
-    if (!BurcatCpDataFile.good())
+    // Check thermoData stream is OK
+    if (!thermoDataFile.good())
     {
         FatalErrorIn(args.executable())
-            << "Cannot read file " << BurcatCpDataFileName
+            << "Cannot read file " << thermoDataFileName
             << abort(FatalError);
     }
 
-    dictionary thermoData(BurcatCpDataFile);
+    dictionary thermoData(thermoDataFile);
 
 
-    Info<< nl << "Reading Burcat data for relevant species" << nl << endl;
+    Info<< nl << "Reading thermodynamic data for relevant species"
+        << nl << endl;
 
     // Reactants
-    thermo FUEL(thermoData.lookup(fuelName));
-    thermo O2(thermoData.lookup("O2"));
-    thermo N2(thermoData.lookup("N2"));
+    thermo FUEL(thermoData.subDict(fuelName));
+    thermo O2(thermoData.subDict("O2"));
+    thermo N2(thermoData.subDict("N2"));
 
     // Products
-    thermo CO2(thermoData.lookup("CO2"));
-    thermo H2O(thermoData.lookup("H2O"));
+    thermo CO2(thermoData.subDict("CO2"));
+    thermo H2O(thermoData.subDict("H2O"));
 
     // Product fragments
-    thermo CO(thermoData.lookup("CO"));
-    thermo H2(thermoData.lookup("H2"));
+    thermo CO(thermoData.subDict("CO"));
+    thermo H2(thermoData.subDict("H2"));
 
 
     // Product dissociation reactions
