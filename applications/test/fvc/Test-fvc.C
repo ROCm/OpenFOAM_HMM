@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,12 +45,9 @@ int main(int argc, char *argv[])
     volScalarField gradx4(fvc::grad(fx)().component(vector::X));
     gradx4.write();
 
-    Info<< fvc::snGrad(fx) - (mesh.Sf()/mesh.magSf())().component(vector::X) << endl;
+    volVectorField curlC(fvc::curl(1.0*mesh.C()));
+    curlC.write();
 
-    //volVectorField curlC(fvc::curl(1.0*mesh.C()));
-    //curlC.write();
-
-    /*
     surfaceScalarField xf(mesh.Cf().component(vector::X));
     surfaceScalarField xf4(pow(xf, 4));
 
@@ -59,7 +56,6 @@ int main(int argc, char *argv[])
         scalar gradx4a = (xf4[i] - xf4[i-1])/(xf[i] - xf[i-1]);
         Info<< (gradx4a - gradx4[i])/gradx4a << endl;
     }
-    */
 
     Info<< "end" << endl;
 }
