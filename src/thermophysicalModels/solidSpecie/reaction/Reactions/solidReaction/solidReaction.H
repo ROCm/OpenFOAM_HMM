@@ -81,6 +81,15 @@ private:
     // Private Member Functions
 
 
+        //- Return string representation of reaction
+        string solidReactionStr(OStringStream&) const;
+
+        //- Return string representation of the left of the reaction
+        void solidReactionStrLeft(OStringStream&) const;
+
+        //- Return string representation of the right of the reaction
+        void solidReactionStrRight(OStringStream&) const;
+
         //- Disallow default bitwise assignment
         void operator=(const solidReaction&);
 

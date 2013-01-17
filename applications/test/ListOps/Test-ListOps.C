@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Face                 : " << testFace << endl;
     Info<< "Rotate by 2          : " << rotateList(testFace, 2) << endl;
-    inplaceRotateList(testFace, -6);
+    inplaceRotateList<List, label>(testFace, -6);
     Info<< "Rotate inplace by -6 : " << testFace << nl << endl;
 
     Info<< "Test inplace rotate      : " << forwardRotate << endl;
