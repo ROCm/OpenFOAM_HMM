@@ -41,7 +41,7 @@ namespace fv
 }
 
 
-// * * * * * * * * * * * *  Private member functions * * * * * * * * * * * //
+// * * * * * * * * * * * *  Protected member functions * * * * * * * * * * * //
 
 void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 {
@@ -71,13 +71,31 @@ void Foam::fv::interRegionHeatTransferModel::setNbrModel()
 
     if (!nbrModelFound)
     {
-        FatalErrorIn("interRegionHeatTransferModel::check()")
+        FatalErrorIn("interRegionHeatTransferModel::setNbrModel()")
             << "Neighbour model not found" << nbrModelName_
             << " in region " << nbrMesh.name() << nl
             << exit(FatalError);
     }
 
     firstIter_ = false;
+}
+
+
+void Foam::fv::interRegionHeatTransferModel::correct()
+{
+    if (master_)
+    {
+        if (mesh_.time().timeIndex() != timeIndex_)
+        {
+            calculateHtc();
+            timeIndex_ = mesh_.time().timeIndex();
+        }
+    }
+    else
+    {
+        nbrModel().correct();
+        interpolate(nbrModel().htc(), htc_);
+    }
 }
 
 
@@ -91,9 +109,11 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
     const fvMesh& mesh
 )
 :
-    option(name, modelType, dict, mesh),
+    option(name, modelType, dict, mesh, readBool(dict.lookup("master"))),
     nbrModel_(NULL),
+    nbrModelName_(word::null),
     firstIter_(true),
+    timeIndex_(-1),
     htc_
     (
         IOobject
@@ -119,6 +139,8 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
 {
     if (active())
     {
+        coeffs_.lookup("nbrModelName") >> nbrModelName_;
+
         coeffs_.lookup("fieldNames") >> fieldNames_;
         applied_.setSize(fieldNames_.size(), false);
 
@@ -142,6 +164,8 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 )
 {
     setNbrModel();
+
+    correct();
 
     const volScalarField& h = eqn.psi();
 
@@ -171,11 +195,6 @@ void Foam::fv::interRegionHeatTransferModel::addSup
         nbrMesh.lookupObject<volScalarField>(TNbrName_);
 
     interpolate(Tnbr, Tmapped.internalField());
-
-    if (!master_)
-    {
-        interpolate(nbrModel().calculateHtc()(), htc_);
-    }
 
     if (debug)
     {

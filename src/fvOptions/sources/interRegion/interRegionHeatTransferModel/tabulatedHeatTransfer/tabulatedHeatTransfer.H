@@ -22,19 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::constantHeatTransfer
+    Foam::fv::tabulatedHeatTransfer
 
 Description
-    Constant heat transfer model. htcConst [W/m2/K] and area/volume [1/m]
-    must be provided.
+    Tabulated heat transfer model. The heat exchange area per unit volume
+    must be provided.  The 2D table returns the heat transfer coefficient
+    by querying the local and neighbour region velocities
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef constantHeatTransfer_H
-#define constantHeatTransfer_H
+#ifndef tabulatedHeatTransfer_H
+#define tabulatedHeatTransfer_H
 
 #include "interRegionHeatTransferModel.H"
 #include "autoPtr.H"
+#include "interpolation2DTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,10 +46,10 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class constantHeatTransfer Declaration
+                    Class tabulatedHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantHeatTransfer
+class tabulatedHeatTransfer
 :
     public interRegionHeatTransferModel
 {
@@ -55,23 +57,38 @@ private:
 
     // Private data
 
-        //- Constant heat transfer coefficient [W/m2/K]
-        autoPtr<volScalarField> htcConst_;
+        //- Name of velocity field; default = U
+        word UName_;
 
-        //- Area per unit volume of heat exchanger [1/m]
+        //- Name of neighbour velocity field; default = U
+        word UNbrName_;
+
+        //- 2D look up table
+        autoPtr<interpolation2DTable<scalar> > hTable_;
+
+        //- Area per unit volume of heat exchanger
         autoPtr<volScalarField> AoV_;
+
+        //- Heat transfer coefficient table
+        const interpolation2DTable<scalar>& hTable();
+
+        //- Field of area divided by volume
+        const volScalarField& AoV();
+
+        //- Start time name
+        const word startTimeName_;
 
 
 public:
 
     //- Runtime type information
-      TypeName("constantHeatTransfer");
+        TypeName("tabulatedHeatTransfer");
 
 
     // Constructors
 
         //- Construct from dictionary
-        constantHeatTransfer
+        tabulatedHeatTransfer
         (
             const word& name,
             const word& modelType,
@@ -81,13 +98,13 @@ public:
 
 
     //- Destructor
-    virtual ~constantHeatTransfer();
+    virtual ~tabulatedHeatTransfer();
 
 
     // Public Functions
 
         //- Calculate the heat transfer coefficient
-        virtual const tmp<volScalarField> calculateHtc();
+        virtual void calculateHtc();
 
 
         // I-O
@@ -106,6 +123,7 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 #endif
 

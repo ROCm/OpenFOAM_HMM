@@ -27,6 +27,7 @@ License
 #include "fvMesh.H"
 #include "fvMatrices.H"
 #include "volFields.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -86,9 +87,7 @@ void Foam::fv::option::setSelection(const dictionary& dict)
         }
         case smMapRegion:
         {
-            dict.lookup("nbrModelName") >> nbrModelName_;
             dict.lookup("nbrRegionName") >> nbrRegionName_;
-            master_ = readBool(dict.lookup("master"));
             break;
         }
         case smAll:
@@ -191,7 +190,10 @@ void Foam::fv::option::setCellSet()
                         (
                             mesh_,
                             nbrMesh,
-                            readBool(dict_.lookup("consistentMeshes"))
+                            meshToMeshNew::interpolationMethodNames_.read
+                            (
+                                dict_.lookup("interpolationMethod")
+                            )
                         )
                     );
                 }
@@ -247,7 +249,8 @@ Foam::fv::option::option
     const word& name,
     const word& modelType,
     const dictionary& dict,
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const bool master
 )
 :
     name_(name),
@@ -261,9 +264,8 @@ Foam::fv::option::option
     cellSetName_("none"),
     V_(0.0),
     meshInterpPtr_(),
-    nbrModelName_("none"),
     nbrRegionName_("none"),
-    master_(false),
+    master_(master),
     fieldNames_(),
     applied_()
 {
@@ -350,15 +352,7 @@ Foam::label Foam::fv::option::applyToField(const word& fieldName) const
         return 0;
     }
 
-    forAll(fieldNames_, i)
-    {
-        if (fieldNames_[i] == fieldName)
-        {
-            return i;
-        }
-    }
-
-    return -1;
+    return findIndex(fieldNames_, fieldName);
 }
 
 

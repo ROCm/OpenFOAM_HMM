@@ -23,7 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "constantHeatTransfer.H"
+#include "variableHeatTransfer.H"
+#include "turbulenceModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,11 +33,11 @@ namespace Foam
 {
 namespace fv
 {
-    defineTypeNameAndDebug(constantHeatTransfer, 0);
+    defineTypeNameAndDebug(variableHeatTransfer, 0);
     addToRunTimeSelectionTable
     (
         option,
-        constantHeatTransfer,
+        variableHeatTransfer,
         dictionary
     );
 }
@@ -45,7 +46,7 @@ namespace fv
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::constantHeatTransfer::constantHeatTransfer
+Foam::fv::variableHeatTransfer::variableHeatTransfer
 (
     const word& name,
     const word& modelType,
@@ -54,27 +55,21 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    htcConst_(),
+    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
+    a_(0),
+    b_(0),
+    c_(0),
+    ds_(0),
+    Pr_(0),
     AoV_()
 {
-    if (active() && master_)
+    if (master_)
     {
-        htcConst_.reset
-        (
-            new volScalarField
-            (
-                IOobject
-                (
-                    "htcConst",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh_
-            )
-        );
-
+        a_ = readScalar(coeffs_.lookup("a"));
+        b_ = readScalar(coeffs_.lookup("b"));
+        c_ = readScalar(coeffs_.lookup("c"));
+        ds_ = readScalar(coeffs_.lookup("ds"));
+        Pr_ = readScalar(coeffs_.lookup("Pr"));
         AoV_.reset
         (
             new volScalarField
@@ -90,37 +85,48 @@ Foam::fv::constantHeatTransfer::constantHeatTransfer
                 mesh_
             )
         );
-
-        const DimensionedField<scalar, volMesh>& htcConsti =
-            htcConst_().dimensionedInternalField();
-        const DimensionedField<scalar, volMesh>& AoVi =
-            AoV_().dimensionedInternalField();
-        dimensionedScalar interVol("V", dimVolume, meshInterp().V());
-
-        htc_.dimensionedInternalField() = htcConsti*AoVi*interVol/mesh.V();
-        htc_.correctBoundaryConditions();
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fv::constantHeatTransfer::~constantHeatTransfer()
+Foam::fv::variableHeatTransfer::~variableHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::constantHeatTransfer::calculateHtc()
+void Foam::fv::variableHeatTransfer::calculateHtc()
 {
-    return htc_;
+    const fvMesh& nbrMesh =
+        mesh_.time().lookupObject<fvMesh>(nbrRegionName());
+
+    const compressible::turbulenceModel& nbrTurb =
+        nbrMesh.lookupObject<compressible::turbulenceModel>("turbulenceModel");
+
+    const fluidThermo& nbrThermo =
+        nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
+
+    const volVectorField& UNbr =
+        nbrMesh.lookupObject<volVectorField>(UNbrName_);
+
+    const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
+
+    const volScalarField NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
+
+    const scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
+
+    const scalarField htcNbrMapped(interpolate(htcNbr));
+
+    htc_.internalField() = htcNbrMapped*AoV_;
 }
 
 
-void Foam::fv::constantHeatTransfer::writeData(Ostream& os) const
+void Foam::fv::variableHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+
     interRegionHeatTransferModel::writeData(os);
 
     os << indent << type() + "Coeffs" << nl;
@@ -131,10 +137,18 @@ void Foam::fv::constantHeatTransfer::writeData(Ostream& os) const
 }
 
 
-bool Foam::fv::constantHeatTransfer::read(const dictionary& dict)
+bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
+        coeffs_.readIfPresent("UNbrName", UNbrName_);
+
+        coeffs_.readIfPresent("a", a_);
+        coeffs_.readIfPresent("b", b_);
+        coeffs_.readIfPresent("c", c_);
+        coeffs_.readIfPresent("ds", ds_);
+        coeffs_.readIfPresent("Pr", Pr_);
+
         return true;
     }
     else

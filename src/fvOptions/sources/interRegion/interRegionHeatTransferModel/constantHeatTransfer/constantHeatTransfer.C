@@ -23,8 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "variableHeatTransfer.H"
-#include "turbulenceModel.H"
+#include "constantHeatTransfer.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -33,11 +32,11 @@ namespace Foam
 {
 namespace fv
 {
-    defineTypeNameAndDebug(variableHeatTransfer, 0);
+    defineTypeNameAndDebug(constantHeatTransfer, 0);
     addToRunTimeSelectionTable
     (
         option,
-        variableHeatTransfer,
+        constantHeatTransfer,
         dictionary
     );
 }
@@ -46,7 +45,7 @@ namespace fv
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::variableHeatTransfer::variableHeatTransfer
+Foam::fv::constantHeatTransfer::constantHeatTransfer
 (
     const word& name,
     const word& modelType,
@@ -55,21 +54,27 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 )
 :
     interRegionHeatTransferModel(name, modelType, dict, mesh),
-    UNbrName_(coeffs_.lookupOrDefault<word>("UNbrName", "U")),
-    a_(0),
-    b_(0),
-    c_(0),
-    ds_(0),
-    Pr_(0),
+    htcConst_(),
     AoV_()
 {
-    if (master_)
+    if (active() && master_)
     {
-        a_ = readScalar(coeffs_.lookup("a"));
-        b_ = readScalar(coeffs_.lookup("b"));
-        c_ = readScalar(coeffs_.lookup("c"));
-        ds_ = readScalar(coeffs_.lookup("ds"));
-        Pr_ = readScalar(coeffs_.lookup("Pr"));
+        htcConst_.reset
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "htcConst",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh_
+            )
+        );
+
         AoV_.reset
         (
             new volScalarField
@@ -85,51 +90,29 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
                 mesh_
             )
         );
+
+        htc_ = htcConst_()*AoV_();
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fv::variableHeatTransfer::~variableHeatTransfer()
+Foam::fv::constantHeatTransfer::~constantHeatTransfer()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::tmp<Foam::volScalarField>
-Foam::fv::variableHeatTransfer::calculateHtc()
+void Foam::fv::constantHeatTransfer::calculateHtc()
 {
-    const fvMesh& nbrMesh =
-        mesh_.time().lookupObject<fvMesh>(nbrRegionName());
-
-    const compressible::turbulenceModel& nbrTurb =
-        nbrMesh.lookupObject<compressible::turbulenceModel>("turbulenceModel");
-
-    const fluidThermo& nbrThermo =
-        nbrMesh.lookupObject<fluidThermo>("thermophysicalProperties");
-
-    const volVectorField& UNbr =
-        nbrMesh.lookupObject<volVectorField>(UNbrName_);
-
-    const volScalarField ReNbr(mag(UNbr)*ds_*nbrThermo.rho()/nbrTurb.mut());
-
-    const volScalarField NuNbr(a_*pow(ReNbr, b_)*pow(Pr_, c_));
-
-    const scalarField htcNbr(NuNbr*nbrTurb.kappaEff()/ds_);
-
-    const scalarField htcNbrMapped(interpolate(htcNbr));
-
-    htc_.internalField() = htcNbrMapped*AoV_*meshInterp().V()/mesh_.V();
-
-    return htc_;
+    // do nothing
 }
 
 
-void Foam::fv::variableHeatTransfer::writeData(Ostream& os) const
+void Foam::fv::constantHeatTransfer::writeData(Ostream& os) const
 {
     os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-
     interRegionHeatTransferModel::writeData(os);
 
     os << indent << type() + "Coeffs" << nl;
@@ -140,18 +123,10 @@ void Foam::fv::variableHeatTransfer::writeData(Ostream& os) const
 }
 
 
-bool Foam::fv::variableHeatTransfer::read(const dictionary& dict)
+bool Foam::fv::constantHeatTransfer::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        coeffs_.readIfPresent("UNbrName", UNbrName_);
-
-        coeffs_.readIfPresent("a", a_);
-        coeffs_.readIfPresent("b", b_);
-        coeffs_.readIfPresent("c", c_);
-        coeffs_.readIfPresent("ds", ds_);
-        coeffs_.readIfPresent("Pr", Pr_);
-
         return true;
     }
     else

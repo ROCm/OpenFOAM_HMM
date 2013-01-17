@@ -137,8 +137,82 @@ gasSpecies() const
 template<class ReactionThermo>
 void Foam::solidReaction<ReactionThermo>::write(Ostream& os) const
 {
-    Reaction<ReactionThermo>::write(os);
+    OStringStream reaction;
+    os.writeKeyword("reaction") << solidReactionStr(reaction)
+        << token::END_STATEMENT << nl;
 }
 
+
+template<class ReactionThermo>
+Foam::string Foam::solidReaction<ReactionThermo>::solidReactionStr
+(
+    OStringStream& reaction
+) const
+{
+    this->reactionStrLeft(reaction);
+    reaction << " + ";
+    solidReactionStrLeft(reaction);
+    reaction << " = ";
+    this->reactionStrRight(reaction);
+    reaction << " + ";
+    solidReactionStrRight(reaction);
+    return reaction.str();
+
+}
+
+
+template<class ReactionThermo>
+void Foam::solidReaction<ReactionThermo>::solidReactionStrLeft
+(
+    OStringStream& reaction
+) const
+{
+    for (label i = 0; i < glhs().size(); ++i)
+    {
+        reaction << " + ";
+
+        if (i > 0)
+        {
+            reaction << " + ";
+        }
+        if (mag(glhs()[i].stoichCoeff - 1) > SMALL)
+        {
+            reaction << glhs()[i].stoichCoeff;
+        }
+        reaction << gasSpecies()[glhs()[i].index];
+        if (mag(glhs()[i].exponent - glhs()[i].stoichCoeff) > SMALL)
+        {
+            reaction << "^" << glhs()[i].exponent;
+        }
+    }
+}
+
+
+template<class ReactionThermo>
+void Foam::solidReaction<ReactionThermo>::solidReactionStrRight
+(
+    OStringStream& reaction
+) const
+{
+
+    for (label i = 0; i < grhs().size(); ++i)
+    {
+        reaction << " + ";
+
+        if (i > 0)
+        {
+            reaction << " + ";
+        }
+        if (mag(grhs()[i].stoichCoeff - 1) > SMALL)
+        {
+            reaction << grhs()[i].stoichCoeff;
+        }
+        reaction << gasSpecies()[grhs()[i].index];
+        if (mag(grhs()[i].exponent - grhs()[i].stoichCoeff) > SMALL)
+        {
+            reaction << "^" << grhs()[i].exponent;
+        }
+    }
+}
 
 // ************************************************************************* //

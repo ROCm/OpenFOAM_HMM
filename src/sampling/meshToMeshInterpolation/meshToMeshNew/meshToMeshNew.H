@@ -40,6 +40,7 @@ SourceFiles
 #include "boundBox.H"
 #include "mapDistribute.H"
 #include "volFieldsFwd.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +53,22 @@ namespace Foam
 
 class meshToMeshNew
 {
+public:
+
+    // Public data types
+
+        //- Enumeration specifying required accuracy
+        enum interpolationMethod
+        {
+            imMap,
+            imCellVolumeWeight
+        };
+
+        static const NamedEnum<interpolationMethod, 2>
+            interpolationMethodNames_;
+
+private:
+
     // Private data
 
         //- Name of source mesh region
@@ -72,6 +89,9 @@ class meshToMeshNew
         //- Target to source cell interpolation weights
         scalarListList tgtToSrcCellWght_;
 
+        //- Interpolation method
+        interpolationMethod method_;
+
         //- Cell total volume in overlap region [m3]
         scalar V_;
 
@@ -84,9 +104,6 @@ class meshToMeshNew
 
         //- Target map pointer - parallel running only
         autoPtr<mapDistribute> tgtMapPtr_;
-
-        //- Flag to indicate that direct (one-to-one) mapping should be applied
-        bool directMapping_;
 
         //- Tolerance used in volume overlap calculations
         static scalar tolerance_;
@@ -289,7 +306,7 @@ public:
     (
         const polyMesh& src,
         const polyMesh& tgt,
-        const bool directMapping
+        const interpolationMethod& method
     );
 
 

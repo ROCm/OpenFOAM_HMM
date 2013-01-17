@@ -22,21 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fv::tabulatedHeatTransfer
+    Foam::fv::variableHeatTransfer
 
 Description
-    Tabulated heat transfer model. The heat exchange area per unit volume
-    must be provided.  The 2D table returns the heat transfer coefficient
-    by querying the local and neighbour region velocities
+    Variable heat transfer model depending on local values. The area of contact
+    between regions (area) must be provided. The Nu number is calculated as:
+
+        Nu = a*pow(Re, b)*pow(Pr, c)
+
+    and the heat transfer coefficient as:
+
+        htc = Nu*K/ds
+
+    where:
+        K is the heat conduction
+        ds is the strut diameter
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tabulatedHeatTransfer_H
-#define tabulatedHeatTransfer_H
+#ifndef variableHeatTransfer_H
+#define variableHeatTransfer_H
 
 #include "interRegionHeatTransferModel.H"
 #include "autoPtr.H"
-#include "interpolation2DTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,10 +54,10 @@ namespace fv
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class tabulatedHeatTransfer Declaration
+                    Class variableHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
-class tabulatedHeatTransfer
+class variableHeatTransfer
 :
     public interRegionHeatTransferModel
 {
@@ -57,38 +65,34 @@ private:
 
     // Private data
 
-        //- Name of velocity field; default = U
-        word UName_;
-
         //- Name of neighbour velocity field; default = U
         word UNbrName_;
 
-        //- 2D look up table
-        autoPtr<interpolation2DTable<scalar> > hTable_;
+        //- Model constants
+        scalar a_;
+        scalar b_;
+        scalar c_;
+
+        //- Strut diameter
+        scalar ds_;
+
+        //- Fluid Prandt number
+        scalar Pr_;
 
         //- Area per unit volume of heat exchanger
         autoPtr<volScalarField> AoV_;
-
-        //- Heat transfer coefficient table
-        const interpolation2DTable<scalar>& hTable();
-
-        //- Field of area divided by volume
-        const volScalarField& AoV();
-
-        //- Start time name
-        const word startTimeName_;
 
 
 public:
 
     //- Runtime type information
-        TypeName("tabulatedHeatTransfer");
+    TypeName("variableHeatTransfer");
 
 
     // Constructors
 
         //- Construct from dictionary
-        tabulatedHeatTransfer
+        variableHeatTransfer
         (
             const word& name,
             const word& modelType,
@@ -98,13 +102,13 @@ public:
 
 
     //- Destructor
-    virtual ~tabulatedHeatTransfer();
+    virtual ~variableHeatTransfer();
 
 
     // Public Functions
 
         //- Calculate the heat transfer coefficient
-        virtual const tmp<volScalarField> calculateHtc();
+        virtual void calculateHtc();
 
 
         // I-O
@@ -113,7 +117,7 @@ public:
             virtual void writeData(Ostream&) const;
 
             //- Read dictionary
-            virtual bool read(const dictionary& dict);
+            virtual bool read(const dictionary& dict) ;
 };
 
 
@@ -123,7 +127,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 #endif
 

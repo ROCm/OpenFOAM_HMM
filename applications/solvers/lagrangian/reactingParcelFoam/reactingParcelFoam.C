@@ -22,12 +22,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    porousExplicitSourceReactingParcelFoam
+    reactingParcelFoam
 
 Description
     Transient PIMPLE solver for compressible, laminar or turbulent flow with
     reacting multiphase Lagrangian parcels, including run-time selectable
-    finite volume options, e.g. fvOptions, constraints
+    finite volume options, e.g. sources, constraints
 
 \*---------------------------------------------------------------------------*/
 

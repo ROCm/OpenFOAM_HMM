@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,15 @@ void Foam::fieldAverage::addMeanField
 
         const word& fieldName = faItems_[fieldI].fieldName();
 
-        const word meanFieldName = fieldName + EXT_MEAN;
+        word meanFieldName = fieldName + EXT_MEAN;
+        if
+        (
+            (faItems_[fieldI].window() > 0)
+         && (faItems_[fieldI].windowName() != "")
+        )
+        {
+            meanFieldName = meanFieldName + "_" + faItems_[fieldI].windowName();
+        }
 
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
 
@@ -100,7 +108,16 @@ void Foam::fieldAverage::addPrime2MeanField
 
         const word& fieldName = faItems_[fieldI].fieldName();
 
-        const word meanFieldName = fieldName + EXT_PRIME2MEAN;
+        word meanFieldName = fieldName + EXT_PRIME2MEAN;
+        if
+        (
+            (faItems_[fieldI].window() > 0)
+         && (faItems_[fieldI].windowName() != "")
+        )
+        {
+            meanFieldName = meanFieldName + "_" + faItems_[fieldI].windowName();
+        }
+
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
 
         if (obr_.foundObject<fieldType2>(meanFieldName))

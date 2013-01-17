@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -127,9 +127,12 @@ public:
         (
             const label idc,
             const label idl,
-            const label p,
-            const label T
+            const scalar p,
+            const scalar T
         ) const;
+
+        //- Return maximum/limiting temperature
+        virtual scalar TMax(const scalar pIn, const scalar TIn) const;
 };
 
 

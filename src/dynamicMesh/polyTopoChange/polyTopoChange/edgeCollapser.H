@@ -61,7 +61,7 @@ class face;
 class edge;
 
 /*---------------------------------------------------------------------------*\
-                           Class edgeCollapser Declaration
+                        Class edgeCollapser Declaration
 \*---------------------------------------------------------------------------*/
 
 class edgeCollapser
@@ -84,12 +84,18 @@ private:
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        //- Controls collapse of a face to an edge
         const scalar guardFraction_;
 
+        //- Only collapse face to a point if high aspect ratio
         const scalar maxCollapseFaceToPointSideLengthCoeff_;
 
+        //- Allow a face to be collapsed to a point early, before the test
+        //  to collapse to an edge
         const Switch allowEarlyCollapseToPoint_;
 
+        //- Fraction of maxCollapseFaceToPointSideLengthCoeff_ to use when
+        //  allowEarlyCollapseToPoint_ is on
         const scalar allowEarlyCollapseCoeff_;
 
 
@@ -266,8 +272,8 @@ public:
                 const dictionary& meshQualityDict
             );
 
-            // Check mesh and mark points on faces in error
-            // Returns boolList with points in error set
+            //- Check mesh and mark points on faces in error
+            //  Returns boolList with points in error set
             static label checkMeshQuality
             (
                 const polyMesh& mesh,
@@ -300,7 +306,7 @@ public:
                 polyTopoChange& meshMod
             ) const;
 
-            // Mark (in collapseEdge) any edges to collapse
+            //- Mark (in collapseEdge) any edges to collapse
             label markSmallEdges
             (
                 const scalarField& minEdgeLen,
@@ -309,7 +315,7 @@ public:
                 Map<point>& collapsePointToLocation
             ) const;
 
-            // Mark (in collapseEdge) any edges to merge
+            //- Mark (in collapseEdge) any edges to merge
             label markMergeEdges
             (
                 const scalar maxCos,
@@ -332,6 +338,7 @@ public:
                 Map<point>& collapsePointToLocation
             ) const;
 
+            //- Marks edges in the faceZone indirectPatchFaces for collapse
             void markIndirectPatchFaces
             (
                 PackedBoolList& collapseEdge,
