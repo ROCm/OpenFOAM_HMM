@@ -334,7 +334,7 @@ Foam::Time::Time
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
     graphFormat_("raw"),
-    runTimeModifiable_(true),
+    runTimeModifiable_(false),
 
     functionObjects_(*this, enableFunctionObjects)
 {
@@ -427,7 +427,7 @@ Foam::Time::Time
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
     graphFormat_("raw"),
-    runTimeModifiable_(true),
+    runTimeModifiable_(false),
 
     functionObjects_(*this, !args.optionFound("noFunctionObjects"))
 {
@@ -523,7 +523,7 @@ Foam::Time::Time
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
     graphFormat_("raw"),
-    runTimeModifiable_(true),
+    runTimeModifiable_(false),
 
     functionObjects_(*this, enableFunctionObjects)
 {
@@ -619,7 +619,7 @@ Foam::Time::Time
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
     graphFormat_("raw"),
-    runTimeModifiable_(true),
+    runTimeModifiable_(false),
 
     functionObjects_(*this, enableFunctionObjects)
 {
