@@ -64,8 +64,7 @@ class kineticTheoryModel
 
         const dragModel& draga_;
 
-        const dimensionedScalar& rho1_;
-        const dimensionedScalar& nu1_;
+        const volScalarField& rho1_;
 
         //- dictionary holding the modeling info
         IOdictionary kineticTheoryProperties_;

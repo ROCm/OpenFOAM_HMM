@@ -74,7 +74,7 @@ granularPressureCoeff
 (
     const volScalarField& alpha1,
     const volScalarField& g0,
-    const dimensionedScalar& rho1,
+    const volScalarField& rho1,
     const dimensionedScalar& e
 ) const
 {
@@ -90,7 +90,7 @@ granularPressureCoeffPrime
     const volScalarField& alpha1,
     const volScalarField& g0,
     const volScalarField& g0prime,
-    const dimensionedScalar& rho1,
+    const volScalarField& rho1,
     const dimensionedScalar& e
 ) const
 {

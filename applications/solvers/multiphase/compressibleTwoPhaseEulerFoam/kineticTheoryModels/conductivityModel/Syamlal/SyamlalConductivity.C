@@ -73,7 +73,7 @@ Foam::kineticTheoryModels::conductivityModels::Syamlal::kappa
     const volScalarField& alpha1,
     const volScalarField& Theta,
     const volScalarField& g0,
-    const dimensionedScalar& rho1,
+    const volScalarField& rho1,
     const volScalarField& da,
     const dimensionedScalar& e
 ) const
