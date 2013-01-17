@@ -133,7 +133,24 @@ subModels
 
 
 cloudFunctions
-{}
+{
+    particleCollector
+    {
+        mode            concentricCircle;
+
+        origin          (0.05 0.025 0.005);
+        radius          (0.01 0.025 0.05);
+        nSector         10;
+        refDir          (1 0 0);
+        normal          (0 0 1);
+
+        negateParcelsOppositeNormal no;
+        removeCollected no;
+        surfaceFormat   vtk;
+        resetOnWrite    no;
+        log             yes;
+    }
+}
 
 
 // ************************************************************************* //

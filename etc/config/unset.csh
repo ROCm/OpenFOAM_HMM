@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -125,6 +125,7 @@ unsetenv OPAL_PREFIX
 unsetenv ENSIGHT9_READER
 unsetenv CMAKE_HOME
 unsetenv ParaView_DIR
+unsetenv ParaView_INCLUDE_DIR
 unsetenv PV_PLUGIN_PATH
 
 

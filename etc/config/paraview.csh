@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -85,9 +85,28 @@ setenv ParaView_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/paraview-
 
 # set paths if binaries or source are present
 if ( -r $ParaView_DIR || -r $paraviewInstDir ) then
+    setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview-${ParaView_MAJOR}
+    if (! -r $ParaView_INCLUDE_DIR && -r $ParaView_DIR/include/paraview) then
+        setenv ParaView_INCLUDE_DIR $ParaView_DIR/include/paraview
+    endif
+
+    set ParaView_LIB_DIR=${ParaView_DIR}/lib/paraview-${ParaView_MAJOR}
+    if (! -r $ParaView_LIB_DIR && -r ${ParaView_DIR}/lib/paraview) then
+        set ParaView_LIB_DIR=${ParaView_DIR}/lib/paraview
+    endif
+
     setenv PATH ${ParaView_DIR}/bin:${PATH}
-    setenv LD_LIBRARY_PATH "${ParaView_DIR}/lib/paraview-${ParaView_MAJOR}:${LD_LIBRARY_PATH}"
+    setenv LD_LIBRARY_PATH "${ParaView_LIB_DIR}:${LD_LIBRARY_PATH}"
     setenv PV_PLUGIN_PATH $FOAM_LIBBIN/paraview-${ParaView_MAJOR}
+
+    if ($?FOAM_VERBOSE && $?prompt) then
+        echo "Using paraview"
+        echo "    ParaView_DIR         : $ParaView_DIR"
+        echo "    ParaView_LIB_DIR     : $ParaView_LIB_DIR"
+        echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
+        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+    endif
+
 
     # add in python libraries if required
     set paraviewPython=$ParaView_DIR/Utilities/VTKPythonWrapping

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -376,6 +376,58 @@ Foam::ThermoCloud<CloudType>::sigmap() const
     }
 
     return tsigmap;
+}
+
+
+template<class CloudType>
+inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmax() const
+{
+    scalar T = -GREAT;
+    scalar n = 0;
+    forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        T = max(T, p.T());
+        n++;
+    }
+
+    reduce(T, maxOp<scalar>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return T;
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+
+template<class CloudType>
+inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
+{
+    scalar T = GREAT;
+    scalar n = 0;
+    forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
+    {
+        const parcelType& p = iter();
+        T = min(T, p.T());
+        n++;
+    }
+
+    reduce(T, minOp<scalar>());
+    reduce(n, sumOp<label>());
+
+    if (n > 0)
+    {
+        return T;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 

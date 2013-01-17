@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,6 +147,13 @@ public:
                 const scalar tol,
                 TrackingData& td
             );
+
+    // Member Operators
+
+        // Needed for List IO
+        inline bool operator==(const pointData&) const;
+        inline bool operator!=(const pointData&) const;
+
 
     // IOstream Operators
 

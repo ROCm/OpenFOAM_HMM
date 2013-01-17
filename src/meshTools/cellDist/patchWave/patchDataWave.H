@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,10 +55,9 @@ namespace Foam
 // Forward declaration of classes
 class polyMesh;
 class wallPoint;
-//template<class Type, class TrackingData> class MeshWave;
 
 /*---------------------------------------------------------------------------*\
-                           Class patchDataWave Declaration
+                        Class patchDataWave Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class TransferType>

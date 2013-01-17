@@ -2,30 +2,22 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          collapseDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      collapseDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 collapseEdgesCoeffs
 {
     // Edges shorter than this absolute value will be merged
-    minimumEdgeLength   1e-8;
+    minimumEdgeLength   1e-6;
 
     // The maximum angle between two edges that share a point attached to
     // no other edges
@@ -33,7 +25,7 @@ collapseEdgesCoeffs
 
     // The amount that minimumEdgeLength will be reduced by for each
     // edge if that edge's collapse generates a poor quality face
-    reductionFactor                         0.5;
+    reductionFactor     0.5;
 }
 
 
@@ -75,10 +67,17 @@ meshQualityCoeffs
 {
     // Name of the dictionary that has the mesh quality coefficients used
     // by motionSmoother::checkMesh
-    meshQualityCoeffDict    meshQualityDict;
+    #include                    "meshQualityDict";
+
+    // Maximum number of smoothing iterations for the reductionFactors
+    maximumSmoothingIterations  2;
 
     // Maximum number of outer iterations is mesh quality checking is enabled
-    maximumIterations       30;
+    maximumIterations           10;
+
+    // Maximum number of iterations deletion of a point can cause a bad face
+    // to be constructed before it is forced to not be deleted
+    maxPointErrorCount          5;
 }
 
 

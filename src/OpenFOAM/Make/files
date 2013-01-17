@@ -284,7 +284,8 @@ $(lduInterfaceFields)/cyclicLduInterfaceField/cyclicLduInterfaceField.C
 GAMG = $(lduMatrix)/solvers/GAMG
 $(GAMG)/GAMGSolver.C
 $(GAMG)/GAMGSolverAgglomerateMatrix.C
-$(GAMG)/GAMGSolverScalingFactor.C
+$(GAMG)/GAMGSolverInterpolate.C
+$(GAMG)/GAMGSolverScale.C
 $(GAMG)/GAMGSolverSolve.C
 
 GAMGInterfaces = $(GAMG)/interfaces

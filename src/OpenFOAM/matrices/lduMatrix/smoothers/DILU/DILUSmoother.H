@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,9 +26,6 @@ Class
 
 Description
     Simplified diagonal-based incomplete LU smoother for asymmetric matrices.
-
-    To improve efficiency, the residual is evaluated after every nSweeps
-    sweeps.
 
 SourceFiles
     DILUSmoother.C

@@ -11,6 +11,11 @@ cyclic
     type  cyclic;
 }
 
+cyclicAMI
+{
+    type  cyclicAMI;
+}
+
 cyclicSlip
 {
     type  cyclicSlip;

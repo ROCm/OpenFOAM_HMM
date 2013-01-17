@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 #include "OFstream.H"
 #include "Random.H"
 #include "treeDataFace.H"
+#include "treeDataPoint.H"
 #include "indexedOctree.H"
 #include "polyMesh.H"
 #include "polyPatch.H"
@@ -38,6 +39,7 @@ License
 #include "mapDistribute.H"
 #include "SubField.H"
 #include "triPointRef.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,12 +51,13 @@ namespace Foam
     const char* Foam::NamedEnum
     <
         Foam::mappedPatchBase::sampleMode,
-        4
+        5
     >::names[] =
     {
         "nearestCell",
         "nearestPatchFace",
         "nearestPatchFaceAMI",
+        "nearestPatchPoint",
         "nearestFace"
     };
 
@@ -72,7 +75,7 @@ namespace Foam
 }
 
 
-const Foam::NamedEnum<Foam::mappedPatchBase::sampleMode, 4>
+const Foam::NamedEnum<Foam::mappedPatchBase::sampleMode, 5>
     Foam::mappedPatchBase::sampleModeNames_;
 
 const Foam::NamedEnum<Foam::mappedPatchBase::offsetMode, 3>
@@ -315,6 +318,77 @@ void Foam::mappedPatchBase::findSamples
             break;
         }
 
+        case NEARESTPATCHPOINT:
+        {
+            Random rndGen(123456);
+
+            const polyPatch& pp = samplePolyPatch();
+
+            if (pp.empty())
+            {
+                forAll(samples, sampleI)
+                {
+                    nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                    nearest[sampleI].second().second() = Pstream::myProcNo();
+                }
+            }
+            else
+            {
+                // patch (local) points
+                treeBoundBox patchBb
+                (
+                    treeBoundBox(pp.points(), pp.meshPoints()).extend
+                    (
+                        rndGen,
+                        1e-4
+                    )
+                );
+                patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+                indexedOctree<treeDataPoint> boundaryTree
+                (
+                    treeDataPoint   // all information needed to search faces
+                    (
+                        mesh.points(),
+                        pp.meshPoints() // selection of points to search on
+                    ),
+                    patchBb,        // overall search domain
+                    8,              // maxLevel
+                    10,             // leafsize
+                    3.0             // duplicity
+                );
+
+                forAll(samples, sampleI)
+                {
+                    const point& sample = samples[sampleI];
+
+                    pointIndexHit& nearInfo = nearest[sampleI].first();
+                    nearInfo = boundaryTree.findNearest
+                    (
+                        sample,
+                        magSqr(patchBb.span())
+                    );
+
+                    if (!nearInfo.hit())
+                    {
+                        nearest[sampleI].second().first() = Foam::sqr(GREAT);
+                        nearest[sampleI].second().second() =
+                            Pstream::myProcNo();
+                    }
+                    else
+                    {
+                        const point& pt = nearInfo.hitPoint();
+
+                        nearest[sampleI].second().first() = magSqr(pt-sample);
+                        nearest[sampleI].second().second() =
+                            Pstream::myProcNo();
+                    }
+                }
+            }
+            break;
+        }
+
         case NEARESTFACE:
         {
             if (samplePatch_.size() && samplePatch_ != "none")
@@ -373,9 +447,10 @@ void Foam::mappedPatchBase::findSamples
     }
 
 
-    // Find nearest
+    // Find nearest. Combine on master.
     Pstream::listCombineGather(nearest, nearestEqOp());
     Pstream::listCombineScatter(nearest);
+
 
     if (debug)
     {
@@ -388,8 +463,9 @@ void Foam::mappedPatchBase::findSamples
 
             Info<< "    " << sampleI << " coord:"<< samples[sampleI]
                 << " found on processor:" << procI
-                << " in local cell/face:" << localI
-                << " with cc:" << nearest[sampleI].first().rawPoint() << endl;
+                << " in local cell/face/point:" << localI
+                << " with location:" << nearest[sampleI].first().rawPoint()
+                << endl;
         }
     }
 
@@ -599,7 +675,8 @@ void Foam::mappedPatchBase::calcMapping() const
           + "_mapped.obj"
         );
         Pout<< "Dumping mapping as lines from patch faceCentres to"
-            << " sampled cell/faceCentres to file " << str.name() << endl;
+            << " sampled cell/faceCentres/points to file " << str.name()
+            << endl;
 
         label vertI = 0;
 

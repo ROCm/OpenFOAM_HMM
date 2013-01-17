@@ -20,7 +20,7 @@
 
     radiation::radiationModel& rad = radiation[i];
 
-    IObasicSourceList& sources = fluidSources[i];
+    fv::IOoptionList& fvOptions = fluidFvOptions[i];
 
     const dimensionedScalar initialMass
     (

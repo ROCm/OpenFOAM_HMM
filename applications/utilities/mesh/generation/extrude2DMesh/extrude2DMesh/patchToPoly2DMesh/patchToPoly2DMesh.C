@@ -26,12 +26,6 @@ License
 #include "patchToPoly2DMesh.H"
 #include "PatchTools.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::patchToPoly2DMesh::flipFaceOrder()
@@ -275,12 +269,9 @@ void Foam::patchToPoly2DMesh::createPolyMeshComponents()
     addPatchFacesToOwner();
 }
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct from a primitivePatch
 Foam::patchToPoly2DMesh::patchToPoly2DMesh
 (
     const MeshedSurface<face>& patch,
@@ -320,14 +311,6 @@ void Foam::patchToPoly2DMesh::createMesh()
         startFace += patchSizes_[patchI];
     }
 }
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

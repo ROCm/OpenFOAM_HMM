@@ -41,7 +41,7 @@ $(pWave)/pointEdgePoint.C
 patchWave = $(algorithms)/PatchEdgeFaceWave
 $(patchWave)/PatchEdgeFaceWaveName.C
 $(patchWave)/patchEdgeFaceInfo.C
-$(patchWave)/patchDist.C
+$(patchWave)/patchPatchDist.C
 
 meshWave = $(algorithms)/MeshWave
 $(meshWave)/MeshWaveName.C
@@ -200,5 +200,7 @@ regionCoupled/GAMG/interfaces/regionCoupledGAMGInterface/regionCoupledGAMGInterf
 regionCoupled/GAMG/interfaces/regionCoupledGAMGInterface/regionCoupledWallGAMGInterface.C
 regionCoupled/GAMG/interfaceFields/regionCoupledGAMGInterfaceField/regionCoupledGAMGInterfaceField.C
 regionCoupled/GAMG/interfaceFields/regionCoupledGAMGInterfaceField/regionCoupledWallGAMGInterfaceField.C
+
+tetOverlapVolume/tetOverlapVolume.C
 
 LIB = $(FOAM_LIBBIN)/libmeshTools

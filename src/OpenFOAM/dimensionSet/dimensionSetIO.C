@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "dimensionSet.H"
 #include "IOstreams.H"
 #include "dimensionedScalar.H"
+#include <limits>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -142,7 +143,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
                 word subWord = w(start, i-start);
                 if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
                 {
-                    push(token(readLabel(IStringStream(subWord)())));
+                    push(token(readScalar(IStringStream(subWord)())));
                 }
                 else
                 {
@@ -153,7 +154,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
             {
                 if (isdigit(w[i]))
                 {
-                    push(token(readLabel(IStringStream(w[i])())));
+                    push(token(readScalar(IStringStream(w[i])())));
                 }
                 else
                 {
@@ -168,7 +169,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
         word subWord = w(start, w.size()-start);
         if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
         {
-            push(token(readLabel(IStringStream(subWord)())));
+            push(token(readScalar(IStringStream(subWord)())));
         }
         else
         {
@@ -209,6 +210,29 @@ void Foam::dimensionSet::tokeniser::putBack(const token& t)
     else
     {
         unpop(t);
+    }
+}
+
+
+void Foam::dimensionSet::round(const scalar tol)
+{
+    for (int i=0; i < dimensionSet::nDimensions; ++i)
+    {
+        scalar integralPart;
+        scalar fractionalPart = std::modf(exponents_[i], &integralPart);
+
+        if (mag(fractionalPart-1.0) <= tol)
+        {
+            exponents_[i] = 1.0+integralPart;
+        }
+        else if (mag(fractionalPart+1.0) <= tol)
+        {
+            exponents_[i] = -1.0+integralPart;
+        }
+        else if (mag(fractionalPart) <= tol)
+        {
+            exponents_[i] = integralPart;
+        }
     }
 }
 
@@ -327,6 +351,8 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
                     dimensionedScalar exp(parse(nextPrior, tis, readSet));
 
                     ds.dimensions().reset(pow(ds.dimensions(), exp.value()));
+                    // Round to nearest integer if close to it
+                    ds.dimensions().round(10*smallExponent);
                     ds.value() = Foam::pow(ds.value(), exp.value());
                 }
                 else
@@ -535,6 +561,8 @@ Foam::Istream& Foam::dimensionSet::read
                 s.read(readSet[symbol], readSet);
 
                 symbolSet.reset(pow(s.dimensions(), exponent));
+                // Round to nearest integer if close to it
+                symbolSet.round(10*smallExponent);
                 multiplier *= Foam::pow(s.value(), exponent);
             }
             else
@@ -634,6 +662,13 @@ Foam::Ostream& Foam::dimensionSet::write
         writeUnits.coefficients(exponents);
 
         bool hasPrinted = false;
+
+        // Set precision to lots
+        std::streamsize oldPrecision = os.precision
+        (
+            std::numeric_limits<scalar>::digits10
+        );
+
         forAll(exponents, i)
         {
             if (mag(exponents[i]) > smallExponent)
@@ -658,6 +693,9 @@ Foam::Ostream& Foam::dimensionSet::write
                 }
             }
         }
+
+        // Reset precision
+        os.precision(oldPrecision);
     }
     else
     {

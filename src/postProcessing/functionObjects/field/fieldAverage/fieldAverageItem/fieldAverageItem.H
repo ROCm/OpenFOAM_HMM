@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ Description
         prime2Mean      on;
         base            time; // iteration
         window          200;  // optional averaging window
+        windowName      w1;   // optional window name (default = "")
     }
     \endverbatim
 
@@ -107,6 +108,9 @@ private:
         //- Averaging window - defaults to -1 for 'all iters/time'
         scalar window_;
 
+        //- Averaging window name - defaults to 'window'
+        word windowName_;
+
 
 public:
 
@@ -171,6 +175,11 @@ public:
                 return window_;
             }
 
+            const word& windowName() const
+            {
+                return windowName_;
+            }
+
 
     // Member Operators
 
@@ -190,7 +199,8 @@ public:
              && a.mean_ == b.mean_
              && a.prime2Mean_ == b.prime2Mean_
              && a.base_ == b.base_
-             && a.window_ == b.window_;
+             && a.window_ == b.window_
+             && a.windowName_ == b.windowName_;
         }
 
         friend bool operator!=

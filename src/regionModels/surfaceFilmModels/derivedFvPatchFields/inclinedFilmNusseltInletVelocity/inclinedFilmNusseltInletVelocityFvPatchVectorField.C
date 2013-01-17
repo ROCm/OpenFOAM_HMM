@@ -115,12 +115,13 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const scalar t = db().time().timeOutputValue();
-
     // retrieve the film region from the database
 
     const regionModels::regionModel& region =
-        db().lookupObject<regionModels::regionModel>("surfaceFilmProperties");
+        db().time().lookupObject<regionModels::regionModel>
+        (
+            "surfaceFilmProperties"
+        );
 
     const regionModels::surfaceFilmModels::kinematicSingleLayer& film =
         dynamic_cast
@@ -129,36 +130,8 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
         >(region);
 
     // calculate the vector tangential to the patch
-
-    const vectorField n(patch().nf());
-
-    const volVectorField& nHat = film.nHat();
-
-    const vectorField nHatp(nHat.boundaryField()[patchI].patchInternalField());
-
-    vectorField nTan(nHatp ^ n);
-    nTan /= mag(nTan) + ROOTVSMALL;
-
-    // calculate distance in patch tangential direction
-
-    const vectorField& Cf = patch().Cf();
-    scalarField d(nTan & Cf);
-
-    // calculate the wavy film height
-
-    const scalar GMean = GammaMean_->value(t);
-    const scalar a = a_->value(t);
-    const scalar omega = omega_->value(t);
-
-    const scalarField G(GMean + a*sin(omega*constant::mathematical::twoPi*d));
-
-    const volScalarField& mu = film.mu();
-    const scalarField mup(mu.boundaryField()[patchI].patchInternalField());
-
-    const volScalarField& rho = film.rho();
-    const scalarField rhop(rho.boundaryField()[patchI].patchInternalField());
-
-    const scalarField Re(max(G, scalar(0.0))/mup);
+    // note: normal pointing into the domain
+    const vectorField n(-patch().nf());
 
     // TODO: currently re-evaluating the entire gTan field to return this patch
     const scalarField gTan(film.gTan()().boundaryField()[patchI] & n);
@@ -175,6 +148,36 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
             << "gravity"
             << endl;
     }
+
+    const volVectorField& nHat = film.nHat();
+
+    const vectorField nHatp(nHat.boundaryField()[patchI].patchInternalField());
+
+    vectorField nTan(nHatp ^ n);
+    nTan /= mag(nTan) + ROOTVSMALL;
+
+    // calculate distance in patch tangential direction
+
+    const vectorField& Cf = patch().Cf();
+    scalarField d(nTan & Cf);
+
+    // calculate the wavy film height
+
+    const scalar t = db().time().timeOutputValue();
+
+    const scalar GMean = GammaMean_->value(t);
+    const scalar a = a_->value(t);
+    const scalar omega = omega_->value(t);
+
+    const scalarField G(GMean + a*sin(omega*constant::mathematical::twoPi*d));
+
+    const volScalarField& mu = film.mu();
+    const scalarField mup(mu.boundaryField()[patchI].patchInternalField());
+
+    const volScalarField& rho = film.rho();
+    const scalarField rhop(rho.boundaryField()[patchI].patchInternalField());
+
+    const scalarField Re(max(G, scalar(0.0))/mup);
 
     operator==(n*pow(gTan*mup/(3.0*rhop), 0.333)*pow(Re, 0.666));
 

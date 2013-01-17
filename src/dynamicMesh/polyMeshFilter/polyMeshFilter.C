@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,12 @@ License
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+namespace Foam
+{
+defineTypeNameAndDebug(polyMeshFilter, 0);
+}
+
 
 Foam::autoPtr<Foam::fvMesh> Foam::polyMeshFilter::copyMesh(const fvMesh& mesh)
 {
@@ -1080,6 +1086,106 @@ Foam::label Foam::polyMeshFilter::filterEdges
             isErrorPoint,
             pointErrorCount
         );
+    }
+
+    return nBadFaces;
+}
+
+
+Foam::label Foam::polyMeshFilter::filterIndirectPatchFaces()
+{
+    newMeshPtr_ = copyMesh(mesh_);
+    fvMesh& newMesh = newMeshPtr_();
+
+    label nIterations = 0;
+    label nBadFaces = 0;
+
+    while (true)
+    {
+        Info<< nl << indent << "Iteration = "
+            << nIterations++ << nl << incrIndent << endl;
+
+        // Per edge collapse status
+        PackedBoolList collapseEdge(newMesh.nEdges());
+
+        Map<point> collapsePointToLocation(newMesh.nPoints());
+
+        labelList boundaryPoint(newMesh.nPoints());
+
+        edgeCollapser collapser(newMesh, collapseFacesCoeffDict_);
+
+        collapser.markIndirectPatchFaces
+        (
+            collapseEdge,
+            collapsePointToLocation
+        );
+
+        // Merge edge collapses into consistent collapse-network.
+        // Make sure no cells get collapsed.
+        List<pointEdgeCollapse> allPointInfo;
+        const globalIndex globalPoints(newMesh.nPoints());
+
+        collapser.consistentCollapse
+        (
+            globalPoints,
+            boundaryPoint,
+            collapsePointToLocation,
+            collapseEdge,
+            allPointInfo
+        );
+
+        label nLocalCollapse = collapseEdge.count();
+
+        reduce(nLocalCollapse, sumOp<label>());
+        Info<< nl << indent << "Collapsing " << nLocalCollapse
+            << " edges after synchronisation and PointEdgeWave" << endl;
+
+        if (nLocalCollapse == 0)
+        {
+            break;
+        }
+
+        // Apply collapses to current mesh
+        polyTopoChange newMeshMod(newMesh);
+
+        // Insert mesh refinement into polyTopoChange.
+        collapser.setRefinement(allPointInfo, newMeshMod);
+
+        Info<< indent << "Apply changes to the current mesh"
+            << decrIndent << endl;
+
+        // Apply changes to current mesh
+        autoPtr<mapPolyMesh> newMapPtr = newMeshMod.changeMesh
+        (
+            newMesh,
+            false
+        );
+        const mapPolyMesh& newMap = newMapPtr();
+
+        // Update fields
+        newMesh.updateMesh(newMap);
+        if (newMap.hasMotionPoints())
+        {
+            newMesh.movePoints(newMap.preMotionPoints());
+        }
+
+        // Mesh check
+        // ~~~~~~~~~~~~~~~~~~
+        // Do not allow collapses in regions of error.
+        // Updates minEdgeLen, nRelaxedEdges
+
+        PackedBoolList isErrorPoint(newMesh.nPoints());
+        nBadFaces = edgeCollapser::checkMeshQuality
+        (
+            newMesh,
+            meshQualityCoeffDict_,
+            isErrorPoint
+        );
+
+        Info<< nl << "    Number of bad faces     : " << nBadFaces << nl
+            << "    Number of marked points : "
+            << returnReduce(isErrorPoint.count(), sumOp<unsigned int>())
+            << endl;
     }
 
     return nBadFaces;

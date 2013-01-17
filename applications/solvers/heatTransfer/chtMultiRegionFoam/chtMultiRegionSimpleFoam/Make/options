@@ -12,7 +12,7 @@ EXE_INC = \
     -I$(LIB_SRC)/turbulenceModels \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/RAS/lnInclude \
-    -I$(LIB_SRC)/fieldSources/lnInclude \
+    -I$(LIB_SRC)/fvOptions/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude
 
@@ -25,6 +25,6 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lradiationModels \
-    -lfieldSources \
+    -lfvOptions \
     -lregionModels \
     -lsampling

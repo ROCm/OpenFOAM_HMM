@@ -6,17 +6,17 @@ tmp<fvVectorMatrix> UEqn
   + fvm::div(phi, U)
   + turbulence->divDevRhoReff(U)
  ==
-    sources(rho, U)
+    fvOptions(rho, U)
 );
 
 UEqn().relax();
 
-sources.constrain(UEqn());
+fvOptions.constrain(UEqn());
 
 if (pimple.momentumPredictor())
 {
     solve(UEqn() == -fvc::grad(p));
 
-    sources.correct(U);
+    fvOptions.correct(U);
     K = 0.5*magSqr(U);
 }

@@ -80,6 +80,9 @@ thermoSingleLayerCoeffs
                 variance        100;
             }
         }
+
+        zeroForcePatches
+        ();
     }
 
     injectionModels

@@ -11,16 +11,16 @@ if (finalIter)
             fvm::ddt(betav*rho, h)
           - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
           ==
-            sources(rho, h)
+            fvOptions(rho, h)
         );
 
         hEqn().relax();
 
-        sources.constrain(hEqn());
+        fvOptions.constrain(hEqn());
 
         hEqn().solve(mesh.solver(h.select(finalIter)));
 
-        sources.correct(h);
+        fvOptions.correct(h);
     }
 }
 

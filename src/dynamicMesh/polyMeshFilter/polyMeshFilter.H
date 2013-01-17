@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,10 @@ Class
     Foam::polyMeshFilter
 
 Description
+    Filter the edges and faces of a polyMesh whilst satisfying the given mesh
+    quality criteria.
+
+    Works on a copy of the mesh.
 
 SourceFiles
     polyMeshFilter.C
@@ -102,9 +106,9 @@ class polyMeshFilter
         //  faces
         const scalar faceReductionFactor_;
 
-        //-
+        //- Maximum number of times a deleted point can be associated with the
+        //  creation of a bad face it is forced to be kept.
         const label maxPointErrorCount_;
-
 
         //- The minimum edge length for each edge
         scalarField minEdgeLen_;
@@ -195,6 +199,10 @@ class polyMeshFilter
 
 public:
 
+    //- Runtime type information
+    ClassName("polyMeshFilter");
+
+
     // Constructors
 
         //- Construct from fvMesh
@@ -224,6 +232,9 @@ public:
 
             //- Filter edges only.
             label filterEdges(const label nOriginalBadFaces);
+
+            //- Filter all faces that are in the face zone indirectPatchFaces
+            label filterIndirectPatchFaces();
 };
 
 

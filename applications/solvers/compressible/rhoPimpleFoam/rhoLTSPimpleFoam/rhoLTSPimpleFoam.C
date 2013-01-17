@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Application
 
 Description
     Transient solver for laminar or turbulent flow of compressible fluids
-    with support for run-time selectable sources, e.g. MRF, explicit porosity.
+    with support for run-time selectable finite volume options, e.g. MRF,
+    explicit porosity.
 
     Uses the flexible PIMPLE (PISO-SIMPLE) solution for time-resolved and
     pseudo-transient simulations with support for local time-stepping for
@@ -37,7 +38,7 @@ Description
 #include "fvCFD.H"
 #include "psiThermo.H"
 #include "turbulenceModel.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "fvcSmooth.H"
 #include "pimpleControl.H"
 #include "bound.H"
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
 
     #include "setInitialrDeltaT.H"
     #include "createFields.H"
-    #include "createSources.H"
+    #include "createFvOptions.H"
     #include "initContinuityErrs.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

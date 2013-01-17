@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,8 +72,7 @@ Foam::tmp<Foam::volScalarField> Foam::heatTransferModels::RanzMarshall::K
 ) const
 {
     volScalarField Re(max(Ur*phase1_.d()/phase2_.nu(), scalar(1.0e-3)));
-    dimensionedScalar Prb =
-        phase2_.rho()*phase2_.nu()*phase2_.Cp()/phase2_.kappa();
+    volScalarField Prb(phase2_.rho()*phase2_.nu()*phase2_.Cp()/phase2_.kappa());
     volScalarField Nu(scalar(2) + 0.6*sqrt(Re)*cbrt(Prb));
 
     return 6.0*phase2_.kappa()*Nu/sqr(phase1_.d());

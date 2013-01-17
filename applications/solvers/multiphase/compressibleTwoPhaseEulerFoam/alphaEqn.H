@@ -1,9 +1,9 @@
-surfaceScalarField alphaPhi1("alphaPhi1", phi1);
-surfaceScalarField alphaPhi2("alphaPhi2", phi2);
+surfaceScalarField alphaPhi1("alphaPhi", phi1);
+surfaceScalarField alphaPhi2("alphaPhi", phi2);
 
 {
-    word scheme("div(phi,alpha1)");
-    word schemer("div(phir,alpha1)");
+    word scheme("div(phi,alpha)");
+    word schemer("div(phir,alpha)");
 
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);
@@ -68,16 +68,22 @@ surfaceScalarField alphaPhi2("alphaPhi2", phi2);
 
         if (g0.value() > 0.0)
         {
+            surfaceScalarField alpha1f(fvc::interpolate(alpha1));
+
             ppMagf =
                 fvc::interpolate((1.0/rho1)*rAU1)
-               *fvc::interpolate
-                (
-                    g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
-                );
+               *g0*min(exp(preAlphaExp*(alpha1f - alphaMax)), expMax);
+
+            // ppMagf =
+            //     fvc::interpolate((1.0/rho1)*rAU1)
+            //    *fvc::interpolate
+            //     (
+            //         g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
+            //     );
 
             alpha1Eqn -= fvm::laplacian
             (
-                (fvc::interpolate(alpha1) + scalar(0.0001))*ppMagf,
+                alpha1f*ppMagf,
                 alpha1,
                 "laplacian(alphaPpMag,alpha1)"
             );

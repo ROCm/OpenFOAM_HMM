@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 // Constants supplied in the main controlDict
 #include "fundamentalConstants.C"
 
-// Derived constants
+// Derived constants. Note:order is important
 #include "universalConstants.C"
 #include "electromagneticConstants.C"
 #include "atomicConstants.C"

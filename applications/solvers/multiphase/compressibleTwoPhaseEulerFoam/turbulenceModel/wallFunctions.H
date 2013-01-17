@@ -4,7 +4,6 @@
     scalar Cmu25 = ::pow(Cmu.value(), 0.25);
     scalar Cmu75 = ::pow(Cmu.value(), 0.75);
     scalar kappa_ = kappa.value();
-    scalar nu2_ = nu2.value();
 
     const fvPatchList& patches = mesh.boundary();
 
@@ -30,6 +29,8 @@
     forAll(patches, patchi)
     {
         const fvPatch& currPatch = patches[patchi];
+        const scalarField& mu2_ = thermo2.mu().boundaryField()[patchi];
+        const scalarField& rho2_ = rho2.boundaryField()[patchi];
 
         if (isA<wallFvPatch>(currPatch))
         {
@@ -52,7 +53,8 @@
                     /(kappa_*y[patchi][facei]);
 
                 G[faceCelli] +=
-                    (nut2w[facei] + nu2_)*magFaceGradU[facei]
+                    (nut2w[facei] + mu2_[facei]/rho2_[facei])
+                   *magFaceGradU[facei]
                    *Cmu25*::sqrt(k[faceCelli])
                    /(kappa_*y[patchi][facei]);
             }

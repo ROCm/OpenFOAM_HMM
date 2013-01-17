@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,9 @@ Class
 
 Description
     mesh to mesh interpolation class.
+
+Note
+    This class is due to be deprecated in favour of meshToMeshNew
 
 SourceFiles
     meshToMesh.C
@@ -93,6 +96,9 @@ class meshToMesh
 
         //- Cell to cell overlap addressing
         mutable labelListList* cellToCellAddressingPtr_;
+
+        //- Overlap volume
+        mutable scalar V_;
 
 
     // Private Member Functions
@@ -231,6 +237,13 @@ public:
                 return cellAddressing_;
             }
 
+            //- Overlap volume
+            scalar V() const
+            {
+                return V_;
+            }
+
+
         // Interpolation
 
             //- Map field
@@ -275,7 +288,7 @@ public:
                 const labelList& adr,
                 const vectorField& centres,
                 const CombineOp& cop
-            ) const;
+            )const;
 
 
             //- Interpolate internal volume field

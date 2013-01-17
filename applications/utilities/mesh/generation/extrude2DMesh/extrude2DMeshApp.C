@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,6 +114,8 @@ int main(int argc, char *argv[])
 {
     argList::validArgs.append("surfaceFormat");
 
+    #include "addOverwriteOption.H"
+
     #include "setRootCase.H"
 
     Info<< "Create time\n" << endl;
@@ -128,6 +130,7 @@ int main(int argc, char *argv[])
     runTimeExtruded.functionObjects().off();
 
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
+    const bool overwrite = args.optionFound("overwrite");
 
     Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat]
         << " at time " << runTimeExtruded.timeName() << endl;
@@ -304,13 +307,22 @@ int main(int argc, char *argv[])
         mesh().updateMesh(morphMap);
     }
 
+    if (!overwrite)
+    {
+        runTimeExtruded++;
+    }
+    else
+    {
+        mesh().setInstance("constant");
+    }
+
     // Take over refinement levels and write to new time directory.
-    Pout<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
+    Info<< "\nWriting extruded mesh to time = " << runTimeExtruded.timeName()
         << nl << endl;
 
     mesh().write();
 
-    Pout<< "End\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

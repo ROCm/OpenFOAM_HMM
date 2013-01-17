@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,89 +39,128 @@ Description
 
 // Universal constants
 
-const Foam::dimensionedScalar Foam::constant::universal::c
+namespace Foam
+{
+namespace constant
+{
+
+defineDimensionedConstant
 (
-    dimensionedConstant(universal::group, "c")
+    universal::group,
+    universal::c,
+    constantuniversalc,
+    "c"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::universal::G
+defineDimensionedConstant
 (
-    dimensionedConstant(universal::group, "G")
+    universal::group,
+    universal::G,
+    constantuniversalG,
+    "G"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::universal::h
+defineDimensionedConstant
 (
-    dimensionedConstant(universal::group, "h")
+    universal::group,
+    universal::h,
+    constantuniversalh,
+    "h"
 );
 
 
 // Electromagnetic
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::e
+defineDimensionedConstant
 (
-    dimensionedConstant(electromagnetic::group, "e")
+    electromagnetic::group,
+    electromagnetic::e,
+    constantelectromagnetice,
+    "e"
 );
 
 
 // Atomic
 
-const Foam::dimensionedScalar Foam::constant::atomic::me
+defineDimensionedConstant
 (
-    dimensionedConstant(atomic::group, "me")
+    atomic::group,
+    atomic::me,
+    constantatomicme,
+    "me"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::mp
+defineDimensionedConstant
 (
-    dimensionedConstant(atomic::group, "mp")
+    atomic::group,
+    atomic::mp,
+    constantatomicmp,
+    "mp"
 );
 
 
 // Physico-chemical
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::mu
+defineDimensionedConstant
 (
-    dimensionedConstant(physicoChemical::group, "mu")
+    physicoChemical::group,
+    physicoChemical::mu,
+    constantphysicoChemicalmu,
+    "mu"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::NA
+// Note: cannot use dimless etc since not guaranteed to be constructed
+defineDimensionedConstantWithDefault
 (
-//    dimensionedConstant(physicoChemical::group, "NA")
-    dimensionedConstant
+    physicoChemical::group,
+    physicoChemical::NA,
+    Foam::dimensionedScalar
     (
-        physicoChemical::group,
         "NA",
-        dimensionedScalar
-        (
-            "NA",
-            dimless/dimMoles,
-            6.0221417930e+23
-        )
-    )
+        dimensionSet(0, 0, 0, 0, -1), //Foam::dimless/Foam::dimMoles,
+        6.0221417930e+23
+    ),
+    constantphysicoChemicalNA,
+    "NA"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::k
+defineDimensionedConstant
 (
-    dimensionedConstant(physicoChemical::group, "k")
+    physicoChemical::group,
+    physicoChemical::k,
+    constantphysicoChemicalk,
+    "k"
 );
 
 
 // Standard
 
-const Foam::dimensionedScalar Foam::constant::standard::Pstd
+defineDimensionedConstant
 (
-    dimensionedConstant("standard", "Pstd")
+    "standard",
+    standard::Pstd,
+    constantstandardPstd,
+    "Pstd"
 );
 
 
-const Foam::dimensionedScalar Foam::constant::standard::Tstd
+defineDimensionedConstant
 (
-    dimensionedConstant("standard", "Tstd")
+    "standard",
+    standard::Tstd,
+    constantstandardTstd,
+    "Tstd"
 );
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace constant
+} // End namespace Foam
 
 // ************************************************************************* //

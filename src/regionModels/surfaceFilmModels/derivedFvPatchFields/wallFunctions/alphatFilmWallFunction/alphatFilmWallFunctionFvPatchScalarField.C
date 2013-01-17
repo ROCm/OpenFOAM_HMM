@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,10 +141,10 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    bool ok =
-        db().objectRegistry::foundObject<modelType>("surfaceFilmProperties");
+    bool foundFilm =
+        db().time().foundObject<modelType>("surfaceFilmProperties");
 
-    if (!ok)
+    if (!foundFilm)
     {
         // do nothing on construction - film model doesn't exist yet
         return;
@@ -154,7 +154,7 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
 
     // Retrieve phase change mass from surface film model
     const modelType& filmModel =
-        db().objectRegistry::lookupObject<modelType>("surfaceFilmProperties");
+        db().time().lookupObject<modelType>("surfaceFilmProperties");
 
     const label filmPatchI = filmModel.regionPatchID(patchI);
 
@@ -214,7 +214,6 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ class polyMesh;
 class wallPoint;
 
 /*---------------------------------------------------------------------------*\
-                           Class patchWave Declaration
+                          Class patchWave Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchWave
@@ -128,7 +128,7 @@ public:
             return distance_;
         }
 
-        //- Non const access so we can 'transfer' contents for efficiency.
+        //- Non const access so we can 'transfer' contents for efficiency
         scalarField& distance()
         {
             return distance_;
@@ -143,7 +143,6 @@ public:
         {
             return patchDistance_;
         }
-
 };
 
 

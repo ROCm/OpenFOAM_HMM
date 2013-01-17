@@ -39,7 +39,8 @@ inline Ostream& operator<<
     const solidReaction<ReactionThermo>& r
 )
 {
-    r.write(os);
+    OStringStream reaction;
+    os << r.solidReactionStr(reaction)<< token::END_STATEMENT <<nl;
     return os;
 }
 

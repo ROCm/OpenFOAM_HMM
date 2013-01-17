@@ -24,7 +24,7 @@
       + phig
     );
 
-    sources.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     {
         fvScalarMatrix p_rghDDtEqn
@@ -66,7 +66,7 @@
                 U = HbyA
                   + rAU*fvc::reconstruct((phig + p_rghEqn.flux())/rhorAUf);
                 U.correctBoundaryConditions();
-                sources.correct(U);
+                fvOptions.correct(U);
                 K = 0.5*magSqr(U);
             }
         }

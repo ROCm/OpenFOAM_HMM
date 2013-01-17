@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,9 @@ Class
 
 Description
     Film contact angle force
+
+    The effect of the contact angle force can be ignored over a specified
+    distance from patches.
 
 SourceFiles
     contactAngleForce.C
@@ -69,9 +72,14 @@ private:
         //- Parcel size PDF model
         const autoPtr<distributionModels::distributionModel> distribution_;
 
+        //- Mask over which force is applied
+        volScalarField mask_;
 
 
     // Private member functions
+
+        //- Initialise
+        void initialise();
 
         //- Disallow default bitwise copy construct
         contactAngleForce(const contactAngleForce&);

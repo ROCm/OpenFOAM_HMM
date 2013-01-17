@@ -1,5 +1,5 @@
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == sources(U))().H();
+HbyA = rAU*(UEqn() == fvOptions(U))().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
@@ -51,4 +51,4 @@ fvc::makeRelative(phi, U);
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();
-sources.correct(U);
+fvOptions.correct(U);

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -429,7 +429,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-1.5.4
+    export FOAM_MPI=openmpi-1.6.3
     # optional configuration tweaks:
     _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config/openmpi.sh`
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,9 @@ namespace debug
         //- Register DimensionSets read/write object
         void addDimensionSetObject(const char* name, simpleRegIOobject* obj);
 
+        //- Register DimensionedConstant read/write object
+        void addDimensionedConstantObject(const char* name, simpleRegIOobject*);
+
 
         //- Get access to registered debug switch objects
         simpleObjectRegistry& debugObjects();
@@ -106,6 +109,8 @@ namespace debug
         //- Get access to registered dimensionSets switch objects
         simpleObjectRegistry& dimensionSetObjects();
 
+        //- Get access to registered dimensionedConstant switch objects
+        simpleObjectRegistry& dimensionedConstantObjects();
 
 } // End namespace debug
 

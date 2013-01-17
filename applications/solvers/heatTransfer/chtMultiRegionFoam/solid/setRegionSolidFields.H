@@ -17,4 +17,4 @@
 
     const volScalarField& betav = betavSolid[i];
 
-    IObasicSourceList& sources = solidHeatSources[i];
+    fv::IOoptionList& fvOptions = solidHeatSources[i];

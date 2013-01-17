@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,8 @@ Application
 Description
     Local time stepping (LTS) solver for steady, compressible, laminar or
     turbulent reacting and non-reacting flow with multiphase Lagrangian
-    parcels and porous media, including explicit sources for mass, momentum
-    and energy
+    parcels and porous media, including run-time selectable finitite volume
+    options, e.g. sources, constraints
 
     Note: ddtPhiCorr not used here when porous zones are active
     - not well defined for porous calculations
@@ -41,7 +41,7 @@ Description
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
 #include "IOporosityModelList.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 #include "SLGThermo.H"
 #include "fvcSmooth.H"
 #include "pimpleControl.H"
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     #include "readTimeControls.H"
     #include "createFields.H"
-    #include "createSources.H"
+    #include "createFvOptions.H"
     #include "createRDeltaT.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
