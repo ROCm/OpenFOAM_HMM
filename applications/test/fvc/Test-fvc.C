@@ -35,16 +35,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-
-    volScalarField fx(pow(mesh.C().component(vector::X), 2));
+    volScalarField fx(pow(mesh.C().component(vector::X), 1));
     fx.write();
     volScalarField gradx4(fvc::grad(fx)().component(vector::X));
     gradx4.write();
+
+    Info<< fvc::snGrad(fx) - (mesh.Sf()/mesh.magSf())().component(vector::X) << endl;
 
     //volVectorField curlC(fvc::curl(1.0*mesh.C()));
     //curlC.write();
