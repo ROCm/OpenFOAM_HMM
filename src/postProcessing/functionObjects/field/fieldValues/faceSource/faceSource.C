@@ -540,23 +540,7 @@ Foam::vector Foam::fieldValues::faceSource::processValues
         case opSumDirection:
         {
             const vector direction(dict_.lookup("direction"));
-
-            vector v(vector::zero);
-
-            forAll(Sf, i)
-            {
-                scalar d = Sf[i] & direction;
-                if (d > 0)
-                {
-                    v += pos(values[i] & direction)*values[i];
-                }
-                else
-                {
-                    v += neg(values[i] & direction)*values[i];
-                }
-            }
-
-            return v;
+            return sum(pos(values & direction)*values);
         }
         case opAreaNormalAverage:
         {
