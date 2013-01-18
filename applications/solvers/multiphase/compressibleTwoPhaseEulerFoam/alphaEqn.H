@@ -2,8 +2,8 @@ surfaceScalarField alphaPhi1("alphaPhi" + phase1Name, phi1);
 surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
 
 {
-    word alphaScheme("div(phi,alpha)");
-    word alpharScheme("div(phir,alpha)");
+    word alphaScheme("div(phi," + alpha1.name() + ')');
+    word alpharScheme("div(phir," + alpha1.name() + ')');
 
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);

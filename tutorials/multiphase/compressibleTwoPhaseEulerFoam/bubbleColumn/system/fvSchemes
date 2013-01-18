@@ -18,6 +18,8 @@ FoamFile
 ddtSchemes
 {
     default         Euler;
+
+    "ddt\(alpha.*,.*\)"  bounded Euler;
 }
 
 gradSchemes
@@ -27,25 +29,20 @@ gradSchemes
 
 divSchemes
 {
-    default             none;
+    default                 none;
 
-    div(phi,alpha)          Gauss limitedLinear01 1;
-    div(phir,alpha)         Gauss limitedLinear01 1;
-    div(alphaPhiair,Uair)   Gauss limitedLinearV 1;
-    div(alphaPhiwater,Uwater)   Gauss limitedLinearV 1;
-    div(phiair,Uair)        Gauss limitedLinearV 1;
-    div(phiwater,Uwater)    Gauss limitedLinearV 1;
-    div((alphaair*Rc))      Gauss linear;
-    div((alphawater*Rc))    Gauss linear;
-    div(alphaPhiair,hair)   Gauss limitedLinear 1;
-    div(alphaPhiwater,hwater)   Gauss limitedLinear 1;
-    div(alphaPhiwater,k)    Gauss limitedLinear 1;
-    div(alphaPhiwater,epsilon)  Gauss limitedLinear 1;
-    div(phi,Theta)          Gauss limitedLinear 1;
-    div(phidair,p)          Gauss upwind;
-    div(phidwater,p)        Gauss upwind;
-    div(phiair,Kair)        Gauss limitedLinear 1;
-    div(phiwater,Kwater)    Gauss limitedLinear 1;
+    div(phi,alphaair)       Gauss vanLeer;
+    div(phir,alphaair)      Gauss vanLeer;
+
+    "div\(alphaPhi.*,U.*\)" bounded Gauss limitedLinearV 1;
+    "div\(phi.*,U.*\)"      Gauss limitedLinearV 1;
+    "div\(\(alpha.*Rc\)\)"  Gauss linear;
+    "div\(phid.*,p\)"       Gauss upwind;
+
+    "div\(alphaPhi.*,h.*\)" bounded Gauss limitedLinear 1;
+    "div\(phi.*,K.*\)"      Gauss limitedLinear 1;
+
+    "div\(alphaPhi.*,(k|epsilon)\)"  bounded Gauss limitedLinear 1;
 }
 
 laplacianSchemes

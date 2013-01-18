@@ -14,14 +14,18 @@
     volScalarField& he1 = thermo1.he();
     volScalarField& he2 = thermo2.he();
 
+    volScalarField Cpv1(thermo1.Cpv());
+    volScalarField Cpv2(thermo2.Cpv());
+
     fvScalarMatrix he1Eqn
     (
         fvm::ddt(alpha1, he1)
       + fvm::div(alphaPhi1, he1)
       - fvm::laplacian(k1, he1)
      ==
-        heatTransferCoeff*(thermo1.he(p, thermo2.T())/thermo1.Cp())/rho1
-      - fvm::Sp(heatTransferCoeff/thermo1.Cp()/rho1, he1)
+        heatTransferCoeff*(thermo2.T() - thermo1.T())/rho1
+      + heatTransferCoeff*he1/Cpv1/rho1
+      - fvm::Sp(heatTransferCoeff/Cpv1/rho1, he1)
       + alpha1*(dpdt/rho1 - (fvc::ddt(K1) + fvc::div(phi1, K1)))
     );
 
@@ -31,8 +35,9 @@
       + fvm::div(alphaPhi2, he2)
       - fvm::laplacian(k2, he2)
      ==
-        heatTransferCoeff*(thermo2.he(p, thermo1.T())/thermo2.Cp())/rho2
-      - fvm::Sp(heatTransferCoeff/thermo2.Cp()/rho2, he2)
+        heatTransferCoeff*(thermo1.T() - thermo2.T())/rho2
+      + heatTransferCoeff*he2/Cpv2/rho2
+      - fvm::Sp(heatTransferCoeff/Cpv2/rho2, he2)
       + alpha2*(dpdt/rho2 - (fvc::ddt(K2) + fvc::div(phi2, K2)))
     );
 
