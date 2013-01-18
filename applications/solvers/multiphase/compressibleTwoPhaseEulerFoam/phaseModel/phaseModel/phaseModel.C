@@ -51,7 +51,15 @@ Foam::phaseModel::phaseModel
         dimensionedScalar("alpha", dimless, 0)
     ),
     name_(phaseName),
-    phaseDict_(transportProperties.subDict(phaseName)),
+    phaseDict_
+    (
+        transportProperties.subDict
+        (
+            phaseName == "1" || phaseName == "2"
+          ? "phase" + phaseName
+          : word(phaseName)
+        )
+    ),
     thermo_(rhoThermo::New(mesh, phaseName)),
     U_
     (
