@@ -21,6 +21,10 @@
     (
         fvm::ddt(alpha1, he1)
       + fvm::div(alphaPhi1, he1)
+
+        // Compressibity correction
+      - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), he1)
+
       - fvm::laplacian(k1, he1)
      ==
         heatTransferCoeff*(thermo2.T() - thermo1.T())/rho1
@@ -33,6 +37,10 @@
     (
         fvm::ddt(alpha2, he2)
       + fvm::div(alphaPhi2, he2)
+
+        // Compressibity correction
+      - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), he2)
+
       - fvm::laplacian(k2, he2)
      ==
         heatTransferCoeff*(thermo1.T() - thermo2.T())/rho2

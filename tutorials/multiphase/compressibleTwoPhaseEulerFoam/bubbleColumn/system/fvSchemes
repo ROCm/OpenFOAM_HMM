@@ -18,8 +18,6 @@ FoamFile
 ddtSchemes
 {
     default         Euler;
-
-    "ddt\(alpha.*,.*\)"  bounded Euler;
 }
 
 gradSchemes
@@ -34,15 +32,15 @@ divSchemes
     div(phi,alphaair)       Gauss vanLeer;
     div(phir,alphaair)      Gauss vanLeer;
 
-    "div\(alphaPhi.*,U.*\)" bounded Gauss limitedLinearV 1;
+    "div\(alphaPhi.*,U.*\)" Gauss limitedLinearV 1;
     "div\(phi.*,U.*\)"      Gauss limitedLinearV 1;
     "div\(\(alpha.*Rc\)\)"  Gauss linear;
     "div\(phid.*,p\)"       Gauss upwind;
 
-    "div\(alphaPhi.*,h.*\)" bounded Gauss limitedLinear 1;
+    "div\(alphaPhi.*,h.*\)" Gauss limitedLinear 1;
     "div\(phi.*,K.*\)"      Gauss limitedLinear 1;
 
-    "div\(alphaPhi.*,(k|epsilon)\)"  bounded Gauss limitedLinear 1;
+    "div\(alphaPhi.*,(k|epsilon)\)"  Gauss limitedLinear 1;
 }
 
 laplacianSchemes
