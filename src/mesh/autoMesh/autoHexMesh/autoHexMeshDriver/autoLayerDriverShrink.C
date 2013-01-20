@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -350,6 +350,11 @@ void Foam::autoLayerDriver::smoothNormals
         label meshPointI = fixedPoints[i];
         isFixedPoint.set(meshPointI, 1);
     }
+
+    // Make sure that points that are coupled to meshPoints but not on a patch
+    // are fixed as well
+    syncTools::syncPointList(mesh, isFixedPoint, maxEqOp<unsigned int>(), 0);
+
 
     // Correspondence between local edges/points and mesh edges/points
     const labelList meshEdges(identity(mesh.nEdges()));
@@ -831,6 +836,19 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         )
     );
 
+    // pointNormals
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        pointField meshPointNormals(mesh.nPoints(), point(1, 0, 0));
+        UIndirectList<point>(meshPointNormals, pp.meshPoints()) = pointNormals;
+        meshRefinement::testSyncPointList
+        (
+            "pointNormals",
+            mesh,
+            meshPointNormals
+        );
+    }
+
     // Smooth patch normal vectors
     smoothPatchNormals
     (
@@ -841,6 +859,18 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
         pointNormals
     );
 
+    // smoothed pointNormals
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        pointField meshPointNormals(mesh.nPoints(), point(1, 0, 0));
+        UIndirectList<point>(meshPointNormals, pp.meshPoints()) = pointNormals;
+        meshRefinement::testSyncPointList
+        (
+            "smoothed pointNormals",
+            mesh,
+            meshPointNormals
+        );
+    }
 
     // Calculate distance to pp points
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -882,6 +912,28 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             dummyTrackData
         );
     }
+
+
+    // Check sync of wall distance
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        pointField origin(pointWallDist.size());
+        scalarField distSqr(pointWallDist.size());
+        scalarField passiveS(pointWallDist.size());
+        pointField passiveV(pointWallDist.size());
+        forAll(pointWallDist, pointI)
+        {
+            origin[pointI] = pointWallDist[pointI].origin();
+            distSqr[pointI] = pointWallDist[pointI].distSqr();
+            passiveS[pointI] = pointWallDist[pointI].s();
+            passiveV[pointI] = pointWallDist[pointI].v();
+        }
+        meshRefinement::testSyncPointList("origin", mesh, origin);
+        meshRefinement::testSyncPointList("distSqr", mesh, distSqr);
+        meshRefinement::testSyncPointList("passiveS", mesh, passiveS);
+        meshRefinement::testSyncPointList("passiveV", mesh, passiveV);
+    }
+
 
     // 2. Find points with max distance and transport information back to
     //    wall.
@@ -1095,6 +1147,13 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             medialDist[pointI] = Foam::sqrt(pointMedialDist[pointI].distSqr());
             medialVec[pointI] = pointMedialDist[pointI].origin();
         }
+
+        // Check
+        if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+        {
+            meshRefinement::testSyncPointList("medialDist", mesh, medialDist);
+            meshRefinement::testSyncPointList("medialVec", mesh, medialVec);
+        }
     }
 
     // Extract transported surface normals as pointVectorField
@@ -1105,6 +1164,11 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
     // Smooth normal vectors. Do not change normals on pp.meshPoints
     smoothNormals(nSmoothNormals, isMasterEdge, meshPoints, dispVec);
+
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        meshRefinement::testSyncPointList("smoothed dispVec", mesh, dispVec);
+    }
 
     // Calculate ratio point medial distance to point wall distance
     forAll(medialRatio, pointI)
@@ -1121,6 +1185,14 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             medialRatio[pointI] = mDist / (Foam::sqrt(wDist2) + mDist);
         }
     }
+
+
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        // medialRatio
+        meshRefinement::testSyncPointList("medialRatio", mesh, medialRatio);
+    }
+
 
     if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
     {
@@ -1415,6 +1487,42 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             *dispVec[pointI];
     }
 
+
+
+
+    // Check a bit the sync of displacements
+    if (debug&meshRefinement::MESH || debug&meshRefinement::LAYERINFO)
+    {
+        // initial mesh
+        meshRefinement::testSyncPointList("mesh.points()", mesh, mesh.points());
+
+        // pointWallDist
+        scalarField pWallDist(pointWallDist.size());
+        forAll(pointWallDist, pointI)
+        {
+            pWallDist[pointI] = pointWallDist[pointI].s();
+        }
+        meshRefinement::testSyncPointList("pointWallDist", mesh, pWallDist);
+
+        // dispVec
+        meshRefinement::testSyncPointList("dispVec", mesh, dispVec);
+
+        // displacement before and after correction
+        meshRefinement::testSyncPointList
+        (
+            "displacement BEFORE",
+            mesh,
+            displacement
+        );
+
+        meshMover.correctBoundaryConditions(displacement);
+        meshRefinement::testSyncPointList
+        (
+            "displacement AFTER",
+            mesh,
+            displacement
+        );
+    }
 
 
 //XXXXX

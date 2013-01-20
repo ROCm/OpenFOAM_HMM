@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -510,6 +510,9 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const CompositionModel<reactingCloudType>& composition =
         td.cloud().composition();
 
+    const scalar TMax = td.cloud().phaseChange().TMax(pc_, this->Tc_);
+    const scalar Tdash = min(T, TMax);
+    const scalar Tsdash = min(Ts, TMax);
 
     // Calculate mass transfer due to phase change
     td.cloud().phaseChange().calculate
@@ -520,8 +523,8 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         Pr,
         d,
         nus,
-        T,
-        Ts,
+        Tdash,
+        Tsdash,
         pc_,
         this->Tc_,
         YComponents,
@@ -541,7 +544,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         const label idc = composition.localToGlobalCarrierId(idPhase, i);
         const label idl = composition.globalIds(idPhase)[i];
 
-        const scalar dh = td.cloud().phaseChange().dh(idc, idl, pc_, T);
+        const scalar dh = td.cloud().phaseChange().dh(idc, idl, pc_, Tdash);
         Sh -= dMassPC[i]*dh/dt;
     }
 
@@ -558,12 +561,12 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
             const label idc = composition.localToGlobalCarrierId(idPhase, i);
             const label idl = composition.globalIds(idPhase)[i];
 
-            const scalar Cp = composition.carrier().Cp(idc, pc_, Ts);
+            const scalar Cp = composition.carrier().Cp(idc, pc_, Tsdash);
             const scalar W = composition.carrier().W(idc);
             const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
 
             const scalar Dab =
-                composition.liquids().properties()[idl].D(pc_, Ts, Wc);
+                composition.liquids().properties()[idl].D(pc_, Tsdash, Wc);
 
             // Molar flux of species coming from the particle (kmol/m^2/s)
             N += Ni;

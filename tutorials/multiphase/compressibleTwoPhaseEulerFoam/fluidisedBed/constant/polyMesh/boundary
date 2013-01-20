@@ -38,6 +38,7 @@ FoamFile
     frontAndBackPlanes
     {
         type            empty;
+        inGroups        1(empty);
         nFaces          12000;
         startFace       12230;
     }

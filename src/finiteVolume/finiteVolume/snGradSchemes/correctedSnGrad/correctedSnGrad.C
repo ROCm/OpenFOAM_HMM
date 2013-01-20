@@ -98,21 +98,8 @@ Foam::fv::correctedSnGrad<Type>::correction
         ssf.replace
         (
             cmpt,
-            mesh.nonOrthCorrectionVectors()
-          & linear
-            <
-                typename
-                outerProduct<vector, typename pTraits<Type>::cmptType>::type
-            >(mesh).interpolate
-            (
-                gradScheme<typename pTraits<Type>::cmptType>::New
-                (
-                    mesh,
-                    mesh.gradScheme("grad(" + ssf.name() + ')')
-                )()
-                //gaussGrad<typename pTraits<Type>::cmptType>(mesh)
-               .grad(vf.component(cmpt))
-            )
+            correctedSnGrad<typename pTraits<Type>::cmptType>(mesh)
+           .fullGradCorrection(vf.component(cmpt))
         );
     }
 

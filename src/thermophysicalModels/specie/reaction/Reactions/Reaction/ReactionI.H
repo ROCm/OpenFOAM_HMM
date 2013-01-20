@@ -67,8 +67,8 @@ Reaction<ReactionThermo>::rhs() const
 template<class ReactionThermo>
 inline Ostream& operator<<(Ostream& os, const Reaction<ReactionThermo>& r)
 {
-   os << r.reactionStr()<< token::END_STATEMENT <<nl;
-
+    OStringStream reaction;
+    os << r.reactionStr(reaction)<< token::END_STATEMENT <<nl;
    return os;
 }
 

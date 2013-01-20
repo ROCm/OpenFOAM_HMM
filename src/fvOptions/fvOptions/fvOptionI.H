@@ -126,12 +126,6 @@ inline Foam::scalar& Foam::fv::option::duration()
 }
 
 
-inline const Foam::word& Foam::fv::option::nbrModelName() const
-{
-    return nbrModelName_;
-}
-
-
 inline const Foam::word& Foam::fv::option::nbrRegionName() const
 {
     return nbrRegionName_;

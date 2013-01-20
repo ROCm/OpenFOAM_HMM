@@ -32,9 +32,10 @@ forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
                 "div(Rc)"
             )
          ==
-          - fvm::Sp(fluid.dragCoeff(phase, dragCoeffs())/phase.rho(), U)
+        //- fvm::Sp(fluid.dragCoeff(phase, dragCoeffs())/phase.rho(), U)
         //- (alpha*phase.rho())*fluid.lift(phase)
-          + (alpha/phase.rho())*fluid.Svm(phase)
+          //+
+            (alpha/phase.rho())*fluid.Svm(phase)
           - fvm::Sp
             (
                 slamDampCoeff
@@ -53,7 +54,7 @@ forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
         alpha*(1 + (1/phase.rho())*fluid.Cvm(phase)),
         UEqns[phasei]
     );
-    UEqns[phasei].relax();
+    //UEqns[phasei].relax();
 
     phasei++;
 }

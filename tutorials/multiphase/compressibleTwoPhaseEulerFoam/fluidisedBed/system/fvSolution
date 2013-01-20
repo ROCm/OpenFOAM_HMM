@@ -47,7 +47,7 @@ solvers
         relTol          0;
     }
 
-    "T.*"
+    "h.*"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -90,11 +90,11 @@ solvers
 
 PIMPLE
 {
-    nOuterCorrectors 1;
-    nCorrectors     2;
+    nOuterCorrectors 3;
+    nCorrectors     1;
     nNonOrthogonalCorrectors 0;
-    nAlphaCorr      2;
-    correctAlpha    yes;
+    nAlphaCorr      1;
+    nAlphaSubCycles 2;
 }
 
 relaxationFactors
@@ -105,7 +105,7 @@ relaxationFactors
     equations
     {
         "U.*"           1;
-        "T.*"           1;
+        "h.*"           1;
         "alpha.*"       1;
         "Theta.*"       1;
         "k.*"           1;

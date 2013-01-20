@@ -1,9 +1,9 @@
-surfaceScalarField alphaPhi1("alphaPhi", phi1);
-surfaceScalarField alphaPhi2("alphaPhi", phi2);
+surfaceScalarField alphaPhi1("alphaPhi" + phase1Name, phi1);
+surfaceScalarField alphaPhi2("alphaPhi" + phase2Name, phi2);
 
 {
-    word scheme("div(phi,alpha)");
-    word schemer("div(phir,alpha)");
+    word alphaScheme("div(phi," + alpha1.name() + ')');
+    word alpharScheme("div(phir," + alpha1.name() + ')');
 
     surfaceScalarField phic("phic", phi);
     surfaceScalarField phir("phir", phi1 - phi2);
@@ -56,15 +56,55 @@ surfaceScalarField alphaPhi2("alphaPhi", phi2);
             }
         }
 
+        dimensionedScalar totalDeltaT = runTime.deltaT();
+        if (nAlphaSubCycles > 1)
+        {
+            alphaPhi1 = dimensionedScalar("0", alphaPhi1.dimensions(), 0);
+        }
 
-        fvScalarMatrix alpha1Eqn
+        for
         (
-             fvm::ddt(alpha1)
-           + fvm::div(phic, alpha1, scheme)
-           + fvm::div(-fvc::flux(-phir, alpha2, schemer), alpha1, schemer)
-          ==
-             fvm::Sp(Sp, alpha1) + Su
-        );
+            subCycle<volScalarField> alphaSubCycle(alpha1, nAlphaSubCycles);
+            !(++alphaSubCycle).end();
+        )
+        {
+            surfaceScalarField alphaPhic1
+            (
+                fvc::flux
+                (
+                    phic,
+                    alpha1,
+                    alphaScheme
+                )
+              + fvc::flux
+                (
+                    -fvc::flux(-phir, scalar(1) - alpha1, alpharScheme),
+                    alpha1,
+                    alpharScheme
+                )
+            );
+
+            MULES::explicitSolve
+            (
+                geometricOneField(),
+                alpha1,
+                phi,
+                alphaPhic1,
+                Sp,
+                Su,
+                (g0.value() > 0 ? alphaMax : 1),
+                0
+            );
+
+            if (nAlphaSubCycles > 1)
+            {
+                alphaPhi1 += (runTime.deltaT()/totalDeltaT)*alphaPhic1;
+            }
+            else
+            {
+                alphaPhi1 = alphaPhic1;
+            }
+        }
 
         if (g0.value() > 0.0)
         {
@@ -74,30 +114,25 @@ surfaceScalarField alphaPhi2("alphaPhi", phi2);
                 fvc::interpolate((1.0/rho1)*rAU1)
                *g0*min(exp(preAlphaExp*(alpha1f - alphaMax)), expMax);
 
-            // ppMagf =
-            //     fvc::interpolate((1.0/rho1)*rAU1)
-            //    *fvc::interpolate
-            //     (
-            //         g0*min(exp(preAlphaExp*(alpha1 - alphaMax)), expMax)
-            //     );
-
-            alpha1Eqn -= fvm::laplacian
+            fvScalarMatrix alpha1Eqn
             (
-                alpha1f*ppMagf,
-                alpha1,
-                "laplacian(alphaPpMag,alpha1)"
+                fvm::ddt(alpha1) - fvc::ddt(alpha1)
+              - fvm::laplacian
+                (
+                    alpha1f*ppMagf,
+                    alpha1,
+                    "laplacian(alpha1PpMag,alpha1)"
+                )
             );
+
+            alpha1Eqn.relax();
+            alpha1Eqn.solve();
+
+            #include "packingLimiter.H"
+
+            alphaPhi1 += alpha1Eqn.flux();
         }
 
-        alpha1Eqn.relax();
-        alpha1Eqn.solve();
-
-        //***HGW temporary boundedness-fix pending the introduction of MULES
-        alpha1 = max(min(alpha1, scalar(1)), scalar(0));
-
-        #include "packingLimiter.H"
-
-        alphaPhi1 = alpha1Eqn.flux();
         alphaPhi2 = phi - alphaPhi1;
         alpha2 = scalar(1) - alpha1;
 

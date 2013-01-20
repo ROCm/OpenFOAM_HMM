@@ -28,7 +28,7 @@ Description
     Local time stepping (LTS) solver for steady, compressible, laminar or
     turbulent reacting and non-reacting flow with multiphase Lagrangian
     parcels and porous media, including run-time selectable finitite volume
-    options, e.g. fvOptions, constraints
+    options, e.g. sources, constraints
 
     Note: ddtPhiCorr not used here when porous zones are active
     - not well defined for porous calculations

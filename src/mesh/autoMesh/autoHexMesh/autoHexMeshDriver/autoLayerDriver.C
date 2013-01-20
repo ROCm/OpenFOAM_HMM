@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -292,6 +292,46 @@ void Foam::autoLayerDriver::handleNonManifolds
             nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
         }
     }
+
+    // 3. Remote check for end of layer across coupled boundaries
+    {
+        PackedBoolList isCoupledEdge(mesh.nEdges());
+
+        const labelList& cpEdges = mesh.globalData().coupledPatchMeshEdges();
+        forAll(cpEdges, i)
+        {
+            isCoupledEdge[cpEdges[i]] = true;
+        }
+        syncTools::syncEdgeList
+        (
+            mesh,
+            isCoupledEdge,
+            orEqOp<unsigned int>(),
+            0
+        );
+
+        forAll(edgeGlobalFaces, edgeI)
+        {
+            label meshEdgeI = meshEdges[edgeI];
+
+            if
+            (
+                pp.edgeFaces()[edgeI].size() == 1
+             && edgeGlobalFaces[edgeI].size() == 1
+             && isCoupledEdge[meshEdgeI]
+            )
+            {
+                // Edge of patch but no continuation across processor.
+                const edge& e = pp.edges()[edgeI];
+                //Pout<< "** Stopping extrusion on edge "
+                //    << pp.localPoints()[e[0]]
+                //    << pp.localPoints()[e[1]] << endl;
+                nonManifoldPoints.insert(pp.meshPoints()[e[0]]);
+                nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
+            }
+        }
+    }
+
 
 
     label nNonManif = returnReduce(nonManifoldPoints.size(), sumOp<label>());

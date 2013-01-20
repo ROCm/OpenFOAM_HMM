@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ thermoTemp            .{10}
 thermoSpecieName      .{18}
 thermoDate            .{6}
 thermoFormula         .{20}
-thermoPhase           S|L|G
+thermoPhase           S|L|G|C
 thermoLowTemp         .{10}
 thermoHighTemp        .{10}
 thermoCommonTemp      .{8}
@@ -439,6 +439,7 @@ bool finishReaction = false;
 
 <readThermoSpecieName>{thermoSpecieName} {
         string specieString(foamSpecieString(YYText()));
+        // Old format
         size_t spacePos = specieString.find(' ');
         if (spacePos != string::npos)
         {
@@ -448,6 +449,10 @@ bool finishReaction = false;
         {
             currentSpecieName = specieString;
         }
+        // New format
+        // specieString.replaceAll(" ", "_");
+        // size_t strEnd = specieString.find_last_not_of('_');
+        // currentSpecieName = specieString.substr(0, strEnd + 1);
         BEGIN(readThermoDate);
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -170,11 +170,22 @@ Foam::scalar Foam::PhaseChangeModel<CloudType>::dh
 (
     const label idc,
     const label idl,
-    const label p,
-    const label T
+    const scalar p,
+    const scalar T
 ) const
 {
     return 0.0;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::PhaseChangeModel<CloudType>::TMax
+(
+    const scalar,
+    const scalar
+) const
+{
+    return GREAT;
 }
 
 

@@ -90,8 +90,11 @@ void Foam::fv::option::writeData(Ostream& os) const
 bool Foam::fv::option::read(const dictionary& dict)
 {
     active_ = readBool(dict.lookup("active"));
-    timeStart_ = readScalar(dict.lookup("timeStart"));
-    duration_  = readScalar(dict.lookup("duration"));
+
+    if (dict.readIfPresent("timeStart", timeStart_))
+    {
+        dict.lookup("duration") >> duration_;
+    }
 
     coeffs_ = dict.subDict(type() + "Coeffs");
 

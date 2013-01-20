@@ -45,14 +45,15 @@ Foam::IOobject Foam::fv::IOoptionList::createIOobject
 
     if (io.headerOk())
     {
-        Info<< "Creating field source list from " << io.name() << nl << endl;
+        Info<< "Creating fintite volume options from " << io.name() << nl
+            << endl;
 
         io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
         return io;
     }
     else
     {
-        Info<< "No field sources present" << nl << endl;
+        Info<< "No finite volume options present" << nl << endl;
 
         io.readOpt() = IOobject::NO_READ;
         return io;

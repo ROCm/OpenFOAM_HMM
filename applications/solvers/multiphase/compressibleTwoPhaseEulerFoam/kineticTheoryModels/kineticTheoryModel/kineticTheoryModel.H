@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,8 +64,7 @@ class kineticTheoryModel
 
         const dragModel& draga_;
 
-        const dimensionedScalar& rho1_;
-        const dimensionedScalar& nu1_;
+        const volScalarField& rho1_;
 
         //- dictionary holding the modeling info
         IOdictionary kineticTheoryProperties_;

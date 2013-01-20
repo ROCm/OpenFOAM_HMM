@@ -888,7 +888,7 @@ DebugSwitches
     waveTransmissive    0;
     wedge               0;
     weighted            0;
-    word                2;
+    word                0;
     writer              0;
     xmgr                0;
     zeroGradient        0;

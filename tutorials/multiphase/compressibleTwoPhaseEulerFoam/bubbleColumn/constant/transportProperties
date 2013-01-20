@@ -29,8 +29,6 @@ air
 
 water
 {
-    //R               1e10;
-
     diameterModel constant;
     constantCoeffs
     {
