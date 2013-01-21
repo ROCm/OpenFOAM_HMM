@@ -52,7 +52,6 @@ Foam::porosityModels::pressureDrop::pressureDrop
 )
 :
     porosityModel(name, modelType, mesh, dict, cellZoneName),
-    coordSys_(coeffs_, mesh),
     mDotvsDp_(DataEntry<scalar>::New("mDotvsDp", coeffs_)),
     lRef_(readScalar(coeffs_.lookup("lRef"))),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))

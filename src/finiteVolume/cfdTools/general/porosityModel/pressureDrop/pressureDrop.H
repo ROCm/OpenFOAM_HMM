@@ -97,9 +97,6 @@ private:
 
     // Private data
 
-        //- Local co-ordinate system
-        coordinateSystem coordSys_;
-
         //- Pressure drop per unit length [Pa/m] as a function of
         //  mass flow rate [kg/s]
         autoPtr<DataEntry<scalar> > mDotvsDp_;

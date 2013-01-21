@@ -35,7 +35,7 @@ void Foam::porosityModels::pressureDrop::apply
 ) const
 {
     // local-to-global transformation tensor
-    const tensor& E = coordSys_.R();
+    const tensor& E = coordSys_.R().R();
 
     forAll(cellZoneIds_, zoneI)
     {
@@ -67,7 +67,7 @@ void Foam::porosityModels::pressureDrop::apply
 ) const
 {
     // local-to-global transformation tensor
-    const tensor& E = coordSys_.R();
+    const tensor& E = coordSys_.R().R();
 
     forAll(cellZoneIds_, zoneI)
     {
