@@ -47,4 +47,23 @@ porosity1
 }
 
 
+MRF1
+{
+    type            MRFSource;
+    active          yes;
+    selectionMode   cellZone;
+    cellZone        rotor;
+
+    MRFSourceCoeffs
+    {
+        // Fixed patches (by default they 'move' with the MRF zone)
+        nonRotatingPatches ();
+
+        origin    (0 0 0);
+        axis      (0 0 1);
+        omega     constant 1047.2;
+    }
+}
+
+
 // ************************************************************************* //
