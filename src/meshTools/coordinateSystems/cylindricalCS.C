@@ -35,7 +35,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(cylindricalCS, 0);
     addToRunTimeSelectionTable(coordinateSystem, cylindricalCS, dictionary);
-    addToRunTimeSelectionTable(coordinateSystem, cylindricalCS, origRotation);
 }
 
 
@@ -106,6 +105,23 @@ Foam::cylindricalCS::cylindricalCS
 :
     coordinateSystem(name, dict),
     inDegrees_(dict.lookupOrDefault("degrees", true))
+{}
+
+
+Foam::cylindricalCS::cylindricalCS
+(
+    const objectRegistry& obr,
+    const dictionary& dict
+)
+:
+    coordinateSystem(obr, dict),
+    inDegrees_(dict.lookupOrDefault("degrees", true))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::cylindricalCS::~cylindricalCS()
 {}
 
 

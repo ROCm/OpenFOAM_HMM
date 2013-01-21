@@ -61,6 +61,7 @@ protected:
 
     // Protected Member Functions
 
+
         //- Convert from local coordinate system to the global Cartesian system
         //  with optional translation for the origin
         virtual vector localToGlobal(const vector&, bool translate) const;
@@ -131,8 +132,15 @@ public:
             const bool inDegrees=true
         );
 
-        //- Construct from dictionary
-        cylindricalCS(const word& name, const dictionary&);
+        //- Construct from dictionary and name
+        cylindricalCS(const word&, const dictionary&);
+
+        //- Construct from dictionary and objectRegistry
+        cylindricalCS(const objectRegistry&, const dictionary&);
+
+
+    //- Destructor
+    virtual ~cylindricalCS();
 
 
     // Member Functions
