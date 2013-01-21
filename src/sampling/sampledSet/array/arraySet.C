@@ -83,7 +83,7 @@ void Foam::arraySet::calcSamples
 
     forAll(sampleCoords, i)
     {
-        sampleCoords[i] = transform(coordSys_.R(), sampleCoords[i]);
+        sampleCoords[i] = transform(coordSys_.R().R(), sampleCoords[i]);
     }
 
     forAll(sampleCoords, sampleI)

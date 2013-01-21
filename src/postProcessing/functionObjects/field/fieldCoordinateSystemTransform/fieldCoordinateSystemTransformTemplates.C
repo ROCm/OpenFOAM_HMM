@@ -39,7 +39,7 @@ void Foam::fieldCoordinateSystemTransform::transformField
 {
     const word& fieldName = field.name() + "Transformed";
 
-    dimensionedTensor R("R", field.dimensions(), coordSys_.R());
+    dimensionedTensor R("R", field.dimensions(), coordSys_.R().R());
 
     if (obr_.foundObject<Type>(fieldName))
     {

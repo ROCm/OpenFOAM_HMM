@@ -63,7 +63,7 @@ Foam::enginePiston::enginePiston
     (
         coordinateSystem::New
         (
-            "coordinateSystem",
+            mesh_,
             dict.subDict("coordinateSystem")
         )
     ),

@@ -125,7 +125,7 @@ Foam::engineValve::engineValve
     (
         coordinateSystem::New
         (
-            "coordinateSystem",
+            mesh_,
             dict.subDict("coordinateSystem")
         )
     ),

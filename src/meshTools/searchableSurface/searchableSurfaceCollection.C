@@ -203,7 +203,6 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                 surfI,
                 coordinateSystem::New
                 (
-                    "",
                     subDict.subDict("transform")
                 )
             );

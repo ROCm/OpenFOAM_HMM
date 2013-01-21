@@ -66,6 +66,17 @@ void Foam::porosityModel::adjustNegativeResistance(dimensionedVector& resist)
 }
 
 
+Foam::label Foam::porosityModel::fieldIndex(const label i) const
+{
+    label index = 0;
+    if (!coordSys_.R().uniform())
+    {
+        index = i;
+    }
+    return index;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::porosityModel::porosityModel
@@ -83,7 +94,8 @@ Foam::porosityModel::porosityModel
     coeffs_(dict.subDict(modelType + "Coeffs")),
     active_(true),
     zoneName_(cellZoneName),
-    cellZoneIds_()
+    cellZoneIds_(),
+    coordSys_(coordinateSystem::New(mesh, coeffs_))
 {
     if (zoneName_ == word::null)
     {
@@ -158,7 +170,7 @@ void Foam::porosityModel::porosityModel::addResistance
 (
     const fvVectorMatrix& UEqn,
     volTensorField& AU,
-    bool correctAUprocBC         
+    bool correctAUprocBC
 ) const
 {
     if (cellZoneIds_.empty())
