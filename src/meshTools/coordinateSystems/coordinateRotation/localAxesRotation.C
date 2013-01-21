@@ -114,7 +114,7 @@ Foam::vector Foam::localAxesRotation::transform(const vector& st) const
     (
         "vector Foam::localAxesRotation::transform(const vector&) const"
     );
-    return vector(vector::zero);
+    return vector::zero;
 }
 
 
@@ -124,7 +124,7 @@ Foam::vector Foam::localAxesRotation::invTransform(const vector& st) const
     (
         "vector Foam::localAxesRotation::invTransform(const vector&) const"
     );
-    return vector(vector::zero);
+    return vector::zero;
 }
 
 
@@ -174,7 +174,7 @@ Foam::tensor Foam::localAxesRotation::transformTensor
 ) const
 {
     notImplemented("tensor localAxesRotation::transformTensor() const");
-    return tensor(tensor::zero);
+    return tensor::zero;
 }
 
 
@@ -235,7 +235,7 @@ Foam::symmTensor Foam::localAxesRotation::transformVector
     (
         "tensor localAxesRotation::transformVector(const vector&) const"
     );
-    return symmTensor(symmTensor::zero);
+    return symmTensor::zero;
 }
 
 
@@ -251,7 +251,7 @@ void Foam::localAxesRotation::init
     forAll(mesh.cellCentres(), cellI)
     {
         vector dir = mesh.cellCentres()[cellI] - origin_;
-        dir /= mag(dir);
+        dir /= mag(dir) + VSMALL;
 
         Rptr_()[cellI] = axesRotation(e3_, dir).R();
     }

@@ -39,6 +39,10 @@ boundaryField
         inletValue      uniform 0;
         value           uniform 0;
     }
+    defaultFaces
+    {
+        type            empty;
+    }
     porous_half0
     {
         type            cyclic;
@@ -46,10 +50,6 @@ boundaryField
     porous_half1
     {
         type            cyclic;
-    }
-    defaultFaces
-    {
-        type            empty;
     }
 }
 
