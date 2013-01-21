@@ -77,7 +77,7 @@ Foam::sampledPlane::sampledPlane
     // allow lookup from global coordinate systems
     if (dict.found("coordinateSystem"))
     {
-        coordinateSystem cs(dict, mesh);
+        coordinateSystem cs(mesh, dict);
 
         point  base = cs.globalPosition(planeDesc().refPoint());
         vector norm = cs.globalVector(planeDesc().normal());

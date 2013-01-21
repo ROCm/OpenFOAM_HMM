@@ -48,7 +48,7 @@ Foam::fieldCoordinateSystemTransform::fieldCoordinateSystemTransform
     obr_(obr),
     active_(true),
     fieldSet_(),
-    coordSys_(dict, obr)
+    coordSys_(obr, dict)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
