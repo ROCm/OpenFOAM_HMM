@@ -23,7 +23,7 @@ internalFacesOnly true;
 // Baffles to create.
 baffles
 {
-    baffleFaces
+    baffleFacesThermoBaffle1D
     {
         //- Use predefined faceZone to select faces and orientation.
         type        faceZone;
@@ -52,61 +52,27 @@ baffles
                 {
                     T
                     {
-                        type                compressible::thermoBaffle;
-
-                        // Coupled BC.
-                        neighbourFieldName  T;
-                        kappa               fluidThermo;
-                        kappaName           none;
-
-                        // Thermo baffle model
-                        thermoBaffleModel   thermoBaffle;
-                        regionName          baffleRegion;
-                        infoOutput          no;
-                        active              yes;
-                        thermoBaffleCoeffs
+                        type   compressible::thermoBaffle1D<hConstSolidThermoPhysics>;
+                        baffleActivated yes;
+                        thickness       uniform 0.005;  // thickness [m]
+                        Qs              uniform 100;    // heat flux [W/m2]
+                        specie
                         {
+                            nMoles          1;
+                            molWeight       20;
                         }
-
-                        // Solid thermo
-                        thermoType
+                        transport
                         {
-                            type            heSolidThermo;
-                            mixture         pureMixture;
-                            transport       constIso;
-                            thermo          hConst;
-                            equationOfState rhoConst;
-                            specie          specie;
-                            energy          sensibleEnthalpy;
+                            kappa           1;
                         }
-
-                        mixture
+                        thermodynamics
                         {
-                            specie
-                            {
-                                nMoles          1;
-                                molWeight       20;
-                            }
-                            transport
-                            {
-                                kappa           0.01;
-                            }
-                            thermodynamics
-                            {
-                                Hf              0;
-                                Cp              15;
-                            }
-                            equationOfState
-                            {
-                                rho             80;
-                            }
+                            Hf              0;
+                            Cp              10;
                         }
-
-                        radiation
+                        equationOfState
                         {
-                            radiationModel  opaqueSolid;
-                            absorptionEmissionModel none;
-                            scatterModel    none;
+                            rho             10;
                         }
 
                         value               uniform 300;
@@ -160,7 +126,10 @@ baffles
                 offsetMode      uniform;
                 offset          (0 0 0);
 
-                ${..master.patchFields}
+                patchFields
+                {
+                    ${...master.patchFields}
+                }
             }
         }
     }
