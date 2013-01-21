@@ -16,14 +16,14 @@
     (
         transportProperties.found("phases")
       ? wordList(transportProperties.lookup("phases"))[0]
-      : "phase1"
+      : "1"
     );
 
     word phase2Name
     (
         transportProperties.found("phases")
       ? wordList(transportProperties.lookup("phases"))[1]
-      : "phase2"
+      : "2"
     );
 
     autoPtr<phaseModel> phase1 = phaseModel::New

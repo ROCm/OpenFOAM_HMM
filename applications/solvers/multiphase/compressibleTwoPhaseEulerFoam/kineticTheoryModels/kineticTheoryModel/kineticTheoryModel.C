@@ -45,8 +45,7 @@ Foam::kineticTheoryModel::kineticTheoryModel
     phi1_(phase1.phi()),
     draga_(draga),
 
-    rho1_(phase1.rho()[0]), //***HGW
-    nu1_(phase1.nu()()[0]), //***HGW
+    rho1_(phase1.rho()),
 
     kineticTheoryProperties_
     (
@@ -203,9 +202,9 @@ void Foam::kineticTheoryModel::solve(const volTensorField& gradU1t)
 
     volScalarField da_(phase1_.d());
 
-    surfaceScalarField phi(1.5*rho1_*phi1_*fvc::interpolate(alpha1_));
+    surfaceScalarField phi(1.5*phi1_*fvc::interpolate(rho1_*alpha1_));
 
-    volTensorField dU(gradU1t.T());    //fvc::grad(U1_);
+    volTensorField dU(gradU1t.T());
     volSymmTensorField D(symm(dU));
 
     // NB, drag = K*alpha1*alpha2,
