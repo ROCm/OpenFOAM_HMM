@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,38 +22,61 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::DarcyForchheimer
+    Foam::pressureDrop
 
 Description
-    Darcy-Forchheimer law porosity model, given by:
+    Pressure drop porosity model, whereby the user speciefies the pressure
+    drop per unit length as a function of mass flow rate, over a fixed distance.
 
-        \f[
-            S = - (\mu d + \frac{\rho |U|}{2} f) U
-        \f]
+    Example usage:
+    \verbatim
+    pressureDropCoeffs
+    {
+        coordinateSystem
+        {
+            e1  (1 0 0);
+            e2  (0 1 0);
+        }
 
-    where
-    \vartable
-        d        | Darcy coefficient [1/m2]
-        f        | Forchheimer coefficient [1/m]
-    \endvartable
+        lRef    0.5;
 
-    Since negative Darcy/Forchheimer parameters are invalid, they can be used
-    to specify a multiplier (of the max component).
+        mDotvsDp table
+        (
+            (0   0)
+            (0.2 20)
+            (0.4 40)
+            (0.6 65)
+            (0.8 95)
+            (1.0 125)
+            (1.5 220)
+            (2.0 320)
+            (2.5 435)
+            (3.0 560)
+            (3.5 700)
+        );
+    }
+    \endverbatim
 
-    The orientation of the porous region is defined with the same notation as
-    a co-ordinate system, but only a Cartesian co-ordinate system is valid.
+Note
+    The mDotvsDp entry is a DataEntry type, able to describe the pressure drop
+    per unit length as a function mass flow rate.  The example above gives the
+    usage for supplying in-line tabulated data.
+
+SeeAlso
+    Foam::DataEntry
 
 SourceFiles
-    DarcyForchheimer.C
-    DarcyForchheimerTemplates.C
+    pressureDrop.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DarcyForchheimer_H
-#define DarcyForchheimer_H
+#ifndef pressureDrop_H
+#define pressureDrop_H
 
 #include "porosityModel.H"
-#include "dimensionedTensor.H"
+#include "coordinateSystem.H"
+#include "autoPtr.H"
+#include "DataEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,10 +86,10 @@ namespace porosityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class DarcyForchheimer Declaration
+                      Class pressureDrop Declaration
 \*---------------------------------------------------------------------------*/
 
-class DarcyForchheimer
+class pressureDrop
 :
     public porosityModel
 {
@@ -74,21 +97,15 @@ private:
 
     // Private data
 
+        //- Pressure drop per unit length [Pa/m] as a function of
+        //  mass flow rate [kg/s]
+        autoPtr<DataEntry<scalar> > mDotvsDp_;
 
-        //- Darcy coefficient [1/m2]
-        List<tensorField> D_;
-
-        //- Forchheimer coefficient [1/m]
-        List<tensorField> F_;
+        //- Distance over which pressure drop is applied
+        scalar lRef_;
 
         //- Name of density field
         word rhoName_;
-
-        //- Name of dynamic viscosity field
-        word muName_;
-
-        //- Name of kinematic viscosity field
-        word nuName_;
 
 
     // Private Member Functions
@@ -101,8 +118,8 @@ private:
             vectorField& Usource,
             const scalarField& V,
             const RhoFieldType& rho,
-            const scalarField& mu,
-            const vectorField& U
+            const vectorField& U,
+            const scalar rhoScale
         ) const;
 
         //- Apply
@@ -111,24 +128,24 @@ private:
         (
             tensorField& AU,
             const RhoFieldType& rho,
-            const scalarField& mu,
-            const vectorField& U
+            const vectorField& U,
+            const scalar rhoScale
         ) const;
 
         //- Disallow default bitwise copy construct
-        DarcyForchheimer(const DarcyForchheimer&);
+        pressureDrop(const pressureDrop&);
 
         //- Disallow default bitwise assignment
-        void operator=(const DarcyForchheimer&);
+        void operator=(const pressureDrop&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("DarcyForchheimer");
+    TypeName("pressureDrop");
 
     //- Constructor
-    DarcyForchheimer
+    pressureDrop
     (
         const word& name,
         const word& modelType,
@@ -138,7 +155,7 @@ public:
     );
 
     //- Destructor
-    virtual ~DarcyForchheimer();
+    virtual ~pressureDrop();
 
 
     // Member Functions
@@ -176,7 +193,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "DarcyForchheimerTemplates.C"
+    #include "pressureDropTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

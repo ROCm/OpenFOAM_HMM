@@ -18,7 +18,7 @@ FoamFile
 porosity1
 {
     type            explicitPorositySource;
-    active          false;
+    active          true;
     selectionMode   cellZone;
     cellZone        porosity;
 
@@ -47,4 +47,4 @@ porosity1
 }
 
 
-//************************************************************************* //
+// ************************************************************************* //

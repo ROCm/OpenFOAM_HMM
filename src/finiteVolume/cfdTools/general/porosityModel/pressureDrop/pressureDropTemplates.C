@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 template<class RhoFieldType>
-void Foam::porosityModels::DarcyForchheimer::apply
+void Foam::porosityModels::pressureDrop::apply
 (
     scalarField& Udiag,
     vectorField& Usource,
     const scalarField& V,
     const RhoFieldType& rho,
-    const scalarField& mu,
-    const vectorField& U
+    const vectorField& U,
+    const scalar rhoScale
 ) const
 {
+    // local-to-global transformation tensor
+    const tensor& E = coordSys_.R().R();
+
     forAll(cellZoneIds_, zoneI)
     {
-        const tensorField& dZones = D_[zoneI];
-        const tensorField& fZones = F_[zoneI];
-
         const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
 
         forAll(cells, i)
         {
             const label cellI = cells[i];
-            const label j = this->fieldIndex(i);
-            const tensor Cd =
-                mu[cellI]*dZones[j] + (rho[cellI]*mag(U[cellI]))*fZones[j];
-
+            const scalar magU = mag(U[cellI]);
+            const scalar mDot = rho[cellI]*magU;
+            const scalar dp = mDotvsDp_->value(mDot);
+            const tensor Cd = E*dp/(lRef_*magU*rhoScale + ROOTVSMALL);
             const scalar isoCd = tr(Cd);
 
             Udiag[cellI] += V[cellI]*isoCd;
@@ -60,29 +58,29 @@ void Foam::porosityModels::DarcyForchheimer::apply
 
 
 template<class RhoFieldType>
-void Foam::porosityModels::DarcyForchheimer::apply
+void Foam::porosityModels::pressureDrop::apply
 (
     tensorField& AU,
     const RhoFieldType& rho,
-    const scalarField& mu,
-    const vectorField& U
+    const vectorField& U,
+    const scalar rhoScale
 ) const
 {
+    // local-to-global transformation tensor
+    const tensor& E = coordSys_.R().R();
+
     forAll(cellZoneIds_, zoneI)
     {
-        const tensorField& dZones = D_[zoneI];
-        const tensorField& fZones = F_[zoneI];
-
         const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
 
         forAll(cells, i)
         {
             const label cellI = cells[i];
-            const label j = this->fieldIndex(i);
-            const tensor D = dZones[j];
-            const tensor F = fZones[j];
+            const scalar magU = mag(U[cellI]);
+            const scalar mDot = rho[cellI]*magU;
+            const scalar dp = mDotvsDp_->value(mDot);
 
-            AU[cellI] += mu[cellI]*D + (rho[cellI]*mag(U[cellI]))*F;
+            AU[cellI] += E*dp/(lRef_*magU*rhoScale + ROOTVSMALL);
         }
     }
 }
