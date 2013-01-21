@@ -9,60 +9,65 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      nut;
+    class       polyBoundaryMesh;
+    location    "constant/polyMesh";
+    object      boundary;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
+7
+(
     leftWall
     {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
+        type            wall;
+        nFaces          50;
+        startFace       4419;
     }
     rightWall
     {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
+        type            wall;
+        nFaces          50;
+        startFace       4469;
     }
     lowerWall
     {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
+        type            wall;
+        nFaces          62;
+        startFace       4519;
     }
     atmosphere
     {
-        type            calculated;
-        value           uniform 0;
+        type            patch;
+        nFaces          46;
+        startFace       4581;
     }
     defaultFaces
     {
         type            empty;
+        inGroups        1(empty);
+        nFaces          4536;
+        startFace       4627;
     }
     porous_half0
     {
         type            cyclic;
+        inGroups        1(cyclic);
+        nFaces          13;
+        startFace       9163;
+        matchTolerance  0.0001;
+        transform       unknown;
+        neighbourPatch  porous_half1;
     }
     porous_half1
     {
         type            cyclic;
+        inGroups        1(cyclic);
+        nFaces          13;
+        startFace       9176;
+        matchTolerance  0.0001;
+        transform       unknown;
+        neighbourPatch  porous_half0;
     }
-}
-
+)
 
 // ************************************************************************* //
