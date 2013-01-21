@@ -11,40 +11,43 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      transportProperties;
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-phase1
+thermoType
 {
-    diameterModel   isothermal;
-    isothermalCoeffs
-    {
-        d0              3e-3;
-        p0              1e5;
-    }
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectFluid;
+    specie          specie;
+    energy          sensibleEnthalpy;
 }
 
-phase2
+mixture
 {
-    diameterModel constant;
-    constantCoeffs
+    specie
     {
-        d               1e-4;
+        nMoles      1;
+        molWeight   28.9;
+    }
+    equationOfState
+    {
+        rho0        1027;
+    }
+    thermodynamics
+    {
+        Cp          4195;
+        Hf          0;
+    }
+    transport
+    {
+        mu          3.645e-4;
+        Pr          2.289;
     }
 }
-
-// Virtual-mass ceofficient
-Cvm             0.5;
-
-// Lift coefficient
-Cl              0;
-
-// Dispersed-phase turbulence coefficient
-Ct              1;
-
-// Minimum allowable pressure
-pMin            10000;
 
 
 // ************************************************************************* //

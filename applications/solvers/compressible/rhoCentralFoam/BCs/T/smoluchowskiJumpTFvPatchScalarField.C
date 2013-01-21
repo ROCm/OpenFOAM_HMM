@@ -185,12 +185,10 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
 
     dimensionedScalar Pr
     (
-        dimensionedScalar::lookupOrDefault
-        (
-            "Pr",
-            thermophysicalProperties,
-            1.0
-        )
+        "Pr",
+        dimless,
+        thermophysicalProperties.subDict("mixture").subDict("transport")
+        .lookup("Pr")
     );
 
     Field<scalar> C2

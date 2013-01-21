@@ -31,6 +31,9 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
             fvm::ddt(alpha1, U1)
           + fvm::div(alphaPhi1, U1)
 
+            // Compressibity correction
+          - fvm::Sp(fvc::ddt(alpha1) + fvc::div(alphaPhi1), U1)
+
           + Cvm*rho2*alpha1*alpha2/rho1*
             (
                 fvm::ddt(U1)
@@ -60,6 +63,9 @@ fvVectorMatrix U2Eqn(U2, U2.dimensions()*dimVol/dimTime);
         (
             fvm::ddt(alpha2, U2)
           + fvm::div(alphaPhi2, U2)
+
+            // Compressibity correction
+          - fvm::Sp(fvc::ddt(alpha2) + fvc::div(alphaPhi2), U2)
 
           + Cvm*rho2*alpha1*alpha2/rho2*
             (

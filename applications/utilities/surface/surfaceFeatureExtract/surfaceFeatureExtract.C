@@ -744,7 +744,7 @@ int main(int argc, char *argv[])
         // Read
         // ~~~~
 
-        triSurface surf("constant/triSurface/" + surfFileName);
+        triSurface surf(runTime.constantPath()/"triSurface"/surfFileName);
 
         Info<< "Statistics:" << endl;
         surf.writeStats(Info);
@@ -1338,7 +1338,7 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constant()/"triSurface",    // outputDir
+                    runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
                     surf.points(),
                     faces,
@@ -1350,7 +1350,7 @@ int main(int argc, char *argv[])
 
                 vtkSurfaceWriter().write
                 (
-                    runTime.constant()/"triSurface",    // outputDir
+                    runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
                     surf.points(),
                     faces,
@@ -1403,7 +1403,7 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constant()/"triSurface",    // outputDir
+                    runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
                     surf.points(),
                     faces,
@@ -1482,7 +1482,7 @@ int main(int argc, char *argv[])
             {
                 vtkSurfaceWriter().write
                 (
-                    runTime.constant()/"triSurface",    // outputDir
+                    runTime.constantPath()/"triSurface",// outputDir
                     sFeatFileName,                      // surfaceName
                     surf.points(),
                     faces,
