@@ -40,6 +40,7 @@ SourceFiles
 #include "dictionary.H"
 #include "fvMatricesFwd.H"
 #include "runTimeSelectionTables.H"
+#include "coordinateSystem.H"
 #include "dimensionedVector.H"
 #include "keyType.H"
 
@@ -90,6 +91,9 @@ protected:
         //- Cell zone Ids
         labelList cellZoneIds_;
 
+        //- Local co-ordinate system
+        coordinateSystem coordSys_;
+
 
     // Protected Member Functions
 
@@ -110,6 +114,9 @@ protected:
             const fvVectorMatrix& UEqn,
             volTensorField& AU
         ) const = 0;
+
+        //- Return label index
+        label fieldIndex(const label index) const;
 
 
 public:

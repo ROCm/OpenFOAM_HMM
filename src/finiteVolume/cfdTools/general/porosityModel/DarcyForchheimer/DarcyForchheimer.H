@@ -53,7 +53,6 @@ SourceFiles
 #define DarcyForchheimer_H
 
 #include "porosityModel.H"
-#include "coordinateSystem.H"
 #include "dimensionedTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,14 +74,12 @@ private:
 
     // Private data
 
-        //- Local co-ordinate system
-        coordinateSystem coordSys_;
 
         //- Darcy coefficient [1/m2]
-        dimensionedTensor D_;
+        List<tensorField> D_;
 
         //- Forchheimer coefficient [1/m]
-        dimensionedTensor F_;
+        List<tensorField> F_;
 
         //- Name of density field
         word rhoName_;
@@ -161,7 +158,7 @@ public:
         virtual void correct
         (
             const fvVectorMatrix& UEqn,
-            volTensorField& AU            
+            volTensorField& AU
         ) const;
 
 
