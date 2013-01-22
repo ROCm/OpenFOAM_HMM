@@ -59,9 +59,9 @@ Foam::vector Foam::targetCoeffTrim::calcCoeffs
     const List<point>& x = rotor_.x();
 
     const vector& origin = rotor_.coordSys().origin();
-    const vector& rollAxis = rotor_.coordSys().e1();
-    const vector& pitchAxis = rotor_.coordSys().e2();
-    const vector& yawAxis = rotor_.coordSys().e3();
+    const vector& rollAxis = rotor_.coordSys().R().e1();
+    const vector& pitchAxis = rotor_.coordSys().R().e2();
+    const vector& yawAxis = rotor_.coordSys().R().e3();
 
     scalar coeff1 = alpha_*sqr(rotor_.omega())*mathematical::pi;
 

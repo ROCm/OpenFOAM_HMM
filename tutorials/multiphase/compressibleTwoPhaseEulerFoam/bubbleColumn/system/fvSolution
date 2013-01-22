@@ -63,23 +63,7 @@ solvers
         relTol          0;
     }
 
-    "Theta.*"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    "k.*"
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    "epsilon.*"
+    "(k|epsilon|Theta).*"
     {
         solver          PBiCG;
         preconditioner  DILU;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -444,7 +444,7 @@ void Foam::forces::read(const dictionary& dict)
         // specified directly, from coordinate system, or implicitly (0 0 0)
         if (!dict.readIfPresent<point>("CofR", coordSys_.origin()))
         {
-            coordSys_ = coordinateSystem(dict, obr_);
+            coordSys_ = coordinateSystem(obr_, dict);
             localSystem_ = true;
         }
 

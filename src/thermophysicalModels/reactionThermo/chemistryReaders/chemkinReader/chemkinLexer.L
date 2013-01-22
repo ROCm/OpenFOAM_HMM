@@ -439,9 +439,20 @@ bool finishReaction = false;
 
 <readThermoSpecieName>{thermoSpecieName} {
         string specieString(foamSpecieString(YYText()));
-        specieString.replaceAll(" ", "_");
-        size_t strEnd = specieString.find_last_not_of('_');
-        currentSpecieName = specieString.substr(0, strEnd + 1);
+        // Old format
+        size_t spacePos = specieString.find(' ');
+        if (spacePos != string::npos)
+        {
+            currentSpecieName = specieString(0, spacePos);
+        }
+        else
+        {
+            currentSpecieName = specieString;
+        }
+        // New format
+        // specieString.replaceAll(" ", "_");
+        // size_t strEnd = specieString.find_last_not_of('_');
+        // currentSpecieName = specieString.substr(0, strEnd + 1);
         BEGIN(readThermoDate);
     }
 

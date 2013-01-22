@@ -5,6 +5,8 @@ tmp<fvVectorMatrix> UEqn
     fvm::ddt(U)
   + fvm::div(phi, U)
   + turbulence->divDevReff(U)
+  ==
+    fvOptions(U)
 );
 
 UEqn().relax();

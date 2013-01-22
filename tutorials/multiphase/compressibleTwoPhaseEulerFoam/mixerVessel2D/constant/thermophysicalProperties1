@@ -11,27 +11,39 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      porosityProperties;
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-porosity1
+thermoType
 {
-    type            DarcyForchheimer;
-    active          yes;
-    cellZone        stator;
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
 
-    DarcyForchheimerCoeffs
+mixture
+{
+    specie
     {
-        d   d [0 -2 0 0 0 0 0] (1e5 -1000 -1000);
-        f   f [0 -1 0 0 0 0 0] (0 0 0);
-
-        coordinateSystem
-        {
-            e1  (1 0 0);
-            e2  (0 1 0);
-        }
+        nMoles      1;
+        molWeight   28.9;
+    }
+    thermodynamics
+    {
+        Cp          1007;
+        Hf          0;
+    }
+    transport
+    {
+        mu          1.84e-05;
+        Pr          0.7;
     }
 }
+
 
 // ************************************************************************* //

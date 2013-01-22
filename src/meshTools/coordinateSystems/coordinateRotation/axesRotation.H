@@ -22,39 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::coordinateRotation
+    Foam::axesRotation
 
 Description
-    Abstract base class for coordinate rotation
+    A coordinate rotation specified using global axis
+
+    The rotation is defined by a combination of vectors (e1/e2), (e2/e3)
+    or (e3/e1). Any nonorthogonality will be absorbed into the second vector.
 
     \verbatim
-        coordinateRotation
+        axesRotation
         {
-            type        axesRotation
+            type        axesRotation;
             e1          (1 0 0);
             e2          (0 1 0);
         }
     \endverbatim
 
-    Types of coordinateRotation:
-    1) axesRotation
-    2) STARCDRotation
-    3) localAxesRotation
-    4) EulerCoordinateRotation
-
-
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef coordinateRotation_H
-#define coordinateRotation_H
+#ifndef axesRotation_H
+#define axesRotation_H
 
 #include "vector.H"
-#include "tensor.H"
-#include "tensorField.H"
+#include "coordinateRotation.H"
 #include "dictionary.H"
 #include "runTimeSelectionTables.H"
-#include "objectRegistry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,148 +55,166 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class coordinateRotation Declaration
+                    Class axesRotation Declaration
 \*---------------------------------------------------------------------------*/
 
-class coordinateRotation
+class axesRotation
+:
+    public coordinateRotation
 {
-protected:
+    // Private data
 
-    // Protected member functions
+        //- Local-to-Global transformation tensor
+        tensor R_;
 
-        //- Transform principal
-        symmTensor transformPrincipal(const tensor&, const vector&) const;
+        //- Global-to-Local transformation tensor
+        tensor Rtr_;
 
+        //- the combination of local axes to be used
+        enum axisOrder
+        {
+            e1e2,
+            e2e3,
+            e3e1
+        };
+
+    // Private Member Functions
+
+        //- Calculate transformation tensor
+        void calcTransform
+        (
+            const vector& axis1,
+            const vector& axis2,
+            const axisOrder& order = e3e1
+        );
 
 public:
 
-
     //- Runtime type information
-    TypeName("coordinateRotation");
+    TypeName("axesRotation");
 
+    // Constructors
 
-    // Declare run-time constructor selection table
-    // for constructors with dictionary and objectRegistry
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        coordinateRotation,
-        objectRegistry,
+        //- Construct null
+        axesRotation();
+
+        //- Construct from 2 axes
+        axesRotation
         (
-            const dictionary& dict, const objectRegistry& obr
-        ),
-        (dict, obr)
-    );
-
-
-    // Declare run-time constructor selection table
-    // for constructors with dictionary
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        coordinateRotation,
-        dictionary,
-        (
-            const dictionary& dict
-        ),
-        (dict)
-    );
-
-
-    // Selectors
-
-        //- Select constructed from dictionary and objectRegistry
-        static autoPtr<coordinateRotation> New
-        (
-            const dictionary& dict, const objectRegistry& obr
+            const vector& axis,
+            const vector& dir
         );
 
-        //- Select constructed from dictionary
-        static autoPtr<coordinateRotation> New
-        (
-            const dictionary& dict
-        );
+        //- Construct from dictionary
+        axesRotation(const dictionary&);
+
+        //- Construct from components
+        axesRotation(const tensor& R);
+
+        //- Construct from dictionary and mesh
+        axesRotation(const dictionary&, const objectRegistry&);
+
+        //- Return clone
+        autoPtr<axesRotation> clone() const
+        {
+            return autoPtr<axesRotation>(new axesRotation(*this));
+        }
 
 
     //- Destructor
-    virtual ~coordinateRotation()
+    virtual ~axesRotation()
     {}
 
 
     // Member Functions
 
         //- Reset rotation to an identity rotation
-        virtual void clear() = 0;
-
-        //- Return local-to-global transformation tensor
-        virtual const tensor& R() const = 0;
-
-        //- Return global-to-local transformation tensor
-        virtual const tensor& Rtr() const = 0;
-
-        //- Return local Cartesian x-axis
-        virtual const vector e1() const = 0;
-
-        //- Return local Cartesian y-axis
-        virtual const vector e2() const = 0;
-
-        //- Return local Cartesian z-axis
-        virtual const vector e3() const = 0;
-
-        //- Return local-to-global transformation tensor
-        virtual const tensorField& Tr() const = 0;
-
-        //- Return true if the rotation tensor is uniform
-        virtual bool uniform() const
+        virtual void clear()
         {
-            return true;
+            R_ = sphericalTensor::I;
+            Rtr_ = sphericalTensor::I;
         }
 
+        //- Return local-to-global transformation tensor
+        virtual const tensor& R() const
+        {
+            return R_;
+        }
+
+        //- Return global-to-local transformation tensor
+        virtual const tensor& Rtr() const
+        {
+            return Rtr_;
+        }
+
+        //- Return local Cartesian x-axis
+        virtual const vector e1() const
+        {
+            return R_.x();
+        }
+
+        //- Return local Cartesian y-axis
+        virtual const vector e2() const
+        {
+            return R_.y();
+        }
+
+        //- Return local Cartesian z-axis
+        virtual const vector e3() const
+        {
+            return R_.z();
+        }
+
+        //- Return transformation tensor field
+        virtual const tensorField& Tr() const;
+
         //- Transform vectorField using transformation tensor field
-        virtual tmp<vectorField> transform(const vectorField& st) const = 0;
+        virtual tmp<vectorField> transform(const vectorField& st) const;
 
         //- Transform vector using transformation tensor
-        virtual vector transform(const vector& st) const = 0;
+        virtual vector transform(const vector& st) const;
 
         //- Inverse transform vectorField using transformation tensor field
-        virtual tmp<vectorField> invTransform(const vectorField& st) const = 0;
+        virtual tmp<vectorField> invTransform(const vectorField& st) const;
 
         //- Inverse transform vector using transformation tensor
-        virtual vector invTransform(const vector& st) const = 0;
+        virtual vector invTransform(const vector& st) const;
 
         //- Transform tensor field using transformation tensorField
-        virtual tmp<tensorField> transformTensor
-        (
-            const tensorField& st
-        ) const = 0;
+        virtual tmp<tensorField> transformTensor(const tensorField& st) const;
+
+        //- Transform tensor using transformation tensorField
+        virtual tensor transformTensor(const tensor& st) const;
 
         //- Transform tensor sub-field using transformation tensorField
         virtual tmp<tensorField> transformTensor
         (
             const tensorField& st,
             const labelList& cellMap
-        ) const = 0;
-
-        //- Transform tensor using transformation tensorField
-        virtual tensor transformTensor(const tensor& st) const = 0;
+        ) const;
 
         //- Transform vectorField using transformation tensorField and return
         // symmetrical tensorField
         virtual tmp<symmTensorField> transformVector
         (
             const vectorField& st
-        ) const = 0;
+        ) const;
 
         //- Transform vector using transformation tensor and return
         // symmetrical tensor
-        virtual symmTensor transformVector(const vector& st) const = 0;
+        virtual symmTensor transformVector(const vector& st) const;
+
+
+    // Member Operators
+
+        //- assign from dictionary
+        void operator=(const dictionary&);
 
 
     // Write
 
-            //- Write
-            virtual void write(Ostream&) const = 0;
-
+        //- Write
+        virtual void write(Ostream&) const;
 };
 
 

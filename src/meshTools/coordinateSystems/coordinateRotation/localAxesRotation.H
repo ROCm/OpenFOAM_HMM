@@ -22,34 +22,29 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::EulerCoordinateRotation
+    Foam::localAxesRotation
 
 Description
-    A coordinateRotation defined in the z-x-y Euler convention.
-
-    The 3 rotations are defined in the Euler convention
-    (around Z, around X' and around Z').
-    For reference and illustration, see
-    http://mathworld.wolfram.com/EulerAngles.html
-    Note, however, that it is the reverse transformation
-    (local->global) that is defined here.
-
-    - the rotation angles are in degrees, unless otherwise explictly specified:
+    A local coordinate rotation.
+    Each rotational tensor is defined with two vectors (dir and e3)
+    where dir =  cellC - origin and e3 is the rotation axis.
+    Per each cell an axesRotation type of rotation is created
 
     \verbatim
-        coordinateRotation
+        localAxesRotation
         {
-            type        EulerRotation
-            degrees     false;
-            rotation    (0 0 3.141592654);
+            type        localAxes;
+            e3          (0 0 1);
         }
     \endverbatim
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EulerCoordinateRotation_H
-#define EulerCoordinateRotation_H
+#ifndef localAxesRotation_H
+#define localAxesRotation_H
 
+#include "point.H"
+#include "vector.H"
 #include "coordinateRotation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,110 +53,99 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class EulerCoordinateRotation Declaration
+                    Class localAxesRotation Declaration
 \*---------------------------------------------------------------------------*/
 
-class EulerCoordinateRotation
+class localAxesRotation
 :
     public coordinateRotation
 {
+    // Private data
 
-    // Private Member Data
+        //- AutoPtr to transformation tensor
+        autoPtr<tensorField> Rptr_;
 
-        //- Local-to-global transformation tensor
-        tensor R_;
+        //- Origin of the coordinate system
+        point origin_;
 
-        //- Global-to-Local transformation tensor
-        tensor Rtr_;
+        //- Rotation axis
+        vector e3_;
 
 
-    // Private Member Functions
+    // Private members
 
-        //- Calculate transformation tensor
-        void calcTransform
-        (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees=true
-        );
+        //- Init transformation tensor
+        void init(const dictionary& dict, const objectRegistry& obr);
 
 
 public:
 
     //- Runtime type information
-    TypeName("EulerRotation");
-
+    TypeName("localAxesRotation");
 
     // Constructors
 
-        //- Construct null
-        EulerCoordinateRotation();
-
-        //- Construct from rotation vector
-        EulerCoordinateRotation
-        (
-            const vector& phiThetaPsi,
-            const bool inDegrees=true
-        );
-
-        //- Construct from components of rotation vector
-        EulerCoordinateRotation
-        (
-            const scalar phiAngle,
-            const scalar thetaAngle,
-            const scalar psiAngle,
-            const bool inDegrees=true
-        );
+        //- Construct from dictionary and objectRegistry
+        localAxesRotation(const dictionary&, const objectRegistry&);
 
         //- Construct from dictionary
-        EulerCoordinateRotation(const dictionary&);
+        localAxesRotation(const dictionary&);
 
-        //- Construct from dictionary and mesh
-        EulerCoordinateRotation(const dictionary&, const objectRegistry&);
+        //- Return clone
+        autoPtr<localAxesRotation> clone() const
+        {
+            return autoPtr<localAxesRotation>(new localAxesRotation(*this));
+        }
+
+
+    //- Destructor
+    virtual ~localAxesRotation()
+    {}
 
 
     // Member Functions
 
         //- Reset rotation to an identity rotation
-        virtual void clear()
-        {
-            R_ = sphericalTensor::I;
-            Rtr_ = sphericalTensor::I;
-        }
+        virtual void clear();
 
         //- Return local-to-global transformation tensor
         virtual const tensor& R() const
         {
-            return R_;
+            notImplemented("const tensor& localAxesRotation::R() const");
+            return tensor::zero;
         }
 
         //- Return global-to-local transformation tensor
         virtual const tensor& Rtr() const
         {
-            return Rtr_;
-        };
+             notImplemented("const tensor& localAxesRotation::Rtr() const");
+             return tensor::zero;
+        }
 
         //- Return local Cartesian x-axis
         virtual const vector e1() const
         {
-            return R_.x();
+            notImplemented("const tensor& localAxesRotation::e1() const");
+            return vector::zero;
         }
 
         //- Return local Cartesian y-axis
         virtual const vector e2() const
         {
-            return R_.y();
+            notImplemented("const tensor& localAxesRotation::e2() const");
+            return vector::zero;
         }
 
         //- Return local Cartesian z-axis
         virtual const vector e3() const
         {
-            return R_.z();
+            return e3_;
         }
 
-        //- Return transformation tensor field
-        virtual const tensorField& Tr() const;
+        virtual const tensorField& Tr() const
+        {
+            return Rptr_();
+        }
 
         //- Transform vectorField using transformation tensor field
         virtual tmp<vectorField> transform(const vectorField& st) const;
@@ -174,6 +158,12 @@ public:
 
         //- Inverse transform vector using transformation tensor
         virtual vector invTransform(const vector& st) const;
+
+        //- Return if the rotation is uniform
+        virtual bool uniform() const
+        {
+            return false;
+        }
 
         //- Transform tensor field using transformation tensorField
         virtual tmp<tensorField> transformTensor(const tensorField& st) const;
@@ -196,7 +186,7 @@ public:
         ) const;
 
         //- Transform vector using transformation tensor and return
-        // symmetrical tensor
+        // symmetrical tensor (R & st & R.T())
         virtual symmTensor transformVector(const vector& st) const;
 
 
@@ -204,6 +194,7 @@ public:
 
         //- Write
         virtual void write(Ostream&) const;
+
 };
 
 

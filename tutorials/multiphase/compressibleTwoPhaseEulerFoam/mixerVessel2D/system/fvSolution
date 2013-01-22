@@ -36,21 +36,13 @@ solvers
         relTol          0;
     }
 
-    U
+    "U.*"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
         nSweeps         2;
         tolerance       1e-07;
         relTol          0.1;
-    }
-
-    UFinal
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-07;
-        relTol          0;
     }
 
     "alpha.*"
@@ -61,7 +53,7 @@ solvers
         relTol          0;
     }
 
-    "(k|epsilon|Theta|T).*"
+    "(k|epsilon|Theta|h).*"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -76,7 +68,7 @@ PIMPLE
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
     nAlphaCorr      1;
-    correctAlpha    yes;
+    nAlphaSubCycles 2;
     pRefCell        0;
     pRefValue       0;
 }
@@ -85,16 +77,15 @@ relaxationFactors
 {
     fields
     {
-        p                1;
     }
     equations
     {
         "U.*"            1;
+        "h.*"            1;
         "alpha.*"        1;
         "Theta.*"        1;
         "k.*"            1;
         "epsilon.*"      1;
-        "T.*"            1;
     }
 }
 

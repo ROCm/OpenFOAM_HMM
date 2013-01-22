@@ -1,5 +1,5 @@
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == fvOptions(U))().H();
+HbyA = rAU*UEqn().H();
 
 if (pimple.nCorrPISO() <= 1)
 {

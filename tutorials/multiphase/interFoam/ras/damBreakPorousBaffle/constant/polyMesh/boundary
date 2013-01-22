@@ -15,33 +15,58 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-4
+7
 (
-    rotor
+    leftWall
     {
         type            wall;
-        nFaces          192;
-        startFace       5952;
+        nFaces          50;
+        startFace       4419;
     }
-    stator
+    rightWall
     {
         type            wall;
-        nFaces          192;
-        startFace       6144;
+        nFaces          50;
+        startFace       4469;
     }
-    front
+    lowerWall
+    {
+        type            wall;
+        nFaces          62;
+        startFace       4519;
+    }
+    atmosphere
+    {
+        type            patch;
+        nFaces          46;
+        startFace       4581;
+    }
+    defaultFaces
     {
         type            empty;
         inGroups        1(empty);
-        nFaces          3072;
-        startFace       6336;
+        nFaces          4536;
+        startFace       4627;
     }
-    back
+    porous_half0
     {
-        type            empty;
-        inGroups        1(empty);
-        nFaces          3072;
-        startFace       9408;
+        type            cyclic;
+        inGroups        1(cyclic);
+        nFaces          13;
+        startFace       9163;
+        matchTolerance  0.0001;
+        transform       unknown;
+        neighbourPatch  porous_half1;
+    }
+    porous_half1
+    {
+        type            cyclic;
+        inGroups        1(cyclic);
+        nFaces          13;
+        startFace       9176;
+        matchTolerance  0.0001;
+        transform       unknown;
+        neighbourPatch  porous_half0;
     }
 )
 

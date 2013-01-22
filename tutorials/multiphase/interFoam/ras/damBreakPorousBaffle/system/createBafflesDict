@@ -65,7 +65,10 @@ baffles
                 type            cyclic;
                 neighbourPatch  porous_half0;
 
-                ${..master.patchFields}
+                patchFields
+                {
+                    ${...master.patchFields}
+                }
             }
         }
     }

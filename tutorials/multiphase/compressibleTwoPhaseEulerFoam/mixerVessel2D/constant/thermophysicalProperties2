@@ -11,21 +11,43 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      MRFProperties;
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-zone1
+thermoType
 {
-    cellZone    rotor;
-    active      yes;
-
-    // Fixed patches (by default they 'move' with the MRF zone)
-    nonRotatingPatches ();
-
-    origin    (0 0 0);
-    axis      (0 0 1);
-    omega     constant 104.72;
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectFluid;
+    specie          specie;
+    energy          sensibleEnthalpy;
 }
+
+mixture
+{
+    specie
+    {
+        nMoles      1;
+        molWeight   28.9;
+    }
+    equationOfState
+    {
+        rho0        1027;
+    }
+    thermodynamics
+    {
+        Cp          4195;
+        Hf          0;
+    }
+    transport
+    {
+        mu          3.645e-4;
+        Pr          2.289;
+    }
+}
+
 
 // ************************************************************************* //
