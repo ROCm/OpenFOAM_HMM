@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -344,7 +344,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
 (
-    const scalar& fraction
+    const scalar fraction
 ) const
 {
     if ((fraction < 0) || (fraction > 1))
@@ -353,7 +353,7 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration
         (
             "inline Foam::scalar Foam::KinematicCloud<CloudType>::penetration"
             "("
-                "const scalar&"
+                "const scalar"
             ") const"
         )
             << "fraction should be in the range 0 < fraction < 1"
