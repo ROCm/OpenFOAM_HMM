@@ -383,7 +383,6 @@ $(porosity)/porosityModel/IOporosityModelList.C
 $(porosity)/DarcyForchheimer/DarcyForchheimer.C
 $(porosity)/fixedCoeff/fixedCoeff.C
 $(porosity)/powerLaw/powerLaw.C
-$(porosity)/pressureDrop/pressureDrop.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C
