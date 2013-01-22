@@ -1,18 +1,29 @@
-    scalar DiNum = -GREAT;
+scalar DiNum = -GREAT;
 
-    forAll(solidRegions, i)
+forAll(solidRegions, i)
+{
+    #include "setRegionSolidFields.H"
+
+    tmp<volScalarField> magKappa;
+    if (thermo.isotropic())
     {
-        #include "setRegionSolidFields.H"
-
-        DiNum = max
-        (
-            solidRegionDiffNo
-            (
-                solidRegions[i],
-                runTime,
-                rho*cp,
-                kappa
-            ),
-            DiNum
-        );
+        magKappa = thermo.kappa();
     }
+    else
+    {
+        magKappa = mag(thermo.Kappa());
+    }
+
+    DiNum = max
+    (
+        solidRegionDiffNo
+        (
+            solidRegions[i],
+            runTime,
+            rho*cp,
+            magKappa()
+        ),
+        DiNum
+    );
+
+}
