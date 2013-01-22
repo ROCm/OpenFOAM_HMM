@@ -1,6 +1,6 @@
 volScalarField rAUrel(1.0/UrelEqn().A());
 volVectorField HbyA("HbyA", Urel);
-HbyA = rAUrel*(UrelEqn() == fvOptions(Urel))().H();
+HbyA = rAUrel*UrelEqn().H();
 
 if (pimple.nCorrPISO() <= 1)
 {
