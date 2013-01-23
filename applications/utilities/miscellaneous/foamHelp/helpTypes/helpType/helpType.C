@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -148,7 +148,12 @@ void Foam::helpType::displayDoc
     {
         FatalErrorIn
         (
-            "void Foam::helpType::displayDoc(const word, const string)"
+            "void Foam::helpType::displayDoc"
+            "("
+                "const word&, "
+                "const string&, "
+                "const bool"
+            ")"
         )
             << "No help for type " << className << " found."
             << "  Valid options include:" << SortableList<word>(parser.toc())
