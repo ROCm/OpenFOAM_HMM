@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,47 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CLASSNAME.H"
-#include "IOstreams.H"
+#include "topoDistanceData.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::CLASSNAME::CLASSNAME(Istream& is)
-:
-    base1(is),
-    base2(is),
-    member1(is),
-    member2(is)
+Foam::Ostream& Foam::operator<<
+(
+    Foam::Ostream& os,
+    const Foam::topoDistanceData& wDist
+)
 {
-    // Check state of Istream
-    is.check("Foam::CLASSNAME::CLASSNAME(Foam::Istream&)");
+    return os << wDist.data_ << token::SPACE << wDist.distance_;
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, CLASSNAME&)
+Foam::Istream& Foam::operator>>
+(
+    Foam::Istream& is,
+    Foam::topoDistanceData& wDist
+)
 {
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::CLASSNAME&)"
-    );
-
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const CLASSNAME&)
-{
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::CLASSNAME&)"
-    );
-
-    return os;
+    return is >> wDist.data_ >> wDist.distance_;
 }
 
 

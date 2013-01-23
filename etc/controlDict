@@ -46,6 +46,8 @@ InfoSwitches
 
 OptimisationSwitches
 {
+    // On NFS mounted file system: maximum wait for files to appear/get
+    // updated. Set to 0 on distributed case.
     fileModificationSkew 10;
 
     //- Modification checking:
@@ -1004,6 +1006,22 @@ DimensionSets
         // Set of units used for printing. Can be any basic or derived
         // but not scaled (only supported for dimensionedScalar, etc)
         //writeUnits (kg m s K mol A Cd);
+    }
+
+    USCSCoeffs
+    {
+        // Basic units
+        lb  lb  [ 1 0 0 0 0 0 0 ] 1.0;
+        ft  ft  [ 0 1 0 0 0 0 0 ] 1.0;
+        s   s   [ 0 0 1 0 0 0 0 ] 1.0;
+        R   R   [ 0 0 0 1 0 0 0 ] 1.0;
+        mol mol [ 0 0 0 0 1 0 0 ] 1.0;
+        A   A   [ 0 0 0 0 0 1 0 ] 1.0;
+        Cd  Cd  [ 0 0 0 0 0 0 1 ] 1.0;
+
+        // Set of units used for printing. Can be any basic or derived
+        // but not scaled (only supported for dimensionedScalar, etc)
+        //writeUnits (lb ft s R mol A Cd);
     }
 }
 
