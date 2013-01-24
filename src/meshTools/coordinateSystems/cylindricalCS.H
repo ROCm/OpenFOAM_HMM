@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,7 @@ class cylindricalCS
 protected:
 
     // Protected Member Functions
+
 
         //- Convert from local coordinate system to the global Cartesian system
         //  with optional translation for the origin
@@ -131,8 +132,15 @@ public:
             const bool inDegrees=true
         );
 
-        //- Construct from dictionary
-        cylindricalCS(const word& name, const dictionary&);
+        //- Construct from dictionary and name
+        cylindricalCS(const word&, const dictionary&);
+
+        //- Construct from dictionary and objectRegistry
+        cylindricalCS(const objectRegistry&, const dictionary&);
+
+
+    //- Destructor
+    virtual ~cylindricalCS();
 
 
     // Member Functions

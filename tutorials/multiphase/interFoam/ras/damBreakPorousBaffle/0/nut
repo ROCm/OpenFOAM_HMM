@@ -24,22 +24,35 @@ boundaryField
     leftWall
     {
         type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
         value           uniform 0;
     }
     rightWall
     {
         type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
         value           uniform 0;
     }
     lowerWall
     {
         type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
         value           uniform 0;
     }
     atmosphere
     {
         type            calculated;
         value           uniform 0;
+    }
+    defaultFaces
+    {
+        type            empty;
     }
     porous_half0
     {
@@ -48,10 +61,6 @@ boundaryField
     porous_half1
     {
         type            cyclic;
-    }
-    defaultFaces
-    {
-        type            empty;
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,25 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::parabolicCylindricalCS
+    Foam::cartesianCS
 
 Description
-    Parabolic cylindrical coordinate system.
-
-    Notation: u = a.x() v = a.y() z = a.z();
-
-Note
-    The maintenance of this class may lag that of the main types.
+    Cylindrical coordinate system
 
 SourceFiles
-    parabolicCylindricalCS.C
+    cartesianCS.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef parabolicCylindricalCS_H
-#define parabolicCylindricalCS_H
+#ifndef cartesianCS_H
+#define cartesianCS_H
 
 #include "coordinateSystem.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,17 +44,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class parabolicCylindricalCS Declaration
+                        Class cartesianCS Declaration
 \*---------------------------------------------------------------------------*/
 
-class parabolicCylindricalCS
+class cartesianCS
 :
     public coordinateSystem
 {
-
 protected:
 
     // Protected Member Functions
+
 
         //- Convert from local coordinate system to the global Cartesian system
         //  with optional translation for the origin
@@ -88,24 +84,55 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("parabolicCylindrical");
+    TypeName("cartesian");
 
 
     // Constructors
 
         //- Construct null
-        parabolicCylindricalCS();
+        cartesianCS();
+
+        //- Construct copy
+        cartesianCS
+        (
+            const coordinateSystem&
+        );
+
+        //- Construct copy with a different name
+        cartesianCS
+        (
+            const word& name,
+            const coordinateSystem&
+        );
 
         //- Construct from origin and rotation
-        parabolicCylindricalCS
+        cartesianCS
         (
             const word& name,
             const point& origin,
             const coordinateRotation&
         );
 
+        //- Construct from origin and 2 axes
+        cartesianCS
+        (
+            const word& name,
+            const point& origin,
+            const vector& axis,
+            const vector& dirn
+        );
+
         //- Construct from dictionary
-        parabolicCylindricalCS(const word&, const dictionary&);
+        cartesianCS(const word&, const dictionary&);
+
+
+        //- Construct from dictionary and objectRegistry
+        cartesianCS(const objectRegistry&, const dictionary&);
+
+
+    //- Destructor
+    virtual ~cartesianCS();
+
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,18 +36,19 @@ void Foam::porosityModels::DarcyForchheimer::apply
     const vectorField& U
 ) const
 {
-    const tensor& D = D_.value();
-    const tensor& F = F_.value();
-
     forAll(cellZoneIds_, zoneI)
     {
+        const tensorField& dZones = D_[zoneI];
+        const tensorField& fZones = F_[zoneI];
+
         const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
 
         forAll(cells, i)
         {
             const label cellI = cells[i];
-
-            const tensor Cd = mu[cellI]*D + (rho[cellI]*mag(U[cellI]))*F;
+            const label j = this->fieldIndex(i);
+            const tensor Cd =
+                mu[cellI]*dZones[j] + (rho[cellI]*mag(U[cellI]))*fZones[j];
 
             const scalar isoCd = tr(Cd);
 
@@ -67,16 +68,20 @@ void Foam::porosityModels::DarcyForchheimer::apply
     const vectorField& U
 ) const
 {
-    const tensor& D = D_.value();
-    const tensor& F = F_.value();
-
     forAll(cellZoneIds_, zoneI)
     {
+        const tensorField& dZones = D_[zoneI];
+        const tensorField& fZones = F_[zoneI];
+
         const labelList& cells = mesh_.cellZones()[cellZoneIds_[zoneI]];
 
         forAll(cells, i)
         {
             const label cellI = cells[i];
+            const label j = this->fieldIndex(i);
+            const tensor D = dZones[j];
+            const tensor F = fZones[j];
+
             AU[cellI] += mu[cellI]*D + (rho[cellI]*mag(U[cellI]))*F;
         }
     }

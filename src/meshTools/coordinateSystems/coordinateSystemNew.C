@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 
 Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
-    const word& name,
+    const objectRegistry& obr,
     const dictionary& dict
 )
 {
@@ -41,17 +41,8 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
             << endl;
     }
 
-    // construct base class directly, also allow 'cartesian' as an alias
-    word coordType(typeName_());
-    if
-    (
-        !dict.readIfPresent("type", coordType)
-     || coordType == typeName_()
-     || coordType == "cartesian"
-    )
-    {
-        return autoPtr<coordinateSystem>(new coordinateSystem(name, dict));
-    }
+    const dictionary& coordDict = dict.subDict(typeName_());
+    word coordType = coordDict.lookup("type");
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(coordType);
@@ -60,20 +51,54 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     {
         FatalIOErrorIn
         (
-            "coordinateSystem::New(const word&, const dictionary&)",
+            "coordinateSystem::New(const objectRegistry&, const dictionary&)",
             dict
         )   << "Unknown coordinateSystem type "
             << coordType << nl << nl
             << "Valid coordinateSystem types are :" << nl
-            << "[default: " << typeName_() << "]"
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
-    return autoPtr<coordinateSystem>(cstrIter()(name, dict));
+    return autoPtr<coordinateSystem>(cstrIter()(obr, coordDict));
 }
 
 
+Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
+(
+    const dictionary& dict
+)
+{
+    if (debug)
+    {
+        Pout<< "coordinateSystem::New(cconst dictionary&) : "
+            << "constructing coordinateSystem"
+            << endl;
+    }
+
+    const dictionary& coordDict = dict.subDict(typeName_());
+    word coordType = coordDict.lookup("type");
+/*
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(coordType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalIOErrorIn
+        (
+            "coordinateSystem::New(const dictionary&)",
+            dict
+        )   << "Unknown coordinateSystem type "
+            << coordType << nl << nl
+            << "Valid coordinateSystem types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalIOError);
+    }
+*/
+    return autoPtr<coordinateSystem>(new coordinateSystem(coordDict));
+}
+
+/*
 Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
     const word& coordType,
@@ -109,7 +134,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 
     return autoPtr<coordinateSystem>(cstrIter()(name, origin, cr));
 }
-
+*/
 
 Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 (
@@ -119,7 +144,26 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     const word name(is);
     const dictionary dict(is);
 
-    return New(name, dict);
+    word coordType = dict.lookup("type");
+/*
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(coordType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalIOErrorIn
+        (
+            "coordinateSystem::New(Istream& is)",
+            dict
+        )   << "Unknown coordinateSystem type "
+            << coordType << nl << nl
+            << "Valid coordinateSystem types are :" << nl
+            << "[default: " << typeName_() << "]"
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalIOError);
+    }
+*/
+    return autoPtr<coordinateSystem>(new coordinateSystem(name, dict));
 }
 
 

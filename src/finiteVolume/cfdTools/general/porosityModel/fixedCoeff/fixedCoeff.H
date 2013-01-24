@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,6 @@ SourceFiles
 #define fixedCoeff_H
 
 #include "porosityModel.H"
-#include "coordinateSystem.H"
 #include "dimensionedTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,14 +64,11 @@ private:
 
     // Private data
 
-        //- Local co-ordinate system
-        coordinateSystem coordSys_;
-
         //- Model alpha coefficient [1/s]
-        dimensionedTensor alpha_;
+        List<tensorField> alpha_;
 
         //- Model beta coefficient [1/m]
-        dimensionedTensor beta_;
+        List<tensorField> beta_;
 
 
     // Private Member Functions
@@ -138,7 +134,7 @@ public:
         virtual void correct
         (
             const fvVectorMatrix& UEqn,
-            volTensorField& AU            
+            volTensorField& AU
         ) const;
 
 

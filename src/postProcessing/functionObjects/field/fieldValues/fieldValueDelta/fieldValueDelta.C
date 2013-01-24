@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,15 +38,16 @@ namespace Foam
 
     template<>
     const char*
-    NamedEnum<fieldValues::fieldValueDelta::operationType, 4>::names[] =
+    NamedEnum<fieldValues::fieldValueDelta::operationType, 5>::names[] =
     {
         "add",
         "subtract",
         "min",
-        "max"
+        "max",
+        "average"
     };
 
-    const NamedEnum<fieldValues::fieldValueDelta::operationType, 4>
+    const NamedEnum<fieldValues::fieldValueDelta::operationType, 5>
         fieldValues::fieldValueDelta::operationTypeNames_;
 }
 
@@ -158,7 +159,7 @@ void Foam::fieldValues::fieldValueDelta::write()
 
     if (log_)
     {
-        Info<< type() << " output:" << endl;
+        Info<< type() << " " << name_ << " output:" << endl;
     }
 
     bool found = false;
@@ -179,10 +180,8 @@ void Foam::fieldValues::fieldValueDelta::write()
         {
             Info<< "    none" << endl;
         }
-        else
-        {
-            Info<< endl;
-        }
+
+        Info<< endl;
     }
 }
 

@@ -14,12 +14,13 @@ $(csys)/coordinateSystem.C
 $(csys)/coordinateSystemNew.C
 $(csys)/coordinateSystems.C
 $(csys)/cylindricalCS.C
-$(csys)/sphericalCS.C
-$(csys)/parabolicCylindricalCS.C
-$(csys)/toroidalCS.C
+$(csys)/cartesianCS.C
+$(csys)/coordinateRotation/axesRotation.C
 $(csys)/coordinateRotation/coordinateRotation.C
+$(csys)/coordinateRotation/coordinateRotationNew.C
 $(csys)/coordinateRotation/EulerCoordinateRotation.C
 $(csys)/coordinateRotation/STARCDCoordinateRotation.C
+$(csys)/coordinateRotation/localAxesRotation.C
 
 edgeFaceCirculator/edgeFaceCirculator.C
 
@@ -187,6 +188,9 @@ mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
+meshStructure/meshStructure.C
+meshStructure/topoDistanceData.C
+meshStructure/pointTopoDistanceData.C
 
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledBase.C
 regionCoupled/patches/regionCoupledPolyPatch/regionCoupledPolyPatch.C

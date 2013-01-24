@@ -13,7 +13,7 @@ runApplication blockMesh
 runApplication topoSet
 
 # create baffles and fields
-createBaffles -overwrite
+runApplication createBaffles -overwrite
 
 runApplication $application
 
