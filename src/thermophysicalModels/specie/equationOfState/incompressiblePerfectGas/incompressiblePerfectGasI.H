@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,28 +25,40 @@ License
 
 #include "incompressiblePerfectGas.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class Specie>
-inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
-(
-    const Specie& sp
-)
-:
-    Specie(sp)
-{}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Specie>
 inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
 (
-    const word& name,
-    const incompressiblePerfectGas<Specie>& pg
+    const Specie& sp,  const scalar pRef
 )
 :
-    Specie(name, pg)
+    Specie(sp),
+    pRef_(pRef)
+{}
+
+
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
+(
+    const incompressiblePerfectGas& ipg
+)
+:
+    Specie(ipg),
+    pRef_(ipg.pRef_)
+{}
+
+
+template<class Specie>
+inline Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
+(
+    const word& name,
+    const incompressiblePerfectGas<Specie>& ipg
+)
+:
+    Specie(name, ipg),
+    pRef_(ipg.pRef_)
 {}
 
 
@@ -109,7 +121,7 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::psi
     scalar T
 ) const
 {
-    return 0.0;
+    return 1.0/(this->R()*T);
 }
 
 
@@ -120,7 +132,7 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::Z
     scalar
 ) const
 {
-    return 0.0;
+    return 1.0;
 }
 
 
@@ -139,22 +151,42 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::cpMcv
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Specie>
-inline void Foam::incompressiblePerfectGas<Specie>::operator+=
+inline Foam::incompressiblePerfectGas<Specie>&
+Foam::incompressiblePerfectGas<Specie>::operator=
 (
-    const incompressiblePerfectGas<Specie>& pg
+    const incompressiblePerfectGas<Specie>& ipg
 )
 {
-    Specie::operator+=(pg);
+    Specie::operator=(ipg);
+
+    pRef_ = ipg.pRef_;
+
+    return *this;
+}
+
+template<class Specie>
+inline void Foam::incompressiblePerfectGas<Specie>::operator+=
+(
+    const incompressiblePerfectGas<Specie>& ipg
+)
+{
+    scalar molr1 = this->nMoles();
+    Specie::operator+=(ipg);
+    molr1 /= this->nMoles();
+    scalar molr2 = ipg.nMoles()/this->nMoles();
+
+    pRef_ = molr1*pRef_ + molr2*ipg.pRef_;
 }
 
 
 template<class Specie>
 inline void Foam::incompressiblePerfectGas<Specie>::operator-=
 (
-    const incompressiblePerfectGas<Specie>& pg
+    const incompressiblePerfectGas<Specie>& ipg
 )
 {
-    Specie::operator-=(pg);
+    Specie::operator-=(ipg);
+    pRef_ = ipg.pRef_;
 }
 
 
@@ -170,14 +202,19 @@ inline void Foam::incompressiblePerfectGas<Specie>::operator*=(const scalar s)
 template<class Specie>
 inline Foam::incompressiblePerfectGas<Specie> Foam::operator+
 (
-    const incompressiblePerfectGas<Specie>& pg1,
-    const incompressiblePerfectGas<Specie>& pg2
+    const incompressiblePerfectGas<Specie>& ipg1,
+    const incompressiblePerfectGas<Specie>& ipg2
 )
 {
+    scalar nMoles = ipg1.nMoles() + ipg2.nMoles();
+    scalar molr1 = ipg1.nMoles()/nMoles;
+    scalar molr2 = ipg2.nMoles()/nMoles;
+
     return incompressiblePerfectGas<Specie>
     (
-        static_cast<const Specie&>(pg1)
-      + static_cast<const Specie&>(pg2)
+        static_cast<const Specie&>(ipg1)
+      + static_cast<const Specie&>(ipg2),
+        molr1*ipg1.pRef_ + molr2*ipg2.pRef_
     );
 }
 
@@ -185,14 +222,15 @@ inline Foam::incompressiblePerfectGas<Specie> Foam::operator+
 template<class Specie>
 inline Foam::incompressiblePerfectGas<Specie> Foam::operator-
 (
-    const incompressiblePerfectGas<Specie>& pg1,
-    const incompressiblePerfectGas<Specie>& pg2
+    const incompressiblePerfectGas<Specie>& ipg1,
+    const incompressiblePerfectGas<Specie>& ipg2
 )
 {
     return incompressiblePerfectGas<Specie>
     (
-        static_cast<const Specie&>(pg1)
-      - static_cast<const Specie&>(pg2)
+        static_cast<const Specie&>(ipg1)
+      - static_cast<const Specie&>(ipg2),
+        ipg1.pRef_
     );
 }
 
@@ -201,10 +239,14 @@ template<class Specie>
 inline Foam::incompressiblePerfectGas<Specie> Foam::operator*
 (
     const scalar s,
-    const incompressiblePerfectGas<Specie>& pg
+    const incompressiblePerfectGas<Specie>& ipg
 )
 {
-    return incompressiblePerfectGas<Specie>(s*static_cast<const Specie&>(pg));
+    return incompressiblePerfectGas<Specie>
+    (
+        s*static_cast<const Specie&>(ipg),
+        ipg.pRef_
+    );
 }
 
 
