@@ -32,8 +32,6 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<>
 const char* const triad::Vector<vector>::typeName = "triad";
 
@@ -49,6 +47,8 @@ const triad triad::max(vector::max, vector::max, vector::max);
 const triad triad::min(vector::min, vector::min, vector::min);
 
 const triad triad::unset(triad::max);
+
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -353,6 +353,30 @@ void Foam::triad::operator=(const tensor& t)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::scalar Foam::diff(const triad& A, const triad& B)
+{
+    triad tmpA = A.sortxyz();
+    triad tmpB = B.sortxyz();
+
+    scalar sumDifference = 0;
+
+    for (direction dir = 0; dir < 3; dir++)
+    {
+        if (!tmpA.set(dir) || !tmpB.set(dir))
+        {
+            continue;
+        }
+
+        scalar cosPhi =
+            (tmpA[dir] & tmpB[dir])/(mag(tmpA[dir])*mag(tmpA[dir]) + SMALL);
+
+        cosPhi = min(max(cosPhi, -1), 1);
+
+        sumDifference += mag(cosPhi - 1);
+    }
+
+    return (sumDifference/3);
+}
+
 
 // ************************************************************************* //
