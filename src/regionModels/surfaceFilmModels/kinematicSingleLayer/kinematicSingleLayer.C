@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -298,8 +298,6 @@ tmp<Foam::fvVectorMatrix> kinematicSingleLayer::solveMomentum
     {
         Info<< "kinematicSingleLayer::solveMomentum()" << endl;
     }
-
-    updateSurfaceVelocities();
 
     // Momentum
     tmp<fvVectorMatrix> tUEqn
@@ -861,8 +859,13 @@ void kinematicSingleLayer::evolveRegion()
         Info<< "kinematicSingleLayer::evolveRegion()" << endl;
     }
 
+    // Update film coverage indicator
     correctAlpha();
 
+    // Update film wall and surface velocities
+    updateSurfaceVelocities();
+
+    // Update sub-models to provide updated source contributions
     updateSubmodels();
 
     // Solve continuity for deltaRho_
@@ -889,9 +892,6 @@ void kinematicSingleLayer::evolveRegion()
 
     // Update deltaRho_ with new delta_
     deltaRho_ == delta_*rho_;
-
-    // Update film wall and surface velocities
-    updateSurfaceVelocities();
 
     // Reset source terms for next time integration
     resetPrimaryRegionSourceTerms();
