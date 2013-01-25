@@ -54,6 +54,16 @@ SIMPLE
     rhoMin          rhoMin [1 -3 0 0 0] 0.1;
     rhoMax          rhoMax [1 -3 0 0 0] 1.0;
     transonic       yes;
+
+    residualControl
+    {
+        p               1e-3;
+        U               1e-4;
+        e               1e-3;
+
+        // possibly check turbulence fields
+        "(k|epsilon|omega)" 1e-3;
+    }
 }
 
 relaxationFactors
