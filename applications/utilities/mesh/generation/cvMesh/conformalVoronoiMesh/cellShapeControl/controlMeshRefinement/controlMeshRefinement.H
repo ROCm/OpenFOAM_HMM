@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSizeAndAlignmentControls
+    Foam::controlMeshRefinement
 
 Description
 
 SourceFiles
-    cellSizeAndAlignmentControls.C
+    controlMeshRefinementI.H
+    controlMeshRefinement.C
+    controlMeshRefinementIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSizeAndAlignmentControls_H
-#define cellSizeAndAlignmentControls_H
+#ifndef controlMeshRefinement_H
+#define controlMeshRefinement_H
 
-#include "dictionary.H"
-#include "cellSizeAndAlignmentControl.H"
+#include "cellShapeControl.H"
+#include "cellShapeControlMesh.H"
+#include "cellSizeAndAlignmentControls.H"
+#include "conformationSurfaces.H"
+#include "backgroundMeshDecomposition.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,74 +48,77 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class cellSizeAndAlignmentControls Declaration
+                    Class controlMeshRefinement Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellSizeAndAlignmentControls
+class controlMeshRefinement
 {
     // Private data
 
-        const dictionary& shapeControlDict_;
+        const cellShapeControl& shapeController_;
+
+        cellShapeControlMesh& mesh_;
+
+        const cellSizeAndAlignmentControls& sizeControls_;
 
         const conformationSurfaces& geometryToConformTo_;
-
-        PtrList<cellSizeAndAlignmentControl> controlFunctions_;
-
-        const scalar defaultCellSize_;
 
 
     // Private Member Functions
 
-        bool evalCellSizeFunctions(const point& pt, scalar& minSize) const;
+        bool detectEdge
+        (
+            point a,
+            point b,
+            DynamicList<Vb>& pointsFound
+        ) const;
+
+        DynamicList<Vb> findDiscontinuities(const linePointRef& l) const;
 
         //- Disallow default bitwise copy construct
-        cellSizeAndAlignmentControls(const cellSizeAndAlignmentControls&);
+        controlMeshRefinement(const controlMeshRefinement&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cellSizeAndAlignmentControls&);
+        void operator=(const controlMeshRefinement&);
 
 
 public:
 
         //- Runtime type information
-        ClassName("cellSizeAndAlignmentControls");
+        ClassName("controlMeshRefinement");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        cellSizeAndAlignmentControls
-        (
-            const Time& runTime,
-            const dictionary& shapeControlDict,
-            const conformationSurfaces& geometryToConformTo,
-            const scalar defaultCellSize
-        );
+        //- Construct null
+        controlMeshRefinement(cellShapeControl& shapeController);
 
 
     //- Destructor
-    virtual ~cellSizeAndAlignmentControls();
+    ~controlMeshRefinement();
 
 
     // Member Functions
 
         // Access
 
-            inline const PtrList<cellSizeAndAlignmentControl>&
-            controlFunctions() const
-            {
-                return controlFunctions_;
-            }
+        // Check
 
-            inline const conformationSurfaces& geometryToConformTo() const
-            {
-                return geometryToConformTo_;
-            }
+        // Edit
+
+            void initialMeshPopulation
+            (
+                const autoPtr<backgroundMeshDecomposition>& decomposition
+            );
+
+            label refineMesh
+            (
+                const autoPtr<backgroundMeshDecomposition>& decomposition
+            );
 
 
-        // Query
+        // Write
 
-            scalar cellSize(const point& pt) const;
 };
 
 

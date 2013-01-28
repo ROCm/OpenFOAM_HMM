@@ -53,6 +53,8 @@ SourceFiles
 namespace Foam
 {
 
+class cellSizeAndAlignmentControls;
+
 /*---------------------------------------------------------------------------*\
                       Class cellShapeControlMesh Declaration
 \*---------------------------------------------------------------------------*/

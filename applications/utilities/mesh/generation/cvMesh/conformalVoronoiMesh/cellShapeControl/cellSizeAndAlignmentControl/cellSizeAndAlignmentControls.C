@@ -30,9 +30,7 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(cellSizeAndAlignmentControls, 0);
-
 }
 
 
@@ -116,12 +114,12 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
 (
     const Time& runTime,
     const dictionary& shapeControlDict,
-    const conformationSurfaces& allGeometry,
+    const conformationSurfaces& geometryToConformTo,
     const scalar defaultCellSize
 )
 :
     shapeControlDict_(shapeControlDict),
-    allGeometry_(allGeometry),
+    geometryToConformTo_(geometryToConformTo),
     controlFunctions_(shapeControlDict_.size()),
     defaultCellSize_(defaultCellSize)
 {
@@ -136,6 +134,8 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
             shapeControlDict_.subDict(shapeControlEntryName)
         );
 
+        Info<< nl << "Shape Control : " << shapeControlEntryName << endl;
+
         controlFunctions_.set
         (
             functionI,
@@ -144,7 +144,7 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
                 runTime,
                 shapeControlEntryName,
                 controlFunctionDict,
-                allGeometry
+                geometryToConformTo
             )
         );
 

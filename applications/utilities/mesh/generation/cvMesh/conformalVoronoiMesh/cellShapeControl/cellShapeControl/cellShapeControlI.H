@@ -52,4 +52,17 @@ Foam::cellShapeControl::aspectRatio() const
 }
 
 
+inline const Foam::cellSizeAndAlignmentControls&
+Foam::cellShapeControl::sizeAndAlignment() const
+{
+    return sizeAndAlignment_;
+}
+
+
+inline const Foam::scalar& Foam::cellShapeControl::minimumCellSize() const
+{
+    return minimumCellSize_;
+}
+
+
 // ************************************************************************* //

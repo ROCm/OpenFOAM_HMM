@@ -92,6 +92,7 @@ surface2.nas
 
     // Output the proximity of feature points and edges to each other
     featureProximity        no;
+
     // The maximum search distance to use when looking for other feature
     // points and edges
     maxFeatureProximity     1;

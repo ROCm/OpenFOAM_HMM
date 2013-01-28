@@ -69,7 +69,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         // Rebuild, insert and store new surface conformation
         buildSurfaceConformation();
 
-        if (distributeBackground())
+        if (distributeBackground(*this))
         {
             if (Pstream::parRun())
             {

@@ -75,8 +75,6 @@ const triad triad::unset
 
 }
 
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

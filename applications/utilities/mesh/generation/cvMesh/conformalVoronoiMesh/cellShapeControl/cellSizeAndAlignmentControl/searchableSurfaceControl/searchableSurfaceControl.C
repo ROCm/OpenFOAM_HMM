@@ -158,7 +158,7 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
     const Time& runTime,
     const word& name,
     const dictionary& controlFunctionDict,
-    const conformationSurfaces& allGeometry
+    const conformationSurfaces& geometryToConformTo
 )
 :
     cellSizeAndAlignmentControl
@@ -166,11 +166,11 @@ Foam::searchableSurfaceControl::searchableSurfaceControl
         runTime,
         name,
         controlFunctionDict,
-        allGeometry
+        geometryToConformTo
     ),
     surfaceName_(controlFunctionDict.lookupOrDefault<word>("surface", name)),
-    searchableSurface_(allGeometry.geometry()[surfaceName_]),
-    allGeometry_(allGeometry),
+    searchableSurface_(geometryToConformTo.geometry()[surfaceName_]),
+    geometryToConformTo_(geometryToConformTo),
     cellSizeFunction_
     (
         cellSizeFunction::New(controlFunctionDict, searchableSurface_)
@@ -579,7 +579,7 @@ void Foam::searchableSurfaceControl::initialVertices
 
         pointIndexHit info;
         label infoFeature;
-        allGeometry_.findFeaturePointNearest
+        geometryToConformTo_.findFeaturePointNearest
         (
             pts[pI],
             nearFeatDistSqrCoeff,
@@ -592,7 +592,7 @@ void Foam::searchableSurfaceControl::initialVertices
         if (info.hit())
         {
             const extendedFeatureEdgeMesh& features =
-                allGeometry_.features()[infoFeature];
+                geometryToConformTo_.features()[infoFeature];
 
             vectorField norms = features.featurePointNormals(info.index());
 
@@ -608,7 +608,7 @@ void Foam::searchableSurfaceControl::initialVertices
         }
         else
         {
-            allGeometry_.findEdgeNearest
+            geometryToConformTo_.findEdgeNearest
             (
                 pts[pI],
                 nearFeatDistSqrCoeff,
@@ -619,7 +619,7 @@ void Foam::searchableSurfaceControl::initialVertices
             if (info.hit())
             {
                 const extendedFeatureEdgeMesh& features =
-                    allGeometry_.features()[infoFeature];
+                    geometryToConformTo_.features()[infoFeature];
 
                 vectorField norms = features.edgeNormals(info.index());
 

@@ -613,17 +613,9 @@ void Foam::conformalVoronoiMesh::insertFeaturePoints()
     }
 
     label nFeatureVertices = number_of_vertices() - preFeaturePointSize;
+    reduce(nFeatureVertices, sumOp<label>());
 
-    if (Pstream::parRun())
-    {
-        reduce(nFeatureVertices, sumOp<label>());
-    }
-
-    if (nFeatureVertices > 0)
-    {
-        Info<< "    Inserted " << nFeatureVertices
-            << " feature vertices" << endl;
-    }
+    Info<< "    Inserted " << nFeatureVertices << " feature vertices" << endl;
 
     featureVertices_.clear();
     featureVertices_.setSize(pts.size());

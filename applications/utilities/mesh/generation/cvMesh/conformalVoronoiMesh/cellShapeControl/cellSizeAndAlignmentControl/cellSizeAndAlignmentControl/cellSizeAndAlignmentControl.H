@@ -91,9 +91,9 @@ public:
                 const Time& runTime,
                 const word& name,
                 const dictionary& controlFunctionDict,
-                const conformationSurfaces& allGeometry
+                const conformationSurfaces& geometryToConformTo
             ),
-            (runTime, name, controlFunctionDict, allGeometry)
+            (runTime, name, controlFunctionDict, geometryToConformTo)
         );
 
 
@@ -106,7 +106,7 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& allGeometry
+            const conformationSurfaces& geometryToConformTo
         );
 
 
@@ -118,7 +118,7 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& allGeometry
+            const conformationSurfaces& geometryToConformTo
         );
 
 

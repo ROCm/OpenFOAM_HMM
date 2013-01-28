@@ -31,15 +31,15 @@ License
 #include "vectorTools.H"
 #include "IOmanip.H"
 #include "indexedCellChecks.H"
+#include "controlMeshRefinement.H"
+#include "smoothAlignmentSolver.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(conformalVoronoiMesh, 0);
-
 }
 
 const Foam::scalar Foam::conformalVoronoiMesh::tolParallel = 1e-3;
@@ -634,160 +634,6 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 }
 
 
-Foam::scalar Foam::conformalVoronoiMesh::calculateLoadUnbalance() const
-{
-    label nRealVertices = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        // Only store real vertices that are not feature vertices
-        if (vit->real() && !vit->featurePoint())
-        {
-            nRealVertices++;
-        }
-    }
-
-    scalar globalNRealVertices = returnReduce
-    (
-        nRealVertices,
-        sumOp<label>()
-    );
-
-    scalar unbalance = returnReduce
-    (
-        mag(1.0 - nRealVertices/(globalNRealVertices/Pstream::nProcs())),
-        maxOp<scalar>()
-    );
-
-    Info<< "    Processor unbalance " << unbalance << endl;
-
-    return unbalance;
-}
-
-
-bool Foam::conformalVoronoiMesh::distributeBackground()
-{
-    if (!Pstream::parRun())
-    {
-        return false;
-    }
-
-    Info<< nl << "Redistributing points" << endl;
-
-    timeCheck("Before distribute");
-
-    label iteration = 0;
-
-    scalar previousLoadUnbalance = 0;
-
-    while (true)
-    {
-        scalar maxLoadUnbalance = calculateLoadUnbalance();
-
-        if
-        (
-            maxLoadUnbalance <= cvMeshControls().maxLoadUnbalance()
-         || maxLoadUnbalance <= previousLoadUnbalance
-        )
-        {
-            // If this is the first iteration, return false, if it was a
-            // subsequent one, return true;
-            return iteration != 0;
-        }
-
-        previousLoadUnbalance = maxLoadUnbalance;
-
-        Info<< "    Total number of vertices before redistribution "
-            << returnReduce(label(number_of_vertices()), sumOp<label>())
-            << endl;
-
-        const fvMesh& bMesh = decomposition_().mesh();
-
-        volScalarField cellWeights
-        (
-            IOobject
-            (
-                "cellWeights",
-                bMesh.time().timeName(),
-                bMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            bMesh,
-            dimensionedScalar("weight", dimless, 1e-2),
-            zeroGradientFvPatchScalarField::typeName
-        );
-
-        meshSearch cellSearch(bMesh, polyMesh::FACEPLANES);
-
-        labelList cellVertices(bMesh.nCells(), 0);
-
-        for
-        (
-            Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-            vit != finite_vertices_end();
-            ++vit
-        )
-        {
-            // Only store real vertices that are not feature vertices
-            if (vit->real() && !vit->featurePoint())
-            {
-                pointFromPoint v = topoint(vit->point());
-
-                label cellI = cellSearch.findCell(v);
-
-                if (cellI == -1)
-                {
-//                     Pout<< "findCell conformalVoronoiMesh::distribute "
-//                         << "findCell "
-//                         << vit->type() << " "
-//                         << vit->index() << " "
-//                         << v << " "
-//                         << cellI
-//                         << " find nearest cellI ";
-
-                    cellI = cellSearch.findNearestCell(v);
-                }
-
-                cellVertices[cellI]++;
-            }
-        }
-
-        forAll(cellVertices, cI)
-        {
-            // Give a small but finite weight for empty cells.  Some
-            // decomposition methods have difficulty with integer overflows in
-            // the sum of the normalised weight field.
-            cellWeights.internalField()[cI] = max
-            (
-                cellVertices[cI],
-                1e-2
-            );
-        }
-
-        autoPtr<mapDistributePolyMesh> mapDist = decomposition_().distribute
-        (
-            cellWeights
-        );
-
-        cellShapeControl_.shapeControlMesh().distribute(decomposition_);
-
-        distribute();
-
-        timeCheck("After distribute");
-
-        iteration++;
-    }
-
-    return true;
-}
-
-
 void Foam::conformalVoronoiMesh::distribute()
 {
     if (!Pstream::parRun())
@@ -871,13 +717,24 @@ void Foam::conformalVoronoiMesh::distribute()
 
 void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 {
-    cellShapeControl_.initialMeshPopulation(decomposition_);
+    controlMeshRefinement meshRefinement
+    (
+        cellShapeControl_
+    );
+
+    smoothAlignmentSolver meshAlignmentSmoother
+    (
+        cellShapeControl_.shapeControlMesh()
+    );
+
+    meshRefinement.initialMeshPopulation(decomposition_);
 
     cellShapeControlMesh& cellSizeMesh = cellShapeControl_.shapeControlMesh();
 
     if (Pstream::parRun())
     {
-        cellSizeMesh.distribute(decomposition_);
+        distributeBackground(cellSizeMesh);
+//        cellSizeMesh.distribute(decomposition_);
     }
 
     label nMaxIter = readLabel
@@ -892,40 +749,48 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 
     for (label i = 0; i < nMaxIter; ++i)
     {
-//        label nRemoved = cellSizeMesh.removePoints();
-        label nRemoved = 0;
-        reduce(nRemoved, sumOp<label>());
-
-        label nAdded = cellShapeControl_.refineMesh(decomposition_);
-//        label nAdded = 0;
+        label nAdded = meshRefinement.refineMesh(decomposition_);
+        //cellShapeControl_.refineMesh(decomposition_);
         reduce(nAdded, sumOp<label>());
 
         if (Pstream::parRun())
         {
-            cellSizeMesh.distribute(decomposition_);
-        }
-
-        if (nRemoved + nAdded == 0)
-        {
-            break;
+            distributeBackground(cellSizeMesh);
         }
 
         Info<< "    Iteration " << i
             << " Added = " << nAdded << " points"
-            << ", Removed = " << nRemoved << " points"
             << endl;
+
+        if (nAdded == 0)
+        {
+            break;
+        }
     }
 
-    cellShapeControl_.smoothMesh();
+    label maxSmoothingIterations = readLabel
+    (
+        cvMeshControls().cvMeshDict().subDict("motionControl").lookup
+        (
+            "maxSmoothingIterations"
+        )
+    );
+    meshAlignmentSmoother.smoothAlignments(maxSmoothingIterations);
 
     Info<< "Background cell size and alignment mesh:" << endl;
     cellSizeMesh.printInfo(Info);
 
-    if (cvMeshControls().objOutput())
+    Info<< "Triangulation is "
+        << (cellSizeMesh.is_valid() ? "valid" : "not valid!" )
+        << endl;
+
+    if (!Pstream::parRun())
     {
-        cellSizeMesh.writeTriangulation();
+        //cellSizeMesh.writeTriangulation();
         cellSizeMesh.write();
     }
+
+    cellSizeMesh.printVertexInfo(Info);
 }
 
 
@@ -1102,11 +967,6 @@ void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
                 vit->targetCellSize(),
                 vit->alignment()
             );
-
-            //vit->alignment() = tensor(1,0,0,0,1,0,0,0,1);
-            //vit->alignment() = requiredAlignment(pt);
-
-            //vit->targetCellSize() = cellShapeControls().cellSize(pt);
         }
     }
 }
@@ -1424,13 +1284,13 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     // Improve the guess that the backgroundMeshDecomposition makes with the
     // initial positions.  Use before building the surface conformation to
     // better balance the surface conformation load.
-    distributeBackground();
+    distributeBackground(*this);
 
     buildSurfaceConformation();
 
     // The introduction of the surface conformation may have distorted the
     // balance of vertices, distribute if necessary.
-    distributeBackground();
+    distributeBackground(*this);
 
     if (Pstream::parRun())
     {
@@ -1701,22 +1561,22 @@ void Foam::conformalVoronoiMesh::move()
                         delta
                     );
 
-                    if (targetFaceArea == 0)
-                    {
-                        Pout<< vA->info() << vB->info();
-
-                        Cell_handle ch = locate(vA->point());
-                        if (is_infinite(ch))
-                        {
-                            Pout<< "vA " << vA->targetCellSize() << endl;
-                        }
-
-                        ch = locate(vB->point());
-                        if (is_infinite(ch))
-                        {
-                            Pout<< "vB " << vB->targetCellSize() << endl;
-                        }
-                    }
+//                    if (targetFaceArea == 0)
+//                    {
+//                        Pout<< vA->info() << vB->info();
+//
+//                        Cell_handle ch = locate(vA->point());
+//                        if (is_infinite(ch))
+//                        {
+//                            Pout<< "vA " << vA->targetCellSize() << endl;
+//                        }
+//
+//                        ch = locate(vB->point());
+//                        if (is_infinite(ch))
+//                        {
+//                            Pout<< "vB " << vB->targetCellSize() << endl;
+//                        }
+//                    }
 
                     delta *= faceAreaWeightModel_->faceAreaWeight
                     (

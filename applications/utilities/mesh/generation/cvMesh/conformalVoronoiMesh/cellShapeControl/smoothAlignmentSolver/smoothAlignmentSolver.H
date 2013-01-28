@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cellSizeAndAlignmentControls
+    Foam::smoothAlignmentSolver
 
 Description
 
 SourceFiles
-    cellSizeAndAlignmentControls.C
+    smoothAlignmentSolverI.H
+    smoothAlignmentSolver.C
+    smoothAlignmentSolverIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellSizeAndAlignmentControls_H
-#define cellSizeAndAlignmentControls_H
+#ifndef smoothAlignmentSolver_H
+#define smoothAlignmentSolver_H
 
-#include "dictionary.H"
-#include "cellSizeAndAlignmentControl.H"
+#include "cellShapeControlMesh.H"
+#include "triadField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,74 +45,86 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class cellSizeAndAlignmentControls Declaration
+                    Class smoothAlignmentSolver Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellSizeAndAlignmentControls
+class smoothAlignmentSolver
 {
     // Private data
 
-        const dictionary& shapeControlDict_;
-
-        const conformationSurfaces& geometryToConformTo_;
-
-        PtrList<cellSizeAndAlignmentControl> controlFunctions_;
-
-        const scalar defaultCellSize_;
+        cellShapeControlMesh& mesh_;
 
 
     // Private Member Functions
 
-        bool evalCellSizeFunctions(const point& pt, scalar& minSize) const;
+        template <class Triangulation, class Type>
+        tmp<Field<Type> > filterFarPoints
+        (
+            const Triangulation& mesh,
+            const Field<Type>& field
+        );
+
+        template <class Triangulation>
+        autoPtr<mapDistribute> buildMap
+        (
+            const Triangulation& mesh,
+            labelListList& pointPoints
+        );
+
+        template <class Triangulation>
+        autoPtr<mapDistribute> buildReferredMap
+        (
+            const Triangulation& mesh,
+            labelList& indices
+        );
+
+        template <class Triangulation>
+        tmp<triadField> buildAlignmentField(const Triangulation& mesh);
+
+        template <class Triangulation>
+        tmp<pointField> buildPointField(const Triangulation& mesh);
 
         //- Disallow default bitwise copy construct
-        cellSizeAndAlignmentControls(const cellSizeAndAlignmentControls&);
+        smoothAlignmentSolver(const smoothAlignmentSolver&);
 
         //- Disallow default bitwise assignment
-        void operator=(const cellSizeAndAlignmentControls&);
+        void operator=(const smoothAlignmentSolver&);
 
 
 public:
 
-        //- Runtime type information
-        ClassName("cellSizeAndAlignmentControls");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        cellSizeAndAlignmentControls
-        (
-            const Time& runTime,
-            const dictionary& shapeControlDict,
-            const conformationSurfaces& geometryToConformTo,
-            const scalar defaultCellSize
-        );
+        //- Construct null
+        smoothAlignmentSolver(cellShapeControlMesh& mesh);
 
 
     //- Destructor
-    virtual ~cellSizeAndAlignmentControls();
+    ~smoothAlignmentSolver();
 
 
     // Member Functions
 
         // Access
 
-            inline const PtrList<cellSizeAndAlignmentControl>&
-            controlFunctions() const
-            {
-                return controlFunctions_;
-            }
+        // Check
 
-            inline const conformationSurfaces& geometryToConformTo() const
-            {
-                return geometryToConformTo_;
-            }
+        // Edit
+
+            //- Smooth the alignments on the mesh
+            void smoothAlignments(const label maxSmoothingIterations);
 
 
-        // Query
+        // Write
 
-            scalar cellSize(const point& pt) const;
+
+    // Member Operators
+
+    // Friend Functions
+
+    // Friend Operators
+
+    // IOstream Operators
 };
 
 

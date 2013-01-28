@@ -59,7 +59,7 @@ class searchableSurfaceControl
         //- Reference to the searchableSurface object holding the geometry data
         const searchableSurface& searchableSurface_;
 
-        const conformationSurfaces& allGeometry_;
+        const conformationSurfaces& geometryToConformTo_;
 
         autoPtr<cellSizeFunction> cellSizeFunction_;
 
@@ -106,7 +106,7 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& allGeometry
+            const conformationSurfaces& geometryToConformTo
         );
 
     //- Destructor

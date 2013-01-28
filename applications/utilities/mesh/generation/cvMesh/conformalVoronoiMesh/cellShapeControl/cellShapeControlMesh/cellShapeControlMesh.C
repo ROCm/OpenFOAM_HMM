@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellShapeControlMesh.H"
+#include "cellSizeAndAlignmentControls.H"
 #include "pointIOField.H"
 #include "scalarIOField.H"
 #include "tensorIOField.H"
@@ -36,9 +37,7 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(cellShapeControlMesh, 0);
-
 }
 
 
@@ -537,12 +536,9 @@ void Foam::cellShapeControlMesh::barycentricCoords
 ) const
 {
     // Use the previous cell handle as a hint on where to start searching
-    ch = locate
-    (
-        Point(pt.x(), pt.y(), pt.z())
-    );
+    ch = locate(toPoint<Point>(pt));
 
-    if (!is_infinite(ch))
+    if (dimension() > 2 && !is_infinite(ch))
     {
         oldCellHandle_ = ch;
 

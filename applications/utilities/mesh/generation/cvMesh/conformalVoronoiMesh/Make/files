@@ -29,6 +29,10 @@ $(cellSizeAndAlignmentControl)/searchableSurfaceControl/searchableSurfaceControl
 
 cellShapeControl/cellAspectRatioControl/cellAspectRatioControl.C
 
+cellShapeControl/smoothAlignmentSolver/smoothAlignmentSolver.C
+
+cellShapeControl/controlMeshRefinement/controlMeshRefinement.C
+
 /*cellSizeControlSurfaces/cellSizeControlSurfaces.C*/
 
 cellSizeFunctions = cellSizeControlSurfaces/cellSizeFunction

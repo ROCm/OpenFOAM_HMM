@@ -34,6 +34,7 @@ SourceFiles
     conformalVoronoiMeshFeaturePoints.C
     conformalVoronoiMeshFeaturePointSpecialisations.C
     conformalVoronoiMeshCalcDualMesh.C
+    conformalVoronoiMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 

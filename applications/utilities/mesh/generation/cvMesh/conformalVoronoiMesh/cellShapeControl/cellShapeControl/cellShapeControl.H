@@ -84,33 +84,6 @@ class cellShapeControl
 
     // Private Member Functions
 
-        template <class Triangulation, class Type>
-        tmp<Field<Type> > filterFarPoints
-        (
-            const Triangulation& mesh,
-            const Field<Type>& field
-        );
-
-        template <class Triangulation>
-        autoPtr<mapDistribute> buildMap
-        (
-            const Triangulation& mesh,
-            labelListList& pointPoints
-        );
-
-        template <class Triangulation>
-        autoPtr<mapDistribute> buildReferredMap
-        (
-            const Triangulation& mesh,
-            labelList& indices
-        );
-
-        template <class Triangulation>
-        tmp<triadField> buildAlignmentField(const Triangulation& mesh);
-
-        template <class Triangulation>
-        tmp<pointField> buildPointField(const Triangulation& mesh);
-
         //- Disallow default bitwise copy construct
         cellShapeControl(const cellShapeControl&);
 
@@ -155,6 +128,8 @@ public:
 
             inline const cellSizeAndAlignmentControls& sizeAndAlignment() const;
 
+            inline const scalar& minimumCellSize() const;
+
 
         // Query
 
@@ -172,29 +147,6 @@ public:
                 scalar& size,
                 tensor& alignment
             ) const;
-
-
-        // Edit
-
-            void initialMeshPopulation
-            (
-                const autoPtr<backgroundMeshDecomposition>& decomposition
-            );
-
-            label refineMesh
-            (
-                const autoPtr<backgroundMeshDecomposition>& decomposition
-            );
-
-            void smoothMesh();
-
-            //- Add a control point with a specified size and alignment
-//            virtual void addControlPoint
-//            (
-//                const point& pt,
-//                const scalar& size,
-//                const tensor& alignment
-//            );
 };
 
 
