@@ -30,8 +30,8 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::quaternion::typeName = "quaternion";
-const Foam::quaternion Foam::quaternion::zero(0, vector::zero);
-const Foam::quaternion Foam::quaternion::I(1, vector::zero);
+const Foam::quaternion Foam::quaternion::zero(0, vector(0, 0, 0));
+const Foam::quaternion Foam::quaternion::I(1, vector(0, 0, 0));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
