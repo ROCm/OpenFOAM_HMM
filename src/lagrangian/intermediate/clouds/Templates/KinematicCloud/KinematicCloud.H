@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -471,7 +471,7 @@ public:
             inline scalar rotationalKineticEnergyOfSystem() const;
 
             //- Penetration for fraction [0-1] of the current total mass
-            inline scalar penetration(const scalar& fraction) const;
+            inline scalar penetration(const scalar fraction) const;
 
             //- Mean diameter Dij
             inline scalar Dij(const label i, const label j) const;

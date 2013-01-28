@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,10 @@ Class
     Foam::doxygenXmlParser
 
 Description
+    Parser for doxygen XML
 
 SourceFiles
+    doxygenXmlParser.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,10 +67,10 @@ public:
     // Member functions
 
         //- Skip past a block
-        void skipBlock(IFstream& is, const word blockName) const;
+        void skipBlock(IFstream& is, const word& blockName) const;
 
         //- Skip forward to block
-        void skipForward(IFstream& is, const word blockName) const;
+        void skipForward(IFstream& is, const word& blockName) const;
 
         //- Return the entry
         template<class Type>

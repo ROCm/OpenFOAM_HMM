@@ -29,8 +29,8 @@ cp -r 0.org 0
 runApplication blockMesh
 refineMeshByCellSet 1 2 3
 
-echo "mapping fields from 2D throttle case"
-runApplication mapFields ../throttle -sourceTime latestTime
+#echo "mapping fields from 2D throttle case"
+#runApplication mapFields ../throttle -sourceTime latestTime
 
 runApplication decomposePar
 runParallel $application 4

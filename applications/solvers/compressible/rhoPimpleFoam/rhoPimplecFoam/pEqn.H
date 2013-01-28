@@ -5,11 +5,10 @@ rho.relax();
 
 volScalarField rAU(1.0/UEqn().A());
 volScalarField rAtU(1.0/(1.0/rAU - UEqn().H1()));
-
 volVectorField HbyA("HbyA", U);
-HbyA = rAU*(UEqn() == fvOptions(rho, U))().H();
+HbyA = rAU*UEqn().H();
 
-if (pimple.nCorrPIMPLE() <= 1)
+if (pimple.nCorrPISO() <= 1)
 {
     UEqn.clear();
 }
@@ -25,6 +24,8 @@ if (pimple.transonic())
           + fvc::ddtPhiCorr(rAU, rho, U, phi)
         )
     );
+
+    fvOptions.relativeFlux(fvc::interpolate(psi), phid);
 
     surfaceScalarField phic
     (
@@ -48,12 +49,9 @@ if (pimple.transonic())
             fvOptions(psi, p, rho.name())
         );
 
-        // Relax the pressure equation to maintain diagonal dominance
-        pEqn.relax();
-
         fvOptions.constrain(pEqn);
 
-        pEqn.solve();
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
         if (pimple.finalNonOrthogonalIter())
         {
@@ -73,6 +71,8 @@ else
         )
     );
 
+    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+
     phiHbyA += fvc::interpolate(rho*(rAtU - rAU))*fvc::snGrad(p)*mesh.magSf();
     HbyA -= (rAU - rAtU)*fvc::grad(p);
 
@@ -91,7 +91,7 @@ else
 
         fvOptions.constrain(pEqn);
 
-        pEqn.solve();
+        pEqn.solve(mesh.solver(p.select(pimple.finalInnerIter())));
 
         if (pimple.finalNonOrthogonalIter())
         {

@@ -381,8 +381,8 @@ $(porosity)/porosityModel/porosityModelNew.C
 $(porosity)/porosityModel/porosityModelList.C
 $(porosity)/porosityModel/IOporosityModelList.C
 $(porosity)/DarcyForchheimer/DarcyForchheimer.C
-$(porosity)/powerLaw/powerLaw.C
 $(porosity)/fixedCoeff/fixedCoeff.C
+$(porosity)/powerLaw/powerLaw.C
 
 MRF = $(general)/MRF
 $(MRF)/MRFZone.C

@@ -38,15 +38,42 @@ const char* const triad::Vector<vector>::typeName = "triad";
 template<>
 const char* triad::Vector<vector>::componentNames[] = {"x", "y", "z"};
 
-const triad triad::zero(vector::zero, vector::zero, vector::zero);
+const triad triad::zero
+(
+    vector(0, 0, 0),
+    vector(0, 0, 0),
+    vector(0, 0, 0)
+);
 
-const triad triad::one(vector::one, vector::one, vector::one);
+const triad triad::one
+(
+    vector(1, 1, 1),
+    vector(1, 1, 1),
+    vector(1, 1, 1)
+);
 
-const triad triad::max(vector::max, vector::max, vector::max);
+const triad triad::max
+(
+    vector(VGREAT, VGREAT, VGREAT),
+    vector(VGREAT, VGREAT, VGREAT),
+    vector(VGREAT, VGREAT, VGREAT)
+);
 
-const triad triad::min(vector::min, vector::min, vector::min);
+const triad triad::min
+(
+    vector(-VGREAT, -VGREAT, -VGREAT),
+    vector(-VGREAT, -VGREAT, -VGREAT),
+    vector(-VGREAT, -VGREAT, -VGREAT)
+);
 
-const triad triad::unset(triad::max);
+const triad triad::unset
+(
+    vector(VGREAT, VGREAT, VGREAT),
+    vector(VGREAT, VGREAT, VGREAT),
+    vector(VGREAT, VGREAT, VGREAT)
+);
+
+}
 
 }
 

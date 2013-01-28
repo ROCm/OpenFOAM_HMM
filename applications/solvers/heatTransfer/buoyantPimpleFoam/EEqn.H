@@ -17,7 +17,8 @@
         )
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
-        fvOptions(rho, he)
+        radiation->Sh(thermo)
+      + fvOptions(rho, he)
     );
 
     EEqn.relax();
@@ -29,4 +30,5 @@
     fvOptions.correct(he);
 
     thermo.correct();
+    radiation->correct();
 }

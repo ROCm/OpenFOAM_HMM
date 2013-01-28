@@ -3,7 +3,9 @@
     {
         fvScalarMatrix hEqn
         (
-           - fvm::laplacian(betav*alpha, h, "laplacian(alpha,h)")
+            thermo.isotropic()
+            ? -fvm::laplacian(betav*thermo.alpha(), h, "laplacian(alpha,h)")
+            : -fvm::laplacian(betav*tAnialpha(), h, "laplacian(alpha,h)")
            + fvOptions(rho, h)
         );
 

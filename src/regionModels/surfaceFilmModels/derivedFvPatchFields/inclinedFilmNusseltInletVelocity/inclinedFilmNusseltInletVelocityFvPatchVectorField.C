@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
     // TODO: currently re-evaluating the entire gTan field to return this patch
     const scalarField gTan(film.gTan()().boundaryField()[patchI] & n);
 
-    if (max(mag(gTan)) < SMALL)
+    if (patch().size() && (max(mag(gTan)) < SMALL))
     {
         WarningIn
         (

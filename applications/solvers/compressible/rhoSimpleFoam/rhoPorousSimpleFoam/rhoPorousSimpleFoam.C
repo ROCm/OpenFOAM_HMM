@@ -27,14 +27,13 @@ Application
 Description
     Steady-state solver for turbulent flow of compressible fluids with
     RANS turbulence modelling, implicit or explicit porosity treatment
-    and MRF for HVAC and similar applications.
+    and run-time selectable finite volume sources.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "rhoThermo.H"
 #include "RASModel.H"
-#include "IOMRFZoneList.H"
 #include "fvIOoptionList.H"
 #include "IOporosityModelList.H"
 #include "simpleControl.H"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -176,38 +176,32 @@ Foam::doxygenXmlParser::doxygenXmlParser
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::doxygenXmlParser::skipBlock(IFstream& is, const word blockName) const
+void Foam::doxygenXmlParser::skipBlock
+(
+    IFstream& is,
+    const word& blockName
+) const
 {
     // recurse to move forward in 'is' until come across </blockName>
-
     string closeName = "";
 
-    // fast-forward until we reach a '<'
     char c;
-    while (is.get(c) && c  != '<')
-    {}
-
-    // check to see if this is a closing block
-    if (is.get(c) && c  == '/')
+    while (is.good() && (closeName != blockName))
     {
-        while (is.get(c) && c  != '>')
-        {
-            closeName += c;
-        }
+        // fast-forward until we reach a '<'
+        while (is.get(c) && c  != '<')
+        {}
 
-        if (closeName == blockName)
+        // check to see if this is a closing block
+        if (is.get(c) && c  == '/')
         {
-            // finished reading block
-            return;
+            closeName = "";
+
+            while (is.get(c) && c != '>')
+            {
+                closeName += c;
+            }
         }
-        else
-        {
-            skipBlock(is, blockName);
-        }
-    }
-    else
-    {
-        skipBlock(is, blockName);
     }
 }
 
@@ -215,7 +209,7 @@ void Foam::doxygenXmlParser::skipBlock(IFstream& is, const word blockName) const
 void Foam::doxygenXmlParser::skipForward
 (
     IFstream& is,
-    const word blockName
+    const word& blockName
 ) const
 {
     // recurse to move forward in 'is' until come across <blockName>

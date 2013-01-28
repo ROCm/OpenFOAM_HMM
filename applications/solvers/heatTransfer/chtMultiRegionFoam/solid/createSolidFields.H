@@ -1,4 +1,5 @@
     // Initialise solid field pointer lists
+    PtrList<coordinateSystem> coordinates(solidRegions.size());
     PtrList<solidThermo> thermos(solidRegions.size());
     PtrList<radiation::radiationModel> radiations(solidRegions.size());
     PtrList<fv::IOoptionList> solidHeatSources(solidRegions.size());
@@ -22,6 +23,16 @@
             i,
             new fv::IOoptionList(solidRegions[i])
         );
+
+        if (!thermos[i].isotropic())
+        {
+            Info<< "    Adding coordinateSystems\n" << endl;
+            coordinates.set
+            (
+                i,
+                coordinateSystem::New(solidRegions[i], thermos[i])
+            );
+        }
 
         IOobject betavSolidIO
         (

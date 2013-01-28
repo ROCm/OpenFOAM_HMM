@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,14 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "topoDistanceData.H"
+#include "pointTopoDistanceData.H"
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::topoDistanceData& wDist
+    const Foam::pointTopoDistanceData& wDist
 )
 {
     return os << wDist.data_ << token::SPACE << wDist.distance_;
@@ -40,7 +40,7 @@ Foam::Ostream& Foam::operator<<
 Foam::Istream& Foam::operator>>
 (
     Foam::Istream& is,
-    Foam::topoDistanceData& wDist
+    Foam::pointTopoDistanceData& wDist
 )
 {
     return is >> wDist.data_ >> wDist.distance_;

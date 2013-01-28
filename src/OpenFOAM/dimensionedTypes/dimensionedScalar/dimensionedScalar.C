@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -275,6 +275,21 @@ transFunc(jn)
 transFunc(yn)
 
 #undef transFunc
+
+
+dimensionedScalar atan2
+(
+    const dimensionedScalar& x,
+    const dimensionedScalar& y
+)
+{
+    return dimensionedScalar
+    (
+        "atan2(" + x.name() + ',' + y.name() + ')',
+        atan2(x.dimensions(), y.dimensions()),
+        ::atan2(x.value(), y.value())
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

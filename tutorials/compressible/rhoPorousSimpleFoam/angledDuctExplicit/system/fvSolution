@@ -64,7 +64,7 @@ SIMPLE
     {
         p               1e-2;
         U               1e-4;
-        T               1e-3;
+        e               1e-3;
 
         // possibly check turbulence fields
         "(k|epsilon|omega)" 1e-3;
@@ -76,7 +76,7 @@ relaxationFactors
     fields
     {
         p               0.3;
-        rho             0.05;
+        rho             0.03;
     }
     equations
     {
