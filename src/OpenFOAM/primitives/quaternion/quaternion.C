@@ -58,7 +58,14 @@ Foam::quaternion Foam::slerp
     const scalar t
 )
 {
-    return qa*pow((inv(qa)*qb), t);
+    label sign = 1;
+
+    if ((qa & qb) < 0)
+    {
+        sign = -1;
+    }
+
+    return qa*pow((inv(qa)*sign*qb), t);
 }
 
 

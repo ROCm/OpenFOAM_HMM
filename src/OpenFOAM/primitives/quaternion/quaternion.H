@@ -213,7 +213,7 @@ inline scalar mag(const quaternion& q);
 //- Return the conjugate of the given quaternion
 inline quaternion conjugate(const quaternion& q);
 
-//- Return the normailzed (unit) quaternion of the given quaternion
+//- Return the normalized (unit) quaternion of the given quaternion
 inline quaternion normalize(const quaternion& q);
 
 //- Return the inverse of the given quaternion
