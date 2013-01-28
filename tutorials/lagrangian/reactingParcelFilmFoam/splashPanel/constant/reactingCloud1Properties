@@ -89,7 +89,7 @@ subModels
             duration        10.0;
             parcelsPerSecond 200;
         }
-    ]
+    }
 
     dispersionModel none;
 

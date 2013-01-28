@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,24 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+bool haveAllTimes
+(
+    const HashSet<word>& masterTimeDirSet,
+    const instantList& timeDirs
+)
+{
+    // Loop over all times
+    forAll(timeDirs, timeI)
+    {
+        if (!masterTimeDirSet.found(timeDirs[timeI].name()))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 int main(int argc, char *argv[])
 {
     argList::addNote
@@ -54,7 +72,7 @@ int main(int argc, char *argv[])
     // enable -zeroTime to prevent accidentally trashing the initial fields
     timeSelector::addOptions(true, true);
     argList::noParallel();
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
     argList::addBoolOption
     (
         "allRegions",
@@ -86,8 +104,8 @@ int main(int argc, char *argv[])
         "only reconstruct new times (i.e. that do not exist already)"
     );
 
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     HashSet<word> selectedFields;
     if (args.optionFound("fields"))
@@ -169,6 +187,11 @@ int main(int argc, char *argv[])
     {
         masterTimeDirs = runTime.times();
     }
+    HashSet<word> masterTimeDirSet(2*masterTimeDirs.size());
+    forAll(masterTimeDirs, i)
+    {
+        masterTimeDirSet.insert(masterTimeDirs[i].name());
+    }
 
 
     // Set all times on processor meshes equal to reconstructed mesh
@@ -222,6 +245,21 @@ int main(int argc, char *argv[])
         Info<< "\n\nReconstructing fields for mesh " << regionName << nl
             << endl;
 
+        if
+        (
+            newTimes
+         && regionNames.size() == 1
+         && regionDirs[0].empty()
+         && haveAllTimes(masterTimeDirSet, timeDirs)
+        )
+        {
+            Info<< "Skipping region " << regionName
+                << " since already have all times"
+                << endl << endl;
+            continue;
+        }
+
+
         fvMesh mesh
         (
             IOobject
@@ -240,29 +278,16 @@ int main(int argc, char *argv[])
 
         // check face addressing for meshes that have been decomposed
         // with a very old foam version
-#      include "checkFaceAddressingComp.H"
+        #include "checkFaceAddressingComp.H"
 
         // Loop over all times
         forAll(timeDirs, timeI)
         {
-            if (newTimes)
+            if (newTimes && masterTimeDirSet.found(timeDirs[timeI].name()))
             {
-                // Compare on timeName, not value
-                bool foundTime = false;
-                forAll(masterTimeDirs, i)
-                {
-                    if (masterTimeDirs[i].name() == timeDirs[timeI].name())
-                    {
-                        foundTime = true;
-                        break;
-                    }
-                }
-                if (foundTime)
-                {
-                    Info<< "Skipping time " << timeDirs[timeI].name()
-                        << endl << endl;
-                    continue;
-                }
+                Info<< "Skipping time " << timeDirs[timeI].name()
+                    << endl << endl;
+                continue;
             }
 
 
