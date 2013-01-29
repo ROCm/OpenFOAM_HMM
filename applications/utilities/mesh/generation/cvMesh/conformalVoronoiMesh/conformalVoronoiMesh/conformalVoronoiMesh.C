@@ -1311,7 +1311,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     cellSizeMeshOverlapsBackground();
 
-    printVertexInfo();
+    printVertexInfo(Info);
 
     if (cvMeshControls().objOutput())
     {
@@ -1878,7 +1878,7 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck("After conformToSurface");
 
-    printVertexInfo();
+    printVertexInfo(Info);
 
     // Write the intermediate mesh, do not filter the dual faces.
     if (runTime_.outputTime())

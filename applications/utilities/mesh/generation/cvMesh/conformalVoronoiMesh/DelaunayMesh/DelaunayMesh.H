@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,6 +204,8 @@ public:
     // Queries
 
         void printInfo(Ostream& os) const;
+
+        void printVertexInfo(Ostream& os) const;
 
         //- Create an fvMesh from the triangulation.
         //  The mesh is not parallel consistent - only used for viewing

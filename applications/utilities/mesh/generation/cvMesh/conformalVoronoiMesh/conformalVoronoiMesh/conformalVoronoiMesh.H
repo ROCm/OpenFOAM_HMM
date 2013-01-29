@@ -503,13 +503,15 @@ private:
         void insertInitialPoints();
 
         //- Calculate the worst load balance
-        scalar calculateLoadUnbalance() const;
+        template <class Triangulation>
+        scalar calculateLoadUnbalance(const Triangulation& mesh) const;
 
         //- In parallel redistribute the backgroundMeshDecomposition and
         //  vertices to balance the number of vertices on each processor.
         //  Returns true if the background mesh changes as this removes all
         //  referred vertices, so the parallel interface may need rebuilt.
-        bool distributeBackground();
+        template<class Triangulation>
+        bool distributeBackground(const Triangulation& mesh);
 
         // Test for full containment
         void cellSizeMeshOverlapsBackground() const;
@@ -1022,8 +1024,6 @@ public:
         //  surface as required
         void move();
 
-        void printVertexInfo() const;
-
         //- Check if the point is in the domain handled by this processor
         bool positionOnThisProc(const Foam::point& pt) const;
 
@@ -1080,6 +1080,13 @@ public:
 
             //- Write the elapsedCpuTime and memory usage, with an optional
             //  description
+            static void timeCheck
+            (
+                const Time& runTime,
+                const string& description = string::null,
+                const bool check = true
+            );
+
             void timeCheck
             (
                 const string& description = string::null
@@ -1190,6 +1197,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "conformalVoronoiMeshI.H"
+
+#ifdef NoRepository
+#   include "conformalVoronoiMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -41,11 +41,22 @@ void Foam::conformalVoronoiMesh::timeCheck
     const string& description
 ) const
 {
-    if (cvMeshControls().timeChecks())
+    timeCheck(time(), description, cvMeshControls().timeChecks());
+}
+
+
+void Foam::conformalVoronoiMesh::timeCheck
+(
+    const Time& runTime,
+    const string& description,
+    const bool check
+)
+{
+    if (check)
     {
         Info<< nl << "--- [ cpuTime "
-            << runTime_.elapsedCpuTime() << " s, "
-            << "delta " << runTime_.cpuTimeIncrement()<< " s";
+            << runTime.elapsedCpuTime() << " s, "
+            << "delta " << runTime.cpuTimeIncrement()<< " s";
 
         if (description != word::null)
         {
@@ -62,182 +73,21 @@ void Foam::conformalVoronoiMesh::timeCheck
 
         if (m.valid())
         {
-            PrintTable<word, label> memoryTable("Memory Usage (kB)");
+            PrintTable<word, label> memoryTable
+            (
+                "Memory Usage (kB): "
+              + description
+            );
 
             memoryTable.add("mSize", m.size());
             memoryTable.add("mPeak", m.peak());
             memoryTable.add("mRss", m.rss());
 
             Info<< incrIndent;
-            memoryTable.print(Info);
+            memoryTable.print(Info, true, true);
             Info<< decrIndent;
         }
     }
-}
-
-
-void Foam::conformalVoronoiMesh::printVertexInfo() const
-{
-    label nInternal = 0;
-    label nInternalRef = 0;
-    label nUnassigned = 0;
-    label nUnassignedRef = 0;
-    label nInternalNearBoundary = 0;
-    label nInternalNearBoundaryRef = 0;
-    label nInternalSurface = 0;
-    label nInternalSurfaceRef = 0;
-    label nInternalFeatureEdge = 0;
-    label nInternalFeatureEdgeRef = 0;
-    label nInternalFeaturePoint = 0;
-    label nInternalFeaturePointRef = 0;
-    label nExternalSurface = 0;
-    label nExternalSurfaceRef = 0;
-    label nExternalFeatureEdge = 0;
-    label nExternalFeatureEdgeRef = 0;
-    label nExternalFeaturePoint = 0;
-    label nExternalFeaturePointRef = 0;
-    label nFar = 0;
-    label nReferred = 0;
-
-    for
-    (
-        Delaunay::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->type() == Vb::vtInternal)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nInternalRef++;
-            }
-
-            nInternal++;
-        }
-        else if (vit->type() == Vb::vtUnassigned)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nUnassignedRef++;
-            }
-
-            nUnassigned++;
-        }
-        else if (vit->type() == Vb::vtInternalNearBoundary)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nInternalNearBoundaryRef++;
-            }
-
-            nInternalNearBoundary++;
-        }
-        else if (vit->type() == Vb::vtInternalSurface)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nInternalSurfaceRef++;
-            }
-
-            nInternalSurface++;
-        }
-        else if (vit->type() == Vb::vtInternalFeatureEdge)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nInternalFeatureEdgeRef++;
-            }
-
-            nInternalFeatureEdge++;
-        }
-        else if (vit->type() == Vb::vtInternalFeaturePoint)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nInternalFeaturePointRef++;
-            }
-
-            nInternalFeaturePoint++;
-        }
-        else if (vit->type() == Vb::vtExternalSurface)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nExternalSurfaceRef++;
-            }
-
-            nExternalSurface++;
-        }
-        else if (vit->type() == Vb::vtExternalFeatureEdge)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nExternalFeatureEdgeRef++;
-            }
-
-            nExternalFeatureEdge++;
-        }
-        else if (vit->type() == Vb::vtExternalFeaturePoint)
-        {
-            if (vit->referred())
-            {
-                nReferred++;
-                nExternalFeaturePointRef++;
-            }
-
-            nExternalFeaturePoint++;
-        }
-        else if (vit->type() == Vb::vtFar)
-        {
-            nFar++;
-        }
-    }
-
-    label nTotalVertices
-        = nUnassigned
-        + nInternal
-        + nInternalNearBoundary
-        + nInternalSurface
-        + nInternalFeatureEdge
-        + nInternalFeaturePoint
-        + nExternalSurface
-        + nExternalFeatureEdge
-        + nExternalFeaturePoint
-        + nFar;
-
-    if (nTotalVertices != label(number_of_vertices()))
-    {
-        WarningIn("Foam::conformalVoronoiMesh::printVertexInfo()")
-            << nTotalVertices << " does not equal " << number_of_vertices()
-            << endl;
-    }
-
-    PrintTable<word, label> vertexTable("Vertex Type Information");
-
-    vertexTable.add("Total", nTotalVertices);
-    vertexTable.add("Unassigned", nUnassigned);
-    vertexTable.add("nInternal", nInternal);
-    vertexTable.add("nInternalNearBoundary", nInternalNearBoundary);
-    vertexTable.add("nInternalSurface", nInternalSurface);
-    vertexTable.add("nInternalFeatureEdge", nInternalFeatureEdge);
-    vertexTable.add("nInternalFeaturePoint", nInternalFeaturePoint);
-    vertexTable.add("nExternalSurface", nExternalSurface);
-    vertexTable.add("nExternalFeatureEdge", nExternalFeatureEdge);
-    vertexTable.add("nExternalFeaturePoint", nExternalFeaturePoint);
-    vertexTable.add("nFar", nFar);
-    vertexTable.add("nReferred", nReferred);
-
-    Info<< endl;
-    vertexTable.print(Info);
 }
 
 

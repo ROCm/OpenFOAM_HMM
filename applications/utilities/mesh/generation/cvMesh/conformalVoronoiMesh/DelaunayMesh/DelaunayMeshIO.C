@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -162,6 +162,173 @@ void Foam::DelaunayMesh<Triangulation>::printInfo(Ostream& os) const
 
 
 template<class Triangulation>
+void Foam::DelaunayMesh<Triangulation>::printVertexInfo(Ostream& os) const
+{
+    label nInternal = 0;
+    label nInternalRef = 0;
+    label nUnassigned = 0;
+    label nUnassignedRef = 0;
+    label nInternalNearBoundary = 0;
+    label nInternalNearBoundaryRef = 0;
+    label nInternalSurface = 0;
+    label nInternalSurfaceRef = 0;
+    label nInternalFeatureEdge = 0;
+    label nInternalFeatureEdgeRef = 0;
+    label nInternalFeaturePoint = 0;
+    label nInternalFeaturePointRef = 0;
+    label nExternalSurface = 0;
+    label nExternalSurfaceRef = 0;
+    label nExternalFeatureEdge = 0;
+    label nExternalFeatureEdgeRef = 0;
+    label nExternalFeaturePoint = 0;
+    label nExternalFeaturePointRef = 0;
+    label nFar = 0;
+    label nReferred = 0;
+
+    for
+    (
+        Finite_vertices_iterator vit = Triangulation::finite_vertices_begin();
+        vit != Triangulation::finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->type() == Vb::vtInternal)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalRef++;
+            }
+
+            nInternal++;
+        }
+        else if (vit->type() == Vb::vtUnassigned)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nUnassignedRef++;
+            }
+
+            nUnassigned++;
+        }
+        else if (vit->type() == Vb::vtInternalNearBoundary)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalNearBoundaryRef++;
+            }
+
+            nInternalNearBoundary++;
+        }
+        else if (vit->type() == Vb::vtInternalSurface)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalSurfaceRef++;
+            }
+
+            nInternalSurface++;
+        }
+        else if (vit->type() == Vb::vtInternalFeatureEdge)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalFeatureEdgeRef++;
+            }
+
+            nInternalFeatureEdge++;
+        }
+        else if (vit->type() == Vb::vtInternalFeaturePoint)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nInternalFeaturePointRef++;
+            }
+
+            nInternalFeaturePoint++;
+        }
+        else if (vit->type() == Vb::vtExternalSurface)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalSurfaceRef++;
+            }
+
+            nExternalSurface++;
+        }
+        else if (vit->type() == Vb::vtExternalFeatureEdge)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalFeatureEdgeRef++;
+            }
+
+            nExternalFeatureEdge++;
+        }
+        else if (vit->type() == Vb::vtExternalFeaturePoint)
+        {
+            if (vit->referred())
+            {
+                nReferred++;
+                nExternalFeaturePointRef++;
+            }
+
+            nExternalFeaturePoint++;
+        }
+        else if (vit->type() == Vb::vtFar)
+        {
+            nFar++;
+        }
+    }
+
+    label nTotalVertices =
+          nUnassigned
+        + nInternal
+        + nInternalNearBoundary
+        + nInternalSurface
+        + nInternalFeatureEdge
+        + nInternalFeaturePoint
+        + nExternalSurface
+        + nExternalFeatureEdge
+        + nExternalFeaturePoint
+        + nFar;
+
+    if (nTotalVertices != label(Triangulation::number_of_vertices()))
+    {
+        WarningIn("Foam::conformalVoronoiMesh::printVertexInfo()")
+            << nTotalVertices << " does not equal "
+            << Triangulation::number_of_vertices()
+            << endl;
+    }
+
+    PrintTable<word, label> vertexTable("Vertex Type Information");
+
+    vertexTable.add("Total", nTotalVertices);
+    vertexTable.add("Unassigned", nUnassigned);
+    vertexTable.add("nInternal", nInternal);
+    vertexTable.add("nInternalNearBoundary", nInternalNearBoundary);
+    vertexTable.add("nInternalSurface", nInternalSurface);
+    vertexTable.add("nInternalFeatureEdge", nInternalFeatureEdge);
+    vertexTable.add("nInternalFeaturePoint", nInternalFeaturePoint);
+    vertexTable.add("nExternalSurface", nExternalSurface);
+    vertexTable.add("nExternalFeatureEdge", nExternalFeatureEdge);
+    vertexTable.add("nExternalFeaturePoint", nExternalFeaturePoint);
+    vertexTable.add("nFar", nFar);
+    vertexTable.add("nReferred", nReferred);
+
+    os  << endl;
+    vertexTable.print(os);
+}
+
+
+template<class Triangulation>
 Foam::autoPtr<Foam::fvMesh>
 Foam::DelaunayMesh<Triangulation>::createMesh
 (
@@ -185,7 +352,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     List<DynamicList<face> > patchFaces(1, DynamicList<face>());
     List<DynamicList<label> > patchOwners(1, DynamicList<label>());
 
-    vertexMap.setSize(Triangulation::number_of_vertices());
+    vertexMap.setSize(vertexCount());
     cellMap.setSize(Triangulation::number_of_finite_cells());
 
     // Calculate pts and a map of point index to location in pts.
@@ -242,6 +409,16 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         const Cell_handle c1(fit->first);
         const int oppositeVertex = fit->second;
         const Cell_handle c2(c1->neighbor(oppositeVertex));
+
+        // Do not output if face has neither opposite vertex as an internal
+//        if
+//        (
+//            !c1->vertex(oppositeVertex)->internalPoint()
+//         || !Triangulation::mirror_vertex(c1, oppositeVertex)->internalPoint()
+//        )
+//        {
+//            continue;
+//        }
 
         label c1I = Cb::ctFar;
         bool c1Real = false;
@@ -331,6 +508,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     sortFaces(faces, owner, neighbour);
 
+    Info<< "Creating patches" << endl;
+
     addPatches
     (
         faceI,
@@ -341,6 +520,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         patchFaces,
         patchOwners
     );
+
+    Info<< "Creating mesh" << endl;
 
     autoPtr<fvMesh> meshPtr
     (
@@ -360,6 +541,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
             xferMove(neighbour)
         )
     );
+
+    Info<< "Adding patches" << endl;
 
     List<polyPatch*> patches(patchStarts.size());
 
@@ -383,6 +566,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     patches.setSize(nValidPatches);
 
     meshPtr().addFvPatches(patches);
+
+    Info<< "Mesh created" << endl;
 
     return meshPtr;
 }
