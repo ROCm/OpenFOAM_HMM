@@ -30,10 +30,8 @@ License
 
 namespace Foam
 {
-
 defineTypeNameAndDebug(cellSizeAndAlignmentControl, 0);
 defineRunTimeSelectionTable(cellSizeAndAlignmentControl, dictionary);
-
 }
 
 

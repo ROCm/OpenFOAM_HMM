@@ -470,7 +470,7 @@ private:
             const extendedFeatureEdgeMesh& feMesh,
             const labelList& pEds,
             pointFeatureEdgesTypes& pFEdgeTypes
-        );
+        ) const;
 
         //- Create feature point groups if a specialisation exists for the
         //  structure

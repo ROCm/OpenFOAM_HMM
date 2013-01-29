@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ Foam::conformalVoronoiMesh::calcPointFeatureEdgesTypes
     const extendedFeatureEdgeMesh& feMesh,
     const labelList& pEds,
     pointFeatureEdgesTypes& pFEdgeTypes
-)
+) const
 {
     List<extendedFeatureEdgeMesh::edgeStatus> allEdStat(pEds.size());
 
@@ -49,11 +49,6 @@ Foam::conformalVoronoiMesh::calcPointFeatureEdgesTypes
         eS = feMesh.getEdgeStatus(edgeI);
 
         pFEdgeTypes(eS)++;
-    }
-
-    if (debug)
-    {
-        Info<< pFEdgeTypes << endl;
     }
 
     return allEdStat;
@@ -424,9 +419,342 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
      && pFEdgesTypes[extendedFeatureEdgeMesh::INTERNAL] == 2
     )
     {
-        // Info<< "nExternal == 1 && nInternal == 2" << endl;
+        Info<< "nExternal == 1 && nInternal == 2" << endl;
 
-        return false;
+        const Foam::point& featPt = feMesh.points()[ptI];
+
+        if (!positionOnThisProc(featPt))
+        {
+            return false;
+        }
+
+        label nVert = number_of_vertices();
+
+        const label initialNumOfPoints = pts.size();
+
+        const scalar ppDist = pointPairDistance(featPt);
+
+        const vectorField& normals = feMesh.normals();
+
+        const labelListList& edgeNormals = feMesh.edgeNormals();
+
+        label convexEdgeI = -1;
+        labelList concaveEdgesI(2, -1);
+        label nConcave = 0;
+
+        forAll(pEds, i)
+        {
+            const extendedFeatureEdgeMesh::edgeStatus& eS = allEdStat[i];
+
+            if (eS == extendedFeatureEdgeMesh::EXTERNAL)
+            {
+                convexEdgeI = pEds[i];
+            }
+            else if (eS == extendedFeatureEdgeMesh::INTERNAL)
+            {
+                concaveEdgesI[nConcave++] = pEds[i];
+            }
+            else if (eS == extendedFeatureEdgeMesh::FLAT)
+            {
+                WarningIn("Foam::conformalVoronoiMesh::"
+                    "createSpecialisedFeaturePoint")
+                    << "Edge " << eS << " is flat"
+                    << endl;
+            }
+            else
+            {
+                FatalErrorIn("Foam::conformalVoronoiMesh::"
+                    "createSpecialisedFeaturePoint")
+                    << "Edge " << eS << " not concave/convex"
+                    << exit(FatalError);
+            }
+        }
+
+        const vector& convexEdgePlaneANormal =
+            normals[edgeNormals[convexEdgeI][0]];
+
+        const vector& convexEdgePlaneBNormal =
+            normals[edgeNormals[convexEdgeI][1]];
+
+        // Intersect planes parallel to the concave edge planes offset
+        // by ppDist and the plane defined by featPt and the edge vector.
+        plane planeA
+        (
+            featPt - ppDist*convexEdgePlaneANormal,
+            convexEdgePlaneANormal
+        );
+
+        plane planeB
+        (
+            featPt - ppDist*convexEdgePlaneBNormal,
+            convexEdgePlaneBNormal
+        );
+
+        const vector& convexEdgeDir = feMesh.edgeDirection
+        (
+            convexEdgeI,
+            ptI
+        );
+
+        // Todo,needed later but want to get rid of this.
+        const Foam::point convexEdgeLocalFeatPt =
+            featPt + ppDist*convexEdgeDir;
+
+        // Finding the nearest point on the intersecting line to the edge
+        // point. Floating point errors often occur using planePlaneIntersect
+
+        plane planeF(convexEdgeLocalFeatPt, convexEdgeDir);
+
+        const Foam::point convexEdgeExternalPt = planeF.planePlaneIntersect
+        (
+            planeA,
+            planeB
+        );
+
+        // Redefine planes to be on the feature surfaces to project through
+
+        planeA = plane(featPt, convexEdgePlaneANormal);
+
+        planeB = plane(featPt, convexEdgePlaneBNormal);
+
+        const Foam::point internalPtA =
+            convexEdgeExternalPt
+          + 2.0*planeA.distance(convexEdgeExternalPt)
+           *convexEdgePlaneANormal;
+
+        pts.append
+        (
+            Vb(internalPtA, Vb::vtInternalFeaturePoint)
+        );
+
+        const Foam::point internalPtB =
+            convexEdgeExternalPt
+          + 2.0*planeB.distance(convexEdgeExternalPt)
+           *convexEdgePlaneBNormal;
+
+        pts.append
+        (
+            Vb(internalPtB, Vb::vtInternalFeaturePoint)
+        );
+
+        // Add the internal points
+
+        Foam::point externalPtD;
+        Foam::point externalPtE;
+
+        vector concaveEdgePlaneCNormal(0,0,0);
+        vector concaveEdgePlaneDNormal(0,0,0);
+
+        const labelList& convexEdgeNormals = edgeNormals[convexEdgeI];
+        const labelList& concaveEdgeANormals = edgeNormals[concaveEdgesI[0]];
+        const labelList& concaveEdgeBNormals = edgeNormals[concaveEdgesI[1]];
+
+        forAll(convexEdgeNormals, edgeNormalI)
+        {
+            bool concaveEdgeA = false;
+            bool concaveEdgeB = false;
+
+            forAll(concaveEdgeANormals, edgeAnormalI)
+            {
+                const vector& convexNormal
+                    = normals[convexEdgeNormals[edgeNormalI]];
+                const vector& concaveNormal
+                    = normals[concaveEdgeANormals[edgeAnormalI]];
+
+                Info<< "Angle between vectors = "
+                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+
+                // Need a looser tolerance, because sometimes adjacent triangles
+                // on the same surface will be slightly out of alignment.
+                if (areParallel(convexNormal, concaveNormal, tolParallel))
+                {
+                    concaveEdgeA = true;
+                }
+            }
+
+            forAll(concaveEdgeBNormals, edgeBnormalI)
+            {
+                const vector& convexNormal
+                    = normals[convexEdgeNormals[edgeNormalI]];
+                const vector& concaveNormal
+                    = normals[concaveEdgeBNormals[edgeBnormalI]];
+
+                Info<< "Angle between vectors = "
+                    << degAngleBetween(convexNormal, concaveNormal) << endl;
+
+                // Need a looser tolerance, because sometimes adjacent triangles
+                // on the same surface will be slightly out of alignment.
+                if (areParallel(convexNormal, concaveNormal, tolParallel))
+                {
+                    concaveEdgeB = true;
+                }
+            }
+
+            if
+            (
+                (concaveEdgeA && concaveEdgeB)
+             || (!concaveEdgeA && !concaveEdgeB)
+            )
+            {
+                WarningIn
+                (
+                 "Foam::conformalVoronoiMesh"
+                 "::createSpecialisedFeaturePoint"
+                )   << "Both or neither of the concave edges share the convex "
+                    << "edge's normal."
+                    << " concaveEdgeA = " << concaveEdgeA
+                    << " concaveEdgeB = " << concaveEdgeB
+                    << endl;
+
+                // Remove points that have just been added before returning
+                for (label i = 0; i < 2; ++i)
+                {
+                    pts.remove();
+                    nVert--;
+                }
+
+                return false;
+            }
+
+            if (concaveEdgeA)
+            {
+                forAll(concaveEdgeANormals, edgeAnormalI)
+                {
+                    const vector& convexNormal
+                        = normals[convexEdgeNormals[edgeNormalI]];
+                    const vector& concaveNormal
+                        = normals[concaveEdgeANormals[edgeAnormalI]];
+
+                    if
+                    (
+                        !areParallel(convexNormal, concaveNormal, tolParallel)
+                    )
+                    {
+                        concaveEdgePlaneCNormal = concaveNormal;
+
+                        plane planeC(featPt, concaveEdgePlaneCNormal);
+
+                        externalPtD =
+                            internalPtA
+                          - 2.0*planeC.distance(internalPtA)
+                           *concaveEdgePlaneCNormal;
+
+                        pts.append
+                        (
+                            Vb(externalPtD, Vb::vtExternalFeaturePoint)
+                        );
+                    }
+                }
+            }
+
+            if (concaveEdgeB)
+            {
+                forAll(concaveEdgeBNormals, edgeBnormalI)
+                {
+                    const vector& convexNormal
+                        = normals[convexEdgeNormals[edgeNormalI]];
+                    const vector& concaveNormal
+                        = normals[concaveEdgeBNormals[edgeBnormalI]];
+
+                    if
+                    (
+                        !areParallel(convexNormal, concaveNormal, tolParallel)
+                    )
+                    {
+                        concaveEdgePlaneDNormal = concaveNormal;
+
+                        plane planeD(featPt, concaveEdgePlaneDNormal);
+
+                        externalPtE =
+                            internalPtB
+                          - 2.0*planeD.distance(internalPtB)
+                           *concaveEdgePlaneDNormal;
+
+                        pts.append
+                        (
+                            Vb(externalPtE, Vb::vtExternalFeaturePoint)
+                        );
+                    }
+                }
+            }
+        }
+
+        pts.append
+        (
+            Vb(convexEdgeExternalPt, Vb::vtExternalFeaturePoint)
+        );
+
+        const scalar totalAngle = radToDeg
+        (
+            constant::mathematical::pi
+          + radAngleBetween(convexEdgePlaneANormal, convexEdgePlaneBNormal)
+        );
+
+        if (totalAngle > cvMeshControls().maxQuadAngle())
+        {
+            // Add additional mitreing points
+            //scalar angleSign = 1.0;
+
+
+            vector convexEdgesPlaneNormal =
+                0.5*(concaveEdgePlaneCNormal + concaveEdgePlaneDNormal);
+
+            plane planeM(featPt, convexEdgesPlaneNormal);
+
+//            if
+//            (
+//                geometryToConformTo_.outside
+//                (
+//                    featPt - convexEdgesPlaneNormal*ppDist
+//                )
+//            )
+//            {
+//                angleSign = -1.0;
+//            }
+
+//            scalar phi =
+//                angleSign*acos(concaveEdgeDir & -convexEdgesPlaneNormal);
+//
+//            scalar guard =
+//            (
+//                1.0 + sin(phi)*ppDist/mag
+//                (
+//                    concaveEdgeLocalFeatPt - concaveEdgeExternalPt
+//                )
+//            )/cos(phi) - 1.0;
+
+            const Foam::point internalPtF =
+                convexEdgeExternalPt
+            //+ (2.0 + guard)*(concaveEdgeLocalFeatPt - concaveEdgeExternalPt);
+              + 2.0*(convexEdgeLocalFeatPt - convexEdgeExternalPt);
+
+            pts.append
+            (
+                Vb(internalPtF, Vb::vtInternalFeaturePoint)
+            );
+
+            const Foam::point externalPtG =
+                internalPtF
+              - 2.0*planeM.distance(internalPtF)*convexEdgesPlaneNormal;
+
+            pts.append
+            (
+                Vb(externalPtG, Vb::vtExternalFeaturePoint)
+            );
+        }
+
+        if (debug)
+        {
+            for (label ptI = initialNumOfPoints; ptI < pts.size(); ++ptI)
+            {
+                Info<< "Point " << ptI << " "
+                    << indexedVertexEnum::vertexTypeNames_[pts[ptI].type()]
+                    << " : ";
+                meshTools::writeOBJ(Info, topoint(pts[ptI].point()));
+            }
+        }
+
+        return true;
     }
 
     return false;

@@ -1061,6 +1061,8 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
 
     if (anyChanged)
     {
+        inplaceReorder(faceMap, faces);
+
         // Rotate faces (rotation is already in new face indices).
         label nRotated = 0;
 
@@ -1077,8 +1079,6 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 nRotated++;
             }
         }
-
-        inplaceReorder(faceMap, faces);
 
         Info<< indent << returnReduce(nRotated, sumOp<label>())
             << " faces have been rotated" << decrIndent << decrIndent << endl;

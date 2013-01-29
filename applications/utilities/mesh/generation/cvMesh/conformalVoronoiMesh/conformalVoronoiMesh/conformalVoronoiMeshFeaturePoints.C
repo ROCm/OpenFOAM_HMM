@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -861,29 +861,13 @@ void Foam::conformalVoronoiMesh::createMasterAndSlavePoints
               : Vb::vtInternalFeaturePoint // false
             );
 
-            if
-            (
-                masterPointsTypes.last() == Vb::vtInternalFeaturePoint
-             && !geometryToConformTo_.inside(masterPoints.last())
-            )
-            {
-                return;
-            }
+            Info<< "    " << " " << firstPlane << endl;
 
-            const Foam::point reflectedPoint = reflectPointInPlane
-            (
-                masterPoints.last(),
-                firstPlane.last()()
-            );
-
-            if
-            (
-                masterPointsTypes.last() == Vb::vtExternalFeaturePoint
-             && !geometryToConformTo_.inside(reflectedPoint)
-            )
-            {
-                return;
-            }
+//            const Foam::point reflectedPoint = reflectPointInPlane
+//            (
+//                masterPoints.last(),
+//                firstPlane.last()()
+//            );
 
             masterPointReflections.insert
             (
