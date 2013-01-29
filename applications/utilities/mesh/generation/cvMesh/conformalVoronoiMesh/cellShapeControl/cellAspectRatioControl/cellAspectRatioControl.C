@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,8 @@ Foam::cellAspectRatioControl::cellAspectRatioControl
 {
     Info<< nl << "    Cell Aspect Ratio Control" << nl
         << "        Ratio     : " << aspectRatio_ << nl
-        << "        Direction : " << aspectRatioDirection_ << nl << endl;
+        << "        Direction : " << aspectRatioDirection_
+        << endl;
 }
 
 

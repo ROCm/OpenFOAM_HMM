@@ -141,14 +141,15 @@ public:
                 const Foam::point& pt
             );
 
-            void distribute
-            (
-                const backgroundMeshDecomposition& decomposition
-            );
+            void distribute(const backgroundMeshDecomposition& decomposition);
 
             tensorField dumpAlignments() const;
 
-            void insertBoundingPoints(const boundBox& bb);
+            void insertBoundingPoints
+            (
+                const boundBox& bb,
+                const cellSizeAndAlignmentControls& sizeControls
+            );
 
             void writeTriangulation();
 

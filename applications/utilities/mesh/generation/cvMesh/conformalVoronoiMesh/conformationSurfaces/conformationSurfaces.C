@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "conformationSurfaces.H"
 #include "conformalVoronoiMesh.H"
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -250,6 +251,9 @@ Foam::conformationSurfaces::conformationSurfaces
     Info<< endl
         << "Testing for locationInMesh " << locationInMesh_ << endl;
 
+    vector sum = vector::zero;
+    label totalTriangles = 0;
+
     forAll(surfaces_, s)
     {
         const searchableSurface& surface(allGeometry_[surfaces_[s]]);
@@ -273,7 +277,27 @@ Foam::conformationSurfaces::conformationSurfaces
                 << " surface " << surface.name()
                 << endl;
         }
+
+        if (isA<triSurface>(surface))
+        {
+            const triSurface& triSurf = refCast<const triSurface>(surface);
+
+            const pointField& surfPts = triSurf.points();
+
+            forAll(triSurf, sI)
+            {
+                sum += triSurf[sI].normal(surfPts);
+            }
+
+            totalTriangles += triSurf.size();
+        }
     }
+
+    Info<< "    Sum of all the surface normals (if near zero, surface is"
+        << " probably closed):" << nl
+        << "        Sum = " << sum/totalTriangles << nl
+        << "        mag(Sum) = " << mag(sum)/totalTriangles
+        << endl;
 }
 
 
