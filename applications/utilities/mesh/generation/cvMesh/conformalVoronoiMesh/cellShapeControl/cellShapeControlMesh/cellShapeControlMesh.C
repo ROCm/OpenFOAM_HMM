@@ -595,6 +595,8 @@ void Foam::cellShapeControlMesh::distribute
     DynamicList<scalar> sizes(number_of_vertices());
     DynamicList<tensor> alignments(number_of_vertices());
 
+    DynamicList<Vb> farPts(8);
+
     for
     (
         Finite_vertices_iterator vit = finite_vertices_begin();
@@ -608,6 +610,22 @@ void Foam::cellShapeControlMesh::distribute
             sizes.append(vit->targetCellSize());
             alignments.append(vit->alignment());
         }
+        else if (vit->farPoint())
+        {
+            farPts.append
+            (
+                Vb
+                (
+                    vit->point(),
+                    -1,
+                    Vb::vtFar,
+                    Pstream::myProcNo()
+                )
+            );
+
+            farPts.last().targetCellSize() = vit->targetCellSize();
+            farPts.last().alignment() = vit->alignment();
+        }
     }
 
     mapDist().distribute(points);
@@ -617,13 +635,16 @@ void Foam::cellShapeControlMesh::distribute
     // Reset the entire tessellation
     DelaunayMesh<CellSizeDelaunay>::reset();
 
-    Info<< nl << "    Inserting distributed tessellation" << endl;
-
-    insertBoundingPoints(decomposition.procBounds());
 
     // Internal points have to be inserted first
-
     DynamicList<Vb> verticesToInsert(points.size());
+
+
+    forAll(farPts, ptI)
+    {
+        verticesToInsert.append(farPts[ptI]);
+    }
+
 
     forAll(points, pI)
     {
@@ -642,12 +663,16 @@ void Foam::cellShapeControlMesh::distribute
         verticesToInsert.last().alignment() = alignments[pI];
     }
 
+    Info<< nl << "    Inserting distributed background tessellation..." << endl;
+
     this->rangeInsertWithInfo
     (
         verticesToInsert.begin(),
         verticesToInsert.end(),
         true
     );
+
+    Info<< nl << "    Inserted distributed background tessellation" << endl;
 
     sync(decomposition.procBounds());
 
@@ -675,16 +700,45 @@ Foam::tensorField Foam::cellShapeControlMesh::dumpAlignments() const
 }
 
 
-void Foam::cellShapeControlMesh::insertBoundingPoints(const boundBox& bb)
+void Foam::cellShapeControlMesh::insertBoundingPoints
+(
+    const boundBox& bb,
+    const cellSizeAndAlignmentControls& sizeControls
+)
 {
-    boundBox bbInflate = bb;
-    bbInflate.inflate(10);
+    // Loop over bound box points and get cell size and alignment
+    const pointField bbPoints(bb.points());
 
-    pointField pts(bbInflate.points());
-
-    forAll(pts, pI)
+    forAll(bbPoints, pI)
     {
-        insertFar(pts[pI]);
+        const Foam::point& pt = bbPoints[pI];
+
+        // Cell size here will return default cell size
+        const scalar cellSize = sizeControls.cellSize(pt);
+
+        if (debug)
+        {
+            Info<< "Insert Bounding Point: " << pt << " " << cellSize << endl;
+        }
+
+        // Get the cell size of the nearest surface.
+//        geometryToConformTo_.findSurfaceNearest
+//        (
+//            pt,
+//            GREAT,
+//            surfHit,
+//            hitSurface
+//        );
+
+        const tensor alignment = tensor::I;
+
+        insert
+        (
+            pt,
+            cellSize,
+            alignment,
+            Vb::vtInternalNearBoundary
+        );
     }
 }
 
@@ -736,6 +790,8 @@ void Foam::cellShapeControlMesh::write() const
         scalar(0)
     );
 
+    OFstream str(runTime_.path()/"alignments.obj");
+
     for
     (
         Finite_vertices_iterator vit = finite_vertices_begin();
@@ -745,7 +801,27 @@ void Foam::cellShapeControlMesh::write() const
     {
         if (!vit->farPoint())
         {
+            // Populate sizes
             sizes[vertexMap[vit->index()]] = vit->targetCellSize();
+
+            // Write alignments
+            const tensor& alignment = vit->alignment();
+            pointFromPoint pt = topoint(vit->point());
+
+            if
+            (
+                alignment.x() == triad::unset[0]
+             || alignment.y() == triad::unset[0]
+             || alignment.z() == triad::unset[0]
+            )
+            {
+                Info<< "Bad alignment = " << vit->info();
+                continue;
+            }
+
+            meshTools::writeOBJ(str, pt, alignment.x() + pt);
+            meshTools::writeOBJ(str, pt, alignment.y() + pt);
+            meshTools::writeOBJ(str, pt, alignment.z() + pt);
         }
     }
 
