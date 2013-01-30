@@ -55,6 +55,11 @@ Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir() const
 template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
 {
+    if (!Pstream::master())
+    {
+        return;
+    }
+
     if (log_)
     {
         Info<< type() << ": creating lock file" << endl;
@@ -69,6 +74,11 @@ void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
 template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::removeLockFile() const
 {
+    if (!Pstream::master())
+    {
+        return;
+    }
+
     if (log_)
     {
         Info<< type() << ": removing lock file" << endl;
@@ -89,8 +99,6 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
         Info<< type() << ": writing data to " << transferFile << endl;
     }
 
-    OFstream os(transferFile);
-
     if (Pstream::parRun())
     {
         int tag = Pstream::msgType() + 1;
@@ -98,20 +106,22 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
         List<Field<Type> > values(Pstream::nProcs());
         values[Pstream::myProcNo()].setSize(this->refValue().size());
         values[Pstream::myProcNo()] = this->refValue();
-        Pstream::listCombineScatter(values, tag);
+        Pstream::gatherList(values, tag);
 
         List<Field<Type> > grads(Pstream::nProcs());
         grads[Pstream::myProcNo()].setSize(this->refGrad().size());
         grads[Pstream::myProcNo()] = this->refGrad();
-        Pstream::listCombineScatter(grads, tag);
+        Pstream::gatherList(grads, tag);
 
         List<scalarField> fracs(Pstream::nProcs());
         fracs[Pstream::myProcNo()].setSize(this->valueFraction().size());
         fracs[Pstream::myProcNo()] = this->valueFraction();
-        Pstream::listCombineScatter(fracs, tag);
+        Pstream::gatherList(fracs, tag);
 
         if (Pstream::master())
         {
+            OFstream os(transferFile);
+
             forAll(values, procI)
             {
                 const Field<Type>& v = values[procI];
@@ -125,28 +135,34 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
                         << f[faceI] << nl;
                 }
             }
+
+            os.flush();
         }
     }
     else
     {
+        OFstream os(transferFile);
+
         forAll(this->patch(), faceI)
         {
             os  << this->refValue()[faceI] << token::SPACE
                 << this->refGrad()[faceI] << token::SPACE
                 << this->valueFraction()[faceI] << nl;
         }
+
+        os.flush();
     }
 
-    os.flush();
+    const fileName lockFile(baseDir()/(lockName + ".lock"));
 
     // remove lock file, signalling external source to execute
     removeLockFile();
 
-    const fileName lockFile(baseDir()/(lockName + ".lock"));
 
     if (log_)
     {
-        Info<< type() << ": beginning wait for lock file " << lockFile << endl;
+        Info<< type() << ": beginning wait for lock file " << lockFile
+            << endl;
     }
 
     bool found = false;
@@ -169,8 +185,8 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
                 "void Foam::externalCoupledMixedFvPatchField<Type>::"
                 "writeAndWait(const fileName&) const"
             )
-                << "Wait time exceeded time out time of " << timeOut_ << " s"
-                << abort(FatalError);
+                << "Wait time exceeded time out time of " << timeOut_
+                << " s" << abort(FatalError);
         }
 
         IFstream is(lockFile);
@@ -186,8 +202,12 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
         }
     }
 
-    // remove old data file from OpenFOAM
-    rm(transferFile);
+
+    if (Pstream::master())
+    {
+        // remove old data file from OpenFOAM
+        rm(transferFile);
+    }
 }
 
 
@@ -213,25 +233,28 @@ void Foam::externalCoupledMixedFvPatchField<Type>::initialiseRead
     {
         // fast-forward to relevant point in file
         globalIndex gi(this->patch().size());
-        const label offset = gi.offset(Pstream::myProcNo());
 
-        string line;
-        for (label i = 0; i < offset; i++)
+        if (this->patch().size())
         {
-            if (is.good())
+            string line;
+            const label offset = gi.offset(Pstream::myProcNo());
+            for (label i = 0; i < offset; i++)
             {
-                is.getLine(line);
-            }
-            else
-            {
-                FatalErrorIn
-                (
-                    "void Foam::externalCoupledMixedFvPatchField<Type>::"
-                    "initialiseRead()"
-                )
-                    << "Unable to distribute parallel data for file "
-                    << is.name() << " for patch " << this->patch().name()
-                    << exit(FatalError);
+                if (is.good())
+                {
+                    is.getLine(line);
+                }
+                else
+                {
+                    FatalErrorIn
+                    (
+                        "void Foam::externalCoupledMixedFvPatchField<Type>::"
+                        "initialiseRead()"
+                    )
+                        << "Unable to distribute parallel data for file "
+                        << is.name() << " for patch " << this->patch().name()
+                        << exit(FatalError);
+                }
             }
         }
     }
