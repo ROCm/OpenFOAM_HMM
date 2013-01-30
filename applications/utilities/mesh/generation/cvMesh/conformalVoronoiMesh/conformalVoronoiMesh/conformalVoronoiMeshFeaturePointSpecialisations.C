@@ -417,6 +417,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
     (
         pFEdgesTypes[extendedFeatureEdgeMesh::EXTERNAL] == 1
      && pFEdgesTypes[extendedFeatureEdgeMesh::INTERNAL] == 2
+     && pEds.size() == 3
     )
     {
         Info<< "nExternal == 1 && nInternal == 2" << endl;
@@ -524,7 +525,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtA, Vb::vtInternalFeaturePoint)
+            Vb(internalPtA, Vb::vtExternalFeaturePoint)
         );
 
         const Foam::point internalPtB =
@@ -534,7 +535,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(internalPtB, Vb::vtInternalFeaturePoint)
+            Vb(internalPtB, Vb::vtExternalFeaturePoint)
         );
 
         // Add the internal points
@@ -641,7 +642,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtD, Vb::vtExternalFeaturePoint)
+                            Vb(externalPtD, Vb::vtInternalFeaturePoint)
                         );
                     }
                 }
@@ -672,7 +673,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
                         pts.append
                         (
-                            Vb(externalPtE, Vb::vtExternalFeaturePoint)
+                            Vb(externalPtE, Vb::vtInternalFeaturePoint)
                         );
                     }
                 }
@@ -681,7 +682,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
         pts.append
         (
-            Vb(convexEdgeExternalPt, Vb::vtExternalFeaturePoint)
+            Vb(convexEdgeExternalPt, Vb::vtInternalFeaturePoint)
         );
 
         const scalar totalAngle = radToDeg
@@ -730,7 +731,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(internalPtF, Vb::vtInternalFeaturePoint)
+                Vb(internalPtF, Vb::vtExternalFeaturePoint)
             );
 
             const Foam::point externalPtG =
@@ -739,7 +740,7 @@ bool Foam::conformalVoronoiMesh::createSpecialisedFeaturePoint
 
             pts.append
             (
-                Vb(externalPtG, Vb::vtExternalFeaturePoint)
+                Vb(externalPtG, Vb::vtInternalFeaturePoint)
             );
         }
 
