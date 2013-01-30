@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,50 +41,50 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("patch");
+    argList::validArgs.append("(patches)");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 #   include "createPolyMesh.H"
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
-    // Get name of patch
-    const word patchName = args[1];
+    labelList patchIDs
+    (
+        pbm.patchSet(wordReList(IStringStream(args[1])())).sortedToc()
+    );
 
-    // Find the label in patches by name.
-    label patchI = patches.findPatchID(patchName);
+    Info<< "Starting walk from patches "
+        << UIndirectList<word>(pbm.names(), patchIDs)
+        << nl
+        << endl;
 
+    label nPoints = 0;
+    forAll(patchIDs, i)
     {
-        // Test whether any processor has patch
-        label maxPatchI = patchI;
-
-        reduce(maxPatchI, maxOp<label>());
-
-        if (maxPatchI == -1)
-        {
-            FatalErrorIn(args.executable())
-                << "Cannot find patch named " << patchName << exit(FatalError);
-        }
+        nPoints += pbm[patchIDs[i]].nPoints();
     }
+
+    Info<< "Seeding " << returnReduce(nPoints, sumOp<label>())
+        << " patch points" << nl << endl;
 
 
     // Set initial changed points to all the patch points(if patch present)
-    List<pointEdgePoint> wallInfo;
-    labelList wallPoints;
+    List<pointEdgePoint> wallInfo(nPoints);
+    labelList wallPoints(nPoints);
+    nPoints = 0;
 
-    if (patchI != -1)
+    forAll(patchIDs, i)
     {
         // Retrieve the patch now we have its index in patches.
-        const polyPatch& pp = mesh.boundaryMesh()[patchI];
+        const polyPatch& pp = pbm[patchIDs[i]];
 
-        wallPoints = pp.meshPoints();
-
-        wallInfo.setSize(pp.nPoints());
-
-        forAll(pp.localPoints(), ppI)
+        forAll(pp.meshPoints(), ppI)
         {
-            wallInfo[ppI] = pointEdgePoint(pp.localPoints()[ppI], 0.0);
+            label meshPointI = pp.meshPoints()[ppI];
+            wallPoints[nPoints] = meshPointI;
+            wallInfo[nPoints] = pointEdgePoint(mesh.points()[meshPointI], 0.0);
+            nPoints++;
         }
     }
 
