@@ -47,7 +47,7 @@ Description
 
         $FOAM_CASE/comms/patchName/data.out
 
-    The lock file is then removed, instructing the exterbal source to take
+    The lock file is then removed, instructing the external source to take
     control of the program execution.  When ready, the external program
     should create the return values, e.g. to file
 
@@ -62,9 +62,9 @@ Description
     \table
         Property     | Description             | Required    | Default value
         commsDir     | communications folder   | yes         |
-        fileName     | data transfer file name | yes         |
+        fileName     | transfer file name      | yes         |
         waitInterval | interval [s] between file checks | no | 1
-        timeOut      | time after which error invoked | no   | 100*waitInterval
+        timeOut      | time after which error invoked [s] |no |100*waitInterval
         calcFrequency | calculation frequency  | no          | 1
         log          | log program control     | no          | no
     \endtable
