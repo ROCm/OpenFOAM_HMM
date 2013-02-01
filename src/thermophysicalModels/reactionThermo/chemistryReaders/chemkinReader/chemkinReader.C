@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -862,13 +862,15 @@ Foam::chemkinReader::chemkinReader
 (
     const fileName& CHEMKINFileName,
     speciesTable& species,
-    const fileName& thermoFileName
+    const fileName& thermoFileName,
+    const bool newFormat
 )
 :
     lineNo_(1),
     specieNames_(10),
     speciesTable_(species),
-    reactions_(speciesTable_, speciesThermo_)
+    reactions_(speciesTable_, speciesThermo_),
+    newFormat_(newFormat)
 {
     read(CHEMKINFileName, thermoFileName);
 }
@@ -883,8 +885,14 @@ Foam::chemkinReader::chemkinReader
     lineNo_(1),
     specieNames_(10),
     speciesTable_(species),
-    reactions_(speciesTable_, speciesThermo_)
+    reactions_(speciesTable_, speciesThermo_),
+    newFormat_(thermoDict.lookupOrDefault("newFormat", false))
 {
+    if (newFormat_)
+    {
+        Info<< "Reading CHEMKIN thermo data in new file format" << endl;
+    }
+
     fileName chemkinFile(fileName(thermoDict.lookup("CHEMKINFile")).expand());
 
     fileName thermoFile = fileName::null;
