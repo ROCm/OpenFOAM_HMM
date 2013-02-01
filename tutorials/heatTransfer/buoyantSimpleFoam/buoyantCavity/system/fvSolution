@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  2.2.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -42,16 +42,16 @@ solvers
 
 SIMPLE
 {
-    momentumPredictor yes;
+    momentumPredictor no;
     nNonOrthogonalCorrectors 0;
     pRefCell        0;
     pRefValue       0;
 
     residualControl
     {
-        p_rgh           1e-2;
-        U               1e-3;
-        h               1e-3;
+        p_rgh           1e-4;
+        U               1e-4;
+        h               1e-4;
 
         // possibly check turbulence fields
         "(k|epsilon|omega)" 1e-3;
