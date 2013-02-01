@@ -1027,17 +1027,24 @@ void Foam::conformalVoronoiMesh::writeMesh
         }
         else
         {
-            patches[nValidPatches] = polyPatch::New
-            (
-                patchTypes[p],
-                patchNames[p],
-                patchSizes[p],
-                patchStarts[p],
-                nValidPatches,
-                mesh.boundaryMesh()
-            ).ptr();
+            // Check that the patch is not empty on every processor
+            label totalPatchSize = patchSizes[p];
+            reduce(totalPatchSize, sumOp<label>());
 
-            nValidPatches++;
+            if (totalPatchSize > 0)
+            {
+                patches[nValidPatches] = polyPatch::New
+                (
+                    patchTypes[p],
+                    patchNames[p],
+                    patchSizes[p],
+                    patchStarts[p],
+                    nValidPatches,
+                    mesh.boundaryMesh()
+                ).ptr();
+
+                nValidPatches++;
+            }
         }
     }
 
