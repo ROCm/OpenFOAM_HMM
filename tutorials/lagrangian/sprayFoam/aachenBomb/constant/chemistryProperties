@@ -21,7 +21,7 @@ chemistryType
     chemistryThermo   psi;
 }
 
-chemistry       off;
+chemistry       on;
 
 initialChemicalTimeStep 1e-07;
 
