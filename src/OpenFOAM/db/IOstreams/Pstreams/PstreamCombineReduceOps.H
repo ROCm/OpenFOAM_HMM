@@ -53,11 +53,12 @@ void combineReduce
     const List<UPstream::commsStruct>& comms,
     T& Value,
     const CombineOp& cop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    Pstream::combineGather(comms, Value, cop, tag);
-    Pstream::combineScatter(comms, Value, tag);
+    Pstream::combineGather(comms, Value, cop, tag, comm);
+    Pstream::combineScatter(comms, Value, tag, comm);
 }
 
 
@@ -66,24 +67,45 @@ void combineReduce
 (
     T& Value,
     const CombineOp& cop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = Pstream::worldComm
 )
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
         Pstream::combineGather
         (
-            UPstream::linearCommunication(),
+            UPstream::linearCommunication(comm),
             Value,
             cop,
-            tag
+            tag,
+            comm
         );
-        Pstream::combineScatter(UPstream::linearCommunication(), Value, tag);
+        Pstream::combineScatter
+        (
+            UPstream::linearCommunication(comm),
+            Value,
+            tag,
+            comm
+        );
     }
     else
     {
-        Pstream::combineGather(UPstream::treeCommunication(), Value, cop, tag);
-        Pstream::combineScatter(UPstream::treeCommunication(), Value, tag);
+        Pstream::combineGather
+        (
+            UPstream::treeCommunication(comm),
+            Value,
+            cop,
+            tag,
+            comm
+        );
+        Pstream::combineScatter
+        (
+            UPstream::treeCommunication(comm),
+            Value,
+            tag,
+            comm
+        );
     }
 }
 

@@ -44,11 +44,12 @@ void reduce
     const List<UPstream::commsStruct>& comms,
     T& Value,
     const BinaryOp& bop,
-    const int tag
+    const int tag,
+    const label comm
 )
 {
-    Pstream::gather(comms, Value, bop, tag);
-    Pstream::scatter(comms, Value, tag);
+    Pstream::gather(comms, Value, bop, tag, comm);
+    Pstream::scatter(comms, Value, tag, comm);
 }
 
 
@@ -58,16 +59,17 @@ void reduce
 (
     T& Value,
     const BinaryOp& bop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        reduce(UPstream::linearCommunication(), Value, bop, tag);
+        reduce(UPstream::linearCommunication(comm), Value, bop, tag, comm);
     }
     else
     {
-        reduce(UPstream::treeCommunication(), Value, bop, tag);
+        reduce(UPstream::treeCommunication(comm), Value, bop, tag, comm);
     }
 }
 
@@ -78,18 +80,33 @@ T returnReduce
 (
     const T& Value,
     const BinaryOp& bop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 )
 {
     T WorkValue(Value);
 
-    if (UPstream::nProcs() < UPstream::nProcsSimpleSum)
+    if (UPstream::nProcs(comm) < UPstream::nProcsSimpleSum)
     {
-        reduce(UPstream::linearCommunication(), WorkValue, bop, tag);
+        reduce
+        (
+            UPstream::linearCommunication(comm),
+            WorkValue,
+            bop,
+            tag,
+            comm
+        );
     }
     else
     {
-        reduce(UPstream::treeCommunication(), WorkValue, bop, tag);
+        reduce
+        (
+            UPstream::treeCommunication(comm),
+            WorkValue,
+            bop,
+            tag,
+            comm
+        );
     }
 
     return WorkValue;
@@ -102,11 +119,12 @@ void sumReduce
 (
     T& Value,
     label& Count,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 )
 {
-    reduce(Value, sumOp<T>(), tag);
-    reduce(Count, sumOp<label>(), tag);
+    reduce(Value, sumOp<T>(), tag, comm);
+    reduce(Count, sumOp<label>(), tag, comm);
 }
 
 
@@ -117,10 +135,14 @@ void reduce
     T& Value,
     const BinaryOp& bop,
     const int tag,
+    const label comm,
     label& request
 )
 {
-    notImplemented("reduce(T&, const BinaryOp&, const int, label&");
+    notImplemented
+    (
+        "reduce(T&, const BinaryOp&, const int, const label, label&"
+    );
 }
 
 
@@ -129,28 +151,32 @@ void reduce
 (
     scalar& Value,
     const sumOp<scalar>& bop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 );
 
 void reduce
 (
     scalar& Value,
     const minOp<scalar>& bop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 );
 
 void reduce
 (
     vector2D& Value,
     const sumOp<vector2D>& bop,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 );
 
 void sumReduce
 (
     scalar& Value,
     label& Count,
-    const int tag = Pstream::msgType()
+    const int tag = Pstream::msgType(),
+    const label comm = UPstream::worldComm
 );
 
 void reduce
@@ -158,6 +184,7 @@ void reduce
     scalar& Value,
     const sumOp<scalar>& bop,
     const int tag,
+    const label comm,
     label& request
 );
 

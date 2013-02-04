@@ -95,6 +95,8 @@ class PstreamBuffers
 
         const int tag_;
 
+        const label comm_;
+
         const IOstream::streamFormat format_;
 
         const IOstream::versionNumber version_;
@@ -127,6 +129,7 @@ public:
         (
             const UPstream::commsTypes commsType,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
             IOstream::streamFormat format=IOstream::BINARY,
             IOstream::versionNumber version=IOstream::currentVersion
         );

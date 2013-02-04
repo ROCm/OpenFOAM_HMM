@@ -76,14 +76,14 @@ private:
 
         //- Return all neighbouring processors of this processor. Set
         //  procPatchMap_.
-        labelList procNeighbours(const PtrList<Patch>&);
+        labelList procNeighbours(const label nProcs, const PtrList<Patch>&);
 
 public:
 
     // Constructors
 
         //- Construct from boundaryMesh
-        ProcessorTopology(const PtrList<Patch>& patches);
+        ProcessorTopology(const PtrList<Patch>& patches, const label comm);
 
 
     // Member Functions

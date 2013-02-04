@@ -71,6 +71,9 @@ public:
 
         // Access
 
+            //- Return communicator used for comms
+            virtual int comm() const = 0;
+
             //- Return processor number
             virtual int myProcNo() const = 0;
 

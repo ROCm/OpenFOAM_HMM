@@ -78,9 +78,10 @@ void Foam::IOdictionary::readFile(const bool masterOnly)
         (
             comms,
             const_cast<word&>(headerClassName()),
-            Pstream::msgType()
+            Pstream::msgType(),
+            Pstream::worldComm
         );
-        Pstream::scatter(comms, note(), Pstream::msgType());
+        Pstream::scatter(comms, note(), Pstream::msgType(), Pstream::worldComm);
 
         // Get my communication order
         const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];

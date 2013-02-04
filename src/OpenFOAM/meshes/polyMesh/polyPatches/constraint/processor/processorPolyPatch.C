@@ -54,12 +54,14 @@ Foam::processorPolyPatch::processorPolyPatch
     const label start,
     const label index,
     const polyBoundaryMesh& bm,
+    const label comm,
     const int myProcNo,
     const int neighbProcNo,
     const transformType transform
 )
 :
     coupledPolyPatch(name, size, start, index, bm, typeName, transform),
+    comm_(comm),
     myProcNo_(myProcNo),
     neighbProcNo_(neighbProcNo),
     neighbFaceCentres_(),
@@ -78,6 +80,10 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
+    comm_
+    (
+        dict.lookupOrDefault("communicator", UPstream::worldComm)
+    ),
     myProcNo_(readLabel(dict.lookup("myProcNo"))),
     neighbProcNo_(readLabel(dict.lookup("neighbProcNo"))),
     neighbFaceCentres_(),
@@ -93,6 +99,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
+    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -111,6 +118,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
+    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -129,6 +137,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -1082,6 +1091,11 @@ bool Foam::processorPolyPatch::order
 void Foam::processorPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
+    if (comm_ != UPstream::worldComm)
+    {
+        os.writeKeyword("communicator") << comm_
+            << token::END_STATEMENT << nl;
+    }
     os.writeKeyword("myProcNo") << myProcNo_
         << token::END_STATEMENT << nl;
     os.writeKeyword("neighbProcNo") << neighbProcNo_

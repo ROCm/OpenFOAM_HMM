@@ -52,7 +52,8 @@ void allReduce
     MPI_Datatype MPIType,
     MPI_Op op,
     const BinaryOp& bop,
-    const int tag
+    const int tag,
+    const label communicator
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

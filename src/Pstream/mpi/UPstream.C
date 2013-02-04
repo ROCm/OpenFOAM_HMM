@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,6 @@ void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
     validParOptions.insert("p4wd", "directory");
     validParOptions.insert("p4amslave", "");
     validParOptions.insert("p4yourname", "hostname");
-    validParOptions.insert("GAMMANP", "number of instances");
     validParOptions.insert("machinefile", "machine file");
 }
 
@@ -66,12 +65,13 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
     int numprocs;
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myProcNo_);
+    int myRank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     if (debug)
     {
         Pout<< "UPstream::init : initialised with numProcs:" << numprocs
-            << " myProcNo:" << myProcNo_ << endl;
+            << " myRank:" << myRank << endl;
     }
 
     if (numprocs <= 1)
@@ -82,14 +82,9 @@ bool Foam::UPstream::init(int& argc, char**& argv)
             << Foam::abort(FatalError);
     }
 
-    procIDs_.setSize(numprocs);
 
-    forAll(procIDs_, procNo)
-    {
-        procIDs_[procNo] = procNo;
-    }
-
-    setParRun();
+    // Initialise parallel structure
+    setParRun(numprocs);
 
 #   ifndef SGIMPI
     string bufferSizeName = getEnv("MPI_BUFFER_SIZE");
@@ -116,11 +111,9 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     char processorName[MPI_MAX_PROCESSOR_NAME];
 
     MPI_Get_processor_name(processorName, &processorNameLen);
+    processorName[processorNameLen] = '\0';
 
-    //signal(SIGABRT, stop);
-
-    // Now that nprocs is known construct communication tables.
-    initCommunicationSchedule();
+    Pout<< "Processor name:" << processorName << endl;
 
     return true;
 }
@@ -153,6 +146,15 @@ void Foam::UPstream::exit(int errnum)
             << endl;
     }
 
+    // Clean mpi communicators
+    forAll(myProcNo_, communicator)
+    {
+        if (myProcNo_[communicator] != -1)
+        {
+            freePstreamCommunicator(communicator);
+        }
+    }
+
     if (errnum == 0)
     {
         MPI_Finalize();
@@ -171,21 +173,39 @@ void Foam::UPstream::abort()
 }
 
 
-void Foam::reduce(scalar& Value, const sumOp<scalar>& bop, const int tag)
+void Foam::reduce
+(
+    scalar& Value,
+    const sumOp<scalar>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag);
+    allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
 
-void Foam::reduce(scalar& Value, const minOp<scalar>& bop, const int tag)
+void Foam::reduce
+(
+    scalar& Value,
+    const minOp<scalar>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag);
+    allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag, communicator);
 }
 
 
-void Foam::reduce(vector2D& Value, const sumOp<vector2D>& bop, const int tag)
+void Foam::reduce
+(
+    vector2D& Value,
+    const sumOp<vector2D>& bop,
+    const int tag,
+    const label communicator
+)
 {
-    allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag);
+    allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
 
@@ -193,11 +213,12 @@ void Foam::sumReduce
 (
     scalar& Value,
     label& Count,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
     vector2D twoScalars(Value, scalar(Count));
-    reduce(twoScalars, sumOp<vector2D>());
+    reduce(twoScalars, sumOp<vector2D>(), tag, communicator);
 
     Value = twoScalars.x();
     Count = twoScalars.y();
@@ -209,6 +230,7 @@ void Foam::reduce
     scalar& Value,
     const sumOp<scalar>& bop,
     const int tag,
+    const label communicator,
     label& requestID
 )
 {
@@ -225,7 +247,7 @@ void Foam::reduce
         MPI_SCALAR,
         MPI_SUM,
         0,              //root
-        MPI_COMM_WORLD,
+        PstreamGlobals::MPICommunicators_[communicator],
         &request
     );
 
@@ -233,9 +255,138 @@ void Foam::reduce
     PstreamGlobals::outstandingRequests_.append(request);
 #else
     // Non-blocking not yet implemented in mpi
-    reduce(Value, bop, tag);
+    reduce(Value, bop, tag, communicator);
     requestID = -1;
 #endif
+}
+
+
+void Foam::UPstream::allocatePstreamCommunicator
+(
+    const label parentIndex,
+    const label index
+)
+{
+    if (index == PstreamGlobals::MPIGroups_.size())
+    {
+        // Extend storage with dummy values
+        MPI_Group newGroup;
+        PstreamGlobals::MPIGroups_.append(newGroup);
+        MPI_Comm newComm;
+        PstreamGlobals::MPICommunicators_.append(newComm);
+    }
+    else if (index > PstreamGlobals::MPIGroups_.size())
+    {
+        FatalErrorIn
+        (
+            "UPstream::allocatePstreamCommunicator\n"
+            "(\n"
+            "    const label parentIndex,\n"
+            "    const labelList& subRanks\n"
+            ")\n"
+        )   << "PstreamGlobals out of sync with UPstream data. Problem."
+            << Foam::exit(FatalError);
+    }
+
+
+    if (parentIndex == -1)
+    {
+        // Allocate world communicator
+
+        //std::cout
+        //    << "MPI : Allocating world communicator at index " << index
+        //    << std::endl;
+
+        if (index != UPstream::worldComm)
+        {
+            FatalErrorIn
+            (
+                "UPstream::allocateCommunicator\n"
+                "(\n"
+                "    const label parentIndex,\n"
+                "    const labelList& subRanks\n"
+                ")\n"
+            )   << "world communicator should always be index "
+                << UPstream::worldComm << Foam::exit(FatalError);
+        }
+
+        PstreamGlobals::MPICommunicators_[index] = MPI_COMM_WORLD;
+        MPI_Comm_group(MPI_COMM_WORLD, &PstreamGlobals::MPIGroups_[index]);
+        MPI_Comm_rank
+        (
+            PstreamGlobals::MPICommunicators_[index],
+           &myProcNo_[index]
+        );
+
+        // Set the number of processes to the actual number
+        int numProcs;
+        MPI_Comm_size(PstreamGlobals::MPICommunicators_[index], &numProcs);
+        procIDs_[index] = identity(numProcs);
+    }
+    else
+    {
+        //std::cout
+        //    << "MPI : Allocating new communicator at index " << index
+        //    << " from parent " << parentIndex
+        //    << std::endl;
+
+        // Create new group
+        MPI_Group_incl
+        (
+            PstreamGlobals::MPIGroups_[parentIndex],
+            procIDs_[index].size(),
+            procIDs_[index].begin(),
+           &PstreamGlobals::MPIGroups_[index]
+        );
+ 
+       //std::cout
+       //     << "MPI : New group " << long(PstreamGlobals::MPIGroups_[index])
+       //     << std::endl;
+
+
+        // Create new communicator
+        MPI_Comm_create
+        (
+            PstreamGlobals::MPICommunicators_[parentIndex],
+            PstreamGlobals::MPIGroups_[index],
+           &PstreamGlobals::MPICommunicators_[index]
+        );
+
+        if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
+        {
+            //std::cout
+            //     << "MPI : NULL : not in group"
+            //    << std::endl;
+            myProcNo_[index] = -1;
+        }
+        else
+        {
+            //std::cout
+            //    << "MPI : New comm "
+            //    << long(PstreamGlobals::MPICommunicators_[index])
+            //    << std::endl;
+            MPI_Comm_rank
+            (
+                PstreamGlobals::MPICommunicators_[index],
+               &myProcNo_[index]
+            );
+        }
+    }
+
+    //std::cout<< "MPI : I am rank " << myProcNo_[index] << std::endl;
+}
+
+
+void Foam::UPstream::freePstreamCommunicator(const label communicator)
+{
+    if (communicator != UPstream::worldComm)
+    {
+        if (PstreamGlobals::MPICommunicators_[communicator] != MPI_COMM_NULL)
+        {
+            MPI_Comm_free(&PstreamGlobals::MPICommunicators_[communicator]);
+        }
+        MPI_Group_free(&PstreamGlobals::MPIGroups_[communicator]);
+    }
 }
 
 

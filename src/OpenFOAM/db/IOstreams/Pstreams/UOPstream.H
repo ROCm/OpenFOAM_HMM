@@ -65,6 +65,8 @@ class UOPstream
 
         const int tag_;
 
+        const label comm_;
+
         const bool sendAtDestruct_;
 
 
@@ -93,6 +95,7 @@ public:
             const int toProcNo,
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
             streamFormat format=BINARY,
             versionNumber version=currentVersion
@@ -126,7 +129,8 @@ public:
                 const int toProcNo,
                 const char* buf,
                 const std::streamsize bufSize,
-                const int tag = UPstream::msgType()
+                const int tag = UPstream::msgType(),
+                const label communicator = 0
             );
 
             //- Write next token to stream

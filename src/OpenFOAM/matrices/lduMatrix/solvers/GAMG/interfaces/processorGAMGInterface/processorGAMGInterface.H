@@ -55,7 +55,7 @@ class processorGAMGInterface
 {
     // Private data
 
-        //- Reference tor the processorLduInterface from which this is
+        //- Reference for the processorLduInterface from which this is
         //  agglomerated
         const processorLduInterface& fineProcInterface_;
 
@@ -136,6 +136,12 @@ public:
             virtual int tag() const
             {
                 return fineProcInterface_.tag();
+            }
+
+            //- Return communicator used for sending
+            virtual int comm() const
+            {
+                return fineProcInterface_.comm();
             }
 };
 

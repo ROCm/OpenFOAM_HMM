@@ -98,7 +98,8 @@ public:
                 const List<commsStruct>& comms,
                 T& Value,
                 const BinaryOp& bop,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -107,7 +108,8 @@ public:
             (
                 T& Value,
                 const BinaryOp& bop,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
             );
 
             //- Scatter data. Distribute without modification. Reverse of gather
@@ -116,12 +118,18 @@ public:
             (
                 const List<commsStruct>& comms,
                 T& Value,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
             template <class T>
-            static void scatter(T& Value, const int tag = Pstream::msgType());
+            static void scatter
+            (
+                T& Value,
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
+            );
 
 
         // Combine variants. Inplace combine values from processors.
@@ -133,7 +141,8 @@ public:
                 const List<commsStruct>& comms,
                 T& Value,
                 const CombineOp& cop,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -142,7 +151,8 @@ public:
             (
                 T& Value,
                 const CombineOp& cop,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
             );
 
             //- Scatter data. Reverse of combineGather
@@ -151,7 +161,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 T& Value,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -159,7 +170,8 @@ public:
             static void combineScatter
             (
                 T& Value,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
             );
 
         // Combine variants working on whole List at a time.
@@ -170,7 +182,8 @@ public:
                 const List<commsStruct>& comms,
                 List<T>& Value,
                 const CombineOp& cop,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -179,7 +192,8 @@ public:
             (
                 List<T>& Value,
                 const CombineOp& cop,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
             );
 
             //- Scatter data. Reverse of combineGather
@@ -188,7 +202,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 List<T>& Value,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -196,7 +211,8 @@ public:
             static void listCombineScatter
             (
                 List<T>& Value,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = Pstream::worldComm
             );
 
         // Combine variants working on whole map at a time. Container needs to
@@ -208,7 +224,8 @@ public:
                 const List<commsStruct>& comms,
                 Container& Values,
                 const CombineOp& cop,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -217,7 +234,8 @@ public:
             (
                 Container& Values,
                 const CombineOp& cop,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
             //- Scatter data. Reverse of combineGather
@@ -226,7 +244,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 Container& Values,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -234,7 +253,8 @@ public:
             static void mapCombineScatter
             (
                 Container& Values,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
 
@@ -249,7 +269,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 List<T>& Values,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -257,7 +278,8 @@ public:
             static void gatherList
             (
                 List<T>& Values,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
             //- Scatter data. Reverse of gatherList
@@ -266,7 +288,8 @@ public:
             (
                 const List<commsStruct>& comms,
                 List<T>& Values,
-                const int tag
+                const int tag,
+                const label comm
             );
 
             //- Like above but switches between linear/tree communication
@@ -274,7 +297,8 @@ public:
             static void scatterList
             (
                 List<T>& Values,
-                const int tag = Pstream::msgType()
+                const int tag = Pstream::msgType(),
+                const label comm = UPstream::worldComm
             );
 
 
@@ -291,6 +315,7 @@ public:
                 List<Container >&,
                 labelListList& sizes,
                 const int tag = UPstream::msgType(),
+                const label comm = UPstream::worldComm,
                 const bool block = true
             );
 

@@ -34,6 +34,7 @@ License
 template<class Patch, class ProcPatch>
 Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 (
+    const label nProcs,
     const PtrList<Patch>& patches
 )
 {
@@ -43,7 +44,7 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     label maxNb = 0;
 
-    boolList isNeighbourProc(Pstream::nProcs(), false);
+    boolList isNeighbourProc(nProcs, false);
 
     forAll(patches, patchi)
     {
@@ -106,20 +107,21 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 template<class Patch, class ProcPatch>
 Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
 (
-    const PtrList<Patch>& patches
+    const PtrList<Patch>& patches,
+    const label comm
 )
 :
-    labelListList(Pstream::nProcs()),
+    labelListList(Pstream::nProcs(comm)),
     patchSchedule_(2*patches.size())
 {
     if (Pstream::parRun())
     {
         // Fill my 'slot' with my neighbours
-        operator[](Pstream::myProcNo()) = procNeighbours(patches);
+        operator[](Pstream::myProcNo()) = procNeighbours(this->size(), patches);
 
         // Distribute to all processors
-        Pstream::gatherList(*this);
-        Pstream::scatterList(*this);
+        Pstream::gatherList(*this, Pstream::msgType(), comm);
+        Pstream::scatterList(*this, Pstream::msgType(), comm);
     }
 
     if (Pstream::parRun() && Pstream::defaultCommsType == Pstream::scheduled)
@@ -172,7 +174,7 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
         (
             commSchedule
             (
-                Pstream::nProcs(),
+                Pstream::nProcs(comm),
                 comms
             ).procSchedule()[Pstream::myProcNo()]
         );

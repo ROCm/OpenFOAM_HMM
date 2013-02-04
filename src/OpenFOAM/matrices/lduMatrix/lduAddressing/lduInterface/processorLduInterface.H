@@ -84,10 +84,13 @@ public:
 
         // Access
 
-            //- Return processor number
+            //- Return communicator used for sending
+            virtual int comm() const = 0;
+
+            //- Return processor number (rank in communicator)
             virtual int myProcNo() const = 0;
 
-            //- Return neigbour processor number
+            //- Return neigbour processor number (rank in communicator)
             virtual int neighbProcNo() const = 0;
 
             //- Return face transformation tensor

@@ -58,6 +58,9 @@ class processorPolyPatch
 {
     // Private data
 
+        //- Communicator to use
+        label comm_;
+
         int myProcNo_;
         int neighbProcNo_;
 
@@ -133,6 +136,7 @@ public:
             const label start,
             const label index,
             const polyBoundaryMesh& bm,
+            const label comm,
             const int myProcNo,
             const int neighbProcNo,
             const transformType transform = UNKNOWN  // transformation type
@@ -242,6 +246,13 @@ public:
             {
                 return false;
             }
+        }
+
+
+        //- Return communicator used for communication
+        label comm() const
+        {
+            return comm_;
         }
 
         //- Return processor number

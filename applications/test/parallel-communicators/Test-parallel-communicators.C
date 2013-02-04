@@ -150,45 +150,48 @@ int main(int argc, char *argv[])
         top.append(i);
     }
 
-    Pout<< "bottom:" << bottom << endl;
-    Pout<< "top:" << top << endl;
+    //Pout<< "bottom:" << bottom << endl;
+    Pout<< "top             :" << top << endl;
 
 
     scalar localValue = 111*UPstream::myProcNo(UPstream::worldComm);
-    Pout<< "localValue:" << localValue << endl;
+    Pout<< "localValue      :" << localValue << endl;
 
-    if (Pstream::myProcNo(UPstream::worldComm) < n/2)
+
+    label comm = Pstream::allocateCommunicator
+    (
+        UPstream::worldComm,
+        top
+    );
+
+    Pout<< "allocated comm  :" << comm << endl;
+    Pout<< "comm myproc     :" << Pstream::myProcNo(comm)
+        << endl;
+
+
+    if (Pstream::myProcNo(comm) != -1)
     {
-        label comm = Pstream::allocateCommunicator
+        //scalar sum = sumReduce(comm, localValue);
+        //scalar sum = localValue;
+        //reduce
+        //(
+        //    UPstream::treeCommunication(comm),
+        //    sum,
+        //    sumOp<scalar>(),
+        //    Pstream::msgType(),
+        //    comm
+        //);
+        scalar sum = returnReduce
         (
-            UPstream::worldComm,
-            bottom
+            localValue,
+            sumOp<scalar>(),
+            Pstream::msgType(),
+            comm
         );
-
-        Pout<< "allocated bottom comm:" << comm << endl;
-        Pout<< "comm myproc          :" << Pstream::myProcNo(comm)
-            << endl;
-        scalar sum = sumReduce(comm, localValue);
-        Pout<< "sum                  :" << sum << endl;
-
-        Pstream::freeCommunicator(comm);
+        Pout<< "sum             :" << sum << endl;
     }
-    else
-    {
-        label comm = Pstream::allocateCommunicator
-        (
-            UPstream::worldComm,
-            top
-        );
 
-        Pout<< "allocated top comm:" << comm << endl;
-        Pout<< "comm myproc       :" << Pstream::myProcNo(comm)
-            << endl;
-        scalar sum = sumReduce(comm, localValue);
-        Pout<< "sum                  :" << sum << endl;
-
-        Pstream::freeCommunicator(comm);
-    }
+    Pstream::freeCommunicator(comm);
 
 
     Pout<< "End\n" << endl;

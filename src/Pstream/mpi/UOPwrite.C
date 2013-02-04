@@ -39,16 +39,21 @@ bool Foam::UOPstream::write
     const int toProcNo,
     const char* buf,
     const std::streamsize bufSize,
-    const int tag
+    const int tag,
+    const label communicator
 )
 {
     if (debug)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
-            << " tag:" << tag << " size:" << label(bufSize)
+            << " tag:" << tag
+            << " comm:" << communicator << " size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
     }
+
+    PstreamGlobals::checkCommunicator(communicator, toProcNo);
+
 
     bool transferFailed = true;
 
@@ -59,9 +64,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
-            procID(toProcNo),
+            toProcNo,   //procID(toProcNo),
             tag,
-            MPI_COMM_WORLD
+            PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
         if (debug)
@@ -79,9 +84,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
-            procID(toProcNo),
+            toProcNo,   //procID(toProcNo),
             tag,
-            MPI_COMM_WORLD
+            PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
         if (debug)
@@ -101,9 +106,9 @@ bool Foam::UOPstream::write
             const_cast<char*>(buf),
             bufSize,
             MPI_PACKED,
-            procID(toProcNo),
+            toProcNo,   //procID(toProcNo),
             tag,
-            MPI_COMM_WORLD,
+            PstreamGlobals::MPICommunicators_[communicator],//MPI_COMM_WORLD,
             &request
         );
 

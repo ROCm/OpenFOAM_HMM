@@ -25,7 +25,7 @@ Class
     Foam::procLduInterface
 
 Description
-    Foam::procLduInterface
+    IO interface for processorLduInterface
 
 SourceFiles
     procLduInterface.C
@@ -58,6 +58,7 @@ class procLduInterface
         label myProcNo_;
         label neighbProcNo_;
         label tag_;
+        label comm_;
 
 
     // Private Member Functions

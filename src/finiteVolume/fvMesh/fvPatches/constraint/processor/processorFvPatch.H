@@ -84,14 +84,20 @@ public:
 
     // Member functions
 
+        //- Return communicator used for comms
+        virtual int comm() const
+        {
+            return procPolyPatch_.comm();
+        }
+
         //- Return processor number
-        int myProcNo() const
+        virtual int myProcNo() const
         {
             return procPolyPatch_.myProcNo();
         }
 
         //- Return neigbour processor number
-        int neighbProcNo() const
+        virtual int neighbProcNo() const
         {
             return procPolyPatch_.neighbProcNo();
         }

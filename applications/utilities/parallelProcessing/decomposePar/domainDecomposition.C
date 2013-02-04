@@ -448,6 +448,7 @@ bool Foam::domainDecomposition::writeDecomposition()
                             curStart,
                             nPatches,
                             procMesh.boundaryMesh(),
+                            Pstream::worldComm,
                             procI,
                             curNeighbourProcessors[procPatchI]
                         );
@@ -475,6 +476,7 @@ bool Foam::domainDecomposition::writeDecomposition()
                             curStart,
                             nPatches,
                             procMesh.boundaryMesh(),
+                            Pstream::worldComm,
                             procI,
                             curNeighbourProcessors[procPatchI],
                             referPatch,

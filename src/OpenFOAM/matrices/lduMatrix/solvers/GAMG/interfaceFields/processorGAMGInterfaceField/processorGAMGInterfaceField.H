@@ -146,6 +146,12 @@ public:
 
         //- Processor interface functions
 
+            //- Return communicator used for comms
+            virtual int comm() const
+            {
+                return procInterface_.comm();
+            }
+
             //- Return processor number
             virtual int myProcNo() const
             {

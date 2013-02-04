@@ -548,7 +548,8 @@ void Foam::mapDistribute::exchangeAddressing
         wantedRemoteElements,
         subMap_,
         sendSizes,
-        tag
+        tag,
+        Pstream::worldComm  //TBD
     );
 
     // Renumber elements
@@ -627,7 +628,8 @@ void Foam::mapDistribute::exchangeAddressing
         wantedRemoteElements,
         subMap_,
         sendSizes,
-        tag
+        tag,
+        Pstream::worldComm      //TBD
     );
 
     // Renumber elements
