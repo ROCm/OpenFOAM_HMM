@@ -43,7 +43,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "phaseEquationOfState.H"
+#include "twoPhaseThermo.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 

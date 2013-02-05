@@ -1,16 +1,19 @@
 EXE_INC = \
+    -ItwoPhaseThermo \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/transportModels \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
-    -IphaseEquationsOfState/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/incompressible/turbulenceModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
 EXE_LIBS = \
+    -ltwoPhaseThermo \
+    -lfluidThermophysicalModels \
+    -lspecie \
     -linterfaceProperties \
     -ltwoPhaseInterfaceProperties \
     -lincompressibleTransportModels \
-    -lphaseEquationsOfState \
     -lincompressibleTurbulenceModel \
     -lincompressibleRASModels \
     -lincompressibleLESModels \

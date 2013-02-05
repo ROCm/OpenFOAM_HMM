@@ -38,9 +38,10 @@ Description
 #include "fvCFD.H"
 #include "MULES.H"
 #include "subCycle.H"
+#include "rhoThermo.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "phaseEquationOfState.H"
+#include "twoPhaseThermo.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 
