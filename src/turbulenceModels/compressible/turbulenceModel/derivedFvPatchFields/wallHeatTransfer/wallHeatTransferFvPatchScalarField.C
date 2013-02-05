@@ -26,8 +26,7 @@ License
 #include "wallHeatTransferFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-#include "volFields.H"
-#include "basicThermo.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -149,19 +148,19 @@ void Foam::wallHeatTransferFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const basicThermo& thermo = basicThermo::lookupThermo(*this);
-    const label patchi = patch().index();
+    const compressible::turbulenceModel& turbModel =
+        db().lookupObject<compressible::turbulenceModel>
+        (
+            "turbulenceModel"
+        );
 
-    const scalarField& pw = thermo.p().boundaryField()[patchi];
-    const scalarField& Tw = thermo.T().boundaryField()[patchi];
-    const scalarField Cpw(thermo.Cp(pw, Tw, patchi));
+    const label patchi = patch().index();
 
     valueFraction() =
         1.0/
         (
             1.0
-          + Cpw*thermo.alpha().boundaryField()[patchi]
-           *patch().deltaCoeffs()/alphaWall_
+          + turbModel.kappaEff(patchi)*patch().deltaCoeffs()/alphaWall_
         );
 
     mixedFvPatchScalarField::updateCoeffs();
