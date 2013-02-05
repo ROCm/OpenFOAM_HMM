@@ -35,7 +35,7 @@ SourceFiles
 #ifndef noThermo_H
 #define noThermo_H
 
-#include "thermoBaffleModel.H"
+#include "thermalBaffleModel.H"
 #include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,7 +44,7 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -53,7 +53,7 @@ namespace thermoBaffleModels
 
 class noThermo
 :
-    public thermoBaffleModel
+    public thermalBaffleModel
 {
 private:
 
@@ -139,7 +139,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 

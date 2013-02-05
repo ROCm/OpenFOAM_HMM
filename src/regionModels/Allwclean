@@ -6,7 +6,7 @@ set -x
 wclean $makeType regionModel
 wclean $makeType pyrolysisModels
 wclean $makeType surfaceFilmModels
-wclean $makeType thermoBaffleModels
+wclean $makeType thermalBaffleModels
 wclean $makeType regionCoupling
 
 

@@ -54,7 +54,7 @@ makeDeltaCoeffs(scalarField& dc) const
     const modelType& region1D =
         patch().boundaryMesh().mesh().time().lookupObject<modelType>
         (
-            "thermoBaffleProperties"
+            "thermalBaffleProperties"
         );
 
     dc = 2.0/(pp.thickness()/region1D.nLayers());

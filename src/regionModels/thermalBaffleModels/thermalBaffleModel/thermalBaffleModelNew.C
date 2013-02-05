@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoBaffleModel.H"
+#include "thermalBaffleModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -31,20 +31,20 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
+autoPtr<thermalBaffleModel> thermalBaffleModel::New(const fvMesh& mesh)
 {
     word modelType;
     {
-        IOdictionary thermoBafflePropertiesDict
+        IOdictionary thermalBafflePropertiesDict
         (
             IOobject
             (
-                "thermoBaffleProperties",
+                "thermalBaffleProperties",
                 mesh.time().constant(),
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,
@@ -53,7 +53,7 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
             )
         );
 
-        thermoBafflePropertiesDict.lookup("thermoBaffleModel") >> modelType;
+        thermalBafflePropertiesDict.lookup("thermalBaffleModel") >> modelType;
     }
 
     Info<< "Selecting baffle model " << modelType << endl;
@@ -64,25 +64,25 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New(const fvMesh& mesh)
     if (cstrIter == meshConstructorTablePtr_->end())
     {
 
-        FatalErrorIn("thermoBaffleModel::New(const fvMesh&)")
-            << "Unknown thermoBaffleModel type " << modelType
+        FatalErrorIn("thermalBaffleModel::New(const fvMesh&)")
+            << "Unknown thermalBaffleModel type " << modelType
             << nl << nl
-            <<  "Valid thermoBaffleModel types are:" << nl
+            <<  "Valid thermalBaffleModel types are:" << nl
             << meshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<thermoBaffleModel>(cstrIter()(modelType, mesh));
+    return autoPtr<thermalBaffleModel>(cstrIter()(modelType, mesh));
 }
 
 
-autoPtr<thermoBaffleModel> thermoBaffleModel::New
+autoPtr<thermalBaffleModel> thermalBaffleModel::New
 (
     const fvMesh& mesh,
     const dictionary& dict
 )
 {
-    word modelType = dict.lookup("thermoBaffleModel");
+    word modelType = dict.lookup("thermalBaffleModel");
 
     Info<< "Selecting baffle model " << modelType << endl;
 
@@ -92,21 +92,23 @@ autoPtr<thermoBaffleModel> thermoBaffleModel::New
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
 
-        FatalErrorIn("thermoBaffleModel::New(const fvMesh&, const dictionary&)")
-            << "Unknown thermoBaffleModel type " << modelType
+        FatalErrorIn
+        (
+            "thermalBaffleModel::New(const fvMesh&, const dictionary&)"
+        )   << "Unknown thermalBaffleModel type " << modelType
             << nl << nl
-            <<  "Valid thermoBaffleModel types are:" << nl
+            <<  "Valid thermalBaffleModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    return autoPtr<thermoBaffleModel>(cstrIter()(modelType, mesh, dict));
+    return autoPtr<thermalBaffleModel>(cstrIter()(modelType, mesh, dict));
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 

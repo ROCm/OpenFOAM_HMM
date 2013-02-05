@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "thermoBaffleModel.H"
+#include "thermalBaffleModel.H"
 #include "fvMesh.H"
 #include "mappedVariableThicknessWallPolyPatch.H"
 #include "wedgePolyPatch.H"
@@ -34,33 +34,33 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(thermoBaffleModel, 0);
-defineRunTimeSelectionTable(thermoBaffleModel, mesh);
-defineRunTimeSelectionTable(thermoBaffleModel, dictionary);
+defineTypeNameAndDebug(thermalBaffleModel, 0);
+defineRunTimeSelectionTable(thermalBaffleModel, mesh);
+defineRunTimeSelectionTable(thermalBaffleModel, dictionary);
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool thermoBaffleModel::read()
+bool thermalBaffleModel::read()
 {
     regionModel1D::read();
     return true;
 }
 
 
-bool thermoBaffleModel::read(const dictionary& dict)
+bool thermalBaffleModel::read(const dictionary& dict)
 {
     regionModel1D::read(dict);
     return true;
 }
 
 
-void thermoBaffleModel::init()
+void thermalBaffleModel::init()
 {
     if (active_)
     {
@@ -116,7 +116,7 @@ void thermoBaffleModel::init()
             {
                 FatalErrorIn
                 (
-                    "thermoBaffleModel::thermoBaffleModel"
+                    "thermalBaffleModel::thermalBaffleModel"
                     "("
                     "   const word&,"
                     "   const fvMesh&"
@@ -133,7 +133,7 @@ void thermoBaffleModel::init()
             {
                 FatalErrorIn
                 (
-                    "thermoBaffleModel::thermoBaffleModel"
+                    "thermalBaffleModel::thermalBaffleModel"
                     "("
                     "   const word&,"
                     "   const fvMesh&"
@@ -164,12 +164,12 @@ void thermoBaffleModel::init()
             {
                 FatalErrorIn
                 (
-                    "thermoBaffleModel::thermoBaffleModel"
+                    "thermalBaffleModel::thermalBaffleModel"
                     "("
                     "   const word&,"
                     "   const fvMesh&"
                     ")"
-                )   << " coupled patches in thermoBaffle are " << nl
+                )   << " coupled patches in thermalBaffle are " << nl
                     << " different sizes from list thickness" << nl
                     << exit(FatalError);
             }
@@ -199,7 +199,7 @@ void thermoBaffleModel::init()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
+thermalBaffleModel::thermalBaffleModel(const fvMesh& mesh)
 :
     regionModel1D(mesh),
     thickness_(),
@@ -209,7 +209,7 @@ thermoBaffleModel::thermoBaffleModel(const fvMesh& mesh)
 {}
 
 
-thermoBaffleModel::thermoBaffleModel
+thermalBaffleModel::thermalBaffleModel
 (
     const word& modelType,
     const fvMesh& mesh,
@@ -217,7 +217,7 @@ thermoBaffleModel::thermoBaffleModel
 
 )
 :
-    regionModel1D(mesh, "thermoBaffle", modelType, dict, true),
+    regionModel1D(mesh, "thermalBaffle", modelType, dict, true),
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
@@ -227,9 +227,13 @@ thermoBaffleModel::thermoBaffleModel
 }
 
 
-thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
+thermalBaffleModel::thermalBaffleModel
+(
+    const word& modelType,
+    const fvMesh& mesh
+)
 :
-    regionModel1D(mesh, "thermoBaffle", modelType),
+    regionModel1D(mesh, "thermalBaffle", modelType),
     thickness_(),
     delta_("delta", dimLength, 0.0),
     oneD_(false),
@@ -241,19 +245,19 @@ thermoBaffleModel::thermoBaffleModel(const word& modelType, const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-thermoBaffleModel::~thermoBaffleModel()
+thermalBaffleModel::~thermalBaffleModel()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void thermoBaffleModel::preEvolveRegion()
+void thermalBaffleModel::preEvolveRegion()
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 

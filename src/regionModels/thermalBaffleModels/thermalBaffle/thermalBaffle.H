@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoBaffle
+    Foam::thermalBaffle
 
 Description
     2D thermal baffle
 
 SourceFiles
-    thermoBaffle.C
-    thermoBaffleI.H
+    thermalBaffle.C
+    thermalBaffleI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoBaffle_H
-#define thermoBaffle_H
+#ifndef thermalBaffle_H
+#define thermalBaffle_H
 
-#include "thermoBaffleModel.H"
+#include "thermalBaffleModel.H"
 #include "volFieldsFwd.H"
 
 
@@ -46,29 +46,29 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 
 /*---------------------------------------------------------------------------*\
-                        Class thermoBaffle Declaration
+                        Class thermalBaffle Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoBaffle
+class thermalBaffle
 :
-    public thermoBaffleModel
+    public thermalBaffleModel
 {
 private:
 
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        thermoBaffle(const thermoBaffle&);
+        thermalBaffle(const thermalBaffle&);
 
         //- Disallow default bitwise assignment
-        void operator=(const thermoBaffle&);
+        void operator=(const thermalBaffle&);
 
-        //- Initialize thermoBaffle
+        //- Initialize thermalBaffle
         void init();
 
 
@@ -124,16 +124,16 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("thermoBaffle");
+    TypeName("thermalBaffle");
 
 
     // Constructors
 
         //- Construct from components
-        thermoBaffle(const word& modelType, const fvMesh& mesh);
+        thermalBaffle(const word& modelType, const fvMesh& mesh);
 
         //- Construct from components and dict
-        thermoBaffle
+        thermalBaffle
         (
             const word& modelType,
             const fvMesh& mesh,
@@ -142,7 +142,7 @@ public:
 
 
     //- Destructor
-    virtual ~thermoBaffle();
+    virtual ~thermalBaffle();
 
 
     // Member Functions
@@ -205,13 +205,13 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "thermoBaffleI.H"
+#include "thermalBaffleI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

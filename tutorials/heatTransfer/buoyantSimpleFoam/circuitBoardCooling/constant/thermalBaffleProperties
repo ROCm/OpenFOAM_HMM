@@ -11,17 +11,17 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      thermoBaffleProperties;
+    object      thermalBaffleProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoBaffleModel  none;
+thermalBaffleModel  none;
 
 active          no;
 
 regionName      none;
 
-thermoBaffleCoeffs
+thermalBaffleCoeffs
 {
 }
 

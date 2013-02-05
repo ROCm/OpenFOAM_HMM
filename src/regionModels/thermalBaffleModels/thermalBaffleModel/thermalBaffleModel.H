@@ -22,17 +22,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoBaffleModel
+    Foam::thermalBaffleModel
 
 Description
 
 SourceFiles
-    thermoBaffleModel.C
+    thermalBaffleModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoBaffleModel_H
-#define thermoBaffleModel_H
+#ifndef thermalBaffleModel_H
+#define thermalBaffleModel_H
 
 #include "runTimeSelectionTables.H"
 #include "scalarIOField.H"
@@ -49,14 +49,14 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class thermoBaffleModel Declaration
+                      Class thermalBaffleModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoBaffleModel
+class thermalBaffleModel
 :
     public regionModel1D
 {
@@ -65,10 +65,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        thermoBaffleModel(const thermoBaffleModel&);
+        thermalBaffleModel(const thermalBaffleModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const thermoBaffleModel&);
+        void operator=(const thermalBaffleModel&);
 
         //- Initialize thermal Baffle
         void init();
@@ -103,7 +103,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("thermoBaffleModel");
+    TypeName("thermalBaffleModel");
 
 
     // Declare runtime constructor selection tables
@@ -111,7 +111,7 @@ public:
          declareRunTimeSelectionTable
          (
              autoPtr,
-             thermoBaffleModel,
+             thermalBaffleModel,
              mesh,
              (
                 const word& modelType,
@@ -123,7 +123,7 @@ public:
          declareRunTimeSelectionTable
          (
              autoPtr,
-             thermoBaffleModel,
+             thermalBaffleModel,
              dictionary,
              (
                 const word& modelType,
@@ -137,13 +137,13 @@ public:
     // Constructors
 
         //- Construct null from mesh
-        thermoBaffleModel(const fvMesh& mesh);
+        thermalBaffleModel(const fvMesh& mesh);
 
         //- Construct from type name and mesh
-        thermoBaffleModel(const word& modelType, const fvMesh& mesh);
+        thermalBaffleModel(const word& modelType, const fvMesh& mesh);
 
         //- Construct from type name and mesh and dict
-        thermoBaffleModel
+        thermalBaffleModel
         (
             const word& modelType,
             const fvMesh& mesh,
@@ -154,10 +154,10 @@ public:
     // Selectors
 
         //- Return a reference to the selected model
-        static autoPtr<thermoBaffleModel> New(const fvMesh& mesh);
+        static autoPtr<thermalBaffleModel> New(const fvMesh& mesh);
 
         //- Return a reference to the selected model using dictionary
-        static autoPtr<thermoBaffleModel> New
+        static autoPtr<thermalBaffleModel> New
         (
             const fvMesh& mesh,
             const dictionary& dict
@@ -165,7 +165,7 @@ public:
 
 
     //- Destructor
-    virtual ~thermoBaffleModel();
+    virtual ~thermalBaffleModel();
 
 
     // Member Functions
@@ -227,7 +227,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 

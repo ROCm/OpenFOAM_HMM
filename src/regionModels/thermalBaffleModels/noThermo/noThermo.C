@@ -33,15 +33,15 @@ namespace Foam
 {
 namespace regionModels
 {
-namespace thermoBaffleModels
+namespace thermalBaffleModels
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(noThermo, 0);
 
-addToRunTimeSelectionTable(thermoBaffleModel, noThermo, mesh);
-addToRunTimeSelectionTable(thermoBaffleModel, noThermo, dictionary);
+addToRunTimeSelectionTable(thermalBaffleModel, noThermo, mesh);
+addToRunTimeSelectionTable(thermalBaffleModel, noThermo, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ bool noThermo::read()
 
 noThermo::noThermo(const word& modelType, const fvMesh& mesh)
 :
-    thermoBaffleModel(mesh)
+    thermalBaffleModel(mesh)
 {}
 
 
@@ -66,7 +66,7 @@ noThermo::noThermo
     const dictionary& dict
 )
 :
-    thermoBaffleModel(modelType, mesh, dict)
+    thermalBaffleModel(modelType, mesh, dict)
 {}
 
 
@@ -157,7 +157,7 @@ const solidThermo& noThermo::thermo() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace thermoBaffleModels
+} // End namespace thermalBaffleModels
 } // End namespace regionModels
 } // End namespace Foam
 

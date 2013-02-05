@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoBaffle1DFvPatchScalarField
+    Foam::thermalBaffle1DFvPatchScalarField
 
 Description
     Boundary which solves the 1D steady state heat transfer equation
     through a baffle.
 
 SourceFiles
-    thermoBaffle1DFvPatchScalarField.C
+    thermalBaffle1DFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoBaffle1DFvPatchScalarField_H
-#define thermoBaffle1DFvPatchScalarField_H
+#ifndef thermalBaffle1DFvPatchScalarField_H
+#define thermalBaffle1DFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 #include "autoPtr.H"
@@ -48,11 +48,11 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-            Class thermoBaffle1DFvPatchScalarField Declaration
+            Class thermalBaffle1DFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class solidType>
-class thermoBaffle1DFvPatchScalarField
+class thermalBaffle1DFvPatchScalarField
 :
     public mixedFvPatchScalarField
 {
@@ -77,20 +77,20 @@ class thermoBaffle1DFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("compressible::thermoBaffle1D");
+    TypeName("compressible::thermalBaffle1D");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        thermoBaffle1DFvPatchScalarField
+        thermalBaffle1DFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        thermoBaffle1DFvPatchScalarField
+        thermalBaffle1DFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -98,19 +98,19 @@ public:
         );
 
         //- Construct by mapping given
-        //  thermoBaffle1DFvPatchScalarField onto a new patch
-        thermoBaffle1DFvPatchScalarField
+        //  thermalBaffle1DFvPatchScalarField onto a new patch
+        thermalBaffle1DFvPatchScalarField
         (
-            const thermoBaffle1DFvPatchScalarField&,
+            const thermalBaffle1DFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        thermoBaffle1DFvPatchScalarField
+        thermalBaffle1DFvPatchScalarField
         (
-            const thermoBaffle1DFvPatchScalarField&
+            const thermalBaffle1DFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -118,14 +118,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new thermoBaffle1DFvPatchScalarField(*this)
+                new thermalBaffle1DFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        thermoBaffle1DFvPatchScalarField
+        thermalBaffle1DFvPatchScalarField
         (
-            const thermoBaffle1DFvPatchScalarField&,
+            const thermalBaffle1DFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -137,7 +137,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new thermoBaffle1DFvPatchScalarField(*this, iF)
+                new thermalBaffle1DFvPatchScalarField(*this, iF)
             );
         }
 
@@ -176,7 +176,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "thermoBaffle1DFvPatchScalarField.C"
+#   include "thermalBaffle1DFvPatchScalarField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
