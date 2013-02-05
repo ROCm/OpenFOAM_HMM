@@ -34,14 +34,8 @@ void Foam::conformationSurfaces::hasBoundedVolume
     List<searchableSurface::volumeType>& referenceVolumeTypes
 ) const
 {
-    vector sum = vector::zero;
+    vector sum(vector::zero);
     label totalTriangles = 0;
-
-    Info<< baffleSurfaces_ << endl;
-    Info<< surfaces_ << endl;
-    Info<< regionOffset_ << endl;
-    Info<< allGeometryToSurfaces_ << endl;
-
 
     forAll(surfaces_, s)
     {
