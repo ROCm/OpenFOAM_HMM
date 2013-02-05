@@ -58,7 +58,8 @@ Foam::fileControl::fileControl
     const Time& runTime,
     const word& name,
     const dictionary& controlFunctionDict,
-    const conformationSurfaces& geometryToConformTo
+    const conformationSurfaces& geometryToConformTo,
+    const scalar& defaultCellSize
 )
 :
     cellSizeAndAlignmentControl
@@ -66,14 +67,14 @@ Foam::fileControl::fileControl
         runTime,
         name,
         controlFunctionDict,
-        geometryToConformTo
+        geometryToConformTo,
+        defaultCellSize
     ),
     pointsFile_(controlFunctionDict.lookup("pointsFile")),
     sizesFile_(controlFunctionDict.lookup("sizesFile")),
-    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile")),
-    priority_(readLabel(controlFunctionDict.lookup("priority")))
+    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile"))
 {
-    Info<< indent << "Loading from file... " << nl
+    Info<< indent << "Loading " << name << " from file:" << nl
         << indent << "    points     : " << pointsFile_ << nl
         << indent << "    sizes      : " << sizesFile_ << nl
         << indent << "    alignments : " << alignmentsFile_

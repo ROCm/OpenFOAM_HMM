@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,8 @@ protected:
 
         const dictionary coeffsDict_;
 
+        const scalar& defaultCellSize_;
+
         //- If cell resizing is allowed, this is the factor of the old cell size
         //  to get the new cell size
         scalar refinementFactor_;
@@ -95,9 +97,10 @@ public:
             dictionary,
             (
                 const dictionary& surfaceCellSizeFunctionDict,
-                const searchableSurface& surface
+                const searchableSurface& surface,
+                const scalar& defaultCellSize
             ),
-            (surfaceCellSizeFunctionDict, surface)
+            (surfaceCellSizeFunctionDict, surface, defaultCellSize)
         );
 
 
@@ -108,7 +111,8 @@ public:
         (
             const word& type,
             const dictionary& surfaceCellSizeFunctionDict,
-            const searchableSurface& surface
+            const searchableSurface& surface,
+            const scalar& defaultCellSize
         );
 
 
@@ -118,7 +122,8 @@ public:
         static autoPtr<surfaceCellSizeFunction> New
         (
             const dictionary& surfaceCellSizeFunctionDict,
-            const searchableSurface& surface
+            const searchableSurface& surface,
+            const scalar& defaultCellSize
         );
 
 

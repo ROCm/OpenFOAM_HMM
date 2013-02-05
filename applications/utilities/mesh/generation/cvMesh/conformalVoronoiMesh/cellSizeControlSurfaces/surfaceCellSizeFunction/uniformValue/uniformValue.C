@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,11 +45,21 @@ namespace Foam
 Foam::uniformValue::uniformValue
 (
     const dictionary& cellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
-    surfaceCellSizeFunction(typeName, cellSizeFunctionDict, surface),
-    surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize")))
+    surfaceCellSizeFunction
+    (
+        typeName,
+        cellSizeFunctionDict,
+        surface,
+        defaultCellSize
+    ),
+    surfaceCellSize_
+    (
+        readScalar(coeffsDict().lookup("surfaceCellSizeCoeff"))*defaultCellSize_
+    )
 {}
 
 

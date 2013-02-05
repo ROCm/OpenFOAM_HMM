@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -95,10 +95,17 @@ void Foam::automatic::smoothField(triSurfaceScalarField& surf)
 Foam::automatic::automatic
 (
     const dictionary& cellSizeCalcTypeDict,
-    const triSurfaceMesh& surface
+    const triSurfaceMesh& surface,
+    const scalar& defaultCellSize
 )
 :
-    cellSizeCalculationType(typeName, cellSizeCalcTypeDict, surface),
+    cellSizeCalculationType
+    (
+        typeName,
+        cellSizeCalcTypeDict,
+        surface,
+        defaultCellSize
+    ),
     coeffsDict_(cellSizeCalcTypeDict.subDict(typeName + "Coeffs")),
     surface_(surface),
     surfaceName_(surface.searchableSurface::name()),
@@ -108,13 +115,13 @@ Foam::automatic::automatic
     featureProximityFile_(coeffsDict_.lookup("featureProximityFile")),
     readInternalCloseness_(Switch(coeffsDict_.lookup("internalCloseness"))),
     internalClosenessFile_(coeffsDict_.lookup("internalClosenessFile")),
-    curvatureCellSizeFactor_
+    curvatureCellSizeCoeff_
     (
-        readScalar(coeffsDict_.lookup("curvatureCellSizeFactor"))
+        readScalar(coeffsDict_.lookup("curvatureCellSizeCoeff"))
     ),
     maximumCellSize_
     (
-        readScalar(coeffsDict_.lookup("maximumCellSize"))
+        readScalar(coeffsDict_.lookup("maximumCellSizeCoeff"))*defaultCellSize_
     )
 {}
 
@@ -186,7 +193,7 @@ Foam::triSurfaceScalarField Foam::automatic::load()
                     1.0
                    /max
                     (
-                        (1.0/curvatureCellSizeFactor_)
+                        (1.0/curvatureCellSizeCoeff_)
                        *interpolatedCurvatureToFace,
                         1.0/maximumCellSize_
                     ),

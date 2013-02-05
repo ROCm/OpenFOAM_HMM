@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,10 @@ class conformationSurfaces
 
         //- The offset between the patch indices of the individual surface and
         //  the entry in the overall patch list
-        labelList patchOffsets_;
+        labelList regionOffset_;
+
+        //- From global region number to patchType
+        PtrList<dictionary> patchInfo_;
 
         //- The overall boundBox of all of the surfaces to be conformed to
         treeBoundBox globalBounds_;
@@ -96,6 +99,19 @@ class conformationSurfaces
 
 
     // Private Member Functions
+
+        void hasBoundedVolume
+        (
+            List<searchableSurface::volumeType>& referenceVolumeTypes
+        ) const;
+
+        //- Read into features_ from a dictionary
+        void readFeatures
+        (
+            const dictionary& featureDict,
+            const word& surfaceName,
+            label& featureIndex
+        );
 
         //- Disallow default bitwise copy construct
         conformationSurfaces(const conformationSurfaces&);
@@ -141,6 +157,9 @@ public:
 
             //- Return the patch names
             inline const List<word>& patchNames() const;
+
+            //- Return the patch info
+            inline const PtrList<dictionary>& patchInfo() const;
 
             //- Return the global bounds
             inline const treeBoundBox& globalBounds() const;
@@ -293,6 +312,13 @@ public:
                 List<label>& featuresHit
             ) const;
 
+            //- Get the region number of a hit surface
+            label getPatchID
+            (
+                const label hitSurface,
+                const pointIndexHit& surfHit
+            ) const;
+
             //- Find which patch is intersected by the line from one point to
             //  another
             label findPatch(const point& ptA, const point& ptB) const;
@@ -300,8 +326,12 @@ public:
             //- Find which patch is closest to the point
             label findPatch(const point& pt) const;
 
-            //- Is the surface a baffle
-            inline bool isBaffle(const label index) const;
+            //- Is the surface a baffle.
+            bool isBaffle
+            (
+                const label hitSurface,
+                const pointIndexHit& surfHit
+            ) const;
 
 
         // Write

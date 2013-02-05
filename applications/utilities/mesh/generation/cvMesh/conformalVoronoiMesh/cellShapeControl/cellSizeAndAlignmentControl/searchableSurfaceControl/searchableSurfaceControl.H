@@ -61,7 +61,9 @@ class searchableSurfaceControl
 
         const conformationSurfaces& geometryToConformTo_;
 
-        autoPtr<cellSizeFunction> cellSizeFunction_;
+        PtrList<cellSizeFunction> cellSizeFunctions_;
+
+        label maxPriority_;
 
 
 //        const conformationSurfaces& geometryToConformTo_;
@@ -106,7 +108,8 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& geometryToConformTo
+            const conformationSurfaces& geometryToConformTo,
+            const scalar& defaultCellSize
         );
 
     //- Destructor
@@ -147,15 +150,22 @@ public:
             triadField& alignments
         ) const;
 
-        const cellSizeFunction& sizeFunction() const
+        const PtrList<cellSizeFunction>& sizeFunctions() const
         {
-            return cellSizeFunction_();
+            return cellSizeFunctions_;
         }
 
-        virtual label priority() const
+        virtual label maxPriority() const
         {
-            return cellSizeFunction_().priority();
+            return maxPriority_;
         }
+
+        bool cellSize
+        (
+            const Foam::point& pt,
+            scalar& cellSize,
+            label& priority
+        ) const;
 
         // Edit
 

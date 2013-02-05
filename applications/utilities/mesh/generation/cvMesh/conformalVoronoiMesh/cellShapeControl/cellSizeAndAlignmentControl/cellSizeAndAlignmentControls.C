@@ -63,43 +63,10 @@ bool Foam::cellSizeAndAlignmentControls::evalCellSizeFunctions
 
                 if (debug)
                 {
-                    Info<< "size function "
-                        << sSC.name()
-                        << " priority " << sSC.priority()
-                        << endl;
+                    Info<< "size function " << sSC.name() << endl;
                 }
 
-                if (sSC.priority() < previousPriority)
-                {
-                    return minSize;
-                }
-
-                scalar sizeI;
-
-                if (sSC.sizeFunction().cellSize(pt, sizeI))
-                {
-                    anyFunctionFound = true;
-
-                    if (sSC.priority() == previousPriority)
-                    {
-                        if (sizeI < minSize)
-                        {
-                            minSize = sizeI;
-                        }
-                    }
-                    else
-                    {
-                        minSize = sizeI;
-                    }
-
-                    if (debug)
-                    {
-                        Info<< "sizeI " << sizeI
-                            <<" minSize " << minSize << endl;
-                    }
-
-                    previousPriority = sSC.priority();
-                }
+                anyFunctionFound = sSC.cellSize(pt, minSize, previousPriority);
             }
         }
     }
@@ -115,7 +82,7 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
     const Time& runTime,
     const dictionary& shapeControlDict,
     const conformationSurfaces& geometryToConformTo,
-    const scalar defaultCellSize
+    const scalar& defaultCellSize
 )
 :
     shapeControlDict_(shapeControlDict),
@@ -135,6 +102,7 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
         );
 
         Info<< nl << "Shape Control : " << shapeControlEntryName << endl;
+        Info<< incrIndent;
 
         controlFunctions_.set
         (
@@ -144,9 +112,12 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
                 runTime,
                 shapeControlEntryName,
                 controlFunctionDict,
-                geometryToConformTo
+                geometryToConformTo_,
+                defaultCellSize_
             )
         );
+
+        Info<< decrIndent;
 
         functionI++;
     }

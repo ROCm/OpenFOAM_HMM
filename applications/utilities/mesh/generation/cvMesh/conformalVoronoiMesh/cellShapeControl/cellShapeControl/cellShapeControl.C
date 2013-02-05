@@ -47,23 +47,23 @@ defineTypeNameAndDebug(cellShapeControl, 0);
 Foam::cellShapeControl::cellShapeControl
 (
     const Time& runTime,
-    const dictionary& motionDict,
+    const cvControls& cvMeshControls,
     const searchableSurfaces& allGeometry,
     const conformationSurfaces& geometryToConformTo
 )
 :
-    dictionary(motionDict),
+    dictionary(cvMeshControls.cvMeshDict().subDict("motionControl")),
     runTime_(runTime),
     allGeometry_(allGeometry),
     geometryToConformTo_(geometryToConformTo),
-    defaultCellSize_(readScalar(lookup("defaultCellSize"))),
-    minimumCellSize_(readScalar(lookup("minimumCellSize"))),
+    defaultCellSize_(cvMeshControls.defaultCellSize()),
+    minimumCellSize_(cvMeshControls.minimumCellSize()),
     shapeControlMesh_(runTime),
-    aspectRatio_(motionDict),
+    aspectRatio_(*this),
     sizeAndAlignment_
     (
         runTime,
-        motionDict.subDict("shapeControlFunctions"),
+        subDict("shapeControlFunctions"),
         geometryToConformTo_,
         defaultCellSize_
     )

@@ -48,6 +48,7 @@ SourceFiles
 #include "cellSizeAndAlignmentControls.H"
 #include "cellShapeControlMesh.H"
 #include "backgroundMeshDecomposition.H"
+#include "cvControls.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -104,7 +105,7 @@ public:
         cellShapeControl
         (
             const Time& runTime,
-            const dictionary& cellShapeControlDict,
+            const cvControls& cvMeshControls,
             const searchableSurfaces& allGeometry,
             const conformationSurfaces& geometryToConformTo
         );

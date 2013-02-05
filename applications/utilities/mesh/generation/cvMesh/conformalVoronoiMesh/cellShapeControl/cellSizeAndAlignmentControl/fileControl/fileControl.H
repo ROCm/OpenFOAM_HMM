@@ -58,8 +58,6 @@ class fileControl
 
         const fileName alignmentsFile_;
 
-        label priority_;
-
 
     // Private Member Functions
 
@@ -85,7 +83,8 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& geometryToConformTo
+            const conformationSurfaces& geometryToConformTo,
+            const scalar& defaultCellSize
         );
 
     //- Destructor
@@ -121,11 +120,6 @@ public:
             scalarField& sizes,
             triadField& alignments
         ) const;
-
-        virtual label priority() const
-        {
-            return priority_;
-        }
 };
 
 

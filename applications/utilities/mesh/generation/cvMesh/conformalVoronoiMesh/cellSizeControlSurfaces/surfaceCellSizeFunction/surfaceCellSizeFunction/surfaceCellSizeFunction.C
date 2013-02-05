@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,12 +40,14 @@ Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
 (
     const word& type,
     const dictionary& surfaceCellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
     dictionary(surfaceCellSizeFunctionDict),
     surface_(surface),
     coeffsDict_(subDict(type + "Coeffs")),
+    defaultCellSize_(defaultCellSize),
     refinementFactor_
     (
         lookupOrDefault<scalar>("refinementFactor", 1.0)
@@ -58,7 +60,8 @@ Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
 Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 (
     const dictionary& surfaceCellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 {
     word surfaceCellSizeFunctionTypeName
@@ -66,7 +69,7 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
         surfaceCellSizeFunctionDict.lookup("surfaceCellSizeFunction")
     );
 
-    Info<< "    Selecting surfaceCellSizeFunction "
+    Info<< indent << "Selecting surfaceCellSizeFunction "
         << surfaceCellSizeFunctionTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -88,7 +91,7 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 
     return autoPtr<surfaceCellSizeFunction>
     (
-        cstrIter()(surfaceCellSizeFunctionDict, surface)
+        cstrIter()(surfaceCellSizeFunctionDict, surface, defaultCellSize)
     );
 }
 

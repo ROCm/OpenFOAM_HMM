@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,12 +42,17 @@ addToRunTimeSelectionTable(cellSizeFunction, linearSpatial, dictionary);
 linearSpatial::linearSpatial
 (
     const dictionary& initialPointsDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface),
+    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
     referencePoint_(coeffsDict().lookup("referencePoint")),
-    referenceCellSize_(readScalar(coeffsDict().lookup("referenceCellSize"))),
+    referenceCellSize_
+    (
+        readScalar(coeffsDict().lookup("referenceCellSizeCoeff"))
+       *defaultCellSize_
+    ),
     direction_(coeffsDict().lookup("direction")),
     cellSizeGradient_(readScalar(coeffsDict().lookup("cellSizeGradient")))
 {

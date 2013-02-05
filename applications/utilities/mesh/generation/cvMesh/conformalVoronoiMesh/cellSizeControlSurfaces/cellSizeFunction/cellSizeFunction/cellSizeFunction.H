@@ -94,6 +94,8 @@ protected:
         //- Method details dictionary
         dictionary coeffsDict_;
 
+        const scalar& defaultCellSize_;
+
         //- Mode of size specification, i.e. inside, outside or bothSides
         sideMode sideMode_;
 
@@ -122,9 +124,10 @@ public:
             dictionary,
             (
                 const dictionary& cellSizeFunctionDict,
-                const searchableSurface& surface
+                const searchableSurface& surface,
+                const scalar& defaultCellSize
             ),
-            (cellSizeFunctionDict, surface)
+            (cellSizeFunctionDict, surface, defaultCellSize)
         );
 
 
@@ -135,7 +138,8 @@ public:
         (
             const word& type,
             const dictionary& cellSizeFunctionDict,
-            const searchableSurface& surface
+            const searchableSurface& surface,
+            const scalar& defaultCellSize
         );
 
 
@@ -145,7 +149,8 @@ public:
         static autoPtr<cellSizeFunction> New
         (
             const dictionary& cellSizeFunctionDict,
-            const searchableSurface& surface
+            const searchableSurface& surface,
+            const scalar& defaultCellSize
         );
 
 

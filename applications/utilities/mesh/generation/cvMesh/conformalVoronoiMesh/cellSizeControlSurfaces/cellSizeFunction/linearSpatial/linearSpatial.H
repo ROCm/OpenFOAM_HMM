@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,8 @@ public:
         linearSpatial
         (
             const dictionary& initialPointsDict,
-            const searchableSurface& surface
+            const searchableSurface& surface,
+            const scalar& defaultCellSize
         );
 
 

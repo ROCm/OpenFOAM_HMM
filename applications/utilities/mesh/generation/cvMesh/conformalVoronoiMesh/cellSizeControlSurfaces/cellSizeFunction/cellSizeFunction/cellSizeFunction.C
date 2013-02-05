@@ -42,7 +42,8 @@ Foam::cellSizeFunction::cellSizeFunction
 (
     const word& type,
     const dictionary& cellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
     dictionary(cellSizeFunctionDict),
@@ -52,14 +53,16 @@ Foam::cellSizeFunction::cellSizeFunction
         surfaceCellSizeFunction::New
         (
             cellSizeFunctionDict,
-            surface
+            surface,
+            defaultCellSize
         )
     ),
     coeffsDict_(subDict(type + "Coeffs")),
+    defaultCellSize_(defaultCellSize),
     sideMode_(),
-    priority_(readLabel(cellSizeFunctionDict.lookup("priority")))
+    priority_(readLabel(cellSizeFunctionDict.lookup("priority", true)))
 {
-    word mode = cellSizeFunctionDict.lookup("mode");
+    word mode = cellSizeFunctionDict.lookup("mode", true);
 
     if (surface_.hasVolumeType())
     {
@@ -102,7 +105,8 @@ Foam::cellSizeFunction::cellSizeFunction
 Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 (
     const dictionary& cellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 {
     word cellSizeFunctionTypeName
@@ -110,7 +114,7 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
         cellSizeFunctionDict.lookup("cellSizeFunction")
     );
 
-    Info<< "    Selecting cellSizeFunction " << cellSizeFunctionTypeName
+    Info<< indent << "Selecting cellSizeFunction " << cellSizeFunctionTypeName
         << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -132,7 +136,7 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 
     return autoPtr<cellSizeFunction>
     (
-        cstrIter()(cellSizeFunctionDict, surface)
+        cstrIter()(cellSizeFunctionDict, surface, defaultCellSize)
     );
 }
 

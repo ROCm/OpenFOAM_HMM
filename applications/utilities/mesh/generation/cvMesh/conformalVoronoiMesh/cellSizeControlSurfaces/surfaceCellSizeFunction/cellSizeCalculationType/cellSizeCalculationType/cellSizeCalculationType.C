@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,10 +41,12 @@ Foam::cellSizeCalculationType::cellSizeCalculationType
 (
     const word& type,
     const dictionary& cellSizeCalculationTypeDict,
-    const triSurfaceMesh& surface
+    const triSurfaceMesh& surface,
+    const scalar& defaultCellSize
 )
 :
-    cellSizeCalculationTypeDict_(cellSizeCalculationTypeDict)
+    cellSizeCalculationTypeDict_(cellSizeCalculationTypeDict),
+    defaultCellSize_(defaultCellSize)
 {}
 
 
@@ -53,7 +55,8 @@ Foam::cellSizeCalculationType::cellSizeCalculationType
 Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
 (
     const dictionary& cellSizeCalculationTypeDict,
-    const triSurfaceMesh& surface
+    const triSurfaceMesh& surface,
+    const scalar& defaultCellSize
 )
 {
     word cellSizeCalculationTypeTypeName
@@ -61,7 +64,7 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
         cellSizeCalculationTypeDict.lookup("cellSizeCalculationType")
     );
 
-    Info<< "    Selecting cellSizeCalculationType "
+    Info<< indent << "Selecting cellSizeCalculationType "
         << cellSizeCalculationTypeTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -83,7 +86,7 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
 
     return autoPtr<cellSizeCalculationType>
     (
-        cstrIter()(cellSizeCalculationTypeDict, surface)
+        cstrIter()(cellSizeCalculationTypeDict, surface, defaultCellSize)
     );
 }
 

@@ -127,7 +127,8 @@ Foam::cvControls::cvControls
 
     defaultCellSize_ = readScalar(motionDict.lookup("defaultCellSize"));
 
-    minimumCellSize_ = readScalar(motionDict.lookup("minimumCellSize"));
+    minimumCellSize_ =
+        readScalar(motionDict.lookup("minimumCellSizeCoeff"))*defaultCellSize_;
 
     objOutput_ = Switch(motionDict.lookupOrDefault<Switch>("objOutput", false));
 

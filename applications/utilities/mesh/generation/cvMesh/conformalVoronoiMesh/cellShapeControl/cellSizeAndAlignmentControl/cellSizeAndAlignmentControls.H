@@ -56,7 +56,7 @@ class cellSizeAndAlignmentControls
 
         PtrList<cellSizeAndAlignmentControl> controlFunctions_;
 
-        const scalar defaultCellSize_;
+        const scalar& defaultCellSize_;
 
 
     // Private Member Functions
@@ -84,7 +84,7 @@ public:
             const Time& runTime,
             const dictionary& shapeControlDict,
             const conformationSurfaces& geometryToConformTo,
-            const scalar defaultCellSize
+            const scalar& defaultCellSize
         );
 
 

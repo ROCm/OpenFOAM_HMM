@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,49 +46,60 @@ addToRunTimeSelectionTable
 surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 (
     const dictionary& initialPointsDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
-    cellSizeFunction(typeName, initialPointsDict, surface),
-    distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
-    surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),
+    cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
+    distanceCellSize_
+    (
+        readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
+       *defaultCellSize_
+    ),
+    surfaceOffset_
+    (
+        readScalar(coeffsDict().lookup("surfaceOffsetCoeff"))*defaultCellSize_
+    ),
     totalDistance_(),
     totalDistanceSqr_()
 {
     if
     (
-        coeffsDict().found("totalDistance")
-     || coeffsDict().found("linearDistance")
+        coeffsDict().found("totalDistanceCoeff")
+     || coeffsDict().found("linearDistanceCoeff")
     )
     {
         if
         (
-            coeffsDict().found("totalDistance")
-         && coeffsDict().found("linearDistance")
+            coeffsDict().found("totalDistanceCoeff")
+         && coeffsDict().found("linearDistanceCoeff")
         )
         {
             FatalErrorIn
             (
                 "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
                 "("
-                    "const dictionary& initialPointsDict, "
-                    "const conformalVoronoiMesh& cvMesh, "
-                    "const searchableSurface& surface"
+                "    const dictionary& initialPointsDict,"
+                "    const searchableSurface& surface,"
+                "    const scalar& defaultCellSize"
                 ")"
             )
-                << "totalDistance and linearDistance found, "
+                << "totalDistanceCoeff and linearDistanceCoeff found, "
                 << "specify one or other, not both."
                 << nl << exit(FatalError) << endl;
         }
 
-        if (coeffsDict().found("totalDistance"))
+        if (coeffsDict().found("totalDistanceCoeff"))
         {
-            totalDistance_ = readScalar(coeffsDict().lookup("totalDistance"));
+            totalDistance_ =
+                readScalar(coeffsDict().lookup("totalDistanceCoeff"))
+               *defaultCellSize_;
         }
         else
         {
             totalDistance_ =
-                readScalar(coeffsDict().lookup("linearDistance"))
+                readScalar(coeffsDict().lookup("linearDistanceCoeff"))
+               *defaultCellSize_
               + surfaceOffset_;
         }
     }
@@ -98,12 +109,12 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
         (
             "surfaceOffsetLinearDistance::surfaceOffsetLinearDistance"
             "("
-                "const dictionary& initialPointsDict, "
-                "const conformalVoronoiMesh& cvMesh, "
-                "const searchableSurface& surface"
+            "    const dictionary& initialPointsDict,"
+            "    const searchableSurface& surface,"
+            "    const scalar& defaultCellSize"
             ")"
         )
-            << "totalDistance or linearDistance not found."
+            << "totalDistanceCoeff or linearDistanceCoeff not found."
             << nl << exit(FatalError) << endl;
     }
 

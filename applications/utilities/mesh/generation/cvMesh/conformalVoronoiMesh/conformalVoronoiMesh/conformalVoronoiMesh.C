@@ -539,7 +539,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 
         const Foam::point& surfacePt(surfaceHit.hitPoint());
 
-        if (geometryToConformTo_.isBaffle(featureIndex))
+        if (geometryToConformTo_.isBaffle(featureIndex, surfaceHit))
         {
             createBafflePointPair
             (
@@ -1213,7 +1213,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     cellShapeControl_
     (
         runTime_,
-        cvMeshDict.subDict("motionControl"),
+        cvMeshControls_,
         allGeometry_,
         geometryToConformTo_
     ),

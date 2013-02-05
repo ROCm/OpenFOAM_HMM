@@ -46,10 +46,12 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
     const Time& runTime,
     const word& name,
     const dictionary& controlFunctionDict,
-    const conformationSurfaces& geometryToConformTo
+    const conformationSurfaces& geometryToConformTo,
+    const scalar& defaultCellSize
 )
 :
     runTime_(runTime),
+    defaultCellSize_(defaultCellSize),
     name_(name)
 {}
 
@@ -62,7 +64,8 @@ Foam::cellSizeAndAlignmentControl::New
     const Time& runTime,
     const word& name,
     const dictionary& controlFunctionDict,
-    const conformationSurfaces& geometryToConformTo
+    const conformationSurfaces& geometryToConformTo,
+    const scalar& defaultCellSize
 )
 {
     word cellSizeAndAlignmentControlTypeName
@@ -70,7 +73,7 @@ Foam::cellSizeAndAlignmentControl::New
         controlFunctionDict.lookup("type")
     );
 
-    Info<< "    Selecting cellSizeAndAlignmentControl "
+    Info<< indent << "Selecting cellSizeAndAlignmentControl "
         << cellSizeAndAlignmentControlTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
@@ -99,7 +102,8 @@ Foam::cellSizeAndAlignmentControl::New
             runTime,
             name,
             controlFunctionDict,
-            geometryToConformTo
+            geometryToConformTo,
+            defaultCellSize
         )
     );
 }

@@ -27,6 +27,133 @@ License
 #include "conformalVoronoiMesh.H"
 #include "triSurface.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::conformationSurfaces::hasBoundedVolume
+(
+    List<searchableSurface::volumeType>& referenceVolumeTypes
+) const
+{
+    vector sum = vector::zero;
+    label totalTriangles = 0;
+
+    Info<< baffleSurfaces_ << endl;
+    Info<< surfaces_ << endl;
+    Info<< regionOffset_ << endl;
+    Info<< allGeometryToSurfaces_ << endl;
+
+
+    forAll(surfaces_, s)
+    {
+        const searchableSurface& surface(allGeometry_[surfaces_[s]]);
+
+        if (surface.hasVolumeType())
+        {
+            pointField pts(1, locationInMesh_);
+
+            List<searchableSurface::volumeType> vTypes
+            (
+                pts.size(),
+                searchableSurface::UNKNOWN
+            );
+
+            surface.getVolumeType(pts, vTypes);
+
+            referenceVolumeTypes[s] = vTypes[0];
+
+            Info<< "    is "
+                << searchableSurface::volumeTypeNames[referenceVolumeTypes[s]]
+                << " surface " << surface.name()
+                << endl;
+        }
+
+        if (isA<triSurface>(surface))
+        {
+            const triSurface& triSurf = refCast<const triSurface>(surface);
+
+            const pointField& surfPts = triSurf.points();
+
+            forAll(triSurf, sI)
+            {
+                const label patchID =
+                    triSurf[sI].region()
+                  + regionOffset_[allGeometryToSurfaces_[s]];
+
+                // Don't include baffle surfaces in the calculation
+                if (!baffleSurfaces_[patchID])
+                {
+                    sum += triSurf[sI].normal(surfPts);
+                }
+            }
+
+            totalTriangles += triSurf.size();
+        }
+    }
+
+    Info<< "    Sum of all the surface normals (if near zero, surface is"
+        << " probably closed):" << nl
+        << "        Sum = " << sum/totalTriangles << nl
+        << "        mag(Sum) = " << mag(sum)/totalTriangles
+        << endl;
+}
+
+
+void Foam::conformationSurfaces::readFeatures
+(
+    const dictionary& featureDict,
+    const word& surfaceName,
+    label& featureIndex
+)
+{
+    word featureMethod =
+        featureDict.lookupOrDefault<word>("featureMethod", "none");
+
+    if (featureMethod == "extendedFeatureEdgeMesh")
+    {
+        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+
+        Info<< "    features: " << feMeshName << endl;
+
+        features_.set
+        (
+            featureIndex++,
+            new extendedFeatureEdgeMesh
+            (
+                IOobject
+                (
+                    feMeshName,
+                    runTime_.time().constant(),
+                    "extendedFeatureEdgeMesh",
+                    runTime_.time(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            )
+        );
+    }
+    else if (featureMethod == "extractFeatures")
+    {
+        notImplemented
+        (
+            "Foam::conformationSurfaces::readFeatures, "
+            "else if (featureMethod == \"extractFeatures\")"
+        );
+    }
+    else if (featureMethod == "none")
+    {
+        // Currently nothing to do
+    }
+    else
+    {
+        FatalErrorIn("Foam::conformationSurfaces::readFeatures")
+            << "No valid featureMethod found for surface " << surfaceName
+            << nl << "Use \"extendedFeatureEdgeMesh\" "
+            << "or \"extractFeatures\"."
+            << exit(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::conformationSurfaces::conformationSurfaces
@@ -45,8 +172,9 @@ Foam::conformationSurfaces::conformationSurfaces
     surfaces_(),
     allGeometryToSurfaces_(),
     baffleSurfaces_(),
-    patchNames_(0),
-    patchOffsets_(),
+    patchNames_(),
+    regionOffset_(),
+    patchInfo_(),
     globalBounds_(),
     referenceVolumeTypes_(0)
 {
@@ -55,25 +183,34 @@ Foam::conformationSurfaces::conformationSurfaces
         surfaceConformationDict.subDict("geometryToConformTo")
     );
 
+    const label nSurf = surfacesDict.size();
+
     const dictionary& additionalFeaturesDict
     (
         surfaceConformationDict.subDict("additionalFeatures")
     );
 
+    const label nAddFeat = additionalFeaturesDict.size();
+
     Info<< nl << "Reading geometryToConformTo" << endl;
 
-    surfaces_.setSize(surfacesDict.size(), -1);
+    surfaces_.setSize(nSurf, -1);
 
     allGeometryToSurfaces_.setSize(allGeometry_.size(), -1);
 
-    baffleSurfaces_.setSize(surfacesDict.size(), false);
+    baffleSurfaces_.setSize(nSurf, false);
 
     // Features may be attached to host surfaces or independent
-    features_.setSize(surfacesDict.size() + additionalFeaturesDict.size());
+    features_.setSize(nSurf + nAddFeat);
 
     label featureI = 0;
 
-    patchOffsets_.setSize(surfacesDict.size(), -1);
+    regionOffset_.setSize(nSurf, 0);
+
+    PtrList<dictionary> globalPatchInfo(nSurf);
+    List<Map<autoPtr<dictionary> > > regionPatchInfo(nSurf);
+    boolList globalBaffleSurfaces(nSurf, false);
+    List<Map<bool> > regionBaffleSurface(nSurf);
 
     label surfI = 0;
 
@@ -83,30 +220,31 @@ Foam::conformationSurfaces::conformationSurfaces
 
         surfaces_[surfI] = allGeometry_.findSurfaceID(surfaceName);
 
-        allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
-
         if (surfaces_[surfI] < 0)
         {
             FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
-                << "No surface " << iter().keyword() << " found. "
+                << "No surface " << surfaceName << " found. "
                 << "Valid geometry is " << nl << allGeometry_.names()
                 << exit(FatalError);
         }
 
-        Info<< nl << "    " << iter().keyword() << endl;
+        allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
 
-        patchOffsets_[surfI] = patchNames_.size();
+        Info<< nl << "    " << surfaceName << endl;
 
-        patchNames_.append(allGeometry.regionNames()[surfaces_[surfI]]);
+        const wordList& regionNames =
+            allGeometry_.regionNames()[surfaces_[surfI]];
+
+        patchNames_.append(regionNames);
 
         const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
 
-        baffleSurfaces_[surfI] = Switch
+        globalBaffleSurfaces[surfI] = Switch
         (
             surfaceSubDict.lookupOrDefault("baffleSurface", false)
         );
 
-        if (!baffleSurfaces_[surfI])
+        if (!globalBaffleSurfaces[surfI])
         {
             if (!allGeometry_[surfaces_[surfI]].hasVolumeType())
             {
@@ -118,57 +256,118 @@ Foam::conformationSurfaces::conformationSurfaces
             }
         }
 
-        word featureMethod = surfaceSubDict.lookup("featureMethod");
-
-        if (featureMethod == "extendedFeatureEdgeMesh")
+        // Load patch info
+        if (surfaceSubDict.found("patchInfo"))
         {
-            fileName feMeshName
+            globalPatchInfo.set
             (
-                surfaceSubDict.lookup("extendedFeatureEdgeMesh")
+                surfI,
+                surfaceSubDict.subDict("patchInfo").clone()
             );
+        }
 
-            Info<< "    features: " << feMeshName<< endl;
+        readFeatures(surfaceSubDict, surfaceName, featureI);
 
-            features_.set
-            (
-                featureI++,
-                new extendedFeatureEdgeMesh
-                (
-                    IOobject
+        if (surfaceSubDict.found("regions"))
+        {
+            const dictionary& regionsDict = surfaceSubDict.subDict("regions");
+
+            forAll(regionNames, regionI)
+            {
+                const word& regionName = regionNames[regionI];
+
+                if (regionsDict.found(regionName))
+                {
+                    Info<< "        region " << regionName << endl;
+
+                    // Get the dictionary for region
+                    const dictionary& regionDict = regionsDict.subDict
                     (
-                        feMeshName,
-                        runTime_.time().constant(),
-                        "extendedFeatureEdgeMesh",
-                        runTime_.time(),
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                )
-            );
-        }
-        else if (featureMethod == "extractFeatures")
-        {
-            notImplemented
-            (
-                "conformationSurfaces::conformationSurfaces, "
-                "else if (featureMethod == \"extractFeatures\")"
-            );
-        }
-        else if (featureMethod == "none")
-        {
-            // Currently nothing to do
-        }
-        else
-        {
-            FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
-                << "No valid featureMethod found for surface " << surfaceName
-                << nl << "Use \"extendedFeatureEdgeMesh\" "
-                << "or \"extractFeatures\"."
-                << exit(FatalError);
+                        regionName
+                    );
+
+                    if (regionDict.found("patchInfo"))
+                    {
+                        regionPatchInfo[surfI].insert
+                        (
+                            regionI,
+                            regionDict.subDict("patchInfo").clone()
+                        );
+
+//                        Info<< "            patchInfo: "
+//                            << regionPatchInfo[surfI][regionI] << endl;
+                    }
+
+                    if (regionDict.found("baffleSurface"))
+                    {
+                        regionBaffleSurface[surfI].insert
+                        (
+                            regionI,
+                            regionDict.lookup("baffleSurface")
+                        );
+
+//                        Info<< "            baffle: "
+//                            << regionBaffleSurface[surfI][regionI] << endl;
+                    }
+
+                    readFeatures(regionDict, regionName, featureI);
+                }
+            }
         }
 
         surfI++;
     }
+
+    // Calculate local to global region offset
+    label nRegions = 0;
+
+    forAll(surfaces_, surfI)
+    {
+        regionOffset_[surfI] = nRegions;
+        nRegions += allGeometry_[surfaces_[surfI]].regions().size();
+    }
+
+    // Rework surface specific information into information per global region
+    patchInfo_.setSize(nRegions);
+    baffleSurfaces_.setSize(nRegions, false);
+
+    forAll(surfaces_, surfI)
+    {
+        label nRegions = allGeometry_[surfaces_[surfI]].regions().size();
+
+        // Initialise to global (i.e. per surface)
+        for (label i = 0; i < nRegions; i++)
+        {
+            label globalRegionI = regionOffset_[surfI] + i;
+            baffleSurfaces_[globalRegionI] = globalBaffleSurfaces[surfI];
+            if (globalPatchInfo.set(surfI))
+            {
+                patchInfo_.set
+                (
+                    globalRegionI,
+                    globalPatchInfo[surfI].clone()
+                );
+            }
+        }
+
+        forAllConstIter(Map<bool>, regionBaffleSurface[surfI], iter)
+        {
+            label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            baffleSurfaces_[globalRegionI] =
+                regionBaffleSurface[surfI][iter.key()];
+        }
+
+        const Map<autoPtr<dictionary> >& localInfo = regionPatchInfo[surfI];
+        forAllConstIter(Map<autoPtr<dictionary> >, localInfo, iter)
+        {
+            label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            patchInfo_.set(globalRegionI, iter()().clone());
+        }
+    }
+
+
 
     if (!additionalFeaturesDict.empty())
     {
@@ -186,38 +385,7 @@ Foam::conformationSurfaces::conformationSurfaces
             additionalFeaturesDict.subDict(featureName)
         );
 
-        word featureMethod = featureSubDict.lookupOrDefault
-        (
-            "featureMethod",
-            word("none")
-        );
-
-        if (featureMethod == "extendedFeatureEdgeMesh")
-        {
-            fileName feMeshName
-            (
-                featureSubDict.lookup("extendedFeatureEdgeMesh")
-            );
-
-            Info<< "    features: " << feMeshName << endl;
-
-            features_.set
-            (
-                featureI++,
-                new extendedFeatureEdgeMesh
-                (
-                    IOobject
-                    (
-                        feMeshName,
-                        runTime_.time().constant(),
-                        "extendedFeatureEdgeMesh",
-                        runTime_.time(),
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE
-                    )
-                )
-            );
-        }
+        readFeatures(featureSubDict, featureName, featureI);
     }
 
     // Remove unnecessary space from the features list
@@ -251,53 +419,7 @@ Foam::conformationSurfaces::conformationSurfaces
     Info<< endl
         << "Testing for locationInMesh " << locationInMesh_ << endl;
 
-    vector sum = vector::zero;
-    label totalTriangles = 0;
-
-    forAll(surfaces_, s)
-    {
-        const searchableSurface& surface(allGeometry_[surfaces_[s]]);
-
-        if (surface.hasVolumeType())
-        {
-            pointField pts(1, locationInMesh_);
-
-            List<searchableSurface::volumeType> vTypes
-            (
-                pts.size(),
-                searchableSurface::UNKNOWN
-            );
-
-            surface.getVolumeType(pts, vTypes);
-
-            referenceVolumeTypes_[s] = vTypes[0];
-
-            Info<< "    is "
-                << searchableSurface::volumeTypeNames[referenceVolumeTypes_[s]]
-                << " surface " << surface.name()
-                << endl;
-        }
-
-        if (isA<triSurface>(surface))
-        {
-            const triSurface& triSurf = refCast<const triSurface>(surface);
-
-            const pointField& surfPts = triSurf.points();
-
-            forAll(triSurf, sI)
-            {
-                sum += triSurf[sI].normal(surfPts);
-            }
-
-            totalTriangles += triSurf.size();
-        }
-    }
-
-    Info<< "    Sum of all the surface normals (if near zero, surface is"
-        << " probably closed):" << nl
-        << "        Sum = " << sum/totalTriangles << nl
-        << "        mag(Sum) = " << mag(sum)/totalTriangles
-        << endl;
+    hasBoundedVolume(referenceVolumeTypes_);
 }
 
 
@@ -867,21 +989,7 @@ Foam::label Foam::conformationSurfaces::findPatch
 
     findSurfaceAnyIntersection(ptA, ptB, surfHit, hitSurface);
 
-    if (!surfHit.hit())
-    {
-        return -1;
-    }
-
-    labelList surfLocalRegion;
-
-    allGeometry_[hitSurface].getRegion
-    (
-        List<pointIndexHit>(1, surfHit),
-        surfLocalRegion
-    );
-
-    return
-        surfLocalRegion[0] + patchOffsets_[allGeometryToSurfaces_[hitSurface]];
+    return getPatchID(hitSurface, surfHit);
 }
 
 
@@ -898,6 +1006,16 @@ Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
         hitSurface
     );
 
+    return getPatchID(hitSurface, surfHit);
+}
+
+
+Foam::label Foam::conformationSurfaces::getPatchID
+(
+    const label hitSurface,
+    const pointIndexHit& surfHit
+) const
+{
     if (!surfHit.hit())
     {
         return -1;
@@ -911,8 +1029,28 @@ Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
         surfLocalRegion
     );
 
-    return
-        surfLocalRegion[0] + patchOffsets_[allGeometryToSurfaces_[hitSurface]];
+    const label patchID =
+        surfLocalRegion[0]
+      + regionOffset_[allGeometryToSurfaces_[hitSurface]];
+
+    return patchID;
+}
+
+
+bool Foam::conformationSurfaces::isBaffle
+(
+    const label hitSurface,
+    const pointIndexHit& surfHit
+) const
+{
+    const label patchID = getPatchID(hitSurface, surfHit);
+
+    if (patchID == -1)
+    {
+        return false;
+    }
+
+    return baffleSurfaces_[patchID];
 }
 
 

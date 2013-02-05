@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,10 +48,17 @@ namespace Foam
 Foam::nonUniformField::nonUniformField
 (
     const dictionary& cellSizeFunctionDict,
-    const searchableSurface& surface
+    const searchableSurface& surface,
+    const scalar& defaultCellSize
 )
 :
-    surfaceCellSizeFunction(typeName, cellSizeFunctionDict, surface),
+    surfaceCellSizeFunction
+    (
+        typeName,
+        cellSizeFunctionDict,
+        surface,
+        defaultCellSize
+    ),
     surfaceTriMesh_(refCast<const triSurfaceMesh>(surface)),
     surfaceCellSize_
     (
@@ -70,16 +77,19 @@ Foam::nonUniformField::nonUniformField
     ),
     cellSizeCalculationType_
     (
-        cellSizeCalculationType::New(coeffsDict(), surfaceTriMesh_)
+        cellSizeCalculationType::New
+        (
+            coeffsDict(),
+            surfaceTriMesh_,
+            defaultCellSize_
+        )
     ),
     pointCellSize_(),
     patch_()
 {
-    Info<< incrIndent << incrIndent;
+    Info<< incrIndent;
 
     surfaceCellSize_ = cellSizeCalculationType_().load();
-
-    Info<< decrIndent;
 
     Info<< indent << "Cell size field statistics:" << nl
         << indent << "    Minimum: " << min(surfaceCellSize_).value() << nl

@@ -1823,12 +1823,23 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
     patchTypes.setSize(patchNames.size() + 1, wallPolyPatch::typeName);
     procNeighbours.setSize(patchNames.size() + 1, -1);
 
+    const PtrList<dictionary>& patchInfo = geometryToConformTo_.patchInfo();
+
+    forAll(patchNames, patchI)
+    {
+        if (patchInfo.set(patchI))
+        {
+            patchTypes[patchI] =
+                patchInfo[patchI].lookupOrDefault<word>
+                (
+                    "type",
+                    wallPolyPatch::typeName
+                );
+        }
+    }
+
     patchNames.setSize(patchNames.size() + 1);
-
     label defaultPatchIndex = patchNames.size() - 1;
-
-    patchTypes[defaultPatchIndex] = wallPolyPatch::typeName;
-    procNeighbours[defaultPatchIndex] = -1;
     patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
 
     label nProcPatches = 0;

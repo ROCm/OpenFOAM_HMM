@@ -57,6 +57,8 @@ protected:
 
         const Time& runTime_;
 
+        const scalar& defaultCellSize_;
+
 
 private:
 
@@ -91,9 +93,16 @@ public:
                 const Time& runTime,
                 const word& name,
                 const dictionary& controlFunctionDict,
-                const conformationSurfaces& geometryToConformTo
+                const conformationSurfaces& geometryToConformTo,
+                const scalar& defaultCellSize
             ),
-            (runTime, name, controlFunctionDict, geometryToConformTo)
+            (
+                runTime,
+                name,
+                controlFunctionDict,
+                geometryToConformTo,
+                defaultCellSize
+            )
         );
 
 
@@ -106,7 +115,8 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& geometryToConformTo
+            const conformationSurfaces& geometryToConformTo,
+            const scalar& defaultCellSize
         );
 
 
@@ -118,7 +128,8 @@ public:
             const Time& runTime,
             const word& name,
             const dictionary& controlFunctionDict,
-            const conformationSurfaces& geometryToConformTo
+            const conformationSurfaces& geometryToConformTo,
+            const scalar& defaultCellSize
         );
 
 
@@ -134,8 +145,6 @@ public:
             {
                 return name_;
             }
-
-            virtual label priority() const = 0;
 
 
         // Query

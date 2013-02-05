@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,8 @@ protected:
 
         const dictionary& cellSizeCalculationTypeDict_;
 
+        const scalar& defaultCellSize_;
+
 
 private:
 
@@ -85,9 +87,10 @@ public:
             dictionary,
             (
                 const dictionary& cellSizeCalculationTypeDict,
-                const triSurfaceMesh& surface
+                const triSurfaceMesh& surface,
+                const scalar& defaultCellSize
             ),
-            (cellSizeCalculationTypeDict, surface)
+            (cellSizeCalculationTypeDict, surface, defaultCellSize)
         );
 
 
@@ -98,7 +101,8 @@ public:
         (
             const word& type,
             const dictionary& cellSizeCalculationTypeDict,
-            const triSurfaceMesh& surface
+            const triSurfaceMesh& surface,
+            const scalar& defaultCellSize
         );
 
 
@@ -108,7 +112,8 @@ public:
         static autoPtr<cellSizeCalculationType> New
         (
             const dictionary& cellSizeCalculationTypeDict,
-            const triSurfaceMesh& surface
+            const triSurfaceMesh& surface,
+            const scalar& defaultCellSize
         );
 
 
