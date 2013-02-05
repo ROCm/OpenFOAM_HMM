@@ -5,21 +5,13 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          cvMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Any scalar with a name <name>Coeff specifies a value that will be implemented
@@ -29,6 +21,7 @@ geometry
 {
     blob.stl
     {
+        name blob;
         type triSurfaceMesh;
     }
 
@@ -54,29 +47,29 @@ initialPoints
 {
     minimumSurfaceDistanceCoeff 0.55;
 
-    initialPointsMethod     autoDensity;
+    initialPointsMethod         autoDensity;
     // initialPointsMethod     pointFile;
 
     autoDensityCoeffs
     {
-        minLevels 0;
-        maxSizeRatio 5.0;
-        sampleResolution 5;
+        minLevels               0;
+        maxSizeRatio            5.0;
+        sampleResolution        5;
         surfaceSampleResolution 5;
     }
 
     pointFileCoeffs
     {
-        pointFile              "constant/internalDelaunayVertices";
+        pointFile               "constant/internalDelaunayVertices";
     }
 }
 
 
 surfaceConformation
 {
-    locationInMesh (0.1 0.1 0.2);
+    locationInMesh                      (0.1 0.1 0.2);
 
-    pointPairDistanceCoeff      0.1;
+    pointPairDistanceCoeff              0.1;
 
     mixedFeaturePointPPDistanceCoeff    5.0;
 
@@ -84,17 +77,17 @@ surfaceConformation
 
     featureEdgeExclusionDistanceCoeff   0.2;
 
-    surfaceSearchDistanceCoeff  5;
+    surfaceSearchDistanceCoeff          5;
 
-    nearBoundaryDistanceCoeff   5;
+    nearBoundaryDistanceCoeff           5;
 
-    maxSurfaceProtrusionCoeff   0.001;
+    maxSurfaceProtrusionCoeff           0.001;
 
-    maxQuadAngle 125;
+    maxQuadAngle                        125;
 
     surfaceConformationRebuildFrequency 10;
 
-    specialiseFeaturePoints off;
+    specialiseFeaturePoints             off;
 
     conformationControls
     {
@@ -102,50 +95,61 @@ surfaceConformation
         surfacePtReplaceDistCoeff       0.5;
         surfacePtExclusionDistanceCoeff 0.5;
 
-        maxIterations 15;
+        maxIterations                   15;
 
         iterationToInitialHitRatioLimit 0.0001;
     }
 
     geometryToConformTo
     {
-        blob.stl
+        blob
         {
             featureMethod       none;
         }
     }
 
     additionalFeatures
-    {
-    }
+    {}
 }
 
 
 motionControl
 {
-    defaultCellSize     0.1;
+    defaultCellSize             0.1;
+
+    minimumCellSizeCoeff        0;
+
+    maxSmoothingIterations      0;
+    maxRefinementIterations     0;
 
     shapeControlFunctions
     {
-        blob.stl
+/*        blob*/
+/*        {*/
+/*            type                    searchableSurfaceControl;*/
+/*            priority                1;*/
+/*            mode                    bothSides;*/
+
+/*            surfaceCellSizeFunction uniformValue;*/
+/*            uniformValueCoeffs*/
+/*            {*/
+/*                surfaceCellSizeCoeff     1;*/
+/*            }*/
+
+/*            cellSizeFunction        uniform;*/
+/*            uniformCoeffs*/
+/*            {}*/
+/*        }*/
+
+        fileControl
         {
-            type                    searchableSurfaceControl;
+            type                    fileControl;
             priority                1;
-            mode                    bothSides;
-
-            surfaceCellSizeFunction uniformValue;
-            uniformValueCoeffs
-            {
-                surfaceCellSize     $defaultCellSize;
-            }
-
-            cellSizeFunction        uniform;
-            uniformCoeffs
-            {}
+            pointsFile              "points";
+            sizesFile               "sizes";
+            alignmentsFile          "alignments";
         }
     }
-
-    maxRefinementIterations 1;
 
     cellAspectRatioControl
     {

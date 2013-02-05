@@ -5,30 +5,23 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version         2.0;
     format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
     class           dictionary;
     object          cvMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Any scalar with a name <name>Coeff specifies a value that will be implemented
-// as a faction of the local target cell size
+// as a faction of the target cell size
 
 geometry
 {
     flange.obj
     {
+        name flange;
         type triSurfaceMesh;
     }
 }
@@ -78,7 +71,7 @@ surfaceConformation
 
     geometryToConformTo
     {
-        flange.obj
+        flange
         {
             featureMethod           extendedFeatureEdgeMesh;
             extendedFeatureEdgeMesh "flange.extendedFeatureEdgeMesh";
@@ -86,8 +79,7 @@ surfaceConformation
     }
 
     additionalFeatures
-    {
-    }
+    {}
 }
 
 
@@ -96,13 +88,12 @@ initialPoints
     minimumSurfaceDistanceCoeff 0.55;
 
     initialPointsMethod         autoDensity;
-    //initialPointsMethod         pointFile;
 
     autoDensityCoeffs
     {
-        minLevels 1;
-        maxSizeRatio 3.0;
-        sampleResolution 4;
+        minLevels               2;
+        maxSizeRatio            3.0;
+        sampleResolution        4;
         surfaceSampleResolution 5;
     }
 
@@ -115,38 +106,58 @@ initialPoints
 
 motionControl
 {
-    defaultCellSize     0.001;
+    defaultCellSize             0.0008;
+
+    minimumCellSizeCoeff        0;
+
+    // For background cell size and alignment grid
+    maxSmoothingIterations      100;
+
+    maxRefinementIterations     5;
 
     shapeControlFunctions
     {
-        flange.obj
+        flange
         {
-            type                    searchableSurfaceControl;
-            priority                1;
-            mode                    inside;
-            surfaceCellSizeFunction uniformValue;
+            type                        searchableSurfaceControl;
+            priority                    1;
+            mode                        inside;
+            surfaceCellSizeFunction     uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize     $defaultCellSize;
+                surfaceCellSizeCoeff    1;
             }
-
-            cellSizeFunction        uniform;
-            uniformCoeffs{}
+            cellSizeFunction            surfaceOffsetLinearDistance;
+            surfaceOffsetLinearDistanceCoeffs
+            {
+                distanceCellSizeCoeff   1;
+                surfaceOffsetCoeff      2.5;
+                linearDistanceCoeff     2.5;
+            }
         }
+
+/*        fileControl*/
+/*        {*/
+/*            type                    fileControl;*/
+/*            priority                1;*/
+/*            pointsFile              "points";*/
+/*            sizesFile               "sizes";*/
+/*            alignmentsFile          "alignments";*/
+/*        }*/
     }
 
     cellAspectRatioControl
     {
-        aspectRatio                 1.0;
-        aspectRatioDirection        (0 0 0);
+        aspectRatio             1.0;
+        aspectRatioDirection    (0 0 0);
     }
 
-    relaxationModel     adaptiveLinear;
+    relaxationModel             adaptiveLinear;
 
     adaptiveLinearCoeffs
     {
-        relaxationStart 1.0;
-        relaxationEnd   0.0;
+        relaxationStart         0.5;
+        relaxationEnd           0.0;
     }
 
     objOutput                   no;
@@ -170,10 +181,10 @@ motionControl
 
     pointRemovalCriteria
     {
-        cellCentreDistCoeff  0.65;
+        cellCentreDistCoeff     0.65;
     }
 
-    faceAreaWeightModel piecewiseLinearRamp;
+    faceAreaWeightModel         piecewiseLinearRamp;
 
     piecewiseLinearRampCoeffs
     {

@@ -5,7 +5,6 @@
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
     version         2.0;
@@ -13,7 +12,6 @@ FoamFile
     class           dictionary;
     object          cvMeshDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
@@ -45,7 +43,7 @@ See also cvControls.H in the conformalVoronoiMesh library
 // Important:
 // ----------
 // Any scalar with a name <name>Coeff specifies a value that will be implemented
-// as a faction of the local target cell size
+// as a faction of the target cell size
 // Any scalar with a name <name>Size specifies an absolute size.
 
 
@@ -69,6 +67,10 @@ geometry
     {
         name domain;
         type triSurfaceMesh;
+        regions
+        {
+            ascii{ name domain_patch0; }
+        }
     }
 
 }
@@ -167,7 +169,8 @@ surfaceConformation
         }
     }
 
-    additionalFeatures {}
+    additionalFeatures
+    {}
 }
 
 
@@ -237,7 +240,14 @@ initialPoints
 motionControl
 {
     // Absolute cell size of back ground mesh. This is the maximum cell size.
-    defaultCellSize     0.1;
+    defaultCellSize         0.1;
+
+    minimumCellSizeCoeff    0;
+
+    // For background cell size and alignment grid
+    maxSmoothingIterations      100;
+
+    maxRefinementIterations     0;
 
     shapeControlFunctions
     {
@@ -250,7 +260,7 @@ motionControl
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize 0.075;
+                surfaceCellSizeCoeff 0.75;
             }
 
             cellSizeFunction        uniform;
@@ -267,7 +277,7 @@ motionControl
             surfaceCellSizeFunction uniformValue;
             uniformValueCoeffs
             {
-                surfaceCellSize $defaultCellSize;
+                surfaceCellSizeCoeff 1;
             }
 
             cellSizeFunction        uniform;
