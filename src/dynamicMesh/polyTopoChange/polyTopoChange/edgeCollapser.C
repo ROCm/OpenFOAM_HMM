@@ -1242,7 +1242,19 @@ Foam::edgeCollapser::edgeCollapser
     (
         dict.lookupOrDefault<scalar>("allowEarlyCollapseCoeff", 0)
     )
-{}
+{
+    if (debug)
+    {
+        Info<< "Edge Collapser Settings:" << nl
+            << "    Guard Fraction = " << guardFraction_ << nl
+            << "    Max collapse face to point side length = "
+            << maxCollapseFaceToPointSideLengthCoeff_ << nl
+            << "    " << (allowEarlyCollapseToPoint_ ? "Allow" : "Do not allow")
+            << " early collapse to point" << nl
+            << "    Early collapse coeff = " << allowEarlyCollapseCoeff_
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

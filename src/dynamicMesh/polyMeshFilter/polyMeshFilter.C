@@ -484,16 +484,45 @@ Foam::polyMeshFilter::polyMeshFilter(const fvMesh& mesh)
     minEdgeLen_(),
     faceFilterFactor_()
 {
-    Info<< "Merging:" << nl
-        << "    edges with length less than " << minLen_ << " meters" << nl
-        << "    edges split by a point with edges in line to within "
-        << radToDeg(::acos(maxCos_)) << " degrees" << nl
-        << "    Minimum edge length reduction factor = "
-        << edgeReductionFactor_ << nl
-        << endl;
+    Info<< "Edge Collapser will merge:" << nl
+            << "    edges with length less than " << minLen_ << " meters" << nl
+            << "    edges split by a point with edges in line to within "
+            << radToDeg(::acos(maxCos_)) << " degrees" << nl
+            << "    Minimum edge length reduction factor = "
+            << edgeReductionFactor_ << nl
+            << endl;
 
-    Info<< "Collapse faces with reduction factor = " << faceReductionFactor_
-        << endl;
+    if (collapseFacesCoeffDict_.empty())
+    {
+        Info<< "Face collapsing is off" << endl;
+    }
+    else
+    {
+        Info<< "Face collapsing is on" << endl;
+        Info<< "    Initial face length factor = "<< initialFaceLengthFactor_
+            << endl;
+    }
+
+    Info<< "Control mesh quality = " << controlMeshQuality_.asText() << endl;
+
+    if (controlMeshQuality_)
+    {
+        Info<< "    Minimum edge length reduction factor = "
+            << edgeReductionFactor_ << nl
+            << "    Minimum face area reduction factor = "
+            << faceReductionFactor_ << endl;
+
+        Info<< "    Maximum number of collapse iterations = " << maxIterations_
+            << endl;
+
+        Info<< "    Maximum number of edge/face reduction factor smoothing "
+            << "iterations = " << maxSmoothIters_ << endl;
+
+        Info<< "    Maximum number of times a point can contribute to bad "
+            << "faces across " << nl
+            << "    collapse iterations = " << maxPointErrorCount_
+            << endl;
+    }
 
     Info<< "Selectively disabling wanted collapses until resulting quality"
         << " satisfies constraints in system/meshQualityDict" << nl
