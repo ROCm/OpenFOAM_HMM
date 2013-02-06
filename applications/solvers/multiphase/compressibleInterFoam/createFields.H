@@ -28,34 +28,6 @@
 
     #include "createPhi.H"
 
-    Info<< "Reading field T\n" << endl;
-    volScalarField T
-    (
-        IOobject
-        (
-            "T",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        p_rgh
-    );
-
-
     Info<< "Reading transportProperties\n" << endl;
     twoPhaseMixture twoPhaseProperties(U, phi);
 
@@ -69,114 +41,37 @@
         scalar(1) - alpha1
     );
 
-    dimensionedScalar k1
-    (
-        "k",
-        dimensionSet(1, 1, -3, -1, 0),
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("k")
-    );
+    Info<< "Reading thermophysical properties\n" << endl;
 
-    dimensionedScalar k2
-    (
-        "k",
-        dimensionSet(1, 1, -3, -1, 0),
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("k")
-    );
+    twoPhaseThermo thermo(mesh, alpha1, alpha2);
 
-    dimensionedScalar Cv1
-    (
-        "Cv",
-        dimensionSet(0, 2, -2, -1, 0),
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase1Name()
-        ).lookup("Cv")
-    );
+    volScalarField& rho = thermo.rho();
+    volScalarField& p = thermo.p();
+    volScalarField& T = thermo.T();
+    const volScalarField& rho1 = thermo.thermo1().rho();
+    const volScalarField& psi1 = thermo.thermo1().psi();
+    const volScalarField& rho2 = thermo.thermo2().rho();
+    const volScalarField& psi2 = thermo.thermo2().psi();
 
-    dimensionedScalar Cv2
-    (
-        "Cv",
-        dimensionSet(0, 2, -2, -1, 0),
-        twoPhaseProperties.subDict
-        (
-            twoPhaseProperties.phase2Name()
-        ).lookup("Cv")
-    );
+    // volScalarField rho
+    // (
+    //     IOobject
+    //     (
+    //         "rho",
+    //         runTime.timeName(),
+    //         mesh,
+    //         IOobject::READ_IF_PRESENT,
+    //         IOobject::AUTO_WRITE
+    //     ),
+    //     alpha1*rho1 + alpha2*rho2
+    // );
 
-    autoPtr<phaseEquationOfState> eos1
-    (
-        phaseEquationOfState::New
-        (
-            twoPhaseProperties.subDict
-            (
-                twoPhaseProperties.phase1Name()
-            )
-        )
-    );
-
-    autoPtr<phaseEquationOfState> eos2
-    (
-        phaseEquationOfState::New
-        (
-            twoPhaseProperties.subDict
-            (
-                twoPhaseProperties.phase2Name()
-            )
-        )
-    );
-
-    volScalarField psi1
-    (
-        IOobject
-        (
-            "psi1",
-            runTime.timeName(),
-            mesh
-        ),
-        eos1->psi(p, T)
-    );
-    psi1.oldTime();
-
-    volScalarField psi2
-    (
-        IOobject
-        (
-            "psi2",
-            runTime.timeName(),
-            mesh
-        ),
-        eos2->psi(p, T)
-    );
-    psi2.oldTime();
 
     dimensionedScalar pMin(twoPhaseProperties.lookup("pMin"));
 
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
     surfaceScalarField ghf("ghf", g & mesh.Cf());
-
-    volScalarField rho1("rho1", eos1->rho(p, T));
-    volScalarField rho2("rho2", eos2->rho(p, T));
-
-    volScalarField rho
-    (
-        IOobject
-        (
-            "rho",
-            runTime.timeName(),
-            mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        alpha1*rho1 + alpha2*rho2
-    );
-
 
     // Mass flux
     // Initialisation does not matter because rhoPhi is reset after the
@@ -207,3 +102,19 @@
     (
         incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
     );
+
+    Info<< "Creating field dpdt\n" << endl;
+    volScalarField dpdt
+    (
+        IOobject
+        (
+            "dpdt",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
+    );
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K("K", 0.5*magSqr(U));

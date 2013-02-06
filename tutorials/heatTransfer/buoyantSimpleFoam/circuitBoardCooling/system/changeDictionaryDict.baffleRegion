@@ -91,7 +91,7 @@ dictionaryReplacement
 
             "region0_to.*"
             {
-                type                compressible::thermoBaffle;
+                type                compressible::thermalBaffle;
 
                 // Coupled BC.
                 neighbourFieldName  T;
@@ -99,11 +99,11 @@ dictionaryReplacement
                 kappaName           none;
 
                 // Thermo baffle model
-                thermoBaffleModel   thermoBaffle;
+                thermalBaffleModel   thermalBaffle;
                 regionName          baffleRegion;
                 infoOutput          no;
                 active              yes;
-                thermoBaffleCoeffs
+                thermalBaffleCoeffs
                 {
                 }
 
