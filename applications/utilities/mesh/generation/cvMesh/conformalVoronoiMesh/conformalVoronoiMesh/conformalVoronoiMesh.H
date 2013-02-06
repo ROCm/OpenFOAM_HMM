@@ -770,9 +770,7 @@ private:
             labelList& neighbour,
             wordList& patchTypes,
             wordList& patchNames,
-            labelList& patchSizes,
-            labelList& patchStarts,
-            labelList& procNeighbours,
+            PtrList<dictionary>& patchDicts,
             pointField& cellCentres,
             labelList& cellToDelaunayVertex,
             labelListList& patchToDelaunayVertex,
@@ -789,8 +787,7 @@ private:
             labelList& neighbour,
             wordList& patchTypes,
             wordList& patchNames,
-            labelList& patchSizes,
-            labelList& patchStarts
+            PtrList<dictionary>& patchDicts
         );
 
         //- Determines if the dual face constructed by the Delaunay
@@ -873,7 +870,7 @@ private:
         (
             wordList& patchNames,
             wordList& patchTypes,
-            labelList& procNeighbours
+            PtrList<dictionary>& patchDicts
         ) const;
 
         //- Create all of the internal and boundary faces
@@ -884,9 +881,7 @@ private:
             labelList& neighbour,
             wordList& patchTypes,
             wordList& patchNames,
-            labelList& patchSizes,
-            labelList& patchStarts,
-            labelList& procNeighbours,
+            PtrList<dictionary>& patchDicts,
             labelListList& patchPointPairSlaves,
             PackedBoolList& boundaryFacesToRemove,
             bool includeEmptyPatches = false
@@ -924,8 +919,7 @@ private:
             const label nInternalFaces,
             faceList& faces,
             labelList& owner,
-            labelList& patchSizes,
-            labelList& patchStarts,
+            PtrList<dictionary>& patchDicts,
             PackedBoolList& boundaryFacesToRemove,
             const List<DynamicList<face> >& patchFaces,
             const List<DynamicList<label> >& patchOwners,
@@ -954,9 +948,7 @@ private:
             const IOobject& io,
             const wordList& patchTypes,
             const wordList& patchNames,
-            const labelList& patchSizes,
-            const labelList& patchStarts,
-            const labelList& procNeighbours
+            const PtrList<dictionary>& patchDicts
         ) const;
 
         //- Create a polyMesh from points.
@@ -965,8 +957,7 @@ private:
         void checkProcessorPatchesMatch
         (
             const wordList& patchTypes,
-            const labelList& patchSizes,
-            const labelList& procNeighbours
+            const PtrList<dictionary>& patchDicts
         ) const;
 
         void reorderPoints
@@ -986,9 +977,7 @@ private:
             faceList& faces,
             const wordList& patchTypes,
             const wordList& patchNames,
-            const labelList& patchSizes,
-            const labelList& patchStarts,
-            const labelList& procNeighbours
+            const PtrList<dictionary>& patchDicts
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -1153,9 +1142,7 @@ public:
                 labelList& neighbour,
                 const wordList& patchTypes,
                 const wordList& patchNames,
-                const labelList& patchSizes,
-                const labelList& patchStarts,
-                const labelList& procNeighbours,
+                const PtrList<dictionary>& patchDicts,
                 const pointField& cellCentres,
                 const PackedBoolList& boundaryFacesToRemove
             ) const;

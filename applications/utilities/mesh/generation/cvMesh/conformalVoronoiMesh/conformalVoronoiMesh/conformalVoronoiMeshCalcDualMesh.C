@@ -515,9 +515,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     labelList& neighbour,
     wordList& patchTypes,
     wordList& patchNames,
-    labelList& patchSizes,
-    labelList& patchStarts,
-    labelList& procNeighbours,
+    PtrList<dictionary>& patchDicts,
+    //labelList& patchSizes,
+    //labelList& patchStarts,
+    //labelList& procNeighbours,
     pointField& cellCentres,
     labelList& cellToDelaunayVertex,
     labelListList& patchToDelaunayVertex,
@@ -564,9 +565,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         neighbour,
         patchTypes,
         patchNames,
-        patchSizes,
-        patchStarts,
-        procNeighbours,
+        patchDicts,
+//        patchSizes,
+//        patchStarts,
+//        procNeighbours,
         patchToDelaunayVertex,  // from patch face to Delaunay vertex (slavePp)
         boundaryFacesToRemove,
         false
@@ -595,8 +597,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     labelList& neighbour,
     wordList& patchTypes,
     wordList& patchNames,
-    labelList& patchSizes,
-    labelList& patchStarts
+    PtrList<dictionary>& patchDicts
 )
 {
     labelList vertexMap(number_of_vertices());
@@ -771,15 +772,19 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     sortFaces(faces, owner, neighbour);
 
+//    PackedBoolList boundaryFacesToRemove;
+//    List<DynamicList<bool> > indirectPatchFace;
+//
 //    addPatches
 //    (
 //        nInternalFaces,
 //        faces,
 //        owner,
-//        patchSizes,
-//        patchStarts,
+//        patchDicts,
+//        boundaryFacesToRemove,
 //        patchFaces,
-//        patchOwners
+//        patchOwners,
+//        indirectPatchFace
 //    );
 }
 
@@ -1179,9 +1184,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     labelList neighbour;
     wordList patchTypes;
     wordList patchNames;
-    labelList patchSizes;
-    labelList patchStarts;
-    labelList procNeighbours;
+    PtrList<dictionary> patchDicts;
     pointField cellCentres;
     labelListList patchToDelaunayVertex;
     PackedBoolList boundaryFacesToRemove;
@@ -1197,9 +1200,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
         neighbour,
         patchTypes,
         patchNames,
-        patchSizes,
-        patchStarts,
-        procNeighbours,
+        patchDicts,
         patchToDelaunayVertex,
         boundaryFacesToRemove,
         false
@@ -1232,46 +1233,50 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 
     polyMesh& pMesh = meshPtr();
 
-    List<polyPatch*> patches(patchStarts.size());
+    List<polyPatch*> patches(patchNames.size());
 
     label nValidPatches = 0;
 
     forAll(patches, p)
     {
-       if (patchTypes[p] == processorPolyPatch::typeName)
-       {
-           // Do not create empty processor patches
-           if (patchSizes[p] > 0)
-           {
-               patches[nValidPatches] = new processorPolyPatch
-               (
-                   patchNames[p],
-                   patchSizes[p],
-                   patchStarts[p],
-                   nValidPatches,
-                   pMesh.boundaryMesh(),
-                   Pstream::myProcNo(),
-                   procNeighbours[p],
-                   coupledPolyPatch::COINCIDENTFULLMATCH
-               );
+        label totalPatchSize = readLabel(patchDicts[p].lookup("nFaces"));
 
-               nValidPatches++;
-           }
-       }
-       else
-       {
-           patches[nValidPatches] = polyPatch::New
-           (
-               patchTypes[p],
-               patchNames[p],
-               patchSizes[p],
-               patchStarts[p],
-               nValidPatches,
-               pMesh.boundaryMesh()
-           ).ptr();
+        if (patchTypes[p] == processorPolyPatch::typeName)
+        {
+            // Do not create empty processor patches
+            if (totalPatchSize > 0)
+            {
+                patches[nValidPatches] = new processorPolyPatch
+                (
+                    patchNames[p],
+                    patchDicts[p],
+                    nValidPatches,
+                    pMesh.boundaryMesh(),
+                    patchTypes[p]
+                );
 
-           nValidPatches++;
-       }
+                nValidPatches++;
+            }
+        }
+        else
+        {
+            // Check that the patch is not empty on every processor
+            reduce(totalPatchSize, sumOp<label>());
+
+            if (totalPatchSize > 0)
+            {
+                patches[nValidPatches] = polyPatch::New
+                (
+                    patchTypes[p],
+                    patchNames[p],
+                    patchDicts[p],
+                    nValidPatches,
+                    pMesh.boundaryMesh()
+                ).ptr();
+
+                nValidPatches++;
+            }
+        }
     }
 
     patches.setSize(nValidPatches);
@@ -1816,12 +1821,13 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
 (
     wordList& patchNames,
     wordList& patchTypes,
-    labelList& procNeighbours
+    PtrList<dictionary>& patchDicts
 ) const
 {
     patchNames = geometryToConformTo_.patchNames();
+
     patchTypes.setSize(patchNames.size() + 1, wallPolyPatch::typeName);
-    procNeighbours.setSize(patchNames.size() + 1, -1);
+    patchDicts.setSize(patchNames.size() + 1);
 
     const PtrList<dictionary>& patchInfo = geometryToConformTo_.patchInfo();
 
@@ -1836,11 +1842,14 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
                     wallPolyPatch::typeName
                 );
         }
+
+        patchDicts.set(patchI, new dictionary());
     }
 
     patchNames.setSize(patchNames.size() + 1);
     label defaultPatchIndex = patchNames.size() - 1;
     patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
+    patchDicts.set(defaultPatchIndex, new dictionary());
 
     label nProcPatches = 0;
 
@@ -1895,10 +1904,15 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
         }
 
         label nNonProcPatches = patchNames.size();
+        label nTotalPatches = nNonProcPatches + nProcPatches;
 
-        patchNames.setSize(nNonProcPatches + nProcPatches);
-        patchTypes.setSize(nNonProcPatches + nProcPatches);
-        procNeighbours.setSize(nNonProcPatches + nProcPatches, -1);
+        patchNames.setSize(nTotalPatches);
+        patchTypes.setSize(nTotalPatches);
+        patchDicts.setSize(nTotalPatches);
+        for (label pI = nNonProcPatches; pI < nTotalPatches; ++pI)
+        {
+            patchDicts.set(pI, new dictionary());
+        }
 
         label procAddI = 0;
 
@@ -1915,7 +1929,12 @@ Foam::label Foam::conformalVoronoiMesh::createPatchInfo
                    + "to"
                    + name(pUI);
 
-                procNeighbours[nNonProcPatches + procAddI] = pUI;
+                patchDicts[nNonProcPatches + procAddI].set
+                (
+                    "myProcNo",
+                    Pstream::myProcNo()
+                );
+                patchDicts[nNonProcPatches + procAddI].set("neighbProcNo", pUI);
 
                 procAddI++;
             }
@@ -1933,9 +1952,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     labelList& neighbour,
     wordList& patchTypes,
     wordList& patchNames,
-    labelList& patchSizes,
-    labelList& patchStarts,
-    labelList& procNeighbours,
+    PtrList<dictionary>& patchDicts,
     labelListList& patchPointPairSlaves,
     PackedBoolList& boundaryFacesToRemove,
     bool includeEmptyPatches
@@ -1945,10 +1962,24 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     (
         patchNames,
         patchTypes,
-        procNeighbours
+        patchDicts
     );
 
     const label nPatches = patchNames.size();
+
+    labelList procNeighbours(nPatches, -1);
+    forAll(procNeighbours, patchI)
+    {
+        if (patchDicts[patchI].found("neighbProcNo"))
+        {
+            procNeighbours[patchI] =
+                (
+                    patchDicts[patchI].found("neighbProcNo")
+                  ? readLabel(patchDicts[patchI].lookup("neighbProcNo"))
+                  : -1
+                );
+        }
+    }
 
     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
@@ -2183,8 +2214,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
         nInternalFaces,
         faces,
         owner,
-        patchSizes,
-        patchStarts,
+        patchDicts,
         boundaryFacesToRemove,
         patchFaces,
         patchOwners,
@@ -2202,11 +2232,16 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     {
         Info<< "Writing processor interfaces" << endl;
 
-        forAll(procNeighbours, nbI)
+        forAll(patchDicts, nbI)
         {
             if (patchFaces[nbI].size() > 0)
             {
-                const label neighbour = procNeighbours[nbI];
+                const label neighbour =
+                (
+                    patchDicts[nbI].found("neighbProcNo")
+                  ? readLabel(patchDicts[nbI].lookup("neighbProcNo"))
+                  : -1
+                );
 
                 faceList procPatchFaces = patchFaces[nbI];
 
@@ -2401,27 +2436,22 @@ void Foam::conformalVoronoiMesh::addPatches
     const label nInternalFaces,
     faceList& faces,
     labelList& owner,
-    labelList& patchSizes,
-    labelList& patchStarts,
+    PtrList<dictionary>& patchDicts,
     PackedBoolList& boundaryFacesToRemove,
     const List<DynamicList<face> >& patchFaces,
     const List<DynamicList<label> >& patchOwners,
     const List<DynamicList<bool> >& indirectPatchFace
 ) const
 {
-    label nPatches = patchFaces.size();
-
-    patchSizes.setSize(nPatches, -1);
-    patchStarts.setSize(nPatches, -1);
-
     label nBoundaryFaces = 0;
 
     forAll(patchFaces, p)
     {
-        patchSizes[p] = patchFaces[p].size();
-        patchStarts[p] = nInternalFaces + nBoundaryFaces;
+        patchDicts[p].set("nFaces", patchFaces[p].size());
+        patchDicts[p].set("startFace", nInternalFaces + nBoundaryFaces);
+        patchDicts[p].set("transform", "noOrdering");
 
-        nBoundaryFaces += patchSizes[p];
+        nBoundaryFaces += patchFaces[p].size();
     }
 
     faces.setSize(nInternalFaces + nBoundaryFaces);

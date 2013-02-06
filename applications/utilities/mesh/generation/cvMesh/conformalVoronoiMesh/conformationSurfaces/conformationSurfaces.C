@@ -409,7 +409,6 @@ Foam::conformationSurfaces::conformationSurfaces
         searchableSurface::UNKNOWN
     );
 
-
     Info<< endl
         << "Testing for locationInMesh " << locationInMesh_ << endl;
 

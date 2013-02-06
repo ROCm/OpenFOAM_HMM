@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -270,6 +270,17 @@ public:
         //  dictionary
         static autoPtr<polyPatch> New
         (
+            const word& name,
+            const dictionary& dict,
+            const label index,
+            const polyBoundaryMesh& bm
+        );
+
+        //- Return a pointer to a new patch created on freestore from
+        //  dictionary
+        static autoPtr<polyPatch> New
+        (
+            const word& patchType,
             const word& name,
             const dictionary& dict,
             const label index,
