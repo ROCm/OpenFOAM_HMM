@@ -183,6 +183,7 @@ void Foam::reduce
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
         Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }
@@ -201,6 +202,7 @@ void Foam::reduce
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
         Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }
@@ -219,6 +221,7 @@ void Foam::reduce
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
         Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }
@@ -237,6 +240,7 @@ void Foam::sumReduce
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
         Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }

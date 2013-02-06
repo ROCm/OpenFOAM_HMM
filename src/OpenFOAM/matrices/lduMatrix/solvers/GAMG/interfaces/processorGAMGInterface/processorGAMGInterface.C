@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    const label coarseComm
 )
 :
     GAMGInterface
@@ -62,7 +63,8 @@ Foam::processorGAMGInterface::processorGAMGInterface
         localRestrictAddressing,
         neighbourRestrictAddressing
     ),
-    fineProcInterface_(refCast<const processorLduInterface>(fineInterface))
+    fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
+    comm_(coarseComm)
 {
     // From coarse face to coarse cell
     DynamicList<label> dynFaceCells(localRestrictAddressing.size());
@@ -140,7 +142,12 @@ void Foam::processorGAMGInterface::initInternalFieldTransfer
     const labelUList& iF
 ) const
 {
+label oldWarn = UPstream::warnComm;
+UPstream::warnComm = comm();
+
     send(commsType, interfaceInternalField(iF)());
+
+UPstream::warnComm = oldWarn;
 }
 
 
@@ -150,7 +157,13 @@ Foam::tmp<Foam::labelField> Foam::processorGAMGInterface::internalFieldTransfer
     const labelUList& iF
 ) const
 {
-    return receive<label>(commsType, this->size());
+label oldWarn = UPstream::warnComm;
+UPstream::warnComm = comm();
+
+    tmp<Field<label> > tfld(receive<label>(commsType, this->size()));
+
+UPstream::warnComm = oldWarn;
+    return tfld;
 }
 
 

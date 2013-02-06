@@ -34,6 +34,7 @@ Description
 
 #include "lduMesh.H"
 #include "labelList.H"
+#include "processorLduInterface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,6 +113,24 @@ public:
                 << " interfaces:" << interfaces_.size()
                 << " comm:" << comm_
                 << endl;
+            forAll(interfaces_, i)
+            {
+                if (interfaces_.set(i))
+                {
+                    if (isA<processorLduInterface>(interfaces_[i]))
+                    {
+                        const processorLduInterface& pi = refCast
+                        <
+                            const processorLduInterface
+                        >(interfaces_[i]);
+
+                        Pout<< "    comm:" << pi.comm()
+                            << " myProcNo:" << pi.myProcNo()
+                            << " neighbProcNo:" << pi.neighbProcNo()
+                            << endl;
+                    }
+                }
+            }
         }
 
 
@@ -144,6 +163,24 @@ public:
                 << " interfaces:" << interfaces_.size()
                 << " comm:" << comm_
                 << endl;
+            forAll(interfaces_, i)
+            {
+                if (interfaces_.set(i))
+                {
+                    if (isA<processorLduInterface>(interfaces_[i]))
+                    {
+                        const processorLduInterface& pi = refCast
+                        <
+                            const processorLduInterface
+                        >(interfaces_[i]);
+
+                        Pout<< "    comm:" << pi.comm()
+                            << " myProcNo:" << pi.myProcNo()
+                            << " neighbProcNo:" << pi.neighbProcNo()
+                            << endl;
+                    }
+                }
+            }
         }
 
 

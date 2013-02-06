@@ -79,6 +79,9 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
+label oldWarn = UPstream::warnComm;
+UPstream::warnComm = comm();
+
     procInterface_.interfaceInternalField(psiInternal, scalarSendBuf_);
 
     if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
@@ -93,7 +96,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
             procInterface_.tag(),
-            procInterface_.comm()
+            comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
@@ -104,7 +107,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
             procInterface_.tag(),
-            procInterface_.comm()
+            comm()
         );
     }
     else
@@ -113,6 +116,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = false;
+
+UPstream::warnComm = oldWarn;
 }
 
 
@@ -129,6 +134,9 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     {
         return;
     }
+
+label oldWarn = UPstream::warnComm;
+UPstream::warnComm = comm();
 
     const labelUList& faceCells = procInterface_.faceCells();
 
@@ -173,6 +181,8 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;
+
+UPstream::warnComm = oldWarn;
 }
 
 

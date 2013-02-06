@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,9 @@ class processorGAMGInterface
         //  agglomerated
         const processorLduInterface& fineProcInterface_;
 
+        //- Communicator to use for parallel communication
+        const label comm_;
+
 
     // Private Member Functions
 
@@ -85,7 +88,8 @@ public:
             const lduInterface& fineInterface,
             const labelField& restrictAddressing,
             const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            const label coarseComm
         );
 
 
@@ -141,7 +145,7 @@ public:
             //- Return communicator used for sending
             virtual int comm() const
             {
-                return fineProcInterface_.comm();
+                return comm_;
             }
 };
 

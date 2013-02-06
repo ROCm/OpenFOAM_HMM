@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,7 +101,8 @@ public:
                 const lduInterface& fineInterface,
                 const labelField& localRestrictAddressing,
                 const labelField& neighbourRestrictAddressing,
-                const label fineLevelIndex
+                const label fineLevelIndex,
+                const label coarseComm
             ),
             (
                 index,
@@ -109,7 +110,8 @@ public:
                 fineInterface,
                 localRestrictAddressing,
                 neighbourRestrictAddressing,
-                fineLevelIndex
+                fineLevelIndex,
+                coarseComm
             )
         );
 
@@ -125,7 +127,8 @@ public:
             const lduInterface& fineInterface,
             const labelField& localRestrictAddressing,
             const labelField& neighbourRestrictAddressing,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            const label coarseComm
         );
 
 
@@ -140,7 +143,8 @@ public:
             const lduInterface&,
             const labelField&,
             const labelField&,
-            const label fineLevelIndex = -1
+            const label fineLevelIndex = -1,
+            const label coarseComm = UPstream::worldComm
         )
         :
             index_(index),

@@ -57,6 +57,7 @@ bool Foam::UOPstream::write
             << " tag:" << tag
             << " comm:" << communicator << " size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
+            << " warnComm:" << UPstream::warnComm
             << Foam::endl;
         error::printStack(Pout);
     }

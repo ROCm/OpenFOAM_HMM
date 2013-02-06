@@ -82,7 +82,13 @@ Foam::UIPstream::UIPstream
         // and set it
         if (!wantedSize)
         {
-            MPI_Probe(fromProcNo_, tag_, MPI_COMM_WORLD, &status);
+            MPI_Probe
+            (
+                fromProcNo_,
+                tag_,
+                PstreamGlobals::MPICommunicators_[comm_],
+                &status
+            );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
             externalBuf_.setCapacity(messageSize_);
@@ -171,7 +177,13 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         // and set it
         if (!wantedSize)
         {
-            MPI_Probe(fromProcNo_, tag_, MPI_COMM_WORLD, &status);
+            MPI_Probe
+            (
+                fromProcNo_,
+                tag_,
+                PstreamGlobals::MPICommunicators_[comm_],
+                &status
+            );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
             externalBuf_.setCapacity(messageSize_);
@@ -231,6 +243,7 @@ Foam::label Foam::UIPstream::read
             << " tag:" << tag << " comm:" << communicator
             << " wanted size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
+            << " warnComm:" << UPstream::warnComm
             << Foam::endl;
         error::printStack(Pout);
     }

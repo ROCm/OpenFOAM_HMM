@@ -441,6 +441,11 @@ void Foam::GAMGSolver::solveCoarsestLevel
     const scalarField& coarsestSource
 ) const
 {
+    const label coarsestLevel = matrixLevels_.size() - 1;
+    label coarseComm = matrixLevels_[coarsestLevel].mesh().comm();
+    label oldWarn = UPstream::warnComm;
+    UPstream::warnComm = coarseComm;
+
     if (directSolveCoarsest_)
     {
         coarsestCorrField = coarsestSource;
@@ -489,9 +494,11 @@ void Foam::GAMGSolver::solveCoarsestLevel
 
         if (debug >= 2)
         {
-            coarseSolverPerf.print(Info(matrix().mesh().comm()));
+            coarseSolverPerf.print(Info(coarseComm));
         }
     }
+
+    UPstream::warnComm = oldWarn;
 }
 
 

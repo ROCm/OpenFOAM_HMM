@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,8 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
     const lduInterface& fineInterface,
     const labelField& localRestrictAddressing,
     const labelField& neighbourRestrictAddressing,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    const label coarseComm
 )
 :
     GAMGInterface
@@ -48,7 +49,8 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
         fineInterface,
         localRestrictAddressing,
         neighbourRestrictAddressing,
-        fineLevelIndex
+        fineLevelIndex,
+        coarseComm
     ),
     fineRegionCoupledLduInterface_
     (

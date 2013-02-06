@@ -196,6 +196,16 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
 
 Foam::GAMGAgglomeration::~GAMGAgglomeration()
 {
+    // Temporary store the user-defined communicators so we can delete them
+    labelList communicators(meshLevels_.size());
+    forAll(meshLevels_, leveli)
+    {
+        communicators[leveli] = meshLevels_[leveli].comm();
+    }
+
+    Pout<< "~GAMGAgglomeration() : current communicators:" << communicators
+        << endl;
+
     // Clear the interface storage by hand.
     // It is a list of ptrs not a PtrList for consistency of the interface
     for (label leveli=1; leveli<interfaceLevels_.size(); leveli++)
@@ -209,6 +219,11 @@ Foam::GAMGAgglomeration::~GAMGAgglomeration()
                 delete curLevel(i);
             }
         }
+    }
+
+    forAll(communicators, i)
+    {
+        UPstream::freeCommunicator(communicators[i]);
     }
 }
 

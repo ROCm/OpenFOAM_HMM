@@ -94,6 +94,10 @@ Foam::GAMGSolver::GAMGSolver
 
         if (directSolveCoarsest_)
         {
+            label coarseComm = matrixLevels_[coarsestLevel].mesh().comm();
+            label oldWarn = UPstream::warnComm;
+            UPstream::warnComm = coarseComm;
+
             coarsestLUMatrixPtr_.set
             (
                 new LUscalarMatrix
@@ -103,6 +107,8 @@ Foam::GAMGSolver::GAMGSolver
                     interfaceLevels_[coarsestLevel]
                 )
             );
+
+            UPstream::warnComm = oldWarn;
         }
     }
     else

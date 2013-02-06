@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,9 @@ class LUscalarMatrix
     public scalarSquareMatrix
 {
     // Private data
+
+        //- Communicator to use
+        const label comm_;
 
         //- Processor matrix offsets
         labelList procOffsets_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ License
 
 Foam::LUscalarMatrix::LUscalarMatrix(const scalarSquareMatrix& matrix)
 :
+    comm_(Pstream::worldComm),
     scalarSquareMatrix(matrix),
     pivotIndices_(n())
 {
@@ -46,10 +47,12 @@ Foam::LUscalarMatrix::LUscalarMatrix
     const FieldField<Field, scalar>& interfaceCoeffs,
     const lduInterfaceFieldPtrsList& interfaces
 )
+:
+    comm_(ldum.mesh().comm())
 {
     if (Pstream::parRun())
     {
-        PtrList<procLduMatrix> lduMatrices(Pstream::nProcs());
+        PtrList<procLduMatrix> lduMatrices(Pstream::nProcs(comm_));
 
         label lduMatrixi = 0;
 
@@ -64,25 +67,49 @@ Foam::LUscalarMatrix::LUscalarMatrix
             )
         );
 
-        if (Pstream::master())
+
+Pout<< "LUscalarMatrix :"
+    << " comm:" << comm_
+    << " master:" << Pstream::master(comm_) << endl;
+
+        if (Pstream::master(comm_))
         {
             for
             (
                 int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                slave<=Pstream::lastSlave(comm_);
                 slave++
             )
             {
+Pout<< "Receiving from " << slave
+    << " using comm:" << comm_ << endl;
                 lduMatrices.set
                 (
                     lduMatrixi++,
-                    new procLduMatrix(IPstream(Pstream::scheduled, slave)())
+                    new procLduMatrix
+                    (
+                        IPstream
+                        (
+                            Pstream::scheduled,
+                            slave,
+                            0,          // bufSize
+                            Pstream::msgType(),
+                            comm_
+                        )()
+                    )
                 );
             }
         }
         else
         {
-            OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
+            OPstream toMaster
+            (
+                Pstream::scheduled,
+                Pstream::masterNo(),
+                0,              // bufSize
+                Pstream::msgType(),
+                comm_
+            );
             procLduMatrix cldum
             (
                 ldum,
@@ -93,7 +120,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
         }
 
-        if (Pstream::master())
+        if (Pstream::master(comm_))
         {
             label nCells = 0;
             forAll(lduMatrices, i)
@@ -114,7 +141,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
         convert(ldum, interfaceCoeffs, interfaces);
     }
 
-    if (Pstream::master())
+    if (Pstream::master(comm_))
     {
         pivotIndices_.setSize(n());
         LUDecompose(*this, pivotIndices_);

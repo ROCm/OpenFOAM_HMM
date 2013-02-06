@@ -240,6 +240,15 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
         Pstream::waitRequests();
     }
 
+
+    // Allocate a communicator for the coarse level
+    label coarseComm = UPstream::allocateCommunicator
+    (
+        fineMesh.comm(),
+        identity(UPstream::nProcs(fineMesh.comm()))  //TBD
+    );
+
+
     // Add the coarse level
     forAll(fineInterfaces, inti)
     {
@@ -259,7 +268,8 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
                         Pstream::nonBlocking,
                         restrictMap
                     ),
-                    fineLevelIndex
+                    fineLevelIndex,
+                    coarseComm
                 ).ptr()
             );
 
@@ -280,7 +290,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
             coarseInterfaceAddr,
             coarseInterfaces,
             fineMeshAddr.patchSchedule(),
-            fineMesh.comm(),
+            coarseComm,
             true
         )
     );
