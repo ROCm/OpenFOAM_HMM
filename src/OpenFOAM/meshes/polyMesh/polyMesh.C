@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -210,6 +210,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         *this
     ),
     bounds_(points_),
+    comm_(UPstream::worldComm),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
@@ -403,6 +404,7 @@ Foam::polyMesh::polyMesh
         polyPatchList()
     ),
     bounds_(points_, syncPar),
+    comm_(UPstream::worldComm),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
@@ -561,6 +563,7 @@ Foam::polyMesh::polyMesh
         0
     ),
     bounds_(points_, syncPar),
+    comm_(UPstream::worldComm),
     geometricD_(Vector<label>::zero),
     solutionD_(Vector<label>::zero),
     tetBasePtIsPtr_(NULL),
@@ -1209,6 +1212,18 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
     }
 
     return globalMeshDataPtr_();
+}
+
+
+Foam::label Foam::polyMesh::comm() const
+{
+    return comm_;
+}
+
+
+Foam::label& Foam::polyMesh::comm()
+{
+    return comm_;
 }
 
 

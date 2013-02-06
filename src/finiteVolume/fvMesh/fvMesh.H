@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -268,6 +268,12 @@ public:
             virtual lduInterfacePtrsList interfaces() const
             {
                 return boundary().interfaces();
+            }
+
+            //- Return communicator used for parallel communication
+            virtual int comm() const
+            {
+                return polyMesh::comm();
             }
 
             //- Internal face owner

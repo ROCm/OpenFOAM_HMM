@@ -43,9 +43,7 @@ Description
 
 SourceFiles
     GAMGSolver.C
-    GAMGSolverCalcAgglomeration.C
-    GAMGSolverMakeCoarseMatrix.C
-    GAMGSolverOperations.C
+    GAMGSolverAgglomerateMatrix.C
     GAMGSolverInterpolate.C
     GAMGSolverScale.C
     GAMGSolverSolve.C

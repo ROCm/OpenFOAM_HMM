@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -270,6 +270,19 @@ Foam::label Foam::UPstream::allocateCommunicator
     forAll(procIDs_[index], i)
     {
         procIDs_[index][i] = subRanks[i];
+
+        // Enforce incremental order (so index is rank in next communicator)
+        if (i >= 1 && subRanks[i] <= subRanks[i-1])
+        {
+            FatalErrorIn
+            (
+                "UPstream::allocateCommunicator"
+                "(const label, const labelList&, const bool)"
+            )   << "subranks not sorted : " << subRanks
+                << " when allocating subcommunicator from parent "
+                << parentIndex
+                << Foam::abort(FatalError);
+        }
     }
     parentCommunicator_[index] = parentIndex;
 
@@ -277,7 +290,7 @@ Foam::label Foam::UPstream::allocateCommunicator
     treeCommunication_[index] = calcTreeComm(procIDs_[index].size());
 
 
-    if (doPstream)
+    if (doPstream && parRun())
     {
         allocatePstreamCommunicator(parentIndex, index);
     }
@@ -297,7 +310,7 @@ void Foam::UPstream::freeCommunicator
         << "    myProcNo : " << myProcNo_[communicator] << endl
         << endl;
 
-    if (doPstream)
+    if (doPstream && parRun())
     {
         freePstreamCommunicator(communicator);
     }
@@ -435,6 +448,10 @@ addcommsTypeToOpt addcommsTypeToOpt_("commsType");
 
 // Default communicator
 Foam::label Foam::UPstream::worldComm(0);
+
+
+// Warn for use of any communicator
+Foam::label Foam::UPstream::warnComm(-1);
 
 
 // Number of polling cycles in processor updates

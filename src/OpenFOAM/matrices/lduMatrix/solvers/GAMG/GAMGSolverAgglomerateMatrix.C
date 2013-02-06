@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,7 +126,7 @@ void Foam::GAMGSolver::agglomerateMatrix(const label fineLevelIndex)
     }
 
 
-    // Check if matrix is assymetric and if so agglomerate both upper and lower
+    // Check if matrix is asymetric and if so agglomerate both upper and lower
     // coefficients ...
     if (fineMatrix.hasLower())
     {

@@ -68,7 +68,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     int myRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::init : initialised with numProcs:" << numprocs
             << " myRank:" << myRank << endl;
@@ -107,13 +107,12 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     }
 #   endif
 
-    int processorNameLen;
-    char processorName[MPI_MAX_PROCESSOR_NAME];
-
-    MPI_Get_processor_name(processorName, &processorNameLen);
-    processorName[processorNameLen] = '\0';
-
-    Pout<< "Processor name:" << processorName << endl;
+    //int processorNameLen;
+    //char processorName[MPI_MAX_PROCESSOR_NAME];
+    //
+    //MPI_Get_processor_name(processorName, &processorNameLen);
+    //processorName[processorNameLen] = '\0';
+    //Pout<< "Processor name:" << processorName << endl;
 
     return true;
 }
@@ -121,7 +120,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 void Foam::UPstream::exit(int errnum)
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::exit." << endl;
     }
@@ -181,6 +180,12 @@ void Foam::reduce
     const label communicator
 )
 {
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << endl;
+        error::printStack(Pout);
+    }
     allReduce(Value, 1, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
@@ -193,6 +198,12 @@ void Foam::reduce
     const label communicator
 )
 {
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << endl;
+        error::printStack(Pout);
+    }
     allReduce(Value, 1, MPI_SCALAR, MPI_MIN, bop, tag, communicator);
 }
 
@@ -205,6 +216,12 @@ void Foam::reduce
     const label communicator
 )
 {
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << endl;
+        error::printStack(Pout);
+    }
     allReduce(Value, 2, MPI_SCALAR, MPI_SUM, bop, tag, communicator);
 }
 
@@ -217,6 +234,12 @@ void Foam::sumReduce
     const label communicator
 )
 {
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << communicator
+            << endl;
+        error::printStack(Pout);
+    }
     vector2D twoScalars(Value, scalar(Count));
     reduce(twoScalars, sumOp<vector2D>(), tag, communicator);
 
@@ -407,7 +430,7 @@ void Foam::UPstream::resetRequests(const label i)
 
 void Foam::UPstream::waitRequests(const label start)
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequests : starting wait for "
             << PstreamGlobals::outstandingRequests_.size()-start
@@ -442,7 +465,7 @@ void Foam::UPstream::waitRequests(const label start)
         resetRequests(start);
     }
 
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequests : finished wait." << endl;
     }
@@ -451,7 +474,7 @@ void Foam::UPstream::waitRequests(const label start)
 
 void Foam::UPstream::waitRequest(const label i)
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequest : starting wait for request:" << i
             << endl;
@@ -484,7 +507,7 @@ void Foam::UPstream::waitRequest(const label i)
         )   << "MPI_Wait returned with error" << Foam::endl;
     }
 
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequest : finished wait for request:" << i
             << endl;
@@ -494,7 +517,7 @@ void Foam::UPstream::waitRequest(const label i)
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequests : checking finishedRequest:" << i
             << endl;
@@ -520,7 +543,7 @@ bool Foam::UPstream::finishedRequest(const label i)
         MPI_STATUS_IGNORE
     );
 
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UPstream::waitRequests : finished finishedRequest:" << i
             << endl;

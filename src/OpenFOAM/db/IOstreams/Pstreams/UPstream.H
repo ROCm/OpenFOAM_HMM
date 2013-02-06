@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -269,6 +269,10 @@ public:
         //- Default communicator (all processors)
         static label worldComm;
 
+        //- Debugging: warn for use of any communicator differing from warnComm
+        static label warnComm;
+
+
     // Constructors
 
         //- Construct given optional buffer size
@@ -319,17 +323,17 @@ public:
                 comm_(allocateCommunicator(parent, subRanks, doPstream))
             {}
 
-            communicator(const label parent)
-            :
-                comm_
-                (
-                    allocateCommunicator
-                    (
-                        parent,
-                        identity(UPstream::nProcs(parent))
-                    )
-                )
-            {}
+//            communicator(const label parent)
+//            :
+//                comm_
+//                (
+//                    allocateCommunicator
+//                    (
+//                        parent,
+//                        identity(UPstream::nProcs(parent))
+//                    )
+//                )
+//            {}
 
             ~communicator()
             {
@@ -407,17 +411,24 @@ public:
             return myProcNo_[communicator];
         }
 
+        static label parent(const label communicator)
+        {
+            return parentCommunicator_(communicator);
+        }
+
+
 //        //- Process IDs
 //        static const List<int>& procIDs()
 //        {
 //            return procIDs_;
 //        }
-//
-//        //- Process ID of given process index
-//        static int procID(int procNo)
-//        {
-//            return procIDs_[procNo];
-//        }
+
+
+        //- Process ID of given process index
+        static List<int>& procID(int communicator)
+        {
+            return procIDs_[communicator];
+        }
 
         //- Process index of first slave
         static int firstSlave()

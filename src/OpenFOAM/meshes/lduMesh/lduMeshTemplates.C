@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,53 +21,21 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamspace
-    Foam
-
-Description
-    Various functions to wrap MPI_Allreduce
-
-SourceFiles
-    allReduceTemplates.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef allReduce_H
-#define allReduce_H
+#include "lduMesh.H"
 
-#include "mpi.h"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include "UPstream.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-template<class Type, class BinaryOp>
-void allReduce
+template<class T, class BinaryOp>
+void Foam::lduMesh::reduce
 (
-    Type& Value,
-    int count,
-    MPI_Datatype MPIType,
-    MPI_Op op,
-    const BinaryOp& bop,
-    const int tag,
-    const int communicator
-);
+    T& Value,
+    const BinaryOp& bop
+) const
+{
+    Foam::reduce(Value, bop, Pstream::msgType(), comm());
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "allReduceTemplates.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGAgglomeration.H"
+#include "mapDistribute.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,24 +38,57 @@ void Foam::GAMGAgglomeration::restrictField
 {
     const labelList& fineToCoarse = restrictAddressing_[fineLevelIndex];
 
-    if (ff.size() != fineToCoarse.size())
+    if (restrictDistributeMapPtr_.valid())
     {
-        FatalErrorIn
-        (
-            "void GAMGAgglomeration::restrictField"
-            "(Field<Type>& cf, const Field<Type>& ff, "
-            "const label fineLevelIndex) const"
-        )   << "field does not correspond to level " << fineLevelIndex
-            << " sizes: field = " << ff.size()
-            << " level = " << fineToCoarse.size()
-            << abort(FatalError);
+        const mapDistribute& map = restrictDistributeMapPtr_();
+        Field<Type> combinedFf(map.constructSize());
+        forAll(ff, i)
+        {
+            combinedFf[i] = ff[i];
+        }
+        map.distribute(combinedFf);
+
+        if (combinedFf.size() != fineToCoarse.size())
+        {
+            FatalErrorIn
+            (
+                "void GAMGAgglomeration::restrictField"
+                "(Field<Type>& cf, const Field<Type>& ff, "
+                "const label fineLevelIndex) const"
+            )   << "field does not correspond to level " << fineLevelIndex
+                << " sizes: field = " << combinedFf.size()
+                << " level = " << fineToCoarse.size()
+                << abort(FatalError);
+        }
+
+        cf = pTraits<Type>::zero;
+
+        forAll(combinedFf, i)
+        {
+            cf[fineToCoarse[i]] += combinedFf[i];
+        }
     }
-
-    cf = pTraits<Type>::zero;
-
-    forAll(ff, i)
+    else
     {
-        cf[fineToCoarse[i]] += ff[i];
+        if (ff.size() != fineToCoarse.size())
+        {
+            FatalErrorIn
+            (
+                "void GAMGAgglomeration::restrictField"
+                "(Field<Type>& cf, const Field<Type>& ff, "
+                "const label fineLevelIndex) const"
+            )   << "field does not correspond to level " << fineLevelIndex
+                << " sizes: field = " << ff.size()
+                << " level = " << fineToCoarse.size()
+                << abort(FatalError);
+        }
+
+        cf = pTraits<Type>::zero;
+
+        forAll(ff, i)
+        {
+            cf[fineToCoarse[i]] += ff[i];
+        }
     }
 }
 
@@ -69,15 +103,40 @@ void Foam::GAMGAgglomeration::restrictFaceField
 {
     const labelList& fineToCoarse = faceRestrictAddressing_[fineLevelIndex];
 
-    cf = pTraits<Type>::zero;
-
-    forAll(fineToCoarse, ffacei)
+    if (faceRestrictDistributeMapPtr_.valid())
     {
-        label cFace = fineToCoarse[ffacei];
-
-        if (cFace >= 0)
+        const mapDistribute& map = faceRestrictDistributeMapPtr_();
+        Field<Type> combinedFf(map.constructSize());
+        forAll(ff, i)
         {
-            cf[cFace] += ff[ffacei];
+            combinedFf[i] = ff[i];
+        }
+        map.distribute(combinedFf);
+
+        cf = pTraits<Type>::zero;
+
+        forAll(fineToCoarse, ffacei)
+        {
+            label cFace = fineToCoarse[ffacei];
+
+            if (cFace >= 0)
+            {
+                cf[cFace] += combinedFf[ffacei];
+            }
+        }
+    }
+    else
+    {
+        cf = pTraits<Type>::zero;
+
+        forAll(fineToCoarse, ffacei)
+        {
+            label cFace = fineToCoarse[ffacei];
+
+            if (cFace >= 0)
+            {
+                cf[cFace] += ff[ffacei];
+            }
         }
     }
 }
@@ -93,9 +152,23 @@ void Foam::GAMGAgglomeration::prolongField
 {
     const labelList& fineToCoarse = restrictAddressing_[coarseLevelIndex];
 
-    forAll(fineToCoarse, i)
+    if (restrictDistributeMapPtr_.valid())
     {
-        ff[i] = cf[fineToCoarse[i]];
+        const mapDistribute& map = restrictDistributeMapPtr_();
+        Field<Type> combinedCf(cf);
+        map.reverseDistribute(fineToCoarse.size(), combinedCf);
+
+        forAll(fineToCoarse, i)
+        {
+            ff[i] = combinedCf[fineToCoarse[i]];
+        }
+    }
+    else
+    {
+        forAll(fineToCoarse, i)
+        {
+            ff[i] = cf[fineToCoarse[i]];
+        }
     }
 }
 

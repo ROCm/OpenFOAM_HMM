@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,6 +163,74 @@ Foam::OSstream& Foam::messageStream::operator()
         dict.startLineNumber(),
         dict.endLineNumber()
     );
+}
+
+
+Foam::OSstream& Foam::messageStream::operator()(const label communicator)
+{
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "** messageStream with comm:" << communicator
+            << endl;
+        error::printStack(Pout);
+    }
+
+    if (communicator == UPstream::worldComm)
+    {
+        return operator()();
+    }
+    else
+    {
+        bool master = UPstream::master(communicator);
+
+        if (level)
+        {
+            bool collect = (severity_ == INFO || severity_ == WARNING);
+
+            // Report the error
+            if (!master && collect)
+            {
+                return Snull;
+            }
+            else
+            {
+                if (title().size())
+                {
+                    if (Pstream::parRun() && !collect)
+                    {
+                        Pout<< title().c_str();
+                    }
+                    else
+                    {
+                        Sout<< title().c_str();
+                    }
+                }
+
+                if (maxErrors_)
+                {
+                    errorCount_++;
+
+                    if (errorCount_ >= maxErrors_)
+                    {
+                        FatalErrorIn("messageStream::operator OSstream&()")
+                            << "Too many errors"
+                            << abort(FatalError);
+                    }
+                }
+
+                if (Pstream::parRun() && !collect)
+                {
+                    return Pout;
+                }
+                else
+                {
+                    return Sout;
+                }
+            }
+        }
+    }
+
+    return Snull;
 }
 
 

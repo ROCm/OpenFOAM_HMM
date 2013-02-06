@@ -58,7 +58,11 @@ void Foam::GAMGSolver::scale
     }
 
     vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
-    reduce(scalingVector, sumOp<vector2D>());
+    matrix().mesh().reduce
+    (
+        scalingVector,
+        sumOp<vector2D>()
+    );
     scalar sf = scalingVector.x()/stabilise(scalingVector.y(), VSMALL);
 
     if (debug >= 2)

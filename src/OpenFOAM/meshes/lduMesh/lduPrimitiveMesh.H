@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,8 @@ class lduPrimitiveMesh
         //  Note this does not need to be held as a copy because it is invariant
         const lduSchedule& patchSchedule_;
 
+        //- Communicator to use for any parallel communication
+        const label comm_;
 
     // Private Member Functions
 
@@ -90,7 +92,8 @@ public:
             const labelUList& u,
             const labelListList& pa,
             lduInterfacePtrsList interfaces,
-            const lduSchedule& ps
+            const lduSchedule& ps,
+            const label comm
         )
         :
             lduAddressing(nCells),
@@ -98,8 +101,18 @@ public:
             upperAddr_(u),
             patchAddr_(pa),
             interfaces_(interfaces),
-            patchSchedule_(ps)
-        {}
+            patchSchedule_(ps),
+            comm_(comm)
+        {
+            Pout<< "lduPrimitiveMesh :"
+                << " nCells:" << nCells
+                << " l:" << lowerAddr_.size()
+                << " u::" << upperAddr_.size()
+                << " pa:" << patchAddr_.size()
+                << " interfaces:" << interfaces_.size()
+                << " comm:" << comm_
+                << endl;
+        }
 
 
         //- Construct from components and  re-use storage as specified.
@@ -111,6 +124,7 @@ public:
             labelListList& pa,
             lduInterfacePtrsList interfaces,
             const lduSchedule& ps,
+            const label comm,
             bool reUse
         )
         :
@@ -119,8 +133,18 @@ public:
             upperAddr_(u, reUse),
             patchAddr_(pa, reUse),
             interfaces_(interfaces, reUse),
-            patchSchedule_(ps)
-        {}
+            patchSchedule_(ps),
+            comm_(comm)
+        {
+            Pout<< "lduPrimitiveMesh :"
+                << " nCells:" << nCells
+                << " l:" << lowerAddr_.size()
+                << " u::" << upperAddr_.size()
+                << " pa:" << patchAddr_.size()
+                << " interfaces:" << interfaces_.size()
+                << " comm:" << comm_
+                << endl;
+        }
 
 
     //- Destructor
@@ -143,6 +167,12 @@ public:
             virtual lduInterfacePtrsList interfaces() const
             {
                 return interfaces_;
+            }
+
+            //- Return communicator used for parallel communication
+            virtual label comm() const
+            {
+                return comm_;
             }
 
             //- Return Lower addressing

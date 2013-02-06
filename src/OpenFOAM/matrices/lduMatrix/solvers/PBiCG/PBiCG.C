@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,7 +114,9 @@ Foam::solverPerformance Foam::PBiCG::solve
     }
 
     // --- Calculate normalised residual norm
-    solverPerf.initialResidual() = gSumMag(rA)/normFactor;
+    solverPerf.initialResidual() =
+        gSumMag(rA, matrix().mesh().comm())
+       /normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
     // --- Check convergence, solve if not converged
@@ -139,7 +141,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             preconPtr->preconditionT(wT, rT, cmpt);
 
             // --- Update search directions:
-            wArT = gSumProd(wA, rT);
+            wArT = gSumProd(wA, rT, matrix().mesh().comm());
 
             if (solverPerf.nIterations() == 0)
             {
@@ -165,7 +167,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             matrix_.Amul(wA, pA, interfaceBouCoeffs_, interfaces_, cmpt);
             matrix_.Tmul(wT, pT, interfaceIntCoeffs_, interfaces_, cmpt);
 
-            scalar wApT = gSumProd(wA, pT);
+            scalar wApT = gSumProd(wA, pT, matrix().mesh().comm());
 
             // --- Test for singularity
             if (solverPerf.checkSingularity(mag(wApT)/normFactor))
@@ -185,8 +187,9 @@ Foam::solverPerformance Foam::PBiCG::solve
                 rTPtr[cell] -= alpha*wTPtr[cell];
             }
 
-            solverPerf.finalResidual() = gSumMag(rA)/normFactor;
-
+            solverPerf.finalResidual() =
+                gSumMag(rA, matrix().mesh().comm())
+               /normFactor;
         } while
         (
             solverPerf.nIterations()++ < maxIter_

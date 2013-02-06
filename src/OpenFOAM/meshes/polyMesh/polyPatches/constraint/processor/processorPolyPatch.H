@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -266,6 +266,30 @@ public:
         {
             return neighbProcNo_;
         }
+
+
+        // For testing
+
+            //- Return communicator used for communication
+            label& comm()
+            {
+                return comm_;
+            }
+
+            //- Return processor number
+            int& myProcNo()
+            {
+                return myProcNo_;
+            }
+
+            //- Return neigbour processor number
+            int& neighbProcNo()
+            {
+                return neighbProcNo_;
+            }
+
+
+
 
         //- Does the processor own the patch ?
         virtual bool owner() const

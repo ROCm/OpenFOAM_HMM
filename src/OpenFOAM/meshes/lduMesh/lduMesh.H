@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,12 +77,29 @@ public:
             //- Return a list of pointers for each patch
             //  with only those pointing to interfaces being set
             virtual lduInterfacePtrsList interfaces() const = 0;
+
+            //- Return communicator used for parallel communication
+            virtual int comm() const = 0;
+
+            //- Helper: reduce with current communicator
+            template<class T, class BinaryOp>
+            void reduce
+            (
+                T& Value,
+                const BinaryOp& bop
+            ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "lduMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

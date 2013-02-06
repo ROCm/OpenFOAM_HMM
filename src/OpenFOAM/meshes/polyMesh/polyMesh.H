@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,6 +132,9 @@ private:
             //- Mesh bounding-box.
             //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
+
+            //- Communicator used for parallel communication
+            label comm_;
 
             //- vector of non-constrained directions in mesh
             //  defined according to the presence of empty and wedge patches
@@ -441,6 +444,12 @@ public:
 
             //- Return parallel info
             const globalMeshData& globalData() const;
+
+            //- Return communicator used for parallel communication
+            label comm() const;
+
+            //- Return communicator used for parallel communication
+            label& comm();
 
             //- Return the object registry
             const objectRegistry& thisDb() const

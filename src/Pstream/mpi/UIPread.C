@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ Foam::UIPstream::UIPstream
 
         label wantedSize = externalBuf_.capacity();
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UIPstream::UIPstream : read from:" << fromProcNo
                 << " tag:" << tag << " wanted size:" << wantedSize
@@ -88,7 +88,7 @@ Foam::UIPstream::UIPstream
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
 
-            if (debug)
+            if (debug&1)
             {
                 Pout<< "UIPstream::UIPstream : probed size:" << wantedSize
                     << Foam::endl;
@@ -145,7 +145,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         // Message is already received into externalBuf
         messageSize_ = buffers.recvBuf_[fromProcNo].size();
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " fromProcNo:" << fromProcNo
@@ -159,7 +159,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 
         label wantedSize = externalBuf_.capacity();
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " read from:" << fromProcNo
@@ -177,7 +177,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
 
-            if (debug)
+            if (debug&1)
             {
                 Pout<< "UIPstream::UIPstream PstreamBuffers : probed size:"
                     << wantedSize << Foam::endl;
@@ -217,13 +217,22 @@ Foam::label Foam::UIPstream::read
     const label communicator
 )
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UIPstream::read : starting read from:" << fromProcNo
             << " tag:" << tag << " comm:" << communicator
             << " wanted size:" << label(bufSize)
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
+    }
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "UIPstream::read : starting read from:" << fromProcNo
+            << " tag:" << tag << " comm:" << communicator
+            << " wanted size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << Foam::endl;
+        error::printStack(Pout);
     }
 
     if (commsType == blocking || commsType == scheduled)
@@ -260,7 +269,7 @@ Foam::label Foam::UIPstream::read
         int messageSize;
         MPI_Get_count(&status, MPI_BYTE, &messageSize);
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UIPstream::read : finished read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)
@@ -310,7 +319,7 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UIPstream::read : started read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)

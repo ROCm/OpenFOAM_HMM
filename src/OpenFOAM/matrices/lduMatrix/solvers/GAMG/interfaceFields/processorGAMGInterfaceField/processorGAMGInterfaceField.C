@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,7 +92,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             procInterface_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
-            procInterface_.tag()
+            procInterface_.tag(),
+            procInterface_.comm()
         );
 
         outstandingSendRequest_ = UPstream::nRequests();
@@ -102,7 +103,8 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
             procInterface_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
-            procInterface_.tag()
+            procInterface_.tag(),
+            procInterface_.comm()
         );
     }
     else

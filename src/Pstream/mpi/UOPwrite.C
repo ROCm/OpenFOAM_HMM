@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ bool Foam::UOPstream::write
     const label communicator
 )
 {
-    if (debug)
+    if (debug&1)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
             << " tag:" << tag
@@ -51,6 +51,16 @@ bool Foam::UOPstream::write
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
     }
+    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    {
+        Pout<< "UOPstream::write : starting write to:" << toProcNo
+            << " tag:" << tag
+            << " comm:" << communicator << " size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << Foam::endl;
+        error::printStack(Pout);
+    }
+
 
     PstreamGlobals::checkCommunicator(communicator, toProcNo);
 
@@ -69,7 +79,7 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -89,7 +99,7 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -112,7 +122,7 @@ bool Foam::UOPstream::write
             &request
         );
 
-        if (debug)
+        if (debug&1)
         {
             Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)

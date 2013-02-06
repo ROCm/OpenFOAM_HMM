@@ -61,7 +61,11 @@ Foam::solverPerformance Foam::GAMGSolver::solve
     scalarField finestResidual(source - Apsi);
 
     // Calculate normalised residual for convergence test
-    solverPerf.initialResidual() = gSumMag(finestResidual)/normFactor;
+    solverPerf.initialResidual() = gSumMag
+    (
+        finestResidual,
+        matrix().mesh().comm()
+    )/normFactor;
     solverPerf.finalResidual() = solverPerf.initialResidual();
 
 
@@ -100,11 +104,15 @@ Foam::solverPerformance Foam::GAMGSolver::solve
             finestResidual = source;
             finestResidual -= Apsi;
 
-            solverPerf.finalResidual() = gSumMag(finestResidual)/normFactor;
+            solverPerf.finalResidual() = gSumMag
+            (
+                finestResidual,
+                matrix().mesh().comm()
+            )/normFactor;
 
             if (debug >= 2)
             {
-                solverPerf.print(Info);
+                solverPerf.print(Info(matrix().mesh().comm()));
             }
         } while
         (
@@ -481,7 +489,7 @@ void Foam::GAMGSolver::solveCoarsestLevel
 
         if (debug >= 2)
         {
-            coarseSolverPerf.print(Info);
+            coarseSolverPerf.print(Info(matrix().mesh().comm()));
         }
     }
 }

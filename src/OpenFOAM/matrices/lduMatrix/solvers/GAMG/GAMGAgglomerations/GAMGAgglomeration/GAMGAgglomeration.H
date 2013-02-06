@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,7 @@ namespace Foam
 
 class lduMesh;
 class lduMatrix;
+class mapDistribute;
 
 /*---------------------------------------------------------------------------*\
                     Class GAMGAgglomeration Declaration
@@ -77,6 +78,9 @@ protected:
         //  Maps from the finer to the coarser level.
         PtrList<labelField> restrictAddressing_;
 
+        //- For cross-processor operation
+        autoPtr<mapDistribute> restrictDistributeMapPtr_;
+
         //- Face restriction addressing array.
         //  Maps from the finer to the coarser level.
         //  Positive indices map the finer faces which form part of the boundary
@@ -84,6 +88,9 @@ protected:
         //  Negative indices map the finer faces which are internal to the
         //  coarser cells to minus the corresponding coarser cell index minus 1.
         PtrList<labelList> faceRestrictAddressing_;
+
+        //- For cross-processor operation
+        autoPtr<mapDistribute> faceRestrictDistributeMapPtr_;
 
         //- Hierarchy of mesh addressing
         PtrList<lduPrimitiveMesh> meshLevels_;

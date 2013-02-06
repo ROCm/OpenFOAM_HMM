@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,7 +57,7 @@ bool Foam::GAMGAgglomeration::continueAgglomerating
 {
     // Check the need for further agglomeration on all processors
     bool contAgg = nCoarseCells >= nCellsInCoarsestLevel_;
-    reduce(contAgg, andOp<bool>());
+    mesh().reduce(contAgg, andOp<bool>());
     return contAgg;
 }
 

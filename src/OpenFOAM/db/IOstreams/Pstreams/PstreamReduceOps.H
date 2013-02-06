@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,12 @@ void reduce
     const label comm
 )
 {
+    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    {
+        Pout<< "** reducing:" << Value << " with comm:" << comm
+            << endl;
+        error::printStack(Pout);
+    }
     Pstream::gather(comms, Value, bop, tag, comm);
     Pstream::scatter(comms, Value, tag, comm);
 }

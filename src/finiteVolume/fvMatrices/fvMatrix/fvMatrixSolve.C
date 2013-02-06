@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -198,7 +198,10 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
             solverControls
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
-        solverPerf.print(Info);
+        //solverPerf.print(Info);
+Pout<< "** calling solverPerformance::print with comm:" << this->mesh().comm()
+    << endl;
+        solverPerf.print(Info(this->mesh().comm()));
 
         solverPerfVec = max(solverPerfVec, solverPerf);
         solverPerfVec.solverName() = solverPerf.solverName();
@@ -261,7 +264,10 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
         coupledMatrixSolver->solve(psi)
     );
 
-    solverPerf.print(Info);
+    //solverPerf.print(Info);
+Pout<< "** calling solverPerformance::print with comm:" << this->mesh().comm()
+    << endl;
+    solverPerf.print(Info(this->mesh().comm()));
 
     psi.correctBoundaryConditions();
 
