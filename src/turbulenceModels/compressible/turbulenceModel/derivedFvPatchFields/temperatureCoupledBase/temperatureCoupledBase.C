@@ -92,13 +92,13 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
     {
         case BASICTHERMO:
         {
-            const compressible::turbulenceModel& model =
+            const compressible::turbulenceModel& turbModel =
                 mesh.lookupObject<compressible::turbulenceModel>
                 (
                     "turbulenceModel"
                 );
 
-            return model.kappaEff(patch_.index());
+            return turbModel.kappaEff(patch_.index());
             break;
         }
 

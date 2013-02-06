@@ -105,13 +105,13 @@ kappa() const
     {
         case FLUID:
         {
-            const compressible::turbulenceModel& model =
+            const compressible::turbulenceModel& turbModel =
                 this->db().lookupObject<compressible::turbulenceModel>
                 (
                     "turbulenceModel"
                 );
 
-            return model.kappaEff(patch().index());
+            return turbModel.kappaEff(patch().index());
         }
         break;
 
