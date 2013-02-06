@@ -54,7 +54,8 @@ Foam::twoPhaseMixture::twoPhaseMixture
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const word& alpha1Name
+    const word& alpha1Name,
+    const word& alpha2Name
 )
 :
     transportModel(U, phi),
@@ -100,6 +101,17 @@ Foam::twoPhaseMixture::twoPhaseMixture
             IOobject::AUTO_WRITE
         ),
         U_.mesh()
+    ),
+
+    alpha2_
+    (
+        IOobject
+        (
+            found("phases") ? word("alpha" + phase2Name_) : alpha2Name,
+            U_.time().timeName(),
+            U_.db()
+        ),
+        1.0 - alpha1_
     ),
 
     nu_
