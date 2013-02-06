@@ -110,8 +110,8 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 {
     if (debug)
     {
-        Info<< "polyPatch::New(const word&, const dictionary&, const label, "
-               "const polyBoundaryMesh&) : constructing polyPatch"
+        Info<< "polyPatch::New(const word&, const word&, const dictionary&, "
+               "const label, const polyBoundaryMesh&) : constructing polyPatch"
             << endl;
     }
 
