@@ -1006,8 +1006,6 @@ void Foam::conformalVoronoiMesh::writeMesh
     {
         label totalPatchSize = readLabel(patchDicts[p].lookup("nFaces"));
 
-        Pout<< patchDicts[p] << endl;
-
         if (patchTypes[p] == processorPolyPatch::typeName)
         {
             // Do not create empty processor patches

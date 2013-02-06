@@ -39,107 +39,160 @@ defineTypeNameAndDebug(controlMeshRefinement, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::controlMeshRefinement::detectEdge
+Foam::scalar Foam::controlMeshRefinement::calcFirstDerivative
 (
-    point a,
-    point b,
-    DynamicList<Vb>& pointsFound
+    const Foam::point& a,
+    const scalar& cellSizeA,
+    const Foam::point& b,
+    const scalar& cellSizeB
 ) const
 {
-    const Foam::point midpoint = 0.5*(a + b);
-    const scalar h = mag(a - b);
-
-    scalar cellSizeA = sizeControls_.cellSize(a);
-    scalar cellSizeMid = sizeControls_.cellSize(midpoint);
-    scalar cellSizeB = sizeControls_.cellSize(b);
-
-    scalar firstDerivative = (cellSizeA - cellSizeB)/h;
-
-    scalar secondDerivative =
-        (
-            cellSizeB
-          - 2*cellSizeMid
-          + cellSizeA
-        )
-       /magSqr(h/2.0);
-
-//    Info<< a << " " << midpoint << " " << b << endl;
-//    Info<< " length = " << h << endl;
-//    Info<< "size(a) = " << cellSizeA << endl;
-//    Info<< "size(m) = " << cellSizeMid << endl;
-//    Info<< "size(b) = " << cellSizeB << endl;
-//    Info<< "    f'  = " << firstDerivative << endl;
-//    Info<< "    f'' = " << secondDerivative << endl;
-
-    if (mag(secondDerivative) < 1e-1)
-    {
-        return false;
-    }
-
-    if (mag(a - b) < 1e-1*cellSizeMid)
-    {
-        if (geometryToConformTo_.outside(midpoint))
-        {
-            return false;
-        }
-        else
-        {
-//            Info<< "    Point Added" << endl;
-
-            pointsFound.append
-            (
-                Vb
-                (
-                    toPoint<cellShapeControlMesh::Point>(midpoint),
-                    Vb::vtInternal
-                )
-            );
-            pointsFound.last().targetCellSize() =
-                sizeControls_.cellSize(midpoint);
-            pointsFound.last().alignment() = triad::unset;
-
-            return true;
-        }
-    }
-
-    detectEdge(a, midpoint, pointsFound);
-    detectEdge(midpoint, b, pointsFound);
+    return (cellSizeA - cellSizeB)/mag(a - b);
 }
 
 
-Foam::DynamicList<Vb>
-Foam::controlMeshRefinement::findDiscontinuities(const linePointRef& l) const
+Foam::scalar Foam::controlMeshRefinement::calcSecondDerivative
+(
+    const Foam::point& a,
+    const scalar& cellSizeA,
+    const Foam::point& midPoint,
+    const scalar& cellSizeMid,
+    const Foam::point& b,
+    const scalar& cellSizeB
+) const
 {
-    DynamicList<Vb> verts(2);
+    return (cellSizeA - 2*cellSizeMid + cellSizeB)/magSqr((a - b)/2);
+}
 
-    // Divide up the line into a reasonable number of intervals
 
+bool Foam::controlMeshRefinement::detectEdge
+(
+    const Foam::point& startPt,
+    const Foam::point& endPt,
+    pointHit& pointFound,
+    const scalar tolSqr,
+    const scalar secondDerivTolSqr
+) const
+{
+    Foam::point a(startPt);
+    Foam::point b(endPt);
 
-    // Call detectEdge on each interval
-    detectEdge(l.start(), l.end(), verts);
+    Foam::point midPoint = (a + b)/2.0;
 
-    if (verts.size())
+    label nIterations = 0;
+
+    while (true)
     {
-        Info<< l << " has " << verts.size() << " discontinuities" << endl;
+        nIterations++;
 
-        OFstream str("plotSizes_" + name(verts.size()));
-
-        forAll(verts, vI)
+        if (magSqr(a - b) < tolSqr)
         {
-            scalar x =
-                mag(topoint(verts[vI].point()) - l.start())
-               /mag(l.end() - l.start());
+            pointFound.setPoint(midPoint);
+            pointFound.setHit();
 
-            str << x << " " << verts[vI].targetCellSize() << endl;
+            return true;
         }
 
-//        forAll(verts, vI)
-//        {
-//            Info<< verts[vI].info();
-//        }
-    }
+        // Split into two regions
 
-    return verts;
+        const scalar cellSizeA = sizeControls_.cellSize(a);
+        const scalar cellSizeB = sizeControls_.cellSize(b);
+        const scalar cellSizeMid = sizeControls_.cellSize(midPoint);
+
+        // Region 1
+        Foam::point midPoint1 = (a + midPoint)/2.0;
+        const scalar cellSizeMid1 = sizeControls_.cellSize(midPoint1);
+
+//        scalar firstDerivative1 =
+//            calcFirstDerivative(cellSizeA, cellSizeMid);
+        scalar secondDerivative1 =
+            calcSecondDerivative
+            (
+                a,
+                cellSizeA,
+                midPoint1,
+                cellSizeMid1,
+                midPoint,
+                cellSizeMid
+            );
+
+        // Region 2
+        Foam::point midPoint2 = (midPoint + b)/2.0;
+        const scalar cellSizeMid2 = sizeControls_.cellSize(midPoint2);
+
+//        scalar firstDerivative2 =
+//            calcFirstDerivative(f, cellSizeMid, cellSizeB);
+        scalar secondDerivative2 =
+            calcSecondDerivative
+            (
+                midPoint,
+                cellSizeMid,
+                midPoint2,
+                cellSizeMid2,
+                b,
+                cellSizeB
+            );
+
+        // Neither region appears to have an inflection
+        // To be sure should use higher order derivatives
+        if
+        (
+            magSqr(secondDerivative1) < secondDerivTolSqr
+         && magSqr(secondDerivative2) < secondDerivTolSqr
+        )
+        {
+            return false;
+        }
+
+        // Pick region with greatest second derivative
+        if (magSqr(secondDerivative1) > magSqr(secondDerivative2))
+        {
+            b = midPoint;
+            midPoint = midPoint1;
+        }
+        else
+        {
+            a = midPoint;
+            midPoint = midPoint2;
+        }
+    }
+}
+
+
+Foam::pointHit Foam::controlMeshRefinement::findDiscontinuities
+(
+    const linePointRef& l
+) const
+{
+//    if (true)
+//    {
+//        Info<< "Searching " << l << " for a discontinuity" << endl;
+//    }
+
+    pointHit p(point::max);
+
+    const scalar tolSqr = sqr(1e-6);
+    const scalar secondDerivTolSqr = sqr(1e-3);
+
+    detectEdge
+    (
+        l.start(),
+        l.end(),
+        p,
+        tolSqr,
+        secondDerivTolSqr
+    );
+
+//    if (p.hit())
+//    {
+//        Info<< "    " << l << " has a discontinuity at " << p << endl;
+//    }
+//    else
+//    {
+//        Info<< "    No discontinuity found" << endl;
+//    }
+
+    return p;
 }
 
 
@@ -374,7 +427,7 @@ Foam::label Foam::controlMeshRefinement::refineMesh
         linePointRef l(ptA, ptB);
 
 //        Info<< "Edge " << l << endl;
-//
+
 //        Info<< vA->info() << vB->info();
 
         const Foam::point midPoint = l.centre();
@@ -391,105 +444,135 @@ Foam::label Foam::controlMeshRefinement::refineMesh
 //            << "         vA cell size = " << vA->targetCellSize() << nl
 //            << "         vB cell size = " << vB->targetCellSize() << endl;
 
-//        verts.append(findDiscontinuities(l));
+        const pointHit hitPt = findDiscontinuities(l);
 
-        if (diff/interpolatedSize > 0.1)
+        if (hitPt.hit())
         {
-            // Create a new point
-            // Walk along the edge, placing points where the gradient in cell
-            // size changes
-            if (vA->targetCellSize() <= vB->targetCellSize())
-            {
-                // Walk from vA
-                const label nPoints = length/vA->targetCellSize();
+            const Foam::point& pt = hitPt.hitPoint();
 
-                if (nPoints == 0)
+            if (!geometryToConformTo_.inside(pt))
+            {
+                continue;
+            }
+
+            if (Pstream::parRun())
+            {
+                if (!decomposition().positionOnThisProcessor(pt))
                 {
                     continue;
                 }
-
-                scalar prevSize = vA->targetCellSize();
-
-                for (label pI = 1; pI < nPoints; ++pI)
-                {
-                    const Foam::point testPt =
-                        topoint(vA->point()) + pI*l.vec()/nPoints;
-
-//                    if (geometryToConformTo_.outside(testPt))
-//                    {
-//                        continue;
-//                    }
-
-                    scalar testPtSize = sizeControls_.cellSize(testPt);
-
-                    if (mag(testPtSize - prevSize) < 1e-3*testPtSize)
-                    {
-//                        Info<< "Adding " << testPt << " " << testPtSize
-//                            << endl;
-                        verts.append
-                        (
-                            Vb
-                            (
-                                toPoint<cellShapeControlMesh::Point>(testPt),
-                                Vb::vtInternal
-                            )
-                        );
-                        verts.last().targetCellSize() = testPtSize;
-                        verts.last().alignment() = triad::unset;
-
-                        break;
-                    }
-
-                    prevSize = testPtSize;
-                }
             }
-            else
-            {
-                // Walk from vB
-                const label nPoints = length/vB->targetCellSize();
 
-                if (nPoints == 0)
-                {
-                    continue;
-                }
+            verts.append
+            (
+                Vb
+                (
+                    toPoint<cellShapeControlMesh::Point>(pt),
+                    Vb::vtInternal
+                )
+            );
 
-                scalar prevSize = vA->targetCellSize();
-
-                for (label pI = 1; pI < nPoints; ++pI)
-                {
-                    const Foam::point testPt =
-                        topoint(vB->point()) - pI*l.vec()/nPoints;
-
-//                    if (geometryToConformTo_.outside(testPt))
-//                    {
-//                        continue;
-//                    }
-
-                    scalar testPtSize = sizeControls_.cellSize(testPt);
-
-                    if (mag(testPtSize - prevSize) < 1e-3*testPtSize)
-                    //if (testPtSize > prevSize)// || testPtSize < prevSize)
-                    {
-//                        Info<< "Adding " << testPt << " " << testPtSize
-//                            << endl;
-                        verts.append
-                        (
-                            Vb
-                            (
-                                toPoint<cellShapeControlMesh::Point>(testPt),
-                                Vb::vtInternal
-                            )
-                        );
-                        verts.last().targetCellSize() = testPtSize;
-                        verts.last().alignment() = triad::unset;
-
-                        break;
-                    }
-
-                    prevSize = testPtSize;
-                }
-            }
+            verts.last().targetCellSize() = sizeControls_.cellSize(pt);
+            verts.last().alignment() = triad::unset;
         }
+
+//        if (diff/interpolatedSize > 0.1)
+//        {
+//            // Create a new point
+//            // Walk along the edge, placing points where the gradient in cell
+//            // size changes
+//            if (vA->targetCellSize() <= vB->targetCellSize())
+//            {
+//                // Walk from vA
+//                const label nPoints = length/vA->targetCellSize();
+//
+//                if (nPoints == 0)
+//                {
+//                    continue;
+//                }
+//
+//                scalar prevSize = vA->targetCellSize();
+//
+//                for (label pI = 1; pI < nPoints; ++pI)
+//                {
+//                    const Foam::point testPt =
+//                        topoint(vA->point()) + pI*l.vec()/nPoints;
+//
+////                    if (geometryToConformTo_.outside(testPt))
+////                    {
+////                        continue;
+////                    }
+//
+//                    scalar testPtSize = sizeControls_.cellSize(testPt);
+//
+//                    if (mag(testPtSize - prevSize) < 1e-3*testPtSize)
+//                    {
+////                        Info<< "Adding " << testPt << " " << testPtSize
+////                            << endl;
+//                        verts.append
+//                        (
+//                            Vb
+//                            (
+//                                toPoint<cellShapeControlMesh::Point>(testPt),
+//                                Vb::vtInternal
+//                            )
+//                        );
+//                        verts.last().targetCellSize() = testPtSize;
+//                        verts.last().alignment() = triad::unset;
+//
+//                        break;
+//                    }
+//
+//                    prevSize = testPtSize;
+//                }
+//            }
+//            else
+//            {
+//                // Walk from vB
+//                const label nPoints = length/vB->targetCellSize();
+//
+//                if (nPoints == 0)
+//                {
+//                    continue;
+//                }
+//
+//                scalar prevSize = vA->targetCellSize();
+//
+//                for (label pI = 1; pI < nPoints; ++pI)
+//                {
+//                    const Foam::point testPt =
+//                        topoint(vB->point()) - pI*l.vec()/nPoints;
+//
+////                    if (geometryToConformTo_.outside(testPt))
+////                    {
+////                        continue;
+////                    }
+//
+//                    scalar testPtSize = sizeControls_.cellSize(testPt);
+//
+//                    if (mag(testPtSize - prevSize) < 1e-3*testPtSize)
+//                    //if (testPtSize > prevSize)// || testPtSize < prevSize)
+//                    {
+////                        Info<< "Adding " << testPt << " " << testPtSize
+////                            << endl;
+//                        verts.append
+//                        (
+//                            Vb
+//                            (
+//                                toPoint<cellShapeControlMesh::Point>(testPt),
+//                                Vb::vtInternal
+//                            )
+//                        );
+//                        verts.last().targetCellSize() = testPtSize;
+//                        verts.last().alignment() = triad::unset;
+//
+//                        break;
+//                    }
+//
+//                    prevSize = testPtSize;
+//                }
+//            }
+//        }
     }
 
 //    const pointField cellCentres(mesh_.cellCentres());

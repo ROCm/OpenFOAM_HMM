@@ -66,14 +66,35 @@ class controlMeshRefinement
 
     // Private Member Functions
 
-        bool detectEdge
+        scalar calcFirstDerivative
         (
-            point a,
-            point b,
-            DynamicList<Vb>& pointsFound
+            const Foam::point& a,
+            const scalar& cellSizeA,
+            const Foam::point& b,
+            const scalar& cellSizeB
         ) const;
 
-        DynamicList<Vb> findDiscontinuities(const linePointRef& l) const;
+        scalar calcSecondDerivative
+        (
+            const Foam::point& a,
+            const scalar& cellSizeA,
+            const Foam::point& midPoint,
+            const scalar& cellSizeMid,
+            const Foam::point& b,
+            const scalar& cellSizeB
+        ) const;
+
+
+        bool detectEdge
+        (
+            const Foam::point& startPt,
+            const Foam::point& endPt,
+            pointHit& pointFound,
+            const scalar tolSqr,
+            const scalar secondDerivTolSqr
+        ) const;
+
+        pointHit findDiscontinuities(const linePointRef& l) const;
 
         //- Disallow default bitwise copy construct
         controlMeshRefinement(const controlMeshRefinement&);
