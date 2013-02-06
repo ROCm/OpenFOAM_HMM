@@ -32,18 +32,11 @@
     twoPhaseMixture twoPhaseProperties(U, phi);
 
     volScalarField& alpha1(twoPhaseProperties.alpha1());
-
-    Info<< "Calculating phase-fraction alpha" << twoPhaseProperties.phase2Name()
-        << nl << endl;
-    volScalarField alpha2
-    (
-        "alpha" + twoPhaseProperties.phase2Name(),
-        scalar(1) - alpha1
-    );
+    volScalarField& alpha2(twoPhaseProperties.alpha2());
 
     Info<< "Reading thermophysical properties\n" << endl;
 
-    twoPhaseThermo thermo(mesh, alpha1, alpha2);
+    twoPhaseThermo thermo(twoPhaseProperties);
 
     volScalarField& rho = thermo.rho();
     volScalarField& p = thermo.p();

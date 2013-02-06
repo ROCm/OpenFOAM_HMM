@@ -39,64 +39,18 @@ namespace Foam
 
 Foam::twoPhaseThermo::twoPhaseThermo
 (
-    const fvMesh& mesh,
-    const volScalarField& alpha1,
-    const volScalarField& alpha2,
-    const word& phaseName
+    const twoPhaseMixture& twoPhaseProperties
 )
 :
-    rhoThermo(mesh, phaseName),
-    phaseName1_("1"),
-    phaseName2_("2"),
-    alpha1_(alpha1),
-    alpha2_(alpha2),
-    thermo1_(rhoThermo::New(mesh, phaseName1_)),
-    thermo2_(rhoThermo::New(mesh, phaseName2_)),
-    he_
-    (
-        IOobject
-        (
-            phasePropertyName
-            (
-                "he"
-            ),
-            mesh.time().timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimEnergy/dimMass,
-        heBoundaryTypes(),
-        heBoundaryBaseTypes()
-    )
+    rhoThermo(twoPhaseProperties.alpha1().mesh(), word::null),
+    tpm_(twoPhaseProperties),
+    thermo1_(rhoThermo::New(tpm_.alpha1().mesh(), tpm_.phase1Name())),
+    thermo2_(rhoThermo::New(tpm_.alpha1().mesh(), tpm_.phase2Name()))
 {
-    thermo1_->validate("phaseModel 1", "e");
-    thermo2_->validate("phaseModel 2", "e");
+    thermo1_->validate(tpm_.phase1Name(), "e");
+    thermo2_->validate(tpm_.phase2Name(), "e");
 
-    rho_ = alpha1_*thermo1_->rho() + alpha2_*thermo2_->rho();
-
-    he_ =
-    (
-        alpha1_*thermo1_->rho()*thermo1_->he()
-      + alpha2_*thermo2_->rho()*thermo2_->he()
-    )/rho_;
-
-    volScalarField::GeometricBoundaryField& hbf = he_.boundaryField();
-
-    forAll(hbf, patchi)
-    {
-        if (isA<gradientEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<gradientEnergyFvPatchScalarField>(hbf[patchi]).gradient()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-        else if (isA<mixedEnergyFvPatchScalarField>(hbf[patchi]))
-        {
-            refCast<mixedEnergyFvPatchScalarField>(hbf[patchi]).refGrad()
-                = hbf[patchi].fvPatchField::snGrad();
-        }
-    }
+    rho_ = tpm_.alpha1()*thermo1_->rho() + tpm_.alpha2()*thermo2_->rho();
 
     correct();
 }
@@ -118,9 +72,9 @@ void Foam::twoPhaseThermo::correct()
     thermo2_->he() = thermo2_->he(p_, T_);
     thermo2_->correct();
 
-    psi_ = alpha1_*thermo1_->psi() + alpha2_*thermo2_->psi();
-    mu_ = alpha1_*thermo1_->mu() + alpha2_*thermo2_->mu();
-    alpha_ = alpha1_*thermo1_->alpha() + alpha2_*thermo2_->alpha();
+    psi_ = tpm_.alpha1()*thermo1_->psi() + tpm_.alpha2()*thermo2_->psi();
+    mu_ = tpm_.alpha1()*thermo1_->mu() + tpm_.alpha2()*thermo2_->mu();
+    alpha_ = tpm_.alpha1()*thermo1_->alpha() + tpm_.alpha2()*thermo2_->alpha();
 }
 
 
@@ -142,7 +96,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::he
     const volScalarField& T
 ) const
 {
-    return alpha1_*thermo1_->he(p, T) + alpha2_*thermo2_->he(p, T);
+    return tpm_.alpha1()*thermo1_->he(p, T) + tpm_.alpha2()*thermo2_->he(p, T);
 }
 
 
@@ -154,8 +108,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
 ) const
 {
     return
-        scalarField(alpha1_, cells)*thermo1_->he(p, T, cells)
-      + scalarField(alpha2_, cells)*thermo2_->he(p, T, cells);
+        scalarField(tpm_.alpha1(), cells)*thermo1_->he(p, T, cells)
+      + scalarField(tpm_.alpha2(), cells)*thermo2_->he(p, T, cells);
 }
 
 
@@ -167,14 +121,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->he(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->he(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->he(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->he(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::hc() const
 {
-    return alpha1_*thermo1_->hc() + alpha2_*thermo2_->hc();
+    return tpm_.alpha1()*thermo1_->hc() + tpm_.alpha2()*thermo2_->hc();
 }
 
 
@@ -186,7 +140,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
     const labelList& cells
 ) const
 {
-    notImplemented("Foam::twoPhaseThermo::THE");
+    notImplemented("twoPhaseThermo::THE(...)");
     return T0;
 }
 
@@ -199,14 +153,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
     const label patchi
 ) const
 {
-    notImplemented("Foam::twoPhaseThermo::THE");
+    notImplemented("twoPhaseThermo::THE(...)");
     return T0;
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cp() const
 {
-    return alpha1_*thermo1_->Cp() + alpha2_*thermo2_->Cp();
+    return tpm_.alpha1()*thermo1_->Cp() + tpm_.alpha2()*thermo2_->Cp();
 }
 
 
@@ -218,14 +172,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cp
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->Cp(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->Cp(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->Cp(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->Cp(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cv() const
 {
-    return alpha1_*thermo1_->Cv() + alpha2_*thermo2_->Cv();
+    return tpm_.alpha1()*thermo1_->Cv() + tpm_.alpha2()*thermo2_->Cv();
 }
 
 
@@ -237,14 +191,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cv
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->Cv(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->Cv(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->Cv(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->Cv(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::gamma() const
 {
-    return alpha1_*thermo1_->gamma() + alpha2_*thermo2_->gamma();
+    return tpm_.alpha1()*thermo1_->gamma() + tpm_.alpha2()*thermo2_->gamma();
 }
 
 
@@ -256,14 +210,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::gamma
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->gamma(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->gamma(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->gamma(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->gamma(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cpv() const
 {
-    return alpha1_*thermo1_->Cpv() + alpha2_*thermo2_->Cpv();
+    return tpm_.alpha1()*thermo1_->Cpv() + tpm_.alpha2()*thermo2_->Cpv();
 }
 
 
@@ -275,14 +229,16 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cpv
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->Cpv(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->Cpv(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->Cpv(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->Cpv(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::CpByCpv() const
 {
-    return alpha1_*thermo1_->CpByCpv() + alpha2_*thermo2_->CpByCpv();
+    return
+        tpm_.alpha1()*thermo1_->CpByCpv()
+      + tpm_.alpha2()*thermo2_->CpByCpv();
 }
 
 
@@ -294,14 +250,14 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::CpByCpv
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->CpByCpv(p, T, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->CpByCpv(p, T, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->CpByCpv(p, T, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->CpByCpv(p, T, patchi);
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::kappa() const
 {
-    return alpha1_*thermo1_->kappa() + alpha2_*thermo2_->kappa();
+    return tpm_.alpha1()*thermo1_->kappa() + tpm_.alpha2()*thermo2_->kappa();
 }
 
 
@@ -311,8 +267,8 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappa
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->kappa(patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->kappa(patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->kappa(patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->kappa(patchi);
 }
 
 
@@ -322,8 +278,8 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::kappaEff
 ) const
 {
     return
-        alpha1_*thermo1_->kappaEff(alphat)
-      + alpha2_*thermo2_->kappaEff(alphat);
+        tpm_.alpha1()*thermo1_->kappaEff(alphat)
+      + tpm_.alpha2()*thermo2_->kappaEff(alphat);
 }
 
 
@@ -334,8 +290,9 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappaEff
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->kappaEff(alphat, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->kappaEff(alphat, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->kappaEff(alphat, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->kappaEff(alphat, patchi)
+    ;
 }
 
 
@@ -345,8 +302,8 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::alphaEff
 ) const
 {
     return
-        alpha1_*thermo1_->alphaEff(alphat)
-      + alpha2_*thermo2_->alphaEff(alphat);
+        tpm_.alpha1()*thermo1_->alphaEff(alphat)
+      + tpm_.alpha2()*thermo2_->alphaEff(alphat);
 }
 
 
@@ -357,8 +314,9 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::alphaEff
 ) const
 {
     return
-        alpha1_.boundaryField()[patchi]*thermo1_->alphaEff(alphat, patchi)
-      + alpha2_.boundaryField()[patchi]*thermo2_->alphaEff(alphat, patchi);
+        tpm_.alpha1().boundaryField()[patchi]*thermo1_->alphaEff(alphat, patchi)
+      + tpm_.alpha2().boundaryField()[patchi]*thermo2_->alphaEff(alphat, patchi)
+    ;
 }
 
 

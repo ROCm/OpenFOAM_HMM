@@ -37,6 +37,7 @@ SourceFiles
 #define twoPhaseThermo_H
 
 #include "rhoThermo.H"
+#include "twoPhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,26 +54,13 @@ class twoPhaseThermo
 {
     // Private data
 
-        //- Name of phase 1
-        word phaseName1_;
-
-        //- Name of phase 2
-        word phaseName2_;
-
-        //- Phase-fraction of phase 1
-        const volScalarField& alpha1_;
-
-        //- Phase-fraction of phase2
-        const volScalarField& alpha2_;
+        const twoPhaseMixture& tpm_;
 
         //- Thermo-package of phase 1
         autoPtr<rhoThermo> thermo1_;
 
         //- Thermo-package of phase 2
         autoPtr<rhoThermo> thermo2_;
-
-        //- Energy field
-        volScalarField he_;
 
 
 public:
@@ -86,10 +74,7 @@ public:
         //- Construct from mesh and phase fractions
         twoPhaseThermo
         (
-            const fvMesh&,
-            const volScalarField& alpha1,
-            const volScalarField& alpha2,
-            const word& phaseName=word::null
+            const twoPhaseMixture& twoPhaseProperties
         );
 
 
@@ -127,13 +112,15 @@ public:
             //  Non-const access allowed for transport equations
             virtual volScalarField& he()
             {
-                return he_;
+                notImplemented("twoPhaseThermo::he()");
+                return thermo1_->he();
             }
 
             //- Enthalpy/Internal energy [J/kg]
             virtual const volScalarField& he() const
             {
-                return he_;
+                notImplemented("twoPhaseThermo::he() const");
+                return thermo1_->he();
             }
 
             //- Enthalpy/Internal energy
