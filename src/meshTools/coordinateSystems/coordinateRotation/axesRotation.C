@@ -171,12 +171,7 @@ Foam::tmp<Foam::vectorField> Foam::axesRotation::transform
     const vectorField& st
 ) const
 {
-    notImplemented
-    (
-        "tmp<vectorField> Foam::axesRotation:: "
-        "transform(const vectorField& st) const"
-    );
-    return tmp<vectorField>(NULL);
+    return (R_ & st);
 }
 
 
@@ -185,12 +180,7 @@ Foam::tmp<Foam::vectorField> Foam::axesRotation::invTransform
     const vectorField& st
 ) const
 {
-    notImplemented
-    (
-        "tmp<vectorField>  Foam::axesRotation::"
-        "invTransform(const vectorField& st) const"
-    );
-    return tmp<vectorField>(NULL);
+    return (Rtr_ & st);
 }
 
 
