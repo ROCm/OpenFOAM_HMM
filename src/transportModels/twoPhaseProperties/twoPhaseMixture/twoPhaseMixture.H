@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,97 +22,97 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::phaseEquationOfState
+    Foam::twoPhaseMixture
 
 Description
-    A2stract base-class for dispersed-phase particle diameter models.
+    A two-phase mixture model
 
 SourceFiles
-    phaseEquationOfState.C
-    newDiameterModel.C
+    twoPhaseMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef phaseEquationOfState_H
-#define phaseEquationOfState_H
+#ifndef twoPhaseMixture_H
+#define twoPhaseMixture_H
+
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "dictionary.H"
-#include "volFieldsFwd.H"
-#include "runTimeSelectionTables.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class phaseEquationOfState Declaration
+                      Class twoPhaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
-class phaseEquationOfState
+class twoPhaseMixture
 {
 protected:
 
     // Protected data
 
-        const dictionary& dict_;
+        word phase1Name_;
+        word phase2Name_;
+
+        volScalarField alpha1_;
+        volScalarField alpha2_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("phaseEquationOfState");
-
-
-    // Declare runtime construction
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            phaseEquationOfState,
-            dictionary,
-            (
-                const dictionary& dict
-            ),
-            (dict)
-        );
-
-
     // Constructors
 
-        phaseEquationOfState
+        //- Construct from components
+        twoPhaseMixture
         (
-            const dictionary& dict
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& alpha1Name = "alpha1",
+            const word& alpha2Name = "alpha2"
         );
 
 
     //- Destructor
-    virtual ~phaseEquationOfState();
-
-
-    // Selectors
-
-        static autoPtr<phaseEquationOfState> New
-        (
-            const dictionary& dict
-        );
+    ~twoPhaseMixture()
+    {}
 
 
     // Member Functions
 
-        //- Return the phase density
-        virtual tmp<volScalarField> rho
-        (
-            const volScalarField& p,
-            const volScalarField& T
-        ) const = 0;
+        const word phase1Name() const
+        {
+            return phase1Name_;
+        }
 
-        //- Return the phase compressibility
-        virtual tmp<volScalarField> psi
-        (
-            const volScalarField& p,
-            const volScalarField& T
-        ) const = 0;
+        const word phase2Name() const
+        {
+            return phase2Name_;
+        }
+
+        //- Return the phase-fraction of phase 1
+        const volScalarField& alpha1() const
+        {
+            return alpha1_;
+        }
+
+        //- Return the phase-fraction of phase 1
+        volScalarField& alpha1()
+        {
+            return alpha1_;
+        }
+
+        //- Return the phase-fraction of phase 2
+        const volScalarField& alpha2() const
+        {
+            return alpha2_;
+        }
+
+        //- Return the phase-fraction of phase 2
+        volScalarField& alpha2()
+        {
+            return alpha2_;
+        }
 };
 
 

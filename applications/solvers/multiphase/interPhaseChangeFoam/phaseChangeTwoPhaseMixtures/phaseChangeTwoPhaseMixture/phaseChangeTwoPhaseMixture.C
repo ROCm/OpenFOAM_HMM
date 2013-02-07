@@ -43,7 +43,7 @@ Foam::phaseChangeTwoPhaseMixture::phaseChangeTwoPhaseMixture
     const word& alpha1Name
 )
 :
-    twoPhaseMixture(U, phi, alpha1Name),
+    incompressibleTwoPhaseMixture(U, phi, alpha1Name),
     phaseChangeTwoPhaseMixtureCoeffs_(subDict(type + "Coeffs")),
     pSat_(lookup("pSat"))
 {}
@@ -76,7 +76,7 @@ Foam::phaseChangeTwoPhaseMixture::vDotP() const
 
 bool Foam::phaseChangeTwoPhaseMixture::read()
 {
-    if (twoPhaseMixture::read())
+    if (incompressibleTwoPhaseMixture::read())
     {
         phaseChangeTwoPhaseMixtureCoeffs_ = subDict(type() + "Coeffs");
         lookup("pSat") >> pSat_;

@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "twoPhaseMixture.H"
+#include "incompressibleTwoPhaseMixture.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 #include "fvc.H"
@@ -32,7 +32,7 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 //- Calculate and return the laminar viscosity
-void Foam::twoPhaseMixture::calcNu()
+void Foam::incompressibleTwoPhaseMixture::calcNu()
 {
     nuModel1_->correct();
     nuModel2_->correct();
@@ -50,7 +50,7 @@ void Foam::twoPhaseMixture::calcNu()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::twoPhaseMixture::twoPhaseMixture
+Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -59,16 +59,14 @@ Foam::twoPhaseMixture::twoPhaseMixture
 )
 :
     transportModel(U, phi),
-
-    phase1Name_(found("phases") ? wordList(lookup("phases"))[0] : "phase1"),
-    phase2Name_(found("phases") ? wordList(lookup("phases"))[1] : "phase2"),
+    twoPhaseMixture(U.mesh(), *this, alpha1Name, alpha2Name),
 
     nuModel1_
     (
         viscosityModel::New
         (
             "nu1",
-            subDict(phase1Name_),
+            subDict(phase1Name_ == "1" ? "phase1": phase1Name_),
             U,
             phi
         )
@@ -78,7 +76,7 @@ Foam::twoPhaseMixture::twoPhaseMixture
         viscosityModel::New
         (
             "nu2",
-            subDict(phase2Name_),
+            subDict(phase2Name_ == "2" ? "phase2": phase2Name_),
             U,
             phi
         )
@@ -89,30 +87,6 @@ Foam::twoPhaseMixture::twoPhaseMixture
 
     U_(U),
     phi_(phi),
-
-    alpha1_
-    (
-        IOobject
-        (
-            found("phases") ? word("alpha" + phase1Name_) : alpha1Name,
-            U_.time().timeName(),
-            U_.db(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        U_.mesh()
-    ),
-
-    alpha2_
-    (
-        IOobject
-        (
-            found("phases") ? word("alpha" + phase2Name_) : alpha2Name,
-            U_.time().timeName(),
-            U_.db()
-        ),
-        1.0 - alpha1_
-    ),
 
     nu_
     (
@@ -133,7 +107,8 @@ Foam::twoPhaseMixture::twoPhaseMixture
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixture::mu() const
+Foam::tmp<Foam::volScalarField>
+Foam::incompressibleTwoPhaseMixture::mu() const
 {
     const volScalarField limitedAlpha1
     (
@@ -152,7 +127,8 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixture::mu() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::muf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::incompressibleTwoPhaseMixture::muf() const
 {
     const surfaceScalarField alpha1f
     (
@@ -171,7 +147,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::muf() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::nuf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::incompressibleTwoPhaseMixture::nuf() const
 {
     const surfaceScalarField alpha1f
     (
@@ -192,7 +169,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::twoPhaseMixture::nuf() const
 }
 
 
-bool Foam::twoPhaseMixture::read()
+bool Foam::incompressibleTwoPhaseMixture::read()
 {
     if (transportModel::read())
     {

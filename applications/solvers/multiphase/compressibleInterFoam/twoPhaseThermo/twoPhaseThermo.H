@@ -37,6 +37,7 @@ SourceFiles
 #define twoPhaseThermo_H
 
 #include "rhoThermo.H"
+#include "psiThermo.H"
 #include "twoPhaseMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,11 +51,10 @@ namespace Foam
 
 class twoPhaseThermo
 :
-    public rhoThermo
+    public psiThermo,
+    public twoPhaseMixture
 {
     // Private data
-
-        const twoPhaseMixture& tpm_;
 
         //- Thermo-package of phase 1
         autoPtr<rhoThermo> thermo1_;
@@ -71,10 +71,10 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and phase fractions
+        //- Construct from mesh
         twoPhaseThermo
         (
-            const twoPhaseMixture& twoPhaseProperties
+            const fvMesh& mesh
         );
 
 

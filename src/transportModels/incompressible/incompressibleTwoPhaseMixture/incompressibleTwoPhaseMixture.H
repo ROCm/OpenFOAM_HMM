@@ -22,23 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::twoPhaseMixture
+    Foam::incompressibleTwoPhaseMixture
 
 Description
     A two-phase incompressible transportModel
 
 SourceFiles
-    twoPhaseMixture.C
+    incompressibleTwoPhaseMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef twoPhaseMixture_H
-#define twoPhaseMixture_H
+#ifndef incompressibleTwoPhaseMixture_H
+#define incompressibleTwoPhaseMixture_H
 
 #include "incompressible/transportModel/transportModel.H"
 #include "incompressible/viscosityModels/viscosityModel/viscosityModel.H"
-#include "dimensionedScalar.H"
-#include "volFields.H"
+#include "twoPhaseMixture.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,19 +46,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class twoPhaseMixture Declaration
+                      Class incompressibleTwoPhaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
-class twoPhaseMixture
+class incompressibleTwoPhaseMixture
 :
-    public transportModel
+    public transportModel,
+    public twoPhaseMixture
 {
 protected:
 
     // Protected data
-
-        word phase1Name_;
-        word phase2Name_;
 
         autoPtr<viscosityModel> nuModel1_;
         autoPtr<viscosityModel> nuModel2_;
@@ -68,9 +66,6 @@ protected:
 
         const volVectorField& U_;
         const surfaceScalarField& phi_;
-
-        volScalarField alpha1_;
-        volScalarField alpha2_;
 
         volScalarField nu_;
 
@@ -86,7 +81,7 @@ public:
     // Constructors
 
         //- Construct from components
-        twoPhaseMixture
+        incompressibleTwoPhaseMixture
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -96,45 +91,11 @@ public:
 
 
     //- Destructor
-    ~twoPhaseMixture()
+    virtual ~incompressibleTwoPhaseMixture()
     {}
 
 
     // Member Functions
-
-        const word phase1Name() const
-        {
-            return phase1Name_;
-        }
-
-        const word phase2Name() const
-        {
-            return phase2Name_;
-        }
-
-        //- Return the phase-fraction of phase 1
-        const volScalarField& alpha1() const
-        {
-            return alpha1_;
-        }
-
-        //- Return the phase-fraction of phase 1
-        volScalarField& alpha1()
-        {
-            return alpha1_;
-        }
-
-        //- Return the phase-fraction of phase 2
-        const volScalarField& alpha2() const
-        {
-            return alpha2_;
-        }
-
-        //- Return the phase-fraction of phase 2
-        volScalarField& alpha2()
-        {
-            return alpha2_;
-        }
 
         //- Return const-access to phase1 viscosityModel
         const viscosityModel& nuModel1() const

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,38 +23,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "phaseEquationOfState.H"
+#include "twoPhaseMixture.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::phaseEquationOfState> Foam::phaseEquationOfState::New
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::twoPhaseMixture::twoPhaseMixture
 (
-    const dictionary& dict
+    const fvMesh& mesh,
+    const dictionary& dict,
+    const word& alpha1Name,
+    const word& alpha2Name
 )
-{
-    word phaseEquationOfStateType
+:
+    phase1Name_
     (
-        dict.subDict("equationOfState").lookup("type")
-    );
+        dict.found("phases")
+      ? wordList(dict.lookup("phases"))[0]
+      : "1"
+    ),
+    phase2Name_
+    (
+        dict.found("phases")
+      ? wordList(dict.lookup("phases"))[1]
+      : "2"
+    ),
 
-    Info<< "Selecting phaseEquationOfState "
-        << phaseEquationOfStateType << endl;
+    alpha1_
+    (
+        IOobject
+        (
+            dict.found("phases") ? word("alpha" + phase1Name_) : alpha1Name,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    ),
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(phaseEquationOfStateType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn("phaseEquationOfState::New")
-           << "Unknown phaseEquationOfStateType type "
-           << phaseEquationOfStateType << endl << endl
-           << "Valid phaseEquationOfState types are : " << endl
-           << dictionaryConstructorTablePtr_->sortedToc()
-           << exit(FatalError);
-    }
-
-    return cstrIter()(dict.subDict("equationOfState"));
-}
+    alpha2_
+    (
+        IOobject
+        (
+            dict.found("phases") ? word("alpha" + phase2Name_) : alpha2Name,
+            mesh.time().timeName(),
+            mesh
+        ),
+        1.0 - alpha1_
+    )
+{}
 
 
 // ************************************************************************* //

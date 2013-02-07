@@ -34,7 +34,7 @@ Description
 #include "fvCFD.H"
 #include "MULES.H"
 #include "subCycle.H"
-#include "twoPhaseMixture.H"
+#include "incompressibleTwoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"
 
