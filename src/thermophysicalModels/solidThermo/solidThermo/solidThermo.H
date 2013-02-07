@@ -81,7 +81,7 @@ public:
         (mesh, phaseName)
     );
 
-     // Declare run-time constructor selection tables
+    // Declare run-time constructor selection tables
     declareRunTimeSelectionTable
     (
         autoPtr,

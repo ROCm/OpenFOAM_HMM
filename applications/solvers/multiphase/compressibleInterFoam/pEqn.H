@@ -1,7 +1,4 @@
 {
-    rho1 = eos1->rho(p, T);
-    rho2 = eos2->rho(p, T);
-
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rAUf("Dp", fvc::interpolate(rAU));
 
@@ -91,9 +88,15 @@
 
     p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
 
-    rho1 = eos1->rho(p, T);
-    rho2 = eos2->rho(p, T);
+    // thermo.correct();
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
     Info<< "min(p_rgh) " << min(p_rgh).value() << endl;
+
+    K = 0.5*magSqr(U);
+
+    if (thermo.dpdt())
+    {
+        dpdt = fvc::ddt(p);
+    }
 }

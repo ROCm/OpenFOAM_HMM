@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,6 +70,7 @@ protected:
         const surfaceScalarField& phi_;
 
         volScalarField alpha1_;
+        volScalarField alpha2_;
 
         volScalarField nu_;
 
@@ -89,7 +90,8 @@ public:
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const word& alpha1Name = "alpha1"
+            const word& alpha1Name = "alpha1",
+            const word& alpha2Name = "alpha2"
         );
 
 
@@ -120,6 +122,18 @@ public:
         volScalarField& alpha1()
         {
             return alpha1_;
+        }
+
+        //- Return the phase-fraction of phase 2
+        const volScalarField& alpha2() const
+        {
+            return alpha2_;
+        }
+
+        //- Return the phase-fraction of phase 2
+        volScalarField& alpha2()
+        {
+            return alpha2_;
         }
 
         //- Return const-access to phase1 viscosityModel
