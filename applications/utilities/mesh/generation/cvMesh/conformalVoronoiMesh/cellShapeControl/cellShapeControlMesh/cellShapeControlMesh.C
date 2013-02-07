@@ -817,9 +817,7 @@ void Foam::cellShapeControlMesh::write() const
             {
                 Info<< "Bad alignment = " << vit->info();
 
-                triad tmpTriad(vit->alignment());
-                tmpTriad.orthogonalize();
-                vit->alignment() = tmpTriad;
+                vit->alignment() = tensor::I;
 
                 Info<< "New alignment = " << vit->info();
 
