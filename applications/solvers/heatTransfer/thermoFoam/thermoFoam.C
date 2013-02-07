@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,58 +22,80 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    buoyantSimpleRadiationFoam
+    thermoFoam
 
 Description
-    Steady-state solver for buoyant, turbulent flow of compressible fluids,
-    including radiation, for ventilation and heat-transfer.
+    Evolves the thermodynamics on a forzen flow field
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "rhoThermo.H"
+#include "turbulenceModel.H"
 #include "RASModel.H"
+#include "LESModel.H"
 #include "radiationModel.H"
-#include "simpleControl.H"
 #include "fvIOoptionList.H"
+#include "simpleControl.H"
+#include "pimpleControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
+
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createFvOptions.H"
     #include "createRadiationModel.H"
-    #include "initContinuityErrs.H"
-
-    simpleControl simple(mesh);
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info<< "\nStarting time loop\n" << endl;
+    Info<< "\nEvolving thermodynamics\n" << endl;
 
-    while (simple.loop())
+    if (mesh.solutionDict().found("SIMPLE"))
     {
-        Info<< "Time = " << runTime.timeName() << nl << endl;
+        simpleControl simple(mesh);
 
-        // Pressure-velocity SIMPLE corrector
+        while (simple.loop())
         {
-            #include "UEqn.H"
-            #include "EEqn.H"
-            #include "pEqn.H"
+            Info<< "Time = " << runTime.timeName() << nl << endl;
+
+            while (simple.correctNonOrthogonal())
+            {
+                #include "EEqn.H"
+            }
+
+            Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+                << nl << endl;
+
+            runTime.write();
         }
+    }
+    else
+    {
+        pimpleControl pimple(mesh);
 
-        turbulence->correct();
+        while (runTime.run())
+        {
+            runTime++;
 
-        runTime.write();
+            Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+            while (pimple.correctNonOrthogonal())
+            {
+                #include "EEqn.H"
+            }
+
+            Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+                << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+                << nl << endl;
+
+            runTime.write();
+        }
     }
 
     Info<< "End\n" << endl;
