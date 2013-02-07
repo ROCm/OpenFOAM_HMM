@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::twoPhaseThermo
+    Foam::twoPhaseMixtureThermo
 
 Description
 
 SourceFiles
-    twoPhaseThermoI.H
-    twoPhaseThermo.C
-    twoPhaseThermoIO.C
+    twoPhaseMixtureThermoI.H
+    twoPhaseMixtureThermo.C
+    twoPhaseMixtureThermoIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef twoPhaseThermo_H
-#define twoPhaseThermo_H
+#ifndef twoPhaseMixtureThermo_H
+#define twoPhaseMixtureThermo_H
 
 #include "rhoThermo.H"
 #include "psiThermo.H"
@@ -46,10 +46,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class twoPhaseThermo Declaration
+                         Class twoPhaseMixtureThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-class twoPhaseThermo
+class twoPhaseMixtureThermo
 :
     public psiThermo,
     public twoPhaseMixture
@@ -66,20 +66,20 @@ class twoPhaseThermo
 public:
 
     //- Runtime type information
-    TypeName("twoPhaseThermo");
+    TypeName("twoPhaseMixtureThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        twoPhaseThermo
+        twoPhaseMixtureThermo
         (
             const fvMesh& mesh
         );
 
 
     //- Destructor
-    virtual ~twoPhaseThermo();
+    virtual ~twoPhaseMixtureThermo();
 
 
     // Member Functions
@@ -112,14 +112,14 @@ public:
             //  Non-const access allowed for transport equations
             virtual volScalarField& he()
             {
-                notImplemented("twoPhaseThermo::he()");
+                notImplemented("twoPhaseMixtureThermo::he()");
                 return thermo1_->he();
             }
 
             //- Enthalpy/Internal energy [J/kg]
             virtual const volScalarField& he() const
             {
-                notImplemented("twoPhaseThermo::he() const");
+                notImplemented("twoPhaseMixtureThermo::he() const");
                 return thermo1_->he();
             }
 

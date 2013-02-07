@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "twoPhaseThermo.H"
+#include "twoPhaseMixtureThermo.H"
 #include "gradientEnergyFvPatchScalarField.H"
 #include "mixedEnergyFvPatchScalarField.H"
 
@@ -32,12 +32,12 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(twoPhaseThermo, 0);
+    defineTypeNameAndDebug(twoPhaseMixtureThermo, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::twoPhaseThermo::twoPhaseThermo
+Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
 (
     const fvMesh& mesh
 )
@@ -56,13 +56,13 @@ Foam::twoPhaseThermo::twoPhaseThermo
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::twoPhaseThermo::~twoPhaseThermo()
+Foam::twoPhaseMixtureThermo::~twoPhaseMixtureThermo()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::twoPhaseThermo::correct()
+void Foam::twoPhaseMixtureThermo::correct()
 {
     thermo1_->he() = thermo1_->he(p_, T_);
     thermo1_->correct();
@@ -76,19 +76,19 @@ void Foam::twoPhaseThermo::correct()
 }
 
 
-bool Foam::twoPhaseThermo::incompressible() const
+bool Foam::twoPhaseMixtureThermo::incompressible() const
 {
     return thermo1_->incompressible() && thermo2_->incompressible();
 }
 
 
-bool Foam::twoPhaseThermo::isochoric() const
+bool Foam::twoPhaseMixtureThermo::isochoric() const
 {
     return thermo1_->isochoric() && thermo2_->isochoric();
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::he
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::he
 (
     const volScalarField& p,
     const volScalarField& T
@@ -98,7 +98,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::he
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::he
 (
     const scalarField& p,
     const scalarField& T,
@@ -111,7 +111,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::he
 (
     const scalarField& p,
     const scalarField& T,
@@ -124,13 +124,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::he
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::hc() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::hc() const
 {
     return alpha1()*thermo1_->hc() + alpha2()*thermo2_->hc();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::THE
 (
     const scalarField& h,
     const scalarField& p,
@@ -138,12 +138,12 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
     const labelList& cells
 ) const
 {
-    notImplemented("twoPhaseThermo::THE(...)");
+    notImplemented("twoPhaseMixtureThermo::THE(...)");
     return T0;
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::THE
 (
     const scalarField& h,
     const scalarField& p,
@@ -151,18 +151,18 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::THE
     const label patchi
 ) const
 {
-    notImplemented("twoPhaseThermo::THE(...)");
+    notImplemented("twoPhaseMixtureThermo::THE(...)");
     return T0;
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cp() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::Cp() const
 {
     return alpha1()*thermo1_->Cp() + alpha2()*thermo2_->Cp();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cp
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::Cp
 (
     const scalarField& p,
     const scalarField& T,
@@ -175,13 +175,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cp
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::Cv() const
 {
     return alpha1()*thermo1_->Cv() + alpha2()*thermo2_->Cv();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cv
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::Cv
 (
     const scalarField& p,
     const scalarField& T,
@@ -194,13 +194,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::gamma() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::gamma() const
 {
     return alpha1()*thermo1_->gamma() + alpha2()*thermo2_->gamma();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::gamma
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::gamma
 (
     const scalarField& p,
     const scalarField& T,
@@ -213,13 +213,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::gamma
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::Cpv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::Cpv() const
 {
     return alpha1()*thermo1_->Cpv() + alpha2()*thermo2_->Cpv();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cpv
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::Cpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -232,7 +232,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::Cpv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::CpByCpv() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::CpByCpv() const
 {
     return
         alpha1()*thermo1_->CpByCpv()
@@ -240,7 +240,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::CpByCpv() const
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::CpByCpv
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::CpByCpv
 (
     const scalarField& p,
     const scalarField& T,
@@ -253,13 +253,13 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::CpByCpv
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::kappa() const
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::kappa() const
 {
     return alpha1()*thermo1_->kappa() + alpha2()*thermo2_->kappa();
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappa
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::kappa
 (
     const label patchi
 ) const
@@ -270,7 +270,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappa
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::kappaEff
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::kappaEff
 (
     const volScalarField& alphat
 ) const
@@ -281,7 +281,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::kappaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappaEff
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::kappaEff
 (
     const scalarField& alphat,
     const label patchi
@@ -294,7 +294,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::kappaEff
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::alphaEff
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::alphaEff
 (
     const volScalarField& alphat
 ) const
@@ -305,7 +305,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseThermo::alphaEff
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::twoPhaseThermo::alphaEff
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::alphaEff
 (
     const scalarField& alphat,
     const label patchi

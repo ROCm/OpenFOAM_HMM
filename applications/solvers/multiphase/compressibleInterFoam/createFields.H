@@ -28,8 +28,8 @@
 
     #include "createPhi.H"
 
-    Info<< "Constructing twoPhaseThermo\n" << endl;
-    twoPhaseThermo twoPhaseProperties(mesh);
+    Info<< "Constructing twoPhaseMixtureThermo\n" << endl;
+    twoPhaseMixtureThermo twoPhaseProperties(mesh);
 
     volScalarField& alpha1(twoPhaseProperties.alpha1());
     volScalarField& alpha2(twoPhaseProperties.alpha2());
