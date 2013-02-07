@@ -212,6 +212,12 @@ public:
         //- Return the turbulence thermal diffusivity
         virtual tmp<volScalarField> alphat() const = 0;
 
+        //- Return the turbulence thermal diffusivity for a patch
+        virtual tmp<scalarField> alphat(const label patchI) const
+        {
+            return alphat()().boundaryField()[patchI];
+        }
+
         //- Return the effective turbulence temperature diffusivity
         virtual tmp<volScalarField> kappaEff() const = 0;
 
