@@ -417,6 +417,7 @@ void Foam::smoothAlignmentSolver::smoothAlignments
 
         forAll(alignments, pI)
         {
+            triadAv[pI].orthogonalize();
             alignments[pI] = triadAv[pI].sortxyz();
         }
 
