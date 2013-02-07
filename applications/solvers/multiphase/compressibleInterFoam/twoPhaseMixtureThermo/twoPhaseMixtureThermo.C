@@ -35,6 +35,7 @@ namespace Foam
     defineTypeNameAndDebug(twoPhaseMixtureThermo, 0);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
@@ -44,9 +45,22 @@ Foam::twoPhaseMixtureThermo::twoPhaseMixtureThermo
 :
     psiThermo(mesh, word::null),
     twoPhaseMixture(mesh, *this),
-    thermo1_(rhoThermo::New(mesh, phase1Name())),
-    thermo2_(rhoThermo::New(mesh, phase2Name()))
+    thermo1_(NULL),
+    thermo2_(NULL)
 {
+    {
+        volScalarField T1("T" + phase1Name(), T_);
+        T1.write();
+    }
+
+    {
+        volScalarField T2("T" + phase2Name(), T_);
+        T2.write();
+    }
+
+    thermo1_ = rhoThermo::New(mesh, phase1Name());
+    thermo2_ = rhoThermo::New(mesh, phase2Name());
+
     thermo1_->validate(phase1Name(), "e");
     thermo2_->validate(phase2Name(), "e");
 

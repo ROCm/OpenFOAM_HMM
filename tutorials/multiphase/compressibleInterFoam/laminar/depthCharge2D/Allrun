@@ -10,6 +10,7 @@ application=`getApplication`
 runApplication blockMesh
 cp 0/alphawater.org 0/alphawater
 cp 0/p_rgh.org 0/p_rgh
+cp 0/p.org 0/p
 cp 0/T.org 0/T
 runApplication setFields
 runApplication $application
