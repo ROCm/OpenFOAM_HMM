@@ -137,6 +137,9 @@ protected:
         //- Return the file path to the base communications folder
         fileName baseDir() const;
 
+        //- Write the geometry to the comms dir
+        void writeGeometry() const;
+
         //- Return the file path to the lock file
         fileName lockFile() const;
 
