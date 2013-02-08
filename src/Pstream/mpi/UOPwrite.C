@@ -43,7 +43,7 @@ bool Foam::UOPstream::write
     const label communicator
 )
 {
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
             << " tag:" << tag
@@ -80,7 +80,7 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -100,7 +100,7 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -123,7 +123,7 @@ bool Foam::UOPstream::write
             &request
         );
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)

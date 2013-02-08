@@ -339,6 +339,39 @@ void Foam::UPstream::freeCommunicators(const bool doPstream)
 }
 
 
+int Foam::UPstream::baseProcNo(const label myComm, const int myProcID)
+{
+    int procID = myProcID;
+    label comm = myComm;
+
+    while (parent(comm) != -1)
+    {
+        const List<int>& parentRanks = UPstream::procID(comm);
+        procID = parentRanks[procID];
+        comm = UPstream::parent(comm);
+    }
+
+    return procID;
+}
+
+
+Foam::label Foam::UPstream::myProcNo(const label myComm, const int baseProcID)
+{
+    const List<int>& parentRanks = procID(myComm);
+    label parentComm = parent(myComm);
+
+    if (parentComm == -1)
+    {
+        return findIndex(parentRanks, baseProcID);
+    }
+    else
+    {
+        label parentRank = myProcNo(parentComm, baseProcID);
+        return findIndex(parentRanks, parentRank);
+    }
+}
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // By default this is not a parallel run

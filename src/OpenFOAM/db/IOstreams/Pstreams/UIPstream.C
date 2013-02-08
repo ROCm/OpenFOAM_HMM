@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -330,7 +330,7 @@ Foam::Istream& Foam::UIPstream::rewind()
 void Foam::UIPstream::print(Ostream& os) const
 {
     os  << "Reading from processor " << fromProcNo_
-        << " to processor " << myProcNo << " using communicator " << comm_
+        << " using communicator " << comm_
         <<  " and tag " << tag_
         << Foam::endl;
 }

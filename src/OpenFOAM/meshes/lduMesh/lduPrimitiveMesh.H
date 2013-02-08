@@ -108,7 +108,7 @@ public:
             Pout<< "lduPrimitiveMesh :"
                 << " nCells:" << nCells
                 << " l:" << lowerAddr_.size()
-                << " u::" << upperAddr_.size()
+                << " u:" << upperAddr_.size()
                 << " pa:" << patchAddr_.size()
                 << " interfaces:" << interfaces_.size()
                 << " comm:" << comm_
@@ -124,9 +124,11 @@ public:
                             const processorLduInterface
                         >(interfaces_[i]);
 
-                        Pout<< "    comm:" << pi.comm()
+                        Pout<< "    patch:" << i
+                            << " size:" << patchAddr_[i].size()
                             << " myProcNo:" << pi.myProcNo()
                             << " neighbProcNo:" << pi.neighbProcNo()
+                            << " comm:" << pi.comm()
                             << endl;
                     }
                 }
@@ -158,7 +160,7 @@ public:
             Pout<< "lduPrimitiveMesh :"
                 << " nCells:" << nCells
                 << " l:" << lowerAddr_.size()
-                << " u::" << upperAddr_.size()
+                << " u:" << upperAddr_.size()
                 << " pa:" << patchAddr_.size()
                 << " interfaces:" << interfaces_.size()
                 << " comm:" << comm_
@@ -174,9 +176,11 @@ public:
                             const processorLduInterface
                         >(interfaces_[i]);
 
-                        Pout<< "    comm:" << pi.comm()
+                        Pout<< "    patch:" << i
+                            << " size:" << patchAddr_[i].size()
                             << " myProcNo:" << pi.myProcNo()
                             << " neighbProcNo:" << pi.neighbProcNo()
+                            << " comm:" << pi.comm()
                             << endl;
                     }
                 }

@@ -323,18 +323,6 @@ public:
                 comm_(allocateCommunicator(parent, subRanks, doPstream))
             {}
 
-//            communicator(const label parent)
-//            :
-//                comm_
-//                (
-//                    allocateCommunicator
-//                    (
-//                        parent,
-//                        identity(UPstream::nProcs(parent))
-//                    )
-//                )
-//            {}
-
             ~communicator()
             {
                 freeCommunicator(comm_);
@@ -345,6 +333,14 @@ public:
                 return comm_;
             }
         };
+
+        //- Return physical processor number (i.e. processor number in
+        //  worldComm) given communicator and procssor
+        static int baseProcNo(const label myComm, const int myProcID);
+
+        //- Return processor number in communicator (given physical processor
+        //  number) (= reverse of baseProcNo)
+        static label myProcNo(const label myComm, const int baseProcID);
 
 
         //- Add the valid option this type of communications library
@@ -379,6 +375,12 @@ public:
             static void freeTag(const char*, const int tag);
 
             static void freeTag(const word&, const int tag);
+
+//            //- Return (index of) request to use in calls to nonblocking ops
+//            static label allocateRequest(const word&);
+//
+//            //- Free (index of) request
+//            static void freeRequest(const word&, const label request);
 
 
         //- Is this a parallel run?
@@ -415,7 +417,6 @@ public:
         {
             return parentCommunicator_(communicator);
         }
-
 
 //        //- Process IDs
 //        static const List<int>& procIDs()

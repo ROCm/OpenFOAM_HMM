@@ -196,14 +196,7 @@ Foam::OSstream& Foam::messageStream::operator()(const label communicator)
             {
                 if (title().size())
                 {
-                    if (Pstream::parRun() && !collect)
-                    {
-                        Pout<< title().c_str();
-                    }
-                    else
-                    {
-                        Sout<< title().c_str();
-                    }
+                    Pout<< title().c_str();
                 }
 
                 if (maxErrors_)
@@ -218,14 +211,7 @@ Foam::OSstream& Foam::messageStream::operator()(const label communicator)
                     }
                 }
 
-                if (Pstream::parRun() && !collect)
-                {
-                    return Pout;
-                }
-                else
-                {
-                    return Sout;
-                }
+                return Pout;
             }
         }
     }

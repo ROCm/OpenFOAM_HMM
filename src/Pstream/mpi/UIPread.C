@@ -70,7 +70,7 @@ Foam::UIPstream::UIPstream
 
         label wantedSize = externalBuf_.capacity();
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UIPstream::UIPstream : read from:" << fromProcNo
                 << " tag:" << tag << " wanted size:" << wantedSize
@@ -94,7 +94,7 @@ Foam::UIPstream::UIPstream
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
 
-            if (debug&1)
+            if (debug)
             {
                 Pout<< "UIPstream::UIPstream : probed size:" << wantedSize
                     << Foam::endl;
@@ -151,7 +151,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         // Message is already received into externalBuf
         messageSize_ = buffers.recvBuf_[fromProcNo].size();
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " fromProcNo:" << fromProcNo
@@ -165,7 +165,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 
         label wantedSize = externalBuf_.capacity();
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " read from:" << fromProcNo
@@ -189,7 +189,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
 
-            if (debug&1)
+            if (debug)
             {
                 Pout<< "UIPstream::UIPstream PstreamBuffers : probed size:"
                     << wantedSize << Foam::endl;
@@ -229,7 +229,7 @@ Foam::label Foam::UIPstream::read
     const label communicator
 )
 {
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UIPstream::read : starting read from:" << fromProcNo
             << " tag:" << tag << " comm:" << communicator
@@ -282,7 +282,7 @@ Foam::label Foam::UIPstream::read
         int messageSize;
         MPI_Get_count(&status, MPI_BYTE, &messageSize);
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UIPstream::read : finished read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)
@@ -332,7 +332,7 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
-        if (debug&1)
+        if (debug)
         {
             Pout<< "UIPstream::read : started read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)

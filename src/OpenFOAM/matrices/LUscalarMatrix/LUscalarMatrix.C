@@ -33,8 +33,8 @@ License
 
 Foam::LUscalarMatrix::LUscalarMatrix(const scalarSquareMatrix& matrix)
 :
-    comm_(Pstream::worldComm),
     scalarSquareMatrix(matrix),
+    comm_(Pstream::worldComm),
     pivotIndices_(n())
 {
     LUDecompose(*this, pivotIndices_);
@@ -67,11 +67,6 @@ Foam::LUscalarMatrix::LUscalarMatrix
             )
         );
 
-
-Pout<< "LUscalarMatrix :"
-    << " comm:" << comm_
-    << " master:" << Pstream::master(comm_) << endl;
-
         if (Pstream::master(comm_))
         {
             for
@@ -81,8 +76,6 @@ Pout<< "LUscalarMatrix :"
                 slave++
             )
             {
-Pout<< "Receiving from " << slave
-    << " using comm:" << comm_ << endl;
                 lduMatrices.set
                 (
                     lduMatrixi++,

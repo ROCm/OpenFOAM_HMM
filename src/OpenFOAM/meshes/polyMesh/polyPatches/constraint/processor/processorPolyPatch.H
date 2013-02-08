@@ -42,6 +42,7 @@ SourceFiles
 #include "coupledPolyPatch.H"
 #include "polyBoundaryMesh.H"
 #include "faceListFwd.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,9 +58,6 @@ class processorPolyPatch
     public coupledPolyPatch
 {
     // Private data
-
-        //- Communicator to use
-        label comm_;
 
         int myProcNo_;
         int neighbProcNo_;
@@ -252,7 +250,8 @@ public:
         //- Return communicator used for communication
         label comm() const
         {
-            return comm_;
+            //return comm_;
+            return boundaryMesh().mesh().comm();
         }
 
         //- Return processor number
@@ -270,11 +269,11 @@ public:
 
         // For testing
 
-            //- Return communicator used for communication
-            label& comm()
-            {
-                return comm_;
-            }
+//            //- Return communicator used for communication
+//            label& comm()
+//            {
+//                return comm_;
+//            }
 
             //- Return processor number
             int& myProcNo()

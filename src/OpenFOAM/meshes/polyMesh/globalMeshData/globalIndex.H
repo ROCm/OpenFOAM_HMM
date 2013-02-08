@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,13 +71,21 @@ public:
 
     // Constructors
 
+
+        //- Construct from local max size
+        globalIndex(const label localSize);
+
         //- Construct from local max size
         globalIndex
         (
             const label localSize,
-            const int tag = Pstream::msgType(),
-            const bool parallel = true              // use parallel comms
+            const int tag,
+            const label comm,
+            const bool parallel     // use parallel comms
         );
+
+        //- Construct from components
+        globalIndex(const labelList& offsets);
 
         //- Construct from Istream
         globalIndex(Istream& is);
@@ -85,7 +93,7 @@ public:
 
     // Member Functions
 
-        // Queries relating to my processor
+        // Queries relating to my processor (using world communicator)
 
             //- my local size
             inline label localSize() const;

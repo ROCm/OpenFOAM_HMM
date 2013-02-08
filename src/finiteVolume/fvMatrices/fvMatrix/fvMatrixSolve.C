@@ -60,7 +60,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solve
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solve(const dictionary& solverControls) : "
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solve(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
     }
@@ -107,7 +108,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solveSegregated"
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solveSegregated"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
@@ -199,8 +201,6 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveSegregated
         )->solve(psiCmpt, sourceCmpt, cmpt);
 
         //solverPerf.print(Info);
-Pout<< "** calling solverPerformance::print with comm:" << this->mesh().comm()
-    << endl;
         solverPerf.print(Info(this->mesh().comm()));
 
         solverPerfVec = max(solverPerfVec, solverPerf);
@@ -226,7 +226,8 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
 {
     if (debug)
     {
-        Info<< "fvMatrix<Type>::solveCoupled"
+        Info(this->mesh().comm())
+            << "fvMatrix<Type>::solveCoupled"
                "(const dictionary& solverControls) : "
                "solving fvMatrix<Type>"
             << endl;
@@ -265,8 +266,6 @@ Foam::solverPerformance Foam::fvMatrix<Type>::solveCoupled
     );
 
     //solverPerf.print(Info);
-Pout<< "** calling solverPerformance::print with comm:" << this->mesh().comm()
-    << endl;
     solverPerf.print(Info(this->mesh().comm()));
 
     psi.correctBoundaryConditions();

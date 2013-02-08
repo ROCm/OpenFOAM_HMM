@@ -68,7 +68,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     int myRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::init : initialised with numProcs:" << numprocs
             << " myRank:" << myRank << endl;
@@ -120,7 +120,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 void Foam::UPstream::exit(int errnum)
 {
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::exit." << endl;
     }
@@ -280,6 +280,13 @@ void Foam::reduce
 
     requestID = PstreamGlobals::outstandingRequests_.size();
     PstreamGlobals::outstandingRequests_.append(request);
+
+    if (debug)
+    {
+        Pout<< "UPstream::allocateRequest for non-blocking reduce"
+            << " : request:" << requestID
+            << endl;
+
 #else
     // Non-blocking not yet implemented in mpi
     reduce(Value, bop, tag, communicator);
@@ -434,7 +441,7 @@ void Foam::UPstream::resetRequests(const label i)
 
 void Foam::UPstream::waitRequests(const label start)
 {
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::waitRequests : starting wait for "
             << PstreamGlobals::outstandingRequests_.size()-start
@@ -469,7 +476,7 @@ void Foam::UPstream::waitRequests(const label start)
         resetRequests(start);
     }
 
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::waitRequests : finished wait." << endl;
     }
@@ -478,7 +485,7 @@ void Foam::UPstream::waitRequests(const label start)
 
 void Foam::UPstream::waitRequest(const label i)
 {
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::waitRequest : starting wait for request:" << i
             << endl;
@@ -511,7 +518,7 @@ void Foam::UPstream::waitRequest(const label i)
         )   << "MPI_Wait returned with error" << Foam::endl;
     }
 
-    if (debug&1)
+    if (debug)
     {
         Pout<< "UPstream::waitRequest : finished wait for request:" << i
             << endl;
@@ -521,9 +528,9 @@ void Foam::UPstream::waitRequest(const label i)
 
 bool Foam::UPstream::finishedRequest(const label i)
 {
-    if (debug&1)
+    if (debug)
     {
-        Pout<< "UPstream::waitRequests : checking finishedRequest:" << i
+        Pout<< "UPstream::finishedRequest : checking request:" << i
             << endl;
     }
 
@@ -547,14 +554,162 @@ bool Foam::UPstream::finishedRequest(const label i)
         MPI_STATUS_IGNORE
     );
 
-    if (debug&1)
+    if (debug)
     {
-        Pout<< "UPstream::waitRequests : finished finishedRequest:" << i
+        Pout<< "UPstream::finishedRequest : finished request:" << i
             << endl;
     }
 
     return flag != 0;
 }
+
+
+int Foam::UPstream::allocateTag(const char* s)
+{
+    int tag;
+    if (PstreamGlobals::freedTags_.size())
+    {
+        tag = PstreamGlobals::freedTags_.remove();
+    }
+    else
+    {
+        tag = PstreamGlobals::nTags_++;
+    }
+
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::allocateTag " << s
+            << " : tag:" << tag
+            << endl;
+    }
+
+    return tag;
+}
+
+
+int Foam::UPstream::allocateTag(const word& s)
+{
+    int tag;
+    if (PstreamGlobals::freedTags_.size())
+    {
+        tag = PstreamGlobals::freedTags_.remove();
+    }
+    else
+    {
+        tag = PstreamGlobals::nTags_++;
+    }
+
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = 'X';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::allocateTag " << s
+            << " : tag:" << tag
+            << endl;
+    }
+
+    return tag;
+}
+
+
+void Foam::UPstream::freeTag(const char* s, const int tag)
+{
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+    }
+    PstreamGlobals::freedTags_.append(tag);
+}
+
+
+void Foam::UPstream::freeTag(const word& s, const int tag)
+{
+    if (debug)
+    {
+        //if (UPstream::lateBlocking > 0)
+        //{
+        //    string& poutp = Pout.prefix();
+        //    poutp[poutp.size()-2*(UPstream::lateBlocking+2)+tag] = ' ';
+        //    Perr.prefix() = Pout.prefix();
+        //}
+        Pout<< "UPstream::freeTag " << s << " tag:" << tag << endl;
+    }
+    PstreamGlobals::freedTags_.append(tag);
+}
+
+
+//Foam::label Foam::UPstream::allocateRequest(const word& s)
+//{
+//    label request;
+//    if (PstreamGlobals::freedRequests_.size())
+//    {
+//        request = PstreamGlobals::freedRequests_.remove();
+//    }
+//    else
+//    {
+//        request = PstreamGlobals::outstandingRequests_.size();
+//
+//        // Make sure outstanding requests table can hold this
+//        PstreamGlobals::outstandingRequests_.reserve(request);
+//    }
+//
+//    if (debug)
+//    {
+//        //if (UPstream::lateBlocking > 0)
+//        //{
+//        //    string& poutp = Pout.prefix();
+//        //    poutp[poutp.size()-(UPstream::lateBlocking+2)+request] = 'X';
+//        //    Perr.prefix() = Pout.prefix();
+//        //}
+//        Pout<< "UPstream::allocateRequest " << s
+//            << " : request:" << request
+//            << " out of:" << PstreamGlobals::outstandingRequests_.size()
+//            << " capacity:" << PstreamGlobals::outstandingRequests_.capacity()
+//            << endl;
+//    }
+//
+//    return request;
+//}
+//
+//
+//void Foam::UPstream::freeRequest(const word& s, const label index)
+//{
+//    if (PstreamGlobals::outstandingRequests_(index) != MPI_REQUEST_NULL)
+//    {
+//        PstreamGlobals::outstandingRequests_(index) = MPI_REQUEST_NULL;
+//        PstreamGlobals::freedRequests_.append(index);
+//
+//        if (debug)
+//        {
+//            //if (UPstream::lateBlocking > 0)
+//            //{
+//            //    string& poutp = Pout.prefix();
+//            //    poutp[poutp.size()-(UPstream::lateBlocking+2)+index] = ' ';
+//            //    Perr.prefix() = Pout.prefix();
+//            //}
+//            Pout<< "UPstream::freeRequest " << s
+//                << " : request:" << index
+//                << " now nullRequest:"
+//                << long(PstreamGlobals::outstandingRequests_(index)) << endl;
+//        }
+//    }
+//}
 
 
 // ************************************************************************* //

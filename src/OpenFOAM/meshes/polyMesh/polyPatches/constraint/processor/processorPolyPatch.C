@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(name, size, start, index, bm, typeName, transform),
-    comm_(comm),
+//    comm_(comm),
     myProcNo_(myProcNo),
     neighbProcNo_(neighbProcNo),
     neighbFaceCentres_(),
@@ -80,10 +80,10 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
-    comm_
-    (
-        dict.lookupOrDefault("communicator", UPstream::worldComm)
-    ),
+//    comm_
+//    (
+//        dict.lookupOrDefault("communicator", UPstream::worldComm)
+//    ),
     myProcNo_(readLabel(dict.lookup("myProcNo"))),
     neighbProcNo_(readLabel(dict.lookup("neighbProcNo"))),
     neighbFaceCentres_(),
@@ -99,7 +99,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm),
-    comm_(pp.comm_),
+//    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -118,7 +118,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, newSize, newStart),
-    comm_(pp.comm_),
+//    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -137,7 +137,7 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
-    comm_(pp.comm_),
+//    comm_(pp.comm_),
     myProcNo_(pp.myProcNo_),
     neighbProcNo_(pp.neighbProcNo_),
     neighbFaceCentres_(),
@@ -1091,11 +1091,11 @@ bool Foam::processorPolyPatch::order
 void Foam::processorPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
-    if (comm_ != UPstream::worldComm)
-    {
-        os.writeKeyword("communicator") << comm_
-            << token::END_STATEMENT << nl;
-    }
+//    if (comm_ != UPstream::worldComm)
+//    {
+//        os.writeKeyword("communicator") << comm_
+//            << token::END_STATEMENT << nl;
+//    }
     os.writeKeyword("myProcNo") << myProcNo_
         << token::END_STATEMENT << nl;
     os.writeKeyword("neighbProcNo") << neighbProcNo_
