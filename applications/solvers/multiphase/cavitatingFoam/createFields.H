@@ -44,7 +44,7 @@
 
     Info<< "Reading transportProperties\n" << endl;
 
-    twoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
+    incompressibleTwoPhaseMixture twoPhaseProperties(U, phiv, "gamma");
 
     volScalarField& gamma(twoPhaseProperties.alpha1());
     gamma.oldTime();

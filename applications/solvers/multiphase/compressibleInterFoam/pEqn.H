@@ -47,7 +47,7 @@
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
     // pressure solution - done in 2 parts. Part 1:
-    //thermo.rho() -= psi*p_rgh;
+    //twoPhaseProperties.rho() -= psi*p_rgh;
 
     while (pimple.correctNonOrthogonal())
     {
@@ -70,7 +70,7 @@
         if (pimple.finalNonOrthogonalIter())
         {
             // Second part of thermodynamic density update
-            //thermo.rho() += psi*p_rgh;
+            //twoPhaseProperties.rho() += psi*p_rgh;
 
             dgdt =
             (
@@ -88,14 +88,14 @@
 
     p = max(p_rgh + (alpha1*rho1 + alpha2*rho2)*gh, pMin);
 
-    // thermo.correct();
+    // twoPhaseProperties.correct();
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
     Info<< "min(p_rgh) " << min(p_rgh).value() << endl;
 
     K = 0.5*magSqr(U);
 
-    if (thermo.dpdt())
+    if (twoPhaseProperties.dpdt())
     {
         dpdt = fvc::ddt(p);
     }
