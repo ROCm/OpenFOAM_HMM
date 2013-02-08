@@ -30,6 +30,7 @@ License
 #include "IFstream.H"
 #include "OFstream.H"
 #include "globalIndex.H"
+#include "ListListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -49,6 +50,62 @@ Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir() const
     }
 
     return fileName(commsDir_/regionName/this->patch().name());
+}
+
+
+template<class Type>
+void Foam::externalCoupledMixedFvPatchField<Type>::writeGeometry() const
+{
+    int tag = Pstream::msgType() + 1;
+
+    const label procI = Pstream::myProcNo();
+    const polyPatch& p = this->patch().patch();
+    const polyMesh& mesh = p.boundaryMesh().mesh();
+
+    labelList pointToGlobal;
+    labelList uniquePointIDs;
+    (void)mesh.globalData().mergePoints
+    (
+        p.meshPoints(),
+        p.meshPointMap(),
+        pointToGlobal,
+        uniquePointIDs
+    );
+
+    List<pointField> allPoints(Pstream::nProcs());
+    allPoints[procI] = pointField(mesh.points(), uniquePointIDs);
+    Pstream::gatherList(allPoints, tag);
+
+    List<faceList> allFaces(Pstream::nProcs());
+    faceList& patchFaces = allFaces[procI];
+    patchFaces = p.localFaces();
+    forAll(patchFaces, faceI)
+    {
+        inplaceRenumber(pointToGlobal, patchFaces[faceI]);
+    }
+
+    Pstream::gatherList(allFaces, tag);
+
+    if (Pstream::master())
+    {
+        OFstream osPoints(baseDir()/"patchPoints");
+        if (log_)
+        {
+            Info<< "writing patch points to: " << osPoints.name() << endl;
+        }
+
+        osPoints<<
+            ListListOps::combine<pointField>(allPoints, accessOp<pointField>());
+
+        OFstream osFaces(baseDir()/"patchFaces");
+        if (log_)
+        {
+            Info<< "writing patch faces to: " << osFaces.name() << endl;
+        }
+
+        osFaces<<
+            ListListOps::combine<faceList>(allFaces, accessOp<faceList>());
+    }
 }
 
 
@@ -346,6 +403,8 @@ Foam::externalCoupledMixedFvPatchField<Type>::externalCoupledMixedFvPatchField
     this->refValue() = *this;
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 1.0;
+
+    writeGeometry();
 }
 
 

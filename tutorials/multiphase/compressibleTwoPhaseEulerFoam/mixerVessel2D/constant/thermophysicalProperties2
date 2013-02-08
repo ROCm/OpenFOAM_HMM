@@ -31,11 +31,12 @@ mixture
     specie
     {
         nMoles      1;
-        molWeight   28.9;
+        molWeight   18;
     }
     equationOfState
     {
         rho0        1027;
+        R           3000;
     }
     thermodynamics
     {

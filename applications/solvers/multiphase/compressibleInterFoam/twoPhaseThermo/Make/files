@@ -1,3 +1,0 @@
-twoPhaseThermo.C
-
-LIB = $(FOAM_LIBBIN)/libtwoPhaseThermo

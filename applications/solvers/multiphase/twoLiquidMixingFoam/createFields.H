@@ -29,7 +29,7 @@
     #include "createPhi.H"
 
     Info<< "Reading transportProperties\n" << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi);
+    incompressibleTwoPhaseMixture twoPhaseProperties(U, phi);
 
     volScalarField& alpha1(twoPhaseProperties.alpha1());
     volScalarField& alpha2(twoPhaseProperties.alpha2());
