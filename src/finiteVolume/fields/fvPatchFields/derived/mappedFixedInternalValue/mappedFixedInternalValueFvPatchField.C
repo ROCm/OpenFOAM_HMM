@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -135,6 +135,7 @@ void Foam::mappedFixedInternalValueFvPatchField<Type>::updateCoeffs()
             break;
         }
         case mappedPatchBase::NEARESTPATCHFACE:
+        case mappedPatchBase::NEARESTPATCHFACEAMI:
         {
             const label samplePatchI = mpp.samplePolyPatch().index();
             const fvPatchField<Type>& nbrPatchField =
