@@ -82,25 +82,27 @@ void Foam::DelaunayMesh<Triangulation>::addPatches
     const label nInternalFaces,
     faceList& faces,
     labelList& owner,
-    labelList& patchSizes,
-    labelList& patchStarts,
+    PtrList<dictionary>& patchDicts,
     const List<DynamicList<face> >& patchFaces,
     const List<DynamicList<label> >& patchOwners
 ) const
 {
     label nPatches = patchFaces.size();
 
-    patchSizes.setSize(nPatches, -1);
-    patchStarts.setSize(nPatches, -1);
+    patchDicts.setSize(nPatches);
+    forAll(patchDicts, patchI)
+    {
+        patchDicts.set(patchI, new dictionary());
+    }
 
     label nBoundaryFaces = 0;
 
     forAll(patchFaces, p)
     {
-        patchSizes[p] = patchFaces[p].size();
-        patchStarts[p] = nInternalFaces + nBoundaryFaces;
+        patchDicts[p].set("nFaces", patchFaces[p].size());
+        patchDicts[p].set("startFace", nInternalFaces + nBoundaryFaces);
 
-        nBoundaryFaces += patchSizes[p];
+        nBoundaryFaces += patchFaces[p].size();
     }
 
     faces.setSize(nInternalFaces + nBoundaryFaces);
@@ -346,8 +348,8 @@ Foam::DelaunayMesh<Triangulation>::createMesh
     wordList patchNames(1, "cvMesh_defaultPatch");
     wordList patchTypes(1, wallPolyPatch::typeName);
 
-    labelList patchSizes(1, 0);
-    labelList patchStarts(1, 0);
+    PtrList<dictionary> patchDicts(1);
+    patchDicts.set(0, new dictionary());
 
     List<DynamicList<face> > patchFaces(1, DynamicList<face>());
     List<DynamicList<label> > patchOwners(1, DynamicList<label>());
@@ -515,8 +517,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         faceI,
         faces,
         owner,
-        patchSizes,
-        patchStarts,
+        patchDicts,
         patchFaces,
         patchOwners
     );
@@ -544,7 +545,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     Info<< "Adding patches" << endl;
 
-    List<polyPatch*> patches(patchStarts.size());
+    List<polyPatch*> patches(patchNames.size());
 
     label nValidPatches = 0;
 
@@ -554,8 +555,7 @@ Foam::DelaunayMesh<Triangulation>::createMesh
         (
             patchTypes[p],
             patchNames[p],
-            patchSizes[p],
-            patchStarts[p],
+            patchDicts[p],
             nValidPatches,
             meshPtr().boundaryMesh()
         ).ptr();

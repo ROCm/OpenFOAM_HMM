@@ -141,8 +141,7 @@ private:
             const label nInternalFaces,
             faceList& faces,
             labelList& owner,
-            labelList& patchSizes,
-            labelList& patchStarts,
+            PtrList<dictionary>& patchDicts,
             const List<DynamicList<face> >& patchFaces,
             const List<DynamicList<label> >& patchOwners
         ) const;
