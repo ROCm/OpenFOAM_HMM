@@ -28,43 +28,33 @@
 
     #include "createPhi.H"
 
-    Info<< "Reading transportProperties\n" << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi);
+    Info<< "Constructing twoPhaseMixtureThermo\n" << endl;
+    twoPhaseMixtureThermo twoPhaseProperties(mesh);
 
     volScalarField& alpha1(twoPhaseProperties.alpha1());
-
-    Info<< "Calculating phase-fraction alpha" << twoPhaseProperties.phase2Name()
-        << nl << endl;
-    volScalarField alpha2
-    (
-        "alpha" + twoPhaseProperties.phase2Name(),
-        scalar(1) - alpha1
-    );
+    volScalarField& alpha2(twoPhaseProperties.alpha2());
 
     Info<< "Reading thermophysical properties\n" << endl;
 
-    twoPhaseThermo thermo(mesh, alpha1, alpha2);
+    volScalarField& p = twoPhaseProperties.p();
+    volScalarField& T = twoPhaseProperties.T();
+    const volScalarField& rho1 = twoPhaseProperties.thermo1().rho();
+    const volScalarField& psi1 = twoPhaseProperties.thermo1().psi();
+    const volScalarField& rho2 = twoPhaseProperties.thermo2().rho();
+    const volScalarField& psi2 = twoPhaseProperties.thermo2().psi();
 
-    volScalarField& rho = thermo.rho();
-    volScalarField& p = thermo.p();
-    volScalarField& T = thermo.T();
-    const volScalarField& rho1 = thermo.thermo1().rho();
-    const volScalarField& psi1 = thermo.thermo1().psi();
-    const volScalarField& rho2 = thermo.thermo2().rho();
-    const volScalarField& psi2 = thermo.thermo2().psi();
-
-    // volScalarField rho
-    // (
-    //     IOobject
-    //     (
-    //         "rho",
-    //         runTime.timeName(),
-    //         mesh,
-    //         IOobject::READ_IF_PRESENT,
-    //         IOobject::AUTO_WRITE
-    //     ),
-    //     alpha1*rho1 + alpha2*rho2
-    // );
+    volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            runTime.timeName(),
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::AUTO_WRITE
+        ),
+        alpha1*rho1 + alpha2*rho2
+    );
 
 
     dimensionedScalar pMin(twoPhaseProperties.lookup("pMin"));
@@ -97,10 +87,10 @@
     // Construct interface from alpha1 distribution
     interfaceProperties interface(alpha1, U, twoPhaseProperties);
 
-    // Construct incompressible turbulence model
-    autoPtr<incompressible::turbulenceModel> turbulence
+    // Construct compressible turbulence model
+    autoPtr<compressible::turbulenceModel> turbulence
     (
-        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
+        compressible::turbulenceModel::New(rho, U, rhoPhi, twoPhaseProperties)
     );
 
     Info<< "Creating field dpdt\n" << endl;

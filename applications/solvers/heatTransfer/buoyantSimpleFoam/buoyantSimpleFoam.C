@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "psiThermo.H"
+#include "rhoThermo.H"
 #include "RASModel.H"
 #include "radiationModel.H"
 #include "simpleControl.H"

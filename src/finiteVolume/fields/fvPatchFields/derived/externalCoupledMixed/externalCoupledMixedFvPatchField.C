@@ -53,6 +53,13 @@ Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::baseDir() const
 
 
 template<class Type>
+Foam::fileName Foam::externalCoupledMixedFvPatchField<Type>::lockFile() const
+{
+    return fileName(baseDir()/(lockName + ".lock"));
+}
+
+
+template<class Type>
 void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
 {
     if (!Pstream::master())
@@ -65,7 +72,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::createLockFile() const
         Info<< type() << ": creating lock file" << endl;
     }
 
-    OFstream os(baseDir()/(lockName + ".lock"));
+    OFstream os(lockFile());
     os  << "waiting";
     os.flush();
 }
@@ -84,7 +91,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::removeLockFile() const
         Info<< type() << ": removing lock file" << endl;
     }
 
-    rm(baseDir()/(lockName + ".lock"));
+    rm(lockFile());
 }
 
 
@@ -153,15 +160,13 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
         os.flush();
     }
 
-    const fileName lockFile(baseDir()/(lockName + ".lock"));
-
     // remove lock file, signalling external source to execute
     removeLockFile();
 
 
     if (log_)
     {
-        Info<< type() << ": beginning wait for lock file " << lockFile
+        Info<< type() << ": beginning wait for lock file " << lockFile()
             << endl;
     }
 
@@ -189,13 +194,13 @@ void Foam::externalCoupledMixedFvPatchField<Type>::writeAndWait
                 << " s" << abort(FatalError);
         }
 
-        IFstream is(lockFile);
+        IFstream is(lockFile());
 
         if (is.good())
         {
             if (log_)
             {
-                Info<< type() << ": found lock file " << lockFile << endl;
+                Info<< type() << ": found lock file " << lockFile() << endl;
             }
 
             found = true;
@@ -438,8 +443,7 @@ void Foam::externalCoupledMixedFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("fileName") << fName_ << token::END_STATEMENT << nl;
     os.writeKeyword("waitInterval") << waitInterval_ << token::END_STATEMENT
         << nl;
-    os.writeKeyword("timeOut") << timeOut_ << token::END_STATEMENT
-        << nl;
+    os.writeKeyword("timeOut") << timeOut_ << token::END_STATEMENT << nl;
     os.writeKeyword("calcFrequency") << calcFrequency_ << token::END_STATEMENT
         << nl;
     os.writeKeyword("log") << log_ << token::END_STATEMENT << nl;
