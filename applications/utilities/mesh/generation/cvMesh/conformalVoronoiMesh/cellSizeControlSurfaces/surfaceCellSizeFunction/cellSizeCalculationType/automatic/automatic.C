@@ -121,7 +121,7 @@ Foam::automatic::automatic
     ),
     maximumCellSize_
     (
-        readScalar(coeffsDict_.lookup("maximumCellSizeCoeff"))*defaultCellSize_
+        readScalar(coeffsDict_.lookup("maximumCellSizeCoeff"))*defaultCellSize
     )
 {}
 

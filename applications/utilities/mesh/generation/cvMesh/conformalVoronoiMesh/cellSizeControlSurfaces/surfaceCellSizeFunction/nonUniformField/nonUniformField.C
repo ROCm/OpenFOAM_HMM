@@ -81,7 +81,7 @@ Foam::nonUniformField::nonUniformField
         (
             coeffsDict(),
             surfaceTriMesh_,
-            defaultCellSize_
+            defaultCellSize
         )
     ),
     pointCellSize_(),

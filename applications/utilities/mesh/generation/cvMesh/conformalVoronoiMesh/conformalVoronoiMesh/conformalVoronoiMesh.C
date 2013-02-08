@@ -734,7 +734,6 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
     if (Pstream::parRun())
     {
         distributeBackground(cellSizeMesh);
-//        cellSizeMesh.distribute(decomposition_);
     }
 
     label nMaxIter = readLabel
@@ -790,7 +789,10 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         cellSizeMesh.write();
     }
 
-    cellSizeMesh.printVertexInfo(Info);
+    if (cvMeshControls().printVertexInfo())
+    {
+        cellSizeMesh.printVertexInfo(Info);
+    }
 }
 
 
@@ -1311,7 +1313,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     cellSizeMeshOverlapsBackground();
 
-    printVertexInfo(Info);
+    if (cvMeshControls().printVertexInfo())
+    {
+        printVertexInfo(Info);
+    }
 
     if (cvMeshControls().objOutput())
     {
@@ -1878,7 +1883,10 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck("After conformToSurface");
 
-    printVertexInfo(Info);
+    if (cvMeshControls().printVertexInfo())
+    {
+        printVertexInfo(Info);
+    }
 
     // Write the intermediate mesh, do not filter the dual faces.
     if (runTime_.outputTime())

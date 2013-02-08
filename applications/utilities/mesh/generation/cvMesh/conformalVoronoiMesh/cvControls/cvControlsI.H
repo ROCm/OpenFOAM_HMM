@@ -136,6 +136,12 @@ inline Foam::Switch Foam::cvControls::timeChecks() const
 }
 
 
+inline Foam::Switch Foam::cvControls::printVertexInfo() const
+{
+    return printVertexInfo_;
+}
+
+
 inline Foam::scalar Foam::cvControls::maxLoadUnbalance() const
 {
     return maxLoadUnbalance_;

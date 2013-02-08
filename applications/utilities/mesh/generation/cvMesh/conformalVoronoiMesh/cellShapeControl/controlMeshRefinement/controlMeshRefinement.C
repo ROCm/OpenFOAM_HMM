@@ -168,8 +168,8 @@ Foam::pointHit Foam::controlMeshRefinement::findDiscontinuities
 {
     pointHit p(point::max);
 
-    const scalar tolSqr = sqr(1e-3);
-    const scalar secondDerivTolSqr = sqr(1e-3);
+    const scalar tolSqr = sqr(1e-1);
+    const scalar secondDerivTolSqr = sqr(1e-1);
 
     detectEdge
     (
@@ -373,6 +373,54 @@ void Foam::controlMeshRefinement::initialMeshPopulation
             << "/" << returnReduce(vertices.size(), sumOp<label>())
             << endl;
     }
+
+    // Change cell size function of bounding points to be consistent
+    // with their nearest neighbours
+//    for
+//    (
+//        CellSizeDelaunay::Finite_vertices_iterator vit =
+//            mesh_.finite_vertices_begin();
+//        vit != mesh_.finite_vertices_end();
+//        ++vit
+//    )
+//    {
+//        if (vit->uninitialised())
+//        {
+//            // Get its adjacent vertices
+//            std::list<CellSizeDelaunay::Vertex_handle> adjacentVertices;
+//
+//            mesh_.adjacent_vertices
+//            (
+//                vit,
+//                std::back_inserter(adjacentVertices)
+//            );
+//
+//            scalar totalCellSize = 0;
+//            label nVerts = 0;
+//
+//            for
+//            (
+//                std::list<CellSizeDelaunay::Vertex_handle>::iterator avit =
+//                    adjacentVertices.begin();
+//                avit != adjacentVertices.end();
+//                ++avit
+//            )
+//            {
+//                if (!(*avit)->uninitialised())
+//                {
+//                    totalCellSize += (*avit)->targetCellSize();
+//                    nVerts++;
+//                }
+//            }
+//
+//            Pout<< "Changing " << vit->info();
+//
+//            vit->targetCellSize() = totalCellSize/nVerts;
+//            vit->type() = Vb::vtInternalNearBoundary;
+//
+//            Pout<< "to " << vit->info() << endl;
+//        }
+//    }
 }
 
 
@@ -381,7 +429,9 @@ Foam::label Foam::controlMeshRefinement::refineMesh
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
-    Info<< "Iterate over cell size mesh edges" << endl;
+    Info<< "Iterate over "
+        << returnReduce(label(mesh_.number_of_finite_edges()), sumOp<label>())
+        << " cell size mesh edges" << endl;
 
     DynamicList<Vb> verts(mesh_.number_of_vertices());
 

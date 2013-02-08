@@ -54,11 +54,11 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
     distanceCellSize_
     (
         readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
-       *defaultCellSize_
+       *defaultCellSize
     ),
     surfaceOffset_
     (
-        readScalar(coeffsDict().lookup("surfaceOffsetCoeff"))*defaultCellSize_
+        readScalar(coeffsDict().lookup("surfaceOffsetCoeff"))*defaultCellSize
     ),
     totalDistance_(),
     totalDistanceSqr_()
@@ -93,13 +93,13 @@ surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
         {
             totalDistance_ =
                 readScalar(coeffsDict().lookup("totalDistanceCoeff"))
-               *defaultCellSize_;
+               *defaultCellSize;
         }
         else
         {
             totalDistance_ =
                 readScalar(coeffsDict().lookup("linearDistanceCoeff"))
-               *defaultCellSize_
+               *defaultCellSize
               + surfaceOffset_;
         }
     }

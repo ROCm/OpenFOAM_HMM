@@ -137,6 +137,11 @@ Foam::cvControls::cvControls
         motionDict.lookupOrDefault<Switch>("timeChecks", false)
     );
 
+    printVertexInfo_ = Switch
+    (
+        motionDict.lookupOrDefault<Switch>("printVertexInfo", false)
+    );
+
     if (Pstream::parRun())
     {
         maxLoadUnbalance_ = readScalar(motionDict.lookup("maxLoadUnbalance"));

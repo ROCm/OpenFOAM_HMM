@@ -51,7 +51,7 @@ linearSpatial::linearSpatial
     referenceCellSize_
     (
         readScalar(coeffsDict().lookup("referenceCellSizeCoeff"))
-       *defaultCellSize_
+       *defaultCellSize
     ),
     direction_(coeffsDict().lookup("direction")),
     cellSizeGradient_(readScalar(coeffsDict().lookup("cellSizeGradient")))

@@ -49,7 +49,7 @@ uniformDistance::uniformDistance
     cellSizeFunction(typeName, initialPointsDict, surface, defaultCellSize),
     distance_
     (
-        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize_
+        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize
     ),
     distanceSqr_(sqr(distance_))
 {}

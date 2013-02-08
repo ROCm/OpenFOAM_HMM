@@ -58,7 +58,7 @@ Foam::uniformValue::uniformValue
     ),
     surfaceCellSize_
     (
-        readScalar(coeffsDict().lookup("surfaceCellSizeCoeff"))*defaultCellSize_
+        readScalar(coeffsDict().lookup("surfaceCellSizeCoeff"))*defaultCellSize
     )
 {}
 

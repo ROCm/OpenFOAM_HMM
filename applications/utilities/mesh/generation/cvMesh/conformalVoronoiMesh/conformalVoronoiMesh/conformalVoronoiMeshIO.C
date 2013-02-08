@@ -328,7 +328,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
     labelList cellToDelaunayVertex;
     // Per patch, per face the Delaunay vertex
     labelListList patchToDelaunayVertex;
-    // Per patch the start of the dual faces
+
     labelList dualPatchStarts;
 
     {
@@ -771,9 +771,6 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const wordList& patchTypes,
     const wordList& patchNames,
     const PtrList<dictionary>& patchDicts
-//    const labelList& patchSizes,
-//    const labelList& patchStarts,
-//    const labelList& procNeighbours
 ) const
 {
     Info<< incrIndent << indent << "Reordering processor patches" << endl;

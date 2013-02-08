@@ -52,11 +52,11 @@ linearDistance::linearDistance
     distanceCellSize_
     (
         readScalar(coeffsDict().lookup("distanceCellSizeCoeff"))
-       *defaultCellSize_
+       *defaultCellSize
     ),
     distance_
     (
-        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize_
+        readScalar(coeffsDict().lookup("distanceCoeff"))*defaultCellSize
     ),
     distanceSqr_(sqr(distance_))
 {}

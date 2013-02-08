@@ -142,6 +142,9 @@ class cvControls
         //- Switch to control the reporting of detailed timeChecks
         Switch timeChecks_;
 
+        //- Switch to control the reporting of detailed vertex information
+        Switch printVertexInfo_;
+
         //- Allowed relative load unbalance
         scalar maxLoadUnbalance_;
 
@@ -276,6 +279,9 @@ public:
 
             //- Return the timeChecks Switch
             inline Switch timeChecks() const;
+
+            //- Return the printVertexInfo Switch
+            inline Switch printVertexInfo() const;
 
             //- Return the maxLoadUnbalance
             inline scalar maxLoadUnbalance() const;
