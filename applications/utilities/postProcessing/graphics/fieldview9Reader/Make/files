@@ -1,5 +1,0 @@
-errno.c
-readerDatabase.C
-fieldview9Reader.C
-
-EXE = $(FOAM_APPBIN)/fvbinFoam
