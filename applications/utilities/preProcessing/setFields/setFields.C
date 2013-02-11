@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ bool setCellFieldType
 
     word fieldName(fieldValueStream);
 
+    // Check the current time directory
     IOobject fieldHeader
     (
         fieldName,
@@ -61,6 +62,18 @@ bool setCellFieldType
         mesh,
         IOobject::MUST_READ
     );
+
+    // Check the "constant" directory
+    if (!fieldHeader.headerOk())
+    {
+        fieldHeader = IOobject
+        (
+            fieldName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ
+        );
+    }
 
     // Check field exists
     if (fieldHeader.headerOk())
@@ -193,6 +206,7 @@ bool setFaceFieldType
 
     word fieldName(fieldValueStream);
 
+    // Check the current time directory
     IOobject fieldHeader
     (
         fieldName,
@@ -200,6 +214,18 @@ bool setFaceFieldType
         mesh,
         IOobject::MUST_READ
     );
+
+    // Check the "constant" directory
+    if (!fieldHeader.headerOk())
+    {
+        fieldHeader = IOobject
+        (
+            fieldName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ
+        );
+    }
 
     // Check field exists
     if (fieldHeader.headerOk())
