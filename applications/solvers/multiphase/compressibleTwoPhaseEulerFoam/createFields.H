@@ -275,8 +275,8 @@
     );
 
 
-    Info<< "Creating field dpdt\n" << endl;
-    volScalarField dpdt
+    Info<< "Creating field dalpha1pdt\n" << endl;
+    volScalarField dalpha1pdt
     (
         IOobject
         (
@@ -285,7 +285,20 @@
             mesh
         ),
         mesh,
-        dimensionedScalar("dpdt", p.dimensions()/dimTime, 0)
+        dimensionedScalar("dalpha1pdt", p.dimensions()/dimTime, 0)
+    );
+
+    Info<< "Creating field dalpha2pdt\n" << endl;
+    volScalarField dalpha2pdt
+    (
+        IOobject
+        (
+            "dpdt",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("dalpha2pdt", p.dimensions()/dimTime, 0)
     );
 
     Info<< "Creating field kinetic energy K\n" << endl;

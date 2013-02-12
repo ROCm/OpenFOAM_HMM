@@ -37,8 +37,8 @@ divSchemes
     "div\(\(alpha.*Rc\)\)"  Gauss linear;
     "div\(phid.,p\)"        Gauss upwind;
 
-    "div\(alphaPhi.,h.\)"   Gauss limitedLinear 1;
-    "div\(phi.,K.\)"        Gauss limitedLinear 1;
+    "div\(alphaPhi.,(h|e).\)"   Gauss limitedLinear 1;
+    "div\(alphaPhi.,K.\)"   Gauss limitedLinear 1;
 
     div(alphaPhi2,k)        Gauss limitedLinear 1;
     div(alphaPhi2,epsilon)  Gauss limitedLinear 1;
