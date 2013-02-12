@@ -109,6 +109,11 @@ public:
 
         // Query
 
+            const Time& time() const
+            {
+                return runTime_;
+            }
+
             //- Calculate and return the barycentric coordinates for
             //  interpolating quantities on the background mesh
             void barycentricCoords

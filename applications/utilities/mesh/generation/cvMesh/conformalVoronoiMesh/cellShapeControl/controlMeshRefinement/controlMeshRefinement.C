@@ -51,18 +51,18 @@ Foam::scalar Foam::controlMeshRefinement::calcFirstDerivative
 }
 
 
-Foam::scalar Foam::controlMeshRefinement::calcSecondDerivative
-(
-    const Foam::point& a,
-    const scalar& cellSizeA,
-    const Foam::point& midPoint,
-    const scalar& cellSizeMid,
-    const Foam::point& b,
-    const scalar& cellSizeB
-) const
-{
-    return (cellSizeA - 2*cellSizeMid + cellSizeB)/magSqr((a - b)/2);
-}
+//Foam::scalar Foam::controlMeshRefinement::calcSecondDerivative
+//(
+//    const Foam::point& a,
+//    const scalar& cellSizeA,
+//    const Foam::point& midPoint,
+//    const scalar& cellSizeMid,
+//    const Foam::point& b,
+//    const scalar& cellSizeB
+//) const
+//{
+//    return (cellSizeA - 2*cellSizeMid + cellSizeB)/magSqr((a - b)/2);
+//}
 
 
 bool Foam::controlMeshRefinement::detectEdge
@@ -77,7 +77,12 @@ bool Foam::controlMeshRefinement::detectEdge
     Foam::point a(startPt);
     Foam::point b(endPt);
 
+//    scalar cellSizeA = sizeControls_.cellSize(a);
+//    scalar cellSizeB = sizeControls_.cellSize(b);
+
     Foam::point midPoint = (a + b)/2.0;
+
+//    scalar cellSizeMid = sizeControls_.cellSize(midPoint);
 
     label nIterations = 0;
 
@@ -85,7 +90,10 @@ bool Foam::controlMeshRefinement::detectEdge
     {
         nIterations++;
 
-        if (magSqr(a - b) < tolSqr)
+        if
+        (
+            magSqr(a - b) < tolSqr
+        )
         {
             pointFound.setPoint(midPoint);
             pointFound.setHit();
@@ -95,9 +103,15 @@ bool Foam::controlMeshRefinement::detectEdge
 
         // Split into two regions
 
-        const scalar cellSizeA = sizeControls_.cellSize(a);
-        const scalar cellSizeB = sizeControls_.cellSize(b);
-        const scalar cellSizeMid = sizeControls_.cellSize(midPoint);
+        scalar cellSizeA = sizeControls_.cellSize(a);
+        scalar cellSizeB = sizeControls_.cellSize(b);
+
+        if (magSqr(cellSizeA - cellSizeB) < 1e-6)
+        {
+            return false;
+        }
+
+        scalar cellSizeMid = sizeControls_.cellSize(midPoint);
 
         // Region 1
         Foam::point midPoint1 = (a + midPoint)/2.0;
@@ -150,12 +164,16 @@ bool Foam::controlMeshRefinement::detectEdge
         if (magSqr(secondDerivative1) > magSqr(secondDerivative2))
         {
             b = midPoint;
+//            cellSizeB = cellSizeMid;
             midPoint = midPoint1;
+//            cellSizeMid = cellSizeMid1;
         }
         else
         {
             a = midPoint;
+//            cellSizeA = cellSizeMid;
             midPoint = midPoint2;
+//            cellSizeMid = cellSizeMid2;
         }
     }
 }
@@ -435,6 +453,8 @@ Foam::label Foam::controlMeshRefinement::refineMesh
 
     DynamicList<Vb> verts(mesh_.number_of_vertices());
 
+    label count = 0;
+
     for
     (
         CellSizeDelaunay::Finite_edges_iterator eit =
@@ -443,6 +463,14 @@ Foam::label Foam::controlMeshRefinement::refineMesh
         ++eit
     )
     {
+        if (count % 10000 == 0)
+        {
+            Info<< count << " edges, inserted " << verts.size()
+                << " Time = " << mesh_.time().elapsedCpuTime()
+                << endl;
+        }
+        count++;
+
         CellSizeDelaunay::Cell_handle c = eit->first;
         CellSizeDelaunay::Vertex_handle vA = c->vertex(eit->second);
         CellSizeDelaunay::Vertex_handle vB = c->vertex(eit->third);
@@ -452,8 +480,8 @@ Foam::label Foam::controlMeshRefinement::refineMesh
             mesh_.is_infinite(vA)
          || mesh_.is_infinite(vB)
          || (vA->referred() && vB->referred())
-         || (vA->referred() && vA->procIndex() > vB->procIndex())
-         || (vB->referred() && vB->procIndex() > vA->procIndex())
+         || (vA->referred() && (vA->procIndex() > vB->procIndex()))
+         || (vB->referred() && (vB->procIndex() > vA->procIndex()))
         )
         {
             continue;

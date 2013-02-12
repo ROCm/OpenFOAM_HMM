@@ -82,7 +82,10 @@ class controlMeshRefinement
             const scalar& cellSizeMid,
             const Foam::point& b,
             const scalar& cellSizeB
-        ) const;
+        ) const
+        {
+            return (cellSizeA - 2*cellSizeMid + cellSizeB)/magSqr((a - b)/2);
+        }
 
 
         bool detectEdge

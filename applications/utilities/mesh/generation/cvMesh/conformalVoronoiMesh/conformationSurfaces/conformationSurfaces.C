@@ -86,6 +86,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
 
     Info<< "    Sum of all the surface normals (if near zero, surface is"
         << " probably closed):" << nl
+        << "    Note: Does not include baffle surfaces in calculation" << nl
         << "        Sum = " << sum/totalTriangles << nl
         << "        mag(Sum) = " << mag(sum)/totalTriangles
         << endl;
