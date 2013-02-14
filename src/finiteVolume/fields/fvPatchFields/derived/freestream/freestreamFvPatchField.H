@@ -37,6 +37,7 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
+        freestreamValue   | freestream velocity          | yes         |
         phi          | flux field name         | no          | phi
     \endtable
 
