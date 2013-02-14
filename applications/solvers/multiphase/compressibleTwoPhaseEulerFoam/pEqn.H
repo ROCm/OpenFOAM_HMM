@@ -192,6 +192,11 @@
 
     if (thermo1.dpdt())
     {
-        dpdt = fvc::ddt(p);
+        dalpha1pdt = fvc::ddt(alpha1, p);
+    }
+
+    if (thermo2.dpdt())
+    {
+        dalpha2pdt = fvc::ddt(alpha2, p);
     }
 }

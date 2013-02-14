@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ Description
     Velocity condition to be used in conjunction with the single
     rotating frame (SRF) model (see: SRFModel class)
 
-    Given the free stream velocity in the absolute frame, the condition 
+    Given the free stream velocity in the absolute frame, the condition
     applies the appropriate rotation transformation in time and space to
     determine the local velocity.
 
@@ -62,8 +62,8 @@ Description
 
     \table
         Property     | Description             | Required    | Default value
-        relative     | relative motion to the SRF? | yes     |
         inletValue   | inlet velocity          | yes         |
+        relative     | inletValue relative motion to the SRF? | yes     |
     \endtable
 
     Example of the boundary condition specification:
@@ -71,8 +71,8 @@ Description
     myPatch
     {
         type            SRFVelocity;
-        relative        yes;
         inletValue      uniform (0 0 0);
+        relative        yes;
         value           uniform (0 0 0);    // initial value
     }
     \endverbatim
