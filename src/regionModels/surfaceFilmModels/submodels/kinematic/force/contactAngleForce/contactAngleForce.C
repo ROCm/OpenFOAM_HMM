@@ -103,7 +103,7 @@ contactAngleForce::contactAngleForce
             IOobject::NO_WRITE
         ),
         owner_.regionMesh(),
-        dimensionedScalar("mask", dimless, 0.0)
+        dimensionedScalar("mask", dimless, 1.0)
     )
 {
     initialise();
@@ -166,13 +166,13 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
             cellI = cellN;
         }
 
-        if (cellI != -1 && mask_[cellI] > 0)
+        if (cellI != -1 && mask_[cellI] > 0.5)
         {
-            const scalar dx = owner_.regionMesh().deltaCoeffs()[faceI];
+            const scalar invDx = owner_.regionMesh().deltaCoeffs()[faceI];
             const vector n =
                 gradAlpha[cellI]/(mag(gradAlpha[cellI]) + ROOTVSMALL);
             scalar theta = cos(degToRad(distribution_->sample()));
-            force[cellI] += Ccf_*n*sigma[cellI]*(1.0 - theta)/dx;
+            force[cellI] += Ccf_*n*sigma[cellI]*(1.0 - theta)/invDx;
             nHits[cellI]++;
         }
     }
@@ -183,12 +183,12 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         {
             const fvPatchField<scalar>& alphaf = alpha.boundaryField()[patchI];
             const fvPatchField<scalar>& maskf = mask_.boundaryField()[patchI];
-            const scalarField& dx = alphaf.patch().deltaCoeffs();
+            const scalarField& invDx = alphaf.patch().deltaCoeffs();
             const labelUList& faceCells = alphaf.patch().faceCells();
 
             forAll(alphaf, faceI)
             {
-                if (maskf[faceI] > 0)
+                if (maskf[faceI] > 0.5)
                 {
                     label cellO = faceCells[faceI];
 
@@ -199,7 +199,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
                            /(mag(gradAlpha[cellO]) + ROOTVSMALL);
                         scalar theta = cos(degToRad(distribution_->sample()));
                         force[cellO] +=
-                            Ccf_*n*sigma[cellO]*(1.0 - theta)/dx[faceI];
+                            Ccf_*n*sigma[cellO]*(1.0 - theta)/invDx[faceI];
                         nHits[cellO]++;
                     }
                 }
