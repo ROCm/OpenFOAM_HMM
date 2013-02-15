@@ -81,11 +81,8 @@ baffles
             }
             slave
             {
-                //- Slave side patch
-                name            baffles;
-                type            wall;
-
-                ${..master.patchFields}
+                // Reuse master data
+                ${..master}
             }
         }
     }

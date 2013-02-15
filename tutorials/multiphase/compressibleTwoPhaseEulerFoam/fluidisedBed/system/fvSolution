@@ -47,7 +47,7 @@ solvers
         relTol          0;
     }
 
-    "h.*"
+    "(h|e).*"
     {
         solver          PBiCG;
         preconditioner  DILU;
