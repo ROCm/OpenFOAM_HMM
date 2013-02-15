@@ -149,8 +149,6 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
 
     volVectorField gradAlpha(fvc::grad(alpha));
 
-    scalarField nHits(owner_.regionMesh().nCells(), 0.0);
-
     forAll(nbr, faceI)
     {
         const label cellO = own[faceI];
@@ -173,7 +171,6 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
                 gradAlpha[cellI]/(mag(gradAlpha[cellI]) + ROOTVSMALL);
             scalar theta = cos(degToRad(distribution_->sample()));
             force[cellI] += Ccf_*n*sigma[cellI]*(1.0 - theta)/invDx;
-            nHits[cellI]++;
         }
     }
 
@@ -200,15 +197,13 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
                         scalar theta = cos(degToRad(distribution_->sample()));
                         force[cellO] +=
                             Ccf_*n*sigma[cellO]*(1.0 - theta)/invDx[faceI];
-                        nHits[cellO]++;
                     }
                 }
             }
         }
     }
 
-    force /= (max(nHits, scalar(1.0))*magSf);
-    tForce().correctBoundaryConditions();
+    force /= magSf;
 
     if (owner_.regionMesh().time().outputTime())
     {
