@@ -355,7 +355,7 @@ int Foam::UPstream::baseProcNo(const label myComm, const int myProcID)
 }
 
 
-Foam::label Foam::UPstream::myProcNo(const label myComm, const int baseProcID)
+Foam::label Foam::UPstream::procNo(const label myComm, const int baseProcID)
 {
     const List<int>& parentRanks = procID(myComm);
     label parentComm = parent(myComm);
@@ -366,9 +366,21 @@ Foam::label Foam::UPstream::myProcNo(const label myComm, const int baseProcID)
     }
     else
     {
-        label parentRank = myProcNo(parentComm, baseProcID);
+        label parentRank = procNo(parentComm, baseProcID);
         return findIndex(parentRanks, parentRank);
     }
+}
+
+
+Foam::label Foam::UPstream::procNo
+(
+    const label myComm,
+    const label currentComm,
+    const int currentProcID
+)
+{
+    label physProcID = UPstream::baseProcNo(currentComm, currentProcID);
+    return procNo(myComm, physProcID);
 }
 
 

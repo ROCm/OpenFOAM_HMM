@@ -336,12 +336,20 @@ public:
 
         //- Return physical processor number (i.e. processor number in
         //  worldComm) given communicator and procssor
-        static int baseProcNo(const label myComm, const int myProcID);
+        static int baseProcNo(const label myComm, const int procID);
 
         //- Return processor number in communicator (given physical processor
         //  number) (= reverse of baseProcNo)
-        static label myProcNo(const label myComm, const int baseProcID);
+        static label procNo(const label comm, const int baseProcID);
 
+        //- Return processor number in communicator (given processor number
+        //  and communicator)
+        static label procNo
+        (
+            const label myComm,
+            const label currentComm,
+            const int currentProcID
+        );
 
         //- Add the valid option this type of communications library
         //  adds/requires on the command line

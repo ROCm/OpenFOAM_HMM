@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,11 +31,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Patch, class ProcPatch>
-Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
+template<class Container, class ProcPatch>
+Foam::labelList Foam::ProcessorTopology<Container, ProcPatch>::procNeighbours
 (
     const label nProcs,
-    const PtrList<Patch>& patches
+    const Container& patches
 )
 {
     // Determine number of processor neighbours and max neighbour id.
@@ -48,7 +48,7 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     forAll(patches, patchi)
     {
-        const Patch& patch = patches[patchi];
+        const typename Container::const_reference patch = patches[patchi];
 
         if (isA<ProcPatch>(patch))
         {
@@ -85,7 +85,7 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 
     forAll(patches, patchi)
     {
-        const Patch& patch = patches[patchi];
+        const typename Container::const_reference patch = patches[patchi];
 
         if (isA<ProcPatch>(patch))
         {
@@ -104,10 +104,10 @@ Foam::labelList Foam::ProcessorTopology<Patch, ProcPatch>::procNeighbours
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-template<class Patch, class ProcPatch>
-Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
+template<class Container, class ProcPatch>
+Foam::ProcessorTopology<Container, ProcPatch>::ProcessorTopology
 (
-    const PtrList<Patch>& patches,
+    const Container& patches,
     const label comm
 )
 :
@@ -117,7 +117,8 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
     if (Pstream::parRun())
     {
         // Fill my 'slot' with my neighbours
-        operator[](Pstream::myProcNo()) = procNeighbours(this->size(), patches);
+        operator[](Pstream::myProcNo(comm)) =
+            procNeighbours(this->size(), patches);
 
         // Distribute to all processors
         Pstream::gatherList(*this, Pstream::msgType(), comm);
@@ -176,7 +177,7 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
             (
                 Pstream::nProcs(comm),
                 comms
-            ).procSchedule()[Pstream::myProcNo()]
+            ).procSchedule()[Pstream::myProcNo(comm)]
         );
 
         forAll(mySchedule, iter)
@@ -185,13 +186,13 @@ Foam::ProcessorTopology<Patch, ProcPatch>::ProcessorTopology
 
             // Get the other processor
             label nb = comms[commI][0];
-            if (nb == Pstream::myProcNo())
+            if (nb == Pstream::myProcNo(comm))
             {
                 nb = comms[commI][1];
             }
             label patchi = procPatchMap_[nb];
 
-            if (Pstream::myProcNo() > nb)
+            if (Pstream::myProcNo(comm) > nb)
             {
                 patchSchedule_[patchEvali].patch = patchi;
                 patchSchedule_[patchEvali++].init = true;

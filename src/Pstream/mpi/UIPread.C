@@ -73,7 +73,8 @@ Foam::UIPstream::UIPstream
         if (debug)
         {
             Pout<< "UIPstream::UIPstream : read from:" << fromProcNo
-                << " tag:" << tag << " wanted size:" << wantedSize
+                << " tag:" << tag << " comm:" << comm_
+                << " wanted size:" << wantedSize
                 << Foam::endl;
         }
 
@@ -155,7 +156,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " fromProcNo:" << fromProcNo
-                << " tag:" << tag_ << " receive buffer size:" << messageSize_
+                << " tag:" << tag_ << " comm:" << comm_
+                << " receive buffer size:" << messageSize_
                 << Foam::endl;
         }
     }
@@ -169,7 +171,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         {
             Pout<< "UIPstream::UIPstream PstreamBuffers :"
                 << " read from:" << fromProcNo
-                << " tag:" << tag_ << " wanted size:" << wantedSize
+                << " tag:" << tag_ << " comm:" << comm_
+                << " wanted size:" << wantedSize
                 << Foam::endl;
         }
 

@@ -65,10 +65,10 @@ protected:
         const lduInterfacePtrsList& coarseInterfaces_;
 
         //- Face-cell addressing
-        labelField faceCells_;
+        labelList faceCells_;
 
         //- Face restrict addressing
-        labelField faceRestrictAddressing_;
+        labelList faceRestrictAddressing_;
 
 
 private:
@@ -134,21 +134,31 @@ public:
 
     // Constructors
 
-        //- Construct from fine-level interface,
-        //  local and neighbour restrict addressing
+        //- Construct from interfaces, restrict addressing set later on
         GAMGInterface
         (
             const label index,
-            const lduInterfacePtrsList& coarseInterfaces,
-            const lduInterface&,
-            const labelField&,
-            const labelField&,
-            const label fineLevelIndex = -1,
-            const label coarseComm = UPstream::worldComm
+            const lduInterfacePtrsList& coarseInterfaces
         )
         :
             index_(index),
             coarseInterfaces_(coarseInterfaces)
+        {}
+
+
+        //- Construct from interfaces and restrict addressing
+        GAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            const labelUList& faceCells,
+            const labelUList& faceRestrictAddressing
+        )
+        :
+            index_(index),
+            coarseInterfaces_(coarseInterfaces),
+            faceCells_(faceCells),
+            faceRestrictAddressing_(faceRestrictAddressing)
         {}
 
 

@@ -27,6 +27,9 @@ Class
 Description
     Simplest contrete lduMesh which stores the addressing needed by lduMatrix.
 
+SourceFiles
+    lduPrimitiveMesh.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef lduPrimitiveMesh_H
@@ -34,12 +37,17 @@ Description
 
 #include "lduMesh.H"
 #include "labelList.H"
-#include "processorLduInterface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+//// Forward declaration of friend functions and operators
+//
+//class lduPrimitiveMesh;
+//
+//Ostream& operator<<(Ostream&, const lduPrimitiveMesh&);
 
 /*---------------------------------------------------------------------------*\
                        Class lduPrimitiveMesh Declaration
@@ -63,11 +71,10 @@ class lduPrimitiveMesh
 
         //- List of pointers for each patch
         //  with only those pointing to interfaces being set
-        lduInterfacePtrsList interfaces_;
+        const lduInterfacePtrsList interfaces_;
 
-        //- Patch field evaluation schedule.
-        //  Note this does not need to be held as a copy because it is invariant
-        const lduSchedule& patchSchedule_;
+        //- Patch field evaluation schedule
+        const lduSchedule patchSchedule_;
 
         //- Communicator to use for any parallel communication
         const label comm_;
@@ -92,100 +99,26 @@ public:
             const labelUList& l,
             const labelUList& u,
             const labelListList& pa,
-            lduInterfacePtrsList interfaces,
+            const lduInterfacePtrsList& interfaces,
             const lduSchedule& ps,
             const label comm
-        )
-        :
-            lduAddressing(nCells),
-            lowerAddr_(l),
-            upperAddr_(u),
-            patchAddr_(pa),
-            interfaces_(interfaces),
-            patchSchedule_(ps),
-            comm_(comm)
-        {
-            Pout<< "lduPrimitiveMesh :"
-                << " nCells:" << nCells
-                << " l:" << lowerAddr_.size()
-                << " u:" << upperAddr_.size()
-                << " pa:" << patchAddr_.size()
-                << " interfaces:" << interfaces_.size()
-                << " comm:" << comm_
-                << endl;
-            forAll(interfaces_, i)
-            {
-                if (interfaces_.set(i))
-                {
-                    if (isA<processorLduInterface>(interfaces_[i]))
-                    {
-                        const processorLduInterface& pi = refCast
-                        <
-                            const processorLduInterface
-                        >(interfaces_[i]);
+        );
 
-                        Pout<< "    patch:" << i
-                            << " size:" << patchAddr_[i].size()
-                            << " myProcNo:" << pi.myProcNo()
-                            << " neighbProcNo:" << pi.neighbProcNo()
-                            << " comm:" << pi.comm()
-                            << endl;
-                    }
-                }
-            }
-        }
-
-
-        //- Construct from components and  re-use storage as specified.
+        //- Construct from components and re-use storage as specified.
         lduPrimitiveMesh
         (
             const label nCells,
             labelList& l,
             labelList& u,
             labelListList& pa,
-            lduInterfacePtrsList interfaces,
+            lduInterfacePtrsList& interfaces,
             const lduSchedule& ps,
             const label comm,
             bool reUse
-        )
-        :
-            lduAddressing(nCells),
-            lowerAddr_(l, reUse),
-            upperAddr_(u, reUse),
-            patchAddr_(pa, reUse),
-            interfaces_(interfaces, reUse),
-            patchSchedule_(ps),
-            comm_(comm)
-        {
-            Pout<< "lduPrimitiveMesh :"
-                << " nCells:" << nCells
-                << " l:" << lowerAddr_.size()
-                << " u:" << upperAddr_.size()
-                << " pa:" << patchAddr_.size()
-                << " interfaces:" << interfaces_.size()
-                << " comm:" << comm_
-                << endl;
-            forAll(interfaces_, i)
-            {
-                if (interfaces_.set(i))
-                {
-                    if (isA<processorLduInterface>(interfaces_[i]))
-                    {
-                        const processorLduInterface& pi = refCast
-                        <
-                            const processorLduInterface
-                        >(interfaces_[i]);
+        );
 
-                        Pout<< "    patch:" << i
-                            << " size:" << patchAddr_[i].size()
-                            << " myProcNo:" << pi.myProcNo()
-                            << " neighbProcNo:" << pi.neighbProcNo()
-                            << " comm:" << pi.comm()
-                            << endl;
-                    }
-                }
-            }
-        }
+        //- Construct from Istream
+        lduPrimitiveMesh(Istream& is);
 
 
     //- Destructor
@@ -239,6 +172,10 @@ public:
             {
                 return patchSchedule_;
             }
+//
+//    // Ostream operator
+//
+//        friend Ostream& operator<<(Ostream&, const procLduMatrix&);
 };
 
 

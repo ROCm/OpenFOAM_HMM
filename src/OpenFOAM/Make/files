@@ -317,6 +317,7 @@ algebraicPairGAMGAgglomeration = $(GAMGAgglomerations)/algebraicPairGAMGAgglomer
 $(algebraicPairGAMGAgglomeration)/algebraicPairGAMGAgglomeration.C
 
 meshes/lduMesh/lduMesh.C
+meshes/lduMesh/lduPrimitiveMesh.C
 
 LduMatrix = matrices/LduMatrix
 $(LduMatrix)/LduMatrix/lduMatrices.C

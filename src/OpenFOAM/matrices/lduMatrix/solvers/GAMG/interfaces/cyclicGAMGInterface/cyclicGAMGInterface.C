@@ -58,10 +58,10 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
+        coarseInterfaces
+//        fineInterface,
+//        localRestrictAddressing,
+//        neighbourRestrictAddressing
     ),
     fineCyclicInterface_(refCast<const cyclicLduInterface>(fineInterface))
 {

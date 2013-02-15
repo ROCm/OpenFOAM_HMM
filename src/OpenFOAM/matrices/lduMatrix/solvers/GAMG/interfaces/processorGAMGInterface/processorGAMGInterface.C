@@ -58,13 +58,20 @@ Foam::processorGAMGInterface::processorGAMGInterface
     GAMGInterface
     (
         index,
-        coarseInterfaces,
-        fineInterface,
-        localRestrictAddressing,
-        neighbourRestrictAddressing
+        coarseInterfaces
+//        fineInterface,
+//        localRestrictAddressing,
+//        neighbourRestrictAddressing
     ),
-    fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
-    comm_(coarseComm)
+//    fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
+    comm_(coarseComm),
+    myProcNo_(refCast<const processorLduInterface>(fineInterface).myProcNo()),
+    neighbProcNo_
+    (
+        refCast<const processorLduInterface>(fineInterface).neighbProcNo()
+    ),
+    forwardT_(refCast<const processorLduInterface>(fineInterface).forwardT()),
+    tag_(refCast<const processorLduInterface>(fineInterface).tag())
 {
     // From coarse face to coarse cell
     DynamicList<label> dynFaceCells(localRestrictAddressing.size());
@@ -128,7 +135,37 @@ Foam::processorGAMGInterface::processorGAMGInterface
 }
 
 
-// * * * * * * * * * * * * * * * * Desstructor * * * * * * * * * * * * * * * //
+Foam::processorGAMGInterface::processorGAMGInterface
+(
+    const label index,
+    const lduInterfacePtrsList& coarseInterfaces,
+//    const lduInterface& fineInterface,
+    const labelUList& faceCells,
+    const labelUList& faceRestrictAddresssing,
+    const label coarseComm,
+    const label myProcNo,
+    const label neighbProcNo,
+    const tensorField& forwardT,
+    const int tag
+)
+:
+    GAMGInterface
+    (
+        index,
+        coarseInterfaces,
+        faceCells,
+        faceRestrictAddresssing
+    ),
+    //fineProcInterface_(refCast<const processorLduInterface>(fineInterface)),
+    comm_(coarseComm),
+    myProcNo_(myProcNo),
+    neighbProcNo_(neighbProcNo),
+    forwardT_(forwardT),
+    tag_(tag)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
 Foam::processorGAMGInterface::~processorGAMGInterface()
 {}
