@@ -96,7 +96,7 @@ contactAngleForce::contactAngleForce
     (
         IOobject
         (
-            typeName + ".contactForceMask",
+            typeName + ":contactForceMask",
             owner_.time().timeName(),
             owner_.regionMesh(),
             IOobject::NO_READ,
@@ -126,7 +126,7 @@ tmp<fvVectorMatrix> contactAngleForce::correct(volVectorField& U)
         (
             IOobject
             (
-                typeName + ".contactForce",
+                typeName + ":contactForce",
                 owner_.time().timeName(),
                 owner_.regionMesh(),
                 IOobject::NO_READ,
