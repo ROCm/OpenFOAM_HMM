@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,9 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-
 #include "SRFModel.H"
+#include "steadyStateDdtScheme.H"
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,6 +41,7 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(p, iF),
+    relative_(false),
     UInf_(vector::zero)
 {}
 
@@ -54,6 +56,7 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(ptf, p, iF, mapper),
+    relative_(ptf.relative_),
     UInf_(ptf.UInf_)
 {}
 
@@ -67,6 +70,7 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(p, iF),
+    relative_(dict.lookupOrDefault("relative", false)),
     UInf_(dict.lookup("UInf"))
 {
     fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
@@ -80,6 +84,7 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(srfvpvf),
+    relative_(srfvpvf.relative_),
     UInf_(srfvpvf.UInf_)
 {}
 
@@ -92,6 +97,7 @@ SRFFreestreamVelocityFvPatchVectorField
 )
 :
     inletOutletFvPatchVectorField(srfvpvf, iF),
+    relative_(srfvpvf.relative_),
     UInf_(srfvpvf.UInf_)
 {}
 
@@ -109,12 +115,36 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
     const SRF::SRFModel& srf =
         db().lookupObject<SRF::SRFModel>("SRFProperties");
 
-    scalar time = this->db().time().value();
-    scalar theta = time*mag(srf.omega().value());
 
-    refValue() =
-        cos(theta)*UInf_ + sin(theta)*(srf.axis() ^ UInf_)
-      - srf.velocity(patch().Cf());
+    word ddtScheme
+    (
+        this->dimensionedInternalField().mesh()
+       .ddtScheme(this->dimensionedInternalField().name())
+    );
+
+    if (ddtScheme == fv::steadyStateDdtScheme<scalar>::typeName)
+    {
+        // If not relative to the SRF include the effect of the SRF
+        if (!relative_)
+        {
+            refValue() = UInf_ - srf.velocity(patch().Cf());
+        }
+        // If already relative to the SRF simply supply the inlet value
+        // as a fixed value
+        else
+        {
+            refValue() = UInf_;
+        }
+    }
+    else
+    {
+        scalar time = this->db().time().value();
+        scalar theta = time*mag(srf.omega().value());
+
+        refValue() =
+            cos(theta)*UInf_ + sin(theta)*(srf.axis() ^ UInf_)
+          - srf.velocity(patch().Cf());
+    }
 
     // Set the inlet-outlet choice based on the direction of the freestream
     valueFraction() = 1.0 - pos(refValue() & patch().Sf());
@@ -126,6 +156,7 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
 void Foam::SRFFreestreamVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
+    os.writeKeyword("relative") << relative_ << token::END_STATEMENT << nl;
     os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
