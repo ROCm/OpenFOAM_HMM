@@ -28,7 +28,7 @@ Description
     Freestream velocity condition to be used in conjunction with the single
     rotating frame (SRF) model (see: SRFModel class)
 
-    Given the free stream velocity in the absolute frame, the condition 
+    Given the free stream velocity in the absolute frame, the condition
     applies the appropriate rotation transformation in time and space to
     determine the local velocity using:
 
@@ -49,8 +49,9 @@ Description
     \heading Patch usage
 
     \table
-        Property     | Description             | Required    | Default value
-        UInf         | free stream velocity    | yes         |
+        Property        | Description               | Required | Default value
+        UInf            | freestream velocity       | yes      |
+        relative        | UInf relative to the SRF? | no       |
     \endtable
 
     Example of the boundary condition specification:
@@ -58,13 +59,18 @@ Description
     myPatch
     {
         type            SRFFreestreamVelocity;
-        UInf            (0 0 0);
-        value           uniform (0 0 0);    // optional value entry
+        UInf            uniform (0 0 0);
+        relative        no;
+        value           uniform (0 0 0);    // initial value
     }
     \endverbatim
 
+SeeAlso
+    Foam::freestreamFvPatchField
+    Foam::SRFVelocityFvPatchVectorField
+
 SourceFiles
-    SRFVelocityFvPatchVectorField.C
+    SRFFreestreamVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -72,6 +78,7 @@ SourceFiles
 #define SRFFreestreamVelocityFvPatchVectorField_H
 
 #include "inletOutletFvPatchFields.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,6 +94,9 @@ class SRFFreestreamVelocityFvPatchVectorField
     public inletOutletFvPatchVectorField
 {
     // Private data
+
+        //- Is the supplied inlet value relative to the SRF
+        Switch relative_;
 
         //- Velocity of the free stream in the absolute frame [m/s]
         vector UInf_;
