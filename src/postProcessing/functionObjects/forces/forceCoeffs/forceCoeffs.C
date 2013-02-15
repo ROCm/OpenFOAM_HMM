@@ -137,8 +137,8 @@ void Foam::forceCoeffs::write()
             scalar Cd = sum(coeffs[1]);
             scalar Cm = sum(coeffs[2]);
 
-            scalar Clf = Cl/2.0 - Cm;
-            scalar Clr = Cl/2.0 + Cm;
+            scalar Clf = Cl/2.0 + Cm;
+            scalar Clr = Cl/2.0 - Cm;
 
             file()
                 << obr_.time().value() << tab
