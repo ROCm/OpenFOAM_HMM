@@ -241,11 +241,25 @@ void Foam::forces::writeBins() const
 
     wordList fieldNames(IStringStream("(pressure viscous)")());
 
+    List<Field<vector> > f(force_);
+    List<Field<vector> > m(moment_);
+
+    if (binCumulative_)
+    {
+        for (label i = 1; i < f[0].size(); i++)
+        {
+            f[0][i] += f[0][i-1];
+            f[1][i] += f[1][i-1];
+            m[0][i] += m[0][i-1];
+            m[1][i] += m[1][i-1];
+        }
+    }
+
     OFstream osForce(forcesDir/"force_bins");
-    binWriterPtr->write(axis, fieldNames, force_, osForce);
+    binWriterPtr->write(axis, fieldNames, f, osForce);
 
     OFstream osMoment(forcesDir/"moment_bins");
-    binWriterPtr->write(axis, fieldNames, moment_, osMoment);
+    binWriterPtr->write(axis, fieldNames, m, osMoment);
 
 
     if (localSystem_)
@@ -256,6 +270,17 @@ void Foam::forces::writeBins() const
         localForce[1] = coordSys_.localVector(force_[1]);
         localMoment[0] = coordSys_.localVector(moment_[0]);
         localMoment[1] = coordSys_.localVector(moment_[1]);
+
+        if (binCumulative_)
+        {
+            for (label i = 1; i < localForce[0].size(); i++)
+            {
+                localForce[0][i] += localForce[0][i-1];
+                localForce[1][i] += localForce[1][i-1];
+                localMoment[0][i] += localMoment[0][i-1];
+                localMoment[1][i] += localMoment[1][i-1];
+            }
+        }
 
         OFstream osLocalForce(forcesDir/"force_local");
         binWriterPtr->write(axis, fieldNames, localForce, osLocalForce);
@@ -298,7 +323,8 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined")
+    binFormat_("undefined"),
+    binCumulative_(true)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -356,7 +382,8 @@ Foam::forces::forces
     binDx_(0.0),
     binMin_(GREAT),
     binPoints_(),
-    binFormat_("undefined")
+    binFormat_("undefined"),
+    binCumulative_(true)
 {}
 
 
@@ -448,9 +475,11 @@ void Foam::forces::read(const dictionary& dict)
             localSystem_ = true;
         }
 
-        // read bin information if present
-        if (dict.readIfPresent<label>("nBin", nBin_))
+        if (dict.found("binData"))
         {
+            const dictionary& binDict(dict.subDict("binData"));
+            binDict.lookup("nBin") >> nBin_;
+
             if (nBin_ < 0)
             {
                 FatalIOErrorIn
@@ -470,7 +499,7 @@ void Foam::forces::read(const dictionary& dict)
 
             if (nBin_ > 1)
             {
-                dict.lookup("binDir") >> binDir_;
+                binDict.lookup("direction") >> binDir_;
                 binDir_ /= mag(binDir_);
 
                 binMin_ = GREAT;
@@ -499,7 +528,9 @@ void Foam::forces::read(const dictionary& dict)
                     binPoints_[i] = (i + 0.5)*binDir_*binDx_;
                 }
 
-                dict.lookup("binFormat") >> binFormat_;
+                binDict.lookup("format") >> binFormat_;
+
+                binDict.lookup("cumulative") >> binCumulative_;
 
                 // allocate storage for forces and moments
                 forAll(force_, i)
