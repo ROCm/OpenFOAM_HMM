@@ -27,7 +27,7 @@ $(derivedSources)/rotorDiskSource/trimModel/trimModel/trimModel.C
 $(derivedSources)/rotorDiskSource/trimModel/trimModel/trimModelNew.C
 $(derivedSources)/rotorDiskSource/trimModel/fixed/fixedTrim.C
 $(derivedSources)/rotorDiskSource/trimModel/targetCoeff/targetCoeffTrim.C
-$(derivedSources)/heatExchangerSource/heatExchangerSource.C
+$(derivedSources)/effectivenessHeatExchangerSource/effectivenessHeatExchangerSource.C
 
 interRegion = sources/interRegion
 $(interRegion)/interRegionHeatTransferModel/constantHeatTransfer/constantHeatTransfer.C
