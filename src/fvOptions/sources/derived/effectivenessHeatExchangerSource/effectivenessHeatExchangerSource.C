@@ -24,7 +24,7 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "heatExchangerSource.H"
+#include "effectivenessHeatExchangerSource.H"
 #include "fvMesh.H"
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
@@ -38,11 +38,11 @@ namespace Foam
 {
 namespace fv
 {
-    defineTypeNameAndDebug(heatExchangerSource, 0);
+    defineTypeNameAndDebug(effectivenessHeatExchangerSource, 0);
     addToRunTimeSelectionTable
     (
         option,
-        heatExchangerSource,
+        effectivenessHeatExchangerSource,
         dictionary
     );
 }
@@ -51,7 +51,7 @@ namespace fv
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fv::heatExchangerSource::init()
+void Foam::fv::effectivenessHeatExchangerSource::init()
 {
     const faceZone& fZone = mesh_.faceZones()[zoneID_];
 
@@ -119,26 +119,10 @@ void Foam::fv::heatExchangerSource::init()
 }
 
 
-void Foam::fv::heatExchangerSource::addHeatSource
+void Foam::fv::effectivenessHeatExchangerSource::calculateTotalArea
 (
-    scalarField& heSource,
-    const labelList& cells,
-    const scalarField& Vcells,
-    const vectorField& U,
-    const scalar Qt,
-    const scalarField& deltaTCells,
-    const scalar totHeat
-) const
-{
-    forAll(cells, i)
-    {
-        heSource[cells[i]] -=
-            Qt*Vcells[cells[i]]*mag(U[cells[i]])*deltaTCells[i]/totHeat;
-    }
-}
-
-
-void Foam::fv::heatExchangerSource::calculateTotalArea(scalar& area)
+    scalar& area
+)
 {
     area = 0;
     forAll(faceId_, i)
@@ -160,7 +144,7 @@ void Foam::fv::heatExchangerSource::calculateTotalArea(scalar& area)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fv::heatExchangerSource::heatExchangerSource
+Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
 (
     const word& name,
     const word& modelType,
@@ -188,7 +172,7 @@ Foam::fv::heatExchangerSource::heatExchangerSource
     {
         FatalErrorIn
         (
-            "heatExchangerSource::heatExchangerSource"
+            "effectivenessHeatExchangerSource::effectivenessHeatExchangerSource"
             "("
                 "const word&, "
                 "const word&, "
@@ -209,14 +193,14 @@ Foam::fv::heatExchangerSource::heatExchangerSource
 
     init();
 
-    Info<< "    - creating heatExchangerSource: "
+    Info<< "    - creating effectivenessHeatExchangerSource: "
         << this->name() << endl;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fv::heatExchangerSource::addSup
+void Foam::fv::effectivenessHeatExchangerSource::addSup
 (
     fvMatrix<scalar>& eqn,
     const label
@@ -286,19 +270,23 @@ void Foam::fv::heatExchangerSource::addSup
     }
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
-    const scalarField& cellsV = mesh_.V();
-    scalar totHeat = 0;
+    const scalarField& V = mesh_.V();
+    scalar sumWeight = 0;
     forAll(cells_, i)
     {
-        totHeat += cellsV[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i];
+        sumWeight += V[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i];
     }
-    reduce(totHeat, sumOp<scalar>());
+    reduce(sumWeight, sumOp<scalar>());
 
-    scalarField& heSource = eqn.source();
-
-    if (V() > VSMALL && mag(Qt) > VSMALL)
+    if (this->V() > VSMALL && mag(Qt) > VSMALL)
     {
-        addHeatSource(heSource, cells_, cellsV, U, Qt, deltaTCells, totHeat);
+        scalarField& heSource = eqn.source();
+
+        forAll(cells_, i)
+        {
+            heSource[cells_[i]] -=
+                Qt*V[cells_[i]]*mag(U[cells_[i]])*deltaTCells[i]/sumWeight;
+        }
     }
 
     if (debug && Pstream::master())
@@ -312,14 +300,14 @@ void Foam::fv::heatExchangerSource::addSup
 }
 
 
-void Foam::fv::heatExchangerSource::writeData(Ostream& os) const
+void Foam::fv::effectivenessHeatExchangerSource::writeData(Ostream& os) const
 {
     os  << indent << name_ << endl;
     dict_.write(os);
 }
 
 
-bool Foam::fv::heatExchangerSource::read(const dictionary& dict)
+bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
